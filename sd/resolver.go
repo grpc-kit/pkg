@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"path"
 
-	"go.etcd.io/etcd/mvcc/mvccpb"
+	// etcdv3.3.x版本的clientv3还是引用coreos/etcd下类型
+	// "go.etcd.io/etcd/mvcc/mvccpb"
+	mvccpb "github.com/coreos/etcd/mvcc/mvccpb"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -17,9 +19,9 @@ type etcdv3Resolver struct {
 	conn   *Connector
 	client *etcdv3Client
 	cc     resolver.ClientConn
-	tls    *TLSInfo
 }
 
+// NewResolver xx
 func NewResolver(conn *Connector) resolver.Builder {
 	return &etcdv3Resolver{conn: conn}
 }
@@ -76,13 +78,13 @@ func (r *etcdv3Resolver) watcher(ctx context.Context, endpointsKey string) {
 			addr := path.Base(string(e.Kv.Key))
 
 			switch e.Type {
-			case mvccpb.PUT:
+			case mvccpb.Event_EventType(mvccpb.PUT):
 				// 更新地址
 				if !existAddr(addrs, addr) {
 					addrs = append(addrs, resolver.Address{Addr: addr, Type: resolver.GRPCLB})
 					r.cc.NewAddress(addrs)
 				}
-			case mvccpb.DELETE:
+			case mvccpb.Event_EventType(mvccpb.DELETE):
 				// 删除地址
 				if s, ok := removeAddr(addrs, addr); ok {
 					addrs = s

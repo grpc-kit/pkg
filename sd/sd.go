@@ -7,11 +7,14 @@ import (
 )
 
 const (
+	// ETCDV3 xx
 	ETCDV3 = iota
 )
 
 var (
-	Prefix    = "service"
+	// Prefix xx
+	Prefix = "service"
+	// Namespace xx
 	Namespace = "default"
 
 	errConnectorIsNil   = errors.New("connector is nil")
@@ -19,6 +22,7 @@ var (
 	errSchemeInvalid    = errors.New("scheme invalid")
 )
 
+// Connector 连接器
 type Connector struct {
 	logger *logrus.Entry
 	Driver int
@@ -26,6 +30,7 @@ type Connector struct {
 	TLS    *TLSInfo
 }
 
+// TLSInfo 证书结构
 type TLSInfo struct {
 	CAFile   string
 	CertFile string
@@ -47,6 +52,7 @@ func NewConnector(logger *logrus.Entry, driver int, hosts string) (*Connector, e
 	}, nil
 }
 
+// WithTLSInfo 设置认证
 func (c *Connector) WithTLSInfo(tls *TLSInfo) {
 	c.TLS = tls
 }

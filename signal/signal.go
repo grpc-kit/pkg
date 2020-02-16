@@ -26,8 +26,6 @@ func WaitQuit() {
 		switch si {
 		case syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM:
 			receiveQuit = true
-
-			break
 		default:
 			fmt.Println("ignore receive signal:", si.String())
 		}

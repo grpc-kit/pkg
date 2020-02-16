@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/keepalive"
 )
 
-// Server xx
+// Server server instance
 type Server struct {
 	config  *Config
 	server  *grpc.Server
