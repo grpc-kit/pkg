@@ -1,16 +1,19 @@
 package rpc
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )
 
 // Server server instance
 type Server struct {
+	logger  *logrus.Entry
 	config  *Config
 	server  *grpc.Server
 	gateway *http.Server
@@ -27,6 +30,7 @@ func NewServer(c *Config, opts ...grpc.ServerOption) *Server {
 	opts = append(opts, keepParam)
 
 	s.config = c
+	s.logger = c.logger
 	s.server = grpc.NewServer(opts...)
 
 	return s
@@ -75,9 +79,33 @@ func (s *Server) StartBackground() error {
 
 	go func() {
 		if err := s.gateway.ListenAndServe(); err != nil {
-			panic(err)
+			// ignore shutdown error
+			if err != http.ErrServerClosed {
+				panic(err)
+			}
 		}
 	}()
+
+	return nil
+}
+
+// Shutdown graceful stop server
+func (s *Server) Shutdown(ctx context.Context) error {
+	if s.gateway != nil {
+		s.logger.Debugf("Shutdown gateway server start")
+
+		if err := s.gateway.Shutdown(ctx); err != nil {
+			return err
+		}
+
+		s.logger.Debugf("Shutdown gateway server end")
+	}
+
+	s.logger.Debugf("Shutdown gRPC server start")
+
+	s.server.GracefulStop()
+
+	s.logger.Debugf("Shutdown gRPC server end")
 
 	return nil
 }
