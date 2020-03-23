@@ -43,7 +43,7 @@ func (s *Server) Server() *grpc.Server {
 }
 
 // RegisterGateway return the http server for registering service
-func (s *Server) RegisterGateway(mux http.Handler) error {
+func (s *Server) RegisterGateway(mux *http.ServeMux) error {
 	// TODO; check HTTPAddress
 
 	srv := &http.Server{
