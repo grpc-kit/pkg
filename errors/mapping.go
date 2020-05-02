@@ -6,9 +6,8 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-// Mapping xx
 // https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
-func Mapping(code codes.Code) int {
+func mapping(code codes.Code) int {
 	switch code {
 	case codes.OK:
 		return http.StatusOK
