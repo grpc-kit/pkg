@@ -9,16 +9,18 @@ import (
 
 // OK is returned on success.
 func OK(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.OK),
-		Message: "No error.",
-		details: details}
+	s := New(int32(codes.OK),
+		"No error.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // Canceled indicates the operation was canceled (typically by the caller).
 func Canceled(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.Canceled),
-		Message: "Request cancelled by the client.",
-		details: details}
+	s := New(int32(codes.Canceled),
+		"Request cancelled by the client.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // Unknown error. An example of where this error may be returned is
@@ -27,9 +29,10 @@ func Canceled(ctx context.Context, details ...proto.Message) *Status {
 // errors raised by APIs that do not return enough error information
 // may be converted to this error.
 func Unknown(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.Unknown),
-		Message: "Unknown server error.",
-		details: details}
+	s := New(int32(codes.Unknown),
+		"Unknown server error.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // InvalidArgument indicates client specified an invalid argument.
@@ -38,9 +41,10 @@ func Unknown(ctx context.Context, details ...proto.Message) *Status {
 // (e.g., a malformed file name).
 // For example, Request field x.y.z is xxx, expected one of [yyy, zzz].
 func InvalidArgument(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.InvalidArgument),
-		Message: "Client specified an invalid argument.",
-		details: details}
+	s := New(int32(codes.InvalidArgument),
+		"Client specified an invalid argument.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // DeadlineExceeded means operation expired before completion.
@@ -52,26 +56,29 @@ func InvalidArgument(ctx context.Context, details ...proto.Message) *Status {
 // default deadline (i.e. requested deadline is not enough for the server to process the request) and
 // the request did not finish within the deadline.
 func DeadlineExceeded(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.DeadlineExceeded),
-		Message: "Request deadline exceeded.",
-		details: details}
+	s := New(int32(codes.DeadlineExceeded),
+		"Request deadline exceeded.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // NotFound means some requested entity (e.g., file or directory) was
 // not found.
 func NotFound(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.NotFound),
-		Message: "A specified resource is not found, or the request is rejected by undisclosed reasons, such as whitelisting.",
-		details: details}
+	s := New(int32(codes.NotFound),
+		"A specified resource is not found, or the request is rejected by undisclosed reasons, such as whitelisting.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // AlreadyExists means an attempt to create an entity failed because one
 // already exists.
 // For example, Resource 'xxx' already exists.
 func AlreadyExists(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.AlreadyExists),
-		Message: "The resource that a client tried to create already exists.",
-		details: details}
+	s := New(int32(codes.AlreadyExists),
+		"The resource that a client tried to create already exists.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // PermissionDenied indicates the caller does not have permission to
@@ -84,9 +91,10 @@ func AlreadyExists(ctx context.Context, details ...proto.Message) *Status {
 // This can happen because the OAuth token does not have the right scopes,
 // the client doesn't have permission, or the API has not been enabled for the client project.
 func PermissionDenied(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.PermissionDenied),
-		Message: "Client does not have sufficient permission.",
-		details: details}
+	s := New(int32(codes.PermissionDenied),
+		"Client does not have sufficient permission.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // ResourceExhausted indicates some resource has been exhausted, perhaps
@@ -94,9 +102,10 @@ func PermissionDenied(ctx context.Context, details ...proto.Message) *Status {
 // For example, Quota limit 'xxx' exceeded.
 // The client should look for google.rpc.QuotaFailure error detail for more information.
 func ResourceExhausted(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.ResourceExhausted),
-		Message: "Either out of resource quota or reaching rate limiting.",
-		details: details}
+	s := New(int32(codes.ResourceExhausted),
+		"Either out of resource quota or reaching rate limiting.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // FailedPrecondition indicates operation was rejected because the
@@ -121,9 +130,10 @@ func ResourceExhausted(ctx context.Context, details ...proto.Message) *Status {
 //
 // For example, Resource xxx is a non-empty directory, so it cannot be deleted.
 func FailedPrecondition(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.FailedPrecondition),
-		Message: "Request can not be executed in the current system state, such as deleting a non-empty directory.",
-		details: details}
+	s := New(int32(codes.FailedPrecondition),
+		"Request can not be executed in the current system state, such as deleting a non-empty directory.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // Aborted indicates the operation was aborted, typically due to a
@@ -135,9 +145,10 @@ func FailedPrecondition(ctx context.Context, details ...proto.Message) *Status {
 //
 // For example, Couldn’t acquire lock on resource ‘xxx’.
 func Aborted(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.Aborted),
-		Message: "Concurrency conflict, such as read-modify-write conflict.",
-		details: details}
+	s := New(int32(codes.Aborted),
+		"Concurrency conflict, such as read-modify-write conflict.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // OutOfRange means operation was attempted past the valid range.
@@ -158,27 +169,30 @@ func Aborted(ctx context.Context, details ...proto.Message) *Status {
 //
 // For example, Parameter 'age' is out of range [0, 125].
 func OutOfRange(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.OutOfRange),
-		Message: "Client specified an invalid range.",
-		details: details}
+	s := New(int32(codes.OutOfRange),
+		"Client specified an invalid range.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // Unimplemented indicates operation is not implemented or not
 // supported/enabled in this service.
 // For example, Method 'xxx' not implemented.
 func Unimplemented(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.Unimplemented),
-		Message: "The API method not implemented or enabled by the server.",
-		details: details}
+	s := New(int32(codes.Unimplemented),
+		"The API method not implemented or enabled by the server.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // Internal errors. Means some invariants expected by underlying
 // system has been broken. If you see one of these errors,
 // something is very broken.
 func Internal(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.Internal),
-		Message: "Internal server error.",
-		details: details}
+	s := New(int32(codes.Internal),
+		"Internal server error.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // Unavailable indicates the service is currently unavailable.
@@ -189,22 +203,25 @@ func Internal(ctx context.Context, details ...proto.Message) *Status {
 // See litmus test above for deciding between FailedPrecondition,
 // Aborted, and Unavailable.
 func Unavailable(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.Unavailable),
-		Message: "Service unavailable.",
-		details: details}
+	s := New(int32(codes.Unavailable),
+		"Service unavailable.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // DataLoss indicates unrecoverable data loss or corruption.
 func DataLoss(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.DataLoss),
-		Message: "Unrecoverable data loss or data corruption.",
-		details: details}
+	s := New(int32(codes.DataLoss),
+		"Unrecoverable data loss or data corruption.")
+	s = s.WithDetails(details...)
+	return s
 }
 
 // Unauthenticated indicates the request does not have valid
 // authentication credentials for the operation.
 func Unauthenticated(ctx context.Context, details ...proto.Message) *Status {
-	return &Status{Code: int32(codes.Unauthenticated),
-		Message: "Request not authenticated due to missing, invalid, or expired OAuth token.",
-		details: details}
+	s := New(int32(codes.Unauthenticated),
+		"Request not authenticated due to missing, invalid, or expired OAuth token.")
+	s = s.WithDetails(details...)
+	return s
 }

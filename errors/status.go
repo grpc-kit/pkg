@@ -10,6 +10,14 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// New 创建一个基础错误类型
+func New(code int32, message string) *Status {
+	s := &Status{Code: code,
+		Status:  codes.Code(code).String(),
+		Message: message}
+	return s
+}
+
 // FromStatus 用于转换 google.rpc.Status 类型为统一错误响应结构
 func FromStatus(s *status.Status) *Status {
 	if s == nil {
@@ -55,6 +63,20 @@ func (s *Status) Error() string {
 // WithMessage 覆盖默认的错误说明
 func (s *Status) WithMessage(msg string) *Status {
 	s.Message = msg
+	return s
+}
+
+// WithDetails returns a new status with the provided details messages appended to the status.
+func (s *Status) WithDetails(details ...proto.Message) *Status {
+	s.details = append(s.details, details...)
+
+	for _, detail := range details {
+		any, err := ptypes.MarshalAny(detail)
+		if err != nil {
+			continue
+		}
+		s.Details = append(s.Details, any)
+	}
 	return s
 }
 
