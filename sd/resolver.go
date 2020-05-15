@@ -16,9 +16,10 @@ const (
 )
 
 type etcdv3Resolver struct {
-	conn   *Connector
-	client *etcdv3Client
-	cc     resolver.ClientConn
+	conn               *Connector
+	client             *etcdv3Client
+	cc                 resolver.ClientConn
+	resolveNowCallback func(resolver.ResolveNowOptions)
 }
 
 // NewResolver xx
@@ -26,6 +27,7 @@ func NewResolver(conn *Connector) resolver.Builder {
 	return &etcdv3Resolver{conn: conn}
 }
 
+// Build xx
 func (r *etcdv3Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOption) (resolver.Resolver, error) {
 	if target.Scheme != scheme {
 		return nil, errSchemeInvalid
@@ -41,38 +43,44 @@ func (r *etcdv3Resolver) Build(target resolver.Target, cc resolver.ClientConn, o
 
 	r.cc = cc
 
+	resolver.Register(r)
+
+	ctx := context.Background()
 	endpointsKey := fmt.Sprintf("%v/%v/endpoints", r.client.basePath(), target.Endpoint)
-	go r.watcher(context.Background(), endpointsKey)
-
-	return r, nil
-}
-
-func (r *etcdv3Resolver) Scheme() string {
-	return scheme
-}
-
-func (r *etcdv3Resolver) Close() {
-	if err := r.client.release(); err != nil {
-		fmt.Println("close etcd err:", err)
-	}
-}
-
-func (r *etcdv3Resolver) ResolveNow(t resolver.ResolveNowOption) {
-}
-
-func (r *etcdv3Resolver) watcher(ctx context.Context, endpointsKey string) {
 	resp, err := r.client.getKey(ctx, endpointsKey)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	addrs := make([]resolver.Address, 0)
 	for _, v := range resp.Kvs {
-		addrs = append(addrs, resolver.Address{Addr: path.Base(string(v.Key)), Type: resolver.GRPCLB})
+		addrs = append(addrs, resolver.Address{Addr: path.Base(string(v.Key))})
 	}
+	r.cc.UpdateState(resolver.State{Addresses: addrs})
 
-	r.cc.NewAddress(addrs)
+	go r.watcher(ctx, endpointsKey, addrs)
 
+	return r, nil
+}
+
+// Scheme xx
+func (r *etcdv3Resolver) Scheme() string {
+	return scheme
+}
+
+// Close 实现 resolver.Close
+func (r *etcdv3Resolver) Close() {
+	if err := r.client.release(); err != nil {
+		r.conn.logger.Errorf("close etcd err: %v", err)
+	}
+}
+
+// ResolveNow 实现 resolver.Resolver
+func (r *etcdv3Resolver) ResolveNow(o resolver.ResolveNowOptions) {
+	r.resolveNowCallback(o)
+}
+
+func (r *etcdv3Resolver) watcher(ctx context.Context, endpointsKey string, addrs []resolver.Address) {
 	for n := range r.client.watchKey(ctx, endpointsKey) {
 		for _, e := range n.Events {
 			addr := path.Base(string(e.Kv.Key))
@@ -81,14 +89,16 @@ func (r *etcdv3Resolver) watcher(ctx context.Context, endpointsKey string) {
 			case mvccpb.Event_EventType(mvccpb.PUT):
 				// 更新地址
 				if !existAddr(addrs, addr) {
-					addrs = append(addrs, resolver.Address{Addr: addr, Type: resolver.GRPCLB})
-					r.cc.NewAddress(addrs)
+					addrs = append(addrs, resolver.Address{Addr: addr})
+					// r.cc.NewAddress(addrs)
+					r.cc.UpdateState(resolver.State{Addresses: addrs})
 				}
 			case mvccpb.Event_EventType(mvccpb.DELETE):
 				// 删除地址
 				if s, ok := removeAddr(addrs, addr); ok {
 					addrs = s
-					r.cc.NewAddress(addrs)
+					// r.cc.NewAddress(addrs)
+					r.cc.UpdateState(resolver.State{Addresses: addrs})
 				}
 			}
 		}
