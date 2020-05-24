@@ -14,6 +14,11 @@ type Config struct {
 	HTTPAddress string
 
 	KeepaliveTimeout time.Duration
+
+	// client
+	Scheme      string
+	Authority   string
+	APIEndpoint string
 }
 
 // NewConfig xx
@@ -28,6 +33,7 @@ func NewConfig(l *logrus.Entry) *Config {
 
 	// default values
 	c.KeepaliveTimeout = 20 * time.Second
+	c.Scheme = "grpc-kit"
 
 	return c
 }
