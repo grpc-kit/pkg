@@ -17,29 +17,44 @@ type Server struct {
 	logger  *logrus.Entry
 	config  *Config
 	server  *grpc.Server
+	opts    []grpc.ServerOption
 	gateway *http.Server
 }
 
 // NewServer returns Server instance
-func NewServer(c *Config, opts ...grpc.ServerOption) *Server {
+func NewServer(c *Config) *Server {
 	s := new(Server)
 
 	keepParam := grpc.KeepaliveParams(keepalive.ServerParameters{
 		Timeout: c.KeepaliveTimeout,
 	})
 
-	opts = append(opts, keepParam)
+	s.opts = append(s.opts, keepParam)
 
 	s.config = c
 	s.logger = c.logger
-	s.server = grpc.NewServer(opts...)
 
 	return s
 }
 
 // Server return the grpc server for registering service
 func (s *Server) Server() *grpc.Server {
+	if s.server == nil {
+		s.server = grpc.NewServer(s.opts...)
+	}
+
 	return s.server
+}
+
+// UseServerOption 用于设置选项并初始化grpc server
+func (s *Server) UseServerOption(opts ...grpc.ServerOption) *Server {
+	s.opts = append(s.opts, opts...)
+
+	if s.server == nil {
+		s.server = grpc.NewServer(s.opts...)
+	}
+
+	return s
 }
 
 // RegisterGateway return the http server for registering service
@@ -59,6 +74,10 @@ func (s *Server) RegisterGateway(mux *http.ServeMux) error {
 // StartBackground xx
 func (s *Server) StartBackground() error {
 	// TODO; check GRPCAddress
+
+	if s.server == nil {
+		s.server = grpc.NewServer(s.opts...)
+	}
 
 	// start grpc
 	lis, err := net.Listen("tcp", s.config.GRPCAddress)
