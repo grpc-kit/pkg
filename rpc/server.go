@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -102,10 +103,23 @@ func (s *Server) StartBackground() error {
 	grpcprometheus.EnableHandlingTimeHistogram()
 
 	go func() {
-		if err := s.gateway.ListenAndServe(); err != nil {
-			// ignore shutdown error
-			if err != http.ErrServerClosed {
-				panic(err)
+		// 这里可以通过替换为ListenAndServeTLS，开启HTTP2
+		if s.config.TLS == nil {
+			if err := s.gateway.ListenAndServe(); err != nil {
+				// ignore shutdown error
+				if err != http.ErrServerClosed {
+					panic(err)
+				}
+			}
+		} else {
+			if s.config.TLS.CertFile == "" && s.config.TLS.KeyFile == "" {
+				panic(fmt.Errorf("cert_file or key_file must set"))
+			}
+			if err := s.gateway.ListenAndServeTLS(s.config.TLS.CertFile, s.config.TLS.KeyFile); err != nil {
+				// ignore shutdown error
+				if err != http.ErrServerClosed {
+					panic(err)
+				}
 			}
 		}
 	}()
