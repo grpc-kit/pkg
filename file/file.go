@@ -56,7 +56,15 @@ func WriteString(path string, s string, perm os.FileMode) error {
 
 // ParseExecute 用于解析模版
 func ParseExecute(tmplStr string, data interface{}) (string, error) {
-	tmpl, err := template.New("").Parse(tmplStr)
+	funcMap := template.FuncMap{
+		"title":      strings.Title,
+		"to_upper":   strings.ToUpper,
+		"to_lower":   strings.ToLower,
+		"to_title":   strings.ToTitle,
+		"trim_space": strings.TrimSpace,
+	}
+
+	tmpl, err := template.New("").Funcs(funcMap).Parse(tmplStr)
 	if err != nil {
 		return "", err
 	}

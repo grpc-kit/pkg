@@ -3,6 +3,7 @@ package rpc
 import (
 	"time"
 
+	"github.com/grpc-kit/cfg"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,6 +20,15 @@ type Config struct {
 	Scheme      string
 	Authority   string
 	APIEndpoint string
+
+	// tls
+	TLS *cfg.TLSConfig
+}
+
+// TLSConfig
+type TLSConfig struct {
+	CertFile string `json:"cert_file"`
+	KeyFile  string `json:"key_file"`
 }
 
 // NewConfig xx
