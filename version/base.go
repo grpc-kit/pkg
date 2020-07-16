@@ -5,6 +5,8 @@ import (
 )
 
 var (
+	// AppName 应用程序的名称
+	Appname string
 	// GitCommit 最后一次git提交的hash值，计算方式：git rev-parse HEAD
 	GitCommit string
 	// BuildDate 编译二进制时的时间，RFC3339规范，计算方式：date -u +'%Y-%m-%dT%H:%M:%SZ'
@@ -21,6 +23,7 @@ var (
 
 // Info 用于记录版本相关信息结构
 type Info struct {
+	Appname        string `json:"appname" yaml:"appname"`
 	BuildDate      string `json:"build_date" yaml:"build_date"`
 	GitCommit      string `json:"git_commit" yaml:"git_commit"`
 	GitBranch      string `json:"git_branch" yaml:"git_branch"`
