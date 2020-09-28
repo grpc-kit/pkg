@@ -1,7 +1,6 @@
 package signal
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,7 +26,7 @@ func WaitQuit() {
 		case syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM:
 			receiveQuit = true
 		default:
-			fmt.Println("ignore receive signal:", si.String())
+			// fmt.Println("ignore receive signal:", si.String())
 		}
 
 		if receiveQuit {
