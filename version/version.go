@@ -14,6 +14,7 @@ func Get() Info {
 	}
 
 	info := Info{
+		Appname:        Appname,
 		GitCommit:      GitCommit,
 		BuildDate:      BuildDate,
 		CommitUnixTime: cut,

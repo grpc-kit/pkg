@@ -19,6 +19,15 @@ type Config struct {
 	Scheme      string
 	Authority   string
 	APIEndpoint string
+
+	// tls
+	TLS *TLSConfig
+}
+
+// TLSConfig
+type TLSConfig struct {
+	CertFile string `json:"cert_file"`
+	KeyFile  string `json:"key_file"`
 }
 
 // NewConfig xx
