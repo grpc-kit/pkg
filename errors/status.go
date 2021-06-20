@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
+	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -95,4 +96,14 @@ func (s *Status) AppendDetail(detail proto.Message) *Status {
 // HTTPStatusCode 用于转换错误代码为标准HTTP状态码
 func (s *Status) HTTPStatusCode() int {
 	return mapping(codes.Code(s.Code))
+}
+
+// Proto 用于返回googleapis下的Status proto结构
+func (s *Status) Proto() *spb.Status {
+	if s == nil {
+		return nil
+	}
+	return &spb.Status{Code: s.Code,
+		Message: s.Message,
+		Details: s.Details}
 }
