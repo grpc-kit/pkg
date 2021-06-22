@@ -26,7 +26,6 @@ type Status struct {
 	Status  string     `protobuf:"bytes,2,name=status" json:"status"`
 	Message string     `protobuf:"bytes,3,name=message" json:"message"`
 	Details []*any.Any `protobuf:"bytes,4,rep,name=details" json:"details"`
-	details []proto.Message
 }
 
 // Reset 为实现 proto.Message 接口定义

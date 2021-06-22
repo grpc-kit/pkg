@@ -50,10 +50,7 @@ func FromError(err error) *Status {
 
 // Err 为返回 status.statusError 错误类型
 func (s *Status) Err() error {
-	t, _ := status.New(codes.Code(s.Code), s.Message).
-		WithDetails(s.details...)
-
-	return t.Err()
+	return status.New(codes.Code(s.Code), s.Message).Err()
 }
 
 // Error 为实现 error 接口定义
@@ -69,22 +66,14 @@ func (s *Status) WithMessage(msg string) *Status {
 
 // WithDetails returns a new status with the provided details messages appended to the status.
 func (s *Status) WithDetails(details ...proto.Message) *Status {
-	s.details = append(s.details, details...)
-
 	for _, detail := range details {
-		any, err := ptypes.MarshalAny(detail)
-		if err != nil {
-			continue
-		}
-		s.Details = append(s.Details, any)
+		s = s.AppendDetail(detail)
 	}
 	return s
 }
 
 // AppendDetail 添加错误详情内容
 func (s *Status) AppendDetail(detail proto.Message) *Status {
-	s.details = append(s.details, detail)
-
 	any, err := ptypes.MarshalAny(detail)
 	if err == nil {
 		s.Details = append(s.Details, any)
