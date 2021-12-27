@@ -24,8 +24,6 @@ func FromStatus(s *status.Status) *Status {
 		return Unknown(context.Background())
 	}
 
-	m := s.Proto()
-
 	t := &Status{
 		Code:    s.Proto().Code,
 		Status:  s.Code().String(),
