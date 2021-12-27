@@ -6,7 +6,6 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
-	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -24,6 +23,8 @@ func FromStatus(s *status.Status) *Status {
 	if s == nil {
 		return Unknown(context.Background())
 	}
+
+	m := s.Proto()
 
 	t := &Status{
 		Code:    s.Proto().Code,
@@ -43,8 +44,8 @@ func FromError(err error) *Status {
 		}); ok {
 			return FromStatus(se.GRPCStatus())
 		}
-	}
 
+	}
 	return Unknown(context.Background())
 }
 
@@ -55,7 +56,7 @@ func (s *Status) Err() error {
 
 // Error 为实现 error 接口定义
 func (s *Status) Error() string {
-	return fmt.Sprintf("rpc error: code = %v desc = %s", s.Code, s.Message)
+	return fmt.Sprintf("rpc error: code = %v desc = %s", s.Status, s.Message)
 }
 
 // WithMessage 覆盖默认的错误说明
@@ -78,7 +79,6 @@ func (s *Status) AppendDetail(detail proto.Message) *Status {
 	if err == nil {
 		s.Details = append(s.Details, any)
 	}
-
 	return s
 }
 
@@ -87,12 +87,18 @@ func (s *Status) HTTPStatusCode() int {
 	return mapping(codes.Code(s.Code))
 }
 
-// Proto 用于返回googleapis下的Status proto结构
-func (s *Status) Proto() *spb.Status {
+// GRPCStatus 用于返回google grpc status.Status结构
+func (s *Status) GRPCStatus() *status.Status {
 	if s == nil {
 		return nil
 	}
-	return &spb.Status{Code: s.Code,
-		Message: s.Message,
-		Details: s.Details}
+	/*
+		t := &spb.Status{Code: s.Code,
+			Message: s.Message,
+			Details: s.Details}
+	*/
+	t := status.New(codes.Code(s.Code), s.Message)
+	//t.WithDetails(s.Details...)
+
+	return t
 }
