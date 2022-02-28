@@ -24,7 +24,7 @@ import (
 	grpcopentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	api "github.com/grpc-kit/api/proto/v1"
+	"github.com/grpc-kit/pkg/api"
 	"github.com/grpc-kit/pkg/errors"
 	"github.com/grpc-kit/pkg/version"
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
