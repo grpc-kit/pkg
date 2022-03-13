@@ -1,32 +1,36 @@
 module github.com/grpc-kit/pkg
 
-go 1.13
+go 1.16
 
 require (
-	github.com/coreos/bbolt v1.3.3 // indirect
-	github.com/coreos/etcd v3.3.18+incompatible
-	github.com/coreos/go-semver v0.3.0 // indirect
-	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf // indirect
-	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
-	github.com/gogo/protobuf v1.3.1 // indirect
-	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
-	github.com/golang/protobuf v1.3.2
-	github.com/google/btree v1.0.0 // indirect
-	github.com/google/uuid v1.1.1 // indirect
-	github.com/gorilla/websocket v1.4.1 // indirect
+	github.com/HdrHistogram/hdrhistogram-go v1.1.2 // indirect
+	github.com/Shopify/sarama v1.32.0
+	github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2 v2.8.0
+	github.com/cloudevents/sdk-go/v2 v2.8.0
+	github.com/coreos/go-oidc/v3 v3.1.0
+	github.com/gogo/gateway v1.1.0
+	github.com/gogo/protobuf v1.3.2
+	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang/protobuf v1.5.2
+	github.com/google/uuid v1.1.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
-	github.com/grpc-ecosystem/grpc-gateway v1.13.0 // indirect
-	github.com/jonboulle/clockwork v0.1.0 // indirect
-	github.com/prometheus/client_golang v1.4.1 // indirect
-	github.com/sirupsen/logrus v1.4.2
-	github.com/soheilhy/cmux v0.1.4 // indirect
-	github.com/tmc/grpc-websocket-proxy v0.0.0-20200122045848-3419fae592fc // indirect
-	github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2 // indirect
-	go.etcd.io/bbolt v1.3.3 // indirect
-	go.uber.org/zap v1.13.0 // indirect
-	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
-	google.golang.org/grpc v1.26.0
-	sigs.k8s.io/yaml v1.2.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway v1.16.0
+	github.com/mitchellh/mapstructure v1.4.3
+	github.com/opentracing-contrib/go-stdlib v1.0.0
+	github.com/opentracing/opentracing-go v1.1.0
+	github.com/prometheus/client_golang v1.11.0
+	github.com/sirupsen/logrus v1.8.1
+	github.com/spf13/viper v1.10.1
+	github.com/uber/jaeger-client-go v2.30.0+incompatible
+	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
+	github.com/xdg/scram v1.0.5
+	go.etcd.io/etcd/api/v3 v3.5.2
+	go.etcd.io/etcd/client/pkg/v3 v3.5.2
+	go.etcd.io/etcd/client/v3 v3.5.2
+	google.golang.org/grpc v1.43.0
+	gopkg.in/yaml.v2 v2.4.0
+	k8s.io/apimachinery v0.23.4
 )
+
+replace google.golang.org/grpc => google.golang.org/grpc v1.38.0
