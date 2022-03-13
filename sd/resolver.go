@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"path"
 
-	// etcdv3.3.x版本的clientv3还是引用coreos/etcd下类型
-	// "go.etcd.io/etcd/mvcc/mvccpb"
-	mvccpb "github.com/coreos/etcd/mvcc/mvccpb"
+	"go.etcd.io/etcd/api/v3/mvccpb"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -28,7 +26,7 @@ func NewResolver(conn *Connector) resolver.Builder {
 }
 
 // Build xx
-func (r *etcdv3Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOption) (resolver.Resolver, error) {
+func (r *etcdv3Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	if target.Scheme != scheme {
 		return nil, errSchemeInvalid
 	}

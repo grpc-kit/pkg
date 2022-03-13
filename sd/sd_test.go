@@ -3,7 +3,7 @@ package sd
 import (
 	"fmt"
 	"testing"
-	"time"
+	// "time"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -27,7 +27,7 @@ func TestRegisterDemo1(t *testing.T) {
 		fmt.Println("register err:", err)
 	}
 
-	time.Sleep(1000 * time.Second)
+	// time.Sleep(10 * time.Second)
 
 	if err := cli.Deregister(); err != nil {
 		fmt.Println("deregister err:", err)
