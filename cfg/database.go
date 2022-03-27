@@ -73,10 +73,10 @@ func (c *LocalConfig) InitDatabase() error {
     maxOpenConns := c.Database.ConnectionPool.MaxOpenConns
 
     if maxIdleTime.Seconds() == 0 {
-        maxIdleTime = 3 * time.Second
+        maxIdleTime = 30 * time.Minute
     }
     if maxLifeTime.Seconds() == 0 {
-        maxLifeTime = 3 * time.Second
+        maxLifeTime = 6 * time.Hour
     }
     if maxIdleConns == 0 {
         maxIdleConns = 3

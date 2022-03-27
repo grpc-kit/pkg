@@ -28,11 +28,11 @@ func testDatabaseConfig(t *testing.T) {
         t.Errorf(ErrDatabaseParamsMust.Error())
     }
 
-    if lc.Database.ConnectionPool.MaxIdleTime.Seconds() != 30 {
-        configKeydiffValue(t, "database.connection_pool", "max_idle_time", "30s", lc.Database.ConnectionPool.MaxIdleTime.String())
+    if lc.Database.ConnectionPool.MaxIdleTime.Seconds() != 1800 {
+        configKeydiffValue(t, "database.connection_pool", "max_idle_time", "30m", lc.Database.ConnectionPool.MaxIdleTime.String())
     }
-    if lc.Database.ConnectionPool.MaxLifeTime.Seconds() != 30 {
-        configKeydiffValue(t, "database.connection_pool", "max_life_time", "30s", lc.Database.ConnectionPool.MaxLifeTime.String())
+    if lc.Database.ConnectionPool.MaxLifeTime.Seconds() != 21600 {
+        configKeydiffValue(t, "database.connection_pool", "max_life_time", "6h", lc.Database.ConnectionPool.MaxLifeTime.String())
     }
     if lc.Database.ConnectionPool.MaxIdleConns != 300 {
         configKeydiffValue(t, "database.connection_pool", "max_idle_conns", 300, lc.Database.ConnectionPool.MaxIdleConns)
