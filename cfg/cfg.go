@@ -2,6 +2,7 @@ package cfg
 
 import (
     "context"
+    "database/sql"
     "fmt"
     "math/rand"
     "net/http"
@@ -100,14 +101,17 @@ type SecurityConfig struct {
 
 // DatabaseConfig 数据库设置，指关系数据库，数据不允许丢失，如postgres、mysql
 type DatabaseConfig struct {
-    Driver         string `mapstructure:"driver"`
-    DBName         string `mapstructure:"dbname"`
-    User           string `mapstructure:"user"`
-    Password       string `mapstructure:"password"`
-    Host           string `mapstructure:"host"`
-    Port           int    `mapstructure:"port"`
-    SSLMode        string `mapstructure:"sslmode"`
-    ConnectTimeout int    `mapstructure:"connect_timeout"`
+    db *sql.DB
+
+    Enable         bool           `mapstructure:"enable"`
+    Driver         string         `mapstructure:"driver"`
+    Username       string         `mapstructure:"username"`
+    Password       string         `mapstructure:"password"`
+    Protocol       string         `mapstructure:"protocol"`
+    Address        string         `mapstructure:"address"`
+    DBName         string         `mapstructure:"dbname"`
+    Parameters     string         `mapstructure:"parameters"`
+    ConnectionPool ConnectionPool `mapstructure:"connection_pool"`
 }
 
 // CachebufConfig 缓存配置，区别于数据库配置，缓存的数据可以丢失
@@ -193,6 +197,14 @@ type KafkaSarama struct {
     Config  SaramaConfig `mapstructure:"config"`
 }
 
+// ConnectionPool 数据库连接池配置
+type ConnectionPool struct {
+    MaxIdleTime  time.Duration `mapstructure:"max_idle_time"`
+    MaxLifeTime  time.Duration `mapstructure:"max_life_time"`
+    MaxIdleConns int           `mapstructure:"max_idle_conns"`
+    MaxOpenConns int           `mapstructure:"max_open_conns"`
+}
+
 // SaramaConfig xx
 /*
 type SaramaConfig struct {
@@ -266,6 +278,10 @@ func (c *LocalConfig) Init() error {
     }
 
     if err := c.InitCloudEvents(); err != nil {
+        return err
+    }
+
+    if err := c.InitDatabase(); err != nil {
         return err
     }
 

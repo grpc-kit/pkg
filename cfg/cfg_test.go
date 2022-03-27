@@ -121,6 +121,12 @@ func testOpenTracing(t *testing.T) {
     // time.Sleep(3 * time.Second)
 }
 
+func configKeydiffValue(t *testing.T, prefix, key string, expect, current interface{}) {
+    if expect != current {
+        t.Errorf("%v.%v expect value '%v', current value '%v'", prefix, key, expect, current)
+    }
+}
+
 /*
 func testServiceGRPCAddress(t *testing.T) {
 	address, port, err := lc.Services.GetGRPCListenHostPort()
