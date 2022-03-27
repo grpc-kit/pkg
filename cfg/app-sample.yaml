@@ -72,8 +72,8 @@ database:
   #address: 192.168.31.200:5432
   #parameters: "sslmode=disable"
   connection_pool:
-    max_idle_time: 30s
-    max_life_time: 30s
+    max_idle_time: 1800s
+    max_life_time: 21600s
     max_idle_conns: 300
     max_open_conns: 300
 
