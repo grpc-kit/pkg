@@ -10,7 +10,7 @@
 -----|------|---------|----
 host | string | 主机IPv4或IPv6地址 | 127.0.0.1
 port | int | 主机端口号 | 6379
-address | string | 不包含协议，由主机IP与端口组成 | 127.0.0.1:6379 或 [fe80::1%lo0]:53
+address | string | 不包含协议，由主机IP与端口组成 | 127.0.0.1:6379 或 [fe80::1%lo0]:53 或 unix socket
 endpoints | []string | 由协议、IP、端口组成，多个通过逗号","分割 | https://node1:2379,https://node2:2379,https://node3:2379
 
 ### 其他类型

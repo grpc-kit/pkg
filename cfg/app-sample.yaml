@@ -1,4 +1,4 @@
-# https://github.com/grpc-kit/cfg/blob/master/app-sample.yaml
+# https://github.com/grpc-kit/pkg/blob/main/cfg/app-sample.yaml
 
 # 基础服务配置
 services:
@@ -61,14 +61,21 @@ security:
 
 # 关系数据配置
 database:
-  driver: postgres
+  enable: true
+  driver: mysql
+  #driver: postgres
   dbname: demo
-  user: demo
-  password: grpc-kit
-  host: 127.0.0.1
-  port: 5432
-  sslmode: disable
-  connect_timeout: 10
+  username: demo
+  password: password
+  address: 192.168.31.200:3306
+  parameters: ""
+  #address: 192.168.31.200:5432
+  #parameters: "sslmode=disable"
+  connection_pool:
+    max_idle_time: 30s
+    max_life_time: 30s
+    max_idle_conns: 300
+    max_open_conns: 300
 
 # 缓存服务配置
 cachebuf:
