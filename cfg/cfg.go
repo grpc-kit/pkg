@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -66,7 +67,7 @@ type LocalConfig struct {
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
 	logger      *logrus.Entry
-	srvdis      sd.Clienter
+	srvdis      sd.Registry
 	eventClient eventclient.Client
 }
 
@@ -293,7 +294,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 	gw func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) (err error),
 	opts ...runtime.ServeMuxOption) (*http.ServeMux, error) {
 
-	if err := c.registerConfig(); err != nil {
+	if err := c.registerConfig(ctx); err != nil {
 		return nil, err
 	}
 
@@ -303,7 +304,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 // Deregister 用于撤销注册中心上的服务信息
 func (c *LocalConfig) Deregister() error {
 	// 配置文件未设置注册地址，则主动忽略
-	if c.Discover == nil {
+	if c.Discover == nil || c.srvdis == nil {
 		return nil
 	}
 
@@ -324,7 +325,7 @@ func (c *LocalConfig) GetServiceName() string {
 	return fmt.Sprintf("%v.%v", c.Services.ServiceCode, c.Services.APIEndpoint)
 }
 
-func (c *LocalConfig) registerConfig() error {
+func (c *LocalConfig) registerConfig(ctx context.Context) error {
 	// 配置文件未设置注册地址，则主动忽略
 	if c.Discover == nil {
 		return nil
@@ -355,18 +356,59 @@ func (c *LocalConfig) registerConfig() error {
 		return err
 	}
 
-	// TODO; 服务端口开起来后在注册
-
-	reg, err := sd.Register(connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
-	if err != nil {
-		return fmt.Errorf("Register server err: %v%v", err, "\n")
+	// 确保服务端口开起来后在注册
+	tryConnect := func(address string) error {
+		conn, err := net.DialTimeout("tcp", address, 2*time.Second)
+		if err != nil {
+			return err
+		}
+		return conn.Close()
 	}
 
-	c.srvdis = reg
+	go func() {
+		retryMax := 5
+		retryCount := 0
+		allowRegistry := true
 
-	// 注册解析器
-	r := sd.NewResolver(connector)
-	resolver.Register(r)
+		for retryCount < retryMax {
+			retryCount += 1
+
+			time.Sleep(3 * time.Second)
+
+			if err := tryConnect(c.Services.PublicAddress); err != nil {
+				c.logger.Errorf("Register server, grpc health check err='%v', retry_count=%v, retry_max=%v",
+					err, retryCount, retryMax)
+
+				continue
+			}
+
+			c.logger.Infof("Register server, grpc health check public_address='%v' success",
+				c.Services.PublicAddress)
+			break
+		}
+
+		if retryCount >= retryMax {
+			allowRegistry = false
+
+			c.logger.Errorf("Register server, grpc health check fail public_address='%v' will not public to registry",
+				c.Services.PublicAddress)
+
+			// TODO; 达到最大检测次数，但后端服务端口还未正常，此时应该发送信号退出应用，不允许注册
+		}
+
+		// TODO; 如果后端grpc服务未正常注册，前端必须配合http健康检测，http状态码为503
+		if allowRegistry {
+			reg, err := sd.Register(connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
+			if err != nil {
+				c.logger.Errorf("Register server err: %v%v", err, "\n")
+			}
+
+			c.srvdis = reg
+
+			// TODO; 注册解析器，目前在全局，建议在dial中配置（grpc 1.27以后支持）
+			resolver.Register(reg)
+		}
+	}()
 
 	return nil
 }
