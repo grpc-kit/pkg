@@ -376,13 +376,13 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 			time.Sleep(3 * time.Second)
 
 			if err := tryConnect(c.Services.PublicAddress); err != nil {
-				c.logger.Errorf("Register server, grpc health check err='%v', retry_count=%v, retry_max=%v",
+				c.logger.Errorf("register service the grpc health check err: %v, retry_count: %v, retry_max: %v",
 					err, retryCount, retryMax)
 
 				continue
 			}
 
-			c.logger.Infof("Register server, grpc health check public_address='%v' success",
+			c.logger.Infof("register service the grpc health check public_address: %v success",
 				c.Services.PublicAddress)
 			break
 		}
@@ -390,7 +390,7 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 		if retryCount >= retryMax {
 			allowRegistry = false
 
-			c.logger.Errorf("Register server, grpc health check fail public_address='%v' will not public to registry",
+			c.logger.Errorf("register service the grpc health check fail public_address: %v will not public to registry",
 				c.Services.PublicAddress)
 
 			// TODO; 达到最大检测次数，但后端服务端口还未正常，此时应该发送信号退出应用，不允许注册
@@ -400,7 +400,7 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 		if allowRegistry {
 			reg, err := sd.Register(connector, c.GetServiceName(), c.Services.PublicAddress, string(rawBody), ttl)
 			if err != nil {
-				c.logger.Errorf("Register server err: %v%v", err, "\n")
+				c.logger.Errorf("register service err: %v%v", err, "\n")
 			}
 
 			c.srvdis = reg
