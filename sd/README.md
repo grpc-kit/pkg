@@ -14,12 +14,12 @@ https://node3.example.com:2379
 /${root_path}/${namespace}/${service_name}/${endpoint_name}/${service_addr}
 ```
 
-参数 | 说明  | 示例
------|-------|-------------
-root_path     | 注册的根地址         | 默认为：services
-namespace     | 命名空间             | 默认为：default
-endpoint_name | 微服务提供地址的父级 | 统一固定为：endpoints
-endpoint_addr | 具体一个微服务的地址 | 比如：lb.example.com:10080
+ 参数 | 说明  | 示例 
+---------------|-------|-------------
+ root_path     | 注册的根地址         | 默认为：services
+ namespace     | 命名空间             | 默认为：default
+ endpoint_name | 微服务提供地址的父级 | 统一固定为：endpoints
+ endpoint_addr | 具体一个微服务的地址 | 比如：lb.example.com:10080
 
 示例：
 

@@ -18,6 +18,8 @@ var (
 	Prefix = "service"
 	// Namespace xx
 	Namespace = "default"
+	// Scheme xx
+	Scheme = "grpc-kit"
 )
 
 var (
@@ -26,7 +28,7 @@ var (
 	errSchemeInvalid    = errors.New("scheme invalid")
 )
 
-// Registry 服务注册发现
+// Registry 服务注册发现，TODO：（之后会进行改造，主要支持kubernetes）
 type Registry interface {
 	// Register 注册服务信息至etcd等
 	Register(ctx context.Context, name, addr, val string, ttl int64) error
