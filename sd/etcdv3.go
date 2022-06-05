@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -28,14 +29,20 @@ type etcdv3Client struct {
 	client             *clientv3.Client
 	cc                 resolver.ClientConn
 	resolveNowCallback func(resolver.ResolveNowOptions)
+	mutexState         *sync.RWMutex
+	mutexWatch         *sync.RWMutex
 	targetState        map[string]resolver.State
+	targetWatch        map[string]bool
 }
 
 func newEtcdv3Client(prefix, namespace string, conn *Connector) (*etcdv3Client, error) {
 	e := &etcdv3Client{prefix: prefix,
 		namespace:   namespace,
 		logger:      conn.logger,
-		targetState: make(map[string]resolver.State)}
+		mutexState:  new(sync.RWMutex),
+		mutexWatch:  new(sync.RWMutex),
+		targetState: make(map[string]resolver.State),
+		targetWatch: make(map[string]bool)}
 	e.hosts = strings.Split(conn.Hosts, ",")
 
 	etcdv3conf := clientv3.Config{
@@ -68,33 +75,32 @@ func newEtcdv3Client(prefix, namespace string, conn *Connector) (*etcdv3Client, 
 	return e, nil
 }
 
-func (c *etcdv3Client) basePath() string {
-	return fmt.Sprintf("/%v/%v", c.prefix, c.namespace)
+func (e *etcdv3Client) basePath() string {
+	return fmt.Sprintf("/%v/%v", e.prefix, e.namespace)
 }
 
-func (c *etcdv3Client) regEndpointPath() string {
-	return fmt.Sprintf("%v/%v/endpoints/%v", c.basePath(), c.serviceName, c.serviceAddr)
+func (e *etcdv3Client) regEndpointPath() string {
+	return fmt.Sprintf("%v/%v/endpoints/%v", e.basePath(), e.serviceName, e.serviceAddr)
 }
 
-func (c *etcdv3Client) release() error {
-	// return c.client.Close()
+func (e *etcdv3Client) release() error {
 	return nil
 }
 
 // register 写入数据至etcd
-func (c *etcdv3Client) register(ctx context.Context, name, addr, val string, ttl int64) (<-chan *clientv3.LeaseKeepAliveResponse, error) {
-	resp, err := c.client.Grant(ctx, ttl)
+func (e *etcdv3Client) register(ctx context.Context, val string, ttl int64) (<-chan *clientv3.LeaseKeepAliveResponse, error) {
+	resp, err := e.client.Grant(ctx, ttl)
 	if err != nil {
 		return nil, err
 	}
-	_, err = c.client.Put(ctx, c.regEndpointPath(), val, clientv3.WithLease(resp.ID))
+	_, err = e.client.Put(ctx, e.regEndpointPath(), val, clientv3.WithLease(resp.ID))
 	if err != nil {
 		return nil, err
 	}
 
-	c.logger.Debugf("etcdv3 reg path: %v, ttl: %v, resp id: %v", c.regEndpointPath(), ttl, resp.ID)
+	e.logger.Debugf("etcdv3 reg path: %v, ttl: %v, resp id: %v", e.regEndpointPath(), ttl, resp.ID)
 
-	kap, err := c.client.KeepAlive(ctx, resp.ID)
+	kap, err := e.client.KeepAlive(ctx, resp.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +109,7 @@ func (c *etcdv3Client) register(ctx context.Context, name, addr, val string, ttl
 }
 
 // eatKeepAliveMessage 检测keepalive是否异常被关闭等，比如：etcd集群异常重连，重新注册服务
-func (c *etcdv3Client) eatKeepAliveMessage(ctx context.Context, kap <-chan *clientv3.LeaseKeepAliveResponse) error {
+func (e *etcdv3Client) eatKeepAliveMessage(ctx context.Context, kap <-chan *clientv3.LeaseKeepAliveResponse) error {
 	// lease keepalive response queue is full; dropping response send
 	// https://github.com/etcd-io/etcd/blob/master/clientv3/lease.go#L121
 	// 需要对keepalive的响应channel做消费，否则会满
@@ -114,7 +120,7 @@ func (c *etcdv3Client) eatKeepAliveMessage(ctx context.Context, kap <-chan *clie
 			if x == nil {
 				return fmt.Errorf("keepalive channel is closed")
 			}
-			c.logger.Debugf("etcd keepalive: %v", x)
+			e.logger.Debugf("etcd keepalive: %v", x)
 		case <-ctx.Done():
 			// 接收到被取消的信号
 			return fmt.Errorf("keepalive receiver cancel")
@@ -126,18 +132,18 @@ func (c *etcdv3Client) eatKeepAliveMessage(ctx context.Context, kap <-chan *clie
 }
 
 // Register 注册服务
-func (c *etcdv3Client) Register(ctx context.Context, name, addr, val string, ttl int64) error {
-	c.serviceName = name
-	c.serviceAddr = addr
+func (e *etcdv3Client) Register(ctx context.Context, name, addr, val string, ttl int64) error {
+	e.serviceName = name
+	e.serviceAddr = addr
 
 	go func() {
 		for {
-			kap, err := c.register(ctx, name, addr, val, ttl)
+			kap, err := e.register(ctx, val, ttl)
 			if err == nil {
-				err = c.eatKeepAliveMessage(ctx, kap)
+				err = e.eatKeepAliveMessage(ctx, kap)
 			}
 
-			c.logger.Errorf("etcd registry found fails, will be retry later, reason: %v", err)
+			e.logger.Errorf("etcd registry found fails, will be retry later, reason: %v", err)
 
 			// TODO; 是否提取为变量
 			time.Sleep(5 * time.Second)
@@ -148,21 +154,21 @@ func (c *etcdv3Client) Register(ctx context.Context, name, addr, val string, ttl
 }
 
 // Deregister 取消注册
-func (c *etcdv3Client) Deregister() error {
-	_, err := c.client.Delete(context.Background(), c.regEndpointPath())
+func (e *etcdv3Client) Deregister() error {
+	_, err := e.client.Delete(context.Background(), e.regEndpointPath())
 	if err != nil {
 		return err
 	}
 
-	if err := c.release(); err != nil {
+	if err := e.release(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (c *etcdv3Client) getKey(ctx context.Context, key string) (*clientv3.GetResponse, error) {
-	resp, err := c.client.Get(ctx, key, clientv3.WithPrefix())
+func (e *etcdv3Client) getKey(ctx context.Context, key string) (*clientv3.GetResponse, error) {
+	resp, err := e.client.Get(ctx, key, clientv3.WithPrefix())
 	if err != nil {
 		return resp, err
 	}
@@ -170,107 +176,117 @@ func (c *etcdv3Client) getKey(ctx context.Context, key string) (*clientv3.GetRes
 	return resp, nil
 }
 
-func (c *etcdv3Client) watchKey(ctx context.Context, key string) clientv3.WatchChan {
-	return c.client.Watch(ctx, key, clientv3.WithPrefix())
+// updateState 更新grpc服务后端地址
+func (e *etcdv3Client) updateState(endpoint string, state resolver.State) error {
+	e.mutexState.Lock()
+	defer e.mutexState.Unlock()
+
+	memState, foundState := e.targetState[endpoint]
+	if len(state.Addresses) == 0 && foundState {
+		state = memState
+	}
+
+	e.logger.Debugf("etcdv3 registry update endpoint: %v, state addrs: %v", endpoint, state.Addresses)
+
+	e.targetState[endpoint] = state
+	return e.cc.UpdateState(state)
 }
 
-// Build 实现 resolver.Build
-func (r *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
+// Build 实现"resolver.Build"
+// 仅当调用"grpc.Dial"时执行，如果在此之间后端服务地址变更，则需要依赖"watch"做自动化更新
+func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	if target.Scheme != scheme {
 		return nil, errSchemeInvalid
 	}
 
-	var err error
-	r.cc = cc
+	e.cc = cc
 
-	ctx := context.Background()
-
-	ctxTw, cancel := context.WithTimeout(ctx, 2*time.Second)
+	// TODO; 从etcd目录获取数据超时时间应该小于2s内
+	ctx, cancel := context.WithTimeout(context.TODO(), 2*time.Second)
 	defer cancel()
 
-	endpointsKey := fmt.Sprintf("%v/%v/endpoints", r.basePath(), target.Endpoint)
-	resp, err := r.getKey(ctxTw, endpointsKey)
+	endpointKey := fmt.Sprintf("%v/%v/endpoints", e.basePath(), target.Endpoint)
+	resp, err := e.getKey(ctx, endpointKey)
 	if err != nil {
-		r.logger.Errorf("resolver build getkey err='%v'", err)
+		e.logger.Errorf("resolver build getkey err: %v, will use last resolver address", err)
 
-		// 如果查询超时，则返回本地最近一次可用的地址
-		err = r.cc.UpdateState(r.targetState[target.Endpoint])
+		// 如果查询超时，则返回内存中最近一次可用的地址
+		err = e.updateState(target.Endpoint, resolver.State{})
 		if err != nil {
-			r.logger.Errorf("resolver build update state err='%v'", err)
+			e.logger.Errorf("resolver build update state err: %v", err)
 		}
-		return r, nil
+
+		return e, nil
 	}
 
-	addrs := make([]resolver.Address, 0)
+	adders := make([]resolver.Address, 0)
 	for _, v := range resp.Kvs {
-		addrs = append(addrs, resolver.Address{Addr: path.Base(string(v.Key))})
+		adders = append(adders, resolver.Address{Addr: path.Base(string(v.Key))})
 	}
-	state := resolver.State{Addresses: addrs}
+	state := resolver.State{Addresses: adders}
 
-	// 最近一次该服务地址存入内存以便获取失败时使用
-	r.targetState[target.Endpoint] = state
-
-	err = r.cc.UpdateState(state)
+	// 最近一次解析服务地址存入内存以便获取失败时使用
+	err = e.updateState(target.Endpoint, state)
 	if err != nil {
-		return r, err
+		e.logger.Errorf("resolver build update state err: %v", err)
+		return nil, err
 	}
 
-	// TODO; 存在多次wathc的问题
-	// go r.watcher(ctx, endpointsKey, addrs)
+	e.mutexWatch.Lock()
+	defer e.mutexWatch.Unlock()
+	if !e.targetWatch[target.Endpoint] {
+		go e.watcher(target.Endpoint, adders)
+		e.targetWatch[target.Endpoint] = true
+	}
 
-	return r, nil
+	return e, nil
 }
 
 // Scheme 实现 resolver.Scheme
-func (r *etcdv3Client) Scheme() string {
+func (e *etcdv3Client) Scheme() string {
 	return scheme
 }
 
 // Close 实现 resolver.Close
 // 仅当执行 grpc.ClientConn.Close 时调用
-func (r *etcdv3Client) Close() {
+func (e *etcdv3Client) Close() {
 	// 没有资源需要释放
 }
 
 // ResolveNow 实现 resolver.Resolver
-func (r *etcdv3Client) ResolveNow(o resolver.ResolveNowOptions) {
-	r.resolveNowCallback(o)
+func (e *etcdv3Client) ResolveNow(o resolver.ResolveNowOptions) {
+	e.logger.Infof("ResolveNow...")
+
+	e.resolveNowCallback(o)
 }
 
-func (r *etcdv3Client) watcher(ctx context.Context, endpointsKey string, addrs []resolver.Address) {
-	r.logger.Debugf("resolver watcher key = %v", endpointsKey)
+func (e *etcdv3Client) watcher(endpoint string, addrs []resolver.Address) {
+	endpointKey := fmt.Sprintf("%v/%v/endpoints", e.basePath(), endpoint)
 
-	for n := range r.watchKey(ctx, endpointsKey) {
-		for _, e := range n.Events {
-			addr := path.Base(string(e.Kv.Key))
+	// 这里context不能被取消或超时
+	ctx := context.Background()
+	for n := range e.client.Watch(ctx, endpointKey, clientv3.WithPrefix()) {
+		for _, v := range n.Events {
+			addr := path.Base(string(v.Kv.Key))
 
-			// DEBUG
-			r.logger.Debugf("resolver watcher found key = %v", string(e.Kv.Key))
-
-			switch e.Type {
+			switch v.Type {
 			case mvccpb.PUT:
 				// 更新地址
 				if !existAddr(addrs, addr) {
 					addrs = append(addrs, resolver.Address{Addr: addr})
-					err := r.cc.UpdateState(resolver.State{Addresses: addrs})
+					err := e.updateState(endpoint, resolver.State{Addresses: addrs})
 					if err != nil {
 						return
 					}
-
-					// DEBUG
-					fmt.Println("state addrs:", addrs)
 				}
 			case mvccpb.DELETE:
 				// 删除地址
 				if s, ok := removeAddr(addrs, addr); ok {
 					addrs = s
-					err := r.cc.UpdateState(resolver.State{Addresses: addrs})
+					err := e.updateState(endpoint, resolver.State{Addresses: addrs})
 					if err != nil {
 						return
 					}
-
-					// DEBUG
-					fmt.Println("state addrs:", addrs)
 				}
 			}
 		}
