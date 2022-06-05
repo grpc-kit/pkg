@@ -3,7 +3,6 @@ package sd
 import (
 	"fmt"
 	"testing"
-	// "time"
 
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -15,7 +14,7 @@ var (
 )
 
 func TestRegisterDemo1(t *testing.T) {
-	hosts := "http://127.0.0.1:2379,http://127.0.0.1:2379,http://127.0.0.1:2379"
+	hosts := "http://127.0.0.1:2379"
 	conns, err := NewConnector(logger, ETCDV3, hosts)
 	if err != nil {
 		fmt.Println("err:", err)
@@ -37,17 +36,18 @@ func TestRegisterDemo1(t *testing.T) {
 }
 
 func TestRegisterDemo2(t *testing.T) {
-	hosts := "http://127.0.0.1:2379,http://127.0.0.1:2379,http://127.0.0.1:2379"
+	hosts := "http://127.0.0.1:2379"
 	conns, err := NewConnector(logger, ETCDV3, hosts)
 	if err != nil {
 		fmt.Println("err:", err)
 	}
 
 	Home("service", "default")
-	_, err = Register(conns, "com.example.grpc.demo.v1.Demo2", "127.0.0.1:20089", "", 100)
+	cli, err := Register(conns, "com.example.grpc.demo.v1.Demo2", "127.0.0.1:20089", "", 100)
 	if err != nil {
 		fmt.Println("register err:", err)
 	}
+	cli.Deregister()
 
 	// time.Sleep(10 * time.Second)
 
@@ -61,14 +61,14 @@ func TestRegisterDemo2(t *testing.T) {
 }
 
 func TestResolver(t *testing.T) {
-	hosts := "http://127.0.0.1:2379,http://127.0.0.1:2379,http://127.0.0.1:2379"
+	hosts := "http://127.0.0.1:2379"
 	conns, err := NewConnector(logger, ETCDV3, hosts)
 	if err != nil {
 		fmt.Println("err:", err)
 	}
 
 	Home("service", "default")
-	r := NewResolver(conns)
+	r, err := Register(conns, "com.example.grpc.demo.v1.Demo2", "127.0.0.1:20089", "", 100)
 	resolver.Register(r)
 
 	target := fmt.Sprintf("%v://default/%v", r.Scheme(), "com.example.grpc.demo.v1.Demo2")
@@ -78,6 +78,8 @@ func TestResolver(t *testing.T) {
 		panic(err)
 	}
 	defer conn.Close()
+
+	r.Deregister()
 
 	fmt.Println("target:", conn.GetState().String())
 }
