@@ -14,6 +14,7 @@ import (
 
 	eventclient "github.com/cloudevents/sdk-go/v2/client"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
@@ -68,6 +69,7 @@ type LocalConfig struct {
 
 	logger      *logrus.Entry
 	srvdis      sd.Registry
+	rpcConfig   *rpc.Config
 	eventClient eventclient.Client
 }
 
@@ -283,6 +285,10 @@ func (c *LocalConfig) Init() error {
 	}
 
 	if err := c.InitDatabase(); err != nil {
+		return err
+	}
+
+	if err := c.InitRPCConfig(); err != nil {
 		return err
 	}
 
