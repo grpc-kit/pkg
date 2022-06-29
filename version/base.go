@@ -5,13 +5,13 @@ import (
 )
 
 var (
-	// AppName 应用程序的名称
+	// Appname 应用程序的名称
 	Appname string
 	// GitCommit 最后一次git提交的hash值，计算方式：git rev-parse HEAD
 	GitCommit string
 	// BuildDate 编译二进制时的时间，RFC3339规范，计算方式：date -u +'%Y-%m-%dT%H:%M:%SZ'
 	BuildDate string
-	// GitBranch 编译是所在的git分支，计算方式：git rev-parse --abbrev-ref HEAD
+	// GitBranch 编译时所在的git分支，计算方式：git rev-parse --abbrev-ref HEAD
 	GitBranch string
 	// CliVersion 生成该服务模版所使用的 github.com/grpc-kit/cli 版本
 	CliVersion string
@@ -42,7 +42,7 @@ func (info Info) String() string {
 		tmp := Info{
 			BuildDate:      "1970-01-01T00:00:00Z",
 			CommitUnixTime: 0,
-			ReleaseVersion: "v0.0.0",
+			ReleaseVersion: "0.0.0",
 		}
 		rawBody, _ = json.Marshal(tmp)
 		return string(rawBody)

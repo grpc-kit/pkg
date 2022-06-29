@@ -36,10 +36,10 @@ func Get() Info {
 		info.GitBranch = ""
 	}
 	if info.ReleaseVersion == "" {
-		info.ReleaseVersion = "v0.0.0"
+		info.ReleaseVersion = "0.0.0"
 	}
 	if info.CliVersion == "" {
-		info.CliVersion = "v0.0.0"
+		info.CliVersion = "0.0.0"
 	}
 
 	return info
