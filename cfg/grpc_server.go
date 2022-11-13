@@ -116,7 +116,14 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 	// 正常响应时调用，统一植入特定内容
 	forwardResponseOption := func(ctx context.Context, w http.ResponseWriter, msg proto.Message) error {
+		// 禁用浏览器的 Content-Type 猜测行为
 		w.Header().Set("X-Content-Type-Options", "nosniff")
+		// 限制仅可在相同域名页面的 frame 中展示
+		w.Header().Set("X-Frame-Options", "sameorigin")
+		// 防范 XSS 攻击，检测到攻击，浏览器将不会清除页面，而是阻止页面加载
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+		// 访问一个 HTTPS 网站，要求浏览器总是通过 HTTPS 访问它
+		// w.Header().Set("Strict-Transport-Security", "max-age=172800")
 
 		// TODO; 如果msg是数组返回，则无法成功序列化为json
 		if c.Opentracing.LogFields.HTTPResponse {
@@ -147,6 +154,8 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		w.Header().Del("Trailer")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "sameorigin")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
 
 		// 请求的是忽略追踪的http url地址
 		ignoreTracing := false
