@@ -435,6 +435,11 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 						// 认证成功
 						ctx = c.WithUsername(ctx, tmps[0])
 						ctx = c.WithAuthenticationType(ctx, AuthenticationTypeBasic)
+						ctx = c.WithGroups(ctx, v.Groups)
+
+						if err := c.checkPermission(ctx, v.Groups); err != nil {
+							return ctx, err
+						}
 						return ctx, nil
 					}
 				}
@@ -465,13 +470,42 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 
 			ctx = c.WithIDToken(ctx, temp)
 			ctx = c.WithUsername(ctx, temp.Email)
+			ctx = c.WithGroups(ctx, temp.Groups)
 			ctx = c.WithAuthenticationType(ctx, AuthenticationTypeBearer)
 
+			if err := c.checkPermission(ctx, temp.Groups); err != nil {
+				return ctx, err
+			}
 			return ctx, nil
 		}
 
 		return ctx, errors.Unauthenticated(ctx).Err()
 	}
+}
+
+func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) error {
+	// 是否开启鉴权
+	if c.Security.Authorization != nil {
+		// 需要当前用户组进行核对，是否拥护权限
+		if len(c.Security.Authorization.AllowedGroups) > 0 {
+			allow := false
+			found := make(map[string]int, 0)
+			for _, g := range c.Security.Authorization.AllowedGroups {
+				found[g] = 0
+			}
+			for _, g := range groups {
+				if _, ok := found[g]; ok {
+					allow = true
+					break
+				}
+			}
+			if !allow {
+				return errors.PermissionDenied(ctx).Err()
+			}
+		}
+	}
+
+	return nil
 }
 
 func calcRequestID(carrier map[string]string) string {

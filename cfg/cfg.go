@@ -53,6 +53,9 @@ const (
 
 	// authenticationTypeKey 用于存放当前认证方式
 	authenticationTypeKey
+
+	// groupsKey 用于存放当前用户归属的组列表
+	groupsKey
 )
 
 // LocalConfig 本地配置，全局微服务配置结构
@@ -169,12 +172,14 @@ type Authentication struct {
 
 // Authorization 用于鉴权
 type Authorization struct {
+	AllowedGroups []string `mapstructure:"allowed_groups"`
 }
 
 // BasicAuth 用于HTTP基本认证的用户权限定义
 type BasicAuth struct {
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
+	Username string   `mapstructure:"username"`
+	Password string   `mapstructure:"password"`
+	Groups   []string `mapstructure:"groups"`
 }
 
 // OIDCProvider 用于OIDC认证提供方配置

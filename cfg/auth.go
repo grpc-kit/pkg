@@ -93,6 +93,11 @@ func (c *LocalConfig) WithAuthenticationType(parent context.Context, authType st
 	return context.WithValue(parent, authenticationTypeKey, authType)
 }
 
+// WithGroups 用于设置当前会话用户属于组
+func (c *LocalConfig) WithGroups(parent context.Context, groups []string) context.Context {
+	return context.WithValue(parent, groupsKey, groups)
+}
+
 // IDTokenFrom 用于获取当前会话的IDToken
 func (c *LocalConfig) IDTokenFrom(ctx context.Context) (IDTokenClaims, bool) {
 	idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
@@ -109,6 +114,12 @@ func (c *LocalConfig) UsernameFrom(ctx context.Context) (string, bool) {
 func (c *LocalConfig) AuthenticationTypeFrom(ctx context.Context) (string, bool) {
 	username, ok := ctx.Value(authenticationTypeKey).(string)
 	return username, ok
+}
+
+// GroupsFrom 用于获取当前会话的用户组列表
+func (c *LocalConfig) GroupsFrom(ctx context.Context) ([]string, bool) {
+	groups, ok := ctx.Value(groupsKey).([]string)
+	return groups, ok
 }
 
 // setVerifier 用于设置oidc verifier实例

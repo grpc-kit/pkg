@@ -56,8 +56,12 @@ security:
     http_users:
       - username: user1
         password: pass1
+        groups:
+          - sysadmin
   # TODO; 鉴权：能做什么
   authorization:
+    allowed_groups:
+      - sysadmin
 
 # 关系数据配置
 database:
