@@ -232,6 +232,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	rmux := runtime.NewServeMux(defaultOpts...)
 
 	hmux := http.NewServeMux()
+	hmux.Handle("/ping", httpHandleHealthPing())
 	hmux.Handle("/metrics", promhttp.Handler())
 	hmux.Handle("/version", httpHandleGetVersion())
 
@@ -530,5 +531,14 @@ func httpHandleGetVersion() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 
 		_, _ = io.WriteString(w, version.Get().String())
+	}
+}
+
+func httpHandleHealthPing() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusOK)
+
+		_, _ = io.WriteString(w, "OK")
 	}
 }
