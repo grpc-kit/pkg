@@ -190,6 +190,8 @@ type SaramaConfig struct {
 				Interval time.Duration `mapstructure:"interval"`
 			} `mapstructure:"auto_commit"`
 
+			// OffsetNewest=-1 代表访问 commit 位置的下一条消息
+			// OffsetOldest=-2 消费者可以访问到的 topic 里的最早的消息
 			Initial   int64         `mapstructure:"initial"`
 			Retention time.Duration `mapstructure:"retention"`
 

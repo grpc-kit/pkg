@@ -6,12 +6,20 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// InitLogger 用于初始化日志实例
-func (c *LocalConfig) InitLogger() (*logrus.Entry, error) {
+// InitDebugger 用于初始化日志实例
+func (c *LocalConfig) InitDebugger() error {
 	logger := logrus.WithFields(
 		logrus.Fields{
 			"service_name": c.GetServiceName(),
 		})
+
+	if c.Debugger == nil {
+		c.Debugger = &DebuggerConfig{
+			LogLevel:    "info",
+			LogFormat:   "text",
+			EnablePprof: false,
+		}
+	}
 
 	logLevel := c.Debugger.LogLevel
 	logFormat := c.Debugger.LogFormat
@@ -55,7 +63,7 @@ func (c *LocalConfig) InitLogger() (*logrus.Entry, error) {
 
 	c.logger = logger
 
-	return logger, nil
+	return nil
 }
 
 // GetLogger 用于获取全局日志

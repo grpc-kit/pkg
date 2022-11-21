@@ -9,8 +9,14 @@ import (
 	jaegerconfig "github.com/uber/jaeger-client-go/config"
 )
 
-// InitOpenTracing 初始化全局分布式链路追踪
-func (c *LocalConfig) InitOpenTracing() (io.Closer, error) {
+// InitOpentracing 初始化全局分布式链路追踪
+func (c *LocalConfig) InitOpentracing() (io.Closer, error) {
+	if c.Opentracing == nil {
+		c.Opentracing = &OpentracingConfig{
+			Enable: false,
+		}
+	}
+
 	samplerCfg := &jaegerconfig.SamplerConfig{
 		Type:  jaeger.SamplerTypeConst,
 		Param: 1,

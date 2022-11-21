@@ -24,6 +24,10 @@ const (
 
 // InitDatabase 用于初始化数据库
 func (c *LocalConfig) InitDatabase() error {
+	if c.Database == nil {
+		c.Database = &DatabaseConfig{Enable: false}
+	}
+
 	if !c.Database.Enable {
 		return nil
 	}

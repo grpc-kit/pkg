@@ -21,8 +21,12 @@ type IDTokenClaims struct {
 	FederatedClaims map[string]string `json:"federated_claims"`
 }
 
-// InitAuthentication 初始化认证
-func (c *LocalConfig) InitAuthentication() error {
+// InitSecurity 初始化认证
+func (c *LocalConfig) InitSecurity() error {
+	if c.Security == nil {
+		c.Security = &SecurityConfig{Enable: false}
+	}
+
 	if !c.Security.Enable {
 		return nil
 	}
