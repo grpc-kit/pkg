@@ -6,7 +6,7 @@ services:
   root_path: service
   # 服务注册的空间，全局统一
   namespace: example
-  # 服务的代码，设置后不可变更
+  # 服务的代码，名称唯一且必填，格式：应用短名.接口版本.产品代码
   service_code: cmdb.v1.commons
   # 接口网关的地址
   api_endpoint: api.grpc-kit.com
