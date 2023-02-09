@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v4"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // IDTokenClaims 用于框架jwt的数据结构
 type IDTokenClaims struct {
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	Email           string            `json:"email"`
 	EmailVerified   bool              `json:"email_verified"`
 	Groups          []string          `json:"groups"`
