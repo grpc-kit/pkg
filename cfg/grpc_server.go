@@ -269,20 +269,38 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 // GetUnaryInterceptor 用于获取gRPC的一元拦截器
 func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterceptor) grpc.ServerOption {
-	// TODO; 根据fullMethodName进行过滤哪些需要记录gRPC调用链，返回false表示不记录
+	// TODO; 根据 fullMethodName 进行过滤哪些需要记录 gRPC 调用链，返回 false 表示不记录
 	tracingFilterFunc := grpcopentracing.WithFilterFunc(func(ctx context.Context, fullMethodName string) bool {
-		return path.Base(fullMethodName) != "HealthCheck"
+		rpcName := path.Base(fullMethodName)
+		switch rpcName {
+		case "HealthCheck":
+			return false
+		case "Check", "Watch":
+			return false
+		default:
+			return true
+		}
+		// return path.Base(fullMethodName) != "HealthCheck"
 	})
 
-	// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
+	// TODO; 根据 fullMethodName 进行过滤哪些需要记录 payload 的，返回 false 表示不记录
 	logPayloadFilterFunc := func(ctx context.Context, fullMethodName string, servingObject interface{}) bool {
 		return false
 	}
 
-	// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
+	// TODO; 根据 fullMethodName 进行过滤哪些需要记录请求状态的，返回 false 表示不记录
 	logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
 		// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-		return err == nil && path.Base(fullMethodName) != "HealthCheck"
+		rpcName := path.Base(fullMethodName)
+		switch rpcName {
+		case "HealthCheck":
+			return false
+		case "Check", "Watch":
+			return false
+		default:
+			return true
+		}
+		// return err == nil && path.Base(fullMethodName) != "HealthCheck"
 	})}
 
 	var defaultUnaryOpt []grpc.UnaryServerInterceptor
@@ -346,7 +364,15 @@ func (c *LocalConfig) GetClientUnaryInterceptor() []grpc.UnaryClientInterceptor 
 	// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
 	logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
 		// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-		return err == nil && path.Base(fullMethodName) != "HealthCheck"
+		rpcName := path.Base(fullMethodName)
+		switch rpcName {
+		case "HealthCheck":
+			return false
+		case "Check", "Watch":
+			return false
+		default:
+			return true
+		}
 	})}
 
 	var opts []grpc.UnaryClientInterceptor
@@ -359,12 +385,12 @@ func (c *LocalConfig) GetClientUnaryInterceptor() []grpc.UnaryClientInterceptor 
 
 // GetClientStreamInterceptor 获取客户端默认流拦截器
 func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientInterceptor {
-	// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
+	// TODO; 根据 fullMethodName 进行过滤哪些需要记录 payload 的，返回 false 表示不记录
 	logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
 		return false
 	}
 
-	// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
+	// TODO; 根据 fullMethodName 进行过滤哪些需要记录请求状态的，返回 false 表示不记录
 	logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
 		// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
 		return err == nil && path.Base(fullMethodName) != "HealthCheck"
