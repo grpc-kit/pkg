@@ -26,7 +26,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/grpc-kit/pkg/api"
 	"github.com/grpc-kit/pkg/errors"
-	"github.com/grpc-kit/pkg/version"
+	"github.com/grpc-kit/pkg/vars"
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
 	opentracing "github.com/opentracing/opentracing-go"
 	opentracinglog "github.com/opentracing/opentracing-go/log"
@@ -530,7 +530,7 @@ func httpHandleGetVersion() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
-		_, _ = io.WriteString(w, version.Get().String())
+		_, _ = io.WriteString(w, vars.GetVersion().String())
 	}
 }
 
