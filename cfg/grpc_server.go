@@ -480,27 +480,23 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 				return ctx, errors.Unauthenticated(ctx).Err()
 			}
 
-			tokenVerifier, ok := c.Security.idTokenVerifier()
-			if !ok {
-				return ctx, errors.Unauthenticated(ctx).WithMessage(err.Error()).Err()
-			}
-
-			idToken, err := tokenVerifier.Verify(ctx, bearerToken)
+			idToken, err := c.Security.verifyBearerToken(ctx, bearerToken)
 			if err != nil {
-				return ctx, errors.Unauthenticated(ctx).WithMessage(err.Error()).Err()
+				if idToken.Subject != "" || idToken.Email != "" {
+					c.logger.Warnf("bearer token sub: %v email: %v verify err: %v", idToken.Subject, idToken.Email, err)
+				} else {
+					c.logger.Warnf("bearer token verify err: %v", err)
+				}
+
+				return ctx, errors.Unauthenticated(ctx).Err()
 			}
 
-			var temp IDTokenClaims
-			if err := idToken.Claims(&temp); err != nil {
-				return ctx, errors.Unauthenticated(ctx).WithMessage(err.Error()).Err()
-			}
-
-			ctx = c.WithIDToken(ctx, temp)
-			ctx = c.WithUsername(ctx, temp.Email)
-			ctx = c.WithGroups(ctx, temp.Groups)
+			ctx = c.WithIDToken(ctx, idToken)
+			ctx = c.WithUsername(ctx, idToken.Email)
+			ctx = c.WithGroups(ctx, idToken.Groups)
 			ctx = c.WithAuthenticationType(ctx, AuthenticationTypeBearer)
 
-			if err := c.checkPermission(ctx, temp.Groups); err != nil {
+			if err := c.checkPermission(ctx, idToken.Groups); err != nil {
 				return ctx, err
 			}
 			return ctx, nil
