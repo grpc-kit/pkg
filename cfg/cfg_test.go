@@ -27,8 +27,8 @@ func TestConfig(t *testing.T) {
 		t.Errorf("Load config file err: %v\n", err)
 	}
 
-	if lc.Services.Namespace != "example" {
-		t.Errorf("service.Namespace != example")
+	if lc.Services.Namespace != "default" {
+		t.Errorf("service.Namespace != default")
 	}
 
 	t.Run("testServiceName", testServiceName)
@@ -40,23 +40,24 @@ func TestConfig(t *testing.T) {
 }
 
 func testServiceName(t *testing.T) {
-	serviceName := "cmdb.v1.commons.api.grpc-kit.com"
+	serviceName := "test1.v1.opsaid.api.grpc-kit.com"
 	if serviceName != fmt.Sprintf("%v.%v", lc.Services.ServiceCode, lc.Services.APIEndpoint) {
 		t.Errorf("service_name not match")
 	}
 }
 
 func testLogger(t *testing.T) {
-	lo, err := lc.InitLogger()
+	err := lc.InitDebugger()
 	if err != nil {
 		t.Errorf("Init logger err: %v\n", err)
 	}
 
+	lo := lc.GetLogger()
 	lo.Info("hello test")
 }
 
 func testOpenTracing(t *testing.T) {
-	closer, err := lc.InitOpenTracing()
+	closer, err := lc.InitOpentracing()
 	if err != nil {
 		t.Errorf("Init OpenTracing err: %v\n", err)
 	}
