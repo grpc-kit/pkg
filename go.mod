@@ -30,6 +30,7 @@ require (
 	go.etcd.io/etcd/api/v3 v3.5.2
 	go.etcd.io/etcd/client/pkg/v3 v3.5.2
 	go.etcd.io/etcd/client/v3 v3.5.2
+	golang.org/x/crypto v0.6.0 // indirect
 	google.golang.org/grpc v1.43.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.23.4
