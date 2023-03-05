@@ -1,20 +1,31 @@
-package errors
+package errs
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+
+	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 )
+
+// Status 统一错误响应内容
+type Status struct {
+	*statusv1.Status
+}
 
 // New 创建一个基础错误类型
 func New(code int32, message string) *Status {
-	s := &Status{Code: code,
-		Status:  codes.Code(code).String(),
-		Message: message}
+	s := &Status{
+		&statusv1.Status{
+			Code:    code,
+			Status:  codes.Code(code).String(),
+			Message: message,
+		},
+	}
 	return s
 }
 
@@ -25,10 +36,12 @@ func FromStatus(s *status.Status) *Status {
 	}
 
 	t := &Status{
-		Code:    s.Proto().Code,
-		Status:  s.Code().String(),
-		Message: s.Proto().Message,
-		Details: s.Proto().Details,
+		&statusv1.Status{
+			Code:    s.Proto().Code,
+			Status:  s.Code().String(),
+			Message: s.Proto().Message,
+			Details: s.Proto().Details,
+		},
 	}
 
 	return t
@@ -73,9 +86,9 @@ func (s *Status) WithDetails(details ...proto.Message) *Status {
 
 // AppendDetail 添加错误详情内容
 func (s *Status) AppendDetail(detail proto.Message) *Status {
-	any, err := ptypes.MarshalAny(detail)
+	a, err := anypb.New(detail)
 	if err == nil {
-		s.Details = append(s.Details, any)
+		s.Details = append(s.Details, a)
 	}
 	return s
 }
@@ -90,13 +103,5 @@ func (s *Status) GRPCStatus() *status.Status {
 	if s == nil {
 		return nil
 	}
-	/*
-		t := &spb.Status{Code: s.Code,
-			Message: s.Message,
-			Details: s.Details}
-	*/
-	t := status.New(codes.Code(s.Code), s.Message)
-	//t.WithDetails(s.Details...)
-
-	return t
+	return status.New(codes.Code(s.Code), s.Message)
 }
