@@ -9,14 +9,11 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.8.0
 	github.com/coreos/go-oidc/v3 v3.1.0
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/gogo/gateway v1.1.0
-	github.com/gogo/protobuf v1.3.2
 	github.com/golang-jwt/jwt/v4 v4.4.3
-	github.com/golang/protobuf v1.5.2
-	github.com/google/uuid v1.1.2
+	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
-	github.com/grpc-ecosystem/grpc-gateway v1.16.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.2
 	github.com/lib/pq v1.10.4
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/opentracing-contrib/go-stdlib v1.0.0
@@ -31,7 +28,8 @@ require (
 	go.etcd.io/etcd/client/pkg/v3 v3.5.2
 	go.etcd.io/etcd/client/v3 v3.5.2
 	golang.org/x/crypto v0.6.0 // indirect
-	google.golang.org/grpc v1.43.0
+	google.golang.org/grpc v1.53.0
+	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.23.4
 )
