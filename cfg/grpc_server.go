@@ -13,9 +13,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/gogo/gateway"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpcauth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
@@ -23,9 +20,9 @@ import (
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpcopentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/grpc-kit/pkg/api"
-	"github.com/grpc-kit/pkg/errors"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
+	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/vars"
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
 	opentracing "github.com/opentracing/opentracing-go"
@@ -34,6 +31,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
 	"google.golang.org/grpc/metadata"
+	// "google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 // registerGateway 注册 microservice.pb.gw
@@ -68,10 +68,19 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	// ServeMuxOption如果存在同样的设置选项，则以最后设置为准（见runtime.NewServeMux）
 	defaultOpts := make([]runtime.ServeMuxOption, 0)
 
-	// 根据content-type选择marshal
-	// jsonpb使用gogo版本，代替golang/protobuf/jsonpb
+	// 根据 content-type 选择 marshal
 	defaultOpts = append(defaultOpts, runtime.WithMarshalerOption(
-		runtime.MIMEWildcard, &gateway.JSONPb{OrigName: true, EmitDefaults: true}))
+		runtime.MIMEWildcard, &runtime.HTTPBodyMarshaler{
+			Marshaler: &runtime.JSONPb{
+				MarshalOptions: protojson.MarshalOptions{
+					UseProtoNames:   true,
+					EmitUnpopulated: true,
+				},
+				UnmarshalOptions: protojson.UnmarshalOptions{
+					DiscardUnknown: true,
+				},
+			},
+		}))
 
 	// 植入特定的请求头
 	optionWithMetada := func(ctx context.Context, req *http.Request) metadata.MD {
@@ -132,15 +141,14 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 				return nil
 			}
 
-			var buf bytes.Buffer
-			x := jsonpb.Marshaler{}
-			if err := x.Marshal(&buf, msg); err != nil {
+			respBody, err := protojson.Marshal(msg)
+			if err != nil {
+				return err
 			}
-			respBody := buf.String()
 			if len(respBody) <= 2 {
-				respBody = msg.String()
+				// respBody = msg.String()
 			}
-			span.LogFields(opentracinglog.String("http.body", respBody))
+			span.LogFields(opentracinglog.String("http.body", string(respBody)))
 		}
 
 		return nil
@@ -149,7 +157,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	// 错误响应时调用，统一植入特定内容
 	optionWithProtoErrorHandler := func(ctx context.Context, mux *runtime.ServeMux, _ runtime.Marshaler,
 		w http.ResponseWriter, req *http.Request, err error) {
-		s := errors.FromError(err)
+		s := errs.FromError(err)
 
 		w.Header().Del("Trailer")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -178,20 +186,18 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			requestID = calcRequestID(carrier)
 		}
 
-		t := &api.TracingRequest{Id: requestID}
+		t := &statusv1.TracingRequest{Id: requestID}
 		s = s.AppendDetail(t)
 
-		body := &errors.Response{
-			Error: *s,
+		body := &statusv1.ErrorResponse{
+			Error: s.Status,
 		}
 
-		// 错误返回均使用golang/protobuf/jsonpb进行序列，忽略marshaler
-		x := jsonpb.Marshaler{}
-		var buf bytes.Buffer
-		if err := x.Marshal(&buf, body); err != nil {
-			s = errors.Internal(ctx, t).WithMessage(err.Error())
-			body.Error = *s
-			x.Marshal(&buf, body)
+		rawBody, err := protojson.Marshal(body)
+		if err != nil {
+			s = errs.Internal(ctx, t).WithMessage(err.Error())
+			body.Error = s.Status
+			rawBody, _ = protojson.Marshal(body)
 		}
 
 		// 接口请求错误情况下，均会记录响应体
@@ -203,7 +209,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 					span.LogFields(opentracinglog.String("http.body", string(rawBody)))
 				}
 			}
-			span.LogFields(opentracinglog.String("http.response", buf.String()))
+			span.LogFields(opentracinglog.String("http.response", string(rawBody)))
 		}
 
 		md, ok := runtime.ServerMetadataFromContext(ctx)
@@ -221,13 +227,13 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		}
 
 		w.WriteHeader(s.HTTPStatusCode())
-		if _, err := w.Write(buf.Bytes()); err != nil {
+		if _, err := w.Write(rawBody); err != nil {
 		}
 	}
 
 	defaultOpts = append(defaultOpts, runtime.WithMetadata(optionWithMetada))
 	defaultOpts = append(defaultOpts, runtime.WithForwardResponseOption(forwardResponseOption))
-	defaultOpts = append(defaultOpts, runtime.WithProtoErrorHandler(optionWithProtoErrorHandler))
+	defaultOpts = append(defaultOpts, runtime.WithErrorHandler(optionWithProtoErrorHandler))
 	defaultOpts = append(defaultOpts, customOpts...)
 	rmux := runtime.NewServeMux(defaultOpts...)
 
@@ -440,7 +446,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 
 		// 如果未配置任何验证方式，则拒绝所有请求
 		if c.Security.Authentication == nil {
-			return ctx, errors.Unauthenticated(ctx).Err()
+			return ctx, errs.Unauthenticated(ctx).Err()
 		}
 
 		// 验证http basic认证
@@ -454,7 +460,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 
 				tmps := strings.Split(string(payload), ":")
 				if len(tmps) != 2 {
-					return ctx, errors.Unauthenticated(ctx).Err()
+					return ctx, errs.Unauthenticated(ctx).Err()
 				}
 
 				for _, v := range c.Security.Authentication.HTTPUsers {
@@ -477,7 +483,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 		if c.Security.Authentication.OIDCProvider != nil {
 			bearerToken, err := grpcauth.AuthFromMD(ctx, AuthenticationTypeBearer)
 			if err != nil || bearerToken == "" {
-				return ctx, errors.Unauthenticated(ctx).Err()
+				return ctx, errs.Unauthenticated(ctx).Err()
 			}
 
 			idToken, err := c.Security.verifyBearerToken(ctx, bearerToken)
@@ -488,7 +494,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 					c.logger.Warnf("bearer token verify err: %v", err)
 				}
 
-				return ctx, errors.Unauthenticated(ctx).Err()
+				return ctx, errs.Unauthenticated(ctx).Err()
 			}
 
 			ctx = c.WithIDToken(ctx, idToken)
@@ -502,7 +508,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			return ctx, nil
 		}
 
-		return ctx, errors.Unauthenticated(ctx).Err()
+		return ctx, errs.Unauthenticated(ctx).Err()
 	}
 }
 
@@ -523,7 +529,7 @@ func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) erro
 				}
 			}
 			if !allow {
-				return errors.PermissionDenied(ctx).Err()
+				return errs.PermissionDenied(ctx).Err()
 			}
 		}
 	}
