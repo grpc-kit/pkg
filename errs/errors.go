@@ -1,10 +1,10 @@
-package errors
+package errs
 
 import (
 	"context"
 
-	"github.com/golang/protobuf/proto"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/protobuf/proto"
 )
 
 // OK is returned on success.
