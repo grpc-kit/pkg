@@ -1,3 +1,7 @@
 # api
 
-定义公共的数据结构，用于在各个包之间引用。
+公知各 proto 源文件
+
+```shell
+https://github.com/grpc-kit/api.git
+```
