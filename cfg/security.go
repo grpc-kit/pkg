@@ -64,7 +64,8 @@ func (c *LocalConfig) InitSecurity() error {
 
 			provider, err := oidc.NewProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer)
 			if err != nil {
-				c.logger.Errorf("oidc authenticator: initializing plugin: %v", err)
+				// TODO; c.logger may be nil
+				// c.logger.Errorf("oidc authenticator: initializing plugin: %v", err)
 				return false, err
 			}
 			verifier := provider.Verifier(oidcConfig)
