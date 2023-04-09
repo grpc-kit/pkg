@@ -237,6 +237,10 @@ func New(v *viper.Viper) (*LocalConfig, error) {
 
 // Init 用于根据配置初始化各个实例，初始化需注意空指针判断
 func (c *LocalConfig) Init() error {
+	if err := c.InitDebugger(); err != nil {
+		return err
+	}
+
 	if err := c.InitServices(); err != nil {
 		return err
 	}
@@ -246,10 +250,6 @@ func (c *LocalConfig) Init() error {
 	}
 
 	if err := c.InitDatabase(); err != nil {
-		return err
-	}
-
-	if err := c.InitDebugger(); err != nil {
 		return err
 	}
 
