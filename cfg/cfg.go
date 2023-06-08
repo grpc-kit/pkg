@@ -64,6 +64,7 @@ type LocalConfig struct {
 	Database    *DatabaseConfig    `json:",omitempty"` // 关系数据配置
 	Cachebuf    *CachebufConfig    `json:",omitempty"` // 缓存服务配置
 	Debugger    *DebuggerConfig    `json:",omitempty"` // 日志调试配置
+	Objstore    *ObjstoreConfig    `json:",omitempty"` // 对象存储配置
 	Opentracing *OpentracingConfig `json:",omitempty"` // 链路追踪配置
 	CloudEvents *CloudEventsConfig `json:",omitempty"` // 公共事件配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
@@ -151,14 +152,6 @@ type CloudEventsConfig struct {
 type LogFields struct {
 	HTTPBody     bool `mapstructure:"http_body"`
 	HTTPResponse bool `mapstructure:"http_response"`
-}
-
-// TLSConfig 证书配置
-type TLSConfig struct {
-	CAFile             string `mapstructure:"ca_file"`
-	CertFile           string `mapstructure:"cert_file"`
-	KeyFile            string `mapstructure:"key_file"`
-	InsecureSkipVerify bool   `mapstructure:"insecure_skip_verify"`
 }
 
 // Authentication 用于认证
@@ -262,6 +255,10 @@ func (c *LocalConfig) Init() error {
 	}
 
 	if err := c.InitRPCConfig(); err != nil {
+		return err
+	}
+
+	if err := c.InitObjstore(); err != nil {
 		return err
 	}
 
