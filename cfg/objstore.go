@@ -52,7 +52,7 @@ type ObjstoreBucket interface {
 	Name() string
 
 	// Upload 用于上传对象到默认的 bucket 里
-	Upload(ctx context.Context, name string, r io.Reader) error
+	Upload(ctx context.Context, name string, r io.Reader) (ObjstoreAttributes, error)
 
 	// Delete 用于删除对象在默认的 bucket 里
 	Delete(ctx context.Context, name string) error

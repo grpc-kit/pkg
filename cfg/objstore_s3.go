@@ -141,18 +141,20 @@ func (b *S3Bucket) Exists(ctx context.Context, name string) (bool, error) {
 }
 
 // Upload 用于上传对象到默认的 bucket 里
-func (b *S3Bucket) Upload(ctx context.Context, name string, r io.Reader) error {
+func (b *S3Bucket) Upload(ctx context.Context, name string, r io.Reader) (ObjstoreAttributes, error) {
 	size, err := b.tryToGetSize(r)
 	if err != nil {
 		b.logger.Errorf("could not guess file size for multipart upload; upload might be not optimized, name: %v, err: %v", name, err)
 		size = -1
 	}
 
+	var attrs ObjstoreAttributes
+
 	partSize := b.partSize
 	if size < int64(partSize) {
 		partSize = 0
 	}
-	if _, err := b.client.PutObject(
+	info, err := b.client.PutObject(
 		ctx,
 		b.name,
 		name,
@@ -166,11 +168,16 @@ func (b *S3Bucket) Upload(ctx context.Context, name string, r io.Reader) error {
 			StorageClass:         b.storageClass,
 			NumThreads:           4,
 		},
-	); err != nil {
-		return fmt.Errorf("upload s3 object: %v", err)
+	)
+	if err != nil {
+		return attrs, fmt.Errorf("upload s3 object: %v", err)
 	}
 
-	return nil
+	attrs.ETag = info.ETag
+	attrs.Size = info.Size
+	attrs.LastModified = info.LastModified
+
+	return attrs, nil
 }
 
 // Attributes 用于获取默认 bucket 中对象的额外属性
