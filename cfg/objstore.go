@@ -61,13 +61,13 @@ type ObjstoreBucket interface {
 // ObjstoreBucketReader 抽象化包装，以简化使用，只读操作权限
 type ObjstoreBucketReader interface {
 	// Get 用于获取默认 bucket 的对象内容
-	Get(ctx context.Context, name string) (io.ReadCloser, error)
+	Get(ctx context.Context, name string) (io.ReadCloser, ObjstoreAttributes, error)
 
 	// Iter 用于遍历默认 bucket 里的对象文件
 	Iter(ctx context.Context, dir string, f func(string) error) error
 
 	// GetRange 用于获取默认 bucket 中对象指定位置的内容
-	GetRange(ctx context.Context, name string, off, length int64) (io.ReadCloser, error)
+	GetRange(ctx context.Context, name string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error)
 
 	// Exists 用于判断默认 bucket 是否存在该对象
 	Exists(ctx context.Context, name string) (bool, error)

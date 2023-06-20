@@ -91,39 +91,51 @@ func (b *S3Bucket) Iter(ctx context.Context, dir string, f func(string) error) e
 }
 
 // getRange 用于获取对象范围数据
-func (b *S3Bucket) getRange(ctx context.Context, name string, off, length int64) (io.ReadCloser, error) {
+func (b *S3Bucket) getRange(ctx context.Context, name string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error) {
+	a := ObjstoreAttributes{}
 	opts := &minio.GetObjectOptions{ServerSideEncryption: b.defaultSSE}
 	if length != -1 {
 		if err := opts.SetRange(off, off+length-1); err != nil {
-			return nil, err
+			return nil, a, err
 		}
 	} else if off > 0 {
 		if err := opts.SetRange(off, 0); err != nil {
-			return nil, err
+			return nil, a, err
 		}
 	}
 	r, err := b.client.GetObject(ctx, b.name, name, *opts)
 	if err != nil {
-		return nil, err
+		return nil, a, err
 	}
 
 	// NotFoundObject error is revealed only after first Read. This does the initial GetRequest. Prefetch this here
 	// for convenience.
 	if _, err := r.Read(nil); err != nil {
 		// First GET Object request error.
-		return nil, err
+		return nil, a, err
 	}
 
-	return r, nil
+	i, err := r.Stat()
+	if err != nil {
+		return nil, a, err
+	}
+
+	a.Size = i.Size
+	a.LastModified = i.LastModified
+	a.UserTags = i.UserTags
+	a.UserMetadata = i.UserMetadata
+	a.ETag = i.ETag
+
+	return r, a, nil
 }
 
 // Get 用于获取默认 bucket 的对象内容
-func (b *S3Bucket) Get(ctx context.Context, name string) (io.ReadCloser, error) {
+func (b *S3Bucket) Get(ctx context.Context, name string) (io.ReadCloser, ObjstoreAttributes, error) {
 	return b.getRange(ctx, name, 0, -1)
 }
 
 // GetRange 用于获取默认 bucket 中对象指定位置的内容
-func (b *S3Bucket) GetRange(ctx context.Context, name string, off, length int64) (io.ReadCloser, error) {
+func (b *S3Bucket) GetRange(ctx context.Context, name string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error) {
 	return b.getRange(ctx, name, off, length)
 }
 
