@@ -218,6 +218,32 @@ func (b *S3Bucket) IsObjNotFoundErr(err error) bool {
 	return minio.ToErrorResponse(err).Code == "NoSuchKey"
 }
 
+// CopyTo xx
+func (b *S3Bucket) CopyTo(ctx context.Context, srcName, dstName string) (ObjstoreAttributes, error) {
+	info := ObjstoreAttributes{}
+
+	srcOpt := minio.CopySrcOptions{
+		Bucket: b.name,
+		Object: srcName,
+	}
+	dstOpt := minio.CopyDestOptions{
+		Bucket:          b.name,
+		Object:          dstName,
+		ReplaceMetadata: true,
+	}
+
+	resp, err := b.client.CopyObject(ctx, dstOpt, srcOpt)
+	if err != nil {
+		return info, err
+	}
+
+	info.ETag = resp.ETag
+	info.LastModified = resp.LastModified
+	info.Size = resp.Size
+
+	return info, nil
+}
+
 // Close 释放资源
 func (b *S3Bucket) Close() error {
 	return nil

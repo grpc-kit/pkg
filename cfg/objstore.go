@@ -56,6 +56,9 @@ type ObjstoreBucket interface {
 
 	// Delete 用于删除对象在默认的 bucket 里
 	Delete(ctx context.Context, name string) error
+
+	// CopyTo 用于拷贝对象在默认 bucket 里
+	CopyTo(ctx context.Context, srcName, dstName string) (ObjstoreAttributes, error)
 }
 
 // ObjstoreBucketReader 抽象化包装，以简化使用，只读操作权限
@@ -229,6 +232,39 @@ func (o *ObjstoreConfig) getBucket() (*S3Bucket, error) {
 	return bkt, nil
 }
 
+// BucketClient 获取对象存储客户端实例
+func (o *ObjstoreConfig) BucketClient(logger *logrus.Entry) (ObjstoreBucket, error) {
+	// 标准步骤：验证配置是否合法
+	if err := o.valid(); err != nil {
+		return nil, err
+	}
+
+	// 标准步骤：初始化日志组件
+	if logger != nil {
+		o.logger = logger
+	} else {
+		o.logger = logrus.NewEntry(logrus.New())
+	}
+
+	// 初始化对象存储连接
+	client, err := o.getClient()
+	if err != nil {
+		return nil, err
+	}
+
+	o.client = client
+
+	// 对象存储 bucket 初始化
+	bucket, err := o.getBucket()
+	if err != nil {
+		return nil, err
+	}
+
+	o.bucket = bucket
+
+	return o.bucket, nil
+}
+
 // InitObjstore 初始化对象存储
 func (c *LocalConfig) InitObjstore() error {
 	// 标准步骤：为空或主动关闭则不开启该功能
@@ -236,33 +272,9 @@ func (c *LocalConfig) InitObjstore() error {
 		return nil
 	}
 
-	// 标准步骤：验证配置是否合法
-	if err := c.Objstore.valid(); err != nil {
-		return err
-	}
+	_, err := c.Objstore.BucketClient(c.logger)
 
-	// 标准步骤：初始化日志组件
-	if c.logger != nil {
-		c.Objstore.logger = c.logger
-	} else {
-		c.Objstore.logger = logrus.NewEntry(logrus.New())
-	}
-
-	// 初始化对象存储连接
-	client, err := c.Objstore.getClient()
-	if err != nil {
-		return err
-	}
-	c.Objstore.client = client
-
-	// 对象存储 bucket 初始化
-	bucket, err := c.Objstore.getBucket()
-	if err != nil {
-		return err
-	}
-	c.Objstore.bucket = bucket
-
-	return nil
+	return err
 }
 
 // GetObjstoreBucket 用于获取对象存储
