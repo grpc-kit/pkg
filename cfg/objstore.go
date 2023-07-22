@@ -41,6 +41,9 @@ type ObjstoreAttributes struct {
 
 	// UserTags 用户定义对象文件关联的标签
 	UserTags map[string]string `json:"user_tags"`
+
+	// VersionID 用于说明本次文件版本号
+	VersionID string `json:"version_id"`
 }
 
 // ObjstoreBucket 抽象化包装，以简化使用，读写操作权限

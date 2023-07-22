@@ -188,6 +188,7 @@ func (b *S3Bucket) Upload(ctx context.Context, name string, r io.Reader) (Objsto
 	attrs.ETag = info.ETag
 	attrs.Size = info.Size
 	attrs.LastModified = info.LastModified
+	attrs.VersionID = info.VersionID
 
 	return attrs, nil
 }
@@ -205,6 +206,7 @@ func (b *S3Bucket) Attributes(ctx context.Context, name string) (ObjstoreAttribu
 		UserTags:     objInfo.UserTags,
 		UserMetadata: objInfo.UserMetadata,
 		ETag:         objInfo.ETag,
+		VersionID:    objInfo.VersionID,
 	}, nil
 }
 
@@ -218,7 +220,7 @@ func (b *S3Bucket) IsObjNotFoundErr(err error) bool {
 	return minio.ToErrorResponse(err).Code == "NoSuchKey"
 }
 
-// CopyTo xx
+// CopyTo 用于拷贝同 bucket 下的对象文件，对象名不以 '/' 开头
 func (b *S3Bucket) CopyTo(ctx context.Context, srcName, dstName string) (ObjstoreAttributes, error) {
 	info := ObjstoreAttributes{}
 
