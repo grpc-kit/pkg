@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -86,36 +87,50 @@ type ObjstoreBucketReader interface {
 }
 
 // valid 用于验证对象存储配置是否合法
-func (o *ObjstoreConfig) valid() error {
-	if strings.ToLower(o.Type) != "s3" {
-		return fmt.Errorf("objstore not support type: %v", o.Type)
+func (o *ObjstoreConfig) validAndBucket() (ObjstoreBucket, error) {
+	var err error
+	var bucket ObjstoreBucket
+
+	objType := strings.ToLower(o.Type)
+
+	switch objType {
+	case "s3":
+		if o.Config.Endpoint == "" {
+			return nil, fmt.Errorf("no s3 endpoint in config file")
+		}
+		if o.Config.AccessKey == "" && o.Config.SecretKey != "" {
+			return nil, fmt.Errorf("no s3 access_key specified while secret_key is present in config file")
+		}
+		if o.Config.AccessKey != "" && o.Config.SecretKey == "" {
+			return nil, fmt.Errorf("no s3 secret_key specified while access_key is present in config file")
+		}
+		if o.Config.SSEConfig.Type == "SSE-C" && o.Config.SSEConfig.EncryptionKey == "" {
+			return nil, fmt.Errorf("encryption_key must be set if sse_config.type is set to 'SSE-C'")
+		}
+		if o.Config.SSEConfig.Type == "SSE-KMS" && o.Config.SSEConfig.KMSKeyID == "" {
+			return nil, fmt.Errorf("kms_key_id must be set if sse_config.type is set to 'SSE-KMS'")
+		}
+
+		// 对象存储 bucket 初始化
+		bucket, err = o.getS3Bucket()
+		if err != nil {
+			return nil, err
+		}
+	case "proxy":
+		bucket, err = o.getProxyBucket()
+		if err != nil {
+			return nil, err
+		}
+
+	default:
+		return nil, fmt.Errorf("objstore not support type: %v", objType)
 	}
 
-	if o.Config.Endpoint == "" {
-		return fmt.Errorf("no s3 endpoint in config file")
-	}
-
-	if o.Config.AccessKey == "" && o.Config.SecretKey != "" {
-		return fmt.Errorf("no s3 access_key specified while secret_key is present in config file")
-	}
-
-	if o.Config.AccessKey != "" && o.Config.SecretKey == "" {
-		return fmt.Errorf("no s3 secret_key specified while access_key is present in config file")
-	}
-
-	if o.Config.SSEConfig.Type == "SSE-C" && o.Config.SSEConfig.EncryptionKey == "" {
-		return fmt.Errorf("encryption_key must be set if sse_config.type is set to 'SSE-C'")
-	}
-
-	if o.Config.SSEConfig.Type == "SSE-KMS" && o.Config.SSEConfig.KMSKeyID == "" {
-		return fmt.Errorf("kms_key_id must be set if sse_config.type is set to 'SSE-KMS'")
-	}
-
-	return nil
+	return bucket, nil
 }
 
 // getClient 获取原始的 minio client 资源
-func (o *ObjstoreConfig) getClient() (*minio.Client, error) {
+func (o *ObjstoreConfig) getMinioClient() (*minio.Client, error) {
 	var chain []credentials.Provider
 
 	if o.Config.AccessKey != "" {
@@ -168,10 +183,17 @@ func (o *ObjstoreConfig) getClient() (*minio.Client, error) {
 	return client, nil
 }
 
-// getBucket 获取封装简化的对象
-func (o *ObjstoreConfig) getBucket() (*S3Bucket, error) {
+// getS3Bucket 获取封装简化的对象
+func (o *ObjstoreConfig) getS3Bucket() (*S3Bucket, error) {
 	var err error
 	var sse encrypt.ServerSide
+
+	// 初始化对象存储 s3 类型的连接
+	client, err := o.getMinioClient()
+	if err != nil {
+		return nil, err
+	}
+	o.client = client
 
 	if o.Config.SSEConfig.Type != "" {
 		switch o.Config.SSEConfig.Type {
@@ -235,13 +257,19 @@ func (o *ObjstoreConfig) getBucket() (*S3Bucket, error) {
 	return bkt, nil
 }
 
-// BucketClient 获取对象存储客户端实例
-func (o *ObjstoreConfig) BucketClient(logger *logrus.Entry) (ObjstoreBucket, error) {
-	// 标准步骤：验证配置是否合法
-	if err := o.valid(); err != nil {
-		return nil, err
+// getProxyBucket 获取 proxy 类型
+func (o *ObjstoreConfig) getProxyBucket() (*ProxyBucket, error) {
+	bucket := &ProxyBucket{
+		logger:   o.logger,
+		client:   &http.Client{},
+		endpoint: o.Config.Endpoint,
 	}
 
+	return bucket, nil
+}
+
+// BucketClient 获取对象存储客户端实例
+func (o *ObjstoreConfig) BucketClient(logger *logrus.Entry) (ObjstoreBucket, error) {
 	// 标准步骤：初始化日志组件
 	if logger != nil {
 		o.logger = logger
@@ -249,16 +277,8 @@ func (o *ObjstoreConfig) BucketClient(logger *logrus.Entry) (ObjstoreBucket, err
 		o.logger = logrus.NewEntry(logrus.New())
 	}
 
-	// 初始化对象存储连接
-	client, err := o.getClient()
-	if err != nil {
-		return nil, err
-	}
-
-	o.client = client
-
-	// 对象存储 bucket 初始化
-	bucket, err := o.getBucket()
+	// 标准步骤：验证配置是否合法
+	bucket, err := o.validAndBucket()
 	if err != nil {
 		return nil, err
 	}
