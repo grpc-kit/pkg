@@ -55,31 +55,31 @@ type ObjstoreBucket interface {
 	Name() string
 
 	// Upload 用于上传对象到默认的 bucket 里
-	Upload(ctx context.Context, name string, r io.Reader) (ObjstoreAttributes, error)
+	Upload(ctx context.Context, objectKey string, r io.Reader) (ObjstoreAttributes, error)
 
 	// Delete 用于删除对象在默认的 bucket 里
-	Delete(ctx context.Context, name string) error
+	Delete(ctx context.Context, objectKey string) error
 
 	// CopyTo 用于拷贝对象在默认 bucket 里
-	CopyTo(ctx context.Context, srcName, dstName string) (ObjstoreAttributes, error)
+	CopyTo(ctx context.Context, srcObjectKey, dstObjectKey string) (ObjstoreAttributes, error)
 }
 
 // ObjstoreBucketReader 抽象化包装，以简化使用，只读操作权限
 type ObjstoreBucketReader interface {
 	// Get 用于获取默认 bucket 的对象内容
-	Get(ctx context.Context, name string) (io.ReadCloser, ObjstoreAttributes, error)
+	Get(ctx context.Context, objectKey string) (io.ReadCloser, ObjstoreAttributes, error)
 
 	// Iter 用于遍历默认 bucket 里的对象文件
 	Iter(ctx context.Context, dir string, f func(string) error) error
 
 	// GetRange 用于获取默认 bucket 中对象指定位置的内容
-	GetRange(ctx context.Context, name string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error)
+	GetRange(ctx context.Context, objectKey string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error)
 
 	// Exists 用于判断默认 bucket 是否存在该对象
-	Exists(ctx context.Context, name string) (bool, error)
+	Exists(ctx context.Context, objectKey string) (bool, error)
 
 	// Attributes 用于获取默认 bucket 中对象的额外属性
-	Attributes(ctx context.Context, name string) (ObjstoreAttributes, error)
+	Attributes(ctx context.Context, objectKey string) (ObjstoreAttributes, error)
 
 	// IsObjNotFoundErr 错误是否为查询的对象不存在
 	IsObjNotFoundErr(err error) bool

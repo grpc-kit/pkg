@@ -91,7 +91,7 @@ func (b *S3Bucket) Iter(ctx context.Context, dir string, f func(string) error) e
 }
 
 // getRange 用于获取对象范围数据
-func (b *S3Bucket) getRange(ctx context.Context, name string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error) {
+func (b *S3Bucket) getRange(ctx context.Context, objectKey string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error) {
 	a := ObjstoreAttributes{}
 	opts := &minio.GetObjectOptions{ServerSideEncryption: b.defaultSSE}
 	if length != -1 {
@@ -103,7 +103,7 @@ func (b *S3Bucket) getRange(ctx context.Context, name string, off, length int64)
 			return nil, a, err
 		}
 	}
-	r, err := b.client.GetObject(ctx, b.name, name, *opts)
+	r, err := b.client.GetObject(ctx, b.name, objectKey, *opts)
 	if err != nil {
 		return nil, a, err
 	}
@@ -130,18 +130,18 @@ func (b *S3Bucket) getRange(ctx context.Context, name string, off, length int64)
 }
 
 // Get 用于获取默认 bucket 的对象内容
-func (b *S3Bucket) Get(ctx context.Context, name string) (io.ReadCloser, ObjstoreAttributes, error) {
-	return b.getRange(ctx, name, 0, -1)
+func (b *S3Bucket) Get(ctx context.Context, objectKey string) (io.ReadCloser, ObjstoreAttributes, error) {
+	return b.getRange(ctx, objectKey, 0, -1)
 }
 
 // GetRange 用于获取默认 bucket 中对象指定位置的内容
-func (b *S3Bucket) GetRange(ctx context.Context, name string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error) {
-	return b.getRange(ctx, name, off, length)
+func (b *S3Bucket) GetRange(ctx context.Context, objectKey string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error) {
+	return b.getRange(ctx, objectKey, off, length)
 }
 
 // Exists 用于判断默认 bucket 是否存在该对象Exists 用于判断默认 bucket 是否存在该对象
-func (b *S3Bucket) Exists(ctx context.Context, name string) (bool, error) {
-	_, err := b.client.StatObject(ctx, b.name, name, minio.StatObjectOptions{})
+func (b *S3Bucket) Exists(ctx context.Context, objectKey string) (bool, error) {
+	_, err := b.client.StatObject(ctx, b.name, objectKey, minio.StatObjectOptions{})
 	if err != nil {
 		if b.IsObjNotFoundErr(err) {
 			return false, nil
@@ -153,10 +153,10 @@ func (b *S3Bucket) Exists(ctx context.Context, name string) (bool, error) {
 }
 
 // Upload 用于上传对象到默认的 bucket 里
-func (b *S3Bucket) Upload(ctx context.Context, name string, r io.Reader) (ObjstoreAttributes, error) {
+func (b *S3Bucket) Upload(ctx context.Context, objectKey string, r io.Reader) (ObjstoreAttributes, error) {
 	size, err := b.tryToGetSize(r)
 	if err != nil {
-		b.logger.Errorf("could not guess file size for multipart upload; upload might be not optimized, name: %v, err: %v", name, err)
+		b.logger.Errorf("could not guess file size for multipart upload; upload might be not optimized, name: %v, err: %v", objectKey, err)
 		size = -1
 	}
 
@@ -169,7 +169,7 @@ func (b *S3Bucket) Upload(ctx context.Context, name string, r io.Reader) (Objsto
 	info, err := b.client.PutObject(
 		ctx,
 		b.name,
-		name,
+		objectKey,
 		r,
 		size,
 		minio.PutObjectOptions{
@@ -194,8 +194,8 @@ func (b *S3Bucket) Upload(ctx context.Context, name string, r io.Reader) (Objsto
 }
 
 // Attributes 用于获取默认 bucket 中对象的额外属性
-func (b *S3Bucket) Attributes(ctx context.Context, name string) (ObjstoreAttributes, error) {
-	objInfo, err := b.client.StatObject(ctx, b.name, name, minio.StatObjectOptions{})
+func (b *S3Bucket) Attributes(ctx context.Context, objectkey string) (ObjstoreAttributes, error) {
+	objInfo, err := b.client.StatObject(ctx, b.name, objectkey, minio.StatObjectOptions{})
 	if err != nil {
 		return ObjstoreAttributes{}, err
 	}
@@ -211,8 +211,8 @@ func (b *S3Bucket) Attributes(ctx context.Context, name string) (ObjstoreAttribu
 }
 
 // Delete 用于删除对象在默认的 bucket 里
-func (b *S3Bucket) Delete(ctx context.Context, name string) error {
-	return b.client.RemoveObject(ctx, b.name, name, minio.RemoveObjectOptions{})
+func (b *S3Bucket) Delete(ctx context.Context, objectKey string) error {
+	return b.client.RemoveObject(ctx, b.name, objectKey, minio.RemoveObjectOptions{})
 }
 
 // IsObjNotFoundErr 判断释放为对象不存在
@@ -221,16 +221,16 @@ func (b *S3Bucket) IsObjNotFoundErr(err error) bool {
 }
 
 // CopyTo 用于拷贝同 bucket 下的对象文件，对象名不以 '/' 开头
-func (b *S3Bucket) CopyTo(ctx context.Context, srcName, dstName string) (ObjstoreAttributes, error) {
+func (b *S3Bucket) CopyTo(ctx context.Context, srcObjectKey, dstObjectKey string) (ObjstoreAttributes, error) {
 	info := ObjstoreAttributes{}
 
 	srcOpt := minio.CopySrcOptions{
 		Bucket: b.name,
-		Object: srcName,
+		Object: srcObjectKey,
 	}
 	dstOpt := minio.CopyDestOptions{
 		Bucket:          b.name,
-		Object:          dstName,
+		Object:          dstObjectKey,
 		ReplaceMetadata: true,
 	}
 
