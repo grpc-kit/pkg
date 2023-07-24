@@ -259,9 +259,15 @@ func (o *ObjstoreConfig) getS3Bucket() (*S3Bucket, error) {
 
 // getProxyBucket 获取 proxy 类型
 func (o *ObjstoreConfig) getProxyBucket() (*ProxyBucket, error) {
+	rt, err := NewHTTPTransport(o.Config.HTTPConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{Transport: rt}
 	bucket := &ProxyBucket{
 		logger:   o.logger,
-		client:   &http.Client{},
+		client:   client,
 		endpoint: o.Config.Endpoint,
 	}
 

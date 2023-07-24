@@ -15,6 +15,14 @@ import (
 //type ProxyConfig struct {
 //}
 
+// proxyContextKey 使用自定义类型不对外，防止碰撞冲突
+type proxyContextKey int
+
+const (
+	ProxyContextHeader proxyContextKey = iota
+	ProxyContextBucketLookup
+)
+
 // ProxyBucket xx
 type ProxyBucket struct {
 	logger   *logrus.Entry
@@ -68,39 +76,63 @@ func (b *ProxyBucket) Upload(ctx context.Context, objectKey string, r io.Reader)
 	b.logger.Infof("proxy put object: %v, endpoint: %v", objectKey, b.endpoint)
 
 	tmp := strings.Split(objectKey, "/")
+	appid := tmp[0]
 	fileName := strings.Join(tmp[1:], "/")
 
-	headers := ctx.Value("Header")
+	headersAny := ctx.Value(ProxyContextHeader)
+	bucketLookupAny := ctx.Value(ProxyContextBucketLookup)
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("http://%v/%v", b.endpoint, fileName), r)
 	if err != nil {
 		return info, nil
 	}
 
-	val, ok := headers.(http.Header)
+	bucketLookup, _ := bucketLookupAny.(string)
+
+	val, ok := headersAny.(http.Header)
 	if ok {
 		b.logger.Infof("headers ok: %v", ok)
 	}
 	for k, v := range val {
-		b.logger.Infof("header k: %v, v: %v", k, v)
-		req.Header.Add(k, v[0])
-
 		if k == "Host" {
-			req.Host = v[0]
+			if bucketLookup == "dns" {
+				req.Host = v[0]
+			} else if bucketLookup == "path" {
+				req.Host = fmt.Sprintf("%v.%v", appid, v[0])
+			}
+
+			continue
 		}
+
+		/*
+			if k == "Content-Length" || k == "Connection" {
+				continue
+			}
+		*/
+
+		b.logger.Infof("header k: %v, v: %v", k, v)
+
+		req.Header.Add(k, v[0])
+	}
+
+	for k, v := range req.Header {
+		b.logger.Infof("new header k: %v, v: %v", k, v)
 	}
 
 	resp, err := b.client.Do(req)
+
+	// DEBUG
+	b.logger.Infof("Upload host1: %v, host2: %v, err: %v", req.Host, req.URL.Host, err)
+
 	if err != nil {
 		return info, err
 	}
 
 	rawBody, err := ioutil.ReadAll(resp.Body)
+
 	if err != nil {
 		return info, err
 	}
-
-	b.logger.Infof("%v", string(rawBody))
 
 	return info, nil
 }
