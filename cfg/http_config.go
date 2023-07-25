@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -98,10 +97,10 @@ func NewHTTPTransport(config HTTPConfig) (*http.Transport, error) {
 
 	tr := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
+		//DialContext: (&net.Dialer{
+		//	Timeout:   30 * time.Second,
+		//	KeepAlive: 30 * time.Second,
+		//}).DialContext,
 		TLSClientConfig: tlsConfig,
 	}
 

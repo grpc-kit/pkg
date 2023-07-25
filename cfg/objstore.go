@@ -275,6 +275,9 @@ func (o *ObjstoreConfig) getProxyBucket() (*ProxyBucket, error) {
 	}
 
 	client := &http.Client{Transport: rt}
+	// TODO; 客户端超时配置
+	client.Timeout = 1 * time.Second
+
 	bucket := &ProxyBucket{
 		logger:   o.logger,
 		client:   client,
