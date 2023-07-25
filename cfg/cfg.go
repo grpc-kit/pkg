@@ -23,8 +23,6 @@ import (
 )
 
 const (
-	// HTTPHeaderRequestID 全局请求ID
-	HTTPHeaderRequestID = "X-TR-REQUEST-ID"
 	// TraceContextHeaderName 链路追踪ID
 	TraceContextHeaderName = "jaeger-trace-id"
 	// TraceBaggageHeaderPrefix 数据传递头前缀
@@ -37,6 +35,16 @@ const (
 	AuthenticationTypeNone = "none"
 	// UsernameAnonymous 当未使用任何认证时的用户名
 	UsernameAnonymous = "anonymous"
+)
+
+// 公共标准的 HTTP 请求头名称
+const (
+	// HTTPHeaderRequestID 全局请求ID
+	HTTPHeaderRequestID = "X-TR-REQUEST-ID"
+	// HTTPHeaderHost 主机头
+	HTTPHeaderHost = "Host"
+	// HTTPHeaderEtag 文件内容签名
+	HTTPHeaderEtag = "Etag"
 )
 
 // contextKey 使用自定义类型不对外，防止碰撞冲突

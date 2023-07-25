@@ -15,6 +15,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// URLStyle 对象存储访问的 url 风格类型
+// https://docs.aws.amazon.com/AmazonS3/latest/userguide/RESTAPI.html
+type URLStyle string
+
+const (
+	URLStyleAuto          = "auto"
+	URLStylePath          = "path"
+	URLStyleVirtualHosted = "virtual-hosted"
+)
+
 // ObjstoreConfig 对象存储相关配置
 type ObjstoreConfig struct {
 	Enable bool     `mapstructure:"enable"`
@@ -161,11 +171,11 @@ func (o *ObjstoreConfig) getMinioClient() (*minio.Client, error) {
 
 	bucketLookup := minio.BucketLookupAuto
 	switch o.Config.BucketLookupType {
-	case "auto":
+	case URLStyleAuto:
 		bucketLookup = minio.BucketLookupAuto
-	case "virtual-hosted":
+	case URLStyleVirtualHosted:
 		bucketLookup = minio.BucketLookupDNS
-	case "path":
+	case URLStylePath:
 		bucketLookup = minio.BucketLookupPath
 	}
 
@@ -327,6 +337,5 @@ func (c *LocalConfig) GetObjstoreMinioClient() (*minio.Client, error) {
 	if c.Objstore.client == nil {
 		return nil, fmt.Errorf("objstore not found minio client")
 	}
-
 	return c.Objstore.client, nil
 }
