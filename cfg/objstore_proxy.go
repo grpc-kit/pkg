@@ -2,7 +2,6 @@ package cfg
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -54,23 +53,33 @@ func (b *ProxyBucket) Get(ctx context.Context, objectKey string) (io.ReadCloser,
 	}
 	// defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		var rawBody []byte
-		rawBody, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, info, err
-		}
-		// resp.Body.Close()
-
-		var s3err minio.ErrorResponse
-		if err = json.Unmarshal(rawBody, &s3err); err != nil {
-			return nil, info, err
-		}
-
-		return nil, info, s3err
+	if resp.StatusCode == http.StatusOK {
+		return resp.Body, info, nil
 	}
 
-	return resp.Body, info, nil
+	return resp.Body, info, minio.ErrorResponse{Code: "NoSuchKey"}
+
+	// Unsolicited response received on idle HTTP channel starting with "\n"; err=<nil>
+	/*
+		if resp.StatusCode != http.StatusOK {
+			var rawBody []byte
+			rawBody, err = ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, info, err
+			}
+
+			// resp.Body.Close()
+
+			var s3err minio.ErrorResponse
+			if err = json.Unmarshal(rawBody, &s3err); err != nil {
+				return nil, info, err
+			}
+
+			return nil, info, s3err
+		}
+
+		return resp.Body, info, nil
+	*/
 }
 
 // Iter 用于遍历默认 bucket 里的对象文件
