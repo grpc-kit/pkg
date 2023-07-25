@@ -2,13 +2,14 @@ package cfg
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/minio/minio-go/v7"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/sirupsen/logrus"
 )
 
@@ -21,7 +22,7 @@ type proxyContextKey int
 
 const (
 	ProxyContextHeader proxyContextKey = iota
-	ProxyContextBucketLookup
+	ProxyContextURLStyle
 )
 
 // ProxyBucket xx
@@ -31,51 +32,20 @@ type ProxyBucket struct {
 	endpoint string
 }
 
-// Get xx
+// Get 用于获取默认 bucket 的对象内容
 func (b *ProxyBucket) Get(ctx context.Context, objectKey string) (io.ReadCloser, ObjstoreAttributes, error) {
-	appid := ""
-	fileName := "/"
-
-	tmp := strings.Split(objectKey, "/")
-	if len(tmp) > 1 {
-		appid = tmp[0]
-		fileName = strings.Join(tmp[1:], "/")
-	}
-
-	headersAny := ctx.Value(ProxyContextHeader)
-	bucketLookupAny := ctx.Value(ProxyContextBucketLookup)
-
 	info := ObjstoreAttributes{}
+
+	appid, fileName := b.calcAppidFileName(objectKey)
+
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%v/%v", b.endpoint, fileName), nil)
 	if err != nil {
 		return nil, info, nil
 	}
 
-	bucketLookup, ok := bucketLookupAny.(string)
-	if !ok {
-		return nil, info, fmt.Errorf("objstore proxy context key bucket lookup invalid")
-	}
-
-	headers, ok := headersAny.(http.Header)
-	if !ok {
-		return nil, info, fmt.Errorf("objstore proxy context key headers type invalid")
-	}
-	for k, v := range headers {
-		if k == "Host" {
-			if bucketLookup == "dns" {
-				req.Host = v[0]
-			} else if bucketLookup == "path" {
-				req.Host = fmt.Sprintf("%v.%v", appid, v[0])
-			}
-
-			continue
-		}
-
-		if k == "Content-Length" || k == "Connection" {
-			continue
-		}
-
-		req.Header.Add(k, v[0])
+	req, err = b.proxyHeaders(ctx, appid, req)
+	if err != nil {
+		return nil, info, err
 	}
 
 	resp, err := b.client.Do(req)
@@ -84,13 +54,20 @@ func (b *ProxyBucket) Get(ctx context.Context, objectKey string) (io.ReadCloser,
 	}
 	// defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, info, minio.ErrorResponse{Code: "NoSuchKey"}
-	}
+	if resp.StatusCode != http.StatusOK {
+		var rawBody []byte
+		rawBody, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, info, err
+		}
+		// resp.Body.Close()
 
-	// header
-	for k, v := range resp.Header {
-		b.logger.Infof("get header k: %v, v: %v", k, v)
+		var s3err minio.ErrorResponse
+		if err = json.Unmarshal(rawBody, &s3err); err != nil {
+			return nil, info, err
+		}
+
+		return nil, info, s3err
 	}
 
 	return resp.Body, info, nil
@@ -114,49 +91,18 @@ func (b *ProxyBucket) Exists(ctx context.Context, objectKey string) (bool, error
 
 // Attributes 用于获取默认 bucket 中对象的额外属性
 func (b *ProxyBucket) Attributes(ctx context.Context, objectKey string) (ObjstoreAttributes, error) {
-	appid := ""
-	fileName := "/"
-
-	tmp := strings.Split(objectKey, "/")
-	if len(tmp) > 1 {
-		appid = tmp[0]
-		fileName = strings.Join(tmp[1:], "/")
-	}
-
-	headersAny := ctx.Value(ProxyContextHeader)
-	bucketLookupAny := ctx.Value(ProxyContextBucketLookup)
-
 	info := ObjstoreAttributes{}
+
+	appid, fileName := b.calcAppidFileName(objectKey)
+
 	req, err := http.NewRequest(http.MethodHead, fmt.Sprintf("http://%v/%v", b.endpoint, fileName), nil)
 	if err != nil {
 		return info, nil
 	}
 
-	bucketLookup, ok := bucketLookupAny.(string)
-	if !ok {
-		return info, fmt.Errorf("objstore proxy context key bucket lookup invalid")
-	}
-
-	headers, ok := headersAny.(http.Header)
-	if !ok {
-		return info, fmt.Errorf("objstore proxy context key headers type invalid")
-	}
-	for k, v := range headers {
-		if k == "Host" {
-			if bucketLookup == "dns" {
-				req.Host = v[0]
-			} else if bucketLookup == "path" {
-				req.Host = fmt.Sprintf("%v.%v", appid, v[0])
-			}
-
-			continue
-		}
-
-		if k == "Content-Length" || k == "Connection" {
-			continue
-		}
-
-		req.Header.Add(k, v[0])
+	req, err = b.proxyHeaders(ctx, appid, req)
+	if err != nil {
+		return info, err
 	}
 
 	resp, err := b.client.Do(req)
@@ -185,49 +131,18 @@ func (b *ProxyBucket) Name() string {
 
 // Upload 用于上传对象到默认的 bucket 里
 func (b *ProxyBucket) Upload(ctx context.Context, objectKey string, r io.Reader) (ObjstoreAttributes, error) {
-	appid := ""
-	fileName := "/"
-
-	tmp := strings.Split(objectKey, "/")
-	if len(tmp) > 1 {
-		appid = tmp[0]
-		fileName = strings.Join(tmp[1:], "/")
-	}
-
-	headersAny := ctx.Value(ProxyContextHeader)
-	bucketLookupAny := ctx.Value(ProxyContextBucketLookup)
-
 	info := ObjstoreAttributes{}
+
+	appid, fileName := b.calcAppidFileName(objectKey)
+
 	req, err := http.NewRequest("PUT", fmt.Sprintf("http://%v/%v", b.endpoint, fileName), r)
 	if err != nil {
 		return info, nil
 	}
 
-	bucketLookup, ok := bucketLookupAny.(string)
-	if !ok {
-		return info, fmt.Errorf("objstore proxy context key bucket lookup invalid")
-	}
-
-	headers, ok := headersAny.(http.Header)
-	if !ok {
-		return info, fmt.Errorf("objstore proxy context key headers type invalid")
-	}
-	for k, v := range headers {
-		if k == "Host" {
-			if bucketLookup == "dns" {
-				req.Host = v[0]
-			} else if bucketLookup == "path" {
-				req.Host = fmt.Sprintf("%v.%v", appid, v[0])
-			}
-
-			continue
-		}
-
-		if k == "Content-Length" || k == "Connection" {
-			continue
-		}
-
-		req.Header.Add(k, v[0])
+	req, err = b.proxyHeaders(ctx, appid, req)
+	if err != nil {
+		return info, err
 	}
 
 	resp, err := b.client.Do(req)
@@ -251,48 +166,16 @@ func (b *ProxyBucket) Upload(ctx context.Context, objectKey string, r io.Reader)
 
 // Delete 用于删除对象在默认的 bucket 里
 func (b *ProxyBucket) Delete(ctx context.Context, objectKey string) error {
-	appid := ""
-	fileName := "/"
-
-	tmp := strings.Split(objectKey, "/")
-	if len(tmp) > 1 {
-		appid = tmp[0]
-		fileName = strings.Join(tmp[1:], "/")
-	}
-
-	headersAny := ctx.Value(ProxyContextHeader)
-	bucketLookupAny := ctx.Value(ProxyContextBucketLookup)
+	appid, fileName := b.calcAppidFileName(objectKey)
 
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://%v/%v", b.endpoint, fileName), nil)
 	if err != nil {
 		return err
 	}
 
-	bucketLookup, ok := bucketLookupAny.(string)
-	if !ok {
-		return fmt.Errorf("objstore proxy context key bucket lookup invalid")
-	}
-
-	headers, ok := headersAny.(http.Header)
-	if !ok {
-		return fmt.Errorf("objstore proxy context key headers type invalid")
-	}
-	for k, v := range headers {
-		if k == "Host" {
-			if bucketLookup == "dns" {
-				req.Host = v[0]
-			} else if bucketLookup == "path" {
-				req.Host = fmt.Sprintf("%v.%v", appid, v[0])
-			}
-
-			continue
-		}
-
-		if k == "Content-Length" || k == "Connection" {
-			continue
-		}
-
-		req.Header.Add(k, v[0])
+	req, err = b.proxyHeaders(ctx, appid, req)
+	if err != nil {
+		return err
 	}
 
 	_, err = b.client.Do(req)
@@ -312,4 +195,54 @@ func (b *ProxyBucket) CopyTo(ctx context.Context, srcObjectKey, dstObjectKey str
 // Close 释放资源
 func (b *ProxyBucket) Close() error {
 	return nil
+}
+
+// 计算 appid 与 fileName
+func (b *ProxyBucket) calcAppidFileName(objectKey string) (string, string) {
+	appid := ""
+	fileName := "/"
+
+	tmp := strings.Split(objectKey, "/")
+	if len(tmp) > 1 {
+		appid = tmp[0]
+		fileName = strings.Join(tmp[1:], "/")
+	}
+
+	return appid, fileName
+}
+
+// 植入 proxy header 请求头
+func (b *ProxyBucket) proxyHeaders(ctx context.Context, appid string, req *http.Request) (*http.Request, error) {
+	headersAny := ctx.Value(ProxyContextHeader)
+	urlStyleAny := ctx.Value(ProxyContextURLStyle)
+
+	urlStyle, ok := urlStyleAny.(URLStyle)
+	if !ok {
+		return req, fmt.Errorf("objstore proxy context key bucket lookup invalid")
+	}
+
+	headers, ok := headersAny.(http.Header)
+	if !ok {
+		return req, fmt.Errorf("objstore proxy context key headers invalid")
+	}
+
+	for k, v := range headers {
+		if k == HTTPHeaderHost {
+			if urlStyle == URLStyleVirtualHosted {
+				req.Host = v[0]
+			} else if urlStyle == URLStylePath {
+				req.Host = fmt.Sprintf("%v.%v", appid, v[0])
+			}
+
+			continue
+		}
+
+		if k == "Content-Length" || k == "Connection" {
+			continue
+		}
+
+		req.Header.Add(k, v[0])
+	}
+
+	return req, nil
 }
