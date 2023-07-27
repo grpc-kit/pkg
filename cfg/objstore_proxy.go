@@ -51,6 +51,7 @@ func (b *ProxyBucket) Get(ctx context.Context, objectKey string) (io.ReadCloser,
 	if err != nil {
 		return nil, info, err
 	}
+	// 由后续消费端主动关闭
 	// defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusOK {
@@ -58,28 +59,6 @@ func (b *ProxyBucket) Get(ctx context.Context, objectKey string) (io.ReadCloser,
 	}
 
 	return resp.Body, info, minio.ErrorResponse{Code: "NoSuchKey"}
-
-	// Unsolicited response received on idle HTTP channel starting with "\n"; err=<nil>
-	/*
-		if resp.StatusCode != http.StatusOK {
-			var rawBody []byte
-			rawBody, err = ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return nil, info, err
-			}
-
-			// resp.Body.Close()
-
-			var s3err minio.ErrorResponse
-			if err = json.Unmarshal(rawBody, &s3err); err != nil {
-				return nil, info, err
-			}
-
-			return nil, info, s3err
-		}
-
-		return resp.Body, info, nil
-	*/
 }
 
 // Iter 用于遍历默认 bucket 里的对象文件
@@ -119,11 +98,6 @@ func (b *ProxyBucket) Attributes(ctx context.Context, objectKey string) (Objstor
 		return info, err
 	}
 	defer resp.Body.Close()
-
-	// DEBUG
-	for k, v := range resp.Header {
-		b.logger.Infof("head object header k: %v, v: %v", k, v)
-	}
 
 	return info, nil
 }
