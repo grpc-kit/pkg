@@ -91,15 +91,15 @@ func (b *S3Bucket) Iter(ctx context.Context, dir string, f func(string) error) e
 }
 
 // getRange 用于获取对象范围数据
-func (b *S3Bucket) getRange(ctx context.Context, objectKey string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error) {
+func (b *S3Bucket) getRange(ctx context.Context, objectKey string, start, end int64) (io.ReadCloser, ObjstoreAttributes, error) {
 	a := ObjstoreAttributes{}
 	opts := &minio.GetObjectOptions{ServerSideEncryption: b.defaultSSE}
-	if length != -1 {
-		if err := opts.SetRange(off, off+length-1); err != nil {
+	if end != -1 {
+		if err := opts.SetRange(start, end); err != nil {
 			return nil, a, err
 		}
-	} else if off > 0 {
-		if err := opts.SetRange(off, 0); err != nil {
+	} else if start > 0 {
+		if err := opts.SetRange(start, 0); err != nil {
 			return nil, a, err
 		}
 	}
@@ -111,7 +111,6 @@ func (b *S3Bucket) getRange(ctx context.Context, objectKey string, off, length i
 	// NotFoundObject error is revealed only after first Read. This does the initial GetRequest. Prefetch this here
 	// for convenience.
 	if _, err := r.Read(nil); err != nil {
-		// First GET Object request error.
 		return nil, a, err
 	}
 
@@ -135,8 +134,8 @@ func (b *S3Bucket) Get(ctx context.Context, objectKey string) (io.ReadCloser, Ob
 }
 
 // GetRange 用于获取默认 bucket 中对象指定位置的内容
-func (b *S3Bucket) GetRange(ctx context.Context, objectKey string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error) {
-	return b.getRange(ctx, objectKey, off, length)
+func (b *S3Bucket) GetRange(ctx context.Context, objectKey string, start, end int64) (io.ReadCloser, ObjstoreAttributes, error) {
+	return b.getRange(ctx, objectKey, start, end)
 }
 
 // Exists 用于判断默认 bucket 是否存在该对象Exists 用于判断默认 bucket 是否存在该对象

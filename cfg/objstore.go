@@ -84,7 +84,7 @@ type ObjstoreBucketReader interface {
 	Iter(ctx context.Context, dir string, f func(string) error) error
 
 	// GetRange 用于获取默认 bucket 中对象指定位置的内容
-	GetRange(ctx context.Context, objectKey string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error)
+	GetRange(ctx context.Context, objectKey string, start, end int64) (io.ReadCloser, ObjstoreAttributes, error)
 
 	// Exists 用于判断默认 bucket 是否存在该对象
 	Exists(ctx context.Context, objectKey string) (bool, error)

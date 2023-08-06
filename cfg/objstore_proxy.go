@@ -67,7 +67,7 @@ func (b *ProxyBucket) Iter(ctx context.Context, dir string, f func(string) error
 }
 
 // GetRange 用于获取默认 bucket 中对象指定位置的内容
-func (b *ProxyBucket) GetRange(ctx context.Context, objectKey string, off, length int64) (io.ReadCloser, ObjstoreAttributes, error) {
+func (b *ProxyBucket) GetRange(ctx context.Context, objectKey string, start, end int64) (io.ReadCloser, ObjstoreAttributes, error) {
 	info := ObjstoreAttributes{}
 	return nil, info, nil
 }
