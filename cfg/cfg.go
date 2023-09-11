@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
 	"net"
 	"net/http"
 	"strings"
@@ -77,10 +78,11 @@ type LocalConfig struct {
 	CloudEvents *CloudEventsConfig `json:",omitempty"` // 公共事件配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
-	logger      *logrus.Entry
-	srvdis      sd.Registry
-	rpcConfig   *rpc.Config
-	eventClient eventclient.Client
+	logger       *logrus.Entry
+	srvdis       sd.Registry
+	rpcConfig    *rpc.Config
+	eventClient  eventclient.Client
+	promRegistry *prometheus.Registry
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
@@ -267,6 +269,10 @@ func (c *LocalConfig) Init() error {
 	}
 
 	if err := c.InitObjstore(); err != nil {
+		return err
+	}
+
+	if err := c.InitPrometheus(); err != nil {
 		return err
 	}
 
