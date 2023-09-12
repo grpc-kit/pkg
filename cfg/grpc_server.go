@@ -5,14 +5,20 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"net/http/pprof"
+	"net/textproto"
+	"path"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/vars"
-	"github.com/opentracing-contrib/go-stdlib/nethttp"
-	"github.com/opentracing/opentracing-go"
-	opentracinglog "github.com/opentracing/opentracing-go/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -25,23 +31,16 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"net/http/pprof"
-	"net/textproto"
-	"path"
-	"strings"
-	"time"
 
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
-
 	grpcauth "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 
-	grpclogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpcopentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
+	"github.com/opentracing-contrib/go-stdlib/nethttp"
+	"github.com/opentracing/opentracing-go"
+	opentracinglog "github.com/opentracing/opentracing-go/log"
 )
 
 // registerGateway 注册 microservice.pb.gw
@@ -445,51 +444,55 @@ func (c *LocalConfig) GetClientDialOption(customOpts ...grpc.DialOption) []grpc.
 
 // GetClientUnaryInterceptor 获取客户端默认一元拦截器
 func (c *LocalConfig) GetClientUnaryInterceptor() []grpc.UnaryClientInterceptor {
-	// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
-	logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
-		return false
-	}
-
-	// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
-	logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-		// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-		rpcName := path.Base(fullMethodName)
-		switch rpcName {
-		case "HealthCheck":
+	/*
+		// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
+		logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
 			return false
-		case "Check", "Watch":
-			return false
-		default:
-			return true
 		}
-	})}
+
+		// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
+		logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
+			// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
+			rpcName := path.Base(fullMethodName)
+			switch rpcName {
+			case "HealthCheck":
+				return false
+			case "Check", "Watch":
+				return false
+			default:
+				return true
+			}
+		})}
+	*/
 
 	var opts []grpc.UnaryClientInterceptor
 	//opts = append(opts, grpcprometheus.UnaryClientInterceptor)
 	opts = append(opts, grpcopentracing.UnaryClientInterceptor())
-	opts = append(opts, grpclogrus.UnaryClientInterceptor(c.logger, logReqFilterOpts...))
-	opts = append(opts, grpclogrus.PayloadUnaryClientInterceptor(c.logger, logPayloadFilterFunc))
+	// opts = append(opts, grpclogrus.UnaryClientInterceptor(c.logger, logReqFilterOpts...))
+	// opts = append(opts, grpclogrus.PayloadUnaryClientInterceptor(c.logger, logPayloadFilterFunc))
 	return opts
 }
 
 // GetClientStreamInterceptor 获取客户端默认流拦截器
 func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientInterceptor {
-	// TODO; 根据 fullMethodName 进行过滤哪些需要记录 payload 的，返回 false 表示不记录
-	logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
-		return false
-	}
+	/*
+		// TODO; 根据 fullMethodName 进行过滤哪些需要记录 payload 的，返回 false 表示不记录
+		logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
+			return false
+		}
 
-	// TODO; 根据 fullMethodName 进行过滤哪些需要记录请求状态的，返回 false 表示不记录
-	logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-		// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-		return err == nil && path.Base(fullMethodName) != "HealthCheck"
-	})}
+		// TODO; 根据 fullMethodName 进行过滤哪些需要记录请求状态的，返回 false 表示不记录
+		logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
+			// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
+			return err == nil && path.Base(fullMethodName) != "HealthCheck"
+		})}
+	*/
 
 	var opts []grpc.StreamClientInterceptor
 	//opts = append(opts, grpcprometheus.StreamClientInterceptor)
 	opts = append(opts, grpcopentracing.StreamClientInterceptor())
-	opts = append(opts, grpclogrus.StreamClientInterceptor(c.logger, logReqFilterOpts...))
-	opts = append(opts, grpclogrus.PayloadStreamClientInterceptor(c.logger, logPayloadFilterFunc))
+	// opts = append(opts, grpclogrus.StreamClientInterceptor(c.logger, logReqFilterOpts...))
+	// opts = append(opts, grpclogrus.PayloadStreamClientInterceptor(c.logger, logPayloadFilterFunc))
 	return opts
 }
 
