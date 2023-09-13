@@ -150,6 +150,7 @@ type OpentracingConfig struct {
 	Host      string    `mapstructure:"host"`
 	Port      int       `mapstructure:"port"`
 	LogFields LogFields `mapstructure:"log_fields"`
+	URLPath   string    `mapstructure:"url_path"`
 }
 
 // CloudEventsConfig cloudevents事件配置
