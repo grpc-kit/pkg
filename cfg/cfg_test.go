@@ -1,13 +1,16 @@
 package cfg
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"testing"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
 	"github.com/spf13/viper"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var lc *LocalConfig
@@ -57,67 +60,74 @@ func testLogger(t *testing.T) {
 }
 
 func testOpenTracing(t *testing.T) {
-	closer, err := lc.InitOpentracing()
+	ctx := context.TODO()
+
+	_, err := lc.InitOpentracing()
 	if err != nil {
 		t.Errorf("Init OpenTracing err: %v\n", err)
 	}
-	defer closer.Close()
+	// defer closer.Close()
 
 	rand.Seed(time.Now().UnixNano())
 
-	tracer := opentracing.GlobalTracer()
-	rootSpan := tracer.StartSpan("Hello_RootSpan")
+	tr := otel.Tracer("testOpenTracing")
+	rootCtx, rootSpan := tr.Start(ctx, "Hello_RootSpan")
 
 	for i := 0; i <= 2; i++ {
-		var csp opentracing.Span
+		var csp trace.Span
 		if i == 1 {
-			csp = opentracing.StartSpan(fmt.Sprintf("FollowsFrom_%v", i), opentracing.FollowsFrom(rootSpan.Context()))
+			// csp = opentracing.StartSpan(fmt.Sprintf("FollowsFrom_%v", i), opentracing.FollowsFrom(rootCtx))
+			tr.Start(rootCtx, fmt.Sprintf("FollowsFrom_%v", i))
 		} else {
-			csp = opentracing.StartSpan(fmt.Sprintf("ChildOf_%v", i), opentracing.ChildOf(rootSpan.Context()))
+			// csp = opentracing.StartSpan(fmt.Sprintf("ChildOf_%v", i), opentracing.ChildOf(rootCtx))
+			tr.Start(rootCtx, fmt.Sprintf("ChildOf_%v", i))
 		}
 
 		randInt := rand.Intn(100)
-		csp.SetTag("process_time", randInt)
+		csp.SetAttributes(attribute.Int("process_time", randInt))
 		time.Sleep(time.Duration(randInt) * time.Millisecond)
 
 		for j := 0; j <= 1; j++ {
 
-			var fsp opentracing.Span
+			var fsp trace.Span
 			if j == 1 {
-				fsp = opentracing.StartSpan(fmt.Sprintf("FollowsFrom_%v", j), opentracing.FollowsFrom(csp.Context()))
+				_, fsp = tr.Start(trace.ContextWithSpan(rootCtx, rootSpan), fmt.Sprintf("FollowsFrom_%v", j))
+				//fsp = opentracing.StartSpan(fmt.Sprintf("FollowsFrom_%v", j), opentracing.FollowsFrom(csp.Context()))
 			} else {
-				fsp = opentracing.StartSpan(fmt.Sprintf("ChildOf_%v", j), opentracing.ChildOf(csp.Context()))
+				_, fsp = tr.Start(trace.ContextWithSpan(rootCtx, rootSpan), fmt.Sprintf("ChildOf_%v", j))
 			}
 
 			randInt := rand.Intn(100)
-			fsp.SetTag("process_time", randInt)
+			// fsp.SetTag("process_time", randInt)
 			time.Sleep(time.Duration(randInt) * time.Millisecond)
 
-			fsp.SetTag("follows_key", fmt.Sprintf("%v", j))
-			fsp.Finish()
+			// fsp.SetTag("follows_key", fmt.Sprintf("%v", j))
+			fsp.End()
 
-			go func() {
-				for x := 0; x <= 1; x++ {
-					var xsp opentracing.Span
-					if x == 1 {
-						xsp = opentracing.StartSpan(fmt.Sprintf("FollowsFrom_%v", x), opentracing.FollowsFrom(fsp.Context()))
-					} else {
-						xsp = opentracing.StartSpan(fmt.Sprintf("ChildOf_%v", x), opentracing.ChildOf(fsp.Context()))
+			/*
+				go func() {
+					for x := 0; x <= 1; x++ {
+						var xsp opentracing.Span
+						if x == 1 {
+							xsp = opentracing.StartSpan(fmt.Sprintf("FollowsFrom_%v", x), opentracing.FollowsFrom(fsp.Context()))
+						} else {
+							xsp = opentracing.StartSpan(fmt.Sprintf("ChildOf_%v", x), opentracing.ChildOf(fsp.Context()))
+						}
+
+						randInt := rand.Intn(100)
+						xsp.SetTag("process_time", randInt)
+						time.Sleep(time.Duration(randInt) * time.Millisecond)
+
+						xsp.Finish()
 					}
-
-					randInt := rand.Intn(100)
-					xsp.SetTag("process_time", randInt)
-					time.Sleep(time.Duration(randInt) * time.Millisecond)
-
-					xsp.Finish()
-				}
-			}()
+				}()
+			*/
 		}
 
-		csp.Finish()
+		csp.End()
 	}
 
-	rootSpan.Finish()
+	rootSpan.End()
 
 	// time.Sleep(3 * time.Second)
 }

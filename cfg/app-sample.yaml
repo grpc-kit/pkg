@@ -102,6 +102,7 @@ opentracing:
   enable: true
   host: 127.0.0.1
   port: 6831
+  url_path: ""
   log_fields:
     http_body: true
     http_response: true

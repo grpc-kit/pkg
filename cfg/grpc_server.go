@@ -1,13 +1,16 @@
 package cfg
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	otelcodes "go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/pprof"
 	"net/textproto"
@@ -38,8 +41,6 @@ import (
 	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-
-	"github.com/opentracing/opentracing-go"
 )
 
 // registerGateway 注册 microservice.pb.gw
@@ -103,40 +104,30 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		if span == nil {
 			return metadata.New(carrier)
 		}
+		defer span.End()
 
-		/*
-			if err := span.Tracer().Inject(
-				span.Context(),
-				opentracing.TextMap,
-				opentracing.TextMapCarrier(carrier),
-			); err != nil {
-				return metadata.New(carrier)
-			}
-		*/
+		// 传递携带的信息
+		otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 
-		tc := propagation.TraceContext{}
-		tc.Inject(ctx, propagation.MapCarrier(carrier))
-		otel.SetTextMapPropagator(tc)
+		span.SetAttributes(attribute.KeyValue{
+			Key:   "request.id",
+			Value: attribute.StringValue(carrier[HTTPHeaderRequestID])})
 
-		// span.SetTag("request.id", carrier[HTTPHeaderRequestID])
-		span.SetAttributes(attribute.KeyValue{Key: "request.id", Value: attribute.StringValue(carrier[HTTPHeaderRequestID])})
-
-		span.End()
-
-		// 当method=put或post时，开启http_body记录或开启debug模式与content-type为json时才记录http.body
+		// 当 method=put 或 post 时，开启 http_body 记录或开启 debug 模式与 content-type 为 json 时才记录 http.body
 		if (c.Opentracing.LogFields.HTTPBody || c.Debugger.LogLevel == "debug") &&
 			(req.Method == http.MethodPut || req.Method == http.MethodPost) &&
 			strings.Contains(req.Header.Get("Content-Type"), "application/json") {
 
-			/*
-				rawBody, err := ioutil.ReadAll(req.Body)
-				if err == nil {
-					req.Body = ioutil.NopCloser(bytes.NewBuffer(rawBody))
-					if len(rawBody) > 0 {
-						span.LogFields(opentracinglog.String("http.body", string(rawBody)))
-					}
+			rawBody, err := ioutil.ReadAll(req.Body)
+			if err == nil {
+				req.Body = ioutil.NopCloser(bytes.NewBuffer(rawBody))
+				if len(rawBody) > 0 {
+					span.AddEvent("http.request",
+						trace.WithAttributes(attribute.String("http.request.body.data", string(rawBody))),
+						trace.WithAttributes(attribute.Int("http.request.body.size", len(rawBody))),
+					)
 				}
-			*/
+			}
 		}
 
 		return metadata.New(carrier)
@@ -155,21 +146,28 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 		// TODO; 如果msg是数组返回，则无法成功序列化为json
 		if c.Opentracing.LogFields.HTTPResponse {
-			/*
-				span := opentracing.SpanFromContext(ctx)
-				if span == nil {
-					return nil
-				}
+			span := trace.SpanFromContext(ctx)
+			if span == nil {
+				return nil
+			} else {
+				defer span.End()
+			}
 
-				respBody, err := protojson.Marshal(msg)
-				if err != nil {
-					return err
+			respBody, err := protojson.Marshal(msg)
+			if err != nil {
+				return err
+			}
+			if len(respBody) <= 2 {
+				// respBody = msg.String()
+			} else {
+				// TODO; 确认下 span 不活跃无法上报生效
+				if span.IsRecording() {
+					span.AddEvent("http.response",
+						trace.WithAttributes(attribute.String("http.response.body.data", string(respBody))),
+						trace.WithAttributes(attribute.Int("http.response.body.size", len(respBody))),
+					)
 				}
-				if len(respBody) <= 2 {
-					// respBody = msg.String()
-				}
-				span.LogFields(opentracinglog.String("http.body", string(respBody)))
-			*/
+			}
 		}
 
 		return nil
@@ -188,9 +186,12 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 		// 请求的是忽略追踪的http url地址
 		ignoreTracing := false
-		span := opentracing.SpanFromContext(ctx)
+		span := trace.SpanFromContext(ctx)
 		if span == nil {
 			ignoreTracing = true
+		} else {
+			span.RecordError(err, trace.WithStackTrace(true))
+			defer span.End()
 		}
 
 		requestID := req.Header.Get(HTTPHeaderRequestID)
@@ -199,10 +200,8 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		} else {
 			carrier := make(map[string]string)
 			if !ignoreTracing {
-				span.Tracer().Inject(
-					span.Context(),
-					opentracing.TextMap,
-					opentracing.TextMapCarrier(carrier))
+				// 传递携带的信息
+				otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 			}
 			requestID = calcRequestID(carrier)
 		}
@@ -223,7 +222,31 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 		// 接口请求错误情况下，均会记录响应体
 		if !ignoreTracing {
-			span.SetTag("request.id", requestID)
+			span.SetStatus(otelcodes.Error, string(rawBody))
+			/*
+				span.AddEvent("log", trace.WithAttributes(
+					attribute.KeyValue{
+						Key:   "log.event",
+						Value: attribute.StringValue("error"),
+					},
+						attribute.KeyValue{
+							Key:   "stack",
+							Value: attribute.StringValue(string(rawBody)),
+						},
+				))
+			*/
+
+			span.SetAttributes(
+				attribute.KeyValue{
+					Key:   "error",
+					Value: attribute.BoolValue(true),
+				},
+				attribute.KeyValue{
+					Key:   "request.id",
+					Value: attribute.StringValue(requestID),
+				},
+			)
+
 			/*
 				rawBody, err := ioutil.ReadAll(req.Body)
 				if err == nil {
@@ -283,30 +306,8 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		hmux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	}
 
-	/*
-		hmux.Handle("/", nethttp.Middleware(
-			opentracing.GlobalTracer(),
-			rmux,
-			// 定义http下component名称
-			nethttp.MWComponentName("grpc-gateway"),
-			// 返回false，则不会进行追踪
-			nethttp.MWSpanFilter(func(r *http.Request) bool {
-				switch r.URL.Path {
-				case "/healthz", "/version", "/metrics", "/favicon.ico":
-					// 忽略这几个http请求的链路追踪
-					return false
-				}
-				return true
-			}),
-			// 定义http追踪的方法名称
-			nethttp.OperationNameFunc(func(r *http.Request) string {
-				return fmt.Sprintf("http %s %s", strings.ToLower(r.Method), r.URL.Path)
-			}),
-		))
-	*/
-
 	format := func(operation string, r *http.Request) string {
-		return fmt.Sprintf("http %s %s", strings.ToLower(r.Method), r.URL.Path)
+		return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 	}
 
 	handler := http.Handler(rmux)
