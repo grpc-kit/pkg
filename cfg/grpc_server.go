@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/propagation"
 	"io"
 	"net/http"
 	"net/http/pprof"
@@ -96,18 +99,29 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			req.Header.Set(HTTPHeaderRequestID, carrier[HTTPHeaderRequestID])
 		}
 
-		span := opentracing.SpanFromContext(ctx)
+		span := trace.SpanFromContext(ctx)
 		if span == nil {
 			return metadata.New(carrier)
 		}
-		if err := span.Tracer().Inject(
-			span.Context(),
-			opentracing.TextMap,
-			opentracing.TextMapCarrier(carrier),
-		); err != nil {
-			return metadata.New(carrier)
-		}
-		span.SetTag("request.id", carrier[HTTPHeaderRequestID])
+
+		/*
+			if err := span.Tracer().Inject(
+				span.Context(),
+				opentracing.TextMap,
+				opentracing.TextMapCarrier(carrier),
+			); err != nil {
+				return metadata.New(carrier)
+			}
+		*/
+
+		tc := propagation.TraceContext{}
+		tc.Inject(ctx, propagation.MapCarrier(carrier))
+		otel.SetTextMapPropagator(tc)
+
+		// span.SetTag("request.id", carrier[HTTPHeaderRequestID])
+		span.SetAttributes(attribute.KeyValue{Key: "request.id", Value: attribute.StringValue(carrier[HTTPHeaderRequestID])})
+
+		span.End()
 
 		// 当method=put或post时，开启http_body记录或开启debug模式与content-type为json时才记录http.body
 		if (c.Opentracing.LogFields.HTTPBody || c.Debugger.LogLevel == "debug") &&
@@ -291,8 +305,12 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		))
 	*/
 
+	format := func(operation string, r *http.Request) string {
+		return fmt.Sprintf("http %s %s", strings.ToLower(r.Method), r.URL.Path)
+	}
+
 	handler := http.Handler(rmux)
-	handler = otelhttp.NewHandler(handler, "grpc-gateway")
+	handler = otelhttp.NewHandler(handler, "grpc-gateway", otelhttp.WithSpanNameFormatter(format))
 
 	hmux.Handle("/", handler)
 
@@ -362,8 +380,6 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 		// level.Error(rpcLogger).Log("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
 		return status.Errorf(codes.Internal, "%s", p)
 	}
-
-	// DEBUG logger
 
 	var defaultUnaryOpt []grpc.UnaryServerInterceptor
 	defaultUnaryOpt = append(defaultUnaryOpt, otelgrpc.UnaryServerInterceptor())
