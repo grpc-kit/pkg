@@ -5,10 +5,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	otelcodes "go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/propagation"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -27,6 +23,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	otelcodes "go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
@@ -310,8 +310,15 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 	}
 
+	notFilter := func(*http.Request) bool {
+		return true
+	}
+
 	handler := http.Handler(rmux)
-	handler = otelhttp.NewHandler(handler, "grpc-gateway", otelhttp.WithSpanNameFormatter(format))
+	handler = otelhttp.NewHandler(handler,
+		"grpc-gateway",
+		otelhttp.WithFilter(notFilter),
+		otelhttp.WithSpanNameFormatter(format))
 
 	hmux.Handle("/", handler)
 
