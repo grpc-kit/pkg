@@ -2,11 +2,7 @@ package cfg
 
 import (
 	"context"
-	"fmt"
-	"io"
-
-	"github.com/uber/jaeger-client-go"
-	jaegerconfig "github.com/uber/jaeger-client-go/config"
+	"os"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
@@ -33,6 +29,11 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 		otlptracehttp.WithInsecure())
 	otlptracehttp.WithCompression(1)
 
+	hostName, err := os.Hostname()
+	if err != nil || hostName == "" {
+		hostName = "unknow"
+	}
+
 	traceExp, err := otlptrace.New(ctx, traceClientHttp)
 	res, err := resource.New(ctx,
 		resource.WithFromEnv(),
@@ -43,7 +44,7 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 			// 在可观测链路 OpenTelemetry 版后端显示的服务名称。
 			semconv.ServiceNameKey.String(c.GetServiceName()),
 			// 在可观测链路 OpenTelemetry 版后端显示的主机名称。
-			semconv.HostNameKey.String("test-host-1"),
+			semconv.HostNameKey.String(hostName),
 		),
 	)
 
@@ -61,6 +62,7 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 }
 
 // InitOpentracingV1 初始化全局分布式链路追踪
+/*
 func (c *LocalConfig) InitOpentracingV1() (io.Closer, error) {
 	if c.Opentracing == nil {
 		c.Opentracing = &OpentracingConfig{
@@ -106,3 +108,4 @@ func (c *LocalConfig) InitOpentracingV1() (io.Closer, error) {
 
 	return closer, nil
 }
+*/
