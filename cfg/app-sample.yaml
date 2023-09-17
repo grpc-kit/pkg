@@ -103,9 +103,23 @@ opentracing:
   host: 127.0.0.1
   port: 6831
   url_path: ""
+
+  exporters:
+    otlphttp:
+      endpoint: ""
+    otlpgrpc:
+      endpoint: ""
+    logging:
+      file_path: stdout
+
   log_fields:
     http_body: true
     http_response: true
+
+  filters:
+    - url_path: "/api/demo"
+      method: POST
+    - method: Demo
 
 # 事件通道配置
 cloudevents:

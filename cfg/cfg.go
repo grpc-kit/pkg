@@ -146,11 +146,47 @@ type DebuggerConfig struct {
 
 // OpentracingConfig 分布式链路追踪
 type OpentracingConfig struct {
-	Enable    bool      `mapstructure:"enable"`
-	Host      string    `mapstructure:"host"`
-	Port      int       `mapstructure:"port"`
+	Enable bool `mapstructure:"enable"`
+
+	// Deprecated: Use Exporters instead.
+	Host string `mapstructure:"host"`
+	// Deprecated: Use Exporters instead.
+	Port int `mapstructure:"port"`
+	// Deprecated: Use Exporters instead.
+	URLPath string `mapstructure:"url_path"`
+
+	// 记录特殊字段，默认不开启
 	LogFields LogFields `mapstructure:"log_fields"`
-	URLPath   string    `mapstructure:"url_path"`
+
+	// 过滤器，用于过滤不需要追踪的请求
+	Filters []struct {
+		Method  string `mapstructure:"method"`
+		URLPath string `mapstructure:"url_path"`
+	} `mapstructure:"filters"`
+
+	Exporters *struct {
+		OTLPHTTP *OTLPHTTPConfig `mapstructure:"otlphttp"`
+		OTLPGRPC *OTLPGRPCConfig `mapstructure:"otlpgrpc"`
+		Logging  *struct {
+			FilePath    string `mapstructure:"file_path"`
+			PrettyPrint bool   `mapstructure:"pretty_print"`
+		} `mapstructure:"logging"`
+	} `mapstructure:"exporters"`
+}
+
+// OTLPHTTPConfig xx
+type OTLPHTTPConfig struct {
+	// The target URL to send data to (e.g.: http://some.url:9411).
+	Endpoint      string            `mapstructure:"endpoint"`
+	TracesURLPath string            `mapstructure:"traces_url_path"`
+	Headers       map[string]string `mapstructure:"headers"`
+}
+
+// OTLPGRPCConfig xx
+type OTLPGRPCConfig struct {
+	// The target URL to send data to (e.g.: http://some.url:9411).
+	Endpoint string            `mapstructure:"endpoint"`
+	Headers  map[string]string `mapstructure:"headers"`
 }
 
 // CloudEventsConfig cloudevents事件配置
