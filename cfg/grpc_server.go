@@ -190,7 +190,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		if span == nil {
 			ignoreTracing = true
 		} else {
-			span.RecordError(err, trace.WithStackTrace(true))
+			span.RecordError(err, trace.WithStackTrace(false))
 			defer span.End()
 		}
 
@@ -244,6 +244,10 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 				attribute.KeyValue{
 					Key:   "request.id",
 					Value: attribute.StringValue(requestID),
+				},
+				attribute.KeyValue{
+					Key:   "http.response.status_code",
+					Value: attribute.IntValue(s.HTTPStatusCode()),
 				},
 			)
 
@@ -310,14 +314,37 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 	}
 
-	notFilter := func(*http.Request) bool {
+	// 仅跟踪 "/api/"、"/admin/" 开头路径下内容
+	tracingFilterFunc := func(r *http.Request) bool {
+		switch r.URL.Path {
+		case "/healthz", "/ping", "/metrics", "/version":
+			return false
+		}
+
+		// 是否存在指定的跟踪接口
+		for _, v := range c.Opentracing.Filters {
+			if v.URLPath != "" && v.URLPath == r.URL.Path {
+				if v.Method == "" {
+					return false
+				} else if strings.ToLower(v.Method) == strings.ToLower(r.Method) {
+					return false
+				}
+			}
+
+			if v.Method != "" && v.URLPath == "" {
+				if strings.ToLower(v.Method) == strings.ToLower(r.Method) {
+					return false
+				}
+			}
+		}
+
 		return true
 	}
 
 	handler := http.Handler(rmux)
 	handler = otelhttp.NewHandler(handler,
 		"grpc-gateway",
-		otelhttp.WithFilter(notFilter),
+		otelhttp.WithFilter(tracingFilterFunc),
 		otelhttp.WithSpanNameFormatter(format))
 
 	hmux.Handle("/", handler)
@@ -389,8 +416,34 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 		return status.Errorf(codes.Internal, "%s", p)
 	}
 
+	tracingFilterFunc := func(info *otelgrpc.InterceptorInfo) bool {
+		if info.UnaryServerInfo == nil {
+			return false
+		}
+
+		grpcMethod := path.Base(info.UnaryServerInfo.FullMethod)
+
+		// 忽略内置的健康检查接口
+		switch grpcMethod {
+		case "HealthCheck":
+			return false
+		}
+
+		for _, v := range c.Opentracing.Filters {
+			if v.URLPath == "" && v.Method != "" {
+				if v.Method == grpcMethod {
+					return false
+				}
+			}
+		}
+
+		return true
+	}
+
 	var defaultUnaryOpt []grpc.UnaryServerInterceptor
-	defaultUnaryOpt = append(defaultUnaryOpt, otelgrpc.UnaryServerInterceptor())
+	defaultUnaryOpt = append(defaultUnaryOpt, otelgrpc.UnaryServerInterceptor(
+		otelgrpc.WithInterceptorFilter(tracingFilterFunc)),
+	)
 	defaultUnaryOpt = append(defaultUnaryOpt, srvMetrics.UnaryServerInterceptor(grpcprometheus.WithExemplarFromContext(exemplarFromContext)))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpcrecovery.UnaryServerInterceptor(grpcrecovery.WithRecoveryHandler(grpcPanicRecoveryHandler)))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpcauth.UnaryServerInterceptor(c.authValidate()))
