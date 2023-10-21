@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
@@ -45,17 +44,23 @@ func (c *Client) UseStreamInterceptor(handlers ...grpc.StreamClientInterceptor) 
 
 // Dial 用于创建连接
 func (c *Client) Dial(ctx context.Context, scode string, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
-	c.opts = append(c.opts, opts...)
-	c.opts = append(c.opts, grpc.WithUnaryInterceptor(grpcmiddleware.ChainUnaryClient(c.unaryIntercepts...)))
-	c.opts = append(c.opts, grpc.WithStreamInterceptor(grpcmiddleware.ChainStreamClient(c.streamIntercepts...)))
-
 	if c.config.Scheme == "" || c.config.Authority == "" || c.config.APIEndpoint == "" {
 		return nil, fmt.Errorf("rpc client dial: the scheme authority and api-endoint must set")
 	}
 
+	var all []grpc.DialOption
+	// 各自定义 dial 的参数
+	all = append(all, opts...)
+	// 全局定义 dial 的参数
+	all = append(all, c.opts...)
+	// 全局定义的 unary 类型参数
+	all = append(all, grpc.WithChainUnaryInterceptor(c.unaryIntercepts...))
+	// 全局定义的 stream 类型参数
+	all = append(all, grpc.WithChainStreamInterceptor(c.streamIntercepts...))
+
 	target := fmt.Sprintf("%v://%v/%v.%v", c.config.Scheme, c.config.Authority, scode, c.config.APIEndpoint)
 
-	cc, err := grpc.DialContext(ctx, target, c.opts...)
+	cc, err := grpc.DialContext(ctx, target, all...)
 	if err != nil {
 		return nil, err
 	}

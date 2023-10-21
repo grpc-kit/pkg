@@ -554,6 +554,7 @@ func (c *LocalConfig) GetClientUnaryInterceptor() []grpc.UnaryClientInterceptor 
 	*/
 
 	var opts []grpc.UnaryClientInterceptor
+	opts = append(opts, otelgrpc.UnaryClientInterceptor())
 	//opts = append(opts, grpcprometheus.UnaryClientInterceptor)
 	// opts = append(opts, grpcopentracing.UnaryClientInterceptor())
 	// opts = append(opts, grpclogrus.UnaryClientInterceptor(c.logger, logReqFilterOpts...))
@@ -577,6 +578,7 @@ func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientIntercepto
 	*/
 
 	var opts []grpc.StreamClientInterceptor
+	opts = append(opts, otelgrpc.StreamClientInterceptor())
 	//opts = append(opts, grpcprometheus.StreamClientInterceptor)
 	// opts = append(opts, grpcopentracing.StreamClientInterceptor())
 	// opts = append(opts, grpclogrus.StreamClientInterceptor(c.logger, logReqFilterOpts...))
