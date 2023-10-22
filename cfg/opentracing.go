@@ -3,6 +3,8 @@ package cfg
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
 
 	/*
 		"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
@@ -20,8 +22,6 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 	"google.golang.org/grpc/credentials"
-	"os"
-	"strings"
 )
 
 // InitOpentracing 初始化全局分布式链路追踪
@@ -30,6 +30,10 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 		c.Opentracing = &OpentracingConfig{
 			Enable: false,
 		}
+	}
+
+	if !c.Opentracing.Enable {
+		return nil, nil
 	}
 
 	if c.Opentracing.Exporters == nil {
@@ -42,7 +46,7 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 	}
 
 	ctx := context.Background()
-	var bsp sdktrace.SpanProcessor
+	// var bsp sdktrace.SpanProcessor
 
 	res, err := resource.New(ctx,
 		resource.WithFromEnv(),
@@ -57,6 +61,12 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 		),
 	)
 
+	tracerProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithResource(res),
+		// sdktrace.WithSpanProcessor(bsp),
+	)
+
 	if c.Opentracing.Exporters.OTLPHTTP != nil {
 		tmps := strings.Split(c.Opentracing.Exporters.OTLPHTTP.Endpoint, "//")
 		if len(tmps) != 2 {
@@ -69,12 +79,12 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 		}
 
 		opts := make([]otlptracehttp.Option, 0)
-		if strings.HasPrefix(tmps[1], "https") {
-			return nil, fmt.Errorf("not support https")
+		if strings.HasPrefix(tmps[0], "https") {
+			// return nil, fmt.Errorf("not support https")
 		} else {
 			opts = append(opts, otlptracehttp.WithInsecure())
 		}
-		opts = append(opts, otlptracehttp.WithHeaders(c.Opentracing.Exporters.OTLPGRPC.Headers))
+		opts = append(opts, otlptracehttp.WithHeaders(c.Opentracing.Exporters.OTLPHTTP.Headers))
 		opts = append(opts, otlptracehttp.WithEndpoint(tmps[1]))
 		opts = append(opts, otlptracehttp.WithURLPath(trurl))
 
@@ -86,15 +96,18 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 			return nil, err
 		}
 
-		bsp = sdktrace.NewBatchSpanProcessor(traceExp)
-	} else if c.Opentracing.Exporters.OTLPGRPC != nil {
+		bsp := sdktrace.NewBatchSpanProcessor(traceExp)
+		tracerProvider.RegisterSpanProcessor(bsp)
+	}
+
+	if c.Opentracing.Exporters.OTLPGRPC != nil {
 		tmps := strings.Split(c.Opentracing.Exporters.OTLPGRPC.Endpoint, "//")
 		if len(tmps) != 2 {
 			return nil, fmt.Errorf("opentracing exporter otlp grpc endpoint error")
 		}
 
 		opts := make([]otlptracegrpc.Option, 0)
-		if strings.HasPrefix(tmps[1], "https") {
+		if strings.HasPrefix(tmps[0], "https") {
 			opts = append(opts, otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
 		} else {
 			opts = append(opts, otlptracegrpc.WithInsecure())
@@ -109,7 +122,8 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 			return nil, err
 		}
 
-		bsp = sdktrace.NewBatchSpanProcessor(traceExp)
+		bsp := sdktrace.NewBatchSpanProcessor(traceExp)
+		tracerProvider.RegisterSpanProcessor(bsp)
 
 		// TODO; test metrics
 		/*
@@ -145,7 +159,9 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 			}()
 		*/
 
-	} else if c.Opentracing.Exporters.Logging != nil {
+	}
+
+	if c.Opentracing.Exporters.Logging != nil {
 		opts := make([]stdouttrace.Option, 0)
 		if c.Opentracing.Exporters.Logging.PrettyPrint {
 			opts = append(opts, stdouttrace.WithPrettyPrint())
@@ -162,14 +178,9 @@ func (c *LocalConfig) InitOpentracing() (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		bsp = sdktrace.NewBatchSpanProcessor(traceExp)
+		bsp := sdktrace.NewBatchSpanProcessor(traceExp)
+		tracerProvider.RegisterSpanProcessor(bsp)
 	}
-
-	tracerProvider := sdktrace.NewTracerProvider(
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithResource(res),
-		sdktrace.WithSpanProcessor(bsp),
-	)
 
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 	otel.SetTracerProvider(tracerProvider)
