@@ -75,6 +75,7 @@ type LocalConfig struct {
 	Debugger    *DebuggerConfig    `json:",omitempty"` // 日志调试配置
 	Objstore    *ObjstoreConfig    `json:",omitempty"` // 对象存储配置
 	Opentracing *OpentracingConfig `json:",omitempty"` // 链路追踪配置
+	Observables *ObservablesConfig `json:",omitempty"` // 可观测性配置
 	CloudEvents *CloudEventsConfig `json:",omitempty"` // 公共事件配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
@@ -293,7 +294,7 @@ func (c *LocalConfig) Init() error {
 		return err
 	}
 
-	if _, err := c.InitOpentracing(); err != nil {
+	if _, err := c.InitObservables(); err != nil {
 		return err
 	}
 

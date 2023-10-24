@@ -113,6 +113,10 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			Key:   "request.id",
 			Value: attribute.StringValue(carrier[HTTPHeaderRequestID])})
 
+		if c.Opentracing == nil {
+			return metadata.New(carrier)
+		}
+
 		// 当 method=put 或 post 时，开启 http_body 记录或开启 debug 模式与 content-type 为 json 时才记录 http.body
 		if (c.Opentracing.LogFields.HTTPBody || c.Debugger.LogLevel == "debug") &&
 			(req.Method == http.MethodPut || req.Method == http.MethodPost) &&
@@ -322,21 +326,23 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		}
 
 		// 是否存在指定的跟踪接口
-		for _, v := range c.Opentracing.Filters {
-			if v.URLPath != "" && v.URLPath == r.URL.Path {
-				if v.Method == "" {
-					return false
-				} else if strings.ToLower(v.Method) == strings.ToLower(r.Method) {
-					return false
+		/*
+			for _, v := range c.Opentracing.Filters {
+				if v.URLPath != "" && v.URLPath == r.URL.Path {
+					if v.Method == "" {
+						return false
+					} else if strings.ToLower(v.Method) == strings.ToLower(r.Method) {
+						return false
+					}
 				}
-			}
 
-			if v.Method != "" && v.URLPath == "" {
-				if strings.ToLower(v.Method) == strings.ToLower(r.Method) {
-					return false
+				if v.Method != "" && v.URLPath == "" {
+					if strings.ToLower(v.Method) == strings.ToLower(r.Method) {
+						return false
+					}
 				}
 			}
-		}
+		*/
 
 		return true
 	}
