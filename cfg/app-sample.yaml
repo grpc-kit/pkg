@@ -97,6 +97,37 @@ debugger:
   # 日志输出的格式，可取：json、text
   log_format: text
 
+# 可观测性配置
+observables:
+  enable: true
+
+  telemetry:
+    traces:
+      sample_ratio: 0.2
+
+      # 特别在网关上记录 http 请求与响应体内容，仅当为 json 结构体有效
+      log_fields:
+        http_body: true
+        http_response: true
+
+      filters:
+        - url_path: "/api/demo"
+          method: POST
+        - method: Demo
+
+  exporters:
+    otlp:
+      endpoint: "http://tracing-analysis-dc-hz.aliyuncs.com:8090"
+      headers:
+        Authentication: token
+    otlphttp:
+      endpoint: "http://tracing-analysis-dc-hz.aliyuncs.com"
+      traces_endpoint: ""
+      metrics_endpoint: ""
+      logs_endpoint: ""
+      headers:
+        Authentication: token
+
 # 链路追踪配置
 opentracing:
   enable: true

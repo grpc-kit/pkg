@@ -3,14 +3,14 @@ package cfg
 import (
 	"context"
 	"fmt"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"os"
 	"strings"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -20,9 +20,28 @@ import (
 
 // ObservablesConfig 用于客观性配置
 type ObservablesConfig struct {
-	trace *sdktrace.TracerProvider
+	tracer *sdktrace.TracerProvider
 
 	Enable bool `mapstructure:"enable"`
+
+	Telemetry *struct {
+		Traces *struct {
+			// 给定一个 0 至 1 之间的分数决定采样频率
+			SampleRatio float64 `mapstructure:"sample_ratio"`
+
+			// 记录特殊字段，默认不开启
+			LogFields struct {
+				HTTPBody     bool `mapstructure:"http_body"`
+				HTTPResponse bool `mapstructure:"http_response"`
+			} `mapstructure:"log_fields"`
+
+			// 过滤器，用于过滤不需要追踪的请求
+			Filters []struct {
+				Method  string `mapstructure:"method"`
+				URLPath string `mapstructure:"url_path"`
+			} `mapstructure:"filters"`
+		}
+	} `mapstructure:"telemetry"`
 
 	Exporters *struct {
 		OTLPGRPC *OTLPGRPCConfig `mapstructure:"otlp"`
@@ -38,12 +57,6 @@ type ObservablesConfig struct {
 func (c *LocalConfig) InitObservables() (interface{}, error) {
 	if c.Observables == nil {
 		c.Observables = &ObservablesConfig{
-			Enable: false,
-		}
-	}
-
-	if c.Opentracing == nil {
-		c.Opentracing = &OpentracingConfig{
 			Enable: false,
 		}
 	}
@@ -77,12 +90,26 @@ func (c *LocalConfig) InitObservables() (interface{}, error) {
 		),
 	)
 
+	// 控制采样频率
+	sampleRatio := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(0.2))
+	if c.Observables.Telemetry != nil {
+		if c.Observables.Telemetry.Traces != nil {
+			ratio := c.Observables.Telemetry.Traces.SampleRatio
+			if ratio >= 1 {
+				sampleRatio = sdktrace.AlwaysSample()
+			} else if ratio > 0 {
+				sampleRatio = sdktrace.ParentBased(sdktrace.TraceIDRatioBased(ratio))
+			} else {
+				sampleRatio = sdktrace.NeverSample()
+			}
+		}
+	}
+
 	tracerProvider := sdktrace.NewTracerProvider(
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithSampler(sampleRatio),
 		sdktrace.WithResource(res),
-		// sdktrace.WithSpanProcessor(bsp),
 	)
-	c.Observables.trace = tracerProvider
+	c.Observables.tracer = tracerProvider
 
 	if err = c.initExportOTLPGRPC(ctx); err != nil {
 		return nil, err
@@ -129,7 +156,7 @@ func (c *LocalConfig) initExportOTLPGRPC(ctx context.Context) error {
 	}
 
 	bsp := sdktrace.NewBatchSpanProcessor(exp)
-	c.Observables.trace.RegisterSpanProcessor(bsp)
+	c.Observables.tracer.RegisterSpanProcessor(bsp)
 
 	return nil
 }
@@ -170,7 +197,7 @@ func (c *LocalConfig) initExportOTLPHTTP(ctx context.Context) error {
 	}
 
 	bsp := sdktrace.NewBatchSpanProcessor(exp)
-	c.Observables.trace.RegisterSpanProcessor(bsp)
+	c.Observables.tracer.RegisterSpanProcessor(bsp)
 
 	return nil
 }
@@ -184,11 +211,11 @@ func (c *LocalConfig) initExportLogging(ctx context.Context) error {
 	}
 
 	opts := make([]stdouttrace.Option, 0)
-	if c.Opentracing.Exporters.Logging.PrettyPrint {
+	if c.Observables.Exporters.Logging.PrettyPrint {
 		opts = append(opts, stdouttrace.WithPrettyPrint())
 	}
-	if c.Opentracing.Exporters.Logging.FilePath != "" && c.Opentracing.Exporters.Logging.FilePath != "stdout" {
-		f, err := os.OpenFile(c.Opentracing.Exporters.Logging.FilePath, os.O_RDWR|os.O_CREATE, 0755)
+	if c.Observables.Exporters.Logging.FilePath != "" && c.Observables.Exporters.Logging.FilePath != "stdout" {
+		f, err := os.OpenFile(c.Observables.Exporters.Logging.FilePath, os.O_RDWR|os.O_CREATE, 0755)
 		if err != nil {
 			return err
 		}
@@ -200,7 +227,7 @@ func (c *LocalConfig) initExportLogging(ctx context.Context) error {
 		return err
 	}
 	bsp := sdktrace.NewBatchSpanProcessor(exp)
-	c.Observables.trace.RegisterSpanProcessor(bsp)
+	c.Observables.tracer.RegisterSpanProcessor(bsp)
 
 	return nil
 }
