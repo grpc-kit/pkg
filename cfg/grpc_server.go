@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 	"github.com/grpc-kit/pkg/errs"
@@ -96,29 +95,26 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		if val := req.Header.Get(HTTPHeaderRequestID); val != "" {
 			carrier[HTTPHeaderRequestID] = val
 		} else {
-			carrier[HTTPHeaderRequestID] = calcRequestID(carrier)
+			carrier[HTTPHeaderRequestID] = calcRequestID(ctx)
 			req.Header.Set(HTTPHeaderRequestID, carrier[HTTPHeaderRequestID])
 		}
+
+		// 传递携带的信息
+		otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 
 		span := trace.SpanFromContext(ctx)
 		if span == nil {
 			return metadata.New(carrier)
 		}
-		defer span.End()
+		// 这里不可关闭，否则之后阶段通过 ctx 获取 span 将会为关闭事件上报(span.IsRecording=flase)
+		// defer span.End()
 
-		// 传递携带的信息
-		otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
-
-		span.SetAttributes(attribute.KeyValue{
-			Key:   "request.id",
-			Value: attribute.StringValue(carrier[HTTPHeaderRequestID])})
-
-		if c.Opentracing == nil {
+		if c.Observables.Telemetry == nil || c.Observables.Telemetry.Traces == nil {
 			return metadata.New(carrier)
 		}
 
 		// 当 method=put 或 post 时，开启 http_body 记录或开启 debug 模式与 content-type 为 json 时才记录 http.body
-		if (c.Opentracing.LogFields.HTTPBody || c.Debugger.LogLevel == "debug") &&
+		if (c.Observables.Telemetry.Traces.LogFields.HTTPBody || c.Debugger.LogLevel == "debug") &&
 			(req.Method == http.MethodPut || req.Method == http.MethodPost) &&
 			strings.Contains(req.Header.Get("Content-Type"), "application/json") {
 
@@ -147,30 +143,35 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		w.Header().Set("X-XSS-Protection", "1; mode=block")
 		// 访问一个 HTTPS 网站，要求浏览器总是通过 HTTPS 访问它
 		// w.Header().Set("Strict-Transport-Security", "max-age=172800")
+		// 返回请求ID，如果存在 trace.id 的话，否则返回默认值
+		w.Header().Set(HTTPHeaderRequestID, calcRequestID(ctx))
+
+		// tracing 不可用或当前无法记录上报事件
+		span := trace.SpanFromContext(ctx)
+		if span == nil && !span.IsRecording() {
+			return nil
+		}
+		/*
+			span.SetAttributes(attribute.KeyValue{
+				Key:   "request.id",
+				Value: attribute.StringValue("200")})
+		*/
+
+		if c.Observables.Telemetry == nil || c.Observables.Telemetry.Traces == nil {
+			return nil
+		}
 
 		// TODO; 如果msg是数组返回，则无法成功序列化为json
-		if c.Opentracing.LogFields.HTTPResponse {
-			span := trace.SpanFromContext(ctx)
-			if span == nil {
-				return nil
-			} else {
-				defer span.End()
-			}
-
+		if c.Observables.Telemetry.Traces.LogFields.HTTPResponse {
 			respBody, err := protojson.Marshal(msg)
 			if err != nil {
 				return err
 			}
-			if len(respBody) <= 2 {
-				// respBody = msg.String()
-			} else {
-				// TODO; 确认下 span 不活跃无法上报生效
-				if span.IsRecording() {
-					span.AddEvent("http.response",
-						trace.WithAttributes(attribute.String("http.response.body.data", string(respBody))),
-						trace.WithAttributes(attribute.Int("http.response.body.size", len(respBody))),
-					)
-				}
+			if len(respBody) > 2 {
+				span.AddEvent("http.response",
+					trace.WithAttributes(attribute.String("http.response.body.data", string(respBody))),
+					trace.WithAttributes(attribute.Int("http.response.body.size", len(respBody))),
+				)
 			}
 		}
 
@@ -207,8 +208,10 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 				// 传递携带的信息
 				otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 			}
-			requestID = calcRequestID(carrier)
+			requestID = calcRequestID(ctx)
 		}
+
+		w.Header().Set(HTTPHeaderRequestID, requestID)
 
 		t := &statusv1.TracingRequest{Id: requestID}
 		s = s.AppendDetail(t)
@@ -244,10 +247,6 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 				attribute.KeyValue{
 					Key:   "error",
 					Value: attribute.BoolValue(true),
-				},
-				attribute.KeyValue{
-					Key:   "request.id",
-					Value: attribute.StringValue(requestID),
 				},
 				attribute.KeyValue{
 					Key:   "http.response.status_code",
@@ -435,10 +434,12 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 			return false
 		}
 
-		for _, v := range c.Opentracing.Filters {
-			if v.URLPath == "" && v.Method != "" {
-				if v.Method == grpcMethod {
-					return false
+		if c.Observables.Telemetry != nil && c.Observables.Telemetry.Traces != nil {
+			for _, v := range c.Observables.Telemetry.Traces.Filters {
+				if v.URLPath == "" && v.Method != "" {
+					if v.Method == grpcMethod {
+						return false
+					}
 				}
 			}
 		}
@@ -453,7 +454,6 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 	defaultUnaryOpt = append(defaultUnaryOpt, srvMetrics.UnaryServerInterceptor(grpcprometheus.WithExemplarFromContext(exemplarFromContext)))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpcrecovery.UnaryServerInterceptor(grpcrecovery.WithRecoveryHandler(grpcPanicRecoveryHandler)))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpcauth.UnaryServerInterceptor(c.authValidate()))
-	// defaultUnaryOpt = append(defaultUnaryOpt, grpcopentracing.UnaryServerInterceptor(tracingFilterFunc))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
 		grpclogging.WithTimestampFormat(time.RFC3339Nano),
 		grpclogging.WithLogOnEvents(grpclogging.FinishCall),
@@ -719,17 +719,12 @@ func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) erro
 	return nil
 }
 
-func calcRequestID(carrier map[string]string) string {
+func calcRequestID(ctx context.Context) string {
 	requestID := "0123456789abcdef0123456789abcdef"
 
-	tch, ok := carrier[TraceContextHeaderName]
-	if ok {
-		tmps := strings.Split(tch, ":")
-		if len(tmps) >= 2 {
-			requestID = fmt.Sprintf("%v%v", tmps[0], tmps[1])
-		}
-	} else {
-		requestID = strings.Replace(uuid.New().String(), "-", "", -1)
+	spanCtx := trace.SpanContextFromContext(ctx)
+	if spanCtx.HasTraceID() {
+		requestID = spanCtx.TraceID().String()
 	}
 
 	return requestID
