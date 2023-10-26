@@ -95,7 +95,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		if val := req.Header.Get(HTTPHeaderRequestID); val != "" {
 			carrier[HTTPHeaderRequestID] = val
 		} else {
-			carrier[HTTPHeaderRequestID] = calcRequestID(ctx)
+			carrier[HTTPHeaderRequestID] = c.Observables.calcRequestID(ctx)
 			req.Header.Set(HTTPHeaderRequestID, carrier[HTTPHeaderRequestID])
 		}
 
@@ -109,13 +109,12 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		// 这里不可关闭，否则之后阶段通过 ctx 获取 span 将会为关闭事件上报(span.IsRecording=flase)
 		// defer span.End()
 
-		if c.Observables.Telemetry == nil || c.Observables.Telemetry.Traces == nil {
+		if !c.Observables.hasRecordLogFieldsHTTPRequest() {
 			return metadata.New(carrier)
 		}
 
 		// 当 method=put 或 post 时，开启 http_body 记录或开启 debug 模式与 content-type 为 json 时才记录 http.body
-		if (c.Observables.Telemetry.Traces.LogFields.HTTPBody || c.Debugger.LogLevel == "debug") &&
-			(req.Method == http.MethodPut || req.Method == http.MethodPost) &&
+		if (req.Method == http.MethodPut || req.Method == http.MethodPost) &&
 			strings.Contains(req.Header.Get("Content-Type"), "application/json") {
 
 			rawBody, err := ioutil.ReadAll(req.Body)
@@ -144,25 +143,22 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		// 访问一个 HTTPS 网站，要求浏览器总是通过 HTTPS 访问它
 		// w.Header().Set("Strict-Transport-Security", "max-age=172800")
 		// 返回请求ID，如果存在 trace.id 的话，否则返回默认值
-		w.Header().Set(HTTPHeaderRequestID, calcRequestID(ctx))
+		w.Header().Set(HTTPHeaderRequestID, c.Observables.calcRequestID(ctx))
 
 		// tracing 不可用或当前无法记录上报事件
 		span := trace.SpanFromContext(ctx)
 		if span == nil && !span.IsRecording() {
 			return nil
 		}
+
 		/*
 			span.SetAttributes(attribute.KeyValue{
 				Key:   "request.id",
 				Value: attribute.StringValue("200")})
 		*/
 
-		if c.Observables.Telemetry == nil || c.Observables.Telemetry.Traces == nil {
-			return nil
-		}
-
-		// TODO; 如果msg是数组返回，则无法成功序列化为json
-		if c.Observables.Telemetry.Traces.LogFields.HTTPResponse {
+		if c.Observables.hasRecordLogFieldsHTTPResponse() {
+			// TODO; 如果msg是数组返回，则无法成功序列化为json
 			respBody, err := protojson.Marshal(msg)
 			if err != nil {
 				return err
@@ -208,7 +204,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 				// 传递携带的信息
 				otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 			}
-			requestID = calcRequestID(ctx)
+			requestID = c.Observables.calcRequestID(ctx)
 		}
 
 		w.Header().Set(HTTPHeaderRequestID, requestID)
@@ -230,19 +226,6 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		// 接口请求错误情况下，均会记录响应体
 		if !ignoreTracing {
 			span.SetStatus(otelcodes.Error, string(rawBody))
-			/*
-				span.AddEvent("log", trace.WithAttributes(
-					attribute.KeyValue{
-						Key:   "log.event",
-						Value: attribute.StringValue("error"),
-					},
-						attribute.KeyValue{
-							Key:   "stack",
-							Value: attribute.StringValue(string(rawBody)),
-						},
-				))
-			*/
-
 			span.SetAttributes(
 				attribute.KeyValue{
 					Key:   "error",
@@ -317,39 +300,10 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
 	}
 
-	// 仅跟踪 "/api/"、"/admin/" 开头路径下内容
-	tracingFilterFunc := func(r *http.Request) bool {
-		switch r.URL.Path {
-		case "/healthz", "/ping", "/metrics", "/version":
-			return false
-		}
-
-		// 是否存在指定的跟踪接口
-		/*
-			for _, v := range c.Opentracing.Filters {
-				if v.URLPath != "" && v.URLPath == r.URL.Path {
-					if v.Method == "" {
-						return false
-					} else if strings.ToLower(v.Method) == strings.ToLower(r.Method) {
-						return false
-					}
-				}
-
-				if v.Method != "" && v.URLPath == "" {
-					if strings.ToLower(v.Method) == strings.ToLower(r.Method) {
-						return false
-					}
-				}
-			}
-		*/
-
-		return true
-	}
-
 	handler := http.Handler(rmux)
 	handler = otelhttp.NewHandler(handler,
 		"grpc-gateway",
-		otelhttp.WithFilter(tracingFilterFunc),
+		otelhttp.WithFilter(c.Observables.httpTracingEnableFilter),
 		otelhttp.WithSpanNameFormatter(format))
 
 	hmux.Handle("/", handler)
@@ -458,8 +412,6 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 		grpclogging.WithTimestampFormat(time.RFC3339Nano),
 		grpclogging.WithLogOnEvents(grpclogging.FinishCall),
 	))
-	//defaultUnaryOpt = append(defaultUnaryOpt, grpclogrus.UnaryServerInterceptor(c.logger, logReqFilterOpts...))
-	//defaultUnaryOpt = append(defaultUnaryOpt, grpclogrus.PayloadUnaryServerInterceptor(c.logger, logPayloadFilterFunc))
 	defaultUnaryOpt = append(defaultUnaryOpt, interceptors...)
 
 	return grpc.ChainUnaryInterceptor(defaultUnaryOpt...)
@@ -519,9 +471,6 @@ func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInte
 	opts = append(opts, srvMetrics.StreamServerInterceptor())
 	opts = append(opts, grpcrecovery.StreamServerInterceptor())
 	opts = append(opts, grpcauth.StreamServerInterceptor(c.authValidate()))
-	//opts = append(opts, grpcopentracing.StreamServerInterceptor(tracingFilterFunc))
-	//opts = append(opts, grpclogrus.StreamServerInterceptor(c.logger, logReqFilterOpts...))
-	//opts = append(opts, grpclogrus.PayloadStreamServerInterceptor(c.logger, logPayloadFilterFunc))
 	opts = append(opts, interceptors...)
 
 	return grpc.ChainStreamInterceptor(opts...)
@@ -717,17 +666,6 @@ func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) erro
 	}
 
 	return nil
-}
-
-func calcRequestID(ctx context.Context) string {
-	requestID := "0123456789abcdef0123456789abcdef"
-
-	spanCtx := trace.SpanContextFromContext(ctx)
-	if spanCtx.HasTraceID() {
-		requestID = spanCtx.TraceID().String()
-	}
-
-	return requestID
 }
 
 func httpHandleGetVersion() http.HandlerFunc {
