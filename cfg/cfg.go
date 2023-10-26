@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
 	"net"
 	"net/http"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -74,7 +74,6 @@ type LocalConfig struct {
 	Cachebuf    *CachebufConfig    `json:",omitempty"` // 缓存服务配置
 	Debugger    *DebuggerConfig    `json:",omitempty"` // 日志调试配置
 	Objstore    *ObjstoreConfig    `json:",omitempty"` // 对象存储配置
-	Opentracing *OpentracingConfig `json:",omitempty"` // 链路追踪配置
 	Observables *ObservablesConfig `json:",omitempty"` // 可观测性配置
 	CloudEvents *CloudEventsConfig `json:",omitempty"` // 公共事件配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
@@ -84,6 +83,8 @@ type LocalConfig struct {
 	rpcConfig    *rpc.Config
 	eventClient  eventclient.Client
 	promRegistry *prometheus.Registry
+
+	// Opentracing *OpentracingConfig `json:",omitempty"` // 链路追踪配置
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
@@ -146,6 +147,7 @@ type DebuggerConfig struct {
 }
 
 // OpentracingConfig 分布式链路追踪
+/*
 type OpentracingConfig struct {
 	Enable bool `mapstructure:"enable"`
 
@@ -174,32 +176,12 @@ type OpentracingConfig struct {
 		} `mapstructure:"logging"`
 	} `mapstructure:"exporters"`
 }
-
-// OTLPHTTPConfig xx
-type OTLPHTTPConfig struct {
-	// The target URL to send data to (e.g.: http://some.url:9411).
-	Endpoint      string            `mapstructure:"endpoint"`
-	TracesURLPath string            `mapstructure:"traces_url_path"`
-	Headers       map[string]string `mapstructure:"headers"`
-}
-
-// OTLPGRPCConfig xx
-type OTLPGRPCConfig struct {
-	// The target URL to send data to (e.g.: http://some.url:9411).
-	Endpoint string            `mapstructure:"endpoint"`
-	Headers  map[string]string `mapstructure:"headers"`
-}
+*/
 
 // CloudEventsConfig cloudevents事件配置
 type CloudEventsConfig struct {
 	Protocol    string      `mapstructure:"protocol"`
 	KafkaSarama KafkaSarama `mapstructure:"kafka_sarama"`
-}
-
-// LogFields 开启请求追踪属性
-type LogFields struct {
-	HTTPBody     bool `mapstructure:"http_body"`
-	HTTPResponse bool `mapstructure:"http_response"`
 }
 
 // Authentication 用于认证
