@@ -107,7 +107,7 @@ observables:
 
       # 特别在网关上记录 http 请求与响应体内容，仅当为 json 结构体有效
       log_fields:
-        http_body: true
+        http_request: true
         http_response: true
 
       filters:
@@ -122,6 +122,7 @@ observables:
         Authentication: token
     otlphttp:
       endpoint: "http://tracing-analysis-dc-hz.aliyuncs.com"
+      traces_url_path: "/token/api/otlp/traces"
       traces_endpoint: ""
       metrics_endpoint: ""
       logs_endpoint: ""
