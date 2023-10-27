@@ -3,7 +3,6 @@ package cfg
 import (
 	"context"
 	"fmt"
-	"go.opentelemetry.io/otel/trace"
 	"net/http"
 	"os"
 	"strings"
@@ -16,7 +15,8 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/credentials"
 )
 
@@ -289,7 +289,7 @@ func (c *ObservablesConfig) hasRecordLogFieldsHTTPResponse() bool {
 // httpTracingEnableFilter 哪些 http 请求开启链路跟踪
 func (c *ObservablesConfig) httpTracingEnableFilter(r *http.Request) bool {
 	switch r.URL.Path {
-	case "/healthz", "/ping", "/metrics", "/version":
+	case "/healthz", "/ping", "/metrics", "/version", "/favicon.ico":
 		return false
 	}
 
