@@ -151,12 +151,6 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			return nil
 		}
 
-		/*
-			span.SetAttributes(attribute.KeyValue{
-				Key:   "request.id",
-				Value: attribute.StringValue("200")})
-		*/
-
 		if c.Observables.hasRecordLogFieldsHTTPResponse() {
 			// TODO; 如果msg是数组返回，则无法成功序列化为json
 			respBody, err := protojson.Marshal(msg)
@@ -191,7 +185,6 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		if span == nil {
 			ignoreTracing = true
 		} else {
-			span.RecordError(err, trace.WithStackTrace(false))
 			defer span.End()
 		}
 
@@ -225,27 +218,43 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 		// 接口请求错误情况下，均会记录响应体
 		if !ignoreTracing {
-			span.SetStatus(otelcodes.Error, string(rawBody))
 			span.SetAttributes(
-				attribute.KeyValue{
-					Key:   "error",
-					Value: attribute.BoolValue(true),
-				},
 				attribute.KeyValue{
 					Key:   "http.response.status_code",
 					Value: attribute.IntValue(s.HTTPStatusCode()),
 				},
 			)
 
-			/*
-				rawBody, err := ioutil.ReadAll(req.Body)
-				if err == nil {
-					if len(rawBody) > 0 {
-						span.LogFields(opentracinglog.String("http.body", string(rawBody)))
+			// TODO; 如果状态码是 404 则不认为错误
+			if s.HTTPStatusCode() != http.StatusNotFound {
+				span.RecordError(err, trace.WithStackTrace(false))
+				span.SetStatus(otelcodes.Error, string(rawBody))
+
+				span.SetAttributes(
+					attribute.KeyValue{
+						Key:   "error",
+						Value: attribute.BoolValue(true),
+					},
+				)
+			}
+
+			if c.Observables.hasRecordLogFieldsHTTPRequest() {
+				// 当 method=put 或 post 时，开启 http_body 记录或开启 debug 模式与 content-type 为 json 时才记录 http.body
+				if (req.Method == http.MethodPut || req.Method == http.MethodPost) &&
+					strings.Contains(req.Header.Get("Content-Type"), "application/json") {
+
+					reqBody, err := ioutil.ReadAll(req.Body)
+					if err == nil {
+						req.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
+						if len(reqBody) > 0 {
+							span.AddEvent("http.request",
+								trace.WithAttributes(attribute.String("http.request.body.data", string(reqBody))),
+								trace.WithAttributes(attribute.Int("http.request.body.size", len(reqBody))),
+							)
+						}
 					}
 				}
-				span.LogFields(opentracinglog.String("http.response", string(rawBody)))
-			*/
+			}
 		}
 
 		md, ok := runtime.ServerMetadataFromContext(ctx)
