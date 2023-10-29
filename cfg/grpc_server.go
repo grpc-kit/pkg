@@ -359,36 +359,9 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 		return status.Errorf(codes.Internal, "%s", p)
 	}
 
-	// TODO; 移动到 observables 方法中
-	tracingFilterFunc := func(info *otelgrpc.InterceptorInfo) bool {
-		if info.UnaryServerInfo == nil {
-			return false
-		}
-
-		grpcMethod := path.Base(info.UnaryServerInfo.FullMethod)
-
-		// 忽略内置的健康检查接口
-		switch grpcMethod {
-		case "HealthCheck":
-			return false
-		}
-
-		if c.Observables.Telemetry != nil && c.Observables.Telemetry.Traces != nil {
-			for _, v := range c.Observables.Telemetry.Traces.Filters {
-				if v.URLPath == "" && v.Method != "" {
-					if v.Method == grpcMethod {
-						return false
-					}
-				}
-			}
-		}
-
-		return true
-	}
-
 	var defaultUnaryOpt []grpc.UnaryServerInterceptor
 	defaultUnaryOpt = append(defaultUnaryOpt, otelgrpc.UnaryServerInterceptor(
-		otelgrpc.WithInterceptorFilter(tracingFilterFunc)),
+		otelgrpc.WithInterceptorFilter(c.Observables.grpcTracingEnableFilter)),
 	)
 	defaultUnaryOpt = append(defaultUnaryOpt, srvMetrics.UnaryServerInterceptor(grpcprometheus.WithExemplarFromContext(exemplarFromContext)))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpcauth.UnaryServerInterceptor(c.authValidate()))

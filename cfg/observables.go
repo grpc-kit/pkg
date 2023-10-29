@@ -3,8 +3,10 @@ package cfg
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	"go.opentelemetry.io/otel"
@@ -310,6 +312,33 @@ func (c *ObservablesConfig) httpTracingEnableFilter(r *http.Request) bool {
 		if v.Method != "" && v.URLPath == "" {
 			if strings.ToLower(v.Method) == strings.ToLower(r.Method) {
 				return false
+			}
+		}
+	}
+
+	return true
+}
+
+// grpcTracingEnableFilter 哪些 http 请求开启链路跟踪
+func (c *ObservablesConfig) grpcTracingEnableFilter(i *otelgrpc.InterceptorInfo) bool {
+	if i.UnaryServerInfo == nil {
+		return false
+	}
+
+	grpcMethod := path.Base(i.UnaryServerInfo.FullMethod)
+
+	// 忽略内置的健康检查接口
+	switch grpcMethod {
+	case "HealthCheck":
+		return false
+	}
+
+	if c.Telemetry != nil && c.Telemetry.Traces != nil {
+		for _, v := range c.Telemetry.Traces.Filters {
+			if v.URLPath == "" && v.Method != "" {
+				if v.Method == grpcMethod {
+					return false
+				}
 			}
 		}
 	}
