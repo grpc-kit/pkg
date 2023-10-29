@@ -150,6 +150,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		if span == nil && !span.IsRecording() {
 			return nil
 		}
+		span.SetStatus(otelcodes.Ok, codes.OK.String())
 
 		if c.Observables.hasRecordLogFieldsHTTPResponse() {
 			// TODO; 如果msg是数组返回，则无法成功序列化为json
