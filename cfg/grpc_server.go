@@ -11,9 +11,14 @@ import (
 	"net/http/pprof"
 	"net/textproto"
 	"path"
+	"runtime/debug"
 	"strings"
 	"time"
 
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
+	grpcauth "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
+	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 	"github.com/grpc-kit/pkg/errs"
@@ -22,6 +27,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	otelcodes "go.opentelemetry.io/otel/codes"
@@ -34,12 +40,6 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-
-	grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
-	grpcauth "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
-	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
-	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 // registerGateway 注册 microservice.pb.gw
@@ -228,22 +228,24 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			// TODO; 如果状态码是 404 则不认为错误
 			if s.HTTPStatusCode() != http.StatusNotFound {
 				span.RecordError(err, trace.WithStackTrace(false))
-				span.SetStatus(otelcodes.Error, string(rawBody))
 
-				span.SetAttributes(
-					attribute.KeyValue{
-						Key:   "error",
-						Value: attribute.BoolValue(true),
-					},
+				// error.object
+				// status_code status_message
+				span.SetStatus(otelcodes.Error, "grpc-gateway found error")
+
+				span.AddEvent("http.response",
+					trace.WithAttributes(attribute.String("http.response.body.data", string(rawBody))),
+					// trace.WithAttributes(attribute.String("stack", string(debug.Stack()))),
 				)
-			}
 
-			if c.Observables.hasRecordLogFieldsHTTPRequest() {
+				// TODO; 在错误情况下请求体已经在之前被读取过？
 				// 当 method=put 或 post 时，开启 http_body 记录或开启 debug 模式与 content-type 为 json 时才记录 http.body
 				if (req.Method == http.MethodPut || req.Method == http.MethodPost) &&
 					strings.Contains(req.Header.Get("Content-Type"), "application/json") {
 
 					reqBody, err := ioutil.ReadAll(req.Body)
+					// c.logger.Infof("error found add body: %v, err: %v, remote addr: %v", string(reqBody), err, req.RemoteAddr)
+
 					if err == nil {
 						req.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
 						if len(reqBody) > 0 {
@@ -322,44 +324,6 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 // GetUnaryInterceptor 用于获取gRPC的一元拦截器
 func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterceptor) grpc.ServerOption {
-	/*
-		// TODO; 根据 fullMethodName 进行过滤哪些需要记录 gRPC 调用链，返回 false 表示不记录
-		tracingFilterFunc := grpcopentracing.WithFilterFunc(func(ctx context.Context, fullMethodName string) bool {
-			rpcName := path.Base(fullMethodName)
-			switch rpcName {
-			case "HealthCheck":
-				return false
-			case "Check", "Watch":
-				return false
-			default:
-				return true
-			}
-			// return path.Base(fullMethodName) != "HealthCheck"
-		})
-	*/
-
-	/*
-		// TODO; 根据 fullMethodName 进行过滤哪些需要记录 payload 的，返回 false 表示不记录
-		logPayloadFilterFunc := func(ctx context.Context, fullMethodName string, servingObject interface{}) bool {
-			return false
-		}
-
-		// TODO; 根据 fullMethodName 进行过滤哪些需要记录请求状态的，返回 false 表示不记录
-		logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-			// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-			rpcName := path.Base(fullMethodName)
-			switch rpcName {
-			case "HealthCheck":
-				return false
-			case "Check", "Watch":
-				return false
-			default:
-				return true
-			}
-			// return err == nil && path.Base(fullMethodName) != "HealthCheck"
-		})}
-	*/
-
 	// TODO; metrics
 	srvMetrics := grpcprometheus.NewServerMetrics(
 		grpcprometheus.WithServerHandlingTimeHistogram(
@@ -374,16 +338,28 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 		return nil
 	}
 
+	// TODO; 移动到 observables 方法中
 	panicsTotal := promauto.With(c.promRegistry).NewCounter(prometheus.CounterOpts{
 		Name: "grpc_req_panics_recovered_total",
 		Help: "Total number of gRPC requests recovered from internal panic.",
 	})
-	grpcPanicRecoveryHandler := func(p any) (err error) {
+	grpcPanicRecoveryHandler := func(ctx context.Context, p any) error {
 		panicsTotal.Inc()
 		// level.Error(rpcLogger).Log("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
+		// c.logger.Errorf("panic err file: %v, p: %v", string(debug.Stack()), p)
+
+		span := trace.SpanFromContext(ctx)
+		if span != nil && span.IsRecording() {
+			span.AddEvent("error",
+				trace.WithAttributes(attribute.String("event", "error")),
+				trace.WithAttributes(attribute.String("stack", string(debug.Stack()))),
+			)
+		}
+
 		return status.Errorf(codes.Internal, "%s", p)
 	}
 
+	// TODO; 移动到 observables 方法中
 	tracingFilterFunc := func(info *otelgrpc.InterceptorInfo) bool {
 		if info.UnaryServerInfo == nil {
 			return false
@@ -415,12 +391,14 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 		otelgrpc.WithInterceptorFilter(tracingFilterFunc)),
 	)
 	defaultUnaryOpt = append(defaultUnaryOpt, srvMetrics.UnaryServerInterceptor(grpcprometheus.WithExemplarFromContext(exemplarFromContext)))
-	defaultUnaryOpt = append(defaultUnaryOpt, grpcrecovery.UnaryServerInterceptor(grpcrecovery.WithRecoveryHandler(grpcPanicRecoveryHandler)))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpcauth.UnaryServerInterceptor(c.authValidate()))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
 		grpclogging.WithTimestampFormat(time.RFC3339Nano),
 		grpclogging.WithLogOnEvents(grpclogging.FinishCall),
 	))
+	defaultUnaryOpt = append(defaultUnaryOpt,
+		grpcrecovery.UnaryServerInterceptor(grpcrecovery.WithRecoveryHandlerContext(grpcPanicRecoveryHandler)),
+	)
 	defaultUnaryOpt = append(defaultUnaryOpt, interceptors...)
 
 	return grpc.ChainUnaryInterceptor(defaultUnaryOpt...)
