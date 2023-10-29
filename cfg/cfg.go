@@ -335,6 +335,11 @@ func (c *LocalConfig) GetServiceName() string {
 	return fmt.Sprintf("%v.%v", c.Services.ServiceCode, c.Services.APIEndpoint)
 }
 
+// GetTraceID 用于获取 opentelemetry 下的 trace id
+func (c *LocalConfig) GetTraceID(ctx context.Context) string {
+	return c.Observables.calcRequestID(ctx)
+}
+
 func (c *LocalConfig) registerConfig(ctx context.Context) error {
 	// 配置文件未设置注册地址，则主动忽略
 	if c.Discover == nil {
