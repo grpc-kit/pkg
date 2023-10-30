@@ -102,8 +102,11 @@ observables:
   enable: true
 
   telemetry:
+    metrics:
+      interval: 10s
+
     traces:
-      sample_ratio: 0.2
+      sample_ratio: 0.9
 
       # 特别在网关上记录 http 请求与响应体内容，仅当为 json 结构体有效
       log_fields:
@@ -128,6 +131,14 @@ observables:
       logs_endpoint: ""
       headers:
         Authentication: token
+    prometheus:
+      enable: true
+      metrics_url_path: "/metrics"
+    logging:
+    #  file_path: "/tmp/traces.log"
+    #  pretty_print: true
+    #  trace_log_path: ""
+      metric_file_path: "/tmp/metrics.log"
 
 # 链路追踪配置
 opentracing:

@@ -19,7 +19,7 @@ func (c *LocalConfig) InitPrometheus() error {
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
 
-	c.promRegistry = reg
+	c.Observables.promRegistry = reg
 
 	return nil
 }

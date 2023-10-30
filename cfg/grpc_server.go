@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
+	// grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	grpcauth "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
@@ -22,7 +22,6 @@ import (
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/vars"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -285,15 +284,17 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 	hmux := http.NewServeMux()
 	hmux.Handle("/ping", httpHandleHealthPing())
+
 	hmux.Handle("/metrics", promhttp.InstrumentMetricHandler(
-		c.promRegistry,
+		c.Observables.promRegistry,
 		promhttp.HandlerFor(
-			c.promRegistry,
+			c.Observables.promRegistry,
 			promhttp.HandlerOpts{
-				Registry:          c.promRegistry,
+				Registry:          c.Observables.promRegistry,
 				EnableOpenMetrics: true,
 			})),
 	)
+
 	hmux.Handle("/version", httpHandleGetVersion())
 
 	if c.Debugger.EnablePprof {
@@ -322,18 +323,20 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 // GetUnaryInterceptor 用于获取gRPC的一元拦截器
 func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterceptor) grpc.ServerOption {
 	// TODO; metrics
-	srvMetrics := grpcprometheus.NewServerMetrics(
-		grpcprometheus.WithServerHandlingTimeHistogram(
-			grpcprometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
-		),
-	)
-	c.promRegistry.MustRegister(srvMetrics)
-	exemplarFromContext := func(ctx context.Context) prometheus.Labels {
-		if span := trace.SpanContextFromContext(ctx); span.IsSampled() {
-			return prometheus.Labels{"traceID": span.TraceID().String()}
+	/*
+		srvMetrics := grpcprometheus.NewServerMetrics(
+			grpcprometheus.WithServerHandlingTimeHistogram(
+				grpcprometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
+			),
+		)
+		c.Observables.promRegistry.MustRegister(srvMetrics)
+		exemplarFromContext := func(ctx context.Context) prometheus.Labels {
+			if span := trace.SpanContextFromContext(ctx); span.IsSampled() {
+				return prometheus.Labels{"traceID": span.TraceID().String()}
+			}
+			return nil
 		}
-		return nil
-	}
+	*/
 
 	// TODO; 移动到 observables 方法中
 	/*
@@ -362,8 +365,10 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 	defaultUnaryOpt = append(defaultUnaryOpt, otelgrpc.UnaryServerInterceptor(
 		otelgrpc.WithInterceptorFilter(c.Observables.grpcTracingEnableFilter)),
 	)
-	defaultUnaryOpt = append(defaultUnaryOpt,
-		srvMetrics.UnaryServerInterceptor(grpcprometheus.WithExemplarFromContext(exemplarFromContext)))
+	/*
+		defaultUnaryOpt = append(defaultUnaryOpt,
+			srvMetrics.UnaryServerInterceptor(grpcprometheus.WithExemplarFromContext(exemplarFromContext)))
+	*/
 	defaultUnaryOpt = append(defaultUnaryOpt, grpcauth.UnaryServerInterceptor(c.authValidate()))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
 		grpclogging.WithTimestampFormat(time.RFC3339Nano),
@@ -400,11 +405,13 @@ func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInte
 	*/
 
 	// TODO; metrics
-	srvMetrics := grpcprometheus.NewServerMetrics(
-		grpcprometheus.WithServerHandlingTimeHistogram(
-			grpcprometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
-		),
-	)
+	/*
+		srvMetrics := grpcprometheus.NewServerMetrics(
+			grpcprometheus.WithServerHandlingTimeHistogram(
+				grpcprometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
+			),
+		)
+	*/
 
 	/*
 		c.promRegistry.MustRegister(srvMetrics)
@@ -430,7 +437,7 @@ func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInte
 
 	var opts []grpc.StreamServerInterceptor
 	opts = append(opts, otelgrpc.StreamServerInterceptor())
-	opts = append(opts, srvMetrics.StreamServerInterceptor())
+	// opts = append(opts, srvMetrics.StreamServerInterceptor())
 	opts = append(opts, grpcrecovery.StreamServerInterceptor())
 	opts = append(opts, grpcauth.StreamServerInterceptor(c.authValidate()))
 	opts = append(opts, interceptors...)

@@ -8,13 +8,17 @@ import (
 	"path"
 	"runtime/debug"
 	"strings"
+	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -24,11 +28,17 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
+
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	otelprometheus "go.opentelemetry.io/otel/exporters/prometheus"
+	apimetric "go.opentelemetry.io/otel/metric"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 )
 
 // ObservablesConfig 用于客观性配置
 type ObservablesConfig struct {
-	tracer *sdktrace.TracerProvider
+	tracer       *sdktrace.TracerProvider
+	promRegistry *prometheus.Registry
 
 	Enable bool `mapstructure:"enable"`
 
@@ -55,8 +65,9 @@ type ObservablesConfig struct {
 		OTLPGRPC *OTLPGRPCConfig `mapstructure:"otlp"`
 		OTLPHTTP *OTLPHTTPConfig `mapstructure:"otlphttp"`
 		Logging  *struct {
-			FilePath    string `mapstructure:"file_path"`
-			PrettyPrint bool   `mapstructure:"pretty_print"`
+			FilePath       string `mapstructure:"file_path"`
+			MetricFilePath string `mapstructure:"metric_file_path"`
+			PrettyPrint    bool   `mapstructure:"pretty_print"`
 		} `mapstructure:"logging"`
 	} `mapstructure:"exporters"`
 }
@@ -155,7 +166,139 @@ func (c *LocalConfig) InitObservables() (interface{}, error) {
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 	otel.SetTracerProvider(tracerProvider)
 
+	// TODO, metrics test
+	/*
+		if err = c.Observables.initExporterPrometheus(ctx, c.GetServiceName()); err != nil {
+			return nil, err
+		}
+	*/
+	c.Observables.initPrometheusRegistry()
+
+	c.Observables.initExporterPrometheus(ctx, c.GetServiceName())
+	c.Observables.initExportLoggingMetric(ctx)
+	// TODO, metrics test
+
 	return nil, nil
+}
+
+func (c *ObservablesConfig) initPrometheusRegistry() {
+	// 初始化 prometheus registery 实例
+	reg := prometheus.NewRegistry()
+	prometheus.MustRegister(reg)
+
+	// Add Go module build info.
+	reg.MustRegister(collectors.NewBuildInfoCollector())
+
+	// Add go runtime metrics and process collectors.
+	reg.MustRegister(
+		collectors.NewGoCollector(),
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+	)
+
+	c.promRegistry = reg
+}
+
+func (c *ObservablesConfig) initExporterPrometheus(ctx context.Context, serviceName string) error {
+	if c.promRegistry == nil {
+		return nil
+	}
+
+	exp, err := otelprometheus.New(
+		// 使用自定义的 prometheus registery 实例
+		otelprometheus.WithRegisterer(c.promRegistry),
+		// 避免对每个指标添加额外的 otel_scope_info 标签
+		otelprometheus.WithoutScopeInfo(),
+	)
+	if err != nil {
+		return err
+	}
+
+	// 避免使用 WithFromEnv 以防止不必要的信息泄漏，如 token 等
+	res, err := resource.New(ctx,
+		resource.WithTelemetrySDK(),
+		resource.WithHost(),
+		resource.WithProcessOwner(),
+		resource.WithOSType(),
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String(serviceName),
+		),
+	)
+	if err != nil {
+		return err
+	}
+
+	provider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithReader(exp),
+		sdkmetric.WithResource(res),
+	)
+
+	otel.SetMeterProvider(provider)
+
+	return nil
+}
+
+func (c *ObservablesConfig) initExportOTLPGRPCMetric(ctx context.Context, res *resource.Resource) error {
+	me, err := otlpmetricgrpc.New(
+		context.TODO(),
+		// otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
+		otlpmetricgrpc.WithInsecure(),
+		otlpmetricgrpc.WithEndpoint("ap-guangzhou.apm.tencentcs.com:4317"),
+		otlpmetricgrpc.WithHeaders(c.Exporters.OTLPGRPC.Headers))
+
+	if err != nil {
+		return err
+	}
+
+	reader := sdkmetric.NewPeriodicReader(
+		me,
+		sdkmetric.WithInterval(15*time.Second),
+	)
+	provider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithReader(reader),
+		sdkmetric.WithResource(res),
+	)
+	otel.SetMeterProvider(provider)
+
+	meter := provider.Meter("app_or_package_name")
+	counter, _ := meter.Int64Counter(
+		"grpc_kit.demo.counter_name",
+		apimetric.WithUnit("1"),
+		apimetric.WithDescription("counter description"),
+	)
+
+	go func() {
+		for {
+			counter.Add(ctx, 1)
+			time.Sleep(10 * time.Second)
+		}
+	}()
+
+	return nil
+}
+
+func (c *ObservablesConfig) initExportLoggingMetric(ctx context.Context) error {
+	opts := make([]stdoutmetric.Option, 0)
+	opts = append(opts, stdoutmetric.WithPrettyPrint())
+	opts = append(opts, stdoutmetric.WithoutTimestamps())
+
+	f, err := os.OpenFile(c.Exporters.Logging.MetricFilePath, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+	opts = append(opts, stdoutmetric.WithWriter(f))
+
+	exp, err := stdoutmetric.New(opts...)
+	if err != nil {
+		return err
+	}
+
+	sdkmetric.NewMeterProvider(
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exp)),
+	)
+
+	// otel.SetMeterProvider(provider)
+
+	return nil
 }
 
 func (c *ObservablesConfig) initExportOTLPGRPC(ctx context.Context) error {
@@ -237,7 +380,7 @@ func (c *ObservablesConfig) initExportLogging(ctx context.Context) error {
 	if !c.Enable {
 		return nil
 	}
-	if c.Exporters == nil || c.Exporters.Logging == nil {
+	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.FilePath == "" {
 		return nil
 	}
 

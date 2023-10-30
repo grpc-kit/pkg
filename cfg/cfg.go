@@ -15,7 +15,6 @@ import (
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -78,11 +77,11 @@ type LocalConfig struct {
 	CloudEvents *CloudEventsConfig `json:",omitempty"` // 公共事件配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
-	logger       *logrus.Entry
-	srvdis       sd.Registry
-	rpcConfig    *rpc.Config
-	eventClient  eventclient.Client
-	promRegistry *prometheus.Registry
+	logger      *logrus.Entry
+	srvdis      sd.Registry
+	rpcConfig   *rpc.Config
+	eventClient eventclient.Client
+	// promRegistry *prometheus.Registry
 
 	// Opentracing *OpentracingConfig `json:",omitempty"` // 链路追踪配置
 }
@@ -292,9 +291,11 @@ func (c *LocalConfig) Init() error {
 		return err
 	}
 
-	if err := c.InitPrometheus(); err != nil {
-		return err
-	}
+	/*
+		if err := c.InitPrometheus(); err != nil {
+			return err
+		}
+	*/
 
 	return nil
 }
