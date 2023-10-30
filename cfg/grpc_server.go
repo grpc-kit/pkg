@@ -11,7 +11,6 @@ import (
 	"net/http/pprof"
 	"net/textproto"
 	"path"
-	"runtime/debug"
 	"strings"
 	"time"
 
@@ -24,7 +23,6 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/vars"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -37,7 +35,6 @@ import (
 	"google.golang.org/grpc/balancer/roundrobin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -106,14 +103,14 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		if span == nil {
 			return metadata.New(carrier)
 		}
-		// 这里不可关闭，否则之后阶段通过 ctx 获取 span 将会为关闭事件上报(span.IsRecording=flase)
+		// 这里不可关闭，否则之后阶段通过 ctx 获取 span 将无法上报事件(span.IsRecording=flase)
 		// defer span.End()
 
 		if !c.Observables.hasRecordLogFieldsHTTPRequest() {
 			return metadata.New(carrier)
 		}
 
-		// 当 method=put 或 post 时，开启 http_body 记录或开启 debug 模式与 content-type 为 json 时才记录 http.body
+		// 当 method=put 或 post 时，开启 http_request 记录且 content-type 为 json 时才记录 http.body
 		if (req.Method == http.MethodPut || req.Method == http.MethodPost) &&
 			strings.Contains(req.Header.Get("Content-Type"), "application/json") {
 
@@ -232,14 +229,13 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 				// error.object
 				// status_code status_message
-				span.SetStatus(otelcodes.Error, "grpc-gateway found error")
+				span.SetStatus(otelcodes.Error, s.GetStatus())
 
 				span.AddEvent("http.response",
 					trace.WithAttributes(attribute.String("http.response.body.data", string(rawBody))),
-					// trace.WithAttributes(attribute.String("stack", string(debug.Stack()))),
 				)
 
-				// TODO; 在错误情况下请求体已经在之前被读取过？
+				// TODO; 在错误情况下请求体已经在之前被读取过了，如何重置？
 				// 当 method=put 或 post 时，开启 http_body 记录或开启 debug 模式与 content-type 为 json 时才记录 http.body
 				if (req.Method == http.MethodPut || req.Method == http.MethodPost) &&
 					strings.Contains(req.Header.Get("Content-Type"), "application/json") {
@@ -340,38 +336,43 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 	}
 
 	// TODO; 移动到 observables 方法中
-	panicsTotal := promauto.With(c.promRegistry).NewCounter(prometheus.CounterOpts{
-		Name: "grpc_req_panics_recovered_total",
-		Help: "Total number of gRPC requests recovered from internal panic.",
-	})
-	grpcPanicRecoveryHandler := func(ctx context.Context, p any) error {
-		panicsTotal.Inc()
-		// level.Error(rpcLogger).Log("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
-		// c.logger.Errorf("panic err file: %v, p: %v", string(debug.Stack()), p)
+	/*
+		panicsTotal := promauto.With(c.promRegistry).NewCounter(prometheus.CounterOpts{
+			Name: "grpc_req_panics_recovered_total",
+			Help: "Total number of gRPC requests recovered from internal panic.",
+		})
+		grpcPanicRecoveryHandler := func(ctx context.Context, p any) error {
+			panicsTotal.Inc()
+			// level.Error(rpcLogger).Log("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
+			// c.logger.Errorf("panic err file: %v, p: %v", string(debug.Stack()), p)
 
-		span := trace.SpanFromContext(ctx)
-		if span != nil && span.IsRecording() {
-			span.AddEvent("error",
-				trace.WithAttributes(attribute.String("event", "error")),
-				trace.WithAttributes(attribute.String("stack", string(debug.Stack()))),
-			)
+			span := trace.SpanFromContext(ctx)
+			if span != nil && span.IsRecording() {
+				span.AddEvent("error",
+					trace.WithAttributes(attribute.String("event", "error")),
+					trace.WithAttributes(attribute.String("stack", string(debug.Stack()))),
+				)
+			}
+
+			return status.Errorf(codes.Internal, "%s", p)
 		}
-
-		return status.Errorf(codes.Internal, "%s", p)
-	}
+	*/
 
 	var defaultUnaryOpt []grpc.UnaryServerInterceptor
 	defaultUnaryOpt = append(defaultUnaryOpt, otelgrpc.UnaryServerInterceptor(
 		otelgrpc.WithInterceptorFilter(c.Observables.grpcTracingEnableFilter)),
 	)
-	defaultUnaryOpt = append(defaultUnaryOpt, srvMetrics.UnaryServerInterceptor(grpcprometheus.WithExemplarFromContext(exemplarFromContext)))
+	defaultUnaryOpt = append(defaultUnaryOpt,
+		srvMetrics.UnaryServerInterceptor(grpcprometheus.WithExemplarFromContext(exemplarFromContext)))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpcauth.UnaryServerInterceptor(c.authValidate()))
 	defaultUnaryOpt = append(defaultUnaryOpt, grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
 		grpclogging.WithTimestampFormat(time.RFC3339Nano),
 		grpclogging.WithLogOnEvents(grpclogging.FinishCall),
 	))
 	defaultUnaryOpt = append(defaultUnaryOpt,
-		grpcrecovery.UnaryServerInterceptor(grpcrecovery.WithRecoveryHandlerContext(grpcPanicRecoveryHandler)),
+		grpcrecovery.UnaryServerInterceptor(
+			grpcrecovery.WithRecoveryHandlerContext(c.Observables.grpcPanicRecoveryHandler),
+		),
 	)
 	defaultUnaryOpt = append(defaultUnaryOpt, interceptors...)
 

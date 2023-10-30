@@ -3,13 +3,15 @@ package cfg
 import (
 	"context"
 	"fmt"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"net/http"
 	"os"
 	"path"
+	"runtime/debug"
 	"strings"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -19,7 +21,9 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 )
 
 // ObservablesConfig 用于客观性配置
@@ -44,7 +48,7 @@ type ObservablesConfig struct {
 				Method  string `mapstructure:"method"`
 				URLPath string `mapstructure:"url_path"`
 			} `mapstructure:"filters"`
-		}
+		} `mapstructure:"traces"`
 	} `mapstructure:"telemetry"`
 
 	Exporters *struct {
@@ -344,4 +348,17 @@ func (c *ObservablesConfig) grpcTracingEnableFilter(i *otelgrpc.InterceptorInfo)
 	}
 
 	return true
+}
+
+// grpcPanicRecoveryHandler 用于 grpc 产生 panic 时候记录堆栈信息
+func (c *ObservablesConfig) grpcPanicRecoveryHandler(ctx context.Context, p any) error {
+	span := trace.SpanFromContext(ctx)
+	if span != nil && span.IsRecording() {
+		span.AddEvent("error",
+			trace.WithAttributes(attribute.String("event", "error")),
+			trace.WithAttributes(attribute.String("stack", string(debug.Stack()))),
+		)
+	}
+
+	return status.Errorf(codes.Internal, "%s", p)
 }
