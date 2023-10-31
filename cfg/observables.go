@@ -3,6 +3,7 @@ package cfg
 import (
 	"context"
 	"fmt"
+	"github.com/prometheus/common/version"
 	"net/http"
 	"os"
 	"path"
@@ -117,18 +118,20 @@ func (c *LocalConfig) InitObservables() (interface{}, error) {
 	}
 
 	ctx := context.Background()
-	// var bsp sdktrace.SpanProcessor
 
 	res, err := resource.New(ctx,
 		resource.WithFromEnv(),
-		resource.WithProcess(),
+		resource.WithProcessOwner(),
 		resource.WithTelemetrySDK(),
 		resource.WithHost(),
+		resource.WithOSType(),
+		resource.WithProcessExecutablePath(),
 		resource.WithAttributes(
 			// 在可观测链路 OpenTelemetry 版后端显示的服务名称。
-			semconv.ServiceNameKey.String(c.GetServiceName()),
+			semconv.ServiceName(c.GetServiceName()),
 			// 在可观测链路 OpenTelemetry 版后端显示的主机名称。
-			semconv.HostNameKey.String(hostName),
+			semconv.HostName(hostName),
+			semconv.ServiceVersion(version.Revision),
 		),
 	)
 
@@ -175,7 +178,7 @@ func (c *LocalConfig) InitObservables() (interface{}, error) {
 	c.Observables.initPrometheusRegistry()
 
 	c.Observables.initExporterPrometheus(ctx, c.GetServiceName())
-	c.Observables.initExportLoggingMetric(ctx)
+	// c.Observables.initExportLoggingMetric(ctx)
 	// TODO, metrics test
 
 	return nil, nil
@@ -203,7 +206,7 @@ func (c *ObservablesConfig) initExporterPrometheus(ctx context.Context, serviceN
 		return nil
 	}
 
-	exp, err := otelprometheus.New(
+	exp1, err := otelprometheus.New(
 		// 使用自定义的 prometheus registery 实例
 		otelprometheus.WithRegisterer(c.promRegistry),
 		// 避免对每个指标添加额外的 otel_scope_info 标签
@@ -220,25 +223,62 @@ func (c *ObservablesConfig) initExporterPrometheus(ctx context.Context, serviceN
 		resource.WithProcessOwner(),
 		resource.WithOSType(),
 		resource.WithAttributes(
-			semconv.ServiceNameKey.String(serviceName),
+			semconv.ServiceName(serviceName),
+			semconv.ServiceVersion(version.Revision),
 		),
 	)
 	if err != nil {
 		return err
 	}
 
+	// test logging
+	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.MetricFilePath == "" {
+		return nil
+	}
+
+	opts := make([]stdoutmetric.Option, 0)
+	opts = append(opts, stdoutmetric.WithPrettyPrint())
+	opts = append(opts, stdoutmetric.WithoutTimestamps())
+
+	f, err := os.OpenFile(c.Exporters.Logging.MetricFilePath, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return err
+	}
+	opts = append(opts, stdoutmetric.WithWriter(f))
+
+	exp2, err := stdoutmetric.New(opts...)
+	if err != nil {
+		return err
+	}
+	// test logging
+
 	provider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithReader(exp),
+		sdkmetric.WithReader(exp1),
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exp2)),
 		sdkmetric.WithResource(res),
 	)
 
 	otel.SetMeterProvider(provider)
 
+	meter := provider.Meter("app_or_package_name_prometheus")
+	counter, _ := meter.Int64Counter(
+		"grpc_kit.prometheus.demo.counter_name",
+		apimetric.WithUnit("1"),
+		apimetric.WithDescription("counter description"),
+	)
+
+	go func() {
+		for {
+			counter.Add(ctx, 1)
+			time.Sleep(10 * time.Second)
+		}
+	}()
+
 	return nil
 }
 
 func (c *ObservablesConfig) initExportOTLPGRPCMetric(ctx context.Context, res *resource.Resource) error {
-	me, err := otlpmetricgrpc.New(
+	exp, err := otlpmetricgrpc.New(
 		context.TODO(),
 		// otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
 		otlpmetricgrpc.WithInsecure(),
@@ -250,9 +290,10 @@ func (c *ObservablesConfig) initExportOTLPGRPCMetric(ctx context.Context, res *r
 	}
 
 	reader := sdkmetric.NewPeriodicReader(
-		me,
+		exp,
 		sdkmetric.WithInterval(15*time.Second),
 	)
+
 	provider := sdkmetric.NewMeterProvider(
 		sdkmetric.WithReader(reader),
 		sdkmetric.WithResource(res),
@@ -277,6 +318,13 @@ func (c *ObservablesConfig) initExportOTLPGRPCMetric(ctx context.Context, res *r
 }
 
 func (c *ObservablesConfig) initExportLoggingMetric(ctx context.Context) error {
+	if !c.Enable {
+		return nil
+	}
+	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.MetricFilePath == "" {
+		return nil
+	}
+
 	opts := make([]stdoutmetric.Option, 0)
 	opts = append(opts, stdoutmetric.WithPrettyPrint())
 	opts = append(opts, stdoutmetric.WithoutTimestamps())
@@ -292,11 +340,36 @@ func (c *ObservablesConfig) initExportLoggingMetric(ctx context.Context) error {
 		return err
 	}
 
-	sdkmetric.NewMeterProvider(
-		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exp)),
+	/*
+		exp2, err := otelprometheus.New(
+			// 使用自定义的 prometheus registery 实例
+			otelprometheus.WithRegisterer(c.promRegistry),
+			// 避免对每个指标添加额外的 otel_scope_info 标签
+			otelprometheus.WithoutScopeInfo(),
+		)
+	*/
+
+	provider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithReader(
+			sdkmetric.NewPeriodicReader(exp),
+		),
 	)
 
 	// otel.SetMeterProvider(provider)
+
+	meter := provider.Meter("app_or_package_name_file")
+	counter, _ := meter.Int64Counter(
+		"grpc_kit.file.demo.counter_name",
+		apimetric.WithUnit("1"),
+		apimetric.WithDescription("counter description"),
+	)
+
+	go func() {
+		for {
+			counter.Add(ctx, 1)
+			time.Sleep(10 * time.Second)
+		}
+	}()
 
 	return nil
 }
