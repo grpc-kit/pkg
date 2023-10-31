@@ -253,6 +253,7 @@ func (c *ObservablesConfig) initExporterPrometheus(ctx context.Context, serviceN
 	// test logging
 
 	provider := sdkmetric.NewMeterProvider(
+		// https://github.com/open-telemetry/opentelemetry-go/issues/3720
 		sdkmetric.WithReader(exp1),
 		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exp2)),
 		sdkmetric.WithResource(res),
