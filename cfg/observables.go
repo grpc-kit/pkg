@@ -284,17 +284,22 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 	}
 
 	if c.hasMetricsEnableExporterLogging() {
+		exOpts := make([]stdoutmetric.Option, 0)
+		if c.Exporters.Logging.PrettyPrint {
+			exOpts = append(exOpts, stdoutmetric.WithPrettyPrint())
+		}
+
 		var out *os.File
-		out, err = os.OpenFile(c.Exporters.Logging.MetricFilePath, os.O_RDWR|os.O_CREATE, 0755)
-		if err != nil {
-			return err
+		if c.Exporters.Logging.MetricFilePath != "" && c.Exporters.Logging.MetricFilePath != "stdout" {
+			out, err = os.OpenFile(c.Exporters.Logging.MetricFilePath, os.O_RDWR|os.O_CREATE, 0755)
+			if err != nil {
+				return err
+			}
+			exOpts = append(exOpts, stdoutmetric.WithWriter(out))
 		}
 
 		var exp sdkmetric.Exporter
-		exp, err = stdoutmetric.New(
-			stdoutmetric.WithPrettyPrint(),
-			stdoutmetric.WithoutTimestamps(),
-			stdoutmetric.WithWriter(out))
+		exp, err = stdoutmetric.New(exOpts...)
 		if err != nil {
 			return err
 		}
@@ -430,7 +435,10 @@ func (c *ObservablesConfig) initTracesExporter(ctx context.Context, serviceName 
 			exOpts = append(exOpts, otlptracegrpc.WithInsecure())
 		}
 
-		exOpts = append(exOpts, otlptracegrpc.WithHeaders(c.Exporters.OTLPGRPC.Headers))
+		headers := c.Exporters.OTLPGRPC.Headers
+		headers["user-agent"] = fmt.Sprintf("%v/%v", vars.Appname, vars.ReleaseVersion)
+		exOpts = append(exOpts, otlptracegrpc.WithHeaders(headers))
+
 		exOpts = append(exOpts, otlptracegrpc.WithEndpoint(u.Host))
 
 		client := otlptracegrpc.NewClient(exOpts...)
