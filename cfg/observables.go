@@ -89,7 +89,7 @@ type TelemetryConfig struct {
 // TelemetryMetric 性能指标个性配置
 type TelemetryMetric struct {
 	// 为所有暴露的指标添加前缀
-	Namespace string
+	Namespace string `mapstructure:"namespace"`
 	// 是否启用 Exporters 配置下的 otel otelhttp logging prometheus
 	Exporters ExporterEnable `mapstructure:"exporter_enable"`
 }
@@ -265,12 +265,17 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 	if c.hasMetricsEnableExporterPrometheus() {
 		var exp *otelprometheus.Exporter
 
-		exp, err = otelprometheus.New(
-			// 使用自定义的 prometheus registery 实例
-			otelprometheus.WithRegisterer(c.promRegistry),
-			// 避免对每个指标添加额外的 otel_scope_info 标签
-			otelprometheus.WithoutScopeInfo(),
-		)
+		exOpts := make([]otelprometheus.Option, 0)
+		// 使用自定义的 prometheus registery 实例
+		exOpts = append(exOpts, otelprometheus.WithRegisterer(c.promRegistry))
+		// 避免对每个指标添加额外的 otel_scope_info 标签
+		exOpts = append(exOpts, otelprometheus.WithoutScopeInfo())
+
+		if c.Telemetry.Metrics.Namespace != "" {
+			exOpts = append(exOpts, otelprometheus.WithNamespace(c.Telemetry.Metrics.Namespace))
+		}
+
+		exp, err = otelprometheus.New(exOpts...)
 		if err != nil {
 			return err
 		}
@@ -602,6 +607,10 @@ func (c *ObservablesConfig) grpcPanicRecoveryHandler(ctx context.Context, p any)
 
 // hasTracesEnableExporterOTLP 是否启用 otlp 上报 traces 数据
 func (c *ObservablesConfig) hasTracesEnableExporterOTLP() bool {
+	if !c.Enable {
+		return false
+	}
+
 	if c.Exporters == nil || c.Exporters.OTLPGRPC == nil || c.Exporters.OTLPGRPC.Endpoint == "" {
 		return false
 	}
@@ -611,6 +620,10 @@ func (c *ObservablesConfig) hasTracesEnableExporterOTLP() bool {
 
 // hasTracesEnableExporterOTLPHTTP 是否启用 otlphttp 上报 traces 数据
 func (c *ObservablesConfig) hasTracesEnableExporterOTLPHTTP() bool {
+	if !c.Enable {
+		return false
+	}
+
 	if c.Exporters == nil || c.Exporters.OTLPHTTP == nil || c.Exporters.OTLPHTTP.Endpoint == "" {
 		return false
 	}
@@ -620,6 +633,10 @@ func (c *ObservablesConfig) hasTracesEnableExporterOTLPHTTP() bool {
 
 // hasTracesEnableExporterOTLPLogging 是否启用 logging 记录 traces 数据
 func (c *ObservablesConfig) hasTracesEnableExporterOTLPLogging() bool {
+	if !c.Enable {
+		return false
+	}
+
 	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.TraceFilePath == "" {
 		return false
 	}
@@ -629,6 +646,10 @@ func (c *ObservablesConfig) hasTracesEnableExporterOTLPLogging() bool {
 
 // hasMetricsEnableExporterOTLP 是否启用 otlp 上报 metrics 数据
 func (c *ObservablesConfig) hasMetricsEnableExporterOTLP() bool {
+	if !c.Enable {
+		return false
+	}
+
 	if c.Exporters == nil || c.Exporters.OTLPGRPC == nil || c.Exporters.OTLPGRPC.Endpoint == "" {
 		return false
 	}
@@ -638,6 +659,10 @@ func (c *ObservablesConfig) hasMetricsEnableExporterOTLP() bool {
 
 // hasMetricsEnableExporterOTLPHTTP 是否启用 otlphttp 上报 metrics 数据
 func (c *ObservablesConfig) hasMetricsEnableExporterOTLPHTTP() bool {
+	if !c.Enable {
+		return false
+	}
+
 	if c.Exporters == nil || c.Exporters.OTLPHTTP == nil || c.Exporters.OTLPHTTP.Endpoint == "" {
 		return false
 	}
@@ -647,11 +672,19 @@ func (c *ObservablesConfig) hasMetricsEnableExporterOTLPHTTP() bool {
 
 // hasMetricsEnableExporterPrometheus 是否启用 promhttp 输出指标地址
 func (c *ObservablesConfig) hasMetricsEnableExporterPrometheus() bool {
+	if !c.Enable {
+		return false
+	}
+
 	return *(c.Telemetry.Metrics.Exporters.Prometheus)
 }
 
 // hasMetricsEnableExporterLogging 是否启用 logging 记录 metrics 数据
 func (c *ObservablesConfig) hasMetricsEnableExporterLogging() bool {
+	if !c.Enable {
+		return false
+	}
+
 	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.MetricFilePath == "" {
 		return false
 	}
