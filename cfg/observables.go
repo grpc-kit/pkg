@@ -2,26 +2,33 @@ package cfg
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
-	"github.com/prometheus/common/version"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"runtime/debug"
 	"strings"
 	"time"
 
+	"github.com/grpc-kit/pkg/vars"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	otelprometheus "go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
@@ -29,11 +36,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
-
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
-	otelprometheus "go.opentelemetry.io/otel/exporters/prometheus"
-	apimetric "go.opentelemetry.io/otel/metric"
-	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 )
 
 // ObservablesConfig 用于客观性配置
@@ -41,33 +43,22 @@ type ObservablesConfig struct {
 	tracer       *sdktrace.TracerProvider
 	promRegistry *prometheus.Registry
 
+	// 全局是否启动可观测性
 	Enable bool `mapstructure:"enable"`
 
-	Telemetry *struct {
-		Traces *struct {
-			// 给定一个 0 至 1 之间的分数决定采样频率
-			SampleRatio float64 `mapstructure:"sample_ratio"`
+	// 首次初始化后配置默认值
+	Telemetry *TelemetryConfig `mapstructure:"telemetry"`
 
-			// 记录特殊字段，默认不开启
-			LogFields struct {
-				HTTPRequest  bool `mapstructure:"http_request"`
-				HTTPResponse bool `mapstructure:"http_response"`
-			} `mapstructure:"log_fields"`
-
-			// 过滤器，用于过滤不需要追踪的请求
-			Filters []struct {
-				Method  string `mapstructure:"method"`
-				URLPath string `mapstructure:"url_path"`
-			} `mapstructure:"filters"`
-		} `mapstructure:"traces"`
-	} `mapstructure:"telemetry"`
-
+	// 可观测性数据上报服务地址
 	Exporters *struct {
-		OTLPGRPC *OTLPGRPCConfig `mapstructure:"otlp"`
-		OTLPHTTP *OTLPHTTPConfig `mapstructure:"otlphttp"`
-		Logging  *struct {
-			FilePath       string `mapstructure:"file_path"`
+		OTLPGRPC   *OTLPGRPCConfig `mapstructure:"otlp"`
+		OTLPHTTP   *OTLPHTTPConfig `mapstructure:"otlphttp"`
+		Prometheus *struct {
+			MetricURLPath string `mapstructure:"metric_url_path"`
+		}
+		Logging *struct {
 			MetricFilePath string `mapstructure:"metric_file_path"`
+			TraceFilePath  string `mapstructure:"trace_file_path"`
 			PrettyPrint    bool   `mapstructure:"pretty_print"`
 		} `mapstructure:"logging"`
 	} `mapstructure:"exporters"`
@@ -77,8 +68,9 @@ type ObservablesConfig struct {
 type OTLPHTTPConfig struct {
 	// The target URL to send data to (e.g.: http://some.url:9411).
 	Endpoint      string            `mapstructure:"endpoint"`
-	TracesURLPath string            `mapstructure:"traces_url_path"`
 	Headers       map[string]string `mapstructure:"headers"`
+	TraceURLPath  string            `mapstructure:"trace_url_path"`
+	MetricURLPath string            `mapstructure:"metric_url_path"`
 }
 
 // OTLPGRPCConfig xx
@@ -88,13 +80,48 @@ type OTLPGRPCConfig struct {
 	Headers  map[string]string `mapstructure:"headers"`
 }
 
-// LogFields 开启请求追踪属性
-/*
-type LogFields struct {
-	HTTPRequest  bool `mapstructure:"http_request"`
-	HTTPResponse bool `mapstructure:"http_response"`
+// TelemetryConfig xx
+type TelemetryConfig struct {
+	Metrics *TelemetryMetric `mapstructure:"metrics"`
+	Traces  *TelemetryTrace  `mapstructure:"traces"`
 }
-*/
+
+// TelemetryMetric 性能指标个性配置
+type TelemetryMetric struct {
+	// 为所有暴露的指标添加前缀
+	Namespace string
+	// 是否启用 Exporters 配置下的 otel otelhttp logging prometheus
+	Exporters ExporterEnable `mapstructure:"exporter_enable"`
+}
+
+// TelemetryTrace 链路跟踪个性配置
+type TelemetryTrace struct {
+	// 给定一个 0 至 1 之间的分数决定采样频率
+	SampleRatio float64 `mapstructure:"sample_ratio"`
+
+	// 是否启用 Exporters 配置下的 otel otelhttp logging
+	Exporters ExporterEnable `mapstructure:"exporter_enable"`
+
+	// 记录特殊字段，默认不开启
+	LogFields struct {
+		HTTPRequest  bool `mapstructure:"http_request"`
+		HTTPResponse bool `mapstructure:"http_response"`
+	} `mapstructure:"log_fields"`
+
+	// 过滤器，用于过滤不需要追踪的请求
+	Filters []struct {
+		Method  string `mapstructure:"method"`
+		URLPath string `mapstructure:"url_path"`
+	} `mapstructure:"filters"`
+}
+
+// ExporterEnable 配置是否启用特定 exporter
+type ExporterEnable struct {
+	OTLP       *bool `mapstructure:"otlp"`
+	OTLPHTTP   *bool `mapstructure:"otlphttp"`
+	Logging    *bool `mapstructure:"logging"`
+	Prometheus *bool `mapstructure:"prometheus"`
+}
 
 // InitObservables 初始化可观测性配置
 func (c *LocalConfig) InitObservables() (interface{}, error) {
@@ -104,20 +131,249 @@ func (c *LocalConfig) InitObservables() (interface{}, error) {
 		}
 	}
 
+	// 植入默认值
+	c.Observables.defaultValues()
+
 	if !c.Observables.Enable {
 		return nil, nil
 	}
 
-	if c.Observables.Exporters == nil {
-		return nil, fmt.Errorf("at least one exporter")
+	ctx := context.Background()
+	serviceName := c.GetServiceName()
+	if err := c.Observables.initMetricsExporter(ctx, serviceName); err != nil {
+		return nil, err
+	}
+	if err := c.Observables.initTracesExporter(ctx, serviceName); err != nil {
+		return nil, err
 	}
 
+	return nil, nil
+}
+
+// defaultValues 初始化默认值
+func (c *ObservablesConfig) defaultValues() {
+	// default values
+	var enableVal = true
+	var disalbeVal = false
+
+	defaultMetric := &TelemetryMetric{
+		Exporters: ExporterEnable{
+			OTLP:       &disalbeVal,
+			OTLPHTTP:   &disalbeVal,
+			Logging:    &enableVal,
+			Prometheus: &enableVal,
+		},
+	}
+	defaultTrace := &TelemetryTrace{
+		Exporters: ExporterEnable{
+			OTLP:       &enableVal,
+			OTLPHTTP:   &enableVal,
+			Logging:    &enableVal,
+			Prometheus: &disalbeVal,
+		},
+	}
+
+	if c.Telemetry == nil {
+		c.Telemetry = &TelemetryConfig{
+			Metrics: defaultMetric,
+			Traces:  defaultTrace,
+		}
+	}
+
+	// 客户端自定义了 telemetry 配置
+	if c.Telemetry.Metrics == nil {
+		c.Telemetry.Metrics = defaultMetric
+	} else {
+		if c.Telemetry.Metrics.Exporters.OTLP == nil {
+			c.Telemetry.Metrics.Exporters.OTLP = &disalbeVal
+		}
+		if c.Telemetry.Metrics.Exporters.OTLPHTTP == nil {
+			c.Telemetry.Metrics.Exporters.OTLPHTTP = &disalbeVal
+		}
+		if c.Telemetry.Metrics.Exporters.Logging == nil {
+			c.Telemetry.Metrics.Exporters.Logging = &enableVal
+		}
+		if c.Telemetry.Metrics.Exporters.Prometheus == nil {
+			c.Telemetry.Metrics.Exporters.Prometheus = &enableVal
+		}
+	}
+
+	if c.Telemetry.Traces == nil {
+		c.Telemetry.Traces = defaultTrace
+	} else {
+		if c.Telemetry.Traces.Exporters.OTLP == nil {
+			c.Telemetry.Traces.Exporters.OTLP = &enableVal
+		}
+		if c.Telemetry.Traces.Exporters.OTLPHTTP == nil {
+			c.Telemetry.Traces.Exporters.OTLPHTTP = &enableVal
+		}
+		if c.Telemetry.Traces.Exporters.Logging == nil {
+			c.Telemetry.Traces.Exporters.Logging = &enableVal
+		}
+		if c.Telemetry.Traces.Exporters.Prometheus == nil {
+			c.Telemetry.Traces.Exporters.Prometheus = &disalbeVal
+		}
+	}
+}
+
+// shutdown 关闭前刷新数据并释放资源
+func (c *ObservablesConfig) shutdown(ctx context.Context) error {
+	if err := c.tracer.ForceFlush(ctx); err != nil {
+		return err
+	}
+	if err := c.tracer.Shutdown(ctx); err != nil {
+		return err
+	}
+	return nil
+}
+
+// initMetricsExporter 初始化 metrics exporter 相关
+func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName string) error {
+	// 初始化 prometheus registery 实例
+	reg := prometheus.NewRegistry()
+	prometheus.MustRegister(reg)
+
+	// 添加 go_build_info、go_gc_x、go_memstats_x 几个 go 应用指标
+	reg.MustRegister(
+		collectors.NewGoCollector(),
+		collectors.NewBuildInfoCollector(),
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+	)
+	c.promRegistry = reg
+
+	// 避免使用 WithFromEnv 以防止不必要的信息泄漏，如 token 保留到指标
+	res, err := resource.New(ctx,
+		resource.WithTelemetrySDK(),
+		resource.WithHost(),
+		resource.WithProcessOwner(),
+		resource.WithOSType(),
+		resource.WithAttributes(
+			semconv.ServiceName(serviceName),
+			semconv.ServiceVersion(vars.ReleaseVersion),
+		),
+	)
+	if err != nil {
+		return err
+	}
+
+	mpOpts := make([]sdkmetric.Option, 0)
+	mpOpts = append(mpOpts, sdkmetric.WithResource(res))
+
+	// 添加多个 reader
+	// https://github.com/open-telemetry/opentelemetry-go/issues/3720
+
+	if c.hasMetricsEnableExporterPrometheus() {
+		var exp *otelprometheus.Exporter
+
+		exp, err = otelprometheus.New(
+			// 使用自定义的 prometheus registery 实例
+			otelprometheus.WithRegisterer(c.promRegistry),
+			// 避免对每个指标添加额外的 otel_scope_info 标签
+			otelprometheus.WithoutScopeInfo(),
+		)
+		if err != nil {
+			return err
+		}
+
+		mpOpts = append(mpOpts, sdkmetric.WithReader(exp))
+	}
+
+	if c.hasMetricsEnableExporterLogging() {
+		var out *os.File
+		out, err = os.OpenFile(c.Exporters.Logging.MetricFilePath, os.O_RDWR|os.O_CREATE, 0755)
+		if err != nil {
+			return err
+		}
+
+		var exp sdkmetric.Exporter
+		exp, err = stdoutmetric.New(
+			stdoutmetric.WithPrettyPrint(),
+			stdoutmetric.WithoutTimestamps(),
+			stdoutmetric.WithWriter(out))
+		if err != nil {
+			return err
+		}
+
+		mpOpts = append(mpOpts, sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exp)))
+	}
+
+	if c.hasMetricsEnableExporterOTLP() {
+		u, err := url.Parse(c.Exporters.OTLPGRPC.Endpoint)
+		if err != nil {
+			return err
+		}
+
+		exOpts := make([]otlpmetricgrpc.Option, 0)
+		if u.Scheme == "https" {
+			exOpts = append(exOpts, otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
+		} else {
+			exOpts = append(exOpts, otlpmetricgrpc.WithInsecure())
+		}
+		exOpts = append(exOpts, otlpmetricgrpc.WithEndpoint(u.Host))
+
+		headers := c.Exporters.OTLPGRPC.Headers
+		headers["user-agent"] = fmt.Sprintf("%v/%v", vars.Appname, vars.ReleaseVersion)
+		exOpts = append(exOpts, otlpmetricgrpc.WithHeaders(headers))
+
+		var exp sdkmetric.Exporter
+		exp, err = otlpmetricgrpc.New(ctx, exOpts...)
+		if err != nil {
+			return err
+		}
+
+		reader := sdkmetric.NewPeriodicReader(exp,
+			sdkmetric.WithInterval(15*time.Second),
+		)
+		mpOpts = append(mpOpts, sdkmetric.WithReader(reader))
+	}
+
+	if c.hasMetricsEnableExporterOTLPHTTP() {
+		u, err := url.Parse(c.Exporters.OTLPHTTP.Endpoint)
+		if err != nil {
+			return err
+		}
+
+		exOpts := make([]otlpmetrichttp.Option, 0)
+		if u.Scheme == "https" {
+			// TODO; 跳过 tls ca 验证
+			exOpts = append(exOpts, otlpmetrichttp.WithTLSClientConfig(&tls.Config{InsecureSkipVerify: true}))
+		} else {
+			exOpts = append(exOpts, otlpmetrichttp.WithInsecure())
+		}
+		exOpts = append(exOpts, otlpmetrichttp.WithEndpoint(u.Host))
+
+		headers := c.Exporters.OTLPHTTP.Headers
+		headers["user-agent"] = fmt.Sprintf("%v/%v", vars.Appname, vars.ReleaseVersion)
+		exOpts = append(exOpts, otlpmetrichttp.WithHeaders(headers))
+
+		if c.Exporters.OTLPHTTP.MetricURLPath != "" {
+			exOpts = append(exOpts, otlpmetrichttp.WithURLPath(c.Exporters.OTLPHTTP.MetricURLPath))
+		}
+
+		var exp sdkmetric.Exporter
+		exp, err = otlpmetrichttp.New(ctx, exOpts...)
+		if err != nil {
+			return err
+		}
+
+		reader := sdkmetric.NewPeriodicReader(exp,
+			sdkmetric.WithInterval(15*time.Second),
+		)
+		mpOpts = append(mpOpts, sdkmetric.WithReader(reader))
+	}
+
+	provider := sdkmetric.NewMeterProvider(mpOpts...)
+	otel.SetMeterProvider(provider)
+
+	return nil
+}
+
+// initTracesExporter 初始化 traces exporter 相关
+func (c *ObservablesConfig) initTracesExporter(ctx context.Context, serviceName string) error {
 	hostName, err := os.Hostname()
 	if err != nil || hostName == "" {
 		hostName = "unknow"
 	}
-
-	ctx := context.Background()
 
 	res, err := resource.New(ctx,
 		resource.WithFromEnv(),
@@ -128,18 +384,18 @@ func (c *LocalConfig) InitObservables() (interface{}, error) {
 		resource.WithProcessExecutablePath(),
 		resource.WithAttributes(
 			// 在可观测链路 OpenTelemetry 版后端显示的服务名称。
-			semconv.ServiceName(c.GetServiceName()),
+			semconv.ServiceName(serviceName),
 			// 在可观测链路 OpenTelemetry 版后端显示的主机名称。
 			semconv.HostName(hostName),
-			semconv.ServiceVersion(version.Revision),
+			semconv.ServiceVersion(vars.ReleaseVersion),
 		),
 	)
 
 	// 控制采样频率
 	sampleRatio := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(0.2))
-	if c.Observables.Telemetry != nil {
-		if c.Observables.Telemetry.Traces != nil {
-			ratio := c.Observables.Telemetry.Traces.SampleRatio
+	if c.Telemetry != nil {
+		if c.Telemetry.Traces != nil {
+			ratio := c.Telemetry.Traces.SampleRatio
 			if ratio >= 1 {
 				sampleRatio = sdktrace.AlwaysSample()
 			} else if ratio > 0 {
@@ -154,332 +410,96 @@ func (c *LocalConfig) InitObservables() (interface{}, error) {
 		sdktrace.WithSampler(sampleRatio),
 		sdktrace.WithResource(res),
 	)
-	c.Observables.tracer = tracerProvider
+	c.tracer = tracerProvider
 
-	if err = c.Observables.initExportOTLPGRPC(ctx); err != nil {
-		return nil, err
+	if c.hasTracesEnableExporterOTLP() {
+		u, err := url.Parse(c.Exporters.OTLPGRPC.Endpoint)
+		if err != nil {
+			return err
+		}
+
+		exOpts := make([]otlptracegrpc.Option, 0)
+		if u.Scheme == "https" {
+			exOpts = append(exOpts, otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
+		} else {
+			exOpts = append(exOpts, otlptracegrpc.WithInsecure())
+		}
+
+		exOpts = append(exOpts, otlptracegrpc.WithHeaders(c.Exporters.OTLPGRPC.Headers))
+		exOpts = append(exOpts, otlptracegrpc.WithEndpoint(u.Host))
+
+		client := otlptracegrpc.NewClient(exOpts...)
+		exp, err := otlptrace.New(ctx, client)
+		if err != nil {
+			return err
+		}
+
+		bsp := sdktrace.NewBatchSpanProcessor(exp)
+		c.tracer.RegisterSpanProcessor(bsp)
 	}
-	if err = c.Observables.initExportOTLPHTTP(ctx); err != nil {
-		return nil, err
+
+	if c.hasTracesEnableExporterOTLPHTTP() {
+		u, err := url.Parse(c.Exporters.OTLPHTTP.Endpoint)
+		if err != nil {
+			return err
+		}
+
+		exOpts := make([]otlptracehttp.Option, 0)
+		if u.Scheme == "https" {
+			exOpts = append(exOpts, otlptracehttp.WithTLSClientConfig(&tls.Config{InsecureSkipVerify: true}))
+		} else {
+			exOpts = append(exOpts, otlptracehttp.WithInsecure())
+		}
+
+		headers := c.Exporters.OTLPHTTP.Headers
+		headers["user-agent"] = fmt.Sprintf("%v/%v", vars.Appname, vars.ReleaseVersion)
+		exOpts = append(exOpts, otlptracehttp.WithHeaders(headers))
+
+		exOpts = append(exOpts, otlptracehttp.WithEndpoint(u.Host))
+		if c.Exporters.OTLPHTTP.TraceURLPath != "" {
+			exOpts = append(exOpts, otlptracehttp.WithURLPath(c.Exporters.OTLPHTTP.TraceURLPath))
+		}
+
+		client := otlptracehttp.NewClient(exOpts...)
+		otlptracehttp.WithCompression(1)
+
+		exp, err := otlptrace.New(ctx, client)
+		if err != nil {
+			return err
+		}
+
+		bsp := sdktrace.NewBatchSpanProcessor(exp)
+		c.tracer.RegisterSpanProcessor(bsp)
 	}
-	if err = c.Observables.initExportLogging(ctx); err != nil {
-		return nil, err
+
+	if c.hasTracesEnableExporterOTLPLogging() {
+		opts := make([]stdouttrace.Option, 0)
+		if c.Exporters.Logging.PrettyPrint {
+			opts = append(opts, stdouttrace.WithPrettyPrint())
+		}
+		if c.Exporters.Logging.TraceFilePath != "" && c.Exporters.Logging.TraceFilePath != "stdout" {
+			f, err := os.OpenFile(c.Exporters.Logging.TraceFilePath, os.O_RDWR|os.O_CREATE, 0755)
+			if err != nil {
+				return err
+			}
+			opts = append(opts, stdouttrace.WithWriter(f))
+		}
+
+		exp, err := stdouttrace.New(opts...)
+		if err != nil {
+			return err
+		}
+		bsp := sdktrace.NewBatchSpanProcessor(exp)
+		c.tracer.RegisterSpanProcessor(bsp)
 	}
 
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 	otel.SetTracerProvider(tracerProvider)
 
-	// TODO, metrics test
-	/*
-		if err = c.Observables.initExporterPrometheus(ctx, c.GetServiceName()); err != nil {
-			return nil, err
-		}
-	*/
-	c.Observables.initPrometheusRegistry()
-
-	c.Observables.initExporterPrometheus(ctx, c.GetServiceName())
-	// c.Observables.initExportLoggingMetric(ctx)
-	// TODO, metrics test
-
-	return nil, nil
-}
-
-func (c *ObservablesConfig) initPrometheusRegistry() {
-	// 初始化 prometheus registery 实例
-	reg := prometheus.NewRegistry()
-	prometheus.MustRegister(reg)
-
-	// Add Go module build info.
-	reg.MustRegister(collectors.NewBuildInfoCollector())
-
-	// Add go runtime metrics and process collectors.
-	reg.MustRegister(
-		collectors.NewGoCollector(),
-		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
-	)
-
-	c.promRegistry = reg
-}
-
-func (c *ObservablesConfig) initExporterPrometheus(ctx context.Context, serviceName string) error {
-	if c.promRegistry == nil {
-		return nil
-	}
-
-	exp1, err := otelprometheus.New(
-		// 使用自定义的 prometheus registery 实例
-		otelprometheus.WithRegisterer(c.promRegistry),
-		// 避免对每个指标添加额外的 otel_scope_info 标签
-		otelprometheus.WithoutScopeInfo(),
-	)
-	if err != nil {
-		return err
-	}
-
-	// 避免使用 WithFromEnv 以防止不必要的信息泄漏，如 token 等
-	res, err := resource.New(ctx,
-		resource.WithTelemetrySDK(),
-		resource.WithHost(),
-		resource.WithProcessOwner(),
-		resource.WithOSType(),
-		resource.WithAttributes(
-			semconv.ServiceName(serviceName),
-			semconv.ServiceVersion(version.Revision),
-		),
-	)
-	if err != nil {
-		return err
-	}
-
-	// test logging
-	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.MetricFilePath == "" {
-		return nil
-	}
-
-	opts := make([]stdoutmetric.Option, 0)
-	opts = append(opts, stdoutmetric.WithPrettyPrint())
-	opts = append(opts, stdoutmetric.WithoutTimestamps())
-
-	f, err := os.OpenFile(c.Exporters.Logging.MetricFilePath, os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
-		return err
-	}
-	opts = append(opts, stdoutmetric.WithWriter(f))
-
-	exp2, err := stdoutmetric.New(opts...)
-	if err != nil {
-		return err
-	}
-	// test logging
-
-	provider := sdkmetric.NewMeterProvider(
-		// https://github.com/open-telemetry/opentelemetry-go/issues/3720
-		sdkmetric.WithReader(exp1),
-		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exp2)),
-		sdkmetric.WithResource(res),
-	)
-
-	otel.SetMeterProvider(provider)
-
-	meter := provider.Meter("app_or_package_name_prometheus")
-	counter, _ := meter.Int64Counter(
-		"grpc_kit.prometheus.demo.counter_name",
-		apimetric.WithUnit("1"),
-		apimetric.WithDescription("counter description"),
-	)
-
-	go func() {
-		for {
-			counter.Add(ctx, 1)
-			time.Sleep(10 * time.Second)
-		}
-	}()
-
 	return nil
 }
 
-func (c *ObservablesConfig) initExportOTLPGRPCMetric(ctx context.Context, res *resource.Resource) error {
-	exp, err := otlpmetricgrpc.New(
-		context.TODO(),
-		// otlpmetricgrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")),
-		otlpmetricgrpc.WithInsecure(),
-		otlpmetricgrpc.WithEndpoint("ap-guangzhou.apm.tencentcs.com:4317"),
-		otlpmetricgrpc.WithHeaders(c.Exporters.OTLPGRPC.Headers))
-
-	if err != nil {
-		return err
-	}
-
-	reader := sdkmetric.NewPeriodicReader(
-		exp,
-		sdkmetric.WithInterval(15*time.Second),
-	)
-
-	provider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithReader(reader),
-		sdkmetric.WithResource(res),
-	)
-	otel.SetMeterProvider(provider)
-
-	meter := provider.Meter("app_or_package_name")
-	counter, _ := meter.Int64Counter(
-		"grpc_kit.demo.counter_name",
-		apimetric.WithUnit("1"),
-		apimetric.WithDescription("counter description"),
-	)
-
-	go func() {
-		for {
-			counter.Add(ctx, 1)
-			time.Sleep(10 * time.Second)
-		}
-	}()
-
-	return nil
-}
-
-func (c *ObservablesConfig) initExportLoggingMetric(ctx context.Context) error {
-	if !c.Enable {
-		return nil
-	}
-	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.MetricFilePath == "" {
-		return nil
-	}
-
-	opts := make([]stdoutmetric.Option, 0)
-	opts = append(opts, stdoutmetric.WithPrettyPrint())
-	opts = append(opts, stdoutmetric.WithoutTimestamps())
-
-	f, err := os.OpenFile(c.Exporters.Logging.MetricFilePath, os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
-		return err
-	}
-	opts = append(opts, stdoutmetric.WithWriter(f))
-
-	exp, err := stdoutmetric.New(opts...)
-	if err != nil {
-		return err
-	}
-
-	/*
-		exp2, err := otelprometheus.New(
-			// 使用自定义的 prometheus registery 实例
-			otelprometheus.WithRegisterer(c.promRegistry),
-			// 避免对每个指标添加额外的 otel_scope_info 标签
-			otelprometheus.WithoutScopeInfo(),
-		)
-	*/
-
-	provider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithReader(
-			sdkmetric.NewPeriodicReader(exp),
-		),
-	)
-
-	// otel.SetMeterProvider(provider)
-
-	meter := provider.Meter("app_or_package_name_file")
-	counter, _ := meter.Int64Counter(
-		"grpc_kit.file.demo.counter_name",
-		apimetric.WithUnit("1"),
-		apimetric.WithDescription("counter description"),
-	)
-
-	go func() {
-		for {
-			counter.Add(ctx, 1)
-			time.Sleep(10 * time.Second)
-		}
-	}()
-
-	return nil
-}
-
-func (c *ObservablesConfig) initExportOTLPGRPC(ctx context.Context) error {
-	if !c.Enable {
-		return nil
-	}
-	if c.Exporters == nil || c.Exporters.OTLPGRPC == nil {
-		return nil
-	}
-
-	tmps := strings.Split(c.Exporters.OTLPGRPC.Endpoint, "//")
-	if len(tmps) != 2 {
-		return fmt.Errorf("opentracing exporter otlp grpc endpoint error")
-	}
-
-	opts := make([]otlptracegrpc.Option, 0)
-	if strings.HasPrefix(tmps[0], "https") {
-		opts = append(opts, otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, "")))
-	} else {
-		opts = append(opts, otlptracegrpc.WithInsecure())
-	}
-	opts = append(opts, otlptracegrpc.WithHeaders(c.Exporters.OTLPGRPC.Headers))
-	opts = append(opts, otlptracegrpc.WithEndpoint(tmps[1]))
-
-	client := otlptracegrpc.NewClient(opts...)
-	exp, err := otlptrace.New(ctx, client)
-	if err != nil {
-		return err
-	}
-
-	bsp := sdktrace.NewBatchSpanProcessor(exp)
-	c.tracer.RegisterSpanProcessor(bsp)
-
-	return nil
-}
-
-func (c *ObservablesConfig) initExportOTLPHTTP(ctx context.Context) error {
-	if !c.Enable {
-		return nil
-	}
-	if c.Exporters == nil || c.Exporters.OTLPHTTP == nil {
-		return nil
-	}
-
-	tmps := strings.Split(c.Exporters.OTLPHTTP.Endpoint, "//")
-	if len(tmps) != 2 {
-		return fmt.Errorf("opentracing exporter otlp http endpoint error")
-	}
-
-	trurl := c.Exporters.OTLPHTTP.TracesURLPath
-	if trurl == "" {
-		trurl = "/v1/traces"
-	}
-
-	opts := make([]otlptracehttp.Option, 0)
-	if strings.HasPrefix(tmps[0], "https") {
-	} else {
-		opts = append(opts, otlptracehttp.WithInsecure())
-	}
-	opts = append(opts, otlptracehttp.WithHeaders(c.Exporters.OTLPHTTP.Headers))
-	opts = append(opts, otlptracehttp.WithEndpoint(tmps[1]))
-	opts = append(opts, otlptracehttp.WithURLPath(trurl))
-
-	client := otlptracehttp.NewClient(opts...)
-	otlptracehttp.WithCompression(1)
-
-	exp, err := otlptrace.New(ctx, client)
-	if err != nil {
-		return err
-	}
-
-	bsp := sdktrace.NewBatchSpanProcessor(exp)
-	c.tracer.RegisterSpanProcessor(bsp)
-
-	return nil
-}
-
-func (c *ObservablesConfig) initExportLogging(ctx context.Context) error {
-	if !c.Enable {
-		return nil
-	}
-	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.FilePath == "" {
-		return nil
-	}
-
-	opts := make([]stdouttrace.Option, 0)
-	if c.Exporters.Logging.PrettyPrint {
-		opts = append(opts, stdouttrace.WithPrettyPrint())
-	}
-	if c.Exporters.Logging.FilePath != "" && c.Exporters.Logging.FilePath != "stdout" {
-		f, err := os.OpenFile(c.Exporters.Logging.FilePath, os.O_RDWR|os.O_CREATE, 0755)
-		if err != nil {
-			return err
-		}
-		opts = append(opts, stdouttrace.WithWriter(f))
-	}
-
-	exp, err := stdouttrace.New(opts...)
-	if err != nil {
-		return err
-	}
-	bsp := sdktrace.NewBatchSpanProcessor(exp)
-	c.tracer.RegisterSpanProcessor(bsp)
-
-	return nil
-}
-
+// calcRequestID 计算 trace id
 func (c *ObservablesConfig) calcRequestID(ctx context.Context) string {
 	requestID := "0123456789abcdef0123456789abcdef"
 
@@ -578,4 +598,87 @@ func (c *ObservablesConfig) grpcPanicRecoveryHandler(ctx context.Context, p any)
 	}
 
 	return status.Errorf(codes.Internal, "%s", p)
+}
+
+// hasTracesEnableExporterOTLP 是否启用 otlp 上报 traces 数据
+func (c *ObservablesConfig) hasTracesEnableExporterOTLP() bool {
+	if c.Exporters == nil || c.Exporters.OTLPGRPC == nil || c.Exporters.OTLPGRPC.Endpoint == "" {
+		return false
+	}
+
+	return *(c.Telemetry.Traces.Exporters.OTLP)
+}
+
+// hasTracesEnableExporterOTLPHTTP 是否启用 otlphttp 上报 traces 数据
+func (c *ObservablesConfig) hasTracesEnableExporterOTLPHTTP() bool {
+	if c.Exporters == nil || c.Exporters.OTLPHTTP == nil || c.Exporters.OTLPHTTP.Endpoint == "" {
+		return false
+	}
+
+	return *(c.Telemetry.Traces.Exporters.OTLPHTTP)
+}
+
+// hasTracesEnableExporterOTLPLogging 是否启用 logging 记录 traces 数据
+func (c *ObservablesConfig) hasTracesEnableExporterOTLPLogging() bool {
+	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.TraceFilePath == "" {
+		return false
+	}
+
+	return *(c.Telemetry.Traces.Exporters.Logging)
+}
+
+// hasMetricsEnableExporterOTLP 是否启用 otlp 上报 metrics 数据
+func (c *ObservablesConfig) hasMetricsEnableExporterOTLP() bool {
+	if c.Exporters == nil || c.Exporters.OTLPGRPC == nil || c.Exporters.OTLPGRPC.Endpoint == "" {
+		return false
+	}
+
+	return *(c.Telemetry.Metrics.Exporters.OTLP)
+}
+
+// hasMetricsEnableExporterOTLPHTTP 是否启用 otlphttp 上报 metrics 数据
+func (c *ObservablesConfig) hasMetricsEnableExporterOTLPHTTP() bool {
+	if c.Exporters == nil || c.Exporters.OTLPHTTP == nil || c.Exporters.OTLPHTTP.Endpoint == "" {
+		return false
+	}
+
+	return *(c.Telemetry.Metrics.Exporters.OTLPHTTP)
+}
+
+// hasMetricsEnableExporterPrometheus 是否启用 promhttp 输出指标地址
+func (c *ObservablesConfig) hasMetricsEnableExporterPrometheus() bool {
+	return *(c.Telemetry.Metrics.Exporters.Prometheus)
+}
+
+// hasMetricsEnableExporterLogging 是否启用 logging 记录 metrics 数据
+func (c *ObservablesConfig) hasMetricsEnableExporterLogging() bool {
+	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.MetricFilePath == "" {
+		return false
+	}
+
+	return *(c.Telemetry.Metrics.Exporters.Logging)
+}
+
+// prometheusExporterHTTP 用于注册性能指标数据至 http 上，如：/metrics
+func (c *ObservablesConfig) prometheusExporterHTTP(hmux *http.ServeMux) {
+	if !c.hasMetricsEnableExporterPrometheus() {
+		return
+	}
+
+	metricURL := "/metrics"
+	if c.Exporters != nil {
+		if c.Exporters.Prometheus != nil && c.Exporters.Prometheus.MetricURLPath != "" {
+			metricURL = c.Exporters.Prometheus.MetricURLPath
+		}
+	}
+
+	hmux.Handle(metricURL, promhttp.InstrumentMetricHandler(
+		c.promRegistry,
+		promhttp.HandlerFor(
+			c.promRegistry,
+			promhttp.HandlerOpts{
+				Registry:          c.promRegistry,
+				EnableOpenMetrics: true,
+			})),
+	)
 }

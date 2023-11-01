@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	// grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	grpcauth "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
@@ -22,7 +21,6 @@ import (
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/vars"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
@@ -283,18 +281,8 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	// TODO; 自定义 prometheus 指标
 
 	hmux := http.NewServeMux()
+	c.Observables.prometheusExporterHTTP(hmux)
 	hmux.Handle("/ping", httpHandleHealthPing())
-
-	hmux.Handle("/metrics", promhttp.InstrumentMetricHandler(
-		c.Observables.promRegistry,
-		promhttp.HandlerFor(
-			c.Observables.promRegistry,
-			promhttp.HandlerOpts{
-				Registry:          c.Observables.promRegistry,
-				EnableOpenMetrics: true,
-			})),
-	)
-
 	hmux.Handle("/version", httpHandleGetVersion())
 
 	if c.Debugger.EnablePprof {
