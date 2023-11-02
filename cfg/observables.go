@@ -41,6 +41,7 @@ import (
 // ObservablesConfig 用于客观性配置
 type ObservablesConfig struct {
 	tracer       *sdktrace.TracerProvider
+	meter        *sdkmetric.MeterProvider
 	promRegistry *prometheus.Registry
 
 	// 全局是否启动可观测性，默认启用
@@ -220,6 +221,12 @@ func (c *ObservablesConfig) defaultValues() {
 
 // shutdown 关闭前刷新数据并释放资源
 func (c *ObservablesConfig) shutdown(ctx context.Context) error {
+	if err := c.meter.ForceFlush(ctx); err != nil {
+		return err
+	}
+	if err := c.meter.Shutdown(ctx); err != nil {
+		return err
+	}
 	if err := c.tracer.ForceFlush(ctx); err != nil {
 		return err
 	}
@@ -260,6 +267,30 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 
 	mpOpts := make([]sdkmetric.Option, 0)
 	mpOpts = append(mpOpts, sdkmetric.WithResource(res))
+
+	/*
+		mpOpts = append(mpOpts, sdkmetric.WithView(
+			sdkmetric.NewView(
+				sdkmetric.Instrument{
+					Name: "rpc.server.duration",
+				},
+				sdkmetric.Stream{Aggregation: sdkmetric.AggregationDrop{}},
+			)),
+		)
+	*/
+
+	/*
+		view1 := sdkmetric.WithView(
+			sdkmetric.NewView(
+				sdkmetric.Instrument{
+					Scope: instrumentation.Scope{Name: "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"},
+				},
+				sdkmetric.Stream{
+					AttributeFilter: attribute.NewAllowKeysFilter("http_flavor", "http_method", "http_scheme", "http_status_code", "le"),
+				},
+			))
+		mpOpts = append(mpOpts, view1)
+	*/
 
 	// 添加多个 reader
 	// https://github.com/open-telemetry/opentelemetry-go/issues/3720
@@ -373,6 +404,8 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 	}
 
 	provider := sdkmetric.NewMeterProvider(mpOpts...)
+	c.meter = provider
+
 	otel.SetMeterProvider(provider)
 
 	return nil
