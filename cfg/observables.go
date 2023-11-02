@@ -43,8 +43,8 @@ type ObservablesConfig struct {
 	tracer       *sdktrace.TracerProvider
 	promRegistry *prometheus.Registry
 
-	// 全局是否启动可观测性
-	Enable bool `mapstructure:"enable"`
+	// 全局是否启动可观测性，默认启用
+	Enable *bool `mapstructure:"enable"`
 
 	// 首次初始化后配置默认值
 	Telemetry *TelemetryConfig `mapstructure:"telemetry"`
@@ -126,15 +126,13 @@ type ExporterEnable struct {
 // InitObservables 初始化可观测性配置
 func (c *LocalConfig) InitObservables() (interface{}, error) {
 	if c.Observables == nil {
-		c.Observables = &ObservablesConfig{
-			Enable: false,
-		}
+		c.Observables = &ObservablesConfig{}
 	}
 
 	// 植入默认值
 	c.Observables.defaultValues()
 
-	if !c.Observables.Enable {
+	if !(*c.Observables.Enable) {
 		return nil, nil
 	}
 
@@ -155,6 +153,10 @@ func (c *ObservablesConfig) defaultValues() {
 	// default values
 	var enableVal = true
 	var disalbeVal = false
+
+	if c.Enable == nil {
+		c.Enable = &enableVal
+	}
 
 	defaultMetric := &TelemetryMetric{
 		Exporters: ExporterEnable{
@@ -321,8 +323,7 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 		}
 		exOpts = append(exOpts, otlpmetricgrpc.WithEndpoint(u.Host))
 
-		headers := c.Exporters.OTLPGRPC.Headers
-		headers["user-agent"] = fmt.Sprintf("%v/%v", vars.Appname, vars.ReleaseVersion)
+		headers := c.commonHTTPHeaders(c.Exporters.OTLPGRPC.Headers)
 		exOpts = append(exOpts, otlpmetricgrpc.WithHeaders(headers))
 
 		var exp sdkmetric.Exporter
@@ -352,8 +353,7 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 		}
 		exOpts = append(exOpts, otlpmetrichttp.WithEndpoint(u.Host))
 
-		headers := c.Exporters.OTLPHTTP.Headers
-		headers["user-agent"] = fmt.Sprintf("%v/%v", vars.Appname, vars.ReleaseVersion)
+		headers := c.commonHTTPHeaders(c.Exporters.OTLPHTTP.Headers)
 		exOpts = append(exOpts, otlpmetrichttp.WithHeaders(headers))
 
 		if c.Exporters.OTLPHTTP.MetricURLPath != "" {
@@ -435,8 +435,7 @@ func (c *ObservablesConfig) initTracesExporter(ctx context.Context, serviceName 
 			exOpts = append(exOpts, otlptracegrpc.WithInsecure())
 		}
 
-		headers := c.Exporters.OTLPGRPC.Headers
-		headers["user-agent"] = fmt.Sprintf("%v/%v", vars.Appname, vars.ReleaseVersion)
+		headers := c.commonHTTPHeaders(c.Exporters.OTLPGRPC.Headers)
 		exOpts = append(exOpts, otlptracegrpc.WithHeaders(headers))
 
 		exOpts = append(exOpts, otlptracegrpc.WithEndpoint(u.Host))
@@ -464,8 +463,7 @@ func (c *ObservablesConfig) initTracesExporter(ctx context.Context, serviceName 
 			exOpts = append(exOpts, otlptracehttp.WithInsecure())
 		}
 
-		headers := c.Exporters.OTLPHTTP.Headers
-		headers["user-agent"] = fmt.Sprintf("%v/%v", vars.Appname, vars.ReleaseVersion)
+		headers := c.commonHTTPHeaders(c.Exporters.OTLPHTTP.Headers)
 		exOpts = append(exOpts, otlptracehttp.WithHeaders(headers))
 
 		exOpts = append(exOpts, otlptracehttp.WithEndpoint(u.Host))
@@ -615,7 +613,7 @@ func (c *ObservablesConfig) grpcPanicRecoveryHandler(ctx context.Context, p any)
 
 // hasTracesEnableExporterOTLP 是否启用 otlp 上报 traces 数据
 func (c *ObservablesConfig) hasTracesEnableExporterOTLP() bool {
-	if !c.Enable {
+	if !(*c.Enable) {
 		return false
 	}
 
@@ -628,7 +626,7 @@ func (c *ObservablesConfig) hasTracesEnableExporterOTLP() bool {
 
 // hasTracesEnableExporterOTLPHTTP 是否启用 otlphttp 上报 traces 数据
 func (c *ObservablesConfig) hasTracesEnableExporterOTLPHTTP() bool {
-	if !c.Enable {
+	if !(*c.Enable) {
 		return false
 	}
 
@@ -641,7 +639,7 @@ func (c *ObservablesConfig) hasTracesEnableExporterOTLPHTTP() bool {
 
 // hasTracesEnableExporterOTLPLogging 是否启用 logging 记录 traces 数据
 func (c *ObservablesConfig) hasTracesEnableExporterOTLPLogging() bool {
-	if !c.Enable {
+	if !(*c.Enable) {
 		return false
 	}
 
@@ -654,7 +652,7 @@ func (c *ObservablesConfig) hasTracesEnableExporterOTLPLogging() bool {
 
 // hasMetricsEnableExporterOTLP 是否启用 otlp 上报 metrics 数据
 func (c *ObservablesConfig) hasMetricsEnableExporterOTLP() bool {
-	if !c.Enable {
+	if !(*c.Enable) {
 		return false
 	}
 
@@ -667,7 +665,7 @@ func (c *ObservablesConfig) hasMetricsEnableExporterOTLP() bool {
 
 // hasMetricsEnableExporterOTLPHTTP 是否启用 otlphttp 上报 metrics 数据
 func (c *ObservablesConfig) hasMetricsEnableExporterOTLPHTTP() bool {
-	if !c.Enable {
+	if !(*c.Enable) {
 		return false
 	}
 
@@ -680,7 +678,7 @@ func (c *ObservablesConfig) hasMetricsEnableExporterOTLPHTTP() bool {
 
 // hasMetricsEnableExporterPrometheus 是否启用 promhttp 输出指标地址
 func (c *ObservablesConfig) hasMetricsEnableExporterPrometheus() bool {
-	if !c.Enable {
+	if !(*c.Enable) {
 		return false
 	}
 
@@ -689,7 +687,7 @@ func (c *ObservablesConfig) hasMetricsEnableExporterPrometheus() bool {
 
 // hasMetricsEnableExporterLogging 是否启用 logging 记录 metrics 数据
 func (c *ObservablesConfig) hasMetricsEnableExporterLogging() bool {
-	if !c.Enable {
+	if !(*c.Enable) {
 		return false
 	}
 
@@ -722,4 +720,27 @@ func (c *ObservablesConfig) prometheusExporterHTTP(hmux *http.ServeMux) {
 				EnableOpenMetrics: true,
 			})),
 	)
+}
+
+// commonHTTPHeaders 添加公共请求头
+func (c *ObservablesConfig) commonHTTPHeaders(headers map[string]string) map[string]string {
+	hasUserAgent := false
+	keyUserAgent := "user-agent"
+
+	if headers == nil {
+		headers = make(map[string]string, 0)
+	} else {
+		for k, _ := range headers {
+			if strings.ToLower(k) == keyUserAgent {
+				hasUserAgent = true
+				break
+			}
+		}
+	}
+
+	if !hasUserAgent {
+		headers[keyUserAgent] = fmt.Sprintf("%v/%v", vars.Appname, vars.ReleaseVersion)
+	}
+
+	return headers
 }
