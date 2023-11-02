@@ -314,6 +314,12 @@ func (c *LocalConfig) Register(ctx context.Context,
 
 // Deregister 用于撤销注册中心上的服务信息
 func (c *LocalConfig) Deregister() error {
+	// TODO; 释放各总资源
+	ctx := context.TODO()
+	if err := c.Observables.shutdown(ctx); err != nil {
+		return err
+	}
+
 	// 配置文件未设置注册地址，则主动忽略
 	if c.Discover == nil || c.srvdis == nil {
 		return nil
