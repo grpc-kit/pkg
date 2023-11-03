@@ -268,6 +268,31 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 	mpOpts := make([]sdkmetric.Option, 0)
 	mpOpts = append(mpOpts, sdkmetric.WithResource(res))
 
+	var view sdkmetric.View = func(i sdkmetric.Instrument) (sdkmetric.Stream, bool) {
+		s := sdkmetric.Stream{Name: i.Name, Description: i.Description, Unit: i.Unit}
+
+		// 对于公知仪器生成的指标不做任何处理
+		if strings.HasPrefix(i.Scope.Name, "go.opentelemetry.io") {
+			if i.Kind == sdkmetric.InstrumentKindHistogram {
+				if s.Name == "rpc.server.duration" || s.Name == "http.server.duration" {
+					s.Aggregation = sdkmetric.AggregationExplicitBucketHistogram{
+						Boundaries: []float64{20, 50, 100, 200, 500, 1000, 1500, 3000, 5000},
+					}
+				}
+			}
+
+			return s, true
+		}
+
+		// 这里实现全局命名空间前缀
+		if c.Telemetry.Metrics.Namespace != "" {
+			s.Name = fmt.Sprintf("%v.%v", c.Telemetry.Metrics.Namespace, s.Name)
+		}
+
+		return s, true
+	}
+	mpOpts = append(mpOpts, sdkmetric.WithView(view))
+
 	/*
 		mpOpts = append(mpOpts, sdkmetric.WithView(
 			sdkmetric.NewView(
@@ -304,9 +329,12 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 		// 避免对每个指标添加额外的 otel_scope_info 标签
 		exOpts = append(exOpts, otelprometheus.WithoutScopeInfo())
 
-		if c.Telemetry.Metrics.Namespace != "" {
-			exOpts = append(exOpts, otelprometheus.WithNamespace(c.Telemetry.Metrics.Namespace))
-		}
+		// 通过在 view 中实现空间前缀，否则这里仅影响到 prometheus exporter 这个 reader
+		/*
+			if c.Telemetry.Metrics.Namespace != "" {
+				exOpts = append(exOpts, otelprometheus.WithNamespace(c.Telemetry.Metrics.Namespace))
+			}
+		*/
 
 		exp, err = otelprometheus.New(exOpts...)
 		if err != nil {
