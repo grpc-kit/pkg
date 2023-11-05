@@ -103,7 +103,8 @@ observables:
 
   telemetry:
     metrics:
-      namespace: cyou
+      # 为所有自定义指标添加前缀
+      namespace: default
 
       # 配置启用的 exporters 插件
       exporter_enable:
@@ -146,12 +147,10 @@ observables:
       headers:
         Authentication: token
     prometheus:
-      enable: true
-      metrics_url_path: "/metrics"
+      metric_url_path: "/metrics"
     logging:
-    #  file_path: "/tmp/traces.log"
-    #  pretty_print: true
-    #  trace_log_path: ""
+      pretty_print: true
+      trace_file_path: "/tmp/traces.log"
       metric_file_path: "/tmp/metrics.log"
 
 # 事件通道配置
