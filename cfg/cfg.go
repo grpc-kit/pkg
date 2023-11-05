@@ -275,7 +275,7 @@ func (c *LocalConfig) Init() error {
 		return err
 	}
 
-	if _, err := c.InitObservables(); err != nil {
+	if err := c.InitObservables(); err != nil {
 		return err
 	}
 

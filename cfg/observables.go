@@ -125,7 +125,7 @@ type ExporterEnable struct {
 }
 
 // InitObservables 初始化可观测性配置
-func (c *LocalConfig) InitObservables() (interface{}, error) {
+func (c *LocalConfig) InitObservables() error {
 	if c.Observables == nil {
 		c.Observables = &ObservablesConfig{}
 	}
@@ -134,19 +134,19 @@ func (c *LocalConfig) InitObservables() (interface{}, error) {
 	c.Observables.defaultValues()
 
 	if !(*c.Observables.Enable) {
-		return nil, nil
+		return nil
 	}
 
 	ctx := context.Background()
 	serviceName := c.GetServiceName()
 	if err := c.Observables.initMetricsExporter(ctx, serviceName); err != nil {
-		return nil, err
+		return err
 	}
 	if err := c.Observables.initTracesExporter(ctx, serviceName); err != nil {
-		return nil, err
+		return err
 	}
 
-	return nil, nil
+	return nil
 }
 
 // defaultValues 初始化默认值

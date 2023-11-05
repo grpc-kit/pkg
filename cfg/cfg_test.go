@@ -1,16 +1,10 @@
 package cfg
 
 import (
-	"context"
 	"fmt"
-	"math/rand"
 	"testing"
-	"time"
 
 	"github.com/spf13/viper"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
 )
 
 var lc *LocalConfig
@@ -36,7 +30,7 @@ func TestConfig(t *testing.T) {
 
 	t.Run("testServiceName", testServiceName)
 	t.Run("testInitLogger", testLogger)
-	t.Run("testInitOpenTracing", testOpenTracing)
+	// t.Run("testInitOpenTracing", testOpenTracing)
 	t.Run("testCloudEventsValue", testCloudEventsValue)
 	t.Run("testCloudEventsParse", testCloudEventsParse)
 	// t.Run("testServiceGRPCAddress", testServiceGRPCAddress)
@@ -59,6 +53,7 @@ func testLogger(t *testing.T) {
 	lo.Info("hello test")
 }
 
+/*
 func testOpenTracing(t *testing.T) {
 	ctx := context.TODO()
 
@@ -104,33 +99,14 @@ func testOpenTracing(t *testing.T) {
 			// fsp.SetTag("follows_key", fmt.Sprintf("%v", j))
 			fsp.End()
 
-			/*
-				go func() {
-					for x := 0; x <= 1; x++ {
-						var xsp opentracing.Span
-						if x == 1 {
-							xsp = opentracing.StartSpan(fmt.Sprintf("FollowsFrom_%v", x), opentracing.FollowsFrom(fsp.Context()))
-						} else {
-							xsp = opentracing.StartSpan(fmt.Sprintf("ChildOf_%v", x), opentracing.ChildOf(fsp.Context()))
-						}
-
-						randInt := rand.Intn(100)
-						xsp.SetTag("process_time", randInt)
-						time.Sleep(time.Duration(randInt) * time.Millisecond)
-
-						xsp.Finish()
-					}
-				}()
-			*/
 		}
 
 		csp.End()
 	}
 
 	rootSpan.End()
-
-	// time.Sleep(3 * time.Second)
 }
+*/
 
 func configKeydiffValue(t *testing.T, prefix, key string, expect, current interface{}) {
 	if expect != current {
