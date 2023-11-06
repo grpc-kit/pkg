@@ -447,17 +447,22 @@ func (c *ObservablesConfig) initTracesExporter(ctx context.Context, serviceName 
 	}
 
 	res, err := resource.New(ctx,
+		// 从环境变量获取数据
 		resource.WithFromEnv(),
+		// 属性 `process.owner`
 		resource.WithProcessOwner(),
+		// 属性 `telemetry.sdk.language` `telemetry.sdk.name` `telemetry.sdk.version`
 		resource.WithTelemetrySDK(),
+		// 属性 `host.name`
 		resource.WithHost(),
+		// 属性 `os.type`
 		resource.WithOSType(),
-		resource.WithProcessExecutablePath(),
 		resource.WithAttributes(
-			// 在可观测链路 OpenTelemetry 版后端显示的服务名称。
+			// 在可观测链路 OpenTelemetry 版后端显示的服务名称
 			semconv.ServiceName(serviceName),
-			// 在可观测链路 OpenTelemetry 版后端显示的主机名称。
+			// 在可观测链路属性 `host.name` 显示主机名称
 			semconv.HostName(hostName),
+			// 在可观测链路属性 `service.version` 展示服务版本
 			semconv.ServiceVersion(vars.ReleaseVersion),
 		),
 	)
