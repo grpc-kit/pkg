@@ -99,13 +99,17 @@ debugger:
 
 # 可观测性配置
 observables:
+  # 全局是否启动可观测性，默认启用
   enable: true
 
+  # 遥测数据（指标、链路）的个性行为配置
   telemetry:
+    # 指标数据
     metrics:
       # 为所有自定义指标添加前缀
       namespace: default
-
+      # 性能数据上报频率，单位：秒
+      push_interval: 60
       # 配置启用的 exporters 插件
       exporter_enable:
         otlp: false
@@ -113,26 +117,27 @@ observables:
         logging: true
         prometheus: true
 
+    # 链路数据
     traces:
+      # 给定一个 0 至 1 之间的分数决定采样频率
       sample_ratio: 1
-
-      # 特别在网关上记录 http 请求与响应体内容，仅当为 json 结构体有效
+      # 在网关上记录 http 请求与响应体内容，仅当为 json 结构体有效
       log_fields:
         http_request: true
         http_response: true
-
       # 配置启用的 exporters 插件
       exporter_enable:
         otlp: true
         otlphttp: true
         logging: true
         prometheus: false
-
+      # 过滤 http 或 grpc 请求的链路数据上报
       filters:
         - url_path: "/api/demo"
           method: POST
         - method: Demo
 
+  # 遥测数据（指标、链路）的上报输出配置
   exporters:
     otlp:
       endpoint: "http://127.0.0.1:4317"
