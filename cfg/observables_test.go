@@ -6,6 +6,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	apimetric "go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -16,6 +17,7 @@ func TestObservables(t *testing.T) {
 
 	t.Run("testObservablesDefaultValues", testObservablesDefaultValues)
 	t.Run("testObservablesTracer", testObservablesTracer)
+	t.Run("testObservablesMeter", testObservablesMeter)
 }
 
 // testObservablesDefaultValues 用于服务初始化默认值的判断
@@ -74,6 +76,7 @@ func testObservablesDefaultValues(t *testing.T) {
 
 /*
 docker run --rm --name jaeger \
+  -e METRICS_STORAGE_TYPE=prometheus \
   -p 16686:16686 \
   -p 4317:4317 \
   -p 4318:4318 \
@@ -96,7 +99,6 @@ func testObservablesTracer(t *testing.T) {
 	_, rpcSpan1Child2 := tr.Start(rpcSpan1Ctx, "RPCSpan1-Child2")
 
 	databaseCtx, databaseSpan := tr.Start(rootCtx, "Database")
-
 	_, mysqlSpan := tr.Start(databaseCtx, "Query MySQL")
 	mysqlSpan.AddEvent("mysql", trace.WithAttributes(
 		attribute.String("db.instance", "mysql-1"),
@@ -121,7 +123,45 @@ func testObservablesTracer(t *testing.T) {
 
 	// 关闭前需强制刷新下内存数据，否则会丢失来不及上报
 	// 使用框架时无需处理，在服务关闭前会自动刷新
-	if err := lc.Observables.shutdown(ctx); err != nil {
+	if err := lc.Observables.tracer.ForceFlush(ctx); err != nil {
 		t.Error(err)
 	}
+
+	/*
+		if err := lc.Observables.shutdown(ctx); err != nil {
+			t.Error(err)
+		}
+	*/
+}
+
+// testObservablesTracer 用于性能数据上报测试
+func testObservablesMeter(t *testing.T) {
+	ctx := context.TODO()
+	packageName := "github.com/grpc-kit/pkg"
+
+	mt := otel.Meter(packageName)
+
+	opts := apimetric.WithAttributes(
+		attribute.Key("key1").String("val1"),
+		attribute.Key("key2").String("val2"),
+	)
+
+	counter, err := mt.Float64Counter("hello.go.testname",
+		apimetric.WithDescription("a demo test"))
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	counter.Add(ctx, 5, opts)
+
+	if err := lc.Observables.meter.ForceFlush(ctx); err != nil {
+		t.Error(err)
+	}
+
+	/*
+		if err := lc.Observables.shutdown(ctx); err != nil {
+			t.Error(err)
+		}
+	*/
 }
