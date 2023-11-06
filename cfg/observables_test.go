@@ -79,7 +79,7 @@ docker run --rm --name jaeger \
   -p 4318:4318 \
   jaegertracing/all-in-one:1.50
 */
-// testObservablesTracing 用于链路跟踪测试
+// testObservablesTracing 用于链路跟踪上报测试依赖本地 jaeger 服务
 func testObservablesTracer(t *testing.T) {
 	ctx := context.TODO()
 	packageName := "github.com/grpc-kit/pkg"
