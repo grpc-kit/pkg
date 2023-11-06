@@ -91,6 +91,8 @@ type TelemetryConfig struct {
 type TelemetryMetric struct {
 	// 为所有暴露的指标添加前缀
 	Namespace string `mapstructure:"namespace"`
+	// 性能数据上报频率，默认1分钟，单位：秒
+	PushInterval int `mapstructure:"push_interval"`
 	// 是否启用 Exporters 配置下的 otel otelhttp logging prometheus
 	Exporters ExporterEnable `mapstructure:"exporter_enable"`
 }
@@ -161,6 +163,7 @@ func (c *ObservablesConfig) defaultValues() {
 	}
 
 	defaultMetric := &TelemetryMetric{
+		PushInterval: 60,
 		Exporters: ExporterEnable{
 			OTLP:       &disalbeVal,
 			OTLPHTTP:   &disalbeVal,
@@ -189,6 +192,9 @@ func (c *ObservablesConfig) defaultValues() {
 	if c.Telemetry.Metrics == nil {
 		c.Telemetry.Metrics = defaultMetric
 	} else {
+		if c.Telemetry.Metrics.PushInterval <= 0 {
+			c.Telemetry.Metrics.PushInterval = 60
+		}
 		if c.Telemetry.Metrics.Exporters.OTLP == nil {
 			c.Telemetry.Metrics.Exporters.OTLP = &disalbeVal
 		}

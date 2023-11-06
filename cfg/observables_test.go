@@ -39,18 +39,26 @@ func testObservablesDefaultValues(t *testing.T) {
 		t.Errorf("`observables.telemetry.traces` is nil")
 	}
 
+	if o.Telemetry.Metrics.PushInterval != 60 {
+		t.Errorf("`observables.telemetry.metrics.push_interval` not default value")
+	}
+
 	if *o.Telemetry.Metrics.Exporters.OTLP != false ||
 		*o.Telemetry.Metrics.Exporters.OTLPHTTP != false ||
 		*o.Telemetry.Metrics.Exporters.Prometheus != true ||
 		*o.Telemetry.Metrics.Exporters.Logging != true {
-		t.Errorf("`observables.telemetry.exporters` not default value")
+		t.Errorf("`observables.telemetry.metrics.exporters` not default value")
+	}
+
+	if *o.Telemetry.Traces.SampleRatio != 1 {
+		t.Errorf("`observables.telemetry.traces.sample_ratio` not default value")
 	}
 
 	if *o.Telemetry.Traces.Exporters.OTLP != true ||
 		*o.Telemetry.Traces.Exporters.OTLPHTTP != true ||
 		*o.Telemetry.Traces.Exporters.Prometheus != false ||
 		*o.Telemetry.Traces.Exporters.Logging != true {
-		t.Errorf("`observables.telemetry.exporters` not default value")
+		t.Errorf("`observables.telemetry.traces.exporters` not default value")
 	}
 
 	if o.Exporters == nil {
