@@ -139,18 +139,22 @@ observables:
 
   # 遥测数据（指标、链路）的上报输出配置
   exporters:
+    # 通过 grpc 上报数据
     otlp:
       endpoint: "http://127.0.0.1:4317"
       headers:
         Authentication: token
+    # 通过 http 上报数据，避免与 oltp 配置多个，否则链路会重复
     #otlphttp:
     #  endpoint: "http://127.0.0.1:4318"
     #  trace_url_path: ""
     #  metric_url_path: ""
     #  headers:
     #    Authentication: token
+    # 对外暴露 prometheus 风格的 http url 地址
     prometheus:
       metric_url_path: "/metrics"
+    # 指标与链路分布写入本地文件路径
     logging:
       pretty_print: true
       trace_file_path: "/tmp/traces.log"

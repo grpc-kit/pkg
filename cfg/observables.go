@@ -65,7 +65,7 @@ type ObservablesConfig struct {
 	} `mapstructure:"exporters"`
 }
 
-// OTLPHTTPConfig xx
+// OTLPHTTPConfig 使用 otlp http 协议上报数据
 type OTLPHTTPConfig struct {
 	// The target URL to send data to (e.g.: http://some.url:9411).
 	Endpoint      string            `mapstructure:"endpoint"`
@@ -74,7 +74,7 @@ type OTLPHTTPConfig struct {
 	MetricURLPath string            `mapstructure:"metric_url_path"`
 }
 
-// OTLPGRPCConfig xx
+// OTLPGRPCConfig 使用 otlp grpc 协议上报数据
 type OTLPGRPCConfig struct {
 	// The target URL to send data to (e.g.: http://some.url:9411).
 	Endpoint string            `mapstructure:"endpoint"`
