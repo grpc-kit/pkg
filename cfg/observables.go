@@ -98,7 +98,7 @@ type TelemetryMetric struct {
 // TelemetryTrace 链路跟踪个性配置
 type TelemetryTrace struct {
 	// 给定一个 0 至 1 之间的分数决定采样频率
-	SampleRatio float64 `mapstructure:"sample_ratio"`
+	SampleRatio *float64 `mapstructure:"sample_ratio"`
 
 	// 是否启用 Exporters 配置下的 otel otelhttp logging
 	Exporters ExporterEnable `mapstructure:"exporter_enable"`
@@ -154,6 +154,7 @@ func (c *ObservablesConfig) defaultValues() {
 	// default values
 	var enableVal = true
 	var disalbeVal = false
+	var sampleRatio float64 = 1
 
 	if c.Enable == nil {
 		c.Enable = &enableVal
@@ -168,6 +169,7 @@ func (c *ObservablesConfig) defaultValues() {
 		},
 	}
 	defaultTrace := &TelemetryTrace{
+		SampleRatio: &sampleRatio,
 		Exporters: ExporterEnable{
 			OTLP:       &enableVal,
 			OTLPHTTP:   &enableVal,
@@ -204,6 +206,10 @@ func (c *ObservablesConfig) defaultValues() {
 	if c.Telemetry.Traces == nil {
 		c.Telemetry.Traces = defaultTrace
 	} else {
+		if c.Telemetry.Traces.SampleRatio == nil {
+			c.Telemetry.Traces.SampleRatio = &sampleRatio
+		}
+
 		if c.Telemetry.Traces.Exporters.OTLP == nil {
 			c.Telemetry.Traces.Exporters.OTLP = &enableVal
 		}
@@ -274,11 +280,14 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 		// 对于公知仪器生成的指标不做任何处理
 		if strings.HasPrefix(i.Scope.Name, "go.opentelemetry.io") {
 			if i.Kind == sdkmetric.InstrumentKindHistogram {
-				if s.Name == "rpc.server.duration" || s.Name == "http.server.duration" {
-					s.Aggregation = sdkmetric.AggregationExplicitBucketHistogram{
-						Boundaries: []float64{20, 50, 100, 200, 500, 1000, 1500, 3000, 5000},
+				// TODO; 是否更改默认 histogram 的边界范围
+				/*
+					if s.Name == "rpc.server.duration" || s.Name == "http.server.duration" {
+						s.Aggregation = sdkmetric.AggregationExplicitBucketHistogram{
+							Boundaries: []float64{20, 50, 100, 200, 500, 1000, 1500, 3000, 5000},
+						}
 					}
-				}
+				*/
 			}
 
 			return s, true
@@ -292,30 +301,6 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 		return s, true
 	}
 	mpOpts = append(mpOpts, sdkmetric.WithView(view))
-
-	/*
-		mpOpts = append(mpOpts, sdkmetric.WithView(
-			sdkmetric.NewView(
-				sdkmetric.Instrument{
-					Name: "rpc.server.duration",
-				},
-				sdkmetric.Stream{Aggregation: sdkmetric.AggregationDrop{}},
-			)),
-		)
-	*/
-
-	/*
-		view1 := sdkmetric.WithView(
-			sdkmetric.NewView(
-				sdkmetric.Instrument{
-					Scope: instrumentation.Scope{Name: "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"},
-				},
-				sdkmetric.Stream{
-					AttributeFilter: attribute.NewAllowKeysFilter("http_flavor", "http_method", "http_scheme", "http_status_code", "le"),
-				},
-			))
-		mpOpts = append(mpOpts, view1)
-	*/
 
 	// 添加多个 reader
 	// https://github.com/open-telemetry/opentelemetry-go/issues/3720
@@ -391,8 +376,9 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 			return err
 		}
 
+		// TODO; 上报指标频率可配置
 		reader := sdkmetric.NewPeriodicReader(exp,
-			sdkmetric.WithInterval(15*time.Second),
+			sdkmetric.WithInterval(60*time.Second),
 		)
 		mpOpts = append(mpOpts, sdkmetric.WithReader(reader))
 	}
@@ -468,10 +454,10 @@ func (c *ObservablesConfig) initTracesExporter(ctx context.Context, serviceName 
 	)
 
 	// 控制采样频率
-	sampleRatio := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(0.2))
+	sampleRatio := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(1))
 	if c.Telemetry != nil {
 		if c.Telemetry.Traces != nil {
-			ratio := c.Telemetry.Traces.SampleRatio
+			ratio := *c.Telemetry.Traces.SampleRatio
 			if ratio >= 1 {
 				sampleRatio = sdktrace.AlwaysSample()
 			} else if ratio > 0 {
