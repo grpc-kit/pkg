@@ -140,11 +140,15 @@ func (c *LocalConfig) InitObservables() error {
 	}
 
 	ctx := context.Background()
-	serviceName := c.GetServiceName()
-	if err := c.Observables.initMetricsExporter(ctx, serviceName); err != nil {
+	res, err := c.Observables.commonResource(ctx, c.GetServiceName())
+	if err != nil {
 		return err
 	}
-	if err := c.Observables.initTracesExporter(ctx, serviceName); err != nil {
+
+	if err := c.Observables.initMetricsExporter(ctx, res); err != nil {
+		return err
+	}
+	if err := c.Observables.initTracesExporter(ctx, res); err != nil {
 		return err
 	}
 
@@ -249,7 +253,7 @@ func (c *ObservablesConfig) shutdown(ctx context.Context) error {
 }
 
 // initMetricsExporter 初始化 metrics exporter 相关
-func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName string) error {
+func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resource.Resource) error {
 	// 初始化 prometheus registery 实例
 	reg := prometheus.NewRegistry()
 	prometheus.MustRegister(reg)
@@ -262,20 +266,7 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 	)
 	c.promRegistry = reg
 
-	// 避免使用 WithFromEnv 以防止不必要的信息泄漏，如 token 保留到指标
-	res, err := resource.New(ctx,
-		resource.WithTelemetrySDK(),
-		resource.WithHost(),
-		resource.WithProcessOwner(),
-		resource.WithOSType(),
-		resource.WithAttributes(
-			semconv.ServiceName(serviceName),
-			semconv.ServiceVersion(vars.ReleaseVersion),
-		),
-	)
-	if err != nil {
-		return err
-	}
+	// 这里避免使用 resources.WithFromEnv 以防止不必要的信息泄漏，如 token 导出到指标
 
 	mpOpts := make([]sdkmetric.Option, 0)
 	mpOpts = append(mpOpts, sdkmetric.WithResource(res))
@@ -327,7 +318,7 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 			}
 		*/
 
-		exp, err = otelprometheus.New(exOpts...)
+		exp, err := otelprometheus.New(exOpts...)
 		if err != nil {
 			return err
 		}
@@ -341,17 +332,15 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 			exOpts = append(exOpts, stdoutmetric.WithPrettyPrint())
 		}
 
-		var out *os.File
 		if c.Exporters.Logging.MetricFilePath != "" && c.Exporters.Logging.MetricFilePath != "stdout" {
-			out, err = os.OpenFile(c.Exporters.Logging.MetricFilePath, os.O_RDWR|os.O_CREATE, 0755)
+			out, err := os.OpenFile(c.Exporters.Logging.MetricFilePath, os.O_RDWR|os.O_CREATE, 0755)
 			if err != nil {
 				return err
 			}
 			exOpts = append(exOpts, stdoutmetric.WithWriter(out))
 		}
 
-		var exp sdkmetric.Exporter
-		exp, err = stdoutmetric.New(exOpts...)
+		exp, err := stdoutmetric.New(exOpts...)
 		if err != nil {
 			return err
 		}
@@ -432,32 +421,25 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, serviceName
 }
 
 // initTracesExporter 初始化 traces exporter 相关
-func (c *ObservablesConfig) initTracesExporter(ctx context.Context, serviceName string) error {
+func (c *ObservablesConfig) initTracesExporter(ctx context.Context, res *resource.Resource) error {
 	hostName, err := os.Hostname()
 	if err != nil || hostName == "" {
 		hostName = "unknow"
 	}
 
-	res, err := resource.New(ctx,
+	res1, err := resource.New(ctx,
 		// 从环境变量获取数据
 		resource.WithFromEnv(),
-		// 属性 `process.owner`
-		resource.WithProcessOwner(),
-		// 属性 `telemetry.sdk.language` `telemetry.sdk.name` `telemetry.sdk.version`
-		resource.WithTelemetrySDK(),
-		// 属性 `host.name`
-		resource.WithHost(),
-		// 属性 `os.type`
-		resource.WithOSType(),
-		resource.WithAttributes(
-			// 在可观测链路 OpenTelemetry 版后端显示的服务名称
-			semconv.ServiceName(serviceName),
-			// 在可观测链路属性 `host.name` 显示主机名称
-			semconv.HostName(hostName),
-			// 在可观测链路属性 `service.version` 展示服务版本
-			semconv.ServiceVersion(vars.ReleaseVersion),
-		),
 	)
+	if err != nil {
+		return err
+	}
+
+	// 合并资源，如果 res、res1 存在同名健值，则以 res 为准，这样避免被来自环境变量的资源所替换
+	res2, err := resource.Merge(res1, res)
+	if err != nil {
+		return err
+	}
 
 	// 控制采样频率
 	sampleRatio := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(1))
@@ -476,7 +458,7 @@ func (c *ObservablesConfig) initTracesExporter(ctx context.Context, serviceName 
 
 	tracerProvider := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sampleRatio),
-		sdktrace.WithResource(res),
+		sdktrace.WithResource(res2),
 	)
 	c.tracer = tracerProvider
 
@@ -778,6 +760,48 @@ func (c *ObservablesConfig) prometheusExporterHTTP(hmux *http.ServeMux) {
 				EnableOpenMetrics: true,
 			})),
 	)
+}
+
+// commonResource 用于链路、指标的公共资源标签
+func (c *ObservablesConfig) commonResource(ctx context.Context, serviceName string) (*resource.Resource, error) {
+	res, err := resource.New(ctx,
+		// 属性 `process.owner`
+		resource.WithProcessOwner(),
+		// 属性 `telemetry.sdk.language` `telemetry.sdk.name` `telemetry.sdk.version`
+		resource.WithTelemetrySDK(),
+		// 属性 `host.name`
+		resource.WithHost(),
+		// 属性 `os.type`
+		resource.WithOSType(),
+		// 属性 `process.runtime.name`
+		resource.WithProcessRuntimeName(),
+		// 属性 `process.runtime.version`
+		resource.WithProcessRuntimeVersion(),
+		// 属性 `process.runtime.description`
+		resource.WithProcessRuntimeDescription(),
+		// 植入框架使用的各属性
+		resource.WithAttributes(
+			// 在可观测链路 OpenTelemetry 版后端显示的服务名称
+			semconv.ServiceName(serviceName),
+			// 在可观测链路属性 `host.name` 显示主机名称
+			// semconv.HostName(hostName),
+			// 在可观测链路属性 `service.version` 展示服务版本
+			semconv.ServiceVersion(vars.ReleaseVersion),
+			// 植入框架相关的三个自定义属性
+			// 属性 `service.appname` 表示应用名称，见 https://grpc-kit.com/docs/spec-api/key-terms/
+			// 属性 `service.library.name` 表示框架名称，见 https://grpc-kit.com/docs/spec-api/key-terms/
+			// 属性 `service.library.version` 表示框架版本，见 https://grpc-kit.com/docs/spec-api/key-terms/
+			attribute.String("service.appname", vars.Appname),
+			attribute.String("service.library.name", "grpc-kit"),
+			attribute.String("service.library.version", vars.CliVersion),
+		),
+	)
+
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
 }
 
 // commonHTTPHeaders 添加公共请求头
