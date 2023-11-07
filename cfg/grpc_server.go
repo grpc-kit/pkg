@@ -11,6 +11,7 @@ import (
 	"net/http/pprof"
 	"net/textproto"
 	"path"
+	"reflect"
 	"strings"
 	"time"
 
@@ -144,6 +145,19 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			return nil
 		}
 		span.SetStatus(otelcodes.Ok, codes.OK.String())
+
+		// TODO；是否存在空值
+		if msg == nil {
+			return nil
+		}
+
+		// TODO; 成功处理时判断 proto 类型确认是否使用 204 状态码，是否有更好的实现方式
+		// https://github.com/grpc-ecosystem/grpc-gateway/issues/240
+		respType := reflect.TypeOf(msg)
+		if respType.String() == "*emptypb.Empty" {
+			w.WriteHeader(http.StatusNoContent)
+			return nil
+		}
 
 		if c.Observables.hasRecordLogFieldsHTTPResponse() {
 			// TODO; 如果msg是数组返回，则无法成功序列化为json
