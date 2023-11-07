@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"net"
 	"net/http"
 	"strings"
@@ -345,6 +346,19 @@ func (c *LocalConfig) GetServiceName() string {
 // GetTraceID 用于获取 opentelemetry 下的 trace id
 func (c *LocalConfig) GetTraceID(ctx context.Context) string {
 	return c.Observables.calcRequestID(ctx)
+}
+
+// HTTPHandlerFunc 功能同 HTTPHandler
+func (c *LocalConfig) HTTPHandlerFunc(handler http.HandlerFunc) http.Handler {
+	return c.HTTPHandler(handler)
+}
+
+// HTTPHandler 用于植入 otelhttp 链路跟踪中间件
+func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
+	return otelhttp.NewHandler(handler,
+		"grpc-gateway",
+		otelhttp.WithFilter(c.Observables.httpTracingEnableFilter),
+		otelhttp.WithSpanNameFormatter(c.Observables.httpTracesSpanName))
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {

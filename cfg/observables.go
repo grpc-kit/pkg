@@ -802,3 +802,8 @@ func (c *ObservablesConfig) commonHTTPHeaders(headers map[string]string) map[str
 
 	return headers
 }
+
+// httpTracesSpanName 用于定义 http 链路跟踪的名称
+func (c *ObservablesConfig) httpTracesSpanName(operation string, r *http.Request) string {
+	return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
+}

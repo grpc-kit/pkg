@@ -22,7 +22,6 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/vars"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	otelcodes "go.opentelemetry.io/otel/codes"
@@ -293,16 +292,8 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		hmux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	}
 
-	format := func(operation string, r *http.Request) string {
-		return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
-	}
-
 	handler := http.Handler(rmux)
-	handler = otelhttp.NewHandler(handler,
-		"grpc-gateway",
-		otelhttp.WithFilter(c.Observables.httpTracingEnableFilter),
-		otelhttp.WithSpanNameFormatter(format))
-
+	handler = c.HTTPHandler(handler)
 	hmux.Handle("/", handler)
 
 	return hmux, rmux
