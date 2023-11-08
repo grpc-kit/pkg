@@ -281,13 +281,24 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 		if strings.HasPrefix(i.Scope.Name, "go.opentelemetry.io") {
 			if i.Kind == sdkmetric.InstrumentKindHistogram {
 				// TODO; 是否更改默认 histogram 的边界范围
-				/*
-					if s.Name == "rpc.server.duration" || s.Name == "http.server.duration" {
-						s.Aggregation = sdkmetric.AggregationExplicitBucketHistogram{
-							Boundaries: []float64{20, 50, 100, 200, 500, 1000, 1500, 3000, 5000},
-						}
+				if s.Name == "http.server.duration" || s.Name == "rpc.server.duration" {
+					s.Aggregation = sdkmetric.AggregationExplicitBucketHistogram{
+						Boundaries: []float64{0, 10, 50, 100, 250, 500, 1000, 2500, 5000, 7500, 10000},
 					}
-				*/
+					s.AttributeFilter = attribute.NewDenyKeysFilter(
+						"net.host.name",
+						"net.host.port",
+						"net.sock.peer.addr",
+						"net.sock.peer.port",
+					)
+				}
+			}
+
+			if s.Name == "http.server.request_content_length" || s.Name == "http.server.response_content_length" {
+				s.AttributeFilter = attribute.NewDenyKeysFilter(
+					"net.host.name",
+					"net.host.port",
+				)
 			}
 
 			return s, true
