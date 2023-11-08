@@ -147,18 +147,18 @@ observables:
     # 通过 http 上报数据，避免与 oltp 配置多个，否则链路会重复
     #otlphttp:
     #  endpoint: "http://127.0.0.1:4318"
-    #  trace_url_path: ""
-    #  metric_url_path: ""
+    #  traces_url_path: "/v1/traces"
+    #  metrics_url_path: "/v1/metrics"
     #  headers:
     #    Authentication: token
     # 对外暴露 prometheus 风格的 http url 地址
     prometheus:
-      metric_url_path: "/metrics"
+      metrics_url_path: "/metrics"
     # 指标与链路分布写入本地文件路径
     logging:
       pretty_print: true
-      trace_file_path: "/tmp/traces.log"
-      metric_file_path: "/tmp/metrics.log"
+      traces_file_path: "/tmp/traces.log"
+      metrics_file_path: "/tmp/metrics.log"
 
 # 事件通道配置
 cloudevents:

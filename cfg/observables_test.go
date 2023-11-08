@@ -65,20 +65,20 @@ func testObservablesDefaultValues(t *testing.T) {
 		t.Errorf("`observables.exporters` is nil")
 	}
 
-	if o.Exporters.Prometheus == nil || o.Exporters.Prometheus.MetricURLPath != "/metrics" {
-		t.Errorf("`observables.exporters.prometheus.metric_url_path` not default value")
+	if o.Exporters.Prometheus == nil || o.Exporters.Prometheus.MetricsURLPath != "/metrics" {
+		t.Errorf("`observables.exporters.prometheus.metrics_url_path` not default value")
 	}
 
 	if o.Exporters.Logging == nil {
 		t.Errorf("`observables.exporters.logging` is nil")
 	}
 
-	if o.Exporters.Logging.PrettyPrint != true && o.Exporters.Logging.MetricFilePath != "/tmp/metrics.log" {
-		t.Errorf("`observables.exporters.logging.metric_file_path` not default value")
+	if o.Exporters.Logging.PrettyPrint != true && o.Exporters.Logging.MetricsFilePath != "/tmp/metrics.log" {
+		t.Errorf("`observables.exporters.logging.metrics_file_path` not default value")
 	}
 
-	if o.Exporters.Logging.PrettyPrint != true && o.Exporters.Logging.TraceFilePath != "/tmp/traces.log" {
-		t.Errorf("`observables.exporters.logging.trace_file_path` not default value")
+	if o.Exporters.Logging.PrettyPrint != true && o.Exporters.Logging.TracesFilePath != "/tmp/traces.log" {
+		t.Errorf("`observables.exporters.logging.traces_file_path` not default value")
 	}
 }
 

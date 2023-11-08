@@ -55,12 +55,12 @@ type ObservablesConfig struct {
 		OTLPGRPC   *OTLPGRPCConfig `mapstructure:"otlp"`
 		OTLPHTTP   *OTLPHTTPConfig `mapstructure:"otlphttp"`
 		Prometheus *struct {
-			MetricURLPath string `mapstructure:"metric_url_path"`
+			MetricsURLPath string `mapstructure:"metrics_url_path"`
 		}
 		Logging *struct {
-			MetricFilePath string `mapstructure:"metric_file_path"`
-			TraceFilePath  string `mapstructure:"trace_file_path"`
-			PrettyPrint    bool   `mapstructure:"pretty_print"`
+			MetricsFilePath string `mapstructure:"metrics_file_path"`
+			TracesFilePath  string `mapstructure:"traces_file_path"`
+			PrettyPrint     bool   `mapstructure:"pretty_print"`
 		} `mapstructure:"logging"`
 	} `mapstructure:"exporters"`
 }
@@ -68,10 +68,13 @@ type ObservablesConfig struct {
 // OTLPHTTPConfig 使用 otlp http 协议上报数据
 type OTLPHTTPConfig struct {
 	// The target URL to send data to (e.g.: http://some.url:9411).
-	Endpoint      string            `mapstructure:"endpoint"`
-	Headers       map[string]string `mapstructure:"headers"`
-	TraceURLPath  string            `mapstructure:"trace_url_path"`
-	MetricURLPath string            `mapstructure:"metric_url_path"`
+	Endpoint string            `mapstructure:"endpoint"`
+	Headers  map[string]string `mapstructure:"headers"`
+	// 保持格式同
+	// https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/config.go
+	TracesURLPath  string `mapstructure:"traces_url_path,omitempty"`
+	MetricsURLPath string `mapstructure:"metrics_url_path,omitempty"`
+	LogsURLPath    string `mapstructure:"logs_url_path,omitempty"`
 }
 
 // OTLPGRPCConfig 使用 otlp grpc 协议上报数据
@@ -332,8 +335,8 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 			exOpts = append(exOpts, stdoutmetric.WithPrettyPrint())
 		}
 
-		if c.Exporters.Logging.MetricFilePath != "" && c.Exporters.Logging.MetricFilePath != "stdout" {
-			out, err := os.OpenFile(c.Exporters.Logging.MetricFilePath, os.O_RDWR|os.O_CREATE, 0755)
+		if c.Exporters.Logging.MetricsFilePath != "" && c.Exporters.Logging.MetricsFilePath != "stdout" {
+			out, err := os.OpenFile(c.Exporters.Logging.MetricsFilePath, os.O_RDWR|os.O_CREATE, 0755)
 			if err != nil {
 				return err
 			}
@@ -396,8 +399,8 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 		headers := c.commonHTTPHeaders(c.Exporters.OTLPHTTP.Headers)
 		exOpts = append(exOpts, otlpmetrichttp.WithHeaders(headers))
 
-		if c.Exporters.OTLPHTTP.MetricURLPath != "" {
-			exOpts = append(exOpts, otlpmetrichttp.WithURLPath(c.Exporters.OTLPHTTP.MetricURLPath))
+		if c.Exporters.OTLPHTTP.MetricsURLPath != "" {
+			exOpts = append(exOpts, otlpmetrichttp.WithURLPath(c.Exporters.OTLPHTTP.MetricsURLPath))
 		}
 
 		var exp sdkmetric.Exporter
@@ -507,8 +510,8 @@ func (c *ObservablesConfig) initTracesExporter(ctx context.Context, res *resourc
 		exOpts = append(exOpts, otlptracehttp.WithHeaders(headers))
 
 		exOpts = append(exOpts, otlptracehttp.WithEndpoint(u.Host))
-		if c.Exporters.OTLPHTTP.TraceURLPath != "" {
-			exOpts = append(exOpts, otlptracehttp.WithURLPath(c.Exporters.OTLPHTTP.TraceURLPath))
+		if c.Exporters.OTLPHTTP.TracesURLPath != "" {
+			exOpts = append(exOpts, otlptracehttp.WithURLPath(c.Exporters.OTLPHTTP.TracesURLPath))
 		}
 
 		client := otlptracehttp.NewClient(exOpts...)
@@ -528,8 +531,8 @@ func (c *ObservablesConfig) initTracesExporter(ctx context.Context, res *resourc
 		if c.Exporters.Logging.PrettyPrint {
 			opts = append(opts, stdouttrace.WithPrettyPrint())
 		}
-		if c.Exporters.Logging.TraceFilePath != "" && c.Exporters.Logging.TraceFilePath != "stdout" {
-			f, err := os.OpenFile(c.Exporters.Logging.TraceFilePath, os.O_RDWR|os.O_CREATE, 0755)
+		if c.Exporters.Logging.TracesFilePath != "" && c.Exporters.Logging.TracesFilePath != "stdout" {
+			f, err := os.OpenFile(c.Exporters.Logging.TracesFilePath, os.O_RDWR|os.O_CREATE, 0755)
 			if err != nil {
 				return err
 			}
@@ -683,7 +686,7 @@ func (c *ObservablesConfig) hasTracesEnableExporterOTLPLogging() bool {
 		return false
 	}
 
-	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.TraceFilePath == "" {
+	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.TracesFilePath == "" {
 		return false
 	}
 
@@ -731,7 +734,7 @@ func (c *ObservablesConfig) hasMetricsEnableExporterLogging() bool {
 		return false
 	}
 
-	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.MetricFilePath == "" {
+	if c.Exporters == nil || c.Exporters.Logging == nil || c.Exporters.Logging.MetricsFilePath == "" {
 		return false
 	}
 
@@ -746,8 +749,8 @@ func (c *ObservablesConfig) prometheusExporterHTTP(hmux *http.ServeMux) {
 
 	metricURL := "/metrics"
 	if c.Exporters != nil {
-		if c.Exporters.Prometheus != nil && c.Exporters.Prometheus.MetricURLPath != "" {
-			metricURL = c.Exporters.Prometheus.MetricURLPath
+		if c.Exporters.Prometheus != nil && c.Exporters.Prometheus.MetricsURLPath != "" {
+			metricURL = c.Exporters.Prometheus.MetricsURLPath
 		}
 	}
 
