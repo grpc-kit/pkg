@@ -233,8 +233,14 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 				},
 			)
 
-			// TODO; 如果状态码是 404 501 则不认为错误
-			if s.HTTPStatusCode() != http.StatusNotFound || s.HTTPStatusCode() != http.StatusNotImplemented {
+			switch s.HTTPStatusCode() {
+			case http.StatusBadRequest:
+				// 如果状态码是 400 则不认为错误
+			case http.StatusNotFound:
+				// 如果状态码是 404 则不认为错误
+			case http.StatusNotImplemented:
+				// 如果状态码是 501 则不认为错误
+			default:
 				span.RecordError(err, trace.WithStackTrace(false))
 
 				// error.object

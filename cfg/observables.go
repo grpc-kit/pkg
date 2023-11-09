@@ -17,6 +17,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	otelruntime "go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
@@ -51,18 +52,7 @@ type ObservablesConfig struct {
 	Telemetry *TelemetryConfig `mapstructure:"telemetry"`
 
 	// 可观测性数据上报服务地址
-	Exporters *struct {
-		OTLPGRPC   *OTLPGRPCConfig `mapstructure:"otlp"`
-		OTLPHTTP   *OTLPHTTPConfig `mapstructure:"otlphttp"`
-		Prometheus *struct {
-			MetricsURLPath string `mapstructure:"metrics_url_path"`
-		}
-		Logging *struct {
-			MetricsFilePath string `mapstructure:"metrics_file_path"`
-			TracesFilePath  string `mapstructure:"traces_file_path"`
-			PrettyPrint     bool   `mapstructure:"pretty_print"`
-		} `mapstructure:"logging"`
-	} `mapstructure:"exporters"`
+	Exporters *ExportersConfig `mapstructure:"exporters"`
 }
 
 // OTLPHTTPConfig 使用 otlp http 协议上报数据
@@ -127,6 +117,20 @@ type ExporterEnable struct {
 	OTLPHTTP   *bool `mapstructure:"otlphttp"`
 	Logging    *bool `mapstructure:"logging"`
 	Prometheus *bool `mapstructure:"prometheus"`
+}
+
+// ExportersConfig 可观测遥感数据导出目标地址
+type ExportersConfig struct {
+	OTLPGRPC   *OTLPGRPCConfig `mapstructure:"otlp"`
+	OTLPHTTP   *OTLPHTTPConfig `mapstructure:"otlphttp"`
+	Prometheus *struct {
+		MetricsURLPath string `mapstructure:"metrics_url_path"`
+	}
+	Logging *struct {
+		PrettyPrint     bool   `mapstructure:"pretty_print"`
+		MetricsFilePath string `mapstructure:"metrics_file_path"`
+		TracesFilePath  string `mapstructure:"traces_file_path"`
+	} `mapstructure:"logging"`
 }
 
 // InitObservables 初始化可观测性配置
@@ -234,6 +238,18 @@ func (c *ObservablesConfig) defaultValues() {
 		}
 		if c.Telemetry.Traces.Exporters.Prometheus == nil {
 			c.Telemetry.Traces.Exporters.Prometheus = &disalbeVal
+		}
+	}
+
+	if c.Exporters == nil || c.Exporters.Prometheus == nil {
+		c.Exporters = &ExportersConfig{
+			Prometheus: (*struct {
+				MetricsURLPath string `mapstructure:"metrics_url_path"`
+			})(&struct {
+				MetricsURLPath string
+			}{
+				MetricsURLPath: "/metrics",
+			}),
 		}
 	}
 }
@@ -429,6 +445,16 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 	provider := sdkmetric.NewMeterProvider(mpOpts...)
 	c.meter = provider
 
+	// TODO; 加入第三方
+	if c.hasMetricsEnableExporterPrometheus() {
+		if err := otelruntime.Start(
+			otelruntime.WithMeterProvider(provider),
+			otelruntime.WithMinimumReadMemStatsInterval(time.Duration(c.Telemetry.Metrics.PushInterval)*time.Second),
+		); err != nil {
+			return err
+		}
+	}
+
 	otel.SetMeterProvider(provider)
 
 	return nil
@@ -597,7 +623,9 @@ func (c *ObservablesConfig) hasRecordLogFieldsHTTPResponse() bool {
 // httpTracingEnableFilter 哪些 http 请求开启链路跟踪
 func (c *ObservablesConfig) httpTracingEnableFilter(r *http.Request) bool {
 	switch r.URL.Path {
-	case "/healthz", "/ping", "/metrics", "/version", "/favicon.ico":
+	case "/healthz", "/ping", "/version", "/favicon.ico":
+		return false
+	case c.Exporters.Prometheus.MetricsURLPath:
 		return false
 	}
 
