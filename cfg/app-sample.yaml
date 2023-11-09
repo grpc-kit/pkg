@@ -97,14 +97,68 @@ debugger:
   # 日志输出的格式，可取：json、text
   log_format: text
 
-# 链路追踪配置
-opentracing:
+# 可观测性配置
+observables:
+  # 全局是否启动可观测性，默认启用
   enable: true
-  host: 127.0.0.1
-  port: 6831
-  log_fields:
-    http_body: true
-    http_response: true
+
+  # 遥测数据（指标、链路）的个性行为配置
+  telemetry:
+    # 指标数据
+    metrics:
+      # 为所有自定义指标添加前缀
+      namespace: default
+      # 指标数据上报频率，单位：秒
+      push_interval: 60
+      # 配置启用的 exporters 插件
+      exporter_enable:
+        otlp: false
+        otlphttp: false
+        logging: true
+        prometheus: true
+
+    # 链路数据
+    traces:
+      # 给定一个 0 至 1 之间的分数决定采样频率
+      sample_ratio: 1
+      # 在网关上记录 http 请求与响应体内容，仅当为 json 结构体有效
+      log_fields:
+        http_request: true
+        http_response: true
+      # 配置启用的 exporters 插件
+      exporter_enable:
+        otlp: true
+        otlphttp: true
+        logging: true
+        prometheus: false
+      # 过滤 http 或 grpc 请求的链路数据上报
+      filters:
+        - url_path: "/api/demo"
+          method: POST
+        - method: Demo
+
+  # 遥测数据（指标、链路）的上报输出配置
+  exporters:
+    # 通过 grpc 上报数据
+    otlp:
+      endpoint: "http://127.0.0.1:4317"
+      headers:
+        Authentication: token
+    # 通过 http 上报数据，避免与 oltp 配置多个，否则链路会重复
+    #otlphttp:
+    #  endpoint: "http://127.0.0.1:4318"
+    #  traces_url_path: "/v1/traces"
+    #  metrics_url_path: "/v1/metrics"
+    #  headers:
+    #    Authentication: token
+    # 对外暴露 prometheus 风格的 http url 地址
+    prometheus:
+      metrics_url_path: "/metrics"
+    # 指标与链路分布写入本地文件路径
+    logging:
+      pretty_print: true
+      traces_file_path: "/tmp/traces.log"
+      metrics_file_path: "/tmp/metrics.log"
 
 # 事件通道配置
 cloudevents:

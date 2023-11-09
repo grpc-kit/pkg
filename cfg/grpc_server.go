@@ -11,27 +11,27 @@ import (
 	"net/http/pprof"
 	"net/textproto"
 	"path"
+	"reflect"
 	"strings"
+	"time"
 
-	"github.com/google/uuid"
-	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpcauth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
-	grpclogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
-	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	grpcopentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
-	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	grpcauth "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
+	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/vars"
-	"github.com/opentracing-contrib/go-stdlib/nethttp"
-	opentracing "github.com/opentracing/opentracing-go"
-	opentracinglog "github.com/opentracing/opentracing-go/log"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	otelcodes "go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-	// "google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 )
@@ -89,33 +89,36 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		if val := req.Header.Get(HTTPHeaderRequestID); val != "" {
 			carrier[HTTPHeaderRequestID] = val
 		} else {
-			carrier[HTTPHeaderRequestID] = calcRequestID(carrier)
+			carrier[HTTPHeaderRequestID] = c.Observables.calcRequestID(ctx)
 			req.Header.Set(HTTPHeaderRequestID, carrier[HTTPHeaderRequestID])
 		}
 
-		span := opentracing.SpanFromContext(ctx)
+		// 传递携带的信息
+		otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
+
+		span := trace.SpanFromContext(ctx)
 		if span == nil {
 			return metadata.New(carrier)
 		}
-		if err := span.Tracer().Inject(
-			span.Context(),
-			opentracing.TextMap,
-			opentracing.TextMapCarrier(carrier),
-		); err != nil {
+		// 这里不可关闭，否则之后阶段通过 ctx 获取 span 将无法上报事件(span.IsRecording=flase)
+		// defer span.End()
+
+		if !c.Observables.hasRecordLogFieldsHTTPRequest() {
 			return metadata.New(carrier)
 		}
-		span.SetTag("request.id", carrier[HTTPHeaderRequestID])
 
-		// 当method=put或post时，开启http_body记录或开启debug模式与content-type为json时才记录http.body
-		if (c.Opentracing.LogFields.HTTPBody || c.Debugger.LogLevel == "debug") &&
-			(req.Method == http.MethodPut || req.Method == http.MethodPost) &&
+		// 当 method=put 或 post 时，开启 http_request 记录且 content-type 为 json 时才记录 http.body
+		if (req.Method == http.MethodPut || req.Method == http.MethodPost) &&
 			strings.Contains(req.Header.Get("Content-Type"), "application/json") {
 
 			rawBody, err := ioutil.ReadAll(req.Body)
 			if err == nil {
 				req.Body = ioutil.NopCloser(bytes.NewBuffer(rawBody))
 				if len(rawBody) > 0 {
-					span.LogFields(opentracinglog.String("http.body", string(rawBody)))
+					span.AddEvent("http.request",
+						trace.WithAttributes(attribute.String("http.request.body.data", string(rawBody))),
+						trace.WithAttributes(attribute.Int("http.request.body.size", len(rawBody))),
+					)
 				}
 			}
 		}
@@ -133,22 +136,41 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		w.Header().Set("X-XSS-Protection", "1; mode=block")
 		// 访问一个 HTTPS 网站，要求浏览器总是通过 HTTPS 访问它
 		// w.Header().Set("Strict-Transport-Security", "max-age=172800")
+		// 返回请求ID，如果存在 trace.id 的话，否则返回默认值
+		w.Header().Set(HTTPHeaderRequestID, c.Observables.calcRequestID(ctx))
 
-		// TODO; 如果msg是数组返回，则无法成功序列化为json
-		if c.Opentracing.LogFields.HTTPResponse {
-			span := opentracing.SpanFromContext(ctx)
-			if span == nil {
-				return nil
-			}
+		// tracing 不可用或当前无法记录上报事件
+		span := trace.SpanFromContext(ctx)
+		if span == nil && !span.IsRecording() {
+			return nil
+		}
+		span.SetStatus(otelcodes.Ok, codes.OK.String())
 
+		// TODO；是否存在空值
+		if msg == nil {
+			return nil
+		}
+
+		// TODO; 成功处理时判断 proto 类型确认是否使用 204 状态码，是否有更好的实现方式
+		// https://github.com/grpc-ecosystem/grpc-gateway/issues/240
+		respType := reflect.TypeOf(msg)
+		if respType.String() == "*emptypb.Empty" {
+			w.WriteHeader(http.StatusNoContent)
+			return nil
+		}
+
+		if c.Observables.hasRecordLogFieldsHTTPResponse() {
+			// TODO; 如果msg是数组返回，则无法成功序列化为json
 			respBody, err := protojson.Marshal(msg)
 			if err != nil {
 				return err
 			}
-			if len(respBody) <= 2 {
-				// respBody = msg.String()
+			if len(respBody) > 2 {
+				span.AddEvent("http.response",
+					trace.WithAttributes(attribute.String("http.response.body.data", string(respBody))),
+					trace.WithAttributes(attribute.Int("http.response.body.size", len(respBody))),
+				)
 			}
-			span.LogFields(opentracinglog.String("http.body", string(respBody)))
 		}
 
 		return nil
@@ -167,9 +189,11 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 		// 请求的是忽略追踪的http url地址
 		ignoreTracing := false
-		span := opentracing.SpanFromContext(ctx)
+		span := trace.SpanFromContext(ctx)
 		if span == nil {
 			ignoreTracing = true
+		} else {
+			defer span.End()
 		}
 
 		requestID := req.Header.Get(HTTPHeaderRequestID)
@@ -178,13 +202,13 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		} else {
 			carrier := make(map[string]string)
 			if !ignoreTracing {
-				span.Tracer().Inject(
-					span.Context(),
-					opentracing.TextMap,
-					opentracing.TextMapCarrier(carrier))
+				// 传递携带的信息
+				otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 			}
-			requestID = calcRequestID(carrier)
+			requestID = c.Observables.calcRequestID(ctx)
 		}
+
+		w.Header().Set(HTTPHeaderRequestID, requestID)
 
 		t := &statusv1.TracingRequest{Id: requestID}
 		s = s.AppendDetail(t)
@@ -202,14 +226,50 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 		// 接口请求错误情况下，均会记录响应体
 		if !ignoreTracing {
-			span.SetTag("request.id", requestID)
-			rawBody, err := ioutil.ReadAll(req.Body)
-			if err == nil {
-				if len(rawBody) > 0 {
-					span.LogFields(opentracinglog.String("http.body", string(rawBody)))
+			span.SetAttributes(
+				attribute.KeyValue{
+					Key:   "http.response.status_code",
+					Value: attribute.IntValue(s.HTTPStatusCode()),
+				},
+			)
+
+			switch s.HTTPStatusCode() {
+			case http.StatusBadRequest:
+				// 如果状态码是 400 则不认为错误
+			case http.StatusNotFound:
+				// 如果状态码是 404 则不认为错误
+			case http.StatusNotImplemented:
+				// 如果状态码是 501 则不认为错误
+			default:
+				span.RecordError(err, trace.WithStackTrace(false))
+
+				// error.object
+				// status_code status_message
+				span.SetStatus(otelcodes.Error, s.GetStatus())
+
+				span.AddEvent("http.response",
+					trace.WithAttributes(attribute.String("http.response.body.data", string(rawBody))),
+				)
+
+				// TODO; 在错误情况下请求体已经在之前被读取过了，如何重置？
+				// 当 method=put 或 post 时，开启 http_body 记录或开启 debug 模式与 content-type 为 json 时才记录 http.body
+				if (req.Method == http.MethodPut || req.Method == http.MethodPost) &&
+					strings.Contains(req.Header.Get("Content-Type"), "application/json") {
+
+					reqBody, err := ioutil.ReadAll(req.Body)
+					// c.logger.Infof("error found add body: %v, err: %v, remote addr: %v", string(reqBody), err, req.RemoteAddr)
+
+					if err == nil {
+						req.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
+						if len(reqBody) > 0 {
+							span.AddEvent("http.request",
+								trace.WithAttributes(attribute.String("http.request.body.data", string(reqBody))),
+								trace.WithAttributes(attribute.Int("http.request.body.size", len(reqBody))),
+							)
+						}
+					}
 				}
 			}
-			span.LogFields(opentracinglog.String("http.response", string(rawBody)))
 		}
 
 		md, ok := runtime.ServerMetadataFromContext(ctx)
@@ -237,9 +297,11 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	defaultOpts = append(defaultOpts, customOpts...)
 	rmux := runtime.NewServeMux(defaultOpts...)
 
+	// TODO; 自定义 prometheus 指标
+
 	hmux := http.NewServeMux()
+	c.Observables.prometheusExporterHTTP(hmux)
 	hmux.Handle("/ping", httpHandleHealthPing())
-	hmux.Handle("/metrics", promhttp.Handler())
 	hmux.Handle("/version", httpHandleGetVersion())
 
 	if c.Debugger.EnablePprof {
@@ -250,105 +312,136 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		hmux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	}
 
-	hmux.Handle("/", nethttp.Middleware(
-		opentracing.GlobalTracer(),
-		rmux,
-		// 定义http下component名称
-		nethttp.MWComponentName("grpc-gateway"),
-		// 返回false，则不会进行追踪
-		nethttp.MWSpanFilter(func(r *http.Request) bool {
-			switch r.URL.Path {
-			case "/healthz", "/version", "/metrics", "/favicon.ico":
-				// 忽略这几个http请求的链路追踪
-				return false
-			}
-			return true
-		}),
-		// 定义http追踪的方法名称
-		nethttp.OperationNameFunc(func(r *http.Request) string {
-			return fmt.Sprintf("http %s %s", strings.ToLower(r.Method), r.URL.Path)
-		}),
-	))
+	handler := http.Handler(rmux)
+	handler = c.HTTPHandler(handler)
+	hmux.Handle("/", handler)
 
 	return hmux, rmux
 }
 
 // GetUnaryInterceptor 用于获取gRPC的一元拦截器
 func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterceptor) grpc.ServerOption {
-	// TODO; 根据 fullMethodName 进行过滤哪些需要记录 gRPC 调用链，返回 false 表示不记录
-	tracingFilterFunc := grpcopentracing.WithFilterFunc(func(ctx context.Context, fullMethodName string) bool {
-		rpcName := path.Base(fullMethodName)
-		switch rpcName {
-		case "HealthCheck":
-			return false
-		case "Check", "Watch":
-			return false
-		default:
-			return true
+	// TODO; metrics
+	/*
+		srvMetrics := grpcprometheus.NewServerMetrics(
+			grpcprometheus.WithServerHandlingTimeHistogram(
+				grpcprometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
+			),
+		)
+		c.Observables.promRegistry.MustRegister(srvMetrics)
+		exemplarFromContext := func(ctx context.Context) prometheus.Labels {
+			if span := trace.SpanContextFromContext(ctx); span.IsSampled() {
+				return prometheus.Labels{"traceID": span.TraceID().String()}
+			}
+			return nil
 		}
-		// return path.Base(fullMethodName) != "HealthCheck"
-	})
+	*/
 
-	// TODO; 根据 fullMethodName 进行过滤哪些需要记录 payload 的，返回 false 表示不记录
-	logPayloadFilterFunc := func(ctx context.Context, fullMethodName string, servingObject interface{}) bool {
-		return false
-	}
+	// TODO; 移动到 observables 方法中
+	/*
+		panicsTotal := promauto.With(c.promRegistry).NewCounter(prometheus.CounterOpts{
+			Name: "grpc_req_panics_recovered_total",
+			Help: "Total number of gRPC requests recovered from internal panic.",
+		})
+		grpcPanicRecoveryHandler := func(ctx context.Context, p any) error {
+			panicsTotal.Inc()
+			// level.Error(rpcLogger).Log("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
+			// c.logger.Errorf("panic err file: %v, p: %v", string(debug.Stack()), p)
 
-	// TODO; 根据 fullMethodName 进行过滤哪些需要记录请求状态的，返回 false 表示不记录
-	logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-		// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-		rpcName := path.Base(fullMethodName)
-		switch rpcName {
-		case "HealthCheck":
-			return false
-		case "Check", "Watch":
-			return false
-		default:
-			return true
+			span := trace.SpanFromContext(ctx)
+			if span != nil && span.IsRecording() {
+				span.AddEvent("error",
+					trace.WithAttributes(attribute.String("event", "error")),
+					trace.WithAttributes(attribute.String("stack", string(debug.Stack()))),
+				)
+			}
+
+			return status.Errorf(codes.Internal, "%s", p)
 		}
-		// return err == nil && path.Base(fullMethodName) != "HealthCheck"
-	})}
+	*/
 
 	var defaultUnaryOpt []grpc.UnaryServerInterceptor
-	defaultUnaryOpt = append(defaultUnaryOpt, grpcprometheus.UnaryServerInterceptor)
-	defaultUnaryOpt = append(defaultUnaryOpt, grpcrecovery.UnaryServerInterceptor())
+	defaultUnaryOpt = append(defaultUnaryOpt, otelgrpc.UnaryServerInterceptor(
+		otelgrpc.WithInterceptorFilter(c.Observables.grpcTracingEnableFilter)),
+	)
+	/*
+		defaultUnaryOpt = append(defaultUnaryOpt,
+			srvMetrics.UnaryServerInterceptor(grpcprometheus.WithExemplarFromContext(exemplarFromContext)))
+	*/
 	defaultUnaryOpt = append(defaultUnaryOpt, grpcauth.UnaryServerInterceptor(c.authValidate()))
-	defaultUnaryOpt = append(defaultUnaryOpt, grpcopentracing.UnaryServerInterceptor(tracingFilterFunc))
-	defaultUnaryOpt = append(defaultUnaryOpt, grpclogrus.UnaryServerInterceptor(c.logger, logReqFilterOpts...))
-	defaultUnaryOpt = append(defaultUnaryOpt, grpclogrus.PayloadUnaryServerInterceptor(c.logger, logPayloadFilterFunc))
+	defaultUnaryOpt = append(defaultUnaryOpt, grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
+		grpclogging.WithTimestampFormat(time.RFC3339Nano),
+		grpclogging.WithLogOnEvents(grpclogging.FinishCall),
+	))
+	defaultUnaryOpt = append(defaultUnaryOpt,
+		grpcrecovery.UnaryServerInterceptor(
+			grpcrecovery.WithRecoveryHandlerContext(c.Observables.grpcPanicRecoveryHandler),
+		),
+	)
 	defaultUnaryOpt = append(defaultUnaryOpt, interceptors...)
 
-	return grpc.UnaryInterceptor(grpcmiddleware.ChainUnaryServer(defaultUnaryOpt...))
+	return grpc.ChainUnaryInterceptor(defaultUnaryOpt...)
 }
 
 // GetStreamInterceptor xx
 func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInterceptor) grpc.ServerOption {
-	// TODO; 根据fullMethodName进行过滤哪些需要记录gRPC调用链，返回false表示不记录
-	tracingFilterFunc := grpcopentracing.WithFilterFunc(func(ctx context.Context, fullMethodName string) bool {
-		return path.Base(fullMethodName) != "HealthCheck"
-	})
+	/*
+		// TODO; 根据fullMethodName进行过滤哪些需要记录gRPC调用链，返回false表示不记录
+		tracingFilterFunc := grpcopentracing.WithFilterFunc(func(ctx context.Context, fullMethodName string) bool {
+			return path.Base(fullMethodName) != "HealthCheck"
+		})
 
-	// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
-	logPayloadFilterFunc := func(ctx context.Context, fullMethodName string, servingObject interface{}) bool {
-		return false
-	}
+		// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
+		logPayloadFilterFunc := func(ctx context.Context, fullMethodName string, servingObject interface{}) bool {
+			return false
+		}
 
-	// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
-	logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-		// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-		return err == nil && path.Base(fullMethodName) != "HealthCheck"
-	})}
+		// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
+		logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
+			// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
+			return err == nil && path.Base(fullMethodName) != "HealthCheck"
+		})}
+	*/
+
+	// TODO; metrics
+	/*
+		srvMetrics := grpcprometheus.NewServerMetrics(
+			grpcprometheus.WithServerHandlingTimeHistogram(
+				grpcprometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
+			),
+		)
+	*/
+
+	/*
+		c.promRegistry.MustRegister(srvMetrics)
+		exemplarFromContext := func(ctx context.Context) prometheus.Labels {
+			if span := trace.SpanContextFromContext(ctx); span.IsSampled() {
+				return prometheus.Labels{"traceID": span.TraceID().String()}
+			}
+			return nil
+		}
+	*/
+
+	/*
+		panicsTotal := promauto.With(c.promRegistry).NewCounter(prometheus.CounterOpts{
+			Name: "grpc_req_panics_recovered_total",
+			Help: "Total number of gRPC requests recovered from internal panic.",
+		})
+		grpcPanicRecoveryHandler := func(p any) (err error) {
+			panicsTotal.Inc()
+			// level.Error(rpcLogger).Log("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
+			return status.Errorf(codes.Internal, "%s", p)
+		}
+	*/
 
 	var opts []grpc.StreamServerInterceptor
-	opts = append(opts, grpcprometheus.StreamServerInterceptor)
+	opts = append(opts, otelgrpc.StreamServerInterceptor())
+	// opts = append(opts, srvMetrics.StreamServerInterceptor())
 	opts = append(opts, grpcrecovery.StreamServerInterceptor())
 	opts = append(opts, grpcauth.StreamServerInterceptor(c.authValidate()))
-	opts = append(opts, grpcopentracing.StreamServerInterceptor(tracingFilterFunc))
-	opts = append(opts, grpclogrus.StreamServerInterceptor(c.logger, logReqFilterOpts...))
-	opts = append(opts, grpclogrus.PayloadStreamServerInterceptor(c.logger, logPayloadFilterFunc))
 	opts = append(opts, interceptors...)
 
-	return grpc.StreamInterceptor(grpcmiddleware.ChainStreamServer(opts...))
+	return grpc.ChainStreamInterceptor(opts...)
 }
 
 // GetClientDialOption 获取客户端连接的设置
@@ -362,51 +455,57 @@ func (c *LocalConfig) GetClientDialOption(customOpts ...grpc.DialOption) []grpc.
 
 // GetClientUnaryInterceptor 获取客户端默认一元拦截器
 func (c *LocalConfig) GetClientUnaryInterceptor() []grpc.UnaryClientInterceptor {
-	// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
-	logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
-		return false
-	}
-
-	// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
-	logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-		// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-		rpcName := path.Base(fullMethodName)
-		switch rpcName {
-		case "HealthCheck":
+	/*
+		// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
+		logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
 			return false
-		case "Check", "Watch":
-			return false
-		default:
-			return true
 		}
-	})}
+
+		// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
+		logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
+			// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
+			rpcName := path.Base(fullMethodName)
+			switch rpcName {
+			case "HealthCheck":
+				return false
+			case "Check", "Watch":
+				return false
+			default:
+				return true
+			}
+		})}
+	*/
 
 	var opts []grpc.UnaryClientInterceptor
-	opts = append(opts, grpcprometheus.UnaryClientInterceptor)
-	opts = append(opts, grpcopentracing.UnaryClientInterceptor())
-	opts = append(opts, grpclogrus.UnaryClientInterceptor(c.logger, logReqFilterOpts...))
-	opts = append(opts, grpclogrus.PayloadUnaryClientInterceptor(c.logger, logPayloadFilterFunc))
+	opts = append(opts, otelgrpc.UnaryClientInterceptor())
+	//opts = append(opts, grpcprometheus.UnaryClientInterceptor)
+	// opts = append(opts, grpcopentracing.UnaryClientInterceptor())
+	// opts = append(opts, grpclogrus.UnaryClientInterceptor(c.logger, logReqFilterOpts...))
+	// opts = append(opts, grpclogrus.PayloadUnaryClientInterceptor(c.logger, logPayloadFilterFunc))
 	return opts
 }
 
 // GetClientStreamInterceptor 获取客户端默认流拦截器
 func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientInterceptor {
-	// TODO; 根据 fullMethodName 进行过滤哪些需要记录 payload 的，返回 false 表示不记录
-	logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
-		return false
-	}
+	/*
+		// TODO; 根据 fullMethodName 进行过滤哪些需要记录 payload 的，返回 false 表示不记录
+		logPayloadFilterFunc := func(ctx context.Context, fullMethodName string) bool {
+			return false
+		}
 
-	// TODO; 根据 fullMethodName 进行过滤哪些需要记录请求状态的，返回 false 表示不记录
-	logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-		// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-		return err == nil && path.Base(fullMethodName) != "HealthCheck"
-	})}
+		// TODO; 根据 fullMethodName 进行过滤哪些需要记录请求状态的，返回 false 表示不记录
+		logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
+			// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
+			return err == nil && path.Base(fullMethodName) != "HealthCheck"
+		})}
+	*/
 
 	var opts []grpc.StreamClientInterceptor
-	opts = append(opts, grpcprometheus.StreamClientInterceptor)
-	opts = append(opts, grpcopentracing.StreamClientInterceptor())
-	opts = append(opts, grpclogrus.StreamClientInterceptor(c.logger, logReqFilterOpts...))
-	opts = append(opts, grpclogrus.PayloadStreamClientInterceptor(c.logger, logPayloadFilterFunc))
+	opts = append(opts, otelgrpc.StreamClientInterceptor())
+	//opts = append(opts, grpcprometheus.StreamClientInterceptor)
+	// opts = append(opts, grpcopentracing.StreamClientInterceptor())
+	// opts = append(opts, grpclogrus.StreamClientInterceptor(c.logger, logReqFilterOpts...))
+	// opts = append(opts, grpclogrus.PayloadStreamClientInterceptor(c.logger, logPayloadFilterFunc))
 	return opts
 }
 
@@ -535,22 +634,6 @@ func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) erro
 	}
 
 	return nil
-}
-
-func calcRequestID(carrier map[string]string) string {
-	requestID := "0123456789abcdef0123456789abcdef"
-
-	tch, ok := carrier[TraceContextHeaderName]
-	if ok {
-		tmps := strings.Split(tch, ":")
-		if len(tmps) >= 2 {
-			requestID = fmt.Sprintf("%v%v", tmps[0], tmps[1])
-		}
-	} else {
-		requestID = strings.Replace(uuid.New().String(), "-", "", -1)
-	}
-
-	return requestID
 }
 
 func httpHandleGetVersion() http.HandlerFunc {

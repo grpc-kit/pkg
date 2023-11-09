@@ -2,6 +2,7 @@ package errs
 
 import (
 	"context"
+	"net/http"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/proto"
@@ -223,6 +224,15 @@ func DataLoss(ctx context.Context, details ...proto.Message) *Status {
 func Unauthenticated(ctx context.Context, details ...proto.Message) *Status {
 	s := New(int32(codes.Unauthenticated),
 		"Request not authenticated due to missing, invalid, or expired OAuth token.")
+	s = s.WithDetails(details...)
+	return s
+}
+
+// NoContent indicates that the server has successfully fulfilled
+// the request and that there is no additional content to send in the response content.
+func NoContent(ctx context.Context, details ...proto.Message) *Status {
+	s := New(int32(http.StatusNoContent),
+		"Service is no additional content to send in the response content.")
 	s = s.WithDetails(details...)
 	return s
 }

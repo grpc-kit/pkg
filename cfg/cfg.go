@@ -17,16 +17,13 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
 	yaml "gopkg.in/yaml.v2"
 )
 
 const (
-	// TraceContextHeaderName 链路追踪ID
-	TraceContextHeaderName = "jaeger-trace-id"
-	// TraceBaggageHeaderPrefix 数据传递头前缀
-	TraceBaggageHeaderPrefix = "jaeger-ctx"
 	// AuthenticationTypeBasic 用于http basic认证
 	AuthenticationTypeBasic = "basic"
 	// AuthenticationTypeBearer 用于jwt认证
@@ -64,6 +61,11 @@ const (
 	groupsKey
 )
 
+const (
+	// ScopeNameGRPCKit 用于该包产生链路、指标的权威名称
+	ScopeNameGRPCKit = "github.com/grpc-kit/pkg"
+)
+
 // LocalConfig 本地配置，全局微服务配置结构
 type LocalConfig struct {
 	Services    *ServicesConfig    `json:",omitempty"` // 基础服务配置
@@ -73,7 +75,7 @@ type LocalConfig struct {
 	Cachebuf    *CachebufConfig    `json:",omitempty"` // 缓存服务配置
 	Debugger    *DebuggerConfig    `json:",omitempty"` // 日志调试配置
 	Objstore    *ObjstoreConfig    `json:",omitempty"` // 对象存储配置
-	Opentracing *OpentracingConfig `json:",omitempty"` // 链路追踪配置
+	Observables *ObservablesConfig `json:",omitempty"` // 可观测性配置
 	CloudEvents *CloudEventsConfig `json:",omitempty"` // 公共事件配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
@@ -81,6 +83,9 @@ type LocalConfig struct {
 	srvdis      sd.Registry
 	rpcConfig   *rpc.Config
 	eventClient eventclient.Client
+	// promRegistry *prometheus.Registry
+
+	// Opentracing *OpentracingConfig `json:",omitempty"` // 链路追踪配置
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
@@ -143,23 +148,41 @@ type DebuggerConfig struct {
 }
 
 // OpentracingConfig 分布式链路追踪
+/*
 type OpentracingConfig struct {
-	Enable    bool      `mapstructure:"enable"`
-	Host      string    `mapstructure:"host"`
-	Port      int       `mapstructure:"port"`
+	Enable bool `mapstructure:"enable"`
+
+	// Deprecated: Use Exporters instead.
+	Host string `mapstructure:"host"`
+	// Deprecated: Use Exporters instead.
+	Port int `mapstructure:"port"`
+	// Deprecated: Use Exporters instead.
+	URLPath string `mapstructure:"url_path"`
+
+	// 记录特殊字段，默认不开启
 	LogFields LogFields `mapstructure:"log_fields"`
+
+	// 过滤器，用于过滤不需要追踪的请求
+	Filters []struct {
+		Method  string `mapstructure:"method"`
+		URLPath string `mapstructure:"url_path"`
+	} `mapstructure:"filters"`
+
+	Exporters *struct {
+		OTLPHTTP *OTLPHTTPConfig `mapstructure:"otlphttp"`
+		OTLPGRPC *OTLPGRPCConfig `mapstructure:"otlpgrpc"`
+		Logging  *struct {
+			FilePath    string `mapstructure:"file_path"`
+			PrettyPrint bool   `mapstructure:"pretty_print"`
+		} `mapstructure:"logging"`
+	} `mapstructure:"exporters"`
 }
+*/
 
 // CloudEventsConfig cloudevents事件配置
 type CloudEventsConfig struct {
 	Protocol    string      `mapstructure:"protocol"`
 	KafkaSarama KafkaSarama `mapstructure:"kafka_sarama"`
-}
-
-// LogFields 开启请求追踪属性
-type LogFields struct {
-	HTTPBody     bool `mapstructure:"http_body"`
-	HTTPResponse bool `mapstructure:"http_response"`
 }
 
 // Authentication 用于认证
@@ -254,7 +277,7 @@ func (c *LocalConfig) Init() error {
 		return err
 	}
 
-	if _, err := c.InitOpentracing(); err != nil {
+	if err := c.InitObservables(); err != nil {
 		return err
 	}
 
@@ -269,6 +292,12 @@ func (c *LocalConfig) Init() error {
 	if err := c.InitObjstore(); err != nil {
 		return err
 	}
+
+	/*
+		if err := c.InitPrometheus(); err != nil {
+			return err
+		}
+	*/
 
 	return nil
 }
@@ -287,6 +316,12 @@ func (c *LocalConfig) Register(ctx context.Context,
 
 // Deregister 用于撤销注册中心上的服务信息
 func (c *LocalConfig) Deregister() error {
+	// TODO; 释放各总资源
+	ctx := context.TODO()
+	if err := c.Observables.shutdown(ctx); err != nil {
+		return err
+	}
+
 	// 配置文件未设置注册地址，则主动忽略
 	if c.Discover == nil || c.srvdis == nil {
 		return nil
@@ -307,6 +342,24 @@ func (c *LocalConfig) GetIndependent(t interface{}) error {
 // GetServiceName 用于获取微服务名称
 func (c *LocalConfig) GetServiceName() string {
 	return fmt.Sprintf("%v.%v", c.Services.ServiceCode, c.Services.APIEndpoint)
+}
+
+// GetTraceID 用于获取 opentelemetry 下的 trace id
+func (c *LocalConfig) GetTraceID(ctx context.Context) string {
+	return c.Observables.calcRequestID(ctx)
+}
+
+// HTTPHandlerFunc 功能同 HTTPHandler
+func (c *LocalConfig) HTTPHandlerFunc(handler http.HandlerFunc) http.Handler {
+	return c.HTTPHandler(handler)
+}
+
+// HTTPHandler 用于植入 otelhttp 链路跟踪中间件
+func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
+	return otelhttp.NewHandler(handler,
+		"grpc-gateway",
+		otelhttp.WithFilter(c.Observables.httpTracingEnableFilter),
+		otelhttp.WithSpanNameFormatter(c.Observables.httpTracesSpanName))
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {

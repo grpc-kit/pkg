@@ -43,6 +43,8 @@ func mapping(code codes.Code) int {
 		return http.StatusServiceUnavailable
 	case codes.DataLoss:
 		return http.StatusInternalServerError
+	case http.StatusNoContent:
+		return http.StatusNoContent
 	}
 
 	return http.StatusInternalServerError

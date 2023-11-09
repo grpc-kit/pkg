@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -99,8 +98,8 @@ func (s *Server) StartBackground() error {
 	time.Sleep(2 * time.Second)
 
 	// register prometheus
-	grpcprometheus.Register(s.server)
-	grpcprometheus.EnableHandlingTimeHistogram()
+	// grpcprometheus.Register(s.server)
+	// grpcprometheus.EnableHandlingTimeHistogram()
 
 	go func() {
 		// 这里可以通过替换为ListenAndServeTLS，开启HTTP2

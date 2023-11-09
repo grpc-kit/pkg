@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	jwt "github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v4"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -19,6 +19,7 @@ type IDTokenClaims struct {
 	EmailVerified   bool              `json:"email_verified"`
 	Groups          []string          `json:"groups"`
 	FederatedClaims map[string]string `json:"federated_claims"`
+	Tenant          string            `json:"tenant"`
 }
 
 // InitSecurity 初始化认证
