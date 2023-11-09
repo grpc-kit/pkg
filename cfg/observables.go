@@ -67,7 +67,7 @@ type ObservablesConfig struct {
 
 // OTLPHTTPConfig 使用 otlp http 协议上报数据
 type OTLPHTTPConfig struct {
-	// The target URL to send data to (e.g.: http://some.url:9411).
+	// 上报数据至服务端地址，如：http://localhost:4318
 	Endpoint string            `mapstructure:"endpoint"`
 	Headers  map[string]string `mapstructure:"headers"`
 	// 保持格式同
@@ -79,7 +79,7 @@ type OTLPHTTPConfig struct {
 
 // OTLPGRPCConfig 使用 otlp grpc 协议上报数据
 type OTLPGRPCConfig struct {
-	// The target URL to send data to (e.g.: http://some.url:9411).
+	// 上报数据至服务端地址，如：http://localhost:4317
 	Endpoint string            `mapstructure:"endpoint"`
 	Headers  map[string]string `mapstructure:"headers"`
 }
@@ -387,7 +387,7 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 
 		// TODO; 上报指标频率可配置
 		reader := sdkmetric.NewPeriodicReader(exp,
-			sdkmetric.WithInterval(60*time.Second),
+			sdkmetric.WithInterval(time.Duration(c.Telemetry.Metrics.PushInterval)*time.Second),
 		)
 		mpOpts = append(mpOpts, sdkmetric.WithReader(reader))
 	}
@@ -421,7 +421,7 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 		}
 
 		reader := sdkmetric.NewPeriodicReader(exp,
-			sdkmetric.WithInterval(15*time.Second),
+			sdkmetric.WithInterval(time.Duration(c.Telemetry.Metrics.PushInterval)*time.Second),
 		)
 		mpOpts = append(mpOpts, sdkmetric.WithReader(reader))
 	}
