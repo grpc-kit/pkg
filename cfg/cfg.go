@@ -61,6 +61,11 @@ const (
 	groupsKey
 )
 
+const (
+	// ScopeNameGRPCKit 用于该包产生链路、指标的权威名称
+	ScopeNameGRPCKit = "github.com/grpc-kit/pkg"
+)
+
 // LocalConfig 本地配置，全局微服务配置结构
 type LocalConfig struct {
 	Services    *ServicesConfig    `json:",omitempty"` // 基础服务配置
