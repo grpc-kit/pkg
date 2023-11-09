@@ -28,16 +28,20 @@ import (
 	otelprometheus "go.opentelemetry.io/otel/exporters/prometheus"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	apimetric "go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
+
+var panicCount apimetric.Int64Counter
 
 // ObservablesConfig 用于客观性配置
 type ObservablesConfig struct {
@@ -192,6 +196,14 @@ func (c *ObservablesConfig) defaultValues() {
 		},
 	}
 
+	defaultPrometheus := (*struct {
+		MetricsURLPath string `mapstructure:"metrics_url_path"`
+	})(&struct {
+		MetricsURLPath string
+	}{
+		MetricsURLPath: "/metrics",
+	})
+
 	if c.Telemetry == nil {
 		c.Telemetry = &TelemetryConfig{
 			Metrics: defaultMetric,
@@ -241,16 +253,13 @@ func (c *ObservablesConfig) defaultValues() {
 		}
 	}
 
-	if c.Exporters == nil || c.Exporters.Prometheus == nil {
+	if c.Exporters == nil {
 		c.Exporters = &ExportersConfig{
-			Prometheus: (*struct {
-				MetricsURLPath string `mapstructure:"metrics_url_path"`
-			})(&struct {
-				MetricsURLPath string
-			}{
-				MetricsURLPath: "/metrics",
-			}),
+			Prometheus: defaultPrometheus,
 		}
+	}
+	if c.Exporters.Prometheus == nil {
+		c.Exporters.Prometheus = defaultPrometheus
 	}
 }
 
@@ -294,7 +303,9 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 		s := sdkmetric.Stream{Name: i.Name, Description: i.Description, Unit: i.Unit}
 
 		// 对于公知仪器生成的指标不做任何处理
-		if strings.HasPrefix(i.Scope.Name, "go.opentelemetry.io") {
+		if strings.HasPrefix(i.Scope.Name, ScopeNameGRPCKit) {
+			return s, true
+		} else if strings.HasPrefix(i.Scope.Name, "go.opentelemetry.io") {
 			if i.Kind == sdkmetric.InstrumentKindHistogram {
 				// TODO; 是否更改默认 histogram 的边界范围
 				if s.Name == "http.server.duration" || s.Name == "rpc.server.duration" {
@@ -451,6 +462,16 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 			otelruntime.WithMeterProvider(provider),
 			otelruntime.WithMinimumReadMemStatsInterval(time.Duration(c.Telemetry.Metrics.PushInterval)*time.Second),
 		); err != nil {
+			return err
+		}
+
+		// 自定义指标
+		var err error
+		meter := provider.Meter(ScopeNameGRPCKit)
+		panicCount, err = meter.Int64Counter("grpc_kit.runtime.panic",
+			apimetric.WithDescription("Number of grpc service panic"),
+		)
+		if err != nil {
 			return err
 		}
 	}
@@ -685,8 +706,29 @@ func (c *ObservablesConfig) grpcPanicRecoveryHandler(ctx context.Context, p any)
 	span := trace.SpanFromContext(ctx)
 	if span != nil && span.IsRecording() {
 		span.AddEvent("error",
-			trace.WithAttributes(attribute.String("event", "error")),
-			trace.WithAttributes(attribute.String("stack", string(debug.Stack()))),
+			trace.WithAttributes(
+				attribute.String("event", "error"),
+				attribute.String("stack", string(debug.Stack())),
+			),
+		)
+	}
+
+	// 实现内置指标统计 panic 数量
+	if c.hasMetricsEnableExporterPrometheus() {
+		dialGRPCMethod, ok := grpc.Method(ctx)
+		var rpcMethod, rpcService string
+		if ok {
+			// /default.api.opsaid.test6.v1.OpsaidTest6/Demo
+			// rpc_method="Demo",rpc_service="default.api.opsaid.test6.v1.OpsaidTest6"
+			tmps := strings.Split(dialGRPCMethod, "/")
+			if len(tmps) == 3 {
+				rpcService = tmps[1]
+				rpcMethod = tmps[2]
+			}
+		}
+		panicCount.Add(ctx, 1, apimetric.WithAttributes(
+			semconv.RPCMethod(rpcMethod),
+			semconv.RPCService(rpcService)),
 		)
 	}
 
