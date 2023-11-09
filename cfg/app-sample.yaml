@@ -108,7 +108,7 @@ observables:
     metrics:
       # 为所有自定义指标添加前缀
       namespace: default
-      # 性能数据上报频率，单位：秒
+      # 指标数据上报频率，单位：秒
       push_interval: 60
       # 配置启用的 exporters 插件
       exporter_enable:
