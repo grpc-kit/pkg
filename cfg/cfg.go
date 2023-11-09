@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"net"
 	"net/http"
 	"strings"
@@ -18,16 +17,13 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
 	yaml "gopkg.in/yaml.v2"
 )
 
 const (
-	// TraceContextHeaderName 链路追踪ID
-	TraceContextHeaderName = "jaeger-trace-id"
-	// TraceBaggageHeaderPrefix 数据传递头前缀
-	TraceBaggageHeaderPrefix = "jaeger-ctx"
 	// AuthenticationTypeBasic 用于http basic认证
 	AuthenticationTypeBasic = "basic"
 	// AuthenticationTypeBearer 用于jwt认证
