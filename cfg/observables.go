@@ -288,9 +288,10 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 
 	// 添加 go_build_info、go_gc_x、go_memstats_x 几个 go 应用指标
 	reg.MustRegister(
+		// 保留兼容，新指标由 otel runtime 代替
 		collectors.NewGoCollector(),
-		collectors.NewBuildInfoCollector(),
-		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+		// collectors.NewBuildInfoCollector(),
+		// collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
 	c.promRegistry = reg
 
@@ -456,7 +457,7 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 	provider := sdkmetric.NewMeterProvider(mpOpts...)
 	c.meter = provider
 
-	// TODO; 加入第三方
+	// TODO; 加入第三方或自定义指标
 	if c.hasMetricsEnableExporterPrometheus() {
 		if err := otelruntime.Start(
 			otelruntime.WithMeterProvider(provider),
@@ -828,14 +829,7 @@ func (c *ObservablesConfig) prometheusExporterHTTP(hmux *http.ServeMux) {
 		return
 	}
 
-	metricURL := "/metrics"
-	if c.Exporters != nil {
-		if c.Exporters.Prometheus != nil && c.Exporters.Prometheus.MetricsURLPath != "" {
-			metricURL = c.Exporters.Prometheus.MetricsURLPath
-		}
-	}
-
-	hmux.Handle(metricURL, promhttp.InstrumentMetricHandler(
+	hmux.Handle(c.Exporters.Prometheus.MetricsURLPath, promhttp.InstrumentMetricHandler(
 		c.promRegistry,
 		promhttp.HandlerFor(
 			c.promRegistry,
