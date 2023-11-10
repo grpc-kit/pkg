@@ -29,7 +29,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/balancer/roundrobin"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -321,58 +320,22 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 // GetUnaryInterceptor 用于获取gRPC的一元拦截器
 func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterceptor) grpc.ServerOption {
-	// TODO; metrics
-	/*
-		srvMetrics := grpcprometheus.NewServerMetrics(
-			grpcprometheus.WithServerHandlingTimeHistogram(
-				grpcprometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
-			),
-		)
-		c.Observables.promRegistry.MustRegister(srvMetrics)
-		exemplarFromContext := func(ctx context.Context) prometheus.Labels {
-			if span := trace.SpanContextFromContext(ctx); span.IsSampled() {
-				return prometheus.Labels{"traceID": span.TraceID().String()}
-			}
-			return nil
-		}
-	*/
-
 	// TODO; 移动到 observables 方法中
-	/*
-		panicsTotal := promauto.With(c.promRegistry).NewCounter(prometheus.CounterOpts{
-			Name: "grpc_req_panics_recovered_total",
-			Help: "Total number of gRPC requests recovered from internal panic.",
-		})
-		grpcPanicRecoveryHandler := func(ctx context.Context, p any) error {
-			panicsTotal.Inc()
-			// level.Error(rpcLogger).Log("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
-			// c.logger.Errorf("panic err file: %v, p: %v", string(debug.Stack()), p)
-
-			span := trace.SpanFromContext(ctx)
-			if span != nil && span.IsRecording() {
-				span.AddEvent("error",
-					trace.WithAttributes(attribute.String("event", "error")),
-					trace.WithAttributes(attribute.String("stack", string(debug.Stack()))),
-				)
-			}
-
-			return status.Errorf(codes.Internal, "%s", p)
-		}
-	*/
 
 	var defaultUnaryOpt []grpc.UnaryServerInterceptor
-	defaultUnaryOpt = append(defaultUnaryOpt, otelgrpc.UnaryServerInterceptor(
-		otelgrpc.WithInterceptorFilter(c.Observables.grpcTracingEnableFilter)),
+	defaultUnaryOpt = append(defaultUnaryOpt,
+		otelgrpc.UnaryServerInterceptor(
+			otelgrpc.WithInterceptorFilter(c.Observables.grpcTracingEnableFilter),
+		),
 	)
-	/*
-		defaultUnaryOpt = append(defaultUnaryOpt,
-			srvMetrics.UnaryServerInterceptor(grpcprometheus.WithExemplarFromContext(exemplarFromContext)))
-	*/
-	defaultUnaryOpt = append(defaultUnaryOpt, grpcauth.UnaryServerInterceptor(c.authValidate()))
-	defaultUnaryOpt = append(defaultUnaryOpt, grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
-		grpclogging.WithTimestampFormat(time.RFC3339Nano),
-		grpclogging.WithLogOnEvents(grpclogging.FinishCall),
-	))
+	defaultUnaryOpt = append(defaultUnaryOpt,
+		grpcauth.UnaryServerInterceptor(c.authValidate()),
+	)
+	defaultUnaryOpt = append(defaultUnaryOpt,
+		grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
+			grpclogging.WithTimestampFormat(time.RFC3339Nano),
+			grpclogging.WithLogOnEvents(grpclogging.FinishCall),
+		))
 	defaultUnaryOpt = append(defaultUnaryOpt,
 		grpcrecovery.UnaryServerInterceptor(
 			grpcrecovery.WithRecoveryHandlerContext(c.Observables.grpcPanicRecoveryHandler),
@@ -446,9 +409,15 @@ func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInte
 
 // GetClientDialOption 获取客户端连接的设置
 func (c *LocalConfig) GetClientDialOption(customOpts ...grpc.DialOption) []grpc.DialOption {
+	const grpcServiceConfig = `{"loadBalancingPolicy":"round_robin"}`
+
 	var defaultOpts []grpc.DialOption
 	defaultOpts = append(defaultOpts, grpc.WithInsecure())
-	defaultOpts = append(defaultOpts, grpc.WithBalancerName(roundrobin.Name))
+
+	// TODO;
+	// defaultOpts = append(defaultOpts, grpc.WithBalancerName(roundrobin.Name))
+	defaultOpts = append(defaultOpts, grpc.WithDefaultServiceConfig(grpcServiceConfig))
+
 	defaultOpts = append(defaultOpts, customOpts...)
 	return defaultOpts
 }

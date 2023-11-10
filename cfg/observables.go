@@ -308,10 +308,17 @@ func (c *ObservablesConfig) initMetricsExporter(ctx context.Context, res *resour
 			return s, true
 		} else if strings.HasPrefix(i.Scope.Name, "go.opentelemetry.io") {
 			if i.Kind == sdkmetric.InstrumentKindHistogram {
-				// TODO; 是否更改默认 histogram 的边界范围
+				// TODO; 是否更改默认 histogram 的边界范围避免基数过大，所有指标见以下文件
+				// github.com/open-telemetry/opentelemetry-go-contrib/instrumentation/google.golang.org/grpc/otelgrpc/config.go
 				if s.Name == "http.server.duration" || s.Name == "rpc.server.duration" {
+					/*
+						s.Aggregation = sdkmetric.AggregationExplicitBucketHistogram{
+							Boundaries: []float64{0, 10, 50, 100, 250, 500, 1000, 2500, 5000, 7500, 10000},
+						}
+					*/
 					s.Aggregation = sdkmetric.AggregationExplicitBucketHistogram{
-						Boundaries: []float64{0, 10, 50, 100, 250, 500, 1000, 2500, 5000, 7500, 10000},
+						Boundaries: []float64{},
+						NoMinMax:   true,
 					}
 					s.AttributeFilter = attribute.NewDenyKeysFilter(
 						"net.host.name",
