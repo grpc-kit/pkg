@@ -107,7 +107,7 @@ func (e *etcdv3Client) Deregister() error {
 // Build 实现"resolver.Build"
 // 仅当调用"grpc.Dial"时执行，如果在此之间后端服务地址变更，则需要依赖"watch"做自动化更新
 func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	if target.Scheme != Scheme {
+	if target.URL.Scheme != Scheme {
 		return nil, errSchemeInvalid
 	}
 
@@ -117,13 +117,13 @@ func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opt
 	ctx, cancel := context.WithTimeout(context.TODO(), 2*time.Second)
 	defer cancel()
 
-	endpointKey := fmt.Sprintf("%v/%v/endpoints", e.basePath(), target.Endpoint)
+	endpointKey := fmt.Sprintf("%v/%v/endpoints", e.basePath(), target.Endpoint())
 	resp, err := e.getKey(ctx, endpointKey)
 	if err != nil {
 		e.logger.Errorf("resolver build getkey err: %v, will use last resolver address", err)
 
 		// 如果查询超时，则返回内存中最近一次可用的地址
-		err = e.updateState(target.Endpoint, resolver.State{})
+		err = e.updateState(target.Endpoint(), resolver.State{})
 		if err != nil {
 			e.logger.Errorf("resolver build update state err: %v", err)
 		}
@@ -138,7 +138,7 @@ func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opt
 	state := resolver.State{Addresses: adders}
 
 	// 最近一次解析服务地址存入内存以便获取失败时使用
-	err = e.updateState(target.Endpoint, state)
+	err = e.updateState(target.Endpoint(), state)
 	if err != nil {
 		e.logger.Errorf("resolver build update state err: %v", err)
 		return nil, err
@@ -146,10 +146,10 @@ func (e *etcdv3Client) Build(target resolver.Target, cc resolver.ClientConn, opt
 
 	e.mutexWatch.Lock()
 	defer e.mutexWatch.Unlock()
-	if !e.targetWatch[target.Endpoint] {
+	if !e.targetWatch[target.Endpoint()] {
 		// 确保每个服务全局仅有一个"watch"组件
-		go e.watcher(target.Endpoint, adders)
-		e.targetWatch[target.Endpoint] = true
+		go e.watcher(target.Endpoint(), adders)
+		e.targetWatch[target.Endpoint()] = true
 	}
 
 	return e, nil
