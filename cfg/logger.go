@@ -91,8 +91,12 @@ func (c *LocalConfig) interceptorLogger(l logrus.FieldLogger) logging.Logger {
 		if ok {
 			val, ok := tmp.(string)
 			if ok {
-				if strings.TrimSpace(val) == "HealthCheck" {
-					// l.Error(msg)
+				switch strings.TrimSpace(val) {
+				case "Check":
+					return
+				case "Watch":
+					return
+				case "HealthCheck":
 					return
 				}
 			}
