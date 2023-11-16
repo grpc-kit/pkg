@@ -11,9 +11,29 @@ func (c *LocalConfig) InitRPCConfig() error {
 	r := rpc.NewConfig(c.logger)
 
 	r.Authority = c.Services.Namespace
-	r.GRPCAddress = c.Services.GRPCAddress
-	r.HTTPAddress = c.Services.HTTPAddress
 	r.APIEndpoint = c.Services.APIEndpoint
+
+	r.GRPCAddress = c.Services.GRPCAddress
+	if c.Services.GRPCService != nil && c.Services.GRPCService.Address != "" {
+		r.GRPCAddress = c.Services.GRPCService.Address
+	}
+
+	r.HTTPAddress = c.Services.HTTPAddress
+	if c.Services.HTTPService != nil && c.Services.HTTPService.Address != "" {
+		r.HTTPAddress = c.Services.HTTPService.Address
+	}
+
+	if c.Services.HTTPService != nil && c.Services.HTTPService.TLSServer != nil {
+		r.TLS.HTTPCertFile = c.Services.HTTPService.TLSServer.CertFile
+		r.TLS.HTTPKeyFile = c.Services.HTTPService.TLSServer.KeyFile
+	}
+	if c.Services.HTTPService != nil && c.Services.HTTPService.TLSAuto != nil && c.Services.HTTPService.TLSAuto.ACME != nil {
+		r.TLS.ACMEEmail = c.Services.HTTPService.TLSAuto.ACME.Email
+		r.TLS.ACMECacheDir = c.Services.HTTPService.TLSAuto.ACME.CacheDir
+		r.TLS.ACMEDomains = c.Services.HTTPService.TLSAuto.ACME.Domains
+		r.TLS.ACMEServer = c.Services.HTTPService.TLSAuto.ACME.Server
+	}
+
 	c.rpcConfig = r
 
 	return nil

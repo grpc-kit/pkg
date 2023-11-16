@@ -21,13 +21,20 @@ type Config struct {
 	APIEndpoint string
 
 	// tls
-	TLS *TLSConfig
+	TLS TLSConfig
 }
 
-// TLSConfig
+// TLSConfig xx
 type TLSConfig struct {
-	CertFile string `json:"cert_file"`
-	KeyFile  string `json:"key_file"`
+	// HTTPCertFile 用于 HTTP 网关证书
+	HTTPCertFile string
+	HTTPKeyFile  string
+
+	// 用于基于 acme 协议的自动化证书申请
+	ACMEServer   string
+	ACMEEmail    string
+	ACMEDomains  []string
+	ACMECacheDir string
 }
 
 // NewConfig xx

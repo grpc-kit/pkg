@@ -2,12 +2,13 @@ package rpc
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net"
 	"net/http"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"golang.org/x/crypto/acme/autocert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 )
@@ -66,6 +67,26 @@ func (s *Server) RegisterGateway(mux *http.ServeMux) error {
 		Handler: mux,
 	}
 
+	// 支持 acme 自动化申请证书
+	var auto *autocert.Manager
+	if len(s.config.TLS.ACMEDomains) > 0 {
+		cacheDir := "/tmp/grpc-kit"
+		if s.config.TLS.ACMECacheDir != "" {
+			cacheDir = s.config.TLS.ACMECacheDir
+		}
+
+		auto = &autocert.Manager{
+			Cache:      autocert.DirCache(cacheDir),
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(s.config.TLS.ACMEDomains...),
+		}
+		if s.config.TLS.ACMEEmail != "" {
+			auto.Email = s.config.TLS.ACMEEmail
+		}
+
+		srv.TLSConfig = auto.TLSConfig()
+	}
+
 	s.gateway = srv
 
 	return nil
@@ -95,31 +116,25 @@ func (s *Server) StartBackground() error {
 		return nil
 	}
 
+	// TODO; 如果有启动 grpc，则通过健康检测，启动之后在开启 http gateway
 	time.Sleep(2 * time.Second)
 
-	// register prometheus
-	// grpcprometheus.Register(s.server)
-	// grpcprometheus.EnableHandlingTimeHistogram()
-
 	go func() {
+		certFile := s.config.TLS.HTTPCertFile
+		keyFile := s.config.TLS.HTTPKeyFile
+
 		// 这里可以通过替换为ListenAndServeTLS，开启HTTP2
-		if s.config.TLS == nil {
-			if err := s.gateway.ListenAndServe(); err != nil {
-				// ignore shutdown error
-				if err != http.ErrServerClosed {
-					panic(err)
-				}
-			}
+
+		if s.gateway.TLSConfig != nil {
+			err = s.gateway.ListenAndServeTLS("", "")
+		} else if certFile != "" && keyFile != "" {
+			err = s.gateway.ListenAndServeTLS(certFile, keyFile)
 		} else {
-			if s.config.TLS.CertFile == "" && s.config.TLS.KeyFile == "" {
-				panic(fmt.Errorf("cert_file or key_file must set"))
-			}
-			if err := s.gateway.ListenAndServeTLS(s.config.TLS.CertFile, s.config.TLS.KeyFile); err != nil {
-				// ignore shutdown error
-				if err != http.ErrServerClosed {
-					panic(err)
-				}
-			}
+			err = s.gateway.ListenAndServe()
+		}
+
+		if !errors.Is(err, http.ErrServerClosed) {
+			panic(err)
 		}
 	}()
 

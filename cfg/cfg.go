@@ -90,13 +90,17 @@ type LocalConfig struct {
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
 type ServicesConfig struct {
-	RootPath      string `mapstructure:"root_path"`
-	Namespace     string `mapstructure:"namespace"`
-	ServiceCode   string `mapstructure:"service_code"`
-	APIEndpoint   string `mapstructure:"api_endpoint"`
-	GRPCAddress   string `mapstructure:"grpc_address"`
-	HTTPAddress   string `mapstructure:"http_address"`
-	PublicAddress string `mapstructure:"public_address"`
+	RootPath    string `mapstructure:"root_path"`
+	Namespace   string `mapstructure:"namespace"`
+	ServiceCode string `mapstructure:"service_code"`
+	APIEndpoint string `mapstructure:"api_endpoint"`
+	// Deprecated: 使用 GRPCService 代替，优先级低于 GRPCService 配置
+	GRPCAddress string `mapstructure:"grpc_address"`
+	// Deprecated: 使用 HTTPService 代替，优先级低于 HTTPService 配置
+	HTTPAddress   string       `mapstructure:"http_address"`
+	PublicAddress string       `mapstructure:"public_address"`
+	GRPCService   *GRPCService `mapstructure:"grpc_service"`
+	HTTPService   *HTTPService `mapstructure:"http_service"`
 }
 
 // DiscoverConfig 服务注册，服务启动后如何汇报自身
