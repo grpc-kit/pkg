@@ -17,6 +17,42 @@ services:
   # 服务注册，外部网络可连接的grpc地址（一般等同于grpc-address）
   public_address: ""
 
+  # grpc 服务配置
+  grpc_service:
+    enabled: false
+    address: 127.0.0.1:10081
+    tls_server:
+      cert_file: ""
+      key_file: ""
+
+  # http 服务配置
+  http_service:
+    enabled: false
+    address: 127.0.0.1:8080
+
+    # 自动化申请 http server 服务端证书，优先级低于 tls_auto
+    tls_server:
+      cert_file: "./config/tls/http.crt"
+      key_file: "./config/tls/http.key"
+
+    # 与本地 grpc 服务通讯使用
+    tls_client:
+      ca_file: ""
+      cert_file: ""
+      key_file: ""
+      insecure_skip_verify: false
+
+    # 自动化申请 http server 服务端证书，优先级高于 tls_server
+    tls_auto:
+      acme:
+        server: "https://acme-v02.api.letsencrypt.org/directory"
+        email: "support@grpc-kit.com"
+        cache: "./config/tls/"
+        domains:
+          - test.grpc-kit.com
+      spiffe:
+        agent: /tmp/agent.socket
+
 # 服务注册配置
 discover:
   driver: etcdv3
