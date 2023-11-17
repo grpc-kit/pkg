@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"net"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/acme/autocert"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 )
 
@@ -31,6 +34,17 @@ func NewServer(c *Config) *Server {
 	})
 
 	s.opts = append(s.opts, keepParam)
+
+	// grpc 服务添加证书
+	if c.TLS.GRPCCertFile != "" && c.TLS.GRPCKeyFile != "" {
+		cert, err := tls.LoadX509KeyPair(c.TLS.GRPCCertFile, c.TLS.GRPCKeyFile)
+		if err != nil {
+			panic(err)
+		}
+		s.opts = append(s.opts, grpc.Creds(credentials.NewServerTLSFromCert(&cert)))
+	} else {
+		s.opts = append(s.opts, grpc.Creds(insecure.NewCredentials()))
+	}
 
 	s.config = c
 	s.logger = c.logger

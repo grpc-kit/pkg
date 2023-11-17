@@ -34,6 +34,11 @@ func (c *LocalConfig) InitRPCConfig() error {
 		r.TLS.ACMEServer = c.Services.HTTPService.TLSAuto.ACME.Server
 	}
 
+	if c.Services.GRPCService != nil && c.Services.GRPCService.TLSServer != nil {
+		r.TLS.GRPCCertFile = c.Services.GRPCService.TLSServer.CertFile
+		r.TLS.GRPCKeyFile = c.Services.GRPCService.TLSServer.KeyFile
+	}
+
 	c.rpcConfig = r
 
 	return nil

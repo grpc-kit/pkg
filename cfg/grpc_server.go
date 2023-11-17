@@ -412,10 +412,13 @@ func (c *LocalConfig) GetClientDialOption(customOpts ...grpc.DialOption) []grpc.
 	const grpcServiceConfig = `{"loadBalancingPolicy":"round_robin"}`
 
 	var defaultOpts []grpc.DialOption
-	defaultOpts = append(defaultOpts, grpc.WithInsecure())
 
-	// TODO;
-	// defaultOpts = append(defaultOpts, grpc.WithBalancerName(roundrobin.Name))
+	creds, err := c.Services.getClientCredentials()
+	if err != nil {
+		panic(err)
+	}
+	defaultOpts = append(defaultOpts, grpc.WithTransportCredentials(creds))
+
 	defaultOpts = append(defaultOpts, grpc.WithDefaultServiceConfig(grpcServiceConfig))
 
 	defaultOpts = append(defaultOpts, customOpts...)

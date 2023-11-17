@@ -30,6 +30,10 @@ type TLSConfig struct {
 	HTTPCertFile string
 	HTTPKeyFile  string
 
+	// GRPCCertFile 用于 GRPC 网关证书
+	GRPCCertFile string
+	GRPCKeyFile  string
+
 	// 用于基于 acme 协议的自动化证书申请
 	ACMEServer   string
 	ACMEEmail    string
