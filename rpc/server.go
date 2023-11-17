@@ -121,6 +121,11 @@ func (s *Server) StartBackground() error {
 	}
 
 	go func() {
+		if s.config.DisableGRPCServer {
+			s.logger.Warnf("Disable gRPC server")
+			return
+		}
+
 		if err := s.server.Serve(lis); err != nil {
 			panic(err)
 		}
@@ -134,6 +139,11 @@ func (s *Server) StartBackground() error {
 	time.Sleep(2 * time.Second)
 
 	go func() {
+		if s.config.DisableHTTPServer {
+			s.logger.Warnf("Disable gateway server")
+			return
+		}
+
 		certFile := s.config.TLS.HTTPCertFile
 		keyFile := s.config.TLS.HTTPKeyFile
 

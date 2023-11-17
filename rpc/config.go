@@ -22,6 +22,10 @@ type Config struct {
 
 	// tls
 	TLS TLSConfig
+
+	// 默认开启 http 与 grpc 服务
+	DisableGRPCServer bool
+	DisableHTTPServer bool
 }
 
 // TLSConfig xx

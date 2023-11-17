@@ -98,3 +98,21 @@ func (s ServicesConfig) getClientCredentials() (credentials.TransportCredentials
 	// 未配置 grpc 证书，则使用 insecure.NewCredentials()
 	return insecure.NewCredentials(), nil
 }
+
+// 判断是否开启了 grpc 服务
+func (s ServicesConfig) hasEnableGRPCServer() bool {
+	if s.GRPCService == nil || s.GRPCService.Enabled == nil {
+		return true
+	}
+
+	return *s.GRPCService.Enabled
+}
+
+// 判断是否开启了 http 服务
+func (s ServicesConfig) hasEnableHTTPServer() bool {
+	if s.HTTPService == nil || s.HTTPService.Enabled == nil {
+		return true
+	}
+
+	return *s.HTTPService.Enabled
+}

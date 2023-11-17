@@ -39,6 +39,13 @@ func (c *LocalConfig) InitRPCConfig() error {
 		r.TLS.GRPCKeyFile = c.Services.GRPCService.TLSServer.KeyFile
 	}
 
+	if !c.Services.hasEnableGRPCServer() {
+		r.DisableGRPCServer = true
+	}
+	if !c.Services.hasEnableHTTPServer() {
+		r.DisableHTTPServer = true
+	}
+
 	c.rpcConfig = r
 
 	return nil
