@@ -37,6 +37,8 @@ type TLSConfig struct {
 	// GRPCCertFile 用于 GRPC 网关证书
 	GRPCCertFile string
 	GRPCKeyFile  string
+	// 用于验证客户端证书有效性，既：http_service.tls_client.cert_file 所签发的 ca 证书
+	GRPCCAFile string
 
 	// 用于基于 acme 协议的自动化证书申请
 	ACMEServer   string

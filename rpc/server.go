@@ -3,7 +3,10 @@ package rpc
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
@@ -28,6 +31,8 @@ type Server struct {
 // NewServer returns Server instance
 func NewServer(c *Config) *Server {
 	s := new(Server)
+	s.config = c
+	s.logger = c.logger
 
 	keepParam := grpc.KeepaliveParams(keepalive.ServerParameters{
 		Timeout: c.KeepaliveTimeout,
@@ -41,13 +46,31 @@ func NewServer(c *Config) *Server {
 		if err != nil {
 			panic(err)
 		}
-		s.opts = append(s.opts, grpc.Creds(credentials.NewServerTLSFromCert(&cert)))
+
+		tlsConfig := &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		}
+
+		// 配置了客户端 ca 证书，说明服务端需要验证客户端的有效性
+		clientCAFile := c.TLS.GRPCCAFile
+		if clientCAFile != "" {
+			caBody, err := ioutil.ReadFile(clientCAFile)
+			if err != nil {
+				panic(err)
+			}
+			caPool := x509.NewCertPool()
+			if !caPool.AppendCertsFromPEM(caBody) {
+				panic(fmt.Errorf("grpc ca file invalid: %v", clientCAFile))
+			}
+
+			tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
+			tlsConfig.ClientCAs = caPool
+		}
+
+		s.opts = append(s.opts, grpc.Creds(credentials.NewTLS(tlsConfig)))
 	} else {
 		s.opts = append(s.opts, grpc.Creds(insecure.NewCredentials()))
 	}
-
-	s.config = c
-	s.logger = c.logger
 
 	return s
 }
@@ -64,10 +87,6 @@ func (s *Server) Server() *grpc.Server {
 // UseServerOption 用于设置选项并初始化grpc server
 func (s *Server) UseServerOption(opts ...grpc.ServerOption) *Server {
 	s.opts = append(s.opts, opts...)
-
-	if s.server == nil {
-		s.server = grpc.NewServer(s.opts...)
-	}
 
 	return s
 }
@@ -109,10 +128,6 @@ func (s *Server) RegisterGateway(mux *http.ServeMux) error {
 // StartBackground xx
 func (s *Server) StartBackground() error {
 	// TODO; check GRPCAddress
-
-	if s.server == nil {
-		s.server = grpc.NewServer(s.opts...)
-	}
 
 	// start grpc
 	lis, err := net.Listen("tcp", s.config.GRPCAddress)

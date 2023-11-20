@@ -54,10 +54,18 @@ func (c *LocalConfig) registerGateway(ctx context.Context,
 		forwardGWAddr = grpcListenAddr
 	}
 
+	// 配置 grpc-gateway 至 grpc 的连接选项
+	var defaultOpts []grpc.DialOption
+	creds, err := c.Services.getClientCredentials()
+	if err != nil {
+		panic(err)
+	}
+	defaultOpts = append(defaultOpts, grpc.WithTransportCredentials(creds))
+
 	err = gw(ctx,
 		rmux,
 		fmt.Sprintf("%v:%v", forwardGWAddr, grpcListenPort),
-		c.GetClientDialOption())
+		c.GetClientDialOption(defaultOpts...))
 
 	return hmux, err
 }
@@ -410,17 +418,8 @@ func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInte
 // GetClientDialOption 获取客户端连接的设置
 func (c *LocalConfig) GetClientDialOption(customOpts ...grpc.DialOption) []grpc.DialOption {
 	const grpcServiceConfig = `{"loadBalancingPolicy":"round_robin"}`
-
 	var defaultOpts []grpc.DialOption
-
-	creds, err := c.Services.getClientCredentials()
-	if err != nil {
-		panic(err)
-	}
-	defaultOpts = append(defaultOpts, grpc.WithTransportCredentials(creds))
-
 	defaultOpts = append(defaultOpts, grpc.WithDefaultServiceConfig(grpcServiceConfig))
-
 	defaultOpts = append(defaultOpts, customOpts...)
 	return defaultOpts
 }

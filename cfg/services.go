@@ -2,7 +2,9 @@ package cfg
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"strconv"
 	"strings"
 
@@ -69,8 +71,8 @@ func (s ServicesConfig) getGRPCListenPort() int {
 // getClientCredentials 用于根据配置文件获取证书配置，存在四种情况：
 // 1. 如果未配置 grpc 证书，则使用 insecure.NewCredentials()
 // 2. 如果配置了 grpc 服务端证书，未配置客户端 ca 则跳过 ca 验证
-// 3. 如果配置了 grpc 服务端证书与客户端 ca，则会验证服务端 ca 证书
-// 4. 如果配置了 grpc 服务端证书与客户端 ca，但主动跳过了 grpc ca 验证，则不会验证
+// 3. 如果配置了 grpc 服务端证书，客户端配置了验证用的 ca 证书，则会验证服务端证书是否有效
+// 4. 如果配置了 grpc 服务端证书，客户端也配置了证书，则客户端请求时会带上证书内容，提供服务端验证客户端证书是否有效
 func (s ServicesConfig) getClientCredentials() (credentials.TransportCredentials, error) {
 	// 配置了 grpc 服务端证书
 	if s.GRPCService != nil &&
@@ -83,12 +85,31 @@ func (s ServicesConfig) getClientCredentials() (credentials.TransportCredentials
 			s.HTTPService.TLSClient != nil &&
 			s.HTTPService.TLSClient.CAFile != "" {
 
-			if s.HTTPService.TLSClient.InsecureSkipVerify {
-				return credentials.NewTLS(&tls.Config{InsecureSkipVerify: true}), nil
+			caBody, err := ioutil.ReadFile(s.HTTPService.TLSClient.CAFile)
+			if err != nil {
+				return nil, err
+			}
+			caPool := x509.NewCertPool()
+			if !caPool.AppendCertsFromPEM(caBody) {
+				return nil, fmt.Errorf("services.http_service.tls_client.ca_file: %v not valid", s.HTTPService.TLSClient.CAFile)
 			}
 
-			// 是否自定义添加 authority 请求头
-			return credentials.NewClientTLSFromFile(s.HTTPService.TLSClient.CAFile, "")
+			tlsConfig := &tls.Config{
+				InsecureSkipVerify: s.HTTPService.TLSClient.InsecureSkipVerify,
+				RootCAs:            caPool,
+			}
+
+			// 客户端提交证书，用于服务端验证客户端
+			if s.HTTPService.TLSClient.CertFile != "" && s.HTTPService.TLSClient.KeyFile != "" {
+				cert, err := tls.LoadX509KeyPair(s.HTTPService.TLSClient.CertFile, s.HTTPService.TLSClient.KeyFile)
+				if err != nil {
+					return nil, err
+				}
+
+				tlsConfig.Certificates = []tls.Certificate{cert}
+			}
+
+			return credentials.NewTLS(tlsConfig), nil
 		} else {
 			// 未配置客户端 ca 证书，跳过服务端证书验证
 			return credentials.NewTLS(&tls.Config{InsecureSkipVerify: true}), nil

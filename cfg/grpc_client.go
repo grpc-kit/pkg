@@ -37,6 +37,7 @@ func (c *LocalConfig) InitRPCConfig() error {
 	if c.Services.GRPCService != nil && c.Services.GRPCService.TLSServer != nil {
 		r.TLS.GRPCCertFile = c.Services.GRPCService.TLSServer.CertFile
 		r.TLS.GRPCKeyFile = c.Services.GRPCService.TLSServer.KeyFile
+		r.TLS.GRPCCAFile = c.Services.GRPCService.TLSServer.CAFile
 	}
 
 	if !c.Services.hasEnableGRPCServer() {
