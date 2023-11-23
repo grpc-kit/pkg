@@ -105,18 +105,18 @@ func (b *S3Bucket) getRange(ctx context.Context, objectKey string, start, end in
 	}
 	r, err := b.client.GetObject(ctx, b.name, objectKey, *opts)
 	if err != nil {
-		return nil, a, err
+		return r, a, err
 	}
 
 	// NotFoundObject error is revealed only after first Read. This does the initial GetRequest. Prefetch this here
 	// for convenience.
 	if _, err := r.Read(nil); err != nil {
-		return nil, a, err
+		return r, a, err
 	}
 
 	i, err := r.Stat()
 	if err != nil {
-		return nil, a, err
+		return r, a, err
 	}
 
 	a.Size = i.Size
