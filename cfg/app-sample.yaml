@@ -21,6 +21,8 @@ services:
   grpc_service:
     enabled: false
     address: 127.0.0.1:10081
+
+    # 如果配置 mTLS 也需要在 http_service.tls_client 加上相应证书，否则 http 转 grpc 接口不可用
     tls_server:
       cert_file: ""
       key_file: ""
@@ -38,8 +40,6 @@ services:
     # 与本地 grpc 服务通讯使用
     tls_client:
       ca_file: ""
-      cert_file: ""
-      key_file: ""
       insecure_skip_verify: false
 
     # 自动化申请 http server 服务端证书，优先级高于 tls_server
@@ -50,8 +50,7 @@ services:
         cache: "./config/tls/"
         domains:
           - test.grpc-kit.com
-      spiffe:
-        agent: /tmp/agent.socket
+          - demo.grpc-kit.com
 
 # 服务注册配置
 discover:
