@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"mime"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
@@ -125,6 +127,13 @@ func (b *S3Bucket) getRange(ctx context.Context, objectKey string, start, end in
 	a.UserMetadata = i.UserMetadata
 	a.ETag = i.ETag
 
+	if a.UserMetadata == nil {
+		a.UserMetadata = make(map[string]string, 0)
+	}
+	if i.ContentType != "" {
+		a.UserMetadata["Content-Type"] = i.ContentType
+	}
+
 	return r, a, nil
 }
 
@@ -161,6 +170,11 @@ func (b *S3Bucket) Upload(ctx context.Context, objectKey string, r io.Reader) (O
 
 	var attrs ObjstoreAttributes
 
+	contentType := mime.TypeByExtension(path.Ext(objectKey))
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+
 	partSize := b.partSize
 	if size < int64(partSize) {
 		partSize = 0
@@ -172,6 +186,7 @@ func (b *S3Bucket) Upload(ctx context.Context, objectKey string, r io.Reader) (O
 		r,
 		size,
 		minio.PutObjectOptions{
+			ContentType:          contentType,
 			PartSize:             partSize,
 			ServerSideEncryption: b.defaultSSE,
 			UserMetadata:         b.putUserMetadata,
