@@ -321,7 +321,10 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 	handler := http.Handler(rmux)
 	handler = c.HTTPHandler(handler)
+
+	// TODO；后续如需集成前端，可考虑添加 "/api" 前缀，把 ”/“ 存放静态 HTML
 	hmux.Handle("/", handler)
+	// hmux.Handle("/api/", handler)
 
 	return hmux, rmux
 }
