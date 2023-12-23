@@ -132,6 +132,23 @@ debugger:
   # 日志输出的格式，可取：json、text
   log_format: text
 
+# 前端相关配置
+frontend:
+  enable: true
+  interface:
+    admin:
+      enabled: false
+      embedded: true
+      handle_url: /admin
+    openapi:
+      enabled: true
+      embedded: true
+      handle_url: /openapi-spec
+    webroot:
+      enabled: false
+      embedded: true
+      handle_url: /
+
 # 可观测性配置
 observables:
   # 全局是否启动可观测性，默认启用

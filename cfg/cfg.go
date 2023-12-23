@@ -299,6 +299,10 @@ func (c *LocalConfig) Init() error {
 		return err
 	}
 
+	if err := c.InitFrontend(); err != nil {
+		return err
+	}
+
 	/*
 		if err := c.InitPrometheus(); err != nil {
 			return err
@@ -370,7 +374,11 @@ func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
 
 // HTTPHandlerFrontend 用于处理前端相关服务
 func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) error {
-	return c.Frontend.web(mux, assets)
+	if *c.Frontend.Enable {
+		return c.Frontend.startHandle(mux, assets)
+	}
+
+	return nil
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {
