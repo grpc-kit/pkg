@@ -139,14 +139,17 @@ frontend:
     admin:
       enabled: false
       embedded: true
+      tracing: false
       handle_url: /admin
     openapi:
       enabled: true
       embedded: true
+      tracing: false
       handle_url: /openapi-spec
     webroot:
       enabled: false
       embedded: true
+      tracing: false
       handle_url: /
 
 # 可观测性配置

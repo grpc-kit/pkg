@@ -374,8 +374,34 @@ func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
 
 // HTTPHandlerFrontend 用于处理前端相关服务
 func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) error {
-	if *c.Frontend.Enable {
-		return c.Frontend.startHandle(mux, assets)
+	if !*c.Frontend.Enable {
+		return nil
+	}
+
+	comps := []string{"admin", "openapi", "webroot"}
+	for _, v := range comps {
+		tracing := false
+
+		switch v {
+		case "admin":
+			tracing = c.Frontend.Interface.Admin.Tracing
+		case "openapi":
+			tracing = c.Frontend.Interface.Openapi.Tracing
+		case "webroot":
+			tracing = c.Frontend.Interface.Webroot.Tracing
+		default:
+			tracing = false
+		}
+
+		handle, url, ok, err := c.Frontend.getHandler(assets, v)
+		if err == nil && ok {
+			if tracing {
+				handle = c.HTTPHandler(handle)
+			}
+			mux.Handle(url, handle)
+		} else if err != nil {
+			return err
+		}
 	}
 
 	return nil
