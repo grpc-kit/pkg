@@ -346,7 +346,28 @@ func (c *LocalConfig) GetIndependent(t interface{}) error {
 		return fmt.Errorf("independent is nil")
 	}
 
-	return mapstructure.Decode(c.Independent, t)
+	// return mapstructure.Decode(c.Independent, t)
+	// 使用全局 Decode 仅仅支持基础类型，当配置结构体存在 time.Duration 类型则无法解析，会产生类似以下错误：
+	// expected type 'time.Duration', got unconvertible type 'string', value: '10s'
+	//
+	// 参考 viper 通过自定义解析器解决
+	// https://github.com/spf13/viper/blob/master/viper.go#L1152
+	// github.com/spf13/viper/viper.go -> defaultDecoderConfig
+	dc := &mapstructure.DecoderConfig{
+		Metadata:         nil,
+		Result:           t,
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToSliceHookFunc(",")),
+	}
+
+	dr, err := mapstructure.NewDecoder(dc)
+	if err != nil {
+		return err
+	}
+
+	return dr.Decode(c.Independent)
 }
 
 // GetServiceName 用于获取微服务名称
