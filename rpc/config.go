@@ -22,6 +22,10 @@ type Config struct {
 
 	// tls
 	TLS TLSConfig
+
+	// 默认开启 http 与 grpc 服务
+	DisableGRPCServer bool
+	DisableHTTPServer bool
 }
 
 // TLSConfig xx
@@ -29,6 +33,12 @@ type TLSConfig struct {
 	// HTTPCertFile 用于 HTTP 网关证书
 	HTTPCertFile string
 	HTTPKeyFile  string
+
+	// GRPCCertFile 用于 GRPC 网关证书
+	GRPCCertFile string
+	GRPCKeyFile  string
+	// 用于验证客户端证书有效性，既：http_service.tls_client.cert_file 所签发的 ca 证书
+	GRPCCAFile string
 
 	// 用于基于 acme 协议的自动化证书申请
 	ACMEServer   string

@@ -265,18 +265,28 @@ func (c *ObservablesConfig) defaultValues() {
 
 // shutdown 关闭前刷新数据并释放资源
 func (c *ObservablesConfig) shutdown(ctx context.Context) error {
-	if err := c.meter.ForceFlush(ctx); err != nil {
-		return err
+	if c.Enable != nil && *c.Enable == false {
+		return nil
 	}
-	if err := c.meter.Shutdown(ctx); err != nil {
-		return err
+
+	if c.meter != nil {
+		if err := c.meter.ForceFlush(ctx); err != nil {
+			return err
+		}
+		if err := c.meter.Shutdown(ctx); err != nil {
+			return err
+		}
 	}
-	if err := c.tracer.ForceFlush(ctx); err != nil {
-		return err
+
+	if c.tracer != nil {
+		if err := c.tracer.ForceFlush(ctx); err != nil {
+			return err
+		}
+		if err := c.tracer.Shutdown(ctx); err != nil {
+			return err
+		}
 	}
-	if err := c.tracer.Shutdown(ctx); err != nil {
-		return err
-	}
+
 	return nil
 }
 

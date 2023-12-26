@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"mime"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
@@ -105,18 +107,18 @@ func (b *S3Bucket) getRange(ctx context.Context, objectKey string, start, end in
 	}
 	r, err := b.client.GetObject(ctx, b.name, objectKey, *opts)
 	if err != nil {
-		return nil, a, err
+		return r, a, err
 	}
 
 	// NotFoundObject error is revealed only after first Read. This does the initial GetRequest. Prefetch this here
 	// for convenience.
-	if _, err := r.Read(nil); err != nil {
-		return nil, a, err
+	if _, err = r.Read(nil); err != nil {
+		return r, a, err
 	}
 
 	i, err := r.Stat()
 	if err != nil {
-		return nil, a, err
+		return r, a, err
 	}
 
 	a.Size = i.Size
@@ -124,6 +126,13 @@ func (b *S3Bucket) getRange(ctx context.Context, objectKey string, start, end in
 	a.UserTags = i.UserTags
 	a.UserMetadata = i.UserMetadata
 	a.ETag = i.ETag
+
+	if a.UserMetadata == nil {
+		a.UserMetadata = make(map[string]string, 0)
+	}
+	if i.ContentType != "" {
+		a.UserMetadata["Content-Type"] = i.ContentType
+	}
 
 	return r, a, nil
 }
@@ -161,6 +170,11 @@ func (b *S3Bucket) Upload(ctx context.Context, objectKey string, r io.Reader) (O
 
 	var attrs ObjstoreAttributes
 
+	contentType := mime.TypeByExtension(path.Ext(objectKey))
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+
 	partSize := b.partSize
 	if size < int64(partSize) {
 		partSize = 0
@@ -172,6 +186,7 @@ func (b *S3Bucket) Upload(ctx context.Context, objectKey string, r io.Reader) (O
 		r,
 		size,
 		minio.PutObjectOptions{
+			ContentType:          contentType,
 			PartSize:             partSize,
 			ServerSideEncryption: b.defaultSSE,
 			UserMetadata:         b.putUserMetadata,

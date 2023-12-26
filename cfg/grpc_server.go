@@ -54,10 +54,18 @@ func (c *LocalConfig) registerGateway(ctx context.Context,
 		forwardGWAddr = grpcListenAddr
 	}
 
+	// 配置 grpc-gateway 至 grpc 的连接选项
+	var defaultOpts []grpc.DialOption
+	creds, err := c.Services.getClientCredentials()
+	if err != nil {
+		panic(err)
+	}
+	defaultOpts = append(defaultOpts, grpc.WithTransportCredentials(creds))
+
 	err = gw(ctx,
 		rmux,
 		fmt.Sprintf("%v:%v", forwardGWAddr, grpcListenPort),
-		c.GetClientDialOption())
+		c.GetClientDialOption(defaultOpts...))
 
 	return hmux, err
 }
@@ -313,7 +321,10 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 	handler := http.Handler(rmux)
 	handler = c.HTTPHandler(handler)
-	hmux.Handle("/", handler)
+
+	// TODO；后续如需集成前端，可考虑添加 "/api" 前缀，把 ”/“ 存放静态 HTML
+	// hmux.Handle("/", handler)
+	hmux.Handle("/api/", handler)
 
 	return hmux, rmux
 }
@@ -410,14 +421,8 @@ func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInte
 // GetClientDialOption 获取客户端连接的设置
 func (c *LocalConfig) GetClientDialOption(customOpts ...grpc.DialOption) []grpc.DialOption {
 	const grpcServiceConfig = `{"loadBalancingPolicy":"round_robin"}`
-
 	var defaultOpts []grpc.DialOption
-	defaultOpts = append(defaultOpts, grpc.WithInsecure())
-
-	// TODO;
-	// defaultOpts = append(defaultOpts, grpc.WithBalancerName(roundrobin.Name))
 	defaultOpts = append(defaultOpts, grpc.WithDefaultServiceConfig(grpcServiceConfig))
-
 	defaultOpts = append(defaultOpts, customOpts...)
 	return defaultOpts
 }
