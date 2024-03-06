@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/Shopify/sarama v1.32.0
 	github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2 v2.8.0
-	github.com/cloudevents/sdk-go/v2 v2.14.0
+	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/coreos/go-oidc/v3 v3.1.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-jwt/jwt/v4 v4.4.3
