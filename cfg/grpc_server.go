@@ -92,6 +92,20 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	// 植入特定的请求头
 	optionWithMetada := func(ctx context.Context, req *http.Request) metadata.MD {
 		carrier := make(map[string]string)
+
+		// DEBUG
+		for k, v := range req.Header {
+			// 仅传递自定义以 "x-" 开头的请求头
+			if strings.HasPrefix(strings.ToLower(k), "x-") {
+				carrier[k] = v[0]
+			}
+		}
+
+		carrier[fmt.Sprintf("%vhost", runtime.MetadataPrefix)] = req.Host
+		carrier[fmt.Sprintf("%vmethod", runtime.MetadataPrefix)] = req.Method
+		carrier[fmt.Sprintf("%vurl-path", runtime.MetadataPrefix)] = req.URL.Path
+		// DEBUG
+
 		// 植入自定义请求头（全局请求ID）
 		if val := req.Header.Get(HTTPHeaderRequestID); val != "" {
 			carrier[HTTPHeaderRequestID] = val
@@ -586,25 +600,32 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 }
 
 func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) error {
-	// 是否开启鉴权
-	if c.Security.Authorization != nil {
-		// 需要当前用户组进行核对，是否拥护权限
-		if len(c.Security.Authorization.AllowedGroups) > 0 {
-			allow := false
-			found := make(map[string]int, 0)
-			for _, g := range c.Security.Authorization.AllowedGroups {
-				found[g] = 0
-			}
-			for _, g := range groups {
-				if _, ok := found[g]; ok {
-					allow = true
-					break
-				}
-			}
-			if !allow {
-				return errs.PermissionDenied(ctx).Err()
+	// 需要当前用户组进行核对，是否拥护权限
+	if len(c.Security.Authorization.AllowedGroups) > 0 {
+		allow := false
+		found := make(map[string]int, 0)
+		for _, g := range c.Security.Authorization.AllowedGroups {
+			found[g] = 0
+		}
+		for _, g := range groups {
+			if _, ok := found[g]; ok {
+				allow = true
+				break
 			}
 		}
+		if !allow {
+			return errs.PermissionDenied(ctx).Err()
+		}
+	}
+
+	// 基于 opa 项目进行鉴权
+	allow, err := c.Security.checkOPAPolicy(ctx)
+	if err != nil {
+		c.logger.Error("check opa policy err: %v", err)
+		return errs.PermissionDenied(ctx).Err()
+	}
+	if !allow {
+		return errs.PermissionDenied(ctx).Err()
 	}
 
 	return nil

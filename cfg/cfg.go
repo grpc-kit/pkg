@@ -3,16 +3,19 @@ package cfg
 import (
 	"context"
 	"database/sql"
+	"embed"
 	"fmt"
 	"io/fs"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"sync/atomic"
 	"time"
 
 	eventclient "github.com/cloudevents/sdk-go/v2/client"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
@@ -117,6 +120,7 @@ type DiscoverConfig struct {
 type SecurityConfig struct {
 	// 包含*oidc.IDTokenVerifier数据结构，不能直接使用*oidc.IDTokenVerifier
 	tokenVerifier atomic.Value
+	authClient    *auth.Client
 
 	Enable         bool            `mapstructure:"enable"`
 	Authentication *Authentication `mapstructure:"authentication"`
@@ -200,7 +204,9 @@ type Authentication struct {
 
 // Authorization 用于鉴权
 type Authorization struct {
-	AllowedGroups []string `mapstructure:"allowed_groups"`
+	AllowedGroups []string    `mapstructure:"allowed_groups"`
+	OPANative     OPANative   `mapstructure:"opa_native"`
+	OPAExternal   OPAExternal `mapstructure:"opa_external"`
 }
 
 // BasicAuth 用于HTTP基本认证的用户权限定义
@@ -426,6 +432,43 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 	}
 
 	return nil
+}
+
+// SecurityPolicyLoad 加载服务本地安全策略
+func (c *LocalConfig) SecurityPolicyLoad(ctx context.Context, assets embed.FS) error {
+	tmps := strings.Split(c.Services.ServiceCode, ".")
+	if len(tmps) != 3 {
+		return fmt.Errorf("invalid service code, must be like 'xxx.yyy.zzz'")
+	}
+
+	packageName := fmt.Sprintf("%v.%v.%v", tmps[2], tmps[0], tmps[1])
+
+	// 内嵌的策略文件
+	embedRegoFile, err := assets.ReadFile("authz.rego")
+	if err != nil {
+		return err
+	}
+	embedDataFile, err := assets.ReadFile("rbac.yaml")
+	if err != nil {
+		return err
+	}
+
+	localRegoFile := c.Security.Authorization.OPANative.Policy.RegoFile
+	localDataFile := c.Security.Authorization.OPANative.Policy.DataFile
+	if localRegoFile != "" {
+		embedRegoFile, err = os.ReadFile(localRegoFile)
+		if err != nil {
+			return err
+		}
+	}
+	if localDataFile != "" {
+		embedDataFile, err = os.ReadFile(localDataFile)
+		if err != nil {
+			return err
+		}
+	}
+
+	return c.Security.initAuthClient(ctx, packageName, embedRegoFile, embedDataFile)
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {

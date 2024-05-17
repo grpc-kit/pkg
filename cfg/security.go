@@ -9,6 +9,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/grpc-kit/pkg/auth"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -20,6 +21,20 @@ type IDTokenClaims struct {
 	Groups          []string          `json:"groups"`
 	FederatedClaims map[string]string `json:"federated_claims"`
 	Tenant          string            `json:"tenant"`
+}
+
+// OPANative 内嵌的 opa 组件
+type OPANative struct {
+	Enabled *bool `mapstructure:"enabled"`
+	Policy  struct {
+		RegoFile string `mapstructure:"rego_file"`
+		DataFile string `mapstructure:"data_file"`
+	} `mapstructure:"policy"`
+}
+
+// OPAExternal 外部的 opa 服务
+type OPAExternal struct {
+	Enabled *bool `mapstructure:"enabled"`
 }
 
 // InitSecurity 初始化认证
@@ -78,6 +93,27 @@ func (c *LocalConfig) InitSecurity() error {
 		if !ok || err != nil {
 			go wait.PollUntil(time.Second*30, initVerifierFn, ctx.Done())
 		}
+	}
+
+	// 初始化默认值
+	falseVal := false
+	trueVal := true
+	if c.Security.Authorization == nil {
+		c.Security.Authorization = &Authorization{
+			OPANative: OPANative{
+				Enabled: &trueVal,
+			},
+			OPAExternal: OPAExternal{
+				Enabled: &falseVal,
+			},
+		}
+	}
+
+	if c.Security.Authorization.OPANative.Enabled == nil {
+		c.Security.Authorization.OPANative.Enabled = &trueVal
+	}
+	if c.Security.Authorization.OPAExternal.Enabled == nil {
+		c.Security.Authorization.OPAExternal.Enabled = &falseVal
 	}
 
 	return nil
@@ -260,3 +296,50 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 
 	return idToken, nil
 }
+
+// initAuthClient 用于初始化 opa 客户端
+func (s *SecurityConfig) initAuthClient(ctx context.Context, pkgName string, regoBody, dataBody []byte) error {
+	c, err := auth.NewClient(
+		&auth.Config{PackageName: pkgName},
+	)
+	if err != nil {
+		return err
+	}
+	s.authClient = c
+
+	if *s.Authorization.OPANative.Enabled {
+		if err = s.authClient.InitOPARego(ctx, regoBody, dataBody); err != nil {
+			return err
+		}
+	}
+	if *s.Authorization.OPAExternal.Enabled {
+		if err = s.authClient.InitOPASDK(ctx, []byte("")); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *SecurityConfig) checkOPAPolicy(ctx context.Context) (bool, error) {
+	if !*s.Authorization.OPANative.Enabled {
+		return true, nil
+	}
+
+	rs, err := s.authClient.Query(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	/*
+		ors, err := s.authClient.Decision(ctx)
+		if err != nil {
+			return false, err
+		}
+		c.logger.Debugf("opa decision: %v", ors)
+	*/
+
+	return rs.Allowed(), nil
+}
+
+// DEBUG
