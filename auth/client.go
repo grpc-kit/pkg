@@ -1,25 +1,28 @@
 package auth
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
 	rbacv3 "github.com/envoyproxy/go-control-plane/envoy/config/rbac/v3"
-	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/sdk"
 	"github.com/open-policy-agent/opa/storage/inmem"
 	"github.com/open-policy-agent/opa/util"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // Client xx
 type Client struct {
 	config *Config
 
+	envoy   *envoyProxy
 	opaSDK  *sdk.OPA
 	opaRego rego.PreparedEvalQuery
 }
@@ -28,16 +31,33 @@ type Client struct {
 func NewClient(config *Config) (*Client, error) {
 	c := &Client{
 		config: config,
+		envoy:  &envoyProxy{},
 	}
 
 	return c, nil
 }
 
 // InitOPARego xx
-func (c *Client) InitOPARego(ctx context.Context, dataRego, dataFile []byte) error {
+func (c *Client) InitOPARego(ctx context.Context, dataRego, dataRBAC []byte) error {
 	var jsonData map[string]interface{}
-	if err := util.Unmarshal(dataFile, &jsonData); err != nil {
+	if err := util.Unmarshal(dataRBAC, &jsonData); err != nil {
 		return err
+	}
+
+	// 如果客户端提供的 rego 或 rbac 文件为空包含被注释，则使用框架默认规则
+	ncl, err := c.nonCommentLineLength(dataRego)
+	if err != nil {
+		return err
+	}
+	if ncl == 0 {
+		dataRego = c.config.defaultRego()
+	}
+	ncl, err = c.nonCommentLineLength(dataRBAC)
+	if err != nil {
+		return err
+	}
+	if ncl == 0 {
+		dataRBAC = c.config.defaultRBAC()
 	}
 
 	query, err := rego.New(
@@ -86,8 +106,13 @@ func (c *Client) InitOPASDK(ctx context.Context, config []byte) error {
 	return nil
 }
 
+// GRPCAuthnMetadata 把 http 请求信息转换为 grpc 的 metadata 用于鉴权
+func (c *Client) GRPCAuthnMetadata(ctx context.Context, req *http.Request) metadata.MD {
+	return c.envoy.extractHTTPHeader(ctx, req)
+}
+
 func (c *Client) Decision(ctx context.Context) (*sdk.DecisionResult, error) {
-	input, err := c.opaUserInputData(ctx)
+	input, err := c.envoy.getCheckRequest(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -100,44 +125,22 @@ func (c *Client) Decision(ctx context.Context) (*sdk.DecisionResult, error) {
 }
 
 func (c *Client) Query(ctx context.Context) (rego.ResultSet, error) {
-	input, err := c.opaUserInputData(ctx)
+	input, err := c.envoy.getCheckRequest(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	rawBody, _ := protojson.Marshal(input)
+	fmt.Println(string(rawBody))
 
 	return c.opaRego.Eval(ctx, rego.EvalInput(input))
 }
 
 // Close xx
-func (c *Client) Close() {
-
-}
-
-// 用户输入数据
-// 转换为兼容 envoy 数据格式
-// https://pkg.go.dev/github.com/envoyproxy/go-control-plane@v0.12.0/envoy/service/auth/v3#CheckRequest
-func (c *Client) opaUserInputData(ctx context.Context) (*authv3.CheckRequest, error) {
-	input := &authv3.CheckRequest{
-		Attributes: &authv3.AttributeContext{
-			Request: &authv3.AttributeContext_Request{
-				Http: &authv3.AttributeContext_HttpRequest{
-					Headers: map[string]string{
-						"x-forwarded-proto": "https",
-					},
-					Method: "GET",
-				},
-			},
-		},
+func (c *Client) Close(ctx context.Context) {
+	if c.opaSDK != nil {
+		c.opaSDK.Stop(ctx)
 	}
-
-	md, ok := metadata.FromIncomingContext(ctx)
-	if ok {
-		for k, v := range md {
-			fmt.Println("k:", k, "v:", v)
-		}
-	}
-
-	return input, nil
 }
 
 // https://pkg.go.dev/github.com/envoyproxy/go-control-plane@v0.12.0/envoy/config/rbac/v3#RBAC
@@ -200,4 +203,34 @@ allow if {
 }
 `
 	return testRego, nil
+}
+
+func (c *Client) nonCommentLineLength(body []byte) (int, error) {
+	if len(body) == 0 {
+		return 0, nil
+	}
+
+	scanner := bufio.NewScanner(bytes.NewReader(body))
+	nonCommentLines := 0
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// 去除行首空白字符
+		line = strings.TrimSpace(line)
+
+		// 跳过空行和注释行
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		// 非注释行计数
+		nonCommentLines++
+	}
+
+	if err := scanner.Err(); err != nil {
+		return 0, err
+	}
+
+	return nonCommentLines, nil
 }

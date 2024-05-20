@@ -94,16 +94,19 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		carrier := make(map[string]string)
 
 		// DEBUG
-		for k, v := range req.Header {
-			// 仅传递自定义以 "x-" 开头的请求头
-			if strings.HasPrefix(strings.ToLower(k), "x-") {
-				carrier[k] = v[0]
+		/*
+			for k, v := range req.Header {
+				// 仅传递自定义以 "x-" 开头的请求头
+				if strings.HasPrefix(strings.ToLower(k), "x-") {
+					carrier[k] = v[0]
+				}
 			}
-		}
 
-		carrier[fmt.Sprintf("%vhost", runtime.MetadataPrefix)] = req.Host
-		carrier[fmt.Sprintf("%vmethod", runtime.MetadataPrefix)] = req.Method
-		carrier[fmt.Sprintf("%vurl-path", runtime.MetadataPrefix)] = req.URL.Path
+			carrier[fmt.Sprintf("%vhost", runtime.MetadataPrefix)] = req.Host
+			carrier[fmt.Sprintf("%vmethod", runtime.MetadataPrefix)] = req.Method
+			carrier[fmt.Sprintf("%vrequest-uri", runtime.MetadataPrefix)] = req.RequestURI
+		*/
+		// c.Security.injectAuthHeader(ctx, carrier)
 		// DEBUG
 
 		// 植入自定义请求头（全局请求ID）
@@ -113,19 +116,26 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			carrier[HTTPHeaderRequestID] = c.Observables.calcRequestID(ctx)
 			req.Header.Set(HTTPHeaderRequestID, carrier[HTTPHeaderRequestID])
 		}
-
 		// 传递携带的信息
 		otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 
+		md := metadata.New(carrier)
+
+		// 植入鉴权信息
+		for k, v := range c.Security.injectAuthHeader(ctx, req) {
+			md.Set(k, v...)
+		}
+
 		span := trace.SpanFromContext(ctx)
 		if span == nil {
-			return metadata.New(carrier)
+			return md
 		}
+
 		// 这里不可关闭，否则之后阶段通过 ctx 获取 span 将无法上报事件(span.IsRecording=flase)
 		// defer span.End()
 
 		if !c.Observables.hasRecordLogFieldsHTTPRequest() {
-			return metadata.New(carrier)
+			return md
 		}
 
 		// 当 method=put 或 post 时，开启 http_request 记录且 content-type 为 json 时才记录 http.body
@@ -144,7 +154,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			}
 		}
 
-		return metadata.New(carrier)
+		return md
 	}
 
 	// 正常响应时调用，统一植入特定内容

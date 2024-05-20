@@ -10,6 +10,7 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
+	"google.golang.org/grpc/metadata"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -97,11 +98,11 @@ func (c *LocalConfig) InitSecurity() error {
 
 	// 初始化默认值
 	falseVal := false
-	trueVal := true
+	// trueVal := true
 	if c.Security.Authorization == nil {
 		c.Security.Authorization = &Authorization{
 			OPANative: OPANative{
-				Enabled: &trueVal,
+				Enabled: &falseVal,
 			},
 			OPAExternal: OPAExternal{
 				Enabled: &falseVal,
@@ -110,7 +111,7 @@ func (c *LocalConfig) InitSecurity() error {
 	}
 
 	if c.Security.Authorization.OPANative.Enabled == nil {
-		c.Security.Authorization.OPANative.Enabled = &trueVal
+		c.Security.Authorization.OPANative.Enabled = &falseVal
 	}
 	if c.Security.Authorization.OPAExternal.Enabled == nil {
 		c.Security.Authorization.OPAExternal.Enabled = &falseVal
@@ -342,4 +343,11 @@ func (s *SecurityConfig) checkOPAPolicy(ctx context.Context) (bool, error) {
 	return rs.Allowed(), nil
 }
 
-// DEBUG
+// injectAuthHeader 用于注入鉴权信息
+func (s *SecurityConfig) injectAuthHeader(ctx context.Context, req *http.Request) metadata.MD {
+	if *s.Authorization.OPANative.Enabled {
+		return s.authClient.GRPCAuthnMetadata(ctx, req)
+	}
+
+	return metadata.MD{}
+}
