@@ -105,8 +105,6 @@ func (e *envoyProxy) getCheckRequest(ctx context.Context) (*authv3.CheckRequest,
 						},
 					},
 				}
-			case fmt.Sprintf("%v%v", authMetadataPrefix, "url-scheme"):
-				input.Attributes.Request.Http.Scheme = v[0]
 			case ":authority":
 				// 如果来自 grpc-gateway 的请求，则忽略
 				// 127.0.0.1:10081
