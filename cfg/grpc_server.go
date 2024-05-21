@@ -629,9 +629,9 @@ func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) erro
 	}
 
 	// 基于 opa 项目进行鉴权
-	allow, err := c.Security.checkOPAPolicy(ctx)
+	allow, err := c.Security.policyAllow(ctx)
 	if err != nil {
-		c.logger.Error("check opa policy err: %v", err)
+		c.logger.Errorf("check opa policy err: %v", err)
 		return errs.PermissionDenied(ctx).Err()
 	}
 	if !allow {

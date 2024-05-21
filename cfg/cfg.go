@@ -204,9 +204,10 @@ type Authentication struct {
 
 // Authorization 用于鉴权
 type Authorization struct {
-	AllowedGroups []string    `mapstructure:"allowed_groups"`
-	OPANative     OPANative   `mapstructure:"opa_native"`
-	OPAExternal   OPAExternal `mapstructure:"opa_external"`
+	AllowedGroups  []string       `mapstructure:"allowed_groups"`
+	OPANative      OPANative      `mapstructure:"opa_native"`
+	OPAExternal    OPAExternal    `mapstructure:"opa_external"`
+	OPAEnvoyPlugin OPAEnvoyPlugin `mapstructure:"opa_envoy_plugin"`
 }
 
 // BasicAuth 用于HTTP基本认证的用户权限定义
@@ -468,7 +469,7 @@ func (c *LocalConfig) SecurityPolicyLoad(ctx context.Context, assets embed.FS) e
 		}
 	}
 
-	return c.Security.initAuthClient(ctx, packageName, embedRegoFile, embedDataFile)
+	return c.Security.initAuthClient(ctx, c.logger, packageName, embedRegoFile, embedDataFile)
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {

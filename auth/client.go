@@ -9,36 +9,65 @@ import (
 	"strings"
 
 	rbacv3 "github.com/envoyproxy/go-control-plane/envoy/config/rbac/v3"
+	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/sdk"
 	"github.com/open-policy-agent/opa/storage/inmem"
 	"github.com/open-policy-agent/opa/util"
+	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// Client xx
+// Client 认证鉴权客户端
 type Client struct {
+	logger *logrus.Entry
 	config *Config
 
-	envoy   *envoyProxy
-	opaSDK  *sdk.OPA
-	opaRego rego.PreparedEvalQuery
+	envoy    *envoyProxy
+	opaSDK   *sdk.OPA
+	opaRego  rego.PreparedEvalQuery
+	opaEnvoy authv3.AuthorizationClient
 }
 
-// NewClient xx
-func NewClient(config *Config) (*Client, error) {
+// NewClient 初始化实例
+func NewClient(ctx context.Context, config *Config) (*Client, error) {
+	var err error
+
 	c := &Client{
 		config: config,
 		envoy:  &envoyProxy{},
+		logger: logrus.NewEntry(logrus.New()),
+	}
+
+	if c.config.OPARego != nil {
+		if err = c.initOPARego(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	if c.config.OPASDK != nil {
+		if err = c.initOPASDK(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	if c.config.OPAEnvoy != nil {
+		if err = c.initOPAEnvoy(ctx); err != nil {
+			return nil, err
+		}
 	}
 
 	return c, nil
 }
 
-// InitOPARego xx
-func (c *Client) InitOPARego(ctx context.Context, dataRego, dataRBAC []byte) error {
+// initOPARego 初始化内置权限验证服务
+func (c *Client) initOPARego(ctx context.Context) error {
+	dataRego := c.config.OPARego.RegoBody
+	dataRBAC := c.config.OPARego.DataBody
+
 	var jsonData map[string]interface{}
 	if err := util.Unmarshal(dataRBAC, &jsonData); err != nil {
 		return err
@@ -52,6 +81,7 @@ func (c *Client) InitOPARego(ctx context.Context, dataRego, dataRBAC []byte) err
 	if ncl == 0 {
 		dataRego = c.config.defaultRego()
 	}
+
 	ncl, err = c.nonCommentLineLength(dataRBAC)
 	if err != nil {
 		return err
@@ -64,6 +94,7 @@ func (c *Client) InitOPARego(ctx context.Context, dataRego, dataRBAC []byte) err
 		rego.Query(fmt.Sprintf("data.%v.allow", c.config.PackageName)),
 		rego.Module("authz.rego", string(dataRego)),
 		rego.Store(inmem.NewFromObject(jsonData)),
+		rego.EnablePrintStatements(true),
 	).PrepareForEval(ctx)
 	if err != nil {
 		return err
@@ -74,29 +105,14 @@ func (c *Client) InitOPARego(ctx context.Context, dataRego, dataRBAC []byte) err
 	return nil
 }
 
-// InitOPASDK xx
-func (c *Client) InitOPASDK(ctx context.Context, config []byte) error {
-	// opa/sdk
-	config = []byte(fmt.Sprintf(`{
-		"services": {
-			"test": {
-				"url": %q
-			}
+// initOPASDK 初始化 opa 连接外部统一授权服务
+func (c *Client) initOPASDK(ctx context.Context) error {
+	opaSDK, err := sdk.New(ctx,
+		sdk.Options{
+			ID:     c.config.PackageName,
+			Config: strings.NewReader(c.config.OPASDK.Config),
 		},
-		"bundles": {
-			"test": {
-				"resource": "/bundle.tar.gz"
-			}
-		},
-		"decision_logs": {
-			"console": true
-		}
-	}`, "http://192.168.0.2:8080"))
-
-	opaSDK, err := sdk.New(ctx, sdk.Options{
-		ID:     "opa-test-1",
-		Config: bytes.NewReader(config),
-	})
+	)
 	if err != nil {
 		return err
 	}
@@ -106,37 +122,98 @@ func (c *Client) InitOPASDK(ctx context.Context, config []byte) error {
 	return nil
 }
 
+// initOPAEnvoy 初始化 opa 连接外部 envoy_ext_authz_grpc 授权服务
+func (c *Client) initOPAEnvoy(ctx context.Context) error {
+	addr := c.config.OPAEnvoy.GRPCAddress
+	if addr == "" {
+		addr = "127.0.0.1:9191"
+	}
+
+	conn, err := grpc.DialContext(ctx, addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return err
+	}
+
+	c.opaEnvoy = authv3.NewAuthorizationClient(conn)
+
+	return nil
+}
+
 // GRPCAuthnMetadata 把 http 请求信息转换为 grpc 的 metadata 用于鉴权
 func (c *Client) GRPCAuthnMetadata(ctx context.Context, req *http.Request) metadata.MD {
 	return c.envoy.extractHTTPHeader(ctx, req)
 }
 
-func (c *Client) Decision(ctx context.Context) (*sdk.DecisionResult, error) {
-	input, err := c.envoy.getCheckRequest(ctx)
+// Allow 是否满足策略允许访问
+func (c *Client) Allow(ctx context.Context) (bool, error) {
+	req, err := c.envoy.getCheckRequest(ctx)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	queryAllow := fmt.Sprintf("%v/allow", strings.Replace(c.config.PackageName, ".", "/", -1))
-	return c.opaSDK.Decision(ctx, sdk.DecisionOptions{
-		Path:  queryAllow,
-		Input: input,
-	})
-}
-
-func (c *Client) Query(ctx context.Context) (rego.ResultSet, error) {
-	input, err := c.envoy.getCheckRequest(ctx)
+	input, err := c.envoy.requestToInput(req)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	rawBody, _ := protojson.Marshal(input)
-	fmt.Println(string(rawBody))
+	c.logger.Debugf("opa auth input: %s", string(util.MustMarshalJSON(input)))
 
-	return c.opaRego.Eval(ctx, rego.EvalInput(input))
+	if c.config.OPARego != nil {
+		var rs rego.ResultSet
+
+		rs, err = c.opaRego.Eval(ctx, rego.EvalInput(input))
+		if err != nil {
+			return false, err
+		}
+
+		if rs.Allowed() == false {
+			return false, err
+		}
+	}
+
+	if c.config.OPASDK != nil {
+		var dr *sdk.DecisionResult
+
+		dr, err = c.opaSDK.Decision(ctx,
+			sdk.DecisionOptions{
+				Path:  fmt.Sprintf("%v/allow", strings.Replace(c.config.PackageName, ".", "/", -1)),
+				Input: input,
+			},
+		)
+		if err != nil {
+			return false, err
+		}
+
+		allow, ok := dr.Result.(bool)
+		if !ok || !allow {
+			return false, err
+		}
+	}
+
+	if c.config.OPAEnvoy != nil {
+		var resp *authv3.CheckResponse
+		resp, err = c.opaEnvoy.Check(ctx, req)
+		if err != nil {
+			return false, err
+		}
+		if resp.GetStatus().Code != 0 {
+			return false, err
+		}
+	}
+
+	return true, nil
 }
 
-// Close xx
+// SetLoggerOption 设置日志记录器
+func (c *Client) SetLoggerOption(logger *logrus.Entry) *Client {
+	if logger != nil {
+		c.logger = logger
+	}
+
+	return c
+}
+
+// Close 关闭释放资源
 func (c *Client) Close(ctx context.Context) {
 	if c.opaSDK != nil {
 		c.opaSDK.Stop(ctx)
@@ -144,7 +221,7 @@ func (c *Client) Close(ctx context.Context) {
 }
 
 // https://pkg.go.dev/github.com/envoyproxy/go-control-plane@v0.12.0/envoy/config/rbac/v3#RBAC
-func (c *Client) opaRBAC(ctx context.Context) (*rbacv3.RBAC, error) {
+func (c *Client) demoDataOPARBAC(ctx context.Context) (*rbacv3.RBAC, error) {
 	data := &rbacv3.RBAC{
 		Action:   rbacv3.RBAC_ALLOW,
 		Policies: make(map[string]*rbacv3.Policy),
@@ -178,31 +255,6 @@ func (c *Client) opaRBAC(ctx context.Context) (*rbacv3.RBAC, error) {
 	data.Policies["role-public"] = role1
 
 	return data, nil
-}
-
-func (c *Client) defaultRego(ctx context.Context) (string, error) {
-	testRego := `
-package oneops.syncmi.v1
-
-import future.keywords.if
-import future.keywords.in
-
-# import rego.v1
-
-import data.oneops.syncmi.v1.action
-import data.oneops.syncmi.v1.policies
-
-default allow := false
-
-allow if {
-#	data.policies[input.appid][input.api_style]
-#	input.pattern in data.policies[input.appid].pattern
-#	# input.pattern in data.pattern
-  policies["role-public"].permissions[0].url_path.path.exact == "/admin"
-  input.attributes.request.http.method == "GET"
-}
-`
-	return testRego, nil
 }
 
 func (c *Client) nonCommentLineLength(body []byte) (int, error) {

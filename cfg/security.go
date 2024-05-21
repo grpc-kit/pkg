@@ -10,6 +10,7 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/metadata"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -35,7 +36,16 @@ type OPANative struct {
 
 // OPAExternal 外部的 opa 服务
 type OPAExternal struct {
+	Enabled *bool  `mapstructure:"enabled"`
+	Config  string `mapstructure:"config"`
+}
+
+// OPAEnvoyPlugin 使用 envoy 的 opa 插件服务
+type OPAEnvoyPlugin struct {
 	Enabled *bool `mapstructure:"enabled"`
+	Service struct {
+		GRPCAddress string `mapstructure:"grpc_address"`
+	} `mapstructure:"service"`
 }
 
 // InitSecurity 初始化认证
@@ -115,6 +125,9 @@ func (c *LocalConfig) InitSecurity() error {
 	}
 	if c.Security.Authorization.OPAExternal.Enabled == nil {
 		c.Security.Authorization.OPAExternal.Enabled = &falseVal
+	}
+	if c.Security.Authorization.OPAEnvoyPlugin.Enabled == nil {
+		c.Security.Authorization.OPAEnvoyPlugin.Enabled = &falseVal
 	}
 
 	return nil
@@ -299,53 +312,55 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 }
 
 // initAuthClient 用于初始化 opa 客户端
-func (s *SecurityConfig) initAuthClient(ctx context.Context, pkgName string, regoBody, dataBody []byte) error {
-	c, err := auth.NewClient(
-		&auth.Config{PackageName: pkgName},
-	)
-	if err != nil {
-		return err
+func (s *SecurityConfig) initAuthClient(ctx context.Context, logger *logrus.Entry, pkgName string, regoBody, dataBody []byte) error {
+	ac := &auth.Config{
+		PackageName: pkgName,
 	}
-	s.authClient = c
-
 	if *s.Authorization.OPANative.Enabled {
-		if err = s.authClient.InitOPARego(ctx, regoBody, dataBody); err != nil {
-			return err
+		ac.OPARego = &auth.OPARegoConfig{
+			RegoBody: regoBody,
+			DataBody: dataBody,
 		}
 	}
 	if *s.Authorization.OPAExternal.Enabled {
-		if err = s.authClient.InitOPASDK(ctx, []byte("")); err != nil {
-			return err
+		ac.OPASDK = &auth.OPASDKConfig{
+			Config: s.Authorization.OPAExternal.Config,
 		}
 	}
+	if *s.Authorization.OPAEnvoyPlugin.Enabled {
+		ac.OPAEnvoy = &auth.OPAEnvoyPluginConfig{
+			GRPCAddress: s.Authorization.OPAEnvoyPlugin.Service.GRPCAddress,
+		}
+	}
+
+	cl, err := auth.NewClient(ctx, ac)
+	if err != nil {
+		return err
+	}
+	s.authClient = cl
+
+	s.authClient.SetLoggerOption(logger)
 
 	return nil
 }
 
-func (s *SecurityConfig) checkOPAPolicy(ctx context.Context) (bool, error) {
-	if !*s.Authorization.OPANative.Enabled {
+// policyAllow 用于以下三个权限验证： opa_native、opa_external、opa_envoy_plugin
+// 如果同时配置并启动以上多个权限策略，则必须所有允许通过才可
+func (s *SecurityConfig) policyAllow(ctx context.Context) (bool, error) {
+	ok, err := s.authClient.Allow(ctx)
+	if ok && err == nil {
 		return true, nil
 	}
 
-	rs, err := s.authClient.Query(ctx)
-	if err != nil {
-		return false, err
-	}
-
-	/*
-		ors, err := s.authClient.Decision(ctx)
-		if err != nil {
-			return false, err
-		}
-		c.logger.Debugf("opa decision: %v", ors)
-	*/
-
-	return rs.Allowed(), nil
+	return false, err
 }
 
 // injectAuthHeader 用于注入鉴权信息
 func (s *SecurityConfig) injectAuthHeader(ctx context.Context, req *http.Request) metadata.MD {
-	if *s.Authorization.OPANative.Enabled {
+	if *s.Authorization.OPANative.Enabled ||
+		*s.Authorization.OPAExternal.Enabled ||
+		*s.Authorization.OPAEnvoyPlugin.Enabled {
+
 		return s.authClient.GRPCAuthnMetadata(ctx, req)
 	}
 

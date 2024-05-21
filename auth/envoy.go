@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -11,7 +12,9 @@ import (
 	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/open-policy-agent/opa/util"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -121,4 +124,57 @@ func (e *envoyProxy) getCheckRequest(ctx context.Context) (*authv3.CheckRequest,
 	}
 
 	return input, nil
+}
+
+// requestToInput envoy CheckReuqest 结构体二次分析添加额外属性，以便同 "opa-envoy-plugin" 插件
+// https://github.com/open-policy-agent/opa-envoy-plugin/blob/main/envoyauth/request.go
+func (e *envoyProxy) requestToInput(req *authv3.CheckRequest) (map[string]interface{}, error) {
+	input := make(map[string]interface{}, 0)
+
+	input["version"] = map[string]string{"ext_authz": "v3", "encoding": "protojson"}
+
+	bs, err := protojson.Marshal(req)
+	if err != nil {
+		return input, err
+	}
+
+	err = util.UnmarshalJSON(bs, &input)
+	if err != nil {
+		return nil, err
+	}
+
+	reqPath := req.GetAttributes().GetRequest().GetHttp().GetPath()
+	parsedPath, parsedQuery, err := getParsedPathAndQuery(reqPath)
+	if err != nil {
+		return nil, err
+	}
+
+	input["parsed_path"] = parsedPath
+	input["parsed_query"] = parsedQuery
+
+	return input, nil
+}
+
+func getParsedPathAndQuery(path string) ([]interface{}, map[string]interface{}, error) {
+	parsedURL, err := url.Parse(path)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	parsedPath := strings.Split(strings.TrimLeft(parsedURL.Path, "/"), "/")
+	parsedPathInterface := make([]interface{}, len(parsedPath))
+	for i, v := range parsedPath {
+		parsedPathInterface[i] = v
+	}
+
+	parsedQueryInterface := make(map[string]interface{})
+	for paramKey, paramValues := range parsedURL.Query() {
+		queryValues := make([]interface{}, len(paramValues))
+		for i, v := range paramValues {
+			queryValues[i] = v
+		}
+		parsedQueryInterface[paramKey] = queryValues
+	}
+
+	return parsedPathInterface, parsedQueryInterface, nil
 }
