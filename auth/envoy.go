@@ -36,8 +36,10 @@ func (e *envoyProxy) extractHTTPHeader(ctx context.Context, req *http.Request) m
 	h[fmt.Sprintf("%vproto", authMetadataPrefix)] = req.Proto
 	h[fmt.Sprintf("%vremote-addr", authMetadataPrefix)] = req.RemoteAddr
 
-	if req.URL != nil {
-		h[fmt.Sprintf("%vurl-scheme", authMetadataPrefix)] = req.URL.Scheme
+	if req.TLS == nil {
+		h[fmt.Sprintf("%vscheme", authMetadataPrefix)] = "http"
+	} else {
+		h[fmt.Sprintf("%vscheme", authMetadataPrefix)] = "https"
 	}
 
 	return metadata.New(h)
@@ -67,6 +69,9 @@ func (e *envoyProxy) getCheckRequest(ctx context.Context) (*authv3.CheckRequest,
 			switch k {
 			case "x-tr-request-id", "x-request-id":
 				input.Attributes.Request.Http.Id = v[0]
+			case fmt.Sprintf("%v%v", authMetadataPrefix, "scheme"):
+				input.Attributes.Request.Http.Scheme = v[0]
+				input.Attributes.Request.Http.Headers[":scheme"] = v[0]
 			case fmt.Sprintf("%v%v", authMetadataPrefix, "host"):
 				input.Attributes.Request.Http.Host = v[0]
 				input.Attributes.Request.Http.Headers[":authority"] = v[0]
