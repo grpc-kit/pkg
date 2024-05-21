@@ -144,7 +144,7 @@ func (e *envoyProxy) requestToInput(req *authv3.CheckRequest) (map[string]interf
 	}
 
 	reqPath := req.GetAttributes().GetRequest().GetHttp().GetPath()
-	parsedPath, parsedQuery, err := getParsedPathAndQuery(reqPath)
+	parsedPath, parsedQuery, err := e.getParsedPathAndQuery(reqPath)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (e *envoyProxy) requestToInput(req *authv3.CheckRequest) (map[string]interf
 	return input, nil
 }
 
-func getParsedPathAndQuery(path string) ([]interface{}, map[string]interface{}, error) {
+func (e *envoyProxy) getParsedPathAndQuery(path string) ([]interface{}, map[string]interface{}, error) {
 	parsedURL, err := url.Parse(path)
 	if err != nil {
 		return nil, nil, err
