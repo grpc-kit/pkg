@@ -3,6 +3,7 @@ package cfg
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -255,8 +256,8 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 			}
 
 			// 继续判断错误类型，忽略 token 过期等
-			switch err {
-			case jwt.ErrTokenExpired:
+			switch {
+			case errors.Is(err, jwt.ErrTokenExpired):
 				if s.Authentication.OIDCProvider.Config.SkipExpiryCheck {
 					return idToken, nil
 				}
