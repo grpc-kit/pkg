@@ -18,7 +18,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/metadata"
 )
 
 // Client 认证鉴权客户端
@@ -139,8 +138,8 @@ func (c *Client) initOPAEnvoy(ctx context.Context) error {
 	return nil
 }
 
-// GRPCAuthnMetadata 把 http 请求信息转换为 grpc 的 metadata 用于鉴权
-func (c *Client) GRPCAuthnMetadata(ctx context.Context, req *http.Request) metadata.MD {
+// AuthMetadata 把 http 请求信息转换为 grpc 的 metadata 用于鉴权
+func (c *Client) AuthMetadata(ctx context.Context, req *http.Request) context.Context {
 	return c.envoy.extractHTTPHeader(ctx, req)
 }
 

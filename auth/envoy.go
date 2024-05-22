@@ -27,7 +27,7 @@ type envoyProxy struct {
 }
 
 // extractHTTPHeader 提取 http 请求头转换为 grpc 元数据
-func (e *envoyProxy) extractHTTPHeader(ctx context.Context, req *http.Request) metadata.MD {
+func (e *envoyProxy) extractHTTPHeader(ctx context.Context, req *http.Request) context.Context {
 	h := make(map[string]string)
 
 	h[fmt.Sprintf("%vhost", authMetadataPrefix)] = req.Host
@@ -42,7 +42,7 @@ func (e *envoyProxy) extractHTTPHeader(ctx context.Context, req *http.Request) m
 		h[fmt.Sprintf("%vscheme", authMetadataPrefix)] = "https"
 	}
 
-	return metadata.New(h)
+	return metadata.NewIncomingContext(ctx, metadata.New(h))
 }
 
 // getCheckRequest 对用户输入数据转换为兼容 envoy 请求验证的数据格式

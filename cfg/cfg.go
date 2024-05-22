@@ -392,12 +392,34 @@ func (c *LocalConfig) HTTPHandlerFunc(handler http.HandlerFunc) http.Handler {
 	return c.HTTPHandler(handler)
 }
 
-// HTTPHandler 用于植入 otelhttp 链路跟踪中间件
+// HTTPHandler 用于植入 otelhttp 链路跟踪与鉴权中间件
 func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
-	return otelhttp.NewHandler(handler,
+	var enableObservables, enableSecurity bool
+
+	// 需要开启链路跟踪
+	if c.Observables != nil && *c.Observables.Enable {
+		enableObservables = true
+	}
+
+	// 需要开启鉴权服务
+	if c.Security != nil && c.Security.Enable {
+		enableSecurity = true
+	}
+
+	obs := otelhttp.NewHandler(handler,
 		"grpc-gateway",
 		otelhttp.WithFilter(c.Observables.httpTracingEnableFilter),
 		otelhttp.WithSpanNameFormatter(c.Observables.httpTracesSpanName))
+
+	if enableObservables && enableSecurity {
+		return c.Security.addAuthHTTPHandler(obs)
+	} else if enableObservables {
+		return obs
+	} else if enableSecurity {
+		return c.Security.addAuthHTTPHandler(handler)
+	}
+
+	return handler
 }
 
 // HTTPHandlerFrontend 用于处理前端相关服务

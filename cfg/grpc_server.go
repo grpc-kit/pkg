@@ -92,22 +92,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	// 植入特定的请求头
 	optionWithMetada := func(ctx context.Context, req *http.Request) metadata.MD {
 		carrier := make(map[string]string)
-
-		// DEBUG
-		/*
-			for k, v := range req.Header {
-				// 仅传递自定义以 "x-" 开头的请求头
-				if strings.HasPrefix(strings.ToLower(k), "x-") {
-					carrier[k] = v[0]
-				}
-			}
-
-			carrier[fmt.Sprintf("%vhost", runtime.MetadataPrefix)] = req.Host
-			carrier[fmt.Sprintf("%vmethod", runtime.MetadataPrefix)] = req.Method
-			carrier[fmt.Sprintf("%vrequest-uri", runtime.MetadataPrefix)] = req.RequestURI
-		*/
-		// c.Security.injectAuthHeader(ctx, carrier)
-		// DEBUG
+		md := metadata.New(carrier)
 
 		// 植入自定义请求头（全局请求ID）
 		if val := req.Header.Get(HTTPHeaderRequestID); val != "" {
@@ -119,11 +104,10 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		// 传递携带的信息
 		otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 
-		md := metadata.New(carrier)
-
-		// 植入鉴权信息
-		for k, v := range c.Security.injectAuthHeader(ctx, req) {
-			md.Set(k, v...)
+		// 植入认证鉴权信息
+		ctx = c.Security.injectAuthHTTPHeader(ctx, req)
+		if tmp, ok := metadata.FromIncomingContext(ctx); ok {
+			md = metadata.Join(md, tmp)
 		}
 
 		span := trace.SpanFromContext(ctx)
@@ -507,7 +491,7 @@ func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientIntercepto
 	return opts
 }
 
-// authValidate 实现认证，待实现鉴权
+// authValidate 认证与鉴权拦截器
 func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		// 如果存在认证请求头，同时帮忙传递下去

@@ -12,7 +12,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc/metadata"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -356,14 +355,29 @@ func (s *SecurityConfig) policyAllow(ctx context.Context) (bool, error) {
 	return false, err
 }
 
-// injectAuthHeader 用于注入鉴权信息
-func (s *SecurityConfig) injectAuthHeader(ctx context.Context, req *http.Request) metadata.MD {
+// injectAuthHeader 用于注入认证鉴权信息
+func (s *SecurityConfig) injectAuthHTTPHeader(ctx context.Context, req *http.Request) context.Context {
 	if *s.Authorization.OPANative.Enabled ||
 		*s.Authorization.OPAExternal.Enabled ||
 		*s.Authorization.OPAEnvoyPlugin.Enabled {
 
-		return s.authClient.GRPCAuthnMetadata(ctx, req)
+		return s.authClient.AuthMetadata(ctx, req)
 	}
 
-	return metadata.MD{}
+	return ctx
+}
+
+func (s *SecurityConfig) addAuthHTTPHandler(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.TODO()
+		ctx = s.injectAuthHTTPHeader(ctx, r)
+
+		ok, err := s.authClient.Allow(ctx)
+		if err != nil || !ok {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
