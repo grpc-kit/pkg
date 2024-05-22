@@ -203,8 +203,8 @@ func (c *Client) Allow(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
-// SetLoggerOption 设置日志记录器
-func (c *Client) SetLoggerOption(logger *logrus.Entry) *Client {
+// WithLoggerOption 设置日志记录器
+func (c *Client) WithLoggerOption(logger *logrus.Entry) *Client {
 	if logger != nil {
 		c.logger = logger
 	}

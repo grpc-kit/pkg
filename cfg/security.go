@@ -339,7 +339,7 @@ func (s *SecurityConfig) initAuthClient(ctx context.Context, logger *logrus.Entr
 	}
 	s.authClient = cl
 
-	s.authClient.SetLoggerOption(logger)
+	s.authClient.WithLoggerOption(logger)
 
 	return nil
 }
