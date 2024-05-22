@@ -157,38 +157,6 @@ type DebuggerConfig struct {
 	LogFormat   string `mapstructure:"log_format"`
 }
 
-// OpentracingConfig 分布式链路追踪
-/*
-type OpentracingConfig struct {
-	Enable bool `mapstructure:"enable"`
-
-	// Deprecated: Use Exporters instead.
-	Host string `mapstructure:"host"`
-	// Deprecated: Use Exporters instead.
-	Port int `mapstructure:"port"`
-	// Deprecated: Use Exporters instead.
-	URLPath string `mapstructure:"url_path"`
-
-	// 记录特殊字段，默认不开启
-	LogFields LogFields `mapstructure:"log_fields"`
-
-	// 过滤器，用于过滤不需要追踪的请求
-	Filters []struct {
-		Method  string `mapstructure:"method"`
-		URLPath string `mapstructure:"url_path"`
-	} `mapstructure:"filters"`
-
-	Exporters *struct {
-		OTLPHTTP *OTLPHTTPConfig `mapstructure:"otlphttp"`
-		OTLPGRPC *OTLPGRPCConfig `mapstructure:"otlpgrpc"`
-		Logging  *struct {
-			FilePath    string `mapstructure:"file_path"`
-			PrettyPrint bool   `mapstructure:"pretty_print"`
-		} `mapstructure:"logging"`
-	} `mapstructure:"exporters"`
-}
-*/
-
 // CloudEventsConfig cloudevents事件配置
 type CloudEventsConfig struct {
 	Protocol    string      `mapstructure:"protocol"`
@@ -309,12 +277,6 @@ func (c *LocalConfig) Init() error {
 	if err := c.InitFrontend(); err != nil {
 		return err
 	}
-
-	/*
-		if err := c.InitPrometheus(); err != nil {
-			return err
-		}
-	*/
 
 	return nil
 }
