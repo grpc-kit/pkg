@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"net/http"
 	"net/url"
 	"os"
@@ -137,8 +138,8 @@ type ExportersConfig struct {
 	} `mapstructure:"logging"`
 }
 
-// InitObservables 初始化可观测性配置
-func (c *LocalConfig) InitObservables() error {
+// initObservables 初始化可观测性配置
+func (c *LocalConfig) initObservables() error {
 	if c.Observables == nil {
 		c.Observables = &ObservablesConfig{}
 	}
@@ -925,4 +926,16 @@ func (c *ObservablesConfig) commonHTTPHeaders(headers map[string]string) map[str
 // httpTracesSpanName 用于定义 http 链路跟踪的名称
 func (c *ObservablesConfig) httpTracesSpanName(operation string, r *http.Request) string {
 	return fmt.Sprintf("%s %s", r.Method, r.URL.Path)
+}
+
+// addHTTPHandler 植入链路跟踪
+func (c *ObservablesConfig) addHTTPHandler(handler http.Handler) http.Handler {
+	if c != nil && *c.Enable {
+		return otelhttp.NewHandler(handler,
+			"grpc-gateway",
+			otelhttp.WithFilter(c.httpTracingEnableFilter),
+			otelhttp.WithSpanNameFormatter(c.httpTracesSpanName))
+	}
+
+	return handler
 }

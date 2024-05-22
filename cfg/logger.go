@@ -10,8 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// InitDebugger 用于初始化日志实例
-func (c *LocalConfig) InitDebugger() error {
+// initDebugger 用于初始化日志实例
+func (c *LocalConfig) initDebugger() error {
 	logger := logrus.WithFields(
 		logrus.Fields{
 			"service_name": c.GetServiceName(),

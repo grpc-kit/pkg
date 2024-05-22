@@ -48,8 +48,8 @@ type OPAEnvoyPlugin struct {
 	} `mapstructure:"service"`
 }
 
-// InitSecurity 初始化认证
-func (c *LocalConfig) InitSecurity() error {
+// initSecurity 初始化认证
+func (c *LocalConfig) initSecurity() error {
 	if c.Security == nil {
 		c.Security = &SecurityConfig{Enable: false}
 	}
@@ -367,7 +367,12 @@ func (s *SecurityConfig) injectAuthHTTPHeader(ctx context.Context, req *http.Req
 	return ctx
 }
 
-func (s *SecurityConfig) addAuthHTTPHandler(next http.Handler) http.Handler {
+// addHTTPHandler 植入认证鉴权
+func (s *SecurityConfig) addHTTPHandler(next http.Handler) http.Handler {
+	if s == nil || s.Enable == false {
+		return next
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := context.TODO()
 		ctx = s.injectAuthHTTPHeader(ctx, r)

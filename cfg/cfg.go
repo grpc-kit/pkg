@@ -21,7 +21,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
 	yaml "gopkg.in/yaml.v2"
@@ -242,39 +241,39 @@ func New(v *viper.Viper) (*LocalConfig, error) {
 
 // Init 用于根据配置初始化各个实例，初始化需注意空指针判断
 func (c *LocalConfig) Init() error {
-	if err := c.InitDebugger(); err != nil {
+	if err := c.initDebugger(); err != nil {
 		return err
 	}
 
-	if err := c.InitServices(); err != nil {
+	if err := c.initServices(); err != nil {
 		return err
 	}
 
-	if err := c.InitSecurity(); err != nil {
+	if err := c.initSecurity(); err != nil {
 		return err
 	}
 
-	if err := c.InitDatabase(); err != nil {
+	if err := c.initDatabase(); err != nil {
 		return err
 	}
 
-	if err := c.InitObservables(); err != nil {
+	if err := c.initObservables(); err != nil {
 		return err
 	}
 
-	if err := c.InitCloudEvents(); err != nil {
+	if err := c.initCloudEvents(); err != nil {
 		return err
 	}
 
-	if err := c.InitRPCConfig(); err != nil {
+	if err := c.initRPCConfig(); err != nil {
 		return err
 	}
 
-	if err := c.InitObjstore(); err != nil {
+	if err := c.initObjstore(); err != nil {
 		return err
 	}
 
-	if err := c.InitFrontend(); err != nil {
+	if err := c.initFrontend(); err != nil {
 		return err
 	}
 
@@ -356,31 +355,8 @@ func (c *LocalConfig) HTTPHandlerFunc(handler http.HandlerFunc) http.Handler {
 
 // HTTPHandler 用于植入 otelhttp 链路跟踪与鉴权中间件
 func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
-	var enableObservables, enableSecurity bool
-
-	// 需要开启链路跟踪
-	if c.Observables != nil && *c.Observables.Enable {
-		enableObservables = true
-	}
-
-	// 需要开启鉴权服务
-	if c.Security != nil && c.Security.Enable {
-		enableSecurity = true
-	}
-
-	obs := otelhttp.NewHandler(handler,
-		"grpc-gateway",
-		otelhttp.WithFilter(c.Observables.httpTracingEnableFilter),
-		otelhttp.WithSpanNameFormatter(c.Observables.httpTracesSpanName))
-
-	if enableObservables && enableSecurity {
-		return c.Security.addAuthHTTPHandler(obs)
-	} else if enableObservables {
-		return obs
-	} else if enableSecurity {
-		return c.Security.addAuthHTTPHandler(handler)
-	}
-
+	handler = c.Observables.addHTTPHandler(handler)
+	handler = c.Security.addHTTPHandler(handler)
 	return handler
 }
 
