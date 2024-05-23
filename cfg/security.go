@@ -368,9 +368,9 @@ func (s *SecurityConfig) injectAuthHTTPHeader(ctx context.Context, req *http.Req
 }
 
 // addHTTPHandler 植入认证鉴权
-func (s *SecurityConfig) addHTTPHandler(next http.Handler) http.Handler {
+func (s *SecurityConfig) addHTTPHandler(handler http.Handler) http.Handler {
 	if s == nil || s.Enable == false {
-		return next
+		return handler
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -383,6 +383,10 @@ func (s *SecurityConfig) addHTTPHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		handler.ServeHTTP(w, r)
 	})
+}
+
+func (s *SecurityConfig) addHTTPHandlerFunc(handler http.HandlerFunc) http.Handler {
+	return s.addHTTPHandler(handler)
 }

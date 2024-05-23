@@ -24,10 +24,10 @@ allow if {
 
 # 仅允许特定内网访问以下 url 前缀地址
 allow if {
-    some url in ["version", "openapi-spec"]
+    some url in ["version", "openapi-spec", "debug"]
     url == input.parsed_path[0]
 
-    some cidr in ["127.0.0.0/8", "100.64.0.0/10", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+    some cidr in ["127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
     net.cidr_contains(cidr, input.attributes.source.address.socketAddress.address)
 }
 
@@ -35,7 +35,7 @@ allow if {
 allow if {
     input.parsed_path[0] == "admin"
 
-    some cidr in ["127.0.0.0/8", "100.64.0.0/10", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+    some cidr in ["127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
     net.cidr_contains(cidr, input.attributes.source.address.socketAddress.address)
 
     some x, _ in policies

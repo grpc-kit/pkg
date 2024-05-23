@@ -320,11 +320,11 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	hmux.Handle("/version", c.Security.addHTTPHandler(httpHandleGetVersion()))
 
 	if c.Debugger.EnablePprof {
-		hmux.HandleFunc("/debug/pprof/", pprof.Index)
-		hmux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		hmux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		hmux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		hmux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+		hmux.Handle("/debug/pprof/", c.Security.addHTTPHandlerFunc(pprof.Index))
+		hmux.Handle("/debug/pprof/cmdline", c.Security.addHTTPHandlerFunc(pprof.Cmdline))
+		hmux.Handle("/debug/pprof/profile", c.Security.addHTTPHandlerFunc(pprof.Profile))
+		hmux.Handle("/debug/pprof/symbol", c.Security.addHTTPHandlerFunc(pprof.Symbol))
+		hmux.Handle("/debug/pprof/trace", c.Security.addHTTPHandlerFunc(pprof.Trace))
 	}
 
 	handler := http.Handler(rmux)
