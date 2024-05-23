@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"net"
@@ -23,7 +24,6 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
-	yaml "gopkg.in/yaml.v2"
 )
 
 const (
@@ -461,7 +461,7 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 		ttl = 30
 	}
 
-	rawBody, err := yaml.Marshal(c)
+	rawBody, err := json.Marshal(c)
 	if err != nil {
 		return err
 	}
