@@ -92,17 +92,21 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	// 植入特定的请求头
 	optionWithMetada := func(ctx context.Context, req *http.Request) metadata.MD {
 		carrier := make(map[string]string)
-		md := metadata.New(carrier)
+
+		// 传递携带的信息，如获取并植入 traceparent 请求头
+		otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 
 		// 植入自定义请求头（全局请求ID）
-		if val := req.Header.Get(HTTPHeaderRequestID); val != "" {
-			carrier[HTTPHeaderRequestID] = val
-		} else {
-			carrier[HTTPHeaderRequestID] = c.Observables.calcRequestID(ctx)
-			req.Header.Set(HTTPHeaderRequestID, carrier[HTTPHeaderRequestID])
-		}
-		// 传递携带的信息
-		otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
+		/*
+			if val := req.Header.Get(HTTPHeaderRequestID); val != "" {
+				carrier[HTTPHeaderRequestID] = val
+			} else {
+				carrier[HTTPHeaderRequestID] = c.Observables.calcRequestID(ctx)
+				req.Header.Set(HTTPHeaderRequestID, carrier[HTTPHeaderRequestID])
+			}
+		*/
+
+		md := metadata.New(carrier)
 
 		// 植入认证鉴权信息
 		ctx = c.Security.injectAuthHTTPHeader(ctx, req)
@@ -211,19 +215,15 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			defer span.End()
 		}
 
-		requestID := req.Header.Get(HTTPHeaderRequestID)
-		if requestID != "" {
-			w.Header().Set(HTTPHeaderRequestID, requestID)
-		} else {
-			carrier := make(map[string]string)
-			if !ignoreTracing {
-				// 传递携带的信息
-				otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
-			}
-			requestID = c.Observables.calcRequestID(ctx)
-		}
-
+		// requestID := req.Header.Get(HTTPHeaderRequestID)
+		requestID := c.Observables.calcRequestID(ctx)
 		w.Header().Set(HTTPHeaderRequestID, requestID)
+
+		if !ignoreTracing {
+			// 传递携带的信息
+			carrier := make(map[string]string)
+			otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
+		}
 
 		t := &statusv1.TracingRequest{Id: requestID}
 		s = s.AppendDetail(t)
