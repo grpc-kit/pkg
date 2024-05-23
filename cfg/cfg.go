@@ -385,7 +385,10 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 		if err == nil && ok {
 			if tracing {
 				handle = c.HTTPHandler(handle)
+			} else {
+				handle = c.Security.addHTTPHandler(handle)
 			}
+
 			mux.Handle(url, handle)
 		} else if err != nil {
 			return err

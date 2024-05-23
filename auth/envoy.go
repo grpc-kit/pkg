@@ -42,6 +42,16 @@ func (e *envoyProxy) extractHTTPHeader(ctx context.Context, req *http.Request) c
 		h[fmt.Sprintf("%vscheme", authMetadataPrefix)] = "https"
 	}
 
+	// 如果为自定义 http.Handler 需植入 header
+	for k, v := range req.Header {
+		// 避免客户端伪装内部请求头
+		if strings.HasPrefix(k, authMetadataPrefix) {
+			continue
+		}
+
+		h[k] = v[0]
+	}
+
 	return metadata.NewIncomingContext(ctx, metadata.New(h))
 }
 
@@ -118,9 +128,9 @@ func (e *envoyProxy) getCheckRequest(ctx context.Context) (*authv3.CheckRequest,
 			default:
 				if strings.HasPrefix(k, runtime.MetadataPrefix) {
 					tmpHeader := strings.Replace(k, runtime.MetadataPrefix, "", 1)
-					input.Attributes.Request.Http.Headers[tmpHeader] = strings.Join(v, ",")
+					input.Attributes.Request.Http.Headers[tmpHeader] = v[0]
 				} else {
-					input.Attributes.Request.Http.Headers[k] = strings.Join(v, ",")
+					input.Attributes.Request.Http.Headers[k] = v[0]
 				}
 			}
 		}

@@ -316,8 +316,8 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 	hmux := http.NewServeMux()
 	c.Observables.prometheusExporterHTTP(hmux)
-	hmux.Handle("/ping", httpHandleHealthPing())
-	hmux.Handle("/version", httpHandleGetVersion())
+	hmux.Handle("/ping", c.Security.addHTTPHandler(httpHandleHealthPing()))
+	hmux.Handle("/version", c.Security.addHTTPHandler(httpHandleGetVersion()))
 
 	if c.Debugger.EnablePprof {
 		hmux.HandleFunc("/debug/pprof/", pprof.Index)
