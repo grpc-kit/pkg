@@ -104,7 +104,7 @@ func (c *Client) initOPARego(ctx context.Context) error {
 
 	query, err := rego.New(
 		rego.Query(fmt.Sprintf("data.%v.allow", c.config.PackageName)),
-		rego.Module("authz.rego", string(dataRego)),
+		rego.Module("auth.rego", string(dataRego)),
 		rego.Store(inmem.NewFromObject(jsonData)),
 		rego.EnablePrintStatements(true),
 	).PrepareForEval(ctx)
