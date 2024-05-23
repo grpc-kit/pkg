@@ -44,7 +44,7 @@ func (e *envoyProxy) extractHTTPHeader(ctx context.Context, req *http.Request) c
 
 	// 如果为自定义 http.Handler 需植入 header
 	for k, v := range req.Header {
-		// 避免客户端伪装内部请求头
+		// 避免客户端伪装内部特殊请求头
 		if strings.HasPrefix(k, authMetadataPrefix) {
 			continue
 		}
@@ -119,7 +119,7 @@ func (e *envoyProxy) getCheckRequest(ctx context.Context) (*authv3.CheckRequest,
 				// 如果来自 grpc-gateway 的请求，则忽略
 				// 127.0.0.1:10081
 				// ignore
-			case "user-agent":
+			// case "user-agent":
 			// 如果来自 grpc-gateway 的请求，则忽略
 			// grpc-go/1.63.2
 			// ignore
