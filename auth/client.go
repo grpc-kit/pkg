@@ -67,11 +67,6 @@ func (c *Client) initOPARego(ctx context.Context) error {
 	dataRego := c.config.OPARego.RegoBody
 	dataRBAC := c.config.OPARego.DataBody
 
-	var jsonData map[string]interface{}
-	if err := util.Unmarshal(dataRBAC, &jsonData); err != nil {
-		return err
-	}
-
 	// 如果客户端提供的 rego 或 rbac 文件为空包含被注释，则使用框架默认规则
 	ncl, err := c.nonCommentLineLength(dataRego)
 	if err != nil {
@@ -88,6 +83,24 @@ func (c *Client) initOPARego(ctx context.Context) error {
 	if ncl == 0 {
 		dataRBAC = c.config.defaultRBAC()
 	}
+
+	// 需把包头加入进去，如：
+	// oneops.syncmi.v1 -> map[oneops:map[syncmi:map[v1:{}]]]
+	parts := strings.Split(c.config.PackageName, ".")
+	jsonData := make(map[string]interface{})
+	currentMap := jsonData
+	for _, part := range parts[:len(parts)-1] {
+		nextMap := make(map[string]interface{})
+		currentMap[part] = nextMap
+		currentMap = nextMap
+	}
+
+	var jsonRBAC map[string]interface{}
+	if err := util.Unmarshal(dataRBAC, &jsonRBAC); err != nil {
+		return err
+	}
+
+	currentMap[parts[len(parts)-1]] = jsonRBAC
 
 	query, err := rego.New(
 		rego.Query(fmt.Sprintf("data.%v.allow", c.config.PackageName)),
