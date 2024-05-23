@@ -408,19 +408,19 @@ func (c *LocalConfig) SecurityPolicyLoad(ctx context.Context, assets embed.FS) e
 	packageName := fmt.Sprintf("%v.%v.%v", tmps[2], tmps[0], tmps[1])
 
 	// 内嵌的策略文件
-	embedRegoFile, err := assets.ReadFile("authz.rego")
+	embedAuthFile, err := assets.ReadFile("auth.rego")
 	if err != nil {
 		return err
 	}
-	embedDataFile, err := assets.ReadFile("rbac.yaml")
+	embedDataFile, err := assets.ReadFile("data.yaml")
 	if err != nil {
 		return err
 	}
 
-	localRegoFile := c.Security.Authorization.OPANative.Policy.RegoFile
+	localAuthFile := c.Security.Authorization.OPANative.Policy.AuthFile
 	localDataFile := c.Security.Authorization.OPANative.Policy.DataFile
-	if localRegoFile != "" {
-		embedRegoFile, err = os.ReadFile(localRegoFile)
+	if localAuthFile != "" {
+		embedAuthFile, err = os.ReadFile(localAuthFile)
 		if err != nil {
 			return err
 		}
@@ -432,7 +432,7 @@ func (c *LocalConfig) SecurityPolicyLoad(ctx context.Context, assets embed.FS) e
 		}
 	}
 
-	return c.Security.initAuthClient(ctx, c.logger, packageName, embedRegoFile, embedDataFile)
+	return c.Security.initAuthClient(ctx, c.logger, packageName, embedAuthFile, embedDataFile)
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {

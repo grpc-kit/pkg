@@ -29,7 +29,7 @@ type IDTokenClaims struct {
 type OPANative struct {
 	Enabled *bool `mapstructure:"enabled"`
 	Policy  struct {
-		RegoFile string `mapstructure:"rego_file"`
+		AuthFile string `mapstructure:"auth_file"`
 		DataFile string `mapstructure:"data_file"`
 	} `mapstructure:"policy"`
 }

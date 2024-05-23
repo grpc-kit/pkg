@@ -103,10 +103,10 @@ security:
     opa_native:
       enabled: true
       #policy:
-        # 未配置则为 internal/security/authz.rego 内嵌文件
-        #rego_file: "./config/authz.rego"
-        # 未配置则为 internal/security/rbac.yaml 内嵌文件
-        #data_file: "./config/rbac.yaml"
+        # 未配置则为 internal/security/auth.rego 内嵌文件
+        #auth_file: "./config/auth.rego"
+        # 未配置则为 internal/security/data.yaml 内嵌文件
+        #data_file: "./config/data.yaml"
 
     # 外部权限规则，外部更改权限本地实时生效，无需重启服务
     opa_external:
