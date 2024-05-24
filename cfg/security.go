@@ -347,6 +347,13 @@ func (s *SecurityConfig) initAuthClient(ctx context.Context, logger *logrus.Entr
 // policyAllow 用于以下三个权限验证： opa_native、opa_external、opa_envoy_plugin
 // 如果同时配置并启动以上多个权限策略，则必须所有允许通过才可
 func (s *SecurityConfig) policyAllow(ctx context.Context) (bool, error) {
+	// 如果均未开启鉴权，则默认允许通过
+	if *s.Authorization.OPANative.Enabled == false &&
+		*s.Authorization.OPAExternal.Enabled == false &&
+		*s.Authorization.OPAEnvoyPlugin.Enabled == false {
+		return true, nil
+	}
+
 	ok, err := s.authClient.Allow(ctx)
 	if ok && err == nil {
 		return true, nil
@@ -357,6 +364,7 @@ func (s *SecurityConfig) policyAllow(ctx context.Context) (bool, error) {
 
 // injectAuthHeader 用于注入认证鉴权信息
 func (s *SecurityConfig) injectAuthHTTPHeader(ctx context.Context, req *http.Request) context.Context {
+	// 开启任意一个功能，则注入认证鉴权信息
 	if *s.Authorization.OPANative.Enabled ||
 		*s.Authorization.OPAExternal.Enabled ||
 		*s.Authorization.OPAEnvoyPlugin.Enabled {
@@ -377,7 +385,7 @@ func (s *SecurityConfig) addHTTPHandler(handler http.Handler) http.Handler {
 		ctx := context.TODO()
 		ctx = s.injectAuthHTTPHeader(ctx, r)
 
-		ok, err := s.authClient.Allow(ctx)
+		ok, err := s.policyAllow(ctx)
 		if err != nil || !ok {
 			w.WriteHeader(http.StatusForbidden)
 			return
