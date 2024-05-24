@@ -10,14 +10,14 @@ policies:
     permissions:
       - any: true
     principals:
-	  - metadata:
-		filter: envoy.filters.http.jwt_authn
-		path:
-		  - key: payload
-		  - key: groups
-		value:
-		  string_match:
-			exact:  admin
+      - metadata:
+        filter: envoy.filters.http.jwt_authn
+        path:
+          - key: payload
+          - key: groups
+        value:
+          string_match:
+            exact:  admin
 
   "%s":
     permissions:
@@ -25,7 +25,7 @@ policies:
           url_path:
             path:
               exact: "/admin"
-    pristinals:
+    principals:
       - any: true
 `,
 		"admin",
