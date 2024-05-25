@@ -22,8 +22,8 @@ const (
 	DatabaseDriverPostgresql = "postgres"
 )
 
-// InitDatabase 用于初始化数据库
-func (c *LocalConfig) InitDatabase() error {
+// initDatabase 用于初始化数据库
+func (c *LocalConfig) initDatabase() error {
 	if c.Database == nil {
 		c.Database = &DatabaseConfig{Enable: false}
 	}

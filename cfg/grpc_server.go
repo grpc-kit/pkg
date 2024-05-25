@@ -92,26 +92,38 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	// 植入特定的请求头
 	optionWithMetada := func(ctx context.Context, req *http.Request) metadata.MD {
 		carrier := make(map[string]string)
-		// 植入自定义请求头（全局请求ID）
-		if val := req.Header.Get(HTTPHeaderRequestID); val != "" {
-			carrier[HTTPHeaderRequestID] = val
-		} else {
-			carrier[HTTPHeaderRequestID] = c.Observables.calcRequestID(ctx)
-			req.Header.Set(HTTPHeaderRequestID, carrier[HTTPHeaderRequestID])
-		}
 
-		// 传递携带的信息
+		// 传递携带的信息，如获取并植入 traceparent 请求头
 		otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
+
+		// 植入自定义请求头（全局请求ID）
+		/*
+			if val := req.Header.Get(HTTPHeaderRequestID); val != "" {
+				carrier[HTTPHeaderRequestID] = val
+			} else {
+				carrier[HTTPHeaderRequestID] = c.Observables.calcRequestID(ctx)
+				req.Header.Set(HTTPHeaderRequestID, carrier[HTTPHeaderRequestID])
+			}
+		*/
+
+		md := metadata.New(carrier)
+
+		// 植入认证鉴权信息
+		ctx = c.Security.injectAuthHTTPHeader(ctx, req)
+		if tmp, ok := metadata.FromIncomingContext(ctx); ok {
+			md = metadata.Join(md, tmp)
+		}
 
 		span := trace.SpanFromContext(ctx)
 		if span == nil {
-			return metadata.New(carrier)
+			return md
 		}
+
 		// 这里不可关闭，否则之后阶段通过 ctx 获取 span 将无法上报事件(span.IsRecording=flase)
 		// defer span.End()
 
 		if !c.Observables.hasRecordLogFieldsHTTPRequest() {
-			return metadata.New(carrier)
+			return md
 		}
 
 		// 当 method=put 或 post 时，开启 http_request 记录且 content-type 为 json 时才记录 http.body
@@ -130,7 +142,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			}
 		}
 
-		return metadata.New(carrier)
+		return md
 	}
 
 	// 正常响应时调用，统一植入特定内容
@@ -203,19 +215,15 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			defer span.End()
 		}
 
-		requestID := req.Header.Get(HTTPHeaderRequestID)
-		if requestID != "" {
-			w.Header().Set(HTTPHeaderRequestID, requestID)
-		} else {
-			carrier := make(map[string]string)
-			if !ignoreTracing {
-				// 传递携带的信息
-				otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
-			}
-			requestID = c.Observables.calcRequestID(ctx)
-		}
-
+		// requestID := req.Header.Get(HTTPHeaderRequestID)
+		requestID := c.Observables.calcRequestID(ctx)
 		w.Header().Set(HTTPHeaderRequestID, requestID)
+
+		if !ignoreTracing {
+			// 传递携带的信息
+			carrier := make(map[string]string)
+			otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
+		}
 
 		t := &statusv1.TracingRequest{Id: requestID}
 		s = s.AppendDetail(t)
@@ -308,19 +316,19 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 	hmux := http.NewServeMux()
 	c.Observables.prometheusExporterHTTP(hmux)
-	hmux.Handle("/ping", httpHandleHealthPing())
-	hmux.Handle("/version", httpHandleGetVersion())
+	hmux.Handle("/ping", c.Security.addHTTPHandler(httpHandleHealthPing()))
+	hmux.Handle("/version", c.Security.addHTTPHandler(httpHandleGetVersion()))
 
 	if c.Debugger.EnablePprof {
-		hmux.HandleFunc("/debug/pprof/", pprof.Index)
-		hmux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-		hmux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-		hmux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-		hmux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+		hmux.Handle("/debug/pprof/", c.Security.addHTTPHandlerFunc(pprof.Index))
+		hmux.Handle("/debug/pprof/cmdline", c.Security.addHTTPHandlerFunc(pprof.Cmdline))
+		hmux.Handle("/debug/pprof/profile", c.Security.addHTTPHandlerFunc(pprof.Profile))
+		hmux.Handle("/debug/pprof/symbol", c.Security.addHTTPHandlerFunc(pprof.Symbol))
+		hmux.Handle("/debug/pprof/trace", c.Security.addHTTPHandlerFunc(pprof.Trace))
 	}
 
 	handler := http.Handler(rmux)
-	handler = c.HTTPHandler(handler)
+	handler = c.Observables.addHTTPHandler(handler)
 
 	// TODO；后续如需集成前端，可考虑添加 "/api" 前缀，把 ”/“ 存放静态 HTML
 	// hmux.Handle("/", handler)
@@ -483,7 +491,7 @@ func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientIntercepto
 	return opts
 }
 
-// authValidate 实现认证，待实现鉴权
+// authValidate 认证与鉴权拦截器
 func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
 		// 如果存在认证请求头，同时帮忙传递下去
@@ -586,25 +594,32 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 }
 
 func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) error {
-	// 是否开启鉴权
-	if c.Security.Authorization != nil {
-		// 需要当前用户组进行核对，是否拥护权限
-		if len(c.Security.Authorization.AllowedGroups) > 0 {
-			allow := false
-			found := make(map[string]int, 0)
-			for _, g := range c.Security.Authorization.AllowedGroups {
-				found[g] = 0
-			}
-			for _, g := range groups {
-				if _, ok := found[g]; ok {
-					allow = true
-					break
-				}
-			}
-			if !allow {
-				return errs.PermissionDenied(ctx).Err()
+	// 需要当前用户组进行核对，是否拥护权限
+	if len(c.Security.Authorization.AllowedGroups) > 0 {
+		allow := false
+		found := make(map[string]int, 0)
+		for _, g := range c.Security.Authorization.AllowedGroups {
+			found[g] = 0
+		}
+		for _, g := range groups {
+			if _, ok := found[g]; ok {
+				allow = true
+				break
 			}
 		}
+		if !allow {
+			return errs.PermissionDenied(ctx).Err()
+		}
+	}
+
+	// 基于 opa 项目进行鉴权
+	allow, err := c.Security.policyAllow(ctx)
+	if err != nil {
+		c.logger.Errorf("check opa policy err: %v", err)
+		return errs.PermissionDenied(ctx).Err()
+	}
+	if !allow {
+		return errs.PermissionDenied(ctx).Err()
 	}
 
 	return nil

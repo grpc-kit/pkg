@@ -3,12 +3,15 @@ package cfg
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/grpc-kit/pkg/auth"
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -22,8 +25,31 @@ type IDTokenClaims struct {
 	Tenant          string            `json:"tenant"`
 }
 
-// InitSecurity 初始化认证
-func (c *LocalConfig) InitSecurity() error {
+// OPANative 内嵌的 opa 组件
+type OPANative struct {
+	Enabled *bool `mapstructure:"enabled"`
+	Policy  struct {
+		AuthFile string `mapstructure:"auth_file"`
+		DataFile string `mapstructure:"data_file"`
+	} `mapstructure:"policy"`
+}
+
+// OPAExternal 外部的 opa 服务
+type OPAExternal struct {
+	Enabled *bool  `mapstructure:"enabled"`
+	Config  string `mapstructure:"config"`
+}
+
+// OPAEnvoyPlugin 使用 envoy 的 opa 插件服务
+type OPAEnvoyPlugin struct {
+	Enabled *bool `mapstructure:"enabled"`
+	Service struct {
+		GRPCAddress string `mapstructure:"grpc_address"`
+	} `mapstructure:"service"`
+}
+
+// initSecurity 初始化认证
+func (c *LocalConfig) initSecurity() error {
 	if c.Security == nil {
 		c.Security = &SecurityConfig{Enable: false}
 	}
@@ -78,6 +104,30 @@ func (c *LocalConfig) InitSecurity() error {
 		if !ok || err != nil {
 			go wait.PollUntil(time.Second*30, initVerifierFn, ctx.Done())
 		}
+	}
+
+	// 初始化默认值
+	falseVal := false
+	// trueVal := true
+	if c.Security.Authorization == nil {
+		c.Security.Authorization = &Authorization{
+			OPANative: OPANative{
+				Enabled: &falseVal,
+			},
+			OPAExternal: OPAExternal{
+				Enabled: &falseVal,
+			},
+		}
+	}
+
+	if c.Security.Authorization.OPANative.Enabled == nil {
+		c.Security.Authorization.OPANative.Enabled = &falseVal
+	}
+	if c.Security.Authorization.OPAExternal.Enabled == nil {
+		c.Security.Authorization.OPAExternal.Enabled = &falseVal
+	}
+	if c.Security.Authorization.OPAEnvoyPlugin.Enabled == nil {
+		c.Security.Authorization.OPAEnvoyPlugin.Enabled = &falseVal
 	}
 
 	return nil
@@ -205,8 +255,8 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 			}
 
 			// 继续判断错误类型，忽略 token 过期等
-			switch err {
-			case jwt.ErrTokenExpired:
+			switch {
+			case errors.Is(err, jwt.ErrTokenExpired):
 				if s.Authentication.OIDCProvider.Config.SkipExpiryCheck {
 					return idToken, nil
 				}
@@ -259,4 +309,92 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 	}
 
 	return idToken, nil
+}
+
+// initAuthClient 用于初始化 opa 客户端
+func (s *SecurityConfig) initAuthClient(ctx context.Context, logger *logrus.Entry, pkgName string, regoBody, dataBody []byte) error {
+	ac := &auth.Config{
+		PackageName: pkgName,
+	}
+	if *s.Authorization.OPANative.Enabled {
+		ac.OPARego = &auth.OPARegoConfig{
+			RegoBody: regoBody,
+			DataBody: dataBody,
+		}
+	}
+	if *s.Authorization.OPAExternal.Enabled {
+		ac.OPASDK = &auth.OPASDKConfig{
+			Config: s.Authorization.OPAExternal.Config,
+		}
+	}
+	if *s.Authorization.OPAEnvoyPlugin.Enabled {
+		ac.OPAEnvoy = &auth.OPAEnvoyPluginConfig{
+			GRPCAddress: s.Authorization.OPAEnvoyPlugin.Service.GRPCAddress,
+		}
+	}
+
+	cl, err := auth.NewClient(ctx, ac)
+	if err != nil {
+		return err
+	}
+	s.authClient = cl
+
+	s.authClient.WithLoggerOption(logger)
+
+	return nil
+}
+
+// policyAllow 用于以下三个权限验证： opa_native、opa_external、opa_envoy_plugin
+// 如果同时配置并启动以上多个权限策略，则必须所有允许通过才可
+func (s *SecurityConfig) policyAllow(ctx context.Context) (bool, error) {
+	// 如果均未开启鉴权，则默认允许通过
+	if *s.Authorization.OPANative.Enabled == false &&
+		*s.Authorization.OPAExternal.Enabled == false &&
+		*s.Authorization.OPAEnvoyPlugin.Enabled == false {
+		return true, nil
+	}
+
+	ok, err := s.authClient.Allow(ctx)
+	if ok && err == nil {
+		return true, nil
+	}
+
+	return false, err
+}
+
+// injectAuthHeader 用于注入认证鉴权信息
+func (s *SecurityConfig) injectAuthHTTPHeader(ctx context.Context, req *http.Request) context.Context {
+	// 开启任意一个功能，则注入认证鉴权信息
+	if *s.Authorization.OPANative.Enabled ||
+		*s.Authorization.OPAExternal.Enabled ||
+		*s.Authorization.OPAEnvoyPlugin.Enabled {
+
+		return s.authClient.AuthMetadata(ctx, req)
+	}
+
+	return ctx
+}
+
+// addHTTPHandler 植入认证鉴权
+func (s *SecurityConfig) addHTTPHandler(handler http.Handler) http.Handler {
+	if s == nil || s.Enable == false {
+		return handler
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.TODO()
+		ctx = s.injectAuthHTTPHeader(ctx, r)
+
+		ok, err := s.policyAllow(ctx)
+		if err != nil || !ok {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+
+		handler.ServeHTTP(w, r)
+	})
+}
+
+func (s *SecurityConfig) addHTTPHandlerFunc(handler http.HandlerFunc) http.Handler {
+	return s.addHTTPHandler(handler)
 }

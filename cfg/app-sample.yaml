@@ -93,10 +93,40 @@ security:
         password: pass1
         groups:
           - sysadmin
-  # TODO; 鉴权：能做什么
+
+  # 鉴权：能做什么
   authorization:
     allowed_groups:
       - sysadmin
+
+    # 内置权限规则，通过本地配置文件管理
+    opa_native:
+      enabled: true
+      #policy:
+        # 未配置则为 internal/security/auth.rego 内嵌文件
+        #auth_file: "./config/auth.rego"
+        # 未配置则为 internal/security/data.yaml 内嵌文件
+        #data_file: "./config/data.yaml"
+
+    # 外部权限规则，外部更改权限本地实时生效，无需重启服务
+    opa_external:
+      enabled: false
+      # 配置内容见：https://www.openpolicyagent.org/docs/latest/configuration/
+      config: |
+        services:
+          test:
+            url: http://192.168.0.2:8080
+        bundles:
+          test:
+            resource: /bundle.tar.gz
+        decision_logs:
+          console: false
+
+    # 外部权限规则，通过把数据提交至 opa-envoy-plugin 服务，由它进行判断功能
+    opa_envoy_plugin:
+      enabled: false
+      service:
+        grpc_address: 192.168.0.1:9191
 
 # 关系数据配置
 database:

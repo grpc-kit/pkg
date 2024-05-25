@@ -308,8 +308,8 @@ func (o *ObjstoreConfig) BucketClient(logger *logrus.Entry) (ObjstoreBucket, err
 	return o.bucket, nil
 }
 
-// InitObjstore 初始化对象存储
-func (c *LocalConfig) InitObjstore() error {
+// initObjstore 初始化对象存储
+func (c *LocalConfig) initObjstore() error {
 	// 标准步骤：为空或主动关闭则不开启该功能
 	if c.Objstore == nil || !c.Objstore.Enable {
 		return nil

@@ -3,25 +3,27 @@ package cfg
 import (
 	"context"
 	"database/sql"
+	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"sync/atomic"
 	"time"
 
 	eventclient "github.com/cloudevents/sdk-go/v2/client"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
-	yaml "gopkg.in/yaml.v2"
 )
 
 const (
@@ -117,6 +119,7 @@ type DiscoverConfig struct {
 type SecurityConfig struct {
 	// 包含*oidc.IDTokenVerifier数据结构，不能直接使用*oidc.IDTokenVerifier
 	tokenVerifier atomic.Value
+	authClient    *auth.Client
 
 	Enable         bool            `mapstructure:"enable"`
 	Authentication *Authentication `mapstructure:"authentication"`
@@ -153,38 +156,6 @@ type DebuggerConfig struct {
 	LogFormat   string `mapstructure:"log_format"`
 }
 
-// OpentracingConfig 分布式链路追踪
-/*
-type OpentracingConfig struct {
-	Enable bool `mapstructure:"enable"`
-
-	// Deprecated: Use Exporters instead.
-	Host string `mapstructure:"host"`
-	// Deprecated: Use Exporters instead.
-	Port int `mapstructure:"port"`
-	// Deprecated: Use Exporters instead.
-	URLPath string `mapstructure:"url_path"`
-
-	// 记录特殊字段，默认不开启
-	LogFields LogFields `mapstructure:"log_fields"`
-
-	// 过滤器，用于过滤不需要追踪的请求
-	Filters []struct {
-		Method  string `mapstructure:"method"`
-		URLPath string `mapstructure:"url_path"`
-	} `mapstructure:"filters"`
-
-	Exporters *struct {
-		OTLPHTTP *OTLPHTTPConfig `mapstructure:"otlphttp"`
-		OTLPGRPC *OTLPGRPCConfig `mapstructure:"otlpgrpc"`
-		Logging  *struct {
-			FilePath    string `mapstructure:"file_path"`
-			PrettyPrint bool   `mapstructure:"pretty_print"`
-		} `mapstructure:"logging"`
-	} `mapstructure:"exporters"`
-}
-*/
-
 // CloudEventsConfig cloudevents事件配置
 type CloudEventsConfig struct {
 	Protocol    string      `mapstructure:"protocol"`
@@ -200,7 +171,10 @@ type Authentication struct {
 
 // Authorization 用于鉴权
 type Authorization struct {
-	AllowedGroups []string `mapstructure:"allowed_groups"`
+	AllowedGroups  []string       `mapstructure:"allowed_groups"`
+	OPANative      OPANative      `mapstructure:"opa_native"`
+	OPAExternal    OPAExternal    `mapstructure:"opa_external"`
+	OPAEnvoyPlugin OPAEnvoyPlugin `mapstructure:"opa_envoy_plugin"`
 }
 
 // BasicAuth 用于HTTP基本认证的用户权限定义
@@ -267,47 +241,41 @@ func New(v *viper.Viper) (*LocalConfig, error) {
 
 // Init 用于根据配置初始化各个实例，初始化需注意空指针判断
 func (c *LocalConfig) Init() error {
-	if err := c.InitDebugger(); err != nil {
+	if err := c.initDebugger(); err != nil {
 		return err
 	}
 
-	if err := c.InitServices(); err != nil {
+	if err := c.initServices(); err != nil {
 		return err
 	}
 
-	if err := c.InitSecurity(); err != nil {
+	if err := c.initSecurity(); err != nil {
 		return err
 	}
 
-	if err := c.InitDatabase(); err != nil {
+	if err := c.initDatabase(); err != nil {
 		return err
 	}
 
-	if err := c.InitObservables(); err != nil {
+	if err := c.initObservables(); err != nil {
 		return err
 	}
 
-	if err := c.InitCloudEvents(); err != nil {
+	if err := c.initCloudEvents(); err != nil {
 		return err
 	}
 
-	if err := c.InitRPCConfig(); err != nil {
+	if err := c.initRPCConfig(); err != nil {
 		return err
 	}
 
-	if err := c.InitObjstore(); err != nil {
+	if err := c.initObjstore(); err != nil {
 		return err
 	}
 
-	if err := c.InitFrontend(); err != nil {
+	if err := c.initFrontend(); err != nil {
 		return err
 	}
-
-	/*
-		if err := c.InitPrometheus(); err != nil {
-			return err
-		}
-	*/
 
 	return nil
 }
@@ -346,7 +314,28 @@ func (c *LocalConfig) GetIndependent(t interface{}) error {
 		return fmt.Errorf("independent is nil")
 	}
 
-	return mapstructure.Decode(c.Independent, t)
+	// return mapstructure.Decode(c.Independent, t)
+	// 使用全局 Decode 仅仅支持基础类型，当配置结构体存在 time.Duration 类型则无法解析，会产生类似以下错误：
+	// expected type 'time.Duration', got unconvertible type 'string', value: '10s'
+	//
+	// 参考 viper 通过自定义解析器解决
+	// https://github.com/spf13/viper/blob/master/viper.go#L1152
+	// github.com/spf13/viper/viper.go -> defaultDecoderConfig
+	dc := &mapstructure.DecoderConfig{
+		Metadata:         nil,
+		Result:           t,
+		WeaklyTypedInput: true,
+		DecodeHook: mapstructure.ComposeDecodeHookFunc(
+			mapstructure.StringToTimeDurationHookFunc(),
+			mapstructure.StringToSliceHookFunc(",")),
+	}
+
+	dr, err := mapstructure.NewDecoder(dc)
+	if err != nil {
+		return err
+	}
+
+	return dr.Decode(c.Independent)
 }
 
 // GetServiceName 用于获取微服务名称
@@ -364,12 +353,11 @@ func (c *LocalConfig) HTTPHandlerFunc(handler http.HandlerFunc) http.Handler {
 	return c.HTTPHandler(handler)
 }
 
-// HTTPHandler 用于植入 otelhttp 链路跟踪中间件
+// HTTPHandler 用于植入 otelhttp 链路跟踪与鉴权中间件
 func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
-	return otelhttp.NewHandler(handler,
-		"grpc-gateway",
-		otelhttp.WithFilter(c.Observables.httpTracingEnableFilter),
-		otelhttp.WithSpanNameFormatter(c.Observables.httpTracesSpanName))
+	handler = c.Observables.addHTTPHandler(handler)
+	handler = c.Security.addHTTPHandler(handler)
+	return handler
 }
 
 // HTTPHandlerFrontend 用于处理前端相关服务
@@ -397,7 +385,10 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 		if err == nil && ok {
 			if tracing {
 				handle = c.HTTPHandler(handle)
+			} else {
+				handle = c.Security.addHTTPHandler(handle)
 			}
+
 			mux.Handle(url, handle)
 		} else if err != nil {
 			return err
@@ -405,6 +396,43 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 	}
 
 	return nil
+}
+
+// SecurityPolicyLoad 加载服务本地安全策略
+func (c *LocalConfig) SecurityPolicyLoad(ctx context.Context, assets embed.FS) error {
+	tmps := strings.Split(c.Services.ServiceCode, ".")
+	if len(tmps) != 3 {
+		return fmt.Errorf("invalid service code, must be like 'xxx.yyy.zzz'")
+	}
+
+	packageName := fmt.Sprintf("%v.%v.%v", tmps[2], tmps[0], tmps[1])
+
+	// 内嵌的策略文件
+	embedAuthFile, err := assets.ReadFile("auth.rego")
+	if err != nil {
+		return err
+	}
+	embedDataFile, err := assets.ReadFile("data.yaml")
+	if err != nil {
+		return err
+	}
+
+	localAuthFile := c.Security.Authorization.OPANative.Policy.AuthFile
+	localDataFile := c.Security.Authorization.OPANative.Policy.DataFile
+	if localAuthFile != "" {
+		embedAuthFile, err = os.ReadFile(localAuthFile)
+		if err != nil {
+			return err
+		}
+	}
+	if localDataFile != "" {
+		embedDataFile, err = os.ReadFile(localDataFile)
+		if err != nil {
+			return err
+		}
+	}
+
+	return c.Security.initAuthClient(ctx, c.logger, packageName, embedAuthFile, embedDataFile)
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {
@@ -433,7 +461,7 @@ func (c *LocalConfig) registerConfig(ctx context.Context) error {
 		ttl = 30
 	}
 
-	rawBody, err := yaml.Marshal(c)
+	rawBody, err := json.Marshal(c)
 	if err != nil {
 		return err
 	}

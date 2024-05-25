@@ -6,8 +6,8 @@ import (
 	"github.com/grpc-kit/pkg/rpc"
 )
 
-// InitRPCConfig 用于初始化rpc客户端、服务端配置
-func (c *LocalConfig) InitRPCConfig() error {
+// initRPCConfig 用于初始化rpc客户端、服务端配置
+func (c *LocalConfig) initRPCConfig() error {
 	r := rpc.NewConfig(c.logger)
 
 	r.Authority = c.Services.Namespace

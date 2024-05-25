@@ -11,7 +11,7 @@ func TestDatabase(t *testing.T) {
 }
 
 func testDatabaseInit(t *testing.T) {
-	if err := lc.InitDatabase(); err != nil {
+	if err := lc.initDatabase(); err != nil {
 		t.Errorf("database init err=%v", err)
 	}
 }
@@ -43,7 +43,7 @@ func testDatabaseConfig(t *testing.T) {
 }
 
 func BenchmarkDatabaseInsert(b *testing.B) {
-	if err := lc.InitDatabase(); err != nil {
+	if err := lc.initDatabase(); err != nil {
 		b.Errorf("init database err=%v", err)
 	}
 	db, err := lc.GetDatabase()

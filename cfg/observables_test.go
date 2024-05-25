@@ -11,7 +11,7 @@ import (
 )
 
 func TestObservables(t *testing.T) {
-	if err := lc.InitObservables(); err != nil {
+	if err := lc.initObservables(); err != nil {
 		t.Error(err)
 	}
 

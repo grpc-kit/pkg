@@ -176,9 +176,14 @@ func (b *S3Bucket) Upload(ctx context.Context, objectKey string, r io.Reader) (O
 	}
 
 	partSize := b.partSize
-	if size < int64(partSize) {
-		partSize = 0
+	// TODO; 设置合理的分块大小，否则会以默认 16M
+	//if size < int64(partSize) {
+	//	partSize = 0
+	//}
+	if partSize == 0 {
+		partSize = 64 * 1024 * 1024
 	}
+
 	info, err := b.client.PutObject(
 		ctx,
 		b.name,
@@ -187,7 +192,7 @@ func (b *S3Bucket) Upload(ctx context.Context, objectKey string, r io.Reader) (O
 		size,
 		minio.PutObjectOptions{
 			ContentType:          contentType,
-			PartSize:             partSize,
+			PartSize:             partSize, // 如果为 0，则 minio-go 自动会设置为最小分块大小 16M，"const minPartSize = 1024 * 1024 * 16"
 			ServerSideEncryption: b.defaultSSE,
 			UserMetadata:         b.putUserMetadata,
 			UserTags:             b.putUserTags,

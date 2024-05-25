@@ -60,8 +60,8 @@ func (f customFileSystem) Open(name string) (http.File, error) {
 	return file, err
 }
 
-// InitFrontend 初始化前端服务
-func (c *LocalConfig) InitFrontend() error {
+// initFrontend 初始化前端服务
+func (c *LocalConfig) initFrontend() error {
 	var enableVal = true
 
 	if c.Frontend == nil {

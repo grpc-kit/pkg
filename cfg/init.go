@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// InitServices 用于基础服务初始化配置检查
-func (c *LocalConfig) InitServices() error {
+// initServices 用于基础服务初始化配置检查
+func (c *LocalConfig) initServices() error {
 	// 验证 service_code 关键属性是否在
 	if c.Services == nil || c.Services.ServiceCode == "" {
 		return fmt.Errorf("unknow service_code")

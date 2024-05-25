@@ -407,8 +407,8 @@ func (s *SaramaConfig) Parse() *sarama.Config {
 	return c
 }
 
-// InitCloudEvents 初始化 cloudevents 数据实例
-func (c *LocalConfig) InitCloudEvents() error {
+// initCloudEvents 初始化 cloudevents 数据实例
+func (c *LocalConfig) initCloudEvents() error {
 	if c.CloudEvents == nil || c.CloudEvents.Protocol == "" {
 		return nil
 	}
