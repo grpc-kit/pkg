@@ -44,12 +44,20 @@ func (e *envoyProxy) extractHTTPHeader(ctx context.Context, req *http.Request) c
 
 	// 如果为自定义 http.Handler 需植入 header
 	for k, v := range req.Header {
+		k = strings.ToLower(k)
+
 		// 避免客户端伪装内部特殊请求头
 		if strings.HasPrefix(k, authMetadataPrefix) {
 			continue
 		}
 
-		h[k] = v[0]
+		// 避免未知 http 请求头传递 grpc 引起异常，如：connection
+		// stream terminated by RST_STREAM with error code: PROTOCOL_ERROR
+		// 这里仅传递认证头信息，在自定义 http handler 中使用
+		switch k {
+		case "authorization":
+			h[k] = v[0]
+		}
 	}
 
 	return metadata.NewIncomingContext(ctx, metadata.New(h))
