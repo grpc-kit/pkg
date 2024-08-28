@@ -54,6 +54,30 @@ func (c *LocalConfig) initSecurity() error {
 		c.Security = &SecurityConfig{Enable: false}
 	}
 
+	// 初始化默认值
+	falseVal := false
+	// trueVal := true
+	if c.Security.Authorization == nil {
+		c.Security.Authorization = &Authorization{
+			OPANative: OPANative{
+				Enabled: &falseVal,
+			},
+			OPAExternal: OPAExternal{
+				Enabled: &falseVal,
+			},
+		}
+	}
+
+	if c.Security.Authorization.OPANative.Enabled == nil {
+		c.Security.Authorization.OPANative.Enabled = &falseVal
+	}
+	if c.Security.Authorization.OPAExternal.Enabled == nil {
+		c.Security.Authorization.OPAExternal.Enabled = &falseVal
+	}
+	if c.Security.Authorization.OPAEnvoyPlugin.Enabled == nil {
+		c.Security.Authorization.OPAEnvoyPlugin.Enabled = &falseVal
+	}
+
 	if !c.Security.Enable {
 		return nil
 	}
@@ -104,30 +128,6 @@ func (c *LocalConfig) initSecurity() error {
 		if !ok || err != nil {
 			go wait.PollUntil(time.Second*30, initVerifierFn, ctx.Done())
 		}
-	}
-
-	// 初始化默认值
-	falseVal := false
-	// trueVal := true
-	if c.Security.Authorization == nil {
-		c.Security.Authorization = &Authorization{
-			OPANative: OPANative{
-				Enabled: &falseVal,
-			},
-			OPAExternal: OPAExternal{
-				Enabled: &falseVal,
-			},
-		}
-	}
-
-	if c.Security.Authorization.OPANative.Enabled == nil {
-		c.Security.Authorization.OPANative.Enabled = &falseVal
-	}
-	if c.Security.Authorization.OPAExternal.Enabled == nil {
-		c.Security.Authorization.OPAExternal.Enabled = &falseVal
-	}
-	if c.Security.Authorization.OPAEnvoyPlugin.Enabled == nil {
-		c.Security.Authorization.OPAEnvoyPlugin.Enabled = &falseVal
 	}
 
 	return nil
