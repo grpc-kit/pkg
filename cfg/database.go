@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 )
@@ -111,4 +112,14 @@ func (c *LocalConfig) GetDatabase() (*sql.DB, error) {
 	}
 
 	return c.Database.db, nil
+}
+
+// GetDatabaseEntSQLDriver 获取以 ent 框架的数据库模型实例
+func (c *LocalConfig) GetDatabaseEntSQLDriver() (*entsql.Driver, error) {
+	db, err := c.GetDatabase()
+	if err != nil {
+		return nil, err
+	}
+
+	return entsql.OpenDB(c.Database.Driver, db), nil
 }
