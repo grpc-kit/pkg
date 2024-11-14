@@ -81,6 +81,7 @@ type LocalConfig struct {
 	Frontend    *FrontendConfig    `json:",omitempty"` // 前端服务配置
 	Observables *ObservablesConfig `json:",omitempty"` // 可观测性配置
 	CloudEvents *CloudEventsConfig `json:",omitempty"` // 公共事件配置
+	Automations *AutomationsConfig `json:",omitempty"` // 流程编排配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
 	logger      *logrus.Entry
@@ -277,6 +278,10 @@ func (c *LocalConfig) Init() error {
 		return err
 	}
 
+	if err := c.initAutomations(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -434,6 +439,30 @@ func (c *LocalConfig) SecurityPolicyLoad(ctx context.Context, assets embed.FS) e
 
 	return c.Security.initAuthClient(ctx, c.logger, packageName, embedAuthFile, embedDataFile)
 }
+
+// GetKubernetesClientset 用于获取 k8s clientset 控制基础资源
+/*
+func (c *LocalConfig) GetKubernetesClientset() (*kubernetes.Clientset, error) {
+	if !c.Automations.Enable {
+		return nil, fmt.Errorf("automations is not enable")
+	}
+
+	// return c.Automations.clientSet, nil
+	return nil, fmt.Errorf("automations not implemented")
+}
+*/
+
+// GetKubernetesDynamicClient 用于获取 k8s dynamic client 控制 crd 资源
+/*
+func (c *LocalConfig) GetKubernetesDynamicClient() (*dynamic.DynamicClient, error) {
+	if !c.Automations.Enable {
+		return nil, fmt.Errorf("automations is not enable")
+	}
+
+	// return c.Automations.dynamicClient, nil
+	return nil, fmt.Errorf("automations not implemented")
+}
+*/
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {
 	// 配置文件未设置注册地址，则主动忽略
