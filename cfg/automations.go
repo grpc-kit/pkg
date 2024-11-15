@@ -2,6 +2,8 @@ package cfg
 
 import (
 	"fmt"
+	"io"
+	"io/fs"
 
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -86,4 +88,20 @@ func (c *LocalConfig) initAutomations() error {
 
 func (a *AutomationsConfig) defaultValues() {
 	return
+}
+
+// GetScriptSource 用于获取脚本内容，从 db 或本地中
+func (fcc *FlowClientConfig) GetScriptSource(assets fs.FS, name string) (string, error) {
+	filePath := fmt.Sprintf("script/%v", name)
+
+	f, err := assets.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	source, err := io.ReadAll(f)
+	if err != nil {
+		return "", err
+	}
+
+	return string(source), nil
 }
