@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 // AutomationsConfig 流程编排配置
@@ -11,6 +12,7 @@ type AutomationsConfig struct {
 	// TODO； 引入后导致编译后的二进制代码变大至少 30M
 	//clientSet     *kubernetes.Clientset
 	//dynamicClient *dynamic.DynamicClient
+	restConfig *rest.Config
 
 	// 全局是否启用
 	Enable bool `mapstructure:"enable"`
@@ -23,6 +25,22 @@ type AutomationsConfig struct {
 type KubernetesConfig struct {
 	// 配置文件路径，既 kubeconfig 文件路径
 	ConfigPath string `mapstructure:"config_path"`
+	// 结构同 https://pkg.go.dev/k8s.io/client-go@v0.31.2/rest#Config
+	RestConfig *struct {
+		Host            string `mapstructure:"host"`
+		BearerToken     string `mapstructure:"bearer_token"`
+		BearerTokenFile string `mapstructure:"bearer_token_file"`
+		TLSClientConfig struct {
+			Insecure bool `mapstructure:"insecure"`
+		} `mapstructure:"tls_client_config"`
+	} `mapstructure:"rest_config"`
+}
+
+// FlowClientConfig 流程编排客户端配置
+type FlowClientConfig struct {
+	Config    *rest.Config
+	Namespace string
+	Appname   string
 }
 
 func (c *LocalConfig) initAutomations() error {
@@ -34,32 +52,35 @@ func (c *LocalConfig) initAutomations() error {
 		return nil
 	}
 
-	x := rest.Config{}
-	c.logger.Infof("rest config: %v", x)
+	var err error
+	var restConfig *rest.Config
 
-	if c.Automations.Kubernetes.ConfigPath == "" {
-		return fmt.Errorf("must set kubeconfig path")
+	// 均未配置则使用 in cluster 模式
+	if c.Automations.Kubernetes.ConfigPath == "" && c.Automations.Kubernetes.RestConfig == nil {
+		restConfig, err = rest.InClusterConfig()
+		if err != nil {
+			return err
+		}
+	} else if c.Automations.Kubernetes.ConfigPath != "" {
+		restConfig, err = clientcmd.BuildConfigFromFlags("", c.Automations.Kubernetes.ConfigPath)
+		if err != nil {
+			return err
+		}
+	} else if c.Automations.Kubernetes.RestConfig != nil {
+		if c.Automations.Kubernetes.RestConfig.Host == "" {
+			return fmt.Errorf("automations.kubernetes.rest_config.host must specified")
+		}
+
+		restConfig = &rest.Config{
+			Host:        c.Automations.Kubernetes.RestConfig.Host,
+			BearerToken: c.Automations.Kubernetes.RestConfig.BearerToken,
+			TLSClientConfig: rest.TLSClientConfig{
+				Insecure: c.Automations.Kubernetes.RestConfig.TLSClientConfig.Insecure,
+			},
+		}
 	}
 
-	/*
-		config, err := clientcmd.BuildConfigFromFlags("", c.Automations.Kubernetes.ConfigPath)
-		if err != nil {
-			return err
-		}
-
-		cs, err := kubernetes.NewForConfig(config)
-		if err != nil {
-			return err
-		}
-		c.Automations.clientSet = cs
-
-		dc, err := dynamic.NewForConfig(config)
-		if err != nil {
-			return err
-		}
-		c.Automations.dynamicClient = dc
-	*/
-
+	c.Automations.restConfig = restConfig
 	return nil
 }
 

@@ -440,29 +440,40 @@ func (c *LocalConfig) SecurityPolicyLoad(ctx context.Context, assets embed.FS) e
 	return c.Security.initAuthClient(ctx, c.logger, packageName, embedAuthFile, embedDataFile)
 }
 
-// GetKubernetesClientset 用于获取 k8s clientset 控制基础资源
-/*
-func (c *LocalConfig) GetKubernetesClientset() (*kubernetes.Clientset, error) {
+// GetFlowClientConfig 用于获取 flow client 配置
+func (c *LocalConfig) GetFlowClientConfig() (*FlowClientConfig, error) {
 	if !c.Automations.Enable {
 		return nil, fmt.Errorf("automations is not enable")
 	}
 
-	// return c.Automations.clientSet, nil
-	return nil, fmt.Errorf("automations not implemented")
-}
-*/
-
-// GetKubernetesDynamicClient 用于获取 k8s dynamic client 控制 crd 资源
-/*
-func (c *LocalConfig) GetKubernetesDynamicClient() (*dynamic.DynamicClient, error) {
-	if !c.Automations.Enable {
-		return nil, fmt.Errorf("automations is not enable")
+	fcc := &FlowClientConfig{
+		Config:    c.Automations.restConfig,
+		Namespace: c.GetNamespace(),
+		Appname:   c.GetAppname(),
 	}
 
-	// return c.Automations.dynamicClient, nil
-	return nil, fmt.Errorf("automations not implemented")
+	return fcc, nil
 }
-*/
+
+// GetNamespace 用于获取应用的命名空间
+func (c *LocalConfig) GetNamespace() string {
+	if c.Services.Namespace == "" {
+		panic("namespace is not set")
+	}
+
+	return c.Services.Namespace
+}
+
+// GetAppname 用于获取应用名称
+func (c *LocalConfig) GetAppname() string {
+	// 这里的 ServiceCode 格式一定是 xxx.yyy.zzz 格式
+	parts := strings.Split(c.Services.ServiceCode, ".")
+	if len(parts) != 3 {
+		panic("invalid service code, must be like 'xxx.yyy.zzz'")
+	}
+
+	return fmt.Sprintf("%s-%s-%s", parts[2], parts[0], parts[1])
+}
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {
 	// 配置文件未设置注册地址，则主动忽略
