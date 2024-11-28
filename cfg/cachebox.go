@@ -2,13 +2,14 @@ package cfg
 
 import (
 	"fmt"
+	"github.com/redis/go-redis/v9"
 
 	"k8s.io/utils/lru"
 )
 
 // CacheboxConfig 缓存配置，区别于数据库配置，缓存的数据可以丢失
 type CacheboxConfig struct {
-	lruCache *LRUCachebox
+	lruCache LRUCachebox
 
 	// 全局是否启用
 	Enable bool `mapstructure:"enable"`
@@ -48,7 +49,17 @@ func (c *LocalConfig) initCachebox() error {
 	switch c.Cachebox.Driver {
 	case "memory":
 		// 限制缓存条目数量，为 0 则不限制
-		c.Cachebox.lruCache.cache = lru.New(c.Cachebox.Memory.MaxEntry)
+		c.Cachebox.lruCache = memoryCache{
+			cache: lru.New(c.Cachebox.Memory.MaxEntry),
+		}
+	case "redis":
+		rdb := redis.NewClient(&redis.Options{
+			Addr:     c.Cachebox.Redis.Address,
+			Password: c.Cachebox.Redis.Password,
+		})
+		c.Cachebox.lruCache = redisCache{
+			cache: rdb,
+		}
 	default:
 		return fmt.Errorf("cachebox driver [%s] not found", c.Cachebox.Driver)
 	}
@@ -57,9 +68,5 @@ func (c *LocalConfig) initCachebox() error {
 }
 
 func (c *CacheboxConfig) defaultValues() {
-	if c.lruCache == nil {
-		c.lruCache = &LRUCachebox{}
-	}
-
 	return
 }

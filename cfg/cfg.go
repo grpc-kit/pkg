@@ -472,7 +472,7 @@ func (c *LocalConfig) GetAppname() string {
 }
 
 // GetLRUCachebox 用于获取 LRU 缓存
-func (c *LocalConfig) GetLRUCachebox() (*LRUCachebox, error) {
+func (c *LocalConfig) GetLRUCachebox() (LRUCachebox, error) {
 	if c.Cachebox.Enable {
 		return c.Cachebox.lruCache, nil
 	}
