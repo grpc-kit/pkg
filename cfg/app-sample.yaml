@@ -147,11 +147,14 @@ database:
     max_open_conns: 300
 
 # 缓存服务配置
-cachebuf:
+cachebox:
   enable: true
-  driver: redis
-  address: 127.0.0.1:6379
-  password: ""
+  driver: redis # memory, redis
+  memory:
+    max_entry: 1024
+  redis:
+    address: 127.0.0.1:6379
+    password: ""
 
 # 日志调试配置
 debugger:
