@@ -75,7 +75,7 @@ type LocalConfig struct {
 	Discover    *DiscoverConfig    `json:",omitempty"` // 服务注册配置
 	Security    *SecurityConfig    `json:",omitempty"` // 认证鉴权配置
 	Database    *DatabaseConfig    `json:",omitempty"` // 关系数据配置
-	Cachebuf    *CachebufConfig    `json:",omitempty"` // 缓存服务配置
+	Cachebox    *CacheboxConfig    `json:",omitempty"` // 缓存服务配置
 	Debugger    *DebuggerConfig    `json:",omitempty"` // 日志调试配置
 	Objstore    *ObjstoreConfig    `json:",omitempty"` // 对象存储配置
 	Frontend    *FrontendConfig    `json:",omitempty"` // 前端服务配置
@@ -140,14 +140,6 @@ type DatabaseConfig struct {
 	DBName         string         `mapstructure:"dbname"`
 	Parameters     string         `mapstructure:"parameters"`
 	ConnectionPool ConnectionPool `mapstructure:"connection_pool"`
-}
-
-// CachebufConfig 缓存配置，区别于数据库配置，缓存的数据可以丢失
-type CachebufConfig struct {
-	Enable   bool   `mapstructure:"enable"`
-	Driver   string `mapstructure:"driver"`
-	Address  string `mapstructure:"address"`
-	Password string `mapstructure:"password"`
 }
 
 // DebuggerConfig 日志配置，用于设定服务启动后日志输出级别格式等
@@ -255,6 +247,10 @@ func (c *LocalConfig) Init() error {
 	}
 
 	if err := c.initDatabase(); err != nil {
+		return err
+	}
+
+	if err := c.initCachebox(); err != nil {
 		return err
 	}
 
@@ -473,6 +469,15 @@ func (c *LocalConfig) GetAppname() string {
 	}
 
 	return fmt.Sprintf("%s-%s-%s", parts[2], parts[0], parts[1])
+}
+
+// GetLRUCachebox 用于获取 LRU 缓存
+func (c *LocalConfig) GetLRUCachebox() (*LRUCachebox, error) {
+	if c.Cachebox.Enable {
+		return c.Cachebox.lruCache, nil
+	}
+
+	return nil, fmt.Errorf("cachebox is not enabled")
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {
