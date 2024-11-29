@@ -13,6 +13,10 @@ import (
 	"k8s.io/utils/lru"
 )
 
+const (
+	cacheKeyPrefix = "grpc-kit:cachebox"
+)
+
 // LRUCachebox 缓存实现 LRU 效果
 type LRUCachebox interface {
 	GetStructValue(ctx context.Context, key string, ptx any) bool
@@ -44,7 +48,7 @@ func newRedisCache(logger *logrus.Entry, client *redis.Client) *redisCache {
 
 // GetStructValue 从内存缓存获取值，并填充用户给定的类型
 func (c *memoryCache) GetStructValue(ctx context.Context, key string, ptr any) bool {
-	val, ok := c.cache.Get(key)
+	val, ok := c.cache.Get(fmt.Sprintf("%v:%v", cacheKeyPrefix, key))
 	if !ok || !isPointer(ptr) {
 		return false
 	}
@@ -62,17 +66,17 @@ func (c *memoryCache) GetStructValue(ctx context.Context, key string, ptr any) b
 
 // SetValue 向内存缓存添加值
 func (c *memoryCache) SetValue(ctx context.Context, key string, value any) error {
-	c.cache.Add(key, value)
+	c.cache.Add(fmt.Sprintf("%v:%v", cacheKeyPrefix, key), value)
 	return nil
 }
 
 // GetStructValue 从 redis 缓存获取值，以 any 类型返回
-func (c *redisCache) GetStructValue(ctx context.Context, key string, ptx any) bool {
-	if !isPointer(ptx) {
+func (c *redisCache) GetStructValue(ctx context.Context, key string, ptr any) bool {
+	if !isPointer(ptr) {
 		return false
 	}
 
-	val, err := c.cache.Get(ctx, key).Result()
+	val, err := c.cache.Get(ctx, fmt.Sprintf("%v:%v", cacheKeyPrefix, key)).Result()
 	if err != nil {
 		return false
 	}
@@ -83,9 +87,9 @@ func (c *redisCache) GetStructValue(ctx context.Context, key string, ptx any) bo
 		return false
 	}
 
-	gob.Register(reflect.TypeOf(ptx).Elem())
+	// gob.Register(reflect.TypeOf(ptr).Elem())
 	decoder := gob.NewDecoder(bytes.NewReader(data))
-	if err := decoder.Decode(ptx); err != nil {
+	if err := decoder.Decode(ptr); err != nil {
 		c.logger.Errorf("redis cache decode error (key: %s): %v\n", key, err)
 		return false
 	}
@@ -102,12 +106,12 @@ func (c *redisCache) SetValue(ctx context.Context, key string, value any) error 
 	}
 
 	encoded := base64.StdEncoding.EncodeToString(buffer.Bytes())
-	return c.cache.Set(ctx, key, encoded, 0).Err()
+	return c.cache.Set(ctx, fmt.Sprintf("%v:%v", cacheKeyPrefix, key), encoded, 0).Err()
 }
 
 // isPointer 检查对象是否为指针
-func isPointer(ptx any) bool {
-	if reflect.TypeOf(ptx).Kind() != reflect.Ptr {
+func isPointer(ptr any) bool {
+	if reflect.TypeOf(ptr).Kind() != reflect.Ptr {
 		return false
 	}
 	return true
