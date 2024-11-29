@@ -92,7 +92,7 @@ func (a *AutomationsConfig) defaultValues() {
 
 // GetScriptSource 用于获取脚本内容，从 db 或本地中
 func (fcc *FlowClientConfig) GetScriptSource(assets fs.FS, name string) (string, error) {
-	filePath := fmt.Sprintf("script/%v", name)
+	filePath := fmt.Sprintf("%v", name)
 
 	f, err := assets.Open(filePath)
 	if err != nil {
