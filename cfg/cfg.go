@@ -480,6 +480,11 @@ func (c *LocalConfig) GetLRUCachebox() (LRUCachebox, error) {
 	return nil, fmt.Errorf("cachebox is not enabled")
 }
 
+// HasCacheboxEnabled 用于判断是否启用缓存
+func (c *LocalConfig) HasCacheboxEnabled() bool {
+	return c.Cachebox.Enable
+}
+
 func (c *LocalConfig) registerConfig(ctx context.Context) error {
 	// 配置文件未设置注册地址，则主动忽略
 	if c.Discover == nil {

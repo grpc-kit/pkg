@@ -20,7 +20,8 @@ const (
 // LRUCachebox 缓存实现 LRU 效果
 type LRUCachebox interface {
 	GetStructValue(ctx context.Context, key string, ptx any) bool
-	SetValue(ctx context.Context, key string, value any) error
+	SetValue(ctx context.Context, key string, value any) bool
+	Remove(ctx context.Context, key string) bool
 }
 
 // memory 实现
@@ -65,9 +66,15 @@ func (c *memoryCache) GetStructValue(ctx context.Context, key string, ptr any) b
 }
 
 // SetValue 向内存缓存添加值
-func (c *memoryCache) SetValue(ctx context.Context, key string, value any) error {
+func (c *memoryCache) SetValue(ctx context.Context, key string, value any) bool {
 	c.cache.Add(fmt.Sprintf("%v:%v", cacheKeyPrefix, key), value)
-	return nil
+	return true
+}
+
+// Remove 重内存缓存移除值
+func (c *memoryCache) Remove(ctx context.Context, key string) bool {
+	c.cache.Remove(fmt.Sprintf("%v:%v", cacheKeyPrefix, key))
+	return true
 }
 
 // GetStructValue 从 redis 缓存获取值，以 any 类型返回
@@ -98,15 +105,31 @@ func (c *redisCache) GetStructValue(ctx context.Context, key string, ptr any) bo
 }
 
 // SetValue 向 redis 缓存添加值
-func (c *redisCache) SetValue(ctx context.Context, key string, value any) error {
+func (c *redisCache) SetValue(ctx context.Context, key string, value any) bool {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 	if err := encoder.Encode(value); err != nil {
-		return fmt.Errorf("redis cache failed to encode value for key %s: %w", key, err)
+		c.logger.Errorf("redis cache failed to encode value for key %s: %w", key, err)
+		return false
 	}
 
 	encoded := base64.StdEncoding.EncodeToString(buffer.Bytes())
-	return c.cache.Set(ctx, fmt.Sprintf("%v:%v", cacheKeyPrefix, key), encoded, 0).Err()
+	err := c.cache.Set(ctx, fmt.Sprintf("%v:%v", cacheKeyPrefix, key), encoded, 0).Err()
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+// Remove 重内存缓存移除值
+func (c *redisCache) Remove(ctx context.Context, key string) bool {
+	err := c.cache.Del(ctx, fmt.Sprintf("%v:%v", cacheKeyPrefix, key)).Err()
+	if err != nil {
+		return false
+	}
+
+	return true
 }
 
 // isPointer 检查对象是否为指针
