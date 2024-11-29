@@ -2,8 +2,6 @@ package cfg
 
 import (
 	"fmt"
-
-	"github.com/redis/go-redis/v9"
 )
 
 // CacheboxConfig 缓存配置，区别于数据库配置，缓存的数据可以丢失
@@ -28,8 +26,16 @@ type MemoryCacheboxConfig struct {
 
 // RedisCacheboxConfig redis 缓存配置
 type RedisCacheboxConfig struct {
-	Address  string `mapstructure:"address"`
-	Password string `mapstructure:"password"`
+	Endpoints []string `mapstructure:"endpoints"`
+	Username  string   `mapstructure:"username"`
+	Password  string   `mapstructure:"password"`
+	DBNumber  int      `mapstructure:"db_number"`
+	Sentinel  struct {
+		MasterName string `mapstructure:"master_name"`
+		Username   string `mapstructure:"username"`
+		Password   string `mapstructure:"password"`
+	} `mapstructure:"sentinel"`
+	TLSClientConfig *TLSConfig `mapstructure:"tls_client_config"`
 }
 
 func (c *LocalConfig) initCachebox() error {
@@ -49,11 +55,7 @@ func (c *LocalConfig) initCachebox() error {
 	case "memory":
 		c.Cachebox.lruCache = newMemoryCache(c.logger, c.Cachebox.Memory.MaxEntry)
 	case "redis":
-		rdb := redis.NewClient(&redis.Options{
-			Addr:     c.Cachebox.Redis.Address,
-			Password: c.Cachebox.Redis.Password,
-		})
-		c.Cachebox.lruCache = newRedisCache(c.logger, rdb)
+		c.Cachebox.lruCache = newRedisCache(c.logger, c.Cachebox.Redis)
 	default:
 		return fmt.Errorf("cachebox driver [%s] not found", c.Cachebox.Driver)
 	}

@@ -8,20 +8,20 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/grpc-kit/pkg/vars"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"k8s.io/utils/lru"
 )
 
-const (
-	cacheKeyPrefix = "grpc-kit:cachebox"
-)
-
 // LRUCachebox 缓存实现 LRU 效果
 type LRUCachebox interface {
-	GetStructValue(ctx context.Context, key string, ptx any) bool
-	SetValue(ctx context.Context, key string, value any) bool
+	// Remove 重内存缓存移除值
 	Remove(ctx context.Context, key string) bool
+	// SetValue 向内存缓存添加值
+	SetValue(ctx context.Context, key string, value any) bool
+	// GetStructValue 从内存缓存获取值，并填充用户给定的类型
+	GetStructValue(ctx context.Context, key string, ptx any) bool
 }
 
 // memory 实现
@@ -33,7 +33,7 @@ type memoryCache struct {
 // redis 缓存实现
 type redisCache struct {
 	logger *logrus.Entry
-	cache  *redis.Client
+	cache  redis.UniversalClient
 }
 
 // NewMemoryCache 创建内存缓存实例
@@ -43,13 +43,31 @@ func newMemoryCache(logger *logrus.Entry, size int) *memoryCache {
 }
 
 // NewRedisCache 创建 Redis 缓存实例
-func newRedisCache(logger *logrus.Entry, client *redis.Client) *redisCache {
-	return &redisCache{logger: logger, cache: client}
+func newRedisCache(logger *logrus.Entry, config RedisCacheboxConfig) *redisCache {
+	opt := &redis.UniversalOptions{
+		Addrs:            config.Endpoints,
+		Username:         config.Username,
+		Password:         config.Password,
+		DB:               config.DBNumber,
+		SentinelUsername: config.Sentinel.Username,
+		SentinelPassword: config.Sentinel.Password,
+	}
+
+	if config.TLSClientConfig != nil {
+		tlsConfig, err := NewTLSConfig(config.TLSClientConfig)
+		if err != nil {
+			logger.Panicf("redis tls config error: %v\n", err)
+		}
+
+		opt.TLSConfig = tlsConfig
+	}
+
+	return &redisCache{logger: logger, cache: redis.NewUniversalClient(opt)}
 }
 
 // GetStructValue 从内存缓存获取值，并填充用户给定的类型
 func (c *memoryCache) GetStructValue(ctx context.Context, key string, ptr any) bool {
-	val, ok := c.cache.Get(fmt.Sprintf("%v:%v", cacheKeyPrefix, key))
+	val, ok := c.cache.Get(getCacheKey(key))
 	if !ok || !isPointer(ptr) {
 		return false
 	}
@@ -67,13 +85,13 @@ func (c *memoryCache) GetStructValue(ctx context.Context, key string, ptr any) b
 
 // SetValue 向内存缓存添加值
 func (c *memoryCache) SetValue(ctx context.Context, key string, value any) bool {
-	c.cache.Add(fmt.Sprintf("%v:%v", cacheKeyPrefix, key), value)
+	c.cache.Add(getCacheKey(key), value)
 	return true
 }
 
 // Remove 重内存缓存移除值
 func (c *memoryCache) Remove(ctx context.Context, key string) bool {
-	c.cache.Remove(fmt.Sprintf("%v:%v", cacheKeyPrefix, key))
+	c.cache.Remove(getCacheKey(key))
 	return true
 }
 
@@ -83,7 +101,7 @@ func (c *redisCache) GetStructValue(ctx context.Context, key string, ptr any) bo
 		return false
 	}
 
-	val, err := c.cache.Get(ctx, fmt.Sprintf("%v:%v", cacheKeyPrefix, key)).Result()
+	val, err := c.cache.Get(ctx, getCacheKey(key)).Result()
 	if err != nil {
 		return false
 	}
@@ -109,13 +127,14 @@ func (c *redisCache) SetValue(ctx context.Context, key string, value any) bool {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 	if err := encoder.Encode(value); err != nil {
-		c.logger.Errorf("redis cache failed to encode value for key %s: %w", key, err)
+		c.logger.Errorf("redis cache failed to encode value for key %v: %v", key, err)
 		return false
 	}
 
 	encoded := base64.StdEncoding.EncodeToString(buffer.Bytes())
-	err := c.cache.Set(ctx, fmt.Sprintf("%v:%v", cacheKeyPrefix, key), encoded, 0).Err()
+	err := c.cache.Set(ctx, getCacheKey(key), encoded, 0).Err()
 	if err != nil {
+		c.logger.Errorf("redis cache failed to set value for key %v: %v", key, err)
 		return false
 	}
 
@@ -124,7 +143,7 @@ func (c *redisCache) SetValue(ctx context.Context, key string, value any) bool {
 
 // Remove 重内存缓存移除值
 func (c *redisCache) Remove(ctx context.Context, key string) bool {
-	err := c.cache.Del(ctx, fmt.Sprintf("%v:%v", cacheKeyPrefix, key)).Err()
+	err := c.cache.Del(ctx, getCacheKey(key)).Err()
 	if err != nil {
 		return false
 	}
@@ -138,4 +157,13 @@ func isPointer(ptr any) bool {
 		return false
 	}
 	return true
+}
+
+func getCacheKey(key string) string {
+	appname := vars.Appname
+	if appname == "" {
+		appname = "grpc-kit"
+	}
+
+	return fmt.Sprintf("%v:cachebox:%v", appname, key)
 }
