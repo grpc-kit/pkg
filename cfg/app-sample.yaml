@@ -153,8 +153,22 @@ cachebox:
   memory:
     max_entry: 1024
   redis:
-    address: 127.0.0.1:6379
+    endpoints:
+    - 127.0.0.1:6380
+    - 127.0.0.1:6381
+    - 127.0.0.1:6382
+    username: ""
     password: ""
+    db_number: 1
+    sentinel:
+      master_name: ""
+      username: ""
+      password: ""
+    tls_client_config:
+      ca_file: ""
+      cert_file: ""
+      key_file: ""
+      insecure_skip_verify: true
 
 # 日志调试配置
 debugger:
