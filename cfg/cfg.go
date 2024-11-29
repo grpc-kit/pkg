@@ -20,6 +20,7 @@ import (
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -478,6 +479,11 @@ func (c *LocalConfig) GetLRUCachebox() (LRUCachebox, error) {
 	}
 
 	return nil, fmt.Errorf("cachebox is not enabled")
+}
+
+// GetCacheboxRedisClient 用于获取缓存服务中初始化的 redis 连接
+func (c *LocalConfig) GetCacheboxRedisClient() (redis.UniversalClient, error) {
+	return c.Cachebox.getRedisClient()
 }
 
 // HasCacheboxEnabled 用于判断是否启用缓存

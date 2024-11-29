@@ -2,11 +2,14 @@ package cfg
 
 import (
 	"fmt"
+
+	"github.com/redis/go-redis/v9"
 )
 
 // CacheboxConfig 缓存配置，区别于数据库配置，缓存的数据可以丢失
 type CacheboxConfig struct {
-	lruCache LRUCachebox
+	lruCache    LRUCachebox
+	redisClient redis.UniversalClient
 
 	// 全局是否启用
 	Enable bool `mapstructure:"enable"`
@@ -55,7 +58,9 @@ func (c *LocalConfig) initCachebox() error {
 	case "memory":
 		c.Cachebox.lruCache = newMemoryCache(c.logger, c.Cachebox.Memory.MaxEntry)
 	case "redis":
-		c.Cachebox.lruCache = newRedisCache(c.logger, c.Cachebox.Redis)
+		r := newRedisCache(c.logger, c.Cachebox.Redis)
+		c.Cachebox.lruCache = r
+		c.Cachebox.redisClient = r.cache
 	default:
 		return fmt.Errorf("cachebox driver [%s] not found", c.Cachebox.Driver)
 	}
@@ -65,4 +70,12 @@ func (c *LocalConfig) initCachebox() error {
 
 func (c *CacheboxConfig) defaultValues() {
 	return
+}
+
+func (c *CacheboxConfig) getRedisClient() (redis.UniversalClient, error) {
+	if c.Enable && c.Driver == "redis" {
+		return c.redisClient, nil
+	}
+
+	return nil, fmt.Errorf("cachebox is not enabled or driver is not redis")
 }
