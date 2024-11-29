@@ -45,12 +45,14 @@ func newMemoryCache(logger *logrus.Entry, size int) *memoryCache {
 // NewRedisCache 创建 Redis 缓存实例
 func newRedisCache(logger *logrus.Entry, config RedisCacheboxConfig) *redisCache {
 	opt := &redis.UniversalOptions{
+		ClientName:       vars.Appname,
 		Addrs:            config.Endpoints,
 		Username:         config.Username,
 		Password:         config.Password,
 		DB:               config.DBNumber,
 		SentinelUsername: config.Sentinel.Username,
 		SentinelPassword: config.Sentinel.Password,
+		MasterName:       config.Sentinel.MasterName,
 	}
 
 	if config.TLSClientConfig != nil {
