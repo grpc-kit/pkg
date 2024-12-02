@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/grpc-kit/pkg/vars"
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"k8s.io/utils/lru"
@@ -64,7 +65,16 @@ func newRedisCache(logger *logrus.Entry, config RedisCacheboxConfig) *redisCache
 		opt.TLSConfig = tlsConfig
 	}
 
-	return &redisCache{logger: logger, cache: redis.NewUniversalClient(opt)}
+	client := redis.NewUniversalClient(opt)
+
+	if err := redisotel.InstrumentTracing(client); err != nil {
+		panic(err)
+	}
+	if err := redisotel.InstrumentMetrics(client); err != nil {
+		panic(err)
+	}
+
+	return &redisCache{logger: logger, cache: client}
 }
 
 // GetStructValue 从内存缓存获取值，并填充用户给定的类型
