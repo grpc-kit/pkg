@@ -149,7 +149,7 @@ func (e *envoyProxy) getCheckRequest(ctx context.Context) (*authv3.CheckRequest,
 
 // requestToInput envoy CheckReuqest 结构体二次分析添加额外属性，以便同 "opa-envoy-plugin" 插件
 // https://github.com/open-policy-agent/opa-envoy-plugin/blob/main/envoyauth/request.go
-func (e *envoyProxy) requestToInput(req *authv3.CheckRequest) (map[string]interface{}, error) {
+func (e *envoyProxy) requestToInput(ctx context.Context, req *authv3.CheckRequest) (map[string]interface{}, error) {
 	input := make(map[string]interface{}, 0)
 
 	input["version"] = map[string]string{"ext_authz": "v3", "encoding": "protojson"}
