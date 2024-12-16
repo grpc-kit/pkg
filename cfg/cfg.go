@@ -491,6 +491,40 @@ func (c *LocalConfig) HasCacheboxEnabled() bool {
 	return c.Cachebox.Enable
 }
 
+// IDTokenFrom 用于获取当前会话的IDToken
+func (c *LocalConfig) IDTokenFrom(ctx context.Context) (IDTokenClaims, bool) {
+	idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
+	return idToken, ok
+}
+
+// UsernameFrom 用于获取当前会话的用户名
+func (c *LocalConfig) UsernameFrom(ctx context.Context) (string, bool) {
+	defaultUser := "anonymous"
+
+	if c.Security == nil || c.Security.Enable == false {
+		return defaultUser, true
+	}
+
+	username, ok := ctx.Value(usernameKey).(string)
+	if ok && username != "" {
+		return username, true
+	}
+
+	return defaultUser, false
+}
+
+// AuthenticationTypeFrom 用于获取当前会话的认证方式
+func (c *LocalConfig) AuthenticationTypeFrom(ctx context.Context) (string, bool) {
+	username, ok := ctx.Value(authenticationTypeKey).(string)
+	return username, ok
+}
+
+// GroupsFrom 用于获取当前会话的用户组列表
+func (c *LocalConfig) GroupsFrom(ctx context.Context) ([]string, bool) {
+	groups, ok := ctx.Value(groupsKey).([]string)
+	return groups, ok
+}
+
 func (c *LocalConfig) registerConfig(ctx context.Context) error {
 	// 配置文件未设置注册地址，则主动忽略
 	if c.Discover == nil {

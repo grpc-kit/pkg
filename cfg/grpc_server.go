@@ -519,8 +519,8 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 		}
 		for _, rpc := range c.Security.Authentication.InsecureRPCs {
 			if currentRPC == rpc {
-				ctx = c.WithUsername(ctx, UsernameAnonymous)
-				ctx = c.WithAuthenticationType(ctx, AuthenticationTypeNone)
+				ctx = c.Security.withUsername(ctx, UsernameAnonymous)
+				ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeNone)
 				return ctx, nil
 			}
 		}
@@ -547,9 +547,9 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 				for _, v := range c.Security.Authentication.HTTPUsers {
 					if v.Username == tmps[0] && v.Password == tmps[1] {
 						// 认证成功
-						ctx = c.WithUsername(ctx, tmps[0])
-						ctx = c.WithAuthenticationType(ctx, AuthenticationTypeBasic)
-						ctx = c.WithGroups(ctx, v.Groups)
+						ctx = c.Security.withUsername(ctx, tmps[0])
+						ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
+						ctx = c.Security.withGroups(ctx, v.Groups)
 
 						if err := c.checkPermission(ctx, v.Groups); err != nil {
 							return ctx, err
@@ -578,10 +578,10 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 				return ctx, errs.Unauthenticated(ctx).Err()
 			}
 
-			ctx = c.WithIDToken(ctx, idToken)
-			ctx = c.WithUsername(ctx, idToken.Email)
-			ctx = c.WithGroups(ctx, idToken.Groups)
-			ctx = c.WithAuthenticationType(ctx, AuthenticationTypeBearer)
+			ctx = c.Security.withIDToken(ctx, idToken)
+			ctx = c.Security.withUsername(ctx, idToken.Email)
+			ctx = c.Security.withGroups(ctx, idToken.Groups)
+			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBearer)
 
 			if err := c.checkPermission(ctx, idToken.Groups); err != nil {
 				return ctx, err
