@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 
@@ -154,21 +153,23 @@ func (c *Client) initOPAEnvoy(ctx context.Context) error {
 
 // AuthMetadata 把 http 请求信息转换为 grpc 的 metadata 用于鉴权
 func (c *Client) AuthMetadata(ctx context.Context, req *http.Request) context.Context {
-	// TODO: 植入请求体
+	// TODO: 植入请求体，在 grpc auth 中还无法获取 content key
 	// DEBUG
-	if (req.Method == http.MethodPut || req.Method == http.MethodPost) &&
-		strings.Contains(req.Header.Get("Content-Type"), "application/json") {
+	/*
+		if (req.Method == http.MethodPut || req.Method == http.MethodPost) &&
+			strings.Contains(req.Header.Get("Content-Type"), "application/json") {
 
-		reqBody, err := io.ReadAll(req.Body)
-		// c.logger.Infof("error found add body: %v, err: %v, remote addr: %v", string(reqBody), err, req.RemoteAddr)
+			reqBody, err := io.ReadAll(req.Body)
+			// c.logger.Infof("error found add body: %v, err: %v, remote addr: %v", string(reqBody), err, req.RemoteAddr)
 
-		if err == nil {
-			req.Body = io.NopCloser(bytes.NewBuffer(reqBody))
-			if len(reqBody) > 0 {
-				ctx = context.WithValue(ctx, "parsed_body", string(reqBody))
+			if err == nil {
+				req.Body = io.NopCloser(bytes.NewBuffer(reqBody))
+				if len(reqBody) > 0 {
+					ctx = context.WithValue(ctx, "parsed_body", string(reqBody))
+				}
 			}
 		}
-	}
+	*/
 
 	return c.envoy.extractHTTPHeader(ctx, req)
 }
