@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // Client 认证鉴权客户端
@@ -29,6 +31,8 @@ type Client struct {
 	opaSDK   *sdk.OPA
 	opaRego  rego.PreparedEvalQuery
 	opaEnvoy authv3.AuthorizationClient
+
+	rbacData *rbacv3.RBAC
 }
 
 // NewClient 初始化实例
@@ -36,9 +40,10 @@ func NewClient(ctx context.Context, config *Config) (*Client, error) {
 	var err error
 
 	c := &Client{
-		config: config,
-		envoy:  &envoyProxy{},
-		logger: logrus.NewEntry(logrus.New()),
+		config:   config,
+		envoy:    &envoyProxy{},
+		logger:   logrus.NewEntry(logrus.New()),
+		rbacData: &rbacv3.RBAC{},
 	}
 
 	if c.config.OPARego != nil {
@@ -96,11 +101,16 @@ func (c *Client) initOPARego(ctx context.Context) error {
 	}
 
 	var jsonRBAC map[string]interface{}
-	if err := util.Unmarshal(dataRBAC, &jsonRBAC); err != nil {
+	if err = util.Unmarshal(dataRBAC, &jsonRBAC); err != nil {
 		return err
 	}
 
 	currentMap[parts[len(parts)-1]] = jsonRBAC
+
+	// 解析 rbac 文件，提供给外部使用
+	if err = c.parseEnvoyRBAC(jsonRBAC); err != nil {
+		return err
+	}
 
 	query, err := rego.New(
 		rego.Query(fmt.Sprintf("data.%v.allow", c.config.PackageName)),
@@ -315,4 +325,24 @@ func (c *Client) nonCommentLineLength(body []byte) (int, error) {
 	}
 
 	return nonCommentLines, nil
+}
+
+// parseEnvoyRBAC 用于解析本地 yaml 内容为 envoy RBAC
+func (c *Client) parseEnvoyRBAC(mapData map[string]interface{}) error {
+	// 因本地配置使用 yaml 格式，故需要先转换为 json
+	rawBody, err := json.Marshal(mapData)
+	if err != nil {
+		return fmt.Errorf("marshal rbac data to json err: %w", err)
+	}
+
+	// 这里必须使用 protojson 转换为 proto 格式
+	if err = protojson.Unmarshal(rawBody, c.rbacData); err != nil {
+		return fmt.Errorf("unmarshal rbac data to proto err: %w", err)
+	}
+
+	return nil
+}
+
+func (c *Client) GetRBACData() *rbacv3.RBAC {
+	return c.rbacData
 }

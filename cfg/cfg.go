@@ -15,6 +15,7 @@ import (
 	"time"
 
 	eventclient "github.com/cloudevents/sdk-go/v2/client"
+	rbacv3 "github.com/envoyproxy/go-control-plane/envoy/config/rbac/v3"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/rpc"
@@ -523,6 +524,15 @@ func (c *LocalConfig) AuthenticationTypeFrom(ctx context.Context) (string, bool)
 func (c *LocalConfig) GroupsFrom(ctx context.Context) ([]string, bool) {
 	groups, ok := ctx.Value(groupsKey).([]string)
 	return groups, ok
+}
+
+// GetRBACData 用于获取 RBAC 数据
+func (c *LocalConfig) GetRBACData(ctx context.Context) *rbacv3.RBAC {
+	if c.Security == nil || c.Security.Enable == false || c.Security.authClient == nil {
+		return &rbacv3.RBAC{}
+	}
+
+	return c.Security.authClient.GetRBACData()
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {
