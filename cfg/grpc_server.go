@@ -79,13 +79,8 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	defaultOpts = append(defaultOpts, runtime.WithMarshalerOption(
 		runtime.MIMEWildcard, &runtime.HTTPBodyMarshaler{
 			Marshaler: &runtime.JSONPb{
-				MarshalOptions: protojson.MarshalOptions{
-					UseProtoNames:   true,
-					EmitUnpopulated: true,
-				},
-				UnmarshalOptions: protojson.UnmarshalOptions{
-					DiscardUnknown: true,
-				},
+				MarshalOptions:   c.Services.jsonMarshal,
+				UnmarshalOptions: c.Services.jsonUnmarshal,
 			},
 		}))
 
@@ -354,7 +349,7 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 	// TODO; DEBUG; 审计拦截器
 	if c.CloudEvents.hasAudit() {
 		defaultUnaryOpt = append(defaultUnaryOpt,
-			c.CloudEvents.auditUnaryInterceptor(c.GetServiceName(), c.Services.ServiceCode),
+			c.CloudEvents.auditUnaryInterceptor(c.GetServiceName(), c.Services.ServiceCode, c.Services.jsonMarshal),
 		)
 	}
 

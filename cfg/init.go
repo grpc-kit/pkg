@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // initServices 用于基础服务初始化配置检查
@@ -23,6 +25,14 @@ func (c *LocalConfig) initServices() error {
 	}
 	if c.Services.APIEndpoint == "" {
 		c.Services.APIEndpoint = "api.grpc-kit.com"
+	}
+
+	c.Services.jsonMarshal = protojson.MarshalOptions{
+		UseProtoNames:   true,
+		EmitUnpopulated: true,
+	}
+	c.Services.jsonUnmarshal = protojson.UnmarshalOptions{
+		DiscardUnknown: true,
 	}
 
 	// 初始化默认设置

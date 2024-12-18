@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (
@@ -93,6 +94,9 @@ type LocalConfig struct {
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
 type ServicesConfig struct {
+	jsonMarshal   protojson.MarshalOptions
+	jsonUnmarshal protojson.UnmarshalOptions
+
 	RootPath    string `mapstructure:"root_path"`
 	Namespace   string `mapstructure:"namespace"`
 	ServiceCode string `mapstructure:"service_code"`
