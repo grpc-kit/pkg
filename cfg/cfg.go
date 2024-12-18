@@ -86,13 +86,9 @@ type LocalConfig struct {
 	Automations *AutomationsConfig `json:",omitempty"` // 流程编排配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
-	logger      *logrus.Entry
-	srvdis      sd.Registry
-	rpcConfig   *rpc.Config
-	eventClient eventclient.Client
-	// promRegistry *prometheus.Registry
-
-	// Opentracing *OpentracingConfig `json:",omitempty"` // 链路追踪配置
+	logger    *logrus.Entry
+	srvdis    sd.Registry
+	rpcConfig *rpc.Config
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
@@ -153,9 +149,18 @@ type DebuggerConfig struct {
 
 // CloudEventsConfig cloudevents事件配置
 type CloudEventsConfig struct {
+	eventClient eventclient.Client
+	auditClient eventclient.Client
+
 	Enable      bool        `mapstructure:"enable"`
 	Protocol    string      `mapstructure:"protocol"`
 	KafkaSarama KafkaSarama `mapstructure:"kafka_sarama"`
+
+	// 审计功能配置
+	AuditPolicy struct {
+		Enabled bool   `mapstructure:"enabled"`
+		Topic   string `mapstructure:"topic"`
+	} `mapstructure:"audit_policy"`
 }
 
 // Authentication 用于认证
@@ -534,6 +539,19 @@ func (c *LocalConfig) GetRBACData(ctx context.Context) *rbacv3.RBAC {
 	}
 
 	return c.Security.authClient.GetRBACData()
+}
+
+// GetCloudEvents 用于获取 cloudevents 连接客户端
+func (c *LocalConfig) GetCloudEvents() (eventclient.Client, error) {
+	if c.CloudEvents == nil || c.CloudEvents.Enable == false {
+		return nil, fmt.Errorf("cloud events is not enabled")
+	}
+
+	if c.CloudEvents.eventClient == nil {
+		return nil, fmt.Errorf("cloudevents client is nil")
+	}
+
+	return c.CloudEvents.eventClient, nil
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {

@@ -350,6 +350,14 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 	defaultUnaryOpt = append(defaultUnaryOpt,
 		grpcauth.UnaryServerInterceptor(c.authValidate()),
 	)
+
+	// TODO; DEBUG; 审计拦截器
+	if c.CloudEvents.hasAudit() {
+		defaultUnaryOpt = append(defaultUnaryOpt,
+			c.CloudEvents.auditUnaryInterceptor(c.GetServiceName(), c.Services.ServiceCode),
+		)
+	}
+
 	defaultUnaryOpt = append(defaultUnaryOpt,
 		grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
 			grpclogging.WithTimestampFormat(time.RFC3339Nano),

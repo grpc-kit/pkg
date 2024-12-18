@@ -5,6 +5,7 @@ go 1.21.0
 require (
 	entgo.io/ent v0.13.1
 	github.com/IBM/sarama v1.43.3
+	github.com/cloudevents/sdk-go/observability/opentelemetry/v2 v2.15.2
 	github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2 v2.15.2
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/coreos/go-oidc/v3 v3.1.0
