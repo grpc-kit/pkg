@@ -231,7 +231,13 @@ type SaramaConfig struct {
 
 // initCloudEvents 初始化 cloudevents 数据实例
 func (c *LocalConfig) initCloudEvents() error {
-	if c.CloudEvents == nil || !c.CloudEvents.Enable || c.CloudEvents.Protocol == "" {
+	if c.CloudEvents == nil {
+		c.CloudEvents = &CloudEventsConfig{
+			Enable: false,
+		}
+	}
+
+	if !c.CloudEvents.Enable || c.CloudEvents.Protocol == "" {
 		return nil
 	}
 
@@ -494,7 +500,7 @@ func (c CloudEventsConfig) hasAudit() bool {
 	return c.Enable && c.AuditPolicy.Enabled
 }
 
-func (c CloudEventsConfig) auditUnaryInterceptor(serviceName, serviceCode string) grpc.UnaryServerInterceptor {
+func (c CloudEventsConfig) auditUnaryInterceptor(serviceName, serviceCode string, mar protojson.MarshalOptions) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		auditEvent := event.New()
 
@@ -503,11 +509,6 @@ func (c CloudEventsConfig) auditUnaryInterceptor(serviceName, serviceCode string
 
 		// content := make(map[string]interface{}, 0)
 		content := AuditEvent{}
-
-		// TODO；需要跟 grpc-gateway 使用同样的风格
-		mar := protojson.MarshalOptions{
-			UseProtoNames: true,
-		}
 
 		// 记录请求体
 		if protoReq, ok := req.(proto.Message); ok {
