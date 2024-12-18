@@ -153,6 +153,7 @@ type DebuggerConfig struct {
 
 // CloudEventsConfig cloudevents事件配置
 type CloudEventsConfig struct {
+	Enable      bool        `mapstructure:"enable"`
 	Protocol    string      `mapstructure:"protocol"`
 	KafkaSarama KafkaSarama `mapstructure:"kafka_sarama"`
 }

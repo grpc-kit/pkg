@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
 	kafkaSarama "github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	eventclient "github.com/cloudevents/sdk-go/v2/client"
@@ -409,7 +409,7 @@ func (s *SaramaConfig) Parse() *sarama.Config {
 
 // initCloudEvents 初始化 cloudevents 数据实例
 func (c *LocalConfig) initCloudEvents() error {
-	if c.CloudEvents == nil || c.CloudEvents.Protocol == "" {
+	if c.CloudEvents == nil || !c.CloudEvents.Enable || c.CloudEvents.Protocol == "" {
 		return nil
 	}
 
@@ -425,12 +425,12 @@ func (c *LocalConfig) initCloudEvents() error {
 		saramaConfig,
 		c.CloudEvents.KafkaSarama.Topic)
 	if err != nil {
-		return err
+		return fmt.Errorf("new kafka sarama sender error: %v", err)
 	}
 
 	client, err := cloudevents.NewClient(sender, cloudevents.WithTimeNow(), cloudevents.WithUUIDs())
 	if err != nil {
-		return err
+		return fmt.Errorf("new cloudevents client error: %v", err)
 	}
 
 	c.eventClient = client
