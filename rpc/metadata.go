@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// ClientSourceIPs 用于获取当前请求的源 IP 列表，即 x-forwarded-for 头
-func ClientSourceIPs(ctx context.Context) []string {
+// GetSourceIPsFromMetadata 用于获取当前请求的源 IP 列表，即 x-forwarded-for 头
+func GetSourceIPsFromMetadata(ctx context.Context) []string {
 	result := make([]string, 0)
 
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -35,8 +35,8 @@ func ClientSourceIPs(ctx context.Context) []string {
 	return result
 }
 
-// ClientUserAgent 用于获取当前请求的 User-Agent
-func ClientUserAgent(ctx context.Context) string {
+// GetUserAgentFromMetadata 用于获取当前请求的 User-Agent
+func GetUserAgentFromMetadata(ctx context.Context) string {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return ""
@@ -54,8 +54,8 @@ func ClientUserAgent(ctx context.Context) string {
 	return ""
 }
 
-// ClientRealIP 用于获取当前请求源 IP 地址，既 x-real-ip 或 x-forwarded-for 头
-func ClientRealIP(ctx context.Context) string {
+// GetRealIPFromMetadata 用于获取当前请求源 IP 地址，既 x-real-ip 或 x-forwarded-for 头
+func GetRealIPFromMetadata(ctx context.Context) string {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return ""
@@ -65,7 +65,7 @@ func ClientRealIP(ctx context.Context) string {
 		return realIPs[0]
 	}
 
-	xff := ClientSourceIPs(ctx)
+	xff := GetSourceIPsFromMetadata(ctx)
 	if len(xff) > 0 {
 		return xff[0]
 	}

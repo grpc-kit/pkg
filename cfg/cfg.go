@@ -50,6 +50,7 @@ const (
 	HTTPHeaderEtag = "Etag"
 )
 
+/*
 // contextKey 使用自定义类型不对外，防止碰撞冲突
 type contextKey int
 
@@ -66,6 +67,7 @@ const (
 	// groupsKey 用于存放当前用户归属的组列表
 	groupsKey
 )
+*/
 
 const (
 	// ScopeNameGRPCKit 用于该包产生链路、指标的权威名称
@@ -504,36 +506,46 @@ func (c *LocalConfig) HasCacheboxEnabled() bool {
 
 // IDTokenFrom 用于获取当前会话的IDToken
 func (c *LocalConfig) IDTokenFrom(ctx context.Context) (IDTokenClaims, bool) {
-	idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
+	tmp := rpc.GetIDTokenFromContext(ctx)
+
+	// idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
+	// return idToken, ok
+
+	idToken, ok := tmp.(IDTokenClaims)
 	return idToken, ok
 }
 
 // UsernameFrom 用于获取当前会话的用户名
 func (c *LocalConfig) UsernameFrom(ctx context.Context) (string, bool) {
-	defaultUser := "anonymous"
+	/*
+		defaultUser := "anonymous"
 
-	if c.Security == nil || c.Security.Enable == false {
-		return defaultUser, true
-	}
+		if c.Security == nil || c.Security.Enable == false {
+			return defaultUser, true
+		}
 
-	username, ok := ctx.Value(usernameKey).(string)
-	if ok && username != "" {
-		return username, true
-	}
+		username, ok := ctx.Value(usernameKey).(string)
+		if ok && username != "" {
+			return username, true
+		}
 
-	return defaultUser, false
+		return defaultUser, false
+	*/
+	return rpc.GetUsernameFromContext(ctx)
 }
 
 // AuthenticationTypeFrom 用于获取当前会话的认证方式
 func (c *LocalConfig) AuthenticationTypeFrom(ctx context.Context) (string, bool) {
-	username, ok := ctx.Value(authenticationTypeKey).(string)
-	return username, ok
+	// username, ok := ctx.Value(authenticationTypeKey).(string)
+	// return username, ok
+	return rpc.GetAuthenticationTypeFromContext(ctx)
 }
 
 // GroupsFrom 用于获取当前会话的用户组列表
 func (c *LocalConfig) GroupsFrom(ctx context.Context) ([]string, bool) {
-	groups, ok := ctx.Value(groupsKey).([]string)
-	return groups, ok
+	// groups, ok := ctx.Value(groupsKey).([]string)
+	// return groups, ok
+	return rpc.GetGroupsFromContext(ctx)
 }
 
 // GetRBACData 用于获取 RBAC 数据

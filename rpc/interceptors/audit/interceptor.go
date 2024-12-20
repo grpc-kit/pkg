@@ -32,8 +32,8 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 		auditEvent.SetSubject(parts[len(parts)-1])
 
 		// content := make(map[string]interface{}, 0)
-		// username, _ := c.UsernameFrom(ctx)
-		// groups, _ := c.GroupsFrom(ctx)
+		username, _ := rpc.GetUsernameFromContext(ctx)
+		groups, _ := rpc.GetGroupsFromContext(ctx)
 
 		content := EventData{
 			Level:                    opt.level,
@@ -42,18 +42,16 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 			RequestReceivedTimestamp: time.Now(),
 			GRPCService:              parts[1],
 			GRPCMethod:               parts[len(parts)-1],
-			SourceIPs:                rpc.ClientSourceIPs(ctx),
+			SourceIPs:                rpc.GetSourceIPsFromMetadata(ctx),
 
-			/*
-				User: struct {
-					UID      string              `json:"uid"`
-					Username string              `json:"username"`
-					Groups   []string            `json:"groups"`
-					Extra    map[string][]string `json:"extra"`
-				}{UID: username, Username: username, Groups: groups, Extra: make(map[string][]string, 0)},
-			*/
+			User: struct {
+				UID      string              `json:"uid"`
+				Username string              `json:"username"`
+				Groups   []string            `json:"groups"`
+				Extra    map[string][]string `json:"extra"`
+			}{UID: username, Username: username, Groups: groups, Extra: make(map[string][]string, 0)},
 
-			UserAgent: rpc.ClientUserAgent(ctx),
+			UserAgent: rpc.GetUserAgentFromMetadata(ctx),
 			RequestID: opt.getTraceID(ctx),
 		}
 
