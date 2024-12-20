@@ -1,7 +1,6 @@
 package cfg
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -10,21 +9,48 @@ import (
 	kafkaSarama "github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/client"
-	"github.com/cloudevents/sdk-go/v2/event"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
 	CloudEventsProtocolKafkaSarama = "kafka_sarama"
 )
 
-// AuditEvent 审计事件
-type AuditEvent struct {
-	Request  string `json:"request"`
-	Response string `json:"response"`
+// AuditEventData 审计事件
+/*
+type AuditEventData struct {
+	// 唯一标识服务名称，如：netdev.v1.oneops.api.grpc-kit.com
+	ServiceName string `json:"service_name"`
+	// 唯一标识服务代号，如：netdev.v1.oneops
+	ServiceCode string `json:"service_code"`
+
+	// 当前请求用户
+	User struct {
+		UID      string              `json:"uid"`
+		Username string              `json:"username"`
+		Groups   []string            `json:"groups"`
+		Extra    map[string][]string `json:"extra"`
+	} `json:"user"`
+
+	// 用户来源 ip 列表
+	SourceIPs []string `json:"source_ips"`
+
+	// UserAgent 用户代理
+	UserAgent string `json:"user_agent"`
+
+	RequestReceivedTimestamp time.Time `json:"request_received_timestamp"`
+	StageTimestamp           time.Time `json:"stage_timestamp"`
+
+	GRPCMethod  string `json:"grpc_method"`
+	GRPCService string `json:"grpc_service"`
+
+	RequestID string `json:"request_id"`
+
+	Level string `json:"level"`
+
+	RequestObject  string `json:"request_object"`
+	ResponseObject string `json:"response_object"`
 }
+*/
 
 // SaramaConfig 用于kafka客户端配置，结构等同于sarama类库
 // https://pkg.go.dev/github.com/Shopify/sarama#Config
@@ -498,53 +524,4 @@ func (s *SaramaConfig) Parse() *sarama.Config {
 
 func (c CloudEventsConfig) hasAudit() bool {
 	return c.Enable && c.AuditPolicy.Enabled
-}
-
-func (c CloudEventsConfig) auditUnaryInterceptor(serviceName, serviceCode string, mar protojson.MarshalOptions) grpc.UnaryServerInterceptor {
-	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		auditEvent := event.New()
-
-		auditEvent.SetSource(serviceName)
-		auditEvent.SetType(fmt.Sprintf("%v.InternalAudit", serviceCode))
-
-		// content := make(map[string]interface{}, 0)
-		content := AuditEvent{}
-
-		// 记录请求体
-		if protoReq, ok := req.(proto.Message); ok {
-			xxx, err := mar.Marshal(protoReq)
-			if err == nil {
-				// fmt.Println("request: ", string(xxx))
-				// content["request"] = string(xxx)
-				content.Request = string(xxx)
-			}
-		} else {
-			fmt.Printf("Request: %+v", req)
-		}
-
-		// 调用下一个拦截器
-		resp, err := handler(ctx, req)
-
-		// 记录响应体
-		if protoResp, ok := resp.(proto.Message); ok {
-			xxx, err := mar.Marshal(protoResp)
-			if err == nil {
-				// fmt.Println("response: ", string(xxx))
-				// content["response"] = string(xxx)
-				content.Response = string(xxx)
-			}
-		}
-
-		// 只有在成功执行后才发送审计事件
-		if err = auditEvent.SetData(event.ApplicationJSON, content); err == nil {
-			res := c.auditClient.Send(ctx, auditEvent)
-			if cloudevents.IsUndelivered(res) {
-				fmt.Println("send audit event ok")
-			}
-		} else {
-			fmt.Println("send audit event fail")
-		}
-
-		return resp, err
-	}
 }

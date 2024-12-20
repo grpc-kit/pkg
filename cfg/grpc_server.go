@@ -21,6 +21,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
 	"github.com/grpc-kit/pkg/vars"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
@@ -107,6 +108,12 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		ctx = c.Security.injectAuthHTTPHeader(ctx, req)
 		if tmp, ok := metadata.FromIncomingContext(ctx); ok {
 			md = metadata.Join(md, tmp)
+		}
+
+		// 传递 gateway 特定请求头至后端 grpc 服务端
+		raddr := strings.Split(req.RemoteAddr, ":")
+		if len(raddr) == 2 {
+			md.Set("x-real-ip", raddr[0])
 		}
 
 		span := trace.SpanFromContext(ctx)
@@ -349,7 +356,14 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 	// TODO; DEBUG; 审计拦截器
 	if c.CloudEvents.hasAudit() {
 		defaultUnaryOpt = append(defaultUnaryOpt,
-			c.CloudEvents.auditUnaryInterceptor(c.GetServiceName(), c.Services.ServiceCode, c.Services.jsonMarshal),
+			audit.UnaryServerInterceptor(
+				audit.WithLogger(c.logger),
+				audit.WithCloudEvent(c.CloudEvents.auditClient),
+				audit.WithServiceName(c.GetServiceName()),
+				audit.WithServiceCode(c.Services.ServiceCode),
+				audit.WithMarshal(c.Services.jsonMarshal),
+				audit.WithLevel(audit.LevelRequest),
+			),
 		)
 	}
 
