@@ -16,7 +16,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	otelruntime "go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
@@ -39,6 +38,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/stats"
 	"google.golang.org/grpc/status"
 )
 
@@ -694,12 +694,12 @@ func (c *ObservablesConfig) httpTracingEnableFilter(r *http.Request) bool {
 }
 
 // grpcTracingEnableFilter 哪些 http 请求开启链路跟踪
-func (c *ObservablesConfig) grpcTracingEnableFilter(i *otelgrpc.InterceptorInfo) bool {
-	if i.UnaryServerInfo == nil {
+func (c *ObservablesConfig) grpcTracingEnableFilter(i *stats.RPCTagInfo) bool {
+	if i == nil {
 		return false
 	}
 
-	grpcMethod := path.Base(i.UnaryServerInfo.FullMethod)
+	grpcMethod := path.Base(i.FullMethodName)
 
 	// 忽略内置的健康检查接口
 	switch grpcMethod {
@@ -752,6 +752,11 @@ func (c *ObservablesConfig) grpcPanicRecoveryHandler(ctx context.Context, p any)
 	}
 
 	return status.Errorf(codes.Internal, "%s", p)
+}
+
+// hasEnable 是否启用链路跟踪
+func (c *ObservablesConfig) hasEnable() bool {
+	return *c.Enable
 }
 
 // hasTracesEnableExporterOTLP 是否启用 otlp 上报 traces 数据

@@ -72,6 +72,10 @@ func NewServer(c *Config) *Server {
 		s.opts = append(s.opts, grpc.Creds(insecure.NewCredentials()))
 	}
 
+	for _, v := range c.opts {
+		s.opts = append(s.opts, v)
+	}
+
 	return s
 }
 

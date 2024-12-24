@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 // Config server config
@@ -26,6 +27,8 @@ type Config struct {
 	// 默认开启 http 与 grpc 服务
 	DisableGRPCServer bool
 	DisableHTTPServer bool
+
+	opts []grpc.ServerOption
 }
 
 // TLSConfig xx
@@ -51,6 +54,7 @@ type TLSConfig struct {
 func NewConfig(l *logrus.Entry) *Config {
 	c := &Config{
 		logger: l,
+		opts:   []grpc.ServerOption{},
 	}
 
 	if c.logger == nil {
@@ -62,4 +66,8 @@ func NewConfig(l *logrus.Entry) *Config {
 	c.Scheme = "grpc-kit"
 
 	return c
+}
+
+func (c *Config) WithServerOption(opt ...grpc.ServerOption) {
+	c.opts = append(c.opts, opt...)
 }

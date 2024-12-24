@@ -346,12 +346,6 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 	var defaultUnaryOpt []grpc.UnaryServerInterceptor
 
 	defaultUnaryOpt = append(defaultUnaryOpt,
-		otelgrpc.UnaryServerInterceptor(
-			otelgrpc.WithInterceptorFilter(c.Observables.grpcTracingEnableFilter),
-		),
-	)
-
-	defaultUnaryOpt = append(defaultUnaryOpt,
 		grpcauth.UnaryServerInterceptor(c.authValidate()),
 	)
 
