@@ -8,6 +8,7 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/client"
 	"github.com/cloudevents/sdk-go/v2/event"
+	"github.com/google/uuid"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel/trace"
@@ -39,14 +40,12 @@ type interceptorOption struct {
 }
 
 func (o *interceptorOption) getTraceID(ctx context.Context) string {
-	requestID := "0123456789abcdef0123456789abcdef"
-
 	spanCtx := trace.SpanContextFromContext(ctx)
 	if spanCtx.HasTraceID() {
-		requestID = spanCtx.TraceID().String()
+		return spanCtx.TraceID().String()
 	}
 
-	return requestID
+	return uuid.New().String()
 }
 
 func (o *interceptorOption) marshalJson(data any) (string, bool, error) {
