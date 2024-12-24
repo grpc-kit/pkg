@@ -32,6 +32,12 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 		grpcService := parts[1]
 		grpcMethod := parts[2]
 
+		// TODO；针对特殊的 method 不做审计
+		switch grpcMethod {
+		case "HealthCheck":
+			return handler(ctx, req)
+		}
+
 		ce := event.New()
 		ce.SetSpecVersion(event.CloudEventsVersionV1)
 		ce.SetSource(opt.serviceName)
