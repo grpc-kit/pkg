@@ -6,6 +6,7 @@ import (
 
 	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/grpc"
 )
 
@@ -57,8 +58,7 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 		}
 
 		if err := opt.sendAuditEvent(ctx, ce, ed); err != nil {
-			// TODO; 植入性能指标
-
+			rpc.MetricAuditEventSendErrorsIncr(ctx)
 			return nil, errs.Unavailable(ctx).WithMessage(err.Error())
 		}
 
@@ -83,8 +83,7 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 			}
 
 			if sendErr := opt.sendAuditEvent(ctx, ce, ed); sendErr != nil {
-				// TODO; 植入性能指标
-
+				rpc.MetricAuditEventSendErrorsIncr(ctx)
 				return nil, errs.Unavailable(ctx).WithMessage(err.Error())
 			}
 		}
