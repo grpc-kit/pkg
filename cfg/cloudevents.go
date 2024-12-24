@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/IBM/sarama"
@@ -9,6 +10,7 @@ import (
 	kafkaSarama "github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/client"
+	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
 )
 
 const (
@@ -522,6 +524,37 @@ func (s *SaramaConfig) Parse() *sarama.Config {
 	return c
 }
 
-func (c CloudEventsConfig) hasAudit() bool {
+func (c CloudEventsConfig) hasAuditEnabled() bool {
 	return c.Enable && c.AuditPolicy.Enabled
+}
+
+func (c CloudEventsConfig) hasAuditEventMustSucceed() bool {
+	if !c.hasAuditEnabled() {
+		return false
+	}
+
+	if c.AuditPolicy.Event.MustSucceed == nil {
+		return true
+	}
+
+	return *c.AuditPolicy.Event.MustSucceed
+}
+
+func (c CloudEventsConfig) getAuditLevel() audit.Level {
+	if !c.hasAuditEnabled() {
+		return audit.LevelNone
+	}
+
+	switch strings.ToLower(c.AuditPolicy.Level) {
+	case "none":
+		return audit.LevelNone
+	case "metadata":
+		return audit.LevelMetadata
+	case "request":
+		return audit.LevelRequest
+	case "request_response":
+		return audit.LevelRequestResponse
+	default:
+		return audit.LevelRequest
+	}
 }

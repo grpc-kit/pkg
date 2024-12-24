@@ -344,25 +344,29 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 	// TODO; 移动到 observables 方法中
 
 	var defaultUnaryOpt []grpc.UnaryServerInterceptor
+
 	defaultUnaryOpt = append(defaultUnaryOpt,
 		otelgrpc.UnaryServerInterceptor(
 			otelgrpc.WithInterceptorFilter(c.Observables.grpcTracingEnableFilter),
 		),
 	)
+
 	defaultUnaryOpt = append(defaultUnaryOpt,
 		grpcauth.UnaryServerInterceptor(c.authValidate()),
 	)
 
-	// TODO; DEBUG; 审计拦截器
-	if c.CloudEvents.hasAudit() {
+	if c.CloudEvents.hasAuditEnabled() {
+		auditLevel := c.CloudEvents.getAuditLevel()
+		mustSucceed := c.CloudEvents.hasAuditEventMustSucceed()
+
 		defaultUnaryOpt = append(defaultUnaryOpt,
 			audit.UnaryServerInterceptor(
 				audit.WithLogger(c.logger),
 				audit.WithCloudEvent(c.CloudEvents.auditClient),
 				audit.WithServiceName(c.GetServiceName()),
-				audit.WithServiceCode(c.Services.ServiceCode),
 				audit.WithMarshal(c.Services.jsonMarshal),
-				audit.WithLevel(audit.LevelRequest),
+				audit.WithLevel(auditLevel),
+				audit.WithMustSucceed(mustSucceed),
 			),
 		)
 	}

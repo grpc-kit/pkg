@@ -2,100 +2,85 @@ package audit
 
 import (
 	"context"
-	"fmt"
 	"strings"
-	"time"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/event"
-	"github.com/grpc-kit/pkg/rpc"
+	"github.com/grpc-kit/pkg/errs"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/proto"
 )
 
-// UnaryServerInterceptor xx
+// UnaryServerInterceptor 审计事件 grpc unary 拦截器
 func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
-	opt := &interceptorOption{}
+	opt := defaultOption
 
 	for _, o := range opts {
 		o(opt)
 	}
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		auditEvent := event.New()
-
-		auditEvent.SetSpecVersion(event.CloudEventsVersionV1)
-		auditEvent.SetSource(opt.serviceName)
-		auditEvent.SetType(fmt.Sprintf("%v.internal.audit", opt.serviceCode))
-
-		parts := strings.Split(info.FullMethod, "/")
-		auditEvent.SetSubject(parts[len(parts)-1])
-
-		// content := make(map[string]interface{}, 0)
-		username, _ := rpc.GetUsernameFromContext(ctx)
-		groups, _ := rpc.GetGroupsFromContext(ctx)
-
-		content := EventData{
-			Level:                    opt.level,
-			ServiceName:              opt.serviceName,
-			ServiceCode:              opt.serviceCode,
-			RequestReceivedTimestamp: time.Now(),
-			GRPCService:              parts[1],
-			GRPCMethod:               parts[len(parts)-1],
-			SourceIPs:                rpc.GetSourceIPsFromMetadata(ctx),
-
-			User: struct {
-				UID      string              `json:"uid"`
-				Username string              `json:"username"`
-				Groups   []string            `json:"groups"`
-				Extra    map[string][]string `json:"extra"`
-			}{UID: username, Username: username, Groups: groups, Extra: make(map[string][]string, 0)},
-
-			UserAgent: rpc.GetUserAgentFromMetadata(ctx),
-			RequestID: opt.getTraceID(ctx),
+		if opt.level == LevelNone {
+			return handler(ctx, req)
 		}
+
+		// "/default.api.oneops.netdev.v1.OneopsNetdev/DisplaySwitchPortVlans"
+		parts := strings.Split(info.FullMethod, "/")
+		if len(parts) < 3 {
+			opt.logger.Warnf("failed to parse grpc metho: %s, ignore audit", info.FullMethod)
+			return handler(ctx, req)
+		}
+
+		grpcService := parts[1]
+		grpcMethod := parts[2]
+
+		ce := event.New()
+		ce.SetSpecVersion(event.CloudEventsVersionV1)
+		ce.SetSource(opt.serviceName)
+		ce.SetType("internal.audit")
+		ce.SetSubject(grpcMethod)
+
+		ed := opt.createEventData(ctx)
+		ed.GRPCMethod = grpcMethod
+		ed.GRPCService = grpcService
 
 		// 记录请求体
 		if opt.level == LevelRequest || opt.level == LevelRequestResponse {
-			if protoReq, ok := req.(proto.Message); ok {
-				xxx, err := opt.marshal.Marshal(protoReq)
-				if err == nil {
-					content.RequestObject = string(xxx)
-				}
-			} else {
-				fmt.Printf("Request: %+v", req)
+			jsonData, ok, jsonErr := opt.marshalJson(req)
+			if jsonErr == nil && ok {
+				ed.setRequestObject(jsonData)
 			}
+		}
+
+		if err := opt.sendAuditEvent(ctx, ce, ed); err != nil {
+			// TODO; 植入性能指标
+
+			return nil, errs.Unavailable(ctx).WithMessage(err.Error())
 		}
 
 		resp, err := handler(ctx, req)
 
-		// 记录响应体
+		// 记录响应体审计阶段
 		if opt.level == LevelRequestResponse {
-			if protoResp, ok := resp.(proto.Message); ok {
-				xxx, err := opt.marshal.Marshal(protoResp)
-				if err == nil {
-					content.ResponseObject = string(xxx)
+			// TODO; 避免 err 变量污染
+
+			ed.setResponseStatus(err)
+
+			if err != nil {
+				jsonData, ok, jsonErr := opt.marshalJson(err)
+				if jsonErr == nil && ok {
+					ed.setResponseObject(jsonData)
+				}
+			} else {
+				jsonData, ok, jsonErr := opt.marshalJson(resp)
+				if jsonErr == nil && ok {
+					ed.setResponseObject(jsonData)
 				}
 			}
-		}
 
-		// 只有在成功执行后才发送审计事件
-		content.StageTimestamp = time.Now()
-		if err = auditEvent.SetData(event.ApplicationJSON, content); err == nil {
-			// DEBUG
-			/*
-				rawBody, err := auditEvent.MarshalJSON()
-				if err == nil {
-					fmt.Println(string(rawBody))
-				}
-			*/
+			if sendErr := opt.sendAuditEvent(ctx, ce, ed); sendErr != nil {
+				// TODO; 植入性能指标
 
-			res := opt.client.Send(ctx, auditEvent)
-			if cloudevents.IsUndelivered(res) {
-				fmt.Println("send audit event ok")
+				return nil, errs.Unavailable(ctx).WithMessage(err.Error())
 			}
-		} else {
-			fmt.Println("send audit event fail")
 		}
 
 		return resp, err

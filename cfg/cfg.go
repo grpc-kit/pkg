@@ -164,8 +164,14 @@ type CloudEventsConfig struct {
 
 	// 审计功能配置
 	AuditPolicy struct {
+		// 是否启用审计功能，默认为 false
 		Enabled bool   `mapstructure:"enabled"`
 		Topic   string `mapstructure:"topic"`
+		Level   string `mapstructure:"level"`
+		Event   struct {
+			// 在 request 阶段审计日志必须推送成功，否则本次请求失败，默认为 true
+			MustSucceed *bool `mapstructure:"must_succeed"`
+		} `mapstructure:"event"`
 	} `mapstructure:"audit_policy"`
 }
 

@@ -333,6 +333,12 @@ cloudevents:
           retry:
             max: 3
       version: "2.4.0"
+  audit_policy:
+    enabled: true
+    topic: "uptime-service-audit"
+    level: metadata # 审计级别 none metadata request request_response
+    event:
+      must_succeed: false # 默认必须成功，会阻塞请求
 
 # 应用私有配置
 independent:
