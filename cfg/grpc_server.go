@@ -432,8 +432,6 @@ func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInte
 	*/
 
 	var opts []grpc.StreamServerInterceptor
-	opts = append(opts, otelgrpc.StreamServerInterceptor())
-	// opts = append(opts, srvMetrics.StreamServerInterceptor())
 	opts = append(opts, grpcrecovery.StreamServerInterceptor())
 	opts = append(opts, grpcauth.StreamServerInterceptor(c.authValidate()))
 	opts = append(opts, interceptors...)
