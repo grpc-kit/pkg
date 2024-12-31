@@ -84,7 +84,7 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 
 			if sendErr := opt.sendAuditEvent(ctx, ce, ed); sendErr != nil {
 				rpc.MetricAuditEventSendErrorsIncr(ctx)
-				return nil, errs.Unavailable(ctx).WithMessage(err.Error())
+				return nil, errs.Unavailable(ctx).WithMessage(sendErr.Error())
 			}
 		}
 
