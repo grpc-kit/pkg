@@ -11,6 +11,7 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/rpc"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -134,47 +135,27 @@ func (c *LocalConfig) initSecurity() error {
 }
 
 // WithIDToken 用于设置当前会话的IDToken
-func (c *LocalConfig) WithIDToken(parent context.Context, token IDTokenClaims) context.Context {
-	return context.WithValue(parent, idTokenKey, token)
+func (c *SecurityConfig) withIDToken(parent context.Context, token IDTokenClaims) context.Context {
+	// return context.WithValue(parent, idTokenKey, token)
+	return rpc.ContextWithIDToken(parent, token)
 }
 
 // WithUsername 用于设置当前会话的用户名
-func (c *LocalConfig) WithUsername(parent context.Context, username string) context.Context {
-	return context.WithValue(parent, usernameKey, username)
+func (c *SecurityConfig) withUsername(parent context.Context, username string) context.Context {
+	// return context.WithValue(parent, usernameKey, username)
+	return rpc.ContextWithUsername(parent, username)
 }
 
 // WithAuthenticationType 用于设置当前会话的认证方式
-func (c *LocalConfig) WithAuthenticationType(parent context.Context, authType string) context.Context {
-	return context.WithValue(parent, authenticationTypeKey, authType)
+func (c *SecurityConfig) withAuthenticationType(parent context.Context, authType string) context.Context {
+	// return context.WithValue(parent, authenticationTypeKey, authType)
+	return rpc.ContextWithAuthenticationType(parent, authType)
 }
 
 // WithGroups 用于设置当前会话用户属于组
-func (c *LocalConfig) WithGroups(parent context.Context, groups []string) context.Context {
-	return context.WithValue(parent, groupsKey, groups)
-}
-
-// IDTokenFrom 用于获取当前会话的IDToken
-func (c *LocalConfig) IDTokenFrom(ctx context.Context) (IDTokenClaims, bool) {
-	idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
-	return idToken, ok
-}
-
-// UsernameFrom 用于获取当前会话的用户名
-func (c *LocalConfig) UsernameFrom(ctx context.Context) (string, bool) {
-	username, ok := ctx.Value(usernameKey).(string)
-	return username, ok
-}
-
-// AuthenticationTypeFrom 用于获取当前会话的认证方式
-func (c *LocalConfig) AuthenticationTypeFrom(ctx context.Context) (string, bool) {
-	username, ok := ctx.Value(authenticationTypeKey).(string)
-	return username, ok
-}
-
-// GroupsFrom 用于获取当前会话的用户组列表
-func (c *LocalConfig) GroupsFrom(ctx context.Context) ([]string, bool) {
-	groups, ok := ctx.Value(groupsKey).([]string)
-	return groups, ok
+func (c *SecurityConfig) withGroups(parent context.Context, groups []string) context.Context {
+	// return context.WithValue(parent, groupsKey, groups)
+	return rpc.ContextWithGroups(parent, groups)
 }
 
 // setVerifier 用于设置oidc verifier实例

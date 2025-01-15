@@ -21,6 +21,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
 	"github.com/grpc-kit/pkg/vars"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
@@ -79,13 +80,8 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	defaultOpts = append(defaultOpts, runtime.WithMarshalerOption(
 		runtime.MIMEWildcard, &runtime.HTTPBodyMarshaler{
 			Marshaler: &runtime.JSONPb{
-				MarshalOptions: protojson.MarshalOptions{
-					UseProtoNames:   true,
-					EmitUnpopulated: true,
-				},
-				UnmarshalOptions: protojson.UnmarshalOptions{
-					DiscardUnknown: true,
-				},
+				MarshalOptions:   c.Services.jsonMarshal,
+				UnmarshalOptions: c.Services.jsonUnmarshal,
 			},
 		}))
 
@@ -112,6 +108,12 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		ctx = c.Security.injectAuthHTTPHeader(ctx, req)
 		if tmp, ok := metadata.FromIncomingContext(ctx); ok {
 			md = metadata.Join(md, tmp)
+		}
+
+		// 传递 gateway 特定请求头至后端 grpc 服务端
+		raddr := strings.Split(req.RemoteAddr, ":")
+		if len(raddr) == 2 {
+			md.Set("x-real-ip", raddr[0])
 		}
 
 		span := trace.SpanFromContext(ctx)
@@ -342,14 +344,27 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 	// TODO; 移动到 observables 方法中
 
 	var defaultUnaryOpt []grpc.UnaryServerInterceptor
-	defaultUnaryOpt = append(defaultUnaryOpt,
-		otelgrpc.UnaryServerInterceptor(
-			otelgrpc.WithInterceptorFilter(c.Observables.grpcTracingEnableFilter),
-		),
-	)
+
 	defaultUnaryOpt = append(defaultUnaryOpt,
 		grpcauth.UnaryServerInterceptor(c.authValidate()),
 	)
+
+	if c.CloudEvents.hasAuditEnabled() {
+		auditLevel := c.CloudEvents.getAuditLevel()
+		mustSucceed := c.CloudEvents.hasAuditEventMustSucceed()
+
+		defaultUnaryOpt = append(defaultUnaryOpt,
+			audit.UnaryServerInterceptor(
+				audit.WithLogger(c.logger),
+				audit.WithCloudEvent(c.CloudEvents.auditClient),
+				audit.WithServiceName(c.GetServiceName()),
+				audit.WithMarshal(c.Services.jsonMarshal),
+				audit.WithLevel(auditLevel),
+				audit.WithMustSucceed(mustSucceed),
+			),
+		)
+	}
+
 	defaultUnaryOpt = append(defaultUnaryOpt,
 		grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
 			grpclogging.WithTimestampFormat(time.RFC3339Nano),
@@ -417,8 +432,6 @@ func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInte
 	*/
 
 	var opts []grpc.StreamServerInterceptor
-	opts = append(opts, otelgrpc.StreamServerInterceptor())
-	// opts = append(opts, srvMetrics.StreamServerInterceptor())
 	opts = append(opts, grpcrecovery.StreamServerInterceptor())
 	opts = append(opts, grpcauth.StreamServerInterceptor(c.authValidate()))
 	opts = append(opts, interceptors...)
@@ -519,8 +532,8 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 		}
 		for _, rpc := range c.Security.Authentication.InsecureRPCs {
 			if currentRPC == rpc {
-				ctx = c.WithUsername(ctx, UsernameAnonymous)
-				ctx = c.WithAuthenticationType(ctx, AuthenticationTypeNone)
+				ctx = c.Security.withUsername(ctx, UsernameAnonymous)
+				ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeNone)
 				return ctx, nil
 			}
 		}
@@ -547,9 +560,9 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 				for _, v := range c.Security.Authentication.HTTPUsers {
 					if v.Username == tmps[0] && v.Password == tmps[1] {
 						// 认证成功
-						ctx = c.WithUsername(ctx, tmps[0])
-						ctx = c.WithAuthenticationType(ctx, AuthenticationTypeBasic)
-						ctx = c.WithGroups(ctx, v.Groups)
+						ctx = c.Security.withUsername(ctx, tmps[0])
+						ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
+						ctx = c.Security.withGroups(ctx, v.Groups)
 
 						if err := c.checkPermission(ctx, v.Groups); err != nil {
 							return ctx, err
@@ -578,10 +591,10 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 				return ctx, errs.Unauthenticated(ctx).Err()
 			}
 
-			ctx = c.WithIDToken(ctx, idToken)
-			ctx = c.WithUsername(ctx, idToken.Email)
-			ctx = c.WithGroups(ctx, idToken.Groups)
-			ctx = c.WithAuthenticationType(ctx, AuthenticationTypeBearer)
+			ctx = c.Security.withIDToken(ctx, idToken)
+			ctx = c.Security.withUsername(ctx, idToken.Email)
+			ctx = c.Security.withGroups(ctx, idToken.Groups)
+			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBearer)
 
 			if err := c.checkPermission(ctx, idToken.Groups); err != nil {
 				return ctx, err

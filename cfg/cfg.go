@@ -15,15 +15,18 @@ import (
 	"time"
 
 	eventclient "github.com/cloudevents/sdk-go/v2/client"
+	rbacv3 "github.com/envoyproxy/go-control-plane/envoy/config/rbac/v3"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (
@@ -47,6 +50,7 @@ const (
 	HTTPHeaderEtag = "Etag"
 )
 
+/*
 // contextKey 使用自定义类型不对外，防止碰撞冲突
 type contextKey int
 
@@ -63,6 +67,7 @@ const (
 	// groupsKey 用于存放当前用户归属的组列表
 	groupsKey
 )
+*/
 
 const (
 	// ScopeNameGRPCKit 用于该包产生链路、指标的权威名称
@@ -75,25 +80,25 @@ type LocalConfig struct {
 	Discover    *DiscoverConfig    `json:",omitempty"` // 服务注册配置
 	Security    *SecurityConfig    `json:",omitempty"` // 认证鉴权配置
 	Database    *DatabaseConfig    `json:",omitempty"` // 关系数据配置
-	Cachebuf    *CachebufConfig    `json:",omitempty"` // 缓存服务配置
+	Cachebox    *CacheboxConfig    `json:",omitempty"` // 缓存服务配置
 	Debugger    *DebuggerConfig    `json:",omitempty"` // 日志调试配置
 	Objstore    *ObjstoreConfig    `json:",omitempty"` // 对象存储配置
 	Frontend    *FrontendConfig    `json:",omitempty"` // 前端服务配置
 	Observables *ObservablesConfig `json:",omitempty"` // 可观测性配置
 	CloudEvents *CloudEventsConfig `json:",omitempty"` // 公共事件配置
+	Automations *AutomationsConfig `json:",omitempty"` // 流程编排配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
-	logger      *logrus.Entry
-	srvdis      sd.Registry
-	rpcConfig   *rpc.Config
-	eventClient eventclient.Client
-	// promRegistry *prometheus.Registry
-
-	// Opentracing *OpentracingConfig `json:",omitempty"` // 链路追踪配置
+	logger    *logrus.Entry
+	srvdis    sd.Registry
+	rpcConfig *rpc.Config
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
 type ServicesConfig struct {
+	jsonMarshal   protojson.MarshalOptions
+	jsonUnmarshal protojson.UnmarshalOptions
+
 	RootPath    string `mapstructure:"root_path"`
 	Namespace   string `mapstructure:"namespace"`
 	ServiceCode string `mapstructure:"service_code"`
@@ -141,14 +146,6 @@ type DatabaseConfig struct {
 	ConnectionPool ConnectionPool `mapstructure:"connection_pool"`
 }
 
-// CachebufConfig 缓存配置，区别于数据库配置，缓存的数据可以丢失
-type CachebufConfig struct {
-	Enable   bool   `mapstructure:"enable"`
-	Driver   string `mapstructure:"driver"`
-	Address  string `mapstructure:"address"`
-	Password string `mapstructure:"password"`
-}
-
 // DebuggerConfig 日志配置，用于设定服务启动后日志输出级别格式等
 type DebuggerConfig struct {
 	EnablePprof bool   `mapstructure:"enable_pprof"`
@@ -158,8 +155,24 @@ type DebuggerConfig struct {
 
 // CloudEventsConfig cloudevents事件配置
 type CloudEventsConfig struct {
+	eventClient eventclient.Client
+	auditClient eventclient.Client
+
+	Enable      bool        `mapstructure:"enable"`
 	Protocol    string      `mapstructure:"protocol"`
 	KafkaSarama KafkaSarama `mapstructure:"kafka_sarama"`
+
+	// 审计功能配置
+	AuditPolicy struct {
+		// 是否启用审计功能，默认为 false
+		Enabled bool   `mapstructure:"enabled"`
+		Topic   string `mapstructure:"topic"`
+		Level   string `mapstructure:"level"`
+		Event   struct {
+			// 在 request 阶段审计日志必须推送成功，否则本次请求失败，默认为 true
+			MustSucceed *bool `mapstructure:"must_succeed"`
+		} `mapstructure:"event"`
+	} `mapstructure:"audit_policy"`
 }
 
 // Authentication 用于认证
@@ -257,6 +270,10 @@ func (c *LocalConfig) Init() error {
 		return err
 	}
 
+	if err := c.initCachebox(); err != nil {
+		return err
+	}
+
 	if err := c.initObservables(); err != nil {
 		return err
 	}
@@ -274,6 +291,10 @@ func (c *LocalConfig) Init() error {
 	}
 
 	if err := c.initFrontend(); err != nil {
+		return err
+	}
+
+	if err := c.initAutomations(); err != nil {
 		return err
 	}
 
@@ -433,6 +454,126 @@ func (c *LocalConfig) SecurityPolicyLoad(ctx context.Context, assets embed.FS) e
 	}
 
 	return c.Security.initAuthClient(ctx, c.logger, packageName, embedAuthFile, embedDataFile)
+}
+
+// GetFlowClientConfig 用于获取 flow client 配置
+func (c *LocalConfig) GetFlowClientConfig() (*FlowClientConfig, error) {
+	if !c.Automations.Enable {
+		return nil, fmt.Errorf("automations is not enable")
+	}
+
+	fcc := &FlowClientConfig{
+		Config:    c.Automations.restConfig,
+		Namespace: c.GetNamespace(),
+		Appname:   c.GetAppname(),
+	}
+
+	return fcc, nil
+}
+
+// GetNamespace 用于获取应用的命名空间
+func (c *LocalConfig) GetNamespace() string {
+	if c.Services.Namespace == "" {
+		panic("namespace is not set")
+	}
+
+	return c.Services.Namespace
+}
+
+// GetAppname 用于获取应用名称
+func (c *LocalConfig) GetAppname() string {
+	// 这里的 ServiceCode 格式一定是 xxx.yyy.zzz 格式
+	parts := strings.Split(c.Services.ServiceCode, ".")
+	if len(parts) != 3 {
+		panic("invalid service code, must be like 'xxx.yyy.zzz'")
+	}
+
+	return fmt.Sprintf("%s-%s-%s", parts[2], parts[0], parts[1])
+}
+
+// GetLRUCachebox 用于获取 LRU 缓存
+func (c *LocalConfig) GetLRUCachebox() (LRUCachebox, error) {
+	if c.Cachebox.Enable {
+		return c.Cachebox.lruCache, nil
+	}
+
+	return nil, fmt.Errorf("cachebox is not enabled")
+}
+
+// GetCacheboxRedisClient 用于获取缓存服务中初始化的 redis 连接
+func (c *LocalConfig) GetCacheboxRedisClient() (redis.UniversalClient, error) {
+	return c.Cachebox.getRedisClient()
+}
+
+// HasCacheboxEnabled 用于判断是否启用缓存
+func (c *LocalConfig) HasCacheboxEnabled() bool {
+	return c.Cachebox.Enable
+}
+
+// IDTokenFrom 用于获取当前会话的IDToken
+func (c *LocalConfig) IDTokenFrom(ctx context.Context) (IDTokenClaims, bool) {
+	tmp := rpc.GetIDTokenFromContext(ctx)
+
+	// idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
+	// return idToken, ok
+
+	idToken, ok := tmp.(IDTokenClaims)
+	return idToken, ok
+}
+
+// UsernameFrom 用于获取当前会话的用户名
+func (c *LocalConfig) UsernameFrom(ctx context.Context) (string, bool) {
+	/*
+		defaultUser := "anonymous"
+
+		if c.Security == nil || c.Security.Enable == false {
+			return defaultUser, true
+		}
+
+		username, ok := ctx.Value(usernameKey).(string)
+		if ok && username != "" {
+			return username, true
+		}
+
+		return defaultUser, false
+	*/
+	return rpc.GetUsernameFromContext(ctx)
+}
+
+// AuthenticationTypeFrom 用于获取当前会话的认证方式
+func (c *LocalConfig) AuthenticationTypeFrom(ctx context.Context) (string, bool) {
+	// username, ok := ctx.Value(authenticationTypeKey).(string)
+	// return username, ok
+	return rpc.GetAuthenticationTypeFromContext(ctx)
+}
+
+// GroupsFrom 用于获取当前会话的用户组列表
+func (c *LocalConfig) GroupsFrom(ctx context.Context) ([]string, bool) {
+	// groups, ok := ctx.Value(groupsKey).([]string)
+	// return groups, ok
+	return rpc.GetGroupsFromContext(ctx)
+}
+
+// GetRBACData 用于获取 RBAC 数据
+func (c *LocalConfig) GetRBACData(ctx context.Context) *rbacv3.RBAC {
+	if c.Security == nil || c.Security.Enable == false || c.Security.authClient == nil {
+		return &rbacv3.RBAC{}
+	}
+
+	return c.Security.authClient.GetRBACData()
+}
+
+// GetCloudEvents 用于获取 cloudevents 连接客户端
+func (c *LocalConfig) GetCloudEvents() (eventclient.Client, error) {
+	if c.CloudEvents == nil || c.CloudEvents.Enable == false {
+		return nil, fmt.Errorf("cloud events is not enabled")
+	}
+
+	if c.CloudEvents.eventClient == nil {
+		return nil, fmt.Errorf("cloudevents client is nil")
+	}
+
+	return c.CloudEvents.eventClient, nil
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {

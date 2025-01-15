@@ -147,11 +147,28 @@ database:
     max_open_conns: 300
 
 # 缓存服务配置
-cachebuf:
+cachebox:
   enable: true
-  driver: redis
-  address: 127.0.0.1:6379
-  password: ""
+  driver: redis # memory, redis
+  memory:
+    max_entry: 1024
+  redis:
+    endpoints:
+    - 127.0.0.1:6380
+    - 127.0.0.1:6381
+    - 127.0.0.1:6382
+    username: ""
+    password: ""
+    db_number: 1
+    sentinel:
+      master_name: ""
+      username: ""
+      password: ""
+    tls_client_config:
+      ca_file: ""
+      cert_file: ""
+      key_file: ""
+      insecure_skip_verify: true
 
 # 日志调试配置
 debugger:
@@ -316,6 +333,12 @@ cloudevents:
           retry:
             max: 3
       version: "2.4.0"
+  audit_policy:
+    enabled: true
+    topic: "uptime-service-audit"
+    level: metadata # 审计级别 none metadata request request_response
+    event:
+      must_succeed: false # 默认必须成功，会阻塞请求
 
 # 应用私有配置
 independent:

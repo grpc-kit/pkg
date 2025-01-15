@@ -2,8 +2,9 @@ package cfg
 
 import (
 	"fmt"
-
 	"github.com/grpc-kit/pkg/rpc"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"google.golang.org/grpc"
 )
 
 // initRPCConfig 用于初始化rpc客户端、服务端配置
@@ -65,5 +66,14 @@ func (c *LocalConfig) GetRPCServer() (*rpc.Server, error) {
 	if c.rpcConfig == nil {
 		return nil, fmt.Errorf("rpc cconfig is nil")
 	}
+
+	if c.Observables.hasEnable() {
+		opt := grpc.StatsHandler(
+			otelgrpc.NewServerHandler(otelgrpc.WithFilter(c.Observables.grpcTracingEnableFilter)),
+		)
+
+		c.rpcConfig.WithServerOption(opt)
+	}
+
 	return rpc.NewServer(c.rpcConfig), nil
 }

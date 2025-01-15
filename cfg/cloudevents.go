@@ -2,17 +2,57 @@ package cfg
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
-	"github.com/Shopify/sarama"
+	"github.com/IBM/sarama"
+	otelObs "github.com/cloudevents/sdk-go/observability/opentelemetry/v2/client"
 	kafkaSarama "github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	eventclient "github.com/cloudevents/sdk-go/v2/client"
+	"github.com/cloudevents/sdk-go/v2/client"
+	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
 )
 
 const (
 	CloudEventsProtocolKafkaSarama = "kafka_sarama"
 )
+
+// AuditEventData 审计事件
+/*
+type AuditEventData struct {
+	// 唯一标识服务名称，如：netdev.v1.oneops.api.grpc-kit.com
+	ServiceName string `json:"service_name"`
+	// 唯一标识服务代号，如：netdev.v1.oneops
+	ServiceCode string `json:"service_code"`
+
+	// 当前请求用户
+	User struct {
+		UID      string              `json:"uid"`
+		Username string              `json:"username"`
+		Groups   []string            `json:"groups"`
+		Extra    map[string][]string `json:"extra"`
+	} `json:"user"`
+
+	// 用户来源 ip 列表
+	SourceIPs []string `json:"source_ips"`
+
+	// UserAgent 用户代理
+	UserAgent string `json:"user_agent"`
+
+	RequestReceivedTimestamp time.Time `json:"request_received_timestamp"`
+	StageTimestamp           time.Time `json:"stage_timestamp"`
+
+	GRPCMethod  string `json:"grpc_method"`
+	GRPCService string `json:"grpc_service"`
+
+	RequestID string `json:"request_id"`
+
+	Level string `json:"level"`
+
+	RequestObject  string `json:"request_object"`
+	ResponseObject string `json:"response_object"`
+}
+*/
 
 // SaramaConfig 用于kafka客户端配置，结构等同于sarama类库
 // https://pkg.go.dev/github.com/Shopify/sarama#Config
@@ -217,6 +257,83 @@ type SaramaConfig struct {
 	Version           string `mapstructure:"version"`
 }
 
+// initCloudEvents 初始化 cloudevents 数据实例
+func (c *LocalConfig) initCloudEvents() error {
+	if c.CloudEvents == nil {
+		c.CloudEvents = &CloudEventsConfig{
+			Enable: false,
+		}
+	}
+
+	if !c.CloudEvents.Enable || c.CloudEvents.Protocol == "" {
+		return nil
+	}
+
+	switch c.CloudEvents.Protocol {
+	case CloudEventsProtocolKafkaSarama:
+	default:
+		return fmt.Errorf("not support cloudevents protocol %v", c.CloudEvents.Protocol)
+	}
+
+	saramaConfig := c.CloudEvents.KafkaSarama.Config.Parse()
+
+	sender, err := kafkaSarama.NewSender(c.CloudEvents.KafkaSarama.Brokers,
+		saramaConfig,
+		c.CloudEvents.KafkaSarama.Topic)
+	if err != nil {
+		return fmt.Errorf("new kafka sarama sender error: %v", err)
+	}
+
+	nameFormatter := func(e cloudevents.Event) string {
+		return "cloudevents " + e.Context.GetType()
+	}
+
+	eventClient, err := cloudevents.NewClient(sender,
+		cloudevents.WithTimeNow(),
+		cloudevents.WithUUIDs(),
+		client.WithObservabilityService(
+			otelObs.NewOTelObservabilityService(
+				otelObs.WithSpanNameFormatter(nameFormatter),
+			),
+		),
+	)
+	if err != nil {
+		return fmt.Errorf("new cloudevents client error: %v", err)
+	}
+
+	c.CloudEvents.eventClient = eventClient
+
+	// 是否启用审计日志
+	if c.CloudEvents.AuditPolicy.Enabled {
+		if c.CloudEvents.AuditPolicy.Topic == "" {
+			c.CloudEvents.auditClient = eventClient
+		} else {
+			sender, err = kafkaSarama.NewSender(c.CloudEvents.KafkaSarama.Brokers,
+				saramaConfig,
+				c.CloudEvents.AuditPolicy.Topic)
+			if err != nil {
+				return fmt.Errorf("new kafka sarama audit sender error: %v", err)
+			}
+			auditClient, err := cloudevents.NewClient(sender,
+				cloudevents.WithTimeNow(),
+				cloudevents.WithUUIDs(),
+				client.WithObservabilityService(
+					otelObs.NewOTelObservabilityService(
+						otelObs.WithSpanNameFormatter(nameFormatter),
+					),
+				),
+			)
+			if err != nil {
+				return fmt.Errorf("new cloudevents client error: %v", err)
+			}
+
+			c.CloudEvents.auditClient = auditClient
+		}
+	}
+
+	return nil
+}
+
 // Parse 解析为 https://pkg.go.dev/github.com/Shopify/sarama#Config
 func (s *SaramaConfig) Parse() *sarama.Config {
 	c := sarama.NewConfig()
@@ -407,42 +524,37 @@ func (s *SaramaConfig) Parse() *sarama.Config {
 	return c
 }
 
-// initCloudEvents 初始化 cloudevents 数据实例
-func (c *LocalConfig) initCloudEvents() error {
-	if c.CloudEvents == nil || c.CloudEvents.Protocol == "" {
-		return nil
-	}
-
-	switch c.CloudEvents.Protocol {
-	case CloudEventsProtocolKafkaSarama:
-	default:
-		return fmt.Errorf("not support cloudevents protocol %v", c.CloudEvents.Protocol)
-	}
-
-	saramaConfig := c.CloudEvents.KafkaSarama.Config.Parse()
-
-	sender, err := kafkaSarama.NewSender(c.CloudEvents.KafkaSarama.Brokers,
-		saramaConfig,
-		c.CloudEvents.KafkaSarama.Topic)
-	if err != nil {
-		return err
-	}
-
-	client, err := cloudevents.NewClient(sender, cloudevents.WithTimeNow(), cloudevents.WithUUIDs())
-	if err != nil {
-		return err
-	}
-
-	c.eventClient = client
-
-	return nil
+func (c CloudEventsConfig) hasAuditEnabled() bool {
+	return c.Enable && c.AuditPolicy.Enabled
 }
 
-// GetCloudEvents 用于获取 cloudevents 连接客户端
-func (c *LocalConfig) GetCloudEvents() (eventclient.Client, error) {
-	if c.eventClient == nil {
-		return nil, fmt.Errorf("cloudevents client is nil")
+func (c CloudEventsConfig) hasAuditEventMustSucceed() bool {
+	if !c.hasAuditEnabled() {
+		return false
 	}
 
-	return c.eventClient, nil
+	if c.AuditPolicy.Event.MustSucceed == nil {
+		return true
+	}
+
+	return *c.AuditPolicy.Event.MustSucceed
+}
+
+func (c CloudEventsConfig) getAuditLevel() audit.Level {
+	if !c.hasAuditEnabled() {
+		return audit.LevelNone
+	}
+
+	switch strings.ToLower(c.AuditPolicy.Level) {
+	case "none":
+		return audit.LevelNone
+	case "metadata":
+		return audit.LevelMetadata
+	case "request":
+		return audit.LevelRequest
+	case "request_response":
+		return audit.LevelRequestResponse
+	default:
+		return audit.LevelRequest
+	}
 }
