@@ -17,6 +17,7 @@ import (
 	eventclient "github.com/cloudevents/sdk-go/v2/client"
 	rbacv3 "github.com/envoyproxy/go-control-plane/envoy/config/rbac/v3"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-kit/pkg/adm"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
@@ -410,6 +411,21 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 				handle = c.Security.addHTTPHandler(handle)
 			}
 
+			// TODO; 如果是 "admin" 组件，则加入 "/admin/api" 后台集成接口
+			if v == "admin" {
+				adminIns := adm.New()
+				admHandle := adminIns.Handle()
+
+				if tracing {
+					admHandle = c.HTTPHandler(admHandle)
+				} else {
+					admHandle = c.Security.addHTTPHandler(admHandle)
+				}
+
+				mux.Handle("/admin/api/", admHandle)
+			}
+
+			// 必须在添加 "/admin/api" 后台集成接口后添加
 			mux.Handle(url, handle)
 		} else if err != nil {
 			return err
