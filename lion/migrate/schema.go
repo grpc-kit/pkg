@@ -9,27 +9,27 @@ import (
 )
 
 var (
-	// TDemoCanRemoveColumns holds the columns for the "t_demo_can_remove" table.
-	TDemoCanRemoveColumns = []*schema.Column{
+	// LionDemoColumns holds the columns for the "lion_demo" table.
+	LionDemoColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Default: "grpc-kit"},
 	}
-	// TDemoCanRemoveTable holds the schema information for the "t_demo_can_remove" table.
-	TDemoCanRemoveTable = &schema.Table{
-		Name:       "t_demo_can_remove",
-		Columns:    TDemoCanRemoveColumns,
-		PrimaryKey: []*schema.Column{TDemoCanRemoveColumns[0]},
+	// LionDemoTable holds the schema information for the "lion_demo" table.
+	LionDemoTable = &schema.Table{
+		Name:       "lion_demo",
+		Columns:    LionDemoColumns,
+		PrimaryKey: []*schema.Column{LionDemoColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		TDemoCanRemoveTable,
+		LionDemoTable,
 	}
 )
 
 func init() {
-	TDemoCanRemoveTable.Annotation = &entsql.Annotation{
-		Table: "t_demo_can_remove",
+	LionDemoTable.Annotation = &entsql.Annotation{
+		Table: "lion_demo",
 	}
 }

@@ -20,7 +20,7 @@ const (
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// Table holds the table name of the demo in the database.
-	Table = "t_demo_can_remove"
+	Table = "lion_demo"
 )
 
 // Columns holds all SQL columns for demo fields.

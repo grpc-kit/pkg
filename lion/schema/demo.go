@@ -35,6 +35,6 @@ func (Demo) Mixin() []ent.Mixin {
 // Annotations 自定义表名
 func (Demo) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "t_demo_can_remove"},
+		entsql.Annotation{Table: "lion_demo"},
 	}
 }
