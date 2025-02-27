@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/grpc-kit/pkg/lion"
 	_ "github.com/lib/pq"
 )
 
@@ -98,6 +100,9 @@ func (c *LocalConfig) initDatabase() error {
 
 	c.Database.db = db
 
+	// TODO; 这里用于测试 lion 数据库
+	c.testDatabaseLion()
+
 	return nil
 }
 
@@ -122,4 +127,17 @@ func (c *LocalConfig) GetDatabaseEntSQLDriver() (*entsql.Driver, error) {
 	}
 
 	return entsql.OpenDB(c.Database.Driver, db), nil
+}
+
+// testDatabaseLion 用于测试 Lion 配置
+func (c *LocalConfig) testDatabaseLion() error {
+	driver, err := c.GetDatabaseEntSQLDriver()
+	if err != nil {
+		return err
+	}
+
+	db := lion.NewClient(lion.Driver(driver))
+	db.Schema.Create(context.TODO())
+
+	return nil
 }
