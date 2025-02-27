@@ -5,8 +5,8 @@ package lion
 import (
 	"time"
 
-	"github.com/grpc-kit/api/ent/schema"
 	"github.com/grpc-kit/pkg/lion/demo"
+	"github.com/grpc-kit/pkg/lion/schema"
 )
 
 // The init function reads all schema descriptors with runtime code
