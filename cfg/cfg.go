@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -207,6 +208,7 @@ type OIDCProvider struct {
 // OIDCConfig 用于OIDC验证相关配置
 type OIDCConfig struct {
 	ClientID             string   `mapstructure:"client_id"`
+	ClientSecret         string   `mapstructure:"client_secret"`
 	SupportedSigningAlgs []string `mapstructure:"supported_signing_algs"`
 	SkipClientIDCheck    bool     `mapstructure:"skip_client_id_check"`
 	SkipExpiryCheck      bool     `mapstructure:"skip_expiry_check"`
@@ -411,9 +413,19 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 				handle = c.Security.addHTTPHandler(handle)
 			}
 
-			// TODO; 如果是 "admin" 组件，则加入 "/admin/api" 后台集成接口
-			if v == "admin" {
-				adminIns := adm.New()
+			// TODO; 如果是 "admin" 组件，则加入 "/admin/builtin/api" 后台集成接口
+			if v == "admin" && c.Security.Enable && c.Security.Authentication != nil && c.Security.Authentication.OIDCProvider != nil {
+				apiPrefix := fmt.Sprintf("%v/builtin/api/", url)
+				// 格式化清理路径，确保以 "/" 结尾
+				apiPrefix = path.Clean(apiPrefix)
+				apiPrefix = fmt.Sprintf("%v/", apiPrefix)
+
+				adminIns := adm.New(apiPrefix,
+					c.Security.Authentication.OIDCProvider.Issuer,
+					c.Security.Authentication.OIDCProvider.Config.ClientID,
+					c.Security.Authentication.OIDCProvider.Config.ClientSecret,
+				)
+
 				admHandle := adminIns.Handle()
 
 				if tracing {
@@ -422,7 +434,7 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 					admHandle = c.Security.addHTTPHandler(admHandle)
 				}
 
-				mux.Handle("/admin/api/", admHandle)
+				mux.Handle(apiPrefix, admHandle)
 			}
 
 			// 必须在添加 "/admin/api" 后台集成接口后添加
