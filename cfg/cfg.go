@@ -18,7 +18,7 @@ import (
 	eventclient "github.com/cloudevents/sdk-go/v2/client"
 	rbacv3 "github.com/envoyproxy/go-control-plane/envoy/config/rbac/v3"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/grpc-kit/pkg/adm"
+	"github.com/grpc-kit/pkg/admin"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
@@ -420,7 +420,7 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 				apiPrefix = path.Clean(apiPrefix)
 				apiPrefix = fmt.Sprintf("%v/", apiPrefix)
 
-				adminIns := adm.New(apiPrefix,
+				adminIns := admin.New(apiPrefix,
 					c.Security.Authentication.OIDCProvider.Issuer,
 					c.Security.Authentication.OIDCProvider.Config.ClientID,
 					c.Security.Authentication.OIDCProvider.Config.ClientSecret,

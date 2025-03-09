@@ -1,4 +1,4 @@
-package adm
+package admin
 
 import (
 	"context"
@@ -36,14 +36,18 @@ func (a *AdminAPI) Handle() http.Handler {
 	r := mux.NewRouter()
 
 	r.HandleFunc(path.Join(a.prefix, "/v1/test"), a.test).Methods("GET")
+	r.HandleFunc(path.Join(a.prefix, "/v1/test"), a.test).Methods("POST")
 	r.HandleFunc(path.Join(a.prefix, "/v1/oidc/callback"), a.oidcCallback).Methods("GET")
 
 	return r
 }
 
 func (a *AdminAPI) test(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("hello"))
+	// { code: 0, data: { token: 'xxx' }, message: '登录成功' }
+	w.Write([]byte(`{ "code": 0, "data": { "token": "xxx" }, "message": "登录成功" }`))
 }
 
 func (a *AdminAPI) oidcCallback(w http.ResponseWriter, r *http.Request) {
