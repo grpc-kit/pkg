@@ -420,10 +420,18 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 				apiPrefix = path.Clean(apiPrefix)
 				apiPrefix = fmt.Sprintf("%v/", apiPrefix)
 
-				adminIns := admin.New(apiPrefix,
-					c.Security.Authentication.OIDCProvider.Issuer,
-					c.Security.Authentication.OIDCProvider.Config.ClientID,
-					c.Security.Authentication.OIDCProvider.Config.ClientSecret,
+				client, err := c.GetAdminDatabaseLion()
+				if err != nil {
+					return err
+				}
+
+				adminIns := admin.New(
+					admin.WithLogger(c.logger),
+					admin.WithPrefix(apiPrefix),
+					admin.WithLionClient(client),
+					admin.WithOIDCProvider(c.Security.Authentication.OIDCProvider.Issuer,
+						c.Security.Authentication.OIDCProvider.Config.ClientID,
+						c.Security.Authentication.OIDCProvider.Config.ClientSecret),
 				)
 
 				admHandle := adminIns.Handle()

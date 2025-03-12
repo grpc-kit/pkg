@@ -101,7 +101,7 @@ func (c *LocalConfig) initDatabase() error {
 	c.Database.db = db
 
 	// TODO; 这里用于测试 lion 数据库
-	c.testDatabaseLion()
+	// c.testDatabaseLion()
 
 	return nil
 }
@@ -129,15 +129,16 @@ func (c *LocalConfig) GetDatabaseEntSQLDriver() (*entsql.Driver, error) {
 	return entsql.OpenDB(c.Database.Driver, db), nil
 }
 
-// testDatabaseLion 用于测试 Lion 配置
-func (c *LocalConfig) testDatabaseLion() error {
+// GetAdminDatabaseLion 用于测试 Lion 配置
+// TODO: 这里用于测试 lion 数据库
+func (c *LocalConfig) GetAdminDatabaseLion() (*lion.Client, error) {
 	driver, err := c.GetDatabaseEntSQLDriver()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	db := lion.NewClient(lion.Driver(driver))
 	db.Schema.Create(context.TODO())
 
-	return nil
+	return db, nil
 }

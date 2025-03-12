@@ -9,35 +9,52 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
 
+// AdminAPI xx
 type AdminAPI struct {
-	// api 接口前缀
-	prefix string
-	// oidc 认证域名
-	provider string
-	// oidc 客户端ID
-	clientID string
-	// oidc 客户端密钥
-	clientSecret string
+	config *config
+	logger *logrus.Entry
 }
 
-func New(prefix, provider, clientID, clientSecret string) *AdminAPI {
+// New xx
+func New(opts ...Options) *AdminAPI {
+	c := &config{}
+
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	// TODO; 默认值设置
+	if c.logger == nil {
+		c.logger = logrus.NewEntry(logrus.New())
+	}
+	if c.prefix == "" {
+		c.prefix = "/admin/builtin/api"
+	}
+
 	return &AdminAPI{
-		prefix:       prefix,
-		provider:     provider,
-		clientID:     clientID,
-		clientSecret: clientSecret,
+		config: c,
+		logger: c.logger,
 	}
 }
 
 func (a *AdminAPI) Handle() http.Handler {
 	r := mux.NewRouter()
 
-	r.HandleFunc(path.Join(a.prefix, "/v1/test"), a.test).Methods("GET")
-	r.HandleFunc(path.Join(a.prefix, "/v1/test"), a.test).Methods("POST")
-	r.HandleFunc(path.Join(a.prefix, "/v1/oidc/callback"), a.oidcCallback).Methods("GET")
+	prefix := a.config.prefix
+
+	r.HandleFunc(path.Join(prefix, "/v1/test"), a.test).Methods("GET")
+	r.HandleFunc(path.Join(prefix, "/v1/test"), a.test).Methods("POST")
+	r.HandleFunc(path.Join(prefix, "/v1/oidc/callback"), a.oidcCallback).Methods("GET")
+
+	// /admin/builtin/api/v1/auth/login
+	// /admin/builtin/api/v1/auth/logout
+	// /admin/builtin/api/v1/auth/oidc/callback
+	// /admin/builtin/api/v1/auth/oauth2/callback
+	r.HandleFunc(path.Join(prefix, "/v1/auth/login"), a.authLogin).Methods("POST")
 
 	return r
 }
@@ -53,7 +70,7 @@ func (a *AdminAPI) test(w http.ResponseWriter, r *http.Request) {
 func (a *AdminAPI) oidcCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
-	provider, err := oidc.NewProvider(ctx, a.provider)
+	provider, err := oidc.NewProvider(ctx, a.config.provider)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,8 +83,8 @@ func (a *AdminAPI) oidcCallback(w http.ResponseWriter, r *http.Request) {
 	*/
 
 	config := oauth2.Config{
-		ClientID:     a.clientID,
-		ClientSecret: a.clientSecret,
+		ClientID:     a.config.clientID,
+		ClientSecret: a.config.clientSecret,
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 		RedirectURL:  "http://127.0.0.1:8080/admin/builtin/api/v1/oidc/callback",
