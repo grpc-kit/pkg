@@ -1,14 +1,12 @@
 package schema
 
 import (
-	"regexp"
-	"time"
-
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
+	"regexp"
 )
 
 // Users 用户实体表 | 存储用户基本信息和认证相关字段
@@ -41,13 +39,16 @@ func (Users) Fields() []ent.Field {
 			Default("").
 			Comment("用户的昵称，用于页面展示"),
 		field.String("profile").
-			Default("").
+			Optional().
+			Nillable().
 			Comment("用户个人资料页面的 URL"),
 		field.String("picture").
-			Default("").
+			Optional().
+			Nillable().
 			Comment("用户头像的 URL"),
 		field.String("website").
-			Default("").
+			Optional().
+			Nillable().
 			Comment("用户的个人网站 URL"),
 		field.Bytes("email_encrypted").
 			Sensitive().
@@ -61,13 +62,16 @@ func (Users) Fields() []ent.Field {
 			Default("unknown").
 			Comment("用户的性别，如：male、female, other"),
 		field.Time("birthdate").
-			Default(time.Time{}).
+			Optional().
+			Nillable().
 			Comment("用户的出生日期，格式为 YYYY-MM-DD，如 1990-12-31"),
 		field.String("zoneinfo").
-			Default("Asia/Shanghai").
+			Optional().
+			Nillable().
 			Comment("用户的时区信息，如：Asia/Shanghai"),
 		field.String("locale").
-			Default("").
+			Optional().
+			Nillable().
 			Comment("用户的语言/地区偏好，如：zh-CN"),
 		field.Bytes("phone_number_encrypted").
 			Sensitive().
