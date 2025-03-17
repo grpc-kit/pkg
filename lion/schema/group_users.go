@@ -9,7 +9,7 @@ import (
 	"entgo.io/ent/schema/mixin"
 )
 
-// GroupUsers holds the schema definition for the Demo entity.
+// GroupUsers 组下关联的具体用户
 type GroupUsers struct {
 	ent.Schema
 }
@@ -17,8 +17,14 @@ type GroupUsers struct {
 // Fields of the table.
 func (GroupUsers) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("group_id").Positive().Comment("关联 lion_groups 表的用户组 ID"),
-		field.Int("user_id").Positive().Comment("关联 lion_users 表的用户 ID"),
+		field.Int("group_id").
+			Positive().
+			Immutable().
+			Comment("关联 lion_groups 表的用户组 ID"),
+		field.Int("user_id").
+			Positive().
+			Immutable().
+			Comment("关联 lion_users 表的用户 ID"),
 	}
 }
 
