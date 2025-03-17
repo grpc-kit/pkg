@@ -1,0 +1,49 @@
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+	"entgo.io/ent/schema/mixin"
+)
+
+// GroupUsers holds the schema definition for the Demo entity.
+type GroupUsers struct {
+	ent.Schema
+}
+
+// Fields of the table.
+func (GroupUsers) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("group_id").Positive().Comment("关联 lion_groups 表的用户组 ID"),
+		field.Int("user_id").Positive().Comment("关联 lion_users 表的用户 ID"),
+	}
+}
+
+// Edges of the table.
+func (GroupUsers) Edges() []ent.Edge {
+	return nil
+}
+
+// Mixin of the table.
+func (GroupUsers) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		mixin.Time{},
+	}
+}
+
+// Indexes of the table.
+func (GroupUsers) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("group_id", "user_id").Unique(),
+	}
+}
+
+// Annotations 自定义表名
+func (GroupUsers) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "lion_group_users"},
+	}
+}

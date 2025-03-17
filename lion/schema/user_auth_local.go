@@ -21,10 +21,9 @@ func (UserAuthLocal) Fields() []ent.Field {
 			Positive().
 			Immutable().
 			Comment("用户ID，关联 lion_users 表"),
-		field.Bytes("password_encrypted").
-			Sensitive().
+		field.Bytes("password_hash").
 			NotEmpty().
-			Comment("加密后的密码"),
+			Comment("哈希后的密码"),
 		field.Bool("mfa_enabled").
 			Default(false).
 			Comment("是否启用 MFA"),
