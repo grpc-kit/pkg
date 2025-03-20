@@ -54,7 +54,7 @@ func (a *AdminAPI) Handle() http.Handler {
 	// /admin/builtin/api/v1/auth/logout
 	// /admin/builtin/api/v1/auth/oidc/callback
 	// /admin/builtin/api/v1/auth/oauth2/callback
-	r.HandleFunc(path.Join(prefix, "/v1/auth/login"), a.authLogin).Methods("POST")
+	r.HandleFunc(path.Join(prefix, "/v1/auth/local/login"), a.authLogin).Methods("POST")
 
 	return r
 }

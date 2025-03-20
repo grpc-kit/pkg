@@ -1,6 +1,8 @@
 package admin
 
 import (
+	"context"
+	"golang.org/x/crypto/bcrypt"
 	"io"
 	"net/http"
 
@@ -26,6 +28,28 @@ func (a *AdminAPI) authLogin(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	hashPass, err := bcrypt.GenerateFromPassword([]byte(authreq.PasswordHash), bcrypt.DefaultCost)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	x, err := a.config.db.Users.Create().
+		SetPreferredUsername(authreq.Username).
+		Save(context.TODO())
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	a.config.db.UserAuthLocal.Create().
+		SetUserID(x.ID).
+		SetPasswordHash(hashPass).
+		SetMfaSecretEncrypted([]byte("hell world")).
+		Save(context.TODO())
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
