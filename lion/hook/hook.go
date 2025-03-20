@@ -9,6 +9,18 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 )
 
+// The AccountsFunc type is an adapter to allow the use of ordinary
+// function as Accounts mutator.
+type AccountsFunc func(context.Context, *lion.AccountsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AccountsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.AccountsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.AccountsMutation", m)
+}
+
 // The DemoFunc type is an adapter to allow the use of ordinary
 // function as Demo mutator.
 type DemoFunc func(context.Context, *lion.DemoMutation) (lion.Value, error)
@@ -19,6 +31,90 @@ func (f DemoFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, erro
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DemoMutation", m)
+}
+
+// The GroupUsersFunc type is an adapter to allow the use of ordinary
+// function as GroupUsers mutator.
+type GroupUsersFunc func(context.Context, *lion.GroupUsersMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GroupUsersFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.GroupUsersMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GroupUsersMutation", m)
+}
+
+// The GroupsFunc type is an adapter to allow the use of ordinary
+// function as Groups mutator.
+type GroupsFunc func(context.Context, *lion.GroupsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GroupsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.GroupsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GroupsMutation", m)
+}
+
+// The OAuthProvidersFunc type is an adapter to allow the use of ordinary
+// function as OAuthProviders mutator.
+type OAuthProvidersFunc func(context.Context, *lion.OAuthProvidersMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OAuthProvidersFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.OAuthProvidersMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.OAuthProvidersMutation", m)
+}
+
+// The UserAttributesFunc type is an adapter to allow the use of ordinary
+// function as UserAttributes mutator.
+type UserAttributesFunc func(context.Context, *lion.UserAttributesMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserAttributesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.UserAttributesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserAttributesMutation", m)
+}
+
+// The UserAuthLocalFunc type is an adapter to allow the use of ordinary
+// function as UserAuthLocal mutator.
+type UserAuthLocalFunc func(context.Context, *lion.UserAuthLocalMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserAuthLocalFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.UserAuthLocalMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserAuthLocalMutation", m)
+}
+
+// The UserAuthSocialFunc type is an adapter to allow the use of ordinary
+// function as UserAuthSocial mutator.
+type UserAuthSocialFunc func(context.Context, *lion.UserAuthSocialMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserAuthSocialFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.UserAuthSocialMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserAuthSocialMutation", m)
+}
+
+// The UsersFunc type is an adapter to allow the use of ordinary
+// function as Users mutator.
+type UsersFunc func(context.Context, *lion.UsersMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UsersFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.UsersMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UsersMutation", m)
 }
 
 // Condition is a hook condition function.

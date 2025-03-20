@@ -12,8 +12,24 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Accounts is the client for interacting with the Accounts builders.
+	Accounts *AccountsClient
 	// Demo is the client for interacting with the Demo builders.
 	Demo *DemoClient
+	// GroupUsers is the client for interacting with the GroupUsers builders.
+	GroupUsers *GroupUsersClient
+	// Groups is the client for interacting with the Groups builders.
+	Groups *GroupsClient
+	// OAuthProviders is the client for interacting with the OAuthProviders builders.
+	OAuthProviders *OAuthProvidersClient
+	// UserAttributes is the client for interacting with the UserAttributes builders.
+	UserAttributes *UserAttributesClient
+	// UserAuthLocal is the client for interacting with the UserAuthLocal builders.
+	UserAuthLocal *UserAuthLocalClient
+	// UserAuthSocial is the client for interacting with the UserAuthSocial builders.
+	UserAuthSocial *UserAuthSocialClient
+	// Users is the client for interacting with the Users builders.
+	Users *UsersClient
 
 	// lazily loaded.
 	client     *Client
@@ -145,7 +161,15 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Accounts = NewAccountsClient(tx.config)
 	tx.Demo = NewDemoClient(tx.config)
+	tx.GroupUsers = NewGroupUsersClient(tx.config)
+	tx.Groups = NewGroupsClient(tx.config)
+	tx.OAuthProviders = NewOAuthProvidersClient(tx.config)
+	tx.UserAttributes = NewUserAttributesClient(tx.config)
+	tx.UserAuthLocal = NewUserAuthLocalClient(tx.config)
+	tx.UserAuthSocial = NewUserAuthSocialClient(tx.config)
+	tx.Users = NewUsersClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -155,7 +179,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Demo.QueryXXX(), the query will be executed
+// applies a query, for example: Accounts.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

@@ -18,7 +18,7 @@ func (OAuthProviders) Fields() []ent.Field {
 	return []ent.Field{
 		field.Enum("name").
 			Values("general_oidc", "wechat", "twitter").
-			Comment("OAuth 认证提供分，如：wechat 等"),
+			Comment("支持的 oauth 认证提供方"),
 		field.String("client_id").
 			Default(""),
 		field.String("client_secret_encrypted").

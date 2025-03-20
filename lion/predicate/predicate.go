@@ -6,5 +6,29 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Accounts is the predicate function for accounts builders.
+type Accounts func(*sql.Selector)
+
 // Demo is the predicate function for demo builders.
 type Demo func(*sql.Selector)
+
+// GroupUsers is the predicate function for groupusers builders.
+type GroupUsers func(*sql.Selector)
+
+// Groups is the predicate function for groups builders.
+type Groups func(*sql.Selector)
+
+// OAuthProviders is the predicate function for oauthproviders builders.
+type OAuthProviders func(*sql.Selector)
+
+// UserAttributes is the predicate function for userattributes builders.
+type UserAttributes func(*sql.Selector)
+
+// UserAuthLocal is the predicate function for userauthlocal builders.
+type UserAuthLocal func(*sql.Selector)
+
+// UserAuthSocial is the predicate function for userauthsocial builders.
+type UserAuthSocial func(*sql.Selector)
+
+// Users is the predicate function for users builders.
+type Users func(*sql.Selector)
