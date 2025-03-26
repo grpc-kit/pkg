@@ -10,7 +10,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -19,6 +18,7 @@ import (
 	rbacv3 "github.com/envoyproxy/go-control-plane/envoy/config/rbac/v3"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-kit/pkg/admin"
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
@@ -94,6 +94,7 @@ type LocalConfig struct {
 	logger    *logrus.Entry
 	srvdis    sd.Registry
 	rpcConfig *rpc.Config
+	rpcServer *rpc.Server
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
@@ -313,6 +314,21 @@ func (c *LocalConfig) Register(ctx context.Context,
 		return nil, err
 	}
 
+	// TODO; 植入默认 admin api 服务
+	// 仅当配置了 "database" 且开启了 "frontend.enable" 且 "frontend.interface.admin.enabled" 则启用内置 "admin api" 服务
+	client, err := c.GetAdminDatabaseLion()
+	if err == nil && c.Frontend.hasEnableAdmin() {
+		adminIns := admin.New(
+			admin.WithLogger(c.logger),
+			admin.WithLionClient(client),
+			admin.WithOIDCProvider(c.Security.Authentication.OIDCProvider.Issuer,
+				c.Security.Authentication.OIDCProvider.Config.ClientID,
+				c.Security.Authentication.OIDCProvider.Config.ClientSecret),
+		)
+		adminv1.RegisterKnownAdminServer(c.rpcServer.Server(), adminIns)
+	}
+	// TODO; 植入默认 admin api 服务
+
 	return c.registerGateway(ctx, gw, opts...)
 }
 
@@ -412,40 +428,6 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 			} else {
 				handle = c.Security.addHTTPHandler(handle)
 			}
-
-			// TODO; 如果是 "admin" 组件，则加入 "/admin/builtin/api" 后台集成接口
-			if v == "admin" && c.Security.Enable && c.Security.Authentication != nil && c.Security.Authentication.OIDCProvider != nil {
-				apiPrefix := fmt.Sprintf("%v/builtin/api/", url)
-				// 格式化清理路径，确保以 "/" 结尾
-				apiPrefix = path.Clean(apiPrefix)
-				apiPrefix = fmt.Sprintf("%v/", apiPrefix)
-
-				client, err := c.GetAdminDatabaseLion()
-				if err != nil {
-					return err
-				}
-
-				adminIns := admin.New(
-					admin.WithLogger(c.logger),
-					admin.WithPrefix(apiPrefix),
-					admin.WithLionClient(client),
-					admin.WithOIDCProvider(c.Security.Authentication.OIDCProvider.Issuer,
-						c.Security.Authentication.OIDCProvider.Config.ClientID,
-						c.Security.Authentication.OIDCProvider.Config.ClientSecret),
-				)
-
-				admHandle := adminIns.Handle()
-
-				if tracing {
-					admHandle = c.HTTPHandler(admHandle)
-				} else {
-					admHandle = c.Security.addHTTPHandler(admHandle)
-				}
-
-				mux.Handle(apiPrefix, admHandle)
-			}
-
-			// 必须在添加 "/admin/api" 后台集成接口后添加
 			mux.Handle(url, handle)
 		} else if err != nil {
 			return err
