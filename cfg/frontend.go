@@ -211,3 +211,15 @@ func (f *FrontendConfig) getHandler(assets fs.FS, kind string) (http.Handler, st
 
 	return handle, handleURL, true, nil
 }
+
+func (f *FrontendConfig) hasEnableAdmin() bool {
+	if f.Enable == nil || !*f.Enable {
+		return false
+	}
+
+	if f.Interface.Admin == nil || !*f.Interface.Admin.Enabled {
+		return false
+	}
+
+	return true
+}
