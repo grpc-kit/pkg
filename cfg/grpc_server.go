@@ -19,6 +19,7 @@ import (
 	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
@@ -41,7 +42,7 @@ func (c *LocalConfig) registerGateway(ctx context.Context,
 	gw func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error,
 	opts ...runtime.ServeMuxOption) (*http.ServeMux, error) {
 
-	hmux, rmux := c.getHTTPServeMux(opts...)
+	hmux, muxOpts := c.getHTTPServeMux(opts...)
 
 	var forwardGWAddr string
 	grpcListenAddr, grpcListenPort, err := c.Services.getGRPCListenHostPort()
@@ -63,16 +64,35 @@ func (c *LocalConfig) registerGateway(ctx context.Context,
 	}
 	defaultOpts = append(defaultOpts, grpc.WithTransportCredentials(creds))
 
+	// TODO;
+	apiMux := runtime.NewServeMux(muxOpts...)
+	apiHandler := http.Handler(apiMux)
+	apiHandler = c.Observables.addHTTPHandler(apiHandler)
+	hmux.Handle("/api/", apiHandler)
+
 	err = gw(ctx,
-		rmux,
+		apiMux,
 		fmt.Sprintf("%v:%v", forwardGWAddr, grpcListenPort),
 		c.GetClientDialOption(defaultOpts...))
+
+	if c.Frontend.hasEnableAdmin() {
+		adminMux := runtime.NewServeMux(muxOpts...)
+		adminHandler := http.Handler(adminMux)
+		adminHandler = c.Observables.addHTTPHandler(adminHandler)
+		hmux.Handle("/builtin/admin/api/", adminHandler)
+
+		err = adminv1.RegisterKnownAdminHandlerFromEndpoint(ctx,
+			adminMux,
+			fmt.Sprintf("%v:%v", forwardGWAddr, grpcListenPort),
+			c.GetClientDialOption(defaultOpts...))
+	}
+	// TODO;
 
 	return hmux, err
 }
 
 // getHTTPServeMux 获取通用的HTTP路由规则
-func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*http.ServeMux, *runtime.ServeMux) {
+func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*http.ServeMux, []runtime.ServeMuxOption) {
 	// ServeMuxOption如果存在同样的设置选项，则以最后设置为准（见runtime.NewServeMux）
 	defaultOpts := make([]runtime.ServeMuxOption, 0)
 
@@ -312,9 +332,6 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	defaultOpts = append(defaultOpts, runtime.WithForwardResponseOption(forwardResponseOption))
 	defaultOpts = append(defaultOpts, runtime.WithErrorHandler(optionWithProtoErrorHandler))
 	defaultOpts = append(defaultOpts, customOpts...)
-	rmux := runtime.NewServeMux(defaultOpts...)
-
-	// TODO; 自定义 prometheus 指标
 
 	hmux := http.NewServeMux()
 	c.Observables.prometheusExporterHTTP(hmux)
@@ -329,14 +346,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		hmux.Handle("/debug/pprof/trace", c.Security.addHTTPHandlerFunc(pprof.Trace))
 	}
 
-	handler := http.Handler(rmux)
-	handler = c.Observables.addHTTPHandler(handler)
-
-	// TODO；后续如需集成前端，可考虑添加 "/api" 前缀，把 ”/“ 存放静态 HTML
-	// hmux.Handle("/", handler)
-	hmux.Handle("/api/", handler)
-
-	return hmux, rmux
+	return hmux, defaultOpts
 }
 
 // GetUnaryInterceptor 用于获取gRPC的一元拦截器
