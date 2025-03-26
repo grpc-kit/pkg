@@ -10,8 +10,6 @@ type config struct {
 	logger *logrus.Entry
 	db     *lion.Client
 
-	prefix string // 接口前缀
-
 	// oidc 认证域名
 	provider string
 	// oidc 客户端ID
@@ -35,12 +33,6 @@ func WithLogger(logger *logrus.Entry) Options {
 func WithLionClient(client *lion.Client) Options {
 	return func(c *config) {
 		c.db = client
-	}
-}
-
-func WithPrefix(prefix string) Options {
-	return func(c *config) {
-		c.prefix = prefix
 	}
 }
 

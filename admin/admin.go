@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"path"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
@@ -31,9 +29,6 @@ func New(opts ...Options) *AdminAPI {
 	if c.logger == nil {
 		c.logger = logrus.NewEntry(logrus.New())
 	}
-	if c.prefix == "" {
-		c.prefix = "/admin/builtin/api"
-	}
 
 	return &AdminAPI{
 		config: c,
@@ -41,6 +36,7 @@ func New(opts ...Options) *AdminAPI {
 	}
 }
 
+/*
 func (a *AdminAPI) Handle() http.Handler {
 	r := mux.NewRouter()
 
@@ -58,6 +54,7 @@ func (a *AdminAPI) Handle() http.Handler {
 
 	return r
 }
+*/
 
 func (a *AdminAPI) test(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
