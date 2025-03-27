@@ -548,6 +548,15 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			}
 		}
 
+		// /grpc_kit.api.known.admin.v1.KnownAdmin/AuthLogin
+		// 确认是否为全局已知跳过认证的 rpc 方法
+		switch currentMethod {
+		case "/grpc_kit.api.known.admin.v1.KnownAdmin/AuthLogin":
+			ctx = c.Security.withUsername(ctx, UsernameAnonymous)
+			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeNone)
+			return ctx, nil
+		}
+
 		// 如果未配置任何验证方式，则拒绝所有请求
 		if c.Security.Authentication == nil {
 			return ctx, errs.Unauthenticated(ctx).Err()
