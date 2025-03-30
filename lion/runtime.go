@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/grpc-kit/pkg/lion/accounts"
+	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/groupusers"
-	"github.com/grpc-kit/pkg/lion/oauthproviders"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/userauthlocal"
@@ -44,6 +44,25 @@ func init() {
 	accountsDescCurrency := accountsFields[1].Descriptor()
 	// accounts.DefaultCurrency holds the default value on creation for the currency field.
 	accounts.DefaultCurrency = accountsDescCurrency.Default.(string)
+	authprovidersMixin := schema.AuthProviders{}.Mixin()
+	authprovidersMixinFields0 := authprovidersMixin[0].Fields()
+	_ = authprovidersMixinFields0
+	authprovidersFields := schema.AuthProviders{}.Fields()
+	_ = authprovidersFields
+	// authprovidersDescCreateTime is the schema descriptor for create_time field.
+	authprovidersDescCreateTime := authprovidersMixinFields0[0].Descriptor()
+	// authproviders.DefaultCreateTime holds the default value on creation for the create_time field.
+	authproviders.DefaultCreateTime = authprovidersDescCreateTime.Default.(func() time.Time)
+	// authprovidersDescUpdateTime is the schema descriptor for update_time field.
+	authprovidersDescUpdateTime := authprovidersMixinFields0[1].Descriptor()
+	// authproviders.DefaultUpdateTime holds the default value on creation for the update_time field.
+	authproviders.DefaultUpdateTime = authprovidersDescUpdateTime.Default.(func() time.Time)
+	// authproviders.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	authproviders.UpdateDefaultUpdateTime = authprovidersDescUpdateTime.UpdateDefault.(func() time.Time)
+	// authprovidersDescClientID is the schema descriptor for client_id field.
+	authprovidersDescClientID := authprovidersFields[1].Descriptor()
+	// authproviders.DefaultClientID holds the default value on creation for the client_id field.
+	authproviders.DefaultClientID = authprovidersDescClientID.Default.(string)
 	demoMixin := schema.Demo{}.Mixin()
 	demoMixinFields0 := demoMixin[0].Fields()
 	_ = demoMixinFields0
@@ -123,25 +142,6 @@ func init() {
 	groupsDescDescription := groupsFields[1].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
-	oauthprovidersMixin := schema.OAuthProviders{}.Mixin()
-	oauthprovidersMixinFields0 := oauthprovidersMixin[0].Fields()
-	_ = oauthprovidersMixinFields0
-	oauthprovidersFields := schema.OAuthProviders{}.Fields()
-	_ = oauthprovidersFields
-	// oauthprovidersDescCreateTime is the schema descriptor for create_time field.
-	oauthprovidersDescCreateTime := oauthprovidersMixinFields0[0].Descriptor()
-	// oauthproviders.DefaultCreateTime holds the default value on creation for the create_time field.
-	oauthproviders.DefaultCreateTime = oauthprovidersDescCreateTime.Default.(func() time.Time)
-	// oauthprovidersDescUpdateTime is the schema descriptor for update_time field.
-	oauthprovidersDescUpdateTime := oauthprovidersMixinFields0[1].Descriptor()
-	// oauthproviders.DefaultUpdateTime holds the default value on creation for the update_time field.
-	oauthproviders.DefaultUpdateTime = oauthprovidersDescUpdateTime.Default.(func() time.Time)
-	// oauthproviders.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
-	oauthproviders.UpdateDefaultUpdateTime = oauthprovidersDescUpdateTime.UpdateDefault.(func() time.Time)
-	// oauthprovidersDescClientID is the schema descriptor for client_id field.
-	oauthprovidersDescClientID := oauthprovidersFields[1].Descriptor()
-	// oauthproviders.DefaultClientID holds the default value on creation for the client_id field.
-	oauthproviders.DefaultClientID = oauthprovidersDescClientID.Default.(string)
 	userattributesMixin := schema.UserAttributes{}.Mixin()
 	userattributesMixinFields0 := userattributesMixin[0].Fields()
 	_ = userattributesMixinFields0

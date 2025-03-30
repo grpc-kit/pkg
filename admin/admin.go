@@ -46,10 +46,11 @@ func (a *AdminAPI) Handle() http.Handler {
 	r.HandleFunc(path.Join(prefix, "/v1/test"), a.test).Methods("POST")
 	r.HandleFunc(path.Join(prefix, "/v1/oidc/callback"), a.oidcCallback).Methods("GET")
 
-	// /admin/builtin/api/v1/auth/login
-	// /admin/builtin/api/v1/auth/logout
-	// /admin/builtin/api/v1/auth/oidc/callback
-	// /admin/builtin/api/v1/auth/oauth2/callback
+	// /builtin/admin/api/v1/auth/login
+	// /builtin/admin/api/v1/auth/logout
+	// /builtin/admin/api/v1/auth/callback/oidc
+	// /builtin/admin/api/v1/auth/callback/wechat
+	// /builtin/admin/api/v1/auth/callback/google
 	r.HandleFunc(path.Join(prefix, "/v1/auth/local/login"), a.authLogin).Methods("POST")
 
 	return r

@@ -23,6 +23,26 @@ var (
 		Columns:    LionAccountsColumns,
 		PrimaryKey: []*schema.Column{LionAccountsColumns[0]},
 	}
+	// LionAuthProvidersColumns holds the columns for the "lion_auth_providers" table.
+	LionAuthProvidersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "name", Type: field.TypeEnum, Enums: []string{"oidc", "ldap", "wechat", "twitter"}},
+		{Name: "client_id", Type: field.TypeString, Default: ""},
+		{Name: "client_secret_encrypted", Type: field.TypeString},
+		{Name: "auth_url", Type: field.TypeString},
+		{Name: "token_url", Type: field.TypeString},
+		{Name: "user_info_url", Type: field.TypeString},
+		{Name: "scopes", Type: field.TypeJSON},
+		{Name: "redirect_url", Type: field.TypeString},
+	}
+	// LionAuthProvidersTable holds the schema information for the "lion_auth_providers" table.
+	LionAuthProvidersTable = &schema.Table{
+		Name:       "lion_auth_providers",
+		Columns:    LionAuthProvidersColumns,
+		PrimaryKey: []*schema.Column{LionAuthProvidersColumns[0]},
+	}
 	// LionDemoColumns holds the columns for the "lion_demo" table.
 	LionDemoColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -70,26 +90,6 @@ var (
 		Name:       "lion_groups",
 		Columns:    LionGroupsColumns,
 		PrimaryKey: []*schema.Column{LionGroupsColumns[0]},
-	}
-	// LionOauthProvidersColumns holds the columns for the "lion_oauth_providers" table.
-	LionOauthProvidersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeEnum, Enums: []string{"general_oidc", "wechat", "twitter"}},
-		{Name: "client_id", Type: field.TypeString, Default: ""},
-		{Name: "client_secret_encrypted", Type: field.TypeString},
-		{Name: "auth_url", Type: field.TypeString},
-		{Name: "token_url", Type: field.TypeString},
-		{Name: "user_info_url", Type: field.TypeString},
-		{Name: "scopes", Type: field.TypeJSON},
-		{Name: "redirect_url", Type: field.TypeString},
-	}
-	// LionOauthProvidersTable holds the schema information for the "lion_oauth_providers" table.
-	LionOauthProvidersTable = &schema.Table{
-		Name:       "lion_oauth_providers",
-		Columns:    LionOauthProvidersColumns,
-		PrimaryKey: []*schema.Column{LionOauthProvidersColumns[0]},
 	}
 	// LionUserAttributesColumns holds the columns for the "lion_user_attributes" table.
 	LionUserAttributesColumns = []*schema.Column{
@@ -187,10 +187,10 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		LionAccountsTable,
+		LionAuthProvidersTable,
 		LionDemoTable,
 		LionGroupUsersTable,
 		LionGroupsTable,
-		LionOauthProvidersTable,
 		LionUserAttributesTable,
 		LionUserAuthLocalTable,
 		LionUserAuthSocialTable,
@@ -202,6 +202,9 @@ func init() {
 	LionAccountsTable.Annotation = &entsql.Annotation{
 		Table: "lion_accounts",
 	}
+	LionAuthProvidersTable.Annotation = &entsql.Annotation{
+		Table: "lion_auth_providers",
+	}
 	LionDemoTable.Annotation = &entsql.Annotation{
 		Table: "lion_demo",
 	}
@@ -210,9 +213,6 @@ func init() {
 	}
 	LionGroupsTable.Annotation = &entsql.Annotation{
 		Table: "lion_groups",
-	}
-	LionOauthProvidersTable.Annotation = &entsql.Annotation{
-		Table: "lion_oauth_providers",
 	}
 	LionUserAttributesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_attributes",

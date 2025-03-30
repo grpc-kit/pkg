@@ -10,11 +10,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/oauthproviders"
+	"github.com/grpc-kit/pkg/lion/authproviders"
 )
 
-// OAuthProviders is the model entity for the OAuthProviders schema.
-type OAuthProviders struct {
+// AuthProviders is the model entity for the AuthProviders schema.
+type AuthProviders struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -22,8 +22,8 @@ type OAuthProviders struct {
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
-	// 支持的 oauth 认证提供方
-	Name oauthproviders.Name `json:"name,omitempty"`
+	// 支持的认证提供方
+	Name authproviders.Name `json:"name,omitempty"`
 	// ClientID holds the value of the "client_id" field.
 	ClientID string `json:"client_id,omitempty"`
 	// ClientSecretEncrypted holds the value of the "client_secret_encrypted" field.
@@ -42,17 +42,17 @@ type OAuthProviders struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*OAuthProviders) scanValues(columns []string) ([]any, error) {
+func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case oauthproviders.FieldScopes:
+		case authproviders.FieldScopes:
 			values[i] = new([]byte)
-		case oauthproviders.FieldID:
+		case authproviders.FieldID:
 			values[i] = new(sql.NullInt64)
-		case oauthproviders.FieldName, oauthproviders.FieldClientID, oauthproviders.FieldClientSecretEncrypted, oauthproviders.FieldAuthURL, oauthproviders.FieldTokenURL, oauthproviders.FieldUserInfoURL, oauthproviders.FieldRedirectURL:
+		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldClientSecretEncrypted, authproviders.FieldAuthURL, authproviders.FieldTokenURL, authproviders.FieldUserInfoURL, authproviders.FieldRedirectURL:
 			values[i] = new(sql.NullString)
-		case oauthproviders.FieldCreateTime, oauthproviders.FieldUpdateTime:
+		case authproviders.FieldCreateTime, authproviders.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -62,148 +62,148 @@ func (*OAuthProviders) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the OAuthProviders fields.
-func (op *OAuthProviders) assignValues(columns []string, values []any) error {
+// to the AuthProviders fields.
+func (ap *AuthProviders) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case oauthproviders.FieldID:
+		case authproviders.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			op.ID = int(value.Int64)
-		case oauthproviders.FieldCreateTime:
+			ap.ID = int(value.Int64)
+		case authproviders.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				op.CreateTime = value.Time
+				ap.CreateTime = value.Time
 			}
-		case oauthproviders.FieldUpdateTime:
+		case authproviders.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				op.UpdateTime = value.Time
+				ap.UpdateTime = value.Time
 			}
-		case oauthproviders.FieldName:
+		case authproviders.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				op.Name = oauthproviders.Name(value.String)
+				ap.Name = authproviders.Name(value.String)
 			}
-		case oauthproviders.FieldClientID:
+		case authproviders.FieldClientID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field client_id", values[i])
 			} else if value.Valid {
-				op.ClientID = value.String
+				ap.ClientID = value.String
 			}
-		case oauthproviders.FieldClientSecretEncrypted:
+		case authproviders.FieldClientSecretEncrypted:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field client_secret_encrypted", values[i])
 			} else if value.Valid {
-				op.ClientSecretEncrypted = value.String
+				ap.ClientSecretEncrypted = value.String
 			}
-		case oauthproviders.FieldAuthURL:
+		case authproviders.FieldAuthURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field auth_url", values[i])
 			} else if value.Valid {
-				op.AuthURL = value.String
+				ap.AuthURL = value.String
 			}
-		case oauthproviders.FieldTokenURL:
+		case authproviders.FieldTokenURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field token_url", values[i])
 			} else if value.Valid {
-				op.TokenURL = value.String
+				ap.TokenURL = value.String
 			}
-		case oauthproviders.FieldUserInfoURL:
+		case authproviders.FieldUserInfoURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_info_url", values[i])
 			} else if value.Valid {
-				op.UserInfoURL = value.String
+				ap.UserInfoURL = value.String
 			}
-		case oauthproviders.FieldScopes:
+		case authproviders.FieldScopes:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field scopes", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &op.Scopes); err != nil {
+				if err := json.Unmarshal(*value, &ap.Scopes); err != nil {
 					return fmt.Errorf("unmarshal field scopes: %w", err)
 				}
 			}
-		case oauthproviders.FieldRedirectURL:
+		case authproviders.FieldRedirectURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field redirect_url", values[i])
 			} else if value.Valid {
-				op.RedirectURL = value.String
+				ap.RedirectURL = value.String
 			}
 		default:
-			op.selectValues.Set(columns[i], values[i])
+			ap.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the OAuthProviders.
+// Value returns the ent.Value that was dynamically selected and assigned to the AuthProviders.
 // This includes values selected through modifiers, order, etc.
-func (op *OAuthProviders) Value(name string) (ent.Value, error) {
-	return op.selectValues.Get(name)
+func (ap *AuthProviders) Value(name string) (ent.Value, error) {
+	return ap.selectValues.Get(name)
 }
 
-// Update returns a builder for updating this OAuthProviders.
-// Note that you need to call OAuthProviders.Unwrap() before calling this method if this OAuthProviders
+// Update returns a builder for updating this AuthProviders.
+// Note that you need to call AuthProviders.Unwrap() before calling this method if this AuthProviders
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (op *OAuthProviders) Update() *OAuthProvidersUpdateOne {
-	return NewOAuthProvidersClient(op.config).UpdateOne(op)
+func (ap *AuthProviders) Update() *AuthProvidersUpdateOne {
+	return NewAuthProvidersClient(ap.config).UpdateOne(ap)
 }
 
-// Unwrap unwraps the OAuthProviders entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the AuthProviders entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (op *OAuthProviders) Unwrap() *OAuthProviders {
-	_tx, ok := op.config.driver.(*txDriver)
+func (ap *AuthProviders) Unwrap() *AuthProviders {
+	_tx, ok := ap.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: OAuthProviders is not a transactional entity")
+		panic("lion: AuthProviders is not a transactional entity")
 	}
-	op.config.driver = _tx.drv
-	return op
+	ap.config.driver = _tx.drv
+	return ap
 }
 
 // String implements the fmt.Stringer.
-func (op *OAuthProviders) String() string {
+func (ap *AuthProviders) String() string {
 	var builder strings.Builder
-	builder.WriteString("OAuthProviders(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", op.ID))
+	builder.WriteString("AuthProviders(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", ap.ID))
 	builder.WriteString("create_time=")
-	builder.WriteString(op.CreateTime.Format(time.ANSIC))
+	builder.WriteString(ap.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
-	builder.WriteString(op.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(ap.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(fmt.Sprintf("%v", op.Name))
+	builder.WriteString(fmt.Sprintf("%v", ap.Name))
 	builder.WriteString(", ")
 	builder.WriteString("client_id=")
-	builder.WriteString(op.ClientID)
+	builder.WriteString(ap.ClientID)
 	builder.WriteString(", ")
 	builder.WriteString("client_secret_encrypted=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("auth_url=")
-	builder.WriteString(op.AuthURL)
+	builder.WriteString(ap.AuthURL)
 	builder.WriteString(", ")
 	builder.WriteString("token_url=")
-	builder.WriteString(op.TokenURL)
+	builder.WriteString(ap.TokenURL)
 	builder.WriteString(", ")
 	builder.WriteString("user_info_url=")
-	builder.WriteString(op.UserInfoURL)
+	builder.WriteString(ap.UserInfoURL)
 	builder.WriteString(", ")
 	builder.WriteString("scopes=")
-	builder.WriteString(fmt.Sprintf("%v", op.Scopes))
+	builder.WriteString(fmt.Sprintf("%v", ap.Scopes))
 	builder.WriteString(", ")
 	builder.WriteString("redirect_url=")
-	builder.WriteString(op.RedirectURL)
+	builder.WriteString(ap.RedirectURL)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// OAuthProvidersSlice is a parsable slice of OAuthProviders.
-type OAuthProvidersSlice []*OAuthProviders
+// AuthProvidersSlice is a parsable slice of AuthProviders.
+type AuthProvidersSlice []*AuthProviders

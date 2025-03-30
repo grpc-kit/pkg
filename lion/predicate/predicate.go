@@ -9,6 +9,9 @@ import (
 // Accounts is the predicate function for accounts builders.
 type Accounts func(*sql.Selector)
 
+// AuthProviders is the predicate function for authproviders builders.
+type AuthProviders func(*sql.Selector)
+
 // Demo is the predicate function for demo builders.
 type Demo func(*sql.Selector)
 
@@ -17,9 +20,6 @@ type GroupUsers func(*sql.Selector)
 
 // Groups is the predicate function for groups builders.
 type Groups func(*sql.Selector)
-
-// OAuthProviders is the predicate function for oauthproviders builders.
-type OAuthProviders func(*sql.Selector)
 
 // UserAttributes is the predicate function for userattributes builders.
 type UserAttributes func(*sql.Selector)

@@ -8,17 +8,17 @@ import (
 	"entgo.io/ent/schema/mixin"
 )
 
-// OAuthProviders holds the schema definition for the Demo entity.
-type OAuthProviders struct {
+// AuthProviders holds the schema definition for the Demo entity.
+type AuthProviders struct {
 	ent.Schema
 }
 
 // Fields of the table.
-func (OAuthProviders) Fields() []ent.Field {
+func (AuthProviders) Fields() []ent.Field {
 	return []ent.Field{
 		field.Enum("name").
-			Values("general_oidc", "wechat", "twitter").
-			Comment("支持的 oauth 认证提供方"),
+			Values("ldap", "oidc", "wechat", "github", "google").
+			Comment("支持的认证提供方"),
 		field.String("client_id").
 			Default(""),
 		field.String("client_secret_encrypted").
@@ -32,20 +32,20 @@ func (OAuthProviders) Fields() []ent.Field {
 }
 
 // Edges of the table.
-func (OAuthProviders) Edges() []ent.Edge {
+func (AuthProviders) Edges() []ent.Edge {
 	return nil
 }
 
 // Mixin of the table.
-func (OAuthProviders) Mixin() []ent.Mixin {
+func (AuthProviders) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.Time{},
 	}
 }
 
 // Annotations 自定义表名
-func (OAuthProviders) Annotations() []schema.Annotation {
+func (AuthProviders) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_oauth_providers"},
+		entsql.Annotation{Table: "lion_auth_providers"},
 	}
 }

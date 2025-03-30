@@ -13,10 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/accounts"
+	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/groupusers"
-	"github.com/grpc-kit/pkg/lion/oauthproviders"
 	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/userauthlocal"
 	"github.com/grpc-kit/pkg/lion/userauthsocial"
@@ -82,10 +82,10 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			accounts.Table:       accounts.ValidColumn,
+			authproviders.Table:  authproviders.ValidColumn,
 			demo.Table:           demo.ValidColumn,
 			groupusers.Table:     groupusers.ValidColumn,
 			groups.Table:         groups.ValidColumn,
-			oauthproviders.Table: oauthproviders.ValidColumn,
 			userattributes.Table: userattributes.ValidColumn,
 			userauthlocal.Table:  userauthlocal.ValidColumn,
 			userauthsocial.Table: userauthsocial.ValidColumn,
