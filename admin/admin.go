@@ -11,14 +11,14 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// AdminAPI xx
-type AdminAPI struct {
+// KnownAdminAPI xx
+type KnownAdminAPI struct {
 	config *config
 	logger *logrus.Entry
 }
 
 // New xx
-func New(opts ...Options) *AdminAPI {
+func New(opts ...Options) *KnownAdminAPI {
 	c := &config{}
 
 	for _, opt := range opts {
@@ -30,7 +30,7 @@ func New(opts ...Options) *AdminAPI {
 		c.logger = logrus.NewEntry(logrus.New())
 	}
 
-	return &AdminAPI{
+	return &KnownAdminAPI{
 		config: c,
 		logger: c.logger,
 	}
@@ -57,7 +57,7 @@ func (a *AdminAPI) Handle() http.Handler {
 }
 */
 
-func (a *AdminAPI) test(w http.ResponseWriter, r *http.Request) {
+func (a *KnownAdminAPI) test(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
@@ -65,7 +65,7 @@ func (a *AdminAPI) test(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{ "code": 0, "data": { "token": "xxx" }, "message": "登录成功" }`))
 }
 
-func (a *AdminAPI) oidcCallback(w http.ResponseWriter, r *http.Request) {
+func (a *KnownAdminAPI) oidcCallback(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	provider, err := oidc.NewProvider(ctx, a.config.provider)

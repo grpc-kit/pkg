@@ -11,7 +11,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 )
 
-func (a *AdminAPI) authLogin(w http.ResponseWriter, r *http.Request) {
+func (a *KnownAdminAPI) authLogin(w http.ResponseWriter, r *http.Request) {
 	authreq := adminv1.AuthLoginRequest{}
 
 	xxx, err := io.ReadAll(r.Body)
