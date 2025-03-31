@@ -12,7 +12,7 @@ import (
 )
 
 func (a *KnownAdminAPI) authLogin(w http.ResponseWriter, r *http.Request) {
-	authreq := adminv1.AuthLoginRequest{}
+	authreq := adminv1.CreateAuthLoginRequest{}
 
 	xxx, err := io.ReadAll(r.Body)
 	if err != nil {

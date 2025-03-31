@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/grpc-kit/pkg/lion"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
@@ -56,6 +57,10 @@ func (a *AdminAPI) Handle() http.Handler {
 	return r
 }
 */
+
+func (a *KnownAdminAPI) GetLionClient() *lion.Client {
+	return a.config.db
+}
 
 func (a *KnownAdminAPI) test(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")

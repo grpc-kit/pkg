@@ -23,7 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KnownAdminClient interface {
 	GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*GetConfigResponse, error)
-	AuthLogin(ctx context.Context, in *AuthLoginRequest, opts ...grpc.CallOption) (*AuthLoginResponse, error)
+	CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*CreateAuthLoginResponse, error)
+	GetAuthProviders(ctx context.Context, in *GetAuthProvidersRequest, opts ...grpc.CallOption) (*GetAuthProvidersResponse, error)
+	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 }
 
 type knownAdminClient struct {
@@ -43,9 +45,27 @@ func (c *knownAdminClient) GetConfig(ctx context.Context, in *GetConfigRequest, 
 	return out, nil
 }
 
-func (c *knownAdminClient) AuthLogin(ctx context.Context, in *AuthLoginRequest, opts ...grpc.CallOption) (*AuthLoginResponse, error) {
-	out := new(AuthLoginResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/AuthLogin", in, out, opts...)
+func (c *knownAdminClient) CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*CreateAuthLoginResponse, error) {
+	out := new(CreateAuthLoginResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) GetAuthProviders(ctx context.Context, in *GetAuthProvidersRequest, opts ...grpc.CallOption) (*GetAuthProvidersResponse, error) {
+	out := new(GetAuthProvidersResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthProviders", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error) {
+	out := new(UpsertAuthProvidersResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpsertAuthProviders", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +77,9 @@ func (c *knownAdminClient) AuthLogin(ctx context.Context, in *AuthLoginRequest, 
 // for forward compatibility
 type KnownAdminServer interface {
 	GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error)
-	AuthLogin(context.Context, *AuthLoginRequest) (*AuthLoginResponse, error)
+	CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*CreateAuthLoginResponse, error)
+	GetAuthProviders(context.Context, *GetAuthProvidersRequest) (*GetAuthProvidersResponse, error)
+	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 }
 
 // UnimplementedKnownAdminServer should be embedded to have forward compatible implementations.
@@ -67,8 +89,14 @@ type UnimplementedKnownAdminServer struct {
 func (UnimplementedKnownAdminServer) GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
 }
-func (UnimplementedKnownAdminServer) AuthLogin(context.Context, *AuthLoginRequest) (*AuthLoginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AuthLogin not implemented")
+func (UnimplementedKnownAdminServer) CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*CreateAuthLoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthLogin not implemented")
+}
+func (UnimplementedKnownAdminServer) GetAuthProviders(context.Context, *GetAuthProvidersRequest) (*GetAuthProvidersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAuthProviders not implemented")
+}
+func (UnimplementedKnownAdminServer) UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpsertAuthProviders not implemented")
 }
 
 // UnsafeKnownAdminServer may be embedded to opt out of forward compatibility for this service.
@@ -100,20 +128,56 @@ func _KnownAdmin_GetConfig_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_AuthLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AuthLoginRequest)
+func _KnownAdmin_CreateAuthLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAuthLoginRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).AuthLogin(ctx, in)
+		return srv.(KnownAdminServer).CreateAuthLogin(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/AuthLogin",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).AuthLogin(ctx, req.(*AuthLoginRequest))
+		return srv.(KnownAdminServer).CreateAuthLogin(ctx, req.(*CreateAuthLoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_GetAuthProviders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAuthProvidersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetAuthProviders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthProviders",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetAuthProviders(ctx, req.(*GetAuthProvidersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpsertAuthProviders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertAuthProvidersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpsertAuthProviders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpsertAuthProviders",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpsertAuthProviders(ctx, req.(*UpsertAuthProvidersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -130,8 +194,16 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_GetConfig_Handler,
 		},
 		{
-			MethodName: "AuthLogin",
-			Handler:    _KnownAdmin_AuthLogin_Handler,
+			MethodName: "CreateAuthLogin",
+			Handler:    _KnownAdmin_CreateAuthLogin_Handler,
+		},
+		{
+			MethodName: "GetAuthProviders",
+			Handler:    _KnownAdmin_GetAuthProviders_Handler,
+		},
+		{
+			MethodName: "UpsertAuthProviders",
+			Handler:    _KnownAdmin_UpsertAuthProviders_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

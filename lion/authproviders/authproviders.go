@@ -79,10 +79,12 @@ type Name string
 
 // Name values.
 const (
-	NameOidc    Name = "oidc"
-	NameLdap    Name = "ldap"
-	NameWechat  Name = "wechat"
-	NameTwitter Name = "twitter"
+	NameLDAP   Name = "LDAP"
+	NameOIDC   Name = "OIDC"
+	NameOAUTH2 Name = "OAUTH2"
+	NameGITHUB Name = "GITHUB"
+	NameWECHAT Name = "WECHAT"
+	NameGOOGLE Name = "GOOGLE"
 )
 
 func (n Name) String() string {
@@ -92,7 +94,7 @@ func (n Name) String() string {
 // NameValidator is a validator for the "name" field enum values. It is called by the builders before save.
 func NameValidator(n Name) error {
 	switch n {
-	case NameOidc, NameLdap, NameWechat, NameTwitter:
+	case NameLDAP, NameOIDC, NameOAUTH2, NameGITHUB, NameWECHAT, NameGOOGLE:
 		return nil
 	default:
 		return fmt.Errorf("authproviders: invalid enum value for name field: %q", n)

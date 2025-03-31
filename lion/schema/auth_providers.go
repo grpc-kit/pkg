@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
 )
 
@@ -17,7 +18,7 @@ type AuthProviders struct {
 func (AuthProviders) Fields() []ent.Field {
 	return []ent.Field{
 		field.Enum("name").
-			Values("ldap", "oidc", "wechat", "github", "google").
+			Values("LDAP", "OIDC", "OAUTH2", "GITHUB", "WECHAT", "GOOGLE").
 			Comment("支持的认证提供方"),
 		field.String("client_id").
 			Default(""),
@@ -40,6 +41,13 @@ func (AuthProviders) Edges() []ent.Edge {
 func (AuthProviders) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.Time{},
+	}
+}
+
+// Indexes of the table.
+func (AuthProviders) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("name").Unique(),
 	}
 }
 

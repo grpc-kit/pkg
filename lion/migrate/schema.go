@@ -28,7 +28,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeEnum, Enums: []string{"oidc", "ldap", "wechat", "twitter"}},
+		{Name: "name", Type: field.TypeEnum, Enums: []string{"LDAP", "OIDC", "OAUTH2", "GITHUB", "WECHAT", "GOOGLE"}},
 		{Name: "client_id", Type: field.TypeString, Default: ""},
 		{Name: "client_secret_encrypted", Type: field.TypeString},
 		{Name: "auth_url", Type: field.TypeString},
@@ -42,6 +42,13 @@ var (
 		Name:       "lion_auth_providers",
 		Columns:    LionAuthProvidersColumns,
 		PrimaryKey: []*schema.Column{LionAuthProvidersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "authproviders_name",
+				Unique:  true,
+				Columns: []*schema.Column{LionAuthProvidersColumns[3]},
+			},
+		},
 	}
 	// LionDemoColumns holds the columns for the "lion_demo" table.
 	LionDemoColumns = []*schema.Column{
