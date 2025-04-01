@@ -44,6 +44,15 @@ func (AuthProviders) Mixin() []ent.Mixin {
 	}
 }
 
+// 考虑还是在应用层选择加密、解密
+/*
+func (AuthProviders) Hooks() []ent.Hook {
+	return []ent.Hook{
+		crypto.EncryptedMixin(),
+	}
+}
+*/
+
 // Indexes of the table.
 func (AuthProviders) Indexes() []ent.Index {
 	return []ent.Index{
