@@ -68,6 +68,20 @@ func (apc *AuthProvidersCreate) SetNillableClientID(s *string) *AuthProvidersCre
 	return apc
 }
 
+// SetEnabled sets the "enabled" field.
+func (apc *AuthProvidersCreate) SetEnabled(b bool) *AuthProvidersCreate {
+	apc.mutation.SetEnabled(b)
+	return apc
+}
+
+// SetNillableEnabled sets the "enabled" field if the given value is not nil.
+func (apc *AuthProvidersCreate) SetNillableEnabled(b *bool) *AuthProvidersCreate {
+	if b != nil {
+		apc.SetEnabled(*b)
+	}
+	return apc
+}
+
 // SetClientSecretEncrypted sets the "client_secret_encrypted" field.
 func (apc *AuthProvidersCreate) SetClientSecretEncrypted(s string) *AuthProvidersCreate {
 	apc.mutation.SetClientSecretEncrypted(s)
@@ -93,7 +107,7 @@ func (apc *AuthProvidersCreate) SetUserInfoURL(s string) *AuthProvidersCreate {
 }
 
 // SetScopes sets the "scopes" field.
-func (apc *AuthProvidersCreate) SetScopes(s []string) *AuthProvidersCreate {
+func (apc *AuthProvidersCreate) SetScopes(s string) *AuthProvidersCreate {
 	apc.mutation.SetScopes(s)
 	return apc
 }
@@ -151,6 +165,10 @@ func (apc *AuthProvidersCreate) defaults() {
 		v := authproviders.DefaultClientID
 		apc.mutation.SetClientID(v)
 	}
+	if _, ok := apc.mutation.Enabled(); !ok {
+		v := authproviders.DefaultEnabled
+		apc.mutation.SetEnabled(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -171,6 +189,9 @@ func (apc *AuthProvidersCreate) check() error {
 	}
 	if _, ok := apc.mutation.ClientID(); !ok {
 		return &ValidationError{Name: "client_id", err: errors.New(`lion: missing required field "AuthProviders.client_id"`)}
+	}
+	if _, ok := apc.mutation.Enabled(); !ok {
+		return &ValidationError{Name: "enabled", err: errors.New(`lion: missing required field "AuthProviders.enabled"`)}
 	}
 	if _, ok := apc.mutation.ClientSecretEncrypted(); !ok {
 		return &ValidationError{Name: "client_secret_encrypted", err: errors.New(`lion: missing required field "AuthProviders.client_secret_encrypted"`)}
@@ -232,6 +253,10 @@ func (apc *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSp
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
 		_node.ClientID = value
 	}
+	if value, ok := apc.mutation.Enabled(); ok {
+		_spec.SetField(authproviders.FieldEnabled, field.TypeBool, value)
+		_node.Enabled = value
+	}
 	if value, ok := apc.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeString, value)
 		_node.ClientSecretEncrypted = value
@@ -249,7 +274,7 @@ func (apc *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSp
 		_node.UserInfoURL = value
 	}
 	if value, ok := apc.mutation.Scopes(); ok {
-		_spec.SetField(authproviders.FieldScopes, field.TypeJSON, value)
+		_spec.SetField(authproviders.FieldScopes, field.TypeString, value)
 		_node.Scopes = value
 	}
 	if value, ok := apc.mutation.RedirectURL(); ok {

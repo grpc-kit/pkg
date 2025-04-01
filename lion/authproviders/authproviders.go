@@ -22,6 +22,8 @@ const (
 	FieldName = "name"
 	// FieldClientID holds the string denoting the client_id field in the database.
 	FieldClientID = "client_id"
+	// FieldEnabled holds the string denoting the enabled field in the database.
+	FieldEnabled = "enabled"
 	// FieldClientSecretEncrypted holds the string denoting the client_secret_encrypted field in the database.
 	FieldClientSecretEncrypted = "client_secret_encrypted"
 	// FieldAuthURL holds the string denoting the auth_url field in the database.
@@ -45,6 +47,7 @@ var Columns = []string{
 	FieldUpdateTime,
 	FieldName,
 	FieldClientID,
+	FieldEnabled,
 	FieldClientSecretEncrypted,
 	FieldAuthURL,
 	FieldTokenURL,
@@ -72,6 +75,8 @@ var (
 	UpdateDefaultUpdateTime func() time.Time
 	// DefaultClientID holds the default value on creation for the "client_id" field.
 	DefaultClientID string
+	// DefaultEnabled holds the default value on creation for the "enabled" field.
+	DefaultEnabled bool
 )
 
 // Name defines the type for the "name" enum field.
@@ -79,6 +84,7 @@ type Name string
 
 // Name values.
 const (
+	NameLOCAL  Name = "LOCAL"
 	NameLDAP   Name = "LDAP"
 	NameOIDC   Name = "OIDC"
 	NameOAUTH2 Name = "OAUTH2"
@@ -94,7 +100,7 @@ func (n Name) String() string {
 // NameValidator is a validator for the "name" field enum values. It is called by the builders before save.
 func NameValidator(n Name) error {
 	switch n {
-	case NameLDAP, NameOIDC, NameOAUTH2, NameGITHUB, NameWECHAT, NameGOOGLE:
+	case NameLOCAL, NameLDAP, NameOIDC, NameOAUTH2, NameGITHUB, NameWECHAT, NameGOOGLE:
 		return nil
 	default:
 		return fmt.Errorf("authproviders: invalid enum value for name field: %q", n)
@@ -129,6 +135,11 @@ func ByClientID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClientID, opts...).ToFunc()
 }
 
+// ByEnabled orders the results by the enabled field.
+func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
+}
+
 // ByClientSecretEncrypted orders the results by the client_secret_encrypted field.
 func ByClientSecretEncrypted(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClientSecretEncrypted, opts...).ToFunc()
@@ -147,6 +158,11 @@ func ByTokenURL(opts ...sql.OrderTermOption) OrderOption {
 // ByUserInfoURL orders the results by the user_info_url field.
 func ByUserInfoURL(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserInfoURL, opts...).ToFunc()
+}
+
+// ByScopes orders the results by the scopes field.
+func ByScopes(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScopes, opts...).ToFunc()
 }
 
 // ByRedirectURL orders the results by the redirect_url field.

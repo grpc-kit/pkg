@@ -18,16 +18,18 @@ type AuthProviders struct {
 func (AuthProviders) Fields() []ent.Field {
 	return []ent.Field{
 		field.Enum("name").
-			Values("LDAP", "OIDC", "OAUTH2", "GITHUB", "WECHAT", "GOOGLE").
+			Values("LOCAL", "LDAP", "OIDC", "OAUTH2", "GITHUB", "WECHAT", "GOOGLE").
 			Comment("支持的认证提供方"),
 		field.String("client_id").
 			Default(""),
+		field.Bool("enabled").
+			Default(false),
 		field.String("client_secret_encrypted").
 			Sensitive(),
 		field.String("auth_url"),      // https://open.weixin.qq.com/connect/qrconnect
 		field.String("token_url"),     // https://api.weixin.qq.com/sns/oauth2/access_token
 		field.String("user_info_url"), // https://api.weixin.qq.com/sns/userinfo
-		field.Strings("scopes"),       // snsapi_login
+		field.String("scopes"),        // snsapi_login
 		field.String("redirect_url"),  // https://your-domain.com/admin/auth/wechat/callback
 	}
 }

@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/predicate"
@@ -59,6 +58,20 @@ func (apu *AuthProvidersUpdate) SetClientID(s string) *AuthProvidersUpdate {
 func (apu *AuthProvidersUpdate) SetNillableClientID(s *string) *AuthProvidersUpdate {
 	if s != nil {
 		apu.SetClientID(*s)
+	}
+	return apu
+}
+
+// SetEnabled sets the "enabled" field.
+func (apu *AuthProvidersUpdate) SetEnabled(b bool) *AuthProvidersUpdate {
+	apu.mutation.SetEnabled(b)
+	return apu
+}
+
+// SetNillableEnabled sets the "enabled" field if the given value is not nil.
+func (apu *AuthProvidersUpdate) SetNillableEnabled(b *bool) *AuthProvidersUpdate {
+	if b != nil {
+		apu.SetEnabled(*b)
 	}
 	return apu
 }
@@ -120,14 +133,16 @@ func (apu *AuthProvidersUpdate) SetNillableUserInfoURL(s *string) *AuthProviders
 }
 
 // SetScopes sets the "scopes" field.
-func (apu *AuthProvidersUpdate) SetScopes(s []string) *AuthProvidersUpdate {
+func (apu *AuthProvidersUpdate) SetScopes(s string) *AuthProvidersUpdate {
 	apu.mutation.SetScopes(s)
 	return apu
 }
 
-// AppendScopes appends s to the "scopes" field.
-func (apu *AuthProvidersUpdate) AppendScopes(s []string) *AuthProvidersUpdate {
-	apu.mutation.AppendScopes(s)
+// SetNillableScopes sets the "scopes" field if the given value is not nil.
+func (apu *AuthProvidersUpdate) SetNillableScopes(s *string) *AuthProvidersUpdate {
+	if s != nil {
+		apu.SetScopes(*s)
+	}
 	return apu
 }
 
@@ -217,6 +232,9 @@ func (apu *AuthProvidersUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if value, ok := apu.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
 	}
+	if value, ok := apu.mutation.Enabled(); ok {
+		_spec.SetField(authproviders.FieldEnabled, field.TypeBool, value)
+	}
 	if value, ok := apu.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeString, value)
 	}
@@ -230,12 +248,7 @@ func (apu *AuthProvidersUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		_spec.SetField(authproviders.FieldUserInfoURL, field.TypeString, value)
 	}
 	if value, ok := apu.mutation.Scopes(); ok {
-		_spec.SetField(authproviders.FieldScopes, field.TypeJSON, value)
-	}
-	if value, ok := apu.mutation.AppendedScopes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, authproviders.FieldScopes, value)
-		})
+		_spec.SetField(authproviders.FieldScopes, field.TypeString, value)
 	}
 	if value, ok := apu.mutation.RedirectURL(); ok {
 		_spec.SetField(authproviders.FieldRedirectURL, field.TypeString, value)
@@ -290,6 +303,20 @@ func (apuo *AuthProvidersUpdateOne) SetClientID(s string) *AuthProvidersUpdateOn
 func (apuo *AuthProvidersUpdateOne) SetNillableClientID(s *string) *AuthProvidersUpdateOne {
 	if s != nil {
 		apuo.SetClientID(*s)
+	}
+	return apuo
+}
+
+// SetEnabled sets the "enabled" field.
+func (apuo *AuthProvidersUpdateOne) SetEnabled(b bool) *AuthProvidersUpdateOne {
+	apuo.mutation.SetEnabled(b)
+	return apuo
+}
+
+// SetNillableEnabled sets the "enabled" field if the given value is not nil.
+func (apuo *AuthProvidersUpdateOne) SetNillableEnabled(b *bool) *AuthProvidersUpdateOne {
+	if b != nil {
+		apuo.SetEnabled(*b)
 	}
 	return apuo
 }
@@ -351,14 +378,16 @@ func (apuo *AuthProvidersUpdateOne) SetNillableUserInfoURL(s *string) *AuthProvi
 }
 
 // SetScopes sets the "scopes" field.
-func (apuo *AuthProvidersUpdateOne) SetScopes(s []string) *AuthProvidersUpdateOne {
+func (apuo *AuthProvidersUpdateOne) SetScopes(s string) *AuthProvidersUpdateOne {
 	apuo.mutation.SetScopes(s)
 	return apuo
 }
 
-// AppendScopes appends s to the "scopes" field.
-func (apuo *AuthProvidersUpdateOne) AppendScopes(s []string) *AuthProvidersUpdateOne {
-	apuo.mutation.AppendScopes(s)
+// SetNillableScopes sets the "scopes" field if the given value is not nil.
+func (apuo *AuthProvidersUpdateOne) SetNillableScopes(s *string) *AuthProvidersUpdateOne {
+	if s != nil {
+		apuo.SetScopes(*s)
+	}
 	return apuo
 }
 
@@ -478,6 +507,9 @@ func (apuo *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthPro
 	if value, ok := apuo.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
 	}
+	if value, ok := apuo.mutation.Enabled(); ok {
+		_spec.SetField(authproviders.FieldEnabled, field.TypeBool, value)
+	}
 	if value, ok := apuo.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeString, value)
 	}
@@ -491,12 +523,7 @@ func (apuo *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthPro
 		_spec.SetField(authproviders.FieldUserInfoURL, field.TypeString, value)
 	}
 	if value, ok := apuo.mutation.Scopes(); ok {
-		_spec.SetField(authproviders.FieldScopes, field.TypeJSON, value)
-	}
-	if value, ok := apuo.mutation.AppendedScopes(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, authproviders.FieldScopes, value)
-		})
+		_spec.SetField(authproviders.FieldScopes, field.TypeString, value)
 	}
 	if value, ok := apuo.mutation.RedirectURL(); ok {
 		_spec.SetField(authproviders.FieldRedirectURL, field.TypeString, value)

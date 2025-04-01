@@ -3,7 +3,6 @@
 package lion
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -26,6 +25,8 @@ type AuthProviders struct {
 	Name authproviders.Name `json:"name,omitempty"`
 	// ClientID holds the value of the "client_id" field.
 	ClientID string `json:"client_id,omitempty"`
+	// Enabled holds the value of the "enabled" field.
+	Enabled bool `json:"enabled,omitempty"`
 	// ClientSecretEncrypted holds the value of the "client_secret_encrypted" field.
 	ClientSecretEncrypted string `json:"-"`
 	// AuthURL holds the value of the "auth_url" field.
@@ -35,7 +36,7 @@ type AuthProviders struct {
 	// UserInfoURL holds the value of the "user_info_url" field.
 	UserInfoURL string `json:"user_info_url,omitempty"`
 	// Scopes holds the value of the "scopes" field.
-	Scopes []string `json:"scopes,omitempty"`
+	Scopes string `json:"scopes,omitempty"`
 	// RedirectURL holds the value of the "redirect_url" field.
 	RedirectURL  string `json:"redirect_url,omitempty"`
 	selectValues sql.SelectValues
@@ -46,11 +47,11 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case authproviders.FieldScopes:
-			values[i] = new([]byte)
+		case authproviders.FieldEnabled:
+			values[i] = new(sql.NullBool)
 		case authproviders.FieldID:
 			values[i] = new(sql.NullInt64)
-		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldClientSecretEncrypted, authproviders.FieldAuthURL, authproviders.FieldTokenURL, authproviders.FieldUserInfoURL, authproviders.FieldRedirectURL:
+		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldClientSecretEncrypted, authproviders.FieldAuthURL, authproviders.FieldTokenURL, authproviders.FieldUserInfoURL, authproviders.FieldScopes, authproviders.FieldRedirectURL:
 			values[i] = new(sql.NullString)
 		case authproviders.FieldCreateTime, authproviders.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -99,6 +100,12 @@ func (ap *AuthProviders) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ap.ClientID = value.String
 			}
+		case authproviders.FieldEnabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field enabled", values[i])
+			} else if value.Valid {
+				ap.Enabled = value.Bool
+			}
 		case authproviders.FieldClientSecretEncrypted:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field client_secret_encrypted", values[i])
@@ -124,12 +131,10 @@ func (ap *AuthProviders) assignValues(columns []string, values []any) error {
 				ap.UserInfoURL = value.String
 			}
 		case authproviders.FieldScopes:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field scopes", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &ap.Scopes); err != nil {
-					return fmt.Errorf("unmarshal field scopes: %w", err)
-				}
+			} else if value.Valid {
+				ap.Scopes = value.String
 			}
 		case authproviders.FieldRedirectURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -185,6 +190,9 @@ func (ap *AuthProviders) String() string {
 	builder.WriteString("client_id=")
 	builder.WriteString(ap.ClientID)
 	builder.WriteString(", ")
+	builder.WriteString("enabled=")
+	builder.WriteString(fmt.Sprintf("%v", ap.Enabled))
+	builder.WriteString(", ")
 	builder.WriteString("client_secret_encrypted=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("auth_url=")
@@ -197,7 +205,7 @@ func (ap *AuthProviders) String() string {
 	builder.WriteString(ap.UserInfoURL)
 	builder.WriteString(", ")
 	builder.WriteString("scopes=")
-	builder.WriteString(fmt.Sprintf("%v", ap.Scopes))
+	builder.WriteString(ap.Scopes)
 	builder.WriteString(", ")
 	builder.WriteString("redirect_url=")
 	builder.WriteString(ap.RedirectURL)

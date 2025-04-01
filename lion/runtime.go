@@ -63,6 +63,10 @@ func init() {
 	authprovidersDescClientID := authprovidersFields[1].Descriptor()
 	// authproviders.DefaultClientID holds the default value on creation for the client_id field.
 	authproviders.DefaultClientID = authprovidersDescClientID.Default.(string)
+	// authprovidersDescEnabled is the schema descriptor for enabled field.
+	authprovidersDescEnabled := authprovidersFields[2].Descriptor()
+	// authproviders.DefaultEnabled holds the default value on creation for the enabled field.
+	authproviders.DefaultEnabled = authprovidersDescEnabled.Default.(bool)
 	demoMixin := schema.Demo{}.Mixin()
 	demoMixinFields0 := demoMixin[0].Fields()
 	_ = demoMixinFields0

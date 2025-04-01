@@ -58,8 +58,12 @@ func (a *AdminAPI) Handle() http.Handler {
 }
 */
 
-func (a *KnownAdminAPI) GetLionClient() *lion.Client {
-	return a.config.db
+func (a *KnownAdminAPI) GetLionClient() (*lion.Client, error) {
+	if a.config == nil || a.config.db == nil {
+		return nil, fmt.Errorf("not found database client")
+	}
+
+	return a.config.db, nil
 }
 
 func (a *KnownAdminAPI) test(w http.ResponseWriter, r *http.Request) {

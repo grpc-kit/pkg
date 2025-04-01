@@ -28,13 +28,14 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeEnum, Enums: []string{"LDAP", "OIDC", "OAUTH2", "GITHUB", "WECHAT", "GOOGLE"}},
+		{Name: "name", Type: field.TypeEnum, Enums: []string{"LOCAL", "LDAP", "OIDC", "OAUTH2", "GITHUB", "WECHAT", "GOOGLE"}},
 		{Name: "client_id", Type: field.TypeString, Default: ""},
+		{Name: "enabled", Type: field.TypeBool, Default: false},
 		{Name: "client_secret_encrypted", Type: field.TypeString},
 		{Name: "auth_url", Type: field.TypeString},
 		{Name: "token_url", Type: field.TypeString},
 		{Name: "user_info_url", Type: field.TypeString},
-		{Name: "scopes", Type: field.TypeJSON},
+		{Name: "scopes", Type: field.TypeString},
 		{Name: "redirect_url", Type: field.TypeString},
 	}
 	// LionAuthProvidersTable holds the schema information for the "lion_auth_providers" table.

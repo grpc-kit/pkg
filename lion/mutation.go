@@ -577,12 +577,12 @@ type AuthProvidersMutation struct {
 	update_time             *time.Time
 	name                    *authproviders.Name
 	client_id               *string
+	enabled                 *bool
 	client_secret_encrypted *string
 	auth_url                *string
 	token_url               *string
 	user_info_url           *string
-	scopes                  *[]string
-	appendscopes            []string
+	scopes                  *string
 	redirect_url            *string
 	clearedFields           map[string]struct{}
 	done                    bool
@@ -832,6 +832,42 @@ func (m *AuthProvidersMutation) ResetClientID() {
 	m.client_id = nil
 }
 
+// SetEnabled sets the "enabled" field.
+func (m *AuthProvidersMutation) SetEnabled(b bool) {
+	m.enabled = &b
+}
+
+// Enabled returns the value of the "enabled" field in the mutation.
+func (m *AuthProvidersMutation) Enabled() (r bool, exists bool) {
+	v := m.enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnabled returns the old "enabled" field's value of the AuthProviders entity.
+// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthProvidersMutation) OldEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnabled: %w", err)
+	}
+	return oldValue.Enabled, nil
+}
+
+// ResetEnabled resets all changes to the "enabled" field.
+func (m *AuthProvidersMutation) ResetEnabled() {
+	m.enabled = nil
+}
+
 // SetClientSecretEncrypted sets the "client_secret_encrypted" field.
 func (m *AuthProvidersMutation) SetClientSecretEncrypted(s string) {
 	m.client_secret_encrypted = &s
@@ -977,13 +1013,12 @@ func (m *AuthProvidersMutation) ResetUserInfoURL() {
 }
 
 // SetScopes sets the "scopes" field.
-func (m *AuthProvidersMutation) SetScopes(s []string) {
+func (m *AuthProvidersMutation) SetScopes(s string) {
 	m.scopes = &s
-	m.appendscopes = nil
 }
 
 // Scopes returns the value of the "scopes" field in the mutation.
-func (m *AuthProvidersMutation) Scopes() (r []string, exists bool) {
+func (m *AuthProvidersMutation) Scopes() (r string, exists bool) {
 	v := m.scopes
 	if v == nil {
 		return
@@ -994,7 +1029,7 @@ func (m *AuthProvidersMutation) Scopes() (r []string, exists bool) {
 // OldScopes returns the old "scopes" field's value of the AuthProviders entity.
 // If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldScopes(ctx context.Context) (v []string, err error) {
+func (m *AuthProvidersMutation) OldScopes(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldScopes is only allowed on UpdateOne operations")
 	}
@@ -1008,23 +1043,9 @@ func (m *AuthProvidersMutation) OldScopes(ctx context.Context) (v []string, err 
 	return oldValue.Scopes, nil
 }
 
-// AppendScopes adds s to the "scopes" field.
-func (m *AuthProvidersMutation) AppendScopes(s []string) {
-	m.appendscopes = append(m.appendscopes, s...)
-}
-
-// AppendedScopes returns the list of values that were appended to the "scopes" field in this mutation.
-func (m *AuthProvidersMutation) AppendedScopes() ([]string, bool) {
-	if len(m.appendscopes) == 0 {
-		return nil, false
-	}
-	return m.appendscopes, true
-}
-
 // ResetScopes resets all changes to the "scopes" field.
 func (m *AuthProvidersMutation) ResetScopes() {
 	m.scopes = nil
-	m.appendscopes = nil
 }
 
 // SetRedirectURL sets the "redirect_url" field.
@@ -1097,7 +1118,7 @@ func (m *AuthProvidersMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AuthProvidersMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.create_time != nil {
 		fields = append(fields, authproviders.FieldCreateTime)
 	}
@@ -1109,6 +1130,9 @@ func (m *AuthProvidersMutation) Fields() []string {
 	}
 	if m.client_id != nil {
 		fields = append(fields, authproviders.FieldClientID)
+	}
+	if m.enabled != nil {
+		fields = append(fields, authproviders.FieldEnabled)
 	}
 	if m.client_secret_encrypted != nil {
 		fields = append(fields, authproviders.FieldClientSecretEncrypted)
@@ -1144,6 +1168,8 @@ func (m *AuthProvidersMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case authproviders.FieldClientID:
 		return m.ClientID()
+	case authproviders.FieldEnabled:
+		return m.Enabled()
 	case authproviders.FieldClientSecretEncrypted:
 		return m.ClientSecretEncrypted()
 	case authproviders.FieldAuthURL:
@@ -1173,6 +1199,8 @@ func (m *AuthProvidersMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldName(ctx)
 	case authproviders.FieldClientID:
 		return m.OldClientID(ctx)
+	case authproviders.FieldEnabled:
+		return m.OldEnabled(ctx)
 	case authproviders.FieldClientSecretEncrypted:
 		return m.OldClientSecretEncrypted(ctx)
 	case authproviders.FieldAuthURL:
@@ -1222,6 +1250,13 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetClientID(v)
 		return nil
+	case authproviders.FieldEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnabled(v)
+		return nil
 	case authproviders.FieldClientSecretEncrypted:
 		v, ok := value.(string)
 		if !ok {
@@ -1251,7 +1286,7 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 		m.SetUserInfoURL(v)
 		return nil
 	case authproviders.FieldScopes:
-		v, ok := value.([]string)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1324,6 +1359,9 @@ func (m *AuthProvidersMutation) ResetField(name string) error {
 		return nil
 	case authproviders.FieldClientID:
 		m.ResetClientID()
+		return nil
+	case authproviders.FieldEnabled:
+		m.ResetEnabled()
 		return nil
 	case authproviders.FieldClientSecretEncrypted:
 		m.ResetClientSecretEncrypted()
