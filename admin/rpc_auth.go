@@ -14,7 +14,7 @@ func (a *KnownAdminAPI) GetConfig(ctx context.Context, req *adminv1.GetConfigReq
 }
 
 func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.CreateAuthLoginRequest) (*adminv1.CreateAuthLoginResponse, error) {
-	result := &adminv1.CreateAuthLoginResponse{}
+	result := &adminv1.CreateAuthLoginResponse{Token: "test"}
 	return result, nil
 }
 

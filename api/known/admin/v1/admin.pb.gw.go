@@ -131,7 +131,7 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/local/login"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/login"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -245,7 +245,7 @@ func RegisterKnownAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/local/login"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/login"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -309,7 +309,7 @@ func RegisterKnownAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 }
 
 var (
-	pattern_KnownAdmin_CreateAuthLogin_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 2, 6}, []string{"builtin", "admin", "api", "v1", "auth", "local", "login"}, ""))
+	pattern_KnownAdmin_CreateAuthLogin_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"builtin", "admin", "api", "v1", "auth", "login"}, ""))
 
 	pattern_KnownAdmin_GetAuthProviders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"builtin", "admin", "api", "v1", "auth", "providers"}, ""))
 
