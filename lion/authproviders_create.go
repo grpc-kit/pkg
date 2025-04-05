@@ -88,6 +88,12 @@ func (apc *AuthProvidersCreate) SetClientSecretEncrypted(s string) *AuthProvider
 	return apc
 }
 
+// SetIssuer sets the "issuer" field.
+func (apc *AuthProvidersCreate) SetIssuer(s string) *AuthProvidersCreate {
+	apc.mutation.SetIssuer(s)
+	return apc
+}
+
 // SetAuthURL sets the "auth_url" field.
 func (apc *AuthProvidersCreate) SetAuthURL(s string) *AuthProvidersCreate {
 	apc.mutation.SetAuthURL(s)
@@ -196,6 +202,9 @@ func (apc *AuthProvidersCreate) check() error {
 	if _, ok := apc.mutation.ClientSecretEncrypted(); !ok {
 		return &ValidationError{Name: "client_secret_encrypted", err: errors.New(`lion: missing required field "AuthProviders.client_secret_encrypted"`)}
 	}
+	if _, ok := apc.mutation.Issuer(); !ok {
+		return &ValidationError{Name: "issuer", err: errors.New(`lion: missing required field "AuthProviders.issuer"`)}
+	}
 	if _, ok := apc.mutation.AuthURL(); !ok {
 		return &ValidationError{Name: "auth_url", err: errors.New(`lion: missing required field "AuthProviders.auth_url"`)}
 	}
@@ -260,6 +269,10 @@ func (apc *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSp
 	if value, ok := apc.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeString, value)
 		_node.ClientSecretEncrypted = value
+	}
+	if value, ok := apc.mutation.Issuer(); ok {
+		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
+		_node.Issuer = value
 	}
 	if value, ok := apc.mutation.AuthURL(); ok {
 		_spec.SetField(authproviders.FieldAuthURL, field.TypeString, value)

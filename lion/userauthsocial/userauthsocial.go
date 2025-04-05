@@ -19,8 +19,8 @@ const (
 	FieldUpdateTime = "update_time"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldProvider holds the string denoting the provider field in the database.
-	FieldProvider = "provider"
+	// FieldProviderName holds the string denoting the provider_name field in the database.
+	FieldProviderName = "provider_name"
 	// FieldProviderUserID holds the string denoting the provider_user_id field in the database.
 	FieldProviderUserID = "provider_user_id"
 	// FieldProviderUnionID holds the string denoting the provider_union_id field in the database.
@@ -41,7 +41,7 @@ var Columns = []string{
 	FieldCreateTime,
 	FieldUpdateTime,
 	FieldUserID,
-	FieldProvider,
+	FieldProviderName,
 	FieldProviderUserID,
 	FieldProviderUnionID,
 	FieldAccessTokenEncrypted,
@@ -68,8 +68,8 @@ var (
 	UpdateDefaultUpdateTime func() time.Time
 	// UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	UserIDValidator func(int) error
-	// ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
-	ProviderValidator func(string) error
+	// ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
+	ProviderNameValidator func(string) error
 	// ProviderUserIDValidator is a validator for the "provider_user_id" field. It is called by the builders before save.
 	ProviderUserIDValidator func(string) error
 )
@@ -97,9 +97,9 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
-// ByProvider orders the results by the provider field.
-func ByProvider(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProvider, opts...).ToFunc()
+// ByProviderName orders the results by the provider_name field.
+func ByProviderName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderName, opts...).ToFunc()
 }
 
 // ByProviderUserID orders the results by the provider_user_id field.

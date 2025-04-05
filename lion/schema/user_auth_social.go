@@ -21,7 +21,7 @@ func (UserAuthSocial) Fields() []ent.Field {
 			Positive().
 			Immutable().
 			Comment("用户ID，关联 lion_users 表"),
-		field.String("provider").
+		field.String("provider_name").
 			NotEmpty().
 			Comment("认证提供分，来自 lion_oauth_providers 表 name 属性"),
 		field.String("provider_user_id").
@@ -65,7 +65,7 @@ func (UserAuthSocial) Mixin() []ent.Mixin {
 func (UserAuthSocial) Indexes() []ent.Index {
 	return []ent.Index{
 		// 保证在相同平台下 provider 与 user_id 的组合唯一
-		index.Fields("user_id", "provider").Unique(),
+		index.Fields("user_id", "provider_name").Unique(),
 	}
 }
 

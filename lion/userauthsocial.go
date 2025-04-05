@@ -24,7 +24,7 @@ type UserAuthSocial struct {
 	// 用户ID，关联 lion_users 表
 	UserID int `json:"user_id,omitempty"`
 	// 认证提供分，来自 lion_oauth_providers 表 name 属性
-	Provider string `json:"provider,omitempty"`
+	ProviderName string `json:"provider_name,omitempty"`
 	// 第三方平台用户唯一标识，如微信的 OpenID
 	ProviderUserID string `json:"provider_user_id,omitempty"`
 	// 第三方平台统一标识，如微信的 UnionID
@@ -47,7 +47,7 @@ func (*UserAuthSocial) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case userauthsocial.FieldID, userauthsocial.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case userauthsocial.FieldProvider, userauthsocial.FieldProviderUserID, userauthsocial.FieldProviderUnionID:
+		case userauthsocial.FieldProviderName, userauthsocial.FieldProviderUserID, userauthsocial.FieldProviderUnionID:
 			values[i] = new(sql.NullString)
 		case userauthsocial.FieldCreateTime, userauthsocial.FieldUpdateTime, userauthsocial.FieldTokenExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -90,11 +90,11 @@ func (uas *UserAuthSocial) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				uas.UserID = int(value.Int64)
 			}
-		case userauthsocial.FieldProvider:
+		case userauthsocial.FieldProviderName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field provider", values[i])
+				return fmt.Errorf("unexpected type %T for field provider_name", values[i])
 			} else if value.Valid {
-				uas.Provider = value.String
+				uas.ProviderName = value.String
 			}
 		case userauthsocial.FieldProviderUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -171,8 +171,8 @@ func (uas *UserAuthSocial) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", uas.UserID))
 	builder.WriteString(", ")
-	builder.WriteString("provider=")
-	builder.WriteString(uas.Provider)
+	builder.WriteString("provider_name=")
+	builder.WriteString(uas.ProviderName)
 	builder.WriteString(", ")
 	builder.WriteString("provider_user_id=")
 	builder.WriteString(uas.ProviderUserID)

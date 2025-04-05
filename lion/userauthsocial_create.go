@@ -54,9 +54,9 @@ func (uasc *UserAuthSocialCreate) SetUserID(i int) *UserAuthSocialCreate {
 	return uasc
 }
 
-// SetProvider sets the "provider" field.
-func (uasc *UserAuthSocialCreate) SetProvider(s string) *UserAuthSocialCreate {
-	uasc.mutation.SetProvider(s)
+// SetProviderName sets the "provider_name" field.
+func (uasc *UserAuthSocialCreate) SetProviderName(s string) *UserAuthSocialCreate {
+	uasc.mutation.SetProviderName(s)
 	return uasc
 }
 
@@ -167,12 +167,12 @@ func (uasc *UserAuthSocialCreate) check() error {
 			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.user_id": %w`, err)}
 		}
 	}
-	if _, ok := uasc.mutation.Provider(); !ok {
-		return &ValidationError{Name: "provider", err: errors.New(`lion: missing required field "UserAuthSocial.provider"`)}
+	if _, ok := uasc.mutation.ProviderName(); !ok {
+		return &ValidationError{Name: "provider_name", err: errors.New(`lion: missing required field "UserAuthSocial.provider_name"`)}
 	}
-	if v, ok := uasc.mutation.Provider(); ok {
-		if err := userauthsocial.ProviderValidator(v); err != nil {
-			return &ValidationError{Name: "provider", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider": %w`, err)}
+	if v, ok := uasc.mutation.ProviderName(); ok {
+		if err := userauthsocial.ProviderNameValidator(v); err != nil {
+			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider_name": %w`, err)}
 		}
 	}
 	if _, ok := uasc.mutation.ProviderUserID(); !ok {
@@ -221,9 +221,9 @@ func (uasc *UserAuthSocialCreate) createSpec() (*UserAuthSocial, *sqlgraph.Creat
 		_spec.SetField(userauthsocial.FieldUserID, field.TypeInt, value)
 		_node.UserID = value
 	}
-	if value, ok := uasc.mutation.Provider(); ok {
-		_spec.SetField(userauthsocial.FieldProvider, field.TypeString, value)
-		_node.Provider = value
+	if value, ok := uasc.mutation.ProviderName(); ok {
+		_spec.SetField(userauthsocial.FieldProviderName, field.TypeString, value)
+		_node.ProviderName = value
 	}
 	if value, ok := uasc.mutation.ProviderUserID(); ok {
 		_spec.SetField(userauthsocial.FieldProviderUserID, field.TypeString, value)

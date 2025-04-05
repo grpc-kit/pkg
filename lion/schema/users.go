@@ -1,12 +1,13 @@
 package schema
 
 import (
+	"regexp"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
-	"regexp"
 )
 
 // Users 用户实体表 | 存储用户基本信息和认证相关字段
@@ -50,9 +51,9 @@ func (Users) Fields() []ent.Field {
 			Optional().
 			Nillable().
 			Comment("用户的个人网站 URL"),
-		field.Bytes("email_encrypted").
+		field.String("email_encrypted").
 			Sensitive().
-			Default([]byte("")).
+			Default("").
 			Comment("用户的邮箱地址"),
 		field.Bool("email_verified").
 			Default(false).

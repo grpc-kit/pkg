@@ -26,6 +26,8 @@ const (
 	FieldEnabled = "enabled"
 	// FieldClientSecretEncrypted holds the string denoting the client_secret_encrypted field in the database.
 	FieldClientSecretEncrypted = "client_secret_encrypted"
+	// FieldIssuer holds the string denoting the issuer field in the database.
+	FieldIssuer = "issuer"
 	// FieldAuthURL holds the string denoting the auth_url field in the database.
 	FieldAuthURL = "auth_url"
 	// FieldTokenURL holds the string denoting the token_url field in the database.
@@ -49,6 +51,7 @@ var Columns = []string{
 	FieldClientID,
 	FieldEnabled,
 	FieldClientSecretEncrypted,
+	FieldIssuer,
 	FieldAuthURL,
 	FieldTokenURL,
 	FieldUserInfoURL,
@@ -143,6 +146,11 @@ func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
 // ByClientSecretEncrypted orders the results by the client_secret_encrypted field.
 func ByClientSecretEncrypted(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldClientSecretEncrypted, opts...).ToFunc()
+}
+
+// ByIssuer orders the results by the issuer field.
+func ByIssuer(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIssuer, opts...).ToFunc()
 }
 
 // ByAuthURL orders the results by the auth_url field.

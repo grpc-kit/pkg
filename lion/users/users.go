@@ -98,7 +98,7 @@ var (
 	// DefaultNickname holds the default value on creation for the "nickname" field.
 	DefaultNickname string
 	// DefaultEmailEncrypted holds the default value on creation for the "email_encrypted" field.
-	DefaultEmailEncrypted []byte
+	DefaultEmailEncrypted string
 	// DefaultEmailVerified holds the default value on creation for the "email_verified" field.
 	DefaultEmailVerified bool
 	// DefaultPhoneNumberEncrypted holds the default value on creation for the "phone_number_encrypted" field.
@@ -178,6 +178,11 @@ func ByPicture(opts ...sql.OrderTermOption) OrderOption {
 // ByWebsite orders the results by the website field.
 func ByWebsite(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWebsite, opts...).ToFunc()
+}
+
+// ByEmailEncrypted orders the results by the email_encrypted field.
+func ByEmailEncrypted(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmailEncrypted, opts...).ToFunc()
 }
 
 // ByEmailVerified orders the results by the email_verified field.

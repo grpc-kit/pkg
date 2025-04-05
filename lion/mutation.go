@@ -579,6 +579,7 @@ type AuthProvidersMutation struct {
 	client_id               *string
 	enabled                 *bool
 	client_secret_encrypted *string
+	issuer                  *string
 	auth_url                *string
 	token_url               *string
 	user_info_url           *string
@@ -904,6 +905,42 @@ func (m *AuthProvidersMutation) ResetClientSecretEncrypted() {
 	m.client_secret_encrypted = nil
 }
 
+// SetIssuer sets the "issuer" field.
+func (m *AuthProvidersMutation) SetIssuer(s string) {
+	m.issuer = &s
+}
+
+// Issuer returns the value of the "issuer" field in the mutation.
+func (m *AuthProvidersMutation) Issuer() (r string, exists bool) {
+	v := m.issuer
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIssuer returns the old "issuer" field's value of the AuthProviders entity.
+// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthProvidersMutation) OldIssuer(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIssuer is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIssuer requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIssuer: %w", err)
+	}
+	return oldValue.Issuer, nil
+}
+
+// ResetIssuer resets all changes to the "issuer" field.
+func (m *AuthProvidersMutation) ResetIssuer() {
+	m.issuer = nil
+}
+
 // SetAuthURL sets the "auth_url" field.
 func (m *AuthProvidersMutation) SetAuthURL(s string) {
 	m.auth_url = &s
@@ -1118,7 +1155,7 @@ func (m *AuthProvidersMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AuthProvidersMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.create_time != nil {
 		fields = append(fields, authproviders.FieldCreateTime)
 	}
@@ -1136,6 +1173,9 @@ func (m *AuthProvidersMutation) Fields() []string {
 	}
 	if m.client_secret_encrypted != nil {
 		fields = append(fields, authproviders.FieldClientSecretEncrypted)
+	}
+	if m.issuer != nil {
+		fields = append(fields, authproviders.FieldIssuer)
 	}
 	if m.auth_url != nil {
 		fields = append(fields, authproviders.FieldAuthURL)
@@ -1172,6 +1212,8 @@ func (m *AuthProvidersMutation) Field(name string) (ent.Value, bool) {
 		return m.Enabled()
 	case authproviders.FieldClientSecretEncrypted:
 		return m.ClientSecretEncrypted()
+	case authproviders.FieldIssuer:
+		return m.Issuer()
 	case authproviders.FieldAuthURL:
 		return m.AuthURL()
 	case authproviders.FieldTokenURL:
@@ -1203,6 +1245,8 @@ func (m *AuthProvidersMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldEnabled(ctx)
 	case authproviders.FieldClientSecretEncrypted:
 		return m.OldClientSecretEncrypted(ctx)
+	case authproviders.FieldIssuer:
+		return m.OldIssuer(ctx)
 	case authproviders.FieldAuthURL:
 		return m.OldAuthURL(ctx)
 	case authproviders.FieldTokenURL:
@@ -1263,6 +1307,13 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetClientSecretEncrypted(v)
+		return nil
+	case authproviders.FieldIssuer:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIssuer(v)
 		return nil
 	case authproviders.FieldAuthURL:
 		v, ok := value.(string)
@@ -1365,6 +1416,9 @@ func (m *AuthProvidersMutation) ResetField(name string) error {
 		return nil
 	case authproviders.FieldClientSecretEncrypted:
 		m.ResetClientSecretEncrypted()
+		return nil
+	case authproviders.FieldIssuer:
+		m.ResetIssuer()
 		return nil
 	case authproviders.FieldAuthURL:
 		m.ResetAuthURL()
@@ -4281,7 +4335,7 @@ type UserAuthSocialMutation struct {
 	update_time             *time.Time
 	user_id                 *int
 	adduser_id              *int
-	provider                *string
+	provider_name           *string
 	provider_user_id        *string
 	provider_union_id       *string
 	access_token_encrypted  *[]byte
@@ -4519,40 +4573,40 @@ func (m *UserAuthSocialMutation) ResetUserID() {
 	m.adduser_id = nil
 }
 
-// SetProvider sets the "provider" field.
-func (m *UserAuthSocialMutation) SetProvider(s string) {
-	m.provider = &s
+// SetProviderName sets the "provider_name" field.
+func (m *UserAuthSocialMutation) SetProviderName(s string) {
+	m.provider_name = &s
 }
 
-// Provider returns the value of the "provider" field in the mutation.
-func (m *UserAuthSocialMutation) Provider() (r string, exists bool) {
-	v := m.provider
+// ProviderName returns the value of the "provider_name" field in the mutation.
+func (m *UserAuthSocialMutation) ProviderName() (r string, exists bool) {
+	v := m.provider_name
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldProvider returns the old "provider" field's value of the UserAuthSocial entity.
+// OldProviderName returns the old "provider_name" field's value of the UserAuthSocial entity.
 // If the UserAuthSocial object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserAuthSocialMutation) OldProvider(ctx context.Context) (v string, err error) {
+func (m *UserAuthSocialMutation) OldProviderName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProvider is only allowed on UpdateOne operations")
+		return v, errors.New("OldProviderName is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProvider requires an ID field in the mutation")
+		return v, errors.New("OldProviderName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProvider: %w", err)
+		return v, fmt.Errorf("querying old value for OldProviderName: %w", err)
 	}
-	return oldValue.Provider, nil
+	return oldValue.ProviderName, nil
 }
 
-// ResetProvider resets all changes to the "provider" field.
-func (m *UserAuthSocialMutation) ResetProvider() {
-	m.provider = nil
+// ResetProviderName resets all changes to the "provider_name" field.
+func (m *UserAuthSocialMutation) ResetProviderName() {
+	m.provider_name = nil
 }
 
 // SetProviderUserID sets the "provider_user_id" field.
@@ -4831,8 +4885,8 @@ func (m *UserAuthSocialMutation) Fields() []string {
 	if m.user_id != nil {
 		fields = append(fields, userauthsocial.FieldUserID)
 	}
-	if m.provider != nil {
-		fields = append(fields, userauthsocial.FieldProvider)
+	if m.provider_name != nil {
+		fields = append(fields, userauthsocial.FieldProviderName)
 	}
 	if m.provider_user_id != nil {
 		fields = append(fields, userauthsocial.FieldProviderUserID)
@@ -4863,8 +4917,8 @@ func (m *UserAuthSocialMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdateTime()
 	case userauthsocial.FieldUserID:
 		return m.UserID()
-	case userauthsocial.FieldProvider:
-		return m.Provider()
+	case userauthsocial.FieldProviderName:
+		return m.ProviderName()
 	case userauthsocial.FieldProviderUserID:
 		return m.ProviderUserID()
 	case userauthsocial.FieldProviderUnionID:
@@ -4890,8 +4944,8 @@ func (m *UserAuthSocialMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldUpdateTime(ctx)
 	case userauthsocial.FieldUserID:
 		return m.OldUserID(ctx)
-	case userauthsocial.FieldProvider:
-		return m.OldProvider(ctx)
+	case userauthsocial.FieldProviderName:
+		return m.OldProviderName(ctx)
 	case userauthsocial.FieldProviderUserID:
 		return m.OldProviderUserID(ctx)
 	case userauthsocial.FieldProviderUnionID:
@@ -4932,12 +4986,12 @@ func (m *UserAuthSocialMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUserID(v)
 		return nil
-	case userauthsocial.FieldProvider:
+	case userauthsocial.FieldProviderName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetProvider(v)
+		m.SetProviderName(v)
 		return nil
 	case userauthsocial.FieldProviderUserID:
 		v, ok := value.(string)
@@ -5074,8 +5128,8 @@ func (m *UserAuthSocialMutation) ResetField(name string) error {
 	case userauthsocial.FieldUserID:
 		m.ResetUserID()
 		return nil
-	case userauthsocial.FieldProvider:
-		m.ResetProvider()
+	case userauthsocial.FieldProviderName:
+		m.ResetProviderName()
 		return nil
 	case userauthsocial.FieldProviderUserID:
 		m.ResetProviderUserID()
@@ -5158,7 +5212,7 @@ type UsersMutation struct {
 	profile                *string
 	picture                *string
 	website                *string
-	email_encrypted        *[]byte
+	email_encrypted        *string
 	email_verified         *bool
 	gender                 *users.Gender
 	birthdate              *time.Time
@@ -5599,12 +5653,12 @@ func (m *UsersMutation) ResetWebsite() {
 }
 
 // SetEmailEncrypted sets the "email_encrypted" field.
-func (m *UsersMutation) SetEmailEncrypted(b []byte) {
-	m.email_encrypted = &b
+func (m *UsersMutation) SetEmailEncrypted(s string) {
+	m.email_encrypted = &s
 }
 
 // EmailEncrypted returns the value of the "email_encrypted" field in the mutation.
-func (m *UsersMutation) EmailEncrypted() (r []byte, exists bool) {
+func (m *UsersMutation) EmailEncrypted() (r string, exists bool) {
 	v := m.email_encrypted
 	if v == nil {
 		return
@@ -5615,7 +5669,7 @@ func (m *UsersMutation) EmailEncrypted() (r []byte, exists bool) {
 // OldEmailEncrypted returns the old "email_encrypted" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldEmailEncrypted(ctx context.Context) (v []byte, err error) {
+func (m *UsersMutation) OldEmailEncrypted(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldEmailEncrypted is only allowed on UpdateOne operations")
 	}
@@ -6198,7 +6252,7 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 		m.SetWebsite(v)
 		return nil
 	case users.FieldEmailEncrypted:
-		v, ok := value.([]byte)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

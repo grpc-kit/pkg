@@ -34,7 +34,7 @@ type Users struct {
 	// 用户的个人网站 URL
 	Website *string `json:"website,omitempty"`
 	// 用户的邮箱地址
-	EmailEncrypted []byte `json:"-"`
+	EmailEncrypted string `json:"-"`
 	// 邮箱是否验证过
 	EmailVerified bool `json:"email_verified,omitempty"`
 	// 用户的性别，如：male、female, other
@@ -59,13 +59,13 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case users.FieldName, users.FieldEmailEncrypted, users.FieldPhoneNumberEncrypted, users.FieldAddressEncrypted:
+		case users.FieldName, users.FieldPhoneNumberEncrypted, users.FieldAddressEncrypted:
 			values[i] = new([]byte)
 		case users.FieldEmailVerified, users.FieldPhoneNumberVerified:
 			values[i] = new(sql.NullBool)
 		case users.FieldID:
 			values[i] = new(sql.NullInt64)
-		case users.FieldPreferredUsername, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldGender, users.FieldZoneinfo, users.FieldLocale:
+		case users.FieldPreferredUsername, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailEncrypted, users.FieldGender, users.FieldZoneinfo, users.FieldLocale:
 			values[i] = new(sql.NullString)
 		case users.FieldCreateTime, users.FieldUpdateTime, users.FieldBirthdate:
 			values[i] = new(sql.NullTime)
@@ -142,10 +142,10 @@ func (u *Users) assignValues(columns []string, values []any) error {
 				*u.Website = value.String
 			}
 		case users.FieldEmailEncrypted:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field email_encrypted", values[i])
-			} else if value != nil {
-				u.EmailEncrypted = *value
+			} else if value.Valid {
+				u.EmailEncrypted = value.String
 			}
 		case users.FieldEmailVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {

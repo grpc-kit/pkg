@@ -223,10 +223,10 @@ func init() {
 	userauthsocialDescUserID := userauthsocialFields[0].Descriptor()
 	// userauthsocial.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	userauthsocial.UserIDValidator = userauthsocialDescUserID.Validators[0].(func(int) error)
-	// userauthsocialDescProvider is the schema descriptor for provider field.
-	userauthsocialDescProvider := userauthsocialFields[1].Descriptor()
-	// userauthsocial.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
-	userauthsocial.ProviderValidator = userauthsocialDescProvider.Validators[0].(func(string) error)
+	// userauthsocialDescProviderName is the schema descriptor for provider_name field.
+	userauthsocialDescProviderName := userauthsocialFields[1].Descriptor()
+	// userauthsocial.ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
+	userauthsocial.ProviderNameValidator = userauthsocialDescProviderName.Validators[0].(func(string) error)
 	// userauthsocialDescProviderUserID is the schema descriptor for provider_user_id field.
 	userauthsocialDescProviderUserID := userauthsocialFields[2].Descriptor()
 	// userauthsocial.ProviderUserIDValidator is a validator for the "provider_user_id" field. It is called by the builders before save.
@@ -276,7 +276,7 @@ func init() {
 	// usersDescEmailEncrypted is the schema descriptor for email_encrypted field.
 	usersDescEmailEncrypted := usersFields[6].Descriptor()
 	// users.DefaultEmailEncrypted holds the default value on creation for the email_encrypted field.
-	users.DefaultEmailEncrypted = usersDescEmailEncrypted.Default.([]byte)
+	users.DefaultEmailEncrypted = usersDescEmailEncrypted.Default.(string)
 	// usersDescEmailVerified is the schema descriptor for email_verified field.
 	usersDescEmailVerified := usersFields[7].Descriptor()
 	// users.DefaultEmailVerified holds the default value on creation for the email_verified field.

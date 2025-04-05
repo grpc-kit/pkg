@@ -25,20 +25,32 @@ func (a *KnownAdminAPI) GetAuthProviders(ctx context.Context, req *adminv1.GetAu
 
 	db, err := a.GetLionClient()
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("get lion client failed")
+		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
 	}
 
-	rows := db.AuthProviders.Query().AllX(ctx)
+	selectFields := []string{
+		"name",
+		"client_id",
+		"enabled",
+		"issuer",
+		"auth_url",
+		"token_url",
+		"user_info_url",
+		"scopes",
+		"redirect_url",
+	}
+
+	rows := db.AuthProviders.Query().Select(selectFields...).AllX(ctx)
 	for _, row := range rows {
 		p := &adminv1.AuthProvider{
-			ClientId:     row.ClientID,
-			ClientSecret: row.ClientSecretEncrypted,
-			Enabled:      row.Enabled,
-			AuthUrl:      row.AuthURL,
-			TokenUrl:     row.TokenURL,
-			UserInfoUrl:  row.UserInfoURL,
-			Scopes:       row.Scopes,
-			RedirectUrl:  row.RedirectURL,
+			ClientId:    row.ClientID,
+			Enabled:     row.Enabled,
+			Issuer:      row.Issuer,
+			AuthUrl:     row.AuthURL,
+			TokenUrl:    row.TokenURL,
+			UserInfoUrl: row.UserInfoURL,
+			Scopes:      row.Scopes,
+			RedirectUrl: row.RedirectURL,
 		}
 
 		switch row.Name {
@@ -69,7 +81,7 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 
 	db, err := a.GetLionClient()
 	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("get lion client failed")
+		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
 	}
 
 	for _, p := range req.Providers {
@@ -94,16 +106,53 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 			continue
 		}
 
-		_, err := db.AuthProviders.Create().
-			SetName(name).
-			SetClientID(p.ClientId).
-			SetClientSecretEncrypted(p.ClientSecret).
-			SetAuthURL(p.AuthUrl).
-			SetTokenURL(p.TokenUrl).
-			SetUserInfoURL(p.UserInfoUrl).
-			SetScopes(p.Scopes).
-			SetRedirectURL(p.RedirectUrl).
-			Save(ctx)
+		existID, err := db.AuthProviders.Query().Where(authproviders.NameEQ(name)).OnlyID(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		if existID == 0 {
+			_, err = db.AuthProviders.Create().
+				SetName(name).
+				SetEnabled(p.Enabled).
+				SetClientID(p.ClientId).
+				SetClientSecretEncrypted(p.ClientSecret).
+				SetIssuer(p.Issuer).
+				SetAuthURL(p.AuthUrl).
+				SetTokenURL(p.TokenUrl).
+				SetUserInfoURL(p.UserInfoUrl).
+				SetScopes(p.Scopes).
+				SetRedirectURL(p.RedirectUrl).
+				Save(ctx)
+		} else {
+			x := db.AuthProviders.Update().Where(authproviders.NameEQ(name))
+
+			if p.ClientId != "" {
+				x.SetClientID(p.ClientId)
+			}
+			if p.ClientSecret != "" {
+				x.SetClientSecretEncrypted(p.ClientSecret)
+			}
+			if p.Issuer != "" {
+				x.SetIssuer(p.Issuer)
+			}
+			if p.AuthUrl != "" {
+				x.SetAuthURL(p.AuthUrl)
+			}
+			if p.TokenUrl != "" {
+				x.SetTokenURL(p.TokenUrl)
+			}
+			if p.UserInfoUrl != "" {
+				x.SetUserInfoURL(p.UserInfoUrl)
+			}
+			if p.Scopes != "" {
+				x.SetScopes(p.Scopes)
+			}
+			if p.RedirectUrl != "" {
+				x.SetRedirectURL(p.RedirectUrl)
+			}
+			err = x.Exec(ctx)
+		}
 
 		if err != nil {
 			return nil, err

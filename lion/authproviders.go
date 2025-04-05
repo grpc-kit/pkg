@@ -29,6 +29,8 @@ type AuthProviders struct {
 	Enabled bool `json:"enabled,omitempty"`
 	// ClientSecretEncrypted holds the value of the "client_secret_encrypted" field.
 	ClientSecretEncrypted string `json:"-"`
+	// Issuer holds the value of the "issuer" field.
+	Issuer string `json:"issuer,omitempty"`
 	// AuthURL holds the value of the "auth_url" field.
 	AuthURL string `json:"auth_url,omitempty"`
 	// TokenURL holds the value of the "token_url" field.
@@ -51,7 +53,7 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case authproviders.FieldID:
 			values[i] = new(sql.NullInt64)
-		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldClientSecretEncrypted, authproviders.FieldAuthURL, authproviders.FieldTokenURL, authproviders.FieldUserInfoURL, authproviders.FieldScopes, authproviders.FieldRedirectURL:
+		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldClientSecretEncrypted, authproviders.FieldIssuer, authproviders.FieldAuthURL, authproviders.FieldTokenURL, authproviders.FieldUserInfoURL, authproviders.FieldScopes, authproviders.FieldRedirectURL:
 			values[i] = new(sql.NullString)
 		case authproviders.FieldCreateTime, authproviders.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -111,6 +113,12 @@ func (ap *AuthProviders) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field client_secret_encrypted", values[i])
 			} else if value.Valid {
 				ap.ClientSecretEncrypted = value.String
+			}
+		case authproviders.FieldIssuer:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field issuer", values[i])
+			} else if value.Valid {
+				ap.Issuer = value.String
 			}
 		case authproviders.FieldAuthURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -194,6 +202,9 @@ func (ap *AuthProviders) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ap.Enabled))
 	builder.WriteString(", ")
 	builder.WriteString("client_secret_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("issuer=")
+	builder.WriteString(ap.Issuer)
 	builder.WriteString(", ")
 	builder.WriteString("auth_url=")
 	builder.WriteString(ap.AuthURL)

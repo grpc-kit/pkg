@@ -90,6 +90,20 @@ func (apu *AuthProvidersUpdate) SetNillableClientSecretEncrypted(s *string) *Aut
 	return apu
 }
 
+// SetIssuer sets the "issuer" field.
+func (apu *AuthProvidersUpdate) SetIssuer(s string) *AuthProvidersUpdate {
+	apu.mutation.SetIssuer(s)
+	return apu
+}
+
+// SetNillableIssuer sets the "issuer" field if the given value is not nil.
+func (apu *AuthProvidersUpdate) SetNillableIssuer(s *string) *AuthProvidersUpdate {
+	if s != nil {
+		apu.SetIssuer(*s)
+	}
+	return apu
+}
+
 // SetAuthURL sets the "auth_url" field.
 func (apu *AuthProvidersUpdate) SetAuthURL(s string) *AuthProvidersUpdate {
 	apu.mutation.SetAuthURL(s)
@@ -238,6 +252,9 @@ func (apu *AuthProvidersUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if value, ok := apu.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeString, value)
 	}
+	if value, ok := apu.mutation.Issuer(); ok {
+		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
+	}
 	if value, ok := apu.mutation.AuthURL(); ok {
 		_spec.SetField(authproviders.FieldAuthURL, field.TypeString, value)
 	}
@@ -331,6 +348,20 @@ func (apuo *AuthProvidersUpdateOne) SetClientSecretEncrypted(s string) *AuthProv
 func (apuo *AuthProvidersUpdateOne) SetNillableClientSecretEncrypted(s *string) *AuthProvidersUpdateOne {
 	if s != nil {
 		apuo.SetClientSecretEncrypted(*s)
+	}
+	return apuo
+}
+
+// SetIssuer sets the "issuer" field.
+func (apuo *AuthProvidersUpdateOne) SetIssuer(s string) *AuthProvidersUpdateOne {
+	apuo.mutation.SetIssuer(s)
+	return apuo
+}
+
+// SetNillableIssuer sets the "issuer" field if the given value is not nil.
+func (apuo *AuthProvidersUpdateOne) SetNillableIssuer(s *string) *AuthProvidersUpdateOne {
+	if s != nil {
+		apuo.SetIssuer(*s)
 	}
 	return apuo
 }
@@ -512,6 +543,9 @@ func (apuo *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthPro
 	}
 	if value, ok := apuo.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeString, value)
+	}
+	if value, ok := apuo.mutation.Issuer(); ok {
+		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
 	}
 	if value, ok := apuo.mutation.AuthURL(); ok {
 		_spec.SetField(authproviders.FieldAuthURL, field.TypeString, value)

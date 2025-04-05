@@ -34,16 +34,16 @@ func (uasu *UserAuthSocialUpdate) SetUpdateTime(t time.Time) *UserAuthSocialUpda
 	return uasu
 }
 
-// SetProvider sets the "provider" field.
-func (uasu *UserAuthSocialUpdate) SetProvider(s string) *UserAuthSocialUpdate {
-	uasu.mutation.SetProvider(s)
+// SetProviderName sets the "provider_name" field.
+func (uasu *UserAuthSocialUpdate) SetProviderName(s string) *UserAuthSocialUpdate {
+	uasu.mutation.SetProviderName(s)
 	return uasu
 }
 
-// SetNillableProvider sets the "provider" field if the given value is not nil.
-func (uasu *UserAuthSocialUpdate) SetNillableProvider(s *string) *UserAuthSocialUpdate {
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (uasu *UserAuthSocialUpdate) SetNillableProviderName(s *string) *UserAuthSocialUpdate {
 	if s != nil {
-		uasu.SetProvider(*s)
+		uasu.SetProviderName(*s)
 	}
 	return uasu
 }
@@ -169,9 +169,9 @@ func (uasu *UserAuthSocialUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uasu *UserAuthSocialUpdate) check() error {
-	if v, ok := uasu.mutation.Provider(); ok {
-		if err := userauthsocial.ProviderValidator(v); err != nil {
-			return &ValidationError{Name: "provider", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider": %w`, err)}
+	if v, ok := uasu.mutation.ProviderName(); ok {
+		if err := userauthsocial.ProviderNameValidator(v); err != nil {
+			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider_name": %w`, err)}
 		}
 	}
 	if v, ok := uasu.mutation.ProviderUserID(); ok {
@@ -197,8 +197,8 @@ func (uasu *UserAuthSocialUpdate) sqlSave(ctx context.Context) (n int, err error
 	if value, ok := uasu.mutation.UpdateTime(); ok {
 		_spec.SetField(userauthsocial.FieldUpdateTime, field.TypeTime, value)
 	}
-	if value, ok := uasu.mutation.Provider(); ok {
-		_spec.SetField(userauthsocial.FieldProvider, field.TypeString, value)
+	if value, ok := uasu.mutation.ProviderName(); ok {
+		_spec.SetField(userauthsocial.FieldProviderName, field.TypeString, value)
 	}
 	if value, ok := uasu.mutation.ProviderUserID(); ok {
 		_spec.SetField(userauthsocial.FieldProviderUserID, field.TypeString, value)
@@ -253,16 +253,16 @@ func (uasuo *UserAuthSocialUpdateOne) SetUpdateTime(t time.Time) *UserAuthSocial
 	return uasuo
 }
 
-// SetProvider sets the "provider" field.
-func (uasuo *UserAuthSocialUpdateOne) SetProvider(s string) *UserAuthSocialUpdateOne {
-	uasuo.mutation.SetProvider(s)
+// SetProviderName sets the "provider_name" field.
+func (uasuo *UserAuthSocialUpdateOne) SetProviderName(s string) *UserAuthSocialUpdateOne {
+	uasuo.mutation.SetProviderName(s)
 	return uasuo
 }
 
-// SetNillableProvider sets the "provider" field if the given value is not nil.
-func (uasuo *UserAuthSocialUpdateOne) SetNillableProvider(s *string) *UserAuthSocialUpdateOne {
+// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
+func (uasuo *UserAuthSocialUpdateOne) SetNillableProviderName(s *string) *UserAuthSocialUpdateOne {
 	if s != nil {
-		uasuo.SetProvider(*s)
+		uasuo.SetProviderName(*s)
 	}
 	return uasuo
 }
@@ -401,9 +401,9 @@ func (uasuo *UserAuthSocialUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uasuo *UserAuthSocialUpdateOne) check() error {
-	if v, ok := uasuo.mutation.Provider(); ok {
-		if err := userauthsocial.ProviderValidator(v); err != nil {
-			return &ValidationError{Name: "provider", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider": %w`, err)}
+	if v, ok := uasuo.mutation.ProviderName(); ok {
+		if err := userauthsocial.ProviderNameValidator(v); err != nil {
+			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider_name": %w`, err)}
 		}
 	}
 	if v, ok := uasuo.mutation.ProviderUserID(); ok {
@@ -446,8 +446,8 @@ func (uasuo *UserAuthSocialUpdateOne) sqlSave(ctx context.Context) (_node *UserA
 	if value, ok := uasuo.mutation.UpdateTime(); ok {
 		_spec.SetField(userauthsocial.FieldUpdateTime, field.TypeTime, value)
 	}
-	if value, ok := uasuo.mutation.Provider(); ok {
-		_spec.SetField(userauthsocial.FieldProvider, field.TypeString, value)
+	if value, ok := uasuo.mutation.ProviderName(); ok {
+		_spec.SetField(userauthsocial.FieldProviderName, field.TypeString, value)
 	}
 	if value, ok := uasuo.mutation.ProviderUserID(); ok {
 		_spec.SetField(userauthsocial.FieldProviderUserID, field.TypeString, value)

@@ -69,9 +69,9 @@ func UserID(v int) predicate.UserAuthSocial {
 	return predicate.UserAuthSocial(sql.FieldEQ(FieldUserID, v))
 }
 
-// Provider applies equality check predicate on the "provider" field. It's identical to ProviderEQ.
-func Provider(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldEQ(FieldProvider, v))
+// ProviderName applies equality check predicate on the "provider_name" field. It's identical to ProviderNameEQ.
+func ProviderName(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldEQ(FieldProviderName, v))
 }
 
 // ProviderUserID applies equality check predicate on the "provider_user_id" field. It's identical to ProviderUserIDEQ.
@@ -219,69 +219,69 @@ func UserIDLTE(v int) predicate.UserAuthSocial {
 	return predicate.UserAuthSocial(sql.FieldLTE(FieldUserID, v))
 }
 
-// ProviderEQ applies the EQ predicate on the "provider" field.
-func ProviderEQ(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldEQ(FieldProvider, v))
+// ProviderNameEQ applies the EQ predicate on the "provider_name" field.
+func ProviderNameEQ(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldEQ(FieldProviderName, v))
 }
 
-// ProviderNEQ applies the NEQ predicate on the "provider" field.
-func ProviderNEQ(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldNEQ(FieldProvider, v))
+// ProviderNameNEQ applies the NEQ predicate on the "provider_name" field.
+func ProviderNameNEQ(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldNEQ(FieldProviderName, v))
 }
 
-// ProviderIn applies the In predicate on the "provider" field.
-func ProviderIn(vs ...string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldIn(FieldProvider, vs...))
+// ProviderNameIn applies the In predicate on the "provider_name" field.
+func ProviderNameIn(vs ...string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldIn(FieldProviderName, vs...))
 }
 
-// ProviderNotIn applies the NotIn predicate on the "provider" field.
-func ProviderNotIn(vs ...string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldNotIn(FieldProvider, vs...))
+// ProviderNameNotIn applies the NotIn predicate on the "provider_name" field.
+func ProviderNameNotIn(vs ...string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldNotIn(FieldProviderName, vs...))
 }
 
-// ProviderGT applies the GT predicate on the "provider" field.
-func ProviderGT(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldGT(FieldProvider, v))
+// ProviderNameGT applies the GT predicate on the "provider_name" field.
+func ProviderNameGT(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldGT(FieldProviderName, v))
 }
 
-// ProviderGTE applies the GTE predicate on the "provider" field.
-func ProviderGTE(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldGTE(FieldProvider, v))
+// ProviderNameGTE applies the GTE predicate on the "provider_name" field.
+func ProviderNameGTE(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldGTE(FieldProviderName, v))
 }
 
-// ProviderLT applies the LT predicate on the "provider" field.
-func ProviderLT(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldLT(FieldProvider, v))
+// ProviderNameLT applies the LT predicate on the "provider_name" field.
+func ProviderNameLT(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldLT(FieldProviderName, v))
 }
 
-// ProviderLTE applies the LTE predicate on the "provider" field.
-func ProviderLTE(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldLTE(FieldProvider, v))
+// ProviderNameLTE applies the LTE predicate on the "provider_name" field.
+func ProviderNameLTE(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldLTE(FieldProviderName, v))
 }
 
-// ProviderContains applies the Contains predicate on the "provider" field.
-func ProviderContains(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldContains(FieldProvider, v))
+// ProviderNameContains applies the Contains predicate on the "provider_name" field.
+func ProviderNameContains(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldContains(FieldProviderName, v))
 }
 
-// ProviderHasPrefix applies the HasPrefix predicate on the "provider" field.
-func ProviderHasPrefix(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldHasPrefix(FieldProvider, v))
+// ProviderNameHasPrefix applies the HasPrefix predicate on the "provider_name" field.
+func ProviderNameHasPrefix(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldHasPrefix(FieldProviderName, v))
 }
 
-// ProviderHasSuffix applies the HasSuffix predicate on the "provider" field.
-func ProviderHasSuffix(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldHasSuffix(FieldProvider, v))
+// ProviderNameHasSuffix applies the HasSuffix predicate on the "provider_name" field.
+func ProviderNameHasSuffix(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldHasSuffix(FieldProviderName, v))
 }
 
-// ProviderEqualFold applies the EqualFold predicate on the "provider" field.
-func ProviderEqualFold(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldEqualFold(FieldProvider, v))
+// ProviderNameEqualFold applies the EqualFold predicate on the "provider_name" field.
+func ProviderNameEqualFold(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldEqualFold(FieldProviderName, v))
 }
 
-// ProviderContainsFold applies the ContainsFold predicate on the "provider" field.
-func ProviderContainsFold(v string) predicate.UserAuthSocial {
-	return predicate.UserAuthSocial(sql.FieldContainsFold(FieldProvider, v))
+// ProviderNameContainsFold applies the ContainsFold predicate on the "provider_name" field.
+func ProviderNameContainsFold(v string) predicate.UserAuthSocial {
+	return predicate.UserAuthSocial(sql.FieldContainsFold(FieldProviderName, v))
 }
 
 // ProviderUserIDEQ applies the EQ predicate on the "provider_user_id" field.

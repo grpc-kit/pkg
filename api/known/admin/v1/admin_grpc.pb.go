@@ -26,6 +26,7 @@ type KnownAdminClient interface {
 	CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*CreateAuthLoginResponse, error)
 	GetAuthProviders(ctx context.Context, in *GetAuthProvidersRequest, opts ...grpc.CallOption) (*GetAuthProvidersResponse, error)
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
+	GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error)
 }
 
 type knownAdminClient struct {
@@ -72,6 +73,15 @@ func (c *knownAdminClient) UpsertAuthProviders(ctx context.Context, in *UpsertAu
 	return out, nil
 }
 
+func (c *knownAdminClient) GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error) {
+	out := new(GetAuthCallbackResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KnownAdminServer is the server API for KnownAdmin service.
 // All implementations should embed UnimplementedKnownAdminServer
 // for forward compatibility
@@ -80,6 +90,7 @@ type KnownAdminServer interface {
 	CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*CreateAuthLoginResponse, error)
 	GetAuthProviders(context.Context, *GetAuthProvidersRequest) (*GetAuthProvidersResponse, error)
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
+	GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error)
 }
 
 // UnimplementedKnownAdminServer should be embedded to have forward compatible implementations.
@@ -97,6 +108,9 @@ func (UnimplementedKnownAdminServer) GetAuthProviders(context.Context, *GetAuthP
 }
 func (UnimplementedKnownAdminServer) UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertAuthProviders not implemented")
+}
+func (UnimplementedKnownAdminServer) GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAuthCallback not implemented")
 }
 
 // UnsafeKnownAdminServer may be embedded to opt out of forward compatibility for this service.
@@ -182,6 +196,24 @@ func _KnownAdmin_UpsertAuthProviders_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_GetAuthCallback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAuthCallbackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetAuthCallback(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetAuthCallback(ctx, req.(*GetAuthCallbackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KnownAdmin_ServiceDesc is the grpc.ServiceDesc for KnownAdmin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -204,6 +236,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpsertAuthProviders",
 			Handler:    _KnownAdmin_UpsertAuthProviders_Handler,
+		},
+		{
+			MethodName: "GetAuthCallback",
+			Handler:    _KnownAdmin_GetAuthCallback_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
