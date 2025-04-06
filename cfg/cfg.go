@@ -321,9 +321,12 @@ func (c *LocalConfig) Register(ctx context.Context,
 		adminIns := admin.New(
 			admin.WithLogger(c.logger),
 			admin.WithLionClient(client),
-			admin.WithOIDCProvider(c.Security.Authentication.OIDCProvider.Issuer,
+			admin.WithAESKey([]byte("b1946ac92492d2347c6235b4d2611184")), // TODO; a test key
+			admin.WithOIDCProvider(
+				c.Security.Authentication.OIDCProvider.Issuer,
 				c.Security.Authentication.OIDCProvider.Config.ClientID,
-				c.Security.Authentication.OIDCProvider.Config.ClientSecret),
+				c.Security.Authentication.OIDCProvider.Config.ClientSecret,
+			),
 		)
 		adminv1.RegisterKnownAdminServer(c.rpcServer.Server(), adminIns)
 	}

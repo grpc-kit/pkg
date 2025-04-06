@@ -15,7 +15,7 @@ func EncryptedMixin() ent.Hook {
 				if strings.HasSuffix(field, "_encrypted") {
 					if value, ok := m.Field(field); ok {
 						if strVal, ok := value.(string); ok {
-							encryptedVal, err := EncryptAES(strVal)
+							encryptedVal, err := EncryptAES([]byte(""), []byte(strVal))
 							if err != nil {
 								return nil, err
 							}

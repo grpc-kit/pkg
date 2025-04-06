@@ -28,7 +28,7 @@ type AuthProviders struct {
 	// Enabled holds the value of the "enabled" field.
 	Enabled bool `json:"enabled,omitempty"`
 	// ClientSecretEncrypted holds the value of the "client_secret_encrypted" field.
-	ClientSecretEncrypted string `json:"-"`
+	ClientSecretEncrypted []byte `json:"-"`
 	// Issuer holds the value of the "issuer" field.
 	Issuer string `json:"issuer,omitempty"`
 	// AuthURL holds the value of the "auth_url" field.
@@ -49,11 +49,13 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case authproviders.FieldClientSecretEncrypted:
+			values[i] = new([]byte)
 		case authproviders.FieldEnabled:
 			values[i] = new(sql.NullBool)
 		case authproviders.FieldID:
 			values[i] = new(sql.NullInt64)
-		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldClientSecretEncrypted, authproviders.FieldIssuer, authproviders.FieldAuthURL, authproviders.FieldTokenURL, authproviders.FieldUserInfoURL, authproviders.FieldScopes, authproviders.FieldRedirectURL:
+		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldIssuer, authproviders.FieldAuthURL, authproviders.FieldTokenURL, authproviders.FieldUserInfoURL, authproviders.FieldScopes, authproviders.FieldRedirectURL:
 			values[i] = new(sql.NullString)
 		case authproviders.FieldCreateTime, authproviders.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -109,10 +111,10 @@ func (ap *AuthProviders) assignValues(columns []string, values []any) error {
 				ap.Enabled = value.Bool
 			}
 		case authproviders.FieldClientSecretEncrypted:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field client_secret_encrypted", values[i])
-			} else if value.Valid {
-				ap.ClientSecretEncrypted = value.String
+			} else if value != nil {
+				ap.ClientSecretEncrypted = *value
 			}
 		case authproviders.FieldIssuer:
 			if value, ok := values[i].(*sql.NullString); !ok {

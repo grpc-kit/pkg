@@ -10,6 +10,8 @@ type config struct {
 	logger *logrus.Entry
 	db     *lion.Client
 
+	aesKey []byte
+
 	// oidc 认证域名
 	provider string
 	// oidc 客户端ID
@@ -41,5 +43,11 @@ func WithOIDCProvider(provider, clientID, clientSecret string) Options {
 		c.provider = provider
 		c.clientID = clientID
 		c.clientSecret = clientSecret
+	}
+}
+
+func WithAESKey(key []byte) Options {
+	return func(c *config) {
+		c.aesKey = key
 	}
 }

@@ -95,7 +95,7 @@ func Website(v string) predicate.Users {
 }
 
 // EmailEncrypted applies equality check predicate on the "email_encrypted" field. It's identical to EmailEncryptedEQ.
-func EmailEncrypted(v string) predicate.Users {
+func EmailEncrypted(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldEmailEncrypted, v))
 }
 
@@ -610,68 +610,43 @@ func WebsiteContainsFold(v string) predicate.Users {
 }
 
 // EmailEncryptedEQ applies the EQ predicate on the "email_encrypted" field.
-func EmailEncryptedEQ(v string) predicate.Users {
+func EmailEncryptedEQ(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldEmailEncrypted, v))
 }
 
 // EmailEncryptedNEQ applies the NEQ predicate on the "email_encrypted" field.
-func EmailEncryptedNEQ(v string) predicate.Users {
+func EmailEncryptedNEQ(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldNEQ(FieldEmailEncrypted, v))
 }
 
 // EmailEncryptedIn applies the In predicate on the "email_encrypted" field.
-func EmailEncryptedIn(vs ...string) predicate.Users {
+func EmailEncryptedIn(vs ...[]byte) predicate.Users {
 	return predicate.Users(sql.FieldIn(FieldEmailEncrypted, vs...))
 }
 
 // EmailEncryptedNotIn applies the NotIn predicate on the "email_encrypted" field.
-func EmailEncryptedNotIn(vs ...string) predicate.Users {
+func EmailEncryptedNotIn(vs ...[]byte) predicate.Users {
 	return predicate.Users(sql.FieldNotIn(FieldEmailEncrypted, vs...))
 }
 
 // EmailEncryptedGT applies the GT predicate on the "email_encrypted" field.
-func EmailEncryptedGT(v string) predicate.Users {
+func EmailEncryptedGT(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldGT(FieldEmailEncrypted, v))
 }
 
 // EmailEncryptedGTE applies the GTE predicate on the "email_encrypted" field.
-func EmailEncryptedGTE(v string) predicate.Users {
+func EmailEncryptedGTE(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldGTE(FieldEmailEncrypted, v))
 }
 
 // EmailEncryptedLT applies the LT predicate on the "email_encrypted" field.
-func EmailEncryptedLT(v string) predicate.Users {
+func EmailEncryptedLT(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldLT(FieldEmailEncrypted, v))
 }
 
 // EmailEncryptedLTE applies the LTE predicate on the "email_encrypted" field.
-func EmailEncryptedLTE(v string) predicate.Users {
+func EmailEncryptedLTE(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldEmailEncrypted, v))
-}
-
-// EmailEncryptedContains applies the Contains predicate on the "email_encrypted" field.
-func EmailEncryptedContains(v string) predicate.Users {
-	return predicate.Users(sql.FieldContains(FieldEmailEncrypted, v))
-}
-
-// EmailEncryptedHasPrefix applies the HasPrefix predicate on the "email_encrypted" field.
-func EmailEncryptedHasPrefix(v string) predicate.Users {
-	return predicate.Users(sql.FieldHasPrefix(FieldEmailEncrypted, v))
-}
-
-// EmailEncryptedHasSuffix applies the HasSuffix predicate on the "email_encrypted" field.
-func EmailEncryptedHasSuffix(v string) predicate.Users {
-	return predicate.Users(sql.FieldHasSuffix(FieldEmailEncrypted, v))
-}
-
-// EmailEncryptedEqualFold applies the EqualFold predicate on the "email_encrypted" field.
-func EmailEncryptedEqualFold(v string) predicate.Users {
-	return predicate.Users(sql.FieldEqualFold(FieldEmailEncrypted, v))
-}
-
-// EmailEncryptedContainsFold applies the ContainsFold predicate on the "email_encrypted" field.
-func EmailEncryptedContainsFold(v string) predicate.Users {
-	return predicate.Users(sql.FieldContainsFold(FieldEmailEncrypted, v))
 }
 
 // EmailVerifiedEQ applies the EQ predicate on the "email_verified" field.

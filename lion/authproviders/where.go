@@ -75,7 +75,7 @@ func Enabled(v bool) predicate.AuthProviders {
 }
 
 // ClientSecretEncrypted applies equality check predicate on the "client_secret_encrypted" field. It's identical to ClientSecretEncryptedEQ.
-func ClientSecretEncrypted(v string) predicate.AuthProviders {
+func ClientSecretEncrypted(v []byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldClientSecretEncrypted, v))
 }
 
@@ -285,68 +285,43 @@ func EnabledNEQ(v bool) predicate.AuthProviders {
 }
 
 // ClientSecretEncryptedEQ applies the EQ predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedEQ(v string) predicate.AuthProviders {
+func ClientSecretEncryptedEQ(v []byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldClientSecretEncrypted, v))
 }
 
 // ClientSecretEncryptedNEQ applies the NEQ predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedNEQ(v string) predicate.AuthProviders {
+func ClientSecretEncryptedNEQ(v []byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldNEQ(FieldClientSecretEncrypted, v))
 }
 
 // ClientSecretEncryptedIn applies the In predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedIn(vs ...string) predicate.AuthProviders {
+func ClientSecretEncryptedIn(vs ...[]byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldIn(FieldClientSecretEncrypted, vs...))
 }
 
 // ClientSecretEncryptedNotIn applies the NotIn predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedNotIn(vs ...string) predicate.AuthProviders {
+func ClientSecretEncryptedNotIn(vs ...[]byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldNotIn(FieldClientSecretEncrypted, vs...))
 }
 
 // ClientSecretEncryptedGT applies the GT predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedGT(v string) predicate.AuthProviders {
+func ClientSecretEncryptedGT(v []byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldGT(FieldClientSecretEncrypted, v))
 }
 
 // ClientSecretEncryptedGTE applies the GTE predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedGTE(v string) predicate.AuthProviders {
+func ClientSecretEncryptedGTE(v []byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldGTE(FieldClientSecretEncrypted, v))
 }
 
 // ClientSecretEncryptedLT applies the LT predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedLT(v string) predicate.AuthProviders {
+func ClientSecretEncryptedLT(v []byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldLT(FieldClientSecretEncrypted, v))
 }
 
 // ClientSecretEncryptedLTE applies the LTE predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedLTE(v string) predicate.AuthProviders {
+func ClientSecretEncryptedLTE(v []byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldLTE(FieldClientSecretEncrypted, v))
-}
-
-// ClientSecretEncryptedContains applies the Contains predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedContains(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContains(FieldClientSecretEncrypted, v))
-}
-
-// ClientSecretEncryptedHasPrefix applies the HasPrefix predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedHasPrefix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasPrefix(FieldClientSecretEncrypted, v))
-}
-
-// ClientSecretEncryptedHasSuffix applies the HasSuffix predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedHasSuffix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasSuffix(FieldClientSecretEncrypted, v))
-}
-
-// ClientSecretEncryptedEqualFold applies the EqualFold predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedEqualFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEqualFold(FieldClientSecretEncrypted, v))
-}
-
-// ClientSecretEncryptedContainsFold applies the ContainsFold predicate on the "client_secret_encrypted" field.
-func ClientSecretEncryptedContainsFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContainsFold(FieldClientSecretEncrypted, v))
 }
 
 // IssuerEQ applies the EQ predicate on the "issuer" field.

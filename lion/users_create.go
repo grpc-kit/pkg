@@ -117,16 +117,8 @@ func (uc *UsersCreate) SetNillableWebsite(s *string) *UsersCreate {
 }
 
 // SetEmailEncrypted sets the "email_encrypted" field.
-func (uc *UsersCreate) SetEmailEncrypted(s string) *UsersCreate {
-	uc.mutation.SetEmailEncrypted(s)
-	return uc
-}
-
-// SetNillableEmailEncrypted sets the "email_encrypted" field if the given value is not nil.
-func (uc *UsersCreate) SetNillableEmailEncrypted(s *string) *UsersCreate {
-	if s != nil {
-		uc.SetEmailEncrypted(*s)
-	}
+func (uc *UsersCreate) SetEmailEncrypted(b []byte) *UsersCreate {
+	uc.mutation.SetEmailEncrypted(b)
 	return uc
 }
 
@@ -407,7 +399,7 @@ func (uc *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_node.Website = &value
 	}
 	if value, ok := uc.mutation.EmailEncrypted(); ok {
-		_spec.SetField(users.FieldEmailEncrypted, field.TypeString, value)
+		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
 		_node.EmailEncrypted = value
 	}
 	if value, ok := uc.mutation.EmailVerified(); ok {

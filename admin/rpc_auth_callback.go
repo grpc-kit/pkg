@@ -3,16 +3,17 @@ package admin
 import (
 	"context"
 	"fmt"
-	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/users"
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/userauthsocial"
+	"github.com/grpc-kit/pkg/lion/users"
 	"golang.org/x/oauth2"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -54,9 +55,15 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		return nil, errs.Internal(ctx).WithMessage(err.Error())
 	}
 
+	var clientSecret []byte
+	clientSecret, err = crypto.DecryptAES(a.config.aesKey, []byte(ap.ClientSecretEncrypted))
+	if err != nil {
+		// TODO;
+	}
+
 	oauth2Config := oauth2.Config{
 		ClientID:     ap.ClientID,
-		ClientSecret: ap.ClientSecretEncrypted,
+		ClientSecret: string(clientSecret),
 		Endpoint:     op.Endpoint(),
 		Scopes:       strings.Split(ap.Scopes, " "),
 		RedirectURL:  ap.RedirectURL,
@@ -117,9 +124,15 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 			return nil, errs.Internal(ctx).WithMessage("create user failed")
 		}
 
+		var emailEnc []byte
+		emailEnc, err = crypto.EncryptAES(a.config.aesKey, []byte(idToken.Email))
+		if err != nil {
+			// TODO;
+		}
+
 		newUser, err := tx.Users.Create().
 			SetPreferredUsername(username).
-			SetEmailEncrypted(idToken.Email).
+			SetEmailEncrypted(emailEnc).
 			SetEmailVerified(idToken.EmailVerified).
 			Save(ctx)
 		if err != nil {
@@ -129,12 +142,20 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 			return nil, errs.Internal(ctx).WithMessage("create user failed")
 		}
 
+		var accessTokenEnc, refreshTokenEnc []byte
+		if oauth2Token.AccessToken != "" {
+			accessTokenEnc, err = crypto.EncryptAES(a.config.aesKey, []byte(oauth2Token.AccessToken))
+		}
+		if oauth2Token.RefreshToken != "" {
+			refreshTokenEnc, err = crypto.EncryptAES(a.config.aesKey, []byte(oauth2Token.RefreshToken))
+		}
+
 		_, err = tx.UserAuthSocial.Create().
 			SetUserID(newUser.ID).
 			SetProviderName(strings.ToUpper(req.ProviderName)).
 			SetProviderUserID(idToken.Subject).
-			SetAccessTokenEncrypted([]byte(oauth2Token.AccessToken)).
-			SetRefreshTokenEncrypted([]byte(oauth2Token.RefreshToken)).
+			SetAccessTokenEncrypted(accessTokenEnc).
+			SetRefreshTokenEncrypted(refreshTokenEnc).
 			SetTokenExpiresAt(oauth2Token.Expiry).
 			Save(ctx)
 		if err != nil {

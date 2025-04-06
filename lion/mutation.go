@@ -578,7 +578,7 @@ type AuthProvidersMutation struct {
 	name                    *authproviders.Name
 	client_id               *string
 	enabled                 *bool
-	client_secret_encrypted *string
+	client_secret_encrypted *[]byte
 	issuer                  *string
 	auth_url                *string
 	token_url               *string
@@ -870,12 +870,12 @@ func (m *AuthProvidersMutation) ResetEnabled() {
 }
 
 // SetClientSecretEncrypted sets the "client_secret_encrypted" field.
-func (m *AuthProvidersMutation) SetClientSecretEncrypted(s string) {
-	m.client_secret_encrypted = &s
+func (m *AuthProvidersMutation) SetClientSecretEncrypted(b []byte) {
+	m.client_secret_encrypted = &b
 }
 
 // ClientSecretEncrypted returns the value of the "client_secret_encrypted" field in the mutation.
-func (m *AuthProvidersMutation) ClientSecretEncrypted() (r string, exists bool) {
+func (m *AuthProvidersMutation) ClientSecretEncrypted() (r []byte, exists bool) {
 	v := m.client_secret_encrypted
 	if v == nil {
 		return
@@ -886,7 +886,7 @@ func (m *AuthProvidersMutation) ClientSecretEncrypted() (r string, exists bool) 
 // OldClientSecretEncrypted returns the old "client_secret_encrypted" field's value of the AuthProviders entity.
 // If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldClientSecretEncrypted(ctx context.Context) (v string, err error) {
+func (m *AuthProvidersMutation) OldClientSecretEncrypted(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldClientSecretEncrypted is only allowed on UpdateOne operations")
 	}
@@ -1302,7 +1302,7 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 		m.SetEnabled(v)
 		return nil
 	case authproviders.FieldClientSecretEncrypted:
-		v, ok := value.(string)
+		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -5212,7 +5212,7 @@ type UsersMutation struct {
 	profile                *string
 	picture                *string
 	website                *string
-	email_encrypted        *string
+	email_encrypted        *[]byte
 	email_verified         *bool
 	gender                 *users.Gender
 	birthdate              *time.Time
@@ -5653,12 +5653,12 @@ func (m *UsersMutation) ResetWebsite() {
 }
 
 // SetEmailEncrypted sets the "email_encrypted" field.
-func (m *UsersMutation) SetEmailEncrypted(s string) {
-	m.email_encrypted = &s
+func (m *UsersMutation) SetEmailEncrypted(b []byte) {
+	m.email_encrypted = &b
 }
 
 // EmailEncrypted returns the value of the "email_encrypted" field in the mutation.
-func (m *UsersMutation) EmailEncrypted() (r string, exists bool) {
+func (m *UsersMutation) EmailEncrypted() (r []byte, exists bool) {
 	v := m.email_encrypted
 	if v == nil {
 		return
@@ -5669,7 +5669,7 @@ func (m *UsersMutation) EmailEncrypted() (r string, exists bool) {
 // OldEmailEncrypted returns the old "email_encrypted" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldEmailEncrypted(ctx context.Context) (v string, err error) {
+func (m *UsersMutation) OldEmailEncrypted(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldEmailEncrypted is only allowed on UpdateOne operations")
 	}
@@ -6252,7 +6252,7 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 		m.SetWebsite(v)
 		return nil
 	case users.FieldEmailEncrypted:
-		v, ok := value.(string)
+		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

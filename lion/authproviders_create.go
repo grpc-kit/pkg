@@ -83,8 +83,8 @@ func (apc *AuthProvidersCreate) SetNillableEnabled(b *bool) *AuthProvidersCreate
 }
 
 // SetClientSecretEncrypted sets the "client_secret_encrypted" field.
-func (apc *AuthProvidersCreate) SetClientSecretEncrypted(s string) *AuthProvidersCreate {
-	apc.mutation.SetClientSecretEncrypted(s)
+func (apc *AuthProvidersCreate) SetClientSecretEncrypted(b []byte) *AuthProvidersCreate {
+	apc.mutation.SetClientSecretEncrypted(b)
 	return apc
 }
 
@@ -174,6 +174,10 @@ func (apc *AuthProvidersCreate) defaults() {
 	if _, ok := apc.mutation.Enabled(); !ok {
 		v := authproviders.DefaultEnabled
 		apc.mutation.SetEnabled(v)
+	}
+	if _, ok := apc.mutation.ClientSecretEncrypted(); !ok {
+		v := authproviders.DefaultClientSecretEncrypted
+		apc.mutation.SetClientSecretEncrypted(v)
 	}
 }
 
@@ -267,7 +271,7 @@ func (apc *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSp
 		_node.Enabled = value
 	}
 	if value, ok := apc.mutation.ClientSecretEncrypted(); ok {
-		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeString, value)
+		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeBytes, value)
 		_node.ClientSecretEncrypted = value
 	}
 	if value, ok := apc.mutation.Issuer(); ok {

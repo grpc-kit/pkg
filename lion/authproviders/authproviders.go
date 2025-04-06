@@ -80,6 +80,8 @@ var (
 	DefaultClientID string
 	// DefaultEnabled holds the default value on creation for the "enabled" field.
 	DefaultEnabled bool
+	// DefaultClientSecretEncrypted holds the default value on creation for the "client_secret_encrypted" field.
+	DefaultClientSecretEncrypted []byte
 )
 
 // Name defines the type for the "name" enum field.
@@ -141,11 +143,6 @@ func ByClientID(opts ...sql.OrderTermOption) OrderOption {
 // ByEnabled orders the results by the enabled field.
 func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
-}
-
-// ByClientSecretEncrypted orders the results by the client_secret_encrypted field.
-func ByClientSecretEncrypted(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldClientSecretEncrypted, opts...).ToFunc()
 }
 
 // ByIssuer orders the results by the issuer field.

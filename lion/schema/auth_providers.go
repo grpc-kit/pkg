@@ -24,8 +24,9 @@ func (AuthProviders) Fields() []ent.Field {
 			Default(""),
 		field.Bool("enabled").
 			Default(false),
-		field.String("client_secret_encrypted").
-			Sensitive(),
+		field.Bytes("client_secret_encrypted").
+			Sensitive().
+			Default([]byte("")),
 		field.String("issuer"),        // https://open.weixin.qq.com/connect/qrconnect
 		field.String("auth_url"),      // https://open.weixin.qq.com/connect/qrconnect
 		field.String("token_url"),     // https://api.weixin.qq.com/sns/oauth2/access_token

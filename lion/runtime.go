@@ -67,6 +67,10 @@ func init() {
 	authprovidersDescEnabled := authprovidersFields[2].Descriptor()
 	// authproviders.DefaultEnabled holds the default value on creation for the enabled field.
 	authproviders.DefaultEnabled = authprovidersDescEnabled.Default.(bool)
+	// authprovidersDescClientSecretEncrypted is the schema descriptor for client_secret_encrypted field.
+	authprovidersDescClientSecretEncrypted := authprovidersFields[3].Descriptor()
+	// authproviders.DefaultClientSecretEncrypted holds the default value on creation for the client_secret_encrypted field.
+	authproviders.DefaultClientSecretEncrypted = authprovidersDescClientSecretEncrypted.Default.([]byte)
 	demoMixin := schema.Demo{}.Mixin()
 	demoMixinFields0 := demoMixin[0].Fields()
 	_ = demoMixinFields0
@@ -276,7 +280,7 @@ func init() {
 	// usersDescEmailEncrypted is the schema descriptor for email_encrypted field.
 	usersDescEmailEncrypted := usersFields[6].Descriptor()
 	// users.DefaultEmailEncrypted holds the default value on creation for the email_encrypted field.
-	users.DefaultEmailEncrypted = usersDescEmailEncrypted.Default.(string)
+	users.DefaultEmailEncrypted = usersDescEmailEncrypted.Default.([]byte)
 	// usersDescEmailVerified is the schema descriptor for email_verified field.
 	usersDescEmailVerified := usersFields[7].Descriptor()
 	// users.DefaultEmailVerified holds the default value on creation for the email_verified field.

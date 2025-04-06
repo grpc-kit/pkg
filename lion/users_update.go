@@ -129,16 +129,8 @@ func (uu *UsersUpdate) ClearWebsite() *UsersUpdate {
 }
 
 // SetEmailEncrypted sets the "email_encrypted" field.
-func (uu *UsersUpdate) SetEmailEncrypted(s string) *UsersUpdate {
-	uu.mutation.SetEmailEncrypted(s)
-	return uu
-}
-
-// SetNillableEmailEncrypted sets the "email_encrypted" field if the given value is not nil.
-func (uu *UsersUpdate) SetNillableEmailEncrypted(s *string) *UsersUpdate {
-	if s != nil {
-		uu.SetEmailEncrypted(*s)
-	}
+func (uu *UsersUpdate) SetEmailEncrypted(b []byte) *UsersUpdate {
+	uu.mutation.SetEmailEncrypted(b)
 	return uu
 }
 
@@ -355,7 +347,7 @@ func (uu *UsersUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.ClearField(users.FieldWebsite, field.TypeString)
 	}
 	if value, ok := uu.mutation.EmailEncrypted(); ok {
-		_spec.SetField(users.FieldEmailEncrypted, field.TypeString, value)
+		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
 	}
 	if value, ok := uu.mutation.EmailVerified(); ok {
 		_spec.SetField(users.FieldEmailVerified, field.TypeBool, value)
@@ -511,16 +503,8 @@ func (uuo *UsersUpdateOne) ClearWebsite() *UsersUpdateOne {
 }
 
 // SetEmailEncrypted sets the "email_encrypted" field.
-func (uuo *UsersUpdateOne) SetEmailEncrypted(s string) *UsersUpdateOne {
-	uuo.mutation.SetEmailEncrypted(s)
-	return uuo
-}
-
-// SetNillableEmailEncrypted sets the "email_encrypted" field if the given value is not nil.
-func (uuo *UsersUpdateOne) SetNillableEmailEncrypted(s *string) *UsersUpdateOne {
-	if s != nil {
-		uuo.SetEmailEncrypted(*s)
-	}
+func (uuo *UsersUpdateOne) SetEmailEncrypted(b []byte) *UsersUpdateOne {
+	uuo.mutation.SetEmailEncrypted(b)
 	return uuo
 }
 
@@ -767,7 +751,7 @@ func (uuo *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error
 		_spec.ClearField(users.FieldWebsite, field.TypeString)
 	}
 	if value, ok := uuo.mutation.EmailEncrypted(); ok {
-		_spec.SetField(users.FieldEmailEncrypted, field.TypeString, value)
+		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
 	}
 	if value, ok := uuo.mutation.EmailVerified(); ok {
 		_spec.SetField(users.FieldEmailVerified, field.TypeBool, value)

@@ -4,54 +4,93 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"io"
 )
 
-// AESKey 密钥 (需要妥善存储，这里是测试)
-var AESKey = []byte("d6c43639164bd159609fde47ae1477cc") // 32 字节密钥
+// 定义最小密文长度常量
+const minGCMCipherTextLength = 12 // GCM 密文至少需要 12 字节（包括 nonce）
+
+// validateAESKey 验证 AES 密钥是否合法
+func validateAESKey(aesKey []byte) error {
+	if len(aesKey) == 0 {
+		return fmt.Errorf("AES key cannot be empty")
+	}
+
+	switch len(aesKey) {
+	case 16, 24, 32:
+		return nil
+	default:
+		return fmt.Errorf("invalid AES key length: %d, must be 16, 24, or 32 bytes", len(aesKey))
+	}
+}
+
+// initializeCipher 初始化 AES 加密块
+func initializeCipher(aesKey []byte) (cipher.Block, error) {
+	if err := validateAESKey(aesKey); err != nil {
+		return nil, err
+	}
+
+	block, err := aes.NewCipher(aesKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create cipher block: %w", err)
+	}
+
+	return block, nil
+}
 
 // EncryptAES 对字符串进行 AES 加密
-func EncryptAES(plainText string) (string, error) {
-	block, err := aes.NewCipher(AESKey)
+func EncryptAES(aesKey, plainText []byte) ([]byte, error) {
+	if len(plainText) == 0 {
+		return nil, fmt.Errorf("plain text cannot be empty")
+	}
+
+	block, err := initializeCipher(aesKey)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	ciphertext := make([]byte, aes.BlockSize+len(plainText))
-	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		return "", err
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create GCM cipher: %w", err)
 	}
 
-	stream := cipher.NewCFBEncrypter(block, iv)
-	stream.XORKeyStream(ciphertext[aes.BlockSize:], []byte(plainText))
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		return nil, fmt.Errorf("failed to generate nonce (possible system resource issue): %w", err)
+	}
 
-	return base64.StdEncoding.EncodeToString(ciphertext), nil
+	cipherText := gcm.Seal(nonce, nonce, plainText, nil)
+
+	return cipherText, nil
 }
 
 // DecryptAES 对 AES 加密字符串解密
-func DecryptAES(encryptedText string) (string, error) {
-	ciphertext, err := base64.StdEncoding.DecodeString(encryptedText)
+func DecryptAES(aesKey, cipherText []byte) ([]byte, error) {
+	if len(cipherText) == 0 {
+		return nil, fmt.Errorf("cipher text cannot be empty")
+	}
+
+	block, err := initializeCipher(aesKey)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	block, err := aes.NewCipher(AESKey)
+	gcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return "", err
+		return nil, fmt.Errorf("failed to create GCM cipher: %w", err)
 	}
 
-	if len(ciphertext) < aes.BlockSize {
-		return "", fmt.Errorf("ciphertext too short")
+	nonceSize := gcm.NonceSize()
+	if len(cipherText) < nonceSize+minGCMCipherTextLength {
+		return nil, fmt.Errorf("invalid cipher text length: %d, must be at least %d bytes", len(cipherText), nonceSize+minGCMCipherTextLength)
 	}
 
-	iv := ciphertext[:aes.BlockSize]
-	ciphertext = ciphertext[aes.BlockSize:]
+	nonce := cipherText[:nonceSize]
+	plaintext, err := gcm.Open(nil, nonce, cipherText[nonceSize:], nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrypt: %w", err)
+	}
 
-	stream := cipher.NewCFBDecrypter(block, iv)
-	stream.XORKeyStream(ciphertext, ciphertext)
-
-	return string(ciphertext), nil
+	return plaintext, nil
 }

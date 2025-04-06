@@ -77,16 +77,8 @@ func (apu *AuthProvidersUpdate) SetNillableEnabled(b *bool) *AuthProvidersUpdate
 }
 
 // SetClientSecretEncrypted sets the "client_secret_encrypted" field.
-func (apu *AuthProvidersUpdate) SetClientSecretEncrypted(s string) *AuthProvidersUpdate {
-	apu.mutation.SetClientSecretEncrypted(s)
-	return apu
-}
-
-// SetNillableClientSecretEncrypted sets the "client_secret_encrypted" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableClientSecretEncrypted(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetClientSecretEncrypted(*s)
-	}
+func (apu *AuthProvidersUpdate) SetClientSecretEncrypted(b []byte) *AuthProvidersUpdate {
+	apu.mutation.SetClientSecretEncrypted(b)
 	return apu
 }
 
@@ -250,7 +242,7 @@ func (apu *AuthProvidersUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		_spec.SetField(authproviders.FieldEnabled, field.TypeBool, value)
 	}
 	if value, ok := apu.mutation.ClientSecretEncrypted(); ok {
-		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeString, value)
+		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeBytes, value)
 	}
 	if value, ok := apu.mutation.Issuer(); ok {
 		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
@@ -339,16 +331,8 @@ func (apuo *AuthProvidersUpdateOne) SetNillableEnabled(b *bool) *AuthProvidersUp
 }
 
 // SetClientSecretEncrypted sets the "client_secret_encrypted" field.
-func (apuo *AuthProvidersUpdateOne) SetClientSecretEncrypted(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetClientSecretEncrypted(s)
-	return apuo
-}
-
-// SetNillableClientSecretEncrypted sets the "client_secret_encrypted" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableClientSecretEncrypted(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetClientSecretEncrypted(*s)
-	}
+func (apuo *AuthProvidersUpdateOne) SetClientSecretEncrypted(b []byte) *AuthProvidersUpdateOne {
+	apuo.mutation.SetClientSecretEncrypted(b)
 	return apuo
 }
 
@@ -542,7 +526,7 @@ func (apuo *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthPro
 		_spec.SetField(authproviders.FieldEnabled, field.TypeBool, value)
 	}
 	if value, ok := apuo.mutation.ClientSecretEncrypted(); ok {
-		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeString, value)
+		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeBytes, value)
 	}
 	if value, ok := apuo.mutation.Issuer(); ok {
 		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)

@@ -51,9 +51,9 @@ func (Users) Fields() []ent.Field {
 			Optional().
 			Nillable().
 			Comment("用户的个人网站 URL"),
-		field.String("email_encrypted").
+		field.Bytes("email_encrypted").
 			Sensitive().
-			Default("").
+			Default([]byte("")).
 			Comment("用户的邮箱地址"),
 		field.Bool("email_verified").
 			Default(false).

@@ -3,6 +3,9 @@ package admin
 import (
 	"context"
 
+	"github.com/grpc-kit/pkg/crypto"
+	"github.com/grpc-kit/pkg/lion"
+
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion/authproviders"
@@ -107,8 +110,14 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 		}
 
 		existID, err := db.AuthProviders.Query().Where(authproviders.NameEQ(name)).OnlyID(ctx)
-		if err != nil {
+		if err != nil && !lion.IsNotFound(err) {
 			return nil, err
+		}
+
+		var clientSecretEnc []byte
+		clientSecretEnc, err = crypto.EncryptAES(a.config.aesKey, []byte(p.ClientSecret))
+		if err != nil {
+			// return nil, err
 		}
 
 		if existID == 0 {
@@ -116,7 +125,7 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 				SetName(name).
 				SetEnabled(p.Enabled).
 				SetClientID(p.ClientId).
-				SetClientSecretEncrypted(p.ClientSecret).
+				SetClientSecretEncrypted(clientSecretEnc).
 				SetIssuer(p.Issuer).
 				SetAuthURL(p.AuthUrl).
 				SetTokenURL(p.TokenUrl).
@@ -130,8 +139,8 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 			if p.ClientId != "" {
 				x.SetClientID(p.ClientId)
 			}
-			if p.ClientSecret != "" {
-				x.SetClientSecretEncrypted(p.ClientSecret)
+			if len(clientSecretEnc) > 0 {
+				x.SetClientSecretEncrypted(clientSecretEnc)
 			}
 			if p.Issuer != "" {
 				x.SetIssuer(p.Issuer)
