@@ -2,7 +2,9 @@ package cfg
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -217,7 +219,16 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 				// 根据 sub 获取作为 username 获取对应的 password 作为 token 的签名验证
 				f, b := s.foundUsername(claims.Subject)
 				if f {
-					return []byte(b.Password), nil
+					// TODO; 使用 password sha256 后作为密钥进行验证
+					jwtKey := []byte(b.PasswordHash)
+					if b.Password != "" {
+						h := sha256.New()
+						h.Write([]byte(b.Password))
+						jwtKey = []byte(hex.EncodeToString(h.Sum(nil)))
+					}
+					return jwtKey, nil
+
+					//return []byte(b.Password), nil
 				}
 
 				return nil, fmt.Errorf("not found key")

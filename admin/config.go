@@ -18,6 +18,9 @@ type config struct {
 	clientID string
 	// oidc 客户端密钥
 	clientSecret string
+
+	// 静态用户
+	staticUsers *StaticUsers
 }
 
 // Options xx
@@ -32,12 +35,14 @@ func WithLogger(logger *logrus.Entry) Options {
 	}
 }
 
+// WithLionClient 内置管理模块的 ent client 数据库 lion 数据结构
 func WithLionClient(client *lion.Client) Options {
 	return func(c *config) {
 		c.db = client
 	}
 }
 
+// WithOIDCProvider 设置 oidc 认证的基础信息
 func WithOIDCProvider(provider, clientID, clientSecret string) Options {
 	return func(c *config) {
 		c.provider = provider
@@ -46,8 +51,16 @@ func WithOIDCProvider(provider, clientID, clientSecret string) Options {
 	}
 }
 
+// WithAESKey 设置 AES 加密的密钥
 func WithAESKey(key []byte) Options {
 	return func(c *config) {
 		c.aesKey = key
+	}
+}
+
+// WithStaticUsers 设置本地配置的静态用户
+func WithStaticUsers(users *StaticUsers) Options {
+	return func(c *config) {
+		c.staticUsers = users
 	}
 }

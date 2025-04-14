@@ -3,24 +3,48 @@ package admin
 import (
 	"context"
 
-	"github.com/grpc-kit/pkg/crypto"
-	"github.com/grpc-kit/pkg/lion"
-
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 )
 
+// GetConfig 获取配置内容
 func (a *KnownAdminAPI) GetConfig(ctx context.Context, req *adminv1.GetConfigRequest) (*adminv1.GetConfigResponse, error) {
 	result := &adminv1.GetConfigResponse{}
 	return result, nil
 }
 
+// CreateAuthLogin 创建登录认证
 func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.CreateAuthLoginRequest) (*adminv1.CreateAuthLoginResponse, error) {
-	result := &adminv1.CreateAuthLoginResponse{Token: "test"}
+	result := &adminv1.CreateAuthLoginResponse{TokenType: "Bearer"}
+
+	// TODO; 当前先支持静态用户登录
+	if a.config.staticUsers == nil {
+		return nil, errs.Unauthenticated(ctx)
+	}
+
+	if req.Username == "" {
+		return nil, errs.Unauthenticated(ctx)
+	}
+
+	u, ok := a.config.staticUsers.Valid(req.Username, req.PasswordHash)
+	if !ok {
+		return nil, errs.Unauthenticated(ctx)
+	}
+
+	tk, err := u.GetAccessToken()
+	if err != nil {
+		return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+	}
+
+	result.AccessToken = tk
+
 	return result, nil
 }
 
+// GetAuthProviders 获取认证提供列表
 func (a *KnownAdminAPI) GetAuthProviders(ctx context.Context, req *adminv1.GetAuthProvidersRequest) (*adminv1.GetAuthProvidersResponse, error) {
 	result := &adminv1.GetAuthProvidersResponse{
 		Providers: make([]*adminv1.AuthProvider, 0),
@@ -79,6 +103,7 @@ func (a *KnownAdminAPI) GetAuthProviders(ctx context.Context, req *adminv1.GetAu
 	return result, nil
 }
 
+// UpsertAuthProviders 更新认证提供方列表
 func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.UpsertAuthProvidersRequest) (*adminv1.UpsertAuthProvidersResponse, error) {
 	result := &adminv1.UpsertAuthProvidersResponse{}
 

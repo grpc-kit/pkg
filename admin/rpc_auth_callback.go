@@ -7,6 +7,9 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
+	"golang.org/x/oauth2"
+
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
@@ -14,11 +17,9 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/userauthsocial"
 	"github.com/grpc-kit/pkg/lion/users"
-	"golang.org/x/oauth2"
-
-	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 )
 
+// GetAuthCallback 处理 OAuth2.0 的回调
 func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAuthCallbackRequest) (*adminv1.GetAuthCallbackResponse, error) {
 	result := &adminv1.GetAuthCallbackResponse{}
 

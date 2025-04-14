@@ -2,8 +2,10 @@ package cfg
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"embed"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -195,9 +197,11 @@ type Authorization struct {
 
 // BasicAuth 用于HTTP基本认证的用户权限定义
 type BasicAuth struct {
-	Username string   `mapstructure:"username"`
-	Password string   `mapstructure:"password"`
-	Groups   []string `mapstructure:"groups"`
+	Username string `mapstructure:"username"`
+	// Deprecated: 使用 PasswordHash 代替，优先级低于 Password 配置
+	Password     string   `mapstructure:"password"`
+	PasswordHash string   `mapstructure:"password_hash"`
+	Groups       []string `mapstructure:"groups"`
 }
 
 // OIDCProvider 用于OIDC认证提供方配置
@@ -316,6 +320,23 @@ func (c *LocalConfig) Register(ctx context.Context,
 
 	// TODO; 植入默认 admin api 服务
 	// 仅当配置了 "database" 且开启了 "frontend.enable" 且 "frontend.interface.admin.enabled" 则启用内置 "admin api" 服务
+	su := &admin.StaticUsers{}
+	if c.Security != nil && c.Security.Authentication != nil {
+		for _, v := range c.Security.Authentication.HTTPUsers {
+			uu := &admin.StaticUser{
+				Username:     v.Username,
+				PasswordHash: v.PasswordHash,
+				Groups:       v.Groups,
+			}
+			if uu.PasswordHash == "" && v.Password != "" {
+				h := sha256.New()
+				h.Write([]byte(v.Password))
+				uu.PasswordHash = hex.EncodeToString(h.Sum(nil))
+			}
+			su.Append(uu)
+		}
+	}
+
 	client, err := c.GetAdminDatabaseLion()
 	if err == nil && c.Frontend.hasEnableAdmin() {
 		adminIns := admin.New(
@@ -327,6 +348,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 				c.Security.Authentication.OIDCProvider.Config.ClientID,
 				c.Security.Authentication.OIDCProvider.Config.ClientSecret,
 			),
+			admin.WithStaticUsers(su),
 		)
 		adminv1.RegisterKnownAdminServer(c.rpcServer.Server(), adminIns)
 	}
