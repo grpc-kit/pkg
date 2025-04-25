@@ -20,30 +20,44 @@ type GroupsCreate struct {
 	hooks    []Hook
 }
 
-// SetCreateTime sets the "create_time" field.
-func (gc *GroupsCreate) SetCreateTime(t time.Time) *GroupsCreate {
-	gc.mutation.SetCreateTime(t)
+// SetCreatedAt sets the "created_at" field.
+func (gc *GroupsCreate) SetCreatedAt(t time.Time) *GroupsCreate {
+	gc.mutation.SetCreatedAt(t)
 	return gc
 }
 
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (gc *GroupsCreate) SetNillableCreateTime(t *time.Time) *GroupsCreate {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (gc *GroupsCreate) SetNillableCreatedAt(t *time.Time) *GroupsCreate {
 	if t != nil {
-		gc.SetCreateTime(*t)
+		gc.SetCreatedAt(*t)
 	}
 	return gc
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (gc *GroupsCreate) SetUpdateTime(t time.Time) *GroupsCreate {
-	gc.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (gc *GroupsCreate) SetUpdatedAt(t time.Time) *GroupsCreate {
+	gc.mutation.SetUpdatedAt(t)
 	return gc
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (gc *GroupsCreate) SetNillableUpdateTime(t *time.Time) *GroupsCreate {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (gc *GroupsCreate) SetNillableUpdatedAt(t *time.Time) *GroupsCreate {
 	if t != nil {
-		gc.SetUpdateTime(*t)
+		gc.SetUpdatedAt(*t)
+	}
+	return gc
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (gc *GroupsCreate) SetDeletedAt(t time.Time) *GroupsCreate {
+	gc.mutation.SetDeletedAt(t)
+	return gc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (gc *GroupsCreate) SetNillableDeletedAt(t *time.Time) *GroupsCreate {
+	if t != nil {
+		gc.SetDeletedAt(*t)
 	}
 	return gc
 }
@@ -103,13 +117,13 @@ func (gc *GroupsCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (gc *GroupsCreate) defaults() {
-	if _, ok := gc.mutation.CreateTime(); !ok {
-		v := groups.DefaultCreateTime()
-		gc.mutation.SetCreateTime(v)
+	if _, ok := gc.mutation.CreatedAt(); !ok {
+		v := groups.DefaultCreatedAt()
+		gc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := gc.mutation.UpdateTime(); !ok {
-		v := groups.DefaultUpdateTime()
-		gc.mutation.SetUpdateTime(v)
+	if _, ok := gc.mutation.UpdatedAt(); !ok {
+		v := groups.DefaultUpdatedAt()
+		gc.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := gc.mutation.Description(); !ok {
 		v := groups.DefaultDescription
@@ -119,11 +133,11 @@ func (gc *GroupsCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupsCreate) check() error {
-	if _, ok := gc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`lion: missing required field "Groups.create_time"`)}
+	if _, ok := gc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "Groups.created_at"`)}
 	}
-	if _, ok := gc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`lion: missing required field "Groups.update_time"`)}
+	if _, ok := gc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Groups.updated_at"`)}
 	}
 	if _, ok := gc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Groups.name"`)}
@@ -162,13 +176,17 @@ func (gc *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_node = &Groups{config: gc.config}
 		_spec = sqlgraph.NewCreateSpec(groups.Table, sqlgraph.NewFieldSpec(groups.FieldID, field.TypeInt))
 	)
-	if value, ok := gc.mutation.CreateTime(); ok {
-		_spec.SetField(groups.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
+	if value, ok := gc.mutation.CreatedAt(); ok {
+		_spec.SetField(groups.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
-	if value, ok := gc.mutation.UpdateTime(); ok {
-		_spec.SetField(groups.FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
+	if value, ok := gc.mutation.UpdatedAt(); ok {
+		_spec.SetField(groups.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := gc.mutation.DeletedAt(); ok {
+		_spec.SetField(groups.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := gc.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)

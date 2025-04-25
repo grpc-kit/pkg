@@ -261,12 +261,12 @@ func (uaq *UserAttributesQuery) Clone() *UserAttributesQuery {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.UserAttributes.Query().
-//		GroupBy(userattributes.FieldCreateTime).
+//		GroupBy(userattributes.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
 func (uaq *UserAttributesQuery) GroupBy(field string, fields ...string) *UserAttributesGroupBy {
@@ -284,11 +284,11 @@ func (uaq *UserAttributesQuery) GroupBy(field string, fields ...string) *UserAtt
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.UserAttributes.Query().
-//		Select(userattributes.FieldCreateTime).
+//		Select(userattributes.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (uaq *UserAttributesQuery) Select(fields ...string) *UserAttributesSelect {
 	uaq.ctx.Fields = append(uaq.ctx.Fields, fields...)

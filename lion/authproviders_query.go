@@ -261,12 +261,12 @@ func (apq *AuthProvidersQuery) Clone() *AuthProvidersQuery {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.AuthProviders.Query().
-//		GroupBy(authproviders.FieldCreateTime).
+//		GroupBy(authproviders.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
 func (apq *AuthProvidersQuery) GroupBy(field string, fields ...string) *AuthProvidersGroupBy {
@@ -284,11 +284,11 @@ func (apq *AuthProvidersQuery) GroupBy(field string, fields ...string) *AuthProv
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.AuthProviders.Query().
-//		Select(authproviders.FieldCreateTime).
+//		Select(authproviders.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (apq *AuthProvidersQuery) Select(fields ...string) *AuthProvidersSelect {
 	apq.ctx.Fields = append(apq.ctx.Fields, fields...)

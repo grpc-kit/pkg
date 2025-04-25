@@ -261,12 +261,12 @@ func (uasq *UserAuthSocialQuery) Clone() *UserAuthSocialQuery {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.UserAuthSocial.Query().
-//		GroupBy(userauthsocial.FieldCreateTime).
+//		GroupBy(userauthsocial.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
 func (uasq *UserAuthSocialQuery) GroupBy(field string, fields ...string) *UserAuthSocialGroupBy {
@@ -284,11 +284,11 @@ func (uasq *UserAuthSocialQuery) GroupBy(field string, fields ...string) *UserAu
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.UserAuthSocial.Query().
-//		Select(userauthsocial.FieldCreateTime).
+//		Select(userauthsocial.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (uasq *UserAuthSocialQuery) Select(fields ...string) *UserAuthSocialSelect {
 	uasq.ctx.Fields = append(uasq.ctx.Fields, fields...)

@@ -5,7 +5,6 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/mixin"
 )
 
 // UserAuthLocal 存储本地用户的认证信息（如密码）
@@ -50,7 +49,7 @@ func (UserAuthLocal) Edges() []ent.Edge {
 // Mixin of the table.
 func (UserAuthLocal) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		TimeMixin{},
 	}
 }
 

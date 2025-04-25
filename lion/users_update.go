@@ -28,9 +28,29 @@ func (uu *UsersUpdate) Where(ps ...predicate.Users) *UsersUpdate {
 	return uu
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uu *UsersUpdate) SetUpdateTime(t time.Time) *UsersUpdate {
-	uu.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (uu *UsersUpdate) SetUpdatedAt(t time.Time) *UsersUpdate {
+	uu.mutation.SetUpdatedAt(t)
+	return uu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uu *UsersUpdate) SetDeletedAt(t time.Time) *UsersUpdate {
+	uu.mutation.SetDeletedAt(t)
+	return uu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uu *UsersUpdate) SetNillableDeletedAt(t *time.Time) *UsersUpdate {
+	if t != nil {
+		uu.SetDeletedAt(*t)
+	}
+	return uu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (uu *UsersUpdate) ClearDeletedAt() *UsersUpdate {
+	uu.mutation.ClearDeletedAt()
 	return uu
 }
 
@@ -48,9 +68,35 @@ func (uu *UsersUpdate) SetNillablePreferredUsername(s *string) *UsersUpdate {
 	return uu
 }
 
-// SetName sets the "name" field.
-func (uu *UsersUpdate) SetName(b []byte) *UsersUpdate {
-	uu.mutation.SetName(b)
+// SetRealnameEncrypted sets the "realname_encrypted" field.
+func (uu *UsersUpdate) SetRealnameEncrypted(b []byte) *UsersUpdate {
+	uu.mutation.SetRealnameEncrypted(b)
+	return uu
+}
+
+// SetIdcardEncrypted sets the "idcard_encrypted" field.
+func (uu *UsersUpdate) SetIdcardEncrypted(b []byte) *UsersUpdate {
+	uu.mutation.SetIdcardEncrypted(b)
+	return uu
+}
+
+// SetIdcardHash sets the "idcard_hash" field.
+func (uu *UsersUpdate) SetIdcardHash(s string) *UsersUpdate {
+	uu.mutation.SetIdcardHash(s)
+	return uu
+}
+
+// SetNillableIdcardHash sets the "idcard_hash" field if the given value is not nil.
+func (uu *UsersUpdate) SetNillableIdcardHash(s *string) *UsersUpdate {
+	if s != nil {
+		uu.SetIdcardHash(*s)
+	}
+	return uu
+}
+
+// ClearIdcardHash clears the value of the "idcard_hash" field.
+func (uu *UsersUpdate) ClearIdcardHash() *UsersUpdate {
+	uu.mutation.ClearIdcardHash()
 	return uu
 }
 
@@ -131,6 +177,26 @@ func (uu *UsersUpdate) ClearWebsite() *UsersUpdate {
 // SetEmailEncrypted sets the "email_encrypted" field.
 func (uu *UsersUpdate) SetEmailEncrypted(b []byte) *UsersUpdate {
 	uu.mutation.SetEmailEncrypted(b)
+	return uu
+}
+
+// SetEmailHash sets the "email_hash" field.
+func (uu *UsersUpdate) SetEmailHash(s string) *UsersUpdate {
+	uu.mutation.SetEmailHash(s)
+	return uu
+}
+
+// SetNillableEmailHash sets the "email_hash" field if the given value is not nil.
+func (uu *UsersUpdate) SetNillableEmailHash(s *string) *UsersUpdate {
+	if s != nil {
+		uu.SetEmailHash(*s)
+	}
+	return uu
+}
+
+// ClearEmailHash clears the value of the "email_hash" field.
+func (uu *UsersUpdate) ClearEmailHash() *UsersUpdate {
+	uu.mutation.ClearEmailHash()
 	return uu
 }
 
@@ -228,6 +294,26 @@ func (uu *UsersUpdate) SetPhoneNumberEncrypted(b []byte) *UsersUpdate {
 	return uu
 }
 
+// SetPhoneNumberHash sets the "phone_number_hash" field.
+func (uu *UsersUpdate) SetPhoneNumberHash(s string) *UsersUpdate {
+	uu.mutation.SetPhoneNumberHash(s)
+	return uu
+}
+
+// SetNillablePhoneNumberHash sets the "phone_number_hash" field if the given value is not nil.
+func (uu *UsersUpdate) SetNillablePhoneNumberHash(s *string) *UsersUpdate {
+	if s != nil {
+		uu.SetPhoneNumberHash(*s)
+	}
+	return uu
+}
+
+// ClearPhoneNumberHash clears the value of the "phone_number_hash" field.
+func (uu *UsersUpdate) ClearPhoneNumberHash() *UsersUpdate {
+	uu.mutation.ClearPhoneNumberHash()
+	return uu
+}
+
 // SetPhoneNumberVerified sets the "phone_number_verified" field.
 func (uu *UsersUpdate) SetPhoneNumberVerified(b bool) *UsersUpdate {
 	uu.mutation.SetPhoneNumberVerified(b)
@@ -283,9 +369,9 @@ func (uu *UsersUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uu *UsersUpdate) defaults() {
-	if _, ok := uu.mutation.UpdateTime(); !ok {
-		v := users.UpdateDefaultUpdateTime()
-		uu.mutation.SetUpdateTime(v)
+	if _, ok := uu.mutation.UpdatedAt(); !ok {
+		v := users.UpdateDefaultUpdatedAt()
+		uu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -316,14 +402,29 @@ func (uu *UsersUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := uu.mutation.UpdateTime(); ok {
-		_spec.SetField(users.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := uu.mutation.UpdatedAt(); ok {
+		_spec.SetField(users.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uu.mutation.DeletedAt(); ok {
+		_spec.SetField(users.FieldDeletedAt, field.TypeTime, value)
+	}
+	if uu.mutation.DeletedAtCleared() {
+		_spec.ClearField(users.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := uu.mutation.PreferredUsername(); ok {
 		_spec.SetField(users.FieldPreferredUsername, field.TypeString, value)
 	}
-	if value, ok := uu.mutation.Name(); ok {
-		_spec.SetField(users.FieldName, field.TypeBytes, value)
+	if value, ok := uu.mutation.RealnameEncrypted(); ok {
+		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := uu.mutation.IdcardEncrypted(); ok {
+		_spec.SetField(users.FieldIdcardEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := uu.mutation.IdcardHash(); ok {
+		_spec.SetField(users.FieldIdcardHash, field.TypeString, value)
+	}
+	if uu.mutation.IdcardHashCleared() {
+		_spec.ClearField(users.FieldIdcardHash, field.TypeString)
 	}
 	if value, ok := uu.mutation.Nickname(); ok {
 		_spec.SetField(users.FieldNickname, field.TypeString, value)
@@ -348,6 +449,12 @@ func (uu *UsersUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.EmailEncrypted(); ok {
 		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := uu.mutation.EmailHash(); ok {
+		_spec.SetField(users.FieldEmailHash, field.TypeString, value)
+	}
+	if uu.mutation.EmailHashCleared() {
+		_spec.ClearField(users.FieldEmailHash, field.TypeString)
 	}
 	if value, ok := uu.mutation.EmailVerified(); ok {
 		_spec.SetField(users.FieldEmailVerified, field.TypeBool, value)
@@ -376,6 +483,12 @@ func (uu *UsersUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.PhoneNumberEncrypted(); ok {
 		_spec.SetField(users.FieldPhoneNumberEncrypted, field.TypeBytes, value)
 	}
+	if value, ok := uu.mutation.PhoneNumberHash(); ok {
+		_spec.SetField(users.FieldPhoneNumberHash, field.TypeString, value)
+	}
+	if uu.mutation.PhoneNumberHashCleared() {
+		_spec.ClearField(users.FieldPhoneNumberHash, field.TypeString)
+	}
 	if value, ok := uu.mutation.PhoneNumberVerified(); ok {
 		_spec.SetField(users.FieldPhoneNumberVerified, field.TypeBool, value)
 	}
@@ -402,9 +515,29 @@ type UsersUpdateOne struct {
 	mutation *UsersMutation
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uuo *UsersUpdateOne) SetUpdateTime(t time.Time) *UsersUpdateOne {
-	uuo.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (uuo *UsersUpdateOne) SetUpdatedAt(t time.Time) *UsersUpdateOne {
+	uuo.mutation.SetUpdatedAt(t)
+	return uuo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uuo *UsersUpdateOne) SetDeletedAt(t time.Time) *UsersUpdateOne {
+	uuo.mutation.SetDeletedAt(t)
+	return uuo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uuo *UsersUpdateOne) SetNillableDeletedAt(t *time.Time) *UsersUpdateOne {
+	if t != nil {
+		uuo.SetDeletedAt(*t)
+	}
+	return uuo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (uuo *UsersUpdateOne) ClearDeletedAt() *UsersUpdateOne {
+	uuo.mutation.ClearDeletedAt()
 	return uuo
 }
 
@@ -422,9 +555,35 @@ func (uuo *UsersUpdateOne) SetNillablePreferredUsername(s *string) *UsersUpdateO
 	return uuo
 }
 
-// SetName sets the "name" field.
-func (uuo *UsersUpdateOne) SetName(b []byte) *UsersUpdateOne {
-	uuo.mutation.SetName(b)
+// SetRealnameEncrypted sets the "realname_encrypted" field.
+func (uuo *UsersUpdateOne) SetRealnameEncrypted(b []byte) *UsersUpdateOne {
+	uuo.mutation.SetRealnameEncrypted(b)
+	return uuo
+}
+
+// SetIdcardEncrypted sets the "idcard_encrypted" field.
+func (uuo *UsersUpdateOne) SetIdcardEncrypted(b []byte) *UsersUpdateOne {
+	uuo.mutation.SetIdcardEncrypted(b)
+	return uuo
+}
+
+// SetIdcardHash sets the "idcard_hash" field.
+func (uuo *UsersUpdateOne) SetIdcardHash(s string) *UsersUpdateOne {
+	uuo.mutation.SetIdcardHash(s)
+	return uuo
+}
+
+// SetNillableIdcardHash sets the "idcard_hash" field if the given value is not nil.
+func (uuo *UsersUpdateOne) SetNillableIdcardHash(s *string) *UsersUpdateOne {
+	if s != nil {
+		uuo.SetIdcardHash(*s)
+	}
+	return uuo
+}
+
+// ClearIdcardHash clears the value of the "idcard_hash" field.
+func (uuo *UsersUpdateOne) ClearIdcardHash() *UsersUpdateOne {
+	uuo.mutation.ClearIdcardHash()
 	return uuo
 }
 
@@ -505,6 +664,26 @@ func (uuo *UsersUpdateOne) ClearWebsite() *UsersUpdateOne {
 // SetEmailEncrypted sets the "email_encrypted" field.
 func (uuo *UsersUpdateOne) SetEmailEncrypted(b []byte) *UsersUpdateOne {
 	uuo.mutation.SetEmailEncrypted(b)
+	return uuo
+}
+
+// SetEmailHash sets the "email_hash" field.
+func (uuo *UsersUpdateOne) SetEmailHash(s string) *UsersUpdateOne {
+	uuo.mutation.SetEmailHash(s)
+	return uuo
+}
+
+// SetNillableEmailHash sets the "email_hash" field if the given value is not nil.
+func (uuo *UsersUpdateOne) SetNillableEmailHash(s *string) *UsersUpdateOne {
+	if s != nil {
+		uuo.SetEmailHash(*s)
+	}
+	return uuo
+}
+
+// ClearEmailHash clears the value of the "email_hash" field.
+func (uuo *UsersUpdateOne) ClearEmailHash() *UsersUpdateOne {
+	uuo.mutation.ClearEmailHash()
 	return uuo
 }
 
@@ -602,6 +781,26 @@ func (uuo *UsersUpdateOne) SetPhoneNumberEncrypted(b []byte) *UsersUpdateOne {
 	return uuo
 }
 
+// SetPhoneNumberHash sets the "phone_number_hash" field.
+func (uuo *UsersUpdateOne) SetPhoneNumberHash(s string) *UsersUpdateOne {
+	uuo.mutation.SetPhoneNumberHash(s)
+	return uuo
+}
+
+// SetNillablePhoneNumberHash sets the "phone_number_hash" field if the given value is not nil.
+func (uuo *UsersUpdateOne) SetNillablePhoneNumberHash(s *string) *UsersUpdateOne {
+	if s != nil {
+		uuo.SetPhoneNumberHash(*s)
+	}
+	return uuo
+}
+
+// ClearPhoneNumberHash clears the value of the "phone_number_hash" field.
+func (uuo *UsersUpdateOne) ClearPhoneNumberHash() *UsersUpdateOne {
+	uuo.mutation.ClearPhoneNumberHash()
+	return uuo
+}
+
 // SetPhoneNumberVerified sets the "phone_number_verified" field.
 func (uuo *UsersUpdateOne) SetPhoneNumberVerified(b bool) *UsersUpdateOne {
 	uuo.mutation.SetPhoneNumberVerified(b)
@@ -670,9 +869,9 @@ func (uuo *UsersUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uuo *UsersUpdateOne) defaults() {
-	if _, ok := uuo.mutation.UpdateTime(); !ok {
-		v := users.UpdateDefaultUpdateTime()
-		uuo.mutation.SetUpdateTime(v)
+	if _, ok := uuo.mutation.UpdatedAt(); !ok {
+		v := users.UpdateDefaultUpdatedAt()
+		uuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -720,14 +919,29 @@ func (uuo *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error
 			}
 		}
 	}
-	if value, ok := uuo.mutation.UpdateTime(); ok {
-		_spec.SetField(users.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := uuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(users.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uuo.mutation.DeletedAt(); ok {
+		_spec.SetField(users.FieldDeletedAt, field.TypeTime, value)
+	}
+	if uuo.mutation.DeletedAtCleared() {
+		_spec.ClearField(users.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := uuo.mutation.PreferredUsername(); ok {
 		_spec.SetField(users.FieldPreferredUsername, field.TypeString, value)
 	}
-	if value, ok := uuo.mutation.Name(); ok {
-		_spec.SetField(users.FieldName, field.TypeBytes, value)
+	if value, ok := uuo.mutation.RealnameEncrypted(); ok {
+		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := uuo.mutation.IdcardEncrypted(); ok {
+		_spec.SetField(users.FieldIdcardEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := uuo.mutation.IdcardHash(); ok {
+		_spec.SetField(users.FieldIdcardHash, field.TypeString, value)
+	}
+	if uuo.mutation.IdcardHashCleared() {
+		_spec.ClearField(users.FieldIdcardHash, field.TypeString)
 	}
 	if value, ok := uuo.mutation.Nickname(); ok {
 		_spec.SetField(users.FieldNickname, field.TypeString, value)
@@ -752,6 +966,12 @@ func (uuo *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error
 	}
 	if value, ok := uuo.mutation.EmailEncrypted(); ok {
 		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := uuo.mutation.EmailHash(); ok {
+		_spec.SetField(users.FieldEmailHash, field.TypeString, value)
+	}
+	if uuo.mutation.EmailHashCleared() {
+		_spec.ClearField(users.FieldEmailHash, field.TypeString)
 	}
 	if value, ok := uuo.mutation.EmailVerified(); ok {
 		_spec.SetField(users.FieldEmailVerified, field.TypeBool, value)
@@ -779,6 +999,12 @@ func (uuo *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error
 	}
 	if value, ok := uuo.mutation.PhoneNumberEncrypted(); ok {
 		_spec.SetField(users.FieldPhoneNumberEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := uuo.mutation.PhoneNumberHash(); ok {
+		_spec.SetField(users.FieldPhoneNumberHash, field.TypeString, value)
+	}
+	if uuo.mutation.PhoneNumberHashCleared() {
+		_spec.ClearField(users.FieldPhoneNumberHash, field.TypeString)
 	}
 	if value, ok := uuo.mutation.PhoneNumberVerified(); ok {
 		_spec.SetField(users.FieldPhoneNumberVerified, field.TypeBool, value)

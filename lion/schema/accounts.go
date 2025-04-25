@@ -5,7 +5,6 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/mixin"
 )
 
 // Accounts 账户表 | 存储账户信息，通常与用户相关联
@@ -29,7 +28,7 @@ func (Accounts) Edges() []ent.Edge {
 // Mixin of the table.
 func (Accounts) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		TimeMixin{},
 	}
 }
 

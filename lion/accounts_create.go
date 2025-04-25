@@ -20,30 +20,44 @@ type AccountsCreate struct {
 	hooks    []Hook
 }
 
-// SetCreateTime sets the "create_time" field.
-func (ac *AccountsCreate) SetCreateTime(t time.Time) *AccountsCreate {
-	ac.mutation.SetCreateTime(t)
+// SetCreatedAt sets the "created_at" field.
+func (ac *AccountsCreate) SetCreatedAt(t time.Time) *AccountsCreate {
+	ac.mutation.SetCreatedAt(t)
 	return ac
 }
 
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (ac *AccountsCreate) SetNillableCreateTime(t *time.Time) *AccountsCreate {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ac *AccountsCreate) SetNillableCreatedAt(t *time.Time) *AccountsCreate {
 	if t != nil {
-		ac.SetCreateTime(*t)
+		ac.SetCreatedAt(*t)
 	}
 	return ac
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (ac *AccountsCreate) SetUpdateTime(t time.Time) *AccountsCreate {
-	ac.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (ac *AccountsCreate) SetUpdatedAt(t time.Time) *AccountsCreate {
+	ac.mutation.SetUpdatedAt(t)
 	return ac
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (ac *AccountsCreate) SetNillableUpdateTime(t *time.Time) *AccountsCreate {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (ac *AccountsCreate) SetNillableUpdatedAt(t *time.Time) *AccountsCreate {
 	if t != nil {
-		ac.SetUpdateTime(*t)
+		ac.SetUpdatedAt(*t)
+	}
+	return ac
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (ac *AccountsCreate) SetDeletedAt(t time.Time) *AccountsCreate {
+	ac.mutation.SetDeletedAt(t)
+	return ac
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (ac *AccountsCreate) SetNillableDeletedAt(t *time.Time) *AccountsCreate {
+	if t != nil {
+		ac.SetDeletedAt(*t)
 	}
 	return ac
 }
@@ -111,13 +125,13 @@ func (ac *AccountsCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ac *AccountsCreate) defaults() {
-	if _, ok := ac.mutation.CreateTime(); !ok {
-		v := accounts.DefaultCreateTime()
-		ac.mutation.SetCreateTime(v)
+	if _, ok := ac.mutation.CreatedAt(); !ok {
+		v := accounts.DefaultCreatedAt()
+		ac.mutation.SetCreatedAt(v)
 	}
-	if _, ok := ac.mutation.UpdateTime(); !ok {
-		v := accounts.DefaultUpdateTime()
-		ac.mutation.SetUpdateTime(v)
+	if _, ok := ac.mutation.UpdatedAt(); !ok {
+		v := accounts.DefaultUpdatedAt()
+		ac.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := ac.mutation.Balance(); !ok {
 		v := accounts.DefaultBalance
@@ -131,11 +145,11 @@ func (ac *AccountsCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ac *AccountsCreate) check() error {
-	if _, ok := ac.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`lion: missing required field "Accounts.create_time"`)}
+	if _, ok := ac.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "Accounts.created_at"`)}
 	}
-	if _, ok := ac.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`lion: missing required field "Accounts.update_time"`)}
+	if _, ok := ac.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Accounts.updated_at"`)}
 	}
 	if _, ok := ac.mutation.Balance(); !ok {
 		return &ValidationError{Name: "balance", err: errors.New(`lion: missing required field "Accounts.balance"`)}
@@ -169,13 +183,17 @@ func (ac *AccountsCreate) createSpec() (*Accounts, *sqlgraph.CreateSpec) {
 		_node = &Accounts{config: ac.config}
 		_spec = sqlgraph.NewCreateSpec(accounts.Table, sqlgraph.NewFieldSpec(accounts.FieldID, field.TypeInt))
 	)
-	if value, ok := ac.mutation.CreateTime(); ok {
-		_spec.SetField(accounts.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
+	if value, ok := ac.mutation.CreatedAt(); ok {
+		_spec.SetField(accounts.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
-	if value, ok := ac.mutation.UpdateTime(); ok {
-		_spec.SetField(accounts.FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
+	if value, ok := ac.mutation.UpdatedAt(); ok {
+		_spec.SetField(accounts.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := ac.mutation.DeletedAt(); ok {
+		_spec.SetField(accounts.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := ac.mutation.Balance(); ok {
 		_spec.SetField(accounts.FieldBalance, field.TypeFloat64, value)

@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"entgo.io/ent/schema/mixin"
 )
 
 // UserAttributes 用于存储用户的扩展属性信息
@@ -38,7 +37,7 @@ func (UserAttributes) Edges() []ent.Edge {
 // Mixin of the table.
 func (UserAttributes) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		TimeMixin{},
 	}
 }
 

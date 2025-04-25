@@ -28,9 +28,29 @@ func (du *DemoUpdate) Where(ps ...predicate.Demo) *DemoUpdate {
 	return du
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (du *DemoUpdate) SetUpdateTime(t time.Time) *DemoUpdate {
-	du.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (du *DemoUpdate) SetUpdatedAt(t time.Time) *DemoUpdate {
+	du.mutation.SetUpdatedAt(t)
+	return du
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (du *DemoUpdate) SetDeletedAt(t time.Time) *DemoUpdate {
+	du.mutation.SetDeletedAt(t)
+	return du
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (du *DemoUpdate) SetNillableDeletedAt(t *time.Time) *DemoUpdate {
+	if t != nil {
+		du.SetDeletedAt(*t)
+	}
+	return du
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (du *DemoUpdate) ClearDeletedAt() *DemoUpdate {
+	du.mutation.ClearDeletedAt()
 	return du
 }
 
@@ -83,9 +103,9 @@ func (du *DemoUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (du *DemoUpdate) defaults() {
-	if _, ok := du.mutation.UpdateTime(); !ok {
-		v := demo.UpdateDefaultUpdateTime()
-		du.mutation.SetUpdateTime(v)
+	if _, ok := du.mutation.UpdatedAt(); !ok {
+		v := demo.UpdateDefaultUpdatedAt()
+		du.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -98,8 +118,14 @@ func (du *DemoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := du.mutation.UpdateTime(); ok {
-		_spec.SetField(demo.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := du.mutation.UpdatedAt(); ok {
+		_spec.SetField(demo.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := du.mutation.DeletedAt(); ok {
+		_spec.SetField(demo.FieldDeletedAt, field.TypeTime, value)
+	}
+	if du.mutation.DeletedAtCleared() {
+		_spec.ClearField(demo.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := du.mutation.Name(); ok {
 		_spec.SetField(demo.FieldName, field.TypeString, value)
@@ -124,9 +150,29 @@ type DemoUpdateOne struct {
 	mutation *DemoMutation
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (duo *DemoUpdateOne) SetUpdateTime(t time.Time) *DemoUpdateOne {
-	duo.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (duo *DemoUpdateOne) SetUpdatedAt(t time.Time) *DemoUpdateOne {
+	duo.mutation.SetUpdatedAt(t)
+	return duo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (duo *DemoUpdateOne) SetDeletedAt(t time.Time) *DemoUpdateOne {
+	duo.mutation.SetDeletedAt(t)
+	return duo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (duo *DemoUpdateOne) SetNillableDeletedAt(t *time.Time) *DemoUpdateOne {
+	if t != nil {
+		duo.SetDeletedAt(*t)
+	}
+	return duo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (duo *DemoUpdateOne) ClearDeletedAt() *DemoUpdateOne {
+	duo.mutation.ClearDeletedAt()
 	return duo
 }
 
@@ -192,9 +238,9 @@ func (duo *DemoUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (duo *DemoUpdateOne) defaults() {
-	if _, ok := duo.mutation.UpdateTime(); !ok {
-		v := demo.UpdateDefaultUpdateTime()
-		duo.mutation.SetUpdateTime(v)
+	if _, ok := duo.mutation.UpdatedAt(); !ok {
+		v := demo.UpdateDefaultUpdatedAt()
+		duo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -224,8 +270,14 @@ func (duo *DemoUpdateOne) sqlSave(ctx context.Context) (_node *Demo, err error) 
 			}
 		}
 	}
-	if value, ok := duo.mutation.UpdateTime(); ok {
-		_spec.SetField(demo.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := duo.mutation.UpdatedAt(); ok {
+		_spec.SetField(demo.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := duo.mutation.DeletedAt(); ok {
+		_spec.SetField(demo.FieldDeletedAt, field.TypeTime, value)
+	}
+	if duo.mutation.DeletedAtCleared() {
+		_spec.ClearField(demo.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := duo.mutation.Name(); ok {
 		_spec.SetField(demo.FieldName, field.TypeString, value)

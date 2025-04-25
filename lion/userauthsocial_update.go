@@ -28,9 +28,29 @@ func (uasu *UserAuthSocialUpdate) Where(ps ...predicate.UserAuthSocial) *UserAut
 	return uasu
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uasu *UserAuthSocialUpdate) SetUpdateTime(t time.Time) *UserAuthSocialUpdate {
-	uasu.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (uasu *UserAuthSocialUpdate) SetUpdatedAt(t time.Time) *UserAuthSocialUpdate {
+	uasu.mutation.SetUpdatedAt(t)
+	return uasu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uasu *UserAuthSocialUpdate) SetDeletedAt(t time.Time) *UserAuthSocialUpdate {
+	uasu.mutation.SetDeletedAt(t)
+	return uasu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uasu *UserAuthSocialUpdate) SetNillableDeletedAt(t *time.Time) *UserAuthSocialUpdate {
+	if t != nil {
+		uasu.SetDeletedAt(*t)
+	}
+	return uasu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (uasu *UserAuthSocialUpdate) ClearDeletedAt() *UserAuthSocialUpdate {
+	uasu.mutation.ClearDeletedAt()
 	return uasu
 }
 
@@ -161,9 +181,9 @@ func (uasu *UserAuthSocialUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uasu *UserAuthSocialUpdate) defaults() {
-	if _, ok := uasu.mutation.UpdateTime(); !ok {
-		v := userauthsocial.UpdateDefaultUpdateTime()
-		uasu.mutation.SetUpdateTime(v)
+	if _, ok := uasu.mutation.UpdatedAt(); !ok {
+		v := userauthsocial.UpdateDefaultUpdatedAt()
+		uasu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -194,8 +214,14 @@ func (uasu *UserAuthSocialUpdate) sqlSave(ctx context.Context) (n int, err error
 			}
 		}
 	}
-	if value, ok := uasu.mutation.UpdateTime(); ok {
-		_spec.SetField(userauthsocial.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := uasu.mutation.UpdatedAt(); ok {
+		_spec.SetField(userauthsocial.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uasu.mutation.DeletedAt(); ok {
+		_spec.SetField(userauthsocial.FieldDeletedAt, field.TypeTime, value)
+	}
+	if uasu.mutation.DeletedAtCleared() {
+		_spec.ClearField(userauthsocial.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := uasu.mutation.ProviderName(); ok {
 		_spec.SetField(userauthsocial.FieldProviderName, field.TypeString, value)
@@ -247,9 +273,29 @@ type UserAuthSocialUpdateOne struct {
 	mutation *UserAuthSocialMutation
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uasuo *UserAuthSocialUpdateOne) SetUpdateTime(t time.Time) *UserAuthSocialUpdateOne {
-	uasuo.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (uasuo *UserAuthSocialUpdateOne) SetUpdatedAt(t time.Time) *UserAuthSocialUpdateOne {
+	uasuo.mutation.SetUpdatedAt(t)
+	return uasuo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uasuo *UserAuthSocialUpdateOne) SetDeletedAt(t time.Time) *UserAuthSocialUpdateOne {
+	uasuo.mutation.SetDeletedAt(t)
+	return uasuo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uasuo *UserAuthSocialUpdateOne) SetNillableDeletedAt(t *time.Time) *UserAuthSocialUpdateOne {
+	if t != nil {
+		uasuo.SetDeletedAt(*t)
+	}
+	return uasuo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (uasuo *UserAuthSocialUpdateOne) ClearDeletedAt() *UserAuthSocialUpdateOne {
+	uasuo.mutation.ClearDeletedAt()
 	return uasuo
 }
 
@@ -393,9 +439,9 @@ func (uasuo *UserAuthSocialUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uasuo *UserAuthSocialUpdateOne) defaults() {
-	if _, ok := uasuo.mutation.UpdateTime(); !ok {
-		v := userauthsocial.UpdateDefaultUpdateTime()
-		uasuo.mutation.SetUpdateTime(v)
+	if _, ok := uasuo.mutation.UpdatedAt(); !ok {
+		v := userauthsocial.UpdateDefaultUpdatedAt()
+		uasuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -443,8 +489,14 @@ func (uasuo *UserAuthSocialUpdateOne) sqlSave(ctx context.Context) (_node *UserA
 			}
 		}
 	}
-	if value, ok := uasuo.mutation.UpdateTime(); ok {
-		_spec.SetField(userauthsocial.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := uasuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(userauthsocial.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uasuo.mutation.DeletedAt(); ok {
+		_spec.SetField(userauthsocial.FieldDeletedAt, field.TypeTime, value)
+	}
+	if uasuo.mutation.DeletedAtCleared() {
+		_spec.ClearField(userauthsocial.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := uasuo.mutation.ProviderName(); ok {
 		_spec.SetField(userauthsocial.FieldProviderName, field.TypeString, value)

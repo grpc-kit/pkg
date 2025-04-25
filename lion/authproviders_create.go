@@ -20,30 +20,44 @@ type AuthProvidersCreate struct {
 	hooks    []Hook
 }
 
-// SetCreateTime sets the "create_time" field.
-func (apc *AuthProvidersCreate) SetCreateTime(t time.Time) *AuthProvidersCreate {
-	apc.mutation.SetCreateTime(t)
+// SetCreatedAt sets the "created_at" field.
+func (apc *AuthProvidersCreate) SetCreatedAt(t time.Time) *AuthProvidersCreate {
+	apc.mutation.SetCreatedAt(t)
 	return apc
 }
 
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (apc *AuthProvidersCreate) SetNillableCreateTime(t *time.Time) *AuthProvidersCreate {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (apc *AuthProvidersCreate) SetNillableCreatedAt(t *time.Time) *AuthProvidersCreate {
 	if t != nil {
-		apc.SetCreateTime(*t)
+		apc.SetCreatedAt(*t)
 	}
 	return apc
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (apc *AuthProvidersCreate) SetUpdateTime(t time.Time) *AuthProvidersCreate {
-	apc.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (apc *AuthProvidersCreate) SetUpdatedAt(t time.Time) *AuthProvidersCreate {
+	apc.mutation.SetUpdatedAt(t)
 	return apc
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (apc *AuthProvidersCreate) SetNillableUpdateTime(t *time.Time) *AuthProvidersCreate {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (apc *AuthProvidersCreate) SetNillableUpdatedAt(t *time.Time) *AuthProvidersCreate {
 	if t != nil {
-		apc.SetUpdateTime(*t)
+		apc.SetUpdatedAt(*t)
+	}
+	return apc
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (apc *AuthProvidersCreate) SetDeletedAt(t time.Time) *AuthProvidersCreate {
+	apc.mutation.SetDeletedAt(t)
+	return apc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (apc *AuthProvidersCreate) SetNillableDeletedAt(t *time.Time) *AuthProvidersCreate {
+	if t != nil {
+		apc.SetDeletedAt(*t)
 	}
 	return apc
 }
@@ -159,13 +173,13 @@ func (apc *AuthProvidersCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (apc *AuthProvidersCreate) defaults() {
-	if _, ok := apc.mutation.CreateTime(); !ok {
-		v := authproviders.DefaultCreateTime()
-		apc.mutation.SetCreateTime(v)
+	if _, ok := apc.mutation.CreatedAt(); !ok {
+		v := authproviders.DefaultCreatedAt()
+		apc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := apc.mutation.UpdateTime(); !ok {
-		v := authproviders.DefaultUpdateTime()
-		apc.mutation.SetUpdateTime(v)
+	if _, ok := apc.mutation.UpdatedAt(); !ok {
+		v := authproviders.DefaultUpdatedAt()
+		apc.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := apc.mutation.ClientID(); !ok {
 		v := authproviders.DefaultClientID
@@ -183,11 +197,11 @@ func (apc *AuthProvidersCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (apc *AuthProvidersCreate) check() error {
-	if _, ok := apc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`lion: missing required field "AuthProviders.create_time"`)}
+	if _, ok := apc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "AuthProviders.created_at"`)}
 	}
-	if _, ok := apc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`lion: missing required field "AuthProviders.update_time"`)}
+	if _, ok := apc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "AuthProviders.updated_at"`)}
 	}
 	if _, ok := apc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "AuthProviders.name"`)}
@@ -250,13 +264,17 @@ func (apc *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSp
 		_node = &AuthProviders{config: apc.config}
 		_spec = sqlgraph.NewCreateSpec(authproviders.Table, sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt))
 	)
-	if value, ok := apc.mutation.CreateTime(); ok {
-		_spec.SetField(authproviders.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
+	if value, ok := apc.mutation.CreatedAt(); ok {
+		_spec.SetField(authproviders.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
-	if value, ok := apc.mutation.UpdateTime(); ok {
-		_spec.SetField(authproviders.FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
+	if value, ok := apc.mutation.UpdatedAt(); ok {
+		_spec.SetField(authproviders.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := apc.mutation.DeletedAt(); ok {
+		_spec.SetField(authproviders.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := apc.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeEnum, value)

@@ -12,8 +12,9 @@ var (
 	// LionAccountsColumns holds the columns for the "lion_accounts" table.
 	LionAccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "balance", Type: field.TypeFloat64, Default: 0},
 		{Name: "currency", Type: field.TypeString, Default: "CNY"},
 	}
@@ -26,8 +27,9 @@ var (
 	// LionAuthProvidersColumns holds the columns for the "lion_auth_providers" table.
 	LionAuthProvidersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeEnum, Enums: []string{"LOCAL", "LDAP", "OIDC", "OAUTH2", "GITHUB", "WECHAT", "GOOGLE"}},
 		{Name: "client_id", Type: field.TypeString, Default: ""},
 		{Name: "enabled", Type: field.TypeBool, Default: false},
@@ -48,15 +50,16 @@ var (
 			{
 				Name:    "authproviders_name",
 				Unique:  true,
-				Columns: []*schema.Column{LionAuthProvidersColumns[3]},
+				Columns: []*schema.Column{LionAuthProvidersColumns[4]},
 			},
 		},
 	}
 	// LionDemoColumns holds the columns for the "lion_demo" table.
 	LionDemoColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Default: "grpc-kit"},
 	}
 	// LionDemoTable holds the schema information for the "lion_demo" table.
@@ -68,8 +71,9 @@ var (
 	// LionGroupUsersColumns holds the columns for the "lion_group_users" table.
 	LionGroupUsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "group_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
@@ -82,15 +86,16 @@ var (
 			{
 				Name:    "groupusers_group_id_user_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionGroupUsersColumns[3], LionGroupUsersColumns[4]},
+				Columns: []*schema.Column{LionGroupUsersColumns[4], LionGroupUsersColumns[5]},
 			},
 		},
 	}
 	// LionGroupsColumns holds the columns for the "lion_groups" table.
 	LionGroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}
@@ -103,8 +108,9 @@ var (
 	// LionUserAttributesColumns holds the columns for the "lion_user_attributes" table.
 	LionUserAttributesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_id", Type: field.TypeInt},
 		{Name: "attr_key", Type: field.TypeString},
 		{Name: "attr_value", Type: field.TypeString},
@@ -118,15 +124,16 @@ var (
 			{
 				Name:    "userattributes_user_id_attr_key",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserAttributesColumns[3], LionUserAttributesColumns[4]},
+				Columns: []*schema.Column{LionUserAttributesColumns[4], LionUserAttributesColumns[5]},
 			},
 		},
 	}
 	// LionUserAuthLocalColumns holds the columns for the "lion_user_auth_local" table.
 	LionUserAuthLocalColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_id", Type: field.TypeInt, Unique: true},
 		{Name: "password_hash", Type: field.TypeBytes},
 		{Name: "mfa_enabled", Type: field.TypeBool, Default: false},
@@ -143,8 +150,9 @@ var (
 	// LionUserAuthSocialColumns holds the columns for the "lion_user_auth_social" table.
 	LionUserAuthSocialColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_id", Type: field.TypeInt},
 		{Name: "provider_name", Type: field.TypeString},
 		{Name: "provider_user_id", Type: field.TypeString},
@@ -162,28 +170,33 @@ var (
 			{
 				Name:    "userauthsocial_user_id_provider_name",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserAuthSocialColumns[3], LionUserAuthSocialColumns[4]},
+				Columns: []*schema.Column{LionUserAuthSocialColumns[4], LionUserAuthSocialColumns[5]},
 			},
 		},
 	}
 	// LionUsersColumns holds the columns for the "lion_users" table.
 	LionUsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "preferred_username", Type: field.TypeString, Unique: true, Size: 255},
-		{Name: "name", Type: field.TypeBytes},
+		{Name: "realname_encrypted", Type: field.TypeBytes},
+		{Name: "idcard_encrypted", Type: field.TypeBytes},
+		{Name: "idcard_hash", Type: field.TypeString, Nullable: true},
 		{Name: "nickname", Type: field.TypeString, Default: ""},
 		{Name: "profile", Type: field.TypeString, Nullable: true},
 		{Name: "picture", Type: field.TypeString, Nullable: true},
 		{Name: "website", Type: field.TypeString, Nullable: true},
 		{Name: "email_encrypted", Type: field.TypeBytes},
+		{Name: "email_hash", Type: field.TypeString, Nullable: true},
 		{Name: "email_verified", Type: field.TypeBool, Default: false},
 		{Name: "gender", Type: field.TypeEnum, Enums: []string{"male", "female", "other", "unknown"}, Default: "unknown"},
 		{Name: "birthdate", Type: field.TypeTime, Nullable: true},
 		{Name: "zoneinfo", Type: field.TypeString, Nullable: true},
 		{Name: "locale", Type: field.TypeString, Nullable: true},
 		{Name: "phone_number_encrypted", Type: field.TypeBytes},
+		{Name: "phone_number_hash", Type: field.TypeString, Nullable: true},
 		{Name: "phone_number_verified", Type: field.TypeBool, Default: false},
 		{Name: "address_encrypted", Type: field.TypeBytes},
 	}

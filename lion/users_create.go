@@ -20,30 +20,44 @@ type UsersCreate struct {
 	hooks    []Hook
 }
 
-// SetCreateTime sets the "create_time" field.
-func (uc *UsersCreate) SetCreateTime(t time.Time) *UsersCreate {
-	uc.mutation.SetCreateTime(t)
+// SetCreatedAt sets the "created_at" field.
+func (uc *UsersCreate) SetCreatedAt(t time.Time) *UsersCreate {
+	uc.mutation.SetCreatedAt(t)
 	return uc
 }
 
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (uc *UsersCreate) SetNillableCreateTime(t *time.Time) *UsersCreate {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (uc *UsersCreate) SetNillableCreatedAt(t *time.Time) *UsersCreate {
 	if t != nil {
-		uc.SetCreateTime(*t)
+		uc.SetCreatedAt(*t)
 	}
 	return uc
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uc *UsersCreate) SetUpdateTime(t time.Time) *UsersCreate {
-	uc.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (uc *UsersCreate) SetUpdatedAt(t time.Time) *UsersCreate {
+	uc.mutation.SetUpdatedAt(t)
 	return uc
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (uc *UsersCreate) SetNillableUpdateTime(t *time.Time) *UsersCreate {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (uc *UsersCreate) SetNillableUpdatedAt(t *time.Time) *UsersCreate {
 	if t != nil {
-		uc.SetUpdateTime(*t)
+		uc.SetUpdatedAt(*t)
+	}
+	return uc
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uc *UsersCreate) SetDeletedAt(t time.Time) *UsersCreate {
+	uc.mutation.SetDeletedAt(t)
+	return uc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uc *UsersCreate) SetNillableDeletedAt(t *time.Time) *UsersCreate {
+	if t != nil {
+		uc.SetDeletedAt(*t)
 	}
 	return uc
 }
@@ -54,9 +68,29 @@ func (uc *UsersCreate) SetPreferredUsername(s string) *UsersCreate {
 	return uc
 }
 
-// SetName sets the "name" field.
-func (uc *UsersCreate) SetName(b []byte) *UsersCreate {
-	uc.mutation.SetName(b)
+// SetRealnameEncrypted sets the "realname_encrypted" field.
+func (uc *UsersCreate) SetRealnameEncrypted(b []byte) *UsersCreate {
+	uc.mutation.SetRealnameEncrypted(b)
+	return uc
+}
+
+// SetIdcardEncrypted sets the "idcard_encrypted" field.
+func (uc *UsersCreate) SetIdcardEncrypted(b []byte) *UsersCreate {
+	uc.mutation.SetIdcardEncrypted(b)
+	return uc
+}
+
+// SetIdcardHash sets the "idcard_hash" field.
+func (uc *UsersCreate) SetIdcardHash(s string) *UsersCreate {
+	uc.mutation.SetIdcardHash(s)
+	return uc
+}
+
+// SetNillableIdcardHash sets the "idcard_hash" field if the given value is not nil.
+func (uc *UsersCreate) SetNillableIdcardHash(s *string) *UsersCreate {
+	if s != nil {
+		uc.SetIdcardHash(*s)
+	}
 	return uc
 }
 
@@ -119,6 +153,20 @@ func (uc *UsersCreate) SetNillableWebsite(s *string) *UsersCreate {
 // SetEmailEncrypted sets the "email_encrypted" field.
 func (uc *UsersCreate) SetEmailEncrypted(b []byte) *UsersCreate {
 	uc.mutation.SetEmailEncrypted(b)
+	return uc
+}
+
+// SetEmailHash sets the "email_hash" field.
+func (uc *UsersCreate) SetEmailHash(s string) *UsersCreate {
+	uc.mutation.SetEmailHash(s)
+	return uc
+}
+
+// SetNillableEmailHash sets the "email_hash" field if the given value is not nil.
+func (uc *UsersCreate) SetNillableEmailHash(s *string) *UsersCreate {
+	if s != nil {
+		uc.SetEmailHash(*s)
+	}
 	return uc
 }
 
@@ -198,6 +246,20 @@ func (uc *UsersCreate) SetPhoneNumberEncrypted(b []byte) *UsersCreate {
 	return uc
 }
 
+// SetPhoneNumberHash sets the "phone_number_hash" field.
+func (uc *UsersCreate) SetPhoneNumberHash(s string) *UsersCreate {
+	uc.mutation.SetPhoneNumberHash(s)
+	return uc
+}
+
+// SetNillablePhoneNumberHash sets the "phone_number_hash" field if the given value is not nil.
+func (uc *UsersCreate) SetNillablePhoneNumberHash(s *string) *UsersCreate {
+	if s != nil {
+		uc.SetPhoneNumberHash(*s)
+	}
+	return uc
+}
+
 // SetPhoneNumberVerified sets the "phone_number_verified" field.
 func (uc *UsersCreate) SetPhoneNumberVerified(b bool) *UsersCreate {
 	uc.mutation.SetPhoneNumberVerified(b)
@@ -253,17 +315,21 @@ func (uc *UsersCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UsersCreate) defaults() {
-	if _, ok := uc.mutation.CreateTime(); !ok {
-		v := users.DefaultCreateTime()
-		uc.mutation.SetCreateTime(v)
+	if _, ok := uc.mutation.CreatedAt(); !ok {
+		v := users.DefaultCreatedAt()
+		uc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := uc.mutation.UpdateTime(); !ok {
-		v := users.DefaultUpdateTime()
-		uc.mutation.SetUpdateTime(v)
+	if _, ok := uc.mutation.UpdatedAt(); !ok {
+		v := users.DefaultUpdatedAt()
+		uc.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := uc.mutation.Name(); !ok {
-		v := users.DefaultName
-		uc.mutation.SetName(v)
+	if _, ok := uc.mutation.RealnameEncrypted(); !ok {
+		v := users.DefaultRealnameEncrypted
+		uc.mutation.SetRealnameEncrypted(v)
+	}
+	if _, ok := uc.mutation.IdcardEncrypted(); !ok {
+		v := users.DefaultIdcardEncrypted
+		uc.mutation.SetIdcardEncrypted(v)
 	}
 	if _, ok := uc.mutation.Nickname(); !ok {
 		v := users.DefaultNickname
@@ -297,11 +363,11 @@ func (uc *UsersCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UsersCreate) check() error {
-	if _, ok := uc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`lion: missing required field "Users.create_time"`)}
+	if _, ok := uc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "Users.created_at"`)}
 	}
-	if _, ok := uc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`lion: missing required field "Users.update_time"`)}
+	if _, ok := uc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Users.updated_at"`)}
 	}
 	if _, ok := uc.mutation.PreferredUsername(); !ok {
 		return &ValidationError{Name: "preferred_username", err: errors.New(`lion: missing required field "Users.preferred_username"`)}
@@ -311,8 +377,11 @@ func (uc *UsersCreate) check() error {
 			return &ValidationError{Name: "preferred_username", err: fmt.Errorf(`lion: validator failed for field "Users.preferred_username": %w`, err)}
 		}
 	}
-	if _, ok := uc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Users.name"`)}
+	if _, ok := uc.mutation.RealnameEncrypted(); !ok {
+		return &ValidationError{Name: "realname_encrypted", err: errors.New(`lion: missing required field "Users.realname_encrypted"`)}
+	}
+	if _, ok := uc.mutation.IdcardEncrypted(); !ok {
+		return &ValidationError{Name: "idcard_encrypted", err: errors.New(`lion: missing required field "Users.idcard_encrypted"`)}
 	}
 	if _, ok := uc.mutation.Nickname(); !ok {
 		return &ValidationError{Name: "nickname", err: errors.New(`lion: missing required field "Users.nickname"`)}
@@ -366,21 +435,33 @@ func (uc *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_node = &Users{config: uc.config}
 		_spec = sqlgraph.NewCreateSpec(users.Table, sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt))
 	)
-	if value, ok := uc.mutation.CreateTime(); ok {
-		_spec.SetField(users.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
+	if value, ok := uc.mutation.CreatedAt(); ok {
+		_spec.SetField(users.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
-	if value, ok := uc.mutation.UpdateTime(); ok {
-		_spec.SetField(users.FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
+	if value, ok := uc.mutation.UpdatedAt(); ok {
+		_spec.SetField(users.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := uc.mutation.DeletedAt(); ok {
+		_spec.SetField(users.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := uc.mutation.PreferredUsername(); ok {
 		_spec.SetField(users.FieldPreferredUsername, field.TypeString, value)
 		_node.PreferredUsername = value
 	}
-	if value, ok := uc.mutation.Name(); ok {
-		_spec.SetField(users.FieldName, field.TypeBytes, value)
-		_node.Name = value
+	if value, ok := uc.mutation.RealnameEncrypted(); ok {
+		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
+		_node.RealnameEncrypted = value
+	}
+	if value, ok := uc.mutation.IdcardEncrypted(); ok {
+		_spec.SetField(users.FieldIdcardEncrypted, field.TypeBytes, value)
+		_node.IdcardEncrypted = value
+	}
+	if value, ok := uc.mutation.IdcardHash(); ok {
+		_spec.SetField(users.FieldIdcardHash, field.TypeString, value)
+		_node.IdcardHash = &value
 	}
 	if value, ok := uc.mutation.Nickname(); ok {
 		_spec.SetField(users.FieldNickname, field.TypeString, value)
@@ -401,6 +482,10 @@ func (uc *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.EmailEncrypted(); ok {
 		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
 		_node.EmailEncrypted = value
+	}
+	if value, ok := uc.mutation.EmailHash(); ok {
+		_spec.SetField(users.FieldEmailHash, field.TypeString, value)
+		_node.EmailHash = &value
 	}
 	if value, ok := uc.mutation.EmailVerified(); ok {
 		_spec.SetField(users.FieldEmailVerified, field.TypeBool, value)
@@ -425,6 +510,10 @@ func (uc *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.PhoneNumberEncrypted(); ok {
 		_spec.SetField(users.FieldPhoneNumberEncrypted, field.TypeBytes, value)
 		_node.PhoneNumberEncrypted = value
+	}
+	if value, ok := uc.mutation.PhoneNumberHash(); ok {
+		_spec.SetField(users.FieldPhoneNumberHash, field.TypeString, value)
+		_node.PhoneNumberHash = &value
 	}
 	if value, ok := uc.mutation.PhoneNumberVerified(); ok {
 		_spec.SetField(users.FieldPhoneNumberVerified, field.TypeBool, value)

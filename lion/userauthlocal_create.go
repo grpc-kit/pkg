@@ -20,30 +20,44 @@ type UserAuthLocalCreate struct {
 	hooks    []Hook
 }
 
-// SetCreateTime sets the "create_time" field.
-func (ualc *UserAuthLocalCreate) SetCreateTime(t time.Time) *UserAuthLocalCreate {
-	ualc.mutation.SetCreateTime(t)
+// SetCreatedAt sets the "created_at" field.
+func (ualc *UserAuthLocalCreate) SetCreatedAt(t time.Time) *UserAuthLocalCreate {
+	ualc.mutation.SetCreatedAt(t)
 	return ualc
 }
 
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (ualc *UserAuthLocalCreate) SetNillableCreateTime(t *time.Time) *UserAuthLocalCreate {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ualc *UserAuthLocalCreate) SetNillableCreatedAt(t *time.Time) *UserAuthLocalCreate {
 	if t != nil {
-		ualc.SetCreateTime(*t)
+		ualc.SetCreatedAt(*t)
 	}
 	return ualc
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (ualc *UserAuthLocalCreate) SetUpdateTime(t time.Time) *UserAuthLocalCreate {
-	ualc.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (ualc *UserAuthLocalCreate) SetUpdatedAt(t time.Time) *UserAuthLocalCreate {
+	ualc.mutation.SetUpdatedAt(t)
 	return ualc
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (ualc *UserAuthLocalCreate) SetNillableUpdateTime(t *time.Time) *UserAuthLocalCreate {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (ualc *UserAuthLocalCreate) SetNillableUpdatedAt(t *time.Time) *UserAuthLocalCreate {
 	if t != nil {
-		ualc.SetUpdateTime(*t)
+		ualc.SetUpdatedAt(*t)
+	}
+	return ualc
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (ualc *UserAuthLocalCreate) SetDeletedAt(t time.Time) *UserAuthLocalCreate {
+	ualc.mutation.SetDeletedAt(t)
+	return ualc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (ualc *UserAuthLocalCreate) SetNillableDeletedAt(t *time.Time) *UserAuthLocalCreate {
+	if t != nil {
+		ualc.SetDeletedAt(*t)
 	}
 	return ualc
 }
@@ -143,13 +157,13 @@ func (ualc *UserAuthLocalCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ualc *UserAuthLocalCreate) defaults() {
-	if _, ok := ualc.mutation.CreateTime(); !ok {
-		v := userauthlocal.DefaultCreateTime()
-		ualc.mutation.SetCreateTime(v)
+	if _, ok := ualc.mutation.CreatedAt(); !ok {
+		v := userauthlocal.DefaultCreatedAt()
+		ualc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := ualc.mutation.UpdateTime(); !ok {
-		v := userauthlocal.DefaultUpdateTime()
-		ualc.mutation.SetUpdateTime(v)
+	if _, ok := ualc.mutation.UpdatedAt(); !ok {
+		v := userauthlocal.DefaultUpdatedAt()
+		ualc.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := ualc.mutation.MfaEnabled(); !ok {
 		v := userauthlocal.DefaultMfaEnabled
@@ -163,11 +177,11 @@ func (ualc *UserAuthLocalCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (ualc *UserAuthLocalCreate) check() error {
-	if _, ok := ualc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`lion: missing required field "UserAuthLocal.create_time"`)}
+	if _, ok := ualc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "UserAuthLocal.created_at"`)}
 	}
-	if _, ok := ualc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`lion: missing required field "UserAuthLocal.update_time"`)}
+	if _, ok := ualc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserAuthLocal.updated_at"`)}
 	}
 	if _, ok := ualc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserAuthLocal.user_id"`)}
@@ -217,13 +231,17 @@ func (ualc *UserAuthLocalCreate) createSpec() (*UserAuthLocal, *sqlgraph.CreateS
 		_node = &UserAuthLocal{config: ualc.config}
 		_spec = sqlgraph.NewCreateSpec(userauthlocal.Table, sqlgraph.NewFieldSpec(userauthlocal.FieldID, field.TypeInt))
 	)
-	if value, ok := ualc.mutation.CreateTime(); ok {
-		_spec.SetField(userauthlocal.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
+	if value, ok := ualc.mutation.CreatedAt(); ok {
+		_spec.SetField(userauthlocal.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
-	if value, ok := ualc.mutation.UpdateTime(); ok {
-		_spec.SetField(userauthlocal.FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
+	if value, ok := ualc.mutation.UpdatedAt(); ok {
+		_spec.SetField(userauthlocal.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := ualc.mutation.DeletedAt(); ok {
+		_spec.SetField(userauthlocal.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := ualc.mutation.UserID(); ok {
 		_spec.SetField(userauthlocal.FieldUserID, field.TypeInt, value)

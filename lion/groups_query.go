@@ -261,12 +261,12 @@ func (gq *GroupsQuery) Clone() *GroupsQuery {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Groups.Query().
-//		GroupBy(groups.FieldCreateTime).
+//		GroupBy(groups.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
 func (gq *GroupsQuery) GroupBy(field string, fields ...string) *GroupsGroupBy {
@@ -284,11 +284,11 @@ func (gq *GroupsQuery) GroupBy(field string, fields ...string) *GroupsGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Groups.Query().
-//		Select(groups.FieldCreateTime).
+//		Select(groups.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (gq *GroupsQuery) Select(fields ...string) *GroupsSelect {
 	gq.ctx.Fields = append(gq.ctx.Fields, fields...)

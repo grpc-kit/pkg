@@ -261,12 +261,12 @@ func (dq *DemoQuery) Clone() *DemoQuery {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Demo.Query().
-//		GroupBy(demo.FieldCreateTime).
+//		GroupBy(demo.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
 func (dq *DemoQuery) GroupBy(field string, fields ...string) *DemoGroupBy {
@@ -284,11 +284,11 @@ func (dq *DemoQuery) GroupBy(field string, fields ...string) *DemoGroupBy {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Demo.Query().
-//		Select(demo.FieldCreateTime).
+//		Select(demo.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (dq *DemoQuery) Select(fields ...string) *DemoSelect {
 	dq.ctx.Fields = append(dq.ctx.Fields, fields...)

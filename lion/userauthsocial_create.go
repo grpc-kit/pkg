@@ -20,30 +20,44 @@ type UserAuthSocialCreate struct {
 	hooks    []Hook
 }
 
-// SetCreateTime sets the "create_time" field.
-func (uasc *UserAuthSocialCreate) SetCreateTime(t time.Time) *UserAuthSocialCreate {
-	uasc.mutation.SetCreateTime(t)
+// SetCreatedAt sets the "created_at" field.
+func (uasc *UserAuthSocialCreate) SetCreatedAt(t time.Time) *UserAuthSocialCreate {
+	uasc.mutation.SetCreatedAt(t)
 	return uasc
 }
 
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (uasc *UserAuthSocialCreate) SetNillableCreateTime(t *time.Time) *UserAuthSocialCreate {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (uasc *UserAuthSocialCreate) SetNillableCreatedAt(t *time.Time) *UserAuthSocialCreate {
 	if t != nil {
-		uasc.SetCreateTime(*t)
+		uasc.SetCreatedAt(*t)
 	}
 	return uasc
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uasc *UserAuthSocialCreate) SetUpdateTime(t time.Time) *UserAuthSocialCreate {
-	uasc.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (uasc *UserAuthSocialCreate) SetUpdatedAt(t time.Time) *UserAuthSocialCreate {
+	uasc.mutation.SetUpdatedAt(t)
 	return uasc
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (uasc *UserAuthSocialCreate) SetNillableUpdateTime(t *time.Time) *UserAuthSocialCreate {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (uasc *UserAuthSocialCreate) SetNillableUpdatedAt(t *time.Time) *UserAuthSocialCreate {
 	if t != nil {
-		uasc.SetUpdateTime(*t)
+		uasc.SetUpdatedAt(*t)
+	}
+	return uasc
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uasc *UserAuthSocialCreate) SetDeletedAt(t time.Time) *UserAuthSocialCreate {
+	uasc.mutation.SetDeletedAt(t)
+	return uasc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uasc *UserAuthSocialCreate) SetNillableDeletedAt(t *time.Time) *UserAuthSocialCreate {
+	if t != nil {
+		uasc.SetDeletedAt(*t)
 	}
 	return uasc
 }
@@ -141,23 +155,23 @@ func (uasc *UserAuthSocialCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uasc *UserAuthSocialCreate) defaults() {
-	if _, ok := uasc.mutation.CreateTime(); !ok {
-		v := userauthsocial.DefaultCreateTime()
-		uasc.mutation.SetCreateTime(v)
+	if _, ok := uasc.mutation.CreatedAt(); !ok {
+		v := userauthsocial.DefaultCreatedAt()
+		uasc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := uasc.mutation.UpdateTime(); !ok {
-		v := userauthsocial.DefaultUpdateTime()
-		uasc.mutation.SetUpdateTime(v)
+	if _, ok := uasc.mutation.UpdatedAt(); !ok {
+		v := userauthsocial.DefaultUpdatedAt()
+		uasc.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (uasc *UserAuthSocialCreate) check() error {
-	if _, ok := uasc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`lion: missing required field "UserAuthSocial.create_time"`)}
+	if _, ok := uasc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "UserAuthSocial.created_at"`)}
 	}
-	if _, ok := uasc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`lion: missing required field "UserAuthSocial.update_time"`)}
+	if _, ok := uasc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserAuthSocial.updated_at"`)}
 	}
 	if _, ok := uasc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserAuthSocial.user_id"`)}
@@ -209,13 +223,17 @@ func (uasc *UserAuthSocialCreate) createSpec() (*UserAuthSocial, *sqlgraph.Creat
 		_node = &UserAuthSocial{config: uasc.config}
 		_spec = sqlgraph.NewCreateSpec(userauthsocial.Table, sqlgraph.NewFieldSpec(userauthsocial.FieldID, field.TypeInt))
 	)
-	if value, ok := uasc.mutation.CreateTime(); ok {
-		_spec.SetField(userauthsocial.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
+	if value, ok := uasc.mutation.CreatedAt(); ok {
+		_spec.SetField(userauthsocial.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
-	if value, ok := uasc.mutation.UpdateTime(); ok {
-		_spec.SetField(userauthsocial.FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
+	if value, ok := uasc.mutation.UpdatedAt(); ok {
+		_spec.SetField(userauthsocial.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := uasc.mutation.DeletedAt(); ok {
+		_spec.SetField(userauthsocial.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := uasc.mutation.UserID(); ok {
 		_spec.SetField(userauthsocial.FieldUserID, field.TypeInt, value)

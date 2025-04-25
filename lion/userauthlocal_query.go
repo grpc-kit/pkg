@@ -261,12 +261,12 @@ func (ualq *UserAuthLocalQuery) Clone() *UserAuthLocalQuery {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.UserAuthLocal.Query().
-//		GroupBy(userauthlocal.FieldCreateTime).
+//		GroupBy(userauthlocal.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
 func (ualq *UserAuthLocalQuery) GroupBy(field string, fields ...string) *UserAuthLocalGroupBy {
@@ -284,11 +284,11 @@ func (ualq *UserAuthLocalQuery) GroupBy(field string, fields ...string) *UserAut
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.UserAuthLocal.Query().
-//		Select(userauthlocal.FieldCreateTime).
+//		Select(userauthlocal.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (ualq *UserAuthLocalQuery) Select(fields ...string) *UserAuthLocalSelect {
 	ualq.ctx.Fields = append(ualq.ctx.Fields, fields...)

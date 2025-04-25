@@ -17,10 +17,12 @@ type Groups struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreateTime holds the value of the "create_time" field.
-	CreateTime time.Time `json:"create_time,omitempty"`
-	// UpdateTime holds the value of the "update_time" field.
-	UpdateTime time.Time `json:"update_time,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 用户组名
 	Name string `json:"name,omitempty"`
 	// 用户组描述
@@ -37,7 +39,7 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case groups.FieldName, groups.FieldDescription:
 			values[i] = new(sql.NullString)
-		case groups.FieldCreateTime, groups.FieldUpdateTime:
+		case groups.FieldCreatedAt, groups.FieldUpdatedAt, groups.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -60,17 +62,24 @@ func (gr *Groups) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			gr.ID = int(value.Int64)
-		case groups.FieldCreateTime:
+		case groups.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				gr.CreateTime = value.Time
+				gr.CreatedAt = value.Time
 			}
-		case groups.FieldUpdateTime:
+		case groups.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				gr.UpdateTime = value.Time
+				gr.UpdatedAt = value.Time
+			}
+		case groups.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				gr.DeletedAt = new(time.Time)
+				*gr.DeletedAt = value.Time
 			}
 		case groups.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -120,11 +129,16 @@ func (gr *Groups) String() string {
 	var builder strings.Builder
 	builder.WriteString("Groups(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", gr.ID))
-	builder.WriteString("create_time=")
-	builder.WriteString(gr.CreateTime.Format(time.ANSIC))
+	builder.WriteString("created_at=")
+	builder.WriteString(gr.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("update_time=")
-	builder.WriteString(gr.UpdateTime.Format(time.ANSIC))
+	builder.WriteString("updated_at=")
+	builder.WriteString(gr.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := gr.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(gr.Name)

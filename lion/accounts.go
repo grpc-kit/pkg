@@ -17,10 +17,12 @@ type Accounts struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreateTime holds the value of the "create_time" field.
-	CreateTime time.Time `json:"create_time,omitempty"`
-	// UpdateTime holds the value of the "update_time" field.
-	UpdateTime time.Time `json:"update_time,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Balance holds the value of the "balance" field.
 	Balance float64 `json:"balance,omitempty"`
 	// Currency holds the value of the "currency" field.
@@ -39,7 +41,7 @@ func (*Accounts) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case accounts.FieldCurrency:
 			values[i] = new(sql.NullString)
-		case accounts.FieldCreateTime, accounts.FieldUpdateTime:
+		case accounts.FieldCreatedAt, accounts.FieldUpdatedAt, accounts.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -62,17 +64,24 @@ func (a *Accounts) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			a.ID = int(value.Int64)
-		case accounts.FieldCreateTime:
+		case accounts.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				a.CreateTime = value.Time
+				a.CreatedAt = value.Time
 			}
-		case accounts.FieldUpdateTime:
+		case accounts.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				a.UpdateTime = value.Time
+				a.UpdatedAt = value.Time
+			}
+		case accounts.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				a.DeletedAt = new(time.Time)
+				*a.DeletedAt = value.Time
 			}
 		case accounts.FieldBalance:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -122,11 +131,16 @@ func (a *Accounts) String() string {
 	var builder strings.Builder
 	builder.WriteString("Accounts(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
-	builder.WriteString("create_time=")
-	builder.WriteString(a.CreateTime.Format(time.ANSIC))
+	builder.WriteString("created_at=")
+	builder.WriteString(a.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("update_time=")
-	builder.WriteString(a.UpdateTime.Format(time.ANSIC))
+	builder.WriteString("updated_at=")
+	builder.WriteString(a.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := a.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("balance=")
 	builder.WriteString(fmt.Sprintf("%v", a.Balance))

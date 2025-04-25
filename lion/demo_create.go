@@ -20,30 +20,44 @@ type DemoCreate struct {
 	hooks    []Hook
 }
 
-// SetCreateTime sets the "create_time" field.
-func (dc *DemoCreate) SetCreateTime(t time.Time) *DemoCreate {
-	dc.mutation.SetCreateTime(t)
+// SetCreatedAt sets the "created_at" field.
+func (dc *DemoCreate) SetCreatedAt(t time.Time) *DemoCreate {
+	dc.mutation.SetCreatedAt(t)
 	return dc
 }
 
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (dc *DemoCreate) SetNillableCreateTime(t *time.Time) *DemoCreate {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (dc *DemoCreate) SetNillableCreatedAt(t *time.Time) *DemoCreate {
 	if t != nil {
-		dc.SetCreateTime(*t)
+		dc.SetCreatedAt(*t)
 	}
 	return dc
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (dc *DemoCreate) SetUpdateTime(t time.Time) *DemoCreate {
-	dc.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (dc *DemoCreate) SetUpdatedAt(t time.Time) *DemoCreate {
+	dc.mutation.SetUpdatedAt(t)
 	return dc
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (dc *DemoCreate) SetNillableUpdateTime(t *time.Time) *DemoCreate {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (dc *DemoCreate) SetNillableUpdatedAt(t *time.Time) *DemoCreate {
 	if t != nil {
-		dc.SetUpdateTime(*t)
+		dc.SetUpdatedAt(*t)
+	}
+	return dc
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (dc *DemoCreate) SetDeletedAt(t time.Time) *DemoCreate {
+	dc.mutation.SetDeletedAt(t)
+	return dc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (dc *DemoCreate) SetNillableDeletedAt(t *time.Time) *DemoCreate {
+	if t != nil {
+		dc.SetDeletedAt(*t)
 	}
 	return dc
 }
@@ -97,13 +111,13 @@ func (dc *DemoCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (dc *DemoCreate) defaults() {
-	if _, ok := dc.mutation.CreateTime(); !ok {
-		v := demo.DefaultCreateTime()
-		dc.mutation.SetCreateTime(v)
+	if _, ok := dc.mutation.CreatedAt(); !ok {
+		v := demo.DefaultCreatedAt()
+		dc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := dc.mutation.UpdateTime(); !ok {
-		v := demo.DefaultUpdateTime()
-		dc.mutation.SetUpdateTime(v)
+	if _, ok := dc.mutation.UpdatedAt(); !ok {
+		v := demo.DefaultUpdatedAt()
+		dc.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := dc.mutation.Name(); !ok {
 		v := demo.DefaultName
@@ -113,11 +127,11 @@ func (dc *DemoCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (dc *DemoCreate) check() error {
-	if _, ok := dc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`lion: missing required field "Demo.create_time"`)}
+	if _, ok := dc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "Demo.created_at"`)}
 	}
-	if _, ok := dc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`lion: missing required field "Demo.update_time"`)}
+	if _, ok := dc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Demo.updated_at"`)}
 	}
 	if _, ok := dc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Demo.name"`)}
@@ -148,13 +162,17 @@ func (dc *DemoCreate) createSpec() (*Demo, *sqlgraph.CreateSpec) {
 		_node = &Demo{config: dc.config}
 		_spec = sqlgraph.NewCreateSpec(demo.Table, sqlgraph.NewFieldSpec(demo.FieldID, field.TypeInt))
 	)
-	if value, ok := dc.mutation.CreateTime(); ok {
-		_spec.SetField(demo.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
+	if value, ok := dc.mutation.CreatedAt(); ok {
+		_spec.SetField(demo.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
-	if value, ok := dc.mutation.UpdateTime(); ok {
-		_spec.SetField(demo.FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
+	if value, ok := dc.mutation.UpdatedAt(); ok {
+		_spec.SetField(demo.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := dc.mutation.DeletedAt(); ok {
+		_spec.SetField(demo.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := dc.mutation.Name(); ok {
 		_spec.SetField(demo.FieldName, field.TypeString, value)

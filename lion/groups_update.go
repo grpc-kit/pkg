@@ -28,9 +28,29 @@ func (gu *GroupsUpdate) Where(ps ...predicate.Groups) *GroupsUpdate {
 	return gu
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (gu *GroupsUpdate) SetUpdateTime(t time.Time) *GroupsUpdate {
-	gu.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (gu *GroupsUpdate) SetUpdatedAt(t time.Time) *GroupsUpdate {
+	gu.mutation.SetUpdatedAt(t)
+	return gu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (gu *GroupsUpdate) SetDeletedAt(t time.Time) *GroupsUpdate {
+	gu.mutation.SetDeletedAt(t)
+	return gu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (gu *GroupsUpdate) SetNillableDeletedAt(t *time.Time) *GroupsUpdate {
+	if t != nil {
+		gu.SetDeletedAt(*t)
+	}
+	return gu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (gu *GroupsUpdate) ClearDeletedAt() *GroupsUpdate {
+	gu.mutation.ClearDeletedAt()
 	return gu
 }
 
@@ -97,9 +117,9 @@ func (gu *GroupsUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (gu *GroupsUpdate) defaults() {
-	if _, ok := gu.mutation.UpdateTime(); !ok {
-		v := groups.UpdateDefaultUpdateTime()
-		gu.mutation.SetUpdateTime(v)
+	if _, ok := gu.mutation.UpdatedAt(); !ok {
+		v := groups.UpdateDefaultUpdatedAt()
+		gu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -125,8 +145,14 @@ func (gu *GroupsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := gu.mutation.UpdateTime(); ok {
-		_spec.SetField(groups.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := gu.mutation.UpdatedAt(); ok {
+		_spec.SetField(groups.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := gu.mutation.DeletedAt(); ok {
+		_spec.SetField(groups.FieldDeletedAt, field.TypeTime, value)
+	}
+	if gu.mutation.DeletedAtCleared() {
+		_spec.ClearField(groups.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := gu.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
@@ -154,9 +180,29 @@ type GroupsUpdateOne struct {
 	mutation *GroupsMutation
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (guo *GroupsUpdateOne) SetUpdateTime(t time.Time) *GroupsUpdateOne {
-	guo.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (guo *GroupsUpdateOne) SetUpdatedAt(t time.Time) *GroupsUpdateOne {
+	guo.mutation.SetUpdatedAt(t)
+	return guo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (guo *GroupsUpdateOne) SetDeletedAt(t time.Time) *GroupsUpdateOne {
+	guo.mutation.SetDeletedAt(t)
+	return guo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (guo *GroupsUpdateOne) SetNillableDeletedAt(t *time.Time) *GroupsUpdateOne {
+	if t != nil {
+		guo.SetDeletedAt(*t)
+	}
+	return guo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (guo *GroupsUpdateOne) ClearDeletedAt() *GroupsUpdateOne {
+	guo.mutation.ClearDeletedAt()
 	return guo
 }
 
@@ -236,9 +282,9 @@ func (guo *GroupsUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (guo *GroupsUpdateOne) defaults() {
-	if _, ok := guo.mutation.UpdateTime(); !ok {
-		v := groups.UpdateDefaultUpdateTime()
-		guo.mutation.SetUpdateTime(v)
+	if _, ok := guo.mutation.UpdatedAt(); !ok {
+		v := groups.UpdateDefaultUpdatedAt()
+		guo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -281,8 +327,14 @@ func (guo *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err err
 			}
 		}
 	}
-	if value, ok := guo.mutation.UpdateTime(); ok {
-		_spec.SetField(groups.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := guo.mutation.UpdatedAt(); ok {
+		_spec.SetField(groups.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := guo.mutation.DeletedAt(); ok {
+		_spec.SetField(groups.FieldDeletedAt, field.TypeTime, value)
+	}
+	if guo.mutation.DeletedAtCleared() {
+		_spec.ClearField(groups.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := guo.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)

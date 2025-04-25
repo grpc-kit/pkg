@@ -20,30 +20,44 @@ type UserAttributesCreate struct {
 	hooks    []Hook
 }
 
-// SetCreateTime sets the "create_time" field.
-func (uac *UserAttributesCreate) SetCreateTime(t time.Time) *UserAttributesCreate {
-	uac.mutation.SetCreateTime(t)
+// SetCreatedAt sets the "created_at" field.
+func (uac *UserAttributesCreate) SetCreatedAt(t time.Time) *UserAttributesCreate {
+	uac.mutation.SetCreatedAt(t)
 	return uac
 }
 
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (uac *UserAttributesCreate) SetNillableCreateTime(t *time.Time) *UserAttributesCreate {
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (uac *UserAttributesCreate) SetNillableCreatedAt(t *time.Time) *UserAttributesCreate {
 	if t != nil {
-		uac.SetCreateTime(*t)
+		uac.SetCreatedAt(*t)
 	}
 	return uac
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uac *UserAttributesCreate) SetUpdateTime(t time.Time) *UserAttributesCreate {
-	uac.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (uac *UserAttributesCreate) SetUpdatedAt(t time.Time) *UserAttributesCreate {
+	uac.mutation.SetUpdatedAt(t)
 	return uac
 }
 
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (uac *UserAttributesCreate) SetNillableUpdateTime(t *time.Time) *UserAttributesCreate {
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (uac *UserAttributesCreate) SetNillableUpdatedAt(t *time.Time) *UserAttributesCreate {
 	if t != nil {
-		uac.SetUpdateTime(*t)
+		uac.SetUpdatedAt(*t)
+	}
+	return uac
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uac *UserAttributesCreate) SetDeletedAt(t time.Time) *UserAttributesCreate {
+	uac.mutation.SetDeletedAt(t)
+	return uac
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uac *UserAttributesCreate) SetNillableDeletedAt(t *time.Time) *UserAttributesCreate {
+	if t != nil {
+		uac.SetDeletedAt(*t)
 	}
 	return uac
 }
@@ -101,23 +115,23 @@ func (uac *UserAttributesCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uac *UserAttributesCreate) defaults() {
-	if _, ok := uac.mutation.CreateTime(); !ok {
-		v := userattributes.DefaultCreateTime()
-		uac.mutation.SetCreateTime(v)
+	if _, ok := uac.mutation.CreatedAt(); !ok {
+		v := userattributes.DefaultCreatedAt()
+		uac.mutation.SetCreatedAt(v)
 	}
-	if _, ok := uac.mutation.UpdateTime(); !ok {
-		v := userattributes.DefaultUpdateTime()
-		uac.mutation.SetUpdateTime(v)
+	if _, ok := uac.mutation.UpdatedAt(); !ok {
+		v := userattributes.DefaultUpdatedAt()
+		uac.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (uac *UserAttributesCreate) check() error {
-	if _, ok := uac.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`lion: missing required field "UserAttributes.create_time"`)}
+	if _, ok := uac.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "UserAttributes.created_at"`)}
 	}
-	if _, ok := uac.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`lion: missing required field "UserAttributes.update_time"`)}
+	if _, ok := uac.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserAttributes.updated_at"`)}
 	}
 	if _, ok := uac.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserAttributes.user_id"`)}
@@ -169,13 +183,17 @@ func (uac *UserAttributesCreate) createSpec() (*UserAttributes, *sqlgraph.Create
 		_node = &UserAttributes{config: uac.config}
 		_spec = sqlgraph.NewCreateSpec(userattributes.Table, sqlgraph.NewFieldSpec(userattributes.FieldID, field.TypeInt))
 	)
-	if value, ok := uac.mutation.CreateTime(); ok {
-		_spec.SetField(userattributes.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
+	if value, ok := uac.mutation.CreatedAt(); ok {
+		_spec.SetField(userattributes.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
-	if value, ok := uac.mutation.UpdateTime(); ok {
-		_spec.SetField(userattributes.FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
+	if value, ok := uac.mutation.UpdatedAt(); ok {
+		_spec.SetField(userattributes.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := uac.mutation.DeletedAt(); ok {
+		_spec.SetField(userattributes.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := uac.mutation.UserID(); ok {
 		_spec.SetField(userattributes.FieldUserID, field.TypeInt, value)

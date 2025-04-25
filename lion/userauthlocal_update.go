@@ -28,9 +28,29 @@ func (ualu *UserAuthLocalUpdate) Where(ps ...predicate.UserAuthLocal) *UserAuthL
 	return ualu
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (ualu *UserAuthLocalUpdate) SetUpdateTime(t time.Time) *UserAuthLocalUpdate {
-	ualu.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (ualu *UserAuthLocalUpdate) SetUpdatedAt(t time.Time) *UserAuthLocalUpdate {
+	ualu.mutation.SetUpdatedAt(t)
+	return ualu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (ualu *UserAuthLocalUpdate) SetDeletedAt(t time.Time) *UserAuthLocalUpdate {
+	ualu.mutation.SetDeletedAt(t)
+	return ualu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (ualu *UserAuthLocalUpdate) SetNillableDeletedAt(t *time.Time) *UserAuthLocalUpdate {
+	if t != nil {
+		ualu.SetDeletedAt(*t)
+	}
+	return ualu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (ualu *UserAuthLocalUpdate) ClearDeletedAt() *UserAuthLocalUpdate {
+	ualu.mutation.ClearDeletedAt()
 	return ualu
 }
 
@@ -135,9 +155,9 @@ func (ualu *UserAuthLocalUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ualu *UserAuthLocalUpdate) defaults() {
-	if _, ok := ualu.mutation.UpdateTime(); !ok {
-		v := userauthlocal.UpdateDefaultUpdateTime()
-		ualu.mutation.SetUpdateTime(v)
+	if _, ok := ualu.mutation.UpdatedAt(); !ok {
+		v := userauthlocal.UpdateDefaultUpdatedAt()
+		ualu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -163,8 +183,14 @@ func (ualu *UserAuthLocalUpdate) sqlSave(ctx context.Context) (n int, err error)
 			}
 		}
 	}
-	if value, ok := ualu.mutation.UpdateTime(); ok {
-		_spec.SetField(userauthlocal.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := ualu.mutation.UpdatedAt(); ok {
+		_spec.SetField(userauthlocal.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := ualu.mutation.DeletedAt(); ok {
+		_spec.SetField(userauthlocal.FieldDeletedAt, field.TypeTime, value)
+	}
+	if ualu.mutation.DeletedAtCleared() {
+		_spec.ClearField(userauthlocal.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := ualu.mutation.PasswordHash(); ok {
 		_spec.SetField(userauthlocal.FieldPasswordHash, field.TypeBytes, value)
@@ -207,9 +233,29 @@ type UserAuthLocalUpdateOne struct {
 	mutation *UserAuthLocalMutation
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (ualuo *UserAuthLocalUpdateOne) SetUpdateTime(t time.Time) *UserAuthLocalUpdateOne {
-	ualuo.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (ualuo *UserAuthLocalUpdateOne) SetUpdatedAt(t time.Time) *UserAuthLocalUpdateOne {
+	ualuo.mutation.SetUpdatedAt(t)
+	return ualuo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (ualuo *UserAuthLocalUpdateOne) SetDeletedAt(t time.Time) *UserAuthLocalUpdateOne {
+	ualuo.mutation.SetDeletedAt(t)
+	return ualuo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (ualuo *UserAuthLocalUpdateOne) SetNillableDeletedAt(t *time.Time) *UserAuthLocalUpdateOne {
+	if t != nil {
+		ualuo.SetDeletedAt(*t)
+	}
+	return ualuo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (ualuo *UserAuthLocalUpdateOne) ClearDeletedAt() *UserAuthLocalUpdateOne {
+	ualuo.mutation.ClearDeletedAt()
 	return ualuo
 }
 
@@ -327,9 +373,9 @@ func (ualuo *UserAuthLocalUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ualuo *UserAuthLocalUpdateOne) defaults() {
-	if _, ok := ualuo.mutation.UpdateTime(); !ok {
-		v := userauthlocal.UpdateDefaultUpdateTime()
-		ualuo.mutation.SetUpdateTime(v)
+	if _, ok := ualuo.mutation.UpdatedAt(); !ok {
+		v := userauthlocal.UpdateDefaultUpdatedAt()
+		ualuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -372,8 +418,14 @@ func (ualuo *UserAuthLocalUpdateOne) sqlSave(ctx context.Context) (_node *UserAu
 			}
 		}
 	}
-	if value, ok := ualuo.mutation.UpdateTime(); ok {
-		_spec.SetField(userauthlocal.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := ualuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(userauthlocal.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := ualuo.mutation.DeletedAt(); ok {
+		_spec.SetField(userauthlocal.FieldDeletedAt, field.TypeTime, value)
+	}
+	if ualuo.mutation.DeletedAtCleared() {
+		_spec.ClearField(userauthlocal.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := ualuo.mutation.PasswordHash(); ok {
 		_spec.SetField(userauthlocal.FieldPasswordHash, field.TypeBytes, value)

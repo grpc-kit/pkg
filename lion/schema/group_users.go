@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"entgo.io/ent/schema/mixin"
 )
 
 // GroupUsers 组下关联的具体用户
@@ -36,7 +35,7 @@ func (GroupUsers) Edges() []ent.Edge {
 // Mixin of the table.
 func (GroupUsers) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		TimeMixin{},
 	}
 }
 

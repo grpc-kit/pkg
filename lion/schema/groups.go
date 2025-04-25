@@ -5,7 +5,6 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/mixin"
 )
 
 // Groups 存储用户组信息，实现 RBAC 权限管理
@@ -35,7 +34,7 @@ func (Groups) Edges() []ent.Edge {
 // Mixin of the table.
 func (Groups) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		TimeMixin{},
 	}
 }
 

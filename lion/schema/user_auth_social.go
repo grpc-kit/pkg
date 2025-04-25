@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"entgo.io/ent/schema/mixin"
 )
 
 // UserAuthSocial 存储通过 OIDC 等社交登录的用户信息
@@ -57,7 +56,7 @@ func (UserAuthSocial) Edges() []ent.Edge {
 // Mixin of the table.
 func (UserAuthSocial) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		TimeMixin{},
 	}
 }
 

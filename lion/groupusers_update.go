@@ -28,9 +28,29 @@ func (guu *GroupUsersUpdate) Where(ps ...predicate.GroupUsers) *GroupUsersUpdate
 	return guu
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (guu *GroupUsersUpdate) SetUpdateTime(t time.Time) *GroupUsersUpdate {
-	guu.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (guu *GroupUsersUpdate) SetUpdatedAt(t time.Time) *GroupUsersUpdate {
+	guu.mutation.SetUpdatedAt(t)
+	return guu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (guu *GroupUsersUpdate) SetDeletedAt(t time.Time) *GroupUsersUpdate {
+	guu.mutation.SetDeletedAt(t)
+	return guu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (guu *GroupUsersUpdate) SetNillableDeletedAt(t *time.Time) *GroupUsersUpdate {
+	if t != nil {
+		guu.SetDeletedAt(*t)
+	}
+	return guu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (guu *GroupUsersUpdate) ClearDeletedAt() *GroupUsersUpdate {
+	guu.mutation.ClearDeletedAt()
 	return guu
 }
 
@@ -69,9 +89,9 @@ func (guu *GroupUsersUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (guu *GroupUsersUpdate) defaults() {
-	if _, ok := guu.mutation.UpdateTime(); !ok {
-		v := groupusers.UpdateDefaultUpdateTime()
-		guu.mutation.SetUpdateTime(v)
+	if _, ok := guu.mutation.UpdatedAt(); !ok {
+		v := groupusers.UpdateDefaultUpdatedAt()
+		guu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -84,8 +104,14 @@ func (guu *GroupUsersUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := guu.mutation.UpdateTime(); ok {
-		_spec.SetField(groupusers.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := guu.mutation.UpdatedAt(); ok {
+		_spec.SetField(groupusers.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := guu.mutation.DeletedAt(); ok {
+		_spec.SetField(groupusers.FieldDeletedAt, field.TypeTime, value)
+	}
+	if guu.mutation.DeletedAtCleared() {
+		_spec.ClearField(groupusers.FieldDeletedAt, field.TypeTime)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, guu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -107,9 +133,29 @@ type GroupUsersUpdateOne struct {
 	mutation *GroupUsersMutation
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (guuo *GroupUsersUpdateOne) SetUpdateTime(t time.Time) *GroupUsersUpdateOne {
-	guuo.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (guuo *GroupUsersUpdateOne) SetUpdatedAt(t time.Time) *GroupUsersUpdateOne {
+	guuo.mutation.SetUpdatedAt(t)
+	return guuo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (guuo *GroupUsersUpdateOne) SetDeletedAt(t time.Time) *GroupUsersUpdateOne {
+	guuo.mutation.SetDeletedAt(t)
+	return guuo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (guuo *GroupUsersUpdateOne) SetNillableDeletedAt(t *time.Time) *GroupUsersUpdateOne {
+	if t != nil {
+		guuo.SetDeletedAt(*t)
+	}
+	return guuo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (guuo *GroupUsersUpdateOne) ClearDeletedAt() *GroupUsersUpdateOne {
+	guuo.mutation.ClearDeletedAt()
 	return guuo
 }
 
@@ -161,9 +207,9 @@ func (guuo *GroupUsersUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (guuo *GroupUsersUpdateOne) defaults() {
-	if _, ok := guuo.mutation.UpdateTime(); !ok {
-		v := groupusers.UpdateDefaultUpdateTime()
-		guuo.mutation.SetUpdateTime(v)
+	if _, ok := guuo.mutation.UpdatedAt(); !ok {
+		v := groupusers.UpdateDefaultUpdatedAt()
+		guuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -193,8 +239,14 @@ func (guuo *GroupUsersUpdateOne) sqlSave(ctx context.Context) (_node *GroupUsers
 			}
 		}
 	}
-	if value, ok := guuo.mutation.UpdateTime(); ok {
-		_spec.SetField(groupusers.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := guuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(groupusers.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := guuo.mutation.DeletedAt(); ok {
+		_spec.SetField(groupusers.FieldDeletedAt, field.TypeTime, value)
+	}
+	if guuo.mutation.DeletedAtCleared() {
+		_spec.ClearField(groupusers.FieldDeletedAt, field.TypeTime)
 	}
 	_node = &GroupUsers{config: guuo.config}
 	_spec.Assign = _node.assignValues

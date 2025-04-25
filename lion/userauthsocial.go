@@ -17,10 +17,12 @@ type UserAuthSocial struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreateTime holds the value of the "create_time" field.
-	CreateTime time.Time `json:"create_time,omitempty"`
-	// UpdateTime holds the value of the "update_time" field.
-	UpdateTime time.Time `json:"update_time,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 用户ID，关联 lion_users 表
 	UserID int `json:"user_id,omitempty"`
 	// 认证提供分，来自 lion_oauth_providers 表 name 属性
@@ -49,7 +51,7 @@ func (*UserAuthSocial) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case userauthsocial.FieldProviderName, userauthsocial.FieldProviderUserID, userauthsocial.FieldProviderUnionID:
 			values[i] = new(sql.NullString)
-		case userauthsocial.FieldCreateTime, userauthsocial.FieldUpdateTime, userauthsocial.FieldTokenExpiresAt:
+		case userauthsocial.FieldCreatedAt, userauthsocial.FieldUpdatedAt, userauthsocial.FieldDeletedAt, userauthsocial.FieldTokenExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -72,17 +74,24 @@ func (uas *UserAuthSocial) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			uas.ID = int(value.Int64)
-		case userauthsocial.FieldCreateTime:
+		case userauthsocial.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				uas.CreateTime = value.Time
+				uas.CreatedAt = value.Time
 			}
-		case userauthsocial.FieldUpdateTime:
+		case userauthsocial.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				uas.UpdateTime = value.Time
+				uas.UpdatedAt = value.Time
+			}
+		case userauthsocial.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				uas.DeletedAt = new(time.Time)
+				*uas.DeletedAt = value.Time
 			}
 		case userauthsocial.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -162,11 +171,16 @@ func (uas *UserAuthSocial) String() string {
 	var builder strings.Builder
 	builder.WriteString("UserAuthSocial(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", uas.ID))
-	builder.WriteString("create_time=")
-	builder.WriteString(uas.CreateTime.Format(time.ANSIC))
+	builder.WriteString("created_at=")
+	builder.WriteString(uas.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("update_time=")
-	builder.WriteString(uas.UpdateTime.Format(time.ANSIC))
+	builder.WriteString("updated_at=")
+	builder.WriteString(uas.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := uas.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", uas.UserID))

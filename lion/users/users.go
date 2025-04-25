@@ -14,14 +14,20 @@ const (
 	Label = "users"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldCreateTime holds the string denoting the create_time field in the database.
-	FieldCreateTime = "create_time"
-	// FieldUpdateTime holds the string denoting the update_time field in the database.
-	FieldUpdateTime = "update_time"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldPreferredUsername holds the string denoting the preferred_username field in the database.
 	FieldPreferredUsername = "preferred_username"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
+	// FieldRealnameEncrypted holds the string denoting the realname_encrypted field in the database.
+	FieldRealnameEncrypted = "realname_encrypted"
+	// FieldIdcardEncrypted holds the string denoting the idcard_encrypted field in the database.
+	FieldIdcardEncrypted = "idcard_encrypted"
+	// FieldIdcardHash holds the string denoting the idcard_hash field in the database.
+	FieldIdcardHash = "idcard_hash"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
 	// FieldProfile holds the string denoting the profile field in the database.
@@ -32,6 +38,8 @@ const (
 	FieldWebsite = "website"
 	// FieldEmailEncrypted holds the string denoting the email_encrypted field in the database.
 	FieldEmailEncrypted = "email_encrypted"
+	// FieldEmailHash holds the string denoting the email_hash field in the database.
+	FieldEmailHash = "email_hash"
 	// FieldEmailVerified holds the string denoting the email_verified field in the database.
 	FieldEmailVerified = "email_verified"
 	// FieldGender holds the string denoting the gender field in the database.
@@ -44,6 +52,8 @@ const (
 	FieldLocale = "locale"
 	// FieldPhoneNumberEncrypted holds the string denoting the phone_number_encrypted field in the database.
 	FieldPhoneNumberEncrypted = "phone_number_encrypted"
+	// FieldPhoneNumberHash holds the string denoting the phone_number_hash field in the database.
+	FieldPhoneNumberHash = "phone_number_hash"
 	// FieldPhoneNumberVerified holds the string denoting the phone_number_verified field in the database.
 	FieldPhoneNumberVerified = "phone_number_verified"
 	// FieldAddressEncrypted holds the string denoting the address_encrypted field in the database.
@@ -55,21 +65,26 @@ const (
 // Columns holds all SQL columns for users fields.
 var Columns = []string{
 	FieldID,
-	FieldCreateTime,
-	FieldUpdateTime,
+	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldPreferredUsername,
-	FieldName,
+	FieldRealnameEncrypted,
+	FieldIdcardEncrypted,
+	FieldIdcardHash,
 	FieldNickname,
 	FieldProfile,
 	FieldPicture,
 	FieldWebsite,
 	FieldEmailEncrypted,
+	FieldEmailHash,
 	FieldEmailVerified,
 	FieldGender,
 	FieldBirthdate,
 	FieldZoneinfo,
 	FieldLocale,
 	FieldPhoneNumberEncrypted,
+	FieldPhoneNumberHash,
 	FieldPhoneNumberVerified,
 	FieldAddressEncrypted,
 }
@@ -85,16 +100,18 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCreateTime holds the default value on creation for the "create_time" field.
-	DefaultCreateTime func() time.Time
-	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
-	DefaultUpdateTime func() time.Time
-	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
-	UpdateDefaultUpdateTime func() time.Time
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// PreferredUsernameValidator is a validator for the "preferred_username" field. It is called by the builders before save.
 	PreferredUsernameValidator func(string) error
-	// DefaultName holds the default value on creation for the "name" field.
-	DefaultName []byte
+	// DefaultRealnameEncrypted holds the default value on creation for the "realname_encrypted" field.
+	DefaultRealnameEncrypted []byte
+	// DefaultIdcardEncrypted holds the default value on creation for the "idcard_encrypted" field.
+	DefaultIdcardEncrypted []byte
 	// DefaultNickname holds the default value on creation for the "nickname" field.
 	DefaultNickname string
 	// DefaultEmailEncrypted holds the default value on creation for the "email_encrypted" field.
@@ -145,19 +162,29 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByCreateTime orders the results by the create_time field.
-func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
-// ByUpdateTime orders the results by the update_time field.
-func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
 // ByPreferredUsername orders the results by the preferred_username field.
 func ByPreferredUsername(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPreferredUsername, opts...).ToFunc()
+}
+
+// ByIdcardHash orders the results by the idcard_hash field.
+func ByIdcardHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIdcardHash, opts...).ToFunc()
 }
 
 // ByNickname orders the results by the nickname field.
@@ -178,6 +205,11 @@ func ByPicture(opts ...sql.OrderTermOption) OrderOption {
 // ByWebsite orders the results by the website field.
 func ByWebsite(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWebsite, opts...).ToFunc()
+}
+
+// ByEmailHash orders the results by the email_hash field.
+func ByEmailHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmailHash, opts...).ToFunc()
 }
 
 // ByEmailVerified orders the results by the email_verified field.
@@ -203,6 +235,11 @@ func ByZoneinfo(opts ...sql.OrderTermOption) OrderOption {
 // ByLocale orders the results by the locale field.
 func ByLocale(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLocale, opts...).ToFunc()
+}
+
+// ByPhoneNumberHash orders the results by the phone_number_hash field.
+func ByPhoneNumberHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPhoneNumberHash, opts...).ToFunc()
 }
 
 // ByPhoneNumberVerified orders the results by the phone_number_verified field.

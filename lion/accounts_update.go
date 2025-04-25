@@ -28,9 +28,29 @@ func (au *AccountsUpdate) Where(ps ...predicate.Accounts) *AccountsUpdate {
 	return au
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (au *AccountsUpdate) SetUpdateTime(t time.Time) *AccountsUpdate {
-	au.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (au *AccountsUpdate) SetUpdatedAt(t time.Time) *AccountsUpdate {
+	au.mutation.SetUpdatedAt(t)
+	return au
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (au *AccountsUpdate) SetDeletedAt(t time.Time) *AccountsUpdate {
+	au.mutation.SetDeletedAt(t)
+	return au
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (au *AccountsUpdate) SetNillableDeletedAt(t *time.Time) *AccountsUpdate {
+	if t != nil {
+		au.SetDeletedAt(*t)
+	}
+	return au
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (au *AccountsUpdate) ClearDeletedAt() *AccountsUpdate {
+	au.mutation.ClearDeletedAt()
 	return au
 }
 
@@ -104,9 +124,9 @@ func (au *AccountsUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (au *AccountsUpdate) defaults() {
-	if _, ok := au.mutation.UpdateTime(); !ok {
-		v := accounts.UpdateDefaultUpdateTime()
-		au.mutation.SetUpdateTime(v)
+	if _, ok := au.mutation.UpdatedAt(); !ok {
+		v := accounts.UpdateDefaultUpdatedAt()
+		au.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -119,8 +139,14 @@ func (au *AccountsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := au.mutation.UpdateTime(); ok {
-		_spec.SetField(accounts.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := au.mutation.UpdatedAt(); ok {
+		_spec.SetField(accounts.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := au.mutation.DeletedAt(); ok {
+		_spec.SetField(accounts.FieldDeletedAt, field.TypeTime, value)
+	}
+	if au.mutation.DeletedAtCleared() {
+		_spec.ClearField(accounts.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := au.mutation.Balance(); ok {
 		_spec.SetField(accounts.FieldBalance, field.TypeFloat64, value)
@@ -151,9 +177,29 @@ type AccountsUpdateOne struct {
 	mutation *AccountsMutation
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (auo *AccountsUpdateOne) SetUpdateTime(t time.Time) *AccountsUpdateOne {
-	auo.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (auo *AccountsUpdateOne) SetUpdatedAt(t time.Time) *AccountsUpdateOne {
+	auo.mutation.SetUpdatedAt(t)
+	return auo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (auo *AccountsUpdateOne) SetDeletedAt(t time.Time) *AccountsUpdateOne {
+	auo.mutation.SetDeletedAt(t)
+	return auo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (auo *AccountsUpdateOne) SetNillableDeletedAt(t *time.Time) *AccountsUpdateOne {
+	if t != nil {
+		auo.SetDeletedAt(*t)
+	}
+	return auo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (auo *AccountsUpdateOne) ClearDeletedAt() *AccountsUpdateOne {
+	auo.mutation.ClearDeletedAt()
 	return auo
 }
 
@@ -240,9 +286,9 @@ func (auo *AccountsUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (auo *AccountsUpdateOne) defaults() {
-	if _, ok := auo.mutation.UpdateTime(); !ok {
-		v := accounts.UpdateDefaultUpdateTime()
-		auo.mutation.SetUpdateTime(v)
+	if _, ok := auo.mutation.UpdatedAt(); !ok {
+		v := accounts.UpdateDefaultUpdatedAt()
+		auo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -272,8 +318,14 @@ func (auo *AccountsUpdateOne) sqlSave(ctx context.Context) (_node *Accounts, err
 			}
 		}
 	}
-	if value, ok := auo.mutation.UpdateTime(); ok {
-		_spec.SetField(accounts.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := auo.mutation.UpdatedAt(); ok {
+		_spec.SetField(accounts.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := auo.mutation.DeletedAt(); ok {
+		_spec.SetField(accounts.FieldDeletedAt, field.TypeTime, value)
+	}
+	if auo.mutation.DeletedAtCleared() {
+		_spec.ClearField(accounts.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := auo.mutation.Balance(); ok {
 		_spec.SetField(accounts.FieldBalance, field.TypeFloat64, value)

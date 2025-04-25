@@ -261,12 +261,12 @@ func (aq *AccountsQuery) Clone() *AccountsQuery {
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Accounts.Query().
-//		GroupBy(accounts.FieldCreateTime).
+//		GroupBy(accounts.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
 func (aq *AccountsQuery) GroupBy(field string, fields ...string) *AccountsGroupBy {
@@ -284,11 +284,11 @@ func (aq *AccountsQuery) GroupBy(field string, fields ...string) *AccountsGroupB
 // Example:
 //
 //	var v []struct {
-//		CreateTime time.Time `json:"create_time,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Accounts.Query().
-//		Select(accounts.FieldCreateTime).
+//		Select(accounts.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (aq *AccountsQuery) Select(fields ...string) *AccountsSelect {
 	aq.ctx.Fields = append(aq.ctx.Fields, fields...)

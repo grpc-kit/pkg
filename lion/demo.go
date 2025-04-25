@@ -17,10 +17,12 @@ type Demo struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// CreateTime holds the value of the "create_time" field.
-	CreateTime time.Time `json:"create_time,omitempty"`
-	// UpdateTime holds the value of the "update_time" field.
-	UpdateTime time.Time `json:"update_time,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name         string `json:"name,omitempty"`
 	selectValues sql.SelectValues
@@ -35,7 +37,7 @@ func (*Demo) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case demo.FieldName:
 			values[i] = new(sql.NullString)
-		case demo.FieldCreateTime, demo.FieldUpdateTime:
+		case demo.FieldCreatedAt, demo.FieldUpdatedAt, demo.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -58,17 +60,24 @@ func (d *Demo) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			d.ID = int(value.Int64)
-		case demo.FieldCreateTime:
+		case demo.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				d.CreateTime = value.Time
+				d.CreatedAt = value.Time
 			}
-		case demo.FieldUpdateTime:
+		case demo.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				d.UpdateTime = value.Time
+				d.UpdatedAt = value.Time
+			}
+		case demo.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				d.DeletedAt = new(time.Time)
+				*d.DeletedAt = value.Time
 			}
 		case demo.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -112,11 +121,16 @@ func (d *Demo) String() string {
 	var builder strings.Builder
 	builder.WriteString("Demo(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", d.ID))
-	builder.WriteString("create_time=")
-	builder.WriteString(d.CreateTime.Format(time.ANSIC))
+	builder.WriteString("created_at=")
+	builder.WriteString(d.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("update_time=")
-	builder.WriteString(d.UpdateTime.Format(time.ANSIC))
+	builder.WriteString("updated_at=")
+	builder.WriteString(d.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := d.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(d.Name)

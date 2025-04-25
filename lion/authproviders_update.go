@@ -28,9 +28,29 @@ func (apu *AuthProvidersUpdate) Where(ps ...predicate.AuthProviders) *AuthProvid
 	return apu
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (apu *AuthProvidersUpdate) SetUpdateTime(t time.Time) *AuthProvidersUpdate {
-	apu.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (apu *AuthProvidersUpdate) SetUpdatedAt(t time.Time) *AuthProvidersUpdate {
+	apu.mutation.SetUpdatedAt(t)
+	return apu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (apu *AuthProvidersUpdate) SetDeletedAt(t time.Time) *AuthProvidersUpdate {
+	apu.mutation.SetDeletedAt(t)
+	return apu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (apu *AuthProvidersUpdate) SetNillableDeletedAt(t *time.Time) *AuthProvidersUpdate {
+	if t != nil {
+		apu.SetDeletedAt(*t)
+	}
+	return apu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (apu *AuthProvidersUpdate) ClearDeletedAt() *AuthProvidersUpdate {
+	apu.mutation.ClearDeletedAt()
 	return apu
 }
 
@@ -201,9 +221,9 @@ func (apu *AuthProvidersUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (apu *AuthProvidersUpdate) defaults() {
-	if _, ok := apu.mutation.UpdateTime(); !ok {
-		v := authproviders.UpdateDefaultUpdateTime()
-		apu.mutation.SetUpdateTime(v)
+	if _, ok := apu.mutation.UpdatedAt(); !ok {
+		v := authproviders.UpdateDefaultUpdatedAt()
+		apu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -229,8 +249,14 @@ func (apu *AuthProvidersUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			}
 		}
 	}
-	if value, ok := apu.mutation.UpdateTime(); ok {
-		_spec.SetField(authproviders.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := apu.mutation.UpdatedAt(); ok {
+		_spec.SetField(authproviders.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := apu.mutation.DeletedAt(); ok {
+		_spec.SetField(authproviders.FieldDeletedAt, field.TypeTime, value)
+	}
+	if apu.mutation.DeletedAtCleared() {
+		_spec.ClearField(authproviders.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := apu.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeEnum, value)
@@ -282,9 +308,29 @@ type AuthProvidersUpdateOne struct {
 	mutation *AuthProvidersMutation
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (apuo *AuthProvidersUpdateOne) SetUpdateTime(t time.Time) *AuthProvidersUpdateOne {
-	apuo.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (apuo *AuthProvidersUpdateOne) SetUpdatedAt(t time.Time) *AuthProvidersUpdateOne {
+	apuo.mutation.SetUpdatedAt(t)
+	return apuo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (apuo *AuthProvidersUpdateOne) SetDeletedAt(t time.Time) *AuthProvidersUpdateOne {
+	apuo.mutation.SetDeletedAt(t)
+	return apuo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (apuo *AuthProvidersUpdateOne) SetNillableDeletedAt(t *time.Time) *AuthProvidersUpdateOne {
+	if t != nil {
+		apuo.SetDeletedAt(*t)
+	}
+	return apuo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (apuo *AuthProvidersUpdateOne) ClearDeletedAt() *AuthProvidersUpdateOne {
+	apuo.mutation.ClearDeletedAt()
 	return apuo
 }
 
@@ -468,9 +514,9 @@ func (apuo *AuthProvidersUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (apuo *AuthProvidersUpdateOne) defaults() {
-	if _, ok := apuo.mutation.UpdateTime(); !ok {
-		v := authproviders.UpdateDefaultUpdateTime()
-		apuo.mutation.SetUpdateTime(v)
+	if _, ok := apuo.mutation.UpdatedAt(); !ok {
+		v := authproviders.UpdateDefaultUpdatedAt()
+		apuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -513,8 +559,14 @@ func (apuo *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthPro
 			}
 		}
 	}
-	if value, ok := apuo.mutation.UpdateTime(); ok {
-		_spec.SetField(authproviders.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := apuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(authproviders.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := apuo.mutation.DeletedAt(); ok {
+		_spec.SetField(authproviders.FieldDeletedAt, field.TypeTime, value)
+	}
+	if apuo.mutation.DeletedAtCleared() {
+		_spec.ClearField(authproviders.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := apuo.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeEnum, value)

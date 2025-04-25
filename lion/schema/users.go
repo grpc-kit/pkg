@@ -7,7 +7,6 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/mixin"
 )
 
 // Users 用户实体表 | 存储用户基本信息和认证相关字段
@@ -24,18 +23,18 @@ func (Users) Fields() []ent.Field {
 			MaxLen(255).
 			Match(regexp.MustCompile(`^[a-zA-Z0-9_.]+$`)).
 			Comment("首选用户名，用于系统识别与登录，仅支持字母、数字、下划线、点号"),
-		field.Bytes("name").
+		field.Bytes("realname_encrypted").
 			Sensitive().
 			Default([]byte("")).
 			Comment("用户的真实姓名"),
-		/*
-			field.String("family_name").
-				Default("").
-				Comment("用户的姓氏"),
-			field.String("given_name").
-				Default("").
-				Comment("用户的名字"),
-		*/
+		field.Bytes("idcard_encrypted").
+			Sensitive().
+			Default([]byte("")).
+			Comment("用户身份证号码"),
+		field.String("idcard_hash").
+			Optional().
+			Nillable().
+			Comment("用户的身份证号码哈希，用于唯一值判断"),
 		field.String("nickname").
 			Default("").
 			Comment("用户的昵称，用于页面展示"),
@@ -55,6 +54,10 @@ func (Users) Fields() []ent.Field {
 			Sensitive().
 			Default([]byte("")).
 			Comment("用户的邮箱地址"),
+		field.String("email_hash").
+			Optional().
+			Nillable().
+			Comment("用户的邮箱地址哈希，用于唯一值判断"),
 		field.Bool("email_verified").
 			Default(false).
 			Comment("邮箱是否验证过"),
@@ -78,6 +81,10 @@ func (Users) Fields() []ent.Field {
 			Sensitive().
 			Default([]byte("")).
 			Comment("用户的手机号码，加密存储"),
+		field.String("phone_number_hash").
+			Optional().
+			Nillable().
+			Comment("用户的手机号哈希，用于唯一值判断"),
 		field.Bool("phone_number_verified").
 			Default(false).
 			Comment("手机号是否验证过"),
@@ -96,7 +103,7 @@ func (Users) Edges() []ent.Edge {
 // Mixin of the table.
 func (Users) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		TimeMixin{},
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"entgo.io/ent/schema/mixin"
 )
 
 // AuthProviders holds the schema definition for the Demo entity.
@@ -44,7 +43,7 @@ func (AuthProviders) Edges() []ent.Edge {
 // Mixin of the table.
 func (AuthProviders) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		mixin.Time{},
+		TimeMixin{},
 	}
 }
 

@@ -28,9 +28,29 @@ func (uau *UserAttributesUpdate) Where(ps ...predicate.UserAttributes) *UserAttr
 	return uau
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uau *UserAttributesUpdate) SetUpdateTime(t time.Time) *UserAttributesUpdate {
-	uau.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (uau *UserAttributesUpdate) SetUpdatedAt(t time.Time) *UserAttributesUpdate {
+	uau.mutation.SetUpdatedAt(t)
+	return uau
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uau *UserAttributesUpdate) SetDeletedAt(t time.Time) *UserAttributesUpdate {
+	uau.mutation.SetDeletedAt(t)
+	return uau
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uau *UserAttributesUpdate) SetNillableDeletedAt(t *time.Time) *UserAttributesUpdate {
+	if t != nil {
+		uau.SetDeletedAt(*t)
+	}
+	return uau
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (uau *UserAttributesUpdate) ClearDeletedAt() *UserAttributesUpdate {
+	uau.mutation.ClearDeletedAt()
 	return uau
 }
 
@@ -97,9 +117,9 @@ func (uau *UserAttributesUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uau *UserAttributesUpdate) defaults() {
-	if _, ok := uau.mutation.UpdateTime(); !ok {
-		v := userattributes.UpdateDefaultUpdateTime()
-		uau.mutation.SetUpdateTime(v)
+	if _, ok := uau.mutation.UpdatedAt(); !ok {
+		v := userattributes.UpdateDefaultUpdatedAt()
+		uau.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -130,8 +150,14 @@ func (uau *UserAttributesUpdate) sqlSave(ctx context.Context) (n int, err error)
 			}
 		}
 	}
-	if value, ok := uau.mutation.UpdateTime(); ok {
-		_spec.SetField(userattributes.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := uau.mutation.UpdatedAt(); ok {
+		_spec.SetField(userattributes.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uau.mutation.DeletedAt(); ok {
+		_spec.SetField(userattributes.FieldDeletedAt, field.TypeTime, value)
+	}
+	if uau.mutation.DeletedAtCleared() {
+		_spec.ClearField(userattributes.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := uau.mutation.AttrKey(); ok {
 		_spec.SetField(userattributes.FieldAttrKey, field.TypeString, value)
@@ -159,9 +185,29 @@ type UserAttributesUpdateOne struct {
 	mutation *UserAttributesMutation
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (uauo *UserAttributesUpdateOne) SetUpdateTime(t time.Time) *UserAttributesUpdateOne {
-	uauo.mutation.SetUpdateTime(t)
+// SetUpdatedAt sets the "updated_at" field.
+func (uauo *UserAttributesUpdateOne) SetUpdatedAt(t time.Time) *UserAttributesUpdateOne {
+	uauo.mutation.SetUpdatedAt(t)
+	return uauo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uauo *UserAttributesUpdateOne) SetDeletedAt(t time.Time) *UserAttributesUpdateOne {
+	uauo.mutation.SetDeletedAt(t)
+	return uauo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uauo *UserAttributesUpdateOne) SetNillableDeletedAt(t *time.Time) *UserAttributesUpdateOne {
+	if t != nil {
+		uauo.SetDeletedAt(*t)
+	}
+	return uauo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (uauo *UserAttributesUpdateOne) ClearDeletedAt() *UserAttributesUpdateOne {
+	uauo.mutation.ClearDeletedAt()
 	return uauo
 }
 
@@ -241,9 +287,9 @@ func (uauo *UserAttributesUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uauo *UserAttributesUpdateOne) defaults() {
-	if _, ok := uauo.mutation.UpdateTime(); !ok {
-		v := userattributes.UpdateDefaultUpdateTime()
-		uauo.mutation.SetUpdateTime(v)
+	if _, ok := uauo.mutation.UpdatedAt(); !ok {
+		v := userattributes.UpdateDefaultUpdatedAt()
+		uauo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -291,8 +337,14 @@ func (uauo *UserAttributesUpdateOne) sqlSave(ctx context.Context) (_node *UserAt
 			}
 		}
 	}
-	if value, ok := uauo.mutation.UpdateTime(); ok {
-		_spec.SetField(userattributes.FieldUpdateTime, field.TypeTime, value)
+	if value, ok := uauo.mutation.UpdatedAt(); ok {
+		_spec.SetField(userattributes.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uauo.mutation.DeletedAt(); ok {
+		_spec.SetField(userattributes.FieldDeletedAt, field.TypeTime, value)
+	}
+	if uauo.mutation.DeletedAtCleared() {
+		_spec.ClearField(userattributes.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := uauo.mutation.AttrKey(); ok {
 		_spec.SetField(userattributes.FieldAttrKey, field.TypeString, value)
