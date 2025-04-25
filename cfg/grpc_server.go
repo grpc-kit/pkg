@@ -3,7 +3,9 @@ package cfg
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -578,16 +580,22 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 				}
 
 				for _, v := range c.Security.Authentication.HTTPUsers {
-					if v.Username == tmps[0] && v.Password == tmps[1] {
-						// 认证成功
-						ctx = c.Security.withUsername(ctx, tmps[0])
-						ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
-						ctx = c.Security.withGroups(ctx, v.Groups)
+					if v.Username == tmps[0] {
+						h := sha256.New()
+						h.Write([]byte(tmps[1]))
+						userHash := hex.EncodeToString(h.Sum(nil))
 
-						if err := c.checkPermission(ctx, v.Groups); err != nil {
-							return ctx, err
+						if v.Password == tmps[1] || v.PasswordHash == userHash {
+							// 认证成功
+							ctx = c.Security.withUsername(ctx, tmps[0])
+							ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
+							ctx = c.Security.withGroups(ctx, v.Groups)
+
+							if err := c.checkPermission(ctx, v.Groups); err != nil {
+								return ctx, err
+							}
+							return ctx, nil
 						}
-						return ctx, nil
 					}
 				}
 			}
