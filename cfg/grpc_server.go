@@ -394,61 +394,28 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 
 // GetStreamInterceptor xx
 func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInterceptor) grpc.ServerOption {
-	/*
-		// TODO; 根据fullMethodName进行过滤哪些需要记录gRPC调用链，返回false表示不记录
-		tracingFilterFunc := grpcopentracing.WithFilterFunc(func(ctx context.Context, fullMethodName string) bool {
-			return path.Base(fullMethodName) != "HealthCheck"
-		})
+	var defaultOpts []grpc.StreamServerInterceptor
 
-		// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
-		logPayloadFilterFunc := func(ctx context.Context, fullMethodName string, servingObject interface{}) bool {
-			return false
-		}
+	defaultOpts = append(defaultOpts,
+		grpcauth.StreamServerInterceptor(c.authValidate()),
+	)
 
-		// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
-		logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-			// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-			return err == nil && path.Base(fullMethodName) != "HealthCheck"
-		})}
-	*/
+	defaultOpts = append(defaultOpts,
+		grpclogging.StreamServerInterceptor(c.interceptorLogger(c.logger),
+			grpclogging.WithTimestampFormat(time.RFC3339Nano),
+			grpclogging.WithLogOnEvents(grpclogging.FinishCall),
+		),
+	)
 
-	// TODO; metrics
-	/*
-		srvMetrics := grpcprometheus.NewServerMetrics(
-			grpcprometheus.WithServerHandlingTimeHistogram(
-				grpcprometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
-			),
-		)
-	*/
+	defaultOpts = append(defaultOpts,
+		grpcrecovery.StreamServerInterceptor(
+			grpcrecovery.WithRecoveryHandlerContext(c.Observables.grpcPanicRecoveryHandler),
+		),
+	)
 
-	/*
-		c.promRegistry.MustRegister(srvMetrics)
-		exemplarFromContext := func(ctx context.Context) prometheus.Labels {
-			if span := trace.SpanContextFromContext(ctx); span.IsSampled() {
-				return prometheus.Labels{"traceID": span.TraceID().String()}
-			}
-			return nil
-		}
-	*/
+	defaultOpts = append(defaultOpts, interceptors...)
 
-	/*
-		panicsTotal := promauto.With(c.promRegistry).NewCounter(prometheus.CounterOpts{
-			Name: "grpc_req_panics_recovered_total",
-			Help: "Total number of gRPC requests recovered from internal panic.",
-		})
-		grpcPanicRecoveryHandler := func(p any) (err error) {
-			panicsTotal.Inc()
-			// level.Error(rpcLogger).Log("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
-			return status.Errorf(codes.Internal, "%s", p)
-		}
-	*/
-
-	var opts []grpc.StreamServerInterceptor
-	opts = append(opts, grpcrecovery.StreamServerInterceptor())
-	opts = append(opts, grpcauth.StreamServerInterceptor(c.authValidate()))
-	opts = append(opts, interceptors...)
-
-	return grpc.ChainStreamInterceptor(opts...)
+	return grpc.ChainStreamInterceptor(defaultOpts...)
 }
 
 // GetClientDialOption 获取客户端连接的设置
