@@ -91,3 +91,89 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 		return resp, err
 	}
 }
+
+// StreamServerInterceptor 审计事件 grpc stream 拦截器
+func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
+	opt := defaultOption
+
+	for _, o := range opts {
+		o(opt)
+	}
+
+	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		if opt.level == LevelNone {
+			return handler(srv, ss)
+		}
+
+		// "/default.api.oneops.netdev.v1.OneopsNetdev/DisplaySwitchPortVlans"
+		parts := strings.Split(info.FullMethod, "/")
+		if len(parts) < 3 {
+			opt.logger.Warnf("failed to parse grpc metho: %s, ignore audit", info.FullMethod)
+			return handler(srv, ss)
+		}
+
+		grpcService := parts[1]
+		grpcMethod := parts[2]
+
+		// TODO；针对特殊的 method 不做审计
+		switch grpcMethod {
+		case "HealthCheck":
+			return handler(srv, ss)
+		}
+
+		ce := event.New()
+		ce.SetSpecVersion(event.CloudEventsVersionV1)
+		ce.SetSource(opt.serviceName)
+		ce.SetType("internal.audit")
+		ce.SetSubject(grpcMethod)
+
+		ctx := ss.Context()
+
+		ed := opt.createEventData(ctx)
+		ed.GRPCMethod = grpcMethod
+		ed.GRPCService = grpcService
+
+		// 记录请求体
+		if opt.level == LevelRequest || opt.level == LevelRequestResponse {
+			jsonData, ok, jsonErr := opt.marshalJson(ctx)
+			if jsonErr == nil && ok {
+				ed.setRequestObject(jsonData)
+			}
+		}
+
+		if err := opt.sendAuditEvent(ctx, ce, ed); err != nil {
+			rpc.MetricAuditEventSendErrorsIncr(ctx)
+			return errs.Unavailable(ctx).WithMessage(err.Error())
+		}
+
+		err := handler(srv, ss)
+
+		// 记录响应体审计阶段
+		if opt.level == LevelRequestResponse {
+			// TODO; 避免 err 变量污染
+
+			ed.setResponseStatus(err)
+
+			if err != nil {
+				jsonData, ok, jsonErr := opt.marshalJson(err)
+				if jsonErr == nil && ok {
+					ed.setResponseObject(jsonData)
+				}
+			} else {
+				/*
+					jsonData, ok, jsonErr := opt.marshalJson()
+					if jsonErr == nil && ok {
+						ed.setResponseObject(jsonData)
+					}
+				*/
+			}
+
+			if sendErr := opt.sendAuditEvent(ctx, ce, ed); sendErr != nil {
+				rpc.MetricAuditEventSendErrorsIncr(ctx)
+				return errs.Unavailable(ctx).WithMessage(sendErr.Error())
+			}
+		}
+
+		return err
+	}
+}

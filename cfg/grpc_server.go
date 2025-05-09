@@ -330,9 +330,16 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		}
 	}
 
+	/*
+		optionWithStreamErrorHandler := func(context.Context, error) *status.Status {
+			return status.New(codes.Internal, codes.Internal.String())
+		}
+	*/
+
 	defaultOpts = append(defaultOpts, runtime.WithMetadata(optionWithMetada))
 	defaultOpts = append(defaultOpts, runtime.WithForwardResponseOption(forwardResponseOption))
 	defaultOpts = append(defaultOpts, runtime.WithErrorHandler(optionWithProtoErrorHandler))
+	// defaultOpts = append(defaultOpts, runtime.WithStreamErrorHandler(optionWithStreamErrorHandler))
 	defaultOpts = append(defaultOpts, customOpts...)
 
 	hmux := http.NewServeMux()
@@ -355,9 +362,9 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterceptor) grpc.ServerOption {
 	// TODO; 移动到 observables 方法中
 
-	var defaultUnaryOpt []grpc.UnaryServerInterceptor
+	var defaultOpts []grpc.UnaryServerInterceptor
 
-	defaultUnaryOpt = append(defaultUnaryOpt,
+	defaultOpts = append(defaultOpts,
 		grpcauth.UnaryServerInterceptor(c.authValidate()),
 	)
 
@@ -365,7 +372,7 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 		auditLevel := c.CloudEvents.getAuditLevel()
 		mustSucceed := c.CloudEvents.hasAuditEventMustSucceed()
 
-		defaultUnaryOpt = append(defaultUnaryOpt,
+		defaultOpts = append(defaultOpts,
 			audit.UnaryServerInterceptor(
 				audit.WithLogger(c.logger),
 				audit.WithCloudEvent(c.CloudEvents.auditClient),
@@ -377,19 +384,22 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 		)
 	}
 
-	defaultUnaryOpt = append(defaultUnaryOpt,
+	defaultOpts = append(defaultOpts,
 		grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
 			grpclogging.WithTimestampFormat(time.RFC3339Nano),
 			grpclogging.WithLogOnEvents(grpclogging.FinishCall),
-		))
-	defaultUnaryOpt = append(defaultUnaryOpt,
+		),
+	)
+
+	defaultOpts = append(defaultOpts,
 		grpcrecovery.UnaryServerInterceptor(
 			grpcrecovery.WithRecoveryHandlerContext(c.Observables.grpcPanicRecoveryHandler),
 		),
 	)
-	defaultUnaryOpt = append(defaultUnaryOpt, interceptors...)
 
-	return grpc.ChainUnaryInterceptor(defaultUnaryOpt...)
+	defaultOpts = append(defaultOpts, interceptors...)
+
+	return grpc.ChainUnaryInterceptor(defaultOpts...)
 }
 
 // GetStreamInterceptor xx
@@ -399,6 +409,22 @@ func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInte
 	defaultOpts = append(defaultOpts,
 		grpcauth.StreamServerInterceptor(c.authValidate()),
 	)
+
+	if c.CloudEvents.hasAuditEnabled() {
+		auditLevel := c.CloudEvents.getAuditLevel()
+		mustSucceed := c.CloudEvents.hasAuditEventMustSucceed()
+
+		defaultOpts = append(defaultOpts,
+			audit.StreamServerInterceptor(
+				audit.WithLogger(c.logger),
+				audit.WithCloudEvent(c.CloudEvents.auditClient),
+				audit.WithServiceName(c.GetServiceName()),
+				audit.WithMarshal(c.Services.jsonMarshal),
+				audit.WithLevel(auditLevel),
+				audit.WithMustSucceed(mustSucceed),
+			),
+		)
+	}
 
 	defaultOpts = append(defaultOpts,
 		grpclogging.StreamServerInterceptor(c.interceptorLogger(c.logger),
