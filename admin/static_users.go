@@ -17,11 +17,13 @@ type StaticUser struct {
 }
 
 // GetAccessToken 获取或生成 jwt token
-func (s StaticUser) GetAccessToken() (string, error) {
+func (s StaticUser) GetAccessToken(expiresIn int32) (string, error) {
+	// TODO; 生成 jwt token 需要考虑不通用户级别生成 token 的最长有效时间
+
 	claims := auth.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   s.Username,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresIn) * time.Second)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 		},

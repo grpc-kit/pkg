@@ -34,12 +34,18 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 		return nil, errs.Unauthenticated(ctx)
 	}
 
-	tk, err := u.GetAccessToken()
+	expiresIn := req.ExpiresIn
+	if expiresIn <= 0 {
+		expiresIn = 24 * 60 * 60
+	}
+
+	tk, err := u.GetAccessToken(expiresIn)
 	if err != nil {
 		return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
 	}
 
 	result.AccessToken = tk
+	result.ExpiresIn = expiresIn
 
 	return result, nil
 }
