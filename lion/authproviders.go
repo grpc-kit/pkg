@@ -31,19 +31,19 @@ type AuthProviders struct {
 	Enabled bool `json:"enabled,omitempty"`
 	// ClientSecretEncrypted holds the value of the "client_secret_encrypted" field.
 	ClientSecretEncrypted []byte `json:"-"`
-	// Issuer holds the value of the "issuer" field.
-	Issuer string `json:"issuer,omitempty"`
-	// AuthURL holds the value of the "auth_url" field.
-	AuthURL string `json:"auth_url,omitempty"`
-	// TokenURL holds the value of the "token_url" field.
-	TokenURL string `json:"token_url,omitempty"`
-	// UserInfoURL holds the value of the "user_info_url" field.
-	UserInfoURL string `json:"user_info_url,omitempty"`
 	// Scopes holds the value of the "scopes" field.
 	Scopes string `json:"scopes,omitempty"`
-	// RedirectURL holds the value of the "redirect_url" field.
-	RedirectURL  string `json:"redirect_url,omitempty"`
-	selectValues sql.SelectValues
+	// RedirectURI holds the value of the "redirect_uri" field.
+	RedirectURI string `json:"redirect_uri,omitempty"`
+	// Issuer holds the value of the "issuer" field.
+	Issuer string `json:"issuer,omitempty"`
+	// AuthorizationEndpoint holds the value of the "authorization_endpoint" field.
+	AuthorizationEndpoint string `json:"authorization_endpoint,omitempty"`
+	// TokenEndpoint holds the value of the "token_endpoint" field.
+	TokenEndpoint string `json:"token_endpoint,omitempty"`
+	// UserinfoEndpoint holds the value of the "userinfo_endpoint" field.
+	UserinfoEndpoint string `json:"userinfo_endpoint,omitempty"`
+	selectValues     sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -57,7 +57,7 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case authproviders.FieldID:
 			values[i] = new(sql.NullInt64)
-		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldIssuer, authproviders.FieldAuthURL, authproviders.FieldTokenURL, authproviders.FieldUserInfoURL, authproviders.FieldScopes, authproviders.FieldRedirectURL:
+		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldScopes, authproviders.FieldRedirectURI, authproviders.FieldIssuer, authproviders.FieldAuthorizationEndpoint, authproviders.FieldTokenEndpoint, authproviders.FieldUserinfoEndpoint:
 			values[i] = new(sql.NullString)
 		case authproviders.FieldCreatedAt, authproviders.FieldUpdatedAt, authproviders.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -125,41 +125,41 @@ func (ap *AuthProviders) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				ap.ClientSecretEncrypted = *value
 			}
-		case authproviders.FieldIssuer:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field issuer", values[i])
-			} else if value.Valid {
-				ap.Issuer = value.String
-			}
-		case authproviders.FieldAuthURL:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field auth_url", values[i])
-			} else if value.Valid {
-				ap.AuthURL = value.String
-			}
-		case authproviders.FieldTokenURL:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field token_url", values[i])
-			} else if value.Valid {
-				ap.TokenURL = value.String
-			}
-		case authproviders.FieldUserInfoURL:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_info_url", values[i])
-			} else if value.Valid {
-				ap.UserInfoURL = value.String
-			}
 		case authproviders.FieldScopes:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field scopes", values[i])
 			} else if value.Valid {
 				ap.Scopes = value.String
 			}
-		case authproviders.FieldRedirectURL:
+		case authproviders.FieldRedirectURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field redirect_url", values[i])
+				return fmt.Errorf("unexpected type %T for field redirect_uri", values[i])
 			} else if value.Valid {
-				ap.RedirectURL = value.String
+				ap.RedirectURI = value.String
+			}
+		case authproviders.FieldIssuer:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field issuer", values[i])
+			} else if value.Valid {
+				ap.Issuer = value.String
+			}
+		case authproviders.FieldAuthorizationEndpoint:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field authorization_endpoint", values[i])
+			} else if value.Valid {
+				ap.AuthorizationEndpoint = value.String
+			}
+		case authproviders.FieldTokenEndpoint:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field token_endpoint", values[i])
+			} else if value.Valid {
+				ap.TokenEndpoint = value.String
+			}
+		case authproviders.FieldUserinfoEndpoint:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field userinfo_endpoint", values[i])
+			} else if value.Valid {
+				ap.UserinfoEndpoint = value.String
 			}
 		default:
 			ap.selectValues.Set(columns[i], values[i])
@@ -219,23 +219,23 @@ func (ap *AuthProviders) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("client_secret_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	builder.WriteString("issuer=")
-	builder.WriteString(ap.Issuer)
-	builder.WriteString(", ")
-	builder.WriteString("auth_url=")
-	builder.WriteString(ap.AuthURL)
-	builder.WriteString(", ")
-	builder.WriteString("token_url=")
-	builder.WriteString(ap.TokenURL)
-	builder.WriteString(", ")
-	builder.WriteString("user_info_url=")
-	builder.WriteString(ap.UserInfoURL)
-	builder.WriteString(", ")
 	builder.WriteString("scopes=")
 	builder.WriteString(ap.Scopes)
 	builder.WriteString(", ")
-	builder.WriteString("redirect_url=")
-	builder.WriteString(ap.RedirectURL)
+	builder.WriteString("redirect_uri=")
+	builder.WriteString(ap.RedirectURI)
+	builder.WriteString(", ")
+	builder.WriteString("issuer=")
+	builder.WriteString(ap.Issuer)
+	builder.WriteString(", ")
+	builder.WriteString("authorization_endpoint=")
+	builder.WriteString(ap.AuthorizationEndpoint)
+	builder.WriteString(", ")
+	builder.WriteString("token_endpoint=")
+	builder.WriteString(ap.TokenEndpoint)
+	builder.WriteString(", ")
+	builder.WriteString("userinfo_endpoint=")
+	builder.WriteString(ap.UserinfoEndpoint)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -102,39 +102,39 @@ func (apc *AuthProvidersCreate) SetClientSecretEncrypted(b []byte) *AuthProvider
 	return apc
 }
 
-// SetIssuer sets the "issuer" field.
-func (apc *AuthProvidersCreate) SetIssuer(s string) *AuthProvidersCreate {
-	apc.mutation.SetIssuer(s)
-	return apc
-}
-
-// SetAuthURL sets the "auth_url" field.
-func (apc *AuthProvidersCreate) SetAuthURL(s string) *AuthProvidersCreate {
-	apc.mutation.SetAuthURL(s)
-	return apc
-}
-
-// SetTokenURL sets the "token_url" field.
-func (apc *AuthProvidersCreate) SetTokenURL(s string) *AuthProvidersCreate {
-	apc.mutation.SetTokenURL(s)
-	return apc
-}
-
-// SetUserInfoURL sets the "user_info_url" field.
-func (apc *AuthProvidersCreate) SetUserInfoURL(s string) *AuthProvidersCreate {
-	apc.mutation.SetUserInfoURL(s)
-	return apc
-}
-
 // SetScopes sets the "scopes" field.
 func (apc *AuthProvidersCreate) SetScopes(s string) *AuthProvidersCreate {
 	apc.mutation.SetScopes(s)
 	return apc
 }
 
-// SetRedirectURL sets the "redirect_url" field.
-func (apc *AuthProvidersCreate) SetRedirectURL(s string) *AuthProvidersCreate {
-	apc.mutation.SetRedirectURL(s)
+// SetRedirectURI sets the "redirect_uri" field.
+func (apc *AuthProvidersCreate) SetRedirectURI(s string) *AuthProvidersCreate {
+	apc.mutation.SetRedirectURI(s)
+	return apc
+}
+
+// SetIssuer sets the "issuer" field.
+func (apc *AuthProvidersCreate) SetIssuer(s string) *AuthProvidersCreate {
+	apc.mutation.SetIssuer(s)
+	return apc
+}
+
+// SetAuthorizationEndpoint sets the "authorization_endpoint" field.
+func (apc *AuthProvidersCreate) SetAuthorizationEndpoint(s string) *AuthProvidersCreate {
+	apc.mutation.SetAuthorizationEndpoint(s)
+	return apc
+}
+
+// SetTokenEndpoint sets the "token_endpoint" field.
+func (apc *AuthProvidersCreate) SetTokenEndpoint(s string) *AuthProvidersCreate {
+	apc.mutation.SetTokenEndpoint(s)
+	return apc
+}
+
+// SetUserinfoEndpoint sets the "userinfo_endpoint" field.
+func (apc *AuthProvidersCreate) SetUserinfoEndpoint(s string) *AuthProvidersCreate {
+	apc.mutation.SetUserinfoEndpoint(s)
 	return apc
 }
 
@@ -220,23 +220,23 @@ func (apc *AuthProvidersCreate) check() error {
 	if _, ok := apc.mutation.ClientSecretEncrypted(); !ok {
 		return &ValidationError{Name: "client_secret_encrypted", err: errors.New(`lion: missing required field "AuthProviders.client_secret_encrypted"`)}
 	}
-	if _, ok := apc.mutation.Issuer(); !ok {
-		return &ValidationError{Name: "issuer", err: errors.New(`lion: missing required field "AuthProviders.issuer"`)}
-	}
-	if _, ok := apc.mutation.AuthURL(); !ok {
-		return &ValidationError{Name: "auth_url", err: errors.New(`lion: missing required field "AuthProviders.auth_url"`)}
-	}
-	if _, ok := apc.mutation.TokenURL(); !ok {
-		return &ValidationError{Name: "token_url", err: errors.New(`lion: missing required field "AuthProviders.token_url"`)}
-	}
-	if _, ok := apc.mutation.UserInfoURL(); !ok {
-		return &ValidationError{Name: "user_info_url", err: errors.New(`lion: missing required field "AuthProviders.user_info_url"`)}
-	}
 	if _, ok := apc.mutation.Scopes(); !ok {
 		return &ValidationError{Name: "scopes", err: errors.New(`lion: missing required field "AuthProviders.scopes"`)}
 	}
-	if _, ok := apc.mutation.RedirectURL(); !ok {
-		return &ValidationError{Name: "redirect_url", err: errors.New(`lion: missing required field "AuthProviders.redirect_url"`)}
+	if _, ok := apc.mutation.RedirectURI(); !ok {
+		return &ValidationError{Name: "redirect_uri", err: errors.New(`lion: missing required field "AuthProviders.redirect_uri"`)}
+	}
+	if _, ok := apc.mutation.Issuer(); !ok {
+		return &ValidationError{Name: "issuer", err: errors.New(`lion: missing required field "AuthProviders.issuer"`)}
+	}
+	if _, ok := apc.mutation.AuthorizationEndpoint(); !ok {
+		return &ValidationError{Name: "authorization_endpoint", err: errors.New(`lion: missing required field "AuthProviders.authorization_endpoint"`)}
+	}
+	if _, ok := apc.mutation.TokenEndpoint(); !ok {
+		return &ValidationError{Name: "token_endpoint", err: errors.New(`lion: missing required field "AuthProviders.token_endpoint"`)}
+	}
+	if _, ok := apc.mutation.UserinfoEndpoint(); !ok {
+		return &ValidationError{Name: "userinfo_endpoint", err: errors.New(`lion: missing required field "AuthProviders.userinfo_endpoint"`)}
 	}
 	return nil
 }
@@ -292,29 +292,29 @@ func (apc *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSp
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeBytes, value)
 		_node.ClientSecretEncrypted = value
 	}
-	if value, ok := apc.mutation.Issuer(); ok {
-		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
-		_node.Issuer = value
-	}
-	if value, ok := apc.mutation.AuthURL(); ok {
-		_spec.SetField(authproviders.FieldAuthURL, field.TypeString, value)
-		_node.AuthURL = value
-	}
-	if value, ok := apc.mutation.TokenURL(); ok {
-		_spec.SetField(authproviders.FieldTokenURL, field.TypeString, value)
-		_node.TokenURL = value
-	}
-	if value, ok := apc.mutation.UserInfoURL(); ok {
-		_spec.SetField(authproviders.FieldUserInfoURL, field.TypeString, value)
-		_node.UserInfoURL = value
-	}
 	if value, ok := apc.mutation.Scopes(); ok {
 		_spec.SetField(authproviders.FieldScopes, field.TypeString, value)
 		_node.Scopes = value
 	}
-	if value, ok := apc.mutation.RedirectURL(); ok {
-		_spec.SetField(authproviders.FieldRedirectURL, field.TypeString, value)
-		_node.RedirectURL = value
+	if value, ok := apc.mutation.RedirectURI(); ok {
+		_spec.SetField(authproviders.FieldRedirectURI, field.TypeString, value)
+		_node.RedirectURI = value
+	}
+	if value, ok := apc.mutation.Issuer(); ok {
+		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
+		_node.Issuer = value
+	}
+	if value, ok := apc.mutation.AuthorizationEndpoint(); ok {
+		_spec.SetField(authproviders.FieldAuthorizationEndpoint, field.TypeString, value)
+		_node.AuthorizationEndpoint = value
+	}
+	if value, ok := apc.mutation.TokenEndpoint(); ok {
+		_spec.SetField(authproviders.FieldTokenEndpoint, field.TypeString, value)
+		_node.TokenEndpoint = value
+	}
+	if value, ok := apc.mutation.UserinfoEndpoint(); ok {
+		_spec.SetField(authproviders.FieldUserinfoEndpoint, field.TypeString, value)
+		_node.UserinfoEndpoint = value
 	}
 	return _node, _spec
 }

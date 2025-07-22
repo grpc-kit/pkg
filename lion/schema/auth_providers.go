@@ -17,7 +17,7 @@ type AuthProviders struct {
 func (AuthProviders) Fields() []ent.Field {
 	return []ent.Field{
 		field.Enum("name").
-			Values("LOCAL", "LDAP", "OIDC", "OAUTH2", "GITHUB", "WECHAT", "GOOGLE").
+			Values("LOCAL", "LDAP", "OIDC", "OAUTH2", "GITHUB", "GOOGLE", "WECHAT").
 			Comment("支持的认证提供方"),
 		field.String("client_id").
 			Default(""),
@@ -26,12 +26,22 @@ func (AuthProviders) Fields() []ent.Field {
 		field.Bytes("client_secret_encrypted").
 			Sensitive().
 			Default([]byte("")),
-		field.String("issuer"),        // https://open.weixin.qq.com/connect/qrconnect
-		field.String("auth_url"),      // https://open.weixin.qq.com/connect/qrconnect
-		field.String("token_url"),     // https://api.weixin.qq.com/sns/oauth2/access_token
-		field.String("user_info_url"), // https://api.weixin.qq.com/sns/userinfo
-		field.String("scopes"),        // snsapi_login
-		field.String("redirect_url"),  // https://your-domain.com/admin/auth/wechat/callback
+		field.String("scopes"),       // snsapi_login
+		field.String("redirect_uri"), // https://your-domain.com/admin/auth/wechat/callback
+		// 以下参考 openid 关键属性
+		// https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
+		// issuer 认证提供方的唯一标识符，不包含查询参数
+		// 如：http://id.example.com/oauth2 或 https://open.weixin.qq.com/connect/qrconnect
+		field.String("issuer"),
+		// authorization_endpoint 认证端点
+		// 如：http://id.example.com/oauth2/auth/local 或 https://open.weixin.qq.com/connect/qrconnect
+		field.String("authorization_endpoint"),
+		// token_endpoint 令牌端点
+		// 如：http://id.example.com/oauth2/token 或 https://api.weixin.qq.com/sns/oauth2/access_token
+		field.String("token_endpoint"),
+		// userinfo_endpoint 用户端点
+		// 如：http://account.example.com/userinfo、https://api.weixin.qq.com/sns/userinfo
+		field.String("userinfo_endpoint"),
 	}
 }
 

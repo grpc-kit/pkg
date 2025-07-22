@@ -656,12 +656,12 @@ type AuthProvidersMutation struct {
 	client_id               *string
 	enabled                 *bool
 	client_secret_encrypted *[]byte
-	issuer                  *string
-	auth_url                *string
-	token_url               *string
-	user_info_url           *string
 	scopes                  *string
-	redirect_url            *string
+	redirect_uri            *string
+	issuer                  *string
+	authorization_endpoint  *string
+	token_endpoint          *string
+	userinfo_endpoint       *string
 	clearedFields           map[string]struct{}
 	done                    bool
 	oldValue                func(context.Context) (*AuthProviders, error)
@@ -1031,150 +1031,6 @@ func (m *AuthProvidersMutation) ResetClientSecretEncrypted() {
 	m.client_secret_encrypted = nil
 }
 
-// SetIssuer sets the "issuer" field.
-func (m *AuthProvidersMutation) SetIssuer(s string) {
-	m.issuer = &s
-}
-
-// Issuer returns the value of the "issuer" field in the mutation.
-func (m *AuthProvidersMutation) Issuer() (r string, exists bool) {
-	v := m.issuer
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIssuer returns the old "issuer" field's value of the AuthProviders entity.
-// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldIssuer(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIssuer is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIssuer requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIssuer: %w", err)
-	}
-	return oldValue.Issuer, nil
-}
-
-// ResetIssuer resets all changes to the "issuer" field.
-func (m *AuthProvidersMutation) ResetIssuer() {
-	m.issuer = nil
-}
-
-// SetAuthURL sets the "auth_url" field.
-func (m *AuthProvidersMutation) SetAuthURL(s string) {
-	m.auth_url = &s
-}
-
-// AuthURL returns the value of the "auth_url" field in the mutation.
-func (m *AuthProvidersMutation) AuthURL() (r string, exists bool) {
-	v := m.auth_url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAuthURL returns the old "auth_url" field's value of the AuthProviders entity.
-// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldAuthURL(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAuthURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAuthURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAuthURL: %w", err)
-	}
-	return oldValue.AuthURL, nil
-}
-
-// ResetAuthURL resets all changes to the "auth_url" field.
-func (m *AuthProvidersMutation) ResetAuthURL() {
-	m.auth_url = nil
-}
-
-// SetTokenURL sets the "token_url" field.
-func (m *AuthProvidersMutation) SetTokenURL(s string) {
-	m.token_url = &s
-}
-
-// TokenURL returns the value of the "token_url" field in the mutation.
-func (m *AuthProvidersMutation) TokenURL() (r string, exists bool) {
-	v := m.token_url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTokenURL returns the old "token_url" field's value of the AuthProviders entity.
-// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldTokenURL(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTokenURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTokenURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTokenURL: %w", err)
-	}
-	return oldValue.TokenURL, nil
-}
-
-// ResetTokenURL resets all changes to the "token_url" field.
-func (m *AuthProvidersMutation) ResetTokenURL() {
-	m.token_url = nil
-}
-
-// SetUserInfoURL sets the "user_info_url" field.
-func (m *AuthProvidersMutation) SetUserInfoURL(s string) {
-	m.user_info_url = &s
-}
-
-// UserInfoURL returns the value of the "user_info_url" field in the mutation.
-func (m *AuthProvidersMutation) UserInfoURL() (r string, exists bool) {
-	v := m.user_info_url
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserInfoURL returns the old "user_info_url" field's value of the AuthProviders entity.
-// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldUserInfoURL(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserInfoURL is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserInfoURL requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserInfoURL: %w", err)
-	}
-	return oldValue.UserInfoURL, nil
-}
-
-// ResetUserInfoURL resets all changes to the "user_info_url" field.
-func (m *AuthProvidersMutation) ResetUserInfoURL() {
-	m.user_info_url = nil
-}
-
 // SetScopes sets the "scopes" field.
 func (m *AuthProvidersMutation) SetScopes(s string) {
 	m.scopes = &s
@@ -1211,40 +1067,184 @@ func (m *AuthProvidersMutation) ResetScopes() {
 	m.scopes = nil
 }
 
-// SetRedirectURL sets the "redirect_url" field.
-func (m *AuthProvidersMutation) SetRedirectURL(s string) {
-	m.redirect_url = &s
+// SetRedirectURI sets the "redirect_uri" field.
+func (m *AuthProvidersMutation) SetRedirectURI(s string) {
+	m.redirect_uri = &s
 }
 
-// RedirectURL returns the value of the "redirect_url" field in the mutation.
-func (m *AuthProvidersMutation) RedirectURL() (r string, exists bool) {
-	v := m.redirect_url
+// RedirectURI returns the value of the "redirect_uri" field in the mutation.
+func (m *AuthProvidersMutation) RedirectURI() (r string, exists bool) {
+	v := m.redirect_uri
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRedirectURL returns the old "redirect_url" field's value of the AuthProviders entity.
+// OldRedirectURI returns the old "redirect_uri" field's value of the AuthProviders entity.
 // If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldRedirectURL(ctx context.Context) (v string, err error) {
+func (m *AuthProvidersMutation) OldRedirectURI(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRedirectURL is only allowed on UpdateOne operations")
+		return v, errors.New("OldRedirectURI is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRedirectURL requires an ID field in the mutation")
+		return v, errors.New("OldRedirectURI requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRedirectURL: %w", err)
+		return v, fmt.Errorf("querying old value for OldRedirectURI: %w", err)
 	}
-	return oldValue.RedirectURL, nil
+	return oldValue.RedirectURI, nil
 }
 
-// ResetRedirectURL resets all changes to the "redirect_url" field.
-func (m *AuthProvidersMutation) ResetRedirectURL() {
-	m.redirect_url = nil
+// ResetRedirectURI resets all changes to the "redirect_uri" field.
+func (m *AuthProvidersMutation) ResetRedirectURI() {
+	m.redirect_uri = nil
+}
+
+// SetIssuer sets the "issuer" field.
+func (m *AuthProvidersMutation) SetIssuer(s string) {
+	m.issuer = &s
+}
+
+// Issuer returns the value of the "issuer" field in the mutation.
+func (m *AuthProvidersMutation) Issuer() (r string, exists bool) {
+	v := m.issuer
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIssuer returns the old "issuer" field's value of the AuthProviders entity.
+// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthProvidersMutation) OldIssuer(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIssuer is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIssuer requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIssuer: %w", err)
+	}
+	return oldValue.Issuer, nil
+}
+
+// ResetIssuer resets all changes to the "issuer" field.
+func (m *AuthProvidersMutation) ResetIssuer() {
+	m.issuer = nil
+}
+
+// SetAuthorizationEndpoint sets the "authorization_endpoint" field.
+func (m *AuthProvidersMutation) SetAuthorizationEndpoint(s string) {
+	m.authorization_endpoint = &s
+}
+
+// AuthorizationEndpoint returns the value of the "authorization_endpoint" field in the mutation.
+func (m *AuthProvidersMutation) AuthorizationEndpoint() (r string, exists bool) {
+	v := m.authorization_endpoint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAuthorizationEndpoint returns the old "authorization_endpoint" field's value of the AuthProviders entity.
+// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthProvidersMutation) OldAuthorizationEndpoint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAuthorizationEndpoint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAuthorizationEndpoint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAuthorizationEndpoint: %w", err)
+	}
+	return oldValue.AuthorizationEndpoint, nil
+}
+
+// ResetAuthorizationEndpoint resets all changes to the "authorization_endpoint" field.
+func (m *AuthProvidersMutation) ResetAuthorizationEndpoint() {
+	m.authorization_endpoint = nil
+}
+
+// SetTokenEndpoint sets the "token_endpoint" field.
+func (m *AuthProvidersMutation) SetTokenEndpoint(s string) {
+	m.token_endpoint = &s
+}
+
+// TokenEndpoint returns the value of the "token_endpoint" field in the mutation.
+func (m *AuthProvidersMutation) TokenEndpoint() (r string, exists bool) {
+	v := m.token_endpoint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenEndpoint returns the old "token_endpoint" field's value of the AuthProviders entity.
+// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthProvidersMutation) OldTokenEndpoint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenEndpoint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenEndpoint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenEndpoint: %w", err)
+	}
+	return oldValue.TokenEndpoint, nil
+}
+
+// ResetTokenEndpoint resets all changes to the "token_endpoint" field.
+func (m *AuthProvidersMutation) ResetTokenEndpoint() {
+	m.token_endpoint = nil
+}
+
+// SetUserinfoEndpoint sets the "userinfo_endpoint" field.
+func (m *AuthProvidersMutation) SetUserinfoEndpoint(s string) {
+	m.userinfo_endpoint = &s
+}
+
+// UserinfoEndpoint returns the value of the "userinfo_endpoint" field in the mutation.
+func (m *AuthProvidersMutation) UserinfoEndpoint() (r string, exists bool) {
+	v := m.userinfo_endpoint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserinfoEndpoint returns the old "userinfo_endpoint" field's value of the AuthProviders entity.
+// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthProvidersMutation) OldUserinfoEndpoint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserinfoEndpoint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserinfoEndpoint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserinfoEndpoint: %w", err)
+	}
+	return oldValue.UserinfoEndpoint, nil
+}
+
+// ResetUserinfoEndpoint resets all changes to the "userinfo_endpoint" field.
+func (m *AuthProvidersMutation) ResetUserinfoEndpoint() {
+	m.userinfo_endpoint = nil
 }
 
 // Where appends a list predicates to the AuthProvidersMutation builder.
@@ -1303,23 +1303,23 @@ func (m *AuthProvidersMutation) Fields() []string {
 	if m.client_secret_encrypted != nil {
 		fields = append(fields, authproviders.FieldClientSecretEncrypted)
 	}
-	if m.issuer != nil {
-		fields = append(fields, authproviders.FieldIssuer)
-	}
-	if m.auth_url != nil {
-		fields = append(fields, authproviders.FieldAuthURL)
-	}
-	if m.token_url != nil {
-		fields = append(fields, authproviders.FieldTokenURL)
-	}
-	if m.user_info_url != nil {
-		fields = append(fields, authproviders.FieldUserInfoURL)
-	}
 	if m.scopes != nil {
 		fields = append(fields, authproviders.FieldScopes)
 	}
-	if m.redirect_url != nil {
-		fields = append(fields, authproviders.FieldRedirectURL)
+	if m.redirect_uri != nil {
+		fields = append(fields, authproviders.FieldRedirectURI)
+	}
+	if m.issuer != nil {
+		fields = append(fields, authproviders.FieldIssuer)
+	}
+	if m.authorization_endpoint != nil {
+		fields = append(fields, authproviders.FieldAuthorizationEndpoint)
+	}
+	if m.token_endpoint != nil {
+		fields = append(fields, authproviders.FieldTokenEndpoint)
+	}
+	if m.userinfo_endpoint != nil {
+		fields = append(fields, authproviders.FieldUserinfoEndpoint)
 	}
 	return fields
 }
@@ -1343,18 +1343,18 @@ func (m *AuthProvidersMutation) Field(name string) (ent.Value, bool) {
 		return m.Enabled()
 	case authproviders.FieldClientSecretEncrypted:
 		return m.ClientSecretEncrypted()
-	case authproviders.FieldIssuer:
-		return m.Issuer()
-	case authproviders.FieldAuthURL:
-		return m.AuthURL()
-	case authproviders.FieldTokenURL:
-		return m.TokenURL()
-	case authproviders.FieldUserInfoURL:
-		return m.UserInfoURL()
 	case authproviders.FieldScopes:
 		return m.Scopes()
-	case authproviders.FieldRedirectURL:
-		return m.RedirectURL()
+	case authproviders.FieldRedirectURI:
+		return m.RedirectURI()
+	case authproviders.FieldIssuer:
+		return m.Issuer()
+	case authproviders.FieldAuthorizationEndpoint:
+		return m.AuthorizationEndpoint()
+	case authproviders.FieldTokenEndpoint:
+		return m.TokenEndpoint()
+	case authproviders.FieldUserinfoEndpoint:
+		return m.UserinfoEndpoint()
 	}
 	return nil, false
 }
@@ -1378,18 +1378,18 @@ func (m *AuthProvidersMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldEnabled(ctx)
 	case authproviders.FieldClientSecretEncrypted:
 		return m.OldClientSecretEncrypted(ctx)
-	case authproviders.FieldIssuer:
-		return m.OldIssuer(ctx)
-	case authproviders.FieldAuthURL:
-		return m.OldAuthURL(ctx)
-	case authproviders.FieldTokenURL:
-		return m.OldTokenURL(ctx)
-	case authproviders.FieldUserInfoURL:
-		return m.OldUserInfoURL(ctx)
 	case authproviders.FieldScopes:
 		return m.OldScopes(ctx)
-	case authproviders.FieldRedirectURL:
-		return m.OldRedirectURL(ctx)
+	case authproviders.FieldRedirectURI:
+		return m.OldRedirectURI(ctx)
+	case authproviders.FieldIssuer:
+		return m.OldIssuer(ctx)
+	case authproviders.FieldAuthorizationEndpoint:
+		return m.OldAuthorizationEndpoint(ctx)
+	case authproviders.FieldTokenEndpoint:
+		return m.OldTokenEndpoint(ctx)
+	case authproviders.FieldUserinfoEndpoint:
+		return m.OldUserinfoEndpoint(ctx)
 	}
 	return nil, fmt.Errorf("unknown AuthProviders field %s", name)
 }
@@ -1448,34 +1448,6 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetClientSecretEncrypted(v)
 		return nil
-	case authproviders.FieldIssuer:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIssuer(v)
-		return nil
-	case authproviders.FieldAuthURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAuthURL(v)
-		return nil
-	case authproviders.FieldTokenURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTokenURL(v)
-		return nil
-	case authproviders.FieldUserInfoURL:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserInfoURL(v)
-		return nil
 	case authproviders.FieldScopes:
 		v, ok := value.(string)
 		if !ok {
@@ -1483,12 +1455,40 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetScopes(v)
 		return nil
-	case authproviders.FieldRedirectURL:
+	case authproviders.FieldRedirectURI:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRedirectURL(v)
+		m.SetRedirectURI(v)
+		return nil
+	case authproviders.FieldIssuer:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIssuer(v)
+		return nil
+	case authproviders.FieldAuthorizationEndpoint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAuthorizationEndpoint(v)
+		return nil
+	case authproviders.FieldTokenEndpoint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenEndpoint(v)
+		return nil
+	case authproviders.FieldUserinfoEndpoint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserinfoEndpoint(v)
 		return nil
 	}
 	return fmt.Errorf("unknown AuthProviders field %s", name)
@@ -1569,23 +1569,23 @@ func (m *AuthProvidersMutation) ResetField(name string) error {
 	case authproviders.FieldClientSecretEncrypted:
 		m.ResetClientSecretEncrypted()
 		return nil
-	case authproviders.FieldIssuer:
-		m.ResetIssuer()
-		return nil
-	case authproviders.FieldAuthURL:
-		m.ResetAuthURL()
-		return nil
-	case authproviders.FieldTokenURL:
-		m.ResetTokenURL()
-		return nil
-	case authproviders.FieldUserInfoURL:
-		m.ResetUserInfoURL()
-		return nil
 	case authproviders.FieldScopes:
 		m.ResetScopes()
 		return nil
-	case authproviders.FieldRedirectURL:
-		m.ResetRedirectURL()
+	case authproviders.FieldRedirectURI:
+		m.ResetRedirectURI()
+		return nil
+	case authproviders.FieldIssuer:
+		m.ResetIssuer()
+		return nil
+	case authproviders.FieldAuthorizationEndpoint:
+		m.ResetAuthorizationEndpoint()
+		return nil
+	case authproviders.FieldTokenEndpoint:
+		m.ResetTokenEndpoint()
+		return nil
+	case authproviders.FieldUserinfoEndpoint:
+		m.ResetUserinfoEndpoint()
 		return nil
 	}
 	return fmt.Errorf("unknown AuthProviders field %s", name)

@@ -84,34 +84,34 @@ func ClientSecretEncrypted(v []byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldClientSecretEncrypted, v))
 }
 
-// Issuer applies equality check predicate on the "issuer" field. It's identical to IssuerEQ.
-func Issuer(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldIssuer, v))
-}
-
-// AuthURL applies equality check predicate on the "auth_url" field. It's identical to AuthURLEQ.
-func AuthURL(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldAuthURL, v))
-}
-
-// TokenURL applies equality check predicate on the "token_url" field. It's identical to TokenURLEQ.
-func TokenURL(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldTokenURL, v))
-}
-
-// UserInfoURL applies equality check predicate on the "user_info_url" field. It's identical to UserInfoURLEQ.
-func UserInfoURL(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldUserInfoURL, v))
-}
-
 // Scopes applies equality check predicate on the "scopes" field. It's identical to ScopesEQ.
 func Scopes(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldScopes, v))
 }
 
-// RedirectURL applies equality check predicate on the "redirect_url" field. It's identical to RedirectURLEQ.
-func RedirectURL(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldRedirectURL, v))
+// RedirectURI applies equality check predicate on the "redirect_uri" field. It's identical to RedirectURIEQ.
+func RedirectURI(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldRedirectURI, v))
+}
+
+// Issuer applies equality check predicate on the "issuer" field. It's identical to IssuerEQ.
+func Issuer(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldIssuer, v))
+}
+
+// AuthorizationEndpoint applies equality check predicate on the "authorization_endpoint" field. It's identical to AuthorizationEndpointEQ.
+func AuthorizationEndpoint(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldAuthorizationEndpoint, v))
+}
+
+// TokenEndpoint applies equality check predicate on the "token_endpoint" field. It's identical to TokenEndpointEQ.
+func TokenEndpoint(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldTokenEndpoint, v))
+}
+
+// UserinfoEndpoint applies equality check predicate on the "userinfo_endpoint" field. It's identical to UserinfoEndpointEQ.
+func UserinfoEndpoint(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldUserinfoEndpoint, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -379,266 +379,6 @@ func ClientSecretEncryptedLTE(v []byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldLTE(FieldClientSecretEncrypted, v))
 }
 
-// IssuerEQ applies the EQ predicate on the "issuer" field.
-func IssuerEQ(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldIssuer, v))
-}
-
-// IssuerNEQ applies the NEQ predicate on the "issuer" field.
-func IssuerNEQ(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNEQ(FieldIssuer, v))
-}
-
-// IssuerIn applies the In predicate on the "issuer" field.
-func IssuerIn(vs ...string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldIn(FieldIssuer, vs...))
-}
-
-// IssuerNotIn applies the NotIn predicate on the "issuer" field.
-func IssuerNotIn(vs ...string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNotIn(FieldIssuer, vs...))
-}
-
-// IssuerGT applies the GT predicate on the "issuer" field.
-func IssuerGT(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGT(FieldIssuer, v))
-}
-
-// IssuerGTE applies the GTE predicate on the "issuer" field.
-func IssuerGTE(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGTE(FieldIssuer, v))
-}
-
-// IssuerLT applies the LT predicate on the "issuer" field.
-func IssuerLT(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLT(FieldIssuer, v))
-}
-
-// IssuerLTE applies the LTE predicate on the "issuer" field.
-func IssuerLTE(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLTE(FieldIssuer, v))
-}
-
-// IssuerContains applies the Contains predicate on the "issuer" field.
-func IssuerContains(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContains(FieldIssuer, v))
-}
-
-// IssuerHasPrefix applies the HasPrefix predicate on the "issuer" field.
-func IssuerHasPrefix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasPrefix(FieldIssuer, v))
-}
-
-// IssuerHasSuffix applies the HasSuffix predicate on the "issuer" field.
-func IssuerHasSuffix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasSuffix(FieldIssuer, v))
-}
-
-// IssuerEqualFold applies the EqualFold predicate on the "issuer" field.
-func IssuerEqualFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEqualFold(FieldIssuer, v))
-}
-
-// IssuerContainsFold applies the ContainsFold predicate on the "issuer" field.
-func IssuerContainsFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContainsFold(FieldIssuer, v))
-}
-
-// AuthURLEQ applies the EQ predicate on the "auth_url" field.
-func AuthURLEQ(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldAuthURL, v))
-}
-
-// AuthURLNEQ applies the NEQ predicate on the "auth_url" field.
-func AuthURLNEQ(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNEQ(FieldAuthURL, v))
-}
-
-// AuthURLIn applies the In predicate on the "auth_url" field.
-func AuthURLIn(vs ...string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldIn(FieldAuthURL, vs...))
-}
-
-// AuthURLNotIn applies the NotIn predicate on the "auth_url" field.
-func AuthURLNotIn(vs ...string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNotIn(FieldAuthURL, vs...))
-}
-
-// AuthURLGT applies the GT predicate on the "auth_url" field.
-func AuthURLGT(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGT(FieldAuthURL, v))
-}
-
-// AuthURLGTE applies the GTE predicate on the "auth_url" field.
-func AuthURLGTE(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGTE(FieldAuthURL, v))
-}
-
-// AuthURLLT applies the LT predicate on the "auth_url" field.
-func AuthURLLT(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLT(FieldAuthURL, v))
-}
-
-// AuthURLLTE applies the LTE predicate on the "auth_url" field.
-func AuthURLLTE(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLTE(FieldAuthURL, v))
-}
-
-// AuthURLContains applies the Contains predicate on the "auth_url" field.
-func AuthURLContains(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContains(FieldAuthURL, v))
-}
-
-// AuthURLHasPrefix applies the HasPrefix predicate on the "auth_url" field.
-func AuthURLHasPrefix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasPrefix(FieldAuthURL, v))
-}
-
-// AuthURLHasSuffix applies the HasSuffix predicate on the "auth_url" field.
-func AuthURLHasSuffix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasSuffix(FieldAuthURL, v))
-}
-
-// AuthURLEqualFold applies the EqualFold predicate on the "auth_url" field.
-func AuthURLEqualFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEqualFold(FieldAuthURL, v))
-}
-
-// AuthURLContainsFold applies the ContainsFold predicate on the "auth_url" field.
-func AuthURLContainsFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContainsFold(FieldAuthURL, v))
-}
-
-// TokenURLEQ applies the EQ predicate on the "token_url" field.
-func TokenURLEQ(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldTokenURL, v))
-}
-
-// TokenURLNEQ applies the NEQ predicate on the "token_url" field.
-func TokenURLNEQ(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNEQ(FieldTokenURL, v))
-}
-
-// TokenURLIn applies the In predicate on the "token_url" field.
-func TokenURLIn(vs ...string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldIn(FieldTokenURL, vs...))
-}
-
-// TokenURLNotIn applies the NotIn predicate on the "token_url" field.
-func TokenURLNotIn(vs ...string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNotIn(FieldTokenURL, vs...))
-}
-
-// TokenURLGT applies the GT predicate on the "token_url" field.
-func TokenURLGT(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGT(FieldTokenURL, v))
-}
-
-// TokenURLGTE applies the GTE predicate on the "token_url" field.
-func TokenURLGTE(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGTE(FieldTokenURL, v))
-}
-
-// TokenURLLT applies the LT predicate on the "token_url" field.
-func TokenURLLT(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLT(FieldTokenURL, v))
-}
-
-// TokenURLLTE applies the LTE predicate on the "token_url" field.
-func TokenURLLTE(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLTE(FieldTokenURL, v))
-}
-
-// TokenURLContains applies the Contains predicate on the "token_url" field.
-func TokenURLContains(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContains(FieldTokenURL, v))
-}
-
-// TokenURLHasPrefix applies the HasPrefix predicate on the "token_url" field.
-func TokenURLHasPrefix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasPrefix(FieldTokenURL, v))
-}
-
-// TokenURLHasSuffix applies the HasSuffix predicate on the "token_url" field.
-func TokenURLHasSuffix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasSuffix(FieldTokenURL, v))
-}
-
-// TokenURLEqualFold applies the EqualFold predicate on the "token_url" field.
-func TokenURLEqualFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEqualFold(FieldTokenURL, v))
-}
-
-// TokenURLContainsFold applies the ContainsFold predicate on the "token_url" field.
-func TokenURLContainsFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContainsFold(FieldTokenURL, v))
-}
-
-// UserInfoURLEQ applies the EQ predicate on the "user_info_url" field.
-func UserInfoURLEQ(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldUserInfoURL, v))
-}
-
-// UserInfoURLNEQ applies the NEQ predicate on the "user_info_url" field.
-func UserInfoURLNEQ(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNEQ(FieldUserInfoURL, v))
-}
-
-// UserInfoURLIn applies the In predicate on the "user_info_url" field.
-func UserInfoURLIn(vs ...string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldIn(FieldUserInfoURL, vs...))
-}
-
-// UserInfoURLNotIn applies the NotIn predicate on the "user_info_url" field.
-func UserInfoURLNotIn(vs ...string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNotIn(FieldUserInfoURL, vs...))
-}
-
-// UserInfoURLGT applies the GT predicate on the "user_info_url" field.
-func UserInfoURLGT(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGT(FieldUserInfoURL, v))
-}
-
-// UserInfoURLGTE applies the GTE predicate on the "user_info_url" field.
-func UserInfoURLGTE(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGTE(FieldUserInfoURL, v))
-}
-
-// UserInfoURLLT applies the LT predicate on the "user_info_url" field.
-func UserInfoURLLT(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLT(FieldUserInfoURL, v))
-}
-
-// UserInfoURLLTE applies the LTE predicate on the "user_info_url" field.
-func UserInfoURLLTE(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLTE(FieldUserInfoURL, v))
-}
-
-// UserInfoURLContains applies the Contains predicate on the "user_info_url" field.
-func UserInfoURLContains(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContains(FieldUserInfoURL, v))
-}
-
-// UserInfoURLHasPrefix applies the HasPrefix predicate on the "user_info_url" field.
-func UserInfoURLHasPrefix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasPrefix(FieldUserInfoURL, v))
-}
-
-// UserInfoURLHasSuffix applies the HasSuffix predicate on the "user_info_url" field.
-func UserInfoURLHasSuffix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasSuffix(FieldUserInfoURL, v))
-}
-
-// UserInfoURLEqualFold applies the EqualFold predicate on the "user_info_url" field.
-func UserInfoURLEqualFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEqualFold(FieldUserInfoURL, v))
-}
-
-// UserInfoURLContainsFold applies the ContainsFold predicate on the "user_info_url" field.
-func UserInfoURLContainsFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContainsFold(FieldUserInfoURL, v))
-}
-
 // ScopesEQ applies the EQ predicate on the "scopes" field.
 func ScopesEQ(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldScopes, v))
@@ -704,69 +444,329 @@ func ScopesContainsFold(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldContainsFold(FieldScopes, v))
 }
 
-// RedirectURLEQ applies the EQ predicate on the "redirect_url" field.
-func RedirectURLEQ(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldRedirectURL, v))
+// RedirectURIEQ applies the EQ predicate on the "redirect_uri" field.
+func RedirectURIEQ(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldRedirectURI, v))
 }
 
-// RedirectURLNEQ applies the NEQ predicate on the "redirect_url" field.
-func RedirectURLNEQ(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNEQ(FieldRedirectURL, v))
+// RedirectURINEQ applies the NEQ predicate on the "redirect_uri" field.
+func RedirectURINEQ(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNEQ(FieldRedirectURI, v))
 }
 
-// RedirectURLIn applies the In predicate on the "redirect_url" field.
-func RedirectURLIn(vs ...string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldIn(FieldRedirectURL, vs...))
+// RedirectURIIn applies the In predicate on the "redirect_uri" field.
+func RedirectURIIn(vs ...string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldIn(FieldRedirectURI, vs...))
 }
 
-// RedirectURLNotIn applies the NotIn predicate on the "redirect_url" field.
-func RedirectURLNotIn(vs ...string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNotIn(FieldRedirectURL, vs...))
+// RedirectURINotIn applies the NotIn predicate on the "redirect_uri" field.
+func RedirectURINotIn(vs ...string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNotIn(FieldRedirectURI, vs...))
 }
 
-// RedirectURLGT applies the GT predicate on the "redirect_url" field.
-func RedirectURLGT(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGT(FieldRedirectURL, v))
+// RedirectURIGT applies the GT predicate on the "redirect_uri" field.
+func RedirectURIGT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGT(FieldRedirectURI, v))
 }
 
-// RedirectURLGTE applies the GTE predicate on the "redirect_url" field.
-func RedirectURLGTE(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGTE(FieldRedirectURL, v))
+// RedirectURIGTE applies the GTE predicate on the "redirect_uri" field.
+func RedirectURIGTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGTE(FieldRedirectURI, v))
 }
 
-// RedirectURLLT applies the LT predicate on the "redirect_url" field.
-func RedirectURLLT(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLT(FieldRedirectURL, v))
+// RedirectURILT applies the LT predicate on the "redirect_uri" field.
+func RedirectURILT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLT(FieldRedirectURI, v))
 }
 
-// RedirectURLLTE applies the LTE predicate on the "redirect_url" field.
-func RedirectURLLTE(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLTE(FieldRedirectURL, v))
+// RedirectURILTE applies the LTE predicate on the "redirect_uri" field.
+func RedirectURILTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLTE(FieldRedirectURI, v))
 }
 
-// RedirectURLContains applies the Contains predicate on the "redirect_url" field.
-func RedirectURLContains(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContains(FieldRedirectURL, v))
+// RedirectURIContains applies the Contains predicate on the "redirect_uri" field.
+func RedirectURIContains(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContains(FieldRedirectURI, v))
 }
 
-// RedirectURLHasPrefix applies the HasPrefix predicate on the "redirect_url" field.
-func RedirectURLHasPrefix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasPrefix(FieldRedirectURL, v))
+// RedirectURIHasPrefix applies the HasPrefix predicate on the "redirect_uri" field.
+func RedirectURIHasPrefix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasPrefix(FieldRedirectURI, v))
 }
 
-// RedirectURLHasSuffix applies the HasSuffix predicate on the "redirect_url" field.
-func RedirectURLHasSuffix(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldHasSuffix(FieldRedirectURL, v))
+// RedirectURIHasSuffix applies the HasSuffix predicate on the "redirect_uri" field.
+func RedirectURIHasSuffix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasSuffix(FieldRedirectURI, v))
 }
 
-// RedirectURLEqualFold applies the EqualFold predicate on the "redirect_url" field.
-func RedirectURLEqualFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEqualFold(FieldRedirectURL, v))
+// RedirectURIEqualFold applies the EqualFold predicate on the "redirect_uri" field.
+func RedirectURIEqualFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEqualFold(FieldRedirectURI, v))
 }
 
-// RedirectURLContainsFold applies the ContainsFold predicate on the "redirect_url" field.
-func RedirectURLContainsFold(v string) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldContainsFold(FieldRedirectURL, v))
+// RedirectURIContainsFold applies the ContainsFold predicate on the "redirect_uri" field.
+func RedirectURIContainsFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContainsFold(FieldRedirectURI, v))
+}
+
+// IssuerEQ applies the EQ predicate on the "issuer" field.
+func IssuerEQ(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldIssuer, v))
+}
+
+// IssuerNEQ applies the NEQ predicate on the "issuer" field.
+func IssuerNEQ(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNEQ(FieldIssuer, v))
+}
+
+// IssuerIn applies the In predicate on the "issuer" field.
+func IssuerIn(vs ...string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldIn(FieldIssuer, vs...))
+}
+
+// IssuerNotIn applies the NotIn predicate on the "issuer" field.
+func IssuerNotIn(vs ...string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNotIn(FieldIssuer, vs...))
+}
+
+// IssuerGT applies the GT predicate on the "issuer" field.
+func IssuerGT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGT(FieldIssuer, v))
+}
+
+// IssuerGTE applies the GTE predicate on the "issuer" field.
+func IssuerGTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGTE(FieldIssuer, v))
+}
+
+// IssuerLT applies the LT predicate on the "issuer" field.
+func IssuerLT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLT(FieldIssuer, v))
+}
+
+// IssuerLTE applies the LTE predicate on the "issuer" field.
+func IssuerLTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLTE(FieldIssuer, v))
+}
+
+// IssuerContains applies the Contains predicate on the "issuer" field.
+func IssuerContains(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContains(FieldIssuer, v))
+}
+
+// IssuerHasPrefix applies the HasPrefix predicate on the "issuer" field.
+func IssuerHasPrefix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasPrefix(FieldIssuer, v))
+}
+
+// IssuerHasSuffix applies the HasSuffix predicate on the "issuer" field.
+func IssuerHasSuffix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasSuffix(FieldIssuer, v))
+}
+
+// IssuerEqualFold applies the EqualFold predicate on the "issuer" field.
+func IssuerEqualFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEqualFold(FieldIssuer, v))
+}
+
+// IssuerContainsFold applies the ContainsFold predicate on the "issuer" field.
+func IssuerContainsFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContainsFold(FieldIssuer, v))
+}
+
+// AuthorizationEndpointEQ applies the EQ predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointEQ(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldAuthorizationEndpoint, v))
+}
+
+// AuthorizationEndpointNEQ applies the NEQ predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointNEQ(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNEQ(FieldAuthorizationEndpoint, v))
+}
+
+// AuthorizationEndpointIn applies the In predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointIn(vs ...string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldIn(FieldAuthorizationEndpoint, vs...))
+}
+
+// AuthorizationEndpointNotIn applies the NotIn predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointNotIn(vs ...string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNotIn(FieldAuthorizationEndpoint, vs...))
+}
+
+// AuthorizationEndpointGT applies the GT predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointGT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGT(FieldAuthorizationEndpoint, v))
+}
+
+// AuthorizationEndpointGTE applies the GTE predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointGTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGTE(FieldAuthorizationEndpoint, v))
+}
+
+// AuthorizationEndpointLT applies the LT predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointLT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLT(FieldAuthorizationEndpoint, v))
+}
+
+// AuthorizationEndpointLTE applies the LTE predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointLTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLTE(FieldAuthorizationEndpoint, v))
+}
+
+// AuthorizationEndpointContains applies the Contains predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointContains(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContains(FieldAuthorizationEndpoint, v))
+}
+
+// AuthorizationEndpointHasPrefix applies the HasPrefix predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointHasPrefix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasPrefix(FieldAuthorizationEndpoint, v))
+}
+
+// AuthorizationEndpointHasSuffix applies the HasSuffix predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointHasSuffix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasSuffix(FieldAuthorizationEndpoint, v))
+}
+
+// AuthorizationEndpointEqualFold applies the EqualFold predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointEqualFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEqualFold(FieldAuthorizationEndpoint, v))
+}
+
+// AuthorizationEndpointContainsFold applies the ContainsFold predicate on the "authorization_endpoint" field.
+func AuthorizationEndpointContainsFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContainsFold(FieldAuthorizationEndpoint, v))
+}
+
+// TokenEndpointEQ applies the EQ predicate on the "token_endpoint" field.
+func TokenEndpointEQ(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldTokenEndpoint, v))
+}
+
+// TokenEndpointNEQ applies the NEQ predicate on the "token_endpoint" field.
+func TokenEndpointNEQ(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNEQ(FieldTokenEndpoint, v))
+}
+
+// TokenEndpointIn applies the In predicate on the "token_endpoint" field.
+func TokenEndpointIn(vs ...string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldIn(FieldTokenEndpoint, vs...))
+}
+
+// TokenEndpointNotIn applies the NotIn predicate on the "token_endpoint" field.
+func TokenEndpointNotIn(vs ...string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNotIn(FieldTokenEndpoint, vs...))
+}
+
+// TokenEndpointGT applies the GT predicate on the "token_endpoint" field.
+func TokenEndpointGT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGT(FieldTokenEndpoint, v))
+}
+
+// TokenEndpointGTE applies the GTE predicate on the "token_endpoint" field.
+func TokenEndpointGTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGTE(FieldTokenEndpoint, v))
+}
+
+// TokenEndpointLT applies the LT predicate on the "token_endpoint" field.
+func TokenEndpointLT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLT(FieldTokenEndpoint, v))
+}
+
+// TokenEndpointLTE applies the LTE predicate on the "token_endpoint" field.
+func TokenEndpointLTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLTE(FieldTokenEndpoint, v))
+}
+
+// TokenEndpointContains applies the Contains predicate on the "token_endpoint" field.
+func TokenEndpointContains(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContains(FieldTokenEndpoint, v))
+}
+
+// TokenEndpointHasPrefix applies the HasPrefix predicate on the "token_endpoint" field.
+func TokenEndpointHasPrefix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasPrefix(FieldTokenEndpoint, v))
+}
+
+// TokenEndpointHasSuffix applies the HasSuffix predicate on the "token_endpoint" field.
+func TokenEndpointHasSuffix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasSuffix(FieldTokenEndpoint, v))
+}
+
+// TokenEndpointEqualFold applies the EqualFold predicate on the "token_endpoint" field.
+func TokenEndpointEqualFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEqualFold(FieldTokenEndpoint, v))
+}
+
+// TokenEndpointContainsFold applies the ContainsFold predicate on the "token_endpoint" field.
+func TokenEndpointContainsFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContainsFold(FieldTokenEndpoint, v))
+}
+
+// UserinfoEndpointEQ applies the EQ predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointEQ(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldUserinfoEndpoint, v))
+}
+
+// UserinfoEndpointNEQ applies the NEQ predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointNEQ(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNEQ(FieldUserinfoEndpoint, v))
+}
+
+// UserinfoEndpointIn applies the In predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointIn(vs ...string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldIn(FieldUserinfoEndpoint, vs...))
+}
+
+// UserinfoEndpointNotIn applies the NotIn predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointNotIn(vs ...string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNotIn(FieldUserinfoEndpoint, vs...))
+}
+
+// UserinfoEndpointGT applies the GT predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointGT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGT(FieldUserinfoEndpoint, v))
+}
+
+// UserinfoEndpointGTE applies the GTE predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointGTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGTE(FieldUserinfoEndpoint, v))
+}
+
+// UserinfoEndpointLT applies the LT predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointLT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLT(FieldUserinfoEndpoint, v))
+}
+
+// UserinfoEndpointLTE applies the LTE predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointLTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLTE(FieldUserinfoEndpoint, v))
+}
+
+// UserinfoEndpointContains applies the Contains predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointContains(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContains(FieldUserinfoEndpoint, v))
+}
+
+// UserinfoEndpointHasPrefix applies the HasPrefix predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointHasPrefix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasPrefix(FieldUserinfoEndpoint, v))
+}
+
+// UserinfoEndpointHasSuffix applies the HasSuffix predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointHasSuffix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasSuffix(FieldUserinfoEndpoint, v))
+}
+
+// UserinfoEndpointEqualFold applies the EqualFold predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointEqualFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEqualFold(FieldUserinfoEndpoint, v))
+}
+
+// UserinfoEndpointContainsFold applies the ContainsFold predicate on the "userinfo_endpoint" field.
+func UserinfoEndpointContainsFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContainsFold(FieldUserinfoEndpoint, v))
 }
 
 // And groups predicates with the AND operator between them.

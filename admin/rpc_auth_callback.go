@@ -38,7 +38,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 			"client_secret_encrypted",
 			"issuer",
 			"scopes",
-			"redirect_url",
+			"redirect_uri",
 		).
 		Where(
 			authproviders.NameEQ(authproviders.Name(strings.ToUpper(req.ProviderName))),
@@ -67,7 +67,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		ClientSecret: string(clientSecret),
 		Endpoint:     op.Endpoint(),
 		Scopes:       strings.Split(ap.Scopes, " "),
-		RedirectURL:  ap.RedirectURL,
+		RedirectURL:  ap.RedirectURI,
 	}
 
 	oauth2Token, err := oauth2Config.Exchange(ctx, req.Code)
@@ -135,6 +135,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 			SetPreferredUsername(username).
 			SetEmailEncrypted(emailEnc).
 			SetEmailVerified(idToken.EmailVerified).
+			SetEmailHash(crypto.SHA256([]byte(idToken.Email))).
 			Save(ctx)
 		if err != nil {
 			_ = tx.Rollback()

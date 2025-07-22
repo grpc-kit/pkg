@@ -28,18 +28,18 @@ const (
 	FieldEnabled = "enabled"
 	// FieldClientSecretEncrypted holds the string denoting the client_secret_encrypted field in the database.
 	FieldClientSecretEncrypted = "client_secret_encrypted"
-	// FieldIssuer holds the string denoting the issuer field in the database.
-	FieldIssuer = "issuer"
-	// FieldAuthURL holds the string denoting the auth_url field in the database.
-	FieldAuthURL = "auth_url"
-	// FieldTokenURL holds the string denoting the token_url field in the database.
-	FieldTokenURL = "token_url"
-	// FieldUserInfoURL holds the string denoting the user_info_url field in the database.
-	FieldUserInfoURL = "user_info_url"
 	// FieldScopes holds the string denoting the scopes field in the database.
 	FieldScopes = "scopes"
-	// FieldRedirectURL holds the string denoting the redirect_url field in the database.
-	FieldRedirectURL = "redirect_url"
+	// FieldRedirectURI holds the string denoting the redirect_uri field in the database.
+	FieldRedirectURI = "redirect_uri"
+	// FieldIssuer holds the string denoting the issuer field in the database.
+	FieldIssuer = "issuer"
+	// FieldAuthorizationEndpoint holds the string denoting the authorization_endpoint field in the database.
+	FieldAuthorizationEndpoint = "authorization_endpoint"
+	// FieldTokenEndpoint holds the string denoting the token_endpoint field in the database.
+	FieldTokenEndpoint = "token_endpoint"
+	// FieldUserinfoEndpoint holds the string denoting the userinfo_endpoint field in the database.
+	FieldUserinfoEndpoint = "userinfo_endpoint"
 	// Table holds the table name of the authproviders in the database.
 	Table = "lion_auth_providers"
 )
@@ -54,12 +54,12 @@ var Columns = []string{
 	FieldClientID,
 	FieldEnabled,
 	FieldClientSecretEncrypted,
-	FieldIssuer,
-	FieldAuthURL,
-	FieldTokenURL,
-	FieldUserInfoURL,
 	FieldScopes,
-	FieldRedirectURL,
+	FieldRedirectURI,
+	FieldIssuer,
+	FieldAuthorizationEndpoint,
+	FieldTokenEndpoint,
+	FieldUserinfoEndpoint,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -153,32 +153,32 @@ func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
 }
 
-// ByIssuer orders the results by the issuer field.
-func ByIssuer(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIssuer, opts...).ToFunc()
-}
-
-// ByAuthURL orders the results by the auth_url field.
-func ByAuthURL(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAuthURL, opts...).ToFunc()
-}
-
-// ByTokenURL orders the results by the token_url field.
-func ByTokenURL(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTokenURL, opts...).ToFunc()
-}
-
-// ByUserInfoURL orders the results by the user_info_url field.
-func ByUserInfoURL(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserInfoURL, opts...).ToFunc()
-}
-
 // ByScopes orders the results by the scopes field.
 func ByScopes(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldScopes, opts...).ToFunc()
 }
 
-// ByRedirectURL orders the results by the redirect_url field.
-func ByRedirectURL(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRedirectURL, opts...).ToFunc()
+// ByRedirectURI orders the results by the redirect_uri field.
+func ByRedirectURI(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRedirectURI, opts...).ToFunc()
+}
+
+// ByIssuer orders the results by the issuer field.
+func ByIssuer(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIssuer, opts...).ToFunc()
+}
+
+// ByAuthorizationEndpoint orders the results by the authorization_endpoint field.
+func ByAuthorizationEndpoint(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAuthorizationEndpoint, opts...).ToFunc()
+}
+
+// ByTokenEndpoint orders the results by the token_endpoint field.
+func ByTokenEndpoint(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTokenEndpoint, opts...).ToFunc()
+}
+
+// ByUserinfoEndpoint orders the results by the userinfo_endpoint field.
+func ByUserinfoEndpoint(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserinfoEndpoint, opts...).ToFunc()
 }

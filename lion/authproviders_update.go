@@ -102,62 +102,6 @@ func (apu *AuthProvidersUpdate) SetClientSecretEncrypted(b []byte) *AuthProvider
 	return apu
 }
 
-// SetIssuer sets the "issuer" field.
-func (apu *AuthProvidersUpdate) SetIssuer(s string) *AuthProvidersUpdate {
-	apu.mutation.SetIssuer(s)
-	return apu
-}
-
-// SetNillableIssuer sets the "issuer" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableIssuer(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetIssuer(*s)
-	}
-	return apu
-}
-
-// SetAuthURL sets the "auth_url" field.
-func (apu *AuthProvidersUpdate) SetAuthURL(s string) *AuthProvidersUpdate {
-	apu.mutation.SetAuthURL(s)
-	return apu
-}
-
-// SetNillableAuthURL sets the "auth_url" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableAuthURL(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetAuthURL(*s)
-	}
-	return apu
-}
-
-// SetTokenURL sets the "token_url" field.
-func (apu *AuthProvidersUpdate) SetTokenURL(s string) *AuthProvidersUpdate {
-	apu.mutation.SetTokenURL(s)
-	return apu
-}
-
-// SetNillableTokenURL sets the "token_url" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableTokenURL(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetTokenURL(*s)
-	}
-	return apu
-}
-
-// SetUserInfoURL sets the "user_info_url" field.
-func (apu *AuthProvidersUpdate) SetUserInfoURL(s string) *AuthProvidersUpdate {
-	apu.mutation.SetUserInfoURL(s)
-	return apu
-}
-
-// SetNillableUserInfoURL sets the "user_info_url" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableUserInfoURL(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetUserInfoURL(*s)
-	}
-	return apu
-}
-
 // SetScopes sets the "scopes" field.
 func (apu *AuthProvidersUpdate) SetScopes(s string) *AuthProvidersUpdate {
 	apu.mutation.SetScopes(s)
@@ -172,16 +116,72 @@ func (apu *AuthProvidersUpdate) SetNillableScopes(s *string) *AuthProvidersUpdat
 	return apu
 }
 
-// SetRedirectURL sets the "redirect_url" field.
-func (apu *AuthProvidersUpdate) SetRedirectURL(s string) *AuthProvidersUpdate {
-	apu.mutation.SetRedirectURL(s)
+// SetRedirectURI sets the "redirect_uri" field.
+func (apu *AuthProvidersUpdate) SetRedirectURI(s string) *AuthProvidersUpdate {
+	apu.mutation.SetRedirectURI(s)
 	return apu
 }
 
-// SetNillableRedirectURL sets the "redirect_url" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableRedirectURL(s *string) *AuthProvidersUpdate {
+// SetNillableRedirectURI sets the "redirect_uri" field if the given value is not nil.
+func (apu *AuthProvidersUpdate) SetNillableRedirectURI(s *string) *AuthProvidersUpdate {
 	if s != nil {
-		apu.SetRedirectURL(*s)
+		apu.SetRedirectURI(*s)
+	}
+	return apu
+}
+
+// SetIssuer sets the "issuer" field.
+func (apu *AuthProvidersUpdate) SetIssuer(s string) *AuthProvidersUpdate {
+	apu.mutation.SetIssuer(s)
+	return apu
+}
+
+// SetNillableIssuer sets the "issuer" field if the given value is not nil.
+func (apu *AuthProvidersUpdate) SetNillableIssuer(s *string) *AuthProvidersUpdate {
+	if s != nil {
+		apu.SetIssuer(*s)
+	}
+	return apu
+}
+
+// SetAuthorizationEndpoint sets the "authorization_endpoint" field.
+func (apu *AuthProvidersUpdate) SetAuthorizationEndpoint(s string) *AuthProvidersUpdate {
+	apu.mutation.SetAuthorizationEndpoint(s)
+	return apu
+}
+
+// SetNillableAuthorizationEndpoint sets the "authorization_endpoint" field if the given value is not nil.
+func (apu *AuthProvidersUpdate) SetNillableAuthorizationEndpoint(s *string) *AuthProvidersUpdate {
+	if s != nil {
+		apu.SetAuthorizationEndpoint(*s)
+	}
+	return apu
+}
+
+// SetTokenEndpoint sets the "token_endpoint" field.
+func (apu *AuthProvidersUpdate) SetTokenEndpoint(s string) *AuthProvidersUpdate {
+	apu.mutation.SetTokenEndpoint(s)
+	return apu
+}
+
+// SetNillableTokenEndpoint sets the "token_endpoint" field if the given value is not nil.
+func (apu *AuthProvidersUpdate) SetNillableTokenEndpoint(s *string) *AuthProvidersUpdate {
+	if s != nil {
+		apu.SetTokenEndpoint(*s)
+	}
+	return apu
+}
+
+// SetUserinfoEndpoint sets the "userinfo_endpoint" field.
+func (apu *AuthProvidersUpdate) SetUserinfoEndpoint(s string) *AuthProvidersUpdate {
+	apu.mutation.SetUserinfoEndpoint(s)
+	return apu
+}
+
+// SetNillableUserinfoEndpoint sets the "userinfo_endpoint" field if the given value is not nil.
+func (apu *AuthProvidersUpdate) SetNillableUserinfoEndpoint(s *string) *AuthProvidersUpdate {
+	if s != nil {
+		apu.SetUserinfoEndpoint(*s)
 	}
 	return apu
 }
@@ -270,23 +270,23 @@ func (apu *AuthProvidersUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if value, ok := apu.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeBytes, value)
 	}
-	if value, ok := apu.mutation.Issuer(); ok {
-		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
-	}
-	if value, ok := apu.mutation.AuthURL(); ok {
-		_spec.SetField(authproviders.FieldAuthURL, field.TypeString, value)
-	}
-	if value, ok := apu.mutation.TokenURL(); ok {
-		_spec.SetField(authproviders.FieldTokenURL, field.TypeString, value)
-	}
-	if value, ok := apu.mutation.UserInfoURL(); ok {
-		_spec.SetField(authproviders.FieldUserInfoURL, field.TypeString, value)
-	}
 	if value, ok := apu.mutation.Scopes(); ok {
 		_spec.SetField(authproviders.FieldScopes, field.TypeString, value)
 	}
-	if value, ok := apu.mutation.RedirectURL(); ok {
-		_spec.SetField(authproviders.FieldRedirectURL, field.TypeString, value)
+	if value, ok := apu.mutation.RedirectURI(); ok {
+		_spec.SetField(authproviders.FieldRedirectURI, field.TypeString, value)
+	}
+	if value, ok := apu.mutation.Issuer(); ok {
+		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
+	}
+	if value, ok := apu.mutation.AuthorizationEndpoint(); ok {
+		_spec.SetField(authproviders.FieldAuthorizationEndpoint, field.TypeString, value)
+	}
+	if value, ok := apu.mutation.TokenEndpoint(); ok {
+		_spec.SetField(authproviders.FieldTokenEndpoint, field.TypeString, value)
+	}
+	if value, ok := apu.mutation.UserinfoEndpoint(); ok {
+		_spec.SetField(authproviders.FieldUserinfoEndpoint, field.TypeString, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, apu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -382,62 +382,6 @@ func (apuo *AuthProvidersUpdateOne) SetClientSecretEncrypted(b []byte) *AuthProv
 	return apuo
 }
 
-// SetIssuer sets the "issuer" field.
-func (apuo *AuthProvidersUpdateOne) SetIssuer(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetIssuer(s)
-	return apuo
-}
-
-// SetNillableIssuer sets the "issuer" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableIssuer(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetIssuer(*s)
-	}
-	return apuo
-}
-
-// SetAuthURL sets the "auth_url" field.
-func (apuo *AuthProvidersUpdateOne) SetAuthURL(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetAuthURL(s)
-	return apuo
-}
-
-// SetNillableAuthURL sets the "auth_url" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableAuthURL(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetAuthURL(*s)
-	}
-	return apuo
-}
-
-// SetTokenURL sets the "token_url" field.
-func (apuo *AuthProvidersUpdateOne) SetTokenURL(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetTokenURL(s)
-	return apuo
-}
-
-// SetNillableTokenURL sets the "token_url" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableTokenURL(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetTokenURL(*s)
-	}
-	return apuo
-}
-
-// SetUserInfoURL sets the "user_info_url" field.
-func (apuo *AuthProvidersUpdateOne) SetUserInfoURL(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetUserInfoURL(s)
-	return apuo
-}
-
-// SetNillableUserInfoURL sets the "user_info_url" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableUserInfoURL(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetUserInfoURL(*s)
-	}
-	return apuo
-}
-
 // SetScopes sets the "scopes" field.
 func (apuo *AuthProvidersUpdateOne) SetScopes(s string) *AuthProvidersUpdateOne {
 	apuo.mutation.SetScopes(s)
@@ -452,16 +396,72 @@ func (apuo *AuthProvidersUpdateOne) SetNillableScopes(s *string) *AuthProvidersU
 	return apuo
 }
 
-// SetRedirectURL sets the "redirect_url" field.
-func (apuo *AuthProvidersUpdateOne) SetRedirectURL(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetRedirectURL(s)
+// SetRedirectURI sets the "redirect_uri" field.
+func (apuo *AuthProvidersUpdateOne) SetRedirectURI(s string) *AuthProvidersUpdateOne {
+	apuo.mutation.SetRedirectURI(s)
 	return apuo
 }
 
-// SetNillableRedirectURL sets the "redirect_url" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableRedirectURL(s *string) *AuthProvidersUpdateOne {
+// SetNillableRedirectURI sets the "redirect_uri" field if the given value is not nil.
+func (apuo *AuthProvidersUpdateOne) SetNillableRedirectURI(s *string) *AuthProvidersUpdateOne {
 	if s != nil {
-		apuo.SetRedirectURL(*s)
+		apuo.SetRedirectURI(*s)
+	}
+	return apuo
+}
+
+// SetIssuer sets the "issuer" field.
+func (apuo *AuthProvidersUpdateOne) SetIssuer(s string) *AuthProvidersUpdateOne {
+	apuo.mutation.SetIssuer(s)
+	return apuo
+}
+
+// SetNillableIssuer sets the "issuer" field if the given value is not nil.
+func (apuo *AuthProvidersUpdateOne) SetNillableIssuer(s *string) *AuthProvidersUpdateOne {
+	if s != nil {
+		apuo.SetIssuer(*s)
+	}
+	return apuo
+}
+
+// SetAuthorizationEndpoint sets the "authorization_endpoint" field.
+func (apuo *AuthProvidersUpdateOne) SetAuthorizationEndpoint(s string) *AuthProvidersUpdateOne {
+	apuo.mutation.SetAuthorizationEndpoint(s)
+	return apuo
+}
+
+// SetNillableAuthorizationEndpoint sets the "authorization_endpoint" field if the given value is not nil.
+func (apuo *AuthProvidersUpdateOne) SetNillableAuthorizationEndpoint(s *string) *AuthProvidersUpdateOne {
+	if s != nil {
+		apuo.SetAuthorizationEndpoint(*s)
+	}
+	return apuo
+}
+
+// SetTokenEndpoint sets the "token_endpoint" field.
+func (apuo *AuthProvidersUpdateOne) SetTokenEndpoint(s string) *AuthProvidersUpdateOne {
+	apuo.mutation.SetTokenEndpoint(s)
+	return apuo
+}
+
+// SetNillableTokenEndpoint sets the "token_endpoint" field if the given value is not nil.
+func (apuo *AuthProvidersUpdateOne) SetNillableTokenEndpoint(s *string) *AuthProvidersUpdateOne {
+	if s != nil {
+		apuo.SetTokenEndpoint(*s)
+	}
+	return apuo
+}
+
+// SetUserinfoEndpoint sets the "userinfo_endpoint" field.
+func (apuo *AuthProvidersUpdateOne) SetUserinfoEndpoint(s string) *AuthProvidersUpdateOne {
+	apuo.mutation.SetUserinfoEndpoint(s)
+	return apuo
+}
+
+// SetNillableUserinfoEndpoint sets the "userinfo_endpoint" field if the given value is not nil.
+func (apuo *AuthProvidersUpdateOne) SetNillableUserinfoEndpoint(s *string) *AuthProvidersUpdateOne {
+	if s != nil {
+		apuo.SetUserinfoEndpoint(*s)
 	}
 	return apuo
 }
@@ -580,23 +580,23 @@ func (apuo *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthPro
 	if value, ok := apuo.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeBytes, value)
 	}
-	if value, ok := apuo.mutation.Issuer(); ok {
-		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
-	}
-	if value, ok := apuo.mutation.AuthURL(); ok {
-		_spec.SetField(authproviders.FieldAuthURL, field.TypeString, value)
-	}
-	if value, ok := apuo.mutation.TokenURL(); ok {
-		_spec.SetField(authproviders.FieldTokenURL, field.TypeString, value)
-	}
-	if value, ok := apuo.mutation.UserInfoURL(); ok {
-		_spec.SetField(authproviders.FieldUserInfoURL, field.TypeString, value)
-	}
 	if value, ok := apuo.mutation.Scopes(); ok {
 		_spec.SetField(authproviders.FieldScopes, field.TypeString, value)
 	}
-	if value, ok := apuo.mutation.RedirectURL(); ok {
-		_spec.SetField(authproviders.FieldRedirectURL, field.TypeString, value)
+	if value, ok := apuo.mutation.RedirectURI(); ok {
+		_spec.SetField(authproviders.FieldRedirectURI, field.TypeString, value)
+	}
+	if value, ok := apuo.mutation.Issuer(); ok {
+		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
+	}
+	if value, ok := apuo.mutation.AuthorizationEndpoint(); ok {
+		_spec.SetField(authproviders.FieldAuthorizationEndpoint, field.TypeString, value)
+	}
+	if value, ok := apuo.mutation.TokenEndpoint(); ok {
+		_spec.SetField(authproviders.FieldTokenEndpoint, field.TypeString, value)
+	}
+	if value, ok := apuo.mutation.UserinfoEndpoint(); ok {
+		_spec.SetField(authproviders.FieldUserinfoEndpoint, field.TypeString, value)
 	}
 	_node = &AuthProviders{config: apuo.config}
 	_spec.Assign = _node.assignValues

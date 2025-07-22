@@ -65,25 +65,25 @@ func (a *KnownAdminAPI) GetAuthProviders(ctx context.Context, req *adminv1.GetAu
 		"name",
 		"client_id",
 		"enabled",
-		"issuer",
-		"auth_url",
-		"token_url",
-		"user_info_url",
 		"scopes",
-		"redirect_url",
+		"redirect_uri",
+		"issuer",
+		"authorization_endpoint",
+		"token_endpoint",
+		"userinfo_endpoint",
 	}
 
 	rows := db.AuthProviders.Query().Select(selectFields...).AllX(ctx)
 	for _, row := range rows {
 		p := &adminv1.AuthProvider{
-			ClientId:    row.ClientID,
-			Enabled:     row.Enabled,
-			Issuer:      row.Issuer,
-			AuthUrl:     row.AuthURL,
-			TokenUrl:    row.TokenURL,
-			UserInfoUrl: row.UserInfoURL,
-			Scopes:      row.Scopes,
-			RedirectUrl: row.RedirectURL,
+			ClientId:              row.ClientID,
+			Enabled:               row.Enabled,
+			Issuer:                row.Issuer,
+			AuthorizationEndpoint: row.AuthorizationEndpoint,
+			TokenEndpoint:         row.TokenEndpoint,
+			UserinfoEndpoint:      row.UserinfoEndpoint,
+			Scopes:                row.Scopes,
+			RedirectUri:           row.RedirectURI,
 		}
 
 		switch row.Name {
@@ -158,11 +158,11 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 				SetClientID(p.ClientId).
 				SetClientSecretEncrypted(clientSecretEnc).
 				SetIssuer(p.Issuer).
-				SetAuthURL(p.AuthUrl).
-				SetTokenURL(p.TokenUrl).
-				SetUserInfoURL(p.UserInfoUrl).
+				SetAuthorizationEndpoint(p.AuthorizationEndpoint).
+				SetTokenEndpoint(p.TokenEndpoint).
+				SetUserinfoEndpoint(p.UserinfoEndpoint).
 				SetScopes(p.Scopes).
-				SetRedirectURL(p.RedirectUrl).
+				SetRedirectURI(p.RedirectUri).
 				Save(ctx)
 		} else {
 			x := db.AuthProviders.Update().Where(authproviders.NameEQ(name))
@@ -176,20 +176,20 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 			if p.Issuer != "" {
 				x.SetIssuer(p.Issuer)
 			}
-			if p.AuthUrl != "" {
-				x.SetAuthURL(p.AuthUrl)
+			if p.AuthorizationEndpoint != "" {
+				x.SetAuthorizationEndpoint(p.AuthorizationEndpoint)
 			}
-			if p.TokenUrl != "" {
-				x.SetTokenURL(p.TokenUrl)
+			if p.TokenEndpoint != "" {
+				x.SetTokenEndpoint(p.TokenEndpoint)
 			}
-			if p.UserInfoUrl != "" {
-				x.SetUserInfoURL(p.UserInfoUrl)
+			if p.UserinfoEndpoint != "" {
+				x.SetUserinfoEndpoint(p.UserinfoEndpoint)
 			}
 			if p.Scopes != "" {
 				x.SetScopes(p.Scopes)
 			}
-			if p.RedirectUrl != "" {
-				x.SetRedirectURL(p.RedirectUrl)
+			if p.RedirectUri != "" {
+				x.SetRedirectURI(p.RedirectUri)
 			}
 			err = x.Exec(ctx)
 		}
