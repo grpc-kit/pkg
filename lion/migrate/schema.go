@@ -141,7 +141,7 @@ var (
 		{Name: "sort_weight", Type: field.TypeInt, Default: 0},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
 		{Name: "hide_in_menu", Type: field.TypeBool, Default: false},
-		{Name: "hide_children_in", Type: field.TypeBool, Default: false},
+		{Name: "hide_children_in_menu", Type: field.TypeBool, Default: false},
 	}
 	// LionMenusTable holds the schema information for the "lion_menus" table.
 	LionMenusTable = &schema.Table{

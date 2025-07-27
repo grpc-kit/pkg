@@ -40,8 +40,8 @@ type Menus struct {
 	// 是否在菜单中隐藏该节点
 	HideInMenu bool `json:"hide_in_menu,omitempty"`
 	// 是否隐藏该节点的子菜单
-	HideChildrenIn bool `json:"hide_children_in,omitempty"`
-	selectValues   sql.SelectValues
+	HideChildrenInMenu bool `json:"hide_children_in_menu,omitempty"`
+	selectValues       sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -49,7 +49,7 @@ func (*Menus) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case menus.FieldEnabled, menus.FieldHideInMenu, menus.FieldHideChildrenIn:
+		case menus.FieldEnabled, menus.FieldHideInMenu, menus.FieldHideChildrenInMenu:
 			values[i] = new(sql.NullBool)
 		case menus.FieldID, menus.FieldParentID, menus.FieldSortWeight:
 			values[i] = new(sql.NullInt64)
@@ -145,11 +145,11 @@ func (m *Menus) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				m.HideInMenu = value.Bool
 			}
-		case menus.FieldHideChildrenIn:
+		case menus.FieldHideChildrenInMenu:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field hide_children_in", values[i])
+				return fmt.Errorf("unexpected type %T for field hide_children_in_menu", values[i])
 			} else if value.Valid {
-				m.HideChildrenIn = value.Bool
+				m.HideChildrenInMenu = value.Bool
 			}
 		default:
 			m.selectValues.Set(columns[i], values[i])
@@ -222,8 +222,8 @@ func (m *Menus) String() string {
 	builder.WriteString("hide_in_menu=")
 	builder.WriteString(fmt.Sprintf("%v", m.HideInMenu))
 	builder.WriteString(", ")
-	builder.WriteString("hide_children_in=")
-	builder.WriteString(fmt.Sprintf("%v", m.HideChildrenIn))
+	builder.WriteString("hide_children_in_menu=")
+	builder.WriteString(fmt.Sprintf("%v", m.HideChildrenInMenu))
 	builder.WriteByte(')')
 	return builder.String()
 }

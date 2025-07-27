@@ -3986,27 +3986,27 @@ func (m *GroupsMutation) ResetEdge(name string) error {
 // MenusMutation represents an operation that mutates the Menus nodes in the graph.
 type MenusMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	created_at       *time.Time
-	updated_at       *time.Time
-	deleted_at       *time.Time
-	parent_id        *int
-	addparent_id     *int
-	name             *string
-	_path            *string
-	locale           *string
-	icon             *string
-	sort_weight      *int
-	addsort_weight   *int
-	enabled          *bool
-	hide_in_menu     *bool
-	hide_children_in *bool
-	clearedFields    map[string]struct{}
-	done             bool
-	oldValue         func(context.Context) (*Menus, error)
-	predicates       []predicate.Menus
+	op                    Op
+	typ                   string
+	id                    *int
+	created_at            *time.Time
+	updated_at            *time.Time
+	deleted_at            *time.Time
+	parent_id             *int
+	addparent_id          *int
+	name                  *string
+	_path                 *string
+	locale                *string
+	icon                  *string
+	sort_weight           *int
+	addsort_weight        *int
+	enabled               *bool
+	hide_in_menu          *bool
+	hide_children_in_menu *bool
+	clearedFields         map[string]struct{}
+	done                  bool
+	oldValue              func(context.Context) (*Menus, error)
+	predicates            []predicate.Menus
 }
 
 var _ ent.Mutation = (*MenusMutation)(nil)
@@ -4556,40 +4556,40 @@ func (m *MenusMutation) ResetHideInMenu() {
 	m.hide_in_menu = nil
 }
 
-// SetHideChildrenIn sets the "hide_children_in" field.
-func (m *MenusMutation) SetHideChildrenIn(b bool) {
-	m.hide_children_in = &b
+// SetHideChildrenInMenu sets the "hide_children_in_menu" field.
+func (m *MenusMutation) SetHideChildrenInMenu(b bool) {
+	m.hide_children_in_menu = &b
 }
 
-// HideChildrenIn returns the value of the "hide_children_in" field in the mutation.
-func (m *MenusMutation) HideChildrenIn() (r bool, exists bool) {
-	v := m.hide_children_in
+// HideChildrenInMenu returns the value of the "hide_children_in_menu" field in the mutation.
+func (m *MenusMutation) HideChildrenInMenu() (r bool, exists bool) {
+	v := m.hide_children_in_menu
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHideChildrenIn returns the old "hide_children_in" field's value of the Menus entity.
+// OldHideChildrenInMenu returns the old "hide_children_in_menu" field's value of the Menus entity.
 // If the Menus object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenusMutation) OldHideChildrenIn(ctx context.Context) (v bool, err error) {
+func (m *MenusMutation) OldHideChildrenInMenu(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHideChildrenIn is only allowed on UpdateOne operations")
+		return v, errors.New("OldHideChildrenInMenu is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHideChildrenIn requires an ID field in the mutation")
+		return v, errors.New("OldHideChildrenInMenu requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHideChildrenIn: %w", err)
+		return v, fmt.Errorf("querying old value for OldHideChildrenInMenu: %w", err)
 	}
-	return oldValue.HideChildrenIn, nil
+	return oldValue.HideChildrenInMenu, nil
 }
 
-// ResetHideChildrenIn resets all changes to the "hide_children_in" field.
-func (m *MenusMutation) ResetHideChildrenIn() {
-	m.hide_children_in = nil
+// ResetHideChildrenInMenu resets all changes to the "hide_children_in_menu" field.
+func (m *MenusMutation) ResetHideChildrenInMenu() {
+	m.hide_children_in_menu = nil
 }
 
 // Where appends a list predicates to the MenusMutation builder.
@@ -4660,8 +4660,8 @@ func (m *MenusMutation) Fields() []string {
 	if m.hide_in_menu != nil {
 		fields = append(fields, menus.FieldHideInMenu)
 	}
-	if m.hide_children_in != nil {
-		fields = append(fields, menus.FieldHideChildrenIn)
+	if m.hide_children_in_menu != nil {
+		fields = append(fields, menus.FieldHideChildrenInMenu)
 	}
 	return fields
 }
@@ -4693,8 +4693,8 @@ func (m *MenusMutation) Field(name string) (ent.Value, bool) {
 		return m.Enabled()
 	case menus.FieldHideInMenu:
 		return m.HideInMenu()
-	case menus.FieldHideChildrenIn:
-		return m.HideChildrenIn()
+	case menus.FieldHideChildrenInMenu:
+		return m.HideChildrenInMenu()
 	}
 	return nil, false
 }
@@ -4726,8 +4726,8 @@ func (m *MenusMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldEnabled(ctx)
 	case menus.FieldHideInMenu:
 		return m.OldHideInMenu(ctx)
-	case menus.FieldHideChildrenIn:
-		return m.OldHideChildrenIn(ctx)
+	case menus.FieldHideChildrenInMenu:
+		return m.OldHideChildrenInMenu(ctx)
 	}
 	return nil, fmt.Errorf("unknown Menus field %s", name)
 }
@@ -4814,12 +4814,12 @@ func (m *MenusMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetHideInMenu(v)
 		return nil
-	case menus.FieldHideChildrenIn:
+	case menus.FieldHideChildrenInMenu:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHideChildrenIn(v)
+		m.SetHideChildrenInMenu(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Menus field %s", name)
@@ -4939,8 +4939,8 @@ func (m *MenusMutation) ResetField(name string) error {
 	case menus.FieldHideInMenu:
 		m.ResetHideInMenu()
 		return nil
-	case menus.FieldHideChildrenIn:
-		m.ResetHideChildrenIn()
+	case menus.FieldHideChildrenInMenu:
+		m.ResetHideChildrenInMenu()
 		return nil
 	}
 	return fmt.Errorf("unknown Menus field %s", name)

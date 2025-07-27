@@ -254,10 +254,10 @@ func init() {
 	menusDescHideInMenu := menusFields[7].Descriptor()
 	// menus.DefaultHideInMenu holds the default value on creation for the hide_in_menu field.
 	menus.DefaultHideInMenu = menusDescHideInMenu.Default.(bool)
-	// menusDescHideChildrenIn is the schema descriptor for hide_children_in field.
-	menusDescHideChildrenIn := menusFields[8].Descriptor()
-	// menus.DefaultHideChildrenIn holds the default value on creation for the hide_children_in field.
-	menus.DefaultHideChildrenIn = menusDescHideChildrenIn.Default.(bool)
+	// menusDescHideChildrenInMenu is the schema descriptor for hide_children_in_menu field.
+	menusDescHideChildrenInMenu := menusFields[8].Descriptor()
+	// menus.DefaultHideChildrenInMenu holds the default value on creation for the hide_children_in_menu field.
+	menus.DefaultHideChildrenInMenu = menusDescHideChildrenInMenu.Default.(bool)
 	userattributesMixin := schema.UserAttributes{}.Mixin()
 	userattributesMixinFields0 := userattributesMixin[0].Fields()
 	_ = userattributesMixinFields0

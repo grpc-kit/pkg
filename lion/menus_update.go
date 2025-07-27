@@ -180,16 +180,16 @@ func (mu *MenusUpdate) SetNillableHideInMenu(b *bool) *MenusUpdate {
 	return mu
 }
 
-// SetHideChildrenIn sets the "hide_children_in" field.
-func (mu *MenusUpdate) SetHideChildrenIn(b bool) *MenusUpdate {
-	mu.mutation.SetHideChildrenIn(b)
+// SetHideChildrenInMenu sets the "hide_children_in_menu" field.
+func (mu *MenusUpdate) SetHideChildrenInMenu(b bool) *MenusUpdate {
+	mu.mutation.SetHideChildrenInMenu(b)
 	return mu
 }
 
-// SetNillableHideChildrenIn sets the "hide_children_in" field if the given value is not nil.
-func (mu *MenusUpdate) SetNillableHideChildrenIn(b *bool) *MenusUpdate {
+// SetNillableHideChildrenInMenu sets the "hide_children_in_menu" field if the given value is not nil.
+func (mu *MenusUpdate) SetNillableHideChildrenInMenu(b *bool) *MenusUpdate {
 	if b != nil {
-		mu.SetHideChildrenIn(*b)
+		mu.SetHideChildrenInMenu(*b)
 	}
 	return mu
 }
@@ -311,8 +311,8 @@ func (mu *MenusUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mu.mutation.HideInMenu(); ok {
 		_spec.SetField(menus.FieldHideInMenu, field.TypeBool, value)
 	}
-	if value, ok := mu.mutation.HideChildrenIn(); ok {
-		_spec.SetField(menus.FieldHideChildrenIn, field.TypeBool, value)
+	if value, ok := mu.mutation.HideChildrenInMenu(); ok {
+		_spec.SetField(menus.FieldHideChildrenInMenu, field.TypeBool, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -486,16 +486,16 @@ func (muo *MenusUpdateOne) SetNillableHideInMenu(b *bool) *MenusUpdateOne {
 	return muo
 }
 
-// SetHideChildrenIn sets the "hide_children_in" field.
-func (muo *MenusUpdateOne) SetHideChildrenIn(b bool) *MenusUpdateOne {
-	muo.mutation.SetHideChildrenIn(b)
+// SetHideChildrenInMenu sets the "hide_children_in_menu" field.
+func (muo *MenusUpdateOne) SetHideChildrenInMenu(b bool) *MenusUpdateOne {
+	muo.mutation.SetHideChildrenInMenu(b)
 	return muo
 }
 
-// SetNillableHideChildrenIn sets the "hide_children_in" field if the given value is not nil.
-func (muo *MenusUpdateOne) SetNillableHideChildrenIn(b *bool) *MenusUpdateOne {
+// SetNillableHideChildrenInMenu sets the "hide_children_in_menu" field if the given value is not nil.
+func (muo *MenusUpdateOne) SetNillableHideChildrenInMenu(b *bool) *MenusUpdateOne {
 	if b != nil {
-		muo.SetHideChildrenIn(*b)
+		muo.SetHideChildrenInMenu(*b)
 	}
 	return muo
 }
@@ -647,8 +647,8 @@ func (muo *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error
 	if value, ok := muo.mutation.HideInMenu(); ok {
 		_spec.SetField(menus.FieldHideInMenu, field.TypeBool, value)
 	}
-	if value, ok := muo.mutation.HideChildrenIn(); ok {
-		_spec.SetField(menus.FieldHideChildrenIn, field.TypeBool, value)
+	if value, ok := muo.mutation.HideChildrenInMenu(); ok {
+		_spec.SetField(menus.FieldHideChildrenInMenu, field.TypeBool, value)
 	}
 	_node = &Menus{config: muo.config}
 	_spec.Assign = _node.assignValues

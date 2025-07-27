@@ -35,8 +35,8 @@ const (
 	FieldEnabled = "enabled"
 	// FieldHideInMenu holds the string denoting the hide_in_menu field in the database.
 	FieldHideInMenu = "hide_in_menu"
-	// FieldHideChildrenIn holds the string denoting the hide_children_in field in the database.
-	FieldHideChildrenIn = "hide_children_in"
+	// FieldHideChildrenInMenu holds the string denoting the hide_children_in_menu field in the database.
+	FieldHideChildrenInMenu = "hide_children_in_menu"
 	// Table holds the table name of the menus in the database.
 	Table = "lion_menus"
 )
@@ -55,7 +55,7 @@ var Columns = []string{
 	FieldSortWeight,
 	FieldEnabled,
 	FieldHideInMenu,
-	FieldHideChildrenIn,
+	FieldHideChildrenInMenu,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -95,8 +95,8 @@ var (
 	DefaultEnabled bool
 	// DefaultHideInMenu holds the default value on creation for the "hide_in_menu" field.
 	DefaultHideInMenu bool
-	// DefaultHideChildrenIn holds the default value on creation for the "hide_children_in" field.
-	DefaultHideChildrenIn bool
+	// DefaultHideChildrenInMenu holds the default value on creation for the "hide_children_in_menu" field.
+	DefaultHideChildrenInMenu bool
 )
 
 // OrderOption defines the ordering options for the Menus queries.
@@ -162,7 +162,7 @@ func ByHideInMenu(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHideInMenu, opts...).ToFunc()
 }
 
-// ByHideChildrenIn orders the results by the hide_children_in field.
-func ByHideChildrenIn(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHideChildrenIn, opts...).ToFunc()
+// ByHideChildrenInMenu orders the results by the hide_children_in_menu field.
+func ByHideChildrenInMenu(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHideChildrenInMenu, opts...).ToFunc()
 }

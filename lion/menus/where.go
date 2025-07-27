@@ -109,9 +109,9 @@ func HideInMenu(v bool) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldHideInMenu, v))
 }
 
-// HideChildrenIn applies equality check predicate on the "hide_children_in" field. It's identical to HideChildrenInEQ.
-func HideChildrenIn(v bool) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldHideChildrenIn, v))
+// HideChildrenInMenu applies equality check predicate on the "hide_children_in_menu" field. It's identical to HideChildrenInMenuEQ.
+func HideChildrenInMenu(v bool) predicate.Menus {
+	return predicate.Menus(sql.FieldEQ(FieldHideChildrenInMenu, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -604,14 +604,14 @@ func HideInMenuNEQ(v bool) predicate.Menus {
 	return predicate.Menus(sql.FieldNEQ(FieldHideInMenu, v))
 }
 
-// HideChildrenInEQ applies the EQ predicate on the "hide_children_in" field.
-func HideChildrenInEQ(v bool) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldHideChildrenIn, v))
+// HideChildrenInMenuEQ applies the EQ predicate on the "hide_children_in_menu" field.
+func HideChildrenInMenuEQ(v bool) predicate.Menus {
+	return predicate.Menus(sql.FieldEQ(FieldHideChildrenInMenu, v))
 }
 
-// HideChildrenInNEQ applies the NEQ predicate on the "hide_children_in" field.
-func HideChildrenInNEQ(v bool) predicate.Menus {
-	return predicate.Menus(sql.FieldNEQ(FieldHideChildrenIn, v))
+// HideChildrenInMenuNEQ applies the NEQ predicate on the "hide_children_in_menu" field.
+func HideChildrenInMenuNEQ(v bool) predicate.Menus {
+	return predicate.Menus(sql.FieldNEQ(FieldHideChildrenInMenu, v))
 }
 
 // And groups predicates with the AND operator between them.

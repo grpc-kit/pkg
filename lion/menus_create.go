@@ -158,16 +158,16 @@ func (mc *MenusCreate) SetNillableHideInMenu(b *bool) *MenusCreate {
 	return mc
 }
 
-// SetHideChildrenIn sets the "hide_children_in" field.
-func (mc *MenusCreate) SetHideChildrenIn(b bool) *MenusCreate {
-	mc.mutation.SetHideChildrenIn(b)
+// SetHideChildrenInMenu sets the "hide_children_in_menu" field.
+func (mc *MenusCreate) SetHideChildrenInMenu(b bool) *MenusCreate {
+	mc.mutation.SetHideChildrenInMenu(b)
 	return mc
 }
 
-// SetNillableHideChildrenIn sets the "hide_children_in" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableHideChildrenIn(b *bool) *MenusCreate {
+// SetNillableHideChildrenInMenu sets the "hide_children_in_menu" field if the given value is not nil.
+func (mc *MenusCreate) SetNillableHideChildrenInMenu(b *bool) *MenusCreate {
 	if b != nil {
-		mc.SetHideChildrenIn(*b)
+		mc.SetHideChildrenInMenu(*b)
 	}
 	return mc
 }
@@ -239,9 +239,9 @@ func (mc *MenusCreate) defaults() {
 		v := menus.DefaultHideInMenu
 		mc.mutation.SetHideInMenu(v)
 	}
-	if _, ok := mc.mutation.HideChildrenIn(); !ok {
-		v := menus.DefaultHideChildrenIn
-		mc.mutation.SetHideChildrenIn(v)
+	if _, ok := mc.mutation.HideChildrenInMenu(); !ok {
+		v := menus.DefaultHideChildrenInMenu
+		mc.mutation.SetHideChildrenInMenu(v)
 	}
 }
 
@@ -297,8 +297,8 @@ func (mc *MenusCreate) check() error {
 	if _, ok := mc.mutation.HideInMenu(); !ok {
 		return &ValidationError{Name: "hide_in_menu", err: errors.New(`lion: missing required field "Menus.hide_in_menu"`)}
 	}
-	if _, ok := mc.mutation.HideChildrenIn(); !ok {
-		return &ValidationError{Name: "hide_children_in", err: errors.New(`lion: missing required field "Menus.hide_children_in"`)}
+	if _, ok := mc.mutation.HideChildrenInMenu(); !ok {
+		return &ValidationError{Name: "hide_children_in_menu", err: errors.New(`lion: missing required field "Menus.hide_children_in_menu"`)}
 	}
 	return nil
 }
@@ -370,9 +370,9 @@ func (mc *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 		_spec.SetField(menus.FieldHideInMenu, field.TypeBool, value)
 		_node.HideInMenu = value
 	}
-	if value, ok := mc.mutation.HideChildrenIn(); ok {
-		_spec.SetField(menus.FieldHideChildrenIn, field.TypeBool, value)
-		_node.HideChildrenIn = value
+	if value, ok := mc.mutation.HideChildrenInMenu(); ok {
+		_spec.SetField(menus.FieldHideChildrenInMenu, field.TypeBool, value)
+		_node.HideChildrenInMenu = value
 	}
 	return _node, _spec
 }

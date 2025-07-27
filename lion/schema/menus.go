@@ -43,7 +43,7 @@ func (Menus) Fields() []ent.Field {
 		field.Bool("hide_in_menu").
 			Default(false).
 			Comment("是否在菜单中隐藏该节点"),
-		field.Bool("hide_children_in").
+		field.Bool("hide_children_in_menu").
 			Default(false).
 			Comment("是否隐藏该节点的子菜单"),
 	}
