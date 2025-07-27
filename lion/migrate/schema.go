@@ -30,7 +30,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "name", Type: field.TypeEnum, Enums: []string{"LOCAL", "LDAP", "OIDC", "OAUTH2", "GITHUB", "WECHAT", "GOOGLE"}},
+		{Name: "name", Type: field.TypeEnum, Enums: []string{"LOCAL", "LDAP", "OIDC", "OAUTH2", "GITHUB", "GOOGLE", "WECHAT"}},
 		{Name: "client_id", Type: field.TypeString, Default: ""},
 		{Name: "enabled", Type: field.TypeBool, Default: false},
 		{Name: "client_secret_encrypted", Type: field.TypeBytes},
@@ -68,6 +68,28 @@ var (
 		Columns:    LionDemoColumns,
 		PrimaryKey: []*schema.Column{LionDemoColumns[0]},
 	}
+	// LionGroupMenusColumns holds the columns for the "lion_group_menus" table.
+	LionGroupMenusColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "group_id", Type: field.TypeInt},
+		{Name: "menu_id", Type: field.TypeInt},
+	}
+	// LionGroupMenusTable holds the schema information for the "lion_group_menus" table.
+	LionGroupMenusTable = &schema.Table{
+		Name:       "lion_group_menus",
+		Columns:    LionGroupMenusColumns,
+		PrimaryKey: []*schema.Column{LionGroupMenusColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "groupmenus_group_id_menu_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionGroupMenusColumns[4], LionGroupMenusColumns[5]},
+			},
+		},
+	}
 	// LionGroupUsersColumns holds the columns for the "lion_group_users" table.
 	LionGroupUsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -104,6 +126,28 @@ var (
 		Name:       "lion_groups",
 		Columns:    LionGroupsColumns,
 		PrimaryKey: []*schema.Column{LionGroupsColumns[0]},
+	}
+	// LionMenusColumns holds the columns for the "lion_menus" table.
+	LionMenusColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "parent_id", Type: field.TypeInt, Default: 0},
+		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "path", Type: field.TypeString, Size: 255},
+		{Name: "locale", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "icon", Type: field.TypeString, Size: 256, Default: ""},
+		{Name: "sort_weight", Type: field.TypeInt, Default: 0},
+		{Name: "enabled", Type: field.TypeBool, Default: true},
+		{Name: "hide_in_menu", Type: field.TypeBool, Default: false},
+		{Name: "hide_children_in", Type: field.TypeBool, Default: false},
+	}
+	// LionMenusTable holds the schema information for the "lion_menus" table.
+	LionMenusTable = &schema.Table{
+		Name:       "lion_menus",
+		Columns:    LionMenusColumns,
+		PrimaryKey: []*schema.Column{LionMenusColumns[0]},
 	}
 	// LionUserAttributesColumns holds the columns for the "lion_user_attributes" table.
 	LionUserAttributesColumns = []*schema.Column{
@@ -211,8 +255,10 @@ var (
 		LionAccountsTable,
 		LionAuthProvidersTable,
 		LionDemoTable,
+		LionGroupMenusTable,
 		LionGroupUsersTable,
 		LionGroupsTable,
+		LionMenusTable,
 		LionUserAttributesTable,
 		LionUserAuthLocalTable,
 		LionUserAuthSocialTable,
@@ -230,11 +276,17 @@ func init() {
 	LionDemoTable.Annotation = &entsql.Annotation{
 		Table: "lion_demo",
 	}
+	LionGroupMenusTable.Annotation = &entsql.Annotation{
+		Table: "lion_group_menus",
+	}
 	LionGroupUsersTable.Annotation = &entsql.Annotation{
 		Table: "lion_group_users",
 	}
 	LionGroupsTable.Annotation = &entsql.Annotation{
 		Table: "lion_groups",
+	}
+	LionMenusTable.Annotation = &entsql.Annotation{
+		Table: "lion_menus",
 	}
 	LionUserAttributesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_attributes",

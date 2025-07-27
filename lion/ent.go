@@ -15,8 +15,10 @@ import (
 	"github.com/grpc-kit/pkg/lion/accounts"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/demo"
+	"github.com/grpc-kit/pkg/lion/groupmenus"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/groupusers"
+	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/userauthlocal"
 	"github.com/grpc-kit/pkg/lion/userauthsocial"
@@ -84,8 +86,10 @@ func checkColumn(table, column string) error {
 			accounts.Table:       accounts.ValidColumn,
 			authproviders.Table:  authproviders.ValidColumn,
 			demo.Table:           demo.ValidColumn,
+			groupmenus.Table:     groupmenus.ValidColumn,
 			groupusers.Table:     groupusers.ValidColumn,
 			groups.Table:         groups.ValidColumn,
+			menus.Table:          menus.ValidColumn,
 			userattributes.Table: userattributes.ValidColumn,
 			userauthlocal.Table:  userauthlocal.ValidColumn,
 			userauthsocial.Table: userauthsocial.ValidColumn,

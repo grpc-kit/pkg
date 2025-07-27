@@ -8,8 +8,10 @@ import (
 	"github.com/grpc-kit/pkg/lion/accounts"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/demo"
+	"github.com/grpc-kit/pkg/lion/groupmenus"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/groupusers"
+	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/userauthlocal"
@@ -90,6 +92,29 @@ func init() {
 	demoDescName := demoFields[0].Descriptor()
 	// demo.DefaultName holds the default value on creation for the name field.
 	demo.DefaultName = demoDescName.Default.(string)
+	groupmenusMixin := schema.GroupMenus{}.Mixin()
+	groupmenusMixinFields0 := groupmenusMixin[0].Fields()
+	_ = groupmenusMixinFields0
+	groupmenusFields := schema.GroupMenus{}.Fields()
+	_ = groupmenusFields
+	// groupmenusDescCreatedAt is the schema descriptor for created_at field.
+	groupmenusDescCreatedAt := groupmenusMixinFields0[0].Descriptor()
+	// groupmenus.DefaultCreatedAt holds the default value on creation for the created_at field.
+	groupmenus.DefaultCreatedAt = groupmenusDescCreatedAt.Default.(func() time.Time)
+	// groupmenusDescUpdatedAt is the schema descriptor for updated_at field.
+	groupmenusDescUpdatedAt := groupmenusMixinFields0[1].Descriptor()
+	// groupmenus.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	groupmenus.DefaultUpdatedAt = groupmenusDescUpdatedAt.Default.(func() time.Time)
+	// groupmenus.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	groupmenus.UpdateDefaultUpdatedAt = groupmenusDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// groupmenusDescGroupID is the schema descriptor for group_id field.
+	groupmenusDescGroupID := groupmenusFields[0].Descriptor()
+	// groupmenus.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
+	groupmenus.GroupIDValidator = groupmenusDescGroupID.Validators[0].(func(int) error)
+	// groupmenusDescMenuID is the schema descriptor for menu_id field.
+	groupmenusDescMenuID := groupmenusFields[1].Descriptor()
+	// groupmenus.MenuIDValidator is a validator for the "menu_id" field. It is called by the builders before save.
+	groupmenus.MenuIDValidator = groupmenusDescMenuID.Validators[0].(func(int) error)
 	groupusersMixin := schema.GroupUsers{}.Mixin()
 	groupusersMixinFields0 := groupusersMixin[0].Fields()
 	_ = groupusersMixinFields0
@@ -150,6 +175,89 @@ func init() {
 	groupsDescDescription := groupsFields[1].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
+	menusMixin := schema.Menus{}.Mixin()
+	menusMixinFields0 := menusMixin[0].Fields()
+	_ = menusMixinFields0
+	menusFields := schema.Menus{}.Fields()
+	_ = menusFields
+	// menusDescCreatedAt is the schema descriptor for created_at field.
+	menusDescCreatedAt := menusMixinFields0[0].Descriptor()
+	// menus.DefaultCreatedAt holds the default value on creation for the created_at field.
+	menus.DefaultCreatedAt = menusDescCreatedAt.Default.(func() time.Time)
+	// menusDescUpdatedAt is the schema descriptor for updated_at field.
+	menusDescUpdatedAt := menusMixinFields0[1].Descriptor()
+	// menus.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	menus.DefaultUpdatedAt = menusDescUpdatedAt.Default.(func() time.Time)
+	// menus.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	menus.UpdateDefaultUpdatedAt = menusDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// menusDescParentID is the schema descriptor for parent_id field.
+	menusDescParentID := menusFields[0].Descriptor()
+	// menus.DefaultParentID holds the default value on creation for the parent_id field.
+	menus.DefaultParentID = menusDescParentID.Default.(int)
+	// menusDescName is the schema descriptor for name field.
+	menusDescName := menusFields[1].Descriptor()
+	// menus.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	menus.NameValidator = func() func(string) error {
+		validators := menusDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// menusDescPath is the schema descriptor for path field.
+	menusDescPath := menusFields[2].Descriptor()
+	// menus.PathValidator is a validator for the "path" field. It is called by the builders before save.
+	menus.PathValidator = func() func(string) error {
+		validators := menusDescPath.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(_path string) error {
+			for _, fn := range fns {
+				if err := fn(_path); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// menusDescLocale is the schema descriptor for locale field.
+	menusDescLocale := menusFields[3].Descriptor()
+	// menus.DefaultLocale holds the default value on creation for the locale field.
+	menus.DefaultLocale = menusDescLocale.Default.(string)
+	// menus.LocaleValidator is a validator for the "locale" field. It is called by the builders before save.
+	menus.LocaleValidator = menusDescLocale.Validators[0].(func(string) error)
+	// menusDescIcon is the schema descriptor for icon field.
+	menusDescIcon := menusFields[4].Descriptor()
+	// menus.DefaultIcon holds the default value on creation for the icon field.
+	menus.DefaultIcon = menusDescIcon.Default.(string)
+	// menus.IconValidator is a validator for the "icon" field. It is called by the builders before save.
+	menus.IconValidator = menusDescIcon.Validators[0].(func(string) error)
+	// menusDescSortWeight is the schema descriptor for sort_weight field.
+	menusDescSortWeight := menusFields[5].Descriptor()
+	// menus.DefaultSortWeight holds the default value on creation for the sort_weight field.
+	menus.DefaultSortWeight = menusDescSortWeight.Default.(int)
+	// menusDescEnabled is the schema descriptor for enabled field.
+	menusDescEnabled := menusFields[6].Descriptor()
+	// menus.DefaultEnabled holds the default value on creation for the enabled field.
+	menus.DefaultEnabled = menusDescEnabled.Default.(bool)
+	// menusDescHideInMenu is the schema descriptor for hide_in_menu field.
+	menusDescHideInMenu := menusFields[7].Descriptor()
+	// menus.DefaultHideInMenu holds the default value on creation for the hide_in_menu field.
+	menus.DefaultHideInMenu = menusDescHideInMenu.Default.(bool)
+	// menusDescHideChildrenIn is the schema descriptor for hide_children_in field.
+	menusDescHideChildrenIn := menusFields[8].Descriptor()
+	// menus.DefaultHideChildrenIn holds the default value on creation for the hide_children_in field.
+	menus.DefaultHideChildrenIn = menusDescHideChildrenIn.Default.(bool)
 	userattributesMixin := schema.UserAttributes{}.Mixin()
 	userattributesMixinFields0 := userattributesMixin[0].Fields()
 	_ = userattributesMixinFields0

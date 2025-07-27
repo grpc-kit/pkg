@@ -17,8 +17,10 @@ import (
 	"github.com/grpc-kit/pkg/lion/accounts"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/demo"
+	"github.com/grpc-kit/pkg/lion/groupmenus"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/groupusers"
+	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/userauthlocal"
 	"github.com/grpc-kit/pkg/lion/userauthsocial"
@@ -36,10 +38,14 @@ type Client struct {
 	AuthProviders *AuthProvidersClient
 	// Demo is the client for interacting with the Demo builders.
 	Demo *DemoClient
+	// GroupMenus is the client for interacting with the GroupMenus builders.
+	GroupMenus *GroupMenusClient
 	// GroupUsers is the client for interacting with the GroupUsers builders.
 	GroupUsers *GroupUsersClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
+	// Menus is the client for interacting with the Menus builders.
+	Menus *MenusClient
 	// UserAttributes is the client for interacting with the UserAttributes builders.
 	UserAttributes *UserAttributesClient
 	// UserAuthLocal is the client for interacting with the UserAuthLocal builders.
@@ -62,8 +68,10 @@ func (c *Client) init() {
 	c.Accounts = NewAccountsClient(c.config)
 	c.AuthProviders = NewAuthProvidersClient(c.config)
 	c.Demo = NewDemoClient(c.config)
+	c.GroupMenus = NewGroupMenusClient(c.config)
 	c.GroupUsers = NewGroupUsersClient(c.config)
 	c.Groups = NewGroupsClient(c.config)
+	c.Menus = NewMenusClient(c.config)
 	c.UserAttributes = NewUserAttributesClient(c.config)
 	c.UserAuthLocal = NewUserAuthLocalClient(c.config)
 	c.UserAuthSocial = NewUserAuthSocialClient(c.config)
@@ -163,8 +171,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Accounts:       NewAccountsClient(cfg),
 		AuthProviders:  NewAuthProvidersClient(cfg),
 		Demo:           NewDemoClient(cfg),
+		GroupMenus:     NewGroupMenusClient(cfg),
 		GroupUsers:     NewGroupUsersClient(cfg),
 		Groups:         NewGroupsClient(cfg),
+		Menus:          NewMenusClient(cfg),
 		UserAttributes: NewUserAttributesClient(cfg),
 		UserAuthLocal:  NewUserAuthLocalClient(cfg),
 		UserAuthSocial: NewUserAuthSocialClient(cfg),
@@ -191,8 +201,10 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Accounts:       NewAccountsClient(cfg),
 		AuthProviders:  NewAuthProvidersClient(cfg),
 		Demo:           NewDemoClient(cfg),
+		GroupMenus:     NewGroupMenusClient(cfg),
 		GroupUsers:     NewGroupUsersClient(cfg),
 		Groups:         NewGroupsClient(cfg),
+		Menus:          NewMenusClient(cfg),
 		UserAttributes: NewUserAttributesClient(cfg),
 		UserAuthLocal:  NewUserAuthLocalClient(cfg),
 		UserAuthSocial: NewUserAuthSocialClient(cfg),
@@ -226,8 +238,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Accounts, c.AuthProviders, c.Demo, c.GroupUsers, c.Groups, c.UserAttributes,
-		c.UserAuthLocal, c.UserAuthSocial, c.Users,
+		c.Accounts, c.AuthProviders, c.Demo, c.GroupMenus, c.GroupUsers, c.Groups,
+		c.Menus, c.UserAttributes, c.UserAuthLocal, c.UserAuthSocial, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -237,8 +249,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Accounts, c.AuthProviders, c.Demo, c.GroupUsers, c.Groups, c.UserAttributes,
-		c.UserAuthLocal, c.UserAuthSocial, c.Users,
+		c.Accounts, c.AuthProviders, c.Demo, c.GroupMenus, c.GroupUsers, c.Groups,
+		c.Menus, c.UserAttributes, c.UserAuthLocal, c.UserAuthSocial, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -253,10 +265,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AuthProviders.mutate(ctx, m)
 	case *DemoMutation:
 		return c.Demo.mutate(ctx, m)
+	case *GroupMenusMutation:
+		return c.GroupMenus.mutate(ctx, m)
 	case *GroupUsersMutation:
 		return c.GroupUsers.mutate(ctx, m)
 	case *GroupsMutation:
 		return c.Groups.mutate(ctx, m)
+	case *MenusMutation:
+		return c.Menus.mutate(ctx, m)
 	case *UserAttributesMutation:
 		return c.UserAttributes.mutate(ctx, m)
 	case *UserAuthLocalMutation:
@@ -669,6 +685,139 @@ func (c *DemoClient) mutate(ctx context.Context, m *DemoMutation) (Value, error)
 	}
 }
 
+// GroupMenusClient is a client for the GroupMenus schema.
+type GroupMenusClient struct {
+	config
+}
+
+// NewGroupMenusClient returns a client for the GroupMenus from the given config.
+func NewGroupMenusClient(c config) *GroupMenusClient {
+	return &GroupMenusClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `groupmenus.Hooks(f(g(h())))`.
+func (c *GroupMenusClient) Use(hooks ...Hook) {
+	c.hooks.GroupMenus = append(c.hooks.GroupMenus, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `groupmenus.Intercept(f(g(h())))`.
+func (c *GroupMenusClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GroupMenus = append(c.inters.GroupMenus, interceptors...)
+}
+
+// Create returns a builder for creating a GroupMenus entity.
+func (c *GroupMenusClient) Create() *GroupMenusCreate {
+	mutation := newGroupMenusMutation(c.config, OpCreate)
+	return &GroupMenusCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of GroupMenus entities.
+func (c *GroupMenusClient) CreateBulk(builders ...*GroupMenusCreate) *GroupMenusCreateBulk {
+	return &GroupMenusCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *GroupMenusClient) MapCreateBulk(slice any, setFunc func(*GroupMenusCreate, int)) *GroupMenusCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &GroupMenusCreateBulk{err: fmt.Errorf("calling to GroupMenusClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*GroupMenusCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &GroupMenusCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for GroupMenus.
+func (c *GroupMenusClient) Update() *GroupMenusUpdate {
+	mutation := newGroupMenusMutation(c.config, OpUpdate)
+	return &GroupMenusUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GroupMenusClient) UpdateOne(gm *GroupMenus) *GroupMenusUpdateOne {
+	mutation := newGroupMenusMutation(c.config, OpUpdateOne, withGroupMenus(gm))
+	return &GroupMenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GroupMenusClient) UpdateOneID(id int) *GroupMenusUpdateOne {
+	mutation := newGroupMenusMutation(c.config, OpUpdateOne, withGroupMenusID(id))
+	return &GroupMenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for GroupMenus.
+func (c *GroupMenusClient) Delete() *GroupMenusDelete {
+	mutation := newGroupMenusMutation(c.config, OpDelete)
+	return &GroupMenusDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GroupMenusClient) DeleteOne(gm *GroupMenus) *GroupMenusDeleteOne {
+	return c.DeleteOneID(gm.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GroupMenusClient) DeleteOneID(id int) *GroupMenusDeleteOne {
+	builder := c.Delete().Where(groupmenus.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GroupMenusDeleteOne{builder}
+}
+
+// Query returns a query builder for GroupMenus.
+func (c *GroupMenusClient) Query() *GroupMenusQuery {
+	return &GroupMenusQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeGroupMenus},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a GroupMenus entity by its id.
+func (c *GroupMenusClient) Get(ctx context.Context, id int) (*GroupMenus, error) {
+	return c.Query().Where(groupmenus.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GroupMenusClient) GetX(ctx context.Context, id int) *GroupMenus {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *GroupMenusClient) Hooks() []Hook {
+	return c.hooks.GroupMenus
+}
+
+// Interceptors returns the client interceptors.
+func (c *GroupMenusClient) Interceptors() []Interceptor {
+	return c.inters.GroupMenus
+}
+
+func (c *GroupMenusClient) mutate(ctx context.Context, m *GroupMenusMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GroupMenusCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GroupMenusUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GroupMenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GroupMenusDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown GroupMenus mutation op: %q", m.Op())
+	}
+}
+
 // GroupUsersClient is a client for the GroupUsers schema.
 type GroupUsersClient struct {
 	config
@@ -932,6 +1081,139 @@ func (c *GroupsClient) mutate(ctx context.Context, m *GroupsMutation) (Value, er
 		return (&GroupsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown Groups mutation op: %q", m.Op())
+	}
+}
+
+// MenusClient is a client for the Menus schema.
+type MenusClient struct {
+	config
+}
+
+// NewMenusClient returns a client for the Menus from the given config.
+func NewMenusClient(c config) *MenusClient {
+	return &MenusClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `menus.Hooks(f(g(h())))`.
+func (c *MenusClient) Use(hooks ...Hook) {
+	c.hooks.Menus = append(c.hooks.Menus, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `menus.Intercept(f(g(h())))`.
+func (c *MenusClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Menus = append(c.inters.Menus, interceptors...)
+}
+
+// Create returns a builder for creating a Menus entity.
+func (c *MenusClient) Create() *MenusCreate {
+	mutation := newMenusMutation(c.config, OpCreate)
+	return &MenusCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Menus entities.
+func (c *MenusClient) CreateBulk(builders ...*MenusCreate) *MenusCreateBulk {
+	return &MenusCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MenusClient) MapCreateBulk(slice any, setFunc func(*MenusCreate, int)) *MenusCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MenusCreateBulk{err: fmt.Errorf("calling to MenusClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MenusCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MenusCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Menus.
+func (c *MenusClient) Update() *MenusUpdate {
+	mutation := newMenusMutation(c.config, OpUpdate)
+	return &MenusUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MenusClient) UpdateOne(m *Menus) *MenusUpdateOne {
+	mutation := newMenusMutation(c.config, OpUpdateOne, withMenus(m))
+	return &MenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MenusClient) UpdateOneID(id int) *MenusUpdateOne {
+	mutation := newMenusMutation(c.config, OpUpdateOne, withMenusID(id))
+	return &MenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Menus.
+func (c *MenusClient) Delete() *MenusDelete {
+	mutation := newMenusMutation(c.config, OpDelete)
+	return &MenusDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MenusClient) DeleteOne(m *Menus) *MenusDeleteOne {
+	return c.DeleteOneID(m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MenusClient) DeleteOneID(id int) *MenusDeleteOne {
+	builder := c.Delete().Where(menus.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MenusDeleteOne{builder}
+}
+
+// Query returns a query builder for Menus.
+func (c *MenusClient) Query() *MenusQuery {
+	return &MenusQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMenus},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Menus entity by its id.
+func (c *MenusClient) Get(ctx context.Context, id int) (*Menus, error) {
+	return c.Query().Where(menus.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MenusClient) GetX(ctx context.Context, id int) *Menus {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MenusClient) Hooks() []Hook {
+	return c.hooks.Menus
+}
+
+// Interceptors returns the client interceptors.
+func (c *MenusClient) Interceptors() []Interceptor {
+	return c.inters.Menus
+}
+
+func (c *MenusClient) mutate(ctx context.Context, m *MenusMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MenusCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MenusUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MenusDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown Menus mutation op: %q", m.Op())
 	}
 }
 
@@ -1470,11 +1752,11 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Accounts, AuthProviders, Demo, GroupUsers, Groups, UserAttributes,
-		UserAuthLocal, UserAuthSocial, Users []ent.Hook
+		Accounts, AuthProviders, Demo, GroupMenus, GroupUsers, Groups, Menus,
+		UserAttributes, UserAuthLocal, UserAuthSocial, Users []ent.Hook
 	}
 	inters struct {
-		Accounts, AuthProviders, Demo, GroupUsers, Groups, UserAttributes,
-		UserAuthLocal, UserAuthSocial, Users []ent.Interceptor
+		Accounts, AuthProviders, Demo, GroupMenus, GroupUsers, Groups, Menus,
+		UserAttributes, UserAuthLocal, UserAuthSocial, Users []ent.Interceptor
 	}
 )

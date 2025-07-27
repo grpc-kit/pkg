@@ -45,6 +45,18 @@ func (f DemoFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DemoMutation", m)
 }
 
+// The GroupMenusFunc type is an adapter to allow the use of ordinary
+// function as GroupMenus mutator.
+type GroupMenusFunc func(context.Context, *lion.GroupMenusMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GroupMenusFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.GroupMenusMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GroupMenusMutation", m)
+}
+
 // The GroupUsersFunc type is an adapter to allow the use of ordinary
 // function as GroupUsers mutator.
 type GroupUsersFunc func(context.Context, *lion.GroupUsersMutation) (lion.Value, error)
@@ -67,6 +79,18 @@ func (f GroupsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, er
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GroupsMutation", m)
+}
+
+// The MenusFunc type is an adapter to allow the use of ordinary
+// function as Menus mutator.
+type MenusFunc func(context.Context, *lion.MenusMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MenusFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.MenusMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.MenusMutation", m)
 }
 
 // The UserAttributesFunc type is an adapter to allow the use of ordinary

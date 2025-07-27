@@ -15,11 +15,17 @@ type AuthProviders func(*sql.Selector)
 // Demo is the predicate function for demo builders.
 type Demo func(*sql.Selector)
 
+// GroupMenus is the predicate function for groupmenus builders.
+type GroupMenus func(*sql.Selector)
+
 // GroupUsers is the predicate function for groupusers builders.
 type GroupUsers func(*sql.Selector)
 
 // Groups is the predicate function for groups builders.
 type Groups func(*sql.Selector)
+
+// Menus is the predicate function for menus builders.
+type Menus func(*sql.Selector)
 
 // UserAttributes is the predicate function for userattributes builders.
 type UserAttributes func(*sql.Selector)
