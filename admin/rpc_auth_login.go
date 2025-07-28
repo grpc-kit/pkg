@@ -50,9 +50,9 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	return result, nil
 }
 
-// GetAuthProviders 获取认证提供列表
-func (a *KnownAdminAPI) GetAuthProviders(ctx context.Context, req *adminv1.GetAuthProvidersRequest) (*adminv1.GetAuthProvidersResponse, error) {
-	result := &adminv1.GetAuthProvidersResponse{
+// ListAuthProviders 获取认证提供列表
+func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.ListAuthProvidersRequest) (*adminv1.ListAuthProvidersResponse, error) {
+	result := &adminv1.ListAuthProvidersResponse{
 		Providers: make([]*adminv1.AuthProvider, 0),
 	}
 
