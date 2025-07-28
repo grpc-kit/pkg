@@ -24,10 +24,10 @@ const _ = grpc.SupportPackageIsVersion7
 type KnownAdminClient interface {
 	GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*GetConfigResponse, error)
 	CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*CreateAuthLoginResponse, error)
-	GetAuthProviders(ctx context.Context, in *GetAuthProvidersRequest, opts ...grpc.CallOption) (*GetAuthProvidersResponse, error)
+	ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error)
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 	GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error)
-	GetMenus(ctx context.Context, in *GetMenusRequest, opts ...grpc.CallOption) (*GetMenusResponse, error)
+	ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error)
 }
 
 type knownAdminClient struct {
@@ -56,9 +56,9 @@ func (c *knownAdminClient) CreateAuthLogin(ctx context.Context, in *CreateAuthLo
 	return out, nil
 }
 
-func (c *knownAdminClient) GetAuthProviders(ctx context.Context, in *GetAuthProvidersRequest, opts ...grpc.CallOption) (*GetAuthProvidersResponse, error) {
-	out := new(GetAuthProvidersResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthProviders", in, out, opts...)
+func (c *knownAdminClient) ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error) {
+	out := new(ListAuthProvidersResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -83,9 +83,9 @@ func (c *knownAdminClient) GetAuthCallback(ctx context.Context, in *GetAuthCallb
 	return out, nil
 }
 
-func (c *knownAdminClient) GetMenus(ctx context.Context, in *GetMenusRequest, opts ...grpc.CallOption) (*GetMenusResponse, error) {
-	out := new(GetMenusResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetMenus", in, out, opts...)
+func (c *knownAdminClient) ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error) {
+	out := new(ListMenusResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,10 +98,10 @@ func (c *knownAdminClient) GetMenus(ctx context.Context, in *GetMenusRequest, op
 type KnownAdminServer interface {
 	GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error)
 	CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*CreateAuthLoginResponse, error)
-	GetAuthProviders(context.Context, *GetAuthProvidersRequest) (*GetAuthProvidersResponse, error)
+	ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error)
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 	GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error)
-	GetMenus(context.Context, *GetMenusRequest) (*GetMenusResponse, error)
+	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
 }
 
 // UnimplementedKnownAdminServer should be embedded to have forward compatible implementations.
@@ -114,8 +114,8 @@ func (UnimplementedKnownAdminServer) GetConfig(context.Context, *GetConfigReques
 func (UnimplementedKnownAdminServer) CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*CreateAuthLoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthLogin not implemented")
 }
-func (UnimplementedKnownAdminServer) GetAuthProviders(context.Context, *GetAuthProvidersRequest) (*GetAuthProvidersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAuthProviders not implemented")
+func (UnimplementedKnownAdminServer) ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAuthProviders not implemented")
 }
 func (UnimplementedKnownAdminServer) UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertAuthProviders not implemented")
@@ -123,8 +123,8 @@ func (UnimplementedKnownAdminServer) UpsertAuthProviders(context.Context, *Upser
 func (UnimplementedKnownAdminServer) GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAuthCallback not implemented")
 }
-func (UnimplementedKnownAdminServer) GetMenus(context.Context, *GetMenusRequest) (*GetMenusResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMenus not implemented")
+func (UnimplementedKnownAdminServer) ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMenus not implemented")
 }
 
 // UnsafeKnownAdminServer may be embedded to opt out of forward compatibility for this service.
@@ -174,20 +174,20 @@ func _KnownAdmin_CreateAuthLogin_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_GetAuthProviders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAuthProvidersRequest)
+func _KnownAdmin_ListAuthProviders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAuthProvidersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetAuthProviders(ctx, in)
+		return srv.(KnownAdminServer).ListAuthProviders(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthProviders",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetAuthProviders(ctx, req.(*GetAuthProvidersRequest))
+		return srv.(KnownAdminServer).ListAuthProviders(ctx, req.(*ListAuthProvidersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -228,20 +228,20 @@ func _KnownAdmin_GetAuthCallback_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_GetMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMenusRequest)
+func _KnownAdmin_ListMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMenusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetMenus(ctx, in)
+		return srv.(KnownAdminServer).ListMenus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetMenus",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetMenus(ctx, req.(*GetMenusRequest))
+		return srv.(KnownAdminServer).ListMenus(ctx, req.(*ListMenusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -262,8 +262,8 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_CreateAuthLogin_Handler,
 		},
 		{
-			MethodName: "GetAuthProviders",
-			Handler:    _KnownAdmin_GetAuthProviders_Handler,
+			MethodName: "ListAuthProviders",
+			Handler:    _KnownAdmin_ListAuthProviders_Handler,
 		},
 		{
 			MethodName: "UpsertAuthProviders",
@@ -274,8 +274,8 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_GetAuthCallback_Handler,
 		},
 		{
-			MethodName: "GetMenus",
-			Handler:    _KnownAdmin_GetMenus_Handler,
+			MethodName: "ListMenus",
+			Handler:    _KnownAdmin_ListMenus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

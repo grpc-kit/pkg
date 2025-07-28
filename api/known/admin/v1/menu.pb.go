@@ -22,21 +22,34 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Menu 用户后台菜单
 type Menu struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                 int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	ParentId           int32  `protobuf:"varint,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	Name               string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Path               string `protobuf:"bytes,4,opt,name=path,proto3" json:"path,omitempty"`
-	Locale             string `protobuf:"bytes,5,opt,name=locale,proto3" json:"locale,omitempty"`
-	Icon               string `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
-	SortWeight         int32  `protobuf:"varint,7,opt,name=sort_weight,json=sortWeight,proto3" json:"sort_weight,omitempty"`
-	Enabled            bool   `protobuf:"varint,8,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	HideInMenu         bool   `protobuf:"varint,9,opt,name=hide_in_menu,json=hideInMenu,proto3" json:"hide_in_menu,omitempty"`
-	HideChildrenInMenu bool   `protobuf:"varint,10,opt,name=hide_children_in_menu,json=hideChildrenInMenu,proto3" json:"hide_children_in_menu,omitempty"`
+	// ID 菜单 ID
+	Id int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// ParentID 父菜单 ID，为 0 表示顶级菜单
+	ParentId int32 `protobuf:"varint,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	// Name 菜单名称
+	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	// Path 菜单路径
+	Path string `protobuf:"bytes,4,opt,name=path,proto3" json:"path,omitempty"`
+	// Locale 国际化标识
+	Locale string `protobuf:"bytes,5,opt,name=locale,proto3" json:"locale,omitempty"`
+	// Icon 菜单图标，通常用于前端展示
+	Icon string `protobuf:"bytes,6,opt,name=icon,proto3" json:"icon,omitempty"`
+	// SortWeight 菜单排序权重，数字越小越靠前
+	SortWeight int32 `protobuf:"varint,7,opt,name=sort_weight,json=sortWeight,proto3" json:"sort_weight,omitempty"`
+	// Enabled 菜单是否启用
+	Enabled bool `protobuf:"varint,8,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	// HideInMenu 是否在菜单列表中隐藏
+	HideInMenu bool `protobuf:"varint,9,opt,name=hide_in_menu,json=hideInMenu,proto3" json:"hide_in_menu,omitempty"`
+	// HideChildrenInMenu 是否在菜单列表中隐藏子菜单
+	HideChildrenInMenu bool `protobuf:"varint,10,opt,name=hide_children_in_menu,json=hideChildrenInMenu,proto3" json:"hide_children_in_menu,omitempty"`
+	// Children 子菜单列表
+	Children []*Menu `protobuf:"bytes,11,rep,name=children,proto3" json:"children,omitempty"`
 }
 
 func (x *Menu) Reset() {
@@ -141,14 +154,21 @@ func (x *Menu) GetHideChildrenInMenu() bool {
 	return false
 }
 
-type GetMenusRequest struct {
+func (x *Menu) GetChildren() []*Menu {
+	if x != nil {
+		return x.Children
+	}
+	return nil
+}
+
+type ListMenusRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *GetMenusRequest) Reset() {
-	*x = GetMenusRequest{}
+func (x *ListMenusRequest) Reset() {
+	*x = ListMenusRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_known_admin_v1_menu_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -156,13 +176,13 @@ func (x *GetMenusRequest) Reset() {
 	}
 }
 
-func (x *GetMenusRequest) String() string {
+func (x *ListMenusRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetMenusRequest) ProtoMessage() {}
+func (*ListMenusRequest) ProtoMessage() {}
 
-func (x *GetMenusRequest) ProtoReflect() protoreflect.Message {
+func (x *ListMenusRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_known_admin_v1_menu_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -174,12 +194,12 @@ func (x *GetMenusRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetMenusRequest.ProtoReflect.Descriptor instead.
-func (*GetMenusRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListMenusRequest.ProtoReflect.Descriptor instead.
+func (*ListMenusRequest) Descriptor() ([]byte, []int) {
 	return file_known_admin_v1_menu_proto_rawDescGZIP(), []int{1}
 }
 
-type GetMenusResponse struct {
+type ListMenusResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -187,8 +207,8 @@ type GetMenusResponse struct {
 	Menus []*Menu `protobuf:"bytes,1,rep,name=menus,proto3" json:"menus,omitempty"`
 }
 
-func (x *GetMenusResponse) Reset() {
-	*x = GetMenusResponse{}
+func (x *ListMenusResponse) Reset() {
+	*x = ListMenusResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_known_admin_v1_menu_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -196,13 +216,13 @@ func (x *GetMenusResponse) Reset() {
 	}
 }
 
-func (x *GetMenusResponse) String() string {
+func (x *ListMenusResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetMenusResponse) ProtoMessage() {}
+func (*ListMenusResponse) ProtoMessage() {}
 
-func (x *GetMenusResponse) ProtoReflect() protoreflect.Message {
+func (x *ListMenusResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_known_admin_v1_menu_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -214,12 +234,12 @@ func (x *GetMenusResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetMenusResponse.ProtoReflect.Descriptor instead.
-func (*GetMenusResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ListMenusResponse.ProtoReflect.Descriptor instead.
+func (*ListMenusResponse) Descriptor() ([]byte, []int) {
 	return file_known_admin_v1_menu_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetMenusResponse) GetMenus() []*Menu {
+func (x *ListMenusResponse) GetMenus() []*Menu {
 	if x != nil {
 		return x.Menus
 	}
@@ -232,7 +252,7 @@ var file_known_admin_v1_menu_proto_rawDesc = []byte{
 	0x0a, 0x19, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31,
 	0x2f, 0x6d, 0x65, 0x6e, 0x75, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x1b, 0x67, 0x72, 0x70,
 	0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e,
-	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x22, 0x97, 0x02, 0x0a, 0x04, 0x4d, 0x65, 0x6e,
+	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x22, 0xd6, 0x02, 0x0a, 0x04, 0x4d, 0x65, 0x6e,
 	0x75, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69,
 	0x64, 0x12, 0x1b, 0x0a, 0x09, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x12, 0x12,
@@ -250,16 +270,21 @@ var file_known_admin_v1_menu_proto_rawDesc = []byte{
 	0x31, 0x0a, 0x15, 0x68, 0x69, 0x64, 0x65, 0x5f, 0x63, 0x68, 0x69, 0x6c, 0x64, 0x72, 0x65, 0x6e,
 	0x5f, 0x69, 0x6e, 0x5f, 0x6d, 0x65, 0x6e, 0x75, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x08, 0x52, 0x12,
 	0x68, 0x69, 0x64, 0x65, 0x43, 0x68, 0x69, 0x6c, 0x64, 0x72, 0x65, 0x6e, 0x49, 0x6e, 0x4d, 0x65,
-	0x6e, 0x75, 0x22, 0x11, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x6e, 0x75, 0x73, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x4b, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x6e, 0x75,
-	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x37, 0x0a, 0x05, 0x6d, 0x65, 0x6e,
-	0x75, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f,
-	0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64,
-	0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x65, 0x6e, 0x75, 0x52, 0x05, 0x6d, 0x65, 0x6e,
-	0x75, 0x73, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
-	0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70,
-	0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31,
-	0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6e, 0x75, 0x12, 0x3d, 0x0a, 0x08, 0x63, 0x68, 0x69, 0x6c, 0x64, 0x72, 0x65, 0x6e, 0x18, 0x0b,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e,
+	0x76, 0x31, 0x2e, 0x4d, 0x65, 0x6e, 0x75, 0x52, 0x08, 0x63, 0x68, 0x69, 0x6c, 0x64, 0x72, 0x65,
+	0x6e, 0x22, 0x12, 0x0a, 0x10, 0x4c, 0x69, 0x73, 0x74, 0x4d, 0x65, 0x6e, 0x75, 0x73, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x4c, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x4d, 0x65, 0x6e,
+	0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x37, 0x0a, 0x05, 0x6d, 0x65,
+	0x6e, 0x75, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x67, 0x72, 0x70, 0x63,
+	0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61,
+	0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x65, 0x6e, 0x75, 0x52, 0x05, 0x6d, 0x65,
+	0x6e, 0x75, 0x73, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61,
+	0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76,
+	0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -276,17 +301,18 @@ func file_known_admin_v1_menu_proto_rawDescGZIP() []byte {
 
 var file_known_admin_v1_menu_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_known_admin_v1_menu_proto_goTypes = []interface{}{
-	(*Menu)(nil),             // 0: grpc_kit.api.known.admin.v1.Menu
-	(*GetMenusRequest)(nil),  // 1: grpc_kit.api.known.admin.v1.GetMenusRequest
-	(*GetMenusResponse)(nil), // 2: grpc_kit.api.known.admin.v1.GetMenusResponse
+	(*Menu)(nil),              // 0: grpc_kit.api.known.admin.v1.Menu
+	(*ListMenusRequest)(nil),  // 1: grpc_kit.api.known.admin.v1.ListMenusRequest
+	(*ListMenusResponse)(nil), // 2: grpc_kit.api.known.admin.v1.ListMenusResponse
 }
 var file_known_admin_v1_menu_proto_depIdxs = []int32{
-	0, // 0: grpc_kit.api.known.admin.v1.GetMenusResponse.menus:type_name -> grpc_kit.api.known.admin.v1.Menu
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: grpc_kit.api.known.admin.v1.Menu.children:type_name -> grpc_kit.api.known.admin.v1.Menu
+	0, // 1: grpc_kit.api.known.admin.v1.ListMenusResponse.menus:type_name -> grpc_kit.api.known.admin.v1.Menu
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_menu_proto_init() }
@@ -308,7 +334,7 @@ func file_known_admin_v1_menu_proto_init() {
 			}
 		}
 		file_known_admin_v1_menu_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetMenusRequest); i {
+			switch v := v.(*ListMenusRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -320,7 +346,7 @@ func file_known_admin_v1_menu_proto_init() {
 			}
 		}
 		file_known_admin_v1_menu_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetMenusResponse); i {
+			switch v := v.(*ListMenusResponse); i {
 			case 0:
 				return &v.state
 			case 1:

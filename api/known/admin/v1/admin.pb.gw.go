@@ -65,20 +65,20 @@ func local_request_KnownAdmin_CreateAuthLogin_0(ctx context.Context, marshaler r
 
 }
 
-func request_KnownAdmin_GetAuthProviders_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetAuthProvidersRequest
+func request_KnownAdmin_ListAuthProviders_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListAuthProvidersRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := client.GetAuthProviders(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ListAuthProviders(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_KnownAdmin_GetAuthProviders_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetAuthProvidersRequest
+func local_request_KnownAdmin_ListAuthProviders_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListAuthProvidersRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := server.GetAuthProviders(ctx, &protoReq)
+	msg, err := server.ListAuthProviders(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -187,20 +187,20 @@ func local_request_KnownAdmin_GetAuthCallback_0(ctx context.Context, marshaler r
 
 }
 
-func request_KnownAdmin_GetMenus_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetMenusRequest
+func request_KnownAdmin_ListMenus_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListMenusRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := client.GetMenus(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ListMenus(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_KnownAdmin_GetMenus_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq GetMenusRequest
+func local_request_KnownAdmin_ListMenus_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListMenusRequest
 	var metadata runtime.ServerMetadata
 
-	msg, err := server.GetMenus(ctx, &protoReq)
+	msg, err := server.ListMenus(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -236,7 +236,7 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 
 	})
 
-	mux.Handle("GET", pattern_KnownAdmin_GetAuthProviders_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_KnownAdmin_ListAuthProviders_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -244,12 +244,12 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthProviders", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/providers"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/providers"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_KnownAdmin_GetAuthProviders_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_KnownAdmin_ListAuthProviders_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -257,7 +257,7 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 			return
 		}
 
-		forward_KnownAdmin_GetAuthProviders_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_KnownAdmin_ListAuthProviders_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -311,7 +311,7 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 
 	})
 
-	mux.Handle("GET", pattern_KnownAdmin_GetMenus_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_KnownAdmin_ListMenus_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -319,12 +319,12 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetMenus", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/menus"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/menus"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_KnownAdmin_GetMenus_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_KnownAdmin_ListMenus_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -332,7 +332,7 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 			return
 		}
 
-		forward_KnownAdmin_GetMenus_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_KnownAdmin_ListMenus_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -399,25 +399,25 @@ func RegisterKnownAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 
 	})
 
-	mux.Handle("GET", pattern_KnownAdmin_GetAuthProviders_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_KnownAdmin_ListAuthProviders_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthProviders", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/providers"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/providers"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_KnownAdmin_GetAuthProviders_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_KnownAdmin_ListAuthProviders_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_KnownAdmin_GetAuthProviders_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_KnownAdmin_ListAuthProviders_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -465,25 +465,25 @@ func RegisterKnownAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 
 	})
 
-	mux.Handle("GET", pattern_KnownAdmin_GetMenus_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_KnownAdmin_ListMenus_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetMenus", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/menus"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/menus"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_KnownAdmin_GetMenus_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_KnownAdmin_ListMenus_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_KnownAdmin_GetMenus_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_KnownAdmin_ListMenus_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -493,23 +493,23 @@ func RegisterKnownAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 var (
 	pattern_KnownAdmin_CreateAuthLogin_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"builtin", "admin", "api", "v1", "auth", "login"}, ""))
 
-	pattern_KnownAdmin_GetAuthProviders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"builtin", "admin", "api", "v1", "auth", "providers"}, ""))
+	pattern_KnownAdmin_ListAuthProviders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"builtin", "admin", "api", "v1", "auth", "providers"}, ""))
 
 	pattern_KnownAdmin_UpsertAuthProviders_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"builtin", "admin", "api", "v1", "auth", "providers"}, ""))
 
 	pattern_KnownAdmin_GetAuthCallback_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 1, 0, 4, 1, 5, 6}, []string{"builtin", "admin", "api", "v1", "auth", "callback", "provider_name"}, ""))
 
-	pattern_KnownAdmin_GetMenus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"builtin", "admin", "api", "v1", "menus"}, ""))
+	pattern_KnownAdmin_ListMenus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"builtin", "admin", "api", "v1", "menus"}, ""))
 )
 
 var (
 	forward_KnownAdmin_CreateAuthLogin_0 = runtime.ForwardResponseMessage
 
-	forward_KnownAdmin_GetAuthProviders_0 = runtime.ForwardResponseMessage
+	forward_KnownAdmin_ListAuthProviders_0 = runtime.ForwardResponseMessage
 
 	forward_KnownAdmin_UpsertAuthProviders_0 = runtime.ForwardResponseMessage
 
 	forward_KnownAdmin_GetAuthCallback_0 = runtime.ForwardResponseMessage
 
-	forward_KnownAdmin_GetMenus_0 = runtime.ForwardResponseMessage
+	forward_KnownAdmin_ListMenus_0 = runtime.ForwardResponseMessage
 )
