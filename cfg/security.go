@@ -240,7 +240,7 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 
 	// 仅在服务端配置支持 HS256 算法时才执行
 	if s.supportedHS256Alg() {
-		token, err := jwt.ParseWithClaims(tokenString, &IDTokenClaims{}, hs256Verify)
+		token, err := jwt.ParseWithClaims(tokenString, &idToken, hs256Verify)
 		if hasHS256Alg && err != nil {
 			if s.Authentication.OIDCProvider.Config == nil {
 				return idToken, err
