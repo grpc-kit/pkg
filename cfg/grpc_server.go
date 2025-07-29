@@ -548,7 +548,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 		switch currentMethod {
 		case "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback",
-			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthProviders":
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders":
 			ctx = c.Security.withUsername(ctx, UsernameAnonymous)
 			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeNone)
 			return ctx, nil
