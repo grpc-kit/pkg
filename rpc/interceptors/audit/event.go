@@ -92,7 +92,7 @@ type EventData struct {
 	StageTimestamp           time.Time `json:"stage_timestamp"`
 }
 
-func newEventDataFromContext(ctx context.Context, opt *interceptorOption) *EventData {
+func newEventDataFromContext(ctx context.Context, opt *interceptorOption, grpcService, grpcMethod string) *EventData {
 	username, ok := rpc.GetUsernameFromContext(ctx)
 	if !ok {
 		username = "-"
@@ -109,8 +109,8 @@ func newEventDataFromContext(ctx context.Context, opt *interceptorOption) *Event
 		Level:       opt.level,
 		AuditID:     opt.getTraceID(ctx),
 		Stage:       StageRequestReceived,
-		GRPCMethod:  opt.grpcMethod,
-		GRPCService: opt.grpcService,
+		GRPCMethod:  grpcMethod,
+		GRPCService: grpcService,
 		User: struct {
 			UID      string              `json:"uid"`
 			Username string              `json:"username"`

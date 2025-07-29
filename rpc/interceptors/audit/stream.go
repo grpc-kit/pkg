@@ -12,6 +12,9 @@ import (
 type serverStream struct {
 	grpc.ServerStream
 
+	grpcService string
+	grpcMethod  string
+
 	opt *interceptorOption
 }
 
@@ -28,7 +31,7 @@ func (s *serverStream) RecvMsg(m interface{}) error {
 	if s.opt.level == LevelRequest || s.opt.level == LevelRequestResponse {
 		ctx := s.ServerStream.Context()
 
-		ed := newEventDataFromContext(ctx, s.opt)
+		ed := newEventDataFromContext(ctx, s.opt, s.grpcService, s.grpcMethod)
 		ed.setRequestObject(m)
 
 		if sendErr := ed.sendEvent(ctx); sendErr != nil {
@@ -47,7 +50,7 @@ func (s *serverStream) SendMsg(m interface{}) error {
 	if s.opt.level == LevelRequestResponse {
 		ctx := s.ServerStream.Context()
 
-		ed := newEventDataFromContext(ctx, s.opt)
+		ed := newEventDataFromContext(ctx, s.opt, s.grpcService, s.grpcMethod)
 		ed.setResponseObject(err, m)
 
 		if sendErr := ed.sendEvent(ctx); sendErr != nil {

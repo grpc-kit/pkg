@@ -18,16 +18,17 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		// "/default.api.oneops.netdev.v1.OneopsNetdev/DisplaySwitchPortVlans"
-		if err := opt.setGRPCMethod(info.FullMethod); err != nil {
+		grpcService, grpcMethod, err := opt.parseGRPCMethod(info.FullMethod)
+		if err != nil {
 			opt.logger.Warnf(err.Error())
 			return handler(ctx, req)
 		}
 
-		if !opt.auditRequired() {
+		if !opt.auditRequired(grpcService, grpcMethod) {
 			return handler(ctx, req)
 		}
 
-		ed := newEventDataFromContext(ctx, opt)
+		ed := newEventDataFromContext(ctx, opt, grpcService, grpcMethod)
 
 		// 记录请求体
 		if opt.level == LevelRequest || opt.level == LevelRequestResponse {
@@ -63,16 +64,17 @@ func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
 
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		// "/default.api.oneops.netdev.v1.OneopsNetdev/DisplaySwitchPortVlans"
-		if err := opt.setGRPCMethod(info.FullMethod); err != nil {
+		grpcService, grpcMethod, err := opt.parseGRPCMethod(info.FullMethod)
+		if err != nil {
 			opt.logger.Warnf(err.Error())
 			return handler(srv, ss)
 		}
 
-		if !opt.auditRequired() {
+		if !opt.auditRequired(grpcService, grpcMethod) {
 			return handler(srv, ss)
 		}
 
-		x := &serverStream{ServerStream: ss, opt: opt}
+		x := &serverStream{ServerStream: ss, opt: opt, grpcService: grpcService, grpcMethod: grpcMethod}
 		return handler(srv, x)
 	}
 }

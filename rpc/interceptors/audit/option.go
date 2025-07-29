@@ -30,8 +30,10 @@ type interceptorOption struct {
 	level Level
 
 	serviceName string // netdev.v1.oneops.api.grpc-kit.com
-	grpcService string // default.api.oneops.netdev.v1.OneopsNetdev
-	grpcMethod  string // DisplaySwitchPortVlans
+
+	// 存在问题，共享实例不能存储变化的内容
+	// grpcService string // default.api.oneops.netdev.v1.OneopsNetdev
+	// grpcMethod  string // DisplaySwitchPortVlans
 
 	marshal     protojson.MarshalOptions
 	mustSucceed *bool
@@ -81,26 +83,29 @@ func (o *interceptorOption) sendAuditEvent(ctx context.Context, data *EventData)
 }
 */
 
-func (o *interceptorOption) setGRPCMethod(fullMethod string) error {
+func (o *interceptorOption) parseGRPCMethod(fullMethod string) (string, string, error) {
 	parts := strings.Split(fullMethod, "/")
 	if len(parts) < 3 {
-		return fmt.Errorf("failed to parse grpc metho: %s, ignore audit", fullMethod)
+		return "", "", fmt.Errorf("failed to parse grpc metho: %s, ignore audit", fullMethod)
 	}
 
-	o.grpcService = parts[1]
-	o.grpcMethod = parts[2]
-
-	return nil
+	return parts[1], parts[2], nil
 }
 
-func (o *interceptorOption) auditRequired() bool {
+func (o *interceptorOption) auditRequired(grpcService, grpcMethod string) bool {
 	// 审计等级为 LevelNone 时，不需要审计
 	if o.level == LevelNone {
 		return false
 	}
 
+	// TODO; 内部服务不做审计
+	switch grpcService {
+	case "grpc_kit.api.known.admin.v1.KnownAdmin":
+		return false
+	}
+
 	// TODO；针对特殊的 method 不做审计
-	switch o.grpcMethod {
+	switch grpcMethod {
 	case "HealthCheck":
 		return false
 	}
