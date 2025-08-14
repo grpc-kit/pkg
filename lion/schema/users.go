@@ -21,7 +21,7 @@ func (Users) Fields() []ent.Field {
 			NotEmpty().
 			Unique().
 			MaxLen(255).
-			Match(regexp.MustCompile(`^[a-zA-Z0-9_.]+$`)).
+			Match(regexp.MustCompile(`^[a-zA-Z0-9_.-]+$`)).
 			Comment("首选用户名，用于系统识别与登录，仅支持字母、数字、下划线、点号"),
 		field.Bytes("realname_encrypted").
 			Sensitive().
