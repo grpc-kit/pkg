@@ -48,6 +48,11 @@ func (f customFileSystem) Open(name string) (http.File, error) {
 			file, err = f.FileSystem.Open(fmt.Sprintf("%v/index.html", name))
 			if err != nil && errors.Is(err, os.ErrNotExist) {
 				file, err = f.FileSystem.Open("404.html")
+
+				// TODO; history fallback 效果
+				if errors.Is(err, os.ErrNotExist) {
+					file, err = f.FileSystem.Open("index.html")
+				}
 			}
 		case ".html":
 			// TODO; 404.html 文件可实现自定义
