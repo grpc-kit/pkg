@@ -115,13 +115,13 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		// 首先确保 "lion_users" 不存在这个用户，开启一个事务
 		tx, err := db.Tx(ctx)
 		if err != nil {
-			a.logger.Errorf("create user failed: %v", err)
+			a.logger.Errorf("create user: %v, err: %v", username, err)
 			return nil, errs.Internal(ctx).WithMessage("create user failed")
 		}
 
 		_, err = tx.Users.Query().Where(users.PreferredUsernameEQ(username)).OnlyID(ctx)
 		if !lion.IsNotFound(err) {
-			a.logger.Errorf("create user failed: %v", err)
+			a.logger.Errorf("create user: %v, err: %v", username, err)
 			return nil, errs.Internal(ctx).WithMessage("create user failed")
 		}
 
@@ -140,7 +140,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		if err != nil {
 			_ = tx.Rollback()
 
-			a.logger.Errorf("create user failed: %v", err)
+			a.logger.Errorf("create user: %v, err: %v", username, err)
 			return nil, errs.Internal(ctx).WithMessage("create user failed")
 		}
 
@@ -163,7 +163,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		if err != nil {
 			_ = tx.Rollback()
 
-			a.logger.Errorf("create user failed: %v", err)
+			a.logger.Errorf("create user: %v, err: %v", username, err)
 			return nil, errs.Internal(ctx).WithMessage("create user failed")
 		}
 
