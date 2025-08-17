@@ -33,20 +33,39 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 	ap, err := db.AuthProviders.Query().
 		Select(
 			"name",
+			"type",
 			"enabled",
 			"client_id",
 			"client_secret_encrypted",
 			"issuer",
+			"authorization_endpoint",
 			"scopes",
 			"redirect_uri",
 		).
 		Where(
-			authproviders.NameEQ(authproviders.Name(strings.ToUpper(req.ProviderName))),
+			authproviders.NameEQ(req.GetProviderName()),
 		).Only(ctx)
 	if err != nil {
 		a.logger.Errorf("get auth providers failed: %v", err)
 
 		return nil, errs.Internal(ctx).WithMessage("get auth providers failed")
+	}
+
+	switch ap.Type {
+	case authproviders.TypeWECHAT:
+		// DEBUG
+		a.logger.Infof("auth providers: %+v", ap)
+
+		var clientSecret []byte
+		clientSecret, err = crypto.DecryptAES(a.config.aesKey, ap.ClientSecretEncrypted)
+		if err != nil {
+			// TODO;
+		}
+
+		wx := newWechatOpen(a.logger, ap.ClientID, string(clientSecret))
+		wx.code2Session(ap.AuthorizationEndpoint, req.GetCode())
+
+		return nil, fmt.Errorf("auth provider type WECHAT is not yet supported")
 	}
 
 	op, err := oidc.NewProvider(ctx, ap.Issuer)
@@ -57,7 +76,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 	}
 
 	var clientSecret []byte
-	clientSecret, err = crypto.DecryptAES(a.config.aesKey, []byte(ap.ClientSecretEncrypted))
+	clientSecret, err = crypto.DecryptAES(a.config.aesKey, ap.ClientSecretEncrypted)
 	if err != nil {
 		// TODO;
 	}
@@ -154,7 +173,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 
 		_, err = tx.UserAuthSocial.Create().
 			SetUserID(newUser.ID).
-			SetProviderName(strings.ToUpper(req.ProviderName)).
+			SetProviderName(req.ProviderName).
 			SetProviderUserID(idToken.Subject).
 			SetAccessTokenEncrypted(accessTokenEnc).
 			SetRefreshTokenEncrypted(refreshTokenEnc).
