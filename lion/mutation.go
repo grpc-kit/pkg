@@ -656,7 +656,8 @@ type AuthProvidersMutation struct {
 	created_at              *time.Time
 	updated_at              *time.Time
 	deleted_at              *time.Time
-	name                    *authproviders.Name
+	name                    *string
+	_type                   *authproviders.Type
 	client_id               *string
 	enabled                 *bool
 	client_secret_encrypted *[]byte
@@ -892,12 +893,12 @@ func (m *AuthProvidersMutation) ResetDeletedAt() {
 }
 
 // SetName sets the "name" field.
-func (m *AuthProvidersMutation) SetName(a authproviders.Name) {
-	m.name = &a
+func (m *AuthProvidersMutation) SetName(s string) {
+	m.name = &s
 }
 
 // Name returns the value of the "name" field in the mutation.
-func (m *AuthProvidersMutation) Name() (r authproviders.Name, exists bool) {
+func (m *AuthProvidersMutation) Name() (r string, exists bool) {
 	v := m.name
 	if v == nil {
 		return
@@ -908,7 +909,7 @@ func (m *AuthProvidersMutation) Name() (r authproviders.Name, exists bool) {
 // OldName returns the old "name" field's value of the AuthProviders entity.
 // If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldName(ctx context.Context) (v authproviders.Name, err error) {
+func (m *AuthProvidersMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldName is only allowed on UpdateOne operations")
 	}
@@ -925,6 +926,42 @@ func (m *AuthProvidersMutation) OldName(ctx context.Context) (v authproviders.Na
 // ResetName resets all changes to the "name" field.
 func (m *AuthProvidersMutation) ResetName() {
 	m.name = nil
+}
+
+// SetType sets the "type" field.
+func (m *AuthProvidersMutation) SetType(a authproviders.Type) {
+	m._type = &a
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *AuthProvidersMutation) GetType() (r authproviders.Type, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the AuthProviders entity.
+// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthProvidersMutation) OldType(ctx context.Context) (v authproviders.Type, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *AuthProvidersMutation) ResetType() {
+	m._type = nil
 }
 
 // SetClientID sets the "client_id" field.
@@ -1285,7 +1322,7 @@ func (m *AuthProvidersMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AuthProvidersMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.created_at != nil {
 		fields = append(fields, authproviders.FieldCreatedAt)
 	}
@@ -1297,6 +1334,9 @@ func (m *AuthProvidersMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, authproviders.FieldName)
+	}
+	if m._type != nil {
+		fields = append(fields, authproviders.FieldType)
 	}
 	if m.client_id != nil {
 		fields = append(fields, authproviders.FieldClientID)
@@ -1341,6 +1381,8 @@ func (m *AuthProvidersMutation) Field(name string) (ent.Value, bool) {
 		return m.DeletedAt()
 	case authproviders.FieldName:
 		return m.Name()
+	case authproviders.FieldType:
+		return m.GetType()
 	case authproviders.FieldClientID:
 		return m.ClientID()
 	case authproviders.FieldEnabled:
@@ -1376,6 +1418,8 @@ func (m *AuthProvidersMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldDeletedAt(ctx)
 	case authproviders.FieldName:
 		return m.OldName(ctx)
+	case authproviders.FieldType:
+		return m.OldType(ctx)
 	case authproviders.FieldClientID:
 		return m.OldClientID(ctx)
 	case authproviders.FieldEnabled:
@@ -1425,11 +1469,18 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 		m.SetDeletedAt(v)
 		return nil
 	case authproviders.FieldName:
-		v, ok := value.(authproviders.Name)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case authproviders.FieldType:
+		v, ok := value.(authproviders.Type)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
 		return nil
 	case authproviders.FieldClientID:
 		v, ok := value.(string)
@@ -1563,6 +1614,9 @@ func (m *AuthProvidersMutation) ResetField(name string) error {
 		return nil
 	case authproviders.FieldName:
 		m.ResetName()
+		return nil
+	case authproviders.FieldType:
+		m.ResetType()
 		return nil
 	case authproviders.FieldClientID:
 		m.ResetClientID()

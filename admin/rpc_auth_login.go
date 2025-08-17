@@ -63,6 +63,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 
 	selectFields := []string{
 		"name",
+		"type",
 		"client_id",
 		"enabled",
 		"scopes",
@@ -76,6 +77,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 	rows := db.AuthProviders.Query().Select(selectFields...).AllX(ctx)
 	for _, row := range rows {
 		p := &adminv1.AuthProvider{
+			Name:                  row.Name,
 			ClientId:              row.ClientID,
 			Enabled:               row.Enabled,
 			Issuer:                row.Issuer,
@@ -86,21 +88,21 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 			RedirectUri:           row.RedirectURI,
 		}
 
-		switch row.Name {
-		case authproviders.NameLOCAL:
-			p.Name = adminv1.AuthProvider_LOCAL
-		case authproviders.NameLDAP:
-			p.Name = adminv1.AuthProvider_LDAP
-		case authproviders.NameOIDC:
-			p.Name = adminv1.AuthProvider_OIDC
-		case authproviders.NameOAUTH2:
-			p.Name = adminv1.AuthProvider_OAUTH2
-		case authproviders.NameGITHUB:
-			p.Name = adminv1.AuthProvider_GITHUB
-		case authproviders.NameWECHAT:
-			p.Name = adminv1.AuthProvider_WECHAT
-		case authproviders.NameGOOGLE:
-			p.Name = adminv1.AuthProvider_GOOGLE
+		switch row.Type {
+		case authproviders.TypeLOCAL:
+			p.Type = adminv1.AuthProvider_LOCAL
+		case authproviders.TypeLDAP:
+			p.Type = adminv1.AuthProvider_LDAP
+		case authproviders.TypeOIDC:
+			p.Type = adminv1.AuthProvider_OIDC
+		case authproviders.TypeOAUTH2:
+			p.Type = adminv1.AuthProvider_OAUTH2
+		case authproviders.TypeGITHUB:
+			p.Type = adminv1.AuthProvider_GITHUB
+		case authproviders.TypeWECHAT:
+			p.Type = adminv1.AuthProvider_WECHAT
+		case authproviders.TypeGOOGLE:
+			p.Type = adminv1.AuthProvider_GOOGLE
 		}
 
 		result.Providers = append(result.Providers, p)
@@ -119,27 +121,28 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 	}
 
 	for _, p := range req.Providers {
-		name := authproviders.NameLDAP
-		switch p.GetName() {
+		providerType := authproviders.TypeLDAP
+		switch p.GetType() {
 		case adminv1.AuthProvider_LOCAL:
-			name = authproviders.NameLOCAL
+			providerType = authproviders.TypeLOCAL
 		case adminv1.AuthProvider_LDAP:
-			name = authproviders.NameLDAP
+			providerType = authproviders.TypeLDAP
 		case adminv1.AuthProvider_OIDC:
-			name = authproviders.NameOIDC
+			providerType = authproviders.TypeOIDC
 		case adminv1.AuthProvider_OAUTH2:
-			name = authproviders.NameOAUTH2
+			providerType = authproviders.TypeOAUTH2
 		case adminv1.AuthProvider_GITHUB:
-			name = authproviders.NameGITHUB
+			providerType = authproviders.TypeGITHUB
 		case adminv1.AuthProvider_WECHAT:
-			name = authproviders.NameWECHAT
+			providerType = authproviders.TypeWECHAT
 		case adminv1.AuthProvider_GOOGLE:
-			name = authproviders.NameGOOGLE
+			providerType = authproviders.TypeGOOGLE
 		default:
-			a.logger.Warnf("auth provider name not found %v", p.Name.String())
+			a.logger.Warnf("auth provider name not found %v", p.Type.String())
 			continue
 		}
 
+		name := p.Name
 		existID, err := db.AuthProviders.Query().Where(authproviders.NameEQ(name)).OnlyID(ctx)
 		if err != nil && !lion.IsNotFound(err) {
 			return nil, err
@@ -154,6 +157,7 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 		if existID == 0 {
 			_, err = db.AuthProviders.Create().
 				SetName(name).
+				SetType(providerType).
 				SetEnabled(p.Enabled).
 				SetClientID(p.ClientId).
 				SetClientSecretEncrypted(clientSecretEnc).

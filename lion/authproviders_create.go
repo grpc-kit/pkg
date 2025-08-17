@@ -63,8 +63,14 @@ func (apc *AuthProvidersCreate) SetNillableDeletedAt(t *time.Time) *AuthProvider
 }
 
 // SetName sets the "name" field.
-func (apc *AuthProvidersCreate) SetName(a authproviders.Name) *AuthProvidersCreate {
-	apc.mutation.SetName(a)
+func (apc *AuthProvidersCreate) SetName(s string) *AuthProvidersCreate {
+	apc.mutation.SetName(s)
+	return apc
+}
+
+// SetType sets the "type" field.
+func (apc *AuthProvidersCreate) SetType(a authproviders.Type) *AuthProvidersCreate {
+	apc.mutation.SetType(a)
 	return apc
 }
 
@@ -206,9 +212,12 @@ func (apc *AuthProvidersCreate) check() error {
 	if _, ok := apc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "AuthProviders.name"`)}
 	}
-	if v, ok := apc.mutation.Name(); ok {
-		if err := authproviders.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.name": %w`, err)}
+	if _, ok := apc.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "AuthProviders.type"`)}
+	}
+	if v, ok := apc.mutation.GetType(); ok {
+		if err := authproviders.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.type": %w`, err)}
 		}
 	}
 	if _, ok := apc.mutation.ClientID(); !ok {
@@ -277,8 +286,12 @@ func (apc *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSp
 		_node.DeletedAt = &value
 	}
 	if value, ok := apc.mutation.Name(); ok {
-		_spec.SetField(authproviders.FieldName, field.TypeEnum, value)
+		_spec.SetField(authproviders.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := apc.mutation.GetType(); ok {
+		_spec.SetField(authproviders.FieldType, field.TypeEnum, value)
+		_node.Type = value
 	}
 	if value, ok := apc.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)

@@ -69,6 +69,11 @@ func DeletedAt(v time.Time) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldName, v))
+}
+
 // ClientID applies equality check predicate on the "client_id" field. It's identical to ClientIDEQ.
 func ClientID(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldClientID, v))
@@ -245,23 +250,88 @@ func DeletedAtNotNil() predicate.AuthProviders {
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v Name) predicate.AuthProviders {
+func NameEQ(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldName, v))
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v Name) predicate.AuthProviders {
+func NameNEQ(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldNEQ(FieldName, v))
 }
 
 // NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...Name) predicate.AuthProviders {
+func NameIn(vs ...string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldIn(FieldName, vs...))
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...Name) predicate.AuthProviders {
+func NameNotIn(vs ...string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldNotIn(FieldName, vs...))
+}
+
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGT(FieldName, v))
+}
+
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGTE(FieldName, v))
+}
+
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLT(FieldName, v))
+}
+
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLTE(FieldName, v))
+}
+
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContains(FieldName, v))
+}
+
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasPrefix(FieldName, v))
+}
+
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEqualFold(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldContainsFold(FieldName, v))
+}
+
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v Type) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldType, v))
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v Type) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNEQ(FieldType, v))
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...Type) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldIn(FieldType, vs...))
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...Type) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNotIn(FieldType, vs...))
 }
 
 // ClientIDEQ applies the EQ predicate on the "client_id" field.

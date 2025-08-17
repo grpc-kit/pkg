@@ -55,15 +55,29 @@ func (apu *AuthProvidersUpdate) ClearDeletedAt() *AuthProvidersUpdate {
 }
 
 // SetName sets the "name" field.
-func (apu *AuthProvidersUpdate) SetName(a authproviders.Name) *AuthProvidersUpdate {
-	apu.mutation.SetName(a)
+func (apu *AuthProvidersUpdate) SetName(s string) *AuthProvidersUpdate {
+	apu.mutation.SetName(s)
 	return apu
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableName(a *authproviders.Name) *AuthProvidersUpdate {
+func (apu *AuthProvidersUpdate) SetNillableName(s *string) *AuthProvidersUpdate {
+	if s != nil {
+		apu.SetName(*s)
+	}
+	return apu
+}
+
+// SetType sets the "type" field.
+func (apu *AuthProvidersUpdate) SetType(a authproviders.Type) *AuthProvidersUpdate {
+	apu.mutation.SetType(a)
+	return apu
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (apu *AuthProvidersUpdate) SetNillableType(a *authproviders.Type) *AuthProvidersUpdate {
 	if a != nil {
-		apu.SetName(*a)
+		apu.SetType(*a)
 	}
 	return apu
 }
@@ -229,9 +243,9 @@ func (apu *AuthProvidersUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (apu *AuthProvidersUpdate) check() error {
-	if v, ok := apu.mutation.Name(); ok {
-		if err := authproviders.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.name": %w`, err)}
+	if v, ok := apu.mutation.GetType(); ok {
+		if err := authproviders.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.type": %w`, err)}
 		}
 	}
 	return nil
@@ -259,7 +273,10 @@ func (apu *AuthProvidersUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		_spec.ClearField(authproviders.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := apu.mutation.Name(); ok {
-		_spec.SetField(authproviders.FieldName, field.TypeEnum, value)
+		_spec.SetField(authproviders.FieldName, field.TypeString, value)
+	}
+	if value, ok := apu.mutation.GetType(); ok {
+		_spec.SetField(authproviders.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := apu.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
@@ -335,15 +352,29 @@ func (apuo *AuthProvidersUpdateOne) ClearDeletedAt() *AuthProvidersUpdateOne {
 }
 
 // SetName sets the "name" field.
-func (apuo *AuthProvidersUpdateOne) SetName(a authproviders.Name) *AuthProvidersUpdateOne {
-	apuo.mutation.SetName(a)
+func (apuo *AuthProvidersUpdateOne) SetName(s string) *AuthProvidersUpdateOne {
+	apuo.mutation.SetName(s)
 	return apuo
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableName(a *authproviders.Name) *AuthProvidersUpdateOne {
+func (apuo *AuthProvidersUpdateOne) SetNillableName(s *string) *AuthProvidersUpdateOne {
+	if s != nil {
+		apuo.SetName(*s)
+	}
+	return apuo
+}
+
+// SetType sets the "type" field.
+func (apuo *AuthProvidersUpdateOne) SetType(a authproviders.Type) *AuthProvidersUpdateOne {
+	apuo.mutation.SetType(a)
+	return apuo
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (apuo *AuthProvidersUpdateOne) SetNillableType(a *authproviders.Type) *AuthProvidersUpdateOne {
 	if a != nil {
-		apuo.SetName(*a)
+		apuo.SetType(*a)
 	}
 	return apuo
 }
@@ -522,9 +553,9 @@ func (apuo *AuthProvidersUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (apuo *AuthProvidersUpdateOne) check() error {
-	if v, ok := apuo.mutation.Name(); ok {
-		if err := authproviders.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.name": %w`, err)}
+	if v, ok := apuo.mutation.GetType(); ok {
+		if err := authproviders.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.type": %w`, err)}
 		}
 	}
 	return nil
@@ -569,7 +600,10 @@ func (apuo *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthPro
 		_spec.ClearField(authproviders.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := apuo.mutation.Name(); ok {
-		_spec.SetField(authproviders.FieldName, field.TypeEnum, value)
+		_spec.SetField(authproviders.FieldName, field.TypeString, value)
+	}
+	if value, ok := apuo.mutation.GetType(); ok {
+		_spec.SetField(authproviders.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := apuo.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)

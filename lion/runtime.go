@@ -62,15 +62,15 @@ func init() {
 	// authproviders.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	authproviders.UpdateDefaultUpdatedAt = authprovidersDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// authprovidersDescClientID is the schema descriptor for client_id field.
-	authprovidersDescClientID := authprovidersFields[1].Descriptor()
+	authprovidersDescClientID := authprovidersFields[2].Descriptor()
 	// authproviders.DefaultClientID holds the default value on creation for the client_id field.
 	authproviders.DefaultClientID = authprovidersDescClientID.Default.(string)
 	// authprovidersDescEnabled is the schema descriptor for enabled field.
-	authprovidersDescEnabled := authprovidersFields[2].Descriptor()
+	authprovidersDescEnabled := authprovidersFields[3].Descriptor()
 	// authproviders.DefaultEnabled holds the default value on creation for the enabled field.
 	authproviders.DefaultEnabled = authprovidersDescEnabled.Default.(bool)
 	// authprovidersDescClientSecretEncrypted is the schema descriptor for client_secret_encrypted field.
-	authprovidersDescClientSecretEncrypted := authprovidersFields[3].Descriptor()
+	authprovidersDescClientSecretEncrypted := authprovidersFields[4].Descriptor()
 	// authproviders.DefaultClientSecretEncrypted holds the default value on creation for the client_secret_encrypted field.
 	authproviders.DefaultClientSecretEncrypted = authprovidersDescClientSecretEncrypted.Default.([]byte)
 	demoMixin := schema.Demo{}.Mixin()

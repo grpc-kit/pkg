@@ -22,6 +22,8 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// FieldClientID holds the string denoting the client_id field in the database.
 	FieldClientID = "client_id"
 	// FieldEnabled holds the string denoting the enabled field in the database.
@@ -51,6 +53,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldDeletedAt,
 	FieldName,
+	FieldType,
 	FieldClientID,
 	FieldEnabled,
 	FieldClientSecretEncrypted,
@@ -87,31 +90,31 @@ var (
 	DefaultClientSecretEncrypted []byte
 )
 
-// Name defines the type for the "name" enum field.
-type Name string
+// Type defines the type for the "type" enum field.
+type Type string
 
-// Name values.
+// Type values.
 const (
-	NameLOCAL  Name = "LOCAL"
-	NameLDAP   Name = "LDAP"
-	NameOIDC   Name = "OIDC"
-	NameOAUTH2 Name = "OAUTH2"
-	NameGITHUB Name = "GITHUB"
-	NameGOOGLE Name = "GOOGLE"
-	NameWECHAT Name = "WECHAT"
+	TypeLOCAL  Type = "LOCAL"
+	TypeLDAP   Type = "LDAP"
+	TypeOIDC   Type = "OIDC"
+	TypeOAUTH2 Type = "OAUTH2"
+	TypeGITHUB Type = "GITHUB"
+	TypeGOOGLE Type = "GOOGLE"
+	TypeWECHAT Type = "WECHAT"
 )
 
-func (n Name) String() string {
-	return string(n)
+func (_type Type) String() string {
+	return string(_type)
 }
 
-// NameValidator is a validator for the "name" field enum values. It is called by the builders before save.
-func NameValidator(n Name) error {
-	switch n {
-	case NameLOCAL, NameLDAP, NameOIDC, NameOAUTH2, NameGITHUB, NameGOOGLE, NameWECHAT:
+// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
+func TypeValidator(_type Type) error {
+	switch _type {
+	case TypeLOCAL, TypeLDAP, TypeOIDC, TypeOAUTH2, TypeGITHUB, TypeGOOGLE, TypeWECHAT:
 		return nil
 	default:
-		return fmt.Errorf("authproviders: invalid enum value for name field: %q", n)
+		return fmt.Errorf("authproviders: invalid enum value for type field: %q", _type)
 	}
 }
 
@@ -141,6 +144,11 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
 // ByClientID orders the results by the client_id field.

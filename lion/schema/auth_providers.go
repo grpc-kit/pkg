@@ -5,7 +5,6 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/index"
 )
 
 // AuthProviders holds the schema definition for the Demo entity.
@@ -16,7 +15,10 @@ type AuthProviders struct {
 // Fields of the table.
 func (AuthProviders) Fields() []ent.Field {
 	return []ent.Field{
-		field.Enum("name").
+		field.String("name").
+			Unique().
+			Comment("认证提供方名称"),
+		field.Enum("type").
 			Values("LOCAL", "LDAP", "OIDC", "OAUTH2", "GITHUB", "GOOGLE", "WECHAT").
 			Comment("支持的认证提供方"),
 		field.String("client_id").
@@ -69,7 +71,7 @@ func (AuthProviders) Hooks() []ent.Hook {
 // Indexes of the table.
 func (AuthProviders) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("name").Unique(),
+		// index.Fields("type").Unique(),
 	}
 }
 

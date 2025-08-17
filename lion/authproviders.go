@@ -23,8 +23,10 @@ type AuthProviders struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 认证提供方名称
+	Name string `json:"name,omitempty"`
 	// 支持的认证提供方
-	Name authproviders.Name `json:"name,omitempty"`
+	Type authproviders.Type `json:"type,omitempty"`
 	// ClientID holds the value of the "client_id" field.
 	ClientID string `json:"client_id,omitempty"`
 	// Enabled holds the value of the "enabled" field.
@@ -57,7 +59,7 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case authproviders.FieldID:
 			values[i] = new(sql.NullInt64)
-		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldScopes, authproviders.FieldRedirectURI, authproviders.FieldIssuer, authproviders.FieldAuthorizationEndpoint, authproviders.FieldTokenEndpoint, authproviders.FieldUserinfoEndpoint:
+		case authproviders.FieldName, authproviders.FieldType, authproviders.FieldClientID, authproviders.FieldScopes, authproviders.FieldRedirectURI, authproviders.FieldIssuer, authproviders.FieldAuthorizationEndpoint, authproviders.FieldTokenEndpoint, authproviders.FieldUserinfoEndpoint:
 			values[i] = new(sql.NullString)
 		case authproviders.FieldCreatedAt, authproviders.FieldUpdatedAt, authproviders.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -105,7 +107,13 @@ func (ap *AuthProviders) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				ap.Name = authproviders.Name(value.String)
+				ap.Name = value.String
+			}
+		case authproviders.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				ap.Type = authproviders.Type(value.String)
 			}
 		case authproviders.FieldClientID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -209,7 +217,10 @@ func (ap *AuthProviders) String() string {
 	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(fmt.Sprintf("%v", ap.Name))
+	builder.WriteString(ap.Name)
+	builder.WriteString(", ")
+	builder.WriteString("type=")
+	builder.WriteString(fmt.Sprintf("%v", ap.Type))
 	builder.WriteString(", ")
 	builder.WriteString("client_id=")
 	builder.WriteString(ap.ClientID)
