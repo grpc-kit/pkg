@@ -29,6 +29,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 	}
 
 	// 根据不同的 provider_name 选择个性处理方式
+	// su, err := newSocialUsers(ctx, a.config.aesKey, db, req.GetProviderName())
 
 	ap, err := db.AuthProviders.Query().
 		Select(
@@ -51,16 +52,16 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		return nil, errs.Internal(ctx).WithMessage("get auth providers failed")
 	}
 
+	var clientSecret []byte
+	clientSecret, err = crypto.DecryptAES(a.config.aesKey, ap.ClientSecretEncrypted)
+	if err != nil {
+		// TODO;
+	}
+
 	switch ap.Type {
 	case authproviders.TypeWECHAT:
 		// DEBUG
 		a.logger.Infof("auth providers: %+v", ap)
-
-		var clientSecret []byte
-		clientSecret, err = crypto.DecryptAES(a.config.aesKey, ap.ClientSecretEncrypted)
-		if err != nil {
-			// TODO;
-		}
 
 		wx := newWechatOpen(a.logger, ap.ClientID, string(clientSecret))
 		wx.code2Session(ap.AuthorizationEndpoint, req.GetCode())
@@ -73,12 +74,6 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		a.logger.Errorf("get auth providers failed: %v", err)
 
 		return nil, errs.Internal(ctx).WithMessage(err.Error())
-	}
-
-	var clientSecret []byte
-	clientSecret, err = crypto.DecryptAES(a.config.aesKey, ap.ClientSecretEncrypted)
-	if err != nil {
-		// TODO;
 	}
 
 	oauth2Config := oauth2.Config{
@@ -115,7 +110,7 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 
 	existUserID, err := db.UserAuthSocial.Query().
 		Where(
-			userauthsocial.ProviderNameEQ(strings.ToUpper(req.ProviderName)),
+			userauthsocial.ProviderNameEQ(req.ProviderName),
 			userauthsocial.ProviderUserIDEQ(idToken.Subject),
 		).
 		OnlyID(ctx)
