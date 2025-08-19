@@ -30,15 +30,15 @@ type socialUsers struct {
 func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
 	ap, err := db.AuthProviders.Query().
 		Select(
-			"name",
-			"type",
-			"enabled",
-			"client_id",
-			"client_secret_encrypted",
-			"issuer",
-			"authorization_endpoint",
-			"scopes",
-			"redirect_uri",
+			authproviders.FieldName,
+			authproviders.FieldType,
+			authproviders.FieldEnabled,
+			authproviders.FieldClientID,
+			authproviders.FieldClientSecretEncrypted,
+			authproviders.FieldIssuer,
+			authproviders.FieldAuthorizationEndpoint,
+			authproviders.FieldScopes,
+			authproviders.FieldRedirectURI,
 		).
 		Where(
 			authproviders.NameEQ(providerName),
@@ -58,6 +58,7 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 	return s, nil
 }
 
+// Exchange 根据客户端上报的 code 进行二次验证返回 access_token
 func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error) {
 	accessToken := ""
 
@@ -65,10 +66,6 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 
 	switch s.AuthProvider.Type {
 	case authproviders.TypeWECHAT:
-		// DEBUG
-
-		// wx := newWechatOpen(a.logger, ap.ClientID, string(clientSecret))
-		// wx.code2Session(ap.AuthorizationEndpoint, req.GetCode())
 		resp, err := s.weixinExchange(ctx, code)
 		if err != nil {
 			return "", err
