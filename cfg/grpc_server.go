@@ -21,11 +21,6 @@ import (
 	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
-	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
-	"github.com/grpc-kit/pkg/errs"
-	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
-	"github.com/grpc-kit/pkg/vars"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -37,6 +32,12 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
+	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
+	"github.com/grpc-kit/pkg/vars"
 )
 
 // registerGateway 注册 microservice.pb.gw
@@ -363,6 +364,20 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 	// TODO; 移动到 observables 方法中
 
 	var defaultOpts []grpc.UnaryServerInterceptor
+
+	// TODO; 测试鉴权函数, begin
+	/*
+		rawBody, err := os.ReadFile("./examples/authz/rbac.json")
+		if err != nil {
+			panic("rbac read file err: " + err.Error())
+		}
+		si, err := authz.NewStatic(string(rawBody))
+		if err != nil {
+			panic("rbac new static err: " + err.Error())
+		}
+		defaultOpts = append(defaultOpts, si.UnaryInterceptor)
+	*/
+	// TODO; 测试鉴权函数, end
 
 	defaultOpts = append(defaultOpts,
 		grpcauth.UnaryServerInterceptor(c.authValidate()),
