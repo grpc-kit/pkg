@@ -137,3 +137,12 @@ func (s ServicesConfig) hasEnableHTTPServer() bool {
 
 	return *s.HTTPService.Enabled
 }
+
+// 判断是否开启了内置 admin 服务
+func (s ServicesConfig) hasEnableIntegrationAdminServer() bool {
+	if s.Integrations.GRPC.Admin == nil {
+		return false
+	}
+
+	return *s.Integrations.GRPC.Admin
+}

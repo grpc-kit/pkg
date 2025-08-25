@@ -52,6 +52,11 @@ services:
           - test.grpc-kit.com
           - demo.grpc-kit.com
 
+  # 内置集成服务开关
+  integrations:
+    grpc:
+      admin: true
+
 # 服务注册配置
 discover:
   driver: etcdv3

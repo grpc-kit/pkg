@@ -115,6 +115,11 @@ type ServicesConfig struct {
 	PublicAddress string       `mapstructure:"public_address"`
 	GRPCService   *GRPCService `mapstructure:"grpc_service"`
 	HTTPService   *HTTPService `mapstructure:"http_service"`
+	Integrations  struct {
+		GRPC struct {
+			Admin *bool `mapstructure:"admin"`
+		}
+	} `mapstructure:"integrations"`
 }
 
 // DiscoverConfig 服务注册，服务启动后如何汇报自身
@@ -202,6 +207,8 @@ type BasicAuth struct {
 	Password     string   `mapstructure:"password"`
 	PasswordHash string   `mapstructure:"password_hash"`
 	Groups       []string `mapstructure:"groups"`
+	// 租户，默认均为 'default' 下
+	Tenant string `mapstructure:"tenant"`
 }
 
 // OIDCProvider 用于OIDC认证提供方配置
@@ -327,6 +334,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 				Username:     v.Username,
 				PasswordHash: v.PasswordHash,
 				Groups:       v.Groups,
+				Tenant:       v.Tenant,
 			}
 			if uu.PasswordHash == "" && v.Password != "" {
 				h := sha256.New()
@@ -337,19 +345,26 @@ func (c *LocalConfig) Register(ctx context.Context,
 		}
 	}
 
-	client, err := c.GetAdminDatabaseLion()
-	if err == nil && c.Frontend.hasEnableAdmin() {
+	if c.Services.hasEnableIntegrationAdminServer() {
+		client, err := c.GetAdminDatabaseLion()
+		if err != nil {
+			c.logger.Warnf("enabled the built-in admin service, but encountered an error connecting to the database. err: %v", err)
+		}
+
 		adminIns := admin.New(
 			admin.WithLogger(c.logger),
 			admin.WithLionClient(client),
 			admin.WithAESKey([]byte("b1946ac92492d2347c6235b4d2611184")), // TODO; a test key
-			admin.WithOIDCProvider(
-				c.Security.Authentication.OIDCProvider.Issuer,
-				c.Security.Authentication.OIDCProvider.Config.ClientID,
-				c.Security.Authentication.OIDCProvider.Config.ClientSecret,
-			),
+			/*
+				admin.WithOIDCProvider(
+					c.Security.Authentication.OIDCProvider.Issuer,
+					c.Security.Authentication.OIDCProvider.Config.ClientID,
+					c.Security.Authentication.OIDCProvider.Config.ClientSecret,
+				),
+			*/
 			admin.WithStaticUsers(su),
 		)
+
 		adminv1.RegisterKnownAdminServer(c.rpcServer.Server(), adminIns)
 	}
 	// TODO; 植入默认 admin api 服务
