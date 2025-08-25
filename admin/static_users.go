@@ -14,11 +14,17 @@ type StaticUser struct {
 	PasswordHash string   `json:"password_hash"`
 	Email        string   `json:"email"`
 	Groups       []string `json:"groups"`
+	Tenant       string   `json:"tenant"`
 }
 
 // GetAccessToken 获取或生成 jwt token
 func (s StaticUser) GetAccessToken(expiresIn int32) (string, error) {
 	// TODO; 生成 jwt token 需要考虑不通用户级别生成 token 的最长有效时间
+
+	tenant := "default"
+	if s.Tenant != "" {
+		tenant = s.Tenant
+	}
 
 	claims := auth.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -31,7 +37,7 @@ func (s StaticUser) GetAccessToken(expiresIn int32) (string, error) {
 		EmailVerified:   true,
 		Groups:          s.Groups,
 		FederatedClaims: nil,
-		Tenant:          "default",
+		Tenant:          tenant,
 	}
 
 	ss, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(s.PasswordHash))
