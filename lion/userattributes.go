@@ -52,7 +52,7 @@ func (*UserAttributes) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the UserAttributes fields.
-func (ua *UserAttributes) assignValues(columns []string, values []any) error {
+func (_m *UserAttributes) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -63,46 +63,46 @@ func (ua *UserAttributes) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			ua.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case userattributes.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ua.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case userattributes.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				ua.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case userattributes.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				ua.DeletedAt = new(time.Time)
-				*ua.DeletedAt = value.Time
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case userattributes.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				ua.UserID = int(value.Int64)
+				_m.UserID = int(value.Int64)
 			}
 		case userattributes.FieldAttrKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field attr_key", values[i])
 			} else if value.Valid {
-				ua.AttrKey = value.String
+				_m.AttrKey = value.String
 			}
 		case userattributes.FieldAttrValue:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field attr_value", values[i])
 			} else if value.Valid {
-				ua.AttrValue = value.String
+				_m.AttrValue = value.String
 			}
 		default:
-			ua.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -110,52 +110,52 @@ func (ua *UserAttributes) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the UserAttributes.
 // This includes values selected through modifiers, order, etc.
-func (ua *UserAttributes) Value(name string) (ent.Value, error) {
-	return ua.selectValues.Get(name)
+func (_m *UserAttributes) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this UserAttributes.
 // Note that you need to call UserAttributes.Unwrap() before calling this method if this UserAttributes
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ua *UserAttributes) Update() *UserAttributesUpdateOne {
-	return NewUserAttributesClient(ua.config).UpdateOne(ua)
+func (_m *UserAttributes) Update() *UserAttributesUpdateOne {
+	return NewUserAttributesClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the UserAttributes entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ua *UserAttributes) Unwrap() *UserAttributes {
-	_tx, ok := ua.config.driver.(*txDriver)
+func (_m *UserAttributes) Unwrap() *UserAttributes {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("lion: UserAttributes is not a transactional entity")
 	}
-	ua.config.driver = _tx.drv
-	return ua
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ua *UserAttributes) String() string {
+func (_m *UserAttributes) String() string {
 	var builder strings.Builder
 	builder.WriteString("UserAttributes(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ua.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(ua.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(ua.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := ua.DeletedAt; v != nil {
+	if v := _m.DeletedAt; v != nil {
 		builder.WriteString("deleted_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", ua.UserID))
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("attr_key=")
-	builder.WriteString(ua.AttrKey)
+	builder.WriteString(_m.AttrKey)
 	builder.WriteString(", ")
 	builder.WriteString("attr_value=")
-	builder.WriteString(ua.AttrValue)
+	builder.WriteString(_m.AttrValue)
 	builder.WriteByte(')')
 	return builder.String()
 }

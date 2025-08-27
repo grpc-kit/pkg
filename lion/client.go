@@ -341,8 +341,8 @@ func (c *AccountsClient) Update() *AccountsUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *AccountsClient) UpdateOne(a *Accounts) *AccountsUpdateOne {
-	mutation := newAccountsMutation(c.config, OpUpdateOne, withAccounts(a))
+func (c *AccountsClient) UpdateOne(_m *Accounts) *AccountsUpdateOne {
+	mutation := newAccountsMutation(c.config, OpUpdateOne, withAccounts(_m))
 	return &AccountsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -359,8 +359,8 @@ func (c *AccountsClient) Delete() *AccountsDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *AccountsClient) DeleteOne(a *Accounts) *AccountsDeleteOne {
-	return c.DeleteOneID(a.ID)
+func (c *AccountsClient) DeleteOne(_m *Accounts) *AccountsDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -474,8 +474,8 @@ func (c *AuthProvidersClient) Update() *AuthProvidersUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *AuthProvidersClient) UpdateOne(ap *AuthProviders) *AuthProvidersUpdateOne {
-	mutation := newAuthProvidersMutation(c.config, OpUpdateOne, withAuthProviders(ap))
+func (c *AuthProvidersClient) UpdateOne(_m *AuthProviders) *AuthProvidersUpdateOne {
+	mutation := newAuthProvidersMutation(c.config, OpUpdateOne, withAuthProviders(_m))
 	return &AuthProvidersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -492,8 +492,8 @@ func (c *AuthProvidersClient) Delete() *AuthProvidersDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *AuthProvidersClient) DeleteOne(ap *AuthProviders) *AuthProvidersDeleteOne {
-	return c.DeleteOneID(ap.ID)
+func (c *AuthProvidersClient) DeleteOne(_m *AuthProviders) *AuthProvidersDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -607,8 +607,8 @@ func (c *DemoClient) Update() *DemoUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *DemoClient) UpdateOne(d *Demo) *DemoUpdateOne {
-	mutation := newDemoMutation(c.config, OpUpdateOne, withDemo(d))
+func (c *DemoClient) UpdateOne(_m *Demo) *DemoUpdateOne {
+	mutation := newDemoMutation(c.config, OpUpdateOne, withDemo(_m))
 	return &DemoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -625,8 +625,8 @@ func (c *DemoClient) Delete() *DemoDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *DemoClient) DeleteOne(d *Demo) *DemoDeleteOne {
-	return c.DeleteOneID(d.ID)
+func (c *DemoClient) DeleteOne(_m *Demo) *DemoDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -740,8 +740,8 @@ func (c *GroupMenusClient) Update() *GroupMenusUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *GroupMenusClient) UpdateOne(gm *GroupMenus) *GroupMenusUpdateOne {
-	mutation := newGroupMenusMutation(c.config, OpUpdateOne, withGroupMenus(gm))
+func (c *GroupMenusClient) UpdateOne(_m *GroupMenus) *GroupMenusUpdateOne {
+	mutation := newGroupMenusMutation(c.config, OpUpdateOne, withGroupMenus(_m))
 	return &GroupMenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -758,8 +758,8 @@ func (c *GroupMenusClient) Delete() *GroupMenusDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *GroupMenusClient) DeleteOne(gm *GroupMenus) *GroupMenusDeleteOne {
-	return c.DeleteOneID(gm.ID)
+func (c *GroupMenusClient) DeleteOne(_m *GroupMenus) *GroupMenusDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -873,8 +873,8 @@ func (c *GroupUsersClient) Update() *GroupUsersUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *GroupUsersClient) UpdateOne(gu *GroupUsers) *GroupUsersUpdateOne {
-	mutation := newGroupUsersMutation(c.config, OpUpdateOne, withGroupUsers(gu))
+func (c *GroupUsersClient) UpdateOne(_m *GroupUsers) *GroupUsersUpdateOne {
+	mutation := newGroupUsersMutation(c.config, OpUpdateOne, withGroupUsers(_m))
 	return &GroupUsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -891,8 +891,8 @@ func (c *GroupUsersClient) Delete() *GroupUsersDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *GroupUsersClient) DeleteOne(gu *GroupUsers) *GroupUsersDeleteOne {
-	return c.DeleteOneID(gu.ID)
+func (c *GroupUsersClient) DeleteOne(_m *GroupUsers) *GroupUsersDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1006,8 +1006,8 @@ func (c *GroupsClient) Update() *GroupsUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *GroupsClient) UpdateOne(gr *Groups) *GroupsUpdateOne {
-	mutation := newGroupsMutation(c.config, OpUpdateOne, withGroups(gr))
+func (c *GroupsClient) UpdateOne(_m *Groups) *GroupsUpdateOne {
+	mutation := newGroupsMutation(c.config, OpUpdateOne, withGroups(_m))
 	return &GroupsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1024,8 +1024,8 @@ func (c *GroupsClient) Delete() *GroupsDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *GroupsClient) DeleteOne(gr *Groups) *GroupsDeleteOne {
-	return c.DeleteOneID(gr.ID)
+func (c *GroupsClient) DeleteOne(_m *Groups) *GroupsDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1139,8 +1139,8 @@ func (c *MenusClient) Update() *MenusUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *MenusClient) UpdateOne(m *Menus) *MenusUpdateOne {
-	mutation := newMenusMutation(c.config, OpUpdateOne, withMenus(m))
+func (c *MenusClient) UpdateOne(_m *Menus) *MenusUpdateOne {
+	mutation := newMenusMutation(c.config, OpUpdateOne, withMenus(_m))
 	return &MenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1157,8 +1157,8 @@ func (c *MenusClient) Delete() *MenusDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *MenusClient) DeleteOne(m *Menus) *MenusDeleteOne {
-	return c.DeleteOneID(m.ID)
+func (c *MenusClient) DeleteOne(_m *Menus) *MenusDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1272,8 +1272,8 @@ func (c *UserAttributesClient) Update() *UserAttributesUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserAttributesClient) UpdateOne(ua *UserAttributes) *UserAttributesUpdateOne {
-	mutation := newUserAttributesMutation(c.config, OpUpdateOne, withUserAttributes(ua))
+func (c *UserAttributesClient) UpdateOne(_m *UserAttributes) *UserAttributesUpdateOne {
+	mutation := newUserAttributesMutation(c.config, OpUpdateOne, withUserAttributes(_m))
 	return &UserAttributesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1290,8 +1290,8 @@ func (c *UserAttributesClient) Delete() *UserAttributesDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserAttributesClient) DeleteOne(ua *UserAttributes) *UserAttributesDeleteOne {
-	return c.DeleteOneID(ua.ID)
+func (c *UserAttributesClient) DeleteOne(_m *UserAttributes) *UserAttributesDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1405,8 +1405,8 @@ func (c *UserAuthLocalClient) Update() *UserAuthLocalUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserAuthLocalClient) UpdateOne(ual *UserAuthLocal) *UserAuthLocalUpdateOne {
-	mutation := newUserAuthLocalMutation(c.config, OpUpdateOne, withUserAuthLocal(ual))
+func (c *UserAuthLocalClient) UpdateOne(_m *UserAuthLocal) *UserAuthLocalUpdateOne {
+	mutation := newUserAuthLocalMutation(c.config, OpUpdateOne, withUserAuthLocal(_m))
 	return &UserAuthLocalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1423,8 +1423,8 @@ func (c *UserAuthLocalClient) Delete() *UserAuthLocalDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserAuthLocalClient) DeleteOne(ual *UserAuthLocal) *UserAuthLocalDeleteOne {
-	return c.DeleteOneID(ual.ID)
+func (c *UserAuthLocalClient) DeleteOne(_m *UserAuthLocal) *UserAuthLocalDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1538,8 +1538,8 @@ func (c *UserAuthSocialClient) Update() *UserAuthSocialUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserAuthSocialClient) UpdateOne(uas *UserAuthSocial) *UserAuthSocialUpdateOne {
-	mutation := newUserAuthSocialMutation(c.config, OpUpdateOne, withUserAuthSocial(uas))
+func (c *UserAuthSocialClient) UpdateOne(_m *UserAuthSocial) *UserAuthSocialUpdateOne {
+	mutation := newUserAuthSocialMutation(c.config, OpUpdateOne, withUserAuthSocial(_m))
 	return &UserAuthSocialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1556,8 +1556,8 @@ func (c *UserAuthSocialClient) Delete() *UserAuthSocialDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserAuthSocialClient) DeleteOne(uas *UserAuthSocial) *UserAuthSocialDeleteOne {
-	return c.DeleteOneID(uas.ID)
+func (c *UserAuthSocialClient) DeleteOne(_m *UserAuthSocial) *UserAuthSocialDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -1671,8 +1671,8 @@ func (c *UsersClient) Update() *UsersUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UsersClient) UpdateOne(u *Users) *UsersUpdateOne {
-	mutation := newUsersMutation(c.config, OpUpdateOne, withUsers(u))
+func (c *UsersClient) UpdateOne(_m *Users) *UsersUpdateOne {
+	mutation := newUsersMutation(c.config, OpUpdateOne, withUsers(_m))
 	return &UsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1689,8 +1689,8 @@ func (c *UsersClient) Delete() *UsersDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UsersClient) DeleteOne(u *Users) *UsersDeleteOne {
-	return c.DeleteOneID(u.ID)
+func (c *UsersClient) DeleteOne(_m *Users) *UsersDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.

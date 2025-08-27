@@ -50,7 +50,7 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Groups fields.
-func (gr *Groups) assignValues(columns []string, values []any) error {
+func (_m *Groups) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -61,40 +61,40 @@ func (gr *Groups) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			gr.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case groups.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				gr.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case groups.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				gr.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case groups.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				gr.DeletedAt = new(time.Time)
-				*gr.DeletedAt = value.Time
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case groups.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				gr.Name = value.String
+				_m.Name = value.String
 			}
 		case groups.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				gr.Description = value.String
+				_m.Description = value.String
 			}
 		default:
-			gr.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -102,49 +102,49 @@ func (gr *Groups) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Groups.
 // This includes values selected through modifiers, order, etc.
-func (gr *Groups) Value(name string) (ent.Value, error) {
-	return gr.selectValues.Get(name)
+func (_m *Groups) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Groups.
 // Note that you need to call Groups.Unwrap() before calling this method if this Groups
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gr *Groups) Update() *GroupsUpdateOne {
-	return NewGroupsClient(gr.config).UpdateOne(gr)
+func (_m *Groups) Update() *GroupsUpdateOne {
+	return NewGroupsClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Groups entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gr *Groups) Unwrap() *Groups {
-	_tx, ok := gr.config.driver.(*txDriver)
+func (_m *Groups) Unwrap() *Groups {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("lion: Groups is not a transactional entity")
 	}
-	gr.config.driver = _tx.drv
-	return gr
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (gr *Groups) String() string {
+func (_m *Groups) String() string {
 	var builder strings.Builder
 	builder.WriteString("Groups(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", gr.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(gr.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(gr.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := gr.DeletedAt; v != nil {
+	if v := _m.DeletedAt; v != nil {
 		builder.WriteString("deleted_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(gr.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
-	builder.WriteString(gr.Description)
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

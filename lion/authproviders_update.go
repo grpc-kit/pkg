@@ -23,197 +23,197 @@ type AuthProvidersUpdate struct {
 }
 
 // Where appends a list predicates to the AuthProvidersUpdate builder.
-func (apu *AuthProvidersUpdate) Where(ps ...predicate.AuthProviders) *AuthProvidersUpdate {
-	apu.mutation.Where(ps...)
-	return apu
+func (_u *AuthProvidersUpdate) Where(ps ...predicate.AuthProviders) *AuthProvidersUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (apu *AuthProvidersUpdate) SetUpdatedAt(t time.Time) *AuthProvidersUpdate {
-	apu.mutation.SetUpdatedAt(t)
-	return apu
+func (_u *AuthProvidersUpdate) SetUpdatedAt(v time.Time) *AuthProvidersUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (apu *AuthProvidersUpdate) SetDeletedAt(t time.Time) *AuthProvidersUpdate {
-	apu.mutation.SetDeletedAt(t)
-	return apu
+func (_u *AuthProvidersUpdate) SetDeletedAt(v time.Time) *AuthProvidersUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableDeletedAt(t *time.Time) *AuthProvidersUpdate {
-	if t != nil {
-		apu.SetDeletedAt(*t)
+func (_u *AuthProvidersUpdate) SetNillableDeletedAt(v *time.Time) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return apu
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (apu *AuthProvidersUpdate) ClearDeletedAt() *AuthProvidersUpdate {
-	apu.mutation.ClearDeletedAt()
-	return apu
+func (_u *AuthProvidersUpdate) ClearDeletedAt() *AuthProvidersUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetName sets the "name" field.
-func (apu *AuthProvidersUpdate) SetName(s string) *AuthProvidersUpdate {
-	apu.mutation.SetName(s)
-	return apu
+func (_u *AuthProvidersUpdate) SetName(v string) *AuthProvidersUpdate {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableName(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetName(*s)
+func (_u *AuthProvidersUpdate) SetNillableName(v *string) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return apu
+	return _u
 }
 
 // SetType sets the "type" field.
-func (apu *AuthProvidersUpdate) SetType(a authproviders.Type) *AuthProvidersUpdate {
-	apu.mutation.SetType(a)
-	return apu
+func (_u *AuthProvidersUpdate) SetType(v authproviders.Type) *AuthProvidersUpdate {
+	_u.mutation.SetType(v)
+	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableType(a *authproviders.Type) *AuthProvidersUpdate {
-	if a != nil {
-		apu.SetType(*a)
+func (_u *AuthProvidersUpdate) SetNillableType(v *authproviders.Type) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetType(*v)
 	}
-	return apu
+	return _u
 }
 
 // SetClientID sets the "client_id" field.
-func (apu *AuthProvidersUpdate) SetClientID(s string) *AuthProvidersUpdate {
-	apu.mutation.SetClientID(s)
-	return apu
+func (_u *AuthProvidersUpdate) SetClientID(v string) *AuthProvidersUpdate {
+	_u.mutation.SetClientID(v)
+	return _u
 }
 
 // SetNillableClientID sets the "client_id" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableClientID(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetClientID(*s)
+func (_u *AuthProvidersUpdate) SetNillableClientID(v *string) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetClientID(*v)
 	}
-	return apu
+	return _u
 }
 
 // SetEnabled sets the "enabled" field.
-func (apu *AuthProvidersUpdate) SetEnabled(b bool) *AuthProvidersUpdate {
-	apu.mutation.SetEnabled(b)
-	return apu
+func (_u *AuthProvidersUpdate) SetEnabled(v bool) *AuthProvidersUpdate {
+	_u.mutation.SetEnabled(v)
+	return _u
 }
 
 // SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableEnabled(b *bool) *AuthProvidersUpdate {
-	if b != nil {
-		apu.SetEnabled(*b)
+func (_u *AuthProvidersUpdate) SetNillableEnabled(v *bool) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetEnabled(*v)
 	}
-	return apu
+	return _u
 }
 
 // SetClientSecretEncrypted sets the "client_secret_encrypted" field.
-func (apu *AuthProvidersUpdate) SetClientSecretEncrypted(b []byte) *AuthProvidersUpdate {
-	apu.mutation.SetClientSecretEncrypted(b)
-	return apu
+func (_u *AuthProvidersUpdate) SetClientSecretEncrypted(v []byte) *AuthProvidersUpdate {
+	_u.mutation.SetClientSecretEncrypted(v)
+	return _u
 }
 
 // SetScopes sets the "scopes" field.
-func (apu *AuthProvidersUpdate) SetScopes(s string) *AuthProvidersUpdate {
-	apu.mutation.SetScopes(s)
-	return apu
+func (_u *AuthProvidersUpdate) SetScopes(v string) *AuthProvidersUpdate {
+	_u.mutation.SetScopes(v)
+	return _u
 }
 
 // SetNillableScopes sets the "scopes" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableScopes(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetScopes(*s)
+func (_u *AuthProvidersUpdate) SetNillableScopes(v *string) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetScopes(*v)
 	}
-	return apu
+	return _u
 }
 
 // SetRedirectURI sets the "redirect_uri" field.
-func (apu *AuthProvidersUpdate) SetRedirectURI(s string) *AuthProvidersUpdate {
-	apu.mutation.SetRedirectURI(s)
-	return apu
+func (_u *AuthProvidersUpdate) SetRedirectURI(v string) *AuthProvidersUpdate {
+	_u.mutation.SetRedirectURI(v)
+	return _u
 }
 
 // SetNillableRedirectURI sets the "redirect_uri" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableRedirectURI(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetRedirectURI(*s)
+func (_u *AuthProvidersUpdate) SetNillableRedirectURI(v *string) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetRedirectURI(*v)
 	}
-	return apu
+	return _u
 }
 
 // SetIssuer sets the "issuer" field.
-func (apu *AuthProvidersUpdate) SetIssuer(s string) *AuthProvidersUpdate {
-	apu.mutation.SetIssuer(s)
-	return apu
+func (_u *AuthProvidersUpdate) SetIssuer(v string) *AuthProvidersUpdate {
+	_u.mutation.SetIssuer(v)
+	return _u
 }
 
 // SetNillableIssuer sets the "issuer" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableIssuer(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetIssuer(*s)
+func (_u *AuthProvidersUpdate) SetNillableIssuer(v *string) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetIssuer(*v)
 	}
-	return apu
+	return _u
 }
 
 // SetAuthorizationEndpoint sets the "authorization_endpoint" field.
-func (apu *AuthProvidersUpdate) SetAuthorizationEndpoint(s string) *AuthProvidersUpdate {
-	apu.mutation.SetAuthorizationEndpoint(s)
-	return apu
+func (_u *AuthProvidersUpdate) SetAuthorizationEndpoint(v string) *AuthProvidersUpdate {
+	_u.mutation.SetAuthorizationEndpoint(v)
+	return _u
 }
 
 // SetNillableAuthorizationEndpoint sets the "authorization_endpoint" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableAuthorizationEndpoint(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetAuthorizationEndpoint(*s)
+func (_u *AuthProvidersUpdate) SetNillableAuthorizationEndpoint(v *string) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetAuthorizationEndpoint(*v)
 	}
-	return apu
+	return _u
 }
 
 // SetTokenEndpoint sets the "token_endpoint" field.
-func (apu *AuthProvidersUpdate) SetTokenEndpoint(s string) *AuthProvidersUpdate {
-	apu.mutation.SetTokenEndpoint(s)
-	return apu
+func (_u *AuthProvidersUpdate) SetTokenEndpoint(v string) *AuthProvidersUpdate {
+	_u.mutation.SetTokenEndpoint(v)
+	return _u
 }
 
 // SetNillableTokenEndpoint sets the "token_endpoint" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableTokenEndpoint(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetTokenEndpoint(*s)
+func (_u *AuthProvidersUpdate) SetNillableTokenEndpoint(v *string) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetTokenEndpoint(*v)
 	}
-	return apu
+	return _u
 }
 
 // SetUserinfoEndpoint sets the "userinfo_endpoint" field.
-func (apu *AuthProvidersUpdate) SetUserinfoEndpoint(s string) *AuthProvidersUpdate {
-	apu.mutation.SetUserinfoEndpoint(s)
-	return apu
+func (_u *AuthProvidersUpdate) SetUserinfoEndpoint(v string) *AuthProvidersUpdate {
+	_u.mutation.SetUserinfoEndpoint(v)
+	return _u
 }
 
 // SetNillableUserinfoEndpoint sets the "userinfo_endpoint" field if the given value is not nil.
-func (apu *AuthProvidersUpdate) SetNillableUserinfoEndpoint(s *string) *AuthProvidersUpdate {
-	if s != nil {
-		apu.SetUserinfoEndpoint(*s)
+func (_u *AuthProvidersUpdate) SetNillableUserinfoEndpoint(v *string) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetUserinfoEndpoint(*v)
 	}
-	return apu
+	return _u
 }
 
 // Mutation returns the AuthProvidersMutation object of the builder.
-func (apu *AuthProvidersUpdate) Mutation() *AuthProvidersMutation {
-	return apu.mutation
+func (_u *AuthProvidersUpdate) Mutation() *AuthProvidersMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (apu *AuthProvidersUpdate) Save(ctx context.Context) (int, error) {
-	apu.defaults()
-	return withHooks(ctx, apu.sqlSave, apu.mutation, apu.hooks)
+func (_u *AuthProvidersUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (apu *AuthProvidersUpdate) SaveX(ctx context.Context) int {
-	affected, err := apu.Save(ctx)
+func (_u *AuthProvidersUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -221,29 +221,29 @@ func (apu *AuthProvidersUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (apu *AuthProvidersUpdate) Exec(ctx context.Context) error {
-	_, err := apu.Save(ctx)
+func (_u *AuthProvidersUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (apu *AuthProvidersUpdate) ExecX(ctx context.Context) {
-	if err := apu.Exec(ctx); err != nil {
+func (_u *AuthProvidersUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (apu *AuthProvidersUpdate) defaults() {
-	if _, ok := apu.mutation.UpdatedAt(); !ok {
+func (_u *AuthProvidersUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := authproviders.UpdateDefaultUpdatedAt()
-		apu.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (apu *AuthProvidersUpdate) check() error {
-	if v, ok := apu.mutation.GetType(); ok {
+func (_u *AuthProvidersUpdate) check() error {
+	if v, ok := _u.mutation.GetType(); ok {
 		if err := authproviders.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.type": %w`, err)}
 		}
@@ -251,61 +251,61 @@ func (apu *AuthProvidersUpdate) check() error {
 	return nil
 }
 
-func (apu *AuthProvidersUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := apu.check(); err != nil {
-		return n, err
+func (_u *AuthProvidersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(authproviders.Table, authproviders.Columns, sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt))
-	if ps := apu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := apu.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(authproviders.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := apu.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(authproviders.FieldDeletedAt, field.TypeTime, value)
 	}
-	if apu.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(authproviders.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := apu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeString, value)
 	}
-	if value, ok := apu.mutation.GetType(); ok {
+	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(authproviders.FieldType, field.TypeEnum, value)
 	}
-	if value, ok := apu.mutation.ClientID(); ok {
+	if value, ok := _u.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
 	}
-	if value, ok := apu.mutation.Enabled(); ok {
+	if value, ok := _u.mutation.Enabled(); ok {
 		_spec.SetField(authproviders.FieldEnabled, field.TypeBool, value)
 	}
-	if value, ok := apu.mutation.ClientSecretEncrypted(); ok {
+	if value, ok := _u.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeBytes, value)
 	}
-	if value, ok := apu.mutation.Scopes(); ok {
+	if value, ok := _u.mutation.Scopes(); ok {
 		_spec.SetField(authproviders.FieldScopes, field.TypeString, value)
 	}
-	if value, ok := apu.mutation.RedirectURI(); ok {
+	if value, ok := _u.mutation.RedirectURI(); ok {
 		_spec.SetField(authproviders.FieldRedirectURI, field.TypeString, value)
 	}
-	if value, ok := apu.mutation.Issuer(); ok {
+	if value, ok := _u.mutation.Issuer(); ok {
 		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
 	}
-	if value, ok := apu.mutation.AuthorizationEndpoint(); ok {
+	if value, ok := _u.mutation.AuthorizationEndpoint(); ok {
 		_spec.SetField(authproviders.FieldAuthorizationEndpoint, field.TypeString, value)
 	}
-	if value, ok := apu.mutation.TokenEndpoint(); ok {
+	if value, ok := _u.mutation.TokenEndpoint(); ok {
 		_spec.SetField(authproviders.FieldTokenEndpoint, field.TypeString, value)
 	}
-	if value, ok := apu.mutation.UserinfoEndpoint(); ok {
+	if value, ok := _u.mutation.UserinfoEndpoint(); ok {
 		_spec.SetField(authproviders.FieldUserinfoEndpoint, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, apu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{authproviders.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -313,8 +313,8 @@ func (apu *AuthProvidersUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		return 0, err
 	}
-	apu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // AuthProvidersUpdateOne is the builder for updating a single AuthProviders entity.
@@ -326,204 +326,204 @@ type AuthProvidersUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (apuo *AuthProvidersUpdateOne) SetUpdatedAt(t time.Time) *AuthProvidersUpdateOne {
-	apuo.mutation.SetUpdatedAt(t)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetUpdatedAt(v time.Time) *AuthProvidersUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (apuo *AuthProvidersUpdateOne) SetDeletedAt(t time.Time) *AuthProvidersUpdateOne {
-	apuo.mutation.SetDeletedAt(t)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetDeletedAt(v time.Time) *AuthProvidersUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableDeletedAt(t *time.Time) *AuthProvidersUpdateOne {
-	if t != nil {
-		apuo.SetDeletedAt(*t)
+func (_u *AuthProvidersUpdateOne) SetNillableDeletedAt(v *time.Time) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return apuo
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (apuo *AuthProvidersUpdateOne) ClearDeletedAt() *AuthProvidersUpdateOne {
-	apuo.mutation.ClearDeletedAt()
-	return apuo
+func (_u *AuthProvidersUpdateOne) ClearDeletedAt() *AuthProvidersUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetName sets the "name" field.
-func (apuo *AuthProvidersUpdateOne) SetName(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetName(s)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetName(v string) *AuthProvidersUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableName(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetName(*s)
+func (_u *AuthProvidersUpdateOne) SetNillableName(v *string) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return apuo
+	return _u
 }
 
 // SetType sets the "type" field.
-func (apuo *AuthProvidersUpdateOne) SetType(a authproviders.Type) *AuthProvidersUpdateOne {
-	apuo.mutation.SetType(a)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetType(v authproviders.Type) *AuthProvidersUpdateOne {
+	_u.mutation.SetType(v)
+	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableType(a *authproviders.Type) *AuthProvidersUpdateOne {
-	if a != nil {
-		apuo.SetType(*a)
+func (_u *AuthProvidersUpdateOne) SetNillableType(v *authproviders.Type) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
 	}
-	return apuo
+	return _u
 }
 
 // SetClientID sets the "client_id" field.
-func (apuo *AuthProvidersUpdateOne) SetClientID(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetClientID(s)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetClientID(v string) *AuthProvidersUpdateOne {
+	_u.mutation.SetClientID(v)
+	return _u
 }
 
 // SetNillableClientID sets the "client_id" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableClientID(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetClientID(*s)
+func (_u *AuthProvidersUpdateOne) SetNillableClientID(v *string) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetClientID(*v)
 	}
-	return apuo
+	return _u
 }
 
 // SetEnabled sets the "enabled" field.
-func (apuo *AuthProvidersUpdateOne) SetEnabled(b bool) *AuthProvidersUpdateOne {
-	apuo.mutation.SetEnabled(b)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetEnabled(v bool) *AuthProvidersUpdateOne {
+	_u.mutation.SetEnabled(v)
+	return _u
 }
 
 // SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableEnabled(b *bool) *AuthProvidersUpdateOne {
-	if b != nil {
-		apuo.SetEnabled(*b)
+func (_u *AuthProvidersUpdateOne) SetNillableEnabled(v *bool) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetEnabled(*v)
 	}
-	return apuo
+	return _u
 }
 
 // SetClientSecretEncrypted sets the "client_secret_encrypted" field.
-func (apuo *AuthProvidersUpdateOne) SetClientSecretEncrypted(b []byte) *AuthProvidersUpdateOne {
-	apuo.mutation.SetClientSecretEncrypted(b)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetClientSecretEncrypted(v []byte) *AuthProvidersUpdateOne {
+	_u.mutation.SetClientSecretEncrypted(v)
+	return _u
 }
 
 // SetScopes sets the "scopes" field.
-func (apuo *AuthProvidersUpdateOne) SetScopes(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetScopes(s)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetScopes(v string) *AuthProvidersUpdateOne {
+	_u.mutation.SetScopes(v)
+	return _u
 }
 
 // SetNillableScopes sets the "scopes" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableScopes(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetScopes(*s)
+func (_u *AuthProvidersUpdateOne) SetNillableScopes(v *string) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetScopes(*v)
 	}
-	return apuo
+	return _u
 }
 
 // SetRedirectURI sets the "redirect_uri" field.
-func (apuo *AuthProvidersUpdateOne) SetRedirectURI(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetRedirectURI(s)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetRedirectURI(v string) *AuthProvidersUpdateOne {
+	_u.mutation.SetRedirectURI(v)
+	return _u
 }
 
 // SetNillableRedirectURI sets the "redirect_uri" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableRedirectURI(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetRedirectURI(*s)
+func (_u *AuthProvidersUpdateOne) SetNillableRedirectURI(v *string) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetRedirectURI(*v)
 	}
-	return apuo
+	return _u
 }
 
 // SetIssuer sets the "issuer" field.
-func (apuo *AuthProvidersUpdateOne) SetIssuer(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetIssuer(s)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetIssuer(v string) *AuthProvidersUpdateOne {
+	_u.mutation.SetIssuer(v)
+	return _u
 }
 
 // SetNillableIssuer sets the "issuer" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableIssuer(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetIssuer(*s)
+func (_u *AuthProvidersUpdateOne) SetNillableIssuer(v *string) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetIssuer(*v)
 	}
-	return apuo
+	return _u
 }
 
 // SetAuthorizationEndpoint sets the "authorization_endpoint" field.
-func (apuo *AuthProvidersUpdateOne) SetAuthorizationEndpoint(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetAuthorizationEndpoint(s)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetAuthorizationEndpoint(v string) *AuthProvidersUpdateOne {
+	_u.mutation.SetAuthorizationEndpoint(v)
+	return _u
 }
 
 // SetNillableAuthorizationEndpoint sets the "authorization_endpoint" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableAuthorizationEndpoint(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetAuthorizationEndpoint(*s)
+func (_u *AuthProvidersUpdateOne) SetNillableAuthorizationEndpoint(v *string) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetAuthorizationEndpoint(*v)
 	}
-	return apuo
+	return _u
 }
 
 // SetTokenEndpoint sets the "token_endpoint" field.
-func (apuo *AuthProvidersUpdateOne) SetTokenEndpoint(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetTokenEndpoint(s)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetTokenEndpoint(v string) *AuthProvidersUpdateOne {
+	_u.mutation.SetTokenEndpoint(v)
+	return _u
 }
 
 // SetNillableTokenEndpoint sets the "token_endpoint" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableTokenEndpoint(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetTokenEndpoint(*s)
+func (_u *AuthProvidersUpdateOne) SetNillableTokenEndpoint(v *string) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetTokenEndpoint(*v)
 	}
-	return apuo
+	return _u
 }
 
 // SetUserinfoEndpoint sets the "userinfo_endpoint" field.
-func (apuo *AuthProvidersUpdateOne) SetUserinfoEndpoint(s string) *AuthProvidersUpdateOne {
-	apuo.mutation.SetUserinfoEndpoint(s)
-	return apuo
+func (_u *AuthProvidersUpdateOne) SetUserinfoEndpoint(v string) *AuthProvidersUpdateOne {
+	_u.mutation.SetUserinfoEndpoint(v)
+	return _u
 }
 
 // SetNillableUserinfoEndpoint sets the "userinfo_endpoint" field if the given value is not nil.
-func (apuo *AuthProvidersUpdateOne) SetNillableUserinfoEndpoint(s *string) *AuthProvidersUpdateOne {
-	if s != nil {
-		apuo.SetUserinfoEndpoint(*s)
+func (_u *AuthProvidersUpdateOne) SetNillableUserinfoEndpoint(v *string) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetUserinfoEndpoint(*v)
 	}
-	return apuo
+	return _u
 }
 
 // Mutation returns the AuthProvidersMutation object of the builder.
-func (apuo *AuthProvidersUpdateOne) Mutation() *AuthProvidersMutation {
-	return apuo.mutation
+func (_u *AuthProvidersUpdateOne) Mutation() *AuthProvidersMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the AuthProvidersUpdate builder.
-func (apuo *AuthProvidersUpdateOne) Where(ps ...predicate.AuthProviders) *AuthProvidersUpdateOne {
-	apuo.mutation.Where(ps...)
-	return apuo
+func (_u *AuthProvidersUpdateOne) Where(ps ...predicate.AuthProviders) *AuthProvidersUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (apuo *AuthProvidersUpdateOne) Select(field string, fields ...string) *AuthProvidersUpdateOne {
-	apuo.fields = append([]string{field}, fields...)
-	return apuo
+func (_u *AuthProvidersUpdateOne) Select(field string, fields ...string) *AuthProvidersUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated AuthProviders entity.
-func (apuo *AuthProvidersUpdateOne) Save(ctx context.Context) (*AuthProviders, error) {
-	apuo.defaults()
-	return withHooks(ctx, apuo.sqlSave, apuo.mutation, apuo.hooks)
+func (_u *AuthProvidersUpdateOne) Save(ctx context.Context) (*AuthProviders, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (apuo *AuthProvidersUpdateOne) SaveX(ctx context.Context) *AuthProviders {
-	node, err := apuo.Save(ctx)
+func (_u *AuthProvidersUpdateOne) SaveX(ctx context.Context) *AuthProviders {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -531,29 +531,29 @@ func (apuo *AuthProvidersUpdateOne) SaveX(ctx context.Context) *AuthProviders {
 }
 
 // Exec executes the query on the entity.
-func (apuo *AuthProvidersUpdateOne) Exec(ctx context.Context) error {
-	_, err := apuo.Save(ctx)
+func (_u *AuthProvidersUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (apuo *AuthProvidersUpdateOne) ExecX(ctx context.Context) {
-	if err := apuo.Exec(ctx); err != nil {
+func (_u *AuthProvidersUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (apuo *AuthProvidersUpdateOne) defaults() {
-	if _, ok := apuo.mutation.UpdatedAt(); !ok {
+func (_u *AuthProvidersUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := authproviders.UpdateDefaultUpdatedAt()
-		apuo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (apuo *AuthProvidersUpdateOne) check() error {
-	if v, ok := apuo.mutation.GetType(); ok {
+func (_u *AuthProvidersUpdateOne) check() error {
+	if v, ok := _u.mutation.GetType(); ok {
 		if err := authproviders.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.type": %w`, err)}
 		}
@@ -561,17 +561,17 @@ func (apuo *AuthProvidersUpdateOne) check() error {
 	return nil
 }
 
-func (apuo *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthProviders, err error) {
-	if err := apuo.check(); err != nil {
+func (_u *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthProviders, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(authproviders.Table, authproviders.Columns, sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt))
-	id, ok := apuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "AuthProviders.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := apuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, authproviders.FieldID)
 		for _, f := range fields {
@@ -583,59 +583,59 @@ func (apuo *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthPro
 			}
 		}
 	}
-	if ps := apuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := apuo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(authproviders.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := apuo.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(authproviders.FieldDeletedAt, field.TypeTime, value)
 	}
-	if apuo.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(authproviders.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := apuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeString, value)
 	}
-	if value, ok := apuo.mutation.GetType(); ok {
+	if value, ok := _u.mutation.GetType(); ok {
 		_spec.SetField(authproviders.FieldType, field.TypeEnum, value)
 	}
-	if value, ok := apuo.mutation.ClientID(); ok {
+	if value, ok := _u.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
 	}
-	if value, ok := apuo.mutation.Enabled(); ok {
+	if value, ok := _u.mutation.Enabled(); ok {
 		_spec.SetField(authproviders.FieldEnabled, field.TypeBool, value)
 	}
-	if value, ok := apuo.mutation.ClientSecretEncrypted(); ok {
+	if value, ok := _u.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeBytes, value)
 	}
-	if value, ok := apuo.mutation.Scopes(); ok {
+	if value, ok := _u.mutation.Scopes(); ok {
 		_spec.SetField(authproviders.FieldScopes, field.TypeString, value)
 	}
-	if value, ok := apuo.mutation.RedirectURI(); ok {
+	if value, ok := _u.mutation.RedirectURI(); ok {
 		_spec.SetField(authproviders.FieldRedirectURI, field.TypeString, value)
 	}
-	if value, ok := apuo.mutation.Issuer(); ok {
+	if value, ok := _u.mutation.Issuer(); ok {
 		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
 	}
-	if value, ok := apuo.mutation.AuthorizationEndpoint(); ok {
+	if value, ok := _u.mutation.AuthorizationEndpoint(); ok {
 		_spec.SetField(authproviders.FieldAuthorizationEndpoint, field.TypeString, value)
 	}
-	if value, ok := apuo.mutation.TokenEndpoint(); ok {
+	if value, ok := _u.mutation.TokenEndpoint(); ok {
 		_spec.SetField(authproviders.FieldTokenEndpoint, field.TypeString, value)
 	}
-	if value, ok := apuo.mutation.UserinfoEndpoint(); ok {
+	if value, ok := _u.mutation.UserinfoEndpoint(); ok {
 		_spec.SetField(authproviders.FieldUserinfoEndpoint, field.TypeString, value)
 	}
-	_node = &AuthProviders{config: apuo.config}
+	_node = &AuthProviders{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, apuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{authproviders.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -643,6 +643,6 @@ func (apuo *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthPro
 		}
 		return nil, err
 	}
-	apuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

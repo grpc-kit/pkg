@@ -20,56 +20,56 @@ type GroupMenusDelete struct {
 }
 
 // Where appends a list predicates to the GroupMenusDelete builder.
-func (gmd *GroupMenusDelete) Where(ps ...predicate.GroupMenus) *GroupMenusDelete {
-	gmd.mutation.Where(ps...)
-	return gmd
+func (_d *GroupMenusDelete) Where(ps ...predicate.GroupMenus) *GroupMenusDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (gmd *GroupMenusDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, gmd.sqlExec, gmd.mutation, gmd.hooks)
+func (_d *GroupMenusDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gmd *GroupMenusDelete) ExecX(ctx context.Context) int {
-	n, err := gmd.Exec(ctx)
+func (_d *GroupMenusDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (gmd *GroupMenusDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *GroupMenusDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(groupmenus.Table, sqlgraph.NewFieldSpec(groupmenus.FieldID, field.TypeInt))
-	if ps := gmd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, gmd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	gmd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // GroupMenusDeleteOne is the builder for deleting a single GroupMenus entity.
 type GroupMenusDeleteOne struct {
-	gmd *GroupMenusDelete
+	_d *GroupMenusDelete
 }
 
 // Where appends a list predicates to the GroupMenusDelete builder.
-func (gmdo *GroupMenusDeleteOne) Where(ps ...predicate.GroupMenus) *GroupMenusDeleteOne {
-	gmdo.gmd.mutation.Where(ps...)
-	return gmdo
+func (_d *GroupMenusDeleteOne) Where(ps ...predicate.GroupMenus) *GroupMenusDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (gmdo *GroupMenusDeleteOne) Exec(ctx context.Context) error {
-	n, err := gmdo.gmd.Exec(ctx)
+func (_d *GroupMenusDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (gmdo *GroupMenusDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gmdo *GroupMenusDeleteOne) ExecX(ctx context.Context) {
-	if err := gmdo.Exec(ctx); err != nil {
+func (_d *GroupMenusDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

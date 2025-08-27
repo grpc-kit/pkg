@@ -23,65 +23,65 @@ type DemoUpdate struct {
 }
 
 // Where appends a list predicates to the DemoUpdate builder.
-func (du *DemoUpdate) Where(ps ...predicate.Demo) *DemoUpdate {
-	du.mutation.Where(ps...)
-	return du
+func (_u *DemoUpdate) Where(ps ...predicate.Demo) *DemoUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (du *DemoUpdate) SetUpdatedAt(t time.Time) *DemoUpdate {
-	du.mutation.SetUpdatedAt(t)
-	return du
+func (_u *DemoUpdate) SetUpdatedAt(v time.Time) *DemoUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (du *DemoUpdate) SetDeletedAt(t time.Time) *DemoUpdate {
-	du.mutation.SetDeletedAt(t)
-	return du
+func (_u *DemoUpdate) SetDeletedAt(v time.Time) *DemoUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (du *DemoUpdate) SetNillableDeletedAt(t *time.Time) *DemoUpdate {
-	if t != nil {
-		du.SetDeletedAt(*t)
+func (_u *DemoUpdate) SetNillableDeletedAt(v *time.Time) *DemoUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return du
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (du *DemoUpdate) ClearDeletedAt() *DemoUpdate {
-	du.mutation.ClearDeletedAt()
-	return du
+func (_u *DemoUpdate) ClearDeletedAt() *DemoUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetName sets the "name" field.
-func (du *DemoUpdate) SetName(s string) *DemoUpdate {
-	du.mutation.SetName(s)
-	return du
+func (_u *DemoUpdate) SetName(v string) *DemoUpdate {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (du *DemoUpdate) SetNillableName(s *string) *DemoUpdate {
-	if s != nil {
-		du.SetName(*s)
+func (_u *DemoUpdate) SetNillableName(v *string) *DemoUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return du
+	return _u
 }
 
 // Mutation returns the DemoMutation object of the builder.
-func (du *DemoUpdate) Mutation() *DemoMutation {
-	return du.mutation
+func (_u *DemoUpdate) Mutation() *DemoMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (du *DemoUpdate) Save(ctx context.Context) (int, error) {
-	du.defaults()
-	return withHooks(ctx, du.sqlSave, du.mutation, du.hooks)
+func (_u *DemoUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (du *DemoUpdate) SaveX(ctx context.Context) int {
-	affected, err := du.Save(ctx)
+func (_u *DemoUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -89,48 +89,48 @@ func (du *DemoUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (du *DemoUpdate) Exec(ctx context.Context) error {
-	_, err := du.Save(ctx)
+func (_u *DemoUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (du *DemoUpdate) ExecX(ctx context.Context) {
-	if err := du.Exec(ctx); err != nil {
+func (_u *DemoUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (du *DemoUpdate) defaults() {
-	if _, ok := du.mutation.UpdatedAt(); !ok {
+func (_u *DemoUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := demo.UpdateDefaultUpdatedAt()
-		du.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (du *DemoUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *DemoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(demo.Table, demo.Columns, sqlgraph.NewFieldSpec(demo.FieldID, field.TypeInt))
-	if ps := du.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := du.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(demo.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := du.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(demo.FieldDeletedAt, field.TypeTime, value)
 	}
-	if du.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(demo.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := du.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(demo.FieldName, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, du.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{demo.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -138,8 +138,8 @@ func (du *DemoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	du.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // DemoUpdateOne is the builder for updating a single Demo entity.
@@ -151,72 +151,72 @@ type DemoUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (duo *DemoUpdateOne) SetUpdatedAt(t time.Time) *DemoUpdateOne {
-	duo.mutation.SetUpdatedAt(t)
-	return duo
+func (_u *DemoUpdateOne) SetUpdatedAt(v time.Time) *DemoUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (duo *DemoUpdateOne) SetDeletedAt(t time.Time) *DemoUpdateOne {
-	duo.mutation.SetDeletedAt(t)
-	return duo
+func (_u *DemoUpdateOne) SetDeletedAt(v time.Time) *DemoUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (duo *DemoUpdateOne) SetNillableDeletedAt(t *time.Time) *DemoUpdateOne {
-	if t != nil {
-		duo.SetDeletedAt(*t)
+func (_u *DemoUpdateOne) SetNillableDeletedAt(v *time.Time) *DemoUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return duo
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (duo *DemoUpdateOne) ClearDeletedAt() *DemoUpdateOne {
-	duo.mutation.ClearDeletedAt()
-	return duo
+func (_u *DemoUpdateOne) ClearDeletedAt() *DemoUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetName sets the "name" field.
-func (duo *DemoUpdateOne) SetName(s string) *DemoUpdateOne {
-	duo.mutation.SetName(s)
-	return duo
+func (_u *DemoUpdateOne) SetName(v string) *DemoUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (duo *DemoUpdateOne) SetNillableName(s *string) *DemoUpdateOne {
-	if s != nil {
-		duo.SetName(*s)
+func (_u *DemoUpdateOne) SetNillableName(v *string) *DemoUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return duo
+	return _u
 }
 
 // Mutation returns the DemoMutation object of the builder.
-func (duo *DemoUpdateOne) Mutation() *DemoMutation {
-	return duo.mutation
+func (_u *DemoUpdateOne) Mutation() *DemoMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the DemoUpdate builder.
-func (duo *DemoUpdateOne) Where(ps ...predicate.Demo) *DemoUpdateOne {
-	duo.mutation.Where(ps...)
-	return duo
+func (_u *DemoUpdateOne) Where(ps ...predicate.Demo) *DemoUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (duo *DemoUpdateOne) Select(field string, fields ...string) *DemoUpdateOne {
-	duo.fields = append([]string{field}, fields...)
-	return duo
+func (_u *DemoUpdateOne) Select(field string, fields ...string) *DemoUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Demo entity.
-func (duo *DemoUpdateOne) Save(ctx context.Context) (*Demo, error) {
-	duo.defaults()
-	return withHooks(ctx, duo.sqlSave, duo.mutation, duo.hooks)
+func (_u *DemoUpdateOne) Save(ctx context.Context) (*Demo, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (duo *DemoUpdateOne) SaveX(ctx context.Context) *Demo {
-	node, err := duo.Save(ctx)
+func (_u *DemoUpdateOne) SaveX(ctx context.Context) *Demo {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -224,34 +224,34 @@ func (duo *DemoUpdateOne) SaveX(ctx context.Context) *Demo {
 }
 
 // Exec executes the query on the entity.
-func (duo *DemoUpdateOne) Exec(ctx context.Context) error {
-	_, err := duo.Save(ctx)
+func (_u *DemoUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (duo *DemoUpdateOne) ExecX(ctx context.Context) {
-	if err := duo.Exec(ctx); err != nil {
+func (_u *DemoUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (duo *DemoUpdateOne) defaults() {
-	if _, ok := duo.mutation.UpdatedAt(); !ok {
+func (_u *DemoUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := demo.UpdateDefaultUpdatedAt()
-		duo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (duo *DemoUpdateOne) sqlSave(ctx context.Context) (_node *Demo, err error) {
+func (_u *DemoUpdateOne) sqlSave(ctx context.Context) (_node *Demo, err error) {
 	_spec := sqlgraph.NewUpdateSpec(demo.Table, demo.Columns, sqlgraph.NewFieldSpec(demo.FieldID, field.TypeInt))
-	id, ok := duo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "Demo.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := duo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, demo.FieldID)
 		for _, f := range fields {
@@ -263,29 +263,29 @@ func (duo *DemoUpdateOne) sqlSave(ctx context.Context) (_node *Demo, err error) 
 			}
 		}
 	}
-	if ps := duo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := duo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(demo.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := duo.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(demo.FieldDeletedAt, field.TypeTime, value)
 	}
-	if duo.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(demo.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := duo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(demo.FieldName, field.TypeString, value)
 	}
-	_node = &Demo{config: duo.config}
+	_node = &Demo{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, duo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{demo.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -293,6 +293,6 @@ func (duo *DemoUpdateOne) sqlSave(ctx context.Context) (_node *Demo, err error) 
 		}
 		return nil, err
 	}
-	duo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

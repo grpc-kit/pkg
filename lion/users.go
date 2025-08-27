@@ -88,7 +88,7 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Users fields.
-func (u *Users) assignValues(columns []string, values []any) error {
+func (_m *Users) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -99,151 +99,151 @@ func (u *Users) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			u.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case users.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				u.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case users.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				u.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case users.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				u.DeletedAt = new(time.Time)
-				*u.DeletedAt = value.Time
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case users.FieldPreferredUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field preferred_username", values[i])
 			} else if value.Valid {
-				u.PreferredUsername = value.String
+				_m.PreferredUsername = value.String
 			}
 		case users.FieldRealnameEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field realname_encrypted", values[i])
 			} else if value != nil {
-				u.RealnameEncrypted = *value
+				_m.RealnameEncrypted = *value
 			}
 		case users.FieldIdcardEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field idcard_encrypted", values[i])
 			} else if value != nil {
-				u.IdcardEncrypted = *value
+				_m.IdcardEncrypted = *value
 			}
 		case users.FieldIdcardHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field idcard_hash", values[i])
 			} else if value.Valid {
-				u.IdcardHash = new(string)
-				*u.IdcardHash = value.String
+				_m.IdcardHash = new(string)
+				*_m.IdcardHash = value.String
 			}
 		case users.FieldNickname:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field nickname", values[i])
 			} else if value.Valid {
-				u.Nickname = value.String
+				_m.Nickname = value.String
 			}
 		case users.FieldProfile:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field profile", values[i])
 			} else if value.Valid {
-				u.Profile = new(string)
-				*u.Profile = value.String
+				_m.Profile = new(string)
+				*_m.Profile = value.String
 			}
 		case users.FieldPicture:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field picture", values[i])
 			} else if value.Valid {
-				u.Picture = new(string)
-				*u.Picture = value.String
+				_m.Picture = new(string)
+				*_m.Picture = value.String
 			}
 		case users.FieldWebsite:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field website", values[i])
 			} else if value.Valid {
-				u.Website = new(string)
-				*u.Website = value.String
+				_m.Website = new(string)
+				*_m.Website = value.String
 			}
 		case users.FieldEmailEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field email_encrypted", values[i])
 			} else if value != nil {
-				u.EmailEncrypted = *value
+				_m.EmailEncrypted = *value
 			}
 		case users.FieldEmailHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field email_hash", values[i])
 			} else if value.Valid {
-				u.EmailHash = new(string)
-				*u.EmailHash = value.String
+				_m.EmailHash = new(string)
+				*_m.EmailHash = value.String
 			}
 		case users.FieldEmailVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field email_verified", values[i])
 			} else if value.Valid {
-				u.EmailVerified = value.Bool
+				_m.EmailVerified = value.Bool
 			}
 		case users.FieldGender:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field gender", values[i])
 			} else if value.Valid {
-				u.Gender = users.Gender(value.String)
+				_m.Gender = users.Gender(value.String)
 			}
 		case users.FieldBirthdate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field birthdate", values[i])
 			} else if value.Valid {
-				u.Birthdate = new(time.Time)
-				*u.Birthdate = value.Time
+				_m.Birthdate = new(time.Time)
+				*_m.Birthdate = value.Time
 			}
 		case users.FieldZoneinfo:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field zoneinfo", values[i])
 			} else if value.Valid {
-				u.Zoneinfo = new(string)
-				*u.Zoneinfo = value.String
+				_m.Zoneinfo = new(string)
+				*_m.Zoneinfo = value.String
 			}
 		case users.FieldLocale:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field locale", values[i])
 			} else if value.Valid {
-				u.Locale = new(string)
-				*u.Locale = value.String
+				_m.Locale = new(string)
+				*_m.Locale = value.String
 			}
 		case users.FieldPhoneNumberEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field phone_number_encrypted", values[i])
 			} else if value != nil {
-				u.PhoneNumberEncrypted = *value
+				_m.PhoneNumberEncrypted = *value
 			}
 		case users.FieldPhoneNumberHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field phone_number_hash", values[i])
 			} else if value.Valid {
-				u.PhoneNumberHash = new(string)
-				*u.PhoneNumberHash = value.String
+				_m.PhoneNumberHash = new(string)
+				*_m.PhoneNumberHash = value.String
 			}
 		case users.FieldPhoneNumberVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field phone_number_verified", values[i])
 			} else if value.Valid {
-				u.PhoneNumberVerified = value.Bool
+				_m.PhoneNumberVerified = value.Bool
 			}
 		case users.FieldAddressEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field address_encrypted", values[i])
 			} else if value != nil {
-				u.AddressEncrypted = *value
+				_m.AddressEncrypted = *value
 			}
 		default:
-			u.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -251,111 +251,111 @@ func (u *Users) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Users.
 // This includes values selected through modifiers, order, etc.
-func (u *Users) Value(name string) (ent.Value, error) {
-	return u.selectValues.Get(name)
+func (_m *Users) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Users.
 // Note that you need to call Users.Unwrap() before calling this method if this Users
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (u *Users) Update() *UsersUpdateOne {
-	return NewUsersClient(u.config).UpdateOne(u)
+func (_m *Users) Update() *UsersUpdateOne {
+	return NewUsersClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Users entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (u *Users) Unwrap() *Users {
-	_tx, ok := u.config.driver.(*txDriver)
+func (_m *Users) Unwrap() *Users {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("lion: Users is not a transactional entity")
 	}
-	u.config.driver = _tx.drv
-	return u
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (u *Users) String() string {
+func (_m *Users) String() string {
 	var builder strings.Builder
 	builder.WriteString("Users(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := u.DeletedAt; v != nil {
+	if v := _m.DeletedAt; v != nil {
 		builder.WriteString("deleted_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("preferred_username=")
-	builder.WriteString(u.PreferredUsername)
+	builder.WriteString(_m.PreferredUsername)
 	builder.WriteString(", ")
 	builder.WriteString("realname_encrypted=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("idcard_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	if v := u.IdcardHash; v != nil {
+	if v := _m.IdcardHash; v != nil {
 		builder.WriteString("idcard_hash=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
-	builder.WriteString(u.Nickname)
+	builder.WriteString(_m.Nickname)
 	builder.WriteString(", ")
-	if v := u.Profile; v != nil {
+	if v := _m.Profile; v != nil {
 		builder.WriteString("profile=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	if v := u.Picture; v != nil {
+	if v := _m.Picture; v != nil {
 		builder.WriteString("picture=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	if v := u.Website; v != nil {
+	if v := _m.Website; v != nil {
 		builder.WriteString("website=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("email_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	if v := u.EmailHash; v != nil {
+	if v := _m.EmailHash; v != nil {
 		builder.WriteString("email_hash=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("email_verified=")
-	builder.WriteString(fmt.Sprintf("%v", u.EmailVerified))
+	builder.WriteString(fmt.Sprintf("%v", _m.EmailVerified))
 	builder.WriteString(", ")
 	builder.WriteString("gender=")
-	builder.WriteString(fmt.Sprintf("%v", u.Gender))
+	builder.WriteString(fmt.Sprintf("%v", _m.Gender))
 	builder.WriteString(", ")
-	if v := u.Birthdate; v != nil {
+	if v := _m.Birthdate; v != nil {
 		builder.WriteString("birthdate=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := u.Zoneinfo; v != nil {
+	if v := _m.Zoneinfo; v != nil {
 		builder.WriteString("zoneinfo=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
-	if v := u.Locale; v != nil {
+	if v := _m.Locale; v != nil {
 		builder.WriteString("locale=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("phone_number_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	if v := u.PhoneNumberHash; v != nil {
+	if v := _m.PhoneNumberHash; v != nil {
 		builder.WriteString("phone_number_hash=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("phone_number_verified=")
-	builder.WriteString(fmt.Sprintf("%v", u.PhoneNumberVerified))
+	builder.WriteString(fmt.Sprintf("%v", _m.PhoneNumberVerified))
 	builder.WriteString(", ")
 	builder.WriteString("address_encrypted=<sensitive>")
 	builder.WriteByte(')')

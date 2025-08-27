@@ -72,7 +72,7 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the AuthProviders fields.
-func (ap *AuthProviders) assignValues(columns []string, values []any) error {
+func (_m *AuthProviders) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -83,94 +83,94 @@ func (ap *AuthProviders) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			ap.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case authproviders.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ap.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case authproviders.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				ap.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case authproviders.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				ap.DeletedAt = new(time.Time)
-				*ap.DeletedAt = value.Time
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case authproviders.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				ap.Name = value.String
+				_m.Name = value.String
 			}
 		case authproviders.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				ap.Type = authproviders.Type(value.String)
+				_m.Type = authproviders.Type(value.String)
 			}
 		case authproviders.FieldClientID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field client_id", values[i])
 			} else if value.Valid {
-				ap.ClientID = value.String
+				_m.ClientID = value.String
 			}
 		case authproviders.FieldEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field enabled", values[i])
 			} else if value.Valid {
-				ap.Enabled = value.Bool
+				_m.Enabled = value.Bool
 			}
 		case authproviders.FieldClientSecretEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field client_secret_encrypted", values[i])
 			} else if value != nil {
-				ap.ClientSecretEncrypted = *value
+				_m.ClientSecretEncrypted = *value
 			}
 		case authproviders.FieldScopes:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field scopes", values[i])
 			} else if value.Valid {
-				ap.Scopes = value.String
+				_m.Scopes = value.String
 			}
 		case authproviders.FieldRedirectURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field redirect_uri", values[i])
 			} else if value.Valid {
-				ap.RedirectURI = value.String
+				_m.RedirectURI = value.String
 			}
 		case authproviders.FieldIssuer:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field issuer", values[i])
 			} else if value.Valid {
-				ap.Issuer = value.String
+				_m.Issuer = value.String
 			}
 		case authproviders.FieldAuthorizationEndpoint:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field authorization_endpoint", values[i])
 			} else if value.Valid {
-				ap.AuthorizationEndpoint = value.String
+				_m.AuthorizationEndpoint = value.String
 			}
 		case authproviders.FieldTokenEndpoint:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field token_endpoint", values[i])
 			} else if value.Valid {
-				ap.TokenEndpoint = value.String
+				_m.TokenEndpoint = value.String
 			}
 		case authproviders.FieldUserinfoEndpoint:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field userinfo_endpoint", values[i])
 			} else if value.Valid {
-				ap.UserinfoEndpoint = value.String
+				_m.UserinfoEndpoint = value.String
 			}
 		default:
-			ap.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -178,75 +178,75 @@ func (ap *AuthProviders) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the AuthProviders.
 // This includes values selected through modifiers, order, etc.
-func (ap *AuthProviders) Value(name string) (ent.Value, error) {
-	return ap.selectValues.Get(name)
+func (_m *AuthProviders) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this AuthProviders.
 // Note that you need to call AuthProviders.Unwrap() before calling this method if this AuthProviders
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ap *AuthProviders) Update() *AuthProvidersUpdateOne {
-	return NewAuthProvidersClient(ap.config).UpdateOne(ap)
+func (_m *AuthProviders) Update() *AuthProvidersUpdateOne {
+	return NewAuthProvidersClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the AuthProviders entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ap *AuthProviders) Unwrap() *AuthProviders {
-	_tx, ok := ap.config.driver.(*txDriver)
+func (_m *AuthProviders) Unwrap() *AuthProviders {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("lion: AuthProviders is not a transactional entity")
 	}
-	ap.config.driver = _tx.drv
-	return ap
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ap *AuthProviders) String() string {
+func (_m *AuthProviders) String() string {
 	var builder strings.Builder
 	builder.WriteString("AuthProviders(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ap.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(ap.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(ap.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := ap.DeletedAt; v != nil {
+	if v := _m.DeletedAt; v != nil {
 		builder.WriteString("deleted_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(ap.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", ap.Type))
+	builder.WriteString(fmt.Sprintf("%v", _m.Type))
 	builder.WriteString(", ")
 	builder.WriteString("client_id=")
-	builder.WriteString(ap.ClientID)
+	builder.WriteString(_m.ClientID)
 	builder.WriteString(", ")
 	builder.WriteString("enabled=")
-	builder.WriteString(fmt.Sprintf("%v", ap.Enabled))
+	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))
 	builder.WriteString(", ")
 	builder.WriteString("client_secret_encrypted=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("scopes=")
-	builder.WriteString(ap.Scopes)
+	builder.WriteString(_m.Scopes)
 	builder.WriteString(", ")
 	builder.WriteString("redirect_uri=")
-	builder.WriteString(ap.RedirectURI)
+	builder.WriteString(_m.RedirectURI)
 	builder.WriteString(", ")
 	builder.WriteString("issuer=")
-	builder.WriteString(ap.Issuer)
+	builder.WriteString(_m.Issuer)
 	builder.WriteString(", ")
 	builder.WriteString("authorization_endpoint=")
-	builder.WriteString(ap.AuthorizationEndpoint)
+	builder.WriteString(_m.AuthorizationEndpoint)
 	builder.WriteString(", ")
 	builder.WriteString("token_endpoint=")
-	builder.WriteString(ap.TokenEndpoint)
+	builder.WriteString(_m.TokenEndpoint)
 	builder.WriteString(", ")
 	builder.WriteString("userinfo_endpoint=")
-	builder.WriteString(ap.UserinfoEndpoint)
+	builder.WriteString(_m.UserinfoEndpoint)
 	builder.WriteByte(')')
 	return builder.String()
 }

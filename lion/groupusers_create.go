@@ -21,73 +21,73 @@ type GroupUsersCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (guc *GroupUsersCreate) SetCreatedAt(t time.Time) *GroupUsersCreate {
-	guc.mutation.SetCreatedAt(t)
-	return guc
+func (_c *GroupUsersCreate) SetCreatedAt(v time.Time) *GroupUsersCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (guc *GroupUsersCreate) SetNillableCreatedAt(t *time.Time) *GroupUsersCreate {
-	if t != nil {
-		guc.SetCreatedAt(*t)
+func (_c *GroupUsersCreate) SetNillableCreatedAt(v *time.Time) *GroupUsersCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return guc
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (guc *GroupUsersCreate) SetUpdatedAt(t time.Time) *GroupUsersCreate {
-	guc.mutation.SetUpdatedAt(t)
-	return guc
+func (_c *GroupUsersCreate) SetUpdatedAt(v time.Time) *GroupUsersCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (guc *GroupUsersCreate) SetNillableUpdatedAt(t *time.Time) *GroupUsersCreate {
-	if t != nil {
-		guc.SetUpdatedAt(*t)
+func (_c *GroupUsersCreate) SetNillableUpdatedAt(v *time.Time) *GroupUsersCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
-	return guc
+	return _c
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (guc *GroupUsersCreate) SetDeletedAt(t time.Time) *GroupUsersCreate {
-	guc.mutation.SetDeletedAt(t)
-	return guc
+func (_c *GroupUsersCreate) SetDeletedAt(v time.Time) *GroupUsersCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (guc *GroupUsersCreate) SetNillableDeletedAt(t *time.Time) *GroupUsersCreate {
-	if t != nil {
-		guc.SetDeletedAt(*t)
+func (_c *GroupUsersCreate) SetNillableDeletedAt(v *time.Time) *GroupUsersCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
-	return guc
+	return _c
 }
 
 // SetGroupID sets the "group_id" field.
-func (guc *GroupUsersCreate) SetGroupID(i int) *GroupUsersCreate {
-	guc.mutation.SetGroupID(i)
-	return guc
+func (_c *GroupUsersCreate) SetGroupID(v int) *GroupUsersCreate {
+	_c.mutation.SetGroupID(v)
+	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (guc *GroupUsersCreate) SetUserID(i int) *GroupUsersCreate {
-	guc.mutation.SetUserID(i)
-	return guc
+func (_c *GroupUsersCreate) SetUserID(v int) *GroupUsersCreate {
+	_c.mutation.SetUserID(v)
+	return _c
 }
 
 // Mutation returns the GroupUsersMutation object of the builder.
-func (guc *GroupUsersCreate) Mutation() *GroupUsersMutation {
-	return guc.mutation
+func (_c *GroupUsersCreate) Mutation() *GroupUsersMutation {
+	return _c.mutation
 }
 
 // Save creates the GroupUsers in the database.
-func (guc *GroupUsersCreate) Save(ctx context.Context) (*GroupUsers, error) {
-	guc.defaults()
-	return withHooks(ctx, guc.sqlSave, guc.mutation, guc.hooks)
+func (_c *GroupUsersCreate) Save(ctx context.Context) (*GroupUsers, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (guc *GroupUsersCreate) SaveX(ctx context.Context) *GroupUsers {
-	v, err := guc.Save(ctx)
+func (_c *GroupUsersCreate) SaveX(ctx context.Context) *GroupUsers {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -95,50 +95,50 @@ func (guc *GroupUsersCreate) SaveX(ctx context.Context) *GroupUsers {
 }
 
 // Exec executes the query.
-func (guc *GroupUsersCreate) Exec(ctx context.Context) error {
-	_, err := guc.Save(ctx)
+func (_c *GroupUsersCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (guc *GroupUsersCreate) ExecX(ctx context.Context) {
-	if err := guc.Exec(ctx); err != nil {
+func (_c *GroupUsersCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (guc *GroupUsersCreate) defaults() {
-	if _, ok := guc.mutation.CreatedAt(); !ok {
+func (_c *GroupUsersCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := groupusers.DefaultCreatedAt()
-		guc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := guc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := groupusers.DefaultUpdatedAt()
-		guc.mutation.SetUpdatedAt(v)
+		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (guc *GroupUsersCreate) check() error {
-	if _, ok := guc.mutation.CreatedAt(); !ok {
+func (_c *GroupUsersCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "GroupUsers.created_at"`)}
 	}
-	if _, ok := guc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "GroupUsers.updated_at"`)}
 	}
-	if _, ok := guc.mutation.GroupID(); !ok {
+	if _, ok := _c.mutation.GroupID(); !ok {
 		return &ValidationError{Name: "group_id", err: errors.New(`lion: missing required field "GroupUsers.group_id"`)}
 	}
-	if v, ok := guc.mutation.GroupID(); ok {
+	if v, ok := _c.mutation.GroupID(); ok {
 		if err := groupusers.GroupIDValidator(v); err != nil {
 			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "GroupUsers.group_id": %w`, err)}
 		}
 	}
-	if _, ok := guc.mutation.UserID(); !ok {
+	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "GroupUsers.user_id"`)}
 	}
-	if v, ok := guc.mutation.UserID(); ok {
+	if v, ok := _c.mutation.UserID(); ok {
 		if err := groupusers.UserIDValidator(v); err != nil {
 			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "GroupUsers.user_id": %w`, err)}
 		}
@@ -146,12 +146,12 @@ func (guc *GroupUsersCreate) check() error {
 	return nil
 }
 
-func (guc *GroupUsersCreate) sqlSave(ctx context.Context) (*GroupUsers, error) {
-	if err := guc.check(); err != nil {
+func (_c *GroupUsersCreate) sqlSave(ctx context.Context) (*GroupUsers, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := guc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, guc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -159,33 +159,33 @@ func (guc *GroupUsersCreate) sqlSave(ctx context.Context) (*GroupUsers, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	guc.mutation.id = &_node.ID
-	guc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (guc *GroupUsersCreate) createSpec() (*GroupUsers, *sqlgraph.CreateSpec) {
+func (_c *GroupUsersCreate) createSpec() (*GroupUsers, *sqlgraph.CreateSpec) {
 	var (
-		_node = &GroupUsers{config: guc.config}
+		_node = &GroupUsers{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(groupusers.Table, sqlgraph.NewFieldSpec(groupusers.FieldID, field.TypeInt))
 	)
-	if value, ok := guc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(groupusers.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := guc.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(groupusers.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := guc.mutation.DeletedAt(); ok {
+	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(groupusers.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := guc.mutation.GroupID(); ok {
+	if value, ok := _c.mutation.GroupID(); ok {
 		_spec.SetField(groupusers.FieldGroupID, field.TypeInt, value)
 		_node.GroupID = value
 	}
-	if value, ok := guc.mutation.UserID(); ok {
+	if value, ok := _c.mutation.UserID(); ok {
 		_spec.SetField(groupusers.FieldUserID, field.TypeInt, value)
 		_node.UserID = value
 	}
@@ -200,16 +200,16 @@ type GroupUsersCreateBulk struct {
 }
 
 // Save creates the GroupUsers entities in the database.
-func (gucb *GroupUsersCreateBulk) Save(ctx context.Context) ([]*GroupUsers, error) {
-	if gucb.err != nil {
-		return nil, gucb.err
+func (_c *GroupUsersCreateBulk) Save(ctx context.Context) ([]*GroupUsers, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(gucb.builders))
-	nodes := make([]*GroupUsers, len(gucb.builders))
-	mutators := make([]Mutator, len(gucb.builders))
-	for i := range gucb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*GroupUsers, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := gucb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupUsersMutation)
@@ -223,11 +223,11 @@ func (gucb *GroupUsersCreateBulk) Save(ctx context.Context) ([]*GroupUsers, erro
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, gucb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gucb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -251,7 +251,7 @@ func (gucb *GroupUsersCreateBulk) Save(ctx context.Context) ([]*GroupUsers, erro
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, gucb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -259,8 +259,8 @@ func (gucb *GroupUsersCreateBulk) Save(ctx context.Context) ([]*GroupUsers, erro
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gucb *GroupUsersCreateBulk) SaveX(ctx context.Context) []*GroupUsers {
-	v, err := gucb.Save(ctx)
+func (_c *GroupUsersCreateBulk) SaveX(ctx context.Context) []*GroupUsers {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -268,14 +268,14 @@ func (gucb *GroupUsersCreateBulk) SaveX(ctx context.Context) []*GroupUsers {
 }
 
 // Exec executes the query.
-func (gucb *GroupUsersCreateBulk) Exec(ctx context.Context) error {
-	_, err := gucb.Save(ctx)
+func (_c *GroupUsersCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gucb *GroupUsersCreateBulk) ExecX(ctx context.Context) {
-	if err := gucb.Exec(ctx); err != nil {
+func (_c *GroupUsersCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

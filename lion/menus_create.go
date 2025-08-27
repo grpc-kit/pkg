@@ -21,171 +21,171 @@ type MenusCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (mc *MenusCreate) SetCreatedAt(t time.Time) *MenusCreate {
-	mc.mutation.SetCreatedAt(t)
-	return mc
+func (_c *MenusCreate) SetCreatedAt(v time.Time) *MenusCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableCreatedAt(t *time.Time) *MenusCreate {
-	if t != nil {
-		mc.SetCreatedAt(*t)
+func (_c *MenusCreate) SetNillableCreatedAt(v *time.Time) *MenusCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return mc
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (mc *MenusCreate) SetUpdatedAt(t time.Time) *MenusCreate {
-	mc.mutation.SetUpdatedAt(t)
-	return mc
+func (_c *MenusCreate) SetUpdatedAt(v time.Time) *MenusCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableUpdatedAt(t *time.Time) *MenusCreate {
-	if t != nil {
-		mc.SetUpdatedAt(*t)
+func (_c *MenusCreate) SetNillableUpdatedAt(v *time.Time) *MenusCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
-	return mc
+	return _c
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (mc *MenusCreate) SetDeletedAt(t time.Time) *MenusCreate {
-	mc.mutation.SetDeletedAt(t)
-	return mc
+func (_c *MenusCreate) SetDeletedAt(v time.Time) *MenusCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableDeletedAt(t *time.Time) *MenusCreate {
-	if t != nil {
-		mc.SetDeletedAt(*t)
+func (_c *MenusCreate) SetNillableDeletedAt(v *time.Time) *MenusCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
-	return mc
+	return _c
 }
 
 // SetParentID sets the "parent_id" field.
-func (mc *MenusCreate) SetParentID(i int) *MenusCreate {
-	mc.mutation.SetParentID(i)
-	return mc
+func (_c *MenusCreate) SetParentID(v int) *MenusCreate {
+	_c.mutation.SetParentID(v)
+	return _c
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableParentID(i *int) *MenusCreate {
-	if i != nil {
-		mc.SetParentID(*i)
+func (_c *MenusCreate) SetNillableParentID(v *int) *MenusCreate {
+	if v != nil {
+		_c.SetParentID(*v)
 	}
-	return mc
+	return _c
 }
 
 // SetName sets the "name" field.
-func (mc *MenusCreate) SetName(s string) *MenusCreate {
-	mc.mutation.SetName(s)
-	return mc
+func (_c *MenusCreate) SetName(v string) *MenusCreate {
+	_c.mutation.SetName(v)
+	return _c
 }
 
 // SetPath sets the "path" field.
-func (mc *MenusCreate) SetPath(s string) *MenusCreate {
-	mc.mutation.SetPath(s)
-	return mc
+func (_c *MenusCreate) SetPath(v string) *MenusCreate {
+	_c.mutation.SetPath(v)
+	return _c
 }
 
 // SetLocale sets the "locale" field.
-func (mc *MenusCreate) SetLocale(s string) *MenusCreate {
-	mc.mutation.SetLocale(s)
-	return mc
+func (_c *MenusCreate) SetLocale(v string) *MenusCreate {
+	_c.mutation.SetLocale(v)
+	return _c
 }
 
 // SetNillableLocale sets the "locale" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableLocale(s *string) *MenusCreate {
-	if s != nil {
-		mc.SetLocale(*s)
+func (_c *MenusCreate) SetNillableLocale(v *string) *MenusCreate {
+	if v != nil {
+		_c.SetLocale(*v)
 	}
-	return mc
+	return _c
 }
 
 // SetIcon sets the "icon" field.
-func (mc *MenusCreate) SetIcon(s string) *MenusCreate {
-	mc.mutation.SetIcon(s)
-	return mc
+func (_c *MenusCreate) SetIcon(v string) *MenusCreate {
+	_c.mutation.SetIcon(v)
+	return _c
 }
 
 // SetNillableIcon sets the "icon" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableIcon(s *string) *MenusCreate {
-	if s != nil {
-		mc.SetIcon(*s)
+func (_c *MenusCreate) SetNillableIcon(v *string) *MenusCreate {
+	if v != nil {
+		_c.SetIcon(*v)
 	}
-	return mc
+	return _c
 }
 
 // SetSortWeight sets the "sort_weight" field.
-func (mc *MenusCreate) SetSortWeight(i int) *MenusCreate {
-	mc.mutation.SetSortWeight(i)
-	return mc
+func (_c *MenusCreate) SetSortWeight(v int) *MenusCreate {
+	_c.mutation.SetSortWeight(v)
+	return _c
 }
 
 // SetNillableSortWeight sets the "sort_weight" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableSortWeight(i *int) *MenusCreate {
-	if i != nil {
-		mc.SetSortWeight(*i)
+func (_c *MenusCreate) SetNillableSortWeight(v *int) *MenusCreate {
+	if v != nil {
+		_c.SetSortWeight(*v)
 	}
-	return mc
+	return _c
 }
 
 // SetEnabled sets the "enabled" field.
-func (mc *MenusCreate) SetEnabled(b bool) *MenusCreate {
-	mc.mutation.SetEnabled(b)
-	return mc
+func (_c *MenusCreate) SetEnabled(v bool) *MenusCreate {
+	_c.mutation.SetEnabled(v)
+	return _c
 }
 
 // SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableEnabled(b *bool) *MenusCreate {
-	if b != nil {
-		mc.SetEnabled(*b)
+func (_c *MenusCreate) SetNillableEnabled(v *bool) *MenusCreate {
+	if v != nil {
+		_c.SetEnabled(*v)
 	}
-	return mc
+	return _c
 }
 
 // SetHideInMenu sets the "hide_in_menu" field.
-func (mc *MenusCreate) SetHideInMenu(b bool) *MenusCreate {
-	mc.mutation.SetHideInMenu(b)
-	return mc
+func (_c *MenusCreate) SetHideInMenu(v bool) *MenusCreate {
+	_c.mutation.SetHideInMenu(v)
+	return _c
 }
 
 // SetNillableHideInMenu sets the "hide_in_menu" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableHideInMenu(b *bool) *MenusCreate {
-	if b != nil {
-		mc.SetHideInMenu(*b)
+func (_c *MenusCreate) SetNillableHideInMenu(v *bool) *MenusCreate {
+	if v != nil {
+		_c.SetHideInMenu(*v)
 	}
-	return mc
+	return _c
 }
 
 // SetHideChildrenInMenu sets the "hide_children_in_menu" field.
-func (mc *MenusCreate) SetHideChildrenInMenu(b bool) *MenusCreate {
-	mc.mutation.SetHideChildrenInMenu(b)
-	return mc
+func (_c *MenusCreate) SetHideChildrenInMenu(v bool) *MenusCreate {
+	_c.mutation.SetHideChildrenInMenu(v)
+	return _c
 }
 
 // SetNillableHideChildrenInMenu sets the "hide_children_in_menu" field if the given value is not nil.
-func (mc *MenusCreate) SetNillableHideChildrenInMenu(b *bool) *MenusCreate {
-	if b != nil {
-		mc.SetHideChildrenInMenu(*b)
+func (_c *MenusCreate) SetNillableHideChildrenInMenu(v *bool) *MenusCreate {
+	if v != nil {
+		_c.SetHideChildrenInMenu(*v)
 	}
-	return mc
+	return _c
 }
 
 // Mutation returns the MenusMutation object of the builder.
-func (mc *MenusCreate) Mutation() *MenusMutation {
-	return mc.mutation
+func (_c *MenusCreate) Mutation() *MenusMutation {
+	return _c.mutation
 }
 
 // Save creates the Menus in the database.
-func (mc *MenusCreate) Save(ctx context.Context) (*Menus, error) {
-	mc.defaults()
-	return withHooks(ctx, mc.sqlSave, mc.mutation, mc.hooks)
+func (_c *MenusCreate) Save(ctx context.Context) (*Menus, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (mc *MenusCreate) SaveX(ctx context.Context) *Menus {
-	v, err := mc.Save(ctx)
+func (_c *MenusCreate) SaveX(ctx context.Context) *Menus {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -193,122 +193,122 @@ func (mc *MenusCreate) SaveX(ctx context.Context) *Menus {
 }
 
 // Exec executes the query.
-func (mc *MenusCreate) Exec(ctx context.Context) error {
-	_, err := mc.Save(ctx)
+func (_c *MenusCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mc *MenusCreate) ExecX(ctx context.Context) {
-	if err := mc.Exec(ctx); err != nil {
+func (_c *MenusCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (mc *MenusCreate) defaults() {
-	if _, ok := mc.mutation.CreatedAt(); !ok {
+func (_c *MenusCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := menus.DefaultCreatedAt()
-		mc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := mc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := menus.DefaultUpdatedAt()
-		mc.mutation.SetUpdatedAt(v)
+		_c.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := mc.mutation.ParentID(); !ok {
+	if _, ok := _c.mutation.ParentID(); !ok {
 		v := menus.DefaultParentID
-		mc.mutation.SetParentID(v)
+		_c.mutation.SetParentID(v)
 	}
-	if _, ok := mc.mutation.Locale(); !ok {
+	if _, ok := _c.mutation.Locale(); !ok {
 		v := menus.DefaultLocale
-		mc.mutation.SetLocale(v)
+		_c.mutation.SetLocale(v)
 	}
-	if _, ok := mc.mutation.Icon(); !ok {
+	if _, ok := _c.mutation.Icon(); !ok {
 		v := menus.DefaultIcon
-		mc.mutation.SetIcon(v)
+		_c.mutation.SetIcon(v)
 	}
-	if _, ok := mc.mutation.SortWeight(); !ok {
+	if _, ok := _c.mutation.SortWeight(); !ok {
 		v := menus.DefaultSortWeight
-		mc.mutation.SetSortWeight(v)
+		_c.mutation.SetSortWeight(v)
 	}
-	if _, ok := mc.mutation.Enabled(); !ok {
+	if _, ok := _c.mutation.Enabled(); !ok {
 		v := menus.DefaultEnabled
-		mc.mutation.SetEnabled(v)
+		_c.mutation.SetEnabled(v)
 	}
-	if _, ok := mc.mutation.HideInMenu(); !ok {
+	if _, ok := _c.mutation.HideInMenu(); !ok {
 		v := menus.DefaultHideInMenu
-		mc.mutation.SetHideInMenu(v)
+		_c.mutation.SetHideInMenu(v)
 	}
-	if _, ok := mc.mutation.HideChildrenInMenu(); !ok {
+	if _, ok := _c.mutation.HideChildrenInMenu(); !ok {
 		v := menus.DefaultHideChildrenInMenu
-		mc.mutation.SetHideChildrenInMenu(v)
+		_c.mutation.SetHideChildrenInMenu(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (mc *MenusCreate) check() error {
-	if _, ok := mc.mutation.CreatedAt(); !ok {
+func (_c *MenusCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "Menus.created_at"`)}
 	}
-	if _, ok := mc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Menus.updated_at"`)}
 	}
-	if _, ok := mc.mutation.ParentID(); !ok {
+	if _, ok := _c.mutation.ParentID(); !ok {
 		return &ValidationError{Name: "parent_id", err: errors.New(`lion: missing required field "Menus.parent_id"`)}
 	}
-	if _, ok := mc.mutation.Name(); !ok {
+	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Menus.name"`)}
 	}
-	if v, ok := mc.mutation.Name(); ok {
+	if v, ok := _c.mutation.Name(); ok {
 		if err := menus.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Menus.name": %w`, err)}
 		}
 	}
-	if _, ok := mc.mutation.Path(); !ok {
+	if _, ok := _c.mutation.Path(); !ok {
 		return &ValidationError{Name: "path", err: errors.New(`lion: missing required field "Menus.path"`)}
 	}
-	if v, ok := mc.mutation.Path(); ok {
+	if v, ok := _c.mutation.Path(); ok {
 		if err := menus.PathValidator(v); err != nil {
 			return &ValidationError{Name: "path", err: fmt.Errorf(`lion: validator failed for field "Menus.path": %w`, err)}
 		}
 	}
-	if _, ok := mc.mutation.Locale(); !ok {
+	if _, ok := _c.mutation.Locale(); !ok {
 		return &ValidationError{Name: "locale", err: errors.New(`lion: missing required field "Menus.locale"`)}
 	}
-	if v, ok := mc.mutation.Locale(); ok {
+	if v, ok := _c.mutation.Locale(); ok {
 		if err := menus.LocaleValidator(v); err != nil {
 			return &ValidationError{Name: "locale", err: fmt.Errorf(`lion: validator failed for field "Menus.locale": %w`, err)}
 		}
 	}
-	if _, ok := mc.mutation.Icon(); !ok {
+	if _, ok := _c.mutation.Icon(); !ok {
 		return &ValidationError{Name: "icon", err: errors.New(`lion: missing required field "Menus.icon"`)}
 	}
-	if v, ok := mc.mutation.Icon(); ok {
+	if v, ok := _c.mutation.Icon(); ok {
 		if err := menus.IconValidator(v); err != nil {
 			return &ValidationError{Name: "icon", err: fmt.Errorf(`lion: validator failed for field "Menus.icon": %w`, err)}
 		}
 	}
-	if _, ok := mc.mutation.SortWeight(); !ok {
+	if _, ok := _c.mutation.SortWeight(); !ok {
 		return &ValidationError{Name: "sort_weight", err: errors.New(`lion: missing required field "Menus.sort_weight"`)}
 	}
-	if _, ok := mc.mutation.Enabled(); !ok {
+	if _, ok := _c.mutation.Enabled(); !ok {
 		return &ValidationError{Name: "enabled", err: errors.New(`lion: missing required field "Menus.enabled"`)}
 	}
-	if _, ok := mc.mutation.HideInMenu(); !ok {
+	if _, ok := _c.mutation.HideInMenu(); !ok {
 		return &ValidationError{Name: "hide_in_menu", err: errors.New(`lion: missing required field "Menus.hide_in_menu"`)}
 	}
-	if _, ok := mc.mutation.HideChildrenInMenu(); !ok {
+	if _, ok := _c.mutation.HideChildrenInMenu(); !ok {
 		return &ValidationError{Name: "hide_children_in_menu", err: errors.New(`lion: missing required field "Menus.hide_children_in_menu"`)}
 	}
 	return nil
 }
 
-func (mc *MenusCreate) sqlSave(ctx context.Context) (*Menus, error) {
-	if err := mc.check(); err != nil {
+func (_c *MenusCreate) sqlSave(ctx context.Context) (*Menus, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := mc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -316,61 +316,61 @@ func (mc *MenusCreate) sqlSave(ctx context.Context) (*Menus, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	mc.mutation.id = &_node.ID
-	mc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (mc *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
+func (_c *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Menus{config: mc.config}
+		_node = &Menus{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(menus.Table, sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt))
 	)
-	if value, ok := mc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(menus.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := mc.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(menus.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := mc.mutation.DeletedAt(); ok {
+	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(menus.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := mc.mutation.ParentID(); ok {
+	if value, ok := _c.mutation.ParentID(); ok {
 		_spec.SetField(menus.FieldParentID, field.TypeInt, value)
 		_node.ParentID = value
 	}
-	if value, ok := mc.mutation.Name(); ok {
+	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(menus.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := mc.mutation.Path(); ok {
+	if value, ok := _c.mutation.Path(); ok {
 		_spec.SetField(menus.FieldPath, field.TypeString, value)
 		_node.Path = value
 	}
-	if value, ok := mc.mutation.Locale(); ok {
+	if value, ok := _c.mutation.Locale(); ok {
 		_spec.SetField(menus.FieldLocale, field.TypeString, value)
 		_node.Locale = value
 	}
-	if value, ok := mc.mutation.Icon(); ok {
+	if value, ok := _c.mutation.Icon(); ok {
 		_spec.SetField(menus.FieldIcon, field.TypeString, value)
 		_node.Icon = value
 	}
-	if value, ok := mc.mutation.SortWeight(); ok {
+	if value, ok := _c.mutation.SortWeight(); ok {
 		_spec.SetField(menus.FieldSortWeight, field.TypeInt, value)
 		_node.SortWeight = value
 	}
-	if value, ok := mc.mutation.Enabled(); ok {
+	if value, ok := _c.mutation.Enabled(); ok {
 		_spec.SetField(menus.FieldEnabled, field.TypeBool, value)
 		_node.Enabled = value
 	}
-	if value, ok := mc.mutation.HideInMenu(); ok {
+	if value, ok := _c.mutation.HideInMenu(); ok {
 		_spec.SetField(menus.FieldHideInMenu, field.TypeBool, value)
 		_node.HideInMenu = value
 	}
-	if value, ok := mc.mutation.HideChildrenInMenu(); ok {
+	if value, ok := _c.mutation.HideChildrenInMenu(); ok {
 		_spec.SetField(menus.FieldHideChildrenInMenu, field.TypeBool, value)
 		_node.HideChildrenInMenu = value
 	}
@@ -385,16 +385,16 @@ type MenusCreateBulk struct {
 }
 
 // Save creates the Menus entities in the database.
-func (mcb *MenusCreateBulk) Save(ctx context.Context) ([]*Menus, error) {
-	if mcb.err != nil {
-		return nil, mcb.err
+func (_c *MenusCreateBulk) Save(ctx context.Context) ([]*Menus, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(mcb.builders))
-	nodes := make([]*Menus, len(mcb.builders))
-	mutators := make([]Mutator, len(mcb.builders))
-	for i := range mcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Menus, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := mcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MenusMutation)
@@ -408,11 +408,11 @@ func (mcb *MenusCreateBulk) Save(ctx context.Context) ([]*Menus, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, mcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -436,7 +436,7 @@ func (mcb *MenusCreateBulk) Save(ctx context.Context) ([]*Menus, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, mcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -444,8 +444,8 @@ func (mcb *MenusCreateBulk) Save(ctx context.Context) ([]*Menus, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (mcb *MenusCreateBulk) SaveX(ctx context.Context) []*Menus {
-	v, err := mcb.Save(ctx)
+func (_c *MenusCreateBulk) SaveX(ctx context.Context) []*Menus {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -453,14 +453,14 @@ func (mcb *MenusCreateBulk) SaveX(ctx context.Context) []*Menus {
 }
 
 // Exec executes the query.
-func (mcb *MenusCreateBulk) Exec(ctx context.Context) error {
-	_, err := mcb.Save(ctx)
+func (_c *MenusCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mcb *MenusCreateBulk) ExecX(ctx context.Context) {
-	if err := mcb.Exec(ctx); err != nil {
+func (_c *MenusCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

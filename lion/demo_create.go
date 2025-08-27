@@ -21,75 +21,75 @@ type DemoCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (dc *DemoCreate) SetCreatedAt(t time.Time) *DemoCreate {
-	dc.mutation.SetCreatedAt(t)
-	return dc
+func (_c *DemoCreate) SetCreatedAt(v time.Time) *DemoCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (dc *DemoCreate) SetNillableCreatedAt(t *time.Time) *DemoCreate {
-	if t != nil {
-		dc.SetCreatedAt(*t)
+func (_c *DemoCreate) SetNillableCreatedAt(v *time.Time) *DemoCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return dc
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (dc *DemoCreate) SetUpdatedAt(t time.Time) *DemoCreate {
-	dc.mutation.SetUpdatedAt(t)
-	return dc
+func (_c *DemoCreate) SetUpdatedAt(v time.Time) *DemoCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (dc *DemoCreate) SetNillableUpdatedAt(t *time.Time) *DemoCreate {
-	if t != nil {
-		dc.SetUpdatedAt(*t)
+func (_c *DemoCreate) SetNillableUpdatedAt(v *time.Time) *DemoCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
-	return dc
+	return _c
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (dc *DemoCreate) SetDeletedAt(t time.Time) *DemoCreate {
-	dc.mutation.SetDeletedAt(t)
-	return dc
+func (_c *DemoCreate) SetDeletedAt(v time.Time) *DemoCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (dc *DemoCreate) SetNillableDeletedAt(t *time.Time) *DemoCreate {
-	if t != nil {
-		dc.SetDeletedAt(*t)
+func (_c *DemoCreate) SetNillableDeletedAt(v *time.Time) *DemoCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
-	return dc
+	return _c
 }
 
 // SetName sets the "name" field.
-func (dc *DemoCreate) SetName(s string) *DemoCreate {
-	dc.mutation.SetName(s)
-	return dc
+func (_c *DemoCreate) SetName(v string) *DemoCreate {
+	_c.mutation.SetName(v)
+	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (dc *DemoCreate) SetNillableName(s *string) *DemoCreate {
-	if s != nil {
-		dc.SetName(*s)
+func (_c *DemoCreate) SetNillableName(v *string) *DemoCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
-	return dc
+	return _c
 }
 
 // Mutation returns the DemoMutation object of the builder.
-func (dc *DemoCreate) Mutation() *DemoMutation {
-	return dc.mutation
+func (_c *DemoCreate) Mutation() *DemoMutation {
+	return _c.mutation
 }
 
 // Save creates the Demo in the database.
-func (dc *DemoCreate) Save(ctx context.Context) (*Demo, error) {
-	dc.defaults()
-	return withHooks(ctx, dc.sqlSave, dc.mutation, dc.hooks)
+func (_c *DemoCreate) Save(ctx context.Context) (*Demo, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (dc *DemoCreate) SaveX(ctx context.Context) *Demo {
-	v, err := dc.Save(ctx)
+func (_c *DemoCreate) SaveX(ctx context.Context) *Demo {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -97,54 +97,54 @@ func (dc *DemoCreate) SaveX(ctx context.Context) *Demo {
 }
 
 // Exec executes the query.
-func (dc *DemoCreate) Exec(ctx context.Context) error {
-	_, err := dc.Save(ctx)
+func (_c *DemoCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dc *DemoCreate) ExecX(ctx context.Context) {
-	if err := dc.Exec(ctx); err != nil {
+func (_c *DemoCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (dc *DemoCreate) defaults() {
-	if _, ok := dc.mutation.CreatedAt(); !ok {
+func (_c *DemoCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := demo.DefaultCreatedAt()
-		dc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := dc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := demo.DefaultUpdatedAt()
-		dc.mutation.SetUpdatedAt(v)
+		_c.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := dc.mutation.Name(); !ok {
+	if _, ok := _c.mutation.Name(); !ok {
 		v := demo.DefaultName
-		dc.mutation.SetName(v)
+		_c.mutation.SetName(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (dc *DemoCreate) check() error {
-	if _, ok := dc.mutation.CreatedAt(); !ok {
+func (_c *DemoCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "Demo.created_at"`)}
 	}
-	if _, ok := dc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Demo.updated_at"`)}
 	}
-	if _, ok := dc.mutation.Name(); !ok {
+	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Demo.name"`)}
 	}
 	return nil
 }
 
-func (dc *DemoCreate) sqlSave(ctx context.Context) (*Demo, error) {
-	if err := dc.check(); err != nil {
+func (_c *DemoCreate) sqlSave(ctx context.Context) (*Demo, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := dc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, dc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -152,29 +152,29 @@ func (dc *DemoCreate) sqlSave(ctx context.Context) (*Demo, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	dc.mutation.id = &_node.ID
-	dc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (dc *DemoCreate) createSpec() (*Demo, *sqlgraph.CreateSpec) {
+func (_c *DemoCreate) createSpec() (*Demo, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Demo{config: dc.config}
+		_node = &Demo{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(demo.Table, sqlgraph.NewFieldSpec(demo.FieldID, field.TypeInt))
 	)
-	if value, ok := dc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(demo.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := dc.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(demo.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := dc.mutation.DeletedAt(); ok {
+	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(demo.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := dc.mutation.Name(); ok {
+	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(demo.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
@@ -189,16 +189,16 @@ type DemoCreateBulk struct {
 }
 
 // Save creates the Demo entities in the database.
-func (dcb *DemoCreateBulk) Save(ctx context.Context) ([]*Demo, error) {
-	if dcb.err != nil {
-		return nil, dcb.err
+func (_c *DemoCreateBulk) Save(ctx context.Context) ([]*Demo, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(dcb.builders))
-	nodes := make([]*Demo, len(dcb.builders))
-	mutators := make([]Mutator, len(dcb.builders))
-	for i := range dcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Demo, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := dcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DemoMutation)
@@ -212,11 +212,11 @@ func (dcb *DemoCreateBulk) Save(ctx context.Context) ([]*Demo, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, dcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, dcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -240,7 +240,7 @@ func (dcb *DemoCreateBulk) Save(ctx context.Context) ([]*Demo, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, dcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -248,8 +248,8 @@ func (dcb *DemoCreateBulk) Save(ctx context.Context) ([]*Demo, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (dcb *DemoCreateBulk) SaveX(ctx context.Context) []*Demo {
-	v, err := dcb.Save(ctx)
+func (_c *DemoCreateBulk) SaveX(ctx context.Context) []*Demo {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -257,14 +257,14 @@ func (dcb *DemoCreateBulk) SaveX(ctx context.Context) []*Demo {
 }
 
 // Exec executes the query.
-func (dcb *DemoCreateBulk) Exec(ctx context.Context) error {
-	_, err := dcb.Save(ctx)
+func (_c *DemoCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dcb *DemoCreateBulk) ExecX(ctx context.Context) {
-	if err := dcb.Exec(ctx); err != nil {
+func (_c *DemoCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

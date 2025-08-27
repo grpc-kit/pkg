@@ -23,143 +23,143 @@ type UserAuthSocialUpdate struct {
 }
 
 // Where appends a list predicates to the UserAuthSocialUpdate builder.
-func (uasu *UserAuthSocialUpdate) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialUpdate {
-	uasu.mutation.Where(ps...)
-	return uasu
+func (_u *UserAuthSocialUpdate) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uasu *UserAuthSocialUpdate) SetUpdatedAt(t time.Time) *UserAuthSocialUpdate {
-	uasu.mutation.SetUpdatedAt(t)
-	return uasu
+func (_u *UserAuthSocialUpdate) SetUpdatedAt(v time.Time) *UserAuthSocialUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (uasu *UserAuthSocialUpdate) SetDeletedAt(t time.Time) *UserAuthSocialUpdate {
-	uasu.mutation.SetDeletedAt(t)
-	return uasu
+func (_u *UserAuthSocialUpdate) SetDeletedAt(v time.Time) *UserAuthSocialUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (uasu *UserAuthSocialUpdate) SetNillableDeletedAt(t *time.Time) *UserAuthSocialUpdate {
-	if t != nil {
-		uasu.SetDeletedAt(*t)
+func (_u *UserAuthSocialUpdate) SetNillableDeletedAt(v *time.Time) *UserAuthSocialUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return uasu
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (uasu *UserAuthSocialUpdate) ClearDeletedAt() *UserAuthSocialUpdate {
-	uasu.mutation.ClearDeletedAt()
-	return uasu
+func (_u *UserAuthSocialUpdate) ClearDeletedAt() *UserAuthSocialUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetProviderName sets the "provider_name" field.
-func (uasu *UserAuthSocialUpdate) SetProviderName(s string) *UserAuthSocialUpdate {
-	uasu.mutation.SetProviderName(s)
-	return uasu
+func (_u *UserAuthSocialUpdate) SetProviderName(v string) *UserAuthSocialUpdate {
+	_u.mutation.SetProviderName(v)
+	return _u
 }
 
 // SetNillableProviderName sets the "provider_name" field if the given value is not nil.
-func (uasu *UserAuthSocialUpdate) SetNillableProviderName(s *string) *UserAuthSocialUpdate {
-	if s != nil {
-		uasu.SetProviderName(*s)
+func (_u *UserAuthSocialUpdate) SetNillableProviderName(v *string) *UserAuthSocialUpdate {
+	if v != nil {
+		_u.SetProviderName(*v)
 	}
-	return uasu
+	return _u
 }
 
 // SetProviderUserID sets the "provider_user_id" field.
-func (uasu *UserAuthSocialUpdate) SetProviderUserID(s string) *UserAuthSocialUpdate {
-	uasu.mutation.SetProviderUserID(s)
-	return uasu
+func (_u *UserAuthSocialUpdate) SetProviderUserID(v string) *UserAuthSocialUpdate {
+	_u.mutation.SetProviderUserID(v)
+	return _u
 }
 
 // SetNillableProviderUserID sets the "provider_user_id" field if the given value is not nil.
-func (uasu *UserAuthSocialUpdate) SetNillableProviderUserID(s *string) *UserAuthSocialUpdate {
-	if s != nil {
-		uasu.SetProviderUserID(*s)
+func (_u *UserAuthSocialUpdate) SetNillableProviderUserID(v *string) *UserAuthSocialUpdate {
+	if v != nil {
+		_u.SetProviderUserID(*v)
 	}
-	return uasu
+	return _u
 }
 
 // SetProviderUnionID sets the "provider_union_id" field.
-func (uasu *UserAuthSocialUpdate) SetProviderUnionID(s string) *UserAuthSocialUpdate {
-	uasu.mutation.SetProviderUnionID(s)
-	return uasu
+func (_u *UserAuthSocialUpdate) SetProviderUnionID(v string) *UserAuthSocialUpdate {
+	_u.mutation.SetProviderUnionID(v)
+	return _u
 }
 
 // SetNillableProviderUnionID sets the "provider_union_id" field if the given value is not nil.
-func (uasu *UserAuthSocialUpdate) SetNillableProviderUnionID(s *string) *UserAuthSocialUpdate {
-	if s != nil {
-		uasu.SetProviderUnionID(*s)
+func (_u *UserAuthSocialUpdate) SetNillableProviderUnionID(v *string) *UserAuthSocialUpdate {
+	if v != nil {
+		_u.SetProviderUnionID(*v)
 	}
-	return uasu
+	return _u
 }
 
 // ClearProviderUnionID clears the value of the "provider_union_id" field.
-func (uasu *UserAuthSocialUpdate) ClearProviderUnionID() *UserAuthSocialUpdate {
-	uasu.mutation.ClearProviderUnionID()
-	return uasu
+func (_u *UserAuthSocialUpdate) ClearProviderUnionID() *UserAuthSocialUpdate {
+	_u.mutation.ClearProviderUnionID()
+	return _u
 }
 
 // SetAccessTokenEncrypted sets the "access_token_encrypted" field.
-func (uasu *UserAuthSocialUpdate) SetAccessTokenEncrypted(b []byte) *UserAuthSocialUpdate {
-	uasu.mutation.SetAccessTokenEncrypted(b)
-	return uasu
+func (_u *UserAuthSocialUpdate) SetAccessTokenEncrypted(v []byte) *UserAuthSocialUpdate {
+	_u.mutation.SetAccessTokenEncrypted(v)
+	return _u
 }
 
 // ClearAccessTokenEncrypted clears the value of the "access_token_encrypted" field.
-func (uasu *UserAuthSocialUpdate) ClearAccessTokenEncrypted() *UserAuthSocialUpdate {
-	uasu.mutation.ClearAccessTokenEncrypted()
-	return uasu
+func (_u *UserAuthSocialUpdate) ClearAccessTokenEncrypted() *UserAuthSocialUpdate {
+	_u.mutation.ClearAccessTokenEncrypted()
+	return _u
 }
 
 // SetRefreshTokenEncrypted sets the "refresh_token_encrypted" field.
-func (uasu *UserAuthSocialUpdate) SetRefreshTokenEncrypted(b []byte) *UserAuthSocialUpdate {
-	uasu.mutation.SetRefreshTokenEncrypted(b)
-	return uasu
+func (_u *UserAuthSocialUpdate) SetRefreshTokenEncrypted(v []byte) *UserAuthSocialUpdate {
+	_u.mutation.SetRefreshTokenEncrypted(v)
+	return _u
 }
 
 // ClearRefreshTokenEncrypted clears the value of the "refresh_token_encrypted" field.
-func (uasu *UserAuthSocialUpdate) ClearRefreshTokenEncrypted() *UserAuthSocialUpdate {
-	uasu.mutation.ClearRefreshTokenEncrypted()
-	return uasu
+func (_u *UserAuthSocialUpdate) ClearRefreshTokenEncrypted() *UserAuthSocialUpdate {
+	_u.mutation.ClearRefreshTokenEncrypted()
+	return _u
 }
 
 // SetTokenExpiresAt sets the "token_expires_at" field.
-func (uasu *UserAuthSocialUpdate) SetTokenExpiresAt(t time.Time) *UserAuthSocialUpdate {
-	uasu.mutation.SetTokenExpiresAt(t)
-	return uasu
+func (_u *UserAuthSocialUpdate) SetTokenExpiresAt(v time.Time) *UserAuthSocialUpdate {
+	_u.mutation.SetTokenExpiresAt(v)
+	return _u
 }
 
 // SetNillableTokenExpiresAt sets the "token_expires_at" field if the given value is not nil.
-func (uasu *UserAuthSocialUpdate) SetNillableTokenExpiresAt(t *time.Time) *UserAuthSocialUpdate {
-	if t != nil {
-		uasu.SetTokenExpiresAt(*t)
+func (_u *UserAuthSocialUpdate) SetNillableTokenExpiresAt(v *time.Time) *UserAuthSocialUpdate {
+	if v != nil {
+		_u.SetTokenExpiresAt(*v)
 	}
-	return uasu
+	return _u
 }
 
 // ClearTokenExpiresAt clears the value of the "token_expires_at" field.
-func (uasu *UserAuthSocialUpdate) ClearTokenExpiresAt() *UserAuthSocialUpdate {
-	uasu.mutation.ClearTokenExpiresAt()
-	return uasu
+func (_u *UserAuthSocialUpdate) ClearTokenExpiresAt() *UserAuthSocialUpdate {
+	_u.mutation.ClearTokenExpiresAt()
+	return _u
 }
 
 // Mutation returns the UserAuthSocialMutation object of the builder.
-func (uasu *UserAuthSocialUpdate) Mutation() *UserAuthSocialMutation {
-	return uasu.mutation
+func (_u *UserAuthSocialUpdate) Mutation() *UserAuthSocialMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uasu *UserAuthSocialUpdate) Save(ctx context.Context) (int, error) {
-	uasu.defaults()
-	return withHooks(ctx, uasu.sqlSave, uasu.mutation, uasu.hooks)
+func (_u *UserAuthSocialUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uasu *UserAuthSocialUpdate) SaveX(ctx context.Context) int {
-	affected, err := uasu.Save(ctx)
+func (_u *UserAuthSocialUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -167,34 +167,34 @@ func (uasu *UserAuthSocialUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uasu *UserAuthSocialUpdate) Exec(ctx context.Context) error {
-	_, err := uasu.Save(ctx)
+func (_u *UserAuthSocialUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uasu *UserAuthSocialUpdate) ExecX(ctx context.Context) {
-	if err := uasu.Exec(ctx); err != nil {
+func (_u *UserAuthSocialUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uasu *UserAuthSocialUpdate) defaults() {
-	if _, ok := uasu.mutation.UpdatedAt(); !ok {
+func (_u *UserAuthSocialUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := userauthsocial.UpdateDefaultUpdatedAt()
-		uasu.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uasu *UserAuthSocialUpdate) check() error {
-	if v, ok := uasu.mutation.ProviderName(); ok {
+func (_u *UserAuthSocialUpdate) check() error {
+	if v, ok := _u.mutation.ProviderName(); ok {
 		if err := userauthsocial.ProviderNameValidator(v); err != nil {
 			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider_name": %w`, err)}
 		}
 	}
-	if v, ok := uasu.mutation.ProviderUserID(); ok {
+	if v, ok := _u.mutation.ProviderUserID(); ok {
 		if err := userauthsocial.ProviderUserIDValidator(v); err != nil {
 			return &ValidationError{Name: "provider_user_id", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider_user_id": %w`, err)}
 		}
@@ -202,58 +202,58 @@ func (uasu *UserAuthSocialUpdate) check() error {
 	return nil
 }
 
-func (uasu *UserAuthSocialUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := uasu.check(); err != nil {
-		return n, err
+func (_u *UserAuthSocialUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(userauthsocial.Table, userauthsocial.Columns, sqlgraph.NewFieldSpec(userauthsocial.FieldID, field.TypeInt))
-	if ps := uasu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uasu.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userauthsocial.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := uasu.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(userauthsocial.FieldDeletedAt, field.TypeTime, value)
 	}
-	if uasu.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(userauthsocial.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := uasu.mutation.ProviderName(); ok {
+	if value, ok := _u.mutation.ProviderName(); ok {
 		_spec.SetField(userauthsocial.FieldProviderName, field.TypeString, value)
 	}
-	if value, ok := uasu.mutation.ProviderUserID(); ok {
+	if value, ok := _u.mutation.ProviderUserID(); ok {
 		_spec.SetField(userauthsocial.FieldProviderUserID, field.TypeString, value)
 	}
-	if value, ok := uasu.mutation.ProviderUnionID(); ok {
+	if value, ok := _u.mutation.ProviderUnionID(); ok {
 		_spec.SetField(userauthsocial.FieldProviderUnionID, field.TypeString, value)
 	}
-	if uasu.mutation.ProviderUnionIDCleared() {
+	if _u.mutation.ProviderUnionIDCleared() {
 		_spec.ClearField(userauthsocial.FieldProviderUnionID, field.TypeString)
 	}
-	if value, ok := uasu.mutation.AccessTokenEncrypted(); ok {
+	if value, ok := _u.mutation.AccessTokenEncrypted(); ok {
 		_spec.SetField(userauthsocial.FieldAccessTokenEncrypted, field.TypeBytes, value)
 	}
-	if uasu.mutation.AccessTokenEncryptedCleared() {
+	if _u.mutation.AccessTokenEncryptedCleared() {
 		_spec.ClearField(userauthsocial.FieldAccessTokenEncrypted, field.TypeBytes)
 	}
-	if value, ok := uasu.mutation.RefreshTokenEncrypted(); ok {
+	if value, ok := _u.mutation.RefreshTokenEncrypted(); ok {
 		_spec.SetField(userauthsocial.FieldRefreshTokenEncrypted, field.TypeBytes, value)
 	}
-	if uasu.mutation.RefreshTokenEncryptedCleared() {
+	if _u.mutation.RefreshTokenEncryptedCleared() {
 		_spec.ClearField(userauthsocial.FieldRefreshTokenEncrypted, field.TypeBytes)
 	}
-	if value, ok := uasu.mutation.TokenExpiresAt(); ok {
+	if value, ok := _u.mutation.TokenExpiresAt(); ok {
 		_spec.SetField(userauthsocial.FieldTokenExpiresAt, field.TypeTime, value)
 	}
-	if uasu.mutation.TokenExpiresAtCleared() {
+	if _u.mutation.TokenExpiresAtCleared() {
 		_spec.ClearField(userauthsocial.FieldTokenExpiresAt, field.TypeTime)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, uasu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userauthsocial.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -261,8 +261,8 @@ func (uasu *UserAuthSocialUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		return 0, err
 	}
-	uasu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // UserAuthSocialUpdateOne is the builder for updating a single UserAuthSocial entity.
@@ -274,150 +274,150 @@ type UserAuthSocialUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uasuo *UserAuthSocialUpdateOne) SetUpdatedAt(t time.Time) *UserAuthSocialUpdateOne {
-	uasuo.mutation.SetUpdatedAt(t)
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) SetUpdatedAt(v time.Time) *UserAuthSocialUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (uasuo *UserAuthSocialUpdateOne) SetDeletedAt(t time.Time) *UserAuthSocialUpdateOne {
-	uasuo.mutation.SetDeletedAt(t)
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) SetDeletedAt(v time.Time) *UserAuthSocialUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (uasuo *UserAuthSocialUpdateOne) SetNillableDeletedAt(t *time.Time) *UserAuthSocialUpdateOne {
-	if t != nil {
-		uasuo.SetDeletedAt(*t)
+func (_u *UserAuthSocialUpdateOne) SetNillableDeletedAt(v *time.Time) *UserAuthSocialUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return uasuo
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (uasuo *UserAuthSocialUpdateOne) ClearDeletedAt() *UserAuthSocialUpdateOne {
-	uasuo.mutation.ClearDeletedAt()
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) ClearDeletedAt() *UserAuthSocialUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetProviderName sets the "provider_name" field.
-func (uasuo *UserAuthSocialUpdateOne) SetProviderName(s string) *UserAuthSocialUpdateOne {
-	uasuo.mutation.SetProviderName(s)
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) SetProviderName(v string) *UserAuthSocialUpdateOne {
+	_u.mutation.SetProviderName(v)
+	return _u
 }
 
 // SetNillableProviderName sets the "provider_name" field if the given value is not nil.
-func (uasuo *UserAuthSocialUpdateOne) SetNillableProviderName(s *string) *UserAuthSocialUpdateOne {
-	if s != nil {
-		uasuo.SetProviderName(*s)
+func (_u *UserAuthSocialUpdateOne) SetNillableProviderName(v *string) *UserAuthSocialUpdateOne {
+	if v != nil {
+		_u.SetProviderName(*v)
 	}
-	return uasuo
+	return _u
 }
 
 // SetProviderUserID sets the "provider_user_id" field.
-func (uasuo *UserAuthSocialUpdateOne) SetProviderUserID(s string) *UserAuthSocialUpdateOne {
-	uasuo.mutation.SetProviderUserID(s)
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) SetProviderUserID(v string) *UserAuthSocialUpdateOne {
+	_u.mutation.SetProviderUserID(v)
+	return _u
 }
 
 // SetNillableProviderUserID sets the "provider_user_id" field if the given value is not nil.
-func (uasuo *UserAuthSocialUpdateOne) SetNillableProviderUserID(s *string) *UserAuthSocialUpdateOne {
-	if s != nil {
-		uasuo.SetProviderUserID(*s)
+func (_u *UserAuthSocialUpdateOne) SetNillableProviderUserID(v *string) *UserAuthSocialUpdateOne {
+	if v != nil {
+		_u.SetProviderUserID(*v)
 	}
-	return uasuo
+	return _u
 }
 
 // SetProviderUnionID sets the "provider_union_id" field.
-func (uasuo *UserAuthSocialUpdateOne) SetProviderUnionID(s string) *UserAuthSocialUpdateOne {
-	uasuo.mutation.SetProviderUnionID(s)
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) SetProviderUnionID(v string) *UserAuthSocialUpdateOne {
+	_u.mutation.SetProviderUnionID(v)
+	return _u
 }
 
 // SetNillableProviderUnionID sets the "provider_union_id" field if the given value is not nil.
-func (uasuo *UserAuthSocialUpdateOne) SetNillableProviderUnionID(s *string) *UserAuthSocialUpdateOne {
-	if s != nil {
-		uasuo.SetProviderUnionID(*s)
+func (_u *UserAuthSocialUpdateOne) SetNillableProviderUnionID(v *string) *UserAuthSocialUpdateOne {
+	if v != nil {
+		_u.SetProviderUnionID(*v)
 	}
-	return uasuo
+	return _u
 }
 
 // ClearProviderUnionID clears the value of the "provider_union_id" field.
-func (uasuo *UserAuthSocialUpdateOne) ClearProviderUnionID() *UserAuthSocialUpdateOne {
-	uasuo.mutation.ClearProviderUnionID()
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) ClearProviderUnionID() *UserAuthSocialUpdateOne {
+	_u.mutation.ClearProviderUnionID()
+	return _u
 }
 
 // SetAccessTokenEncrypted sets the "access_token_encrypted" field.
-func (uasuo *UserAuthSocialUpdateOne) SetAccessTokenEncrypted(b []byte) *UserAuthSocialUpdateOne {
-	uasuo.mutation.SetAccessTokenEncrypted(b)
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) SetAccessTokenEncrypted(v []byte) *UserAuthSocialUpdateOne {
+	_u.mutation.SetAccessTokenEncrypted(v)
+	return _u
 }
 
 // ClearAccessTokenEncrypted clears the value of the "access_token_encrypted" field.
-func (uasuo *UserAuthSocialUpdateOne) ClearAccessTokenEncrypted() *UserAuthSocialUpdateOne {
-	uasuo.mutation.ClearAccessTokenEncrypted()
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) ClearAccessTokenEncrypted() *UserAuthSocialUpdateOne {
+	_u.mutation.ClearAccessTokenEncrypted()
+	return _u
 }
 
 // SetRefreshTokenEncrypted sets the "refresh_token_encrypted" field.
-func (uasuo *UserAuthSocialUpdateOne) SetRefreshTokenEncrypted(b []byte) *UserAuthSocialUpdateOne {
-	uasuo.mutation.SetRefreshTokenEncrypted(b)
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) SetRefreshTokenEncrypted(v []byte) *UserAuthSocialUpdateOne {
+	_u.mutation.SetRefreshTokenEncrypted(v)
+	return _u
 }
 
 // ClearRefreshTokenEncrypted clears the value of the "refresh_token_encrypted" field.
-func (uasuo *UserAuthSocialUpdateOne) ClearRefreshTokenEncrypted() *UserAuthSocialUpdateOne {
-	uasuo.mutation.ClearRefreshTokenEncrypted()
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) ClearRefreshTokenEncrypted() *UserAuthSocialUpdateOne {
+	_u.mutation.ClearRefreshTokenEncrypted()
+	return _u
 }
 
 // SetTokenExpiresAt sets the "token_expires_at" field.
-func (uasuo *UserAuthSocialUpdateOne) SetTokenExpiresAt(t time.Time) *UserAuthSocialUpdateOne {
-	uasuo.mutation.SetTokenExpiresAt(t)
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) SetTokenExpiresAt(v time.Time) *UserAuthSocialUpdateOne {
+	_u.mutation.SetTokenExpiresAt(v)
+	return _u
 }
 
 // SetNillableTokenExpiresAt sets the "token_expires_at" field if the given value is not nil.
-func (uasuo *UserAuthSocialUpdateOne) SetNillableTokenExpiresAt(t *time.Time) *UserAuthSocialUpdateOne {
-	if t != nil {
-		uasuo.SetTokenExpiresAt(*t)
+func (_u *UserAuthSocialUpdateOne) SetNillableTokenExpiresAt(v *time.Time) *UserAuthSocialUpdateOne {
+	if v != nil {
+		_u.SetTokenExpiresAt(*v)
 	}
-	return uasuo
+	return _u
 }
 
 // ClearTokenExpiresAt clears the value of the "token_expires_at" field.
-func (uasuo *UserAuthSocialUpdateOne) ClearTokenExpiresAt() *UserAuthSocialUpdateOne {
-	uasuo.mutation.ClearTokenExpiresAt()
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) ClearTokenExpiresAt() *UserAuthSocialUpdateOne {
+	_u.mutation.ClearTokenExpiresAt()
+	return _u
 }
 
 // Mutation returns the UserAuthSocialMutation object of the builder.
-func (uasuo *UserAuthSocialUpdateOne) Mutation() *UserAuthSocialMutation {
-	return uasuo.mutation
+func (_u *UserAuthSocialUpdateOne) Mutation() *UserAuthSocialMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the UserAuthSocialUpdate builder.
-func (uasuo *UserAuthSocialUpdateOne) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialUpdateOne {
-	uasuo.mutation.Where(ps...)
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uasuo *UserAuthSocialUpdateOne) Select(field string, fields ...string) *UserAuthSocialUpdateOne {
-	uasuo.fields = append([]string{field}, fields...)
-	return uasuo
+func (_u *UserAuthSocialUpdateOne) Select(field string, fields ...string) *UserAuthSocialUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated UserAuthSocial entity.
-func (uasuo *UserAuthSocialUpdateOne) Save(ctx context.Context) (*UserAuthSocial, error) {
-	uasuo.defaults()
-	return withHooks(ctx, uasuo.sqlSave, uasuo.mutation, uasuo.hooks)
+func (_u *UserAuthSocialUpdateOne) Save(ctx context.Context) (*UserAuthSocial, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uasuo *UserAuthSocialUpdateOne) SaveX(ctx context.Context) *UserAuthSocial {
-	node, err := uasuo.Save(ctx)
+func (_u *UserAuthSocialUpdateOne) SaveX(ctx context.Context) *UserAuthSocial {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -425,34 +425,34 @@ func (uasuo *UserAuthSocialUpdateOne) SaveX(ctx context.Context) *UserAuthSocial
 }
 
 // Exec executes the query on the entity.
-func (uasuo *UserAuthSocialUpdateOne) Exec(ctx context.Context) error {
-	_, err := uasuo.Save(ctx)
+func (_u *UserAuthSocialUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uasuo *UserAuthSocialUpdateOne) ExecX(ctx context.Context) {
-	if err := uasuo.Exec(ctx); err != nil {
+func (_u *UserAuthSocialUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uasuo *UserAuthSocialUpdateOne) defaults() {
-	if _, ok := uasuo.mutation.UpdatedAt(); !ok {
+func (_u *UserAuthSocialUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := userauthsocial.UpdateDefaultUpdatedAt()
-		uasuo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uasuo *UserAuthSocialUpdateOne) check() error {
-	if v, ok := uasuo.mutation.ProviderName(); ok {
+func (_u *UserAuthSocialUpdateOne) check() error {
+	if v, ok := _u.mutation.ProviderName(); ok {
 		if err := userauthsocial.ProviderNameValidator(v); err != nil {
 			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider_name": %w`, err)}
 		}
 	}
-	if v, ok := uasuo.mutation.ProviderUserID(); ok {
+	if v, ok := _u.mutation.ProviderUserID(); ok {
 		if err := userauthsocial.ProviderUserIDValidator(v); err != nil {
 			return &ValidationError{Name: "provider_user_id", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider_user_id": %w`, err)}
 		}
@@ -460,17 +460,17 @@ func (uasuo *UserAuthSocialUpdateOne) check() error {
 	return nil
 }
 
-func (uasuo *UserAuthSocialUpdateOne) sqlSave(ctx context.Context) (_node *UserAuthSocial, err error) {
-	if err := uasuo.check(); err != nil {
+func (_u *UserAuthSocialUpdateOne) sqlSave(ctx context.Context) (_node *UserAuthSocial, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(userauthsocial.Table, userauthsocial.Columns, sqlgraph.NewFieldSpec(userauthsocial.FieldID, field.TypeInt))
-	id, ok := uasuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "UserAuthSocial.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uasuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, userauthsocial.FieldID)
 		for _, f := range fields {
@@ -482,56 +482,56 @@ func (uasuo *UserAuthSocialUpdateOne) sqlSave(ctx context.Context) (_node *UserA
 			}
 		}
 	}
-	if ps := uasuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uasuo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userauthsocial.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := uasuo.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(userauthsocial.FieldDeletedAt, field.TypeTime, value)
 	}
-	if uasuo.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(userauthsocial.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := uasuo.mutation.ProviderName(); ok {
+	if value, ok := _u.mutation.ProviderName(); ok {
 		_spec.SetField(userauthsocial.FieldProviderName, field.TypeString, value)
 	}
-	if value, ok := uasuo.mutation.ProviderUserID(); ok {
+	if value, ok := _u.mutation.ProviderUserID(); ok {
 		_spec.SetField(userauthsocial.FieldProviderUserID, field.TypeString, value)
 	}
-	if value, ok := uasuo.mutation.ProviderUnionID(); ok {
+	if value, ok := _u.mutation.ProviderUnionID(); ok {
 		_spec.SetField(userauthsocial.FieldProviderUnionID, field.TypeString, value)
 	}
-	if uasuo.mutation.ProviderUnionIDCleared() {
+	if _u.mutation.ProviderUnionIDCleared() {
 		_spec.ClearField(userauthsocial.FieldProviderUnionID, field.TypeString)
 	}
-	if value, ok := uasuo.mutation.AccessTokenEncrypted(); ok {
+	if value, ok := _u.mutation.AccessTokenEncrypted(); ok {
 		_spec.SetField(userauthsocial.FieldAccessTokenEncrypted, field.TypeBytes, value)
 	}
-	if uasuo.mutation.AccessTokenEncryptedCleared() {
+	if _u.mutation.AccessTokenEncryptedCleared() {
 		_spec.ClearField(userauthsocial.FieldAccessTokenEncrypted, field.TypeBytes)
 	}
-	if value, ok := uasuo.mutation.RefreshTokenEncrypted(); ok {
+	if value, ok := _u.mutation.RefreshTokenEncrypted(); ok {
 		_spec.SetField(userauthsocial.FieldRefreshTokenEncrypted, field.TypeBytes, value)
 	}
-	if uasuo.mutation.RefreshTokenEncryptedCleared() {
+	if _u.mutation.RefreshTokenEncryptedCleared() {
 		_spec.ClearField(userauthsocial.FieldRefreshTokenEncrypted, field.TypeBytes)
 	}
-	if value, ok := uasuo.mutation.TokenExpiresAt(); ok {
+	if value, ok := _u.mutation.TokenExpiresAt(); ok {
 		_spec.SetField(userauthsocial.FieldTokenExpiresAt, field.TypeTime, value)
 	}
-	if uasuo.mutation.TokenExpiresAtCleared() {
+	if _u.mutation.TokenExpiresAtCleared() {
 		_spec.ClearField(userauthsocial.FieldTokenExpiresAt, field.TypeTime)
 	}
-	_node = &UserAuthSocial{config: uasuo.config}
+	_node = &UserAuthSocial{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uasuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userauthsocial.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -539,6 +539,6 @@ func (uasuo *UserAuthSocialUpdateOne) sqlSave(ctx context.Context) (_node *UserA
 		}
 		return nil, err
 	}
-	uasuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

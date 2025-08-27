@@ -21,73 +21,73 @@ type GroupMenusCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (gmc *GroupMenusCreate) SetCreatedAt(t time.Time) *GroupMenusCreate {
-	gmc.mutation.SetCreatedAt(t)
-	return gmc
+func (_c *GroupMenusCreate) SetCreatedAt(v time.Time) *GroupMenusCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (gmc *GroupMenusCreate) SetNillableCreatedAt(t *time.Time) *GroupMenusCreate {
-	if t != nil {
-		gmc.SetCreatedAt(*t)
+func (_c *GroupMenusCreate) SetNillableCreatedAt(v *time.Time) *GroupMenusCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return gmc
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (gmc *GroupMenusCreate) SetUpdatedAt(t time.Time) *GroupMenusCreate {
-	gmc.mutation.SetUpdatedAt(t)
-	return gmc
+func (_c *GroupMenusCreate) SetUpdatedAt(v time.Time) *GroupMenusCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (gmc *GroupMenusCreate) SetNillableUpdatedAt(t *time.Time) *GroupMenusCreate {
-	if t != nil {
-		gmc.SetUpdatedAt(*t)
+func (_c *GroupMenusCreate) SetNillableUpdatedAt(v *time.Time) *GroupMenusCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
-	return gmc
+	return _c
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (gmc *GroupMenusCreate) SetDeletedAt(t time.Time) *GroupMenusCreate {
-	gmc.mutation.SetDeletedAt(t)
-	return gmc
+func (_c *GroupMenusCreate) SetDeletedAt(v time.Time) *GroupMenusCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (gmc *GroupMenusCreate) SetNillableDeletedAt(t *time.Time) *GroupMenusCreate {
-	if t != nil {
-		gmc.SetDeletedAt(*t)
+func (_c *GroupMenusCreate) SetNillableDeletedAt(v *time.Time) *GroupMenusCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
-	return gmc
+	return _c
 }
 
 // SetGroupID sets the "group_id" field.
-func (gmc *GroupMenusCreate) SetGroupID(i int) *GroupMenusCreate {
-	gmc.mutation.SetGroupID(i)
-	return gmc
+func (_c *GroupMenusCreate) SetGroupID(v int) *GroupMenusCreate {
+	_c.mutation.SetGroupID(v)
+	return _c
 }
 
 // SetMenuID sets the "menu_id" field.
-func (gmc *GroupMenusCreate) SetMenuID(i int) *GroupMenusCreate {
-	gmc.mutation.SetMenuID(i)
-	return gmc
+func (_c *GroupMenusCreate) SetMenuID(v int) *GroupMenusCreate {
+	_c.mutation.SetMenuID(v)
+	return _c
 }
 
 // Mutation returns the GroupMenusMutation object of the builder.
-func (gmc *GroupMenusCreate) Mutation() *GroupMenusMutation {
-	return gmc.mutation
+func (_c *GroupMenusCreate) Mutation() *GroupMenusMutation {
+	return _c.mutation
 }
 
 // Save creates the GroupMenus in the database.
-func (gmc *GroupMenusCreate) Save(ctx context.Context) (*GroupMenus, error) {
-	gmc.defaults()
-	return withHooks(ctx, gmc.sqlSave, gmc.mutation, gmc.hooks)
+func (_c *GroupMenusCreate) Save(ctx context.Context) (*GroupMenus, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (gmc *GroupMenusCreate) SaveX(ctx context.Context) *GroupMenus {
-	v, err := gmc.Save(ctx)
+func (_c *GroupMenusCreate) SaveX(ctx context.Context) *GroupMenus {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -95,50 +95,50 @@ func (gmc *GroupMenusCreate) SaveX(ctx context.Context) *GroupMenus {
 }
 
 // Exec executes the query.
-func (gmc *GroupMenusCreate) Exec(ctx context.Context) error {
-	_, err := gmc.Save(ctx)
+func (_c *GroupMenusCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gmc *GroupMenusCreate) ExecX(ctx context.Context) {
-	if err := gmc.Exec(ctx); err != nil {
+func (_c *GroupMenusCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (gmc *GroupMenusCreate) defaults() {
-	if _, ok := gmc.mutation.CreatedAt(); !ok {
+func (_c *GroupMenusCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := groupmenus.DefaultCreatedAt()
-		gmc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := gmc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := groupmenus.DefaultUpdatedAt()
-		gmc.mutation.SetUpdatedAt(v)
+		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gmc *GroupMenusCreate) check() error {
-	if _, ok := gmc.mutation.CreatedAt(); !ok {
+func (_c *GroupMenusCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "GroupMenus.created_at"`)}
 	}
-	if _, ok := gmc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "GroupMenus.updated_at"`)}
 	}
-	if _, ok := gmc.mutation.GroupID(); !ok {
+	if _, ok := _c.mutation.GroupID(); !ok {
 		return &ValidationError{Name: "group_id", err: errors.New(`lion: missing required field "GroupMenus.group_id"`)}
 	}
-	if v, ok := gmc.mutation.GroupID(); ok {
+	if v, ok := _c.mutation.GroupID(); ok {
 		if err := groupmenus.GroupIDValidator(v); err != nil {
 			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "GroupMenus.group_id": %w`, err)}
 		}
 	}
-	if _, ok := gmc.mutation.MenuID(); !ok {
+	if _, ok := _c.mutation.MenuID(); !ok {
 		return &ValidationError{Name: "menu_id", err: errors.New(`lion: missing required field "GroupMenus.menu_id"`)}
 	}
-	if v, ok := gmc.mutation.MenuID(); ok {
+	if v, ok := _c.mutation.MenuID(); ok {
 		if err := groupmenus.MenuIDValidator(v); err != nil {
 			return &ValidationError{Name: "menu_id", err: fmt.Errorf(`lion: validator failed for field "GroupMenus.menu_id": %w`, err)}
 		}
@@ -146,12 +146,12 @@ func (gmc *GroupMenusCreate) check() error {
 	return nil
 }
 
-func (gmc *GroupMenusCreate) sqlSave(ctx context.Context) (*GroupMenus, error) {
-	if err := gmc.check(); err != nil {
+func (_c *GroupMenusCreate) sqlSave(ctx context.Context) (*GroupMenus, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := gmc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, gmc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -159,33 +159,33 @@ func (gmc *GroupMenusCreate) sqlSave(ctx context.Context) (*GroupMenus, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	gmc.mutation.id = &_node.ID
-	gmc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (gmc *GroupMenusCreate) createSpec() (*GroupMenus, *sqlgraph.CreateSpec) {
+func (_c *GroupMenusCreate) createSpec() (*GroupMenus, *sqlgraph.CreateSpec) {
 	var (
-		_node = &GroupMenus{config: gmc.config}
+		_node = &GroupMenus{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(groupmenus.Table, sqlgraph.NewFieldSpec(groupmenus.FieldID, field.TypeInt))
 	)
-	if value, ok := gmc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(groupmenus.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := gmc.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(groupmenus.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := gmc.mutation.DeletedAt(); ok {
+	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(groupmenus.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := gmc.mutation.GroupID(); ok {
+	if value, ok := _c.mutation.GroupID(); ok {
 		_spec.SetField(groupmenus.FieldGroupID, field.TypeInt, value)
 		_node.GroupID = value
 	}
-	if value, ok := gmc.mutation.MenuID(); ok {
+	if value, ok := _c.mutation.MenuID(); ok {
 		_spec.SetField(groupmenus.FieldMenuID, field.TypeInt, value)
 		_node.MenuID = value
 	}
@@ -200,16 +200,16 @@ type GroupMenusCreateBulk struct {
 }
 
 // Save creates the GroupMenus entities in the database.
-func (gmcb *GroupMenusCreateBulk) Save(ctx context.Context) ([]*GroupMenus, error) {
-	if gmcb.err != nil {
-		return nil, gmcb.err
+func (_c *GroupMenusCreateBulk) Save(ctx context.Context) ([]*GroupMenus, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(gmcb.builders))
-	nodes := make([]*GroupMenus, len(gmcb.builders))
-	mutators := make([]Mutator, len(gmcb.builders))
-	for i := range gmcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*GroupMenus, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := gmcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupMenusMutation)
@@ -223,11 +223,11 @@ func (gmcb *GroupMenusCreateBulk) Save(ctx context.Context) ([]*GroupMenus, erro
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, gmcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gmcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -251,7 +251,7 @@ func (gmcb *GroupMenusCreateBulk) Save(ctx context.Context) ([]*GroupMenus, erro
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, gmcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -259,8 +259,8 @@ func (gmcb *GroupMenusCreateBulk) Save(ctx context.Context) ([]*GroupMenus, erro
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gmcb *GroupMenusCreateBulk) SaveX(ctx context.Context) []*GroupMenus {
-	v, err := gmcb.Save(ctx)
+func (_c *GroupMenusCreateBulk) SaveX(ctx context.Context) []*GroupMenus {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -268,14 +268,14 @@ func (gmcb *GroupMenusCreateBulk) SaveX(ctx context.Context) []*GroupMenus {
 }
 
 // Exec executes the query.
-func (gmcb *GroupMenusCreateBulk) Exec(ctx context.Context) error {
-	_, err := gmcb.Save(ctx)
+func (_c *GroupMenusCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gmcb *GroupMenusCreateBulk) ExecX(ctx context.Context) {
-	if err := gmcb.Exec(ctx); err != nil {
+func (_c *GroupMenusCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

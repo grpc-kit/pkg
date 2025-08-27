@@ -23,51 +23,51 @@ type GroupUsersUpdate struct {
 }
 
 // Where appends a list predicates to the GroupUsersUpdate builder.
-func (guu *GroupUsersUpdate) Where(ps ...predicate.GroupUsers) *GroupUsersUpdate {
-	guu.mutation.Where(ps...)
-	return guu
+func (_u *GroupUsersUpdate) Where(ps ...predicate.GroupUsers) *GroupUsersUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (guu *GroupUsersUpdate) SetUpdatedAt(t time.Time) *GroupUsersUpdate {
-	guu.mutation.SetUpdatedAt(t)
-	return guu
+func (_u *GroupUsersUpdate) SetUpdatedAt(v time.Time) *GroupUsersUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (guu *GroupUsersUpdate) SetDeletedAt(t time.Time) *GroupUsersUpdate {
-	guu.mutation.SetDeletedAt(t)
-	return guu
+func (_u *GroupUsersUpdate) SetDeletedAt(v time.Time) *GroupUsersUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (guu *GroupUsersUpdate) SetNillableDeletedAt(t *time.Time) *GroupUsersUpdate {
-	if t != nil {
-		guu.SetDeletedAt(*t)
+func (_u *GroupUsersUpdate) SetNillableDeletedAt(v *time.Time) *GroupUsersUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return guu
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (guu *GroupUsersUpdate) ClearDeletedAt() *GroupUsersUpdate {
-	guu.mutation.ClearDeletedAt()
-	return guu
+func (_u *GroupUsersUpdate) ClearDeletedAt() *GroupUsersUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // Mutation returns the GroupUsersMutation object of the builder.
-func (guu *GroupUsersUpdate) Mutation() *GroupUsersMutation {
-	return guu.mutation
+func (_u *GroupUsersUpdate) Mutation() *GroupUsersMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (guu *GroupUsersUpdate) Save(ctx context.Context) (int, error) {
-	guu.defaults()
-	return withHooks(ctx, guu.sqlSave, guu.mutation, guu.hooks)
+func (_u *GroupUsersUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (guu *GroupUsersUpdate) SaveX(ctx context.Context) int {
-	affected, err := guu.Save(ctx)
+func (_u *GroupUsersUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -75,45 +75,45 @@ func (guu *GroupUsersUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (guu *GroupUsersUpdate) Exec(ctx context.Context) error {
-	_, err := guu.Save(ctx)
+func (_u *GroupUsersUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (guu *GroupUsersUpdate) ExecX(ctx context.Context) {
-	if err := guu.Exec(ctx); err != nil {
+func (_u *GroupUsersUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (guu *GroupUsersUpdate) defaults() {
-	if _, ok := guu.mutation.UpdatedAt(); !ok {
+func (_u *GroupUsersUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := groupusers.UpdateDefaultUpdatedAt()
-		guu.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (guu *GroupUsersUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GroupUsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(groupusers.Table, groupusers.Columns, sqlgraph.NewFieldSpec(groupusers.FieldID, field.TypeInt))
-	if ps := guu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := guu.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(groupusers.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := guu.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(groupusers.FieldDeletedAt, field.TypeTime, value)
 	}
-	if guu.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(groupusers.FieldDeletedAt, field.TypeTime)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, guu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{groupusers.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -121,8 +121,8 @@ func (guu *GroupUsersUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	guu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // GroupUsersUpdateOne is the builder for updating a single GroupUsers entity.
@@ -134,58 +134,58 @@ type GroupUsersUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (guuo *GroupUsersUpdateOne) SetUpdatedAt(t time.Time) *GroupUsersUpdateOne {
-	guuo.mutation.SetUpdatedAt(t)
-	return guuo
+func (_u *GroupUsersUpdateOne) SetUpdatedAt(v time.Time) *GroupUsersUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (guuo *GroupUsersUpdateOne) SetDeletedAt(t time.Time) *GroupUsersUpdateOne {
-	guuo.mutation.SetDeletedAt(t)
-	return guuo
+func (_u *GroupUsersUpdateOne) SetDeletedAt(v time.Time) *GroupUsersUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (guuo *GroupUsersUpdateOne) SetNillableDeletedAt(t *time.Time) *GroupUsersUpdateOne {
-	if t != nil {
-		guuo.SetDeletedAt(*t)
+func (_u *GroupUsersUpdateOne) SetNillableDeletedAt(v *time.Time) *GroupUsersUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return guuo
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (guuo *GroupUsersUpdateOne) ClearDeletedAt() *GroupUsersUpdateOne {
-	guuo.mutation.ClearDeletedAt()
-	return guuo
+func (_u *GroupUsersUpdateOne) ClearDeletedAt() *GroupUsersUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // Mutation returns the GroupUsersMutation object of the builder.
-func (guuo *GroupUsersUpdateOne) Mutation() *GroupUsersMutation {
-	return guuo.mutation
+func (_u *GroupUsersUpdateOne) Mutation() *GroupUsersMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the GroupUsersUpdate builder.
-func (guuo *GroupUsersUpdateOne) Where(ps ...predicate.GroupUsers) *GroupUsersUpdateOne {
-	guuo.mutation.Where(ps...)
-	return guuo
+func (_u *GroupUsersUpdateOne) Where(ps ...predicate.GroupUsers) *GroupUsersUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (guuo *GroupUsersUpdateOne) Select(field string, fields ...string) *GroupUsersUpdateOne {
-	guuo.fields = append([]string{field}, fields...)
-	return guuo
+func (_u *GroupUsersUpdateOne) Select(field string, fields ...string) *GroupUsersUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated GroupUsers entity.
-func (guuo *GroupUsersUpdateOne) Save(ctx context.Context) (*GroupUsers, error) {
-	guuo.defaults()
-	return withHooks(ctx, guuo.sqlSave, guuo.mutation, guuo.hooks)
+func (_u *GroupUsersUpdateOne) Save(ctx context.Context) (*GroupUsers, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (guuo *GroupUsersUpdateOne) SaveX(ctx context.Context) *GroupUsers {
-	node, err := guuo.Save(ctx)
+func (_u *GroupUsersUpdateOne) SaveX(ctx context.Context) *GroupUsers {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -193,34 +193,34 @@ func (guuo *GroupUsersUpdateOne) SaveX(ctx context.Context) *GroupUsers {
 }
 
 // Exec executes the query on the entity.
-func (guuo *GroupUsersUpdateOne) Exec(ctx context.Context) error {
-	_, err := guuo.Save(ctx)
+func (_u *GroupUsersUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (guuo *GroupUsersUpdateOne) ExecX(ctx context.Context) {
-	if err := guuo.Exec(ctx); err != nil {
+func (_u *GroupUsersUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (guuo *GroupUsersUpdateOne) defaults() {
-	if _, ok := guuo.mutation.UpdatedAt(); !ok {
+func (_u *GroupUsersUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := groupusers.UpdateDefaultUpdatedAt()
-		guuo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (guuo *GroupUsersUpdateOne) sqlSave(ctx context.Context) (_node *GroupUsers, err error) {
+func (_u *GroupUsersUpdateOne) sqlSave(ctx context.Context) (_node *GroupUsers, err error) {
 	_spec := sqlgraph.NewUpdateSpec(groupusers.Table, groupusers.Columns, sqlgraph.NewFieldSpec(groupusers.FieldID, field.TypeInt))
-	id, ok := guuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "GroupUsers.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := guuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, groupusers.FieldID)
 		for _, f := range fields {
@@ -232,26 +232,26 @@ func (guuo *GroupUsersUpdateOne) sqlSave(ctx context.Context) (_node *GroupUsers
 			}
 		}
 	}
-	if ps := guuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := guuo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(groupusers.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := guuo.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(groupusers.FieldDeletedAt, field.TypeTime, value)
 	}
-	if guuo.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(groupusers.FieldDeletedAt, field.TypeTime)
 	}
-	_node = &GroupUsers{config: guuo.config}
+	_node = &GroupUsers{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, guuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{groupusers.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -259,6 +259,6 @@ func (guuo *GroupUsersUpdateOne) sqlSave(ctx context.Context) (_node *GroupUsers
 		}
 		return nil, err
 	}
-	guuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

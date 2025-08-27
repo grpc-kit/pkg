@@ -60,7 +60,7 @@ func (*UserAuthLocal) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the UserAuthLocal fields.
-func (ual *UserAuthLocal) assignValues(columns []string, values []any) error {
+func (_m *UserAuthLocal) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -71,66 +71,66 @@ func (ual *UserAuthLocal) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			ual.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case userauthlocal.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ual.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case userauthlocal.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				ual.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case userauthlocal.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				ual.DeletedAt = new(time.Time)
-				*ual.DeletedAt = value.Time
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case userauthlocal.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				ual.UserID = int(value.Int64)
+				_m.UserID = int(value.Int64)
 			}
 		case userauthlocal.FieldPasswordHash:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field password_hash", values[i])
 			} else if value != nil {
-				ual.PasswordHash = *value
+				_m.PasswordHash = *value
 			}
 		case userauthlocal.FieldMfaEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field mfa_enabled", values[i])
 			} else if value.Valid {
-				ual.MfaEnabled = value.Bool
+				_m.MfaEnabled = value.Bool
 			}
 		case userauthlocal.FieldMfaSecretEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field mfa_secret_encrypted", values[i])
 			} else if value != nil {
-				ual.MfaSecretEncrypted = *value
+				_m.MfaSecretEncrypted = *value
 			}
 		case userauthlocal.FieldPasswordChangedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field password_changed_at", values[i])
 			} else if value.Valid {
-				ual.PasswordChangedAt = new(time.Time)
-				*ual.PasswordChangedAt = value.Time
+				_m.PasswordChangedAt = new(time.Time)
+				*_m.PasswordChangedAt = value.Time
 			}
 		case userauthlocal.FieldPasswordExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field password_expires_at", values[i])
 			} else if value.Valid {
-				ual.PasswordExpiresAt = new(time.Time)
-				*ual.PasswordExpiresAt = value.Time
+				_m.PasswordExpiresAt = new(time.Time)
+				*_m.PasswordExpiresAt = value.Time
 			}
 		default:
-			ual.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -138,61 +138,61 @@ func (ual *UserAuthLocal) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the UserAuthLocal.
 // This includes values selected through modifiers, order, etc.
-func (ual *UserAuthLocal) Value(name string) (ent.Value, error) {
-	return ual.selectValues.Get(name)
+func (_m *UserAuthLocal) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this UserAuthLocal.
 // Note that you need to call UserAuthLocal.Unwrap() before calling this method if this UserAuthLocal
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ual *UserAuthLocal) Update() *UserAuthLocalUpdateOne {
-	return NewUserAuthLocalClient(ual.config).UpdateOne(ual)
+func (_m *UserAuthLocal) Update() *UserAuthLocalUpdateOne {
+	return NewUserAuthLocalClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the UserAuthLocal entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ual *UserAuthLocal) Unwrap() *UserAuthLocal {
-	_tx, ok := ual.config.driver.(*txDriver)
+func (_m *UserAuthLocal) Unwrap() *UserAuthLocal {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("lion: UserAuthLocal is not a transactional entity")
 	}
-	ual.config.driver = _tx.drv
-	return ual
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ual *UserAuthLocal) String() string {
+func (_m *UserAuthLocal) String() string {
 	var builder strings.Builder
 	builder.WriteString("UserAuthLocal(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ual.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(ual.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(ual.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := ual.DeletedAt; v != nil {
+	if v := _m.DeletedAt; v != nil {
 		builder.WriteString("deleted_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", ual.UserID))
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("password_hash=")
-	builder.WriteString(fmt.Sprintf("%v", ual.PasswordHash))
+	builder.WriteString(fmt.Sprintf("%v", _m.PasswordHash))
 	builder.WriteString(", ")
 	builder.WriteString("mfa_enabled=")
-	builder.WriteString(fmt.Sprintf("%v", ual.MfaEnabled))
+	builder.WriteString(fmt.Sprintf("%v", _m.MfaEnabled))
 	builder.WriteString(", ")
 	builder.WriteString("mfa_secret_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	if v := ual.PasswordChangedAt; v != nil {
+	if v := _m.PasswordChangedAt; v != nil {
 		builder.WriteString("password_changed_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	if v := ual.PasswordExpiresAt; v != nil {
+	if v := _m.PasswordExpiresAt; v != nil {
 		builder.WriteString("password_expires_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}

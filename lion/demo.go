@@ -48,7 +48,7 @@ func (*Demo) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Demo fields.
-func (d *Demo) assignValues(columns []string, values []any) error {
+func (_m *Demo) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -59,34 +59,34 @@ func (d *Demo) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			d.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case demo.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				d.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case demo.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				d.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case demo.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				d.DeletedAt = new(time.Time)
-				*d.DeletedAt = value.Time
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
 			}
 		case demo.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				d.Name = value.String
+				_m.Name = value.String
 			}
 		default:
-			d.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -94,46 +94,46 @@ func (d *Demo) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Demo.
 // This includes values selected through modifiers, order, etc.
-func (d *Demo) Value(name string) (ent.Value, error) {
-	return d.selectValues.Get(name)
+func (_m *Demo) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Demo.
 // Note that you need to call Demo.Unwrap() before calling this method if this Demo
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (d *Demo) Update() *DemoUpdateOne {
-	return NewDemoClient(d.config).UpdateOne(d)
+func (_m *Demo) Update() *DemoUpdateOne {
+	return NewDemoClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Demo entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (d *Demo) Unwrap() *Demo {
-	_tx, ok := d.config.driver.(*txDriver)
+func (_m *Demo) Unwrap() *Demo {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("lion: Demo is not a transactional entity")
 	}
-	d.config.driver = _tx.drv
-	return d
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (d *Demo) String() string {
+func (_m *Demo) String() string {
 	var builder strings.Builder
 	builder.WriteString("Demo(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", d.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(d.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(d.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := d.DeletedAt; v != nil {
+	if v := _m.DeletedAt; v != nil {
 		builder.WriteString("deleted_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(d.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

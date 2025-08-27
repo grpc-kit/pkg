@@ -21,119 +21,119 @@ type UserAuthSocialCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (uasc *UserAuthSocialCreate) SetCreatedAt(t time.Time) *UserAuthSocialCreate {
-	uasc.mutation.SetCreatedAt(t)
-	return uasc
+func (_c *UserAuthSocialCreate) SetCreatedAt(v time.Time) *UserAuthSocialCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (uasc *UserAuthSocialCreate) SetNillableCreatedAt(t *time.Time) *UserAuthSocialCreate {
-	if t != nil {
-		uasc.SetCreatedAt(*t)
+func (_c *UserAuthSocialCreate) SetNillableCreatedAt(v *time.Time) *UserAuthSocialCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return uasc
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uasc *UserAuthSocialCreate) SetUpdatedAt(t time.Time) *UserAuthSocialCreate {
-	uasc.mutation.SetUpdatedAt(t)
-	return uasc
+func (_c *UserAuthSocialCreate) SetUpdatedAt(v time.Time) *UserAuthSocialCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (uasc *UserAuthSocialCreate) SetNillableUpdatedAt(t *time.Time) *UserAuthSocialCreate {
-	if t != nil {
-		uasc.SetUpdatedAt(*t)
+func (_c *UserAuthSocialCreate) SetNillableUpdatedAt(v *time.Time) *UserAuthSocialCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
-	return uasc
+	return _c
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (uasc *UserAuthSocialCreate) SetDeletedAt(t time.Time) *UserAuthSocialCreate {
-	uasc.mutation.SetDeletedAt(t)
-	return uasc
+func (_c *UserAuthSocialCreate) SetDeletedAt(v time.Time) *UserAuthSocialCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (uasc *UserAuthSocialCreate) SetNillableDeletedAt(t *time.Time) *UserAuthSocialCreate {
-	if t != nil {
-		uasc.SetDeletedAt(*t)
+func (_c *UserAuthSocialCreate) SetNillableDeletedAt(v *time.Time) *UserAuthSocialCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
-	return uasc
+	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (uasc *UserAuthSocialCreate) SetUserID(i int) *UserAuthSocialCreate {
-	uasc.mutation.SetUserID(i)
-	return uasc
+func (_c *UserAuthSocialCreate) SetUserID(v int) *UserAuthSocialCreate {
+	_c.mutation.SetUserID(v)
+	return _c
 }
 
 // SetProviderName sets the "provider_name" field.
-func (uasc *UserAuthSocialCreate) SetProviderName(s string) *UserAuthSocialCreate {
-	uasc.mutation.SetProviderName(s)
-	return uasc
+func (_c *UserAuthSocialCreate) SetProviderName(v string) *UserAuthSocialCreate {
+	_c.mutation.SetProviderName(v)
+	return _c
 }
 
 // SetProviderUserID sets the "provider_user_id" field.
-func (uasc *UserAuthSocialCreate) SetProviderUserID(s string) *UserAuthSocialCreate {
-	uasc.mutation.SetProviderUserID(s)
-	return uasc
+func (_c *UserAuthSocialCreate) SetProviderUserID(v string) *UserAuthSocialCreate {
+	_c.mutation.SetProviderUserID(v)
+	return _c
 }
 
 // SetProviderUnionID sets the "provider_union_id" field.
-func (uasc *UserAuthSocialCreate) SetProviderUnionID(s string) *UserAuthSocialCreate {
-	uasc.mutation.SetProviderUnionID(s)
-	return uasc
+func (_c *UserAuthSocialCreate) SetProviderUnionID(v string) *UserAuthSocialCreate {
+	_c.mutation.SetProviderUnionID(v)
+	return _c
 }
 
 // SetNillableProviderUnionID sets the "provider_union_id" field if the given value is not nil.
-func (uasc *UserAuthSocialCreate) SetNillableProviderUnionID(s *string) *UserAuthSocialCreate {
-	if s != nil {
-		uasc.SetProviderUnionID(*s)
+func (_c *UserAuthSocialCreate) SetNillableProviderUnionID(v *string) *UserAuthSocialCreate {
+	if v != nil {
+		_c.SetProviderUnionID(*v)
 	}
-	return uasc
+	return _c
 }
 
 // SetAccessTokenEncrypted sets the "access_token_encrypted" field.
-func (uasc *UserAuthSocialCreate) SetAccessTokenEncrypted(b []byte) *UserAuthSocialCreate {
-	uasc.mutation.SetAccessTokenEncrypted(b)
-	return uasc
+func (_c *UserAuthSocialCreate) SetAccessTokenEncrypted(v []byte) *UserAuthSocialCreate {
+	_c.mutation.SetAccessTokenEncrypted(v)
+	return _c
 }
 
 // SetRefreshTokenEncrypted sets the "refresh_token_encrypted" field.
-func (uasc *UserAuthSocialCreate) SetRefreshTokenEncrypted(b []byte) *UserAuthSocialCreate {
-	uasc.mutation.SetRefreshTokenEncrypted(b)
-	return uasc
+func (_c *UserAuthSocialCreate) SetRefreshTokenEncrypted(v []byte) *UserAuthSocialCreate {
+	_c.mutation.SetRefreshTokenEncrypted(v)
+	return _c
 }
 
 // SetTokenExpiresAt sets the "token_expires_at" field.
-func (uasc *UserAuthSocialCreate) SetTokenExpiresAt(t time.Time) *UserAuthSocialCreate {
-	uasc.mutation.SetTokenExpiresAt(t)
-	return uasc
+func (_c *UserAuthSocialCreate) SetTokenExpiresAt(v time.Time) *UserAuthSocialCreate {
+	_c.mutation.SetTokenExpiresAt(v)
+	return _c
 }
 
 // SetNillableTokenExpiresAt sets the "token_expires_at" field if the given value is not nil.
-func (uasc *UserAuthSocialCreate) SetNillableTokenExpiresAt(t *time.Time) *UserAuthSocialCreate {
-	if t != nil {
-		uasc.SetTokenExpiresAt(*t)
+func (_c *UserAuthSocialCreate) SetNillableTokenExpiresAt(v *time.Time) *UserAuthSocialCreate {
+	if v != nil {
+		_c.SetTokenExpiresAt(*v)
 	}
-	return uasc
+	return _c
 }
 
 // Mutation returns the UserAuthSocialMutation object of the builder.
-func (uasc *UserAuthSocialCreate) Mutation() *UserAuthSocialMutation {
-	return uasc.mutation
+func (_c *UserAuthSocialCreate) Mutation() *UserAuthSocialMutation {
+	return _c.mutation
 }
 
 // Save creates the UserAuthSocial in the database.
-func (uasc *UserAuthSocialCreate) Save(ctx context.Context) (*UserAuthSocial, error) {
-	uasc.defaults()
-	return withHooks(ctx, uasc.sqlSave, uasc.mutation, uasc.hooks)
+func (_c *UserAuthSocialCreate) Save(ctx context.Context) (*UserAuthSocial, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (uasc *UserAuthSocialCreate) SaveX(ctx context.Context) *UserAuthSocial {
-	v, err := uasc.Save(ctx)
+func (_c *UserAuthSocialCreate) SaveX(ctx context.Context) *UserAuthSocial {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -141,58 +141,58 @@ func (uasc *UserAuthSocialCreate) SaveX(ctx context.Context) *UserAuthSocial {
 }
 
 // Exec executes the query.
-func (uasc *UserAuthSocialCreate) Exec(ctx context.Context) error {
-	_, err := uasc.Save(ctx)
+func (_c *UserAuthSocialCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uasc *UserAuthSocialCreate) ExecX(ctx context.Context) {
-	if err := uasc.Exec(ctx); err != nil {
+func (_c *UserAuthSocialCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uasc *UserAuthSocialCreate) defaults() {
-	if _, ok := uasc.mutation.CreatedAt(); !ok {
+func (_c *UserAuthSocialCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := userauthsocial.DefaultCreatedAt()
-		uasc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := uasc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := userauthsocial.DefaultUpdatedAt()
-		uasc.mutation.SetUpdatedAt(v)
+		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uasc *UserAuthSocialCreate) check() error {
-	if _, ok := uasc.mutation.CreatedAt(); !ok {
+func (_c *UserAuthSocialCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "UserAuthSocial.created_at"`)}
 	}
-	if _, ok := uasc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserAuthSocial.updated_at"`)}
 	}
-	if _, ok := uasc.mutation.UserID(); !ok {
+	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserAuthSocial.user_id"`)}
 	}
-	if v, ok := uasc.mutation.UserID(); ok {
+	if v, ok := _c.mutation.UserID(); ok {
 		if err := userauthsocial.UserIDValidator(v); err != nil {
 			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.user_id": %w`, err)}
 		}
 	}
-	if _, ok := uasc.mutation.ProviderName(); !ok {
+	if _, ok := _c.mutation.ProviderName(); !ok {
 		return &ValidationError{Name: "provider_name", err: errors.New(`lion: missing required field "UserAuthSocial.provider_name"`)}
 	}
-	if v, ok := uasc.mutation.ProviderName(); ok {
+	if v, ok := _c.mutation.ProviderName(); ok {
 		if err := userauthsocial.ProviderNameValidator(v); err != nil {
 			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider_name": %w`, err)}
 		}
 	}
-	if _, ok := uasc.mutation.ProviderUserID(); !ok {
+	if _, ok := _c.mutation.ProviderUserID(); !ok {
 		return &ValidationError{Name: "provider_user_id", err: errors.New(`lion: missing required field "UserAuthSocial.provider_user_id"`)}
 	}
-	if v, ok := uasc.mutation.ProviderUserID(); ok {
+	if v, ok := _c.mutation.ProviderUserID(); ok {
 		if err := userauthsocial.ProviderUserIDValidator(v); err != nil {
 			return &ValidationError{Name: "provider_user_id", err: fmt.Errorf(`lion: validator failed for field "UserAuthSocial.provider_user_id": %w`, err)}
 		}
@@ -200,12 +200,12 @@ func (uasc *UserAuthSocialCreate) check() error {
 	return nil
 }
 
-func (uasc *UserAuthSocialCreate) sqlSave(ctx context.Context) (*UserAuthSocial, error) {
-	if err := uasc.check(); err != nil {
+func (_c *UserAuthSocialCreate) sqlSave(ctx context.Context) (*UserAuthSocial, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := uasc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, uasc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -213,53 +213,53 @@ func (uasc *UserAuthSocialCreate) sqlSave(ctx context.Context) (*UserAuthSocial,
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	uasc.mutation.id = &_node.ID
-	uasc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (uasc *UserAuthSocialCreate) createSpec() (*UserAuthSocial, *sqlgraph.CreateSpec) {
+func (_c *UserAuthSocialCreate) createSpec() (*UserAuthSocial, *sqlgraph.CreateSpec) {
 	var (
-		_node = &UserAuthSocial{config: uasc.config}
+		_node = &UserAuthSocial{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(userauthsocial.Table, sqlgraph.NewFieldSpec(userauthsocial.FieldID, field.TypeInt))
 	)
-	if value, ok := uasc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(userauthsocial.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := uasc.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(userauthsocial.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := uasc.mutation.DeletedAt(); ok {
+	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(userauthsocial.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := uasc.mutation.UserID(); ok {
+	if value, ok := _c.mutation.UserID(); ok {
 		_spec.SetField(userauthsocial.FieldUserID, field.TypeInt, value)
 		_node.UserID = value
 	}
-	if value, ok := uasc.mutation.ProviderName(); ok {
+	if value, ok := _c.mutation.ProviderName(); ok {
 		_spec.SetField(userauthsocial.FieldProviderName, field.TypeString, value)
 		_node.ProviderName = value
 	}
-	if value, ok := uasc.mutation.ProviderUserID(); ok {
+	if value, ok := _c.mutation.ProviderUserID(); ok {
 		_spec.SetField(userauthsocial.FieldProviderUserID, field.TypeString, value)
 		_node.ProviderUserID = value
 	}
-	if value, ok := uasc.mutation.ProviderUnionID(); ok {
+	if value, ok := _c.mutation.ProviderUnionID(); ok {
 		_spec.SetField(userauthsocial.FieldProviderUnionID, field.TypeString, value)
 		_node.ProviderUnionID = value
 	}
-	if value, ok := uasc.mutation.AccessTokenEncrypted(); ok {
+	if value, ok := _c.mutation.AccessTokenEncrypted(); ok {
 		_spec.SetField(userauthsocial.FieldAccessTokenEncrypted, field.TypeBytes, value)
 		_node.AccessTokenEncrypted = value
 	}
-	if value, ok := uasc.mutation.RefreshTokenEncrypted(); ok {
+	if value, ok := _c.mutation.RefreshTokenEncrypted(); ok {
 		_spec.SetField(userauthsocial.FieldRefreshTokenEncrypted, field.TypeBytes, value)
 		_node.RefreshTokenEncrypted = value
 	}
-	if value, ok := uasc.mutation.TokenExpiresAt(); ok {
+	if value, ok := _c.mutation.TokenExpiresAt(); ok {
 		_spec.SetField(userauthsocial.FieldTokenExpiresAt, field.TypeTime, value)
 		_node.TokenExpiresAt = value
 	}
@@ -274,16 +274,16 @@ type UserAuthSocialCreateBulk struct {
 }
 
 // Save creates the UserAuthSocial entities in the database.
-func (uascb *UserAuthSocialCreateBulk) Save(ctx context.Context) ([]*UserAuthSocial, error) {
-	if uascb.err != nil {
-		return nil, uascb.err
+func (_c *UserAuthSocialCreateBulk) Save(ctx context.Context) ([]*UserAuthSocial, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(uascb.builders))
-	nodes := make([]*UserAuthSocial, len(uascb.builders))
-	mutators := make([]Mutator, len(uascb.builders))
-	for i := range uascb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*UserAuthSocial, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := uascb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserAuthSocialMutation)
@@ -297,11 +297,11 @@ func (uascb *UserAuthSocialCreateBulk) Save(ctx context.Context) ([]*UserAuthSoc
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, uascb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, uascb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -325,7 +325,7 @@ func (uascb *UserAuthSocialCreateBulk) Save(ctx context.Context) ([]*UserAuthSoc
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, uascb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -333,8 +333,8 @@ func (uascb *UserAuthSocialCreateBulk) Save(ctx context.Context) ([]*UserAuthSoc
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uascb *UserAuthSocialCreateBulk) SaveX(ctx context.Context) []*UserAuthSocial {
-	v, err := uascb.Save(ctx)
+func (_c *UserAuthSocialCreateBulk) SaveX(ctx context.Context) []*UserAuthSocial {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -342,14 +342,14 @@ func (uascb *UserAuthSocialCreateBulk) SaveX(ctx context.Context) []*UserAuthSoc
 }
 
 // Exec executes the query.
-func (uascb *UserAuthSocialCreateBulk) Exec(ctx context.Context) error {
-	_, err := uascb.Save(ctx)
+func (_c *UserAuthSocialCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uascb *UserAuthSocialCreateBulk) ExecX(ctx context.Context) {
-	if err := uascb.Exec(ctx); err != nil {
+func (_c *UserAuthSocialCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

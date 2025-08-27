@@ -20,56 +20,56 @@ type AuthProvidersDelete struct {
 }
 
 // Where appends a list predicates to the AuthProvidersDelete builder.
-func (apd *AuthProvidersDelete) Where(ps ...predicate.AuthProviders) *AuthProvidersDelete {
-	apd.mutation.Where(ps...)
-	return apd
+func (_d *AuthProvidersDelete) Where(ps ...predicate.AuthProviders) *AuthProvidersDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (apd *AuthProvidersDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, apd.sqlExec, apd.mutation, apd.hooks)
+func (_d *AuthProvidersDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (apd *AuthProvidersDelete) ExecX(ctx context.Context) int {
-	n, err := apd.Exec(ctx)
+func (_d *AuthProvidersDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (apd *AuthProvidersDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *AuthProvidersDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(authproviders.Table, sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt))
-	if ps := apd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, apd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	apd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // AuthProvidersDeleteOne is the builder for deleting a single AuthProviders entity.
 type AuthProvidersDeleteOne struct {
-	apd *AuthProvidersDelete
+	_d *AuthProvidersDelete
 }
 
 // Where appends a list predicates to the AuthProvidersDelete builder.
-func (apdo *AuthProvidersDeleteOne) Where(ps ...predicate.AuthProviders) *AuthProvidersDeleteOne {
-	apdo.apd.mutation.Where(ps...)
-	return apdo
+func (_d *AuthProvidersDeleteOne) Where(ps ...predicate.AuthProviders) *AuthProvidersDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (apdo *AuthProvidersDeleteOne) Exec(ctx context.Context) error {
-	n, err := apdo.apd.Exec(ctx)
+func (_d *AuthProvidersDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (apdo *AuthProvidersDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (apdo *AuthProvidersDeleteOne) ExecX(ctx context.Context) {
-	if err := apdo.Exec(ctx); err != nil {
+func (_d *AuthProvidersDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

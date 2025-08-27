@@ -23,86 +23,86 @@ type AccountsUpdate struct {
 }
 
 // Where appends a list predicates to the AccountsUpdate builder.
-func (au *AccountsUpdate) Where(ps ...predicate.Accounts) *AccountsUpdate {
-	au.mutation.Where(ps...)
-	return au
+func (_u *AccountsUpdate) Where(ps ...predicate.Accounts) *AccountsUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (au *AccountsUpdate) SetUpdatedAt(t time.Time) *AccountsUpdate {
-	au.mutation.SetUpdatedAt(t)
-	return au
+func (_u *AccountsUpdate) SetUpdatedAt(v time.Time) *AccountsUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (au *AccountsUpdate) SetDeletedAt(t time.Time) *AccountsUpdate {
-	au.mutation.SetDeletedAt(t)
-	return au
+func (_u *AccountsUpdate) SetDeletedAt(v time.Time) *AccountsUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (au *AccountsUpdate) SetNillableDeletedAt(t *time.Time) *AccountsUpdate {
-	if t != nil {
-		au.SetDeletedAt(*t)
+func (_u *AccountsUpdate) SetNillableDeletedAt(v *time.Time) *AccountsUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return au
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (au *AccountsUpdate) ClearDeletedAt() *AccountsUpdate {
-	au.mutation.ClearDeletedAt()
-	return au
+func (_u *AccountsUpdate) ClearDeletedAt() *AccountsUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetBalance sets the "balance" field.
-func (au *AccountsUpdate) SetBalance(f float64) *AccountsUpdate {
-	au.mutation.ResetBalance()
-	au.mutation.SetBalance(f)
-	return au
+func (_u *AccountsUpdate) SetBalance(v float64) *AccountsUpdate {
+	_u.mutation.ResetBalance()
+	_u.mutation.SetBalance(v)
+	return _u
 }
 
 // SetNillableBalance sets the "balance" field if the given value is not nil.
-func (au *AccountsUpdate) SetNillableBalance(f *float64) *AccountsUpdate {
-	if f != nil {
-		au.SetBalance(*f)
+func (_u *AccountsUpdate) SetNillableBalance(v *float64) *AccountsUpdate {
+	if v != nil {
+		_u.SetBalance(*v)
 	}
-	return au
+	return _u
 }
 
-// AddBalance adds f to the "balance" field.
-func (au *AccountsUpdate) AddBalance(f float64) *AccountsUpdate {
-	au.mutation.AddBalance(f)
-	return au
+// AddBalance adds value to the "balance" field.
+func (_u *AccountsUpdate) AddBalance(v float64) *AccountsUpdate {
+	_u.mutation.AddBalance(v)
+	return _u
 }
 
 // SetCurrency sets the "currency" field.
-func (au *AccountsUpdate) SetCurrency(s string) *AccountsUpdate {
-	au.mutation.SetCurrency(s)
-	return au
+func (_u *AccountsUpdate) SetCurrency(v string) *AccountsUpdate {
+	_u.mutation.SetCurrency(v)
+	return _u
 }
 
 // SetNillableCurrency sets the "currency" field if the given value is not nil.
-func (au *AccountsUpdate) SetNillableCurrency(s *string) *AccountsUpdate {
-	if s != nil {
-		au.SetCurrency(*s)
+func (_u *AccountsUpdate) SetNillableCurrency(v *string) *AccountsUpdate {
+	if v != nil {
+		_u.SetCurrency(*v)
 	}
-	return au
+	return _u
 }
 
 // Mutation returns the AccountsMutation object of the builder.
-func (au *AccountsUpdate) Mutation() *AccountsMutation {
-	return au.mutation
+func (_u *AccountsUpdate) Mutation() *AccountsMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (au *AccountsUpdate) Save(ctx context.Context) (int, error) {
-	au.defaults()
-	return withHooks(ctx, au.sqlSave, au.mutation, au.hooks)
+func (_u *AccountsUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (au *AccountsUpdate) SaveX(ctx context.Context) int {
-	affected, err := au.Save(ctx)
+func (_u *AccountsUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -110,54 +110,54 @@ func (au *AccountsUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (au *AccountsUpdate) Exec(ctx context.Context) error {
-	_, err := au.Save(ctx)
+func (_u *AccountsUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (au *AccountsUpdate) ExecX(ctx context.Context) {
-	if err := au.Exec(ctx); err != nil {
+func (_u *AccountsUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (au *AccountsUpdate) defaults() {
-	if _, ok := au.mutation.UpdatedAt(); !ok {
+func (_u *AccountsUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := accounts.UpdateDefaultUpdatedAt()
-		au.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (au *AccountsUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *AccountsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(accounts.Table, accounts.Columns, sqlgraph.NewFieldSpec(accounts.FieldID, field.TypeInt))
-	if ps := au.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := au.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(accounts.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := au.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(accounts.FieldDeletedAt, field.TypeTime, value)
 	}
-	if au.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(accounts.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := au.mutation.Balance(); ok {
+	if value, ok := _u.mutation.Balance(); ok {
 		_spec.SetField(accounts.FieldBalance, field.TypeFloat64, value)
 	}
-	if value, ok := au.mutation.AddedBalance(); ok {
+	if value, ok := _u.mutation.AddedBalance(); ok {
 		_spec.AddField(accounts.FieldBalance, field.TypeFloat64, value)
 	}
-	if value, ok := au.mutation.Currency(); ok {
+	if value, ok := _u.mutation.Currency(); ok {
 		_spec.SetField(accounts.FieldCurrency, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{accounts.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -165,8 +165,8 @@ func (au *AccountsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	au.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // AccountsUpdateOne is the builder for updating a single Accounts entity.
@@ -178,93 +178,93 @@ type AccountsUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (auo *AccountsUpdateOne) SetUpdatedAt(t time.Time) *AccountsUpdateOne {
-	auo.mutation.SetUpdatedAt(t)
-	return auo
+func (_u *AccountsUpdateOne) SetUpdatedAt(v time.Time) *AccountsUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (auo *AccountsUpdateOne) SetDeletedAt(t time.Time) *AccountsUpdateOne {
-	auo.mutation.SetDeletedAt(t)
-	return auo
+func (_u *AccountsUpdateOne) SetDeletedAt(v time.Time) *AccountsUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (auo *AccountsUpdateOne) SetNillableDeletedAt(t *time.Time) *AccountsUpdateOne {
-	if t != nil {
-		auo.SetDeletedAt(*t)
+func (_u *AccountsUpdateOne) SetNillableDeletedAt(v *time.Time) *AccountsUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return auo
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (auo *AccountsUpdateOne) ClearDeletedAt() *AccountsUpdateOne {
-	auo.mutation.ClearDeletedAt()
-	return auo
+func (_u *AccountsUpdateOne) ClearDeletedAt() *AccountsUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetBalance sets the "balance" field.
-func (auo *AccountsUpdateOne) SetBalance(f float64) *AccountsUpdateOne {
-	auo.mutation.ResetBalance()
-	auo.mutation.SetBalance(f)
-	return auo
+func (_u *AccountsUpdateOne) SetBalance(v float64) *AccountsUpdateOne {
+	_u.mutation.ResetBalance()
+	_u.mutation.SetBalance(v)
+	return _u
 }
 
 // SetNillableBalance sets the "balance" field if the given value is not nil.
-func (auo *AccountsUpdateOne) SetNillableBalance(f *float64) *AccountsUpdateOne {
-	if f != nil {
-		auo.SetBalance(*f)
+func (_u *AccountsUpdateOne) SetNillableBalance(v *float64) *AccountsUpdateOne {
+	if v != nil {
+		_u.SetBalance(*v)
 	}
-	return auo
+	return _u
 }
 
-// AddBalance adds f to the "balance" field.
-func (auo *AccountsUpdateOne) AddBalance(f float64) *AccountsUpdateOne {
-	auo.mutation.AddBalance(f)
-	return auo
+// AddBalance adds value to the "balance" field.
+func (_u *AccountsUpdateOne) AddBalance(v float64) *AccountsUpdateOne {
+	_u.mutation.AddBalance(v)
+	return _u
 }
 
 // SetCurrency sets the "currency" field.
-func (auo *AccountsUpdateOne) SetCurrency(s string) *AccountsUpdateOne {
-	auo.mutation.SetCurrency(s)
-	return auo
+func (_u *AccountsUpdateOne) SetCurrency(v string) *AccountsUpdateOne {
+	_u.mutation.SetCurrency(v)
+	return _u
 }
 
 // SetNillableCurrency sets the "currency" field if the given value is not nil.
-func (auo *AccountsUpdateOne) SetNillableCurrency(s *string) *AccountsUpdateOne {
-	if s != nil {
-		auo.SetCurrency(*s)
+func (_u *AccountsUpdateOne) SetNillableCurrency(v *string) *AccountsUpdateOne {
+	if v != nil {
+		_u.SetCurrency(*v)
 	}
-	return auo
+	return _u
 }
 
 // Mutation returns the AccountsMutation object of the builder.
-func (auo *AccountsUpdateOne) Mutation() *AccountsMutation {
-	return auo.mutation
+func (_u *AccountsUpdateOne) Mutation() *AccountsMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the AccountsUpdate builder.
-func (auo *AccountsUpdateOne) Where(ps ...predicate.Accounts) *AccountsUpdateOne {
-	auo.mutation.Where(ps...)
-	return auo
+func (_u *AccountsUpdateOne) Where(ps ...predicate.Accounts) *AccountsUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (auo *AccountsUpdateOne) Select(field string, fields ...string) *AccountsUpdateOne {
-	auo.fields = append([]string{field}, fields...)
-	return auo
+func (_u *AccountsUpdateOne) Select(field string, fields ...string) *AccountsUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Accounts entity.
-func (auo *AccountsUpdateOne) Save(ctx context.Context) (*Accounts, error) {
-	auo.defaults()
-	return withHooks(ctx, auo.sqlSave, auo.mutation, auo.hooks)
+func (_u *AccountsUpdateOne) Save(ctx context.Context) (*Accounts, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (auo *AccountsUpdateOne) SaveX(ctx context.Context) *Accounts {
-	node, err := auo.Save(ctx)
+func (_u *AccountsUpdateOne) SaveX(ctx context.Context) *Accounts {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -272,34 +272,34 @@ func (auo *AccountsUpdateOne) SaveX(ctx context.Context) *Accounts {
 }
 
 // Exec executes the query on the entity.
-func (auo *AccountsUpdateOne) Exec(ctx context.Context) error {
-	_, err := auo.Save(ctx)
+func (_u *AccountsUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (auo *AccountsUpdateOne) ExecX(ctx context.Context) {
-	if err := auo.Exec(ctx); err != nil {
+func (_u *AccountsUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (auo *AccountsUpdateOne) defaults() {
-	if _, ok := auo.mutation.UpdatedAt(); !ok {
+func (_u *AccountsUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := accounts.UpdateDefaultUpdatedAt()
-		auo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (auo *AccountsUpdateOne) sqlSave(ctx context.Context) (_node *Accounts, err error) {
+func (_u *AccountsUpdateOne) sqlSave(ctx context.Context) (_node *Accounts, err error) {
 	_spec := sqlgraph.NewUpdateSpec(accounts.Table, accounts.Columns, sqlgraph.NewFieldSpec(accounts.FieldID, field.TypeInt))
-	id, ok := auo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "Accounts.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := auo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, accounts.FieldID)
 		for _, f := range fields {
@@ -311,35 +311,35 @@ func (auo *AccountsUpdateOne) sqlSave(ctx context.Context) (_node *Accounts, err
 			}
 		}
 	}
-	if ps := auo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := auo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(accounts.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := auo.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(accounts.FieldDeletedAt, field.TypeTime, value)
 	}
-	if auo.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(accounts.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := auo.mutation.Balance(); ok {
+	if value, ok := _u.mutation.Balance(); ok {
 		_spec.SetField(accounts.FieldBalance, field.TypeFloat64, value)
 	}
-	if value, ok := auo.mutation.AddedBalance(); ok {
+	if value, ok := _u.mutation.AddedBalance(); ok {
 		_spec.AddField(accounts.FieldBalance, field.TypeFloat64, value)
 	}
-	if value, ok := auo.mutation.Currency(); ok {
+	if value, ok := _u.mutation.Currency(); ok {
 		_spec.SetField(accounts.FieldCurrency, field.TypeString, value)
 	}
-	_node = &Accounts{config: auo.config}
+	_node = &Accounts{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, auo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{accounts.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -347,6 +347,6 @@ func (auo *AccountsUpdateOne) sqlSave(ctx context.Context) (_node *Accounts, err
 		}
 		return nil, err
 	}
-	auo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

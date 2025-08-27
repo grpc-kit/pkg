@@ -21,143 +21,143 @@ type AuthProvidersCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (apc *AuthProvidersCreate) SetCreatedAt(t time.Time) *AuthProvidersCreate {
-	apc.mutation.SetCreatedAt(t)
-	return apc
+func (_c *AuthProvidersCreate) SetCreatedAt(v time.Time) *AuthProvidersCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (apc *AuthProvidersCreate) SetNillableCreatedAt(t *time.Time) *AuthProvidersCreate {
-	if t != nil {
-		apc.SetCreatedAt(*t)
+func (_c *AuthProvidersCreate) SetNillableCreatedAt(v *time.Time) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return apc
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (apc *AuthProvidersCreate) SetUpdatedAt(t time.Time) *AuthProvidersCreate {
-	apc.mutation.SetUpdatedAt(t)
-	return apc
+func (_c *AuthProvidersCreate) SetUpdatedAt(v time.Time) *AuthProvidersCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (apc *AuthProvidersCreate) SetNillableUpdatedAt(t *time.Time) *AuthProvidersCreate {
-	if t != nil {
-		apc.SetUpdatedAt(*t)
+func (_c *AuthProvidersCreate) SetNillableUpdatedAt(v *time.Time) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
-	return apc
+	return _c
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (apc *AuthProvidersCreate) SetDeletedAt(t time.Time) *AuthProvidersCreate {
-	apc.mutation.SetDeletedAt(t)
-	return apc
+func (_c *AuthProvidersCreate) SetDeletedAt(v time.Time) *AuthProvidersCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (apc *AuthProvidersCreate) SetNillableDeletedAt(t *time.Time) *AuthProvidersCreate {
-	if t != nil {
-		apc.SetDeletedAt(*t)
+func (_c *AuthProvidersCreate) SetNillableDeletedAt(v *time.Time) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
 	}
-	return apc
+	return _c
 }
 
 // SetName sets the "name" field.
-func (apc *AuthProvidersCreate) SetName(s string) *AuthProvidersCreate {
-	apc.mutation.SetName(s)
-	return apc
+func (_c *AuthProvidersCreate) SetName(v string) *AuthProvidersCreate {
+	_c.mutation.SetName(v)
+	return _c
 }
 
 // SetType sets the "type" field.
-func (apc *AuthProvidersCreate) SetType(a authproviders.Type) *AuthProvidersCreate {
-	apc.mutation.SetType(a)
-	return apc
+func (_c *AuthProvidersCreate) SetType(v authproviders.Type) *AuthProvidersCreate {
+	_c.mutation.SetType(v)
+	return _c
 }
 
 // SetClientID sets the "client_id" field.
-func (apc *AuthProvidersCreate) SetClientID(s string) *AuthProvidersCreate {
-	apc.mutation.SetClientID(s)
-	return apc
+func (_c *AuthProvidersCreate) SetClientID(v string) *AuthProvidersCreate {
+	_c.mutation.SetClientID(v)
+	return _c
 }
 
 // SetNillableClientID sets the "client_id" field if the given value is not nil.
-func (apc *AuthProvidersCreate) SetNillableClientID(s *string) *AuthProvidersCreate {
-	if s != nil {
-		apc.SetClientID(*s)
+func (_c *AuthProvidersCreate) SetNillableClientID(v *string) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetClientID(*v)
 	}
-	return apc
+	return _c
 }
 
 // SetEnabled sets the "enabled" field.
-func (apc *AuthProvidersCreate) SetEnabled(b bool) *AuthProvidersCreate {
-	apc.mutation.SetEnabled(b)
-	return apc
+func (_c *AuthProvidersCreate) SetEnabled(v bool) *AuthProvidersCreate {
+	_c.mutation.SetEnabled(v)
+	return _c
 }
 
 // SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (apc *AuthProvidersCreate) SetNillableEnabled(b *bool) *AuthProvidersCreate {
-	if b != nil {
-		apc.SetEnabled(*b)
+func (_c *AuthProvidersCreate) SetNillableEnabled(v *bool) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetEnabled(*v)
 	}
-	return apc
+	return _c
 }
 
 // SetClientSecretEncrypted sets the "client_secret_encrypted" field.
-func (apc *AuthProvidersCreate) SetClientSecretEncrypted(b []byte) *AuthProvidersCreate {
-	apc.mutation.SetClientSecretEncrypted(b)
-	return apc
+func (_c *AuthProvidersCreate) SetClientSecretEncrypted(v []byte) *AuthProvidersCreate {
+	_c.mutation.SetClientSecretEncrypted(v)
+	return _c
 }
 
 // SetScopes sets the "scopes" field.
-func (apc *AuthProvidersCreate) SetScopes(s string) *AuthProvidersCreate {
-	apc.mutation.SetScopes(s)
-	return apc
+func (_c *AuthProvidersCreate) SetScopes(v string) *AuthProvidersCreate {
+	_c.mutation.SetScopes(v)
+	return _c
 }
 
 // SetRedirectURI sets the "redirect_uri" field.
-func (apc *AuthProvidersCreate) SetRedirectURI(s string) *AuthProvidersCreate {
-	apc.mutation.SetRedirectURI(s)
-	return apc
+func (_c *AuthProvidersCreate) SetRedirectURI(v string) *AuthProvidersCreate {
+	_c.mutation.SetRedirectURI(v)
+	return _c
 }
 
 // SetIssuer sets the "issuer" field.
-func (apc *AuthProvidersCreate) SetIssuer(s string) *AuthProvidersCreate {
-	apc.mutation.SetIssuer(s)
-	return apc
+func (_c *AuthProvidersCreate) SetIssuer(v string) *AuthProvidersCreate {
+	_c.mutation.SetIssuer(v)
+	return _c
 }
 
 // SetAuthorizationEndpoint sets the "authorization_endpoint" field.
-func (apc *AuthProvidersCreate) SetAuthorizationEndpoint(s string) *AuthProvidersCreate {
-	apc.mutation.SetAuthorizationEndpoint(s)
-	return apc
+func (_c *AuthProvidersCreate) SetAuthorizationEndpoint(v string) *AuthProvidersCreate {
+	_c.mutation.SetAuthorizationEndpoint(v)
+	return _c
 }
 
 // SetTokenEndpoint sets the "token_endpoint" field.
-func (apc *AuthProvidersCreate) SetTokenEndpoint(s string) *AuthProvidersCreate {
-	apc.mutation.SetTokenEndpoint(s)
-	return apc
+func (_c *AuthProvidersCreate) SetTokenEndpoint(v string) *AuthProvidersCreate {
+	_c.mutation.SetTokenEndpoint(v)
+	return _c
 }
 
 // SetUserinfoEndpoint sets the "userinfo_endpoint" field.
-func (apc *AuthProvidersCreate) SetUserinfoEndpoint(s string) *AuthProvidersCreate {
-	apc.mutation.SetUserinfoEndpoint(s)
-	return apc
+func (_c *AuthProvidersCreate) SetUserinfoEndpoint(v string) *AuthProvidersCreate {
+	_c.mutation.SetUserinfoEndpoint(v)
+	return _c
 }
 
 // Mutation returns the AuthProvidersMutation object of the builder.
-func (apc *AuthProvidersCreate) Mutation() *AuthProvidersMutation {
-	return apc.mutation
+func (_c *AuthProvidersCreate) Mutation() *AuthProvidersMutation {
+	return _c.mutation
 }
 
 // Save creates the AuthProviders in the database.
-func (apc *AuthProvidersCreate) Save(ctx context.Context) (*AuthProviders, error) {
-	apc.defaults()
-	return withHooks(ctx, apc.sqlSave, apc.mutation, apc.hooks)
+func (_c *AuthProvidersCreate) Save(ctx context.Context) (*AuthProviders, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (apc *AuthProvidersCreate) SaveX(ctx context.Context) *AuthProviders {
-	v, err := apc.Save(ctx)
+func (_c *AuthProvidersCreate) SaveX(ctx context.Context) *AuthProviders {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -165,97 +165,97 @@ func (apc *AuthProvidersCreate) SaveX(ctx context.Context) *AuthProviders {
 }
 
 // Exec executes the query.
-func (apc *AuthProvidersCreate) Exec(ctx context.Context) error {
-	_, err := apc.Save(ctx)
+func (_c *AuthProvidersCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (apc *AuthProvidersCreate) ExecX(ctx context.Context) {
-	if err := apc.Exec(ctx); err != nil {
+func (_c *AuthProvidersCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (apc *AuthProvidersCreate) defaults() {
-	if _, ok := apc.mutation.CreatedAt(); !ok {
+func (_c *AuthProvidersCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := authproviders.DefaultCreatedAt()
-		apc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := apc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := authproviders.DefaultUpdatedAt()
-		apc.mutation.SetUpdatedAt(v)
+		_c.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := apc.mutation.ClientID(); !ok {
+	if _, ok := _c.mutation.ClientID(); !ok {
 		v := authproviders.DefaultClientID
-		apc.mutation.SetClientID(v)
+		_c.mutation.SetClientID(v)
 	}
-	if _, ok := apc.mutation.Enabled(); !ok {
+	if _, ok := _c.mutation.Enabled(); !ok {
 		v := authproviders.DefaultEnabled
-		apc.mutation.SetEnabled(v)
+		_c.mutation.SetEnabled(v)
 	}
-	if _, ok := apc.mutation.ClientSecretEncrypted(); !ok {
+	if _, ok := _c.mutation.ClientSecretEncrypted(); !ok {
 		v := authproviders.DefaultClientSecretEncrypted
-		apc.mutation.SetClientSecretEncrypted(v)
+		_c.mutation.SetClientSecretEncrypted(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (apc *AuthProvidersCreate) check() error {
-	if _, ok := apc.mutation.CreatedAt(); !ok {
+func (_c *AuthProvidersCreate) check() error {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "AuthProviders.created_at"`)}
 	}
-	if _, ok := apc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "AuthProviders.updated_at"`)}
 	}
-	if _, ok := apc.mutation.Name(); !ok {
+	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "AuthProviders.name"`)}
 	}
-	if _, ok := apc.mutation.GetType(); !ok {
+	if _, ok := _c.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "AuthProviders.type"`)}
 	}
-	if v, ok := apc.mutation.GetType(); ok {
+	if v, ok := _c.mutation.GetType(); ok {
 		if err := authproviders.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.type": %w`, err)}
 		}
 	}
-	if _, ok := apc.mutation.ClientID(); !ok {
+	if _, ok := _c.mutation.ClientID(); !ok {
 		return &ValidationError{Name: "client_id", err: errors.New(`lion: missing required field "AuthProviders.client_id"`)}
 	}
-	if _, ok := apc.mutation.Enabled(); !ok {
+	if _, ok := _c.mutation.Enabled(); !ok {
 		return &ValidationError{Name: "enabled", err: errors.New(`lion: missing required field "AuthProviders.enabled"`)}
 	}
-	if _, ok := apc.mutation.ClientSecretEncrypted(); !ok {
+	if _, ok := _c.mutation.ClientSecretEncrypted(); !ok {
 		return &ValidationError{Name: "client_secret_encrypted", err: errors.New(`lion: missing required field "AuthProviders.client_secret_encrypted"`)}
 	}
-	if _, ok := apc.mutation.Scopes(); !ok {
+	if _, ok := _c.mutation.Scopes(); !ok {
 		return &ValidationError{Name: "scopes", err: errors.New(`lion: missing required field "AuthProviders.scopes"`)}
 	}
-	if _, ok := apc.mutation.RedirectURI(); !ok {
+	if _, ok := _c.mutation.RedirectURI(); !ok {
 		return &ValidationError{Name: "redirect_uri", err: errors.New(`lion: missing required field "AuthProviders.redirect_uri"`)}
 	}
-	if _, ok := apc.mutation.Issuer(); !ok {
+	if _, ok := _c.mutation.Issuer(); !ok {
 		return &ValidationError{Name: "issuer", err: errors.New(`lion: missing required field "AuthProviders.issuer"`)}
 	}
-	if _, ok := apc.mutation.AuthorizationEndpoint(); !ok {
+	if _, ok := _c.mutation.AuthorizationEndpoint(); !ok {
 		return &ValidationError{Name: "authorization_endpoint", err: errors.New(`lion: missing required field "AuthProviders.authorization_endpoint"`)}
 	}
-	if _, ok := apc.mutation.TokenEndpoint(); !ok {
+	if _, ok := _c.mutation.TokenEndpoint(); !ok {
 		return &ValidationError{Name: "token_endpoint", err: errors.New(`lion: missing required field "AuthProviders.token_endpoint"`)}
 	}
-	if _, ok := apc.mutation.UserinfoEndpoint(); !ok {
+	if _, ok := _c.mutation.UserinfoEndpoint(); !ok {
 		return &ValidationError{Name: "userinfo_endpoint", err: errors.New(`lion: missing required field "AuthProviders.userinfo_endpoint"`)}
 	}
 	return nil
 }
 
-func (apc *AuthProvidersCreate) sqlSave(ctx context.Context) (*AuthProviders, error) {
-	if err := apc.check(); err != nil {
+func (_c *AuthProvidersCreate) sqlSave(ctx context.Context) (*AuthProviders, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := apc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, apc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -263,69 +263,69 @@ func (apc *AuthProvidersCreate) sqlSave(ctx context.Context) (*AuthProviders, er
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	apc.mutation.id = &_node.ID
-	apc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (apc *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSpec) {
+func (_c *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSpec) {
 	var (
-		_node = &AuthProviders{config: apc.config}
+		_node = &AuthProviders{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(authproviders.Table, sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt))
 	)
-	if value, ok := apc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(authproviders.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := apc.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(authproviders.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := apc.mutation.DeletedAt(); ok {
+	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(authproviders.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := apc.mutation.Name(); ok {
+	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := apc.mutation.GetType(); ok {
+	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(authproviders.FieldType, field.TypeEnum, value)
 		_node.Type = value
 	}
-	if value, ok := apc.mutation.ClientID(); ok {
+	if value, ok := _c.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
 		_node.ClientID = value
 	}
-	if value, ok := apc.mutation.Enabled(); ok {
+	if value, ok := _c.mutation.Enabled(); ok {
 		_spec.SetField(authproviders.FieldEnabled, field.TypeBool, value)
 		_node.Enabled = value
 	}
-	if value, ok := apc.mutation.ClientSecretEncrypted(); ok {
+	if value, ok := _c.mutation.ClientSecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeBytes, value)
 		_node.ClientSecretEncrypted = value
 	}
-	if value, ok := apc.mutation.Scopes(); ok {
+	if value, ok := _c.mutation.Scopes(); ok {
 		_spec.SetField(authproviders.FieldScopes, field.TypeString, value)
 		_node.Scopes = value
 	}
-	if value, ok := apc.mutation.RedirectURI(); ok {
+	if value, ok := _c.mutation.RedirectURI(); ok {
 		_spec.SetField(authproviders.FieldRedirectURI, field.TypeString, value)
 		_node.RedirectURI = value
 	}
-	if value, ok := apc.mutation.Issuer(); ok {
+	if value, ok := _c.mutation.Issuer(); ok {
 		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
 		_node.Issuer = value
 	}
-	if value, ok := apc.mutation.AuthorizationEndpoint(); ok {
+	if value, ok := _c.mutation.AuthorizationEndpoint(); ok {
 		_spec.SetField(authproviders.FieldAuthorizationEndpoint, field.TypeString, value)
 		_node.AuthorizationEndpoint = value
 	}
-	if value, ok := apc.mutation.TokenEndpoint(); ok {
+	if value, ok := _c.mutation.TokenEndpoint(); ok {
 		_spec.SetField(authproviders.FieldTokenEndpoint, field.TypeString, value)
 		_node.TokenEndpoint = value
 	}
-	if value, ok := apc.mutation.UserinfoEndpoint(); ok {
+	if value, ok := _c.mutation.UserinfoEndpoint(); ok {
 		_spec.SetField(authproviders.FieldUserinfoEndpoint, field.TypeString, value)
 		_node.UserinfoEndpoint = value
 	}
@@ -340,16 +340,16 @@ type AuthProvidersCreateBulk struct {
 }
 
 // Save creates the AuthProviders entities in the database.
-func (apcb *AuthProvidersCreateBulk) Save(ctx context.Context) ([]*AuthProviders, error) {
-	if apcb.err != nil {
-		return nil, apcb.err
+func (_c *AuthProvidersCreateBulk) Save(ctx context.Context) ([]*AuthProviders, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(apcb.builders))
-	nodes := make([]*AuthProviders, len(apcb.builders))
-	mutators := make([]Mutator, len(apcb.builders))
-	for i := range apcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*AuthProviders, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := apcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AuthProvidersMutation)
@@ -363,11 +363,11 @@ func (apcb *AuthProvidersCreateBulk) Save(ctx context.Context) ([]*AuthProviders
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, apcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, apcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -391,7 +391,7 @@ func (apcb *AuthProvidersCreateBulk) Save(ctx context.Context) ([]*AuthProviders
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, apcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -399,8 +399,8 @@ func (apcb *AuthProvidersCreateBulk) Save(ctx context.Context) ([]*AuthProviders
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (apcb *AuthProvidersCreateBulk) SaveX(ctx context.Context) []*AuthProviders {
-	v, err := apcb.Save(ctx)
+func (_c *AuthProvidersCreateBulk) SaveX(ctx context.Context) []*AuthProviders {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -408,14 +408,14 @@ func (apcb *AuthProvidersCreateBulk) SaveX(ctx context.Context) []*AuthProviders
 }
 
 // Exec executes the query.
-func (apcb *AuthProvidersCreateBulk) Exec(ctx context.Context) error {
-	_, err := apcb.Save(ctx)
+func (_c *AuthProvidersCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (apcb *AuthProvidersCreateBulk) ExecX(ctx context.Context) {
-	if err := apcb.Exec(ctx); err != nil {
+func (_c *AuthProvidersCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

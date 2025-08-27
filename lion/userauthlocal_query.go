@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -27,40 +28,40 @@ type UserAuthLocalQuery struct {
 }
 
 // Where adds a new predicate for the UserAuthLocalQuery builder.
-func (ualq *UserAuthLocalQuery) Where(ps ...predicate.UserAuthLocal) *UserAuthLocalQuery {
-	ualq.predicates = append(ualq.predicates, ps...)
-	return ualq
+func (_q *UserAuthLocalQuery) Where(ps ...predicate.UserAuthLocal) *UserAuthLocalQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (ualq *UserAuthLocalQuery) Limit(limit int) *UserAuthLocalQuery {
-	ualq.ctx.Limit = &limit
-	return ualq
+func (_q *UserAuthLocalQuery) Limit(limit int) *UserAuthLocalQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (ualq *UserAuthLocalQuery) Offset(offset int) *UserAuthLocalQuery {
-	ualq.ctx.Offset = &offset
-	return ualq
+func (_q *UserAuthLocalQuery) Offset(offset int) *UserAuthLocalQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (ualq *UserAuthLocalQuery) Unique(unique bool) *UserAuthLocalQuery {
-	ualq.ctx.Unique = &unique
-	return ualq
+func (_q *UserAuthLocalQuery) Unique(unique bool) *UserAuthLocalQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (ualq *UserAuthLocalQuery) Order(o ...userauthlocal.OrderOption) *UserAuthLocalQuery {
-	ualq.order = append(ualq.order, o...)
-	return ualq
+func (_q *UserAuthLocalQuery) Order(o ...userauthlocal.OrderOption) *UserAuthLocalQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // First returns the first UserAuthLocal entity from the query.
 // Returns a *NotFoundError when no UserAuthLocal was found.
-func (ualq *UserAuthLocalQuery) First(ctx context.Context) (*UserAuthLocal, error) {
-	nodes, err := ualq.Limit(1).All(setContextOp(ctx, ualq.ctx, "First"))
+func (_q *UserAuthLocalQuery) First(ctx context.Context) (*UserAuthLocal, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +72,8 @@ func (ualq *UserAuthLocalQuery) First(ctx context.Context) (*UserAuthLocal, erro
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (ualq *UserAuthLocalQuery) FirstX(ctx context.Context) *UserAuthLocal {
-	node, err := ualq.First(ctx)
+func (_q *UserAuthLocalQuery) FirstX(ctx context.Context) *UserAuthLocal {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -81,9 +82,9 @@ func (ualq *UserAuthLocalQuery) FirstX(ctx context.Context) *UserAuthLocal {
 
 // FirstID returns the first UserAuthLocal ID from the query.
 // Returns a *NotFoundError when no UserAuthLocal ID was found.
-func (ualq *UserAuthLocalQuery) FirstID(ctx context.Context) (id int, err error) {
+func (_q *UserAuthLocalQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ualq.Limit(1).IDs(setContextOp(ctx, ualq.ctx, "FirstID")); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -94,8 +95,8 @@ func (ualq *UserAuthLocalQuery) FirstID(ctx context.Context) (id int, err error)
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (ualq *UserAuthLocalQuery) FirstIDX(ctx context.Context) int {
-	id, err := ualq.FirstID(ctx)
+func (_q *UserAuthLocalQuery) FirstIDX(ctx context.Context) int {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -105,8 +106,8 @@ func (ualq *UserAuthLocalQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single UserAuthLocal entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one UserAuthLocal entity is found.
 // Returns a *NotFoundError when no UserAuthLocal entities are found.
-func (ualq *UserAuthLocalQuery) Only(ctx context.Context) (*UserAuthLocal, error) {
-	nodes, err := ualq.Limit(2).All(setContextOp(ctx, ualq.ctx, "Only"))
+func (_q *UserAuthLocalQuery) Only(ctx context.Context) (*UserAuthLocal, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -121,8 +122,8 @@ func (ualq *UserAuthLocalQuery) Only(ctx context.Context) (*UserAuthLocal, error
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (ualq *UserAuthLocalQuery) OnlyX(ctx context.Context) *UserAuthLocal {
-	node, err := ualq.Only(ctx)
+func (_q *UserAuthLocalQuery) OnlyX(ctx context.Context) *UserAuthLocal {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -132,9 +133,9 @@ func (ualq *UserAuthLocalQuery) OnlyX(ctx context.Context) *UserAuthLocal {
 // OnlyID is like Only, but returns the only UserAuthLocal ID in the query.
 // Returns a *NotSingularError when more than one UserAuthLocal ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (ualq *UserAuthLocalQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *UserAuthLocalQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ualq.Limit(2).IDs(setContextOp(ctx, ualq.ctx, "OnlyID")); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -149,8 +150,8 @@ func (ualq *UserAuthLocalQuery) OnlyID(ctx context.Context) (id int, err error) 
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (ualq *UserAuthLocalQuery) OnlyIDX(ctx context.Context) int {
-	id, err := ualq.OnlyID(ctx)
+func (_q *UserAuthLocalQuery) OnlyIDX(ctx context.Context) int {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -158,18 +159,18 @@ func (ualq *UserAuthLocalQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of UserAuthLocals.
-func (ualq *UserAuthLocalQuery) All(ctx context.Context) ([]*UserAuthLocal, error) {
-	ctx = setContextOp(ctx, ualq.ctx, "All")
-	if err := ualq.prepareQuery(ctx); err != nil {
+func (_q *UserAuthLocalQuery) All(ctx context.Context) ([]*UserAuthLocal, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*UserAuthLocal, *UserAuthLocalQuery]()
-	return withInterceptors[[]*UserAuthLocal](ctx, ualq, qr, ualq.inters)
+	return withInterceptors[[]*UserAuthLocal](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ualq *UserAuthLocalQuery) AllX(ctx context.Context) []*UserAuthLocal {
-	nodes, err := ualq.All(ctx)
+func (_q *UserAuthLocalQuery) AllX(ctx context.Context) []*UserAuthLocal {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -177,20 +178,20 @@ func (ualq *UserAuthLocalQuery) AllX(ctx context.Context) []*UserAuthLocal {
 }
 
 // IDs executes the query and returns a list of UserAuthLocal IDs.
-func (ualq *UserAuthLocalQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if ualq.ctx.Unique == nil && ualq.path != nil {
-		ualq.Unique(true)
+func (_q *UserAuthLocalQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, ualq.ctx, "IDs")
-	if err = ualq.Select(userauthlocal.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(userauthlocal.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (ualq *UserAuthLocalQuery) IDsX(ctx context.Context) []int {
-	ids, err := ualq.IDs(ctx)
+func (_q *UserAuthLocalQuery) IDsX(ctx context.Context) []int {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -198,17 +199,17 @@ func (ualq *UserAuthLocalQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (ualq *UserAuthLocalQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, ualq.ctx, "Count")
-	if err := ualq.prepareQuery(ctx); err != nil {
+func (_q *UserAuthLocalQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, ualq, querierCount[*UserAuthLocalQuery](), ualq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*UserAuthLocalQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (ualq *UserAuthLocalQuery) CountX(ctx context.Context) int {
-	count, err := ualq.Count(ctx)
+func (_q *UserAuthLocalQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -216,9 +217,9 @@ func (ualq *UserAuthLocalQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (ualq *UserAuthLocalQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, ualq.ctx, "Exist")
-	switch _, err := ualq.FirstID(ctx); {
+func (_q *UserAuthLocalQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -229,8 +230,8 @@ func (ualq *UserAuthLocalQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (ualq *UserAuthLocalQuery) ExistX(ctx context.Context) bool {
-	exist, err := ualq.Exist(ctx)
+func (_q *UserAuthLocalQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -239,19 +240,19 @@ func (ualq *UserAuthLocalQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the UserAuthLocalQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (ualq *UserAuthLocalQuery) Clone() *UserAuthLocalQuery {
-	if ualq == nil {
+func (_q *UserAuthLocalQuery) Clone() *UserAuthLocalQuery {
+	if _q == nil {
 		return nil
 	}
 	return &UserAuthLocalQuery{
-		config:     ualq.config,
-		ctx:        ualq.ctx.Clone(),
-		order:      append([]userauthlocal.OrderOption{}, ualq.order...),
-		inters:     append([]Interceptor{}, ualq.inters...),
-		predicates: append([]predicate.UserAuthLocal{}, ualq.predicates...),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]userauthlocal.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.UserAuthLocal{}, _q.predicates...),
 		// clone intermediate query.
-		sql:  ualq.sql.Clone(),
-		path: ualq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
@@ -269,10 +270,10 @@ func (ualq *UserAuthLocalQuery) Clone() *UserAuthLocalQuery {
 //		GroupBy(userauthlocal.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (ualq *UserAuthLocalQuery) GroupBy(field string, fields ...string) *UserAuthLocalGroupBy {
-	ualq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &UserAuthLocalGroupBy{build: ualq}
-	grbuild.flds = &ualq.ctx.Fields
+func (_q *UserAuthLocalQuery) GroupBy(field string, fields ...string) *UserAuthLocalGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &UserAuthLocalGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = userauthlocal.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -290,62 +291,62 @@ func (ualq *UserAuthLocalQuery) GroupBy(field string, fields ...string) *UserAut
 //	client.UserAuthLocal.Query().
 //		Select(userauthlocal.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (ualq *UserAuthLocalQuery) Select(fields ...string) *UserAuthLocalSelect {
-	ualq.ctx.Fields = append(ualq.ctx.Fields, fields...)
-	sbuild := &UserAuthLocalSelect{UserAuthLocalQuery: ualq}
+func (_q *UserAuthLocalQuery) Select(fields ...string) *UserAuthLocalSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &UserAuthLocalSelect{UserAuthLocalQuery: _q}
 	sbuild.label = userauthlocal.Label
-	sbuild.flds, sbuild.scan = &ualq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a UserAuthLocalSelect configured with the given aggregations.
-func (ualq *UserAuthLocalQuery) Aggregate(fns ...AggregateFunc) *UserAuthLocalSelect {
-	return ualq.Select().Aggregate(fns...)
+func (_q *UserAuthLocalQuery) Aggregate(fns ...AggregateFunc) *UserAuthLocalSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (ualq *UserAuthLocalQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range ualq.inters {
+func (_q *UserAuthLocalQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, ualq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range ualq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !userauthlocal.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
-	if ualq.path != nil {
-		prev, err := ualq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		ualq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (ualq *UserAuthLocalQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UserAuthLocal, error) {
+func (_q *UserAuthLocalQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UserAuthLocal, error) {
 	var (
 		nodes = []*UserAuthLocal{}
-		_spec = ualq.querySpec()
+		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*UserAuthLocal).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &UserAuthLocal{config: ualq.config}
+		node := &UserAuthLocal{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, ualq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -354,24 +355,24 @@ func (ualq *UserAuthLocalQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	return nodes, nil
 }
 
-func (ualq *UserAuthLocalQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := ualq.querySpec()
-	_spec.Node.Columns = ualq.ctx.Fields
-	if len(ualq.ctx.Fields) > 0 {
-		_spec.Unique = ualq.ctx.Unique != nil && *ualq.ctx.Unique
+func (_q *UserAuthLocalQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, ualq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (ualq *UserAuthLocalQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *UserAuthLocalQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(userauthlocal.Table, userauthlocal.Columns, sqlgraph.NewFieldSpec(userauthlocal.FieldID, field.TypeInt))
-	_spec.From = ualq.sql
-	if unique := ualq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if ualq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := ualq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, userauthlocal.FieldID)
 		for i := range fields {
@@ -380,20 +381,20 @@ func (ualq *UserAuthLocalQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := ualq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := ualq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := ualq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := ualq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -403,33 +404,33 @@ func (ualq *UserAuthLocalQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (ualq *UserAuthLocalQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(ualq.driver.Dialect())
+func (_q *UserAuthLocalQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(userauthlocal.Table)
-	columns := ualq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = userauthlocal.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if ualq.sql != nil {
-		selector = ualq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if ualq.ctx.Unique != nil && *ualq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range ualq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range ualq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := ualq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := ualq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -442,41 +443,41 @@ type UserAuthLocalGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ualgb *UserAuthLocalGroupBy) Aggregate(fns ...AggregateFunc) *UserAuthLocalGroupBy {
-	ualgb.fns = append(ualgb.fns, fns...)
-	return ualgb
+func (_g *UserAuthLocalGroupBy) Aggregate(fns ...AggregateFunc) *UserAuthLocalGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ualgb *UserAuthLocalGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ualgb.build.ctx, "GroupBy")
-	if err := ualgb.build.prepareQuery(ctx); err != nil {
+func (_g *UserAuthLocalGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserAuthLocalQuery, *UserAuthLocalGroupBy](ctx, ualgb.build, ualgb, ualgb.build.inters, v)
+	return scanWithInterceptors[*UserAuthLocalQuery, *UserAuthLocalGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (ualgb *UserAuthLocalGroupBy) sqlScan(ctx context.Context, root *UserAuthLocalQuery, v any) error {
+func (_g *UserAuthLocalGroupBy) sqlScan(ctx context.Context, root *UserAuthLocalQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(ualgb.fns))
-	for _, fn := range ualgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*ualgb.flds)+len(ualgb.fns))
-		for _, f := range *ualgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*ualgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ualgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -490,27 +491,27 @@ type UserAuthLocalSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (uals *UserAuthLocalSelect) Aggregate(fns ...AggregateFunc) *UserAuthLocalSelect {
-	uals.fns = append(uals.fns, fns...)
-	return uals
+func (_s *UserAuthLocalSelect) Aggregate(fns ...AggregateFunc) *UserAuthLocalSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (uals *UserAuthLocalSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, uals.ctx, "Select")
-	if err := uals.prepareQuery(ctx); err != nil {
+func (_s *UserAuthLocalSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserAuthLocalQuery, *UserAuthLocalSelect](ctx, uals.UserAuthLocalQuery, uals, uals.inters, v)
+	return scanWithInterceptors[*UserAuthLocalQuery, *UserAuthLocalSelect](ctx, _s.UserAuthLocalQuery, _s, _s.inters, v)
 }
 
-func (uals *UserAuthLocalSelect) sqlScan(ctx context.Context, root *UserAuthLocalQuery, v any) error {
+func (_s *UserAuthLocalSelect) sqlScan(ctx context.Context, root *UserAuthLocalQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(uals.fns))
-	for _, fn := range uals.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*uals.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -518,7 +519,7 @@ func (uals *UserAuthLocalSelect) sqlScan(ctx context.Context, root *UserAuthLoca
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := uals.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

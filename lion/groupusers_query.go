@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -27,40 +28,40 @@ type GroupUsersQuery struct {
 }
 
 // Where adds a new predicate for the GroupUsersQuery builder.
-func (guq *GroupUsersQuery) Where(ps ...predicate.GroupUsers) *GroupUsersQuery {
-	guq.predicates = append(guq.predicates, ps...)
-	return guq
+func (_q *GroupUsersQuery) Where(ps ...predicate.GroupUsers) *GroupUsersQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (guq *GroupUsersQuery) Limit(limit int) *GroupUsersQuery {
-	guq.ctx.Limit = &limit
-	return guq
+func (_q *GroupUsersQuery) Limit(limit int) *GroupUsersQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (guq *GroupUsersQuery) Offset(offset int) *GroupUsersQuery {
-	guq.ctx.Offset = &offset
-	return guq
+func (_q *GroupUsersQuery) Offset(offset int) *GroupUsersQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (guq *GroupUsersQuery) Unique(unique bool) *GroupUsersQuery {
-	guq.ctx.Unique = &unique
-	return guq
+func (_q *GroupUsersQuery) Unique(unique bool) *GroupUsersQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (guq *GroupUsersQuery) Order(o ...groupusers.OrderOption) *GroupUsersQuery {
-	guq.order = append(guq.order, o...)
-	return guq
+func (_q *GroupUsersQuery) Order(o ...groupusers.OrderOption) *GroupUsersQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // First returns the first GroupUsers entity from the query.
 // Returns a *NotFoundError when no GroupUsers was found.
-func (guq *GroupUsersQuery) First(ctx context.Context) (*GroupUsers, error) {
-	nodes, err := guq.Limit(1).All(setContextOp(ctx, guq.ctx, "First"))
+func (_q *GroupUsersQuery) First(ctx context.Context) (*GroupUsers, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +72,8 @@ func (guq *GroupUsersQuery) First(ctx context.Context) (*GroupUsers, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (guq *GroupUsersQuery) FirstX(ctx context.Context) *GroupUsers {
-	node, err := guq.First(ctx)
+func (_q *GroupUsersQuery) FirstX(ctx context.Context) *GroupUsers {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -81,9 +82,9 @@ func (guq *GroupUsersQuery) FirstX(ctx context.Context) *GroupUsers {
 
 // FirstID returns the first GroupUsers ID from the query.
 // Returns a *NotFoundError when no GroupUsers ID was found.
-func (guq *GroupUsersQuery) FirstID(ctx context.Context) (id int, err error) {
+func (_q *GroupUsersQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = guq.Limit(1).IDs(setContextOp(ctx, guq.ctx, "FirstID")); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -94,8 +95,8 @@ func (guq *GroupUsersQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (guq *GroupUsersQuery) FirstIDX(ctx context.Context) int {
-	id, err := guq.FirstID(ctx)
+func (_q *GroupUsersQuery) FirstIDX(ctx context.Context) int {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -105,8 +106,8 @@ func (guq *GroupUsersQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single GroupUsers entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one GroupUsers entity is found.
 // Returns a *NotFoundError when no GroupUsers entities are found.
-func (guq *GroupUsersQuery) Only(ctx context.Context) (*GroupUsers, error) {
-	nodes, err := guq.Limit(2).All(setContextOp(ctx, guq.ctx, "Only"))
+func (_q *GroupUsersQuery) Only(ctx context.Context) (*GroupUsers, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -121,8 +122,8 @@ func (guq *GroupUsersQuery) Only(ctx context.Context) (*GroupUsers, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (guq *GroupUsersQuery) OnlyX(ctx context.Context) *GroupUsers {
-	node, err := guq.Only(ctx)
+func (_q *GroupUsersQuery) OnlyX(ctx context.Context) *GroupUsers {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -132,9 +133,9 @@ func (guq *GroupUsersQuery) OnlyX(ctx context.Context) *GroupUsers {
 // OnlyID is like Only, but returns the only GroupUsers ID in the query.
 // Returns a *NotSingularError when more than one GroupUsers ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (guq *GroupUsersQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *GroupUsersQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = guq.Limit(2).IDs(setContextOp(ctx, guq.ctx, "OnlyID")); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -149,8 +150,8 @@ func (guq *GroupUsersQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (guq *GroupUsersQuery) OnlyIDX(ctx context.Context) int {
-	id, err := guq.OnlyID(ctx)
+func (_q *GroupUsersQuery) OnlyIDX(ctx context.Context) int {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -158,18 +159,18 @@ func (guq *GroupUsersQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of GroupUsersSlice.
-func (guq *GroupUsersQuery) All(ctx context.Context) ([]*GroupUsers, error) {
-	ctx = setContextOp(ctx, guq.ctx, "All")
-	if err := guq.prepareQuery(ctx); err != nil {
+func (_q *GroupUsersQuery) All(ctx context.Context) ([]*GroupUsers, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*GroupUsers, *GroupUsersQuery]()
-	return withInterceptors[[]*GroupUsers](ctx, guq, qr, guq.inters)
+	return withInterceptors[[]*GroupUsers](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (guq *GroupUsersQuery) AllX(ctx context.Context) []*GroupUsers {
-	nodes, err := guq.All(ctx)
+func (_q *GroupUsersQuery) AllX(ctx context.Context) []*GroupUsers {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -177,20 +178,20 @@ func (guq *GroupUsersQuery) AllX(ctx context.Context) []*GroupUsers {
 }
 
 // IDs executes the query and returns a list of GroupUsers IDs.
-func (guq *GroupUsersQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if guq.ctx.Unique == nil && guq.path != nil {
-		guq.Unique(true)
+func (_q *GroupUsersQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, guq.ctx, "IDs")
-	if err = guq.Select(groupusers.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(groupusers.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (guq *GroupUsersQuery) IDsX(ctx context.Context) []int {
-	ids, err := guq.IDs(ctx)
+func (_q *GroupUsersQuery) IDsX(ctx context.Context) []int {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -198,17 +199,17 @@ func (guq *GroupUsersQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (guq *GroupUsersQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, guq.ctx, "Count")
-	if err := guq.prepareQuery(ctx); err != nil {
+func (_q *GroupUsersQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, guq, querierCount[*GroupUsersQuery](), guq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*GroupUsersQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (guq *GroupUsersQuery) CountX(ctx context.Context) int {
-	count, err := guq.Count(ctx)
+func (_q *GroupUsersQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -216,9 +217,9 @@ func (guq *GroupUsersQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (guq *GroupUsersQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, guq.ctx, "Exist")
-	switch _, err := guq.FirstID(ctx); {
+func (_q *GroupUsersQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -229,8 +230,8 @@ func (guq *GroupUsersQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (guq *GroupUsersQuery) ExistX(ctx context.Context) bool {
-	exist, err := guq.Exist(ctx)
+func (_q *GroupUsersQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -239,19 +240,19 @@ func (guq *GroupUsersQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the GroupUsersQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (guq *GroupUsersQuery) Clone() *GroupUsersQuery {
-	if guq == nil {
+func (_q *GroupUsersQuery) Clone() *GroupUsersQuery {
+	if _q == nil {
 		return nil
 	}
 	return &GroupUsersQuery{
-		config:     guq.config,
-		ctx:        guq.ctx.Clone(),
-		order:      append([]groupusers.OrderOption{}, guq.order...),
-		inters:     append([]Interceptor{}, guq.inters...),
-		predicates: append([]predicate.GroupUsers{}, guq.predicates...),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]groupusers.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.GroupUsers{}, _q.predicates...),
 		// clone intermediate query.
-		sql:  guq.sql.Clone(),
-		path: guq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
@@ -269,10 +270,10 @@ func (guq *GroupUsersQuery) Clone() *GroupUsersQuery {
 //		GroupBy(groupusers.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (guq *GroupUsersQuery) GroupBy(field string, fields ...string) *GroupUsersGroupBy {
-	guq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &GroupUsersGroupBy{build: guq}
-	grbuild.flds = &guq.ctx.Fields
+func (_q *GroupUsersQuery) GroupBy(field string, fields ...string) *GroupUsersGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &GroupUsersGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = groupusers.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -290,62 +291,62 @@ func (guq *GroupUsersQuery) GroupBy(field string, fields ...string) *GroupUsersG
 //	client.GroupUsers.Query().
 //		Select(groupusers.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (guq *GroupUsersQuery) Select(fields ...string) *GroupUsersSelect {
-	guq.ctx.Fields = append(guq.ctx.Fields, fields...)
-	sbuild := &GroupUsersSelect{GroupUsersQuery: guq}
+func (_q *GroupUsersQuery) Select(fields ...string) *GroupUsersSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &GroupUsersSelect{GroupUsersQuery: _q}
 	sbuild.label = groupusers.Label
-	sbuild.flds, sbuild.scan = &guq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a GroupUsersSelect configured with the given aggregations.
-func (guq *GroupUsersQuery) Aggregate(fns ...AggregateFunc) *GroupUsersSelect {
-	return guq.Select().Aggregate(fns...)
+func (_q *GroupUsersQuery) Aggregate(fns ...AggregateFunc) *GroupUsersSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (guq *GroupUsersQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range guq.inters {
+func (_q *GroupUsersQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, guq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range guq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !groupusers.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
-	if guq.path != nil {
-		prev, err := guq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		guq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (guq *GroupUsersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*GroupUsers, error) {
+func (_q *GroupUsersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*GroupUsers, error) {
 	var (
 		nodes = []*GroupUsers{}
-		_spec = guq.querySpec()
+		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*GroupUsers).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &GroupUsers{config: guq.config}
+		node := &GroupUsers{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, guq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -354,24 +355,24 @@ func (guq *GroupUsersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	return nodes, nil
 }
 
-func (guq *GroupUsersQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := guq.querySpec()
-	_spec.Node.Columns = guq.ctx.Fields
-	if len(guq.ctx.Fields) > 0 {
-		_spec.Unique = guq.ctx.Unique != nil && *guq.ctx.Unique
+func (_q *GroupUsersQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, guq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (guq *GroupUsersQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *GroupUsersQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(groupusers.Table, groupusers.Columns, sqlgraph.NewFieldSpec(groupusers.FieldID, field.TypeInt))
-	_spec.From = guq.sql
-	if unique := guq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if guq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := guq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, groupusers.FieldID)
 		for i := range fields {
@@ -380,20 +381,20 @@ func (guq *GroupUsersQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := guq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := guq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := guq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := guq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -403,33 +404,33 @@ func (guq *GroupUsersQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (guq *GroupUsersQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(guq.driver.Dialect())
+func (_q *GroupUsersQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(groupusers.Table)
-	columns := guq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = groupusers.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if guq.sql != nil {
-		selector = guq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if guq.ctx.Unique != nil && *guq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range guq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range guq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := guq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := guq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -442,41 +443,41 @@ type GroupUsersGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (gugb *GroupUsersGroupBy) Aggregate(fns ...AggregateFunc) *GroupUsersGroupBy {
-	gugb.fns = append(gugb.fns, fns...)
-	return gugb
+func (_g *GroupUsersGroupBy) Aggregate(fns ...AggregateFunc) *GroupUsersGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gugb *GroupUsersGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gugb.build.ctx, "GroupBy")
-	if err := gugb.build.prepareQuery(ctx); err != nil {
+func (_g *GroupUsersGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GroupUsersQuery, *GroupUsersGroupBy](ctx, gugb.build, gugb, gugb.build.inters, v)
+	return scanWithInterceptors[*GroupUsersQuery, *GroupUsersGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (gugb *GroupUsersGroupBy) sqlScan(ctx context.Context, root *GroupUsersQuery, v any) error {
+func (_g *GroupUsersGroupBy) sqlScan(ctx context.Context, root *GroupUsersQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(gugb.fns))
-	for _, fn := range gugb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*gugb.flds)+len(gugb.fns))
-		for _, f := range *gugb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*gugb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gugb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -490,27 +491,27 @@ type GroupUsersSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (gus *GroupUsersSelect) Aggregate(fns ...AggregateFunc) *GroupUsersSelect {
-	gus.fns = append(gus.fns, fns...)
-	return gus
+func (_s *GroupUsersSelect) Aggregate(fns ...AggregateFunc) *GroupUsersSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gus *GroupUsersSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gus.ctx, "Select")
-	if err := gus.prepareQuery(ctx); err != nil {
+func (_s *GroupUsersSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GroupUsersQuery, *GroupUsersSelect](ctx, gus.GroupUsersQuery, gus, gus.inters, v)
+	return scanWithInterceptors[*GroupUsersQuery, *GroupUsersSelect](ctx, _s.GroupUsersQuery, _s, _s.inters, v)
 }
 
-func (gus *GroupUsersSelect) sqlScan(ctx context.Context, root *GroupUsersQuery, v any) error {
+func (_s *GroupUsersSelect) sqlScan(ctx context.Context, root *GroupUsersQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(gus.fns))
-	for _, fn := range gus.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*gus.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -518,7 +519,7 @@ func (gus *GroupUsersSelect) sqlScan(ctx context.Context, root *GroupUsersQuery,
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gus.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

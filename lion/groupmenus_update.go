@@ -23,51 +23,51 @@ type GroupMenusUpdate struct {
 }
 
 // Where appends a list predicates to the GroupMenusUpdate builder.
-func (gmu *GroupMenusUpdate) Where(ps ...predicate.GroupMenus) *GroupMenusUpdate {
-	gmu.mutation.Where(ps...)
-	return gmu
+func (_u *GroupMenusUpdate) Where(ps ...predicate.GroupMenus) *GroupMenusUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (gmu *GroupMenusUpdate) SetUpdatedAt(t time.Time) *GroupMenusUpdate {
-	gmu.mutation.SetUpdatedAt(t)
-	return gmu
+func (_u *GroupMenusUpdate) SetUpdatedAt(v time.Time) *GroupMenusUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (gmu *GroupMenusUpdate) SetDeletedAt(t time.Time) *GroupMenusUpdate {
-	gmu.mutation.SetDeletedAt(t)
-	return gmu
+func (_u *GroupMenusUpdate) SetDeletedAt(v time.Time) *GroupMenusUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (gmu *GroupMenusUpdate) SetNillableDeletedAt(t *time.Time) *GroupMenusUpdate {
-	if t != nil {
-		gmu.SetDeletedAt(*t)
+func (_u *GroupMenusUpdate) SetNillableDeletedAt(v *time.Time) *GroupMenusUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return gmu
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (gmu *GroupMenusUpdate) ClearDeletedAt() *GroupMenusUpdate {
-	gmu.mutation.ClearDeletedAt()
-	return gmu
+func (_u *GroupMenusUpdate) ClearDeletedAt() *GroupMenusUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // Mutation returns the GroupMenusMutation object of the builder.
-func (gmu *GroupMenusUpdate) Mutation() *GroupMenusMutation {
-	return gmu.mutation
+func (_u *GroupMenusUpdate) Mutation() *GroupMenusMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (gmu *GroupMenusUpdate) Save(ctx context.Context) (int, error) {
-	gmu.defaults()
-	return withHooks(ctx, gmu.sqlSave, gmu.mutation, gmu.hooks)
+func (_u *GroupMenusUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gmu *GroupMenusUpdate) SaveX(ctx context.Context) int {
-	affected, err := gmu.Save(ctx)
+func (_u *GroupMenusUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -75,45 +75,45 @@ func (gmu *GroupMenusUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (gmu *GroupMenusUpdate) Exec(ctx context.Context) error {
-	_, err := gmu.Save(ctx)
+func (_u *GroupMenusUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gmu *GroupMenusUpdate) ExecX(ctx context.Context) {
-	if err := gmu.Exec(ctx); err != nil {
+func (_u *GroupMenusUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (gmu *GroupMenusUpdate) defaults() {
-	if _, ok := gmu.mutation.UpdatedAt(); !ok {
+func (_u *GroupMenusUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := groupmenus.UpdateDefaultUpdatedAt()
-		gmu.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (gmu *GroupMenusUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GroupMenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(groupmenus.Table, groupmenus.Columns, sqlgraph.NewFieldSpec(groupmenus.FieldID, field.TypeInt))
-	if ps := gmu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := gmu.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(groupmenus.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := gmu.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(groupmenus.FieldDeletedAt, field.TypeTime, value)
 	}
-	if gmu.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(groupmenus.FieldDeletedAt, field.TypeTime)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, gmu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{groupmenus.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -121,8 +121,8 @@ func (gmu *GroupMenusUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	gmu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // GroupMenusUpdateOne is the builder for updating a single GroupMenus entity.
@@ -134,58 +134,58 @@ type GroupMenusUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (gmuo *GroupMenusUpdateOne) SetUpdatedAt(t time.Time) *GroupMenusUpdateOne {
-	gmuo.mutation.SetUpdatedAt(t)
-	return gmuo
+func (_u *GroupMenusUpdateOne) SetUpdatedAt(v time.Time) *GroupMenusUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (gmuo *GroupMenusUpdateOne) SetDeletedAt(t time.Time) *GroupMenusUpdateOne {
-	gmuo.mutation.SetDeletedAt(t)
-	return gmuo
+func (_u *GroupMenusUpdateOne) SetDeletedAt(v time.Time) *GroupMenusUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (gmuo *GroupMenusUpdateOne) SetNillableDeletedAt(t *time.Time) *GroupMenusUpdateOne {
-	if t != nil {
-		gmuo.SetDeletedAt(*t)
+func (_u *GroupMenusUpdateOne) SetNillableDeletedAt(v *time.Time) *GroupMenusUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return gmuo
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (gmuo *GroupMenusUpdateOne) ClearDeletedAt() *GroupMenusUpdateOne {
-	gmuo.mutation.ClearDeletedAt()
-	return gmuo
+func (_u *GroupMenusUpdateOne) ClearDeletedAt() *GroupMenusUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // Mutation returns the GroupMenusMutation object of the builder.
-func (gmuo *GroupMenusUpdateOne) Mutation() *GroupMenusMutation {
-	return gmuo.mutation
+func (_u *GroupMenusUpdateOne) Mutation() *GroupMenusMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the GroupMenusUpdate builder.
-func (gmuo *GroupMenusUpdateOne) Where(ps ...predicate.GroupMenus) *GroupMenusUpdateOne {
-	gmuo.mutation.Where(ps...)
-	return gmuo
+func (_u *GroupMenusUpdateOne) Where(ps ...predicate.GroupMenus) *GroupMenusUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (gmuo *GroupMenusUpdateOne) Select(field string, fields ...string) *GroupMenusUpdateOne {
-	gmuo.fields = append([]string{field}, fields...)
-	return gmuo
+func (_u *GroupMenusUpdateOne) Select(field string, fields ...string) *GroupMenusUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated GroupMenus entity.
-func (gmuo *GroupMenusUpdateOne) Save(ctx context.Context) (*GroupMenus, error) {
-	gmuo.defaults()
-	return withHooks(ctx, gmuo.sqlSave, gmuo.mutation, gmuo.hooks)
+func (_u *GroupMenusUpdateOne) Save(ctx context.Context) (*GroupMenus, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gmuo *GroupMenusUpdateOne) SaveX(ctx context.Context) *GroupMenus {
-	node, err := gmuo.Save(ctx)
+func (_u *GroupMenusUpdateOne) SaveX(ctx context.Context) *GroupMenus {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -193,34 +193,34 @@ func (gmuo *GroupMenusUpdateOne) SaveX(ctx context.Context) *GroupMenus {
 }
 
 // Exec executes the query on the entity.
-func (gmuo *GroupMenusUpdateOne) Exec(ctx context.Context) error {
-	_, err := gmuo.Save(ctx)
+func (_u *GroupMenusUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gmuo *GroupMenusUpdateOne) ExecX(ctx context.Context) {
-	if err := gmuo.Exec(ctx); err != nil {
+func (_u *GroupMenusUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (gmuo *GroupMenusUpdateOne) defaults() {
-	if _, ok := gmuo.mutation.UpdatedAt(); !ok {
+func (_u *GroupMenusUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := groupmenus.UpdateDefaultUpdatedAt()
-		gmuo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (gmuo *GroupMenusUpdateOne) sqlSave(ctx context.Context) (_node *GroupMenus, err error) {
+func (_u *GroupMenusUpdateOne) sqlSave(ctx context.Context) (_node *GroupMenus, err error) {
 	_spec := sqlgraph.NewUpdateSpec(groupmenus.Table, groupmenus.Columns, sqlgraph.NewFieldSpec(groupmenus.FieldID, field.TypeInt))
-	id, ok := gmuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "GroupMenus.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := gmuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, groupmenus.FieldID)
 		for _, f := range fields {
@@ -232,26 +232,26 @@ func (gmuo *GroupMenusUpdateOne) sqlSave(ctx context.Context) (_node *GroupMenus
 			}
 		}
 	}
-	if ps := gmuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := gmuo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(groupmenus.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := gmuo.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(groupmenus.FieldDeletedAt, field.TypeTime, value)
 	}
-	if gmuo.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(groupmenus.FieldDeletedAt, field.TypeTime)
 	}
-	_node = &GroupMenus{config: gmuo.config}
+	_node = &GroupMenus{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, gmuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{groupmenus.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -259,6 +259,6 @@ func (gmuo *GroupMenusUpdateOne) sqlSave(ctx context.Context) (_node *GroupMenus
 		}
 		return nil, err
 	}
-	gmuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

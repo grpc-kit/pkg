@@ -20,56 +20,56 @@ type UserAuthSocialDelete struct {
 }
 
 // Where appends a list predicates to the UserAuthSocialDelete builder.
-func (uasd *UserAuthSocialDelete) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialDelete {
-	uasd.mutation.Where(ps...)
-	return uasd
+func (_d *UserAuthSocialDelete) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (uasd *UserAuthSocialDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, uasd.sqlExec, uasd.mutation, uasd.hooks)
+func (_d *UserAuthSocialDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uasd *UserAuthSocialDelete) ExecX(ctx context.Context) int {
-	n, err := uasd.Exec(ctx)
+func (_d *UserAuthSocialDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (uasd *UserAuthSocialDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *UserAuthSocialDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(userauthsocial.Table, sqlgraph.NewFieldSpec(userauthsocial.FieldID, field.TypeInt))
-	if ps := uasd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, uasd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	uasd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // UserAuthSocialDeleteOne is the builder for deleting a single UserAuthSocial entity.
 type UserAuthSocialDeleteOne struct {
-	uasd *UserAuthSocialDelete
+	_d *UserAuthSocialDelete
 }
 
 // Where appends a list predicates to the UserAuthSocialDelete builder.
-func (uasdo *UserAuthSocialDeleteOne) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialDeleteOne {
-	uasdo.uasd.mutation.Where(ps...)
-	return uasdo
+func (_d *UserAuthSocialDeleteOne) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (uasdo *UserAuthSocialDeleteOne) Exec(ctx context.Context) error {
-	n, err := uasdo.uasd.Exec(ctx)
+func (_d *UserAuthSocialDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (uasdo *UserAuthSocialDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uasdo *UserAuthSocialDeleteOne) ExecX(ctx context.Context) {
-	if err := uasdo.Exec(ctx); err != nil {
+func (_d *UserAuthSocialDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

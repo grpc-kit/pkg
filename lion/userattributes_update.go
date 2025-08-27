@@ -23,79 +23,79 @@ type UserAttributesUpdate struct {
 }
 
 // Where appends a list predicates to the UserAttributesUpdate builder.
-func (uau *UserAttributesUpdate) Where(ps ...predicate.UserAttributes) *UserAttributesUpdate {
-	uau.mutation.Where(ps...)
-	return uau
+func (_u *UserAttributesUpdate) Where(ps ...predicate.UserAttributes) *UserAttributesUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uau *UserAttributesUpdate) SetUpdatedAt(t time.Time) *UserAttributesUpdate {
-	uau.mutation.SetUpdatedAt(t)
-	return uau
+func (_u *UserAttributesUpdate) SetUpdatedAt(v time.Time) *UserAttributesUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (uau *UserAttributesUpdate) SetDeletedAt(t time.Time) *UserAttributesUpdate {
-	uau.mutation.SetDeletedAt(t)
-	return uau
+func (_u *UserAttributesUpdate) SetDeletedAt(v time.Time) *UserAttributesUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (uau *UserAttributesUpdate) SetNillableDeletedAt(t *time.Time) *UserAttributesUpdate {
-	if t != nil {
-		uau.SetDeletedAt(*t)
+func (_u *UserAttributesUpdate) SetNillableDeletedAt(v *time.Time) *UserAttributesUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return uau
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (uau *UserAttributesUpdate) ClearDeletedAt() *UserAttributesUpdate {
-	uau.mutation.ClearDeletedAt()
-	return uau
+func (_u *UserAttributesUpdate) ClearDeletedAt() *UserAttributesUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetAttrKey sets the "attr_key" field.
-func (uau *UserAttributesUpdate) SetAttrKey(s string) *UserAttributesUpdate {
-	uau.mutation.SetAttrKey(s)
-	return uau
+func (_u *UserAttributesUpdate) SetAttrKey(v string) *UserAttributesUpdate {
+	_u.mutation.SetAttrKey(v)
+	return _u
 }
 
 // SetNillableAttrKey sets the "attr_key" field if the given value is not nil.
-func (uau *UserAttributesUpdate) SetNillableAttrKey(s *string) *UserAttributesUpdate {
-	if s != nil {
-		uau.SetAttrKey(*s)
+func (_u *UserAttributesUpdate) SetNillableAttrKey(v *string) *UserAttributesUpdate {
+	if v != nil {
+		_u.SetAttrKey(*v)
 	}
-	return uau
+	return _u
 }
 
 // SetAttrValue sets the "attr_value" field.
-func (uau *UserAttributesUpdate) SetAttrValue(s string) *UserAttributesUpdate {
-	uau.mutation.SetAttrValue(s)
-	return uau
+func (_u *UserAttributesUpdate) SetAttrValue(v string) *UserAttributesUpdate {
+	_u.mutation.SetAttrValue(v)
+	return _u
 }
 
 // SetNillableAttrValue sets the "attr_value" field if the given value is not nil.
-func (uau *UserAttributesUpdate) SetNillableAttrValue(s *string) *UserAttributesUpdate {
-	if s != nil {
-		uau.SetAttrValue(*s)
+func (_u *UserAttributesUpdate) SetNillableAttrValue(v *string) *UserAttributesUpdate {
+	if v != nil {
+		_u.SetAttrValue(*v)
 	}
-	return uau
+	return _u
 }
 
 // Mutation returns the UserAttributesMutation object of the builder.
-func (uau *UserAttributesUpdate) Mutation() *UserAttributesMutation {
-	return uau.mutation
+func (_u *UserAttributesUpdate) Mutation() *UserAttributesMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uau *UserAttributesUpdate) Save(ctx context.Context) (int, error) {
-	uau.defaults()
-	return withHooks(ctx, uau.sqlSave, uau.mutation, uau.hooks)
+func (_u *UserAttributesUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uau *UserAttributesUpdate) SaveX(ctx context.Context) int {
-	affected, err := uau.Save(ctx)
+func (_u *UserAttributesUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -103,34 +103,34 @@ func (uau *UserAttributesUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uau *UserAttributesUpdate) Exec(ctx context.Context) error {
-	_, err := uau.Save(ctx)
+func (_u *UserAttributesUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uau *UserAttributesUpdate) ExecX(ctx context.Context) {
-	if err := uau.Exec(ctx); err != nil {
+func (_u *UserAttributesUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uau *UserAttributesUpdate) defaults() {
-	if _, ok := uau.mutation.UpdatedAt(); !ok {
+func (_u *UserAttributesUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := userattributes.UpdateDefaultUpdatedAt()
-		uau.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uau *UserAttributesUpdate) check() error {
-	if v, ok := uau.mutation.AttrKey(); ok {
+func (_u *UserAttributesUpdate) check() error {
+	if v, ok := _u.mutation.AttrKey(); ok {
 		if err := userattributes.AttrKeyValidator(v); err != nil {
 			return &ValidationError{Name: "attr_key", err: fmt.Errorf(`lion: validator failed for field "UserAttributes.attr_key": %w`, err)}
 		}
 	}
-	if v, ok := uau.mutation.AttrValue(); ok {
+	if v, ok := _u.mutation.AttrValue(); ok {
 		if err := userattributes.AttrValueValidator(v); err != nil {
 			return &ValidationError{Name: "attr_value", err: fmt.Errorf(`lion: validator failed for field "UserAttributes.attr_value": %w`, err)}
 		}
@@ -138,34 +138,34 @@ func (uau *UserAttributesUpdate) check() error {
 	return nil
 }
 
-func (uau *UserAttributesUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := uau.check(); err != nil {
-		return n, err
+func (_u *UserAttributesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(userattributes.Table, userattributes.Columns, sqlgraph.NewFieldSpec(userattributes.FieldID, field.TypeInt))
-	if ps := uau.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uau.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userattributes.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := uau.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(userattributes.FieldDeletedAt, field.TypeTime, value)
 	}
-	if uau.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(userattributes.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := uau.mutation.AttrKey(); ok {
+	if value, ok := _u.mutation.AttrKey(); ok {
 		_spec.SetField(userattributes.FieldAttrKey, field.TypeString, value)
 	}
-	if value, ok := uau.mutation.AttrValue(); ok {
+	if value, ok := _u.mutation.AttrValue(); ok {
 		_spec.SetField(userattributes.FieldAttrValue, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, uau.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userattributes.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -173,8 +173,8 @@ func (uau *UserAttributesUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		return 0, err
 	}
-	uau.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // UserAttributesUpdateOne is the builder for updating a single UserAttributes entity.
@@ -186,86 +186,86 @@ type UserAttributesUpdateOne struct {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (uauo *UserAttributesUpdateOne) SetUpdatedAt(t time.Time) *UserAttributesUpdateOne {
-	uauo.mutation.SetUpdatedAt(t)
-	return uauo
+func (_u *UserAttributesUpdateOne) SetUpdatedAt(v time.Time) *UserAttributesUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (uauo *UserAttributesUpdateOne) SetDeletedAt(t time.Time) *UserAttributesUpdateOne {
-	uauo.mutation.SetDeletedAt(t)
-	return uauo
+func (_u *UserAttributesUpdateOne) SetDeletedAt(v time.Time) *UserAttributesUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (uauo *UserAttributesUpdateOne) SetNillableDeletedAt(t *time.Time) *UserAttributesUpdateOne {
-	if t != nil {
-		uauo.SetDeletedAt(*t)
+func (_u *UserAttributesUpdateOne) SetNillableDeletedAt(v *time.Time) *UserAttributesUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
 	}
-	return uauo
+	return _u
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (uauo *UserAttributesUpdateOne) ClearDeletedAt() *UserAttributesUpdateOne {
-	uauo.mutation.ClearDeletedAt()
-	return uauo
+func (_u *UserAttributesUpdateOne) ClearDeletedAt() *UserAttributesUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
 }
 
 // SetAttrKey sets the "attr_key" field.
-func (uauo *UserAttributesUpdateOne) SetAttrKey(s string) *UserAttributesUpdateOne {
-	uauo.mutation.SetAttrKey(s)
-	return uauo
+func (_u *UserAttributesUpdateOne) SetAttrKey(v string) *UserAttributesUpdateOne {
+	_u.mutation.SetAttrKey(v)
+	return _u
 }
 
 // SetNillableAttrKey sets the "attr_key" field if the given value is not nil.
-func (uauo *UserAttributesUpdateOne) SetNillableAttrKey(s *string) *UserAttributesUpdateOne {
-	if s != nil {
-		uauo.SetAttrKey(*s)
+func (_u *UserAttributesUpdateOne) SetNillableAttrKey(v *string) *UserAttributesUpdateOne {
+	if v != nil {
+		_u.SetAttrKey(*v)
 	}
-	return uauo
+	return _u
 }
 
 // SetAttrValue sets the "attr_value" field.
-func (uauo *UserAttributesUpdateOne) SetAttrValue(s string) *UserAttributesUpdateOne {
-	uauo.mutation.SetAttrValue(s)
-	return uauo
+func (_u *UserAttributesUpdateOne) SetAttrValue(v string) *UserAttributesUpdateOne {
+	_u.mutation.SetAttrValue(v)
+	return _u
 }
 
 // SetNillableAttrValue sets the "attr_value" field if the given value is not nil.
-func (uauo *UserAttributesUpdateOne) SetNillableAttrValue(s *string) *UserAttributesUpdateOne {
-	if s != nil {
-		uauo.SetAttrValue(*s)
+func (_u *UserAttributesUpdateOne) SetNillableAttrValue(v *string) *UserAttributesUpdateOne {
+	if v != nil {
+		_u.SetAttrValue(*v)
 	}
-	return uauo
+	return _u
 }
 
 // Mutation returns the UserAttributesMutation object of the builder.
-func (uauo *UserAttributesUpdateOne) Mutation() *UserAttributesMutation {
-	return uauo.mutation
+func (_u *UserAttributesUpdateOne) Mutation() *UserAttributesMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the UserAttributesUpdate builder.
-func (uauo *UserAttributesUpdateOne) Where(ps ...predicate.UserAttributes) *UserAttributesUpdateOne {
-	uauo.mutation.Where(ps...)
-	return uauo
+func (_u *UserAttributesUpdateOne) Where(ps ...predicate.UserAttributes) *UserAttributesUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uauo *UserAttributesUpdateOne) Select(field string, fields ...string) *UserAttributesUpdateOne {
-	uauo.fields = append([]string{field}, fields...)
-	return uauo
+func (_u *UserAttributesUpdateOne) Select(field string, fields ...string) *UserAttributesUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated UserAttributes entity.
-func (uauo *UserAttributesUpdateOne) Save(ctx context.Context) (*UserAttributes, error) {
-	uauo.defaults()
-	return withHooks(ctx, uauo.sqlSave, uauo.mutation, uauo.hooks)
+func (_u *UserAttributesUpdateOne) Save(ctx context.Context) (*UserAttributes, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uauo *UserAttributesUpdateOne) SaveX(ctx context.Context) *UserAttributes {
-	node, err := uauo.Save(ctx)
+func (_u *UserAttributesUpdateOne) SaveX(ctx context.Context) *UserAttributes {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -273,34 +273,34 @@ func (uauo *UserAttributesUpdateOne) SaveX(ctx context.Context) *UserAttributes 
 }
 
 // Exec executes the query on the entity.
-func (uauo *UserAttributesUpdateOne) Exec(ctx context.Context) error {
-	_, err := uauo.Save(ctx)
+func (_u *UserAttributesUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uauo *UserAttributesUpdateOne) ExecX(ctx context.Context) {
-	if err := uauo.Exec(ctx); err != nil {
+func (_u *UserAttributesUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uauo *UserAttributesUpdateOne) defaults() {
-	if _, ok := uauo.mutation.UpdatedAt(); !ok {
+func (_u *UserAttributesUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := userattributes.UpdateDefaultUpdatedAt()
-		uauo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uauo *UserAttributesUpdateOne) check() error {
-	if v, ok := uauo.mutation.AttrKey(); ok {
+func (_u *UserAttributesUpdateOne) check() error {
+	if v, ok := _u.mutation.AttrKey(); ok {
 		if err := userattributes.AttrKeyValidator(v); err != nil {
 			return &ValidationError{Name: "attr_key", err: fmt.Errorf(`lion: validator failed for field "UserAttributes.attr_key": %w`, err)}
 		}
 	}
-	if v, ok := uauo.mutation.AttrValue(); ok {
+	if v, ok := _u.mutation.AttrValue(); ok {
 		if err := userattributes.AttrValueValidator(v); err != nil {
 			return &ValidationError{Name: "attr_value", err: fmt.Errorf(`lion: validator failed for field "UserAttributes.attr_value": %w`, err)}
 		}
@@ -308,17 +308,17 @@ func (uauo *UserAttributesUpdateOne) check() error {
 	return nil
 }
 
-func (uauo *UserAttributesUpdateOne) sqlSave(ctx context.Context) (_node *UserAttributes, err error) {
-	if err := uauo.check(); err != nil {
+func (_u *UserAttributesUpdateOne) sqlSave(ctx context.Context) (_node *UserAttributes, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(userattributes.Table, userattributes.Columns, sqlgraph.NewFieldSpec(userattributes.FieldID, field.TypeInt))
-	id, ok := uauo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "UserAttributes.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uauo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, userattributes.FieldID)
 		for _, f := range fields {
@@ -330,32 +330,32 @@ func (uauo *UserAttributesUpdateOne) sqlSave(ctx context.Context) (_node *UserAt
 			}
 		}
 	}
-	if ps := uauo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uauo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userattributes.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := uauo.mutation.DeletedAt(); ok {
+	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(userattributes.FieldDeletedAt, field.TypeTime, value)
 	}
-	if uauo.mutation.DeletedAtCleared() {
+	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(userattributes.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := uauo.mutation.AttrKey(); ok {
+	if value, ok := _u.mutation.AttrKey(); ok {
 		_spec.SetField(userattributes.FieldAttrKey, field.TypeString, value)
 	}
-	if value, ok := uauo.mutation.AttrValue(); ok {
+	if value, ok := _u.mutation.AttrValue(); ok {
 		_spec.SetField(userattributes.FieldAttrValue, field.TypeString, value)
 	}
-	_node = &UserAttributes{config: uauo.config}
+	_node = &UserAttributes{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uauo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userattributes.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -363,6 +363,6 @@ func (uauo *UserAttributesUpdateOne) sqlSave(ctx context.Context) (_node *UserAt
 		}
 		return nil, err
 	}
-	uauo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }
