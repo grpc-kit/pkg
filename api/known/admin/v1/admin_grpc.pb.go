@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type KnownAdminClient interface {
 	GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*GetConfigResponse, error)
 	CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*CreateAuthLoginResponse, error)
+	CreateAuthToken(ctx context.Context, in *CreateAuthTokenRequest, opts ...grpc.CallOption) (*CreateAuthTokenResponse, error)
 	ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error)
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 	GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error)
@@ -50,6 +51,15 @@ func (c *knownAdminClient) GetConfig(ctx context.Context, in *GetConfigRequest, 
 func (c *knownAdminClient) CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*CreateAuthLoginResponse, error) {
 	out := new(CreateAuthLoginResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateAuthToken(ctx context.Context, in *CreateAuthTokenRequest, opts ...grpc.CallOption) (*CreateAuthTokenResponse, error) {
+	out := new(CreateAuthTokenResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -98,6 +108,7 @@ func (c *knownAdminClient) ListMenus(ctx context.Context, in *ListMenusRequest, 
 type KnownAdminServer interface {
 	GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error)
 	CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*CreateAuthLoginResponse, error)
+	CreateAuthToken(context.Context, *CreateAuthTokenRequest) (*CreateAuthTokenResponse, error)
 	ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error)
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 	GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error)
@@ -113,6 +124,9 @@ func (UnimplementedKnownAdminServer) GetConfig(context.Context, *GetConfigReques
 }
 func (UnimplementedKnownAdminServer) CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*CreateAuthLoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthLogin not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateAuthToken(context.Context, *CreateAuthTokenRequest) (*CreateAuthTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthToken not implemented")
 }
 func (UnimplementedKnownAdminServer) ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAuthProviders not implemented")
@@ -170,6 +184,24 @@ func _KnownAdmin_CreateAuthLogin_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).CreateAuthLogin(ctx, req.(*CreateAuthLoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateAuthToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAuthTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateAuthToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateAuthToken(ctx, req.(*CreateAuthTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -260,6 +292,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateAuthLogin",
 			Handler:    _KnownAdmin_CreateAuthLogin_Handler,
+		},
+		{
+			MethodName: "CreateAuthToken",
+			Handler:    _KnownAdmin_CreateAuthToken_Handler,
 		},
 		{
 			MethodName: "ListAuthProviders",

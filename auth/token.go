@@ -9,13 +9,33 @@ import (
 )
 
 // IDTokenClaims 用于框架jwt的数据结构
+// 部分参考：https://openid.net/specs/openid-connect-core-1_0.html#IDToken
 type IDTokenClaims struct {
 	jwt.RegisteredClaims
 	Email           string            `json:"email"`
 	EmailVerified   bool              `json:"email_verified"`
-	Groups          []string          `json:"groups"`
-	FederatedClaims map[string]string `json:"federated_claims"`
+	Groups          []string          `json:"groups,omitempty"`
+	FederatedClaims map[string]string `json:"federated_claims,omitempty"`
+	Appid           string            `json:"appid,omitempty"`
 	Tenant          string            `json:"tenant"`
+}
+
+// ParseIDTokenClaims 解析 token
+func ParseIDTokenClaims(token string) (*IDTokenClaims, error) {
+	var ok bool
+	var claims IDTokenClaims
+
+	_, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		// 从这里获取该token的appid
+		claims, ok = token.Claims.(IDTokenClaims)
+		if !ok {
+			return nil, fmt.Errorf("token invalid not match cfg.id_token")
+		}
+
+		return []byte(""), nil
+	})
+
+	return &claims, err
 }
 
 func (i *IDTokenClaims) SetSubject(subject string) *IDTokenClaims {

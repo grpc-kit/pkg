@@ -18,7 +18,7 @@ type StaticUser struct {
 }
 
 // GetAccessToken 获取或生成 jwt token
-func (s StaticUser) GetAccessToken(expiresIn int32) (string, error) {
+func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error) {
 	// TODO; 生成 jwt token 需要考虑不通用户级别生成 token 的最长有效时间
 
 	tenant := "default"
@@ -37,6 +37,7 @@ func (s StaticUser) GetAccessToken(expiresIn int32) (string, error) {
 		EmailVerified:   true,
 		Groups:          s.Groups,
 		FederatedClaims: nil,
+		Appid:           appid,
 		Tenant:          tenant,
 	}
 

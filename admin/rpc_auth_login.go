@@ -39,7 +39,48 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 		expiresIn = 24 * 60 * 60
 	}
 
-	tk, err := u.GetAccessToken(expiresIn)
+	// TODO; 不允许创建过长过期的 token
+
+	tk, err := u.GetAccessToken(expiresIn, "")
+	if err != nil {
+		return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+	}
+
+	result.AccessToken = tk
+	result.ExpiresIn = expiresIn
+
+	return result, nil
+}
+
+// CreateAuthToken 创建认证令牌
+func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.CreateAuthTokenRequest) (*adminv1.CreateAuthTokenResponse, error) {
+	appid := req.Appid
+	if appid == "" {
+		return nil, errs.InvalidArgument(ctx).WithMessage("create token must with appid")
+	}
+
+	result := &adminv1.CreateAuthTokenResponse{}
+
+	// TODO; 当前先支持静态用户登录
+	if a.config.staticUsers == nil {
+		return nil, errs.Unauthenticated(ctx)
+	}
+
+	if req.Username == "" {
+		return nil, errs.Unauthenticated(ctx)
+	}
+
+	u, ok := a.config.staticUsers.Valid(req.Username, req.PasswordHash)
+	if !ok {
+		return nil, errs.Unauthenticated(ctx)
+	}
+
+	expiresIn := req.ExpiresIn
+	if expiresIn <= 0 {
+		expiresIn = 24 * 60 * 60
+	}
+
+	tk, err := u.GetAccessToken(expiresIn, appid)
 	if err != nil {
 		return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
 	}
