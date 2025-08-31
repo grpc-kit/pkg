@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/roleusermapping"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -280,6 +281,21 @@ func (_c *UsersCreate) SetAddressEncrypted(v []byte) *UsersCreate {
 	return _c
 }
 
+// AddLionUserIDs adds the "lion_users" edge to the RoleUserMapping entity by IDs.
+func (_c *UsersCreate) AddLionUserIDs(ids ...int) *UsersCreate {
+	_c.mutation.AddLionUserIDs(ids...)
+	return _c
+}
+
+// AddLionUsers adds the "lion_users" edges to the RoleUserMapping entity.
+func (_c *UsersCreate) AddLionUsers(v ...*RoleUserMapping) *UsersCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionUserIDs(ids...)
+}
+
 // Mutation returns the UsersMutation object of the builder.
 func (_c *UsersCreate) Mutation() *UsersMutation {
 	return _c.mutation
@@ -522,6 +538,22 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
 		_node.AddressEncrypted = value
+	}
+	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   users.LionUsersTable,
+			Columns: []string{users.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

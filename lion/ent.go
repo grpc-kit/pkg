@@ -17,10 +17,15 @@ import (
 	"github.com/grpc-kit/pkg/lion/authuserlocal"
 	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
+	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groupmenus"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/groupusers"
+	"github.com/grpc-kit/pkg/lion/groupusermapping"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
+	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/roles"
+	"github.com/grpc-kit/pkg/lion/roleusermapping"
 	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/users"
 )
@@ -83,17 +88,22 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			accounts.Table:       accounts.ValidColumn,
-			authproviders.Table:  authproviders.ValidColumn,
-			authuserlocal.Table:  authuserlocal.ValidColumn,
-			authusersocial.Table: authusersocial.ValidColumn,
-			demo.Table:           demo.ValidColumn,
-			groupmenus.Table:     groupmenus.ValidColumn,
-			groupusers.Table:     groupusers.ValidColumn,
-			groups.Table:         groups.ValidColumn,
-			menus.Table:          menus.ValidColumn,
-			userattributes.Table: userattributes.ValidColumn,
-			users.Table:          users.ValidColumn,
+			accounts.Table:         accounts.ValidColumn,
+			authproviders.Table:    authproviders.ValidColumn,
+			authuserlocal.Table:    authuserlocal.ValidColumn,
+			authusersocial.Table:   authusersocial.ValidColumn,
+			demo.Table:             demo.ValidColumn,
+			departments.Table:      departments.ValidColumn,
+			groupmenus.Table:       groupmenus.ValidColumn,
+			groupusermapping.Table: groupusermapping.ValidColumn,
+			groups.Table:           groups.ValidColumn,
+			menus.Table:            menus.ValidColumn,
+			rolegroupmapping.Table: rolegroupmapping.ValidColumn,
+			rolemenumapping.Table:  rolemenumapping.ValidColumn,
+			roleusermapping.Table:  roleusermapping.ValidColumn,
+			roles.Table:            roles.ValidColumn,
+			userattributes.Table:   userattributes.ValidColumn,
+			users.Table:            users.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

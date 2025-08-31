@@ -69,6 +69,18 @@ func (f DemoFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DemoMutation", m)
 }
 
+// The DepartmentsFunc type is an adapter to allow the use of ordinary
+// function as Departments mutator.
+type DepartmentsFunc func(context.Context, *lion.DepartmentsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DepartmentsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.DepartmentsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DepartmentsMutation", m)
+}
+
 // The GroupMenusFunc type is an adapter to allow the use of ordinary
 // function as GroupMenus mutator.
 type GroupMenusFunc func(context.Context, *lion.GroupMenusMutation) (lion.Value, error)
@@ -81,16 +93,16 @@ func (f GroupMenusFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GroupMenusMutation", m)
 }
 
-// The GroupUsersFunc type is an adapter to allow the use of ordinary
-// function as GroupUsers mutator.
-type GroupUsersFunc func(context.Context, *lion.GroupUsersMutation) (lion.Value, error)
+// The GroupUserMappingFunc type is an adapter to allow the use of ordinary
+// function as GroupUserMapping mutator.
+type GroupUserMappingFunc func(context.Context, *lion.GroupUserMappingMutation) (lion.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f GroupUsersFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.GroupUsersMutation); ok {
+func (f GroupUserMappingFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.GroupUserMappingMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GroupUsersMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GroupUserMappingMutation", m)
 }
 
 // The GroupsFunc type is an adapter to allow the use of ordinary
@@ -115,6 +127,54 @@ func (f MenusFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, err
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.MenusMutation", m)
+}
+
+// The RoleGroupMappingFunc type is an adapter to allow the use of ordinary
+// function as RoleGroupMapping mutator.
+type RoleGroupMappingFunc func(context.Context, *lion.RoleGroupMappingMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RoleGroupMappingFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.RoleGroupMappingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RoleGroupMappingMutation", m)
+}
+
+// The RoleMenuMappingFunc type is an adapter to allow the use of ordinary
+// function as RoleMenuMapping mutator.
+type RoleMenuMappingFunc func(context.Context, *lion.RoleMenuMappingMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RoleMenuMappingFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.RoleMenuMappingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RoleMenuMappingMutation", m)
+}
+
+// The RoleUserMappingFunc type is an adapter to allow the use of ordinary
+// function as RoleUserMapping mutator.
+type RoleUserMappingFunc func(context.Context, *lion.RoleUserMappingMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RoleUserMappingFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.RoleUserMappingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RoleUserMappingMutation", m)
+}
+
+// The RolesFunc type is an adapter to allow the use of ordinary
+// function as Roles mutator.
+type RolesFunc func(context.Context, *lion.RolesMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RolesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.RolesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RolesMutation", m)
 }
 
 // The UserAttributesFunc type is an adapter to allow the use of ordinary

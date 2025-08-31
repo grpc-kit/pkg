@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/roleusermapping"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -334,9 +335,45 @@ func (_u *UsersUpdate) SetAddressEncrypted(v []byte) *UsersUpdate {
 	return _u
 }
 
+// AddLionUserIDs adds the "lion_users" edge to the RoleUserMapping entity by IDs.
+func (_u *UsersUpdate) AddLionUserIDs(ids ...int) *UsersUpdate {
+	_u.mutation.AddLionUserIDs(ids...)
+	return _u
+}
+
+// AddLionUsers adds the "lion_users" edges to the RoleUserMapping entity.
+func (_u *UsersUpdate) AddLionUsers(v ...*RoleUserMapping) *UsersUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionUserIDs(ids...)
+}
+
 // Mutation returns the UsersMutation object of the builder.
 func (_u *UsersUpdate) Mutation() *UsersMutation {
 	return _u.mutation
+}
+
+// ClearLionUsers clears all "lion_users" edges to the RoleUserMapping entity.
+func (_u *UsersUpdate) ClearLionUsers() *UsersUpdate {
+	_u.mutation.ClearLionUsers()
+	return _u
+}
+
+// RemoveLionUserIDs removes the "lion_users" edge to RoleUserMapping entities by IDs.
+func (_u *UsersUpdate) RemoveLionUserIDs(ids ...int) *UsersUpdate {
+	_u.mutation.RemoveLionUserIDs(ids...)
+	return _u
+}
+
+// RemoveLionUsers removes "lion_users" edges to RoleUserMapping entities.
+func (_u *UsersUpdate) RemoveLionUsers(v ...*RoleUserMapping) *UsersUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionUserIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -494,6 +531,51 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.LionUsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   users.LionUsersTable,
+			Columns: []string{users.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionUsersIDs(); len(nodes) > 0 && !_u.mutation.LionUsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   users.LionUsersTable,
+			Columns: []string{users.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   users.LionUsersTable,
+			Columns: []string{users.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -821,9 +903,45 @@ func (_u *UsersUpdateOne) SetAddressEncrypted(v []byte) *UsersUpdateOne {
 	return _u
 }
 
+// AddLionUserIDs adds the "lion_users" edge to the RoleUserMapping entity by IDs.
+func (_u *UsersUpdateOne) AddLionUserIDs(ids ...int) *UsersUpdateOne {
+	_u.mutation.AddLionUserIDs(ids...)
+	return _u
+}
+
+// AddLionUsers adds the "lion_users" edges to the RoleUserMapping entity.
+func (_u *UsersUpdateOne) AddLionUsers(v ...*RoleUserMapping) *UsersUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionUserIDs(ids...)
+}
+
 // Mutation returns the UsersMutation object of the builder.
 func (_u *UsersUpdateOne) Mutation() *UsersMutation {
 	return _u.mutation
+}
+
+// ClearLionUsers clears all "lion_users" edges to the RoleUserMapping entity.
+func (_u *UsersUpdateOne) ClearLionUsers() *UsersUpdateOne {
+	_u.mutation.ClearLionUsers()
+	return _u
+}
+
+// RemoveLionUserIDs removes the "lion_users" edge to RoleUserMapping entities by IDs.
+func (_u *UsersUpdateOne) RemoveLionUserIDs(ids ...int) *UsersUpdateOne {
+	_u.mutation.RemoveLionUserIDs(ids...)
+	return _u
+}
+
+// RemoveLionUsers removes "lion_users" edges to RoleUserMapping entities.
+func (_u *UsersUpdateOne) RemoveLionUsers(v ...*RoleUserMapping) *UsersUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionUserIDs(ids...)
 }
 
 // Where appends a list predicates to the UsersUpdate builder.
@@ -1011,6 +1129,51 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if value, ok := _u.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.LionUsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   users.LionUsersTable,
+			Columns: []string{users.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionUsersIDs(); len(nodes) > 0 && !_u.mutation.LionUsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   users.LionUsersTable,
+			Columns: []string{users.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   users.LionUsersTable,
+			Columns: []string{users.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Users{config: _u.config}
 	_spec.Assign = _node.assignValues

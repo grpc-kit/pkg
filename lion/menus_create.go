@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/rolemenumapping"
 )
 
 // MenusCreate is the builder for creating a Menus entity.
@@ -48,20 +49,6 @@ func (_c *MenusCreate) SetNillableUpdatedAt(v *time.Time) *MenusCreate {
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *MenusCreate) SetDeletedAt(v time.Time) *MenusCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *MenusCreate) SetNillableDeletedAt(v *time.Time) *MenusCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetParentID sets the "parent_id" field.
 func (_c *MenusCreate) SetParentID(v int) *MenusCreate {
 	_c.mutation.SetParentID(v)
@@ -88,16 +75,16 @@ func (_c *MenusCreate) SetPath(v string) *MenusCreate {
 	return _c
 }
 
-// SetLocale sets the "locale" field.
-func (_c *MenusCreate) SetLocale(v string) *MenusCreate {
-	_c.mutation.SetLocale(v)
+// SetI18nName sets the "i18n_name" field.
+func (_c *MenusCreate) SetI18nName(v string) *MenusCreate {
+	_c.mutation.SetI18nName(v)
 	return _c
 }
 
-// SetNillableLocale sets the "locale" field if the given value is not nil.
-func (_c *MenusCreate) SetNillableLocale(v *string) *MenusCreate {
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_c *MenusCreate) SetNillableI18nName(v *string) *MenusCreate {
 	if v != nil {
-		_c.SetLocale(*v)
+		_c.SetI18nName(*v)
 	}
 	return _c
 }
@@ -126,6 +113,20 @@ func (_c *MenusCreate) SetSortWeight(v int) *MenusCreate {
 func (_c *MenusCreate) SetNillableSortWeight(v *int) *MenusCreate {
 	if v != nil {
 		_c.SetSortWeight(*v)
+	}
+	return _c
+}
+
+// SetMenuType sets the "menu_type" field.
+func (_c *MenusCreate) SetMenuType(v int) *MenusCreate {
+	_c.mutation.SetMenuType(v)
+	return _c
+}
+
+// SetNillableMenuType sets the "menu_type" field if the given value is not nil.
+func (_c *MenusCreate) SetNillableMenuType(v *int) *MenusCreate {
+	if v != nil {
+		_c.SetMenuType(*v)
 	}
 	return _c
 }
@@ -170,6 +171,21 @@ func (_c *MenusCreate) SetNillableHideChildrenInMenu(v *bool) *MenusCreate {
 		_c.SetHideChildrenInMenu(*v)
 	}
 	return _c
+}
+
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenuMapping entity by IDs.
+func (_c *MenusCreate) AddLionRoleMenuIDs(ids ...int) *MenusCreate {
+	_c.mutation.AddLionRoleMenuIDs(ids...)
+	return _c
+}
+
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenuMapping entity.
+func (_c *MenusCreate) AddLionRoleMenus(v ...*RoleMenuMapping) *MenusCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionRoleMenuIDs(ids...)
 }
 
 // Mutation returns the MenusMutation object of the builder.
@@ -219,9 +235,9 @@ func (_c *MenusCreate) defaults() {
 		v := menus.DefaultParentID
 		_c.mutation.SetParentID(v)
 	}
-	if _, ok := _c.mutation.Locale(); !ok {
-		v := menus.DefaultLocale
-		_c.mutation.SetLocale(v)
+	if _, ok := _c.mutation.I18nName(); !ok {
+		v := menus.DefaultI18nName
+		_c.mutation.SetI18nName(v)
 	}
 	if _, ok := _c.mutation.Icon(); !ok {
 		v := menus.DefaultIcon
@@ -230,6 +246,10 @@ func (_c *MenusCreate) defaults() {
 	if _, ok := _c.mutation.SortWeight(); !ok {
 		v := menus.DefaultSortWeight
 		_c.mutation.SetSortWeight(v)
+	}
+	if _, ok := _c.mutation.MenuType(); !ok {
+		v := menus.DefaultMenuType
+		_c.mutation.SetMenuType(v)
 	}
 	if _, ok := _c.mutation.Enabled(); !ok {
 		v := menus.DefaultEnabled
@@ -272,13 +292,8 @@ func (_c *MenusCreate) check() error {
 			return &ValidationError{Name: "path", err: fmt.Errorf(`lion: validator failed for field "Menus.path": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Locale(); !ok {
-		return &ValidationError{Name: "locale", err: errors.New(`lion: missing required field "Menus.locale"`)}
-	}
-	if v, ok := _c.mutation.Locale(); ok {
-		if err := menus.LocaleValidator(v); err != nil {
-			return &ValidationError{Name: "locale", err: fmt.Errorf(`lion: validator failed for field "Menus.locale": %w`, err)}
-		}
+	if _, ok := _c.mutation.I18nName(); !ok {
+		return &ValidationError{Name: "i18n_name", err: errors.New(`lion: missing required field "Menus.i18n_name"`)}
 	}
 	if _, ok := _c.mutation.Icon(); !ok {
 		return &ValidationError{Name: "icon", err: errors.New(`lion: missing required field "Menus.icon"`)}
@@ -290,6 +305,9 @@ func (_c *MenusCreate) check() error {
 	}
 	if _, ok := _c.mutation.SortWeight(); !ok {
 		return &ValidationError{Name: "sort_weight", err: errors.New(`lion: missing required field "Menus.sort_weight"`)}
+	}
+	if _, ok := _c.mutation.MenuType(); !ok {
+		return &ValidationError{Name: "menu_type", err: errors.New(`lion: missing required field "Menus.menu_type"`)}
 	}
 	if _, ok := _c.mutation.Enabled(); !ok {
 		return &ValidationError{Name: "enabled", err: errors.New(`lion: missing required field "Menus.enabled"`)}
@@ -334,10 +352,6 @@ func (_c *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 		_spec.SetField(menus.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(menus.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
-	}
 	if value, ok := _c.mutation.ParentID(); ok {
 		_spec.SetField(menus.FieldParentID, field.TypeInt, value)
 		_node.ParentID = value
@@ -350,9 +364,9 @@ func (_c *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 		_spec.SetField(menus.FieldPath, field.TypeString, value)
 		_node.Path = value
 	}
-	if value, ok := _c.mutation.Locale(); ok {
-		_spec.SetField(menus.FieldLocale, field.TypeString, value)
-		_node.Locale = value
+	if value, ok := _c.mutation.I18nName(); ok {
+		_spec.SetField(menus.FieldI18nName, field.TypeString, value)
+		_node.I18nName = value
 	}
 	if value, ok := _c.mutation.Icon(); ok {
 		_spec.SetField(menus.FieldIcon, field.TypeString, value)
@@ -361,6 +375,10 @@ func (_c *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SortWeight(); ok {
 		_spec.SetField(menus.FieldSortWeight, field.TypeInt, value)
 		_node.SortWeight = value
+	}
+	if value, ok := _c.mutation.MenuType(); ok {
+		_spec.SetField(menus.FieldMenuType, field.TypeInt, value)
+		_node.MenuType = value
 	}
 	if value, ok := _c.mutation.Enabled(); ok {
 		_spec.SetField(menus.FieldEnabled, field.TypeBool, value)
@@ -373,6 +391,22 @@ func (_c *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.HideChildrenInMenu(); ok {
 		_spec.SetField(menus.FieldHideChildrenInMenu, field.TypeBool, value)
 		_node.HideChildrenInMenu = value
+	}
+	if nodes := _c.mutation.LionRoleMenusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   menus.LionRoleMenusTable,
+			Columns: []string{menus.LionRoleMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

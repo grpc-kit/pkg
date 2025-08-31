@@ -34,3 +34,26 @@ func (TimeMixin) Fields() []ent.Field {
 			Nillable(),
 	}
 }
+
+// TimeMixinWithoutDeleted xx
+type TimeMixinWithoutDeleted struct {
+	mixin.Schema
+}
+
+// Fields xx
+func (TimeMixinWithoutDeleted) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("created_at").
+			Immutable().
+			Default(time.Now).
+			Annotations(
+				entsql.Default("CURRENT_TIMESTAMP"),
+			),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now).
+			Annotations(
+				entsql.Default("CURRENT_TIMESTAMP"),
+			),
+	}
+}

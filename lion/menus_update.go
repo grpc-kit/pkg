@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/rolemenumapping"
 )
 
 // MenusUpdate is the builder for updating Menus entities.
@@ -31,26 +32,6 @@ func (_u *MenusUpdate) Where(ps ...predicate.Menus) *MenusUpdate {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *MenusUpdate) SetUpdatedAt(v time.Time) *MenusUpdate {
 	_u.mutation.SetUpdatedAt(v)
-	return _u
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *MenusUpdate) SetDeletedAt(v time.Time) *MenusUpdate {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *MenusUpdate) SetNillableDeletedAt(v *time.Time) *MenusUpdate {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *MenusUpdate) ClearDeletedAt() *MenusUpdate {
-	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -103,16 +84,16 @@ func (_u *MenusUpdate) SetNillablePath(v *string) *MenusUpdate {
 	return _u
 }
 
-// SetLocale sets the "locale" field.
-func (_u *MenusUpdate) SetLocale(v string) *MenusUpdate {
-	_u.mutation.SetLocale(v)
+// SetI18nName sets the "i18n_name" field.
+func (_u *MenusUpdate) SetI18nName(v string) *MenusUpdate {
+	_u.mutation.SetI18nName(v)
 	return _u
 }
 
-// SetNillableLocale sets the "locale" field if the given value is not nil.
-func (_u *MenusUpdate) SetNillableLocale(v *string) *MenusUpdate {
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_u *MenusUpdate) SetNillableI18nName(v *string) *MenusUpdate {
 	if v != nil {
-		_u.SetLocale(*v)
+		_u.SetI18nName(*v)
 	}
 	return _u
 }
@@ -149,6 +130,27 @@ func (_u *MenusUpdate) SetNillableSortWeight(v *int) *MenusUpdate {
 // AddSortWeight adds value to the "sort_weight" field.
 func (_u *MenusUpdate) AddSortWeight(v int) *MenusUpdate {
 	_u.mutation.AddSortWeight(v)
+	return _u
+}
+
+// SetMenuType sets the "menu_type" field.
+func (_u *MenusUpdate) SetMenuType(v int) *MenusUpdate {
+	_u.mutation.ResetMenuType()
+	_u.mutation.SetMenuType(v)
+	return _u
+}
+
+// SetNillableMenuType sets the "menu_type" field if the given value is not nil.
+func (_u *MenusUpdate) SetNillableMenuType(v *int) *MenusUpdate {
+	if v != nil {
+		_u.SetMenuType(*v)
+	}
+	return _u
+}
+
+// AddMenuType adds value to the "menu_type" field.
+func (_u *MenusUpdate) AddMenuType(v int) *MenusUpdate {
+	_u.mutation.AddMenuType(v)
 	return _u
 }
 
@@ -194,9 +196,45 @@ func (_u *MenusUpdate) SetNillableHideChildrenInMenu(v *bool) *MenusUpdate {
 	return _u
 }
 
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenuMapping entity by IDs.
+func (_u *MenusUpdate) AddLionRoleMenuIDs(ids ...int) *MenusUpdate {
+	_u.mutation.AddLionRoleMenuIDs(ids...)
+	return _u
+}
+
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenuMapping entity.
+func (_u *MenusUpdate) AddLionRoleMenus(v ...*RoleMenuMapping) *MenusUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionRoleMenuIDs(ids...)
+}
+
 // Mutation returns the MenusMutation object of the builder.
 func (_u *MenusUpdate) Mutation() *MenusMutation {
 	return _u.mutation
+}
+
+// ClearLionRoleMenus clears all "lion_role_menus" edges to the RoleMenuMapping entity.
+func (_u *MenusUpdate) ClearLionRoleMenus() *MenusUpdate {
+	_u.mutation.ClearLionRoleMenus()
+	return _u
+}
+
+// RemoveLionRoleMenuIDs removes the "lion_role_menus" edge to RoleMenuMapping entities by IDs.
+func (_u *MenusUpdate) RemoveLionRoleMenuIDs(ids ...int) *MenusUpdate {
+	_u.mutation.RemoveLionRoleMenuIDs(ids...)
+	return _u
+}
+
+// RemoveLionRoleMenus removes "lion_role_menus" edges to RoleMenuMapping entities.
+func (_u *MenusUpdate) RemoveLionRoleMenus(v ...*RoleMenuMapping) *MenusUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionRoleMenuIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -247,11 +285,6 @@ func (_u *MenusUpdate) check() error {
 			return &ValidationError{Name: "path", err: fmt.Errorf(`lion: validator failed for field "Menus.path": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Locale(); ok {
-		if err := menus.LocaleValidator(v); err != nil {
-			return &ValidationError{Name: "locale", err: fmt.Errorf(`lion: validator failed for field "Menus.locale": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Icon(); ok {
 		if err := menus.IconValidator(v); err != nil {
 			return &ValidationError{Name: "icon", err: fmt.Errorf(`lion: validator failed for field "Menus.icon": %w`, err)}
@@ -275,12 +308,6 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(menus.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(menus.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(menus.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.ParentID(); ok {
 		_spec.SetField(menus.FieldParentID, field.TypeInt, value)
 	}
@@ -293,8 +320,8 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Path(); ok {
 		_spec.SetField(menus.FieldPath, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Locale(); ok {
-		_spec.SetField(menus.FieldLocale, field.TypeString, value)
+	if value, ok := _u.mutation.I18nName(); ok {
+		_spec.SetField(menus.FieldI18nName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Icon(); ok {
 		_spec.SetField(menus.FieldIcon, field.TypeString, value)
@@ -305,6 +332,12 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedSortWeight(); ok {
 		_spec.AddField(menus.FieldSortWeight, field.TypeInt, value)
 	}
+	if value, ok := _u.mutation.MenuType(); ok {
+		_spec.SetField(menus.FieldMenuType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMenuType(); ok {
+		_spec.AddField(menus.FieldMenuType, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.Enabled(); ok {
 		_spec.SetField(menus.FieldEnabled, field.TypeBool, value)
 	}
@@ -313,6 +346,51 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.HideChildrenInMenu(); ok {
 		_spec.SetField(menus.FieldHideChildrenInMenu, field.TypeBool, value)
+	}
+	if _u.mutation.LionRoleMenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   menus.LionRoleMenusTable,
+			Columns: []string{menus.LionRoleMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionRoleMenusIDs(); len(nodes) > 0 && !_u.mutation.LionRoleMenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   menus.LionRoleMenusTable,
+			Columns: []string{menus.LionRoleMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionRoleMenusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   menus.LionRoleMenusTable,
+			Columns: []string{menus.LionRoleMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -337,26 +415,6 @@ type MenusUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *MenusUpdateOne) SetUpdatedAt(v time.Time) *MenusUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
-	return _u
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *MenusUpdateOne) SetDeletedAt(v time.Time) *MenusUpdateOne {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *MenusUpdateOne) SetNillableDeletedAt(v *time.Time) *MenusUpdateOne {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *MenusUpdateOne) ClearDeletedAt() *MenusUpdateOne {
-	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -409,16 +467,16 @@ func (_u *MenusUpdateOne) SetNillablePath(v *string) *MenusUpdateOne {
 	return _u
 }
 
-// SetLocale sets the "locale" field.
-func (_u *MenusUpdateOne) SetLocale(v string) *MenusUpdateOne {
-	_u.mutation.SetLocale(v)
+// SetI18nName sets the "i18n_name" field.
+func (_u *MenusUpdateOne) SetI18nName(v string) *MenusUpdateOne {
+	_u.mutation.SetI18nName(v)
 	return _u
 }
 
-// SetNillableLocale sets the "locale" field if the given value is not nil.
-func (_u *MenusUpdateOne) SetNillableLocale(v *string) *MenusUpdateOne {
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_u *MenusUpdateOne) SetNillableI18nName(v *string) *MenusUpdateOne {
 	if v != nil {
-		_u.SetLocale(*v)
+		_u.SetI18nName(*v)
 	}
 	return _u
 }
@@ -455,6 +513,27 @@ func (_u *MenusUpdateOne) SetNillableSortWeight(v *int) *MenusUpdateOne {
 // AddSortWeight adds value to the "sort_weight" field.
 func (_u *MenusUpdateOne) AddSortWeight(v int) *MenusUpdateOne {
 	_u.mutation.AddSortWeight(v)
+	return _u
+}
+
+// SetMenuType sets the "menu_type" field.
+func (_u *MenusUpdateOne) SetMenuType(v int) *MenusUpdateOne {
+	_u.mutation.ResetMenuType()
+	_u.mutation.SetMenuType(v)
+	return _u
+}
+
+// SetNillableMenuType sets the "menu_type" field if the given value is not nil.
+func (_u *MenusUpdateOne) SetNillableMenuType(v *int) *MenusUpdateOne {
+	if v != nil {
+		_u.SetMenuType(*v)
+	}
+	return _u
+}
+
+// AddMenuType adds value to the "menu_type" field.
+func (_u *MenusUpdateOne) AddMenuType(v int) *MenusUpdateOne {
+	_u.mutation.AddMenuType(v)
 	return _u
 }
 
@@ -500,9 +579,45 @@ func (_u *MenusUpdateOne) SetNillableHideChildrenInMenu(v *bool) *MenusUpdateOne
 	return _u
 }
 
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenuMapping entity by IDs.
+func (_u *MenusUpdateOne) AddLionRoleMenuIDs(ids ...int) *MenusUpdateOne {
+	_u.mutation.AddLionRoleMenuIDs(ids...)
+	return _u
+}
+
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenuMapping entity.
+func (_u *MenusUpdateOne) AddLionRoleMenus(v ...*RoleMenuMapping) *MenusUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionRoleMenuIDs(ids...)
+}
+
 // Mutation returns the MenusMutation object of the builder.
 func (_u *MenusUpdateOne) Mutation() *MenusMutation {
 	return _u.mutation
+}
+
+// ClearLionRoleMenus clears all "lion_role_menus" edges to the RoleMenuMapping entity.
+func (_u *MenusUpdateOne) ClearLionRoleMenus() *MenusUpdateOne {
+	_u.mutation.ClearLionRoleMenus()
+	return _u
+}
+
+// RemoveLionRoleMenuIDs removes the "lion_role_menus" edge to RoleMenuMapping entities by IDs.
+func (_u *MenusUpdateOne) RemoveLionRoleMenuIDs(ids ...int) *MenusUpdateOne {
+	_u.mutation.RemoveLionRoleMenuIDs(ids...)
+	return _u
+}
+
+// RemoveLionRoleMenus removes "lion_role_menus" edges to RoleMenuMapping entities.
+func (_u *MenusUpdateOne) RemoveLionRoleMenus(v ...*RoleMenuMapping) *MenusUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionRoleMenuIDs(ids...)
 }
 
 // Where appends a list predicates to the MenusUpdate builder.
@@ -566,11 +681,6 @@ func (_u *MenusUpdateOne) check() error {
 			return &ValidationError{Name: "path", err: fmt.Errorf(`lion: validator failed for field "Menus.path": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Locale(); ok {
-		if err := menus.LocaleValidator(v); err != nil {
-			return &ValidationError{Name: "locale", err: fmt.Errorf(`lion: validator failed for field "Menus.locale": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Icon(); ok {
 		if err := menus.IconValidator(v); err != nil {
 			return &ValidationError{Name: "icon", err: fmt.Errorf(`lion: validator failed for field "Menus.icon": %w`, err)}
@@ -611,12 +721,6 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(menus.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(menus.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(menus.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.ParentID(); ok {
 		_spec.SetField(menus.FieldParentID, field.TypeInt, value)
 	}
@@ -629,8 +733,8 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 	if value, ok := _u.mutation.Path(); ok {
 		_spec.SetField(menus.FieldPath, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Locale(); ok {
-		_spec.SetField(menus.FieldLocale, field.TypeString, value)
+	if value, ok := _u.mutation.I18nName(); ok {
+		_spec.SetField(menus.FieldI18nName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Icon(); ok {
 		_spec.SetField(menus.FieldIcon, field.TypeString, value)
@@ -641,6 +745,12 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 	if value, ok := _u.mutation.AddedSortWeight(); ok {
 		_spec.AddField(menus.FieldSortWeight, field.TypeInt, value)
 	}
+	if value, ok := _u.mutation.MenuType(); ok {
+		_spec.SetField(menus.FieldMenuType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMenuType(); ok {
+		_spec.AddField(menus.FieldMenuType, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.Enabled(); ok {
 		_spec.SetField(menus.FieldEnabled, field.TypeBool, value)
 	}
@@ -649,6 +759,51 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 	}
 	if value, ok := _u.mutation.HideChildrenInMenu(); ok {
 		_spec.SetField(menus.FieldHideChildrenInMenu, field.TypeBool, value)
+	}
+	if _u.mutation.LionRoleMenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   menus.LionRoleMenusTable,
+			Columns: []string{menus.LionRoleMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionRoleMenusIDs(); len(nodes) > 0 && !_u.mutation.LionRoleMenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   menus.LionRoleMenusTable,
+			Columns: []string{menus.LionRoleMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionRoleMenusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   menus.LionRoleMenusTable,
+			Columns: []string{menus.LionRoleMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Menus{config: _u.config}
 	_spec.Assign = _node.assignValues

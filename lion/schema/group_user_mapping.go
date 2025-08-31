@@ -8,13 +8,13 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// GroupUsers 组下关联的具体用户
-type GroupUsers struct {
+// GroupUserMapping 组下关联的具体用户
+type GroupUserMapping struct {
 	ent.Schema
 }
 
 // Fields of the table.
-func (GroupUsers) Fields() []ent.Field {
+func (GroupUserMapping) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("group_id").
 			Positive().
@@ -28,27 +28,27 @@ func (GroupUsers) Fields() []ent.Field {
 }
 
 // Edges of the table.
-func (GroupUsers) Edges() []ent.Edge {
+func (GroupUserMapping) Edges() []ent.Edge {
 	return nil
 }
 
 // Mixin of the table.
-func (GroupUsers) Mixin() []ent.Mixin {
+func (GroupUserMapping) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
 	}
 }
 
 // Indexes of the table.
-func (GroupUsers) Indexes() []ent.Index {
+func (GroupUserMapping) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("group_id", "user_id").Unique(),
 	}
 }
 
 // Annotations 自定义表名
-func (GroupUsers) Annotations() []schema.Annotation {
+func (GroupUserMapping) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_group_users"},
+		entsql.Annotation{Table: "lion_group_user_mapping"},
 	}
 }

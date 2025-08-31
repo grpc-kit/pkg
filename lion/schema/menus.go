@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -26,8 +27,7 @@ func (Menus) Fields() []ent.Field {
 			MaxLen(255).
 			NotEmpty().
 			Comment("菜单路径"),
-		field.String("locale").
-			MaxLen(128).
+		field.String("i18n_name").
 			Default("").
 			Comment("国际化标识"),
 		field.String("icon").
@@ -37,6 +37,9 @@ func (Menus) Fields() []ent.Field {
 		field.Int("sort_weight").
 			Default(0).
 			Comment("排序权重，越小越靠前"),
+		field.Int("menu_type").
+			Default(0).
+			Comment("菜单用途类型，如 0=admin 后台"),
 		field.Bool("enabled").
 			Default(true).
 			Comment("是否启用该菜单项，禁用后完全不可访问"),
@@ -51,13 +54,16 @@ func (Menus) Fields() []ent.Field {
 
 // Edges of the table.
 func (Menus) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		// 一个 Menu 可以对应多个 RoleMenu (中间实体)
+		edge.To("lion_role_menus", RoleMenuMapping.Type),
+	}
 }
 
 // Mixin of the table.
 func (Menus) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixin{},
+		TimeMixinWithoutDeleted{},
 	}
 }
 

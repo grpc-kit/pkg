@@ -61,7 +61,28 @@ type Users struct {
 	PhoneNumberVerified bool `json:"phone_number_verified,omitempty"`
 	// 用户的地址信息
 	AddressEncrypted []byte `json:"-"`
-	selectValues     sql.SelectValues
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UsersQuery when eager-loading is set.
+	Edges        UsersEdges `json:"edges"`
+	selectValues sql.SelectValues
+}
+
+// UsersEdges holds the relations/edges for other nodes in the graph.
+type UsersEdges struct {
+	// LionUsers holds the value of the lion_users edge.
+	LionUsers []*RoleUserMapping `json:"lion_users,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// LionUsersOrErr returns the LionUsers value or an error if the edge
+// was not loaded in eager-loading.
+func (e UsersEdges) LionUsersOrErr() ([]*RoleUserMapping, error) {
+	if e.loadedTypes[0] {
+		return e.LionUsers, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_users"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -253,6 +274,11 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Users) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionUsers queries the "lion_users" edge of the Users entity.
+func (_m *Users) QueryLionUsers() *RoleUserMappingQuery {
+	return NewUsersClient(_m.config).QueryLionUsers(_m)
 }
 
 // Update returns a builder for updating this Users.

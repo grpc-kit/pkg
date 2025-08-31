@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -17,28 +18,37 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
-	FieldDeletedAt = "deleted_at"
 	// FieldParentID holds the string denoting the parent_id field in the database.
 	FieldParentID = "parent_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldPath holds the string denoting the path field in the database.
 	FieldPath = "path"
-	// FieldLocale holds the string denoting the locale field in the database.
-	FieldLocale = "locale"
+	// FieldI18nName holds the string denoting the i18n_name field in the database.
+	FieldI18nName = "i18n_name"
 	// FieldIcon holds the string denoting the icon field in the database.
 	FieldIcon = "icon"
 	// FieldSortWeight holds the string denoting the sort_weight field in the database.
 	FieldSortWeight = "sort_weight"
+	// FieldMenuType holds the string denoting the menu_type field in the database.
+	FieldMenuType = "menu_type"
 	// FieldEnabled holds the string denoting the enabled field in the database.
 	FieldEnabled = "enabled"
 	// FieldHideInMenu holds the string denoting the hide_in_menu field in the database.
 	FieldHideInMenu = "hide_in_menu"
 	// FieldHideChildrenInMenu holds the string denoting the hide_children_in_menu field in the database.
 	FieldHideChildrenInMenu = "hide_children_in_menu"
+	// EdgeLionRoleMenus holds the string denoting the lion_role_menus edge name in mutations.
+	EdgeLionRoleMenus = "lion_role_menus"
 	// Table holds the table name of the menus in the database.
 	Table = "lion_menus"
+	// LionRoleMenusTable is the table that holds the lion_role_menus relation/edge.
+	LionRoleMenusTable = "lion_role_menu_mapping"
+	// LionRoleMenusInverseTable is the table name for the RoleMenuMapping entity.
+	// It exists in this package in order to avoid circular dependency with the "rolemenumapping" package.
+	LionRoleMenusInverseTable = "lion_role_menu_mapping"
+	// LionRoleMenusColumn is the table column denoting the lion_role_menus relation/edge.
+	LionRoleMenusColumn = "menu_id"
 )
 
 // Columns holds all SQL columns for menus fields.
@@ -46,13 +56,13 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-	FieldDeletedAt,
 	FieldParentID,
 	FieldName,
 	FieldPath,
-	FieldLocale,
+	FieldI18nName,
 	FieldIcon,
 	FieldSortWeight,
+	FieldMenuType,
 	FieldEnabled,
 	FieldHideInMenu,
 	FieldHideChildrenInMenu,
@@ -81,16 +91,16 @@ var (
 	NameValidator func(string) error
 	// PathValidator is a validator for the "path" field. It is called by the builders before save.
 	PathValidator func(string) error
-	// DefaultLocale holds the default value on creation for the "locale" field.
-	DefaultLocale string
-	// LocaleValidator is a validator for the "locale" field. It is called by the builders before save.
-	LocaleValidator func(string) error
+	// DefaultI18nName holds the default value on creation for the "i18n_name" field.
+	DefaultI18nName string
 	// DefaultIcon holds the default value on creation for the "icon" field.
 	DefaultIcon string
 	// IconValidator is a validator for the "icon" field. It is called by the builders before save.
 	IconValidator func(string) error
 	// DefaultSortWeight holds the default value on creation for the "sort_weight" field.
 	DefaultSortWeight int
+	// DefaultMenuType holds the default value on creation for the "menu_type" field.
+	DefaultMenuType int
 	// DefaultEnabled holds the default value on creation for the "enabled" field.
 	DefaultEnabled bool
 	// DefaultHideInMenu holds the default value on creation for the "hide_in_menu" field.
@@ -117,11 +127,6 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByDeletedAt orders the results by the deleted_at field.
-func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
-}
-
 // ByParentID orders the results by the parent_id field.
 func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentID, opts...).ToFunc()
@@ -137,9 +142,9 @@ func ByPath(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPath, opts...).ToFunc()
 }
 
-// ByLocale orders the results by the locale field.
-func ByLocale(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLocale, opts...).ToFunc()
+// ByI18nName orders the results by the i18n_name field.
+func ByI18nName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldI18nName, opts...).ToFunc()
 }
 
 // ByIcon orders the results by the icon field.
@@ -150,6 +155,11 @@ func ByIcon(opts ...sql.OrderTermOption) OrderOption {
 // BySortWeight orders the results by the sort_weight field.
 func BySortWeight(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSortWeight, opts...).ToFunc()
+}
+
+// ByMenuType orders the results by the menu_type field.
+func ByMenuType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMenuType, opts...).ToFunc()
 }
 
 // ByEnabled orders the results by the enabled field.
@@ -165,4 +175,25 @@ func ByHideInMenu(opts ...sql.OrderTermOption) OrderOption {
 // ByHideChildrenInMenu orders the results by the hide_children_in_menu field.
 func ByHideChildrenInMenu(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHideChildrenInMenu, opts...).ToFunc()
+}
+
+// ByLionRoleMenusCount orders the results by lion_role_menus count.
+func ByLionRoleMenusCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionRoleMenusStep(), opts...)
+	}
+}
+
+// ByLionRoleMenus orders the results by lion_role_menus terms.
+func ByLionRoleMenus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionRoleMenusStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newLionRoleMenusStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionRoleMenusInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleMenusTable, LionRoleMenusColumn),
+	)
 }

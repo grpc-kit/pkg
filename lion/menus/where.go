@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -64,11 +65,6 @@ func UpdatedAt(v time.Time) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
-func DeletedAt(v time.Time) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldDeletedAt, v))
-}
-
 // ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
 func ParentID(v int) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldParentID, v))
@@ -84,9 +80,9 @@ func Path(v string) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldPath, v))
 }
 
-// Locale applies equality check predicate on the "locale" field. It's identical to LocaleEQ.
-func Locale(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldLocale, v))
+// I18nName applies equality check predicate on the "i18n_name" field. It's identical to I18nNameEQ.
+func I18nName(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldEQ(FieldI18nName, v))
 }
 
 // Icon applies equality check predicate on the "icon" field. It's identical to IconEQ.
@@ -97,6 +93,11 @@ func Icon(v string) predicate.Menus {
 // SortWeight applies equality check predicate on the "sort_weight" field. It's identical to SortWeightEQ.
 func SortWeight(v int) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldSortWeight, v))
+}
+
+// MenuType applies equality check predicate on the "menu_type" field. It's identical to MenuTypeEQ.
+func MenuType(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldEQ(FieldMenuType, v))
 }
 
 // Enabled applies equality check predicate on the "enabled" field. It's identical to EnabledEQ.
@@ -192,56 +193,6 @@ func UpdatedAtLT(v time.Time) predicate.Menus {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Menus {
 	return predicate.Menus(sql.FieldLTE(FieldUpdatedAt, v))
-}
-
-// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
-func DeletedAtEQ(v time.Time) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldDeletedAt, v))
-}
-
-// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
-func DeletedAtNEQ(v time.Time) predicate.Menus {
-	return predicate.Menus(sql.FieldNEQ(FieldDeletedAt, v))
-}
-
-// DeletedAtIn applies the In predicate on the "deleted_at" field.
-func DeletedAtIn(vs ...time.Time) predicate.Menus {
-	return predicate.Menus(sql.FieldIn(FieldDeletedAt, vs...))
-}
-
-// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
-func DeletedAtNotIn(vs ...time.Time) predicate.Menus {
-	return predicate.Menus(sql.FieldNotIn(FieldDeletedAt, vs...))
-}
-
-// DeletedAtGT applies the GT predicate on the "deleted_at" field.
-func DeletedAtGT(v time.Time) predicate.Menus {
-	return predicate.Menus(sql.FieldGT(FieldDeletedAt, v))
-}
-
-// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
-func DeletedAtGTE(v time.Time) predicate.Menus {
-	return predicate.Menus(sql.FieldGTE(FieldDeletedAt, v))
-}
-
-// DeletedAtLT applies the LT predicate on the "deleted_at" field.
-func DeletedAtLT(v time.Time) predicate.Menus {
-	return predicate.Menus(sql.FieldLT(FieldDeletedAt, v))
-}
-
-// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
-func DeletedAtLTE(v time.Time) predicate.Menus {
-	return predicate.Menus(sql.FieldLTE(FieldDeletedAt, v))
-}
-
-// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
-func DeletedAtIsNil() predicate.Menus {
-	return predicate.Menus(sql.FieldIsNull(FieldDeletedAt))
-}
-
-// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
-func DeletedAtNotNil() predicate.Menus {
-	return predicate.Menus(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // ParentIDEQ applies the EQ predicate on the "parent_id" field.
@@ -414,69 +365,69 @@ func PathContainsFold(v string) predicate.Menus {
 	return predicate.Menus(sql.FieldContainsFold(FieldPath, v))
 }
 
-// LocaleEQ applies the EQ predicate on the "locale" field.
-func LocaleEQ(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldLocale, v))
+// I18nNameEQ applies the EQ predicate on the "i18n_name" field.
+func I18nNameEQ(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldEQ(FieldI18nName, v))
 }
 
-// LocaleNEQ applies the NEQ predicate on the "locale" field.
-func LocaleNEQ(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldNEQ(FieldLocale, v))
+// I18nNameNEQ applies the NEQ predicate on the "i18n_name" field.
+func I18nNameNEQ(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldNEQ(FieldI18nName, v))
 }
 
-// LocaleIn applies the In predicate on the "locale" field.
-func LocaleIn(vs ...string) predicate.Menus {
-	return predicate.Menus(sql.FieldIn(FieldLocale, vs...))
+// I18nNameIn applies the In predicate on the "i18n_name" field.
+func I18nNameIn(vs ...string) predicate.Menus {
+	return predicate.Menus(sql.FieldIn(FieldI18nName, vs...))
 }
 
-// LocaleNotIn applies the NotIn predicate on the "locale" field.
-func LocaleNotIn(vs ...string) predicate.Menus {
-	return predicate.Menus(sql.FieldNotIn(FieldLocale, vs...))
+// I18nNameNotIn applies the NotIn predicate on the "i18n_name" field.
+func I18nNameNotIn(vs ...string) predicate.Menus {
+	return predicate.Menus(sql.FieldNotIn(FieldI18nName, vs...))
 }
 
-// LocaleGT applies the GT predicate on the "locale" field.
-func LocaleGT(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldGT(FieldLocale, v))
+// I18nNameGT applies the GT predicate on the "i18n_name" field.
+func I18nNameGT(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldGT(FieldI18nName, v))
 }
 
-// LocaleGTE applies the GTE predicate on the "locale" field.
-func LocaleGTE(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldGTE(FieldLocale, v))
+// I18nNameGTE applies the GTE predicate on the "i18n_name" field.
+func I18nNameGTE(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldGTE(FieldI18nName, v))
 }
 
-// LocaleLT applies the LT predicate on the "locale" field.
-func LocaleLT(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldLT(FieldLocale, v))
+// I18nNameLT applies the LT predicate on the "i18n_name" field.
+func I18nNameLT(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldLT(FieldI18nName, v))
 }
 
-// LocaleLTE applies the LTE predicate on the "locale" field.
-func LocaleLTE(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldLTE(FieldLocale, v))
+// I18nNameLTE applies the LTE predicate on the "i18n_name" field.
+func I18nNameLTE(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldLTE(FieldI18nName, v))
 }
 
-// LocaleContains applies the Contains predicate on the "locale" field.
-func LocaleContains(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldContains(FieldLocale, v))
+// I18nNameContains applies the Contains predicate on the "i18n_name" field.
+func I18nNameContains(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldContains(FieldI18nName, v))
 }
 
-// LocaleHasPrefix applies the HasPrefix predicate on the "locale" field.
-func LocaleHasPrefix(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldHasPrefix(FieldLocale, v))
+// I18nNameHasPrefix applies the HasPrefix predicate on the "i18n_name" field.
+func I18nNameHasPrefix(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldHasPrefix(FieldI18nName, v))
 }
 
-// LocaleHasSuffix applies the HasSuffix predicate on the "locale" field.
-func LocaleHasSuffix(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldHasSuffix(FieldLocale, v))
+// I18nNameHasSuffix applies the HasSuffix predicate on the "i18n_name" field.
+func I18nNameHasSuffix(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldHasSuffix(FieldI18nName, v))
 }
 
-// LocaleEqualFold applies the EqualFold predicate on the "locale" field.
-func LocaleEqualFold(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldEqualFold(FieldLocale, v))
+// I18nNameEqualFold applies the EqualFold predicate on the "i18n_name" field.
+func I18nNameEqualFold(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldEqualFold(FieldI18nName, v))
 }
 
-// LocaleContainsFold applies the ContainsFold predicate on the "locale" field.
-func LocaleContainsFold(v string) predicate.Menus {
-	return predicate.Menus(sql.FieldContainsFold(FieldLocale, v))
+// I18nNameContainsFold applies the ContainsFold predicate on the "i18n_name" field.
+func I18nNameContainsFold(v string) predicate.Menus {
+	return predicate.Menus(sql.FieldContainsFold(FieldI18nName, v))
 }
 
 // IconEQ applies the EQ predicate on the "icon" field.
@@ -584,6 +535,46 @@ func SortWeightLTE(v int) predicate.Menus {
 	return predicate.Menus(sql.FieldLTE(FieldSortWeight, v))
 }
 
+// MenuTypeEQ applies the EQ predicate on the "menu_type" field.
+func MenuTypeEQ(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldEQ(FieldMenuType, v))
+}
+
+// MenuTypeNEQ applies the NEQ predicate on the "menu_type" field.
+func MenuTypeNEQ(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldNEQ(FieldMenuType, v))
+}
+
+// MenuTypeIn applies the In predicate on the "menu_type" field.
+func MenuTypeIn(vs ...int) predicate.Menus {
+	return predicate.Menus(sql.FieldIn(FieldMenuType, vs...))
+}
+
+// MenuTypeNotIn applies the NotIn predicate on the "menu_type" field.
+func MenuTypeNotIn(vs ...int) predicate.Menus {
+	return predicate.Menus(sql.FieldNotIn(FieldMenuType, vs...))
+}
+
+// MenuTypeGT applies the GT predicate on the "menu_type" field.
+func MenuTypeGT(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldGT(FieldMenuType, v))
+}
+
+// MenuTypeGTE applies the GTE predicate on the "menu_type" field.
+func MenuTypeGTE(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldGTE(FieldMenuType, v))
+}
+
+// MenuTypeLT applies the LT predicate on the "menu_type" field.
+func MenuTypeLT(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldLT(FieldMenuType, v))
+}
+
+// MenuTypeLTE applies the LTE predicate on the "menu_type" field.
+func MenuTypeLTE(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldLTE(FieldMenuType, v))
+}
+
 // EnabledEQ applies the EQ predicate on the "enabled" field.
 func EnabledEQ(v bool) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldEnabled, v))
@@ -612,6 +603,29 @@ func HideChildrenInMenuEQ(v bool) predicate.Menus {
 // HideChildrenInMenuNEQ applies the NEQ predicate on the "hide_children_in_menu" field.
 func HideChildrenInMenuNEQ(v bool) predicate.Menus {
 	return predicate.Menus(sql.FieldNEQ(FieldHideChildrenInMenu, v))
+}
+
+// HasLionRoleMenus applies the HasEdge predicate on the "lion_role_menus" edge.
+func HasLionRoleMenus() predicate.Menus {
+	return predicate.Menus(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionRoleMenusTable, LionRoleMenusColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionRoleMenusWith applies the HasEdge predicate on the "lion_role_menus" edge with a given conditions (other predicates).
+func HasLionRoleMenusWith(preds ...predicate.RoleMenuMapping) predicate.Menus {
+	return predicate.Menus(func(s *sql.Selector) {
+		step := newLionRoleMenusStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

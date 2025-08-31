@@ -6,12 +6,9 @@ import (
 	"sort"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
-	"github.com/grpc-kit/pkg/crypto"
-	"github.com/grpc-kit/pkg/lion/groupmenus"
-	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/menus"
-	"github.com/grpc-kit/pkg/lion/users"
+	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/rpc"
 )
 
@@ -35,49 +32,51 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 	// 2. 如果 oidc 不支持 groups 时如何处理
 	if len(gs) == 0 {
 		// TODO; 从 lion_group_users 中查询用户组
-		un, ok := rpc.GetUsernameFromContext(ctx)
-		if ok {
-			uu, err := a.config.db.Users.Query().
-				Select(
-					users.FieldID,
-					users.FieldEmailEncrypted,
-				).
-				Where(
-					users.EmailHashEQ(crypto.SHA256([]byte(un))),
-				).
-				Only(ctx)
-			if err == nil && len(uu.EmailEncrypted) > 0 {
-				tu, err := crypto.DecryptAES(a.config.aesKey, uu.EmailEncrypted)
-				if err == nil && string(tu) == un {
-					// 如果解密成功且用户名与请求中的用户名匹配，则添加到用户组
-					tmp, err := a.config.db.GroupUsers.Query().
-						Select(
-							groupusers.FieldGroupID,
-						).
-						Where(
-							groupusers.UserIDEQ(uu.ID),
-						).
-						All(ctx)
-					if err == nil {
-						for _, v := range tmp {
-							gids = append(gids, v.GroupID)
+		/*
+			un, ok := rpc.GetUsernameFromContext(ctx)
+			if ok {
+				uu, err := a.config.db.Users.Query().
+					Select(
+						users.FieldID,
+						users.FieldEmailEncrypted,
+					).
+					Where(
+						users.EmailHashEQ(crypto.SHA256([]byte(un))),
+					).
+					Only(ctx)
+				if err == nil && len(uu.EmailEncrypted) > 0 {
+					tu, err := crypto.DecryptAES(a.config.aesKey, uu.EmailEncrypted)
+					if err == nil && string(tu) == un {
+						// 如果解密成功且用户名与请求中的用户名匹配，则添加到用户组
+						tmp, err := a.config.db.GroupUsers.Query().
+							Select(
+								groupusers.FieldGroupID,
+							).
+							Where(
+								groupusers.UserIDEQ(uu.ID),
+							).
+							All(ctx)
+						if err == nil {
+							for _, v := range tmp {
+								gids = append(gids, v.GroupID)
+							}
 						}
 					}
 				}
 			}
-		}
+		*/
 
 		// TODO; 如果用户组列表为空，则添加默认的 "guest" 用户组
 		gs = append(gs, "guest")
 	}
 
 	// 根据用户组从 db 中获取 id 列表
-	gins, err := a.config.db.Groups.Query().
+	gins, err := a.config.db.Roles.Query().
 		Select(
-			groups.FieldID,
+			roles.FieldID,
 		).
 		Where(
-			groups.NameIn(gs...),
+			roles.NameIn(gs...),
 		).
 		All(ctx)
 	if err != nil {
@@ -89,12 +88,12 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 	}
 
 	// 根据用户组 ID 列表获取菜单
-	mins, err := a.config.db.GroupMenus.Query().
+	mins, err := a.config.db.RoleMenuMapping.Query().
 		Select(
-			groupmenus.FieldMenuID,
+			rolemenumapping.FieldMenuID,
 		).
 		Where(
-			groupmenus.GroupIDIn(gids...),
+			rolemenumapping.RoleIDIn(gids...),
 		).
 		All(ctx)
 	if err != nil {
@@ -113,7 +112,7 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 			menus.FieldParentID,
 			menus.FieldName,
 			menus.FieldPath,
-			menus.FieldLocale,
+			menus.FieldI18nName,
 			menus.FieldIcon,
 			menus.FieldSortWeight,
 			menus.FieldEnabled,
@@ -138,7 +137,7 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 			ParentId:           int32(m.ParentID),
 			Name:               m.Name,
 			Path:               m.Path,
-			Locale:             m.Locale,
+			I18NName:           m.I18nName,
 			Icon:               m.Icon,
 			SortWeight:         int32(m.SortWeight),
 			Enabled:            m.Enabled,

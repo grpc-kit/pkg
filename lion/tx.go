@@ -22,14 +22,24 @@ type Tx struct {
 	AuthUserSocial *AuthUserSocialClient
 	// Demo is the client for interacting with the Demo builders.
 	Demo *DemoClient
+	// Departments is the client for interacting with the Departments builders.
+	Departments *DepartmentsClient
 	// GroupMenus is the client for interacting with the GroupMenus builders.
 	GroupMenus *GroupMenusClient
-	// GroupUsers is the client for interacting with the GroupUsers builders.
-	GroupUsers *GroupUsersClient
+	// GroupUserMapping is the client for interacting with the GroupUserMapping builders.
+	GroupUserMapping *GroupUserMappingClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
 	// Menus is the client for interacting with the Menus builders.
 	Menus *MenusClient
+	// RoleGroupMapping is the client for interacting with the RoleGroupMapping builders.
+	RoleGroupMapping *RoleGroupMappingClient
+	// RoleMenuMapping is the client for interacting with the RoleMenuMapping builders.
+	RoleMenuMapping *RoleMenuMappingClient
+	// RoleUserMapping is the client for interacting with the RoleUserMapping builders.
+	RoleUserMapping *RoleUserMappingClient
+	// Roles is the client for interacting with the Roles builders.
+	Roles *RolesClient
 	// UserAttributes is the client for interacting with the UserAttributes builders.
 	UserAttributes *UserAttributesClient
 	// Users is the client for interacting with the Users builders.
@@ -170,10 +180,15 @@ func (tx *Tx) init() {
 	tx.AuthUserLocal = NewAuthUserLocalClient(tx.config)
 	tx.AuthUserSocial = NewAuthUserSocialClient(tx.config)
 	tx.Demo = NewDemoClient(tx.config)
+	tx.Departments = NewDepartmentsClient(tx.config)
 	tx.GroupMenus = NewGroupMenusClient(tx.config)
-	tx.GroupUsers = NewGroupUsersClient(tx.config)
+	tx.GroupUserMapping = NewGroupUserMappingClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
+	tx.RoleGroupMapping = NewRoleGroupMappingClient(tx.config)
+	tx.RoleMenuMapping = NewRoleMenuMappingClient(tx.config)
+	tx.RoleUserMapping = NewRoleUserMappingClient(tx.config)
+	tx.Roles = NewRolesClient(tx.config)
 	tx.UserAttributes = NewUserAttributesClient(tx.config)
 	tx.Users = NewUsersClient(tx.config)
 }

@@ -21,13 +21,32 @@ type Groups struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 用户组名
 	Name string `json:"name,omitempty"`
 	// 用户组描述
-	Description  string `json:"description,omitempty"`
+	Description string `json:"description,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the GroupsQuery when eager-loading is set.
+	Edges        GroupsEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// GroupsEdges holds the relations/edges for other nodes in the graph.
+type GroupsEdges struct {
+	// LionGroups holds the value of the lion_groups edge.
+	LionGroups []*RoleGroupMapping `json:"lion_groups,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// LionGroupsOrErr returns the LionGroups value or an error if the edge
+// was not loaded in eager-loading.
+func (e GroupsEdges) LionGroupsOrErr() ([]*RoleGroupMapping, error) {
+	if e.loadedTypes[0] {
+		return e.LionGroups, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_groups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -39,7 +58,7 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case groups.FieldName, groups.FieldDescription:
 			values[i] = new(sql.NullString)
-		case groups.FieldCreatedAt, groups.FieldUpdatedAt, groups.FieldDeletedAt:
+		case groups.FieldCreatedAt, groups.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -74,13 +93,6 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case groups.FieldDeletedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
-			} else if value.Valid {
-				_m.DeletedAt = new(time.Time)
-				*_m.DeletedAt = value.Time
-			}
 		case groups.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -104,6 +116,11 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Groups) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionGroups queries the "lion_groups" edge of the Groups entity.
+func (_m *Groups) QueryLionGroups() *RoleGroupMappingQuery {
+	return NewGroupsClient(_m.config).QueryLionGroups(_m)
 }
 
 // Update returns a builder for updating this Groups.
@@ -134,11 +151,6 @@ func (_m *Groups) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	if v := _m.DeletedAt; v != nil {
-		builder.WriteString("deleted_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)

@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,13 +29,16 @@ func (Groups) Fields() []ent.Field {
 
 // Edges of the table.
 func (Groups) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		// 一个 Role 可以对应多个 RoleMenu (中间实体)
+		edge.To("lion_groups", RoleGroupMapping.Type),
+	}
 }
 
 // Mixin of the table.
 func (Groups) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixin{},
+		TimeMixinWithoutDeleted{},
 	}
 }
 

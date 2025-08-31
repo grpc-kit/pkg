@@ -8,30 +8,30 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/roleusermapping"
 )
 
-// GroupUsersDelete is the builder for deleting a GroupUsers entity.
-type GroupUsersDelete struct {
+// RoleUserMappingDelete is the builder for deleting a RoleUserMapping entity.
+type RoleUserMappingDelete struct {
 	config
 	hooks    []Hook
-	mutation *GroupUsersMutation
+	mutation *RoleUserMappingMutation
 }
 
-// Where appends a list predicates to the GroupUsersDelete builder.
-func (_d *GroupUsersDelete) Where(ps ...predicate.GroupUsers) *GroupUsersDelete {
+// Where appends a list predicates to the RoleUserMappingDelete builder.
+func (_d *RoleUserMappingDelete) Where(ps ...predicate.RoleUserMapping) *RoleUserMappingDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *GroupUsersDelete) Exec(ctx context.Context) (int, error) {
+func (_d *RoleUserMappingDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *GroupUsersDelete) ExecX(ctx context.Context) int {
+func (_d *RoleUserMappingDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *GroupUsersDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *GroupUsersDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(groupusers.Table, sqlgraph.NewFieldSpec(groupusers.FieldID, field.TypeInt))
+func (_d *RoleUserMappingDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(roleusermapping.Table, sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *GroupUsersDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// GroupUsersDeleteOne is the builder for deleting a single GroupUsers entity.
-type GroupUsersDeleteOne struct {
-	_d *GroupUsersDelete
+// RoleUserMappingDeleteOne is the builder for deleting a single RoleUserMapping entity.
+type RoleUserMappingDeleteOne struct {
+	_d *RoleUserMappingDelete
 }
 
-// Where appends a list predicates to the GroupUsersDelete builder.
-func (_d *GroupUsersDeleteOne) Where(ps ...predicate.GroupUsers) *GroupUsersDeleteOne {
+// Where appends a list predicates to the RoleUserMappingDelete builder.
+func (_d *RoleUserMappingDeleteOne) Where(ps ...predicate.RoleUserMapping) *RoleUserMappingDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *GroupUsersDeleteOne) Exec(ctx context.Context) error {
+func (_d *RoleUserMappingDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{groupusers.Label}
+		return &NotFoundError{roleusermapping.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *GroupUsersDeleteOne) ExecX(ctx context.Context) {
+func (_d *RoleUserMappingDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

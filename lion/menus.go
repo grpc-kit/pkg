@@ -21,8 +21,6 @@ type Menus struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 父菜单 ID，为 0 表示顶级菜单
 	ParentID int `json:"parent_id,omitempty"`
 	// 菜单名称
@@ -30,18 +28,41 @@ type Menus struct {
 	// 菜单路径
 	Path string `json:"path,omitempty"`
 	// 国际化标识
-	Locale string `json:"locale,omitempty"`
+	I18nName string `json:"i18n_name,omitempty"`
 	// 图标名称，如 UserOutlined
 	Icon string `json:"icon,omitempty"`
 	// 排序权重，越小越靠前
 	SortWeight int `json:"sort_weight,omitempty"`
+	// 菜单用途类型，如 0=admin 后台
+	MenuType int `json:"menu_type,omitempty"`
 	// 是否启用该菜单项，禁用后完全不可访问
 	Enabled bool `json:"enabled,omitempty"`
 	// 是否在菜单中隐藏该节点
 	HideInMenu bool `json:"hide_in_menu,omitempty"`
 	// 是否隐藏该节点的子菜单
 	HideChildrenInMenu bool `json:"hide_children_in_menu,omitempty"`
-	selectValues       sql.SelectValues
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the MenusQuery when eager-loading is set.
+	Edges        MenusEdges `json:"edges"`
+	selectValues sql.SelectValues
+}
+
+// MenusEdges holds the relations/edges for other nodes in the graph.
+type MenusEdges struct {
+	// LionRoleMenus holds the value of the lion_role_menus edge.
+	LionRoleMenus []*RoleMenuMapping `json:"lion_role_menus,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// LionRoleMenusOrErr returns the LionRoleMenus value or an error if the edge
+// was not loaded in eager-loading.
+func (e MenusEdges) LionRoleMenusOrErr() ([]*RoleMenuMapping, error) {
+	if e.loadedTypes[0] {
+		return e.LionRoleMenus, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_role_menus"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -51,11 +72,11 @@ func (*Menus) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case menus.FieldEnabled, menus.FieldHideInMenu, menus.FieldHideChildrenInMenu:
 			values[i] = new(sql.NullBool)
-		case menus.FieldID, menus.FieldParentID, menus.FieldSortWeight:
+		case menus.FieldID, menus.FieldParentID, menus.FieldSortWeight, menus.FieldMenuType:
 			values[i] = new(sql.NullInt64)
-		case menus.FieldName, menus.FieldPath, menus.FieldLocale, menus.FieldIcon:
+		case menus.FieldName, menus.FieldPath, menus.FieldI18nName, menus.FieldIcon:
 			values[i] = new(sql.NullString)
-		case menus.FieldCreatedAt, menus.FieldUpdatedAt, menus.FieldDeletedAt:
+		case menus.FieldCreatedAt, menus.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -90,13 +111,6 @@ func (_m *Menus) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case menus.FieldDeletedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
-			} else if value.Valid {
-				_m.DeletedAt = new(time.Time)
-				*_m.DeletedAt = value.Time
-			}
 		case menus.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
@@ -115,11 +129,11 @@ func (_m *Menus) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Path = value.String
 			}
-		case menus.FieldLocale:
+		case menus.FieldI18nName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field locale", values[i])
+				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
 			} else if value.Valid {
-				_m.Locale = value.String
+				_m.I18nName = value.String
 			}
 		case menus.FieldIcon:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -132,6 +146,12 @@ func (_m *Menus) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field sort_weight", values[i])
 			} else if value.Valid {
 				_m.SortWeight = int(value.Int64)
+			}
+		case menus.FieldMenuType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field menu_type", values[i])
+			} else if value.Valid {
+				_m.MenuType = int(value.Int64)
 			}
 		case menus.FieldEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -164,6 +184,11 @@ func (_m *Menus) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
+// QueryLionRoleMenus queries the "lion_role_menus" edge of the Menus entity.
+func (_m *Menus) QueryLionRoleMenus() *RoleMenuMappingQuery {
+	return NewMenusClient(_m.config).QueryLionRoleMenus(_m)
+}
+
 // Update returns a builder for updating this Menus.
 // Note that you need to call Menus.Unwrap() before calling this method if this Menus
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -193,11 +218,6 @@ func (_m *Menus) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := _m.DeletedAt; v != nil {
-		builder.WriteString("deleted_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
-	builder.WriteString(", ")
 	builder.WriteString("parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
 	builder.WriteString(", ")
@@ -207,14 +227,17 @@ func (_m *Menus) String() string {
 	builder.WriteString("path=")
 	builder.WriteString(_m.Path)
 	builder.WriteString(", ")
-	builder.WriteString("locale=")
-	builder.WriteString(_m.Locale)
+	builder.WriteString("i18n_name=")
+	builder.WriteString(_m.I18nName)
 	builder.WriteString(", ")
 	builder.WriteString("icon=")
 	builder.WriteString(_m.Icon)
 	builder.WriteString(", ")
 	builder.WriteString("sort_weight=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SortWeight))
+	builder.WriteString(", ")
+	builder.WriteString("menu_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MenuType))
 	builder.WriteString(", ")
 	builder.WriteString("enabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))

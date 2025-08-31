@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/groups"
+	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
 )
 
 // GroupsCreate is the builder for creating a Groups entity.
@@ -48,20 +49,6 @@ func (_c *GroupsCreate) SetNillableUpdatedAt(v *time.Time) *GroupsCreate {
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *GroupsCreate) SetDeletedAt(v time.Time) *GroupsCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableDeletedAt(v *time.Time) *GroupsCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetName sets the "name" field.
 func (_c *GroupsCreate) SetName(v string) *GroupsCreate {
 	_c.mutation.SetName(v)
@@ -80,6 +67,21 @@ func (_c *GroupsCreate) SetNillableDescription(v *string) *GroupsCreate {
 		_c.SetDescription(*v)
 	}
 	return _c
+}
+
+// AddLionGroupIDs adds the "lion_groups" edge to the RoleGroupMapping entity by IDs.
+func (_c *GroupsCreate) AddLionGroupIDs(ids ...int) *GroupsCreate {
+	_c.mutation.AddLionGroupIDs(ids...)
+	return _c
+}
+
+// AddLionGroups adds the "lion_groups" edges to the RoleGroupMapping entity.
+func (_c *GroupsCreate) AddLionGroups(v ...*RoleGroupMapping) *GroupsCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionGroupIDs(ids...)
 }
 
 // Mutation returns the GroupsMutation object of the builder.
@@ -184,10 +186,6 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_spec.SetField(groups.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(groups.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
-	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -195,6 +193,22 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if nodes := _c.mutation.LionGroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   groups.LionGroupsTable,
+			Columns: []string{groups.LionGroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolegroupmapping.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

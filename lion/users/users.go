@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -58,8 +59,17 @@ const (
 	FieldPhoneNumberVerified = "phone_number_verified"
 	// FieldAddressEncrypted holds the string denoting the address_encrypted field in the database.
 	FieldAddressEncrypted = "address_encrypted"
+	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
+	EdgeLionUsers = "lion_users"
 	// Table holds the table name of the users in the database.
 	Table = "lion_users"
+	// LionUsersTable is the table that holds the lion_users relation/edge.
+	LionUsersTable = "lion_role_user_mapping"
+	// LionUsersInverseTable is the table name for the RoleUserMapping entity.
+	// It exists in this package in order to avoid circular dependency with the "roleusermapping" package.
+	LionUsersInverseTable = "lion_role_user_mapping"
+	// LionUsersColumn is the table column denoting the lion_users relation/edge.
+	LionUsersColumn = "user_id"
 )
 
 // Columns holds all SQL columns for users fields.
@@ -245,4 +255,25 @@ func ByPhoneNumberHash(opts ...sql.OrderTermOption) OrderOption {
 // ByPhoneNumberVerified orders the results by the phone_number_verified field.
 func ByPhoneNumberVerified(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPhoneNumberVerified, opts...).ToFunc()
+}
+
+// ByLionUsersCount orders the results by lion_users count.
+func ByLionUsersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionUsersStep(), opts...)
+	}
+}
+
+// ByLionUsers orders the results by lion_users terms.
+func ByLionUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newLionUsersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionUsersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionUsersTable, LionUsersColumn),
+	)
 }

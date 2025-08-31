@@ -11,68 +11,68 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/groupusers"
+	"github.com/grpc-kit/pkg/lion/groupusermapping"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
-// GroupUsersQuery is the builder for querying GroupUsers entities.
-type GroupUsersQuery struct {
+// GroupUserMappingQuery is the builder for querying GroupUserMapping entities.
+type GroupUserMappingQuery struct {
 	config
 	ctx        *QueryContext
-	order      []groupusers.OrderOption
+	order      []groupusermapping.OrderOption
 	inters     []Interceptor
-	predicates []predicate.GroupUsers
+	predicates []predicate.GroupUserMapping
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the GroupUsersQuery builder.
-func (_q *GroupUsersQuery) Where(ps ...predicate.GroupUsers) *GroupUsersQuery {
+// Where adds a new predicate for the GroupUserMappingQuery builder.
+func (_q *GroupUserMappingQuery) Where(ps ...predicate.GroupUserMapping) *GroupUserMappingQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *GroupUsersQuery) Limit(limit int) *GroupUsersQuery {
+func (_q *GroupUserMappingQuery) Limit(limit int) *GroupUserMappingQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *GroupUsersQuery) Offset(offset int) *GroupUsersQuery {
+func (_q *GroupUserMappingQuery) Offset(offset int) *GroupUserMappingQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *GroupUsersQuery) Unique(unique bool) *GroupUsersQuery {
+func (_q *GroupUserMappingQuery) Unique(unique bool) *GroupUserMappingQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *GroupUsersQuery) Order(o ...groupusers.OrderOption) *GroupUsersQuery {
+func (_q *GroupUserMappingQuery) Order(o ...groupusermapping.OrderOption) *GroupUserMappingQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// First returns the first GroupUsers entity from the query.
-// Returns a *NotFoundError when no GroupUsers was found.
-func (_q *GroupUsersQuery) First(ctx context.Context) (*GroupUsers, error) {
+// First returns the first GroupUserMapping entity from the query.
+// Returns a *NotFoundError when no GroupUserMapping was found.
+func (_q *GroupUserMappingQuery) First(ctx context.Context) (*GroupUserMapping, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{groupusers.Label}
+		return nil, &NotFoundError{groupusermapping.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *GroupUsersQuery) FirstX(ctx context.Context) *GroupUsers {
+func (_q *GroupUserMappingQuery) FirstX(ctx context.Context) *GroupUserMapping {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -80,22 +80,22 @@ func (_q *GroupUsersQuery) FirstX(ctx context.Context) *GroupUsers {
 	return node
 }
 
-// FirstID returns the first GroupUsers ID from the query.
-// Returns a *NotFoundError when no GroupUsers ID was found.
-func (_q *GroupUsersQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first GroupUserMapping ID from the query.
+// Returns a *NotFoundError when no GroupUserMapping ID was found.
+func (_q *GroupUserMappingQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{groupusers.Label}
+		err = &NotFoundError{groupusermapping.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *GroupUsersQuery) FirstIDX(ctx context.Context) int {
+func (_q *GroupUserMappingQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -103,10 +103,10 @@ func (_q *GroupUsersQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single GroupUsers entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one GroupUsers entity is found.
-// Returns a *NotFoundError when no GroupUsers entities are found.
-func (_q *GroupUsersQuery) Only(ctx context.Context) (*GroupUsers, error) {
+// Only returns a single GroupUserMapping entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one GroupUserMapping entity is found.
+// Returns a *NotFoundError when no GroupUserMapping entities are found.
+func (_q *GroupUserMappingQuery) Only(ctx context.Context) (*GroupUserMapping, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -115,14 +115,14 @@ func (_q *GroupUsersQuery) Only(ctx context.Context) (*GroupUsers, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{groupusers.Label}
+		return nil, &NotFoundError{groupusermapping.Label}
 	default:
-		return nil, &NotSingularError{groupusers.Label}
+		return nil, &NotSingularError{groupusermapping.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *GroupUsersQuery) OnlyX(ctx context.Context) *GroupUsers {
+func (_q *GroupUserMappingQuery) OnlyX(ctx context.Context) *GroupUserMapping {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -130,10 +130,10 @@ func (_q *GroupUsersQuery) OnlyX(ctx context.Context) *GroupUsers {
 	return node
 }
 
-// OnlyID is like Only, but returns the only GroupUsers ID in the query.
-// Returns a *NotSingularError when more than one GroupUsers ID is found.
+// OnlyID is like Only, but returns the only GroupUserMapping ID in the query.
+// Returns a *NotSingularError when more than one GroupUserMapping ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *GroupUsersQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *GroupUserMappingQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -142,15 +142,15 @@ func (_q *GroupUsersQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{groupusers.Label}
+		err = &NotFoundError{groupusermapping.Label}
 	default:
-		err = &NotSingularError{groupusers.Label}
+		err = &NotSingularError{groupusermapping.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *GroupUsersQuery) OnlyIDX(ctx context.Context) int {
+func (_q *GroupUserMappingQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -158,18 +158,18 @@ func (_q *GroupUsersQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of GroupUsersSlice.
-func (_q *GroupUsersQuery) All(ctx context.Context) ([]*GroupUsers, error) {
+// All executes the query and returns a list of GroupUserMappings.
+func (_q *GroupUserMappingQuery) All(ctx context.Context) ([]*GroupUserMapping, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*GroupUsers, *GroupUsersQuery]()
-	return withInterceptors[[]*GroupUsers](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*GroupUserMapping, *GroupUserMappingQuery]()
+	return withInterceptors[[]*GroupUserMapping](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *GroupUsersQuery) AllX(ctx context.Context) []*GroupUsers {
+func (_q *GroupUserMappingQuery) AllX(ctx context.Context) []*GroupUserMapping {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -177,20 +177,20 @@ func (_q *GroupUsersQuery) AllX(ctx context.Context) []*GroupUsers {
 	return nodes
 }
 
-// IDs executes the query and returns a list of GroupUsers IDs.
-func (_q *GroupUsersQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of GroupUserMapping IDs.
+func (_q *GroupUserMappingQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(groupusers.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(groupusermapping.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *GroupUsersQuery) IDsX(ctx context.Context) []int {
+func (_q *GroupUserMappingQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -199,16 +199,16 @@ func (_q *GroupUsersQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *GroupUsersQuery) Count(ctx context.Context) (int, error) {
+func (_q *GroupUserMappingQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*GroupUsersQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*GroupUserMappingQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *GroupUsersQuery) CountX(ctx context.Context) int {
+func (_q *GroupUserMappingQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -217,7 +217,7 @@ func (_q *GroupUsersQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *GroupUsersQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *GroupUserMappingQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -230,7 +230,7 @@ func (_q *GroupUsersQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *GroupUsersQuery) ExistX(ctx context.Context) bool {
+func (_q *GroupUserMappingQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -238,18 +238,18 @@ func (_q *GroupUsersQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the GroupUsersQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the GroupUserMappingQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *GroupUsersQuery) Clone() *GroupUsersQuery {
+func (_q *GroupUserMappingQuery) Clone() *GroupUserMappingQuery {
 	if _q == nil {
 		return nil
 	}
-	return &GroupUsersQuery{
+	return &GroupUserMappingQuery{
 		config:     _q.config,
 		ctx:        _q.ctx.Clone(),
-		order:      append([]groupusers.OrderOption{}, _q.order...),
+		order:      append([]groupusermapping.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.GroupUsers{}, _q.predicates...),
+		predicates: append([]predicate.GroupUserMapping{}, _q.predicates...),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -266,15 +266,15 @@ func (_q *GroupUsersQuery) Clone() *GroupUsersQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.GroupUsers.Query().
-//		GroupBy(groupusers.FieldCreatedAt).
+//	client.GroupUserMapping.Query().
+//		GroupBy(groupusermapping.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (_q *GroupUsersQuery) GroupBy(field string, fields ...string) *GroupUsersGroupBy {
+func (_q *GroupUserMappingQuery) GroupBy(field string, fields ...string) *GroupUserMappingGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &GroupUsersGroupBy{build: _q}
+	grbuild := &GroupUserMappingGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = groupusers.Label
+	grbuild.label = groupusermapping.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -288,23 +288,23 @@ func (_q *GroupUsersQuery) GroupBy(field string, fields ...string) *GroupUsersGr
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.GroupUsers.Query().
-//		Select(groupusers.FieldCreatedAt).
+//	client.GroupUserMapping.Query().
+//		Select(groupusermapping.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *GroupUsersQuery) Select(fields ...string) *GroupUsersSelect {
+func (_q *GroupUserMappingQuery) Select(fields ...string) *GroupUserMappingSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &GroupUsersSelect{GroupUsersQuery: _q}
-	sbuild.label = groupusers.Label
+	sbuild := &GroupUserMappingSelect{GroupUserMappingQuery: _q}
+	sbuild.label = groupusermapping.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a GroupUsersSelect configured with the given aggregations.
-func (_q *GroupUsersQuery) Aggregate(fns ...AggregateFunc) *GroupUsersSelect {
+// Aggregate returns a GroupUserMappingSelect configured with the given aggregations.
+func (_q *GroupUserMappingQuery) Aggregate(fns ...AggregateFunc) *GroupUserMappingSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *GroupUsersQuery) prepareQuery(ctx context.Context) error {
+func (_q *GroupUserMappingQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
@@ -316,7 +316,7 @@ func (_q *GroupUsersQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !groupusers.ValidColumn(f) {
+		if !groupusermapping.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
@@ -330,16 +330,16 @@ func (_q *GroupUsersQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *GroupUsersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*GroupUsers, error) {
+func (_q *GroupUserMappingQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*GroupUserMapping, error) {
 	var (
-		nodes = []*GroupUsers{}
+		nodes = []*GroupUserMapping{}
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*GroupUsers).scanValues(nil, columns)
+		return (*GroupUserMapping).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &GroupUsers{config: _q.config}
+		node := &GroupUserMapping{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
@@ -355,7 +355,7 @@ func (_q *GroupUsersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*G
 	return nodes, nil
 }
 
-func (_q *GroupUsersQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *GroupUserMappingQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -364,8 +364,8 @@ func (_q *GroupUsersQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *GroupUsersQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(groupusers.Table, groupusers.Columns, sqlgraph.NewFieldSpec(groupusers.FieldID, field.TypeInt))
+func (_q *GroupUserMappingQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(groupusermapping.Table, groupusermapping.Columns, sqlgraph.NewFieldSpec(groupusermapping.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -374,9 +374,9 @@ func (_q *GroupUsersQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, groupusers.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, groupusermapping.FieldID)
 		for i := range fields {
-			if fields[i] != groupusers.FieldID {
+			if fields[i] != groupusermapping.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -404,12 +404,12 @@ func (_q *GroupUsersQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *GroupUsersQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *GroupUserMappingQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(groupusers.Table)
+	t1 := builder.Table(groupusermapping.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = groupusers.Columns
+		columns = groupusermapping.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -436,28 +436,28 @@ func (_q *GroupUsersQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// GroupUsersGroupBy is the group-by builder for GroupUsers entities.
-type GroupUsersGroupBy struct {
+// GroupUserMappingGroupBy is the group-by builder for GroupUserMapping entities.
+type GroupUserMappingGroupBy struct {
 	selector
-	build *GroupUsersQuery
+	build *GroupUserMappingQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *GroupUsersGroupBy) Aggregate(fns ...AggregateFunc) *GroupUsersGroupBy {
+func (_g *GroupUserMappingGroupBy) Aggregate(fns ...AggregateFunc) *GroupUserMappingGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *GroupUsersGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *GroupUserMappingGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GroupUsersQuery, *GroupUsersGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*GroupUserMappingQuery, *GroupUserMappingGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *GroupUsersGroupBy) sqlScan(ctx context.Context, root *GroupUsersQuery, v any) error {
+func (_g *GroupUserMappingGroupBy) sqlScan(ctx context.Context, root *GroupUserMappingQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -484,28 +484,28 @@ func (_g *GroupUsersGroupBy) sqlScan(ctx context.Context, root *GroupUsersQuery,
 	return sql.ScanSlice(rows, v)
 }
 
-// GroupUsersSelect is the builder for selecting fields of GroupUsers entities.
-type GroupUsersSelect struct {
-	*GroupUsersQuery
+// GroupUserMappingSelect is the builder for selecting fields of GroupUserMapping entities.
+type GroupUserMappingSelect struct {
+	*GroupUserMappingQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *GroupUsersSelect) Aggregate(fns ...AggregateFunc) *GroupUsersSelect {
+func (_s *GroupUserMappingSelect) Aggregate(fns ...AggregateFunc) *GroupUserMappingSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *GroupUsersSelect) Scan(ctx context.Context, v any) error {
+func (_s *GroupUserMappingSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GroupUsersQuery, *GroupUsersSelect](ctx, _s.GroupUsersQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*GroupUserMappingQuery, *GroupUserMappingSelect](ctx, _s.GroupUserMappingQuery, _s, _s.inters, v)
 }
 
-func (_s *GroupUsersSelect) sqlScan(ctx context.Context, root *GroupUsersQuery, v any) error {
+func (_s *GroupUserMappingSelect) sqlScan(ctx context.Context, root *GroupUserMappingQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {
