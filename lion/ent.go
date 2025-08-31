@@ -12,16 +12,15 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/grpc-kit/pkg/lion/accounts"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/authuserlocal"
 	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/groupmenus"
+	"github.com/grpc-kit/pkg/lion/groupmembership"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/groupusermapping"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
 	"github.com/grpc-kit/pkg/lion/rolemenumapping"
 	"github.com/grpc-kit/pkg/lion/roles"
@@ -88,16 +87,15 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			accounts.Table:         accounts.ValidColumn,
 			authproviders.Table:    authproviders.ValidColumn,
 			authuserlocal.Table:    authuserlocal.ValidColumn,
 			authusersocial.Table:   authusersocial.ValidColumn,
 			demo.Table:             demo.ValidColumn,
 			departments.Table:      departments.ValidColumn,
-			groupmenus.Table:       groupmenus.ValidColumn,
-			groupusermapping.Table: groupusermapping.ValidColumn,
+			groupmembership.Table:  groupmembership.ValidColumn,
 			groups.Table:           groups.ValidColumn,
 			menus.Table:            menus.ValidColumn,
+			permissions.Table:      permissions.ValidColumn,
 			rolegroupmapping.Table: rolegroupmapping.ValidColumn,
 			rolemenumapping.Table:  rolemenumapping.ValidColumn,
 			roleusermapping.Table:  roleusermapping.ValidColumn,

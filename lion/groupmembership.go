@@ -9,11 +9,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/groupusermapping"
+	"github.com/grpc-kit/pkg/lion/groupmembership"
 )
 
-// GroupUserMapping is the model entity for the GroupUserMapping schema.
-type GroupUserMapping struct {
+// GroupMembership is the model entity for the GroupMembership schema.
+type GroupMembership struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -21,8 +21,6 @@ type GroupUserMapping struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 关联 lion_groups 表的用户组 ID
 	GroupID int `json:"group_id,omitempty"`
 	// 关联 lion_users 表的用户 ID
@@ -31,13 +29,13 @@ type GroupUserMapping struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*GroupUserMapping) scanValues(columns []string) ([]any, error) {
+func (*GroupMembership) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case groupusermapping.FieldID, groupusermapping.FieldGroupID, groupusermapping.FieldUserID:
+		case groupmembership.FieldID, groupmembership.FieldGroupID, groupmembership.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case groupusermapping.FieldCreatedAt, groupusermapping.FieldUpdatedAt, groupusermapping.FieldDeletedAt:
+		case groupmembership.FieldCreatedAt, groupmembership.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -47,45 +45,38 @@ func (*GroupUserMapping) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the GroupUserMapping fields.
-func (_m *GroupUserMapping) assignValues(columns []string, values []any) error {
+// to the GroupMembership fields.
+func (_m *GroupMembership) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case groupusermapping.FieldID:
+		case groupmembership.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case groupusermapping.FieldCreatedAt:
+		case groupmembership.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case groupusermapping.FieldUpdatedAt:
+		case groupmembership.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case groupusermapping.FieldDeletedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
-			} else if value.Valid {
-				_m.DeletedAt = new(time.Time)
-				*_m.DeletedAt = value.Time
-			}
-		case groupusermapping.FieldGroupID:
+		case groupmembership.FieldGroupID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field group_id", values[i])
 			} else if value.Valid {
 				_m.GroupID = int(value.Int64)
 			}
-		case groupusermapping.FieldUserID:
+		case groupmembership.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
@@ -98,45 +89,40 @@ func (_m *GroupUserMapping) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the GroupUserMapping.
+// Value returns the ent.Value that was dynamically selected and assigned to the GroupMembership.
 // This includes values selected through modifiers, order, etc.
-func (_m *GroupUserMapping) Value(name string) (ent.Value, error) {
+func (_m *GroupMembership) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// Update returns a builder for updating this GroupUserMapping.
-// Note that you need to call GroupUserMapping.Unwrap() before calling this method if this GroupUserMapping
+// Update returns a builder for updating this GroupMembership.
+// Note that you need to call GroupMembership.Unwrap() before calling this method if this GroupMembership
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *GroupUserMapping) Update() *GroupUserMappingUpdateOne {
-	return NewGroupUserMappingClient(_m.config).UpdateOne(_m)
+func (_m *GroupMembership) Update() *GroupMembershipUpdateOne {
+	return NewGroupMembershipClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the GroupUserMapping entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the GroupMembership entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *GroupUserMapping) Unwrap() *GroupUserMapping {
+func (_m *GroupMembership) Unwrap() *GroupMembership {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: GroupUserMapping is not a transactional entity")
+		panic("lion: GroupMembership is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *GroupUserMapping) String() string {
+func (_m *GroupMembership) String() string {
 	var builder strings.Builder
-	builder.WriteString("GroupUserMapping(")
+	builder.WriteString("GroupMembership(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	if v := _m.DeletedAt; v != nil {
-		builder.WriteString("deleted_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
 	builder.WriteString(", ")
 	builder.WriteString("group_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GroupID))
@@ -147,5 +133,5 @@ func (_m *GroupUserMapping) String() string {
 	return builder.String()
 }
 
-// GroupUserMappings is a parsable slice of GroupUserMapping.
-type GroupUserMappings []*GroupUserMapping
+// GroupMemberships is a parsable slice of GroupMembership.
+type GroupMemberships []*GroupMembership

@@ -1,5 +1,6 @@
 package schema
 
+/*
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
@@ -38,3 +39,4 @@ func (Accounts) Annotations() []schema.Annotation {
 		entsql.Annotation{Table: "lion_accounts"},
 	}
 }
+*/

@@ -10,24 +10,24 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/groupusermapping"
+	"github.com/grpc-kit/pkg/lion/groupmembership"
 )
 
-// GroupUserMappingCreate is the builder for creating a GroupUserMapping entity.
-type GroupUserMappingCreate struct {
+// GroupMembershipCreate is the builder for creating a GroupMembership entity.
+type GroupMembershipCreate struct {
 	config
-	mutation *GroupUserMappingMutation
+	mutation *GroupMembershipMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *GroupUserMappingCreate) SetCreatedAt(v time.Time) *GroupUserMappingCreate {
+func (_c *GroupMembershipCreate) SetCreatedAt(v time.Time) *GroupMembershipCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *GroupUserMappingCreate) SetNillableCreatedAt(v *time.Time) *GroupUserMappingCreate {
+func (_c *GroupMembershipCreate) SetNillableCreatedAt(v *time.Time) *GroupMembershipCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -35,58 +35,44 @@ func (_c *GroupUserMappingCreate) SetNillableCreatedAt(v *time.Time) *GroupUserM
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *GroupUserMappingCreate) SetUpdatedAt(v time.Time) *GroupUserMappingCreate {
+func (_c *GroupMembershipCreate) SetUpdatedAt(v time.Time) *GroupMembershipCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *GroupUserMappingCreate) SetNillableUpdatedAt(v *time.Time) *GroupUserMappingCreate {
+func (_c *GroupMembershipCreate) SetNillableUpdatedAt(v *time.Time) *GroupMembershipCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *GroupUserMappingCreate) SetDeletedAt(v time.Time) *GroupUserMappingCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *GroupUserMappingCreate) SetNillableDeletedAt(v *time.Time) *GroupUserMappingCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetGroupID sets the "group_id" field.
-func (_c *GroupUserMappingCreate) SetGroupID(v int) *GroupUserMappingCreate {
+func (_c *GroupMembershipCreate) SetGroupID(v int) *GroupMembershipCreate {
 	_c.mutation.SetGroupID(v)
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *GroupUserMappingCreate) SetUserID(v int) *GroupUserMappingCreate {
+func (_c *GroupMembershipCreate) SetUserID(v int) *GroupMembershipCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
-// Mutation returns the GroupUserMappingMutation object of the builder.
-func (_c *GroupUserMappingCreate) Mutation() *GroupUserMappingMutation {
+// Mutation returns the GroupMembershipMutation object of the builder.
+func (_c *GroupMembershipCreate) Mutation() *GroupMembershipMutation {
 	return _c.mutation
 }
 
-// Save creates the GroupUserMapping in the database.
-func (_c *GroupUserMappingCreate) Save(ctx context.Context) (*GroupUserMapping, error) {
+// Save creates the GroupMembership in the database.
+func (_c *GroupMembershipCreate) Save(ctx context.Context) (*GroupMembership, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *GroupUserMappingCreate) SaveX(ctx context.Context) *GroupUserMapping {
+func (_c *GroupMembershipCreate) SaveX(ctx context.Context) *GroupMembership {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -95,58 +81,58 @@ func (_c *GroupUserMappingCreate) SaveX(ctx context.Context) *GroupUserMapping {
 }
 
 // Exec executes the query.
-func (_c *GroupUserMappingCreate) Exec(ctx context.Context) error {
+func (_c *GroupMembershipCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *GroupUserMappingCreate) ExecX(ctx context.Context) {
+func (_c *GroupMembershipCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *GroupUserMappingCreate) defaults() {
+func (_c *GroupMembershipCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := groupusermapping.DefaultCreatedAt()
+		v := groupmembership.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := groupusermapping.DefaultUpdatedAt()
+		v := groupmembership.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *GroupUserMappingCreate) check() error {
+func (_c *GroupMembershipCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "GroupUserMapping.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "GroupMembership.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "GroupUserMapping.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "GroupMembership.updated_at"`)}
 	}
 	if _, ok := _c.mutation.GroupID(); !ok {
-		return &ValidationError{Name: "group_id", err: errors.New(`lion: missing required field "GroupUserMapping.group_id"`)}
+		return &ValidationError{Name: "group_id", err: errors.New(`lion: missing required field "GroupMembership.group_id"`)}
 	}
 	if v, ok := _c.mutation.GroupID(); ok {
-		if err := groupusermapping.GroupIDValidator(v); err != nil {
-			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "GroupUserMapping.group_id": %w`, err)}
+		if err := groupmembership.GroupIDValidator(v); err != nil {
+			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "GroupMembership.group_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "GroupUserMapping.user_id"`)}
+		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "GroupMembership.user_id"`)}
 	}
 	if v, ok := _c.mutation.UserID(); ok {
-		if err := groupusermapping.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "GroupUserMapping.user_id": %w`, err)}
+		if err := groupmembership.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "GroupMembership.user_id": %w`, err)}
 		}
 	}
 	return nil
 }
 
-func (_c *GroupUserMappingCreate) sqlSave(ctx context.Context) (*GroupUserMapping, error) {
+func (_c *GroupMembershipCreate) sqlSave(ctx context.Context) (*GroupMembership, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -164,55 +150,51 @@ func (_c *GroupUserMappingCreate) sqlSave(ctx context.Context) (*GroupUserMappin
 	return _node, nil
 }
 
-func (_c *GroupUserMappingCreate) createSpec() (*GroupUserMapping, *sqlgraph.CreateSpec) {
+func (_c *GroupMembershipCreate) createSpec() (*GroupMembership, *sqlgraph.CreateSpec) {
 	var (
-		_node = &GroupUserMapping{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(groupusermapping.Table, sqlgraph.NewFieldSpec(groupusermapping.FieldID, field.TypeInt))
+		_node = &GroupMembership{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(groupmembership.Table, sqlgraph.NewFieldSpec(groupmembership.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(groupusermapping.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(groupmembership.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(groupusermapping.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(groupmembership.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(groupusermapping.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
-	}
 	if value, ok := _c.mutation.GroupID(); ok {
-		_spec.SetField(groupusermapping.FieldGroupID, field.TypeInt, value)
+		_spec.SetField(groupmembership.FieldGroupID, field.TypeInt, value)
 		_node.GroupID = value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(groupusermapping.FieldUserID, field.TypeInt, value)
+		_spec.SetField(groupmembership.FieldUserID, field.TypeInt, value)
 		_node.UserID = value
 	}
 	return _node, _spec
 }
 
-// GroupUserMappingCreateBulk is the builder for creating many GroupUserMapping entities in bulk.
-type GroupUserMappingCreateBulk struct {
+// GroupMembershipCreateBulk is the builder for creating many GroupMembership entities in bulk.
+type GroupMembershipCreateBulk struct {
 	config
 	err      error
-	builders []*GroupUserMappingCreate
+	builders []*GroupMembershipCreate
 }
 
-// Save creates the GroupUserMapping entities in the database.
-func (_c *GroupUserMappingCreateBulk) Save(ctx context.Context) ([]*GroupUserMapping, error) {
+// Save creates the GroupMembership entities in the database.
+func (_c *GroupMembershipCreateBulk) Save(ctx context.Context) ([]*GroupMembership, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*GroupUserMapping, len(_c.builders))
+	nodes := make([]*GroupMembership, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*GroupUserMappingMutation)
+				mutation, ok := m.(*GroupMembershipMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -259,7 +241,7 @@ func (_c *GroupUserMappingCreateBulk) Save(ctx context.Context) ([]*GroupUserMap
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *GroupUserMappingCreateBulk) SaveX(ctx context.Context) []*GroupUserMapping {
+func (_c *GroupMembershipCreateBulk) SaveX(ctx context.Context) []*GroupMembership {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -268,13 +250,13 @@ func (_c *GroupUserMappingCreateBulk) SaveX(ctx context.Context) []*GroupUserMap
 }
 
 // Exec executes the query.
-func (_c *GroupUserMappingCreateBulk) Exec(ctx context.Context) error {
+func (_c *GroupMembershipCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *GroupUserMappingCreateBulk) ExecX(ctx context.Context) {
+func (_c *GroupMembershipCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

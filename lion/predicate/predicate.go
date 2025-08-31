@@ -6,9 +6,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Accounts is the predicate function for accounts builders.
-type Accounts func(*sql.Selector)
-
 // AuthProviders is the predicate function for authproviders builders.
 type AuthProviders func(*sql.Selector)
 
@@ -24,17 +21,17 @@ type Demo func(*sql.Selector)
 // Departments is the predicate function for departments builders.
 type Departments func(*sql.Selector)
 
-// GroupMenus is the predicate function for groupmenus builders.
-type GroupMenus func(*sql.Selector)
-
-// GroupUserMapping is the predicate function for groupusermapping builders.
-type GroupUserMapping func(*sql.Selector)
+// GroupMembership is the predicate function for groupmembership builders.
+type GroupMembership func(*sql.Selector)
 
 // Groups is the predicate function for groups builders.
 type Groups func(*sql.Selector)
 
 // Menus is the predicate function for menus builders.
 type Menus func(*sql.Selector)
+
+// Permissions is the predicate function for permissions builders.
+type Permissions func(*sql.Selector)
 
 // RoleGroupMapping is the predicate function for rolegroupmapping builders.
 type RoleGroupMapping func(*sql.Selector)

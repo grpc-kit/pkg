@@ -11,68 +11,68 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/accounts"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
-// AccountsQuery is the builder for querying Accounts entities.
-type AccountsQuery struct {
+// PermissionsQuery is the builder for querying Permissions entities.
+type PermissionsQuery struct {
 	config
 	ctx        *QueryContext
-	order      []accounts.OrderOption
+	order      []permissions.OrderOption
 	inters     []Interceptor
-	predicates []predicate.Accounts
+	predicates []predicate.Permissions
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the AccountsQuery builder.
-func (_q *AccountsQuery) Where(ps ...predicate.Accounts) *AccountsQuery {
+// Where adds a new predicate for the PermissionsQuery builder.
+func (_q *PermissionsQuery) Where(ps ...predicate.Permissions) *PermissionsQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *AccountsQuery) Limit(limit int) *AccountsQuery {
+func (_q *PermissionsQuery) Limit(limit int) *PermissionsQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *AccountsQuery) Offset(offset int) *AccountsQuery {
+func (_q *PermissionsQuery) Offset(offset int) *PermissionsQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *AccountsQuery) Unique(unique bool) *AccountsQuery {
+func (_q *PermissionsQuery) Unique(unique bool) *PermissionsQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *AccountsQuery) Order(o ...accounts.OrderOption) *AccountsQuery {
+func (_q *PermissionsQuery) Order(o ...permissions.OrderOption) *PermissionsQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// First returns the first Accounts entity from the query.
-// Returns a *NotFoundError when no Accounts was found.
-func (_q *AccountsQuery) First(ctx context.Context) (*Accounts, error) {
+// First returns the first Permissions entity from the query.
+// Returns a *NotFoundError when no Permissions was found.
+func (_q *PermissionsQuery) First(ctx context.Context) (*Permissions, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{accounts.Label}
+		return nil, &NotFoundError{permissions.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *AccountsQuery) FirstX(ctx context.Context) *Accounts {
+func (_q *PermissionsQuery) FirstX(ctx context.Context) *Permissions {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -80,22 +80,22 @@ func (_q *AccountsQuery) FirstX(ctx context.Context) *Accounts {
 	return node
 }
 
-// FirstID returns the first Accounts ID from the query.
-// Returns a *NotFoundError when no Accounts ID was found.
-func (_q *AccountsQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first Permissions ID from the query.
+// Returns a *NotFoundError when no Permissions ID was found.
+func (_q *PermissionsQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{accounts.Label}
+		err = &NotFoundError{permissions.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *AccountsQuery) FirstIDX(ctx context.Context) int {
+func (_q *PermissionsQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -103,10 +103,10 @@ func (_q *AccountsQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single Accounts entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Accounts entity is found.
-// Returns a *NotFoundError when no Accounts entities are found.
-func (_q *AccountsQuery) Only(ctx context.Context) (*Accounts, error) {
+// Only returns a single Permissions entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Permissions entity is found.
+// Returns a *NotFoundError when no Permissions entities are found.
+func (_q *PermissionsQuery) Only(ctx context.Context) (*Permissions, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -115,14 +115,14 @@ func (_q *AccountsQuery) Only(ctx context.Context) (*Accounts, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{accounts.Label}
+		return nil, &NotFoundError{permissions.Label}
 	default:
-		return nil, &NotSingularError{accounts.Label}
+		return nil, &NotSingularError{permissions.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *AccountsQuery) OnlyX(ctx context.Context) *Accounts {
+func (_q *PermissionsQuery) OnlyX(ctx context.Context) *Permissions {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -130,10 +130,10 @@ func (_q *AccountsQuery) OnlyX(ctx context.Context) *Accounts {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Accounts ID in the query.
-// Returns a *NotSingularError when more than one Accounts ID is found.
+// OnlyID is like Only, but returns the only Permissions ID in the query.
+// Returns a *NotSingularError when more than one Permissions ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *AccountsQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *PermissionsQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -142,15 +142,15 @@ func (_q *AccountsQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{accounts.Label}
+		err = &NotFoundError{permissions.Label}
 	default:
-		err = &NotSingularError{accounts.Label}
+		err = &NotSingularError{permissions.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *AccountsQuery) OnlyIDX(ctx context.Context) int {
+func (_q *PermissionsQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -158,18 +158,18 @@ func (_q *AccountsQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of AccountsSlice.
-func (_q *AccountsQuery) All(ctx context.Context) ([]*Accounts, error) {
+// All executes the query and returns a list of PermissionsSlice.
+func (_q *PermissionsQuery) All(ctx context.Context) ([]*Permissions, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Accounts, *AccountsQuery]()
-	return withInterceptors[[]*Accounts](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Permissions, *PermissionsQuery]()
+	return withInterceptors[[]*Permissions](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *AccountsQuery) AllX(ctx context.Context) []*Accounts {
+func (_q *PermissionsQuery) AllX(ctx context.Context) []*Permissions {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -177,20 +177,20 @@ func (_q *AccountsQuery) AllX(ctx context.Context) []*Accounts {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Accounts IDs.
-func (_q *AccountsQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of Permissions IDs.
+func (_q *PermissionsQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(accounts.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(permissions.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *AccountsQuery) IDsX(ctx context.Context) []int {
+func (_q *PermissionsQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -199,16 +199,16 @@ func (_q *AccountsQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *AccountsQuery) Count(ctx context.Context) (int, error) {
+func (_q *PermissionsQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*AccountsQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*PermissionsQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *AccountsQuery) CountX(ctx context.Context) int {
+func (_q *PermissionsQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -217,7 +217,7 @@ func (_q *AccountsQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *AccountsQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *PermissionsQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -230,7 +230,7 @@ func (_q *AccountsQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *AccountsQuery) ExistX(ctx context.Context) bool {
+func (_q *PermissionsQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -238,18 +238,18 @@ func (_q *AccountsQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the AccountsQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the PermissionsQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *AccountsQuery) Clone() *AccountsQuery {
+func (_q *PermissionsQuery) Clone() *PermissionsQuery {
 	if _q == nil {
 		return nil
 	}
-	return &AccountsQuery{
+	return &PermissionsQuery{
 		config:     _q.config,
 		ctx:        _q.ctx.Clone(),
-		order:      append([]accounts.OrderOption{}, _q.order...),
+		order:      append([]permissions.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Accounts{}, _q.predicates...),
+		predicates: append([]predicate.Permissions{}, _q.predicates...),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -266,15 +266,15 @@ func (_q *AccountsQuery) Clone() *AccountsQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Accounts.Query().
-//		GroupBy(accounts.FieldCreatedAt).
+//	client.Permissions.Query().
+//		GroupBy(permissions.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (_q *AccountsQuery) GroupBy(field string, fields ...string) *AccountsGroupBy {
+func (_q *PermissionsQuery) GroupBy(field string, fields ...string) *PermissionsGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &AccountsGroupBy{build: _q}
+	grbuild := &PermissionsGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = accounts.Label
+	grbuild.label = permissions.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -288,23 +288,23 @@ func (_q *AccountsQuery) GroupBy(field string, fields ...string) *AccountsGroupB
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.Accounts.Query().
-//		Select(accounts.FieldCreatedAt).
+//	client.Permissions.Query().
+//		Select(permissions.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *AccountsQuery) Select(fields ...string) *AccountsSelect {
+func (_q *PermissionsQuery) Select(fields ...string) *PermissionsSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &AccountsSelect{AccountsQuery: _q}
-	sbuild.label = accounts.Label
+	sbuild := &PermissionsSelect{PermissionsQuery: _q}
+	sbuild.label = permissions.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a AccountsSelect configured with the given aggregations.
-func (_q *AccountsQuery) Aggregate(fns ...AggregateFunc) *AccountsSelect {
+// Aggregate returns a PermissionsSelect configured with the given aggregations.
+func (_q *PermissionsQuery) Aggregate(fns ...AggregateFunc) *PermissionsSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *AccountsQuery) prepareQuery(ctx context.Context) error {
+func (_q *PermissionsQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
@@ -316,7 +316,7 @@ func (_q *AccountsQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !accounts.ValidColumn(f) {
+		if !permissions.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
@@ -330,16 +330,16 @@ func (_q *AccountsQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *AccountsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Accounts, error) {
+func (_q *PermissionsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Permissions, error) {
 	var (
-		nodes = []*Accounts{}
+		nodes = []*Permissions{}
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Accounts).scanValues(nil, columns)
+		return (*Permissions).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Accounts{config: _q.config}
+		node := &Permissions{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
@@ -355,7 +355,7 @@ func (_q *AccountsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acc
 	return nodes, nil
 }
 
-func (_q *AccountsQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *PermissionsQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -364,8 +364,8 @@ func (_q *AccountsQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *AccountsQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(accounts.Table, accounts.Columns, sqlgraph.NewFieldSpec(accounts.FieldID, field.TypeInt))
+func (_q *PermissionsQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(permissions.Table, permissions.Columns, sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -374,9 +374,9 @@ func (_q *AccountsQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, accounts.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, permissions.FieldID)
 		for i := range fields {
-			if fields[i] != accounts.FieldID {
+			if fields[i] != permissions.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -404,12 +404,12 @@ func (_q *AccountsQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *AccountsQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *PermissionsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(accounts.Table)
+	t1 := builder.Table(permissions.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = accounts.Columns
+		columns = permissions.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -436,28 +436,28 @@ func (_q *AccountsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// AccountsGroupBy is the group-by builder for Accounts entities.
-type AccountsGroupBy struct {
+// PermissionsGroupBy is the group-by builder for Permissions entities.
+type PermissionsGroupBy struct {
 	selector
-	build *AccountsQuery
+	build *PermissionsQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *AccountsGroupBy) Aggregate(fns ...AggregateFunc) *AccountsGroupBy {
+func (_g *PermissionsGroupBy) Aggregate(fns ...AggregateFunc) *PermissionsGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *AccountsGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *PermissionsGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*AccountsQuery, *AccountsGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*PermissionsQuery, *PermissionsGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *AccountsGroupBy) sqlScan(ctx context.Context, root *AccountsQuery, v any) error {
+func (_g *PermissionsGroupBy) sqlScan(ctx context.Context, root *PermissionsQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -484,28 +484,28 @@ func (_g *AccountsGroupBy) sqlScan(ctx context.Context, root *AccountsQuery, v a
 	return sql.ScanSlice(rows, v)
 }
 
-// AccountsSelect is the builder for selecting fields of Accounts entities.
-type AccountsSelect struct {
-	*AccountsQuery
+// PermissionsSelect is the builder for selecting fields of Permissions entities.
+type PermissionsSelect struct {
+	*PermissionsQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *AccountsSelect) Aggregate(fns ...AggregateFunc) *AccountsSelect {
+func (_s *PermissionsSelect) Aggregate(fns ...AggregateFunc) *PermissionsSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *AccountsSelect) Scan(ctx context.Context, v any) error {
+func (_s *PermissionsSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*AccountsQuery, *AccountsSelect](ctx, _s.AccountsQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*PermissionsQuery, *PermissionsSelect](ctx, _s.PermissionsQuery, _s, _s.inters, v)
 }
 
-func (_s *AccountsSelect) sqlScan(ctx context.Context, root *AccountsQuery, v any) error {
+func (_s *PermissionsSelect) sqlScan(ctx context.Context, root *PermissionsQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

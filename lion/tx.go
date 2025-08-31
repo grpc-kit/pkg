@@ -12,8 +12,6 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Accounts is the client for interacting with the Accounts builders.
-	Accounts *AccountsClient
 	// AuthProviders is the client for interacting with the AuthProviders builders.
 	AuthProviders *AuthProvidersClient
 	// AuthUserLocal is the client for interacting with the AuthUserLocal builders.
@@ -24,14 +22,14 @@ type Tx struct {
 	Demo *DemoClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
-	// GroupMenus is the client for interacting with the GroupMenus builders.
-	GroupMenus *GroupMenusClient
-	// GroupUserMapping is the client for interacting with the GroupUserMapping builders.
-	GroupUserMapping *GroupUserMappingClient
+	// GroupMembership is the client for interacting with the GroupMembership builders.
+	GroupMembership *GroupMembershipClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
 	// Menus is the client for interacting with the Menus builders.
 	Menus *MenusClient
+	// Permissions is the client for interacting with the Permissions builders.
+	Permissions *PermissionsClient
 	// RoleGroupMapping is the client for interacting with the RoleGroupMapping builders.
 	RoleGroupMapping *RoleGroupMappingClient
 	// RoleMenuMapping is the client for interacting with the RoleMenuMapping builders.
@@ -175,16 +173,15 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Accounts = NewAccountsClient(tx.config)
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
 	tx.AuthUserLocal = NewAuthUserLocalClient(tx.config)
 	tx.AuthUserSocial = NewAuthUserSocialClient(tx.config)
 	tx.Demo = NewDemoClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
-	tx.GroupMenus = NewGroupMenusClient(tx.config)
-	tx.GroupUserMapping = NewGroupUserMappingClient(tx.config)
+	tx.GroupMembership = NewGroupMembershipClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
+	tx.Permissions = NewPermissionsClient(tx.config)
 	tx.RoleGroupMapping = NewRoleGroupMappingClient(tx.config)
 	tx.RoleMenuMapping = NewRoleMenuMappingClient(tx.config)
 	tx.RoleUserMapping = NewRoleUserMappingClient(tx.config)
@@ -200,7 +197,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Accounts.QueryXXX(), the query will be executed
+// applies a query, for example: AuthProviders.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

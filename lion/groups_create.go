@@ -55,6 +55,12 @@ func (_c *GroupsCreate) SetName(v string) *GroupsCreate {
 	return _c
 }
 
+// SetDepartmentID sets the "department_id" field.
+func (_c *GroupsCreate) SetDepartmentID(v int) *GroupsCreate {
+	_c.mutation.SetDepartmentID(v)
+	return _c
+}
+
 // SetDescription sets the "description" field.
 func (_c *GroupsCreate) SetDescription(v string) *GroupsCreate {
 	_c.mutation.SetDescription(v)
@@ -149,6 +155,14 @@ func (_c *GroupsCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Groups.name": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.DepartmentID(); !ok {
+		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "Groups.department_id"`)}
+	}
+	if v, ok := _c.mutation.DepartmentID(); ok {
+		if err := groups.DepartmentIDValidator(v); err != nil {
+			return &ValidationError{Name: "department_id", err: fmt.Errorf(`lion: validator failed for field "Groups.department_id": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Groups.description"`)}
 	}
@@ -189,6 +203,10 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.DepartmentID(); ok {
+		_spec.SetField(groups.FieldDepartmentID, field.TypeInt, value)
+		_node.DepartmentID = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)

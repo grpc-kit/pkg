@@ -8,30 +8,30 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/groupmenus"
+	"github.com/grpc-kit/pkg/lion/groupmembership"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
-// GroupMenusDelete is the builder for deleting a GroupMenus entity.
-type GroupMenusDelete struct {
+// GroupMembershipDelete is the builder for deleting a GroupMembership entity.
+type GroupMembershipDelete struct {
 	config
 	hooks    []Hook
-	mutation *GroupMenusMutation
+	mutation *GroupMembershipMutation
 }
 
-// Where appends a list predicates to the GroupMenusDelete builder.
-func (_d *GroupMenusDelete) Where(ps ...predicate.GroupMenus) *GroupMenusDelete {
+// Where appends a list predicates to the GroupMembershipDelete builder.
+func (_d *GroupMembershipDelete) Where(ps ...predicate.GroupMembership) *GroupMembershipDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *GroupMenusDelete) Exec(ctx context.Context) (int, error) {
+func (_d *GroupMembershipDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *GroupMenusDelete) ExecX(ctx context.Context) int {
+func (_d *GroupMembershipDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *GroupMenusDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *GroupMenusDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(groupmenus.Table, sqlgraph.NewFieldSpec(groupmenus.FieldID, field.TypeInt))
+func (_d *GroupMembershipDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(groupmembership.Table, sqlgraph.NewFieldSpec(groupmembership.FieldID, field.TypeInt))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *GroupMenusDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// GroupMenusDeleteOne is the builder for deleting a single GroupMenus entity.
-type GroupMenusDeleteOne struct {
-	_d *GroupMenusDelete
+// GroupMembershipDeleteOne is the builder for deleting a single GroupMembership entity.
+type GroupMembershipDeleteOne struct {
+	_d *GroupMembershipDelete
 }
 
-// Where appends a list predicates to the GroupMenusDelete builder.
-func (_d *GroupMenusDeleteOne) Where(ps ...predicate.GroupMenus) *GroupMenusDeleteOne {
+// Where appends a list predicates to the GroupMembershipDelete builder.
+func (_d *GroupMembershipDeleteOne) Where(ps ...predicate.GroupMembership) *GroupMembershipDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *GroupMenusDeleteOne) Exec(ctx context.Context) error {
+func (_d *GroupMembershipDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{groupmenus.Label}
+		return &NotFoundError{groupmembership.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *GroupMenusDeleteOne) ExecX(ctx context.Context) {
+func (_d *GroupMembershipDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

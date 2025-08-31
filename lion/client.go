@@ -15,16 +15,15 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/grpc-kit/pkg/lion/accounts"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/authuserlocal"
 	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/groupmenus"
+	"github.com/grpc-kit/pkg/lion/groupmembership"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/groupusermapping"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
 	"github.com/grpc-kit/pkg/lion/rolemenumapping"
 	"github.com/grpc-kit/pkg/lion/roles"
@@ -38,8 +37,6 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Accounts is the client for interacting with the Accounts builders.
-	Accounts *AccountsClient
 	// AuthProviders is the client for interacting with the AuthProviders builders.
 	AuthProviders *AuthProvidersClient
 	// AuthUserLocal is the client for interacting with the AuthUserLocal builders.
@@ -50,14 +47,14 @@ type Client struct {
 	Demo *DemoClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
-	// GroupMenus is the client for interacting with the GroupMenus builders.
-	GroupMenus *GroupMenusClient
-	// GroupUserMapping is the client for interacting with the GroupUserMapping builders.
-	GroupUserMapping *GroupUserMappingClient
+	// GroupMembership is the client for interacting with the GroupMembership builders.
+	GroupMembership *GroupMembershipClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
 	// Menus is the client for interacting with the Menus builders.
 	Menus *MenusClient
+	// Permissions is the client for interacting with the Permissions builders.
+	Permissions *PermissionsClient
 	// RoleGroupMapping is the client for interacting with the RoleGroupMapping builders.
 	RoleGroupMapping *RoleGroupMappingClient
 	// RoleMenuMapping is the client for interacting with the RoleMenuMapping builders.
@@ -81,16 +78,15 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.Accounts = NewAccountsClient(c.config)
 	c.AuthProviders = NewAuthProvidersClient(c.config)
 	c.AuthUserLocal = NewAuthUserLocalClient(c.config)
 	c.AuthUserSocial = NewAuthUserSocialClient(c.config)
 	c.Demo = NewDemoClient(c.config)
 	c.Departments = NewDepartmentsClient(c.config)
-	c.GroupMenus = NewGroupMenusClient(c.config)
-	c.GroupUserMapping = NewGroupUserMappingClient(c.config)
+	c.GroupMembership = NewGroupMembershipClient(c.config)
 	c.Groups = NewGroupsClient(c.config)
 	c.Menus = NewMenusClient(c.config)
+	c.Permissions = NewPermissionsClient(c.config)
 	c.RoleGroupMapping = NewRoleGroupMappingClient(c.config)
 	c.RoleMenuMapping = NewRoleMenuMappingClient(c.config)
 	c.RoleUserMapping = NewRoleUserMappingClient(c.config)
@@ -189,16 +185,15 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:              ctx,
 		config:           cfg,
-		Accounts:         NewAccountsClient(cfg),
 		AuthProviders:    NewAuthProvidersClient(cfg),
 		AuthUserLocal:    NewAuthUserLocalClient(cfg),
 		AuthUserSocial:   NewAuthUserSocialClient(cfg),
 		Demo:             NewDemoClient(cfg),
 		Departments:      NewDepartmentsClient(cfg),
-		GroupMenus:       NewGroupMenusClient(cfg),
-		GroupUserMapping: NewGroupUserMappingClient(cfg),
+		GroupMembership:  NewGroupMembershipClient(cfg),
 		Groups:           NewGroupsClient(cfg),
 		Menus:            NewMenusClient(cfg),
+		Permissions:      NewPermissionsClient(cfg),
 		RoleGroupMapping: NewRoleGroupMappingClient(cfg),
 		RoleMenuMapping:  NewRoleMenuMappingClient(cfg),
 		RoleUserMapping:  NewRoleUserMappingClient(cfg),
@@ -224,16 +219,15 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:              ctx,
 		config:           cfg,
-		Accounts:         NewAccountsClient(cfg),
 		AuthProviders:    NewAuthProvidersClient(cfg),
 		AuthUserLocal:    NewAuthUserLocalClient(cfg),
 		AuthUserSocial:   NewAuthUserSocialClient(cfg),
 		Demo:             NewDemoClient(cfg),
 		Departments:      NewDepartmentsClient(cfg),
-		GroupMenus:       NewGroupMenusClient(cfg),
-		GroupUserMapping: NewGroupUserMappingClient(cfg),
+		GroupMembership:  NewGroupMembershipClient(cfg),
 		Groups:           NewGroupsClient(cfg),
 		Menus:            NewMenusClient(cfg),
+		Permissions:      NewPermissionsClient(cfg),
 		RoleGroupMapping: NewRoleGroupMappingClient(cfg),
 		RoleMenuMapping:  NewRoleMenuMappingClient(cfg),
 		RoleUserMapping:  NewRoleUserMappingClient(cfg),
@@ -246,7 +240,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Accounts.
+//		AuthProviders.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -269,10 +263,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Accounts, c.AuthProviders, c.AuthUserLocal, c.AuthUserSocial, c.Demo,
-		c.Departments, c.GroupMenus, c.GroupUserMapping, c.Groups, c.Menus,
-		c.RoleGroupMapping, c.RoleMenuMapping, c.RoleUserMapping, c.Roles,
-		c.UserAttributes, c.Users,
+		c.AuthProviders, c.AuthUserLocal, c.AuthUserSocial, c.Demo, c.Departments,
+		c.GroupMembership, c.Groups, c.Menus, c.Permissions, c.RoleGroupMapping,
+		c.RoleMenuMapping, c.RoleUserMapping, c.Roles, c.UserAttributes, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -282,10 +275,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Accounts, c.AuthProviders, c.AuthUserLocal, c.AuthUserSocial, c.Demo,
-		c.Departments, c.GroupMenus, c.GroupUserMapping, c.Groups, c.Menus,
-		c.RoleGroupMapping, c.RoleMenuMapping, c.RoleUserMapping, c.Roles,
-		c.UserAttributes, c.Users,
+		c.AuthProviders, c.AuthUserLocal, c.AuthUserSocial, c.Demo, c.Departments,
+		c.GroupMembership, c.Groups, c.Menus, c.Permissions, c.RoleGroupMapping,
+		c.RoleMenuMapping, c.RoleUserMapping, c.Roles, c.UserAttributes, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -294,8 +286,6 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
-	case *AccountsMutation:
-		return c.Accounts.mutate(ctx, m)
 	case *AuthProvidersMutation:
 		return c.AuthProviders.mutate(ctx, m)
 	case *AuthUserLocalMutation:
@@ -306,14 +296,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Demo.mutate(ctx, m)
 	case *DepartmentsMutation:
 		return c.Departments.mutate(ctx, m)
-	case *GroupMenusMutation:
-		return c.GroupMenus.mutate(ctx, m)
-	case *GroupUserMappingMutation:
-		return c.GroupUserMapping.mutate(ctx, m)
+	case *GroupMembershipMutation:
+		return c.GroupMembership.mutate(ctx, m)
 	case *GroupsMutation:
 		return c.Groups.mutate(ctx, m)
 	case *MenusMutation:
 		return c.Menus.mutate(ctx, m)
+	case *PermissionsMutation:
+		return c.Permissions.mutate(ctx, m)
 	case *RoleGroupMappingMutation:
 		return c.RoleGroupMapping.mutate(ctx, m)
 	case *RoleMenuMappingMutation:
@@ -328,139 +318,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Users.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("lion: unknown mutation type %T", m)
-	}
-}
-
-// AccountsClient is a client for the Accounts schema.
-type AccountsClient struct {
-	config
-}
-
-// NewAccountsClient returns a client for the Accounts from the given config.
-func NewAccountsClient(c config) *AccountsClient {
-	return &AccountsClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `accounts.Hooks(f(g(h())))`.
-func (c *AccountsClient) Use(hooks ...Hook) {
-	c.hooks.Accounts = append(c.hooks.Accounts, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `accounts.Intercept(f(g(h())))`.
-func (c *AccountsClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Accounts = append(c.inters.Accounts, interceptors...)
-}
-
-// Create returns a builder for creating a Accounts entity.
-func (c *AccountsClient) Create() *AccountsCreate {
-	mutation := newAccountsMutation(c.config, OpCreate)
-	return &AccountsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Accounts entities.
-func (c *AccountsClient) CreateBulk(builders ...*AccountsCreate) *AccountsCreateBulk {
-	return &AccountsCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *AccountsClient) MapCreateBulk(slice any, setFunc func(*AccountsCreate, int)) *AccountsCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &AccountsCreateBulk{err: fmt.Errorf("calling to AccountsClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*AccountsCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &AccountsCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Accounts.
-func (c *AccountsClient) Update() *AccountsUpdate {
-	mutation := newAccountsMutation(c.config, OpUpdate)
-	return &AccountsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *AccountsClient) UpdateOne(_m *Accounts) *AccountsUpdateOne {
-	mutation := newAccountsMutation(c.config, OpUpdateOne, withAccounts(_m))
-	return &AccountsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *AccountsClient) UpdateOneID(id int) *AccountsUpdateOne {
-	mutation := newAccountsMutation(c.config, OpUpdateOne, withAccountsID(id))
-	return &AccountsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Accounts.
-func (c *AccountsClient) Delete() *AccountsDelete {
-	mutation := newAccountsMutation(c.config, OpDelete)
-	return &AccountsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *AccountsClient) DeleteOne(_m *Accounts) *AccountsDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AccountsClient) DeleteOneID(id int) *AccountsDeleteOne {
-	builder := c.Delete().Where(accounts.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &AccountsDeleteOne{builder}
-}
-
-// Query returns a query builder for Accounts.
-func (c *AccountsClient) Query() *AccountsQuery {
-	return &AccountsQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeAccounts},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Accounts entity by its id.
-func (c *AccountsClient) Get(ctx context.Context, id int) (*Accounts, error) {
-	return c.Query().Where(accounts.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *AccountsClient) GetX(ctx context.Context, id int) *Accounts {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *AccountsClient) Hooks() []Hook {
-	return c.hooks.Accounts
-}
-
-// Interceptors returns the client interceptors.
-func (c *AccountsClient) Interceptors() []Interceptor {
-	return c.inters.Accounts
-}
-
-func (c *AccountsClient) mutate(ctx context.Context, m *AccountsMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&AccountsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&AccountsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&AccountsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&AccountsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("lion: unknown Accounts mutation op: %q", m.Op())
 	}
 }
 
@@ -1129,107 +986,107 @@ func (c *DepartmentsClient) mutate(ctx context.Context, m *DepartmentsMutation) 
 	}
 }
 
-// GroupMenusClient is a client for the GroupMenus schema.
-type GroupMenusClient struct {
+// GroupMembershipClient is a client for the GroupMembership schema.
+type GroupMembershipClient struct {
 	config
 }
 
-// NewGroupMenusClient returns a client for the GroupMenus from the given config.
-func NewGroupMenusClient(c config) *GroupMenusClient {
-	return &GroupMenusClient{config: c}
+// NewGroupMembershipClient returns a client for the GroupMembership from the given config.
+func NewGroupMembershipClient(c config) *GroupMembershipClient {
+	return &GroupMembershipClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `groupmenus.Hooks(f(g(h())))`.
-func (c *GroupMenusClient) Use(hooks ...Hook) {
-	c.hooks.GroupMenus = append(c.hooks.GroupMenus, hooks...)
+// A call to `Use(f, g, h)` equals to `groupmembership.Hooks(f(g(h())))`.
+func (c *GroupMembershipClient) Use(hooks ...Hook) {
+	c.hooks.GroupMembership = append(c.hooks.GroupMembership, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `groupmenus.Intercept(f(g(h())))`.
-func (c *GroupMenusClient) Intercept(interceptors ...Interceptor) {
-	c.inters.GroupMenus = append(c.inters.GroupMenus, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `groupmembership.Intercept(f(g(h())))`.
+func (c *GroupMembershipClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GroupMembership = append(c.inters.GroupMembership, interceptors...)
 }
 
-// Create returns a builder for creating a GroupMenus entity.
-func (c *GroupMenusClient) Create() *GroupMenusCreate {
-	mutation := newGroupMenusMutation(c.config, OpCreate)
-	return &GroupMenusCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a GroupMembership entity.
+func (c *GroupMembershipClient) Create() *GroupMembershipCreate {
+	mutation := newGroupMembershipMutation(c.config, OpCreate)
+	return &GroupMembershipCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of GroupMenus entities.
-func (c *GroupMenusClient) CreateBulk(builders ...*GroupMenusCreate) *GroupMenusCreateBulk {
-	return &GroupMenusCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of GroupMembership entities.
+func (c *GroupMembershipClient) CreateBulk(builders ...*GroupMembershipCreate) *GroupMembershipCreateBulk {
+	return &GroupMembershipCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *GroupMenusClient) MapCreateBulk(slice any, setFunc func(*GroupMenusCreate, int)) *GroupMenusCreateBulk {
+func (c *GroupMembershipClient) MapCreateBulk(slice any, setFunc func(*GroupMembershipCreate, int)) *GroupMembershipCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &GroupMenusCreateBulk{err: fmt.Errorf("calling to GroupMenusClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &GroupMembershipCreateBulk{err: fmt.Errorf("calling to GroupMembershipClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*GroupMenusCreate, rv.Len())
+	builders := make([]*GroupMembershipCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &GroupMenusCreateBulk{config: c.config, builders: builders}
+	return &GroupMembershipCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for GroupMenus.
-func (c *GroupMenusClient) Update() *GroupMenusUpdate {
-	mutation := newGroupMenusMutation(c.config, OpUpdate)
-	return &GroupMenusUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for GroupMembership.
+func (c *GroupMembershipClient) Update() *GroupMembershipUpdate {
+	mutation := newGroupMembershipMutation(c.config, OpUpdate)
+	return &GroupMembershipUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *GroupMenusClient) UpdateOne(_m *GroupMenus) *GroupMenusUpdateOne {
-	mutation := newGroupMenusMutation(c.config, OpUpdateOne, withGroupMenus(_m))
-	return &GroupMenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *GroupMembershipClient) UpdateOne(_m *GroupMembership) *GroupMembershipUpdateOne {
+	mutation := newGroupMembershipMutation(c.config, OpUpdateOne, withGroupMembership(_m))
+	return &GroupMembershipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GroupMenusClient) UpdateOneID(id int) *GroupMenusUpdateOne {
-	mutation := newGroupMenusMutation(c.config, OpUpdateOne, withGroupMenusID(id))
-	return &GroupMenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *GroupMembershipClient) UpdateOneID(id int) *GroupMembershipUpdateOne {
+	mutation := newGroupMembershipMutation(c.config, OpUpdateOne, withGroupMembershipID(id))
+	return &GroupMembershipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for GroupMenus.
-func (c *GroupMenusClient) Delete() *GroupMenusDelete {
-	mutation := newGroupMenusMutation(c.config, OpDelete)
-	return &GroupMenusDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for GroupMembership.
+func (c *GroupMembershipClient) Delete() *GroupMembershipDelete {
+	mutation := newGroupMembershipMutation(c.config, OpDelete)
+	return &GroupMembershipDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *GroupMenusClient) DeleteOne(_m *GroupMenus) *GroupMenusDeleteOne {
+func (c *GroupMembershipClient) DeleteOne(_m *GroupMembership) *GroupMembershipDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *GroupMenusClient) DeleteOneID(id int) *GroupMenusDeleteOne {
-	builder := c.Delete().Where(groupmenus.ID(id))
+func (c *GroupMembershipClient) DeleteOneID(id int) *GroupMembershipDeleteOne {
+	builder := c.Delete().Where(groupmembership.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &GroupMenusDeleteOne{builder}
+	return &GroupMembershipDeleteOne{builder}
 }
 
-// Query returns a query builder for GroupMenus.
-func (c *GroupMenusClient) Query() *GroupMenusQuery {
-	return &GroupMenusQuery{
+// Query returns a query builder for GroupMembership.
+func (c *GroupMembershipClient) Query() *GroupMembershipQuery {
+	return &GroupMembershipQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeGroupMenus},
+		ctx:    &QueryContext{Type: TypeGroupMembership},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a GroupMenus entity by its id.
-func (c *GroupMenusClient) Get(ctx context.Context, id int) (*GroupMenus, error) {
-	return c.Query().Where(groupmenus.ID(id)).Only(ctx)
+// Get returns a GroupMembership entity by its id.
+func (c *GroupMembershipClient) Get(ctx context.Context, id int) (*GroupMembership, error) {
+	return c.Query().Where(groupmembership.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GroupMenusClient) GetX(ctx context.Context, id int) *GroupMenus {
+func (c *GroupMembershipClient) GetX(ctx context.Context, id int) *GroupMembership {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1238,160 +1095,27 @@ func (c *GroupMenusClient) GetX(ctx context.Context, id int) *GroupMenus {
 }
 
 // Hooks returns the client hooks.
-func (c *GroupMenusClient) Hooks() []Hook {
-	return c.hooks.GroupMenus
+func (c *GroupMembershipClient) Hooks() []Hook {
+	return c.hooks.GroupMembership
 }
 
 // Interceptors returns the client interceptors.
-func (c *GroupMenusClient) Interceptors() []Interceptor {
-	return c.inters.GroupMenus
+func (c *GroupMembershipClient) Interceptors() []Interceptor {
+	return c.inters.GroupMembership
 }
 
-func (c *GroupMenusClient) mutate(ctx context.Context, m *GroupMenusMutation) (Value, error) {
+func (c *GroupMembershipClient) mutate(ctx context.Context, m *GroupMembershipMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&GroupMenusCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&GroupMembershipCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&GroupMenusUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&GroupMembershipUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&GroupMenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&GroupMembershipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&GroupMenusDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&GroupMembershipDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("lion: unknown GroupMenus mutation op: %q", m.Op())
-	}
-}
-
-// GroupUserMappingClient is a client for the GroupUserMapping schema.
-type GroupUserMappingClient struct {
-	config
-}
-
-// NewGroupUserMappingClient returns a client for the GroupUserMapping from the given config.
-func NewGroupUserMappingClient(c config) *GroupUserMappingClient {
-	return &GroupUserMappingClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `groupusermapping.Hooks(f(g(h())))`.
-func (c *GroupUserMappingClient) Use(hooks ...Hook) {
-	c.hooks.GroupUserMapping = append(c.hooks.GroupUserMapping, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `groupusermapping.Intercept(f(g(h())))`.
-func (c *GroupUserMappingClient) Intercept(interceptors ...Interceptor) {
-	c.inters.GroupUserMapping = append(c.inters.GroupUserMapping, interceptors...)
-}
-
-// Create returns a builder for creating a GroupUserMapping entity.
-func (c *GroupUserMappingClient) Create() *GroupUserMappingCreate {
-	mutation := newGroupUserMappingMutation(c.config, OpCreate)
-	return &GroupUserMappingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of GroupUserMapping entities.
-func (c *GroupUserMappingClient) CreateBulk(builders ...*GroupUserMappingCreate) *GroupUserMappingCreateBulk {
-	return &GroupUserMappingCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *GroupUserMappingClient) MapCreateBulk(slice any, setFunc func(*GroupUserMappingCreate, int)) *GroupUserMappingCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &GroupUserMappingCreateBulk{err: fmt.Errorf("calling to GroupUserMappingClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*GroupUserMappingCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &GroupUserMappingCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for GroupUserMapping.
-func (c *GroupUserMappingClient) Update() *GroupUserMappingUpdate {
-	mutation := newGroupUserMappingMutation(c.config, OpUpdate)
-	return &GroupUserMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *GroupUserMappingClient) UpdateOne(_m *GroupUserMapping) *GroupUserMappingUpdateOne {
-	mutation := newGroupUserMappingMutation(c.config, OpUpdateOne, withGroupUserMapping(_m))
-	return &GroupUserMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *GroupUserMappingClient) UpdateOneID(id int) *GroupUserMappingUpdateOne {
-	mutation := newGroupUserMappingMutation(c.config, OpUpdateOne, withGroupUserMappingID(id))
-	return &GroupUserMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for GroupUserMapping.
-func (c *GroupUserMappingClient) Delete() *GroupUserMappingDelete {
-	mutation := newGroupUserMappingMutation(c.config, OpDelete)
-	return &GroupUserMappingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *GroupUserMappingClient) DeleteOne(_m *GroupUserMapping) *GroupUserMappingDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *GroupUserMappingClient) DeleteOneID(id int) *GroupUserMappingDeleteOne {
-	builder := c.Delete().Where(groupusermapping.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &GroupUserMappingDeleteOne{builder}
-}
-
-// Query returns a query builder for GroupUserMapping.
-func (c *GroupUserMappingClient) Query() *GroupUserMappingQuery {
-	return &GroupUserMappingQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeGroupUserMapping},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a GroupUserMapping entity by its id.
-func (c *GroupUserMappingClient) Get(ctx context.Context, id int) (*GroupUserMapping, error) {
-	return c.Query().Where(groupusermapping.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *GroupUserMappingClient) GetX(ctx context.Context, id int) *GroupUserMapping {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *GroupUserMappingClient) Hooks() []Hook {
-	return c.hooks.GroupUserMapping
-}
-
-// Interceptors returns the client interceptors.
-func (c *GroupUserMappingClient) Interceptors() []Interceptor {
-	return c.inters.GroupUserMapping
-}
-
-func (c *GroupUserMappingClient) mutate(ctx context.Context, m *GroupUserMappingMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&GroupUserMappingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&GroupUserMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&GroupUserMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&GroupUserMappingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("lion: unknown GroupUserMapping mutation op: %q", m.Op())
+		return nil, fmt.Errorf("lion: unknown GroupMembership mutation op: %q", m.Op())
 	}
 }
 
@@ -1690,6 +1414,139 @@ func (c *MenusClient) mutate(ctx context.Context, m *MenusMutation) (Value, erro
 		return (&MenusDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown Menus mutation op: %q", m.Op())
+	}
+}
+
+// PermissionsClient is a client for the Permissions schema.
+type PermissionsClient struct {
+	config
+}
+
+// NewPermissionsClient returns a client for the Permissions from the given config.
+func NewPermissionsClient(c config) *PermissionsClient {
+	return &PermissionsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `permissions.Hooks(f(g(h())))`.
+func (c *PermissionsClient) Use(hooks ...Hook) {
+	c.hooks.Permissions = append(c.hooks.Permissions, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `permissions.Intercept(f(g(h())))`.
+func (c *PermissionsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Permissions = append(c.inters.Permissions, interceptors...)
+}
+
+// Create returns a builder for creating a Permissions entity.
+func (c *PermissionsClient) Create() *PermissionsCreate {
+	mutation := newPermissionsMutation(c.config, OpCreate)
+	return &PermissionsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Permissions entities.
+func (c *PermissionsClient) CreateBulk(builders ...*PermissionsCreate) *PermissionsCreateBulk {
+	return &PermissionsCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PermissionsClient) MapCreateBulk(slice any, setFunc func(*PermissionsCreate, int)) *PermissionsCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PermissionsCreateBulk{err: fmt.Errorf("calling to PermissionsClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PermissionsCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PermissionsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Permissions.
+func (c *PermissionsClient) Update() *PermissionsUpdate {
+	mutation := newPermissionsMutation(c.config, OpUpdate)
+	return &PermissionsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PermissionsClient) UpdateOne(_m *Permissions) *PermissionsUpdateOne {
+	mutation := newPermissionsMutation(c.config, OpUpdateOne, withPermissions(_m))
+	return &PermissionsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PermissionsClient) UpdateOneID(id int) *PermissionsUpdateOne {
+	mutation := newPermissionsMutation(c.config, OpUpdateOne, withPermissionsID(id))
+	return &PermissionsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Permissions.
+func (c *PermissionsClient) Delete() *PermissionsDelete {
+	mutation := newPermissionsMutation(c.config, OpDelete)
+	return &PermissionsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PermissionsClient) DeleteOne(_m *Permissions) *PermissionsDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PermissionsClient) DeleteOneID(id int) *PermissionsDeleteOne {
+	builder := c.Delete().Where(permissions.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PermissionsDeleteOne{builder}
+}
+
+// Query returns a query builder for Permissions.
+func (c *PermissionsClient) Query() *PermissionsQuery {
+	return &PermissionsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePermissions},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Permissions entity by its id.
+func (c *PermissionsClient) Get(ctx context.Context, id int) (*Permissions, error) {
+	return c.Query().Where(permissions.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PermissionsClient) GetX(ctx context.Context, id int) *Permissions {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PermissionsClient) Hooks() []Hook {
+	return c.hooks.Permissions
+}
+
+// Interceptors returns the client interceptors.
+func (c *PermissionsClient) Interceptors() []Interceptor {
+	return c.inters.Permissions
+}
+
+func (c *PermissionsClient) mutate(ctx context.Context, m *PermissionsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PermissionsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PermissionsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PermissionsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PermissionsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown Permissions mutation op: %q", m.Op())
 	}
 }
 
@@ -2654,13 +2511,13 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Accounts, AuthProviders, AuthUserLocal, AuthUserSocial, Demo, Departments,
-		GroupMenus, GroupUserMapping, Groups, Menus, RoleGroupMapping, RoleMenuMapping,
+		AuthProviders, AuthUserLocal, AuthUserSocial, Demo, Departments,
+		GroupMembership, Groups, Menus, Permissions, RoleGroupMapping, RoleMenuMapping,
 		RoleUserMapping, Roles, UserAttributes, Users []ent.Hook
 	}
 	inters struct {
-		Accounts, AuthProviders, AuthUserLocal, AuthUserSocial, Demo, Departments,
-		GroupMenus, GroupUserMapping, Groups, Menus, RoleGroupMapping, RoleMenuMapping,
+		AuthProviders, AuthUserLocal, AuthUserSocial, Demo, Departments,
+		GroupMembership, Groups, Menus, Permissions, RoleGroupMapping, RoleMenuMapping,
 		RoleUserMapping, Roles, UserAttributes, Users []ent.Interceptor
 	}
 )

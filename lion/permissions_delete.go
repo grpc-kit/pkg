@@ -8,30 +8,30 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/accounts"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
-// AccountsDelete is the builder for deleting a Accounts entity.
-type AccountsDelete struct {
+// PermissionsDelete is the builder for deleting a Permissions entity.
+type PermissionsDelete struct {
 	config
 	hooks    []Hook
-	mutation *AccountsMutation
+	mutation *PermissionsMutation
 }
 
-// Where appends a list predicates to the AccountsDelete builder.
-func (_d *AccountsDelete) Where(ps ...predicate.Accounts) *AccountsDelete {
+// Where appends a list predicates to the PermissionsDelete builder.
+func (_d *PermissionsDelete) Where(ps ...predicate.Permissions) *PermissionsDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *AccountsDelete) Exec(ctx context.Context) (int, error) {
+func (_d *PermissionsDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *AccountsDelete) ExecX(ctx context.Context) int {
+func (_d *PermissionsDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *AccountsDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *AccountsDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(accounts.Table, sqlgraph.NewFieldSpec(accounts.FieldID, field.TypeInt))
+func (_d *PermissionsDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(permissions.Table, sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *AccountsDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// AccountsDeleteOne is the builder for deleting a single Accounts entity.
-type AccountsDeleteOne struct {
-	_d *AccountsDelete
+// PermissionsDeleteOne is the builder for deleting a single Permissions entity.
+type PermissionsDeleteOne struct {
+	_d *PermissionsDelete
 }
 
-// Where appends a list predicates to the AccountsDelete builder.
-func (_d *AccountsDeleteOne) Where(ps ...predicate.Accounts) *AccountsDeleteOne {
+// Where appends a list predicates to the PermissionsDelete builder.
+func (_d *PermissionsDeleteOne) Where(ps ...predicate.Permissions) *PermissionsDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *AccountsDeleteOne) Exec(ctx context.Context) error {
+func (_d *PermissionsDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{accounts.Label}
+		return &NotFoundError{permissions.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *AccountsDeleteOne) ExecX(ctx context.Context) {
+func (_d *PermissionsDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

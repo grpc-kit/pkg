@@ -5,16 +5,15 @@ package lion
 import (
 	"time"
 
-	"github.com/grpc-kit/pkg/lion/accounts"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/authuserlocal"
 	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/groupmenus"
+	"github.com/grpc-kit/pkg/lion/groupmembership"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/groupusermapping"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
 	"github.com/grpc-kit/pkg/lion/rolemenumapping"
 	"github.com/grpc-kit/pkg/lion/roles"
@@ -28,29 +27,6 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	accountsMixin := schema.Accounts{}.Mixin()
-	accountsMixinFields0 := accountsMixin[0].Fields()
-	_ = accountsMixinFields0
-	accountsFields := schema.Accounts{}.Fields()
-	_ = accountsFields
-	// accountsDescCreatedAt is the schema descriptor for created_at field.
-	accountsDescCreatedAt := accountsMixinFields0[0].Descriptor()
-	// accounts.DefaultCreatedAt holds the default value on creation for the created_at field.
-	accounts.DefaultCreatedAt = accountsDescCreatedAt.Default.(func() time.Time)
-	// accountsDescUpdatedAt is the schema descriptor for updated_at field.
-	accountsDescUpdatedAt := accountsMixinFields0[1].Descriptor()
-	// accounts.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	accounts.DefaultUpdatedAt = accountsDescUpdatedAt.Default.(func() time.Time)
-	// accounts.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	accounts.UpdateDefaultUpdatedAt = accountsDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// accountsDescBalance is the schema descriptor for balance field.
-	accountsDescBalance := accountsFields[0].Descriptor()
-	// accounts.DefaultBalance holds the default value on creation for the balance field.
-	accounts.DefaultBalance = accountsDescBalance.Default.(float64)
-	// accountsDescCurrency is the schema descriptor for currency field.
-	accountsDescCurrency := accountsFields[1].Descriptor()
-	// accounts.DefaultCurrency holds the default value on creation for the currency field.
-	accounts.DefaultCurrency = accountsDescCurrency.Default.(string)
 	authprovidersMixin := schema.AuthProviders{}.Mixin()
 	authprovidersMixinFields0 := authprovidersMixin[0].Fields()
 	_ = authprovidersMixinFields0
@@ -196,52 +172,29 @@ func init() {
 	departmentsDescDescription := departmentsFields[2].Descriptor()
 	// departments.DefaultDescription holds the default value on creation for the description field.
 	departments.DefaultDescription = departmentsDescDescription.Default.(string)
-	groupmenusMixin := schema.GroupMenus{}.Mixin()
-	groupmenusMixinFields0 := groupmenusMixin[0].Fields()
-	_ = groupmenusMixinFields0
-	groupmenusFields := schema.GroupMenus{}.Fields()
-	_ = groupmenusFields
-	// groupmenusDescCreatedAt is the schema descriptor for created_at field.
-	groupmenusDescCreatedAt := groupmenusMixinFields0[0].Descriptor()
-	// groupmenus.DefaultCreatedAt holds the default value on creation for the created_at field.
-	groupmenus.DefaultCreatedAt = groupmenusDescCreatedAt.Default.(func() time.Time)
-	// groupmenusDescUpdatedAt is the schema descriptor for updated_at field.
-	groupmenusDescUpdatedAt := groupmenusMixinFields0[1].Descriptor()
-	// groupmenus.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	groupmenus.DefaultUpdatedAt = groupmenusDescUpdatedAt.Default.(func() time.Time)
-	// groupmenus.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	groupmenus.UpdateDefaultUpdatedAt = groupmenusDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// groupmenusDescGroupID is the schema descriptor for group_id field.
-	groupmenusDescGroupID := groupmenusFields[0].Descriptor()
-	// groupmenus.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
-	groupmenus.GroupIDValidator = groupmenusDescGroupID.Validators[0].(func(int) error)
-	// groupmenusDescMenuID is the schema descriptor for menu_id field.
-	groupmenusDescMenuID := groupmenusFields[1].Descriptor()
-	// groupmenus.MenuIDValidator is a validator for the "menu_id" field. It is called by the builders before save.
-	groupmenus.MenuIDValidator = groupmenusDescMenuID.Validators[0].(func(int) error)
-	groupusermappingMixin := schema.GroupUserMapping{}.Mixin()
-	groupusermappingMixinFields0 := groupusermappingMixin[0].Fields()
-	_ = groupusermappingMixinFields0
-	groupusermappingFields := schema.GroupUserMapping{}.Fields()
-	_ = groupusermappingFields
-	// groupusermappingDescCreatedAt is the schema descriptor for created_at field.
-	groupusermappingDescCreatedAt := groupusermappingMixinFields0[0].Descriptor()
-	// groupusermapping.DefaultCreatedAt holds the default value on creation for the created_at field.
-	groupusermapping.DefaultCreatedAt = groupusermappingDescCreatedAt.Default.(func() time.Time)
-	// groupusermappingDescUpdatedAt is the schema descriptor for updated_at field.
-	groupusermappingDescUpdatedAt := groupusermappingMixinFields0[1].Descriptor()
-	// groupusermapping.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	groupusermapping.DefaultUpdatedAt = groupusermappingDescUpdatedAt.Default.(func() time.Time)
-	// groupusermapping.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	groupusermapping.UpdateDefaultUpdatedAt = groupusermappingDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// groupusermappingDescGroupID is the schema descriptor for group_id field.
-	groupusermappingDescGroupID := groupusermappingFields[0].Descriptor()
-	// groupusermapping.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
-	groupusermapping.GroupIDValidator = groupusermappingDescGroupID.Validators[0].(func(int) error)
-	// groupusermappingDescUserID is the schema descriptor for user_id field.
-	groupusermappingDescUserID := groupusermappingFields[1].Descriptor()
-	// groupusermapping.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	groupusermapping.UserIDValidator = groupusermappingDescUserID.Validators[0].(func(int) error)
+	groupmembershipMixin := schema.GroupMembership{}.Mixin()
+	groupmembershipMixinFields0 := groupmembershipMixin[0].Fields()
+	_ = groupmembershipMixinFields0
+	groupmembershipFields := schema.GroupMembership{}.Fields()
+	_ = groupmembershipFields
+	// groupmembershipDescCreatedAt is the schema descriptor for created_at field.
+	groupmembershipDescCreatedAt := groupmembershipMixinFields0[0].Descriptor()
+	// groupmembership.DefaultCreatedAt holds the default value on creation for the created_at field.
+	groupmembership.DefaultCreatedAt = groupmembershipDescCreatedAt.Default.(func() time.Time)
+	// groupmembershipDescUpdatedAt is the schema descriptor for updated_at field.
+	groupmembershipDescUpdatedAt := groupmembershipMixinFields0[1].Descriptor()
+	// groupmembership.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	groupmembership.DefaultUpdatedAt = groupmembershipDescUpdatedAt.Default.(func() time.Time)
+	// groupmembership.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	groupmembership.UpdateDefaultUpdatedAt = groupmembershipDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// groupmembershipDescGroupID is the schema descriptor for group_id field.
+	groupmembershipDescGroupID := groupmembershipFields[0].Descriptor()
+	// groupmembership.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
+	groupmembership.GroupIDValidator = groupmembershipDescGroupID.Validators[0].(func(int) error)
+	// groupmembershipDescUserID is the schema descriptor for user_id field.
+	groupmembershipDescUserID := groupmembershipFields[1].Descriptor()
+	// groupmembership.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	groupmembership.UserIDValidator = groupmembershipDescUserID.Validators[0].(func(int) error)
 	groupsMixin := schema.Groups{}.Mixin()
 	groupsMixinFields0 := groupsMixin[0].Fields()
 	_ = groupsMixinFields0
@@ -275,8 +228,12 @@ func init() {
 			return nil
 		}
 	}()
+	// groupsDescDepartmentID is the schema descriptor for department_id field.
+	groupsDescDepartmentID := groupsFields[1].Descriptor()
+	// groups.DepartmentIDValidator is a validator for the "department_id" field. It is called by the builders before save.
+	groups.DepartmentIDValidator = groupsDescDepartmentID.Validators[0].(func(int) error)
 	// groupsDescDescription is the schema descriptor for description field.
-	groupsDescDescription := groupsFields[1].Descriptor()
+	groupsDescDescription := groupsFields[2].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
 	menusMixin := schema.Menus{}.Mixin()
@@ -364,6 +321,39 @@ func init() {
 	menusDescHideChildrenInMenu := menusFields[9].Descriptor()
 	// menus.DefaultHideChildrenInMenu holds the default value on creation for the hide_children_in_menu field.
 	menus.DefaultHideChildrenInMenu = menusDescHideChildrenInMenu.Default.(bool)
+	permissionsMixin := schema.Permissions{}.Mixin()
+	permissionsMixinFields0 := permissionsMixin[0].Fields()
+	_ = permissionsMixinFields0
+	permissionsFields := schema.Permissions{}.Fields()
+	_ = permissionsFields
+	// permissionsDescCreatedAt is the schema descriptor for created_at field.
+	permissionsDescCreatedAt := permissionsMixinFields0[0].Descriptor()
+	// permissions.DefaultCreatedAt holds the default value on creation for the created_at field.
+	permissions.DefaultCreatedAt = permissionsDescCreatedAt.Default.(func() time.Time)
+	// permissionsDescUpdatedAt is the schema descriptor for updated_at field.
+	permissionsDescUpdatedAt := permissionsMixinFields0[1].Descriptor()
+	// permissions.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	permissions.DefaultUpdatedAt = permissionsDescUpdatedAt.Default.(func() time.Time)
+	// permissions.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	permissions.UpdateDefaultUpdatedAt = permissionsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// permissionsDescName is the schema descriptor for name field.
+	permissionsDescName := permissionsFields[0].Descriptor()
+	// permissions.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	permissions.NameValidator = func() func(string) error {
+		validators := permissionsDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	rolegroupmappingMixin := schema.RoleGroupMapping{}.Mixin()
 	rolegroupmappingMixinFields0 := rolegroupmappingMixin[0].Fields()
 	_ = rolegroupmappingMixinFields0

@@ -23,6 +23,8 @@ type Groups struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// 用户组名
 	Name string `json:"name,omitempty"`
+	// 关联 lion_departments 表的 ID
+	DepartmentID int `json:"department_id,omitempty"`
 	// 用户组描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -54,7 +56,7 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case groups.FieldID:
+		case groups.FieldID, groups.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
 		case groups.FieldName, groups.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -98,6 +100,12 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
+			}
+		case groups.FieldDepartmentID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field department_id", values[i])
+			} else if value.Valid {
+				_m.DepartmentID = int(value.Int64)
 			}
 		case groups.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -154,6 +162,9 @@ func (_m *Groups) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("department_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentID))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

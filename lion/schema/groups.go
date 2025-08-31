@@ -21,6 +21,10 @@ func (Groups) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("用户组名"),
+		field.Int("department_id").
+			Positive().
+			Immutable().
+			Comment("关联 lion_departments 表的 ID"),
 		field.String("description").
 			Default("").
 			Comment("用户组描述"),
