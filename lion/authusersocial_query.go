@@ -11,68 +11,68 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/userauthsocial"
 )
 
-// UserAuthSocialQuery is the builder for querying UserAuthSocial entities.
-type UserAuthSocialQuery struct {
+// AuthUserSocialQuery is the builder for querying AuthUserSocial entities.
+type AuthUserSocialQuery struct {
 	config
 	ctx        *QueryContext
-	order      []userauthsocial.OrderOption
+	order      []authusersocial.OrderOption
 	inters     []Interceptor
-	predicates []predicate.UserAuthSocial
+	predicates []predicate.AuthUserSocial
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the UserAuthSocialQuery builder.
-func (_q *UserAuthSocialQuery) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialQuery {
+// Where adds a new predicate for the AuthUserSocialQuery builder.
+func (_q *AuthUserSocialQuery) Where(ps ...predicate.AuthUserSocial) *AuthUserSocialQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *UserAuthSocialQuery) Limit(limit int) *UserAuthSocialQuery {
+func (_q *AuthUserSocialQuery) Limit(limit int) *AuthUserSocialQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *UserAuthSocialQuery) Offset(offset int) *UserAuthSocialQuery {
+func (_q *AuthUserSocialQuery) Offset(offset int) *AuthUserSocialQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *UserAuthSocialQuery) Unique(unique bool) *UserAuthSocialQuery {
+func (_q *AuthUserSocialQuery) Unique(unique bool) *AuthUserSocialQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *UserAuthSocialQuery) Order(o ...userauthsocial.OrderOption) *UserAuthSocialQuery {
+func (_q *AuthUserSocialQuery) Order(o ...authusersocial.OrderOption) *AuthUserSocialQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// First returns the first UserAuthSocial entity from the query.
-// Returns a *NotFoundError when no UserAuthSocial was found.
-func (_q *UserAuthSocialQuery) First(ctx context.Context) (*UserAuthSocial, error) {
+// First returns the first AuthUserSocial entity from the query.
+// Returns a *NotFoundError when no AuthUserSocial was found.
+func (_q *AuthUserSocialQuery) First(ctx context.Context) (*AuthUserSocial, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{userauthsocial.Label}
+		return nil, &NotFoundError{authusersocial.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *UserAuthSocialQuery) FirstX(ctx context.Context) *UserAuthSocial {
+func (_q *AuthUserSocialQuery) FirstX(ctx context.Context) *AuthUserSocial {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -80,22 +80,22 @@ func (_q *UserAuthSocialQuery) FirstX(ctx context.Context) *UserAuthSocial {
 	return node
 }
 
-// FirstID returns the first UserAuthSocial ID from the query.
-// Returns a *NotFoundError when no UserAuthSocial ID was found.
-func (_q *UserAuthSocialQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first AuthUserSocial ID from the query.
+// Returns a *NotFoundError when no AuthUserSocial ID was found.
+func (_q *AuthUserSocialQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{userauthsocial.Label}
+		err = &NotFoundError{authusersocial.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *UserAuthSocialQuery) FirstIDX(ctx context.Context) int {
+func (_q *AuthUserSocialQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -103,10 +103,10 @@ func (_q *UserAuthSocialQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single UserAuthSocial entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one UserAuthSocial entity is found.
-// Returns a *NotFoundError when no UserAuthSocial entities are found.
-func (_q *UserAuthSocialQuery) Only(ctx context.Context) (*UserAuthSocial, error) {
+// Only returns a single AuthUserSocial entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one AuthUserSocial entity is found.
+// Returns a *NotFoundError when no AuthUserSocial entities are found.
+func (_q *AuthUserSocialQuery) Only(ctx context.Context) (*AuthUserSocial, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -115,14 +115,14 @@ func (_q *UserAuthSocialQuery) Only(ctx context.Context) (*UserAuthSocial, error
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{userauthsocial.Label}
+		return nil, &NotFoundError{authusersocial.Label}
 	default:
-		return nil, &NotSingularError{userauthsocial.Label}
+		return nil, &NotSingularError{authusersocial.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *UserAuthSocialQuery) OnlyX(ctx context.Context) *UserAuthSocial {
+func (_q *AuthUserSocialQuery) OnlyX(ctx context.Context) *AuthUserSocial {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -130,10 +130,10 @@ func (_q *UserAuthSocialQuery) OnlyX(ctx context.Context) *UserAuthSocial {
 	return node
 }
 
-// OnlyID is like Only, but returns the only UserAuthSocial ID in the query.
-// Returns a *NotSingularError when more than one UserAuthSocial ID is found.
+// OnlyID is like Only, but returns the only AuthUserSocial ID in the query.
+// Returns a *NotSingularError when more than one AuthUserSocial ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *UserAuthSocialQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *AuthUserSocialQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -142,15 +142,15 @@ func (_q *UserAuthSocialQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{userauthsocial.Label}
+		err = &NotFoundError{authusersocial.Label}
 	default:
-		err = &NotSingularError{userauthsocial.Label}
+		err = &NotSingularError{authusersocial.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *UserAuthSocialQuery) OnlyIDX(ctx context.Context) int {
+func (_q *AuthUserSocialQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -158,18 +158,18 @@ func (_q *UserAuthSocialQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of UserAuthSocials.
-func (_q *UserAuthSocialQuery) All(ctx context.Context) ([]*UserAuthSocial, error) {
+// All executes the query and returns a list of AuthUserSocials.
+func (_q *AuthUserSocialQuery) All(ctx context.Context) ([]*AuthUserSocial, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*UserAuthSocial, *UserAuthSocialQuery]()
-	return withInterceptors[[]*UserAuthSocial](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*AuthUserSocial, *AuthUserSocialQuery]()
+	return withInterceptors[[]*AuthUserSocial](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *UserAuthSocialQuery) AllX(ctx context.Context) []*UserAuthSocial {
+func (_q *AuthUserSocialQuery) AllX(ctx context.Context) []*AuthUserSocial {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -177,20 +177,20 @@ func (_q *UserAuthSocialQuery) AllX(ctx context.Context) []*UserAuthSocial {
 	return nodes
 }
 
-// IDs executes the query and returns a list of UserAuthSocial IDs.
-func (_q *UserAuthSocialQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of AuthUserSocial IDs.
+func (_q *AuthUserSocialQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(userauthsocial.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(authusersocial.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *UserAuthSocialQuery) IDsX(ctx context.Context) []int {
+func (_q *AuthUserSocialQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -199,16 +199,16 @@ func (_q *UserAuthSocialQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *UserAuthSocialQuery) Count(ctx context.Context) (int, error) {
+func (_q *AuthUserSocialQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*UserAuthSocialQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*AuthUserSocialQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *UserAuthSocialQuery) CountX(ctx context.Context) int {
+func (_q *AuthUserSocialQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -217,7 +217,7 @@ func (_q *UserAuthSocialQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *UserAuthSocialQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *AuthUserSocialQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -230,7 +230,7 @@ func (_q *UserAuthSocialQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *UserAuthSocialQuery) ExistX(ctx context.Context) bool {
+func (_q *AuthUserSocialQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -238,18 +238,18 @@ func (_q *UserAuthSocialQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the UserAuthSocialQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the AuthUserSocialQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *UserAuthSocialQuery) Clone() *UserAuthSocialQuery {
+func (_q *AuthUserSocialQuery) Clone() *AuthUserSocialQuery {
 	if _q == nil {
 		return nil
 	}
-	return &UserAuthSocialQuery{
+	return &AuthUserSocialQuery{
 		config:     _q.config,
 		ctx:        _q.ctx.Clone(),
-		order:      append([]userauthsocial.OrderOption{}, _q.order...),
+		order:      append([]authusersocial.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.UserAuthSocial{}, _q.predicates...),
+		predicates: append([]predicate.AuthUserSocial{}, _q.predicates...),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -266,15 +266,15 @@ func (_q *UserAuthSocialQuery) Clone() *UserAuthSocialQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.UserAuthSocial.Query().
-//		GroupBy(userauthsocial.FieldCreatedAt).
+//	client.AuthUserSocial.Query().
+//		GroupBy(authusersocial.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (_q *UserAuthSocialQuery) GroupBy(field string, fields ...string) *UserAuthSocialGroupBy {
+func (_q *AuthUserSocialQuery) GroupBy(field string, fields ...string) *AuthUserSocialGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &UserAuthSocialGroupBy{build: _q}
+	grbuild := &AuthUserSocialGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = userauthsocial.Label
+	grbuild.label = authusersocial.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -288,23 +288,23 @@ func (_q *UserAuthSocialQuery) GroupBy(field string, fields ...string) *UserAuth
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.UserAuthSocial.Query().
-//		Select(userauthsocial.FieldCreatedAt).
+//	client.AuthUserSocial.Query().
+//		Select(authusersocial.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *UserAuthSocialQuery) Select(fields ...string) *UserAuthSocialSelect {
+func (_q *AuthUserSocialQuery) Select(fields ...string) *AuthUserSocialSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &UserAuthSocialSelect{UserAuthSocialQuery: _q}
-	sbuild.label = userauthsocial.Label
+	sbuild := &AuthUserSocialSelect{AuthUserSocialQuery: _q}
+	sbuild.label = authusersocial.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a UserAuthSocialSelect configured with the given aggregations.
-func (_q *UserAuthSocialQuery) Aggregate(fns ...AggregateFunc) *UserAuthSocialSelect {
+// Aggregate returns a AuthUserSocialSelect configured with the given aggregations.
+func (_q *AuthUserSocialQuery) Aggregate(fns ...AggregateFunc) *AuthUserSocialSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *UserAuthSocialQuery) prepareQuery(ctx context.Context) error {
+func (_q *AuthUserSocialQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
@@ -316,7 +316,7 @@ func (_q *UserAuthSocialQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !userauthsocial.ValidColumn(f) {
+		if !authusersocial.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
@@ -330,16 +330,16 @@ func (_q *UserAuthSocialQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *UserAuthSocialQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UserAuthSocial, error) {
+func (_q *AuthUserSocialQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*AuthUserSocial, error) {
 	var (
-		nodes = []*UserAuthSocial{}
+		nodes = []*AuthUserSocial{}
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*UserAuthSocial).scanValues(nil, columns)
+		return (*AuthUserSocial).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &UserAuthSocial{config: _q.config}
+		node := &AuthUserSocial{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
@@ -355,7 +355,7 @@ func (_q *UserAuthSocialQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	return nodes, nil
 }
 
-func (_q *UserAuthSocialQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *AuthUserSocialQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -364,8 +364,8 @@ func (_q *UserAuthSocialQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *UserAuthSocialQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(userauthsocial.Table, userauthsocial.Columns, sqlgraph.NewFieldSpec(userauthsocial.FieldID, field.TypeInt))
+func (_q *AuthUserSocialQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(authusersocial.Table, authusersocial.Columns, sqlgraph.NewFieldSpec(authusersocial.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -374,9 +374,9 @@ func (_q *UserAuthSocialQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, userauthsocial.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, authusersocial.FieldID)
 		for i := range fields {
-			if fields[i] != userauthsocial.FieldID {
+			if fields[i] != authusersocial.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -404,12 +404,12 @@ func (_q *UserAuthSocialQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *UserAuthSocialQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *AuthUserSocialQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(userauthsocial.Table)
+	t1 := builder.Table(authusersocial.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = userauthsocial.Columns
+		columns = authusersocial.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -436,28 +436,28 @@ func (_q *UserAuthSocialQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// UserAuthSocialGroupBy is the group-by builder for UserAuthSocial entities.
-type UserAuthSocialGroupBy struct {
+// AuthUserSocialGroupBy is the group-by builder for AuthUserSocial entities.
+type AuthUserSocialGroupBy struct {
 	selector
-	build *UserAuthSocialQuery
+	build *AuthUserSocialQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *UserAuthSocialGroupBy) Aggregate(fns ...AggregateFunc) *UserAuthSocialGroupBy {
+func (_g *AuthUserSocialGroupBy) Aggregate(fns ...AggregateFunc) *AuthUserSocialGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *UserAuthSocialGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *AuthUserSocialGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserAuthSocialQuery, *UserAuthSocialGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*AuthUserSocialQuery, *AuthUserSocialGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *UserAuthSocialGroupBy) sqlScan(ctx context.Context, root *UserAuthSocialQuery, v any) error {
+func (_g *AuthUserSocialGroupBy) sqlScan(ctx context.Context, root *AuthUserSocialQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -484,28 +484,28 @@ func (_g *UserAuthSocialGroupBy) sqlScan(ctx context.Context, root *UserAuthSoci
 	return sql.ScanSlice(rows, v)
 }
 
-// UserAuthSocialSelect is the builder for selecting fields of UserAuthSocial entities.
-type UserAuthSocialSelect struct {
-	*UserAuthSocialQuery
+// AuthUserSocialSelect is the builder for selecting fields of AuthUserSocial entities.
+type AuthUserSocialSelect struct {
+	*AuthUserSocialQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *UserAuthSocialSelect) Aggregate(fns ...AggregateFunc) *UserAuthSocialSelect {
+func (_s *AuthUserSocialSelect) Aggregate(fns ...AggregateFunc) *AuthUserSocialSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *UserAuthSocialSelect) Scan(ctx context.Context, v any) error {
+func (_s *AuthUserSocialSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserAuthSocialQuery, *UserAuthSocialSelect](ctx, _s.UserAuthSocialQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*AuthUserSocialQuery, *AuthUserSocialSelect](ctx, _s.AuthUserSocialQuery, _s, _s.inters, v)
 }
 
-func (_s *UserAuthSocialSelect) sqlScan(ctx context.Context, root *UserAuthSocialQuery, v any) error {
+func (_s *AuthUserSocialSelect) sqlScan(ctx context.Context, root *AuthUserSocialQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

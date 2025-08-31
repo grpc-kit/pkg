@@ -16,6 +16,10 @@ type Tx struct {
 	Accounts *AccountsClient
 	// AuthProviders is the client for interacting with the AuthProviders builders.
 	AuthProviders *AuthProvidersClient
+	// AuthUserLocal is the client for interacting with the AuthUserLocal builders.
+	AuthUserLocal *AuthUserLocalClient
+	// AuthUserSocial is the client for interacting with the AuthUserSocial builders.
+	AuthUserSocial *AuthUserSocialClient
 	// Demo is the client for interacting with the Demo builders.
 	Demo *DemoClient
 	// GroupMenus is the client for interacting with the GroupMenus builders.
@@ -28,10 +32,6 @@ type Tx struct {
 	Menus *MenusClient
 	// UserAttributes is the client for interacting with the UserAttributes builders.
 	UserAttributes *UserAttributesClient
-	// UserAuthLocal is the client for interacting with the UserAuthLocal builders.
-	UserAuthLocal *UserAuthLocalClient
-	// UserAuthSocial is the client for interacting with the UserAuthSocial builders.
-	UserAuthSocial *UserAuthSocialClient
 	// Users is the client for interacting with the Users builders.
 	Users *UsersClient
 
@@ -167,14 +167,14 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Accounts = NewAccountsClient(tx.config)
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
+	tx.AuthUserLocal = NewAuthUserLocalClient(tx.config)
+	tx.AuthUserSocial = NewAuthUserSocialClient(tx.config)
 	tx.Demo = NewDemoClient(tx.config)
 	tx.GroupMenus = NewGroupMenusClient(tx.config)
 	tx.GroupUsers = NewGroupUsersClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
 	tx.UserAttributes = NewUserAttributesClient(tx.config)
-	tx.UserAuthLocal = NewUserAuthLocalClient(tx.config)
-	tx.UserAuthSocial = NewUserAuthSocialClient(tx.config)
 	tx.Users = NewUsersClient(tx.config)
 }
 

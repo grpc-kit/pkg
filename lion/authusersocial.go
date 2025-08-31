@@ -9,11 +9,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/userauthsocial"
+	"github.com/grpc-kit/pkg/lion/authusersocial"
 )
 
-// UserAuthSocial is the model entity for the UserAuthSocial schema.
-type UserAuthSocial struct {
+// AuthUserSocial is the model entity for the AuthUserSocial schema.
+type AuthUserSocial struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -41,17 +41,17 @@ type UserAuthSocial struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*UserAuthSocial) scanValues(columns []string) ([]any, error) {
+func (*AuthUserSocial) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case userauthsocial.FieldAccessTokenEncrypted, userauthsocial.FieldRefreshTokenEncrypted:
+		case authusersocial.FieldAccessTokenEncrypted, authusersocial.FieldRefreshTokenEncrypted:
 			values[i] = new([]byte)
-		case userauthsocial.FieldID, userauthsocial.FieldUserID:
+		case authusersocial.FieldID, authusersocial.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case userauthsocial.FieldProviderName, userauthsocial.FieldProviderUserID, userauthsocial.FieldProviderUnionID:
+		case authusersocial.FieldProviderName, authusersocial.FieldProviderUserID, authusersocial.FieldProviderUnionID:
 			values[i] = new(sql.NullString)
-		case userauthsocial.FieldCreatedAt, userauthsocial.FieldUpdatedAt, userauthsocial.FieldDeletedAt, userauthsocial.FieldTokenExpiresAt:
+		case authusersocial.FieldCreatedAt, authusersocial.FieldUpdatedAt, authusersocial.FieldDeletedAt, authusersocial.FieldTokenExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -61,75 +61,75 @@ func (*UserAuthSocial) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the UserAuthSocial fields.
-func (_m *UserAuthSocial) assignValues(columns []string, values []any) error {
+// to the AuthUserSocial fields.
+func (_m *AuthUserSocial) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case userauthsocial.FieldID:
+		case authusersocial.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case userauthsocial.FieldCreatedAt:
+		case authusersocial.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case userauthsocial.FieldUpdatedAt:
+		case authusersocial.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case userauthsocial.FieldDeletedAt:
+		case authusersocial.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case userauthsocial.FieldUserID:
+		case authusersocial.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				_m.UserID = int(value.Int64)
 			}
-		case userauthsocial.FieldProviderName:
+		case authusersocial.FieldProviderName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field provider_name", values[i])
 			} else if value.Valid {
 				_m.ProviderName = value.String
 			}
-		case userauthsocial.FieldProviderUserID:
+		case authusersocial.FieldProviderUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field provider_user_id", values[i])
 			} else if value.Valid {
 				_m.ProviderUserID = value.String
 			}
-		case userauthsocial.FieldProviderUnionID:
+		case authusersocial.FieldProviderUnionID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field provider_union_id", values[i])
 			} else if value.Valid {
 				_m.ProviderUnionID = value.String
 			}
-		case userauthsocial.FieldAccessTokenEncrypted:
+		case authusersocial.FieldAccessTokenEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field access_token_encrypted", values[i])
 			} else if value != nil {
 				_m.AccessTokenEncrypted = *value
 			}
-		case userauthsocial.FieldRefreshTokenEncrypted:
+		case authusersocial.FieldRefreshTokenEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field refresh_token_encrypted", values[i])
 			} else if value != nil {
 				_m.RefreshTokenEncrypted = *value
 			}
-		case userauthsocial.FieldTokenExpiresAt:
+		case authusersocial.FieldTokenExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field token_expires_at", values[i])
 			} else if value.Valid {
@@ -142,34 +142,34 @@ func (_m *UserAuthSocial) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the UserAuthSocial.
+// Value returns the ent.Value that was dynamically selected and assigned to the AuthUserSocial.
 // This includes values selected through modifiers, order, etc.
-func (_m *UserAuthSocial) Value(name string) (ent.Value, error) {
+func (_m *AuthUserSocial) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// Update returns a builder for updating this UserAuthSocial.
-// Note that you need to call UserAuthSocial.Unwrap() before calling this method if this UserAuthSocial
+// Update returns a builder for updating this AuthUserSocial.
+// Note that you need to call AuthUserSocial.Unwrap() before calling this method if this AuthUserSocial
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *UserAuthSocial) Update() *UserAuthSocialUpdateOne {
-	return NewUserAuthSocialClient(_m.config).UpdateOne(_m)
+func (_m *AuthUserSocial) Update() *AuthUserSocialUpdateOne {
+	return NewAuthUserSocialClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the UserAuthSocial entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the AuthUserSocial entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *UserAuthSocial) Unwrap() *UserAuthSocial {
+func (_m *AuthUserSocial) Unwrap() *AuthUserSocial {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: UserAuthSocial is not a transactional entity")
+		panic("lion: AuthUserSocial is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *UserAuthSocial) String() string {
+func (_m *AuthUserSocial) String() string {
 	var builder strings.Builder
-	builder.WriteString("UserAuthSocial(")
+	builder.WriteString("AuthUserSocial(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -204,5 +204,5 @@ func (_m *UserAuthSocial) String() string {
 	return builder.String()
 }
 
-// UserAuthSocials is a parsable slice of UserAuthSocial.
-type UserAuthSocials []*UserAuthSocial
+// AuthUserSocials is a parsable slice of AuthUserSocial.
+type AuthUserSocials []*AuthUserSocial

@@ -45,7 +45,7 @@ func (a *KnownAdminAPI) authLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.config.db.UserAuthLocal.Create().
+	a.config.db.AuthUserLocal.Create().
 		SetUserID(x.ID).
 		SetPasswordHash(hashPass).
 		SetMfaSecretEncrypted([]byte("hell world")).

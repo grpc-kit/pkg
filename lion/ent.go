@@ -14,14 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/accounts"
 	"github.com/grpc-kit/pkg/lion/authproviders"
+	"github.com/grpc-kit/pkg/lion/authuserlocal"
+	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/groupmenus"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/userattributes"
-	"github.com/grpc-kit/pkg/lion/userauthlocal"
-	"github.com/grpc-kit/pkg/lion/userauthsocial"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -85,14 +85,14 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			accounts.Table:       accounts.ValidColumn,
 			authproviders.Table:  authproviders.ValidColumn,
+			authuserlocal.Table:  authuserlocal.ValidColumn,
+			authusersocial.Table: authusersocial.ValidColumn,
 			demo.Table:           demo.ValidColumn,
 			groupmenus.Table:     groupmenus.ValidColumn,
 			groupusers.Table:     groupusers.ValidColumn,
 			groups.Table:         groups.ValidColumn,
 			menus.Table:          menus.ValidColumn,
 			userattributes.Table: userattributes.ValidColumn,
-			userauthlocal.Table:  userauthlocal.ValidColumn,
-			userauthsocial.Table: userauthsocial.ValidColumn,
 			users.Table:          users.ValidColumn,
 		})
 	})

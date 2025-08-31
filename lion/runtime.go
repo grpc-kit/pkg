@@ -7,6 +7,8 @@ import (
 
 	"github.com/grpc-kit/pkg/lion/accounts"
 	"github.com/grpc-kit/pkg/lion/authproviders"
+	"github.com/grpc-kit/pkg/lion/authuserlocal"
+	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/groupmenus"
 	"github.com/grpc-kit/pkg/lion/groups"
@@ -14,8 +16,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/userattributes"
-	"github.com/grpc-kit/pkg/lion/userauthlocal"
-	"github.com/grpc-kit/pkg/lion/userauthsocial"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -73,6 +73,64 @@ func init() {
 	authprovidersDescClientSecretEncrypted := authprovidersFields[4].Descriptor()
 	// authproviders.DefaultClientSecretEncrypted holds the default value on creation for the client_secret_encrypted field.
 	authproviders.DefaultClientSecretEncrypted = authprovidersDescClientSecretEncrypted.Default.([]byte)
+	authuserlocalMixin := schema.AuthUserLocal{}.Mixin()
+	authuserlocalMixinFields0 := authuserlocalMixin[0].Fields()
+	_ = authuserlocalMixinFields0
+	authuserlocalFields := schema.AuthUserLocal{}.Fields()
+	_ = authuserlocalFields
+	// authuserlocalDescCreatedAt is the schema descriptor for created_at field.
+	authuserlocalDescCreatedAt := authuserlocalMixinFields0[0].Descriptor()
+	// authuserlocal.DefaultCreatedAt holds the default value on creation for the created_at field.
+	authuserlocal.DefaultCreatedAt = authuserlocalDescCreatedAt.Default.(func() time.Time)
+	// authuserlocalDescUpdatedAt is the schema descriptor for updated_at field.
+	authuserlocalDescUpdatedAt := authuserlocalMixinFields0[1].Descriptor()
+	// authuserlocal.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	authuserlocal.DefaultUpdatedAt = authuserlocalDescUpdatedAt.Default.(func() time.Time)
+	// authuserlocal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	authuserlocal.UpdateDefaultUpdatedAt = authuserlocalDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// authuserlocalDescUserID is the schema descriptor for user_id field.
+	authuserlocalDescUserID := authuserlocalFields[0].Descriptor()
+	// authuserlocal.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	authuserlocal.UserIDValidator = authuserlocalDescUserID.Validators[0].(func(int) error)
+	// authuserlocalDescPasswordHash is the schema descriptor for password_hash field.
+	authuserlocalDescPasswordHash := authuserlocalFields[1].Descriptor()
+	// authuserlocal.PasswordHashValidator is a validator for the "password_hash" field. It is called by the builders before save.
+	authuserlocal.PasswordHashValidator = authuserlocalDescPasswordHash.Validators[0].(func([]byte) error)
+	// authuserlocalDescMfaEnabled is the schema descriptor for mfa_enabled field.
+	authuserlocalDescMfaEnabled := authuserlocalFields[2].Descriptor()
+	// authuserlocal.DefaultMfaEnabled holds the default value on creation for the mfa_enabled field.
+	authuserlocal.DefaultMfaEnabled = authuserlocalDescMfaEnabled.Default.(bool)
+	// authuserlocalDescMfaSecretEncrypted is the schema descriptor for mfa_secret_encrypted field.
+	authuserlocalDescMfaSecretEncrypted := authuserlocalFields[3].Descriptor()
+	// authuserlocal.DefaultMfaSecretEncrypted holds the default value on creation for the mfa_secret_encrypted field.
+	authuserlocal.DefaultMfaSecretEncrypted = authuserlocalDescMfaSecretEncrypted.Default.([]byte)
+	authusersocialMixin := schema.AuthUserSocial{}.Mixin()
+	authusersocialMixinFields0 := authusersocialMixin[0].Fields()
+	_ = authusersocialMixinFields0
+	authusersocialFields := schema.AuthUserSocial{}.Fields()
+	_ = authusersocialFields
+	// authusersocialDescCreatedAt is the schema descriptor for created_at field.
+	authusersocialDescCreatedAt := authusersocialMixinFields0[0].Descriptor()
+	// authusersocial.DefaultCreatedAt holds the default value on creation for the created_at field.
+	authusersocial.DefaultCreatedAt = authusersocialDescCreatedAt.Default.(func() time.Time)
+	// authusersocialDescUpdatedAt is the schema descriptor for updated_at field.
+	authusersocialDescUpdatedAt := authusersocialMixinFields0[1].Descriptor()
+	// authusersocial.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	authusersocial.DefaultUpdatedAt = authusersocialDescUpdatedAt.Default.(func() time.Time)
+	// authusersocial.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	authusersocial.UpdateDefaultUpdatedAt = authusersocialDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// authusersocialDescUserID is the schema descriptor for user_id field.
+	authusersocialDescUserID := authusersocialFields[0].Descriptor()
+	// authusersocial.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	authusersocial.UserIDValidator = authusersocialDescUserID.Validators[0].(func(int) error)
+	// authusersocialDescProviderName is the schema descriptor for provider_name field.
+	authusersocialDescProviderName := authusersocialFields[1].Descriptor()
+	// authusersocial.ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
+	authusersocial.ProviderNameValidator = authusersocialDescProviderName.Validators[0].(func(string) error)
+	// authusersocialDescProviderUserID is the schema descriptor for provider_user_id field.
+	authusersocialDescProviderUserID := authusersocialFields[2].Descriptor()
+	// authusersocial.ProviderUserIDValidator is a validator for the "provider_user_id" field. It is called by the builders before save.
+	authusersocial.ProviderUserIDValidator = authusersocialDescProviderUserID.Validators[0].(func(string) error)
 	demoMixin := schema.Demo{}.Mixin()
 	demoMixinFields0 := demoMixin[0].Fields()
 	_ = demoMixinFields0
@@ -285,64 +343,6 @@ func init() {
 	userattributesDescAttrValue := userattributesFields[2].Descriptor()
 	// userattributes.AttrValueValidator is a validator for the "attr_value" field. It is called by the builders before save.
 	userattributes.AttrValueValidator = userattributesDescAttrValue.Validators[0].(func(string) error)
-	userauthlocalMixin := schema.UserAuthLocal{}.Mixin()
-	userauthlocalMixinFields0 := userauthlocalMixin[0].Fields()
-	_ = userauthlocalMixinFields0
-	userauthlocalFields := schema.UserAuthLocal{}.Fields()
-	_ = userauthlocalFields
-	// userauthlocalDescCreatedAt is the schema descriptor for created_at field.
-	userauthlocalDescCreatedAt := userauthlocalMixinFields0[0].Descriptor()
-	// userauthlocal.DefaultCreatedAt holds the default value on creation for the created_at field.
-	userauthlocal.DefaultCreatedAt = userauthlocalDescCreatedAt.Default.(func() time.Time)
-	// userauthlocalDescUpdatedAt is the schema descriptor for updated_at field.
-	userauthlocalDescUpdatedAt := userauthlocalMixinFields0[1].Descriptor()
-	// userauthlocal.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	userauthlocal.DefaultUpdatedAt = userauthlocalDescUpdatedAt.Default.(func() time.Time)
-	// userauthlocal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	userauthlocal.UpdateDefaultUpdatedAt = userauthlocalDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// userauthlocalDescUserID is the schema descriptor for user_id field.
-	userauthlocalDescUserID := userauthlocalFields[0].Descriptor()
-	// userauthlocal.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	userauthlocal.UserIDValidator = userauthlocalDescUserID.Validators[0].(func(int) error)
-	// userauthlocalDescPasswordHash is the schema descriptor for password_hash field.
-	userauthlocalDescPasswordHash := userauthlocalFields[1].Descriptor()
-	// userauthlocal.PasswordHashValidator is a validator for the "password_hash" field. It is called by the builders before save.
-	userauthlocal.PasswordHashValidator = userauthlocalDescPasswordHash.Validators[0].(func([]byte) error)
-	// userauthlocalDescMfaEnabled is the schema descriptor for mfa_enabled field.
-	userauthlocalDescMfaEnabled := userauthlocalFields[2].Descriptor()
-	// userauthlocal.DefaultMfaEnabled holds the default value on creation for the mfa_enabled field.
-	userauthlocal.DefaultMfaEnabled = userauthlocalDescMfaEnabled.Default.(bool)
-	// userauthlocalDescMfaSecretEncrypted is the schema descriptor for mfa_secret_encrypted field.
-	userauthlocalDescMfaSecretEncrypted := userauthlocalFields[3].Descriptor()
-	// userauthlocal.DefaultMfaSecretEncrypted holds the default value on creation for the mfa_secret_encrypted field.
-	userauthlocal.DefaultMfaSecretEncrypted = userauthlocalDescMfaSecretEncrypted.Default.([]byte)
-	userauthsocialMixin := schema.UserAuthSocial{}.Mixin()
-	userauthsocialMixinFields0 := userauthsocialMixin[0].Fields()
-	_ = userauthsocialMixinFields0
-	userauthsocialFields := schema.UserAuthSocial{}.Fields()
-	_ = userauthsocialFields
-	// userauthsocialDescCreatedAt is the schema descriptor for created_at field.
-	userauthsocialDescCreatedAt := userauthsocialMixinFields0[0].Descriptor()
-	// userauthsocial.DefaultCreatedAt holds the default value on creation for the created_at field.
-	userauthsocial.DefaultCreatedAt = userauthsocialDescCreatedAt.Default.(func() time.Time)
-	// userauthsocialDescUpdatedAt is the schema descriptor for updated_at field.
-	userauthsocialDescUpdatedAt := userauthsocialMixinFields0[1].Descriptor()
-	// userauthsocial.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	userauthsocial.DefaultUpdatedAt = userauthsocialDescUpdatedAt.Default.(func() time.Time)
-	// userauthsocial.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	userauthsocial.UpdateDefaultUpdatedAt = userauthsocialDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// userauthsocialDescUserID is the schema descriptor for user_id field.
-	userauthsocialDescUserID := userauthsocialFields[0].Descriptor()
-	// userauthsocial.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	userauthsocial.UserIDValidator = userauthsocialDescUserID.Validators[0].(func(int) error)
-	// userauthsocialDescProviderName is the schema descriptor for provider_name field.
-	userauthsocialDescProviderName := userauthsocialFields[1].Descriptor()
-	// userauthsocial.ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
-	userauthsocial.ProviderNameValidator = userauthsocialDescProviderName.Validators[0].(func(string) error)
-	// userauthsocialDescProviderUserID is the schema descriptor for provider_user_id field.
-	userauthsocialDescProviderUserID := userauthsocialFields[2].Descriptor()
-	// userauthsocial.ProviderUserIDValidator is a validator for the "provider_user_id" field. It is called by the builders before save.
-	userauthsocial.ProviderUserIDValidator = userauthsocialDescProviderUserID.Validators[0].(func(string) error)
 	usersMixin := schema.Users{}.Mixin()
 	usersMixinFields0 := usersMixin[0].Fields()
 	_ = usersMixinFields0
