@@ -135,7 +135,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
-		{Name: "department_id", Type: field.TypeInt},
+		{Name: "department_id", Type: field.TypeInt, Default: 0},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}
 	// LionGroupsTable holds the schema information for the "lion_groups" table.

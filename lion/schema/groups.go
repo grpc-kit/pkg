@@ -24,6 +24,7 @@ func (Groups) Fields() []ent.Field {
 		field.Int("department_id").
 			Positive().
 			Immutable().
+			Default(0).
 			Comment("关联 lion_departments 表的 ID"),
 		field.String("description").
 			Default("").

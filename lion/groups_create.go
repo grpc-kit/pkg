@@ -61,6 +61,14 @@ func (_c *GroupsCreate) SetDepartmentID(v int) *GroupsCreate {
 	return _c
 }
 
+// SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableDepartmentID(v *int) *GroupsCreate {
+	if v != nil {
+		_c.SetDepartmentID(*v)
+	}
+	return _c
+}
+
 // SetDescription sets the "description" field.
 func (_c *GroupsCreate) SetDescription(v string) *GroupsCreate {
 	_c.mutation.SetDescription(v)
@@ -132,6 +140,10 @@ func (_c *GroupsCreate) defaults() {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := groups.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := _c.mutation.DepartmentID(); !ok {
+		v := groups.DefaultDepartmentID
+		_c.mutation.SetDepartmentID(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := groups.DefaultDescription

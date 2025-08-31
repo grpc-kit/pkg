@@ -66,6 +66,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
+	DefaultDepartmentID int
 	// DepartmentIDValidator is a validator for the "department_id" field. It is called by the builders before save.
 	DepartmentIDValidator func(int) error
 	// DefaultDescription holds the default value on creation for the "description" field.
