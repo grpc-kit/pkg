@@ -28,8 +28,8 @@ const (
 	FieldI18nName = "i18n_name"
 	// FieldIcon holds the string denoting the icon field in the database.
 	FieldIcon = "icon"
-	// FieldSortWeight holds the string denoting the sort_weight field in the database.
-	FieldSortWeight = "sort_weight"
+	// FieldOrderWeight holds the string denoting the order_weight field in the database.
+	FieldOrderWeight = "order_weight"
 	// FieldMenuType holds the string denoting the menu_type field in the database.
 	FieldMenuType = "menu_type"
 	// FieldEnabled holds the string denoting the enabled field in the database.
@@ -61,7 +61,7 @@ var Columns = []string{
 	FieldPath,
 	FieldI18nName,
 	FieldIcon,
-	FieldSortWeight,
+	FieldOrderWeight,
 	FieldMenuType,
 	FieldEnabled,
 	FieldHideInMenu,
@@ -97,8 +97,8 @@ var (
 	DefaultIcon string
 	// IconValidator is a validator for the "icon" field. It is called by the builders before save.
 	IconValidator func(string) error
-	// DefaultSortWeight holds the default value on creation for the "sort_weight" field.
-	DefaultSortWeight int
+	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
+	DefaultOrderWeight int
 	// DefaultMenuType holds the default value on creation for the "menu_type" field.
 	DefaultMenuType int
 	// DefaultEnabled holds the default value on creation for the "enabled" field.
@@ -152,9 +152,9 @@ func ByIcon(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIcon, opts...).ToFunc()
 }
 
-// BySortWeight orders the results by the sort_weight field.
-func BySortWeight(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSortWeight, opts...).ToFunc()
+// ByOrderWeight orders the results by the order_weight field.
+func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
 }
 
 // ByMenuType orders the results by the menu_type field.

@@ -112,24 +112,24 @@ func (_u *MenusUpdate) SetNillableIcon(v *string) *MenusUpdate {
 	return _u
 }
 
-// SetSortWeight sets the "sort_weight" field.
-func (_u *MenusUpdate) SetSortWeight(v int) *MenusUpdate {
-	_u.mutation.ResetSortWeight()
-	_u.mutation.SetSortWeight(v)
+// SetOrderWeight sets the "order_weight" field.
+func (_u *MenusUpdate) SetOrderWeight(v int) *MenusUpdate {
+	_u.mutation.ResetOrderWeight()
+	_u.mutation.SetOrderWeight(v)
 	return _u
 }
 
-// SetNillableSortWeight sets the "sort_weight" field if the given value is not nil.
-func (_u *MenusUpdate) SetNillableSortWeight(v *int) *MenusUpdate {
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_u *MenusUpdate) SetNillableOrderWeight(v *int) *MenusUpdate {
 	if v != nil {
-		_u.SetSortWeight(*v)
+		_u.SetOrderWeight(*v)
 	}
 	return _u
 }
 
-// AddSortWeight adds value to the "sort_weight" field.
-func (_u *MenusUpdate) AddSortWeight(v int) *MenusUpdate {
-	_u.mutation.AddSortWeight(v)
+// AddOrderWeight adds value to the "order_weight" field.
+func (_u *MenusUpdate) AddOrderWeight(v int) *MenusUpdate {
+	_u.mutation.AddOrderWeight(v)
 	return _u
 }
 
@@ -326,11 +326,11 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Icon(); ok {
 		_spec.SetField(menus.FieldIcon, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.SortWeight(); ok {
-		_spec.SetField(menus.FieldSortWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.OrderWeight(); ok {
+		_spec.SetField(menus.FieldOrderWeight, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedSortWeight(); ok {
-		_spec.AddField(menus.FieldSortWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedOrderWeight(); ok {
+		_spec.AddField(menus.FieldOrderWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.MenuType(); ok {
 		_spec.SetField(menus.FieldMenuType, field.TypeInt, value)
@@ -495,24 +495,24 @@ func (_u *MenusUpdateOne) SetNillableIcon(v *string) *MenusUpdateOne {
 	return _u
 }
 
-// SetSortWeight sets the "sort_weight" field.
-func (_u *MenusUpdateOne) SetSortWeight(v int) *MenusUpdateOne {
-	_u.mutation.ResetSortWeight()
-	_u.mutation.SetSortWeight(v)
+// SetOrderWeight sets the "order_weight" field.
+func (_u *MenusUpdateOne) SetOrderWeight(v int) *MenusUpdateOne {
+	_u.mutation.ResetOrderWeight()
+	_u.mutation.SetOrderWeight(v)
 	return _u
 }
 
-// SetNillableSortWeight sets the "sort_weight" field if the given value is not nil.
-func (_u *MenusUpdateOne) SetNillableSortWeight(v *int) *MenusUpdateOne {
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_u *MenusUpdateOne) SetNillableOrderWeight(v *int) *MenusUpdateOne {
 	if v != nil {
-		_u.SetSortWeight(*v)
+		_u.SetOrderWeight(*v)
 	}
 	return _u
 }
 
-// AddSortWeight adds value to the "sort_weight" field.
-func (_u *MenusUpdateOne) AddSortWeight(v int) *MenusUpdateOne {
-	_u.mutation.AddSortWeight(v)
+// AddOrderWeight adds value to the "order_weight" field.
+func (_u *MenusUpdateOne) AddOrderWeight(v int) *MenusUpdateOne {
+	_u.mutation.AddOrderWeight(v)
 	return _u
 }
 
@@ -739,11 +739,11 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 	if value, ok := _u.mutation.Icon(); ok {
 		_spec.SetField(menus.FieldIcon, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.SortWeight(); ok {
-		_spec.SetField(menus.FieldSortWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.OrderWeight(); ok {
+		_spec.SetField(menus.FieldOrderWeight, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedSortWeight(); ok {
-		_spec.AddField(menus.FieldSortWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedOrderWeight(); ok {
+		_spec.AddField(menus.FieldOrderWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.MenuType(); ok {
 		_spec.SetField(menus.FieldMenuType, field.TypeInt, value)

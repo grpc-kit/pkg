@@ -114,7 +114,7 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 			menus.FieldPath,
 			menus.FieldI18nName,
 			menus.FieldIcon,
-			menus.FieldSortWeight,
+			menus.FieldOrderWeight,
 			menus.FieldEnabled,
 			menus.FieldHideInMenu,
 			menus.FieldHideChildrenInMenu,
@@ -139,7 +139,7 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 			Path:               m.Path,
 			I18NName:           m.I18nName,
 			Icon:               m.Icon,
-			SortWeight:         int32(m.SortWeight),
+			OrderWeight:        int32(m.OrderWeight),
 			Enabled:            m.Enabled,
 			HideInMenu:         m.HideInMenu,
 			HideChildrenInMenu: m.HideChildrenInMenu,
@@ -160,7 +160,7 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 
 	// 可选：对根菜单排序
 	sort.Slice(roots, func(i, j int) bool {
-		return roots[i].SortWeight < roots[j].SortWeight
+		return roots[i].OrderWeight < roots[j].OrderWeight
 	})
 
 	// TODO；写入该用户的缓存

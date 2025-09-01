@@ -32,8 +32,8 @@ type Menus struct {
 	// 图标名称，如 UserOutlined
 	Icon string `json:"icon,omitempty"`
 	// 排序权重，越小越靠前
-	SortWeight int `json:"sort_weight,omitempty"`
-	// 菜单用途类型，如 0=admin 后台
+	OrderWeight int `json:"order_weight,omitempty"`
+	// 菜单用途类型，如 1=admin 后台
 	MenuType int `json:"menu_type,omitempty"`
 	// 是否启用该菜单项，禁用后完全不可访问
 	Enabled bool `json:"enabled,omitempty"`
@@ -72,7 +72,7 @@ func (*Menus) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case menus.FieldEnabled, menus.FieldHideInMenu, menus.FieldHideChildrenInMenu:
 			values[i] = new(sql.NullBool)
-		case menus.FieldID, menus.FieldParentID, menus.FieldSortWeight, menus.FieldMenuType:
+		case menus.FieldID, menus.FieldParentID, menus.FieldOrderWeight, menus.FieldMenuType:
 			values[i] = new(sql.NullInt64)
 		case menus.FieldName, menus.FieldPath, menus.FieldI18nName, menus.FieldIcon:
 			values[i] = new(sql.NullString)
@@ -141,11 +141,11 @@ func (_m *Menus) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Icon = value.String
 			}
-		case menus.FieldSortWeight:
+		case menus.FieldOrderWeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field sort_weight", values[i])
+				return fmt.Errorf("unexpected type %T for field order_weight", values[i])
 			} else if value.Valid {
-				_m.SortWeight = int(value.Int64)
+				_m.OrderWeight = int(value.Int64)
 			}
 		case menus.FieldMenuType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -233,8 +233,8 @@ func (_m *Menus) String() string {
 	builder.WriteString("icon=")
 	builder.WriteString(_m.Icon)
 	builder.WriteString(", ")
-	builder.WriteString("sort_weight=")
-	builder.WriteString(fmt.Sprintf("%v", _m.SortWeight))
+	builder.WriteString("order_weight=")
+	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
 	builder.WriteString(", ")
 	builder.WriteString("menu_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MenuType))

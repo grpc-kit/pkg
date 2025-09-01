@@ -5235,8 +5235,8 @@ type MenusMutation struct {
 	_path                  *string
 	i18n_name              *string
 	icon                   *string
-	sort_weight            *int
-	addsort_weight         *int
+	order_weight           *int
+	addorder_weight        *int
 	menu_type              *int
 	addmenu_type           *int
 	enabled                *bool
@@ -5621,60 +5621,60 @@ func (m *MenusMutation) ResetIcon() {
 	m.icon = nil
 }
 
-// SetSortWeight sets the "sort_weight" field.
-func (m *MenusMutation) SetSortWeight(i int) {
-	m.sort_weight = &i
-	m.addsort_weight = nil
+// SetOrderWeight sets the "order_weight" field.
+func (m *MenusMutation) SetOrderWeight(i int) {
+	m.order_weight = &i
+	m.addorder_weight = nil
 }
 
-// SortWeight returns the value of the "sort_weight" field in the mutation.
-func (m *MenusMutation) SortWeight() (r int, exists bool) {
-	v := m.sort_weight
+// OrderWeight returns the value of the "order_weight" field in the mutation.
+func (m *MenusMutation) OrderWeight() (r int, exists bool) {
+	v := m.order_weight
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSortWeight returns the old "sort_weight" field's value of the Menus entity.
+// OldOrderWeight returns the old "order_weight" field's value of the Menus entity.
 // If the Menus object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenusMutation) OldSortWeight(ctx context.Context) (v int, err error) {
+func (m *MenusMutation) OldOrderWeight(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSortWeight is only allowed on UpdateOne operations")
+		return v, errors.New("OldOrderWeight is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSortWeight requires an ID field in the mutation")
+		return v, errors.New("OldOrderWeight requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSortWeight: %w", err)
+		return v, fmt.Errorf("querying old value for OldOrderWeight: %w", err)
 	}
-	return oldValue.SortWeight, nil
+	return oldValue.OrderWeight, nil
 }
 
-// AddSortWeight adds i to the "sort_weight" field.
-func (m *MenusMutation) AddSortWeight(i int) {
-	if m.addsort_weight != nil {
-		*m.addsort_weight += i
+// AddOrderWeight adds i to the "order_weight" field.
+func (m *MenusMutation) AddOrderWeight(i int) {
+	if m.addorder_weight != nil {
+		*m.addorder_weight += i
 	} else {
-		m.addsort_weight = &i
+		m.addorder_weight = &i
 	}
 }
 
-// AddedSortWeight returns the value that was added to the "sort_weight" field in this mutation.
-func (m *MenusMutation) AddedSortWeight() (r int, exists bool) {
-	v := m.addsort_weight
+// AddedOrderWeight returns the value that was added to the "order_weight" field in this mutation.
+func (m *MenusMutation) AddedOrderWeight() (r int, exists bool) {
+	v := m.addorder_weight
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetSortWeight resets all changes to the "sort_weight" field.
-func (m *MenusMutation) ResetSortWeight() {
-	m.sort_weight = nil
-	m.addsort_weight = nil
+// ResetOrderWeight resets all changes to the "order_weight" field.
+func (m *MenusMutation) ResetOrderWeight() {
+	m.order_weight = nil
+	m.addorder_weight = nil
 }
 
 // SetMenuType sets the "menu_type" field.
@@ -5951,8 +5951,8 @@ func (m *MenusMutation) Fields() []string {
 	if m.icon != nil {
 		fields = append(fields, menus.FieldIcon)
 	}
-	if m.sort_weight != nil {
-		fields = append(fields, menus.FieldSortWeight)
+	if m.order_weight != nil {
+		fields = append(fields, menus.FieldOrderWeight)
 	}
 	if m.menu_type != nil {
 		fields = append(fields, menus.FieldMenuType)
@@ -5988,8 +5988,8 @@ func (m *MenusMutation) Field(name string) (ent.Value, bool) {
 		return m.I18nName()
 	case menus.FieldIcon:
 		return m.Icon()
-	case menus.FieldSortWeight:
-		return m.SortWeight()
+	case menus.FieldOrderWeight:
+		return m.OrderWeight()
 	case menus.FieldMenuType:
 		return m.MenuType()
 	case menus.FieldEnabled:
@@ -6021,8 +6021,8 @@ func (m *MenusMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldI18nName(ctx)
 	case menus.FieldIcon:
 		return m.OldIcon(ctx)
-	case menus.FieldSortWeight:
-		return m.OldSortWeight(ctx)
+	case menus.FieldOrderWeight:
+		return m.OldOrderWeight(ctx)
 	case menus.FieldMenuType:
 		return m.OldMenuType(ctx)
 	case menus.FieldEnabled:
@@ -6089,12 +6089,12 @@ func (m *MenusMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetIcon(v)
 		return nil
-	case menus.FieldSortWeight:
+	case menus.FieldOrderWeight:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSortWeight(v)
+		m.SetOrderWeight(v)
 		return nil
 	case menus.FieldMenuType:
 		v, ok := value.(int)
@@ -6135,8 +6135,8 @@ func (m *MenusMutation) AddedFields() []string {
 	if m.addparent_id != nil {
 		fields = append(fields, menus.FieldParentID)
 	}
-	if m.addsort_weight != nil {
-		fields = append(fields, menus.FieldSortWeight)
+	if m.addorder_weight != nil {
+		fields = append(fields, menus.FieldOrderWeight)
 	}
 	if m.addmenu_type != nil {
 		fields = append(fields, menus.FieldMenuType)
@@ -6151,8 +6151,8 @@ func (m *MenusMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case menus.FieldParentID:
 		return m.AddedParentID()
-	case menus.FieldSortWeight:
-		return m.AddedSortWeight()
+	case menus.FieldOrderWeight:
+		return m.AddedOrderWeight()
 	case menus.FieldMenuType:
 		return m.AddedMenuType()
 	}
@@ -6171,12 +6171,12 @@ func (m *MenusMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddParentID(v)
 		return nil
-	case menus.FieldSortWeight:
+	case menus.FieldOrderWeight:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddSortWeight(v)
+		m.AddOrderWeight(v)
 		return nil
 	case menus.FieldMenuType:
 		v, ok := value.(int)
@@ -6233,8 +6233,8 @@ func (m *MenusMutation) ResetField(name string) error {
 	case menus.FieldIcon:
 		m.ResetIcon()
 		return nil
-	case menus.FieldSortWeight:
-		m.ResetSortWeight()
+	case menus.FieldOrderWeight:
+		m.ResetOrderWeight()
 		return nil
 	case menus.FieldMenuType:
 		m.ResetMenuType()

@@ -154,7 +154,7 @@ var (
 		{Name: "path", Type: field.TypeString, Size: 255},
 		{Name: "i18n_name", Type: field.TypeString, Default: ""},
 		{Name: "icon", Type: field.TypeString, Size: 256, Default: ""},
-		{Name: "sort_weight", Type: field.TypeInt, Default: 0},
+		{Name: "order_weight", Type: field.TypeInt, Default: 0},
 		{Name: "menu_type", Type: field.TypeInt, Default: 0},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
 		{Name: "hide_in_menu", Type: field.TypeBool, Default: false},

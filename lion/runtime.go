@@ -303,10 +303,10 @@ func init() {
 	menus.DefaultIcon = menusDescIcon.Default.(string)
 	// menus.IconValidator is a validator for the "icon" field. It is called by the builders before save.
 	menus.IconValidator = menusDescIcon.Validators[0].(func(string) error)
-	// menusDescSortWeight is the schema descriptor for sort_weight field.
-	menusDescSortWeight := menusFields[5].Descriptor()
-	// menus.DefaultSortWeight holds the default value on creation for the sort_weight field.
-	menus.DefaultSortWeight = menusDescSortWeight.Default.(int)
+	// menusDescOrderWeight is the schema descriptor for order_weight field.
+	menusDescOrderWeight := menusFields[5].Descriptor()
+	// menus.DefaultOrderWeight holds the default value on creation for the order_weight field.
+	menus.DefaultOrderWeight = menusDescOrderWeight.Default.(int)
 	// menusDescMenuType is the schema descriptor for menu_type field.
 	menusDescMenuType := menusFields[6].Descriptor()
 	// menus.DefaultMenuType holds the default value on creation for the menu_type field.

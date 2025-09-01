@@ -103,16 +103,16 @@ func (_c *MenusCreate) SetNillableIcon(v *string) *MenusCreate {
 	return _c
 }
 
-// SetSortWeight sets the "sort_weight" field.
-func (_c *MenusCreate) SetSortWeight(v int) *MenusCreate {
-	_c.mutation.SetSortWeight(v)
+// SetOrderWeight sets the "order_weight" field.
+func (_c *MenusCreate) SetOrderWeight(v int) *MenusCreate {
+	_c.mutation.SetOrderWeight(v)
 	return _c
 }
 
-// SetNillableSortWeight sets the "sort_weight" field if the given value is not nil.
-func (_c *MenusCreate) SetNillableSortWeight(v *int) *MenusCreate {
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_c *MenusCreate) SetNillableOrderWeight(v *int) *MenusCreate {
 	if v != nil {
-		_c.SetSortWeight(*v)
+		_c.SetOrderWeight(*v)
 	}
 	return _c
 }
@@ -243,9 +243,9 @@ func (_c *MenusCreate) defaults() {
 		v := menus.DefaultIcon
 		_c.mutation.SetIcon(v)
 	}
-	if _, ok := _c.mutation.SortWeight(); !ok {
-		v := menus.DefaultSortWeight
-		_c.mutation.SetSortWeight(v)
+	if _, ok := _c.mutation.OrderWeight(); !ok {
+		v := menus.DefaultOrderWeight
+		_c.mutation.SetOrderWeight(v)
 	}
 	if _, ok := _c.mutation.MenuType(); !ok {
 		v := menus.DefaultMenuType
@@ -303,8 +303,8 @@ func (_c *MenusCreate) check() error {
 			return &ValidationError{Name: "icon", err: fmt.Errorf(`lion: validator failed for field "Menus.icon": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.SortWeight(); !ok {
-		return &ValidationError{Name: "sort_weight", err: errors.New(`lion: missing required field "Menus.sort_weight"`)}
+	if _, ok := _c.mutation.OrderWeight(); !ok {
+		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Menus.order_weight"`)}
 	}
 	if _, ok := _c.mutation.MenuType(); !ok {
 		return &ValidationError{Name: "menu_type", err: errors.New(`lion: missing required field "Menus.menu_type"`)}
@@ -372,9 +372,9 @@ func (_c *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 		_spec.SetField(menus.FieldIcon, field.TypeString, value)
 		_node.Icon = value
 	}
-	if value, ok := _c.mutation.SortWeight(); ok {
-		_spec.SetField(menus.FieldSortWeight, field.TypeInt, value)
-		_node.SortWeight = value
+	if value, ok := _c.mutation.OrderWeight(); ok {
+		_spec.SetField(menus.FieldOrderWeight, field.TypeInt, value)
+		_node.OrderWeight = value
 	}
 	if value, ok := _c.mutation.MenuType(); ok {
 		_spec.SetField(menus.FieldMenuType, field.TypeInt, value)

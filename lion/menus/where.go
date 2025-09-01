@@ -90,9 +90,9 @@ func Icon(v string) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldIcon, v))
 }
 
-// SortWeight applies equality check predicate on the "sort_weight" field. It's identical to SortWeightEQ.
-func SortWeight(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldSortWeight, v))
+// OrderWeight applies equality check predicate on the "order_weight" field. It's identical to OrderWeightEQ.
+func OrderWeight(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldEQ(FieldOrderWeight, v))
 }
 
 // MenuType applies equality check predicate on the "menu_type" field. It's identical to MenuTypeEQ.
@@ -495,44 +495,44 @@ func IconContainsFold(v string) predicate.Menus {
 	return predicate.Menus(sql.FieldContainsFold(FieldIcon, v))
 }
 
-// SortWeightEQ applies the EQ predicate on the "sort_weight" field.
-func SortWeightEQ(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldSortWeight, v))
+// OrderWeightEQ applies the EQ predicate on the "order_weight" field.
+func OrderWeightEQ(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldEQ(FieldOrderWeight, v))
 }
 
-// SortWeightNEQ applies the NEQ predicate on the "sort_weight" field.
-func SortWeightNEQ(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldNEQ(FieldSortWeight, v))
+// OrderWeightNEQ applies the NEQ predicate on the "order_weight" field.
+func OrderWeightNEQ(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldNEQ(FieldOrderWeight, v))
 }
 
-// SortWeightIn applies the In predicate on the "sort_weight" field.
-func SortWeightIn(vs ...int) predicate.Menus {
-	return predicate.Menus(sql.FieldIn(FieldSortWeight, vs...))
+// OrderWeightIn applies the In predicate on the "order_weight" field.
+func OrderWeightIn(vs ...int) predicate.Menus {
+	return predicate.Menus(sql.FieldIn(FieldOrderWeight, vs...))
 }
 
-// SortWeightNotIn applies the NotIn predicate on the "sort_weight" field.
-func SortWeightNotIn(vs ...int) predicate.Menus {
-	return predicate.Menus(sql.FieldNotIn(FieldSortWeight, vs...))
+// OrderWeightNotIn applies the NotIn predicate on the "order_weight" field.
+func OrderWeightNotIn(vs ...int) predicate.Menus {
+	return predicate.Menus(sql.FieldNotIn(FieldOrderWeight, vs...))
 }
 
-// SortWeightGT applies the GT predicate on the "sort_weight" field.
-func SortWeightGT(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldGT(FieldSortWeight, v))
+// OrderWeightGT applies the GT predicate on the "order_weight" field.
+func OrderWeightGT(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldGT(FieldOrderWeight, v))
 }
 
-// SortWeightGTE applies the GTE predicate on the "sort_weight" field.
-func SortWeightGTE(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldGTE(FieldSortWeight, v))
+// OrderWeightGTE applies the GTE predicate on the "order_weight" field.
+func OrderWeightGTE(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldGTE(FieldOrderWeight, v))
 }
 
-// SortWeightLT applies the LT predicate on the "sort_weight" field.
-func SortWeightLT(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldLT(FieldSortWeight, v))
+// OrderWeightLT applies the LT predicate on the "order_weight" field.
+func OrderWeightLT(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldLT(FieldOrderWeight, v))
 }
 
-// SortWeightLTE applies the LTE predicate on the "sort_weight" field.
-func SortWeightLTE(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldLTE(FieldSortWeight, v))
+// OrderWeightLTE applies the LTE predicate on the "order_weight" field.
+func OrderWeightLTE(v int) predicate.Menus {
+	return predicate.Menus(sql.FieldLTE(FieldOrderWeight, v))
 }
 
 // MenuTypeEQ applies the EQ predicate on the "menu_type" field.

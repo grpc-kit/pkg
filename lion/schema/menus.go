@@ -34,12 +34,12 @@ func (Menus) Fields() []ent.Field {
 			MaxLen(256).
 			Default("").
 			Comment("图标名称，如 UserOutlined"),
-		field.Int("sort_weight").
+		field.Int("order_weight").
 			Default(0).
 			Comment("排序权重，越小越靠前"),
 		field.Int("menu_type").
 			Default(0).
-			Comment("菜单用途类型，如 0=admin 后台"),
+			Comment("菜单用途类型，如 1=admin 后台"),
 		field.Bool("enabled").
 			Default(true).
 			Comment("是否启用该菜单项，禁用后完全不可访问"),
