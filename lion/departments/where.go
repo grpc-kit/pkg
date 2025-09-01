@@ -74,9 +74,14 @@ func Name(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldName, v))
 }
 
-// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
-func Description(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldEQ(FieldDescription, v))
+// I18nName applies equality check predicate on the "i18n_name" field. It's identical to I18nNameEQ.
+func I18nName(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldI18nName, v))
+}
+
+// OrderWeight applies equality check predicate on the "order_weight" field. It's identical to OrderWeightEQ.
+func OrderWeight(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldOrderWeight, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -264,69 +269,109 @@ func NameContainsFold(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldContainsFold(FieldName, v))
 }
 
-// DescriptionEQ applies the EQ predicate on the "description" field.
-func DescriptionEQ(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldEQ(FieldDescription, v))
+// I18nNameEQ applies the EQ predicate on the "i18n_name" field.
+func I18nNameEQ(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldI18nName, v))
 }
 
-// DescriptionNEQ applies the NEQ predicate on the "description" field.
-func DescriptionNEQ(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldNEQ(FieldDescription, v))
+// I18nNameNEQ applies the NEQ predicate on the "i18n_name" field.
+func I18nNameNEQ(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldI18nName, v))
 }
 
-// DescriptionIn applies the In predicate on the "description" field.
-func DescriptionIn(vs ...string) predicate.Departments {
-	return predicate.Departments(sql.FieldIn(FieldDescription, vs...))
+// I18nNameIn applies the In predicate on the "i18n_name" field.
+func I18nNameIn(vs ...string) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldI18nName, vs...))
 }
 
-// DescriptionNotIn applies the NotIn predicate on the "description" field.
-func DescriptionNotIn(vs ...string) predicate.Departments {
-	return predicate.Departments(sql.FieldNotIn(FieldDescription, vs...))
+// I18nNameNotIn applies the NotIn predicate on the "i18n_name" field.
+func I18nNameNotIn(vs ...string) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldI18nName, vs...))
 }
 
-// DescriptionGT applies the GT predicate on the "description" field.
-func DescriptionGT(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldGT(FieldDescription, v))
+// I18nNameGT applies the GT predicate on the "i18n_name" field.
+func I18nNameGT(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldI18nName, v))
 }
 
-// DescriptionGTE applies the GTE predicate on the "description" field.
-func DescriptionGTE(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldGTE(FieldDescription, v))
+// I18nNameGTE applies the GTE predicate on the "i18n_name" field.
+func I18nNameGTE(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldI18nName, v))
 }
 
-// DescriptionLT applies the LT predicate on the "description" field.
-func DescriptionLT(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldLT(FieldDescription, v))
+// I18nNameLT applies the LT predicate on the "i18n_name" field.
+func I18nNameLT(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldI18nName, v))
 }
 
-// DescriptionLTE applies the LTE predicate on the "description" field.
-func DescriptionLTE(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldLTE(FieldDescription, v))
+// I18nNameLTE applies the LTE predicate on the "i18n_name" field.
+func I18nNameLTE(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldI18nName, v))
 }
 
-// DescriptionContains applies the Contains predicate on the "description" field.
-func DescriptionContains(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldContains(FieldDescription, v))
+// I18nNameContains applies the Contains predicate on the "i18n_name" field.
+func I18nNameContains(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldContains(FieldI18nName, v))
 }
 
-// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
-func DescriptionHasPrefix(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldHasPrefix(FieldDescription, v))
+// I18nNameHasPrefix applies the HasPrefix predicate on the "i18n_name" field.
+func I18nNameHasPrefix(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldHasPrefix(FieldI18nName, v))
 }
 
-// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
-func DescriptionHasSuffix(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldHasSuffix(FieldDescription, v))
+// I18nNameHasSuffix applies the HasSuffix predicate on the "i18n_name" field.
+func I18nNameHasSuffix(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldHasSuffix(FieldI18nName, v))
 }
 
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldEqualFold(FieldDescription, v))
+// I18nNameEqualFold applies the EqualFold predicate on the "i18n_name" field.
+func I18nNameEqualFold(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEqualFold(FieldI18nName, v))
 }
 
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldContainsFold(FieldDescription, v))
+// I18nNameContainsFold applies the ContainsFold predicate on the "i18n_name" field.
+func I18nNameContainsFold(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldContainsFold(FieldI18nName, v))
+}
+
+// OrderWeightEQ applies the EQ predicate on the "order_weight" field.
+func OrderWeightEQ(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldOrderWeight, v))
+}
+
+// OrderWeightNEQ applies the NEQ predicate on the "order_weight" field.
+func OrderWeightNEQ(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldOrderWeight, v))
+}
+
+// OrderWeightIn applies the In predicate on the "order_weight" field.
+func OrderWeightIn(vs ...int) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldOrderWeight, vs...))
+}
+
+// OrderWeightNotIn applies the NotIn predicate on the "order_weight" field.
+func OrderWeightNotIn(vs ...int) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldOrderWeight, vs...))
+}
+
+// OrderWeightGT applies the GT predicate on the "order_weight" field.
+func OrderWeightGT(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldOrderWeight, v))
+}
+
+// OrderWeightGTE applies the GTE predicate on the "order_weight" field.
+func OrderWeightGTE(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldOrderWeight, v))
+}
+
+// OrderWeightLT applies the LT predicate on the "order_weight" field.
+func OrderWeightLT(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldOrderWeight, v))
+}
+
+// OrderWeightLTE applies the LTE predicate on the "order_weight" field.
+func OrderWeightLTE(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldOrderWeight, v))
 }
 
 // And groups predicates with the AND operator between them.

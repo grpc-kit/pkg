@@ -69,17 +69,38 @@ func (_u *DepartmentsUpdate) SetNillableName(v *string) *DepartmentsUpdate {
 	return _u
 }
 
-// SetDescription sets the "description" field.
-func (_u *DepartmentsUpdate) SetDescription(v string) *DepartmentsUpdate {
-	_u.mutation.SetDescription(v)
+// SetI18nName sets the "i18n_name" field.
+func (_u *DepartmentsUpdate) SetI18nName(v string) *DepartmentsUpdate {
+	_u.mutation.SetI18nName(v)
 	return _u
 }
 
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *DepartmentsUpdate) SetNillableDescription(v *string) *DepartmentsUpdate {
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableI18nName(v *string) *DepartmentsUpdate {
 	if v != nil {
-		_u.SetDescription(*v)
+		_u.SetI18nName(*v)
 	}
+	return _u
+}
+
+// SetOrderWeight sets the "order_weight" field.
+func (_u *DepartmentsUpdate) SetOrderWeight(v int) *DepartmentsUpdate {
+	_u.mutation.ResetOrderWeight()
+	_u.mutation.SetOrderWeight(v)
+	return _u
+}
+
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableOrderWeight(v *int) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetOrderWeight(*v)
+	}
+	return _u
+}
+
+// AddOrderWeight adds value to the "order_weight" field.
+func (_u *DepartmentsUpdate) AddOrderWeight(v int) *DepartmentsUpdate {
+	_u.mutation.AddOrderWeight(v)
 	return _u
 }
 
@@ -158,8 +179,14 @@ func (_u *DepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(departments.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(departments.FieldDescription, field.TypeString, value)
+	if value, ok := _u.mutation.I18nName(); ok {
+		_spec.SetField(departments.FieldI18nName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OrderWeight(); ok {
+		_spec.SetField(departments.FieldOrderWeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedOrderWeight(); ok {
+		_spec.AddField(departments.FieldOrderWeight, field.TypeInt, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -222,17 +249,38 @@ func (_u *DepartmentsUpdateOne) SetNillableName(v *string) *DepartmentsUpdateOne
 	return _u
 }
 
-// SetDescription sets the "description" field.
-func (_u *DepartmentsUpdateOne) SetDescription(v string) *DepartmentsUpdateOne {
-	_u.mutation.SetDescription(v)
+// SetI18nName sets the "i18n_name" field.
+func (_u *DepartmentsUpdateOne) SetI18nName(v string) *DepartmentsUpdateOne {
+	_u.mutation.SetI18nName(v)
 	return _u
 }
 
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *DepartmentsUpdateOne) SetNillableDescription(v *string) *DepartmentsUpdateOne {
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableI18nName(v *string) *DepartmentsUpdateOne {
 	if v != nil {
-		_u.SetDescription(*v)
+		_u.SetI18nName(*v)
 	}
+	return _u
+}
+
+// SetOrderWeight sets the "order_weight" field.
+func (_u *DepartmentsUpdateOne) SetOrderWeight(v int) *DepartmentsUpdateOne {
+	_u.mutation.ResetOrderWeight()
+	_u.mutation.SetOrderWeight(v)
+	return _u
+}
+
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableOrderWeight(v *int) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetOrderWeight(*v)
+	}
+	return _u
+}
+
+// AddOrderWeight adds value to the "order_weight" field.
+func (_u *DepartmentsUpdateOne) AddOrderWeight(v int) *DepartmentsUpdateOne {
+	_u.mutation.AddOrderWeight(v)
 	return _u
 }
 
@@ -341,8 +389,14 @@ func (_u *DepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *Departments
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(departments.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(departments.FieldDescription, field.TypeString, value)
+	if value, ok := _u.mutation.I18nName(); ok {
+		_spec.SetField(departments.FieldI18nName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OrderWeight(); ok {
+		_spec.SetField(departments.FieldOrderWeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedOrderWeight(); ok {
+		_spec.AddField(departments.FieldOrderWeight, field.TypeInt, value)
 	}
 	_node = &Departments{config: _u.config}
 	_spec.Assign = _node.assignValues

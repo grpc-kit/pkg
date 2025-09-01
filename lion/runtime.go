@@ -9,6 +9,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/authuserlocal"
 	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
+	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groupmembership"
 	"github.com/grpc-kit/pkg/lion/groups"
@@ -131,6 +132,21 @@ func init() {
 	demoDescName := demoFields[0].Descriptor()
 	// demo.DefaultName holds the default value on creation for the name field.
 	demo.DefaultName = demoDescName.Default.(string)
+	departmentleadersMixin := schema.DepartmentLeaders{}.Mixin()
+	departmentleadersMixinFields0 := departmentleadersMixin[0].Fields()
+	_ = departmentleadersMixinFields0
+	departmentleadersFields := schema.DepartmentLeaders{}.Fields()
+	_ = departmentleadersFields
+	// departmentleadersDescCreatedAt is the schema descriptor for created_at field.
+	departmentleadersDescCreatedAt := departmentleadersMixinFields0[0].Descriptor()
+	// departmentleaders.DefaultCreatedAt holds the default value on creation for the created_at field.
+	departmentleaders.DefaultCreatedAt = departmentleadersDescCreatedAt.Default.(func() time.Time)
+	// departmentleadersDescUpdatedAt is the schema descriptor for updated_at field.
+	departmentleadersDescUpdatedAt := departmentleadersMixinFields0[1].Descriptor()
+	// departmentleaders.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	departmentleaders.DefaultUpdatedAt = departmentleadersDescUpdatedAt.Default.(func() time.Time)
+	// departmentleaders.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	departmentleaders.UpdateDefaultUpdatedAt = departmentleadersDescUpdatedAt.UpdateDefault.(func() time.Time)
 	departmentsMixin := schema.Departments{}.Mixin()
 	departmentsMixinFields0 := departmentsMixin[0].Fields()
 	_ = departmentsMixinFields0
@@ -168,10 +184,10 @@ func init() {
 			return nil
 		}
 	}()
-	// departmentsDescDescription is the schema descriptor for description field.
-	departmentsDescDescription := departmentsFields[2].Descriptor()
-	// departments.DefaultDescription holds the default value on creation for the description field.
-	departments.DefaultDescription = departmentsDescDescription.Default.(string)
+	// departmentsDescOrderWeight is the schema descriptor for order_weight field.
+	departmentsDescOrderWeight := departmentsFields[3].Descriptor()
+	// departments.DefaultOrderWeight holds the default value on creation for the order_weight field.
+	departments.DefaultOrderWeight = departmentsDescOrderWeight.Default.(int)
 	groupmembershipMixin := schema.GroupMembership{}.Mixin()
 	groupmembershipMixinFields0 := groupmembershipMixin[0].Fields()
 	_ = groupmembershipMixinFields0

@@ -23,9 +23,11 @@ func (Departments) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("部门名称"),
-		field.String("description").
-			Default("").
-			Comment("详细描述"),
+		field.String("i18n_name").
+			Comment("多国语言"),
+		field.Int("order_weight").
+			Default(0).
+			Comment("排序权重，越小越靠前"),
 	}
 }
 

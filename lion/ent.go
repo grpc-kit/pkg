@@ -16,6 +16,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/authuserlocal"
 	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
+	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groupmembership"
 	"github.com/grpc-kit/pkg/lion/groups"
@@ -87,21 +88,22 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			authproviders.Table:    authproviders.ValidColumn,
-			authuserlocal.Table:    authuserlocal.ValidColumn,
-			authusersocial.Table:   authusersocial.ValidColumn,
-			demo.Table:             demo.ValidColumn,
-			departments.Table:      departments.ValidColumn,
-			groupmembership.Table:  groupmembership.ValidColumn,
-			groups.Table:           groups.ValidColumn,
-			menus.Table:            menus.ValidColumn,
-			permissions.Table:      permissions.ValidColumn,
-			rolegroupmapping.Table: rolegroupmapping.ValidColumn,
-			rolemenumapping.Table:  rolemenumapping.ValidColumn,
-			roleusermapping.Table:  roleusermapping.ValidColumn,
-			roles.Table:            roles.ValidColumn,
-			userattributes.Table:   userattributes.ValidColumn,
-			users.Table:            users.ValidColumn,
+			authproviders.Table:     authproviders.ValidColumn,
+			authuserlocal.Table:     authuserlocal.ValidColumn,
+			authusersocial.Table:    authusersocial.ValidColumn,
+			demo.Table:              demo.ValidColumn,
+			departmentleaders.Table: departmentleaders.ValidColumn,
+			departments.Table:       departments.ValidColumn,
+			groupmembership.Table:   groupmembership.ValidColumn,
+			groups.Table:            groups.ValidColumn,
+			menus.Table:             menus.ValidColumn,
+			permissions.Table:       permissions.ValidColumn,
+			rolegroupmapping.Table:  rolegroupmapping.ValidColumn,
+			rolemenumapping.Table:   rolemenumapping.ValidColumn,
+			roleusermapping.Table:   roleusermapping.ValidColumn,
+			roles.Table:             roles.ValidColumn,
+			userattributes.Table:    userattributes.ValidColumn,
+			users.Table:             users.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

@@ -20,6 +20,8 @@ type Tx struct {
 	AuthUserSocial *AuthUserSocialClient
 	// Demo is the client for interacting with the Demo builders.
 	Demo *DemoClient
+	// DepartmentLeaders is the client for interacting with the DepartmentLeaders builders.
+	DepartmentLeaders *DepartmentLeadersClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
 	// GroupMembership is the client for interacting with the GroupMembership builders.
@@ -177,6 +179,7 @@ func (tx *Tx) init() {
 	tx.AuthUserLocal = NewAuthUserLocalClient(tx.config)
 	tx.AuthUserSocial = NewAuthUserSocialClient(tx.config)
 	tx.Demo = NewDemoClient(tx.config)
+	tx.DepartmentLeaders = NewDepartmentLeadersClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
 	tx.GroupMembership = NewGroupMembershipClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)

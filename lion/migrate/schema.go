@@ -93,6 +93,21 @@ var (
 		Columns:    LionDemoColumns,
 		PrimaryKey: []*schema.Column{LionDemoColumns[0]},
 	}
+	// LionDepartmentLeadersColumns holds the columns for the "lion_department_leaders" table.
+	LionDepartmentLeadersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "department_id", Type: field.TypeInt},
+		{Name: "leader_type", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
+	}
+	// LionDepartmentLeadersTable holds the schema information for the "lion_department_leaders" table.
+	LionDepartmentLeadersTable = &schema.Table{
+		Name:       "lion_department_leaders",
+		Columns:    LionDepartmentLeadersColumns,
+		PrimaryKey: []*schema.Column{LionDepartmentLeadersColumns[0]},
+	}
 	// LionDepartmentsColumns holds the columns for the "lion_departments" table.
 	LionDepartmentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -100,7 +115,8 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
-		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "i18n_name", Type: field.TypeString},
+		{Name: "order_weight", Type: field.TypeInt, Default: 0},
 	}
 	// LionDepartmentsTable holds the schema information for the "lion_departments" table.
 	LionDepartmentsTable = &schema.Table{
@@ -359,6 +375,7 @@ var (
 		LionAuthUserLocalTable,
 		LionAuthUserSocialTable,
 		LionDemoTable,
+		LionDepartmentLeadersTable,
 		LionDepartmentsTable,
 		LionGroupMembershipTable,
 		LionGroupsTable,
@@ -385,6 +402,9 @@ func init() {
 	}
 	LionDemoTable.Annotation = &entsql.Annotation{
 		Table: "lion_demo",
+	}
+	LionDepartmentLeadersTable.Annotation = &entsql.Annotation{
+		Table: "lion_department_leaders",
 	}
 	LionDepartmentsTable.Annotation = &entsql.Annotation{
 		Table: "lion_departments",

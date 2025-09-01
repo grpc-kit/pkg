@@ -68,16 +68,22 @@ func (_c *DepartmentsCreate) SetName(v string) *DepartmentsCreate {
 	return _c
 }
 
-// SetDescription sets the "description" field.
-func (_c *DepartmentsCreate) SetDescription(v string) *DepartmentsCreate {
-	_c.mutation.SetDescription(v)
+// SetI18nName sets the "i18n_name" field.
+func (_c *DepartmentsCreate) SetI18nName(v string) *DepartmentsCreate {
+	_c.mutation.SetI18nName(v)
 	return _c
 }
 
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_c *DepartmentsCreate) SetNillableDescription(v *string) *DepartmentsCreate {
+// SetOrderWeight sets the "order_weight" field.
+func (_c *DepartmentsCreate) SetOrderWeight(v int) *DepartmentsCreate {
+	_c.mutation.SetOrderWeight(v)
+	return _c
+}
+
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableOrderWeight(v *int) *DepartmentsCreate {
 	if v != nil {
-		_c.SetDescription(*v)
+		_c.SetOrderWeight(*v)
 	}
 	return _c
 }
@@ -129,9 +135,9 @@ func (_c *DepartmentsCreate) defaults() {
 		v := departments.DefaultParentID
 		_c.mutation.SetParentID(v)
 	}
-	if _, ok := _c.mutation.Description(); !ok {
-		v := departments.DefaultDescription
-		_c.mutation.SetDescription(v)
+	if _, ok := _c.mutation.OrderWeight(); !ok {
+		v := departments.DefaultOrderWeight
+		_c.mutation.SetOrderWeight(v)
 	}
 }
 
@@ -154,8 +160,11 @@ func (_c *DepartmentsCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Departments.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Departments.description"`)}
+	if _, ok := _c.mutation.I18nName(); !ok {
+		return &ValidationError{Name: "i18n_name", err: errors.New(`lion: missing required field "Departments.i18n_name"`)}
+	}
+	if _, ok := _c.mutation.OrderWeight(); !ok {
+		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Departments.order_weight"`)}
 	}
 	return nil
 }
@@ -199,9 +208,13 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 		_spec.SetField(departments.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.Description(); ok {
-		_spec.SetField(departments.FieldDescription, field.TypeString, value)
-		_node.Description = value
+	if value, ok := _c.mutation.I18nName(); ok {
+		_spec.SetField(departments.FieldI18nName, field.TypeString, value)
+		_node.I18nName = value
+	}
+	if value, ok := _c.mutation.OrderWeight(); ok {
+		_spec.SetField(departments.FieldOrderWeight, field.TypeInt, value)
+		_node.OrderWeight = value
 	}
 	return _node, _spec
 }

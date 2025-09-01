@@ -21,8 +21,10 @@ const (
 	FieldParentID = "parent_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldDescription holds the string denoting the description field in the database.
-	FieldDescription = "description"
+	// FieldI18nName holds the string denoting the i18n_name field in the database.
+	FieldI18nName = "i18n_name"
+	// FieldOrderWeight holds the string denoting the order_weight field in the database.
+	FieldOrderWeight = "order_weight"
 	// Table holds the table name of the departments in the database.
 	Table = "lion_departments"
 )
@@ -34,7 +36,8 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldParentID,
 	FieldName,
-	FieldDescription,
+	FieldI18nName,
+	FieldOrderWeight,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -58,8 +61,8 @@ var (
 	DefaultParentID int
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultDescription holds the default value on creation for the "description" field.
-	DefaultDescription string
+	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
+	DefaultOrderWeight int
 )
 
 // OrderOption defines the ordering options for the Departments queries.
@@ -90,7 +93,12 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByDescription orders the results by the description field.
-func ByDescription(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+// ByI18nName orders the results by the i18n_name field.
+func ByI18nName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldI18nName, opts...).ToFunc()
+}
+
+// ByOrderWeight orders the results by the order_weight field.
+func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
 }

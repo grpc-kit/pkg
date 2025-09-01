@@ -29,6 +29,8 @@ type KnownAdminClient interface {
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 	GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error)
 	ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error)
+	// 部门相关
+	CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 }
 
 type knownAdminClient struct {
@@ -102,6 +104,15 @@ func (c *knownAdminClient) ListMenus(ctx context.Context, in *ListMenusRequest, 
 	return out, nil
 }
 
+func (c *knownAdminClient) CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error) {
+	out := new(Department)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KnownAdminServer is the server API for KnownAdmin service.
 // All implementations should embed UnimplementedKnownAdminServer
 // for forward compatibility
@@ -113,6 +124,8 @@ type KnownAdminServer interface {
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 	GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error)
 	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
+	// 部门相关
+	CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error)
 }
 
 // UnimplementedKnownAdminServer should be embedded to have forward compatible implementations.
@@ -139,6 +152,9 @@ func (UnimplementedKnownAdminServer) GetAuthCallback(context.Context, *GetAuthCa
 }
 func (UnimplementedKnownAdminServer) ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListMenus not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDepartment not implemented")
 }
 
 // UnsafeKnownAdminServer may be embedded to opt out of forward compatibility for this service.
@@ -278,6 +294,24 @@ func _KnownAdmin_ListMenus_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_CreateDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDepartmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateDepartment(ctx, req.(*CreateDepartmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KnownAdmin_ServiceDesc is the grpc.ServiceDesc for KnownAdmin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -312,6 +346,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListMenus",
 			Handler:    _KnownAdmin_ListMenus_Handler,
+		},
+		{
+			MethodName: "CreateDepartment",
+			Handler:    _KnownAdmin_CreateDepartment_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

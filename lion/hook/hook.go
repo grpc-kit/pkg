@@ -57,6 +57,18 @@ func (f DemoFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DemoMutation", m)
 }
 
+// The DepartmentLeadersFunc type is an adapter to allow the use of ordinary
+// function as DepartmentLeaders mutator.
+type DepartmentLeadersFunc func(context.Context, *lion.DepartmentLeadersMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DepartmentLeadersFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.DepartmentLeadersMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DepartmentLeadersMutation", m)
+}
+
 // The DepartmentsFunc type is an adapter to allow the use of ordinary
 // function as Departments mutator.
 type DepartmentsFunc func(context.Context, *lion.DepartmentsMutation) (lion.Value, error)

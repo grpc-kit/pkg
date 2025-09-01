@@ -19,6 +19,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/authuserlocal"
 	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
+	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groupmembership"
 	"github.com/grpc-kit/pkg/lion/groups"
@@ -45,6 +46,8 @@ type Client struct {
 	AuthUserSocial *AuthUserSocialClient
 	// Demo is the client for interacting with the Demo builders.
 	Demo *DemoClient
+	// DepartmentLeaders is the client for interacting with the DepartmentLeaders builders.
+	DepartmentLeaders *DepartmentLeadersClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
 	// GroupMembership is the client for interacting with the GroupMembership builders.
@@ -82,6 +85,7 @@ func (c *Client) init() {
 	c.AuthUserLocal = NewAuthUserLocalClient(c.config)
 	c.AuthUserSocial = NewAuthUserSocialClient(c.config)
 	c.Demo = NewDemoClient(c.config)
+	c.DepartmentLeaders = NewDepartmentLeadersClient(c.config)
 	c.Departments = NewDepartmentsClient(c.config)
 	c.GroupMembership = NewGroupMembershipClient(c.config)
 	c.Groups = NewGroupsClient(c.config)
@@ -183,23 +187,24 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:              ctx,
-		config:           cfg,
-		AuthProviders:    NewAuthProvidersClient(cfg),
-		AuthUserLocal:    NewAuthUserLocalClient(cfg),
-		AuthUserSocial:   NewAuthUserSocialClient(cfg),
-		Demo:             NewDemoClient(cfg),
-		Departments:      NewDepartmentsClient(cfg),
-		GroupMembership:  NewGroupMembershipClient(cfg),
-		Groups:           NewGroupsClient(cfg),
-		Menus:            NewMenusClient(cfg),
-		Permissions:      NewPermissionsClient(cfg),
-		RoleGroupMapping: NewRoleGroupMappingClient(cfg),
-		RoleMenuMapping:  NewRoleMenuMappingClient(cfg),
-		RoleUserMapping:  NewRoleUserMappingClient(cfg),
-		Roles:            NewRolesClient(cfg),
-		UserAttributes:   NewUserAttributesClient(cfg),
-		Users:            NewUsersClient(cfg),
+		ctx:               ctx,
+		config:            cfg,
+		AuthProviders:     NewAuthProvidersClient(cfg),
+		AuthUserLocal:     NewAuthUserLocalClient(cfg),
+		AuthUserSocial:    NewAuthUserSocialClient(cfg),
+		Demo:              NewDemoClient(cfg),
+		DepartmentLeaders: NewDepartmentLeadersClient(cfg),
+		Departments:       NewDepartmentsClient(cfg),
+		GroupMembership:   NewGroupMembershipClient(cfg),
+		Groups:            NewGroupsClient(cfg),
+		Menus:             NewMenusClient(cfg),
+		Permissions:       NewPermissionsClient(cfg),
+		RoleGroupMapping:  NewRoleGroupMappingClient(cfg),
+		RoleMenuMapping:   NewRoleMenuMappingClient(cfg),
+		RoleUserMapping:   NewRoleUserMappingClient(cfg),
+		Roles:             NewRolesClient(cfg),
+		UserAttributes:    NewUserAttributesClient(cfg),
+		Users:             NewUsersClient(cfg),
 	}, nil
 }
 
@@ -217,23 +222,24 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:              ctx,
-		config:           cfg,
-		AuthProviders:    NewAuthProvidersClient(cfg),
-		AuthUserLocal:    NewAuthUserLocalClient(cfg),
-		AuthUserSocial:   NewAuthUserSocialClient(cfg),
-		Demo:             NewDemoClient(cfg),
-		Departments:      NewDepartmentsClient(cfg),
-		GroupMembership:  NewGroupMembershipClient(cfg),
-		Groups:           NewGroupsClient(cfg),
-		Menus:            NewMenusClient(cfg),
-		Permissions:      NewPermissionsClient(cfg),
-		RoleGroupMapping: NewRoleGroupMappingClient(cfg),
-		RoleMenuMapping:  NewRoleMenuMappingClient(cfg),
-		RoleUserMapping:  NewRoleUserMappingClient(cfg),
-		Roles:            NewRolesClient(cfg),
-		UserAttributes:   NewUserAttributesClient(cfg),
-		Users:            NewUsersClient(cfg),
+		ctx:               ctx,
+		config:            cfg,
+		AuthProviders:     NewAuthProvidersClient(cfg),
+		AuthUserLocal:     NewAuthUserLocalClient(cfg),
+		AuthUserSocial:    NewAuthUserSocialClient(cfg),
+		Demo:              NewDemoClient(cfg),
+		DepartmentLeaders: NewDepartmentLeadersClient(cfg),
+		Departments:       NewDepartmentsClient(cfg),
+		GroupMembership:   NewGroupMembershipClient(cfg),
+		Groups:            NewGroupsClient(cfg),
+		Menus:             NewMenusClient(cfg),
+		Permissions:       NewPermissionsClient(cfg),
+		RoleGroupMapping:  NewRoleGroupMappingClient(cfg),
+		RoleMenuMapping:   NewRoleMenuMappingClient(cfg),
+		RoleUserMapping:   NewRoleUserMappingClient(cfg),
+		Roles:             NewRolesClient(cfg),
+		UserAttributes:    NewUserAttributesClient(cfg),
+		Users:             NewUsersClient(cfg),
 	}, nil
 }
 
@@ -263,9 +269,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AuthProviders, c.AuthUserLocal, c.AuthUserSocial, c.Demo, c.Departments,
-		c.GroupMembership, c.Groups, c.Menus, c.Permissions, c.RoleGroupMapping,
-		c.RoleMenuMapping, c.RoleUserMapping, c.Roles, c.UserAttributes, c.Users,
+		c.AuthProviders, c.AuthUserLocal, c.AuthUserSocial, c.Demo, c.DepartmentLeaders,
+		c.Departments, c.GroupMembership, c.Groups, c.Menus, c.Permissions,
+		c.RoleGroupMapping, c.RoleMenuMapping, c.RoleUserMapping, c.Roles,
+		c.UserAttributes, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -275,9 +282,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AuthProviders, c.AuthUserLocal, c.AuthUserSocial, c.Demo, c.Departments,
-		c.GroupMembership, c.Groups, c.Menus, c.Permissions, c.RoleGroupMapping,
-		c.RoleMenuMapping, c.RoleUserMapping, c.Roles, c.UserAttributes, c.Users,
+		c.AuthProviders, c.AuthUserLocal, c.AuthUserSocial, c.Demo, c.DepartmentLeaders,
+		c.Departments, c.GroupMembership, c.Groups, c.Menus, c.Permissions,
+		c.RoleGroupMapping, c.RoleMenuMapping, c.RoleUserMapping, c.Roles,
+		c.UserAttributes, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -294,6 +302,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AuthUserSocial.mutate(ctx, m)
 	case *DemoMutation:
 		return c.Demo.mutate(ctx, m)
+	case *DepartmentLeadersMutation:
+		return c.DepartmentLeaders.mutate(ctx, m)
 	case *DepartmentsMutation:
 		return c.Departments.mutate(ctx, m)
 	case *GroupMembershipMutation:
@@ -850,6 +860,139 @@ func (c *DemoClient) mutate(ctx context.Context, m *DemoMutation) (Value, error)
 		return (&DemoDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown Demo mutation op: %q", m.Op())
+	}
+}
+
+// DepartmentLeadersClient is a client for the DepartmentLeaders schema.
+type DepartmentLeadersClient struct {
+	config
+}
+
+// NewDepartmentLeadersClient returns a client for the DepartmentLeaders from the given config.
+func NewDepartmentLeadersClient(c config) *DepartmentLeadersClient {
+	return &DepartmentLeadersClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `departmentleaders.Hooks(f(g(h())))`.
+func (c *DepartmentLeadersClient) Use(hooks ...Hook) {
+	c.hooks.DepartmentLeaders = append(c.hooks.DepartmentLeaders, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `departmentleaders.Intercept(f(g(h())))`.
+func (c *DepartmentLeadersClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DepartmentLeaders = append(c.inters.DepartmentLeaders, interceptors...)
+}
+
+// Create returns a builder for creating a DepartmentLeaders entity.
+func (c *DepartmentLeadersClient) Create() *DepartmentLeadersCreate {
+	mutation := newDepartmentLeadersMutation(c.config, OpCreate)
+	return &DepartmentLeadersCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of DepartmentLeaders entities.
+func (c *DepartmentLeadersClient) CreateBulk(builders ...*DepartmentLeadersCreate) *DepartmentLeadersCreateBulk {
+	return &DepartmentLeadersCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *DepartmentLeadersClient) MapCreateBulk(slice any, setFunc func(*DepartmentLeadersCreate, int)) *DepartmentLeadersCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &DepartmentLeadersCreateBulk{err: fmt.Errorf("calling to DepartmentLeadersClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*DepartmentLeadersCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &DepartmentLeadersCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for DepartmentLeaders.
+func (c *DepartmentLeadersClient) Update() *DepartmentLeadersUpdate {
+	mutation := newDepartmentLeadersMutation(c.config, OpUpdate)
+	return &DepartmentLeadersUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DepartmentLeadersClient) UpdateOne(_m *DepartmentLeaders) *DepartmentLeadersUpdateOne {
+	mutation := newDepartmentLeadersMutation(c.config, OpUpdateOne, withDepartmentLeaders(_m))
+	return &DepartmentLeadersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DepartmentLeadersClient) UpdateOneID(id int) *DepartmentLeadersUpdateOne {
+	mutation := newDepartmentLeadersMutation(c.config, OpUpdateOne, withDepartmentLeadersID(id))
+	return &DepartmentLeadersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for DepartmentLeaders.
+func (c *DepartmentLeadersClient) Delete() *DepartmentLeadersDelete {
+	mutation := newDepartmentLeadersMutation(c.config, OpDelete)
+	return &DepartmentLeadersDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *DepartmentLeadersClient) DeleteOne(_m *DepartmentLeaders) *DepartmentLeadersDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *DepartmentLeadersClient) DeleteOneID(id int) *DepartmentLeadersDeleteOne {
+	builder := c.Delete().Where(departmentleaders.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DepartmentLeadersDeleteOne{builder}
+}
+
+// Query returns a query builder for DepartmentLeaders.
+func (c *DepartmentLeadersClient) Query() *DepartmentLeadersQuery {
+	return &DepartmentLeadersQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeDepartmentLeaders},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a DepartmentLeaders entity by its id.
+func (c *DepartmentLeadersClient) Get(ctx context.Context, id int) (*DepartmentLeaders, error) {
+	return c.Query().Where(departmentleaders.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DepartmentLeadersClient) GetX(ctx context.Context, id int) *DepartmentLeaders {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *DepartmentLeadersClient) Hooks() []Hook {
+	return c.hooks.DepartmentLeaders
+}
+
+// Interceptors returns the client interceptors.
+func (c *DepartmentLeadersClient) Interceptors() []Interceptor {
+	return c.inters.DepartmentLeaders
+}
+
+func (c *DepartmentLeadersClient) mutate(ctx context.Context, m *DepartmentLeadersMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DepartmentLeadersCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DepartmentLeadersUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DepartmentLeadersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DepartmentLeadersDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown DepartmentLeaders mutation op: %q", m.Op())
 	}
 }
 
@@ -2511,13 +2654,14 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AuthProviders, AuthUserLocal, AuthUserSocial, Demo, Departments,
-		GroupMembership, Groups, Menus, Permissions, RoleGroupMapping, RoleMenuMapping,
-		RoleUserMapping, Roles, UserAttributes, Users []ent.Hook
+		AuthProviders, AuthUserLocal, AuthUserSocial, Demo, DepartmentLeaders,
+		Departments, GroupMembership, Groups, Menus, Permissions, RoleGroupMapping,
+		RoleMenuMapping, RoleUserMapping, Roles, UserAttributes, Users []ent.Hook
 	}
 	inters struct {
-		AuthProviders, AuthUserLocal, AuthUserSocial, Demo, Departments,
-		GroupMembership, Groups, Menus, Permissions, RoleGroupMapping, RoleMenuMapping,
-		RoleUserMapping, Roles, UserAttributes, Users []ent.Interceptor
+		AuthProviders, AuthUserLocal, AuthUserSocial, Demo, DepartmentLeaders,
+		Departments, GroupMembership, Groups, Menus, Permissions, RoleGroupMapping,
+		RoleMenuMapping, RoleUserMapping, Roles, UserAttributes,
+		Users []ent.Interceptor
 	}
 )

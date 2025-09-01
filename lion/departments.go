@@ -25,8 +25,10 @@ type Departments struct {
 	ParentID int `json:"parent_id,omitempty"`
 	// 部门名称
 	Name string `json:"name,omitempty"`
-	// 详细描述
-	Description  string `json:"description,omitempty"`
+	// 多国语言
+	I18nName string `json:"i18n_name,omitempty"`
+	// 排序权重，越小越靠前
+	OrderWeight  int `json:"order_weight,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -35,9 +37,9 @@ func (*Departments) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case departments.FieldID, departments.FieldParentID:
+		case departments.FieldID, departments.FieldParentID, departments.FieldOrderWeight:
 			values[i] = new(sql.NullInt64)
-		case departments.FieldName, departments.FieldDescription:
+		case departments.FieldName, departments.FieldI18nName:
 			values[i] = new(sql.NullString)
 		case departments.FieldCreatedAt, departments.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -86,11 +88,17 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case departments.FieldDescription:
+		case departments.FieldI18nName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field description", values[i])
+				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
 			} else if value.Valid {
-				_m.Description = value.String
+				_m.I18nName = value.String
+			}
+		case departments.FieldOrderWeight:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field order_weight", values[i])
+			} else if value.Valid {
+				_m.OrderWeight = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -140,8 +148,11 @@ func (_m *Departments) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("description=")
-	builder.WriteString(_m.Description)
+	builder.WriteString("i18n_name=")
+	builder.WriteString(_m.I18nName)
+	builder.WriteString(", ")
+	builder.WriteString("order_weight=")
+	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
 	builder.WriteByte(')')
 	return builder.String()
 }

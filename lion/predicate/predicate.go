@@ -18,6 +18,9 @@ type AuthUserSocial func(*sql.Selector)
 // Demo is the predicate function for demo builders.
 type Demo func(*sql.Selector)
 
+// DepartmentLeaders is the predicate function for departmentleaders builders.
+type DepartmentLeaders func(*sql.Selector)
+
 // Departments is the predicate function for departments builders.
 type Departments func(*sql.Selector)
 
