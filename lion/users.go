@@ -71,9 +71,11 @@ type Users struct {
 type UsersEdges struct {
 	// LionUsers holds the value of the lion_users edge.
 	LionUsers []*RoleUserMapping `json:"lion_users,omitempty"`
+	// LionDepartmentLeaders holds the value of the lion_department_leaders edge.
+	LionDepartmentLeaders []*DepartmentLeaders `json:"lion_department_leaders,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // LionUsersOrErr returns the LionUsers value or an error if the edge
@@ -83,6 +85,15 @@ func (e UsersEdges) LionUsersOrErr() ([]*RoleUserMapping, error) {
 		return e.LionUsers, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_users"}
+}
+
+// LionDepartmentLeadersOrErr returns the LionDepartmentLeaders value or an error if the edge
+// was not loaded in eager-loading.
+func (e UsersEdges) LionDepartmentLeadersOrErr() ([]*DepartmentLeaders, error) {
+	if e.loadedTypes[1] {
+		return e.LionDepartmentLeaders, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_department_leaders"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -279,6 +290,11 @@ func (_m *Users) Value(name string) (ent.Value, error) {
 // QueryLionUsers queries the "lion_users" edge of the Users entity.
 func (_m *Users) QueryLionUsers() *RoleUserMappingQuery {
 	return NewUsersClient(_m.config).QueryLionUsers(_m)
+}
+
+// QueryLionDepartmentLeaders queries the "lion_department_leaders" edge of the Users entity.
+func (_m *Users) QueryLionDepartmentLeaders() *DepartmentLeadersQuery {
+	return NewUsersClient(_m.config).QueryLionDepartmentLeaders(_m)
 }
 
 // Update returns a builder for updating this Users.

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -25,8 +26,19 @@ const (
 	FieldI18nName = "i18n_name"
 	// FieldOrderWeight holds the string denoting the order_weight field in the database.
 	FieldOrderWeight = "order_weight"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
+	// EdgeLionDepartmentLeaders holds the string denoting the lion_department_leaders edge name in mutations.
+	EdgeLionDepartmentLeaders = "lion_department_leaders"
 	// Table holds the table name of the departments in the database.
 	Table = "lion_departments"
+	// LionDepartmentLeadersTable is the table that holds the lion_department_leaders relation/edge.
+	LionDepartmentLeadersTable = "lion_department_leaders"
+	// LionDepartmentLeadersInverseTable is the table name for the DepartmentLeaders entity.
+	// It exists in this package in order to avoid circular dependency with the "departmentleaders" package.
+	LionDepartmentLeadersInverseTable = "lion_department_leaders"
+	// LionDepartmentLeadersColumn is the table column denoting the lion_department_leaders relation/edge.
+	LionDepartmentLeadersColumn = "department_id"
 )
 
 // Columns holds all SQL columns for departments fields.
@@ -38,6 +50,7 @@ var Columns = []string{
 	FieldName,
 	FieldI18nName,
 	FieldOrderWeight,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -61,8 +74,12 @@ var (
 	DefaultParentID int
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultI18nName holds the default value on creation for the "i18n_name" field.
+	DefaultI18nName string
 	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
 	DefaultOrderWeight int
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
 )
 
 // OrderOption defines the ordering options for the Departments queries.
@@ -101,4 +118,30 @@ func ByI18nName(opts ...sql.OrderTermOption) OrderOption {
 // ByOrderWeight orders the results by the order_weight field.
 func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByLionDepartmentLeadersCount orders the results by lion_department_leaders count.
+func ByLionDepartmentLeadersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionDepartmentLeadersStep(), opts...)
+	}
+}
+
+// ByLionDepartmentLeaders orders the results by lion_department_leaders terms.
+func ByLionDepartmentLeaders(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentLeadersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newLionDepartmentLeadersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionDepartmentLeadersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentLeadersTable, LionDepartmentLeadersColumn),
+	)
 }

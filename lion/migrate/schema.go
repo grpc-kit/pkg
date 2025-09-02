@@ -98,8 +98,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "department_id", Type: field.TypeInt},
 		{Name: "leader_type", Type: field.TypeInt},
+		{Name: "department_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
 	// LionDepartmentLeadersTable holds the schema information for the "lion_department_leaders" table.
@@ -107,6 +107,20 @@ var (
 		Name:       "lion_department_leaders",
 		Columns:    LionDepartmentLeadersColumns,
 		PrimaryKey: []*schema.Column{LionDepartmentLeadersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_department_leaders_lion_departments_lion_department_leaders",
+				Columns:    []*schema.Column{LionDepartmentLeadersColumns[4]},
+				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "lion_department_leaders_lion_users_lion_department_leaders",
+				Columns:    []*schema.Column{LionDepartmentLeadersColumns[5]},
+				RefColumns: []*schema.Column{LionUsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// LionDepartmentsColumns holds the columns for the "lion_departments" table.
 	LionDepartmentsColumns = []*schema.Column{
@@ -115,8 +129,9 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
-		{Name: "i18n_name", Type: field.TypeString},
+		{Name: "i18n_name", Type: field.TypeString, Default: ""},
 		{Name: "order_weight", Type: field.TypeInt, Default: 0},
+		{Name: "description", Type: field.TypeString, Default: ""},
 	}
 	// LionDepartmentsTable holds the schema information for the "lion_departments" table.
 	LionDepartmentsTable = &schema.Table{
@@ -403,6 +418,8 @@ func init() {
 	LionDemoTable.Annotation = &entsql.Annotation{
 		Table: "lion_demo",
 	}
+	LionDepartmentLeadersTable.ForeignKeys[0].RefTable = LionDepartmentsTable
+	LionDepartmentLeadersTable.ForeignKeys[1].RefTable = LionUsersTable
 	LionDepartmentLeadersTable.Annotation = &entsql.Annotation{
 		Table: "lion_department_leaders",
 	}

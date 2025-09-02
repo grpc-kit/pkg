@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -82,6 +83,11 @@ func I18nName(v string) predicate.Departments {
 // OrderWeight applies equality check predicate on the "order_weight" field. It's identical to OrderWeightEQ.
 func OrderWeight(v int) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldOrderWeight, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldDescription, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -372,6 +378,94 @@ func OrderWeightLT(v int) predicate.Departments {
 // OrderWeightLTE applies the LTE predicate on the "order_weight" field.
 func OrderWeightLTE(v int) predicate.Departments {
 	return predicate.Departments(sql.FieldLTE(FieldOrderWeight, v))
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// HasLionDepartmentLeaders applies the HasEdge predicate on the "lion_department_leaders" edge.
+func HasLionDepartmentLeaders() predicate.Departments {
+	return predicate.Departments(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentLeadersTable, LionDepartmentLeadersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionDepartmentLeadersWith applies the HasEdge predicate on the "lion_department_leaders" edge with a given conditions (other predicates).
+func HasLionDepartmentLeadersWith(preds ...predicate.DepartmentLeaders) predicate.Departments {
+	return predicate.Departments(func(s *sql.Selector) {
+		step := newLionDepartmentLeadersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

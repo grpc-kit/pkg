@@ -5,6 +5,9 @@ import (
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/lion/departmentleaders"
+	"github.com/grpc-kit/pkg/lion/departments"
 )
 
 // CreateDepartment 创建部门
@@ -71,4 +74,80 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	_ = tx.Commit()
 
 	return result, nil
+}
+
+// ListDepartments 列出部门
+func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDepartmentsRequest) (*adminv1.ListDepartmentsResponse, error) {
+	result := &adminv1.ListDepartmentsResponse{}
+
+	// TODO;
+	userID := 2
+
+	leaders, err := a.config.db.DepartmentLeaders.Query().
+		Where(departmentleaders.UserIDEQ(userID)).
+		WithLionDepartments().All(ctx)
+	if err != nil {
+		return result, err
+	}
+
+	var deps []*adminv1.Department
+	for _, l := range leaders {
+		dep := l.Edges.LionDepartments
+		if dep == nil {
+			continue
+		}
+
+		tree, err := a.buildDepartmentTree(ctx, dep)
+		if err != nil {
+			return result, err
+		}
+
+		deps = append(deps, tree)
+	}
+
+	result.Departments = deps
+
+	return result, nil
+}
+
+func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Departments) (*adminv1.Department, error) {
+	// 查子部门
+	children, err := a.config.db.Departments.
+		Query().
+		Where(departments.ParentIDEQ(dep.ID)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 查领导
+	leaders, err := a.config.db.DepartmentLeaders.Query().
+		Where(departmentleaders.HasLionDepartmentsWith(departments.ID(dep.ID))).All(ctx)
+
+	pbDep := &adminv1.Department{
+		Id:          int32(dep.ID),
+		ParentId:    int32(dep.ParentID),
+		Name:        dep.Name,
+		I18NName:    I18NNameParse(dep.I18nName),
+		OrderWeight: int32(dep.OrderWeight),
+		Leaders:     make([]*adminv1.Department_Leader, 0),
+	}
+
+	for _, l := range leaders {
+		pbDep.Leaders = append(pbDep.Leaders, &adminv1.Department_Leader{
+			Type:   int32(l.LeaderType),
+			UserId: int32(l.UserID),
+		})
+	}
+
+	// 递归子部门
+	for _, c := range children {
+		childTree, err := a.buildDepartmentTree(ctx, c)
+		if err != nil {
+			return nil, err
+		}
+
+		pbDep.Children = append(pbDep.Children, childTree)
+	}
+
+	return pbDep, nil
 }

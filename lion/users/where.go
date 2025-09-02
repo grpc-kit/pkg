@@ -1333,6 +1333,29 @@ func HasLionUsersWith(preds ...predicate.RoleUserMapping) predicate.Users {
 	})
 }
 
+// HasLionDepartmentLeaders applies the HasEdge predicate on the "lion_department_leaders" edge.
+func HasLionDepartmentLeaders() predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentLeadersTable, LionDepartmentLeadersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionDepartmentLeadersWith applies the HasEdge predicate on the "lion_department_leaders" edge with a given conditions (other predicates).
+func HasLionDepartmentLeadersWith(preds ...predicate.DepartmentLeaders) predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		step := newLionDepartmentLeadersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Users) predicate.Users {
 	return predicate.Users(sql.AndPredicates(predicates...))

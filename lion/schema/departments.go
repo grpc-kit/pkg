@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -24,16 +25,23 @@ func (Departments) Fields() []ent.Field {
 			NotEmpty().
 			Comment("部门名称"),
 		field.String("i18n_name").
+			Default("").
 			Comment("多国语言"),
 		field.Int("order_weight").
 			Default(0).
 			Comment("排序权重，越小越靠前"),
+		field.String("description").
+			Default("").
+			Comment("详细描述"),
 	}
 }
 
 // Edges of the table.
 func (Departments) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		// 一个 Menu 可以对应多个 RoleMenu (中间实体)
+		edge.To("lion_department_leaders", DepartmentLeaders.Type),
+	}
 }
 
 // Mixin of the table.

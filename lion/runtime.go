@@ -184,10 +184,18 @@ func init() {
 			return nil
 		}
 	}()
+	// departmentsDescI18nName is the schema descriptor for i18n_name field.
+	departmentsDescI18nName := departmentsFields[2].Descriptor()
+	// departments.DefaultI18nName holds the default value on creation for the i18n_name field.
+	departments.DefaultI18nName = departmentsDescI18nName.Default.(string)
 	// departmentsDescOrderWeight is the schema descriptor for order_weight field.
 	departmentsDescOrderWeight := departmentsFields[3].Descriptor()
 	// departments.DefaultOrderWeight holds the default value on creation for the order_weight field.
 	departments.DefaultOrderWeight = departmentsDescOrderWeight.Default.(int)
+	// departmentsDescDescription is the schema descriptor for description field.
+	departmentsDescDescription := departmentsFields[4].Descriptor()
+	// departments.DefaultDescription holds the default value on creation for the description field.
+	departments.DefaultDescription = departmentsDescDescription.Default.(string)
 	groupmembershipMixin := schema.GroupMembership{}.Mixin()
 	groupmembershipMixinFields0 := groupmembershipMixin[0].Fields()
 	_ = groupmembershipMixinFields0

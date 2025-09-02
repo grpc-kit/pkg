@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -26,7 +27,19 @@ func (DepartmentLeaders) Fields() []ent.Field {
 
 // Edges of the table.
 func (DepartmentLeaders) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		// 一个 Menu 可以对应多个 RoleMenu (中间实体)
+		edge.From("lion_departments", Departments.Type).
+			Ref("lion_department_leaders").
+			Field("department_id").
+			Unique().
+			Required(),
+		edge.From("lion_department_leaders", Users.Type).
+			Ref("lion_department_leaders").
+			Field("user_id").
+			Unique().
+			Required(),
+	}
 }
 
 // Mixin of the table.

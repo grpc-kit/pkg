@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -23,8 +24,26 @@ const (
 	FieldLeaderType = "leader_type"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// EdgeLionDepartments holds the string denoting the lion_departments edge name in mutations.
+	EdgeLionDepartments = "lion_departments"
+	// EdgeLionDepartmentLeaders holds the string denoting the lion_department_leaders edge name in mutations.
+	EdgeLionDepartmentLeaders = "lion_department_leaders"
 	// Table holds the table name of the departmentleaders in the database.
 	Table = "lion_department_leaders"
+	// LionDepartmentsTable is the table that holds the lion_departments relation/edge.
+	LionDepartmentsTable = "lion_department_leaders"
+	// LionDepartmentsInverseTable is the table name for the Departments entity.
+	// It exists in this package in order to avoid circular dependency with the "departments" package.
+	LionDepartmentsInverseTable = "lion_departments"
+	// LionDepartmentsColumn is the table column denoting the lion_departments relation/edge.
+	LionDepartmentsColumn = "department_id"
+	// LionDepartmentLeadersTable is the table that holds the lion_department_leaders relation/edge.
+	LionDepartmentLeadersTable = "lion_department_leaders"
+	// LionDepartmentLeadersInverseTable is the table name for the Users entity.
+	// It exists in this package in order to avoid circular dependency with the "users" package.
+	LionDepartmentLeadersInverseTable = "lion_users"
+	// LionDepartmentLeadersColumn is the table column denoting the lion_department_leaders relation/edge.
+	LionDepartmentLeadersColumn = "user_id"
 )
 
 // Columns holds all SQL columns for departmentleaders fields.
@@ -87,4 +106,32 @@ func ByLeaderType(opts ...sql.OrderTermOption) OrderOption {
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByLionDepartmentsField orders the results by lion_departments field.
+func ByLionDepartmentsField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentsStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLionDepartmentLeadersField orders the results by lion_department_leaders field.
+func ByLionDepartmentLeadersField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentLeadersStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newLionDepartmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionDepartmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentsTable, LionDepartmentsColumn),
+	)
+}
+func newLionDepartmentLeadersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionDepartmentLeadersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentLeadersTable, LionDepartmentLeadersColumn),
+	)
 }

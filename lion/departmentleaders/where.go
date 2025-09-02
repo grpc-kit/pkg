@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -179,26 +180,6 @@ func DepartmentIDNotIn(vs ...int) predicate.DepartmentLeaders {
 	return predicate.DepartmentLeaders(sql.FieldNotIn(FieldDepartmentID, vs...))
 }
 
-// DepartmentIDGT applies the GT predicate on the "department_id" field.
-func DepartmentIDGT(v int) predicate.DepartmentLeaders {
-	return predicate.DepartmentLeaders(sql.FieldGT(FieldDepartmentID, v))
-}
-
-// DepartmentIDGTE applies the GTE predicate on the "department_id" field.
-func DepartmentIDGTE(v int) predicate.DepartmentLeaders {
-	return predicate.DepartmentLeaders(sql.FieldGTE(FieldDepartmentID, v))
-}
-
-// DepartmentIDLT applies the LT predicate on the "department_id" field.
-func DepartmentIDLT(v int) predicate.DepartmentLeaders {
-	return predicate.DepartmentLeaders(sql.FieldLT(FieldDepartmentID, v))
-}
-
-// DepartmentIDLTE applies the LTE predicate on the "department_id" field.
-func DepartmentIDLTE(v int) predicate.DepartmentLeaders {
-	return predicate.DepartmentLeaders(sql.FieldLTE(FieldDepartmentID, v))
-}
-
 // LeaderTypeEQ applies the EQ predicate on the "leader_type" field.
 func LeaderTypeEQ(v int) predicate.DepartmentLeaders {
 	return predicate.DepartmentLeaders(sql.FieldEQ(FieldLeaderType, v))
@@ -259,24 +240,50 @@ func UserIDNotIn(vs ...int) predicate.DepartmentLeaders {
 	return predicate.DepartmentLeaders(sql.FieldNotIn(FieldUserID, vs...))
 }
 
-// UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v int) predicate.DepartmentLeaders {
-	return predicate.DepartmentLeaders(sql.FieldGT(FieldUserID, v))
+// HasLionDepartments applies the HasEdge predicate on the "lion_departments" edge.
+func HasLionDepartments() predicate.DepartmentLeaders {
+	return predicate.DepartmentLeaders(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentsTable, LionDepartmentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
 }
 
-// UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v int) predicate.DepartmentLeaders {
-	return predicate.DepartmentLeaders(sql.FieldGTE(FieldUserID, v))
+// HasLionDepartmentsWith applies the HasEdge predicate on the "lion_departments" edge with a given conditions (other predicates).
+func HasLionDepartmentsWith(preds ...predicate.Departments) predicate.DepartmentLeaders {
+	return predicate.DepartmentLeaders(func(s *sql.Selector) {
+		step := newLionDepartmentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
-// UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v int) predicate.DepartmentLeaders {
-	return predicate.DepartmentLeaders(sql.FieldLT(FieldUserID, v))
+// HasLionDepartmentLeaders applies the HasEdge predicate on the "lion_department_leaders" edge.
+func HasLionDepartmentLeaders() predicate.DepartmentLeaders {
+	return predicate.DepartmentLeaders(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentLeadersTable, LionDepartmentLeadersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
 }
 
-// UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v int) predicate.DepartmentLeaders {
-	return predicate.DepartmentLeaders(sql.FieldLTE(FieldUserID, v))
+// HasLionDepartmentLeadersWith applies the HasEdge predicate on the "lion_department_leaders" edge with a given conditions (other predicates).
+func HasLionDepartmentLeadersWith(preds ...predicate.Users) predicate.DepartmentLeaders {
+	return predicate.DepartmentLeaders(func(s *sql.Selector) {
+		step := newLionDepartmentLeadersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

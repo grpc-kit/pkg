@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -71,12 +72,13 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return "", err
 		}
 
-		// 填充 idToken 内容
-		idToken.SetSubject(resp.Openid)
-
-		if err = s.upsertUserWechat(ctx, resp); err != nil {
+		userID, err := s.upsertUserWechat(ctx, resp)
+		if err != nil {
 			return "", err
 		}
+
+		// 填充 idToken 内容
+		idToken.SetSubject(strconv.Itoa(userID))
 
 		accessToken, err = idToken.GetAccessToken(resp.SessionKey)
 		if err != nil {
@@ -102,9 +104,13 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		idToken.SetExpiresAt(oauth2Token.ExpiresIn)
 
 		// 判断是否已存在数据库中
-		if err = s.upsertUserOIDC(ctx, oauth2Token, idToken); err != nil {
+		userID, err := s.upsertUserOIDC(ctx, oauth2Token, idToken)
+		if err != nil {
 			return accessToken, err
 		}
+
+		// 填充 idToken 内容
+		idToken.SetSubject(strconv.Itoa(userID))
 
 		// 生成 jwt 返回客户端
 		accessToken, err = idToken.GetAccessToken(oauth2Token.AccessToken)
@@ -116,7 +122,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 	return accessToken, nil
 }
 
-func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, idToken *auth.IDTokenClaims) error {
+func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, idToken *auth.IDTokenClaims) (int, error) {
 	existUserID, err := s.db.AuthUserSocial.Query().
 		Where(
 			authusersocial.ProviderNameEQ(s.ProviderName),
@@ -124,7 +130,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		).
 		OnlyID(ctx)
 	if err != nil && !lion.IsNotFound(err) {
-		return err
+		return 0, err
 	}
 
 	if existUserID == 0 && lion.IsNotFound(err) {
@@ -136,13 +142,13 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		tx, err := s.db.Tx(ctx)
 		if err != nil {
 			s.logger.Errorf("create user: %v, err: %v", username, err)
-			return fmt.Errorf("create user failed")
+			return 0, fmt.Errorf("create user failed")
 		}
 
 		_, err = tx.Users.Query().Where(users.PreferredUsernameEQ(username)).OnlyID(ctx)
 		if !lion.IsNotFound(err) {
 			s.logger.Errorf("create user: %v, err: %v", username, err)
-			return fmt.Errorf("create user failed")
+			return 0, fmt.Errorf("create user failed")
 		}
 
 		var emailEnc []byte
@@ -161,7 +167,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			_ = tx.Rollback()
 
 			s.logger.Errorf("create user: %v, err: %v", username, err)
-			return fmt.Errorf("create user failed")
+			return 0, fmt.Errorf("create user failed")
 		}
 
 		var accessTokenEnc, refreshTokenEnc []byte
@@ -184,8 +190,10 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			_ = tx.Rollback()
 
 			s.logger.Errorf("create user: %v, err: %v", username, err)
-			return fmt.Errorf("create user failed")
+			return 0, fmt.Errorf("create user failed")
 		}
+
+		existUserID = newUser.ID
 
 		_ = tx.Commit()
 	} else {
@@ -204,7 +212,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			SetTokenExpiresAt(oauth2Token.Expiry)
 	}
 
-	return nil
+	return existUserID, nil
 }
 
 func (s *socialUsers) oauth2Exchange(ctx context.Context, code string) (*oauth2.Token, error) {
@@ -246,7 +254,7 @@ func (s *socialUsers) weixinExchange(ctx context.Context, code string) (*wechatC
 	return wx.code2Session(s.AuthProvider.AuthorizationEndpoint, code)
 }
 
-func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2SessionResponse) error {
+func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2SessionResponse) (int, error) {
 	existUserID, err := s.db.AuthUserSocial.Query().
 		Where(
 			authusersocial.ProviderNameEQ(s.ProviderName),
@@ -254,7 +262,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		).
 		OnlyID(ctx)
 	if err != nil && !lion.IsNotFound(err) {
-		return err
+		return existUserID, err
 	}
 
 	if existUserID == 0 && lion.IsNotFound(err) {
@@ -266,13 +274,13 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		tx, err := s.db.Tx(ctx)
 		if err != nil {
 			s.logger.Errorf("create user: %v, err: %v", username, err)
-			return fmt.Errorf("create user failed")
+			return 0, fmt.Errorf("create user failed")
 		}
 
 		_, err = tx.Users.Query().Where(users.PreferredUsernameEQ(username)).OnlyID(ctx)
 		if !lion.IsNotFound(err) {
 			s.logger.Errorf("create user: %v, err: %v", username, err)
-			return fmt.Errorf("create user failed")
+			return 0, fmt.Errorf("create user failed")
 		}
 
 		/*
@@ -293,7 +301,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 			_ = tx.Rollback()
 
 			s.logger.Errorf("create user: %v, err: %v", username, err)
-			return fmt.Errorf("create user failed")
+			return 0, fmt.Errorf("create user failed")
 		}
 
 		var accessTokenEnc, refreshTokenEnc []byte
@@ -314,11 +322,13 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 			_ = tx.Rollback()
 
 			s.logger.Errorf("create user: %v, err: %v", username, err)
-			return fmt.Errorf("create user failed")
+			return 0, fmt.Errorf("create user failed")
 		}
+
+		existUserID = newUser.ID
 
 		_ = tx.Commit()
 	}
 
-	return nil
+	return existUserID, nil
 }

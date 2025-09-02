@@ -971,6 +971,38 @@ func (c *DepartmentLeadersClient) GetX(ctx context.Context, id int) *DepartmentL
 	return obj
 }
 
+// QueryLionDepartments queries the lion_departments edge of a DepartmentLeaders.
+func (c *DepartmentLeadersClient) QueryLionDepartments(_m *DepartmentLeaders) *DepartmentsQuery {
+	query := (&DepartmentsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(departmentleaders.Table, departmentleaders.FieldID, id),
+			sqlgraph.To(departments.Table, departments.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, departmentleaders.LionDepartmentsTable, departmentleaders.LionDepartmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionDepartmentLeaders queries the lion_department_leaders edge of a DepartmentLeaders.
+func (c *DepartmentLeadersClient) QueryLionDepartmentLeaders(_m *DepartmentLeaders) *UsersQuery {
+	query := (&UsersClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(departmentleaders.Table, departmentleaders.FieldID, id),
+			sqlgraph.To(users.Table, users.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, departmentleaders.LionDepartmentLeadersTable, departmentleaders.LionDepartmentLeadersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DepartmentLeadersClient) Hooks() []Hook {
 	return c.hooks.DepartmentLeaders
@@ -1102,6 +1134,22 @@ func (c *DepartmentsClient) GetX(ctx context.Context, id int) *Departments {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryLionDepartmentLeaders queries the lion_department_leaders edge of a Departments.
+func (c *DepartmentsClient) QueryLionDepartmentLeaders(_m *Departments) *DepartmentLeadersQuery {
+	query := (&DepartmentLeadersClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(departments.Table, departments.FieldID, id),
+			sqlgraph.To(departmentleaders.Table, departmentleaders.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionDepartmentLeadersTable, departments.LionDepartmentLeadersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -2619,6 +2667,22 @@ func (c *UsersClient) QueryLionUsers(_m *Users) *RoleUserMappingQuery {
 			sqlgraph.From(users.Table, users.FieldID, id),
 			sqlgraph.To(roleusermapping.Table, roleusermapping.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, users.LionUsersTable, users.LionUsersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionDepartmentLeaders queries the lion_department_leaders edge of a Users.
+func (c *UsersClient) QueryLionDepartmentLeaders(_m *Users) *DepartmentLeadersQuery {
+	query := (&DepartmentLeadersClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(users.Table, users.FieldID, id),
+			sqlgraph.To(departmentleaders.Table, departmentleaders.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, users.LionDepartmentLeadersTable, users.LionDepartmentLeadersColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

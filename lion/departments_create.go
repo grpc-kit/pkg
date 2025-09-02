@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
 )
 
@@ -74,6 +75,14 @@ func (_c *DepartmentsCreate) SetI18nName(v string) *DepartmentsCreate {
 	return _c
 }
 
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableI18nName(v *string) *DepartmentsCreate {
+	if v != nil {
+		_c.SetI18nName(*v)
+	}
+	return _c
+}
+
 // SetOrderWeight sets the "order_weight" field.
 func (_c *DepartmentsCreate) SetOrderWeight(v int) *DepartmentsCreate {
 	_c.mutation.SetOrderWeight(v)
@@ -86,6 +95,35 @@ func (_c *DepartmentsCreate) SetNillableOrderWeight(v *int) *DepartmentsCreate {
 		_c.SetOrderWeight(*v)
 	}
 	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *DepartmentsCreate) SetDescription(v string) *DepartmentsCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableDescription(v *string) *DepartmentsCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
+// AddLionDepartmentLeaderIDs adds the "lion_department_leaders" edge to the DepartmentLeaders entity by IDs.
+func (_c *DepartmentsCreate) AddLionDepartmentLeaderIDs(ids ...int) *DepartmentsCreate {
+	_c.mutation.AddLionDepartmentLeaderIDs(ids...)
+	return _c
+}
+
+// AddLionDepartmentLeaders adds the "lion_department_leaders" edges to the DepartmentLeaders entity.
+func (_c *DepartmentsCreate) AddLionDepartmentLeaders(v ...*DepartmentLeaders) *DepartmentsCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionDepartmentLeaderIDs(ids...)
 }
 
 // Mutation returns the DepartmentsMutation object of the builder.
@@ -135,9 +173,17 @@ func (_c *DepartmentsCreate) defaults() {
 		v := departments.DefaultParentID
 		_c.mutation.SetParentID(v)
 	}
+	if _, ok := _c.mutation.I18nName(); !ok {
+		v := departments.DefaultI18nName
+		_c.mutation.SetI18nName(v)
+	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		v := departments.DefaultOrderWeight
 		_c.mutation.SetOrderWeight(v)
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := departments.DefaultDescription
+		_c.mutation.SetDescription(v)
 	}
 }
 
@@ -165,6 +211,9 @@ func (_c *DepartmentsCreate) check() error {
 	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Departments.order_weight"`)}
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Departments.description"`)}
 	}
 	return nil
 }
@@ -215,6 +264,26 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.OrderWeight(); ok {
 		_spec.SetField(departments.FieldOrderWeight, field.TypeInt, value)
 		_node.OrderWeight = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(departments.FieldDescription, field.TypeString, value)
+		_node.Description = value
+	}
+	if nodes := _c.mutation.LionDepartmentLeadersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   departments.LionDepartmentLeadersTable,
+			Columns: []string{departments.LionDepartmentLeadersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(departmentleaders.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

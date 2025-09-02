@@ -10,6 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
+	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // DepartmentLeaders is the model entity for the DepartmentLeaders schema.
@@ -26,8 +28,44 @@ type DepartmentLeaders struct {
 	// 负责人类型
 	LeaderType int `json:"leader_type,omitempty"`
 	// 用户 ID
-	UserID       int `json:"user_id,omitempty"`
+	UserID int `json:"user_id,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the DepartmentLeadersQuery when eager-loading is set.
+	Edges        DepartmentLeadersEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// DepartmentLeadersEdges holds the relations/edges for other nodes in the graph.
+type DepartmentLeadersEdges struct {
+	// LionDepartments holds the value of the lion_departments edge.
+	LionDepartments *Departments `json:"lion_departments,omitempty"`
+	// LionDepartmentLeaders holds the value of the lion_department_leaders edge.
+	LionDepartmentLeaders *Users `json:"lion_department_leaders,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// LionDepartmentsOrErr returns the LionDepartments value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DepartmentLeadersEdges) LionDepartmentsOrErr() (*Departments, error) {
+	if e.LionDepartments != nil {
+		return e.LionDepartments, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: departments.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_departments"}
+}
+
+// LionDepartmentLeadersOrErr returns the LionDepartmentLeaders value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DepartmentLeadersEdges) LionDepartmentLeadersOrErr() (*Users, error) {
+	if e.LionDepartmentLeaders != nil {
+		return e.LionDepartmentLeaders, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: users.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_department_leaders"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -101,6 +139,16 @@ func (_m *DepartmentLeaders) assignValues(columns []string, values []any) error 
 // This includes values selected through modifiers, order, etc.
 func (_m *DepartmentLeaders) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionDepartments queries the "lion_departments" edge of the DepartmentLeaders entity.
+func (_m *DepartmentLeaders) QueryLionDepartments() *DepartmentsQuery {
+	return NewDepartmentLeadersClient(_m.config).QueryLionDepartments(_m)
+}
+
+// QueryLionDepartmentLeaders queries the "lion_department_leaders" edge of the DepartmentLeaders entity.
+func (_m *DepartmentLeaders) QueryLionDepartmentLeaders() *UsersQuery {
+	return NewDepartmentLeadersClient(_m.config).QueryLionDepartmentLeaders(_m)
 }
 
 // Update returns a builder for updating this DepartmentLeaders.

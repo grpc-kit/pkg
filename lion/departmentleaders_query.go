@@ -12,16 +12,20 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
+	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // DepartmentLeadersQuery is the builder for querying DepartmentLeaders entities.
 type DepartmentLeadersQuery struct {
 	config
-	ctx        *QueryContext
-	order      []departmentleaders.OrderOption
-	inters     []Interceptor
-	predicates []predicate.DepartmentLeaders
+	ctx                       *QueryContext
+	order                     []departmentleaders.OrderOption
+	inters                    []Interceptor
+	predicates                []predicate.DepartmentLeaders
+	withLionDepartments       *DepartmentsQuery
+	withLionDepartmentLeaders *UsersQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +60,50 @@ func (_q *DepartmentLeadersQuery) Unique(unique bool) *DepartmentLeadersQuery {
 func (_q *DepartmentLeadersQuery) Order(o ...departmentleaders.OrderOption) *DepartmentLeadersQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryLionDepartments chains the current query on the "lion_departments" edge.
+func (_q *DepartmentLeadersQuery) QueryLionDepartments() *DepartmentsQuery {
+	query := (&DepartmentsClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(departmentleaders.Table, departmentleaders.FieldID, selector),
+			sqlgraph.To(departments.Table, departments.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, departmentleaders.LionDepartmentsTable, departmentleaders.LionDepartmentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLionDepartmentLeaders chains the current query on the "lion_department_leaders" edge.
+func (_q *DepartmentLeadersQuery) QueryLionDepartmentLeaders() *UsersQuery {
+	query := (&UsersClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(departmentleaders.Table, departmentleaders.FieldID, selector),
+			sqlgraph.To(users.Table, users.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, departmentleaders.LionDepartmentLeadersTable, departmentleaders.LionDepartmentLeadersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first DepartmentLeaders entity from the query.
@@ -245,15 +293,39 @@ func (_q *DepartmentLeadersQuery) Clone() *DepartmentLeadersQuery {
 		return nil
 	}
 	return &DepartmentLeadersQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]departmentleaders.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.DepartmentLeaders{}, _q.predicates...),
+		config:                    _q.config,
+		ctx:                       _q.ctx.Clone(),
+		order:                     append([]departmentleaders.OrderOption{}, _q.order...),
+		inters:                    append([]Interceptor{}, _q.inters...),
+		predicates:                append([]predicate.DepartmentLeaders{}, _q.predicates...),
+		withLionDepartments:       _q.withLionDepartments.Clone(),
+		withLionDepartmentLeaders: _q.withLionDepartmentLeaders.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithLionDepartments tells the query-builder to eager-load the nodes that are connected to
+// the "lion_departments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *DepartmentLeadersQuery) WithLionDepartments(opts ...func(*DepartmentsQuery)) *DepartmentLeadersQuery {
+	query := (&DepartmentsClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionDepartments = query
+	return _q
+}
+
+// WithLionDepartmentLeaders tells the query-builder to eager-load the nodes that are connected to
+// the "lion_department_leaders" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *DepartmentLeadersQuery) WithLionDepartmentLeaders(opts ...func(*UsersQuery)) *DepartmentLeadersQuery {
+	query := (&UsersClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionDepartmentLeaders = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +404,12 @@ func (_q *DepartmentLeadersQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *DepartmentLeadersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*DepartmentLeaders, error) {
 	var (
-		nodes = []*DepartmentLeaders{}
-		_spec = _q.querySpec()
+		nodes       = []*DepartmentLeaders{}
+		_spec       = _q.querySpec()
+		loadedTypes = [2]bool{
+			_q.withLionDepartments != nil,
+			_q.withLionDepartmentLeaders != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*DepartmentLeaders).scanValues(nil, columns)
@@ -341,6 +417,7 @@ func (_q *DepartmentLeadersQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &DepartmentLeaders{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +429,78 @@ func (_q *DepartmentLeadersQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withLionDepartments; query != nil {
+		if err := _q.loadLionDepartments(ctx, query, nodes, nil,
+			func(n *DepartmentLeaders, e *Departments) { n.Edges.LionDepartments = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLionDepartmentLeaders; query != nil {
+		if err := _q.loadLionDepartmentLeaders(ctx, query, nodes, nil,
+			func(n *DepartmentLeaders, e *Users) { n.Edges.LionDepartmentLeaders = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *DepartmentLeadersQuery) loadLionDepartments(ctx context.Context, query *DepartmentsQuery, nodes []*DepartmentLeaders, init func(*DepartmentLeaders), assign func(*DepartmentLeaders, *Departments)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*DepartmentLeaders)
+	for i := range nodes {
+		fk := nodes[i].DepartmentID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(departments.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "department_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *DepartmentLeadersQuery) loadLionDepartmentLeaders(ctx context.Context, query *UsersQuery, nodes []*DepartmentLeaders, init func(*DepartmentLeaders), assign func(*DepartmentLeaders, *Users)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*DepartmentLeaders)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(users.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (_q *DepartmentLeadersQuery) sqlCount(ctx context.Context) (int, error) {
@@ -379,6 +527,12 @@ func (_q *DepartmentLeadersQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != departmentleaders.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withLionDepartments != nil {
+			_spec.Node.AddColumnOnce(departmentleaders.FieldDepartmentID)
+		}
+		if _q.withLionDepartmentLeaders != nil {
+			_spec.Node.AddColumnOnce(departmentleaders.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

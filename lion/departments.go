@@ -28,8 +28,31 @@ type Departments struct {
 	// 多国语言
 	I18nName string `json:"i18n_name,omitempty"`
 	// 排序权重，越小越靠前
-	OrderWeight  int `json:"order_weight,omitempty"`
+	OrderWeight int `json:"order_weight,omitempty"`
+	// 详细描述
+	Description string `json:"description,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the DepartmentsQuery when eager-loading is set.
+	Edges        DepartmentsEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// DepartmentsEdges holds the relations/edges for other nodes in the graph.
+type DepartmentsEdges struct {
+	// LionDepartmentLeaders holds the value of the lion_department_leaders edge.
+	LionDepartmentLeaders []*DepartmentLeaders `json:"lion_department_leaders,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// LionDepartmentLeadersOrErr returns the LionDepartmentLeaders value or an error if the edge
+// was not loaded in eager-loading.
+func (e DepartmentsEdges) LionDepartmentLeadersOrErr() ([]*DepartmentLeaders, error) {
+	if e.loadedTypes[0] {
+		return e.LionDepartmentLeaders, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_department_leaders"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -39,7 +62,7 @@ func (*Departments) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case departments.FieldID, departments.FieldParentID, departments.FieldOrderWeight:
 			values[i] = new(sql.NullInt64)
-		case departments.FieldName, departments.FieldI18nName:
+		case departments.FieldName, departments.FieldI18nName, departments.FieldDescription:
 			values[i] = new(sql.NullString)
 		case departments.FieldCreatedAt, departments.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -100,6 +123,12 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.OrderWeight = int(value.Int64)
 			}
+		case departments.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -111,6 +140,11 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Departments) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionDepartmentLeaders queries the "lion_department_leaders" edge of the Departments entity.
+func (_m *Departments) QueryLionDepartmentLeaders() *DepartmentLeadersQuery {
+	return NewDepartmentsClient(_m.config).QueryLionDepartmentLeaders(_m)
 }
 
 // Update returns a builder for updating this Departments.
@@ -153,6 +187,9 @@ func (_m *Departments) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("order_weight=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

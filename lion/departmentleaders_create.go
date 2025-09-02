@@ -11,6 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
+	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // DepartmentLeadersCreate is the builder for creating a DepartmentLeaders entity.
@@ -64,6 +66,28 @@ func (_c *DepartmentLeadersCreate) SetLeaderType(v int) *DepartmentLeadersCreate
 func (_c *DepartmentLeadersCreate) SetUserID(v int) *DepartmentLeadersCreate {
 	_c.mutation.SetUserID(v)
 	return _c
+}
+
+// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
+func (_c *DepartmentLeadersCreate) SetLionDepartmentsID(id int) *DepartmentLeadersCreate {
+	_c.mutation.SetLionDepartmentsID(id)
+	return _c
+}
+
+// SetLionDepartments sets the "lion_departments" edge to the Departments entity.
+func (_c *DepartmentLeadersCreate) SetLionDepartments(v *Departments) *DepartmentLeadersCreate {
+	return _c.SetLionDepartmentsID(v.ID)
+}
+
+// SetLionDepartmentLeadersID sets the "lion_department_leaders" edge to the Users entity by ID.
+func (_c *DepartmentLeadersCreate) SetLionDepartmentLeadersID(id int) *DepartmentLeadersCreate {
+	_c.mutation.SetLionDepartmentLeadersID(id)
+	return _c
+}
+
+// SetLionDepartmentLeaders sets the "lion_department_leaders" edge to the Users entity.
+func (_c *DepartmentLeadersCreate) SetLionDepartmentLeaders(v *Users) *DepartmentLeadersCreate {
+	return _c.SetLionDepartmentLeadersID(v.ID)
 }
 
 // Mutation returns the DepartmentLeadersMutation object of the builder.
@@ -128,6 +152,12 @@ func (_c *DepartmentLeadersCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "DepartmentLeaders.user_id"`)}
 	}
+	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
+		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "DepartmentLeaders.lion_departments"`)}
+	}
+	if len(_c.mutation.LionDepartmentLeadersIDs()) == 0 {
+		return &ValidationError{Name: "lion_department_leaders", err: errors.New(`lion: missing required edge "DepartmentLeaders.lion_department_leaders"`)}
+	}
 	return nil
 }
 
@@ -162,17 +192,43 @@ func (_c *DepartmentLeadersCreate) createSpec() (*DepartmentLeaders, *sqlgraph.C
 		_spec.SetField(departmentleaders.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DepartmentID(); ok {
-		_spec.SetField(departmentleaders.FieldDepartmentID, field.TypeInt, value)
-		_node.DepartmentID = value
-	}
 	if value, ok := _c.mutation.LeaderType(); ok {
 		_spec.SetField(departmentleaders.FieldLeaderType, field.TypeInt, value)
 		_node.LeaderType = value
 	}
-	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(departmentleaders.FieldUserID, field.TypeInt, value)
-		_node.UserID = value
+	if nodes := _c.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   departmentleaders.LionDepartmentsTable,
+			Columns: []string{departmentleaders.LionDepartmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.DepartmentID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionDepartmentLeadersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   departmentleaders.LionDepartmentLeadersTable,
+			Columns: []string{departmentleaders.LionDepartmentLeadersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
