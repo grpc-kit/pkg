@@ -329,6 +329,20 @@ var (
 		Columns:    LionRolesColumns,
 		PrimaryKey: []*schema.Column{LionRolesColumns[0]},
 	}
+	// LionSecurityKeysColumns holds the columns for the "lion_security_keys" table.
+	LionSecurityKeysColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "public_key", Type: field.TypeString},
+		{Name: "private_key_encrypted", Type: field.TypeBytes},
+	}
+	// LionSecurityKeysTable holds the schema information for the "lion_security_keys" table.
+	LionSecurityKeysTable = &schema.Table{
+		Name:       "lion_security_keys",
+		Columns:    LionSecurityKeysColumns,
+		PrimaryKey: []*schema.Column{LionSecurityKeysColumns[0]},
+	}
 	// LionUserAttributesColumns holds the columns for the "lion_user_attributes" table.
 	LionUserAttributesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -400,6 +414,7 @@ var (
 		LionRoleMenuMappingTable,
 		LionRoleUserMappingTable,
 		LionRolesTable,
+		LionSecurityKeysTable,
 		LionUserAttributesTable,
 		LionUsersTable,
 	}
@@ -455,6 +470,9 @@ func init() {
 	}
 	LionRolesTable.Annotation = &entsql.Annotation{
 		Table: "lion_roles",
+	}
+	LionSecurityKeysTable.Annotation = &entsql.Annotation{
+		Table: "lion_security_keys",
 	}
 	LionUserAttributesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_attributes",

@@ -8,6 +8,7 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateDepartment 创建部门
@@ -108,6 +109,12 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 	result.Departments = deps
 
 	return result, nil
+}
+
+// DeleteDepartment 删除部门
+func (a *KnownAdminAPI) DeleteDepartment(ctx context.Context, req *adminv1.DeleteDepartmentRequest) (*emptypb.Empty, error) {
+	// 必须是部门管理员才允许删除
+	return &emptypb.Empty{}, nil
 }
 
 func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Departments) (*adminv1.Department, error) {

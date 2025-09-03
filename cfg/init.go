@@ -56,5 +56,10 @@ func (c *LocalConfig) initServices() error {
 		}
 	}
 
+	// 如未设置安全字符串，设置默认值
+	if c.Services.SecurityKey == "" {
+		c.Services.SecurityKey = "b1946ac92492d2347c6235b4d2611184"
+	}
+
 	return nil
 }

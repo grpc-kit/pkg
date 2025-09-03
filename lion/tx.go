@@ -40,6 +40,8 @@ type Tx struct {
 	RoleUserMapping *RoleUserMappingClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
+	// SecurityKeys is the client for interacting with the SecurityKeys builders.
+	SecurityKeys *SecurityKeysClient
 	// UserAttributes is the client for interacting with the UserAttributes builders.
 	UserAttributes *UserAttributesClient
 	// Users is the client for interacting with the Users builders.
@@ -189,6 +191,7 @@ func (tx *Tx) init() {
 	tx.RoleMenuMapping = NewRoleMenuMappingClient(tx.config)
 	tx.RoleUserMapping = NewRoleUserMappingClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
+	tx.SecurityKeys = NewSecurityKeysClient(tx.config)
 	tx.UserAttributes = NewUserAttributesClient(tx.config)
 	tx.Users = NewUsersClient(tx.config)
 }

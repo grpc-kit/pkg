@@ -48,6 +48,9 @@ type RoleUserMapping func(*sql.Selector)
 // Roles is the predicate function for roles builders.
 type Roles func(*sql.Selector)
 
+// SecurityKeys is the predicate function for securitykeys builders.
+type SecurityKeys func(*sql.Selector)
+
 // UserAttributes is the predicate function for userattributes builders.
 type UserAttributes func(*sql.Selector)
 

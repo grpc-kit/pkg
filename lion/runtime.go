@@ -20,6 +20,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/roleusermapping"
 	"github.com/grpc-kit/pkg/lion/schema"
+	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/users"
 )
@@ -487,6 +488,29 @@ func init() {
 	rolesDescDescription := rolesFields[1].Descriptor()
 	// roles.DefaultDescription holds the default value on creation for the description field.
 	roles.DefaultDescription = rolesDescDescription.Default.(string)
+	securitykeysMixin := schema.SecurityKeys{}.Mixin()
+	securitykeysMixinFields0 := securitykeysMixin[0].Fields()
+	_ = securitykeysMixinFields0
+	securitykeysFields := schema.SecurityKeys{}.Fields()
+	_ = securitykeysFields
+	// securitykeysDescCreatedAt is the schema descriptor for created_at field.
+	securitykeysDescCreatedAt := securitykeysMixinFields0[0].Descriptor()
+	// securitykeys.DefaultCreatedAt holds the default value on creation for the created_at field.
+	securitykeys.DefaultCreatedAt = securitykeysDescCreatedAt.Default.(func() time.Time)
+	// securitykeysDescUpdatedAt is the schema descriptor for updated_at field.
+	securitykeysDescUpdatedAt := securitykeysMixinFields0[1].Descriptor()
+	// securitykeys.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	securitykeys.DefaultUpdatedAt = securitykeysDescUpdatedAt.Default.(func() time.Time)
+	// securitykeys.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	securitykeys.UpdateDefaultUpdatedAt = securitykeysDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// securitykeysDescPublicKey is the schema descriptor for public_key field.
+	securitykeysDescPublicKey := securitykeysFields[0].Descriptor()
+	// securitykeys.PublicKeyValidator is a validator for the "public_key" field. It is called by the builders before save.
+	securitykeys.PublicKeyValidator = securitykeysDescPublicKey.Validators[0].(func(string) error)
+	// securitykeysDescPrivateKeyEncrypted is the schema descriptor for private_key_encrypted field.
+	securitykeysDescPrivateKeyEncrypted := securitykeysFields[1].Descriptor()
+	// securitykeys.PrivateKeyEncryptedValidator is a validator for the "private_key_encrypted" field. It is called by the builders before save.
+	securitykeys.PrivateKeyEncryptedValidator = securitykeysDescPrivateKeyEncrypted.Validators[0].(func([]byte) error)
 	userattributesMixin := schema.UserAttributes{}.Mixin()
 	userattributesMixinFields0 := userattributesMixin[0].Fields()
 	_ = userattributesMixinFields0

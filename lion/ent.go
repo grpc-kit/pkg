@@ -26,6 +26,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/rolemenumapping"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/roleusermapping"
+	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/users"
 )
@@ -102,6 +103,7 @@ func checkColumn(t, c string) error {
 			rolemenumapping.Table:   rolemenumapping.ValidColumn,
 			roleusermapping.Table:   roleusermapping.ValidColumn,
 			roles.Table:             roles.ValidColumn,
+			securitykeys.Table:      securitykeys.ValidColumn,
 			userattributes.Table:    userattributes.ValidColumn,
 			users.Table:             users.ValidColumn,
 		})

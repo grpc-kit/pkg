@@ -120,6 +120,7 @@ type ServicesConfig struct {
 			Admin *bool `mapstructure:"admin"`
 		}
 	} `mapstructure:"integrations"`
+	SecurityKey string `mapstructure:"security_key"`
 }
 
 // DiscoverConfig 服务注册，服务启动后如何汇报自身
@@ -354,7 +355,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 		adminIns := admin.New(
 			admin.WithLogger(c.logger),
 			admin.WithLionClient(client),
-			admin.WithAESKey([]byte("b1946ac92492d2347c6235b4d2611184")), // TODO; a test key
+			admin.WithAESKey([]byte(c.Services.SecurityKey)), // TODO; a test key
 			/*
 				admin.WithOIDCProvider(
 					c.Security.Authentication.OIDCProvider.Issuer,
