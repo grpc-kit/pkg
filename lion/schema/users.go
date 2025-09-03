@@ -93,6 +93,9 @@ func (Users) Fields() []ent.Field {
 			Sensitive().
 			Default([]byte("")).
 			Comment("用户的地址信息"),
+		field.Int("department_id").
+			Default(0).
+			Comment("部门 ID"),
 	}
 }
 

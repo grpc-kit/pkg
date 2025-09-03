@@ -11480,6 +11480,8 @@ type UsersMutation struct {
 	phone_number_hash              *string
 	phone_number_verified          *bool
 	address_encrypted              *[]byte
+	department_id                  *int
+	adddepartment_id               *int
 	clearedFields                  map[string]struct{}
 	lion_users                     map[int]struct{}
 	removedlion_users              map[int]struct{}
@@ -12512,6 +12514,62 @@ func (m *UsersMutation) ResetAddressEncrypted() {
 	m.address_encrypted = nil
 }
 
+// SetDepartmentID sets the "department_id" field.
+func (m *UsersMutation) SetDepartmentID(i int) {
+	m.department_id = &i
+	m.adddepartment_id = nil
+}
+
+// DepartmentID returns the value of the "department_id" field in the mutation.
+func (m *UsersMutation) DepartmentID() (r int, exists bool) {
+	v := m.department_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDepartmentID returns the old "department_id" field's value of the Users entity.
+// If the Users object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UsersMutation) OldDepartmentID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDepartmentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDepartmentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDepartmentID: %w", err)
+	}
+	return oldValue.DepartmentID, nil
+}
+
+// AddDepartmentID adds i to the "department_id" field.
+func (m *UsersMutation) AddDepartmentID(i int) {
+	if m.adddepartment_id != nil {
+		*m.adddepartment_id += i
+	} else {
+		m.adddepartment_id = &i
+	}
+}
+
+// AddedDepartmentID returns the value that was added to the "department_id" field in this mutation.
+func (m *UsersMutation) AddedDepartmentID() (r int, exists bool) {
+	v := m.adddepartment_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDepartmentID resets all changes to the "department_id" field.
+func (m *UsersMutation) ResetDepartmentID() {
+	m.department_id = nil
+	m.adddepartment_id = nil
+}
+
 // AddLionUserIDs adds the "lion_users" edge to the RoleUserMapping entity by ids.
 func (m *UsersMutation) AddLionUserIDs(ids ...int) {
 	if m.lion_users == nil {
@@ -12654,7 +12712,7 @@ func (m *UsersMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UsersMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 23)
 	if m.created_at != nil {
 		fields = append(fields, users.FieldCreatedAt)
 	}
@@ -12721,6 +12779,9 @@ func (m *UsersMutation) Fields() []string {
 	if m.address_encrypted != nil {
 		fields = append(fields, users.FieldAddressEncrypted)
 	}
+	if m.department_id != nil {
+		fields = append(fields, users.FieldDepartmentID)
+	}
 	return fields
 }
 
@@ -12773,6 +12834,8 @@ func (m *UsersMutation) Field(name string) (ent.Value, bool) {
 		return m.PhoneNumberVerified()
 	case users.FieldAddressEncrypted:
 		return m.AddressEncrypted()
+	case users.FieldDepartmentID:
+		return m.DepartmentID()
 	}
 	return nil, false
 }
@@ -12826,6 +12889,8 @@ func (m *UsersMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldPhoneNumberVerified(ctx)
 	case users.FieldAddressEncrypted:
 		return m.OldAddressEncrypted(ctx)
+	case users.FieldDepartmentID:
+		return m.OldDepartmentID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Users field %s", name)
 }
@@ -12989,6 +13054,13 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAddressEncrypted(v)
 		return nil
+	case users.FieldDepartmentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDepartmentID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Users field %s", name)
 }
@@ -12996,13 +13068,21 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UsersMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.adddepartment_id != nil {
+		fields = append(fields, users.FieldDepartmentID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UsersMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case users.FieldDepartmentID:
+		return m.AddedDepartmentID()
+	}
 	return nil, false
 }
 
@@ -13011,6 +13091,13 @@ func (m *UsersMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UsersMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case users.FieldDepartmentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDepartmentID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Users numeric field %s", name)
 }
@@ -13166,6 +13253,9 @@ func (m *UsersMutation) ResetField(name string) error {
 		return nil
 	case users.FieldAddressEncrypted:
 		m.ResetAddressEncrypted()
+		return nil
+	case users.FieldDepartmentID:
+		m.ResetDepartmentID()
 		return nil
 	}
 	return fmt.Errorf("unknown Users field %s", name)

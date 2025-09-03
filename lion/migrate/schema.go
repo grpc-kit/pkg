@@ -391,6 +391,7 @@ var (
 		{Name: "phone_number_hash", Type: field.TypeString, Nullable: true},
 		{Name: "phone_number_verified", Type: field.TypeBool, Default: false},
 		{Name: "address_encrypted", Type: field.TypeBytes},
+		{Name: "department_id", Type: field.TypeInt, Default: 0},
 	}
 	// LionUsersTable holds the schema information for the "lion_users" table.
 	LionUsersTable = &schema.Table{

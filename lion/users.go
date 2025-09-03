@@ -61,6 +61,8 @@ type Users struct {
 	PhoneNumberVerified bool `json:"phone_number_verified,omitempty"`
 	// 用户的地址信息
 	AddressEncrypted []byte `json:"-"`
+	// 部门 ID
+	DepartmentID int `json:"department_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UsersQuery when eager-loading is set.
 	Edges        UsersEdges `json:"edges"`
@@ -105,7 +107,7 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case users.FieldEmailVerified, users.FieldPhoneNumberVerified:
 			values[i] = new(sql.NullBool)
-		case users.FieldID:
+		case users.FieldID, users.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
 		case users.FieldPreferredUsername, users.FieldIdcardHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldGender, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash:
 			values[i] = new(sql.NullString)
@@ -274,6 +276,12 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.AddressEncrypted = *value
 			}
+		case users.FieldDepartmentID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field department_id", values[i])
+			} else if value.Valid {
+				_m.DepartmentID = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -400,6 +408,9 @@ func (_m *Users) String() string {
 	builder.WriteString(fmt.Sprintf("%v", _m.PhoneNumberVerified))
 	builder.WriteString(", ")
 	builder.WriteString("address_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("department_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentID))
 	builder.WriteByte(')')
 	return builder.String()
 }

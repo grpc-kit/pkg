@@ -59,6 +59,8 @@ const (
 	FieldPhoneNumberVerified = "phone_number_verified"
 	// FieldAddressEncrypted holds the string denoting the address_encrypted field in the database.
 	FieldAddressEncrypted = "address_encrypted"
+	// FieldDepartmentID holds the string denoting the department_id field in the database.
+	FieldDepartmentID = "department_id"
 	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
 	EdgeLionUsers = "lion_users"
 	// EdgeLionDepartmentLeaders holds the string denoting the lion_department_leaders edge name in mutations.
@@ -106,6 +108,7 @@ var Columns = []string{
 	FieldPhoneNumberHash,
 	FieldPhoneNumberVerified,
 	FieldAddressEncrypted,
+	FieldDepartmentID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -143,6 +146,8 @@ var (
 	DefaultPhoneNumberVerified bool
 	// DefaultAddressEncrypted holds the default value on creation for the "address_encrypted" field.
 	DefaultAddressEncrypted []byte
+	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
+	DefaultDepartmentID int
 )
 
 // Gender defines the type for the "gender" enum field.
@@ -264,6 +269,11 @@ func ByPhoneNumberHash(opts ...sql.OrderTermOption) OrderOption {
 // ByPhoneNumberVerified orders the results by the phone_number_verified field.
 func ByPhoneNumberVerified(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPhoneNumberVerified, opts...).ToFunc()
+}
+
+// ByDepartmentID orders the results by the department_id field.
+func ByDepartmentID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDepartmentID, opts...).ToFunc()
 }
 
 // ByLionUsersCount orders the results by lion_users count.

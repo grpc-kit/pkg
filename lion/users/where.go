@@ -160,6 +160,11 @@ func AddressEncrypted(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldAddressEncrypted, v))
 }
 
+// DepartmentID applies equality check predicate on the "department_id" field. It's identical to DepartmentIDEQ.
+func DepartmentID(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldDepartmentID, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldCreatedAt, v))
@@ -1308,6 +1313,46 @@ func AddressEncryptedLT(v []byte) predicate.Users {
 // AddressEncryptedLTE applies the LTE predicate on the "address_encrypted" field.
 func AddressEncryptedLTE(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldAddressEncrypted, v))
+}
+
+// DepartmentIDEQ applies the EQ predicate on the "department_id" field.
+func DepartmentIDEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldDepartmentID, v))
+}
+
+// DepartmentIDNEQ applies the NEQ predicate on the "department_id" field.
+func DepartmentIDNEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldNEQ(FieldDepartmentID, v))
+}
+
+// DepartmentIDIn applies the In predicate on the "department_id" field.
+func DepartmentIDIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldIn(FieldDepartmentID, vs...))
+}
+
+// DepartmentIDNotIn applies the NotIn predicate on the "department_id" field.
+func DepartmentIDNotIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldNotIn(FieldDepartmentID, vs...))
+}
+
+// DepartmentIDGT applies the GT predicate on the "department_id" field.
+func DepartmentIDGT(v int) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldDepartmentID, v))
+}
+
+// DepartmentIDGTE applies the GTE predicate on the "department_id" field.
+func DepartmentIDGTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldDepartmentID, v))
+}
+
+// DepartmentIDLT applies the LT predicate on the "department_id" field.
+func DepartmentIDLT(v int) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldDepartmentID, v))
+}
+
+// DepartmentIDLTE applies the LTE predicate on the "department_id" field.
+func DepartmentIDLTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldDepartmentID, v))
 }
 
 // HasLionUsers applies the HasEdge predicate on the "lion_users" edge.

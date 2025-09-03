@@ -282,6 +282,20 @@ func (_c *UsersCreate) SetAddressEncrypted(v []byte) *UsersCreate {
 	return _c
 }
 
+// SetDepartmentID sets the "department_id" field.
+func (_c *UsersCreate) SetDepartmentID(v int) *UsersCreate {
+	_c.mutation.SetDepartmentID(v)
+	return _c
+}
+
+// SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableDepartmentID(v *int) *UsersCreate {
+	if v != nil {
+		_c.SetDepartmentID(*v)
+	}
+	return _c
+}
+
 // AddLionUserIDs adds the "lion_users" edge to the RoleUserMapping entity by IDs.
 func (_c *UsersCreate) AddLionUserIDs(ids ...int) *UsersCreate {
 	_c.mutation.AddLionUserIDs(ids...)
@@ -391,6 +405,10 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultAddressEncrypted
 		_c.mutation.SetAddressEncrypted(v)
 	}
+	if _, ok := _c.mutation.DepartmentID(); !ok {
+		v := users.DefaultDepartmentID
+		_c.mutation.SetDepartmentID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -440,6 +458,9 @@ func (_c *UsersCreate) check() error {
 	}
 	if _, ok := _c.mutation.AddressEncrypted(); !ok {
 		return &ValidationError{Name: "address_encrypted", err: errors.New(`lion: missing required field "Users.address_encrypted"`)}
+	}
+	if _, ok := _c.mutation.DepartmentID(); !ok {
+		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "Users.department_id"`)}
 	}
 	return nil
 }
@@ -554,6 +575,10 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
 		_node.AddressEncrypted = value
+	}
+	if value, ok := _c.mutation.DepartmentID(); ok {
+		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
+		_node.DepartmentID = value
 	}
 	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

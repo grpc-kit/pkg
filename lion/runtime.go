@@ -604,4 +604,8 @@ func init() {
 	usersDescAddressEncrypted := usersFields[18].Descriptor()
 	// users.DefaultAddressEncrypted holds the default value on creation for the address_encrypted field.
 	users.DefaultAddressEncrypted = usersDescAddressEncrypted.Default.([]byte)
+	// usersDescDepartmentID is the schema descriptor for department_id field.
+	usersDescDepartmentID := usersFields[19].Descriptor()
+	// users.DefaultDepartmentID holds the default value on creation for the department_id field.
+	users.DefaultDepartmentID = usersDescDepartmentID.Default.(int)
 }

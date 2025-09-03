@@ -2,12 +2,15 @@ package admin
 
 import (
 	"context"
+	"strconv"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/users"
+	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -26,7 +29,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 
 	// 确认父部门存在
 	if req.Department.ParentId != 0 {
-		_, err := tx.Departments.Get(ctx, int(req.Department.ParentId))
+		_, err = tx.Departments.Get(ctx, int(req.Department.ParentId))
 		if err != nil {
 			_ = tx.Rollback()
 			return result, errs.InvalidArgument(ctx).WithMessage("department parent id not found")
@@ -81,11 +84,18 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDepartmentsRequest) (*adminv1.ListDepartmentsResponse, error) {
 	result := &adminv1.ListDepartmentsResponse{}
 
-	// TODO;
-	userID := 2
+	userIDStr, ok := rpc.GetUserIDFromContext(ctx)
+	if !ok {
+		return result, errs.Unauthenticated(ctx).WithMessage("user id not found")
+	}
+
+	userIDInt, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		return result, err
+	}
 
 	leaders, err := a.config.db.DepartmentLeaders.Query().
-		Where(departmentleaders.UserIDEQ(userID)).
+		Where(departmentleaders.UserIDEQ(userIDInt)).
 		WithLionDepartments().All(ctx)
 	if err != nil {
 		return result, err
@@ -113,7 +123,86 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 
 // DeleteDepartment 删除部门
 func (a *KnownAdminAPI) DeleteDepartment(ctx context.Context, req *adminv1.DeleteDepartmentRequest) (*emptypb.Empty, error) {
+	empty := &emptypb.Empty{}
+
 	// 必须是部门管理员才允许删除
+	userIDStr, ok := rpc.GetUserIDFromContext(ctx)
+	if !ok {
+		return empty, errs.Unauthenticated(ctx).WithMessage("user id not found")
+	}
+
+	userIDInt, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		return empty, err
+	}
+
+	// 该用户对于的管理部门 ID 列表
+	depIDs := make([]int, 0)
+
+	// 必须是部门管理员才允许删除
+	dls, err := a.config.db.DepartmentLeaders.Query().
+		Select(
+			departmentleaders.FieldLeaderType,
+			departmentleaders.FieldDepartmentID,
+		).
+		Where(
+			departmentleaders.UserIDEQ(userIDInt),
+		).
+		All(ctx)
+	if err != nil {
+		return empty, err
+	}
+
+	for _, d := range dls {
+		depIDs = append(depIDs, d.DepartmentID)
+	}
+
+	dds, err := a.config.db.Departments.Query().Select(
+		departments.FieldID,
+		departments.FieldParentID,
+	).Where(
+		departments.Or(
+			departments.IDIn(depIDs...),
+			departments.ParentIDIn(depIDs...),
+		),
+	).All(ctx)
+
+	for _, d := range dds {
+		depIDs = append(depIDs, d.ID)
+	}
+
+	// 查询请求的部门 ID 是否在 depIDs 中
+	hasAllow := false
+	for _, depID := range depIDs {
+		if depID == int(req.Id) {
+			hasAllow = true
+			break
+		}
+	}
+
+	if hasAllow {
+		// 前提该部门下没有子部门且没有关联成员了
+		userCount := a.config.db.Users.Query().
+			Select(users.FieldDepartmentID).
+			Where(
+				users.DepartmentIDEQ(int(req.Id)),
+			).CountX(ctx)
+		if userCount > 0 {
+			return empty, errs.InvalidArgument(ctx).WithMessage("department has users")
+		}
+
+		for _, d := range dds {
+			if d.ParentID == int(req.Id) {
+				return empty, errs.InvalidArgument(ctx).WithMessage("department has children")
+			}
+		}
+
+		_, err = a.config.db.Departments.Delete().
+			Where(
+				departments.ID(int(req.Id)),
+			).Exec(ctx)
+	}
+
 	return &emptypb.Empty{}, nil
 }
 

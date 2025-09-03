@@ -336,6 +336,27 @@ func (_u *UsersUpdate) SetAddressEncrypted(v []byte) *UsersUpdate {
 	return _u
 }
 
+// SetDepartmentID sets the "department_id" field.
+func (_u *UsersUpdate) SetDepartmentID(v int) *UsersUpdate {
+	_u.mutation.ResetDepartmentID()
+	_u.mutation.SetDepartmentID(v)
+	return _u
+}
+
+// SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableDepartmentID(v *int) *UsersUpdate {
+	if v != nil {
+		_u.SetDepartmentID(*v)
+	}
+	return _u
+}
+
+// AddDepartmentID adds value to the "department_id" field.
+func (_u *UsersUpdate) AddDepartmentID(v int) *UsersUpdate {
+	_u.mutation.AddDepartmentID(v)
+	return _u
+}
+
 // AddLionUserIDs adds the "lion_users" edge to the RoleUserMapping entity by IDs.
 func (_u *UsersUpdate) AddLionUserIDs(ids ...int) *UsersUpdate {
 	_u.mutation.AddLionUserIDs(ids...)
@@ -568,6 +589,12 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.DepartmentID(); ok {
+		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDepartmentID(); ok {
+		_spec.AddField(users.FieldDepartmentID, field.TypeInt, value)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -985,6 +1012,27 @@ func (_u *UsersUpdateOne) SetAddressEncrypted(v []byte) *UsersUpdateOne {
 	return _u
 }
 
+// SetDepartmentID sets the "department_id" field.
+func (_u *UsersUpdateOne) SetDepartmentID(v int) *UsersUpdateOne {
+	_u.mutation.ResetDepartmentID()
+	_u.mutation.SetDepartmentID(v)
+	return _u
+}
+
+// SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableDepartmentID(v *int) *UsersUpdateOne {
+	if v != nil {
+		_u.SetDepartmentID(*v)
+	}
+	return _u
+}
+
+// AddDepartmentID adds value to the "department_id" field.
+func (_u *UsersUpdateOne) AddDepartmentID(v int) *UsersUpdateOne {
+	_u.mutation.AddDepartmentID(v)
+	return _u
+}
+
 // AddLionUserIDs adds the "lion_users" edge to the RoleUserMapping entity by IDs.
 func (_u *UsersUpdateOne) AddLionUserIDs(ids ...int) *UsersUpdateOne {
 	_u.mutation.AddLionUserIDs(ids...)
@@ -1247,6 +1295,12 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if value, ok := _u.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.DepartmentID(); ok {
+		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDepartmentID(); ok {
+		_spec.AddField(users.FieldDepartmentID, field.TypeInt, value)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
