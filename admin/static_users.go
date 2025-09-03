@@ -10,6 +10,7 @@ import (
 
 // StaticUser 本地配置的静态用户
 type StaticUser struct {
+	UserID       string   `json:"user_id"`
 	Username     string   `json:"username"`
 	PasswordHash string   `json:"password_hash"`
 	Email        string   `json:"email"`
@@ -26,9 +27,14 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 		tenant = s.Tenant
 	}
 
+	userID := s.UserID
+	if userID == "" {
+		userID = s.Username
+	}
+
 	claims := auth.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   s.Username,
+			Subject:   s.UserID,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresIn) * time.Second)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),

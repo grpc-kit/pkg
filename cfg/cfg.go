@@ -203,6 +203,7 @@ type Authorization struct {
 
 // BasicAuth 用于HTTP基本认证的用户权限定义
 type BasicAuth struct {
+	UserID   string `mapstructure:"user_id"`
 	Username string `mapstructure:"username"`
 	// Deprecated: 使用 PasswordHash 代替，优先级低于 Password 配置
 	Password     string   `mapstructure:"password"`
@@ -332,6 +333,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 	if c.Security != nil && c.Security.Authentication != nil {
 		for _, v := range c.Security.Authentication.HTTPUsers {
 			uu := &admin.StaticUser{
+				UserID:       v.UserID,
 				Username:     v.Username,
 				PasswordHash: v.PasswordHash,
 				Groups:       v.Groups,
