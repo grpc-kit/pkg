@@ -565,6 +565,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthToken",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders":
+			ctx = c.Security.withUserID(ctx, "0")
 			ctx = c.Security.withUsername(ctx, UsernameAnonymous)
 			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeNone)
 			return ctx, nil
@@ -597,6 +598,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 
 						if v.Password == tmps[1] || v.PasswordHash == userHash {
 							// 认证成功
+							ctx = c.Security.withUserID(ctx, v.UserID)
 							ctx = c.Security.withUsername(ctx, tmps[0])
 							ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
 							ctx = c.Security.withGroups(ctx, v.Groups)
@@ -630,6 +632,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			}
 
 			ctx = c.Security.withIDToken(ctx, idToken)
+			ctx = c.Security.withUserID(ctx, idToken.Subject)
 			ctx = c.Security.withUsername(ctx, idToken.Email)
 			ctx = c.Security.withGroups(ctx, idToken.Groups)
 			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBearer)

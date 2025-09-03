@@ -17,11 +17,18 @@ const (
 
 	// groupsKey 用于存放当前用户归属的组列表
 	groupsKey
+
+	// userIDKey 用于存放当前用户 ID
+	userIDKey
 )
 
 // ContextWithIDToken xx
 func ContextWithIDToken(parent context.Context, token interface{}) context.Context {
 	return context.WithValue(parent, idTokenKey, token)
+}
+
+func ContextWithUserID(parent context.Context, userID string) context.Context {
+	return context.WithValue(parent, userIDKey, userID)
 }
 
 func ContextWithUsername(parent context.Context, username string) context.Context {
@@ -44,6 +51,17 @@ func GetGroupsFromContext(ctx context.Context) ([]string, bool) {
 func GetAuthenticationTypeFromContext(ctx context.Context) (string, bool) {
 	username, ok := ctx.Value(authenticationTypeKey).(string)
 	return username, ok
+}
+
+func GetUserIDFromContext(ctx context.Context) (string, bool) {
+	defaultUser := "0"
+
+	userID, ok := ctx.Value(userIDKey).(string)
+	if ok && userID != "" {
+		return userID, true
+	}
+
+	return defaultUser, false
 }
 
 func GetUsernameFromContext(ctx context.Context) (string, bool) {

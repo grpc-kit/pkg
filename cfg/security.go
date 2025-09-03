@@ -142,6 +142,12 @@ func (c *SecurityConfig) withIDToken(parent context.Context, token IDTokenClaims
 	return rpc.ContextWithIDToken(parent, token)
 }
 
+// WithUserID 用于设置当前会话的用户 ID
+func (c *SecurityConfig) withUserID(parent context.Context, userID string) context.Context {
+	// return context.WithValue(parent, usernameKey, username)
+	return rpc.ContextWithUserID(parent, userID)
+}
+
 // WithUsername 用于设置当前会话的用户名
 func (c *SecurityConfig) withUsername(parent context.Context, username string) context.Context {
 	// return context.WithValue(parent, usernameKey, username)
