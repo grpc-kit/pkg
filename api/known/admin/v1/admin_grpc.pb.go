@@ -34,6 +34,7 @@ type KnownAdminClient interface {
 	CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
 	DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateDepartment(ctx context.Context, in *UpdateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	// 安全相关
 	CreateSecurityKey(ctx context.Context, in *CreateSecurityKeyRequest, opts ...grpc.CallOption) (*SecurityKey, error)
 }
@@ -136,6 +137,15 @@ func (c *knownAdminClient) DeleteDepartment(ctx context.Context, in *DeleteDepar
 	return out, nil
 }
 
+func (c *knownAdminClient) UpdateDepartment(ctx context.Context, in *UpdateDepartmentRequest, opts ...grpc.CallOption) (*Department, error) {
+	out := new(Department)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartment", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) CreateSecurityKey(ctx context.Context, in *CreateSecurityKeyRequest, opts ...grpc.CallOption) (*SecurityKey, error) {
 	out := new(SecurityKey)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateSecurityKey", in, out, opts...)
@@ -160,6 +170,7 @@ type KnownAdminServer interface {
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
 	DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*emptypb.Empty, error)
+	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error)
 	// 安全相关
 	CreateSecurityKey(context.Context, *CreateSecurityKeyRequest) (*SecurityKey, error)
 }
@@ -197,6 +208,9 @@ func (UnimplementedKnownAdminServer) ListDepartments(context.Context, *ListDepar
 }
 func (UnimplementedKnownAdminServer) DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteDepartment not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateDepartment not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateSecurityKey(context.Context, *CreateSecurityKeyRequest) (*SecurityKey, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSecurityKey not implemented")
@@ -393,6 +407,24 @@ func _KnownAdmin_DeleteDepartment_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_UpdateDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDepartmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateDepartment(ctx, req.(*UpdateDepartmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_CreateSecurityKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateSecurityKeyRequest)
 	if err := dec(in); err != nil {
@@ -457,6 +489,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDepartment",
 			Handler:    _KnownAdmin_DeleteDepartment_Handler,
+		},
+		{
+			MethodName: "UpdateDepartment",
+			Handler:    _KnownAdmin_UpdateDepartment_Handler,
 		},
 		{
 			MethodName: "CreateSecurityKey",

@@ -162,6 +162,13 @@ func (a *KnownAdminAPI) DeleteDepartment(ctx context.Context, req *adminv1.Delet
 	return empty, errs.PermissionDenied(ctx)
 }
 
+// UpdateDepartment 更新部门
+func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.UpdateDepartmentRequest) (*adminv1.Department, error) {
+	result := &adminv1.Department{}
+
+	return result, nil
+}
+
 func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Departments) (*adminv1.Department, error) {
 	// 查子部门
 	children, err := a.config.db.Departments.
