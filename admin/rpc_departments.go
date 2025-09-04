@@ -166,6 +166,30 @@ func (a *KnownAdminAPI) DeleteDepartment(ctx context.Context, req *adminv1.Delet
 func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.UpdateDepartmentRequest) (*adminv1.Department, error) {
 	result := &adminv1.Department{}
 
+	if req == nil || req.Department == nil {
+		return result, errs.InvalidArgument(ctx).WithMessage("request body department is nil")
+	}
+
+	if req.UpdateMask != nil && len(req.UpdateMask.Paths) != 0 {
+		x := a.config.db.Departments.Update()
+
+		for _, path := range req.UpdateMask.Paths {
+			switch path {
+			case "name":
+				x.SetName(req.Department.Name)
+			case "i18n_name.en_us":
+			// TODO;
+			case "order_weight":
+				x.SetOrderWeight(int(req.Department.OrderWeight))
+			}
+		}
+
+		_, err := x.Where(departments.IDEQ(int(req.Department.Id))).Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return result, nil
 }
 
