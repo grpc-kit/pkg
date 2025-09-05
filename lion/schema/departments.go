@@ -20,7 +20,6 @@ func (Departments) Fields() []ent.Field {
 			Default(0).
 			Comment("父菜单 ID，为 0 表示顶级菜单"),
 		field.String("name").
-			Unique().
 			MaxLen(128).
 			NotEmpty().
 			Comment("部门名称"),

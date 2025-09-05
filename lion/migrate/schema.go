@@ -128,7 +128,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
-		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
+		{Name: "name", Type: field.TypeString, Size: 128},
 		{Name: "i18n_name", Type: field.TypeString, Default: ""},
 		{Name: "order_weight", Type: field.TypeInt, Default: 0},
 		{Name: "description", Type: field.TypeString, Default: ""},
