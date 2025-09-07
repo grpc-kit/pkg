@@ -3,7 +3,6 @@
 package users
 
 import (
-	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -25,6 +24,8 @@ const (
 	FieldPreferredUsername = "preferred_username"
 	// FieldRealnameEncrypted holds the string denoting the realname_encrypted field in the database.
 	FieldRealnameEncrypted = "realname_encrypted"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// FieldIdcardEncrypted holds the string denoting the idcard_encrypted field in the database.
 	FieldIdcardEncrypted = "idcard_encrypted"
 	// FieldIdcardHash holds the string denoting the idcard_hash field in the database.
@@ -59,14 +60,16 @@ const (
 	FieldPhoneNumberVerified = "phone_number_verified"
 	// FieldAddressEncrypted holds the string denoting the address_encrypted field in the database.
 	FieldAddressEncrypted = "address_encrypted"
-	// FieldDescription holds the string denoting the description field in the database.
-	FieldDescription = "description"
 	// FieldDepartmentID holds the string denoting the department_id field in the database.
 	FieldDepartmentID = "department_id"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
 	EdgeLionUsers = "lion_users"
 	// EdgeLionDepartmentLeaders holds the string denoting the lion_department_leaders edge name in mutations.
 	EdgeLionDepartmentLeaders = "lion_department_leaders"
+	// EdgeLionDepartments holds the string denoting the lion_departments edge name in mutations.
+	EdgeLionDepartments = "lion_departments"
 	// Table holds the table name of the users in the database.
 	Table = "lion_users"
 	// LionUsersTable is the table that holds the lion_users relation/edge.
@@ -83,6 +86,13 @@ const (
 	LionDepartmentLeadersInverseTable = "lion_department_leaders"
 	// LionDepartmentLeadersColumn is the table column denoting the lion_department_leaders relation/edge.
 	LionDepartmentLeadersColumn = "user_id"
+	// LionDepartmentsTable is the table that holds the lion_departments relation/edge.
+	LionDepartmentsTable = "lion_users"
+	// LionDepartmentsInverseTable is the table name for the Departments entity.
+	// It exists in this package in order to avoid circular dependency with the "departments" package.
+	LionDepartmentsInverseTable = "lion_departments"
+	// LionDepartmentsColumn is the table column denoting the lion_departments relation/edge.
+	LionDepartmentsColumn = "department_id"
 )
 
 // Columns holds all SQL columns for users fields.
@@ -93,6 +103,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldPreferredUsername,
 	FieldRealnameEncrypted,
+	FieldStatus,
 	FieldIdcardEncrypted,
 	FieldIdcardHash,
 	FieldNickname,
@@ -110,8 +121,8 @@ var Columns = []string{
 	FieldPhoneNumberHash,
 	FieldPhoneNumberVerified,
 	FieldAddressEncrypted,
-	FieldDescription,
 	FieldDepartmentID,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -135,6 +146,8 @@ var (
 	PreferredUsernameValidator func(string) error
 	// DefaultRealnameEncrypted holds the default value on creation for the "realname_encrypted" field.
 	DefaultRealnameEncrypted []byte
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus int
 	// DefaultIdcardEncrypted holds the default value on creation for the "idcard_encrypted" field.
 	DefaultIdcardEncrypted []byte
 	// DefaultIdcardHash holds the default value on creation for the "idcard_hash" field.
@@ -153,6 +166,8 @@ var (
 	DefaultEmailHash string
 	// DefaultEmailVerified holds the default value on creation for the "email_verified" field.
 	DefaultEmailVerified bool
+	// DefaultGender holds the default value on creation for the "gender" field.
+	DefaultGender int
 	// DefaultBirthdate holds the default value on creation for the "birthdate" field.
 	DefaultBirthdate func() time.Time
 	// DefaultZoneinfo holds the default value on creation for the "zoneinfo" field.
@@ -167,41 +182,13 @@ var (
 	DefaultPhoneNumberVerified bool
 	// DefaultAddressEncrypted holds the default value on creation for the "address_encrypted" field.
 	DefaultAddressEncrypted []byte
+	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
+	DefaultDepartmentID int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	DescriptionValidator func(string) error
-	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
-	DefaultDepartmentID int
 )
-
-// Gender defines the type for the "gender" enum field.
-type Gender string
-
-// GenderUnknown is the default value of the Gender enum.
-const DefaultGender = GenderUnknown
-
-// Gender values.
-const (
-	GenderMale    Gender = "male"
-	GenderFemale  Gender = "female"
-	GenderOther   Gender = "other"
-	GenderUnknown Gender = "unknown"
-)
-
-func (ge Gender) String() string {
-	return string(ge)
-}
-
-// GenderValidator is a validator for the "gender" field enum values. It is called by the builders before save.
-func GenderValidator(ge Gender) error {
-	switch ge {
-	case GenderMale, GenderFemale, GenderOther, GenderUnknown:
-		return nil
-	default:
-		return fmt.Errorf("users: invalid enum value for gender field: %q", ge)
-	}
-}
 
 // OrderOption defines the ordering options for the Users queries.
 type OrderOption func(*sql.Selector)
@@ -229,6 +216,11 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByPreferredUsername orders the results by the preferred_username field.
 func ByPreferredUsername(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPreferredUsername, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
 // ByIdcardHash orders the results by the idcard_hash field.
@@ -296,14 +288,14 @@ func ByPhoneNumberVerified(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPhoneNumberVerified, opts...).ToFunc()
 }
 
-// ByDescription orders the results by the description field.
-func ByDescription(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDescription, opts...).ToFunc()
-}
-
 // ByDepartmentID orders the results by the department_id field.
 func ByDepartmentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDepartmentID, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByLionUsersCount orders the results by lion_users count.
@@ -333,6 +325,13 @@ func ByLionDepartmentLeaders(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOp
 		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentLeadersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByLionDepartmentsField orders the results by lion_departments field.
+func ByLionDepartmentsField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentsStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newLionUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -345,5 +344,12 @@ func newLionDepartmentLeadersStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionDepartmentLeadersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentLeadersTable, LionDepartmentLeadersColumn),
+	)
+}
+func newLionDepartmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionDepartmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentsTable, LionDepartmentsColumn),
 	)
 }

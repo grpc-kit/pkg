@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -27,6 +28,8 @@ type Users struct {
 	PreferredUsername string `json:"preferred_username,omitempty"`
 	// 用户的真实姓名
 	RealnameEncrypted []byte `json:"-"`
+	// 用户状态
+	Status int `json:"status,omitempty"`
 	// 用户身份证号码
 	IdcardEncrypted []byte `json:"-"`
 	// 用户的身份证号码哈希，用于唯一值判断
@@ -45,8 +48,8 @@ type Users struct {
 	EmailHash string `json:"email_hash,omitempty"`
 	// 邮箱是否验证过
 	EmailVerified bool `json:"email_verified,omitempty"`
-	// 用户的性别，如：male、female, other
-	Gender users.Gender `json:"gender,omitempty"`
+	// 用户的性别，如：0, 1=male、2=female
+	Gender int `json:"gender,omitempty"`
 	// 用户的出生日期，格式为 YYYY-MM-DD，如 1990-12-31
 	Birthdate time.Time `json:"birthdate,omitempty"`
 	// 用户的时区信息，如：Asia/Shanghai
@@ -61,10 +64,10 @@ type Users struct {
 	PhoneNumberVerified bool `json:"phone_number_verified,omitempty"`
 	// 用户的地址信息
 	AddressEncrypted []byte `json:"-"`
-	// 用户详细描述
-	Description string `json:"description,omitempty"`
 	// 部门 ID
 	DepartmentID int `json:"department_id,omitempty"`
+	// 用户详细描述
+	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UsersQuery when eager-loading is set.
 	Edges        UsersEdges `json:"edges"`
@@ -77,9 +80,11 @@ type UsersEdges struct {
 	LionUsers []*RoleUserMapping `json:"lion_users,omitempty"`
 	// LionDepartmentLeaders holds the value of the lion_department_leaders edge.
 	LionDepartmentLeaders []*DepartmentLeaders `json:"lion_department_leaders,omitempty"`
+	// LionDepartments holds the value of the lion_departments edge.
+	LionDepartments *Departments `json:"lion_departments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // LionUsersOrErr returns the LionUsers value or an error if the edge
@@ -100,6 +105,17 @@ func (e UsersEdges) LionDepartmentLeadersOrErr() ([]*DepartmentLeaders, error) {
 	return nil, &NotLoadedError{edge: "lion_department_leaders"}
 }
 
+// LionDepartmentsOrErr returns the LionDepartments value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UsersEdges) LionDepartmentsOrErr() (*Departments, error) {
+	if e.LionDepartments != nil {
+		return e.LionDepartments, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: departments.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_departments"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Users) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -109,9 +125,9 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case users.FieldEmailVerified, users.FieldPhoneNumberVerified:
 			values[i] = new(sql.NullBool)
-		case users.FieldID, users.FieldDepartmentID:
+		case users.FieldID, users.FieldStatus, users.FieldGender, users.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
-		case users.FieldPreferredUsername, users.FieldIdcardHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldGender, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
+		case users.FieldPreferredUsername, users.FieldIdcardHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
 			values[i] = new(sql.NullString)
 		case users.FieldCreatedAt, users.FieldUpdatedAt, users.FieldDeletedAt, users.FieldBirthdate:
 			values[i] = new(sql.NullTime)
@@ -166,6 +182,12 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field realname_encrypted", values[i])
 			} else if value != nil {
 				_m.RealnameEncrypted = *value
+			}
+		case users.FieldStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = int(value.Int64)
 			}
 		case users.FieldIdcardEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -222,10 +244,10 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 				_m.EmailVerified = value.Bool
 			}
 		case users.FieldGender:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field gender", values[i])
 			} else if value.Valid {
-				_m.Gender = users.Gender(value.String)
+				_m.Gender = int(value.Int64)
 			}
 		case users.FieldBirthdate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -269,17 +291,17 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.AddressEncrypted = *value
 			}
-		case users.FieldDescription:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field description", values[i])
-			} else if value.Valid {
-				_m.Description = value.String
-			}
 		case users.FieldDepartmentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field department_id", values[i])
 			} else if value.Valid {
 				_m.DepartmentID = int(value.Int64)
+			}
+		case users.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -302,6 +324,11 @@ func (_m *Users) QueryLionUsers() *RoleUserMappingQuery {
 // QueryLionDepartmentLeaders queries the "lion_department_leaders" edge of the Users entity.
 func (_m *Users) QueryLionDepartmentLeaders() *DepartmentLeadersQuery {
 	return NewUsersClient(_m.config).QueryLionDepartmentLeaders(_m)
+}
+
+// QueryLionDepartments queries the "lion_departments" edge of the Users entity.
+func (_m *Users) QueryLionDepartments() *DepartmentsQuery {
+	return NewUsersClient(_m.config).QueryLionDepartments(_m)
 }
 
 // Update returns a builder for updating this Users.
@@ -342,6 +369,9 @@ func (_m *Users) String() string {
 	builder.WriteString(_m.PreferredUsername)
 	builder.WriteString(", ")
 	builder.WriteString("realname_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
 	builder.WriteString("idcard_encrypted=<sensitive>")
 	builder.WriteString(", ")
@@ -390,11 +420,11 @@ func (_m *Users) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("address_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	builder.WriteString("description=")
-	builder.WriteString(_m.Description)
-	builder.WriteString(", ")
 	builder.WriteString("department_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentID))
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

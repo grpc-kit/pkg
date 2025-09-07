@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
+	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/roleusermapping"
 	"github.com/grpc-kit/pkg/lion/users"
 )
@@ -73,6 +74,20 @@ func (_c *UsersCreate) SetPreferredUsername(v string) *UsersCreate {
 // SetRealnameEncrypted sets the "realname_encrypted" field.
 func (_c *UsersCreate) SetRealnameEncrypted(v []byte) *UsersCreate {
 	_c.mutation.SetRealnameEncrypted(v)
+	return _c
+}
+
+// SetStatus sets the "status" field.
+func (_c *UsersCreate) SetStatus(v int) *UsersCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableStatus(v *int) *UsersCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
 	return _c
 }
 
@@ -187,13 +202,13 @@ func (_c *UsersCreate) SetNillableEmailVerified(v *bool) *UsersCreate {
 }
 
 // SetGender sets the "gender" field.
-func (_c *UsersCreate) SetGender(v users.Gender) *UsersCreate {
+func (_c *UsersCreate) SetGender(v int) *UsersCreate {
 	_c.mutation.SetGender(v)
 	return _c
 }
 
 // SetNillableGender sets the "gender" field if the given value is not nil.
-func (_c *UsersCreate) SetNillableGender(v *users.Gender) *UsersCreate {
+func (_c *UsersCreate) SetNillableGender(v *int) *UsersCreate {
 	if v != nil {
 		_c.SetGender(*v)
 	}
@@ -282,20 +297,6 @@ func (_c *UsersCreate) SetAddressEncrypted(v []byte) *UsersCreate {
 	return _c
 }
 
-// SetDescription sets the "description" field.
-func (_c *UsersCreate) SetDescription(v string) *UsersCreate {
-	_c.mutation.SetDescription(v)
-	return _c
-}
-
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_c *UsersCreate) SetNillableDescription(v *string) *UsersCreate {
-	if v != nil {
-		_c.SetDescription(*v)
-	}
-	return _c
-}
-
 // SetDepartmentID sets the "department_id" field.
 func (_c *UsersCreate) SetDepartmentID(v int) *UsersCreate {
 	_c.mutation.SetDepartmentID(v)
@@ -306,6 +307,20 @@ func (_c *UsersCreate) SetDepartmentID(v int) *UsersCreate {
 func (_c *UsersCreate) SetNillableDepartmentID(v *int) *UsersCreate {
 	if v != nil {
 		_c.SetDepartmentID(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *UsersCreate) SetDescription(v string) *UsersCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableDescription(v *string) *UsersCreate {
+	if v != nil {
+		_c.SetDescription(*v)
 	}
 	return _c
 }
@@ -338,6 +353,17 @@ func (_c *UsersCreate) AddLionDepartmentLeaders(v ...*DepartmentLeaders) *UsersC
 		ids[i] = v[i].ID
 	}
 	return _c.AddLionDepartmentLeaderIDs(ids...)
+}
+
+// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
+func (_c *UsersCreate) SetLionDepartmentsID(id int) *UsersCreate {
+	_c.mutation.SetLionDepartmentsID(id)
+	return _c
+}
+
+// SetLionDepartments sets the "lion_departments" edge to the Departments entity.
+func (_c *UsersCreate) SetLionDepartments(v *Departments) *UsersCreate {
+	return _c.SetLionDepartmentsID(v.ID)
 }
 
 // Mutation returns the UsersMutation object of the builder.
@@ -386,6 +412,10 @@ func (_c *UsersCreate) defaults() {
 	if _, ok := _c.mutation.RealnameEncrypted(); !ok {
 		v := users.DefaultRealnameEncrypted
 		_c.mutation.SetRealnameEncrypted(v)
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := users.DefaultStatus
+		_c.mutation.SetStatus(v)
 	}
 	if _, ok := _c.mutation.IdcardEncrypted(); !ok {
 		v := users.DefaultIdcardEncrypted
@@ -455,13 +485,13 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultAddressEncrypted
 		_c.mutation.SetAddressEncrypted(v)
 	}
-	if _, ok := _c.mutation.Description(); !ok {
-		v := users.DefaultDescription
-		_c.mutation.SetDescription(v)
-	}
 	if _, ok := _c.mutation.DepartmentID(); !ok {
 		v := users.DefaultDepartmentID
 		_c.mutation.SetDepartmentID(v)
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := users.DefaultDescription
+		_c.mutation.SetDescription(v)
 	}
 }
 
@@ -483,6 +513,9 @@ func (_c *UsersCreate) check() error {
 	}
 	if _, ok := _c.mutation.RealnameEncrypted(); !ok {
 		return &ValidationError{Name: "realname_encrypted", err: errors.New(`lion: missing required field "Users.realname_encrypted"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`lion: missing required field "Users.status"`)}
 	}
 	if _, ok := _c.mutation.IdcardEncrypted(); !ok {
 		return &ValidationError{Name: "idcard_encrypted", err: errors.New(`lion: missing required field "Users.idcard_encrypted"`)}
@@ -508,11 +541,6 @@ func (_c *UsersCreate) check() error {
 	if _, ok := _c.mutation.Gender(); !ok {
 		return &ValidationError{Name: "gender", err: errors.New(`lion: missing required field "Users.gender"`)}
 	}
-	if v, ok := _c.mutation.Gender(); ok {
-		if err := users.GenderValidator(v); err != nil {
-			return &ValidationError{Name: "gender", err: fmt.Errorf(`lion: validator failed for field "Users.gender": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.Zoneinfo(); !ok {
 		return &ValidationError{Name: "zoneinfo", err: errors.New(`lion: missing required field "Users.zoneinfo"`)}
 	}
@@ -528,6 +556,9 @@ func (_c *UsersCreate) check() error {
 	if _, ok := _c.mutation.AddressEncrypted(); !ok {
 		return &ValidationError{Name: "address_encrypted", err: errors.New(`lion: missing required field "Users.address_encrypted"`)}
 	}
+	if _, ok := _c.mutation.DepartmentID(); !ok {
+		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "Users.department_id"`)}
+	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Users.description"`)}
 	}
@@ -536,8 +567,8 @@ func (_c *UsersCreate) check() error {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.DepartmentID(); !ok {
-		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "Users.department_id"`)}
+	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
+		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "Users.lion_departments"`)}
 	}
 	return nil
 }
@@ -585,6 +616,10 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
 		_node.RealnameEncrypted = value
 	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(users.FieldStatus, field.TypeInt, value)
+		_node.Status = value
+	}
 	if value, ok := _c.mutation.IdcardEncrypted(); ok {
 		_spec.SetField(users.FieldIdcardEncrypted, field.TypeBytes, value)
 		_node.IdcardEncrypted = value
@@ -622,7 +657,7 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_node.EmailVerified = value
 	}
 	if value, ok := _c.mutation.Gender(); ok {
-		_spec.SetField(users.FieldGender, field.TypeEnum, value)
+		_spec.SetField(users.FieldGender, field.TypeInt, value)
 		_node.Gender = value
 	}
 	if value, ok := _c.mutation.Birthdate(); ok {
@@ -657,10 +692,6 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := _c.mutation.DepartmentID(); ok {
-		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
-		_node.DepartmentID = value
-	}
 	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -691,6 +722,23 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   users.LionDepartmentsTable,
+			Columns: []string{users.LionDepartmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.DepartmentID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

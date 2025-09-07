@@ -374,6 +374,7 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "preferred_username", Type: field.TypeString, Unique: true, Size: 255},
 		{Name: "realname_encrypted", Type: field.TypeBytes},
+		{Name: "status", Type: field.TypeInt, Default: 0},
 		{Name: "idcard_encrypted", Type: field.TypeBytes},
 		{Name: "idcard_hash", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "nickname", Type: field.TypeString, Default: ""},
@@ -383,7 +384,7 @@ var (
 		{Name: "email_encrypted", Type: field.TypeBytes},
 		{Name: "email_hash", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "email_verified", Type: field.TypeBool, Default: false},
-		{Name: "gender", Type: field.TypeEnum, Enums: []string{"male", "female", "other", "unknown"}, Default: "unknown"},
+		{Name: "gender", Type: field.TypeInt, Default: 0},
 		{Name: "birthdate", Type: field.TypeTime, Nullable: true},
 		{Name: "zoneinfo", Type: field.TypeString, Default: ""},
 		{Name: "locale", Type: field.TypeString, Default: ""},
@@ -399,6 +400,14 @@ var (
 		Name:       "lion_users",
 		Columns:    LionUsersColumns,
 		PrimaryKey: []*schema.Column{LionUsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_users_lion_departments_lion_users",
+				Columns:    []*schema.Column{LionUsersColumns[25]},
+				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -479,6 +488,7 @@ func init() {
 	LionUserAttributesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_attributes",
 	}
+	LionUsersTable.ForeignKeys[0].RefTable = LionDepartmentsTable
 	LionUsersTable.Annotation = &entsql.Annotation{
 		Table: "lion_users",
 	}

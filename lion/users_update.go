@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
+	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/roleusermapping"
 	"github.com/grpc-kit/pkg/lion/users"
@@ -73,6 +74,27 @@ func (_u *UsersUpdate) SetNillablePreferredUsername(v *string) *UsersUpdate {
 // SetRealnameEncrypted sets the "realname_encrypted" field.
 func (_u *UsersUpdate) SetRealnameEncrypted(v []byte) *UsersUpdate {
 	_u.mutation.SetRealnameEncrypted(v)
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *UsersUpdate) SetStatus(v int) *UsersUpdate {
+	_u.mutation.ResetStatus()
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableStatus(v *int) *UsersUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// AddStatus adds value to the "status" field.
+func (_u *UsersUpdate) AddStatus(v int) *UsersUpdate {
+	_u.mutation.AddStatus(v)
 	return _u
 }
 
@@ -199,16 +221,23 @@ func (_u *UsersUpdate) SetNillableEmailVerified(v *bool) *UsersUpdate {
 }
 
 // SetGender sets the "gender" field.
-func (_u *UsersUpdate) SetGender(v users.Gender) *UsersUpdate {
+func (_u *UsersUpdate) SetGender(v int) *UsersUpdate {
+	_u.mutation.ResetGender()
 	_u.mutation.SetGender(v)
 	return _u
 }
 
 // SetNillableGender sets the "gender" field if the given value is not nil.
-func (_u *UsersUpdate) SetNillableGender(v *users.Gender) *UsersUpdate {
+func (_u *UsersUpdate) SetNillableGender(v *int) *UsersUpdate {
 	if v != nil {
 		_u.SetGender(*v)
 	}
+	return _u
+}
+
+// AddGender adds value to the "gender" field.
+func (_u *UsersUpdate) AddGender(v int) *UsersUpdate {
+	_u.mutation.AddGender(v)
 	return _u
 }
 
@@ -306,23 +335,8 @@ func (_u *UsersUpdate) SetAddressEncrypted(v []byte) *UsersUpdate {
 	return _u
 }
 
-// SetDescription sets the "description" field.
-func (_u *UsersUpdate) SetDescription(v string) *UsersUpdate {
-	_u.mutation.SetDescription(v)
-	return _u
-}
-
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *UsersUpdate) SetNillableDescription(v *string) *UsersUpdate {
-	if v != nil {
-		_u.SetDescription(*v)
-	}
-	return _u
-}
-
 // SetDepartmentID sets the "department_id" field.
 func (_u *UsersUpdate) SetDepartmentID(v int) *UsersUpdate {
-	_u.mutation.ResetDepartmentID()
 	_u.mutation.SetDepartmentID(v)
 	return _u
 }
@@ -335,9 +349,17 @@ func (_u *UsersUpdate) SetNillableDepartmentID(v *int) *UsersUpdate {
 	return _u
 }
 
-// AddDepartmentID adds value to the "department_id" field.
-func (_u *UsersUpdate) AddDepartmentID(v int) *UsersUpdate {
-	_u.mutation.AddDepartmentID(v)
+// SetDescription sets the "description" field.
+func (_u *UsersUpdate) SetDescription(v string) *UsersUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableDescription(v *string) *UsersUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
 	return _u
 }
 
@@ -369,6 +391,17 @@ func (_u *UsersUpdate) AddLionDepartmentLeaders(v ...*DepartmentLeaders) *UsersU
 		ids[i] = v[i].ID
 	}
 	return _u.AddLionDepartmentLeaderIDs(ids...)
+}
+
+// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
+func (_u *UsersUpdate) SetLionDepartmentsID(id int) *UsersUpdate {
+	_u.mutation.SetLionDepartmentsID(id)
+	return _u
+}
+
+// SetLionDepartments sets the "lion_departments" edge to the Departments entity.
+func (_u *UsersUpdate) SetLionDepartments(v *Departments) *UsersUpdate {
+	return _u.SetLionDepartmentsID(v.ID)
 }
 
 // Mutation returns the UsersMutation object of the builder.
@@ -418,6 +451,12 @@ func (_u *UsersUpdate) RemoveLionDepartmentLeaders(v ...*DepartmentLeaders) *Use
 	return _u.RemoveLionDepartmentLeaderIDs(ids...)
 }
 
+// ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
+func (_u *UsersUpdate) ClearLionDepartments() *UsersUpdate {
+	_u.mutation.ClearLionDepartments()
+	return _u
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UsersUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -461,15 +500,13 @@ func (_u *UsersUpdate) check() error {
 			return &ValidationError{Name: "preferred_username", err: fmt.Errorf(`lion: validator failed for field "Users.preferred_username": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Gender(); ok {
-		if err := users.GenderValidator(v); err != nil {
-			return &ValidationError{Name: "gender", err: fmt.Errorf(`lion: validator failed for field "Users.gender": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Description(); ok {
 		if err := users.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
 		}
+	}
+	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "Users.lion_departments"`)
 	}
 	return nil
 }
@@ -500,6 +537,12 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.RealnameEncrypted(); ok {
 		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(users.FieldStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStatus(); ok {
+		_spec.AddField(users.FieldStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.IdcardEncrypted(); ok {
 		_spec.SetField(users.FieldIdcardEncrypted, field.TypeBytes, value)
@@ -535,7 +578,10 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(users.FieldEmailVerified, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Gender(); ok {
-		_spec.SetField(users.FieldGender, field.TypeEnum, value)
+		_spec.SetField(users.FieldGender, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedGender(); ok {
+		_spec.AddField(users.FieldGender, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Birthdate(); ok {
 		_spec.SetField(users.FieldBirthdate, field.TypeTime, value)
@@ -566,12 +612,6 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.DepartmentID(); ok {
-		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedDepartmentID(); ok {
-		_spec.AddField(users.FieldDepartmentID, field.TypeInt, value)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -663,6 +703,35 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.LionDepartmentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   users.LionDepartmentsTable,
+			Columns: []string{users.LionDepartmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   users.LionDepartmentsTable,
+			Columns: []string{users.LionDepartmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{users.Label}
@@ -726,6 +795,27 @@ func (_u *UsersUpdateOne) SetNillablePreferredUsername(v *string) *UsersUpdateOn
 // SetRealnameEncrypted sets the "realname_encrypted" field.
 func (_u *UsersUpdateOne) SetRealnameEncrypted(v []byte) *UsersUpdateOne {
 	_u.mutation.SetRealnameEncrypted(v)
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *UsersUpdateOne) SetStatus(v int) *UsersUpdateOne {
+	_u.mutation.ResetStatus()
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableStatus(v *int) *UsersUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// AddStatus adds value to the "status" field.
+func (_u *UsersUpdateOne) AddStatus(v int) *UsersUpdateOne {
+	_u.mutation.AddStatus(v)
 	return _u
 }
 
@@ -852,16 +942,23 @@ func (_u *UsersUpdateOne) SetNillableEmailVerified(v *bool) *UsersUpdateOne {
 }
 
 // SetGender sets the "gender" field.
-func (_u *UsersUpdateOne) SetGender(v users.Gender) *UsersUpdateOne {
+func (_u *UsersUpdateOne) SetGender(v int) *UsersUpdateOne {
+	_u.mutation.ResetGender()
 	_u.mutation.SetGender(v)
 	return _u
 }
 
 // SetNillableGender sets the "gender" field if the given value is not nil.
-func (_u *UsersUpdateOne) SetNillableGender(v *users.Gender) *UsersUpdateOne {
+func (_u *UsersUpdateOne) SetNillableGender(v *int) *UsersUpdateOne {
 	if v != nil {
 		_u.SetGender(*v)
 	}
+	return _u
+}
+
+// AddGender adds value to the "gender" field.
+func (_u *UsersUpdateOne) AddGender(v int) *UsersUpdateOne {
+	_u.mutation.AddGender(v)
 	return _u
 }
 
@@ -959,23 +1056,8 @@ func (_u *UsersUpdateOne) SetAddressEncrypted(v []byte) *UsersUpdateOne {
 	return _u
 }
 
-// SetDescription sets the "description" field.
-func (_u *UsersUpdateOne) SetDescription(v string) *UsersUpdateOne {
-	_u.mutation.SetDescription(v)
-	return _u
-}
-
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *UsersUpdateOne) SetNillableDescription(v *string) *UsersUpdateOne {
-	if v != nil {
-		_u.SetDescription(*v)
-	}
-	return _u
-}
-
 // SetDepartmentID sets the "department_id" field.
 func (_u *UsersUpdateOne) SetDepartmentID(v int) *UsersUpdateOne {
-	_u.mutation.ResetDepartmentID()
 	_u.mutation.SetDepartmentID(v)
 	return _u
 }
@@ -988,9 +1070,17 @@ func (_u *UsersUpdateOne) SetNillableDepartmentID(v *int) *UsersUpdateOne {
 	return _u
 }
 
-// AddDepartmentID adds value to the "department_id" field.
-func (_u *UsersUpdateOne) AddDepartmentID(v int) *UsersUpdateOne {
-	_u.mutation.AddDepartmentID(v)
+// SetDescription sets the "description" field.
+func (_u *UsersUpdateOne) SetDescription(v string) *UsersUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableDescription(v *string) *UsersUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
 	return _u
 }
 
@@ -1022,6 +1112,17 @@ func (_u *UsersUpdateOne) AddLionDepartmentLeaders(v ...*DepartmentLeaders) *Use
 		ids[i] = v[i].ID
 	}
 	return _u.AddLionDepartmentLeaderIDs(ids...)
+}
+
+// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
+func (_u *UsersUpdateOne) SetLionDepartmentsID(id int) *UsersUpdateOne {
+	_u.mutation.SetLionDepartmentsID(id)
+	return _u
+}
+
+// SetLionDepartments sets the "lion_departments" edge to the Departments entity.
+func (_u *UsersUpdateOne) SetLionDepartments(v *Departments) *UsersUpdateOne {
+	return _u.SetLionDepartmentsID(v.ID)
 }
 
 // Mutation returns the UsersMutation object of the builder.
@@ -1069,6 +1170,12 @@ func (_u *UsersUpdateOne) RemoveLionDepartmentLeaders(v ...*DepartmentLeaders) *
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLionDepartmentLeaderIDs(ids...)
+}
+
+// ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
+func (_u *UsersUpdateOne) ClearLionDepartments() *UsersUpdateOne {
+	_u.mutation.ClearLionDepartments()
+	return _u
 }
 
 // Where appends a list predicates to the UsersUpdate builder.
@@ -1127,15 +1234,13 @@ func (_u *UsersUpdateOne) check() error {
 			return &ValidationError{Name: "preferred_username", err: fmt.Errorf(`lion: validator failed for field "Users.preferred_username": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Gender(); ok {
-		if err := users.GenderValidator(v); err != nil {
-			return &ValidationError{Name: "gender", err: fmt.Errorf(`lion: validator failed for field "Users.gender": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Description(); ok {
 		if err := users.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
 		}
+	}
+	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "Users.lion_departments"`)
 	}
 	return nil
 }
@@ -1184,6 +1289,12 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if value, ok := _u.mutation.RealnameEncrypted(); ok {
 		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
 	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(users.FieldStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStatus(); ok {
+		_spec.AddField(users.FieldStatus, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.IdcardEncrypted(); ok {
 		_spec.SetField(users.FieldIdcardEncrypted, field.TypeBytes, value)
 	}
@@ -1218,7 +1329,10 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 		_spec.SetField(users.FieldEmailVerified, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Gender(); ok {
-		_spec.SetField(users.FieldGender, field.TypeEnum, value)
+		_spec.SetField(users.FieldGender, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedGender(); ok {
+		_spec.AddField(users.FieldGender, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Birthdate(); ok {
 		_spec.SetField(users.FieldBirthdate, field.TypeTime, value)
@@ -1249,12 +1363,6 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.DepartmentID(); ok {
-		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedDepartmentID(); ok {
-		_spec.AddField(users.FieldDepartmentID, field.TypeInt, value)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1339,6 +1447,35 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departmentleaders.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LionDepartmentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   users.LionDepartmentsTable,
+			Columns: []string{users.LionDepartmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   users.LionDepartmentsTable,
+			Columns: []string{users.LionDepartmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

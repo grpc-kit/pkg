@@ -80,6 +80,11 @@ func RealnameEncrypted(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldRealnameEncrypted, v))
 }
 
+// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
+func Status(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldStatus, v))
+}
+
 // IdcardEncrypted applies equality check predicate on the "idcard_encrypted" field. It's identical to IdcardEncryptedEQ.
 func IdcardEncrypted(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldIdcardEncrypted, v))
@@ -125,6 +130,11 @@ func EmailVerified(v bool) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldEmailVerified, v))
 }
 
+// Gender applies equality check predicate on the "gender" field. It's identical to GenderEQ.
+func Gender(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldGender, v))
+}
+
 // Birthdate applies equality check predicate on the "birthdate" field. It's identical to BirthdateEQ.
 func Birthdate(v time.Time) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldBirthdate, v))
@@ -160,14 +170,14 @@ func AddressEncrypted(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldAddressEncrypted, v))
 }
 
-// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
-func Description(v string) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldDescription, v))
-}
-
 // DepartmentID applies equality check predicate on the "department_id" field. It's identical to DepartmentIDEQ.
 func DepartmentID(v int) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldDepartmentID, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldDescription, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -403,6 +413,46 @@ func RealnameEncryptedLT(v []byte) predicate.Users {
 // RealnameEncryptedLTE applies the LTE predicate on the "realname_encrypted" field.
 func RealnameEncryptedLTE(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldRealnameEncrypted, v))
+}
+
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldStatus, v))
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldNEQ(FieldStatus, v))
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldIn(FieldStatus, vs...))
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// StatusGT applies the GT predicate on the "status" field.
+func StatusGT(v int) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldStatus, v))
+}
+
+// StatusGTE applies the GTE predicate on the "status" field.
+func StatusGTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldStatus, v))
+}
+
+// StatusLT applies the LT predicate on the "status" field.
+func StatusLT(v int) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldStatus, v))
+}
+
+// StatusLTE applies the LTE predicate on the "status" field.
+func StatusLTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldStatus, v))
 }
 
 // IdcardEncryptedEQ applies the EQ predicate on the "idcard_encrypted" field.
@@ -906,23 +956,43 @@ func EmailVerifiedNEQ(v bool) predicate.Users {
 }
 
 // GenderEQ applies the EQ predicate on the "gender" field.
-func GenderEQ(v Gender) predicate.Users {
+func GenderEQ(v int) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldGender, v))
 }
 
 // GenderNEQ applies the NEQ predicate on the "gender" field.
-func GenderNEQ(v Gender) predicate.Users {
+func GenderNEQ(v int) predicate.Users {
 	return predicate.Users(sql.FieldNEQ(FieldGender, v))
 }
 
 // GenderIn applies the In predicate on the "gender" field.
-func GenderIn(vs ...Gender) predicate.Users {
+func GenderIn(vs ...int) predicate.Users {
 	return predicate.Users(sql.FieldIn(FieldGender, vs...))
 }
 
 // GenderNotIn applies the NotIn predicate on the "gender" field.
-func GenderNotIn(vs ...Gender) predicate.Users {
+func GenderNotIn(vs ...int) predicate.Users {
 	return predicate.Users(sql.FieldNotIn(FieldGender, vs...))
+}
+
+// GenderGT applies the GT predicate on the "gender" field.
+func GenderGT(v int) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldGender, v))
+}
+
+// GenderGTE applies the GTE predicate on the "gender" field.
+func GenderGTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldGender, v))
+}
+
+// GenderLT applies the LT predicate on the "gender" field.
+func GenderLT(v int) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldGender, v))
+}
+
+// GenderLTE applies the LTE predicate on the "gender" field.
+func GenderLTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldGender, v))
 }
 
 // BirthdateEQ applies the EQ predicate on the "birthdate" field.
@@ -1270,6 +1340,26 @@ func AddressEncryptedLTE(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldAddressEncrypted, v))
 }
 
+// DepartmentIDEQ applies the EQ predicate on the "department_id" field.
+func DepartmentIDEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldDepartmentID, v))
+}
+
+// DepartmentIDNEQ applies the NEQ predicate on the "department_id" field.
+func DepartmentIDNEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldNEQ(FieldDepartmentID, v))
+}
+
+// DepartmentIDIn applies the In predicate on the "department_id" field.
+func DepartmentIDIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldIn(FieldDepartmentID, vs...))
+}
+
+// DepartmentIDNotIn applies the NotIn predicate on the "department_id" field.
+func DepartmentIDNotIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldNotIn(FieldDepartmentID, vs...))
+}
+
 // DescriptionEQ applies the EQ predicate on the "description" field.
 func DescriptionEQ(v string) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldDescription, v))
@@ -1335,46 +1425,6 @@ func DescriptionContainsFold(v string) predicate.Users {
 	return predicate.Users(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// DepartmentIDEQ applies the EQ predicate on the "department_id" field.
-func DepartmentIDEQ(v int) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldDepartmentID, v))
-}
-
-// DepartmentIDNEQ applies the NEQ predicate on the "department_id" field.
-func DepartmentIDNEQ(v int) predicate.Users {
-	return predicate.Users(sql.FieldNEQ(FieldDepartmentID, v))
-}
-
-// DepartmentIDIn applies the In predicate on the "department_id" field.
-func DepartmentIDIn(vs ...int) predicate.Users {
-	return predicate.Users(sql.FieldIn(FieldDepartmentID, vs...))
-}
-
-// DepartmentIDNotIn applies the NotIn predicate on the "department_id" field.
-func DepartmentIDNotIn(vs ...int) predicate.Users {
-	return predicate.Users(sql.FieldNotIn(FieldDepartmentID, vs...))
-}
-
-// DepartmentIDGT applies the GT predicate on the "department_id" field.
-func DepartmentIDGT(v int) predicate.Users {
-	return predicate.Users(sql.FieldGT(FieldDepartmentID, v))
-}
-
-// DepartmentIDGTE applies the GTE predicate on the "department_id" field.
-func DepartmentIDGTE(v int) predicate.Users {
-	return predicate.Users(sql.FieldGTE(FieldDepartmentID, v))
-}
-
-// DepartmentIDLT applies the LT predicate on the "department_id" field.
-func DepartmentIDLT(v int) predicate.Users {
-	return predicate.Users(sql.FieldLT(FieldDepartmentID, v))
-}
-
-// DepartmentIDLTE applies the LTE predicate on the "department_id" field.
-func DepartmentIDLTE(v int) predicate.Users {
-	return predicate.Users(sql.FieldLTE(FieldDepartmentID, v))
-}
-
 // HasLionUsers applies the HasEdge predicate on the "lion_users" edge.
 func HasLionUsers() predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
@@ -1413,6 +1463,29 @@ func HasLionDepartmentLeaders() predicate.Users {
 func HasLionDepartmentLeadersWith(preds ...predicate.DepartmentLeaders) predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
 		step := newLionDepartmentLeadersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLionDepartments applies the HasEdge predicate on the "lion_departments" edge.
+func HasLionDepartments() predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentsTable, LionDepartmentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionDepartmentsWith applies the HasEdge predicate on the "lion_departments" edge with a given conditions (other predicates).
+func HasLionDepartmentsWith(preds ...predicate.Departments) predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		step := newLionDepartmentsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
