@@ -30,37 +30,39 @@ type Users struct {
 	// 用户身份证号码
 	IdcardEncrypted []byte `json:"-"`
 	// 用户的身份证号码哈希，用于唯一值判断
-	IdcardHash *string `json:"idcard_hash,omitempty"`
+	IdcardHash string `json:"idcard_hash,omitempty"`
 	// 用户的昵称，用于页面展示
 	Nickname string `json:"nickname,omitempty"`
 	// 用户个人资料页面的 URL
-	Profile *string `json:"profile,omitempty"`
+	Profile string `json:"profile,omitempty"`
 	// 用户头像的 URL
-	Picture *string `json:"picture,omitempty"`
+	Picture string `json:"picture,omitempty"`
 	// 用户的个人网站 URL
-	Website *string `json:"website,omitempty"`
+	Website string `json:"website,omitempty"`
 	// 用户的邮箱地址
 	EmailEncrypted []byte `json:"-"`
 	// 用户的邮箱地址哈希，用于唯一值判断
-	EmailHash *string `json:"email_hash,omitempty"`
+	EmailHash string `json:"email_hash,omitempty"`
 	// 邮箱是否验证过
 	EmailVerified bool `json:"email_verified,omitempty"`
 	// 用户的性别，如：male、female, other
 	Gender users.Gender `json:"gender,omitempty"`
 	// 用户的出生日期，格式为 YYYY-MM-DD，如 1990-12-31
-	Birthdate *time.Time `json:"birthdate,omitempty"`
+	Birthdate time.Time `json:"birthdate,omitempty"`
 	// 用户的时区信息，如：Asia/Shanghai
-	Zoneinfo *string `json:"zoneinfo,omitempty"`
+	Zoneinfo string `json:"zoneinfo,omitempty"`
 	// 用户的语言/地区偏好，如：zh-CN
-	Locale *string `json:"locale,omitempty"`
+	Locale string `json:"locale,omitempty"`
 	// 用户的手机号码，加密存储
 	PhoneNumberEncrypted []byte `json:"-"`
 	// 用户的手机号哈希，用于唯一值判断
-	PhoneNumberHash *string `json:"phone_number_hash,omitempty"`
+	PhoneNumberHash string `json:"phone_number_hash,omitempty"`
 	// 手机号是否验证过
 	PhoneNumberVerified bool `json:"phone_number_verified,omitempty"`
 	// 用户的地址信息
 	AddressEncrypted []byte `json:"-"`
+	// 用户详细描述
+	Description string `json:"description,omitempty"`
 	// 部门 ID
 	DepartmentID int `json:"department_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -109,7 +111,7 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case users.FieldID, users.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
-		case users.FieldPreferredUsername, users.FieldIdcardHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldGender, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash:
+		case users.FieldPreferredUsername, users.FieldIdcardHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldGender, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
 			values[i] = new(sql.NullString)
 		case users.FieldCreatedAt, users.FieldUpdatedAt, users.FieldDeletedAt, users.FieldBirthdate:
 			values[i] = new(sql.NullTime)
@@ -175,8 +177,7 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field idcard_hash", values[i])
 			} else if value.Valid {
-				_m.IdcardHash = new(string)
-				*_m.IdcardHash = value.String
+				_m.IdcardHash = value.String
 			}
 		case users.FieldNickname:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -188,22 +189,19 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field profile", values[i])
 			} else if value.Valid {
-				_m.Profile = new(string)
-				*_m.Profile = value.String
+				_m.Profile = value.String
 			}
 		case users.FieldPicture:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field picture", values[i])
 			} else if value.Valid {
-				_m.Picture = new(string)
-				*_m.Picture = value.String
+				_m.Picture = value.String
 			}
 		case users.FieldWebsite:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field website", values[i])
 			} else if value.Valid {
-				_m.Website = new(string)
-				*_m.Website = value.String
+				_m.Website = value.String
 			}
 		case users.FieldEmailEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -215,8 +213,7 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field email_hash", values[i])
 			} else if value.Valid {
-				_m.EmailHash = new(string)
-				*_m.EmailHash = value.String
+				_m.EmailHash = value.String
 			}
 		case users.FieldEmailVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -234,22 +231,19 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field birthdate", values[i])
 			} else if value.Valid {
-				_m.Birthdate = new(time.Time)
-				*_m.Birthdate = value.Time
+				_m.Birthdate = value.Time
 			}
 		case users.FieldZoneinfo:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field zoneinfo", values[i])
 			} else if value.Valid {
-				_m.Zoneinfo = new(string)
-				*_m.Zoneinfo = value.String
+				_m.Zoneinfo = value.String
 			}
 		case users.FieldLocale:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field locale", values[i])
 			} else if value.Valid {
-				_m.Locale = new(string)
-				*_m.Locale = value.String
+				_m.Locale = value.String
 			}
 		case users.FieldPhoneNumberEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -261,8 +255,7 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field phone_number_hash", values[i])
 			} else if value.Valid {
-				_m.PhoneNumberHash = new(string)
-				*_m.PhoneNumberHash = value.String
+				_m.PhoneNumberHash = value.String
 			}
 		case users.FieldPhoneNumberVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -275,6 +268,12 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field address_encrypted", values[i])
 			} else if value != nil {
 				_m.AddressEncrypted = *value
+			}
+		case users.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
 			}
 		case users.FieldDepartmentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -346,35 +345,25 @@ func (_m *Users) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("idcard_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	if v := _m.IdcardHash; v != nil {
-		builder.WriteString("idcard_hash=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("idcard_hash=")
+	builder.WriteString(_m.IdcardHash)
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
 	builder.WriteString(_m.Nickname)
 	builder.WriteString(", ")
-	if v := _m.Profile; v != nil {
-		builder.WriteString("profile=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("profile=")
+	builder.WriteString(_m.Profile)
 	builder.WriteString(", ")
-	if v := _m.Picture; v != nil {
-		builder.WriteString("picture=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("picture=")
+	builder.WriteString(_m.Picture)
 	builder.WriteString(", ")
-	if v := _m.Website; v != nil {
-		builder.WriteString("website=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("website=")
+	builder.WriteString(_m.Website)
 	builder.WriteString(", ")
 	builder.WriteString("email_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	if v := _m.EmailHash; v != nil {
-		builder.WriteString("email_hash=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("email_hash=")
+	builder.WriteString(_m.EmailHash)
 	builder.WriteString(", ")
 	builder.WriteString("email_verified=")
 	builder.WriteString(fmt.Sprintf("%v", _m.EmailVerified))
@@ -382,32 +371,27 @@ func (_m *Users) String() string {
 	builder.WriteString("gender=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Gender))
 	builder.WriteString(", ")
-	if v := _m.Birthdate; v != nil {
-		builder.WriteString("birthdate=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
+	builder.WriteString("birthdate=")
+	builder.WriteString(_m.Birthdate.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := _m.Zoneinfo; v != nil {
-		builder.WriteString("zoneinfo=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("zoneinfo=")
+	builder.WriteString(_m.Zoneinfo)
 	builder.WriteString(", ")
-	if v := _m.Locale; v != nil {
-		builder.WriteString("locale=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("locale=")
+	builder.WriteString(_m.Locale)
 	builder.WriteString(", ")
 	builder.WriteString("phone_number_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	if v := _m.PhoneNumberHash; v != nil {
-		builder.WriteString("phone_number_hash=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("phone_number_hash=")
+	builder.WriteString(_m.PhoneNumberHash)
 	builder.WriteString(", ")
 	builder.WriteString("phone_number_verified=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PhoneNumberVerified))
 	builder.WriteString(", ")
 	builder.WriteString("address_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
 	builder.WriteString("department_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentID))

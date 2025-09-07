@@ -282,6 +282,20 @@ func (_c *UsersCreate) SetAddressEncrypted(v []byte) *UsersCreate {
 	return _c
 }
 
+// SetDescription sets the "description" field.
+func (_c *UsersCreate) SetDescription(v string) *UsersCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableDescription(v *string) *UsersCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
 // SetDepartmentID sets the "department_id" field.
 func (_c *UsersCreate) SetDepartmentID(v int) *UsersCreate {
 	_c.mutation.SetDepartmentID(v)
@@ -377,13 +391,33 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultIdcardEncrypted
 		_c.mutation.SetIdcardEncrypted(v)
 	}
+	if _, ok := _c.mutation.IdcardHash(); !ok {
+		v := users.DefaultIdcardHash
+		_c.mutation.SetIdcardHash(v)
+	}
 	if _, ok := _c.mutation.Nickname(); !ok {
 		v := users.DefaultNickname
 		_c.mutation.SetNickname(v)
 	}
+	if _, ok := _c.mutation.Profile(); !ok {
+		v := users.DefaultProfile
+		_c.mutation.SetProfile(v)
+	}
+	if _, ok := _c.mutation.Picture(); !ok {
+		v := users.DefaultPicture
+		_c.mutation.SetPicture(v)
+	}
+	if _, ok := _c.mutation.Website(); !ok {
+		v := users.DefaultWebsite
+		_c.mutation.SetWebsite(v)
+	}
 	if _, ok := _c.mutation.EmailEncrypted(); !ok {
 		v := users.DefaultEmailEncrypted
 		_c.mutation.SetEmailEncrypted(v)
+	}
+	if _, ok := _c.mutation.EmailHash(); !ok {
+		v := users.DefaultEmailHash
+		_c.mutation.SetEmailHash(v)
 	}
 	if _, ok := _c.mutation.EmailVerified(); !ok {
 		v := users.DefaultEmailVerified
@@ -393,9 +427,25 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultGender
 		_c.mutation.SetGender(v)
 	}
+	if _, ok := _c.mutation.Birthdate(); !ok {
+		v := users.DefaultBirthdate()
+		_c.mutation.SetBirthdate(v)
+	}
+	if _, ok := _c.mutation.Zoneinfo(); !ok {
+		v := users.DefaultZoneinfo
+		_c.mutation.SetZoneinfo(v)
+	}
+	if _, ok := _c.mutation.Locale(); !ok {
+		v := users.DefaultLocale
+		_c.mutation.SetLocale(v)
+	}
 	if _, ok := _c.mutation.PhoneNumberEncrypted(); !ok {
 		v := users.DefaultPhoneNumberEncrypted
 		_c.mutation.SetPhoneNumberEncrypted(v)
+	}
+	if _, ok := _c.mutation.PhoneNumberHash(); !ok {
+		v := users.DefaultPhoneNumberHash
+		_c.mutation.SetPhoneNumberHash(v)
 	}
 	if _, ok := _c.mutation.PhoneNumberVerified(); !ok {
 		v := users.DefaultPhoneNumberVerified
@@ -404,6 +454,10 @@ func (_c *UsersCreate) defaults() {
 	if _, ok := _c.mutation.AddressEncrypted(); !ok {
 		v := users.DefaultAddressEncrypted
 		_c.mutation.SetAddressEncrypted(v)
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := users.DefaultDescription
+		_c.mutation.SetDescription(v)
 	}
 	if _, ok := _c.mutation.DepartmentID(); !ok {
 		v := users.DefaultDepartmentID
@@ -436,6 +490,15 @@ func (_c *UsersCreate) check() error {
 	if _, ok := _c.mutation.Nickname(); !ok {
 		return &ValidationError{Name: "nickname", err: errors.New(`lion: missing required field "Users.nickname"`)}
 	}
+	if _, ok := _c.mutation.Profile(); !ok {
+		return &ValidationError{Name: "profile", err: errors.New(`lion: missing required field "Users.profile"`)}
+	}
+	if _, ok := _c.mutation.Picture(); !ok {
+		return &ValidationError{Name: "picture", err: errors.New(`lion: missing required field "Users.picture"`)}
+	}
+	if _, ok := _c.mutation.Website(); !ok {
+		return &ValidationError{Name: "website", err: errors.New(`lion: missing required field "Users.website"`)}
+	}
 	if _, ok := _c.mutation.EmailEncrypted(); !ok {
 		return &ValidationError{Name: "email_encrypted", err: errors.New(`lion: missing required field "Users.email_encrypted"`)}
 	}
@@ -450,6 +513,12 @@ func (_c *UsersCreate) check() error {
 			return &ValidationError{Name: "gender", err: fmt.Errorf(`lion: validator failed for field "Users.gender": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.Zoneinfo(); !ok {
+		return &ValidationError{Name: "zoneinfo", err: errors.New(`lion: missing required field "Users.zoneinfo"`)}
+	}
+	if _, ok := _c.mutation.Locale(); !ok {
+		return &ValidationError{Name: "locale", err: errors.New(`lion: missing required field "Users.locale"`)}
+	}
 	if _, ok := _c.mutation.PhoneNumberEncrypted(); !ok {
 		return &ValidationError{Name: "phone_number_encrypted", err: errors.New(`lion: missing required field "Users.phone_number_encrypted"`)}
 	}
@@ -458,6 +527,14 @@ func (_c *UsersCreate) check() error {
 	}
 	if _, ok := _c.mutation.AddressEncrypted(); !ok {
 		return &ValidationError{Name: "address_encrypted", err: errors.New(`lion: missing required field "Users.address_encrypted"`)}
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Users.description"`)}
+	}
+	if v, ok := _c.mutation.Description(); ok {
+		if err := users.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.DepartmentID(); !ok {
 		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "Users.department_id"`)}
@@ -514,7 +591,7 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.IdcardHash(); ok {
 		_spec.SetField(users.FieldIdcardHash, field.TypeString, value)
-		_node.IdcardHash = &value
+		_node.IdcardHash = value
 	}
 	if value, ok := _c.mutation.Nickname(); ok {
 		_spec.SetField(users.FieldNickname, field.TypeString, value)
@@ -522,15 +599,15 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.Profile(); ok {
 		_spec.SetField(users.FieldProfile, field.TypeString, value)
-		_node.Profile = &value
+		_node.Profile = value
 	}
 	if value, ok := _c.mutation.Picture(); ok {
 		_spec.SetField(users.FieldPicture, field.TypeString, value)
-		_node.Picture = &value
+		_node.Picture = value
 	}
 	if value, ok := _c.mutation.Website(); ok {
 		_spec.SetField(users.FieldWebsite, field.TypeString, value)
-		_node.Website = &value
+		_node.Website = value
 	}
 	if value, ok := _c.mutation.EmailEncrypted(); ok {
 		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
@@ -538,7 +615,7 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.EmailHash(); ok {
 		_spec.SetField(users.FieldEmailHash, field.TypeString, value)
-		_node.EmailHash = &value
+		_node.EmailHash = value
 	}
 	if value, ok := _c.mutation.EmailVerified(); ok {
 		_spec.SetField(users.FieldEmailVerified, field.TypeBool, value)
@@ -550,15 +627,15 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.Birthdate(); ok {
 		_spec.SetField(users.FieldBirthdate, field.TypeTime, value)
-		_node.Birthdate = &value
+		_node.Birthdate = value
 	}
 	if value, ok := _c.mutation.Zoneinfo(); ok {
 		_spec.SetField(users.FieldZoneinfo, field.TypeString, value)
-		_node.Zoneinfo = &value
+		_node.Zoneinfo = value
 	}
 	if value, ok := _c.mutation.Locale(); ok {
 		_spec.SetField(users.FieldLocale, field.TypeString, value)
-		_node.Locale = &value
+		_node.Locale = value
 	}
 	if value, ok := _c.mutation.PhoneNumberEncrypted(); ok {
 		_spec.SetField(users.FieldPhoneNumberEncrypted, field.TypeBytes, value)
@@ -566,7 +643,7 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.PhoneNumberHash(); ok {
 		_spec.SetField(users.FieldPhoneNumberHash, field.TypeString, value)
-		_node.PhoneNumberHash = &value
+		_node.PhoneNumberHash = value
 	}
 	if value, ok := _c.mutation.PhoneNumberVerified(); ok {
 		_spec.SetField(users.FieldPhoneNumberVerified, field.TypeBool, value)
@@ -575,6 +652,10 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
 		_node.AddressEncrypted = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(users.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if value, ok := _c.mutation.DepartmentID(); ok {
 		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)

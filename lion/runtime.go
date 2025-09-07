@@ -580,22 +580,58 @@ func init() {
 	usersDescIdcardEncrypted := usersFields[2].Descriptor()
 	// users.DefaultIdcardEncrypted holds the default value on creation for the idcard_encrypted field.
 	users.DefaultIdcardEncrypted = usersDescIdcardEncrypted.Default.([]byte)
+	// usersDescIdcardHash is the schema descriptor for idcard_hash field.
+	usersDescIdcardHash := usersFields[3].Descriptor()
+	// users.DefaultIdcardHash holds the default value on creation for the idcard_hash field.
+	users.DefaultIdcardHash = usersDescIdcardHash.Default.(string)
 	// usersDescNickname is the schema descriptor for nickname field.
 	usersDescNickname := usersFields[4].Descriptor()
 	// users.DefaultNickname holds the default value on creation for the nickname field.
 	users.DefaultNickname = usersDescNickname.Default.(string)
+	// usersDescProfile is the schema descriptor for profile field.
+	usersDescProfile := usersFields[5].Descriptor()
+	// users.DefaultProfile holds the default value on creation for the profile field.
+	users.DefaultProfile = usersDescProfile.Default.(string)
+	// usersDescPicture is the schema descriptor for picture field.
+	usersDescPicture := usersFields[6].Descriptor()
+	// users.DefaultPicture holds the default value on creation for the picture field.
+	users.DefaultPicture = usersDescPicture.Default.(string)
+	// usersDescWebsite is the schema descriptor for website field.
+	usersDescWebsite := usersFields[7].Descriptor()
+	// users.DefaultWebsite holds the default value on creation for the website field.
+	users.DefaultWebsite = usersDescWebsite.Default.(string)
 	// usersDescEmailEncrypted is the schema descriptor for email_encrypted field.
 	usersDescEmailEncrypted := usersFields[8].Descriptor()
 	// users.DefaultEmailEncrypted holds the default value on creation for the email_encrypted field.
 	users.DefaultEmailEncrypted = usersDescEmailEncrypted.Default.([]byte)
+	// usersDescEmailHash is the schema descriptor for email_hash field.
+	usersDescEmailHash := usersFields[9].Descriptor()
+	// users.DefaultEmailHash holds the default value on creation for the email_hash field.
+	users.DefaultEmailHash = usersDescEmailHash.Default.(string)
 	// usersDescEmailVerified is the schema descriptor for email_verified field.
 	usersDescEmailVerified := usersFields[10].Descriptor()
 	// users.DefaultEmailVerified holds the default value on creation for the email_verified field.
 	users.DefaultEmailVerified = usersDescEmailVerified.Default.(bool)
+	// usersDescBirthdate is the schema descriptor for birthdate field.
+	usersDescBirthdate := usersFields[12].Descriptor()
+	// users.DefaultBirthdate holds the default value on creation for the birthdate field.
+	users.DefaultBirthdate = usersDescBirthdate.Default.(func() time.Time)
+	// usersDescZoneinfo is the schema descriptor for zoneinfo field.
+	usersDescZoneinfo := usersFields[13].Descriptor()
+	// users.DefaultZoneinfo holds the default value on creation for the zoneinfo field.
+	users.DefaultZoneinfo = usersDescZoneinfo.Default.(string)
+	// usersDescLocale is the schema descriptor for locale field.
+	usersDescLocale := usersFields[14].Descriptor()
+	// users.DefaultLocale holds the default value on creation for the locale field.
+	users.DefaultLocale = usersDescLocale.Default.(string)
 	// usersDescPhoneNumberEncrypted is the schema descriptor for phone_number_encrypted field.
 	usersDescPhoneNumberEncrypted := usersFields[15].Descriptor()
 	// users.DefaultPhoneNumberEncrypted holds the default value on creation for the phone_number_encrypted field.
 	users.DefaultPhoneNumberEncrypted = usersDescPhoneNumberEncrypted.Default.([]byte)
+	// usersDescPhoneNumberHash is the schema descriptor for phone_number_hash field.
+	usersDescPhoneNumberHash := usersFields[16].Descriptor()
+	// users.DefaultPhoneNumberHash holds the default value on creation for the phone_number_hash field.
+	users.DefaultPhoneNumberHash = usersDescPhoneNumberHash.Default.(string)
 	// usersDescPhoneNumberVerified is the schema descriptor for phone_number_verified field.
 	usersDescPhoneNumberVerified := usersFields[17].Descriptor()
 	// users.DefaultPhoneNumberVerified holds the default value on creation for the phone_number_verified field.
@@ -604,8 +640,14 @@ func init() {
 	usersDescAddressEncrypted := usersFields[18].Descriptor()
 	// users.DefaultAddressEncrypted holds the default value on creation for the address_encrypted field.
 	users.DefaultAddressEncrypted = usersDescAddressEncrypted.Default.([]byte)
+	// usersDescDescription is the schema descriptor for description field.
+	usersDescDescription := usersFields[19].Descriptor()
+	// users.DefaultDescription holds the default value on creation for the description field.
+	users.DefaultDescription = usersDescDescription.Default.(string)
+	// users.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	users.DescriptionValidator = usersDescDescription.Validators[0].(func(string) error)
 	// usersDescDepartmentID is the schema descriptor for department_id field.
-	usersDescDepartmentID := usersFields[19].Descriptor()
+	usersDescDepartmentID := usersFields[20].Descriptor()
 	// users.DefaultDepartmentID holds the default value on creation for the department_id field.
 	users.DefaultDepartmentID = usersDescDepartmentID.Default.(int)
 }

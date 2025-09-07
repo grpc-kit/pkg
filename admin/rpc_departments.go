@@ -52,7 +52,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		Name:        dp.Name,
 		I18NName:    I18NNameParse(dp.I18nName),
 		OrderWeight: int32(dp.OrderWeight),
-		Leaders:     make([]*adminv1.Department_Leader, 0),
+		Leaders:     make([]*adminv1.Leader, 0),
 	}
 
 	if req.Department.Leaders != nil {
@@ -67,7 +67,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 				return result, err
 			}
 
-			result.Leaders = append(result.Leaders, &adminv1.Department_Leader{
+			result.Leaders = append(result.Leaders, &adminv1.Leader{
 				Type:   int32(tmp.LeaderType),
 				UserId: int32(tmp.UserID),
 			})
@@ -151,6 +151,12 @@ func (a *KnownAdminAPI) DeleteDepartment(ctx context.Context, req *adminv1.Delet
 
 	hasFound = checkDep(deps.Departments)
 	if hasFound {
+		// TODO; 还需判断该部门下是否有用户
+		count := a.config.db.Users.Query().CountX(ctx)
+		if count > 0 {
+			return empty, errs.PermissionDenied(ctx).WithMessage("department has users")
+		}
+
 		_, err = a.config.db.Departments.Delete().
 			Where(
 				departments.ID(int(req.Id)),
@@ -193,6 +199,7 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 	return result, nil
 }
 
+// 构建部门树
 func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Departments) (*adminv1.Department, error) {
 	// 查子部门
 	children, err := a.config.db.Departments.
@@ -212,11 +219,11 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 		Name:        dep.Name,
 		I18NName:    I18NNameParse(dep.I18nName),
 		OrderWeight: int32(dep.OrderWeight),
-		Leaders:     make([]*adminv1.Department_Leader, 0),
+		Leaders:     make([]*adminv1.Leader, 0),
 	}
 
 	for _, l := range leaders {
-		pbDep.Leaders = append(pbDep.Leaders, &adminv1.Department_Leader{
+		pbDep.Leaders = append(pbDep.Leaders, &adminv1.Leader{
 			Type:   int32(l.LeaderType),
 			UserId: int32(l.UserID),
 		})
@@ -233,4 +240,30 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 	}
 
 	return pbDep, nil
+}
+
+// 递归获取所有子部门 ID
+func (a *KnownAdminAPI) getAllSubDeptIDs(ctx context.Context, deptID int) ([]int, error) {
+	var ids []int
+	ids = append(ids, deptID)
+
+	// 查询子部门
+	children, err := a.config.db.Departments.
+		Query().
+		Select(departments.FieldID).
+		Where(departments.ParentID(deptID)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 递归收集
+	for _, child := range children {
+		subIDs, err := a.getAllSubDeptIDs(ctx, child.ID)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, subIDs...)
+	}
+	return ids, nil
 }

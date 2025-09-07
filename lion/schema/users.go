@@ -2,6 +2,7 @@ package schema
 
 import (
 	"regexp"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
@@ -26,38 +27,35 @@ func (Users) Fields() []ent.Field {
 			Comment("首选用户名，用于系统识别与登录，仅支持字母、数字、下划线、点号"),
 		field.Bytes("realname_encrypted").
 			Sensitive().
-			Default([]byte("")).
+			Default([]byte{}).
 			Comment("用户的真实姓名"),
 		field.Bytes("idcard_encrypted").
 			Sensitive().
-			Default([]byte("")).
+			Default([]byte{}).
 			Comment("用户身份证号码"),
 		field.String("idcard_hash").
 			Optional().
-			Nillable().
+			Default("").
 			Comment("用户的身份证号码哈希，用于唯一值判断"),
 		field.String("nickname").
 			Default("").
 			Comment("用户的昵称，用于页面展示"),
 		field.String("profile").
-			Optional().
-			Nillable().
+			Default("").
 			Comment("用户个人资料页面的 URL"),
 		field.String("picture").
-			Optional().
-			Nillable().
+			Default("").
 			Comment("用户头像的 URL"),
 		field.String("website").
-			Optional().
-			Nillable().
+			Default("").
 			Comment("用户的个人网站 URL"),
 		field.Bytes("email_encrypted").
 			Sensitive().
-			Default([]byte("")).
+			Default([]byte{}).
 			Comment("用户的邮箱地址"),
 		field.String("email_hash").
 			Optional().
-			Nillable().
+			Default("").
 			Comment("用户的邮箱地址哈希，用于唯一值判断"),
 		field.Bool("email_verified").
 			Default(false).
@@ -68,31 +66,33 @@ func (Users) Fields() []ent.Field {
 			Comment("用户的性别，如：male、female, other"),
 		field.Time("birthdate").
 			Optional().
-			Nillable().
+			Default(func() time.Time { return time.Time{} }).
 			Comment("用户的出生日期，格式为 YYYY-MM-DD，如 1990-12-31"),
 		field.String("zoneinfo").
-			Optional().
-			Nillable().
+			Default("").
 			Comment("用户的时区信息，如：Asia/Shanghai"),
 		field.String("locale").
-			Optional().
-			Nillable().
+			Default("").
 			Comment("用户的语言/地区偏好，如：zh-CN"),
 		field.Bytes("phone_number_encrypted").
 			Sensitive().
-			Default([]byte("")).
+			Default([]byte{}).
 			Comment("用户的手机号码，加密存储"),
 		field.String("phone_number_hash").
 			Optional().
-			Nillable().
+			Default("").
 			Comment("用户的手机号哈希，用于唯一值判断"),
 		field.Bool("phone_number_verified").
 			Default(false).
 			Comment("手机号是否验证过"),
 		field.Bytes("address_encrypted").
 			Sensitive().
-			Default([]byte("")).
+			Default([]byte{}).
 			Comment("用户的地址信息"),
+		field.String("description").
+			Default("").
+			MaxLen(500).
+			Comment("用户详细描述"),
 		field.Int("department_id").
 			Default(0).
 			Comment("部门 ID"),

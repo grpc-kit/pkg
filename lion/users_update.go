@@ -130,12 +130,6 @@ func (_u *UsersUpdate) SetNillableProfile(v *string) *UsersUpdate {
 	return _u
 }
 
-// ClearProfile clears the value of the "profile" field.
-func (_u *UsersUpdate) ClearProfile() *UsersUpdate {
-	_u.mutation.ClearProfile()
-	return _u
-}
-
 // SetPicture sets the "picture" field.
 func (_u *UsersUpdate) SetPicture(v string) *UsersUpdate {
 	_u.mutation.SetPicture(v)
@@ -150,12 +144,6 @@ func (_u *UsersUpdate) SetNillablePicture(v *string) *UsersUpdate {
 	return _u
 }
 
-// ClearPicture clears the value of the "picture" field.
-func (_u *UsersUpdate) ClearPicture() *UsersUpdate {
-	_u.mutation.ClearPicture()
-	return _u
-}
-
 // SetWebsite sets the "website" field.
 func (_u *UsersUpdate) SetWebsite(v string) *UsersUpdate {
 	_u.mutation.SetWebsite(v)
@@ -167,12 +155,6 @@ func (_u *UsersUpdate) SetNillableWebsite(v *string) *UsersUpdate {
 	if v != nil {
 		_u.SetWebsite(*v)
 	}
-	return _u
-}
-
-// ClearWebsite clears the value of the "website" field.
-func (_u *UsersUpdate) ClearWebsite() *UsersUpdate {
-	_u.mutation.ClearWebsite()
 	return _u
 }
 
@@ -264,12 +246,6 @@ func (_u *UsersUpdate) SetNillableZoneinfo(v *string) *UsersUpdate {
 	return _u
 }
 
-// ClearZoneinfo clears the value of the "zoneinfo" field.
-func (_u *UsersUpdate) ClearZoneinfo() *UsersUpdate {
-	_u.mutation.ClearZoneinfo()
-	return _u
-}
-
 // SetLocale sets the "locale" field.
 func (_u *UsersUpdate) SetLocale(v string) *UsersUpdate {
 	_u.mutation.SetLocale(v)
@@ -281,12 +257,6 @@ func (_u *UsersUpdate) SetNillableLocale(v *string) *UsersUpdate {
 	if v != nil {
 		_u.SetLocale(*v)
 	}
-	return _u
-}
-
-// ClearLocale clears the value of the "locale" field.
-func (_u *UsersUpdate) ClearLocale() *UsersUpdate {
-	_u.mutation.ClearLocale()
 	return _u
 }
 
@@ -333,6 +303,20 @@ func (_u *UsersUpdate) SetNillablePhoneNumberVerified(v *bool) *UsersUpdate {
 // SetAddressEncrypted sets the "address_encrypted" field.
 func (_u *UsersUpdate) SetAddressEncrypted(v []byte) *UsersUpdate {
 	_u.mutation.SetAddressEncrypted(v)
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *UsersUpdate) SetDescription(v string) *UsersUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableDescription(v *string) *UsersUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
 	return _u
 }
 
@@ -482,6 +466,11 @@ func (_u *UsersUpdate) check() error {
 			return &ValidationError{Name: "gender", err: fmt.Errorf(`lion: validator failed for field "Users.gender": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Description(); ok {
+		if err := users.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -527,20 +516,11 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Profile(); ok {
 		_spec.SetField(users.FieldProfile, field.TypeString, value)
 	}
-	if _u.mutation.ProfileCleared() {
-		_spec.ClearField(users.FieldProfile, field.TypeString)
-	}
 	if value, ok := _u.mutation.Picture(); ok {
 		_spec.SetField(users.FieldPicture, field.TypeString, value)
 	}
-	if _u.mutation.PictureCleared() {
-		_spec.ClearField(users.FieldPicture, field.TypeString)
-	}
 	if value, ok := _u.mutation.Website(); ok {
 		_spec.SetField(users.FieldWebsite, field.TypeString, value)
-	}
-	if _u.mutation.WebsiteCleared() {
-		_spec.ClearField(users.FieldWebsite, field.TypeString)
 	}
 	if value, ok := _u.mutation.EmailEncrypted(); ok {
 		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
@@ -566,14 +546,8 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Zoneinfo(); ok {
 		_spec.SetField(users.FieldZoneinfo, field.TypeString, value)
 	}
-	if _u.mutation.ZoneinfoCleared() {
-		_spec.ClearField(users.FieldZoneinfo, field.TypeString)
-	}
 	if value, ok := _u.mutation.Locale(); ok {
 		_spec.SetField(users.FieldLocale, field.TypeString, value)
-	}
-	if _u.mutation.LocaleCleared() {
-		_spec.ClearField(users.FieldLocale, field.TypeString)
 	}
 	if value, ok := _u.mutation.PhoneNumberEncrypted(); ok {
 		_spec.SetField(users.FieldPhoneNumberEncrypted, field.TypeBytes, value)
@@ -589,6 +563,9 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(users.FieldDescription, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DepartmentID(); ok {
 		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
@@ -806,12 +783,6 @@ func (_u *UsersUpdateOne) SetNillableProfile(v *string) *UsersUpdateOne {
 	return _u
 }
 
-// ClearProfile clears the value of the "profile" field.
-func (_u *UsersUpdateOne) ClearProfile() *UsersUpdateOne {
-	_u.mutation.ClearProfile()
-	return _u
-}
-
 // SetPicture sets the "picture" field.
 func (_u *UsersUpdateOne) SetPicture(v string) *UsersUpdateOne {
 	_u.mutation.SetPicture(v)
@@ -826,12 +797,6 @@ func (_u *UsersUpdateOne) SetNillablePicture(v *string) *UsersUpdateOne {
 	return _u
 }
 
-// ClearPicture clears the value of the "picture" field.
-func (_u *UsersUpdateOne) ClearPicture() *UsersUpdateOne {
-	_u.mutation.ClearPicture()
-	return _u
-}
-
 // SetWebsite sets the "website" field.
 func (_u *UsersUpdateOne) SetWebsite(v string) *UsersUpdateOne {
 	_u.mutation.SetWebsite(v)
@@ -843,12 +808,6 @@ func (_u *UsersUpdateOne) SetNillableWebsite(v *string) *UsersUpdateOne {
 	if v != nil {
 		_u.SetWebsite(*v)
 	}
-	return _u
-}
-
-// ClearWebsite clears the value of the "website" field.
-func (_u *UsersUpdateOne) ClearWebsite() *UsersUpdateOne {
-	_u.mutation.ClearWebsite()
 	return _u
 }
 
@@ -940,12 +899,6 @@ func (_u *UsersUpdateOne) SetNillableZoneinfo(v *string) *UsersUpdateOne {
 	return _u
 }
 
-// ClearZoneinfo clears the value of the "zoneinfo" field.
-func (_u *UsersUpdateOne) ClearZoneinfo() *UsersUpdateOne {
-	_u.mutation.ClearZoneinfo()
-	return _u
-}
-
 // SetLocale sets the "locale" field.
 func (_u *UsersUpdateOne) SetLocale(v string) *UsersUpdateOne {
 	_u.mutation.SetLocale(v)
@@ -957,12 +910,6 @@ func (_u *UsersUpdateOne) SetNillableLocale(v *string) *UsersUpdateOne {
 	if v != nil {
 		_u.SetLocale(*v)
 	}
-	return _u
-}
-
-// ClearLocale clears the value of the "locale" field.
-func (_u *UsersUpdateOne) ClearLocale() *UsersUpdateOne {
-	_u.mutation.ClearLocale()
 	return _u
 }
 
@@ -1009,6 +956,20 @@ func (_u *UsersUpdateOne) SetNillablePhoneNumberVerified(v *bool) *UsersUpdateOn
 // SetAddressEncrypted sets the "address_encrypted" field.
 func (_u *UsersUpdateOne) SetAddressEncrypted(v []byte) *UsersUpdateOne {
 	_u.mutation.SetAddressEncrypted(v)
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *UsersUpdateOne) SetDescription(v string) *UsersUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableDescription(v *string) *UsersUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
 	return _u
 }
 
@@ -1171,6 +1132,11 @@ func (_u *UsersUpdateOne) check() error {
 			return &ValidationError{Name: "gender", err: fmt.Errorf(`lion: validator failed for field "Users.gender": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Description(); ok {
+		if err := users.DescriptionValidator(v); err != nil {
+			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -1233,20 +1199,11 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if value, ok := _u.mutation.Profile(); ok {
 		_spec.SetField(users.FieldProfile, field.TypeString, value)
 	}
-	if _u.mutation.ProfileCleared() {
-		_spec.ClearField(users.FieldProfile, field.TypeString)
-	}
 	if value, ok := _u.mutation.Picture(); ok {
 		_spec.SetField(users.FieldPicture, field.TypeString, value)
 	}
-	if _u.mutation.PictureCleared() {
-		_spec.ClearField(users.FieldPicture, field.TypeString)
-	}
 	if value, ok := _u.mutation.Website(); ok {
 		_spec.SetField(users.FieldWebsite, field.TypeString, value)
-	}
-	if _u.mutation.WebsiteCleared() {
-		_spec.ClearField(users.FieldWebsite, field.TypeString)
 	}
 	if value, ok := _u.mutation.EmailEncrypted(); ok {
 		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
@@ -1272,14 +1229,8 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if value, ok := _u.mutation.Zoneinfo(); ok {
 		_spec.SetField(users.FieldZoneinfo, field.TypeString, value)
 	}
-	if _u.mutation.ZoneinfoCleared() {
-		_spec.ClearField(users.FieldZoneinfo, field.TypeString)
-	}
 	if value, ok := _u.mutation.Locale(); ok {
 		_spec.SetField(users.FieldLocale, field.TypeString, value)
-	}
-	if _u.mutation.LocaleCleared() {
-		_spec.ClearField(users.FieldLocale, field.TypeString)
 	}
 	if value, ok := _u.mutation.PhoneNumberEncrypted(); ok {
 		_spec.SetField(users.FieldPhoneNumberEncrypted, field.TypeBytes, value)
@@ -1295,6 +1246,9 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if value, ok := _u.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(users.FieldDescription, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DepartmentID(); ok {
 		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)

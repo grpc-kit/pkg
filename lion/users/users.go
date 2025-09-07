@@ -59,6 +59,8 @@ const (
 	FieldPhoneNumberVerified = "phone_number_verified"
 	// FieldAddressEncrypted holds the string denoting the address_encrypted field in the database.
 	FieldAddressEncrypted = "address_encrypted"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldDepartmentID holds the string denoting the department_id field in the database.
 	FieldDepartmentID = "department_id"
 	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
@@ -108,6 +110,7 @@ var Columns = []string{
 	FieldPhoneNumberHash,
 	FieldPhoneNumberVerified,
 	FieldAddressEncrypted,
+	FieldDescription,
 	FieldDepartmentID,
 }
 
@@ -134,18 +137,40 @@ var (
 	DefaultRealnameEncrypted []byte
 	// DefaultIdcardEncrypted holds the default value on creation for the "idcard_encrypted" field.
 	DefaultIdcardEncrypted []byte
+	// DefaultIdcardHash holds the default value on creation for the "idcard_hash" field.
+	DefaultIdcardHash string
 	// DefaultNickname holds the default value on creation for the "nickname" field.
 	DefaultNickname string
+	// DefaultProfile holds the default value on creation for the "profile" field.
+	DefaultProfile string
+	// DefaultPicture holds the default value on creation for the "picture" field.
+	DefaultPicture string
+	// DefaultWebsite holds the default value on creation for the "website" field.
+	DefaultWebsite string
 	// DefaultEmailEncrypted holds the default value on creation for the "email_encrypted" field.
 	DefaultEmailEncrypted []byte
+	// DefaultEmailHash holds the default value on creation for the "email_hash" field.
+	DefaultEmailHash string
 	// DefaultEmailVerified holds the default value on creation for the "email_verified" field.
 	DefaultEmailVerified bool
+	// DefaultBirthdate holds the default value on creation for the "birthdate" field.
+	DefaultBirthdate func() time.Time
+	// DefaultZoneinfo holds the default value on creation for the "zoneinfo" field.
+	DefaultZoneinfo string
+	// DefaultLocale holds the default value on creation for the "locale" field.
+	DefaultLocale string
 	// DefaultPhoneNumberEncrypted holds the default value on creation for the "phone_number_encrypted" field.
 	DefaultPhoneNumberEncrypted []byte
+	// DefaultPhoneNumberHash holds the default value on creation for the "phone_number_hash" field.
+	DefaultPhoneNumberHash string
 	// DefaultPhoneNumberVerified holds the default value on creation for the "phone_number_verified" field.
 	DefaultPhoneNumberVerified bool
 	// DefaultAddressEncrypted holds the default value on creation for the "address_encrypted" field.
 	DefaultAddressEncrypted []byte
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
+	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	DescriptionValidator func(string) error
 	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
 	DefaultDepartmentID int
 )
@@ -269,6 +294,11 @@ func ByPhoneNumberHash(opts ...sql.OrderTermOption) OrderOption {
 // ByPhoneNumberVerified orders the results by the phone_number_verified field.
 func ByPhoneNumberVerified(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPhoneNumberVerified, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByDepartmentID orders the results by the department_id field.

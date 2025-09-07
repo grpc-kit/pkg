@@ -11480,6 +11480,7 @@ type UsersMutation struct {
 	phone_number_hash              *string
 	phone_number_verified          *bool
 	address_encrypted              *[]byte
+	description                    *string
 	department_id                  *int
 	adddepartment_id               *int
 	clearedFields                  map[string]struct{}
@@ -11838,7 +11839,7 @@ func (m *UsersMutation) IdcardHash() (r string, exists bool) {
 // OldIdcardHash returns the old "idcard_hash" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldIdcardHash(ctx context.Context) (v *string, err error) {
+func (m *UsersMutation) OldIdcardHash(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIdcardHash is only allowed on UpdateOne operations")
 	}
@@ -11923,7 +11924,7 @@ func (m *UsersMutation) Profile() (r string, exists bool) {
 // OldProfile returns the old "profile" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldProfile(ctx context.Context) (v *string, err error) {
+func (m *UsersMutation) OldProfile(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldProfile is only allowed on UpdateOne operations")
 	}
@@ -11937,22 +11938,9 @@ func (m *UsersMutation) OldProfile(ctx context.Context) (v *string, err error) {
 	return oldValue.Profile, nil
 }
 
-// ClearProfile clears the value of the "profile" field.
-func (m *UsersMutation) ClearProfile() {
-	m.profile = nil
-	m.clearedFields[users.FieldProfile] = struct{}{}
-}
-
-// ProfileCleared returns if the "profile" field was cleared in this mutation.
-func (m *UsersMutation) ProfileCleared() bool {
-	_, ok := m.clearedFields[users.FieldProfile]
-	return ok
-}
-
 // ResetProfile resets all changes to the "profile" field.
 func (m *UsersMutation) ResetProfile() {
 	m.profile = nil
-	delete(m.clearedFields, users.FieldProfile)
 }
 
 // SetPicture sets the "picture" field.
@@ -11972,7 +11960,7 @@ func (m *UsersMutation) Picture() (r string, exists bool) {
 // OldPicture returns the old "picture" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldPicture(ctx context.Context) (v *string, err error) {
+func (m *UsersMutation) OldPicture(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPicture is only allowed on UpdateOne operations")
 	}
@@ -11986,22 +11974,9 @@ func (m *UsersMutation) OldPicture(ctx context.Context) (v *string, err error) {
 	return oldValue.Picture, nil
 }
 
-// ClearPicture clears the value of the "picture" field.
-func (m *UsersMutation) ClearPicture() {
-	m.picture = nil
-	m.clearedFields[users.FieldPicture] = struct{}{}
-}
-
-// PictureCleared returns if the "picture" field was cleared in this mutation.
-func (m *UsersMutation) PictureCleared() bool {
-	_, ok := m.clearedFields[users.FieldPicture]
-	return ok
-}
-
 // ResetPicture resets all changes to the "picture" field.
 func (m *UsersMutation) ResetPicture() {
 	m.picture = nil
-	delete(m.clearedFields, users.FieldPicture)
 }
 
 // SetWebsite sets the "website" field.
@@ -12021,7 +11996,7 @@ func (m *UsersMutation) Website() (r string, exists bool) {
 // OldWebsite returns the old "website" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldWebsite(ctx context.Context) (v *string, err error) {
+func (m *UsersMutation) OldWebsite(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldWebsite is only allowed on UpdateOne operations")
 	}
@@ -12035,22 +12010,9 @@ func (m *UsersMutation) OldWebsite(ctx context.Context) (v *string, err error) {
 	return oldValue.Website, nil
 }
 
-// ClearWebsite clears the value of the "website" field.
-func (m *UsersMutation) ClearWebsite() {
-	m.website = nil
-	m.clearedFields[users.FieldWebsite] = struct{}{}
-}
-
-// WebsiteCleared returns if the "website" field was cleared in this mutation.
-func (m *UsersMutation) WebsiteCleared() bool {
-	_, ok := m.clearedFields[users.FieldWebsite]
-	return ok
-}
-
 // ResetWebsite resets all changes to the "website" field.
 func (m *UsersMutation) ResetWebsite() {
 	m.website = nil
-	delete(m.clearedFields, users.FieldWebsite)
 }
 
 // SetEmailEncrypted sets the "email_encrypted" field.
@@ -12106,7 +12068,7 @@ func (m *UsersMutation) EmailHash() (r string, exists bool) {
 // OldEmailHash returns the old "email_hash" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldEmailHash(ctx context.Context) (v *string, err error) {
+func (m *UsersMutation) OldEmailHash(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldEmailHash is only allowed on UpdateOne operations")
 	}
@@ -12227,7 +12189,7 @@ func (m *UsersMutation) Birthdate() (r time.Time, exists bool) {
 // OldBirthdate returns the old "birthdate" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldBirthdate(ctx context.Context) (v *time.Time, err error) {
+func (m *UsersMutation) OldBirthdate(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldBirthdate is only allowed on UpdateOne operations")
 	}
@@ -12276,7 +12238,7 @@ func (m *UsersMutation) Zoneinfo() (r string, exists bool) {
 // OldZoneinfo returns the old "zoneinfo" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldZoneinfo(ctx context.Context) (v *string, err error) {
+func (m *UsersMutation) OldZoneinfo(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldZoneinfo is only allowed on UpdateOne operations")
 	}
@@ -12290,22 +12252,9 @@ func (m *UsersMutation) OldZoneinfo(ctx context.Context) (v *string, err error) 
 	return oldValue.Zoneinfo, nil
 }
 
-// ClearZoneinfo clears the value of the "zoneinfo" field.
-func (m *UsersMutation) ClearZoneinfo() {
-	m.zoneinfo = nil
-	m.clearedFields[users.FieldZoneinfo] = struct{}{}
-}
-
-// ZoneinfoCleared returns if the "zoneinfo" field was cleared in this mutation.
-func (m *UsersMutation) ZoneinfoCleared() bool {
-	_, ok := m.clearedFields[users.FieldZoneinfo]
-	return ok
-}
-
 // ResetZoneinfo resets all changes to the "zoneinfo" field.
 func (m *UsersMutation) ResetZoneinfo() {
 	m.zoneinfo = nil
-	delete(m.clearedFields, users.FieldZoneinfo)
 }
 
 // SetLocale sets the "locale" field.
@@ -12325,7 +12274,7 @@ func (m *UsersMutation) Locale() (r string, exists bool) {
 // OldLocale returns the old "locale" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldLocale(ctx context.Context) (v *string, err error) {
+func (m *UsersMutation) OldLocale(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldLocale is only allowed on UpdateOne operations")
 	}
@@ -12339,22 +12288,9 @@ func (m *UsersMutation) OldLocale(ctx context.Context) (v *string, err error) {
 	return oldValue.Locale, nil
 }
 
-// ClearLocale clears the value of the "locale" field.
-func (m *UsersMutation) ClearLocale() {
-	m.locale = nil
-	m.clearedFields[users.FieldLocale] = struct{}{}
-}
-
-// LocaleCleared returns if the "locale" field was cleared in this mutation.
-func (m *UsersMutation) LocaleCleared() bool {
-	_, ok := m.clearedFields[users.FieldLocale]
-	return ok
-}
-
 // ResetLocale resets all changes to the "locale" field.
 func (m *UsersMutation) ResetLocale() {
 	m.locale = nil
-	delete(m.clearedFields, users.FieldLocale)
 }
 
 // SetPhoneNumberEncrypted sets the "phone_number_encrypted" field.
@@ -12410,7 +12346,7 @@ func (m *UsersMutation) PhoneNumberHash() (r string, exists bool) {
 // OldPhoneNumberHash returns the old "phone_number_hash" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldPhoneNumberHash(ctx context.Context) (v *string, err error) {
+func (m *UsersMutation) OldPhoneNumberHash(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPhoneNumberHash is only allowed on UpdateOne operations")
 	}
@@ -12512,6 +12448,42 @@ func (m *UsersMutation) OldAddressEncrypted(ctx context.Context) (v []byte, err 
 // ResetAddressEncrypted resets all changes to the "address_encrypted" field.
 func (m *UsersMutation) ResetAddressEncrypted() {
 	m.address_encrypted = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *UsersMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *UsersMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Users entity.
+// If the Users object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UsersMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *UsersMutation) ResetDescription() {
+	m.description = nil
 }
 
 // SetDepartmentID sets the "department_id" field.
@@ -12712,7 +12684,7 @@ func (m *UsersMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UsersMutation) Fields() []string {
-	fields := make([]string, 0, 23)
+	fields := make([]string, 0, 24)
 	if m.created_at != nil {
 		fields = append(fields, users.FieldCreatedAt)
 	}
@@ -12779,6 +12751,9 @@ func (m *UsersMutation) Fields() []string {
 	if m.address_encrypted != nil {
 		fields = append(fields, users.FieldAddressEncrypted)
 	}
+	if m.description != nil {
+		fields = append(fields, users.FieldDescription)
+	}
 	if m.department_id != nil {
 		fields = append(fields, users.FieldDepartmentID)
 	}
@@ -12834,6 +12809,8 @@ func (m *UsersMutation) Field(name string) (ent.Value, bool) {
 		return m.PhoneNumberVerified()
 	case users.FieldAddressEncrypted:
 		return m.AddressEncrypted()
+	case users.FieldDescription:
+		return m.Description()
 	case users.FieldDepartmentID:
 		return m.DepartmentID()
 	}
@@ -12889,6 +12866,8 @@ func (m *UsersMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldPhoneNumberVerified(ctx)
 	case users.FieldAddressEncrypted:
 		return m.OldAddressEncrypted(ctx)
+	case users.FieldDescription:
+		return m.OldDescription(ctx)
 	case users.FieldDepartmentID:
 		return m.OldDepartmentID(ctx)
 	}
@@ -13054,6 +13033,13 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAddressEncrypted(v)
 		return nil
+	case users.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
 	case users.FieldDepartmentID:
 		v, ok := value.(int)
 		if !ok {
@@ -13112,26 +13098,11 @@ func (m *UsersMutation) ClearedFields() []string {
 	if m.FieldCleared(users.FieldIdcardHash) {
 		fields = append(fields, users.FieldIdcardHash)
 	}
-	if m.FieldCleared(users.FieldProfile) {
-		fields = append(fields, users.FieldProfile)
-	}
-	if m.FieldCleared(users.FieldPicture) {
-		fields = append(fields, users.FieldPicture)
-	}
-	if m.FieldCleared(users.FieldWebsite) {
-		fields = append(fields, users.FieldWebsite)
-	}
 	if m.FieldCleared(users.FieldEmailHash) {
 		fields = append(fields, users.FieldEmailHash)
 	}
 	if m.FieldCleared(users.FieldBirthdate) {
 		fields = append(fields, users.FieldBirthdate)
-	}
-	if m.FieldCleared(users.FieldZoneinfo) {
-		fields = append(fields, users.FieldZoneinfo)
-	}
-	if m.FieldCleared(users.FieldLocale) {
-		fields = append(fields, users.FieldLocale)
 	}
 	if m.FieldCleared(users.FieldPhoneNumberHash) {
 		fields = append(fields, users.FieldPhoneNumberHash)
@@ -13156,26 +13127,11 @@ func (m *UsersMutation) ClearField(name string) error {
 	case users.FieldIdcardHash:
 		m.ClearIdcardHash()
 		return nil
-	case users.FieldProfile:
-		m.ClearProfile()
-		return nil
-	case users.FieldPicture:
-		m.ClearPicture()
-		return nil
-	case users.FieldWebsite:
-		m.ClearWebsite()
-		return nil
 	case users.FieldEmailHash:
 		m.ClearEmailHash()
 		return nil
 	case users.FieldBirthdate:
 		m.ClearBirthdate()
-		return nil
-	case users.FieldZoneinfo:
-		m.ClearZoneinfo()
-		return nil
-	case users.FieldLocale:
-		m.ClearLocale()
 		return nil
 	case users.FieldPhoneNumberHash:
 		m.ClearPhoneNumberHash()
@@ -13253,6 +13209,9 @@ func (m *UsersMutation) ResetField(name string) error {
 		return nil
 	case users.FieldAddressEncrypted:
 		m.ResetAddressEncrypted()
+		return nil
+	case users.FieldDescription:
+		m.ResetDescription()
 		return nil
 	case users.FieldDepartmentID:
 		m.ResetDepartmentID()

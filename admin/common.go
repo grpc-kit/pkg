@@ -1,7 +1,12 @@
 package admin
 
 import (
+	"context"
+	"fmt"
+	"strconv"
+
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -30,4 +35,19 @@ func I18NNameParse(rawBody string) *adminv1.I18NName {
 	_ = protojson.Unmarshal([]byte(rawBody), result)
 
 	return result
+}
+
+// GetUserID 获取用户 ID
+func GetUserID(ctx context.Context) (int, error) {
+	userIDStr, ok := rpc.GetUserIDFromContext(ctx)
+	if !ok {
+		return 0, fmt.Errorf("not found user id")
+	}
+
+	userIDInt, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		return 0, err
+	}
+
+	return userIDInt, nil
 }
