@@ -14,6 +14,8 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/users"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // CreateUser 创建用户
@@ -21,7 +23,9 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	result := &adminv1.User{}
 
 	if req == nil || req.User == nil {
-		return result, errs.InvalidArgument(ctx).WithMessage("request body user is nil")
+		return result, errs.InvalidArgument(ctx).
+			WithMessage("request body user is nil").
+			WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "请求体为空"})
 	}
 
 	if req.User.GetUsername() == "" {
@@ -109,7 +113,25 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 
 	thisUser, err := userCreate.Save(ctx)
 	if err != nil {
-		return nil, err
+		a.logger.Errorf("user create err: %v", err)
+
+		// st, err := status.New(codes.InvalidArgument, "invalid argument").WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "用户已存在！"})
+		// return nil, st.Err()
+
+		st, _ := errs.AlreadyExists(ctx).WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "用户已存在！"})
+		return nil, st.Err()
+
+		/*
+			if strings.Contains(err.Error(), "duplicate key value") {
+				return nil, errs.AlreadyExists(ctx).
+					WithMessage("user already exists").
+					WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "用户已存在！"}).Err()
+			}
+		*/
+
+		return nil, errs.InvalidArgument(ctx).
+			WithMessage("user create fail.").
+			WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "创建用户失败！"}).Err()
 	}
 
 	result = &adminv1.User{
@@ -141,6 +163,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	basicViewFields := []string{
 		users.FieldID,
 		users.FieldPreferredUsername,
+		users.FieldStatus,
 		users.FieldNickname,
 		users.FieldProfile,
 		users.FieldPicture,
@@ -160,6 +183,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		users.FieldPhoneNumberVerified,
 		users.FieldAddressEncrypted,
 		users.FieldDepartmentID,
+		users.FieldDescription,
 	}...)
 
 	switch req.GetView() {
@@ -303,15 +327,31 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	result.TotalSize = int32(totalSize)
 
 	for _, user := range searchUsers {
+		realname, _ := crypto.DecryptAES(a.config.aesKey, user.RealnameEncrypted)
+		idcard, _ := crypto.DecryptAES(a.config.aesKey, user.IdcardEncrypted)
+		email, _ := crypto.DecryptAES(a.config.aesKey, user.EmailEncrypted)
+		phoneNumber, _ := crypto.DecryptAES(a.config.aesKey, user.PhoneNumberEncrypted)
+		// address, _ := crypto.DecryptAES(a.config.aesKey, user.AddressEncrypted)
+
 		result.Users = append(result.Users, &adminv1.User{
-			Id:       int32(user.ID),
-			Username: user.PreferredUsername,
-			Nickname: user.Nickname,
-			Profile:  user.Profile,
-			Picture:  user.Picture,
-			Website:  user.Website,
-			Zoneinfo: user.Zoneinfo,
-			Locale:   user.Locale,
+			Id:                  int32(user.ID),
+			Username:            user.PreferredUsername,
+			Status:              adminv1.UserStatus(user.Status),
+			Realname:            string(realname),
+			Idcard:              string(idcard),
+			Nickname:            user.Nickname,
+			Profile:             user.Profile,
+			Picture:             user.Picture,
+			Website:             user.Website,
+			Email:               string(email),
+			EmailVerified:       user.EmailVerified,
+			Gender:              adminv1.Gender(user.Gender),
+			Birthday:            timestamppb.New(user.Birthdate),
+			Zoneinfo:            user.Zoneinfo,
+			Locale:              user.Locale,
+			PhoneNumber:         string(phoneNumber),
+			PhoneNumberVerified: user.PhoneNumberVerified,
+			// Address:             address,
 		})
 	}
 

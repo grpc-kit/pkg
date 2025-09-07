@@ -6,7 +6,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/protoadapt"
 	"google.golang.org/protobuf/types/known/anypb"
 
 	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
@@ -24,6 +24,7 @@ func New(code int32, message string) *Status {
 			Code:    code,
 			Status:  codes.Code(code).String(),
 			Message: message,
+			Details: make([]*anypb.Any, 0),
 		},
 	}
 	return s
@@ -62,7 +63,18 @@ func FromError(err error) *Status {
 
 // Err 为返回 status.statusError 错误类型
 func (s *Status) Err() error {
-	return status.New(codes.Code(s.Code), s.Message).Err()
+	statusCode := status.New(codes.Code(s.Code), s.Message)
+
+	if len(s.Details) > 0 {
+		for _, detail := range s.Details {
+			tmp, err := statusCode.WithDetails(detail)
+			if err == nil {
+				statusCode = tmp
+			}
+		}
+	}
+
+	return statusCode.Err()
 }
 
 // Error 为实现 error 接口定义
@@ -77,16 +89,17 @@ func (s *Status) WithMessage(msg string) *Status {
 }
 
 // WithDetails returns a new status with the provided details messages appended to the status.
-func (s *Status) WithDetails(details ...proto.Message) *Status {
+func (s *Status) WithDetails(details ...protoadapt.MessageV1) *Status {
 	for _, detail := range details {
 		s = s.AppendDetail(detail)
 	}
+
 	return s
 }
 
 // AppendDetail 添加错误详情内容
-func (s *Status) AppendDetail(detail proto.Message) *Status {
-	a, err := anypb.New(detail)
+func (s *Status) AppendDetail(detail protoadapt.MessageV1) *Status {
+	a, err := anypb.New(protoadapt.MessageV2Of(detail))
 	if err == nil {
 		s.Details = append(s.Details, a)
 	}
