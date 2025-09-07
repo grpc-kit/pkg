@@ -29,6 +29,9 @@ func (Users) Fields() []ent.Field {
 			Sensitive().
 			Default([]byte{}).
 			Comment("用户的真实姓名"),
+		field.Int("status").
+			Default(0).
+			Comment("用户状态"),
 		field.Bytes("idcard_encrypted").
 			Sensitive().
 			Default([]byte{}).
@@ -60,10 +63,9 @@ func (Users) Fields() []ent.Field {
 		field.Bool("email_verified").
 			Default(false).
 			Comment("邮箱是否验证过"),
-		field.Enum("gender").
-			Values("male", "female", "other", "unknown").
-			Default("unknown").
-			Comment("用户的性别，如：male、female, other"),
+		field.Int("gender").
+			Default(0).
+			Comment("用户的性别，如：0, 1=male、2=female"),
 		field.Time("birthdate").
 			Optional().
 			Default(func() time.Time { return time.Time{} }).
@@ -89,13 +91,13 @@ func (Users) Fields() []ent.Field {
 			Sensitive().
 			Default([]byte{}).
 			Comment("用户的地址信息"),
+		field.Int("department_id").
+			Default(0).
+			Comment("部门 ID"),
 		field.String("description").
 			Default("").
 			MaxLen(500).
 			Comment("用户详细描述"),
-		field.Int("department_id").
-			Default(0).
-			Comment("部门 ID"),
 	}
 }
 
@@ -105,6 +107,11 @@ func (Users) Edges() []ent.Edge {
 		// 一个 Role 可以对应多个 RoleMenu (中间实体)
 		edge.To("lion_users", RoleUserMapping.Type),
 		edge.To("lion_department_leaders", DepartmentLeaders.Type),
+		edge.From("lion_departments", Departments.Type).
+			Ref("lion_users").
+			Field("department_id").
+			Unique().
+			Required(),
 	}
 }
 
