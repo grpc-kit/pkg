@@ -145,7 +145,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			return 0, fmt.Errorf("create user failed")
 		}
 
-		_, err = tx.Users.Query().Where(users.PreferredUsernameEQ(username)).OnlyID(ctx)
+		_, err = tx.Users.Query().Where(users.UsernameEQ(username)).OnlyID(ctx)
 		if !lion.IsNotFound(err) {
 			s.logger.Errorf("create user: %v, err: %v", username, err)
 			return 0, fmt.Errorf("create user failed")
@@ -158,7 +158,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		}
 
 		newUser, err := tx.Users.Create().
-			SetPreferredUsername(username).
+			SetUsername(username).
 			SetEmailEncrypted(emailEnc).
 			SetEmailVerified(idToken.EmailVerified).
 			SetEmailHash(crypto.SHA256([]byte(idToken.Email))).
@@ -277,7 +277,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 			return 0, fmt.Errorf("create user failed")
 		}
 
-		_, err = tx.Users.Query().Where(users.PreferredUsernameEQ(username)).OnlyID(ctx)
+		_, err = tx.Users.Query().Where(users.UsernameEQ(username)).OnlyID(ctx)
 		if !lion.IsNotFound(err) {
 			s.logger.Errorf("create user: %v, err: %v", username, err)
 			return 0, fmt.Errorf("create user failed")
@@ -292,7 +292,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 		*/
 
 		newUser, err := tx.Users.Create().
-			SetPreferredUsername(username).
+			SetUsername(username).
 			//SetEmailEncrypted(emailEnc).
 			//SetEmailVerified(idToken.EmailVerified).
 			//SetEmailHash(crypto.SHA256([]byte(idToken.Email))).

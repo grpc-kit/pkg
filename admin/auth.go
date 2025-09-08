@@ -37,7 +37,7 @@ func (a *KnownAdminAPI) authLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	x, err := a.config.db.Users.Create().
-		SetPreferredUsername(authreq.Username).
+		SetUsername(authreq.Username).
 		Save(context.TODO())
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

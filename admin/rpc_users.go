@@ -63,7 +63,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	// TODO；还需验证创建的用户必须是负责部门内
 
 	userCreate := a.config.db.Users.Create()
-	userCreate.SetPreferredUsername(req.User.GetUsername())
+	userCreate.SetUsername(req.User.GetUsername())
 
 	if req.User.GetRealname() != "" {
 		realname, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.GetRealname()))
@@ -131,7 +131,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 
 	result = &adminv1.User{
 		Id:          int32(thisUser.ID),
-		Username:    thisUser.PreferredUsername,
+		Username:    thisUser.Username,
 		Realname:    req.GetUser().Realname,
 		Idcard:      req.GetUser().Idcard,
 		Email:       req.GetUser().Email,
@@ -157,7 +157,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 
 	basicViewFields := []string{
 		users.FieldID,
-		users.FieldPreferredUsername,
+		users.FieldUsername,
 		users.FieldStatus,
 		users.FieldNickname,
 		users.FieldProfile,
@@ -333,7 +333,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 
 		result.Users = append(result.Users, &adminv1.User{
 			Id:                  int32(user.ID),
-			Username:            user.PreferredUsername,
+			Username:            user.Username,
 			Status:              adminv1.UserStatus(user.Status),
 			Realname:            string(realname),
 			Idcard:              string(idcard),
