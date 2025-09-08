@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
-	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/roleusermapping"
 	"github.com/grpc-kit/pkg/lion/users"
 )
@@ -65,9 +64,9 @@ func (_c *UsersCreate) SetNillableDeletedAt(v *time.Time) *UsersCreate {
 	return _c
 }
 
-// SetPreferredUsername sets the "preferred_username" field.
-func (_c *UsersCreate) SetPreferredUsername(v string) *UsersCreate {
-	_c.mutation.SetPreferredUsername(v)
+// SetUsername sets the "username" field.
+func (_c *UsersCreate) SetUsername(v string) *UsersCreate {
+	_c.mutation.SetUsername(v)
 	return _c
 }
 
@@ -355,17 +354,6 @@ func (_c *UsersCreate) AddLionDepartmentLeaders(v ...*DepartmentLeaders) *UsersC
 	return _c.AddLionDepartmentLeaderIDs(ids...)
 }
 
-// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_c *UsersCreate) SetLionDepartmentsID(id int) *UsersCreate {
-	_c.mutation.SetLionDepartmentsID(id)
-	return _c
-}
-
-// SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_c *UsersCreate) SetLionDepartments(v *Departments) *UsersCreate {
-	return _c.SetLionDepartmentsID(v.ID)
-}
-
 // Mutation returns the UsersMutation object of the builder.
 func (_c *UsersCreate) Mutation() *UsersMutation {
 	return _c.mutation
@@ -503,12 +491,12 @@ func (_c *UsersCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Users.updated_at"`)}
 	}
-	if _, ok := _c.mutation.PreferredUsername(); !ok {
-		return &ValidationError{Name: "preferred_username", err: errors.New(`lion: missing required field "Users.preferred_username"`)}
+	if _, ok := _c.mutation.Username(); !ok {
+		return &ValidationError{Name: "username", err: errors.New(`lion: missing required field "Users.username"`)}
 	}
-	if v, ok := _c.mutation.PreferredUsername(); ok {
-		if err := users.PreferredUsernameValidator(v); err != nil {
-			return &ValidationError{Name: "preferred_username", err: fmt.Errorf(`lion: validator failed for field "Users.preferred_username": %w`, err)}
+	if v, ok := _c.mutation.Username(); ok {
+		if err := users.UsernameValidator(v); err != nil {
+			return &ValidationError{Name: "username", err: fmt.Errorf(`lion: validator failed for field "Users.username": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.RealnameEncrypted(); !ok {
@@ -525,6 +513,11 @@ func (_c *UsersCreate) check() error {
 	}
 	if _, ok := _c.mutation.Profile(); !ok {
 		return &ValidationError{Name: "profile", err: errors.New(`lion: missing required field "Users.profile"`)}
+	}
+	if v, ok := _c.mutation.Profile(); ok {
+		if err := users.ProfileValidator(v); err != nil {
+			return &ValidationError{Name: "profile", err: fmt.Errorf(`lion: validator failed for field "Users.profile": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.Picture(); !ok {
 		return &ValidationError{Name: "picture", err: errors.New(`lion: missing required field "Users.picture"`)}
@@ -567,9 +560,6 @@ func (_c *UsersCreate) check() error {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
 		}
 	}
-	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
-		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "Users.lion_departments"`)}
-	}
 	return nil
 }
 
@@ -608,9 +598,9 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_spec.SetField(users.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := _c.mutation.PreferredUsername(); ok {
-		_spec.SetField(users.FieldPreferredUsername, field.TypeString, value)
-		_node.PreferredUsername = value
+	if value, ok := _c.mutation.Username(); ok {
+		_spec.SetField(users.FieldUsername, field.TypeString, value)
+		_node.Username = value
 	}
 	if value, ok := _c.mutation.RealnameEncrypted(); ok {
 		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
@@ -688,6 +678,10 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
 		_node.AddressEncrypted = value
 	}
+	if value, ok := _c.mutation.DepartmentID(); ok {
+		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
+		_node.DepartmentID = value
+	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
 		_node.Description = value
@@ -722,23 +716,6 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   users.LionDepartmentsTable,
-			Columns: []string{users.LionDepartmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.DepartmentID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

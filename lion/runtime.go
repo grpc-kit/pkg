@@ -553,19 +553,19 @@ func init() {
 	users.DefaultUpdatedAt = usersDescUpdatedAt.Default.(func() time.Time)
 	// users.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	users.UpdateDefaultUpdatedAt = usersDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// usersDescPreferredUsername is the schema descriptor for preferred_username field.
-	usersDescPreferredUsername := usersFields[0].Descriptor()
-	// users.PreferredUsernameValidator is a validator for the "preferred_username" field. It is called by the builders before save.
-	users.PreferredUsernameValidator = func() func(string) error {
-		validators := usersDescPreferredUsername.Validators
+	// usersDescUsername is the schema descriptor for username field.
+	usersDescUsername := usersFields[0].Descriptor()
+	// users.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
+	users.UsernameValidator = func() func(string) error {
+		validators := usersDescUsername.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 			validators[2].(func(string) error),
 		}
-		return func(preferred_username string) error {
+		return func(username string) error {
 			for _, fn := range fns {
-				if err := fn(preferred_username); err != nil {
+				if err := fn(username); err != nil {
 					return err
 				}
 			}
@@ -596,6 +596,8 @@ func init() {
 	usersDescProfile := usersFields[6].Descriptor()
 	// users.DefaultProfile holds the default value on creation for the profile field.
 	users.DefaultProfile = usersDescProfile.Default.(string)
+	// users.ProfileValidator is a validator for the "profile" field. It is called by the builders before save.
+	users.ProfileValidator = usersDescProfile.Validators[0].(func(string) error)
 	// usersDescPicture is the schema descriptor for picture field.
 	usersDescPicture := usersFields[7].Descriptor()
 	// users.DefaultPicture holds the default value on creation for the picture field.

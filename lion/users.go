@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -25,7 +24,7 @@ type Users struct {
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 首选用户名，用于系统识别与登录，仅支持字母、数字、下划线、点号
-	PreferredUsername string `json:"preferred_username,omitempty"`
+	Username string `json:"username,omitempty"`
 	// 用户的真实姓名
 	RealnameEncrypted []byte `json:"-"`
 	// 用户状态
@@ -36,7 +35,7 @@ type Users struct {
 	IdcardHash string `json:"idcard_hash,omitempty"`
 	// 用户的昵称，用于页面展示
 	Nickname string `json:"nickname,omitempty"`
-	// 用户个人资料页面的 URL
+	// 用户个人简介等
 	Profile string `json:"profile,omitempty"`
 	// 用户头像的 URL
 	Picture string `json:"picture,omitempty"`
@@ -80,11 +79,9 @@ type UsersEdges struct {
 	LionUsers []*RoleUserMapping `json:"lion_users,omitempty"`
 	// LionDepartmentLeaders holds the value of the lion_department_leaders edge.
 	LionDepartmentLeaders []*DepartmentLeaders `json:"lion_department_leaders,omitempty"`
-	// LionDepartments holds the value of the lion_departments edge.
-	LionDepartments *Departments `json:"lion_departments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // LionUsersOrErr returns the LionUsers value or an error if the edge
@@ -105,17 +102,6 @@ func (e UsersEdges) LionDepartmentLeadersOrErr() ([]*DepartmentLeaders, error) {
 	return nil, &NotLoadedError{edge: "lion_department_leaders"}
 }
 
-// LionDepartmentsOrErr returns the LionDepartments value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UsersEdges) LionDepartmentsOrErr() (*Departments, error) {
-	if e.LionDepartments != nil {
-		return e.LionDepartments, nil
-	} else if e.loadedTypes[2] {
-		return nil, &NotFoundError{label: departments.Label}
-	}
-	return nil, &NotLoadedError{edge: "lion_departments"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Users) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -127,7 +113,7 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case users.FieldID, users.FieldStatus, users.FieldGender, users.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
-		case users.FieldPreferredUsername, users.FieldIdcardHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
+		case users.FieldUsername, users.FieldIdcardHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
 			values[i] = new(sql.NullString)
 		case users.FieldCreatedAt, users.FieldUpdatedAt, users.FieldDeletedAt, users.FieldBirthdate:
 			values[i] = new(sql.NullTime)
@@ -171,11 +157,11 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case users.FieldPreferredUsername:
+		case users.FieldUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field preferred_username", values[i])
+				return fmt.Errorf("unexpected type %T for field username", values[i])
 			} else if value.Valid {
-				_m.PreferredUsername = value.String
+				_m.Username = value.String
 			}
 		case users.FieldRealnameEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -326,11 +312,6 @@ func (_m *Users) QueryLionDepartmentLeaders() *DepartmentLeadersQuery {
 	return NewUsersClient(_m.config).QueryLionDepartmentLeaders(_m)
 }
 
-// QueryLionDepartments queries the "lion_departments" edge of the Users entity.
-func (_m *Users) QueryLionDepartments() *DepartmentsQuery {
-	return NewUsersClient(_m.config).QueryLionDepartments(_m)
-}
-
 // Update returns a builder for updating this Users.
 // Note that you need to call Users.Unwrap() before calling this method if this Users
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -365,8 +346,8 @@ func (_m *Users) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("preferred_username=")
-	builder.WriteString(_m.PreferredUsername)
+	builder.WriteString("username=")
+	builder.WriteString(_m.Username)
 	builder.WriteString(", ")
 	builder.WriteString("realname_encrypted=<sensitive>")
 	builder.WriteString(", ")

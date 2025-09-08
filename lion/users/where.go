@@ -70,9 +70,9 @@ func DeletedAt(v time.Time) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldDeletedAt, v))
 }
 
-// PreferredUsername applies equality check predicate on the "preferred_username" field. It's identical to PreferredUsernameEQ.
-func PreferredUsername(v string) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldPreferredUsername, v))
+// Username applies equality check predicate on the "username" field. It's identical to UsernameEQ.
+func Username(v string) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldUsername, v))
 }
 
 // RealnameEncrypted applies equality check predicate on the "realname_encrypted" field. It's identical to RealnameEncryptedEQ.
@@ -310,69 +310,69 @@ func DeletedAtNotNil() predicate.Users {
 	return predicate.Users(sql.FieldNotNull(FieldDeletedAt))
 }
 
-// PreferredUsernameEQ applies the EQ predicate on the "preferred_username" field.
-func PreferredUsernameEQ(v string) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldPreferredUsername, v))
+// UsernameEQ applies the EQ predicate on the "username" field.
+func UsernameEQ(v string) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldUsername, v))
 }
 
-// PreferredUsernameNEQ applies the NEQ predicate on the "preferred_username" field.
-func PreferredUsernameNEQ(v string) predicate.Users {
-	return predicate.Users(sql.FieldNEQ(FieldPreferredUsername, v))
+// UsernameNEQ applies the NEQ predicate on the "username" field.
+func UsernameNEQ(v string) predicate.Users {
+	return predicate.Users(sql.FieldNEQ(FieldUsername, v))
 }
 
-// PreferredUsernameIn applies the In predicate on the "preferred_username" field.
-func PreferredUsernameIn(vs ...string) predicate.Users {
-	return predicate.Users(sql.FieldIn(FieldPreferredUsername, vs...))
+// UsernameIn applies the In predicate on the "username" field.
+func UsernameIn(vs ...string) predicate.Users {
+	return predicate.Users(sql.FieldIn(FieldUsername, vs...))
 }
 
-// PreferredUsernameNotIn applies the NotIn predicate on the "preferred_username" field.
-func PreferredUsernameNotIn(vs ...string) predicate.Users {
-	return predicate.Users(sql.FieldNotIn(FieldPreferredUsername, vs...))
+// UsernameNotIn applies the NotIn predicate on the "username" field.
+func UsernameNotIn(vs ...string) predicate.Users {
+	return predicate.Users(sql.FieldNotIn(FieldUsername, vs...))
 }
 
-// PreferredUsernameGT applies the GT predicate on the "preferred_username" field.
-func PreferredUsernameGT(v string) predicate.Users {
-	return predicate.Users(sql.FieldGT(FieldPreferredUsername, v))
+// UsernameGT applies the GT predicate on the "username" field.
+func UsernameGT(v string) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldUsername, v))
 }
 
-// PreferredUsernameGTE applies the GTE predicate on the "preferred_username" field.
-func PreferredUsernameGTE(v string) predicate.Users {
-	return predicate.Users(sql.FieldGTE(FieldPreferredUsername, v))
+// UsernameGTE applies the GTE predicate on the "username" field.
+func UsernameGTE(v string) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldUsername, v))
 }
 
-// PreferredUsernameLT applies the LT predicate on the "preferred_username" field.
-func PreferredUsernameLT(v string) predicate.Users {
-	return predicate.Users(sql.FieldLT(FieldPreferredUsername, v))
+// UsernameLT applies the LT predicate on the "username" field.
+func UsernameLT(v string) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldUsername, v))
 }
 
-// PreferredUsernameLTE applies the LTE predicate on the "preferred_username" field.
-func PreferredUsernameLTE(v string) predicate.Users {
-	return predicate.Users(sql.FieldLTE(FieldPreferredUsername, v))
+// UsernameLTE applies the LTE predicate on the "username" field.
+func UsernameLTE(v string) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldUsername, v))
 }
 
-// PreferredUsernameContains applies the Contains predicate on the "preferred_username" field.
-func PreferredUsernameContains(v string) predicate.Users {
-	return predicate.Users(sql.FieldContains(FieldPreferredUsername, v))
+// UsernameContains applies the Contains predicate on the "username" field.
+func UsernameContains(v string) predicate.Users {
+	return predicate.Users(sql.FieldContains(FieldUsername, v))
 }
 
-// PreferredUsernameHasPrefix applies the HasPrefix predicate on the "preferred_username" field.
-func PreferredUsernameHasPrefix(v string) predicate.Users {
-	return predicate.Users(sql.FieldHasPrefix(FieldPreferredUsername, v))
+// UsernameHasPrefix applies the HasPrefix predicate on the "username" field.
+func UsernameHasPrefix(v string) predicate.Users {
+	return predicate.Users(sql.FieldHasPrefix(FieldUsername, v))
 }
 
-// PreferredUsernameHasSuffix applies the HasSuffix predicate on the "preferred_username" field.
-func PreferredUsernameHasSuffix(v string) predicate.Users {
-	return predicate.Users(sql.FieldHasSuffix(FieldPreferredUsername, v))
+// UsernameHasSuffix applies the HasSuffix predicate on the "username" field.
+func UsernameHasSuffix(v string) predicate.Users {
+	return predicate.Users(sql.FieldHasSuffix(FieldUsername, v))
 }
 
-// PreferredUsernameEqualFold applies the EqualFold predicate on the "preferred_username" field.
-func PreferredUsernameEqualFold(v string) predicate.Users {
-	return predicate.Users(sql.FieldEqualFold(FieldPreferredUsername, v))
+// UsernameEqualFold applies the EqualFold predicate on the "username" field.
+func UsernameEqualFold(v string) predicate.Users {
+	return predicate.Users(sql.FieldEqualFold(FieldUsername, v))
 }
 
-// PreferredUsernameContainsFold applies the ContainsFold predicate on the "preferred_username" field.
-func PreferredUsernameContainsFold(v string) predicate.Users {
-	return predicate.Users(sql.FieldContainsFold(FieldPreferredUsername, v))
+// UsernameContainsFold applies the ContainsFold predicate on the "username" field.
+func UsernameContainsFold(v string) predicate.Users {
+	return predicate.Users(sql.FieldContainsFold(FieldUsername, v))
 }
 
 // RealnameEncryptedEQ applies the EQ predicate on the "realname_encrypted" field.
@@ -1360,6 +1360,26 @@ func DepartmentIDNotIn(vs ...int) predicate.Users {
 	return predicate.Users(sql.FieldNotIn(FieldDepartmentID, vs...))
 }
 
+// DepartmentIDGT applies the GT predicate on the "department_id" field.
+func DepartmentIDGT(v int) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldDepartmentID, v))
+}
+
+// DepartmentIDGTE applies the GTE predicate on the "department_id" field.
+func DepartmentIDGTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldDepartmentID, v))
+}
+
+// DepartmentIDLT applies the LT predicate on the "department_id" field.
+func DepartmentIDLT(v int) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldDepartmentID, v))
+}
+
+// DepartmentIDLTE applies the LTE predicate on the "department_id" field.
+func DepartmentIDLTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldDepartmentID, v))
+}
+
 // DescriptionEQ applies the EQ predicate on the "description" field.
 func DescriptionEQ(v string) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldDescription, v))
@@ -1463,29 +1483,6 @@ func HasLionDepartmentLeaders() predicate.Users {
 func HasLionDepartmentLeadersWith(preds ...predicate.DepartmentLeaders) predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
 		step := newLionDepartmentLeadersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasLionDepartments applies the HasEdge predicate on the "lion_departments" edge.
-func HasLionDepartments() predicate.Users {
-	return predicate.Users(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentsTable, LionDepartmentsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionDepartmentsWith applies the HasEdge predicate on the "lion_departments" edge with a given conditions (other predicates).
-func HasLionDepartmentsWith(preds ...predicate.Departments) predicate.Users {
-	return predicate.Users(func(s *sql.Selector) {
-		step := newLionDepartmentsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

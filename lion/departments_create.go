@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // DepartmentsCreate is the builder for creating a Departments entity.
@@ -110,21 +109,6 @@ func (_c *DepartmentsCreate) SetNillableDescription(v *string) *DepartmentsCreat
 		_c.SetDescription(*v)
 	}
 	return _c
-}
-
-// AddLionUserIDs adds the "lion_users" edge to the Users entity by IDs.
-func (_c *DepartmentsCreate) AddLionUserIDs(ids ...int) *DepartmentsCreate {
-	_c.mutation.AddLionUserIDs(ids...)
-	return _c
-}
-
-// AddLionUsers adds the "lion_users" edges to the Users entity.
-func (_c *DepartmentsCreate) AddLionUsers(v ...*Users) *DepartmentsCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionUserIDs(ids...)
 }
 
 // AddLionDepartmentLeaderIDs adds the "lion_department_leaders" edge to the DepartmentLeaders entity by IDs.
@@ -284,22 +268,6 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(departments.FieldDescription, field.TypeString, value)
 		_node.Description = value
-	}
-	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   departments.LionUsersTable,
-			Columns: []string{departments.LionUsersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.LionDepartmentLeadersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

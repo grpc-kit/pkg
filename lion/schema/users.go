@@ -19,7 +19,7 @@ type Users struct {
 // Fields of the table.
 func (Users) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("preferred_username").
+		field.String("username").
 			NotEmpty().
 			Unique().
 			MaxLen(255).
@@ -45,7 +45,8 @@ func (Users) Fields() []ent.Field {
 			Comment("用户的昵称，用于页面展示"),
 		field.String("profile").
 			Default("").
-			Comment("用户个人资料页面的 URL"),
+			MaxLen(500).
+			Comment("用户个人简介等"),
 		field.String("picture").
 			Default("").
 			Comment("用户头像的 URL"),
@@ -96,7 +97,7 @@ func (Users) Fields() []ent.Field {
 			Comment("部门 ID"),
 		field.String("description").
 			Default("").
-			MaxLen(500).
+			MaxLen(4096).
 			Comment("用户详细描述"),
 	}
 }

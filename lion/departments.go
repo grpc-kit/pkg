@@ -39,28 +39,17 @@ type Departments struct {
 
 // DepartmentsEdges holds the relations/edges for other nodes in the graph.
 type DepartmentsEdges struct {
-	// LionUsers holds the value of the lion_users edge.
-	LionUsers []*Users `json:"lion_users,omitempty"`
 	// LionDepartmentLeaders holds the value of the lion_department_leaders edge.
 	LionDepartmentLeaders []*DepartmentLeaders `json:"lion_department_leaders,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// LionUsersOrErr returns the LionUsers value or an error if the edge
-// was not loaded in eager-loading.
-func (e DepartmentsEdges) LionUsersOrErr() ([]*Users, error) {
-	if e.loadedTypes[0] {
-		return e.LionUsers, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_users"}
+	loadedTypes [1]bool
 }
 
 // LionDepartmentLeadersOrErr returns the LionDepartmentLeaders value or an error if the edge
 // was not loaded in eager-loading.
 func (e DepartmentsEdges) LionDepartmentLeadersOrErr() ([]*DepartmentLeaders, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.LionDepartmentLeaders, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_department_leaders"}
@@ -151,11 +140,6 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Departments) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryLionUsers queries the "lion_users" edge of the Departments entity.
-func (_m *Departments) QueryLionUsers() *UsersQuery {
-	return NewDepartmentsClient(_m.config).QueryLionUsers(_m)
 }
 
 // QueryLionDepartmentLeaders queries the "lion_department_leaders" edge of the Departments entity.

@@ -20,8 +20,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// FieldPreferredUsername holds the string denoting the preferred_username field in the database.
-	FieldPreferredUsername = "preferred_username"
+	// FieldUsername holds the string denoting the username field in the database.
+	FieldUsername = "username"
 	// FieldRealnameEncrypted holds the string denoting the realname_encrypted field in the database.
 	FieldRealnameEncrypted = "realname_encrypted"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -68,8 +68,6 @@ const (
 	EdgeLionUsers = "lion_users"
 	// EdgeLionDepartmentLeaders holds the string denoting the lion_department_leaders edge name in mutations.
 	EdgeLionDepartmentLeaders = "lion_department_leaders"
-	// EdgeLionDepartments holds the string denoting the lion_departments edge name in mutations.
-	EdgeLionDepartments = "lion_departments"
 	// Table holds the table name of the users in the database.
 	Table = "lion_users"
 	// LionUsersTable is the table that holds the lion_users relation/edge.
@@ -86,13 +84,6 @@ const (
 	LionDepartmentLeadersInverseTable = "lion_department_leaders"
 	// LionDepartmentLeadersColumn is the table column denoting the lion_department_leaders relation/edge.
 	LionDepartmentLeadersColumn = "user_id"
-	// LionDepartmentsTable is the table that holds the lion_departments relation/edge.
-	LionDepartmentsTable = "lion_users"
-	// LionDepartmentsInverseTable is the table name for the Departments entity.
-	// It exists in this package in order to avoid circular dependency with the "departments" package.
-	LionDepartmentsInverseTable = "lion_departments"
-	// LionDepartmentsColumn is the table column denoting the lion_departments relation/edge.
-	LionDepartmentsColumn = "department_id"
 )
 
 // Columns holds all SQL columns for users fields.
@@ -101,7 +92,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
-	FieldPreferredUsername,
+	FieldUsername,
 	FieldRealnameEncrypted,
 	FieldStatus,
 	FieldIdcardEncrypted,
@@ -142,8 +133,8 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// PreferredUsernameValidator is a validator for the "preferred_username" field. It is called by the builders before save.
-	PreferredUsernameValidator func(string) error
+	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
+	UsernameValidator func(string) error
 	// DefaultRealnameEncrypted holds the default value on creation for the "realname_encrypted" field.
 	DefaultRealnameEncrypted []byte
 	// DefaultStatus holds the default value on creation for the "status" field.
@@ -156,6 +147,8 @@ var (
 	DefaultNickname string
 	// DefaultProfile holds the default value on creation for the "profile" field.
 	DefaultProfile string
+	// ProfileValidator is a validator for the "profile" field. It is called by the builders before save.
+	ProfileValidator func(string) error
 	// DefaultPicture holds the default value on creation for the "picture" field.
 	DefaultPicture string
 	// DefaultWebsite holds the default value on creation for the "website" field.
@@ -213,9 +206,9 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
-// ByPreferredUsername orders the results by the preferred_username field.
-func ByPreferredUsername(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPreferredUsername, opts...).ToFunc()
+// ByUsername orders the results by the username field.
+func ByUsername(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUsername, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.
@@ -325,13 +318,6 @@ func ByLionDepartmentLeaders(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOp
 		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentLeadersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByLionDepartmentsField orders the results by lion_departments field.
-func ByLionDepartmentsField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentsStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newLionUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -344,12 +330,5 @@ func newLionDepartmentLeadersStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionDepartmentLeadersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentLeadersTable, LionDepartmentLeadersColumn),
-	)
-}
-func newLionDepartmentsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionDepartmentsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentsTable, LionDepartmentsColumn),
 	)
 }

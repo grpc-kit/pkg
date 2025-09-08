@@ -4139,9 +4139,6 @@ type DepartmentsMutation struct {
 	addorder_weight                *int
 	description                    *string
 	clearedFields                  map[string]struct{}
-	lion_users                     map[int]struct{}
-	removedlion_users              map[int]struct{}
-	clearedlion_users              bool
 	lion_department_leaders        map[int]struct{}
 	removedlion_department_leaders map[int]struct{}
 	clearedlion_department_leaders bool
@@ -4540,60 +4537,6 @@ func (m *DepartmentsMutation) ResetDescription() {
 	m.description = nil
 }
 
-// AddLionUserIDs adds the "lion_users" edge to the Users entity by ids.
-func (m *DepartmentsMutation) AddLionUserIDs(ids ...int) {
-	if m.lion_users == nil {
-		m.lion_users = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.lion_users[ids[i]] = struct{}{}
-	}
-}
-
-// ClearLionUsers clears the "lion_users" edge to the Users entity.
-func (m *DepartmentsMutation) ClearLionUsers() {
-	m.clearedlion_users = true
-}
-
-// LionUsersCleared reports if the "lion_users" edge to the Users entity was cleared.
-func (m *DepartmentsMutation) LionUsersCleared() bool {
-	return m.clearedlion_users
-}
-
-// RemoveLionUserIDs removes the "lion_users" edge to the Users entity by IDs.
-func (m *DepartmentsMutation) RemoveLionUserIDs(ids ...int) {
-	if m.removedlion_users == nil {
-		m.removedlion_users = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.lion_users, ids[i])
-		m.removedlion_users[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedLionUsers returns the removed IDs of the "lion_users" edge to the Users entity.
-func (m *DepartmentsMutation) RemovedLionUsersIDs() (ids []int) {
-	for id := range m.removedlion_users {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// LionUsersIDs returns the "lion_users" edge IDs in the mutation.
-func (m *DepartmentsMutation) LionUsersIDs() (ids []int) {
-	for id := range m.lion_users {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetLionUsers resets all changes to the "lion_users" edge.
-func (m *DepartmentsMutation) ResetLionUsers() {
-	m.lion_users = nil
-	m.clearedlion_users = false
-	m.removedlion_users = nil
-}
-
 // AddLionDepartmentLeaderIDs adds the "lion_department_leaders" edge to the DepartmentLeaders entity by ids.
 func (m *DepartmentsMutation) AddLionDepartmentLeaderIDs(ids ...int) {
 	if m.lion_department_leaders == nil {
@@ -4910,10 +4853,7 @@ func (m *DepartmentsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DepartmentsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.lion_users != nil {
-		edges = append(edges, departments.EdgeLionUsers)
-	}
+	edges := make([]string, 0, 1)
 	if m.lion_department_leaders != nil {
 		edges = append(edges, departments.EdgeLionDepartmentLeaders)
 	}
@@ -4924,12 +4864,6 @@ func (m *DepartmentsMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *DepartmentsMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case departments.EdgeLionUsers:
-		ids := make([]ent.Value, 0, len(m.lion_users))
-		for id := range m.lion_users {
-			ids = append(ids, id)
-		}
-		return ids
 	case departments.EdgeLionDepartmentLeaders:
 		ids := make([]ent.Value, 0, len(m.lion_department_leaders))
 		for id := range m.lion_department_leaders {
@@ -4942,10 +4876,7 @@ func (m *DepartmentsMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DepartmentsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedlion_users != nil {
-		edges = append(edges, departments.EdgeLionUsers)
-	}
+	edges := make([]string, 0, 1)
 	if m.removedlion_department_leaders != nil {
 		edges = append(edges, departments.EdgeLionDepartmentLeaders)
 	}
@@ -4956,12 +4887,6 @@ func (m *DepartmentsMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *DepartmentsMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case departments.EdgeLionUsers:
-		ids := make([]ent.Value, 0, len(m.removedlion_users))
-		for id := range m.removedlion_users {
-			ids = append(ids, id)
-		}
-		return ids
 	case departments.EdgeLionDepartmentLeaders:
 		ids := make([]ent.Value, 0, len(m.removedlion_department_leaders))
 		for id := range m.removedlion_department_leaders {
@@ -4974,10 +4899,7 @@ func (m *DepartmentsMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DepartmentsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedlion_users {
-		edges = append(edges, departments.EdgeLionUsers)
-	}
+	edges := make([]string, 0, 1)
 	if m.clearedlion_department_leaders {
 		edges = append(edges, departments.EdgeLionDepartmentLeaders)
 	}
@@ -4988,8 +4910,6 @@ func (m *DepartmentsMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *DepartmentsMutation) EdgeCleared(name string) bool {
 	switch name {
-	case departments.EdgeLionUsers:
-		return m.clearedlion_users
 	case departments.EdgeLionDepartmentLeaders:
 		return m.clearedlion_department_leaders
 	}
@@ -5008,9 +4928,6 @@ func (m *DepartmentsMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *DepartmentsMutation) ResetEdge(name string) error {
 	switch name {
-	case departments.EdgeLionUsers:
-		m.ResetLionUsers()
-		return nil
 	case departments.EdgeLionDepartmentLeaders:
 		m.ResetLionDepartmentLeaders()
 		return nil
@@ -11544,7 +11461,7 @@ type UsersMutation struct {
 	created_at                     *time.Time
 	updated_at                     *time.Time
 	deleted_at                     *time.Time
-	preferred_username             *string
+	username                       *string
 	realname_encrypted             *[]byte
 	status                         *int
 	addstatus                      *int
@@ -11566,6 +11483,8 @@ type UsersMutation struct {
 	phone_number_hash              *string
 	phone_number_verified          *bool
 	address_encrypted              *[]byte
+	department_id                  *int
+	adddepartment_id               *int
 	description                    *string
 	clearedFields                  map[string]struct{}
 	lion_users                     map[int]struct{}
@@ -11574,8 +11493,6 @@ type UsersMutation struct {
 	lion_department_leaders        map[int]struct{}
 	removedlion_department_leaders map[int]struct{}
 	clearedlion_department_leaders bool
-	lion_departments               *int
-	clearedlion_departments        bool
 	done                           bool
 	oldValue                       func(context.Context) (*Users, error)
 	predicates                     []predicate.Users
@@ -11800,40 +11717,40 @@ func (m *UsersMutation) ResetDeletedAt() {
 	delete(m.clearedFields, users.FieldDeletedAt)
 }
 
-// SetPreferredUsername sets the "preferred_username" field.
-func (m *UsersMutation) SetPreferredUsername(s string) {
-	m.preferred_username = &s
+// SetUsername sets the "username" field.
+func (m *UsersMutation) SetUsername(s string) {
+	m.username = &s
 }
 
-// PreferredUsername returns the value of the "preferred_username" field in the mutation.
-func (m *UsersMutation) PreferredUsername() (r string, exists bool) {
-	v := m.preferred_username
+// Username returns the value of the "username" field in the mutation.
+func (m *UsersMutation) Username() (r string, exists bool) {
+	v := m.username
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPreferredUsername returns the old "preferred_username" field's value of the Users entity.
+// OldUsername returns the old "username" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldPreferredUsername(ctx context.Context) (v string, err error) {
+func (m *UsersMutation) OldUsername(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPreferredUsername is only allowed on UpdateOne operations")
+		return v, errors.New("OldUsername is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPreferredUsername requires an ID field in the mutation")
+		return v, errors.New("OldUsername requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPreferredUsername: %w", err)
+		return v, fmt.Errorf("querying old value for OldUsername: %w", err)
 	}
-	return oldValue.PreferredUsername, nil
+	return oldValue.Username, nil
 }
 
-// ResetPreferredUsername resets all changes to the "preferred_username" field.
-func (m *UsersMutation) ResetPreferredUsername() {
-	m.preferred_username = nil
+// ResetUsername resets all changes to the "username" field.
+func (m *UsersMutation) ResetUsername() {
+	m.username = nil
 }
 
 // SetRealnameEncrypted sets the "realname_encrypted" field.
@@ -12614,12 +12531,13 @@ func (m *UsersMutation) ResetAddressEncrypted() {
 
 // SetDepartmentID sets the "department_id" field.
 func (m *UsersMutation) SetDepartmentID(i int) {
-	m.lion_departments = &i
+	m.department_id = &i
+	m.adddepartment_id = nil
 }
 
 // DepartmentID returns the value of the "department_id" field in the mutation.
 func (m *UsersMutation) DepartmentID() (r int, exists bool) {
-	v := m.lion_departments
+	v := m.department_id
 	if v == nil {
 		return
 	}
@@ -12643,9 +12561,28 @@ func (m *UsersMutation) OldDepartmentID(ctx context.Context) (v int, err error) 
 	return oldValue.DepartmentID, nil
 }
 
+// AddDepartmentID adds i to the "department_id" field.
+func (m *UsersMutation) AddDepartmentID(i int) {
+	if m.adddepartment_id != nil {
+		*m.adddepartment_id += i
+	} else {
+		m.adddepartment_id = &i
+	}
+}
+
+// AddedDepartmentID returns the value that was added to the "department_id" field in this mutation.
+func (m *UsersMutation) AddedDepartmentID() (r int, exists bool) {
+	v := m.adddepartment_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetDepartmentID resets all changes to the "department_id" field.
 func (m *UsersMutation) ResetDepartmentID() {
-	m.lion_departments = nil
+	m.department_id = nil
+	m.adddepartment_id = nil
 }
 
 // SetDescription sets the "description" field.
@@ -12792,46 +12729,6 @@ func (m *UsersMutation) ResetLionDepartmentLeaders() {
 	m.removedlion_department_leaders = nil
 }
 
-// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by id.
-func (m *UsersMutation) SetLionDepartmentsID(id int) {
-	m.lion_departments = &id
-}
-
-// ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
-func (m *UsersMutation) ClearLionDepartments() {
-	m.clearedlion_departments = true
-	m.clearedFields[users.FieldDepartmentID] = struct{}{}
-}
-
-// LionDepartmentsCleared reports if the "lion_departments" edge to the Departments entity was cleared.
-func (m *UsersMutation) LionDepartmentsCleared() bool {
-	return m.clearedlion_departments
-}
-
-// LionDepartmentsID returns the "lion_departments" edge ID in the mutation.
-func (m *UsersMutation) LionDepartmentsID() (id int, exists bool) {
-	if m.lion_departments != nil {
-		return *m.lion_departments, true
-	}
-	return
-}
-
-// LionDepartmentsIDs returns the "lion_departments" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// LionDepartmentsID instead. It exists only for internal usage by the builders.
-func (m *UsersMutation) LionDepartmentsIDs() (ids []int) {
-	if id := m.lion_departments; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetLionDepartments resets all changes to the "lion_departments" edge.
-func (m *UsersMutation) ResetLionDepartments() {
-	m.lion_departments = nil
-	m.clearedlion_departments = false
-}
-
 // Where appends a list predicates to the UsersMutation builder.
 func (m *UsersMutation) Where(ps ...predicate.Users) {
 	m.predicates = append(m.predicates, ps...)
@@ -12876,8 +12773,8 @@ func (m *UsersMutation) Fields() []string {
 	if m.deleted_at != nil {
 		fields = append(fields, users.FieldDeletedAt)
 	}
-	if m.preferred_username != nil {
-		fields = append(fields, users.FieldPreferredUsername)
+	if m.username != nil {
+		fields = append(fields, users.FieldUsername)
 	}
 	if m.realname_encrypted != nil {
 		fields = append(fields, users.FieldRealnameEncrypted)
@@ -12936,7 +12833,7 @@ func (m *UsersMutation) Fields() []string {
 	if m.address_encrypted != nil {
 		fields = append(fields, users.FieldAddressEncrypted)
 	}
-	if m.lion_departments != nil {
+	if m.department_id != nil {
 		fields = append(fields, users.FieldDepartmentID)
 	}
 	if m.description != nil {
@@ -12956,8 +12853,8 @@ func (m *UsersMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case users.FieldDeletedAt:
 		return m.DeletedAt()
-	case users.FieldPreferredUsername:
-		return m.PreferredUsername()
+	case users.FieldUsername:
+		return m.Username()
 	case users.FieldRealnameEncrypted:
 		return m.RealnameEncrypted()
 	case users.FieldStatus:
@@ -13015,8 +12912,8 @@ func (m *UsersMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldUpdatedAt(ctx)
 	case users.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
-	case users.FieldPreferredUsername:
-		return m.OldPreferredUsername(ctx)
+	case users.FieldUsername:
+		return m.OldUsername(ctx)
 	case users.FieldRealnameEncrypted:
 		return m.OldRealnameEncrypted(ctx)
 	case users.FieldStatus:
@@ -13089,12 +12986,12 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeletedAt(v)
 		return nil
-	case users.FieldPreferredUsername:
+	case users.FieldUsername:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetPreferredUsername(v)
+		m.SetUsername(v)
 		return nil
 	case users.FieldRealnameEncrypted:
 		v, ok := value.([]byte)
@@ -13257,6 +13154,9 @@ func (m *UsersMutation) AddedFields() []string {
 	if m.addgender != nil {
 		fields = append(fields, users.FieldGender)
 	}
+	if m.adddepartment_id != nil {
+		fields = append(fields, users.FieldDepartmentID)
+	}
 	return fields
 }
 
@@ -13269,6 +13169,8 @@ func (m *UsersMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedStatus()
 	case users.FieldGender:
 		return m.AddedGender()
+	case users.FieldDepartmentID:
+		return m.AddedDepartmentID()
 	}
 	return nil, false
 }
@@ -13291,6 +13193,13 @@ func (m *UsersMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddGender(v)
+		return nil
+	case users.FieldDepartmentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDepartmentID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Users numeric field %s", name)
@@ -13361,8 +13270,8 @@ func (m *UsersMutation) ResetField(name string) error {
 	case users.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
-	case users.FieldPreferredUsername:
-		m.ResetPreferredUsername()
+	case users.FieldUsername:
+		m.ResetUsername()
 		return nil
 	case users.FieldRealnameEncrypted:
 		m.ResetRealnameEncrypted()
@@ -13433,15 +13342,12 @@ func (m *UsersMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UsersMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.lion_users != nil {
 		edges = append(edges, users.EdgeLionUsers)
 	}
 	if m.lion_department_leaders != nil {
 		edges = append(edges, users.EdgeLionDepartmentLeaders)
-	}
-	if m.lion_departments != nil {
-		edges = append(edges, users.EdgeLionDepartments)
 	}
 	return edges
 }
@@ -13462,17 +13368,13 @@ func (m *UsersMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case users.EdgeLionDepartments:
-		if id := m.lion_departments; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UsersMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.removedlion_users != nil {
 		edges = append(edges, users.EdgeLionUsers)
 	}
@@ -13504,15 +13406,12 @@ func (m *UsersMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UsersMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.clearedlion_users {
 		edges = append(edges, users.EdgeLionUsers)
 	}
 	if m.clearedlion_department_leaders {
 		edges = append(edges, users.EdgeLionDepartmentLeaders)
-	}
-	if m.clearedlion_departments {
-		edges = append(edges, users.EdgeLionDepartments)
 	}
 	return edges
 }
@@ -13525,8 +13424,6 @@ func (m *UsersMutation) EdgeCleared(name string) bool {
 		return m.clearedlion_users
 	case users.EdgeLionDepartmentLeaders:
 		return m.clearedlion_department_leaders
-	case users.EdgeLionDepartments:
-		return m.clearedlion_departments
 	}
 	return false
 }
@@ -13535,9 +13432,6 @@ func (m *UsersMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *UsersMutation) ClearEdge(name string) error {
 	switch name {
-	case users.EdgeLionDepartments:
-		m.ClearLionDepartments()
-		return nil
 	}
 	return fmt.Errorf("unknown Users unique edge %s", name)
 }
@@ -13551,9 +13445,6 @@ func (m *UsersMutation) ResetEdge(name string) error {
 		return nil
 	case users.EdgeLionDepartmentLeaders:
 		m.ResetLionDepartmentLeaders()
-		return nil
-	case users.EdgeLionDepartments:
-		m.ResetLionDepartments()
 		return nil
 	}
 	return fmt.Errorf("unknown Users edge %s", name)

@@ -372,13 +372,13 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "preferred_username", Type: field.TypeString, Unique: true, Size: 255},
+		{Name: "username", Type: field.TypeString, Unique: true, Size: 255},
 		{Name: "realname_encrypted", Type: field.TypeBytes},
 		{Name: "status", Type: field.TypeInt, Default: 0},
 		{Name: "idcard_encrypted", Type: field.TypeBytes},
 		{Name: "idcard_hash", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "nickname", Type: field.TypeString, Default: ""},
-		{Name: "profile", Type: field.TypeString, Default: ""},
+		{Name: "profile", Type: field.TypeString, Size: 500, Default: ""},
 		{Name: "picture", Type: field.TypeString, Default: ""},
 		{Name: "website", Type: field.TypeString, Default: ""},
 		{Name: "email_encrypted", Type: field.TypeBytes},
@@ -392,22 +392,14 @@ var (
 		{Name: "phone_number_hash", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "phone_number_verified", Type: field.TypeBool, Default: false},
 		{Name: "address_encrypted", Type: field.TypeBytes},
-		{Name: "description", Type: field.TypeString, Size: 500, Default: ""},
 		{Name: "department_id", Type: field.TypeInt, Default: 0},
+		{Name: "description", Type: field.TypeString, Size: 4096, Default: ""},
 	}
 	// LionUsersTable holds the schema information for the "lion_users" table.
 	LionUsersTable = &schema.Table{
 		Name:       "lion_users",
 		Columns:    LionUsersColumns,
 		PrimaryKey: []*schema.Column{LionUsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_users_lion_departments_lion_users",
-				Columns:    []*schema.Column{LionUsersColumns[25]},
-				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -488,7 +480,6 @@ func init() {
 	LionUserAttributesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_attributes",
 	}
-	LionUsersTable.ForeignKeys[0].RefTable = LionDepartmentsTable
 	LionUsersTable.Annotation = &entsql.Annotation{
 		Table: "lion_users",
 	}

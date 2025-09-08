@@ -445,29 +445,6 @@ func DescriptionContainsFold(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// HasLionUsers applies the HasEdge predicate on the "lion_users" edge.
-func HasLionUsers() predicate.Departments {
-	return predicate.Departments(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionUsersTable, LionUsersColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionUsersWith applies the HasEdge predicate on the "lion_users" edge with a given conditions (other predicates).
-func HasLionUsersWith(preds ...predicate.Users) predicate.Departments {
-	return predicate.Departments(func(s *sql.Selector) {
-		step := newLionUsersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasLionDepartmentLeaders applies the HasEdge predicate on the "lion_department_leaders" edge.
 func HasLionDepartmentLeaders() predicate.Departments {
 	return predicate.Departments(func(s *sql.Selector) {

@@ -28,19 +28,10 @@ const (
 	FieldOrderWeight = "order_weight"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
-	EdgeLionUsers = "lion_users"
 	// EdgeLionDepartmentLeaders holds the string denoting the lion_department_leaders edge name in mutations.
 	EdgeLionDepartmentLeaders = "lion_department_leaders"
 	// Table holds the table name of the departments in the database.
 	Table = "lion_departments"
-	// LionUsersTable is the table that holds the lion_users relation/edge.
-	LionUsersTable = "lion_users"
-	// LionUsersInverseTable is the table name for the Users entity.
-	// It exists in this package in order to avoid circular dependency with the "users" package.
-	LionUsersInverseTable = "lion_users"
-	// LionUsersColumn is the table column denoting the lion_users relation/edge.
-	LionUsersColumn = "department_id"
 	// LionDepartmentLeadersTable is the table that holds the lion_department_leaders relation/edge.
 	LionDepartmentLeadersTable = "lion_department_leaders"
 	// LionDepartmentLeadersInverseTable is the table name for the DepartmentLeaders entity.
@@ -134,20 +125,6 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLionUsersCount orders the results by lion_users count.
-func ByLionUsersCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionUsersStep(), opts...)
-	}
-}
-
-// ByLionUsers orders the results by lion_users terms.
-func ByLionUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByLionDepartmentLeadersCount orders the results by lion_department_leaders count.
 func ByLionDepartmentLeadersCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -160,13 +137,6 @@ func ByLionDepartmentLeaders(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOp
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentLeadersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
-}
-func newLionUsersStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionUsersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionUsersTable, LionUsersColumn),
-	)
 }
 func newLionDepartmentLeadersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
