@@ -27,6 +27,7 @@ import (
 	otelcodes "go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -250,6 +251,12 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 		}
 
+		// 添加追踪信息
+		s = s.AppendDetail(&errdetails.RequestInfo{
+			RequestId: requestID,
+			// ServingData: req.URL.String(),
+		})
+		// 之后考虑废弃移除使用以上结构代替
 		t := &statusv1.TracingRequest{Id: requestID}
 		s = s.AppendDetail(t)
 
