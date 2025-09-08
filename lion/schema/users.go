@@ -107,11 +107,13 @@ func (Users) Edges() []ent.Edge {
 		// 一个 Role 可以对应多个 RoleMenu (中间实体)
 		edge.To("lion_users", RoleUserMapping.Type),
 		edge.To("lion_department_leaders", DepartmentLeaders.Type),
-		edge.From("lion_departments", Departments.Type).
-			Ref("lion_users").
-			Field("department_id").
-			Unique().
-			Required(),
+		/*
+			edge.From("lion_departments", Departments.Type).
+				Ref("lion_users").
+				Field("department_id").
+				Unique().
+				Required(),
+		*/
 	}
 }
 
