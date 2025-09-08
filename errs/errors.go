@@ -5,23 +5,22 @@ import (
 	"net/http"
 
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/protoadapt"
+	"google.golang.org/protobuf/proto"
 )
 
 // OK is returned on success.
-func OK(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.OK),
+func OK(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.OK,
 		"No error.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
 // Canceled indicates the operation was canceled (typically by the caller).
-func Canceled(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.Canceled),
+func Canceled(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.Canceled,
 		"Request cancelled by the client.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
@@ -30,10 +29,10 @@ func Canceled(ctx context.Context, details ...protoadapt.MessageV1) *Status {
 // an error-space that is not known in this address space. Also
 // errors raised by APIs that do not return enough error information
 // may be converted to this error.
-func Unknown(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.Unknown),
+func Unknown(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.Unknown,
 		"Unknown server error.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
@@ -42,10 +41,10 @@ func Unknown(ctx context.Context, details ...protoadapt.MessageV1) *Status {
 // that are problematic regardless of the state of the system
 // (e.g., a malformed file name).
 // For example, Request field x.y.z is xxx, expected one of [yyy, zzz].
-func InvalidArgument(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.InvalidArgument),
+func InvalidArgument(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.InvalidArgument,
 		"Client specified an invalid argument.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
@@ -57,40 +56,42 @@ func InvalidArgument(ctx context.Context, details ...protoadapt.MessageV1) *Stat
 // This will happen only if the caller sets a deadline that is shorter than the method's
 // default deadline (i.e. requested deadline is not enough for the server to process the request) and
 // the request did not finish within the deadline.
-func DeadlineExceeded(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.DeadlineExceeded),
+func DeadlineExceeded(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.DeadlineExceeded,
 		"Request deadline exceeded.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
 // NotFound means some requested entity (e.g., file or directory) was
 // not found.
-func NotFound(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.NotFound),
+func NotFound(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.NotFound,
 		"A specified resource is not found, or the request is rejected by undisclosed reasons, such as whitelisting.")
-	s = s.WithDetails(details...)
+
+	// s = s.WithDetails(details...)
 	return s
 }
 
 // AlreadyExists means an attempt to create an entity failed because one
 // already exists.
 // For example, Resource 'xxx' already exists.
-func AlreadyExists(ctx context.Context, details ...protoadapt.MessageV1) *status.Status {
+func AlreadyExists(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.AlreadyExists,
+		"The resource that a client tried to create already exists.")
+	// s = s.WithDetails(details...)
+	return s
 	/*
-		s := New(int32(codes.AlreadyExists),
-			"The resource that a client tried to create already exists.")
-		s = s.WithDetails(details...)
-		return s
+		st, err := status.New(codes.InvalidArgument, "invalid argument").
+			WithDetails(details...)
+
+		if err != nil {
+			return status.New(codes.Internal, "internal error")
+		}
+
+		return st
+
 	*/
-	st, err := status.New(codes.InvalidArgument, "invalid argument").
-		WithDetails(details...)
-
-	if err != nil {
-		return status.New(codes.Internal, "internal error")
-	}
-
-	return st
 }
 
 // PermissionDenied indicates the caller does not have permission to
@@ -102,10 +103,10 @@ func AlreadyExists(ctx context.Context, details ...protoadapt.MessageV1) *status
 // For example, Permission 'xxx' denied on file 'yyy'.
 // This can happen because the OAuth token does not have the right scopes,
 // the client doesn't have permission, or the API has not been enabled for the client project.
-func PermissionDenied(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.PermissionDenied),
+func PermissionDenied(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.PermissionDenied,
 		"Client does not have sufficient permission.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
@@ -113,10 +114,10 @@ func PermissionDenied(ctx context.Context, details ...protoadapt.MessageV1) *Sta
 // a per-user quota, or perhaps the entire file system is out of space.
 // For example, Quota limit 'xxx' exceeded.
 // The client should look for google.rpc.QuotaFailure error detail for more information.
-func ResourceExhausted(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.ResourceExhausted),
+func ResourceExhausted(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.ResourceExhausted,
 		"Either out of resource quota or reaching rate limiting.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
@@ -142,10 +143,10 @@ func ResourceExhausted(ctx context.Context, details ...protoadapt.MessageV1) *St
 //	    read-modify-write on the same resource.
 //
 // For example, Resource xxx is a non-empty directory, so it cannot be deleted.
-func FailedPrecondition(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.FailedPrecondition),
+func FailedPrecondition(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.FailedPrecondition,
 		"Request can not be executed in the current system state, such as deleting a non-empty directory.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
@@ -157,10 +158,10 @@ func FailedPrecondition(ctx context.Context, details ...protoadapt.MessageV1) *S
 // Aborted, and Unavailable.
 //
 // For example, Couldn’t acquire lock on resource ‘xxx’.
-func Aborted(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.Aborted),
+func Aborted(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.Aborted,
 		"Concurrency conflict, such as read-modify-write conflict.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
@@ -181,30 +182,30 @@ func Aborted(ctx context.Context, details ...protoadapt.MessageV1) *Status {
 // they are done.
 //
 // For example, Parameter 'age' is out of range [0, 125].
-func OutOfRange(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.OutOfRange),
+func OutOfRange(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.OutOfRange,
 		"Client specified an invalid range.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
 // Unimplemented indicates operation is not implemented or not
 // supported/enabled in this service.
 // For example, Method 'xxx' not implemented.
-func Unimplemented(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.Unimplemented),
+func Unimplemented(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.Unimplemented,
 		"The API method not implemented or enabled by the server.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
 // Internal errors. Means some invariants expected by underlying
 // system has been broken. If you see one of these errors,
 // something is very broken.
-func Internal(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.Internal),
+func Internal(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.Internal,
 		"Internal server error.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
@@ -215,35 +216,35 @@ func Internal(ctx context.Context, details ...protoadapt.MessageV1) *Status {
 //
 // See litmus test above for deciding between FailedPrecondition,
 // Aborted, and Unavailable.
-func Unavailable(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.Unavailable),
+func Unavailable(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.Unavailable,
 		"Service unavailable.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
 // DataLoss indicates unrecoverable data loss or corruption.
-func DataLoss(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.DataLoss),
+func DataLoss(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.DataLoss,
 		"Unrecoverable data loss or data corruption.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
 // Unauthenticated indicates the request does not have valid
 // authentication credentials for the operation.
-func Unauthenticated(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(codes.Unauthenticated),
+func Unauthenticated(ctx context.Context, details ...proto.Message) *Status {
+	s := New(codes.Unauthenticated,
 		"Request not authenticated due to missing, invalid, or expired OAuth token.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
 
 // NoContent indicates that the server has successfully fulfilled
 // the request and that there is no additional content to send in the response content.
-func NoContent(ctx context.Context, details ...protoadapt.MessageV1) *Status {
-	s := New(int32(http.StatusNoContent),
+func NoContent(ctx context.Context, details ...proto.Message) *Status {
+	s := New(http.StatusNoContent,
 		"Service is no additional content to send in the response content.")
-	s = s.WithDetails(details...)
+	// s = s.WithDetails(details...)
 	return s
 }
