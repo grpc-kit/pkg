@@ -16,6 +16,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -97,12 +98,15 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		}
 		userCreate.SetEmailEncrypted(email)
 	}
-	if req.GetUser().PhoneNumber != "" {
-		phoneNumber, err := crypto.EncryptAES(a.config.aesKey, []byte(req.GetUser().GetPhoneNumber()))
-		if err != nil {
-			return nil, err
+	if req.GetUser().PhoneNumber != nil {
+		tmp, err := proto.Marshal(req.GetUser().GetPhoneNumber())
+		if err == nil {
+			phoneNumber, err := crypto.EncryptAES(a.config.aesKey, tmp)
+			if err != nil {
+				return nil, err
+			}
+			userCreate.SetPhoneNumberEncrypted(phoneNumber)
 		}
-		userCreate.SetPhoneNumberEncrypted(phoneNumber)
 	}
 	if req.GetUser().Birthday == nil {
 		// userCreate.SetBirthdate(time.)
@@ -321,8 +325,11 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		realname, _ := crypto.DecryptAES(a.config.aesKey, user.RealnameEncrypted)
 		idcard, _ := crypto.DecryptAES(a.config.aesKey, user.IdcardEncrypted)
 		email, _ := crypto.DecryptAES(a.config.aesKey, user.EmailEncrypted)
-		phoneNumber, _ := crypto.DecryptAES(a.config.aesKey, user.PhoneNumberEncrypted)
+		phoneNumberByte, _ := crypto.DecryptAES(a.config.aesKey, user.PhoneNumberEncrypted)
 		// address, _ := crypto.DecryptAES(a.config.aesKey, user.AddressEncrypted)
+
+		var phoneNumber adminv1.PhoneNumber
+		_ = proto.Unmarshal(phoneNumberByte, &phoneNumber)
 
 		result.Users = append(result.Users, &adminv1.User{
 			Id:                  int32(user.ID),
@@ -340,7 +347,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 			Birthday:            timestamppb.New(user.Birthdate),
 			Zoneinfo:            user.Zoneinfo,
 			Locale:              user.Locale,
-			PhoneNumber:         string(phoneNumber),
+			PhoneNumber:         &phoneNumber,
 			PhoneNumberVerified: user.PhoneNumberVerified,
 			// Address:             address,
 		})
