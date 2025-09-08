@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
@@ -24,8 +25,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 
 	if req == nil || req.User == nil {
 		return result, errs.InvalidArgument(ctx).
-			WithMessage("request body user is nil").
-			WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "请求体为空"})
+			WithMessage("request body user is nil")
 	}
 
 	if req.User.GetUsername() == "" {
@@ -113,21 +113,12 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 
 	thisUser, err := userCreate.Save(ctx)
 	if err != nil {
-		a.logger.Errorf("user create err: %v", err)
-
-		// st, err := status.New(codes.InvalidArgument, "invalid argument").WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "用户已存在！"})
-		// return nil, st.Err()
-
-		st, _ := errs.AlreadyExists(ctx).WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "用户已存在！"})
-		return nil, st.Err()
-
-		/*
-			if strings.Contains(err.Error(), "duplicate key value") {
-				return nil, errs.AlreadyExists(ctx).
-					WithMessage("user already exists").
-					WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "用户已存在！"}).Err()
-			}
-		*/
+		if strings.Contains(err.Error(), "duplicate key value") {
+			return nil, errs.AlreadyExists(ctx).
+				WithLogger(a.logger, "create user err: %v", err).
+				WithMessage("user already exists").
+				WithMessageZHCN("你好，已存在!").Err()
+		}
 
 		return nil, errs.InvalidArgument(ctx).
 			WithMessage("user create fail.").
