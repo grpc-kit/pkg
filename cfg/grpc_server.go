@@ -257,8 +257,8 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			// ServingData: req.URL.String(),
 		})
 		// 之后考虑废弃移除使用以上结构代替
-		t := &statusv1.TracingRequest{Id: requestID}
-		s = s.AppendDetail(t)
+		// t := &statusv1.TracingRequest{Id: requestID}
+		// s = s.AppendDetail(t)
 
 		body := &statusv1.ErrorResponse{
 			Error: s.Status,
@@ -266,7 +266,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 		rawBody, err := protojson.Marshal(body)
 		if err != nil {
-			s = errs.Internal(ctx, t).WithMessage(err.Error())
+			s = errs.Internal(ctx).WithMessage(err.Error())
 			body.Error = s.Status
 			rawBody, _ = protojson.Marshal(body)
 		}
