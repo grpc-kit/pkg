@@ -41,6 +41,8 @@ type KnownAdminClient interface {
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	// 安全相关
 	CreateSecurityKey(ctx context.Context, in *CreateSecurityKeyRequest, opts ...grpc.CallOption) (*SecurityKey, error)
+	GetOAuth2Certs(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Certs, error)
+	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
 }
 
 type knownAdminClient struct {
@@ -186,6 +188,24 @@ func (c *knownAdminClient) CreateSecurityKey(ctx context.Context, in *CreateSecu
 	return out, nil
 }
 
+func (c *knownAdminClient) GetOAuth2Certs(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Certs, error) {
+	out := new(OAuth2Certs)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Certs", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error) {
+	out := new(OAuth2Discovery)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KnownAdminServer is the server API for KnownAdmin service.
 // All implementations should embed UnimplementedKnownAdminServer
 // for forward compatibility
@@ -208,6 +228,8 @@ type KnownAdminServer interface {
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	// 安全相关
 	CreateSecurityKey(context.Context, *CreateSecurityKeyRequest) (*SecurityKey, error)
+	GetOAuth2Certs(context.Context, *emptypb.Empty) (*OAuth2Certs, error)
+	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
 }
 
 // UnimplementedKnownAdminServer should be embedded to have forward compatible implementations.
@@ -258,6 +280,12 @@ func (UnimplementedKnownAdminServer) UpdateUser(context.Context, *UpdateUserRequ
 }
 func (UnimplementedKnownAdminServer) CreateSecurityKey(context.Context, *CreateSecurityKeyRequest) (*SecurityKey, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSecurityKey not implemented")
+}
+func (UnimplementedKnownAdminServer) GetOAuth2Certs(context.Context, *emptypb.Empty) (*OAuth2Certs, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2Certs not implemented")
+}
+func (UnimplementedKnownAdminServer) GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2Discovery not implemented")
 }
 
 // UnsafeKnownAdminServer may be embedded to opt out of forward compatibility for this service.
@@ -541,6 +569,42 @@ func _KnownAdmin_CreateSecurityKey_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_GetOAuth2Certs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetOAuth2Certs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Certs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetOAuth2Certs(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_GetOAuth2Discovery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetOAuth2Discovery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetOAuth2Discovery(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KnownAdmin_ServiceDesc is the grpc.ServiceDesc for KnownAdmin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -607,6 +671,14 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateSecurityKey",
 			Handler:    _KnownAdmin_CreateSecurityKey_Handler,
+		},
+		{
+			MethodName: "GetOAuth2Certs",
+			Handler:    _KnownAdmin_GetOAuth2Certs_Handler,
+		},
+		{
+			MethodName: "GetOAuth2Discovery",
+			Handler:    _KnownAdmin_GetOAuth2Discovery_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

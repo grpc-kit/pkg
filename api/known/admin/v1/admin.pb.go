@@ -43,7 +43,7 @@ var file_known_admin_v1_admin_proto_rawDesc = []byte{
 	0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x2f, 0x73, 0x65, 0x63, 0x75, 0x72, 0x69, 0x74, 0x79,
 	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x19, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64,
 	0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x32, 0xd8, 0x0d, 0x0a, 0x0a, 0x4b, 0x6e, 0x6f, 0x77, 0x6e, 0x41, 0x64, 0x6d, 0x69, 0x6e,
+	0x6f, 0x32, 0x88, 0x0f, 0x0a, 0x0a, 0x4b, 0x6e, 0x6f, 0x77, 0x6e, 0x41, 0x64, 0x6d, 0x69, 0x6e,
 	0x12, 0x6a, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x2d, 0x2e,
 	0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f,
 	0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x43,
@@ -152,7 +152,18 @@ var file_known_admin_v1_admin_proto_rawDesc = []byte{
 	0x53, 0x65, 0x63, 0x75, 0x72, 0x69, 0x74, 0x79, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x1a, 0x28, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70,
 	0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31,
-	0x2e, 0x53, 0x65, 0x63, 0x75, 0x72, 0x69, 0x74, 0x79, 0x4b, 0x65, 0x79, 0x42, 0x34, 0x5a, 0x32,
+	0x2e, 0x53, 0x65, 0x63, 0x75, 0x72, 0x69, 0x74, 0x79, 0x4b, 0x65, 0x79, 0x12, 0x52, 0x0a, 0x0e,
+	0x47, 0x65, 0x74, 0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x43, 0x65, 0x72, 0x74, 0x73, 0x12, 0x16,
+	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
+	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x28, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69,
+	0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69,
+	0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x43, 0x65, 0x72, 0x74, 0x73,
+	0x12, 0x5a, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x44, 0x69, 0x73,
+	0x63, 0x6f, 0x76, 0x65, 0x72, 0x79, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x2c,
+	0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e,
+	0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x41, 0x75,
+	0x74, 0x68, 0x32, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x76, 0x65, 0x72, 0x79, 0x42, 0x34, 0x5a, 0x32,
 	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d,
 	0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77,
 	0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e,
@@ -175,19 +186,21 @@ var file_known_admin_v1_admin_proto_goTypes = []interface{}{
 	(*CreateUserRequest)(nil),           // 12: grpc_kit.api.known.admin.v1.CreateUserRequest
 	(*UpdateUserRequest)(nil),           // 13: grpc_kit.api.known.admin.v1.UpdateUserRequest
 	(*CreateSecurityKeyRequest)(nil),    // 14: grpc_kit.api.known.admin.v1.CreateSecurityKeyRequest
-	(*GetConfigResponse)(nil),           // 15: grpc_kit.api.known.admin.v1.GetConfigResponse
-	(*CreateAuthLoginResponse)(nil),     // 16: grpc_kit.api.known.admin.v1.CreateAuthLoginResponse
-	(*CreateAuthTokenResponse)(nil),     // 17: grpc_kit.api.known.admin.v1.CreateAuthTokenResponse
-	(*ListAuthProvidersResponse)(nil),   // 18: grpc_kit.api.known.admin.v1.ListAuthProvidersResponse
-	(*UpsertAuthProvidersResponse)(nil), // 19: grpc_kit.api.known.admin.v1.UpsertAuthProvidersResponse
-	(*GetAuthCallbackResponse)(nil),     // 20: grpc_kit.api.known.admin.v1.GetAuthCallbackResponse
-	(*ListMenusResponse)(nil),           // 21: grpc_kit.api.known.admin.v1.ListMenusResponse
-	(*Department)(nil),                  // 22: grpc_kit.api.known.admin.v1.Department
-	(*ListDepartmentsResponse)(nil),     // 23: grpc_kit.api.known.admin.v1.ListDepartmentsResponse
-	(*emptypb.Empty)(nil),               // 24: google.protobuf.Empty
+	(*emptypb.Empty)(nil),               // 15: google.protobuf.Empty
+	(*GetConfigResponse)(nil),           // 16: grpc_kit.api.known.admin.v1.GetConfigResponse
+	(*CreateAuthLoginResponse)(nil),     // 17: grpc_kit.api.known.admin.v1.CreateAuthLoginResponse
+	(*CreateAuthTokenResponse)(nil),     // 18: grpc_kit.api.known.admin.v1.CreateAuthTokenResponse
+	(*ListAuthProvidersResponse)(nil),   // 19: grpc_kit.api.known.admin.v1.ListAuthProvidersResponse
+	(*UpsertAuthProvidersResponse)(nil), // 20: grpc_kit.api.known.admin.v1.UpsertAuthProvidersResponse
+	(*GetAuthCallbackResponse)(nil),     // 21: grpc_kit.api.known.admin.v1.GetAuthCallbackResponse
+	(*ListMenusResponse)(nil),           // 22: grpc_kit.api.known.admin.v1.ListMenusResponse
+	(*Department)(nil),                  // 23: grpc_kit.api.known.admin.v1.Department
+	(*ListDepartmentsResponse)(nil),     // 24: grpc_kit.api.known.admin.v1.ListDepartmentsResponse
 	(*ListUsersResponse)(nil),           // 25: grpc_kit.api.known.admin.v1.ListUsersResponse
 	(*User)(nil),                        // 26: grpc_kit.api.known.admin.v1.User
 	(*SecurityKey)(nil),                 // 27: grpc_kit.api.known.admin.v1.SecurityKey
+	(*OAuth2Certs)(nil),                 // 28: grpc_kit.api.known.admin.v1.OAuth2Certs
+	(*OAuth2Discovery)(nil),             // 29: grpc_kit.api.known.admin.v1.OAuth2Discovery
 }
 var file_known_admin_v1_admin_proto_depIdxs = []int32{
 	0,  // 0: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfig:input_type -> grpc_kit.api.known.admin.v1.GetConfigRequest
@@ -205,23 +218,27 @@ var file_known_admin_v1_admin_proto_depIdxs = []int32{
 	12, // 12: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser:input_type -> grpc_kit.api.known.admin.v1.CreateUserRequest
 	13, // 13: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUser:input_type -> grpc_kit.api.known.admin.v1.UpdateUserRequest
 	14, // 14: grpc_kit.api.known.admin.v1.KnownAdmin.CreateSecurityKey:input_type -> grpc_kit.api.known.admin.v1.CreateSecurityKeyRequest
-	15, // 15: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfig:output_type -> grpc_kit.api.known.admin.v1.GetConfigResponse
-	16, // 16: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthLogin:output_type -> grpc_kit.api.known.admin.v1.CreateAuthLoginResponse
-	17, // 17: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthToken:output_type -> grpc_kit.api.known.admin.v1.CreateAuthTokenResponse
-	18, // 18: grpc_kit.api.known.admin.v1.KnownAdmin.ListAuthProviders:output_type -> grpc_kit.api.known.admin.v1.ListAuthProvidersResponse
-	19, // 19: grpc_kit.api.known.admin.v1.KnownAdmin.UpsertAuthProviders:output_type -> grpc_kit.api.known.admin.v1.UpsertAuthProvidersResponse
-	20, // 20: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthCallback:output_type -> grpc_kit.api.known.admin.v1.GetAuthCallbackResponse
-	21, // 21: grpc_kit.api.known.admin.v1.KnownAdmin.ListMenus:output_type -> grpc_kit.api.known.admin.v1.ListMenusResponse
-	22, // 22: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDepartment:output_type -> grpc_kit.api.known.admin.v1.Department
-	23, // 23: grpc_kit.api.known.admin.v1.KnownAdmin.ListDepartments:output_type -> grpc_kit.api.known.admin.v1.ListDepartmentsResponse
-	24, // 24: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteDepartment:output_type -> google.protobuf.Empty
-	22, // 25: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateDepartment:output_type -> grpc_kit.api.known.admin.v1.Department
-	25, // 26: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers:output_type -> grpc_kit.api.known.admin.v1.ListUsersResponse
-	26, // 27: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser:output_type -> grpc_kit.api.known.admin.v1.User
-	26, // 28: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUser:output_type -> grpc_kit.api.known.admin.v1.User
-	27, // 29: grpc_kit.api.known.admin.v1.KnownAdmin.CreateSecurityKey:output_type -> grpc_kit.api.known.admin.v1.SecurityKey
-	15, // [15:30] is the sub-list for method output_type
-	0,  // [0:15] is the sub-list for method input_type
+	15, // 15: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Certs:input_type -> google.protobuf.Empty
+	15, // 16: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery:input_type -> google.protobuf.Empty
+	16, // 17: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfig:output_type -> grpc_kit.api.known.admin.v1.GetConfigResponse
+	17, // 18: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthLogin:output_type -> grpc_kit.api.known.admin.v1.CreateAuthLoginResponse
+	18, // 19: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthToken:output_type -> grpc_kit.api.known.admin.v1.CreateAuthTokenResponse
+	19, // 20: grpc_kit.api.known.admin.v1.KnownAdmin.ListAuthProviders:output_type -> grpc_kit.api.known.admin.v1.ListAuthProvidersResponse
+	20, // 21: grpc_kit.api.known.admin.v1.KnownAdmin.UpsertAuthProviders:output_type -> grpc_kit.api.known.admin.v1.UpsertAuthProvidersResponse
+	21, // 22: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthCallback:output_type -> grpc_kit.api.known.admin.v1.GetAuthCallbackResponse
+	22, // 23: grpc_kit.api.known.admin.v1.KnownAdmin.ListMenus:output_type -> grpc_kit.api.known.admin.v1.ListMenusResponse
+	23, // 24: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDepartment:output_type -> grpc_kit.api.known.admin.v1.Department
+	24, // 25: grpc_kit.api.known.admin.v1.KnownAdmin.ListDepartments:output_type -> grpc_kit.api.known.admin.v1.ListDepartmentsResponse
+	15, // 26: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteDepartment:output_type -> google.protobuf.Empty
+	23, // 27: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateDepartment:output_type -> grpc_kit.api.known.admin.v1.Department
+	25, // 28: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers:output_type -> grpc_kit.api.known.admin.v1.ListUsersResponse
+	26, // 29: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser:output_type -> grpc_kit.api.known.admin.v1.User
+	26, // 30: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUser:output_type -> grpc_kit.api.known.admin.v1.User
+	27, // 31: grpc_kit.api.known.admin.v1.KnownAdmin.CreateSecurityKey:output_type -> grpc_kit.api.known.admin.v1.SecurityKey
+	28, // 32: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Certs:output_type -> grpc_kit.api.known.admin.v1.OAuth2Certs
+	29, // 33: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery:output_type -> grpc_kit.api.known.admin.v1.OAuth2Discovery
+	17, // [17:34] is the sub-list for method output_type
+	0,  // [0:17] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
