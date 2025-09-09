@@ -11,68 +11,68 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/groupmembership"
+	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
-// GroupMembershipQuery is the builder for querying GroupMembership entities.
-type GroupMembershipQuery struct {
+// GroupUsersQuery is the builder for querying GroupUsers entities.
+type GroupUsersQuery struct {
 	config
 	ctx        *QueryContext
-	order      []groupmembership.OrderOption
+	order      []groupusers.OrderOption
 	inters     []Interceptor
-	predicates []predicate.GroupMembership
+	predicates []predicate.GroupUsers
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the GroupMembershipQuery builder.
-func (_q *GroupMembershipQuery) Where(ps ...predicate.GroupMembership) *GroupMembershipQuery {
+// Where adds a new predicate for the GroupUsersQuery builder.
+func (_q *GroupUsersQuery) Where(ps ...predicate.GroupUsers) *GroupUsersQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *GroupMembershipQuery) Limit(limit int) *GroupMembershipQuery {
+func (_q *GroupUsersQuery) Limit(limit int) *GroupUsersQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *GroupMembershipQuery) Offset(offset int) *GroupMembershipQuery {
+func (_q *GroupUsersQuery) Offset(offset int) *GroupUsersQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *GroupMembershipQuery) Unique(unique bool) *GroupMembershipQuery {
+func (_q *GroupUsersQuery) Unique(unique bool) *GroupUsersQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *GroupMembershipQuery) Order(o ...groupmembership.OrderOption) *GroupMembershipQuery {
+func (_q *GroupUsersQuery) Order(o ...groupusers.OrderOption) *GroupUsersQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// First returns the first GroupMembership entity from the query.
-// Returns a *NotFoundError when no GroupMembership was found.
-func (_q *GroupMembershipQuery) First(ctx context.Context) (*GroupMembership, error) {
+// First returns the first GroupUsers entity from the query.
+// Returns a *NotFoundError when no GroupUsers was found.
+func (_q *GroupUsersQuery) First(ctx context.Context) (*GroupUsers, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{groupmembership.Label}
+		return nil, &NotFoundError{groupusers.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *GroupMembershipQuery) FirstX(ctx context.Context) *GroupMembership {
+func (_q *GroupUsersQuery) FirstX(ctx context.Context) *GroupUsers {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -80,22 +80,22 @@ func (_q *GroupMembershipQuery) FirstX(ctx context.Context) *GroupMembership {
 	return node
 }
 
-// FirstID returns the first GroupMembership ID from the query.
-// Returns a *NotFoundError when no GroupMembership ID was found.
-func (_q *GroupMembershipQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first GroupUsers ID from the query.
+// Returns a *NotFoundError when no GroupUsers ID was found.
+func (_q *GroupUsersQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{groupmembership.Label}
+		err = &NotFoundError{groupusers.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *GroupMembershipQuery) FirstIDX(ctx context.Context) int {
+func (_q *GroupUsersQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -103,10 +103,10 @@ func (_q *GroupMembershipQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single GroupMembership entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one GroupMembership entity is found.
-// Returns a *NotFoundError when no GroupMembership entities are found.
-func (_q *GroupMembershipQuery) Only(ctx context.Context) (*GroupMembership, error) {
+// Only returns a single GroupUsers entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one GroupUsers entity is found.
+// Returns a *NotFoundError when no GroupUsers entities are found.
+func (_q *GroupUsersQuery) Only(ctx context.Context) (*GroupUsers, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -115,14 +115,14 @@ func (_q *GroupMembershipQuery) Only(ctx context.Context) (*GroupMembership, err
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{groupmembership.Label}
+		return nil, &NotFoundError{groupusers.Label}
 	default:
-		return nil, &NotSingularError{groupmembership.Label}
+		return nil, &NotSingularError{groupusers.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *GroupMembershipQuery) OnlyX(ctx context.Context) *GroupMembership {
+func (_q *GroupUsersQuery) OnlyX(ctx context.Context) *GroupUsers {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -130,10 +130,10 @@ func (_q *GroupMembershipQuery) OnlyX(ctx context.Context) *GroupMembership {
 	return node
 }
 
-// OnlyID is like Only, but returns the only GroupMembership ID in the query.
-// Returns a *NotSingularError when more than one GroupMembership ID is found.
+// OnlyID is like Only, but returns the only GroupUsers ID in the query.
+// Returns a *NotSingularError when more than one GroupUsers ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *GroupMembershipQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *GroupUsersQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -142,15 +142,15 @@ func (_q *GroupMembershipQuery) OnlyID(ctx context.Context) (id int, err error) 
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{groupmembership.Label}
+		err = &NotFoundError{groupusers.Label}
 	default:
-		err = &NotSingularError{groupmembership.Label}
+		err = &NotSingularError{groupusers.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *GroupMembershipQuery) OnlyIDX(ctx context.Context) int {
+func (_q *GroupUsersQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -158,18 +158,18 @@ func (_q *GroupMembershipQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of GroupMemberships.
-func (_q *GroupMembershipQuery) All(ctx context.Context) ([]*GroupMembership, error) {
+// All executes the query and returns a list of GroupUsersSlice.
+func (_q *GroupUsersQuery) All(ctx context.Context) ([]*GroupUsers, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*GroupMembership, *GroupMembershipQuery]()
-	return withInterceptors[[]*GroupMembership](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*GroupUsers, *GroupUsersQuery]()
+	return withInterceptors[[]*GroupUsers](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *GroupMembershipQuery) AllX(ctx context.Context) []*GroupMembership {
+func (_q *GroupUsersQuery) AllX(ctx context.Context) []*GroupUsers {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -177,20 +177,20 @@ func (_q *GroupMembershipQuery) AllX(ctx context.Context) []*GroupMembership {
 	return nodes
 }
 
-// IDs executes the query and returns a list of GroupMembership IDs.
-func (_q *GroupMembershipQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of GroupUsers IDs.
+func (_q *GroupUsersQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(groupmembership.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(groupusers.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *GroupMembershipQuery) IDsX(ctx context.Context) []int {
+func (_q *GroupUsersQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -199,16 +199,16 @@ func (_q *GroupMembershipQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *GroupMembershipQuery) Count(ctx context.Context) (int, error) {
+func (_q *GroupUsersQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*GroupMembershipQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*GroupUsersQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *GroupMembershipQuery) CountX(ctx context.Context) int {
+func (_q *GroupUsersQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -217,7 +217,7 @@ func (_q *GroupMembershipQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *GroupMembershipQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *GroupUsersQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -230,7 +230,7 @@ func (_q *GroupMembershipQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *GroupMembershipQuery) ExistX(ctx context.Context) bool {
+func (_q *GroupUsersQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -238,18 +238,18 @@ func (_q *GroupMembershipQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the GroupMembershipQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the GroupUsersQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *GroupMembershipQuery) Clone() *GroupMembershipQuery {
+func (_q *GroupUsersQuery) Clone() *GroupUsersQuery {
 	if _q == nil {
 		return nil
 	}
-	return &GroupMembershipQuery{
+	return &GroupUsersQuery{
 		config:     _q.config,
 		ctx:        _q.ctx.Clone(),
-		order:      append([]groupmembership.OrderOption{}, _q.order...),
+		order:      append([]groupusers.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.GroupMembership{}, _q.predicates...),
+		predicates: append([]predicate.GroupUsers{}, _q.predicates...),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -266,15 +266,15 @@ func (_q *GroupMembershipQuery) Clone() *GroupMembershipQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.GroupMembership.Query().
-//		GroupBy(groupmembership.FieldCreatedAt).
+//	client.GroupUsers.Query().
+//		GroupBy(groupusers.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (_q *GroupMembershipQuery) GroupBy(field string, fields ...string) *GroupMembershipGroupBy {
+func (_q *GroupUsersQuery) GroupBy(field string, fields ...string) *GroupUsersGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &GroupMembershipGroupBy{build: _q}
+	grbuild := &GroupUsersGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = groupmembership.Label
+	grbuild.label = groupusers.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -288,23 +288,23 @@ func (_q *GroupMembershipQuery) GroupBy(field string, fields ...string) *GroupMe
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.GroupMembership.Query().
-//		Select(groupmembership.FieldCreatedAt).
+//	client.GroupUsers.Query().
+//		Select(groupusers.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *GroupMembershipQuery) Select(fields ...string) *GroupMembershipSelect {
+func (_q *GroupUsersQuery) Select(fields ...string) *GroupUsersSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &GroupMembershipSelect{GroupMembershipQuery: _q}
-	sbuild.label = groupmembership.Label
+	sbuild := &GroupUsersSelect{GroupUsersQuery: _q}
+	sbuild.label = groupusers.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a GroupMembershipSelect configured with the given aggregations.
-func (_q *GroupMembershipQuery) Aggregate(fns ...AggregateFunc) *GroupMembershipSelect {
+// Aggregate returns a GroupUsersSelect configured with the given aggregations.
+func (_q *GroupUsersQuery) Aggregate(fns ...AggregateFunc) *GroupUsersSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *GroupMembershipQuery) prepareQuery(ctx context.Context) error {
+func (_q *GroupUsersQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
@@ -316,7 +316,7 @@ func (_q *GroupMembershipQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !groupmembership.ValidColumn(f) {
+		if !groupusers.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
@@ -330,16 +330,16 @@ func (_q *GroupMembershipQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *GroupMembershipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*GroupMembership, error) {
+func (_q *GroupUsersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*GroupUsers, error) {
 	var (
-		nodes = []*GroupMembership{}
+		nodes = []*GroupUsers{}
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*GroupMembership).scanValues(nil, columns)
+		return (*GroupUsers).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &GroupMembership{config: _q.config}
+		node := &GroupUsers{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
@@ -355,7 +355,7 @@ func (_q *GroupMembershipQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	return nodes, nil
 }
 
-func (_q *GroupMembershipQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *GroupUsersQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -364,8 +364,8 @@ func (_q *GroupMembershipQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *GroupMembershipQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(groupmembership.Table, groupmembership.Columns, sqlgraph.NewFieldSpec(groupmembership.FieldID, field.TypeInt))
+func (_q *GroupUsersQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(groupusers.Table, groupusers.Columns, sqlgraph.NewFieldSpec(groupusers.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -374,9 +374,9 @@ func (_q *GroupMembershipQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, groupmembership.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, groupusers.FieldID)
 		for i := range fields {
-			if fields[i] != groupmembership.FieldID {
+			if fields[i] != groupusers.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -404,12 +404,12 @@ func (_q *GroupMembershipQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *GroupMembershipQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *GroupUsersQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(groupmembership.Table)
+	t1 := builder.Table(groupusers.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = groupmembership.Columns
+		columns = groupusers.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -436,28 +436,28 @@ func (_q *GroupMembershipQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// GroupMembershipGroupBy is the group-by builder for GroupMembership entities.
-type GroupMembershipGroupBy struct {
+// GroupUsersGroupBy is the group-by builder for GroupUsers entities.
+type GroupUsersGroupBy struct {
 	selector
-	build *GroupMembershipQuery
+	build *GroupUsersQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *GroupMembershipGroupBy) Aggregate(fns ...AggregateFunc) *GroupMembershipGroupBy {
+func (_g *GroupUsersGroupBy) Aggregate(fns ...AggregateFunc) *GroupUsersGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *GroupMembershipGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *GroupUsersGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GroupMembershipQuery, *GroupMembershipGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*GroupUsersQuery, *GroupUsersGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *GroupMembershipGroupBy) sqlScan(ctx context.Context, root *GroupMembershipQuery, v any) error {
+func (_g *GroupUsersGroupBy) sqlScan(ctx context.Context, root *GroupUsersQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -484,28 +484,28 @@ func (_g *GroupMembershipGroupBy) sqlScan(ctx context.Context, root *GroupMember
 	return sql.ScanSlice(rows, v)
 }
 
-// GroupMembershipSelect is the builder for selecting fields of GroupMembership entities.
-type GroupMembershipSelect struct {
-	*GroupMembershipQuery
+// GroupUsersSelect is the builder for selecting fields of GroupUsers entities.
+type GroupUsersSelect struct {
+	*GroupUsersQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *GroupMembershipSelect) Aggregate(fns ...AggregateFunc) *GroupMembershipSelect {
+func (_s *GroupUsersSelect) Aggregate(fns ...AggregateFunc) *GroupUsersSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *GroupMembershipSelect) Scan(ctx context.Context, v any) error {
+func (_s *GroupUsersSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GroupMembershipQuery, *GroupMembershipSelect](ctx, _s.GroupMembershipQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*GroupUsersQuery, *GroupUsersSelect](ctx, _s.GroupUsersQuery, _s, _s.inters, v)
 }
 
-func (_s *GroupMembershipSelect) sqlScan(ctx context.Context, root *GroupMembershipQuery, v any) error {
+func (_s *GroupUsersSelect) sqlScan(ctx context.Context, root *GroupUsersQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

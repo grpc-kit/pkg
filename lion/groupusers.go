@@ -9,11 +9,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/groupmembership"
+	"github.com/grpc-kit/pkg/lion/groupusers"
 )
 
-// GroupMembership is the model entity for the GroupMembership schema.
-type GroupMembership struct {
+// GroupUsers is the model entity for the GroupUsers schema.
+type GroupUsers struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -29,13 +29,13 @@ type GroupMembership struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*GroupMembership) scanValues(columns []string) ([]any, error) {
+func (*GroupUsers) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case groupmembership.FieldID, groupmembership.FieldGroupID, groupmembership.FieldUserID:
+		case groupusers.FieldID, groupusers.FieldGroupID, groupusers.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case groupmembership.FieldCreatedAt, groupmembership.FieldUpdatedAt:
+		case groupusers.FieldCreatedAt, groupusers.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -45,38 +45,38 @@ func (*GroupMembership) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the GroupMembership fields.
-func (_m *GroupMembership) assignValues(columns []string, values []any) error {
+// to the GroupUsers fields.
+func (_m *GroupUsers) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case groupmembership.FieldID:
+		case groupusers.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case groupmembership.FieldCreatedAt:
+		case groupusers.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case groupmembership.FieldUpdatedAt:
+		case groupusers.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case groupmembership.FieldGroupID:
+		case groupusers.FieldGroupID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field group_id", values[i])
 			} else if value.Valid {
 				_m.GroupID = int(value.Int64)
 			}
-		case groupmembership.FieldUserID:
+		case groupusers.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
@@ -89,34 +89,34 @@ func (_m *GroupMembership) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the GroupMembership.
+// Value returns the ent.Value that was dynamically selected and assigned to the GroupUsers.
 // This includes values selected through modifiers, order, etc.
-func (_m *GroupMembership) Value(name string) (ent.Value, error) {
+func (_m *GroupUsers) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// Update returns a builder for updating this GroupMembership.
-// Note that you need to call GroupMembership.Unwrap() before calling this method if this GroupMembership
+// Update returns a builder for updating this GroupUsers.
+// Note that you need to call GroupUsers.Unwrap() before calling this method if this GroupUsers
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *GroupMembership) Update() *GroupMembershipUpdateOne {
-	return NewGroupMembershipClient(_m.config).UpdateOne(_m)
+func (_m *GroupUsers) Update() *GroupUsersUpdateOne {
+	return NewGroupUsersClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the GroupMembership entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the GroupUsers entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *GroupMembership) Unwrap() *GroupMembership {
+func (_m *GroupUsers) Unwrap() *GroupUsers {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: GroupMembership is not a transactional entity")
+		panic("lion: GroupUsers is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *GroupMembership) String() string {
+func (_m *GroupUsers) String() string {
 	var builder strings.Builder
-	builder.WriteString("GroupMembership(")
+	builder.WriteString("GroupUsers(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -133,5 +133,5 @@ func (_m *GroupMembership) String() string {
 	return builder.String()
 }
 
-// GroupMemberships is a parsable slice of GroupMembership.
-type GroupMemberships []*GroupMembership
+// GroupUsersSlice is a parsable slice of GroupUsers.
+type GroupUsersSlice []*GroupUsers

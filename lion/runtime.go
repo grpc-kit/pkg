@@ -9,8 +9,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/groupmembership"
 	"github.com/grpc-kit/pkg/lion/groups"
+	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
@@ -139,29 +139,29 @@ func init() {
 	departmentsDescDescription := departmentsFields[4].Descriptor()
 	// departments.DefaultDescription holds the default value on creation for the description field.
 	departments.DefaultDescription = departmentsDescDescription.Default.(string)
-	groupmembershipMixin := schema.GroupMembership{}.Mixin()
-	groupmembershipMixinFields0 := groupmembershipMixin[0].Fields()
-	_ = groupmembershipMixinFields0
-	groupmembershipFields := schema.GroupMembership{}.Fields()
-	_ = groupmembershipFields
-	// groupmembershipDescCreatedAt is the schema descriptor for created_at field.
-	groupmembershipDescCreatedAt := groupmembershipMixinFields0[0].Descriptor()
-	// groupmembership.DefaultCreatedAt holds the default value on creation for the created_at field.
-	groupmembership.DefaultCreatedAt = groupmembershipDescCreatedAt.Default.(func() time.Time)
-	// groupmembershipDescUpdatedAt is the schema descriptor for updated_at field.
-	groupmembershipDescUpdatedAt := groupmembershipMixinFields0[1].Descriptor()
-	// groupmembership.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	groupmembership.DefaultUpdatedAt = groupmembershipDescUpdatedAt.Default.(func() time.Time)
-	// groupmembership.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	groupmembership.UpdateDefaultUpdatedAt = groupmembershipDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// groupmembershipDescGroupID is the schema descriptor for group_id field.
-	groupmembershipDescGroupID := groupmembershipFields[0].Descriptor()
-	// groupmembership.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
-	groupmembership.GroupIDValidator = groupmembershipDescGroupID.Validators[0].(func(int) error)
-	// groupmembershipDescUserID is the schema descriptor for user_id field.
-	groupmembershipDescUserID := groupmembershipFields[1].Descriptor()
-	// groupmembership.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	groupmembership.UserIDValidator = groupmembershipDescUserID.Validators[0].(func(int) error)
+	groupusersMixin := schema.GroupUsers{}.Mixin()
+	groupusersMixinFields0 := groupusersMixin[0].Fields()
+	_ = groupusersMixinFields0
+	groupusersFields := schema.GroupUsers{}.Fields()
+	_ = groupusersFields
+	// groupusersDescCreatedAt is the schema descriptor for created_at field.
+	groupusersDescCreatedAt := groupusersMixinFields0[0].Descriptor()
+	// groupusers.DefaultCreatedAt holds the default value on creation for the created_at field.
+	groupusers.DefaultCreatedAt = groupusersDescCreatedAt.Default.(func() time.Time)
+	// groupusersDescUpdatedAt is the schema descriptor for updated_at field.
+	groupusersDescUpdatedAt := groupusersMixinFields0[1].Descriptor()
+	// groupusers.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	groupusers.DefaultUpdatedAt = groupusersDescUpdatedAt.Default.(func() time.Time)
+	// groupusers.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	groupusers.UpdateDefaultUpdatedAt = groupusersDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// groupusersDescGroupID is the schema descriptor for group_id field.
+	groupusersDescGroupID := groupusersFields[0].Descriptor()
+	// groupusers.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
+	groupusers.GroupIDValidator = groupusersDescGroupID.Validators[0].(func(int) error)
+	// groupusersDescUserID is the schema descriptor for user_id field.
+	groupusersDescUserID := groupusersFields[1].Descriptor()
+	// groupusers.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	groupusers.UserIDValidator = groupusersDescUserID.Validators[0].(func(int) error)
 	groupsMixin := schema.Groups{}.Mixin()
 	groupsMixinFields0 := groupsMixin[0].Fields()
 	_ = groupsMixinFields0

@@ -20,8 +20,8 @@ type Tx struct {
 	DepartmentLeaders *DepartmentLeadersClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
-	// GroupMembership is the client for interacting with the GroupMembership builders.
-	GroupMembership *GroupMembershipClient
+	// GroupUsers is the client for interacting with the GroupUsers builders.
+	GroupUsers *GroupUsersClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
 	// Menus is the client for interacting with the Menus builders.
@@ -181,7 +181,7 @@ func (tx *Tx) init() {
 	tx.Demo = NewDemoClient(tx.config)
 	tx.DepartmentLeaders = NewDepartmentLeadersClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
-	tx.GroupMembership = NewGroupMembershipClient(tx.config)
+	tx.GroupUsers = NewGroupUsersClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
 	tx.Permissions = NewPermissionsClient(tx.config)

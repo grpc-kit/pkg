@@ -16,8 +16,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/groupmembership"
 	"github.com/grpc-kit/pkg/lion/groups"
+	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
@@ -93,7 +93,7 @@ func checkColumn(t, c string) error {
 			demo.Table:              demo.ValidColumn,
 			departmentleaders.Table: departmentleaders.ValidColumn,
 			departments.Table:       departments.ValidColumn,
-			groupmembership.Table:   groupmembership.ValidColumn,
+			groupusers.Table:        groupusers.ValidColumn,
 			groups.Table:            groups.ValidColumn,
 			menus.Table:             menus.ValidColumn,
 			permissions.Table:       permissions.ValidColumn,

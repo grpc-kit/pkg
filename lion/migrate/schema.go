@@ -93,24 +93,24 @@ var (
 		Columns:    LionDepartmentsColumns,
 		PrimaryKey: []*schema.Column{LionDepartmentsColumns[0]},
 	}
-	// LionGroupMembershipColumns holds the columns for the "lion_group_membership" table.
-	LionGroupMembershipColumns = []*schema.Column{
+	// LionGroupUsersColumns holds the columns for the "lion_group_users" table.
+	LionGroupUsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "group_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
-	// LionGroupMembershipTable holds the schema information for the "lion_group_membership" table.
-	LionGroupMembershipTable = &schema.Table{
-		Name:       "lion_group_membership",
-		Columns:    LionGroupMembershipColumns,
-		PrimaryKey: []*schema.Column{LionGroupMembershipColumns[0]},
+	// LionGroupUsersTable holds the schema information for the "lion_group_users" table.
+	LionGroupUsersTable = &schema.Table{
+		Name:       "lion_group_users",
+		Columns:    LionGroupUsersColumns,
+		PrimaryKey: []*schema.Column{LionGroupUsersColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "groupmembership_group_id_user_id",
+				Name:    "groupusers_group_id_user_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionGroupMembershipColumns[3], LionGroupMembershipColumns[4]},
+				Columns: []*schema.Column{LionGroupUsersColumns[3], LionGroupUsersColumns[4]},
 			},
 		},
 	}
@@ -407,7 +407,7 @@ var (
 		LionDemoTable,
 		LionDepartmentLeadersTable,
 		LionDepartmentsTable,
-		LionGroupMembershipTable,
+		LionGroupUsersTable,
 		LionGroupsTable,
 		LionMenusTable,
 		LionPermissionsTable,
@@ -438,8 +438,8 @@ func init() {
 	LionDepartmentsTable.Annotation = &entsql.Annotation{
 		Table: "lion_departments",
 	}
-	LionGroupMembershipTable.Annotation = &entsql.Annotation{
-		Table: "lion_group_membership",
+	LionGroupUsersTable.Annotation = &entsql.Annotation{
+		Table: "lion_group_users",
 	}
 	LionGroupsTable.Annotation = &entsql.Annotation{
 		Table: "lion_groups",

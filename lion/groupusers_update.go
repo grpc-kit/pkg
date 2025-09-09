@@ -11,42 +11,42 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/groupmembership"
+	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
-// GroupMembershipUpdate is the builder for updating GroupMembership entities.
-type GroupMembershipUpdate struct {
+// GroupUsersUpdate is the builder for updating GroupUsers entities.
+type GroupUsersUpdate struct {
 	config
 	hooks    []Hook
-	mutation *GroupMembershipMutation
+	mutation *GroupUsersMutation
 }
 
-// Where appends a list predicates to the GroupMembershipUpdate builder.
-func (_u *GroupMembershipUpdate) Where(ps ...predicate.GroupMembership) *GroupMembershipUpdate {
+// Where appends a list predicates to the GroupUsersUpdate builder.
+func (_u *GroupUsersUpdate) Where(ps ...predicate.GroupUsers) *GroupUsersUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *GroupMembershipUpdate) SetUpdatedAt(v time.Time) *GroupMembershipUpdate {
+func (_u *GroupUsersUpdate) SetUpdatedAt(v time.Time) *GroupUsersUpdate {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
-// Mutation returns the GroupMembershipMutation object of the builder.
-func (_u *GroupMembershipUpdate) Mutation() *GroupMembershipMutation {
+// Mutation returns the GroupUsersMutation object of the builder.
+func (_u *GroupUsersUpdate) Mutation() *GroupUsersMutation {
 	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *GroupMembershipUpdate) Save(ctx context.Context) (int, error) {
+func (_u *GroupUsersUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupMembershipUpdate) SaveX(ctx context.Context) int {
+func (_u *GroupUsersUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -55,28 +55,28 @@ func (_u *GroupMembershipUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *GroupMembershipUpdate) Exec(ctx context.Context) error {
+func (_u *GroupUsersUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *GroupMembershipUpdate) ExecX(ctx context.Context) {
+func (_u *GroupUsersUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *GroupMembershipUpdate) defaults() {
+func (_u *GroupUsersUpdate) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := groupmembership.UpdateDefaultUpdatedAt()
+		v := groupusers.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (_u *GroupMembershipUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(groupmembership.Table, groupmembership.Columns, sqlgraph.NewFieldSpec(groupmembership.FieldID, field.TypeInt))
+func (_u *GroupUsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	_spec := sqlgraph.NewUpdateSpec(groupusers.Table, groupusers.Columns, sqlgraph.NewFieldSpec(groupusers.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -85,11 +85,11 @@ func (_u *GroupMembershipUpdate) sqlSave(ctx context.Context) (_node int, err er
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(groupmembership.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(groupusers.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{groupmembership.Label}
+			err = &NotFoundError{groupusers.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -99,46 +99,46 @@ func (_u *GroupMembershipUpdate) sqlSave(ctx context.Context) (_node int, err er
 	return _node, nil
 }
 
-// GroupMembershipUpdateOne is the builder for updating a single GroupMembership entity.
-type GroupMembershipUpdateOne struct {
+// GroupUsersUpdateOne is the builder for updating a single GroupUsers entity.
+type GroupUsersUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *GroupMembershipMutation
+	mutation *GroupUsersMutation
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *GroupMembershipUpdateOne) SetUpdatedAt(v time.Time) *GroupMembershipUpdateOne {
+func (_u *GroupUsersUpdateOne) SetUpdatedAt(v time.Time) *GroupUsersUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
-// Mutation returns the GroupMembershipMutation object of the builder.
-func (_u *GroupMembershipUpdateOne) Mutation() *GroupMembershipMutation {
+// Mutation returns the GroupUsersMutation object of the builder.
+func (_u *GroupUsersUpdateOne) Mutation() *GroupUsersMutation {
 	return _u.mutation
 }
 
-// Where appends a list predicates to the GroupMembershipUpdate builder.
-func (_u *GroupMembershipUpdateOne) Where(ps ...predicate.GroupMembership) *GroupMembershipUpdateOne {
+// Where appends a list predicates to the GroupUsersUpdate builder.
+func (_u *GroupUsersUpdateOne) Where(ps ...predicate.GroupUsers) *GroupUsersUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *GroupMembershipUpdateOne) Select(field string, fields ...string) *GroupMembershipUpdateOne {
+func (_u *GroupUsersUpdateOne) Select(field string, fields ...string) *GroupUsersUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated GroupMembership entity.
-func (_u *GroupMembershipUpdateOne) Save(ctx context.Context) (*GroupMembership, error) {
+// Save executes the query and returns the updated GroupUsers entity.
+func (_u *GroupUsersUpdateOne) Save(ctx context.Context) (*GroupUsers, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupMembershipUpdateOne) SaveX(ctx context.Context) *GroupMembership {
+func (_u *GroupUsersUpdateOne) SaveX(ctx context.Context) *GroupUsers {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -147,41 +147,41 @@ func (_u *GroupMembershipUpdateOne) SaveX(ctx context.Context) *GroupMembership 
 }
 
 // Exec executes the query on the entity.
-func (_u *GroupMembershipUpdateOne) Exec(ctx context.Context) error {
+func (_u *GroupUsersUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *GroupMembershipUpdateOne) ExecX(ctx context.Context) {
+func (_u *GroupUsersUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *GroupMembershipUpdateOne) defaults() {
+func (_u *GroupUsersUpdateOne) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := groupmembership.UpdateDefaultUpdatedAt()
+		v := groupusers.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (_u *GroupMembershipUpdateOne) sqlSave(ctx context.Context) (_node *GroupMembership, err error) {
-	_spec := sqlgraph.NewUpdateSpec(groupmembership.Table, groupmembership.Columns, sqlgraph.NewFieldSpec(groupmembership.FieldID, field.TypeInt))
+func (_u *GroupUsersUpdateOne) sqlSave(ctx context.Context) (_node *GroupUsers, err error) {
+	_spec := sqlgraph.NewUpdateSpec(groupusers.Table, groupusers.Columns, sqlgraph.NewFieldSpec(groupusers.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "GroupMembership.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "GroupUsers.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, groupmembership.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, groupusers.FieldID)
 		for _, f := range fields {
-			if !groupmembership.ValidColumn(f) {
+			if !groupusers.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 			}
-			if f != groupmembership.FieldID {
+			if f != groupusers.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -194,14 +194,14 @@ func (_u *GroupMembershipUpdateOne) sqlSave(ctx context.Context) (_node *GroupMe
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(groupmembership.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(groupusers.FieldUpdatedAt, field.TypeTime, value)
 	}
-	_node = &GroupMembership{config: _u.config}
+	_node = &GroupUsers{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{groupmembership.Label}
+			err = &NotFoundError{groupusers.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

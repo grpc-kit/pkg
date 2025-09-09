@@ -18,8 +18,8 @@ type DepartmentLeaders func(*sql.Selector)
 // Departments is the predicate function for departments builders.
 type Departments func(*sql.Selector)
 
-// GroupMembership is the predicate function for groupmembership builders.
-type GroupMembership func(*sql.Selector)
+// GroupUsers is the predicate function for groupusers builders.
+type GroupUsers func(*sql.Selector)
 
 // Groups is the predicate function for groups builders.
 type Groups func(*sql.Selector)

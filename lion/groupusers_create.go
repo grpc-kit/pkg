@@ -10,24 +10,24 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/groupmembership"
+	"github.com/grpc-kit/pkg/lion/groupusers"
 )
 
-// GroupMembershipCreate is the builder for creating a GroupMembership entity.
-type GroupMembershipCreate struct {
+// GroupUsersCreate is the builder for creating a GroupUsers entity.
+type GroupUsersCreate struct {
 	config
-	mutation *GroupMembershipMutation
+	mutation *GroupUsersMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *GroupMembershipCreate) SetCreatedAt(v time.Time) *GroupMembershipCreate {
+func (_c *GroupUsersCreate) SetCreatedAt(v time.Time) *GroupUsersCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *GroupMembershipCreate) SetNillableCreatedAt(v *time.Time) *GroupMembershipCreate {
+func (_c *GroupUsersCreate) SetNillableCreatedAt(v *time.Time) *GroupUsersCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -35,13 +35,13 @@ func (_c *GroupMembershipCreate) SetNillableCreatedAt(v *time.Time) *GroupMember
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *GroupMembershipCreate) SetUpdatedAt(v time.Time) *GroupMembershipCreate {
+func (_c *GroupUsersCreate) SetUpdatedAt(v time.Time) *GroupUsersCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *GroupMembershipCreate) SetNillableUpdatedAt(v *time.Time) *GroupMembershipCreate {
+func (_c *GroupUsersCreate) SetNillableUpdatedAt(v *time.Time) *GroupUsersCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -49,30 +49,30 @@ func (_c *GroupMembershipCreate) SetNillableUpdatedAt(v *time.Time) *GroupMember
 }
 
 // SetGroupID sets the "group_id" field.
-func (_c *GroupMembershipCreate) SetGroupID(v int) *GroupMembershipCreate {
+func (_c *GroupUsersCreate) SetGroupID(v int) *GroupUsersCreate {
 	_c.mutation.SetGroupID(v)
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *GroupMembershipCreate) SetUserID(v int) *GroupMembershipCreate {
+func (_c *GroupUsersCreate) SetUserID(v int) *GroupUsersCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
-// Mutation returns the GroupMembershipMutation object of the builder.
-func (_c *GroupMembershipCreate) Mutation() *GroupMembershipMutation {
+// Mutation returns the GroupUsersMutation object of the builder.
+func (_c *GroupUsersCreate) Mutation() *GroupUsersMutation {
 	return _c.mutation
 }
 
-// Save creates the GroupMembership in the database.
-func (_c *GroupMembershipCreate) Save(ctx context.Context) (*GroupMembership, error) {
+// Save creates the GroupUsers in the database.
+func (_c *GroupUsersCreate) Save(ctx context.Context) (*GroupUsers, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *GroupMembershipCreate) SaveX(ctx context.Context) *GroupMembership {
+func (_c *GroupUsersCreate) SaveX(ctx context.Context) *GroupUsers {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -81,58 +81,58 @@ func (_c *GroupMembershipCreate) SaveX(ctx context.Context) *GroupMembership {
 }
 
 // Exec executes the query.
-func (_c *GroupMembershipCreate) Exec(ctx context.Context) error {
+func (_c *GroupUsersCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *GroupMembershipCreate) ExecX(ctx context.Context) {
+func (_c *GroupUsersCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *GroupMembershipCreate) defaults() {
+func (_c *GroupUsersCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := groupmembership.DefaultCreatedAt()
+		v := groupusers.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := groupmembership.DefaultUpdatedAt()
+		v := groupusers.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *GroupMembershipCreate) check() error {
+func (_c *GroupUsersCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "GroupMembership.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "GroupUsers.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "GroupMembership.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "GroupUsers.updated_at"`)}
 	}
 	if _, ok := _c.mutation.GroupID(); !ok {
-		return &ValidationError{Name: "group_id", err: errors.New(`lion: missing required field "GroupMembership.group_id"`)}
+		return &ValidationError{Name: "group_id", err: errors.New(`lion: missing required field "GroupUsers.group_id"`)}
 	}
 	if v, ok := _c.mutation.GroupID(); ok {
-		if err := groupmembership.GroupIDValidator(v); err != nil {
-			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "GroupMembership.group_id": %w`, err)}
+		if err := groupusers.GroupIDValidator(v); err != nil {
+			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "GroupUsers.group_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "GroupMembership.user_id"`)}
+		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "GroupUsers.user_id"`)}
 	}
 	if v, ok := _c.mutation.UserID(); ok {
-		if err := groupmembership.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "GroupMembership.user_id": %w`, err)}
+		if err := groupusers.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "GroupUsers.user_id": %w`, err)}
 		}
 	}
 	return nil
 }
 
-func (_c *GroupMembershipCreate) sqlSave(ctx context.Context) (*GroupMembership, error) {
+func (_c *GroupUsersCreate) sqlSave(ctx context.Context) (*GroupUsers, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -150,51 +150,51 @@ func (_c *GroupMembershipCreate) sqlSave(ctx context.Context) (*GroupMembership,
 	return _node, nil
 }
 
-func (_c *GroupMembershipCreate) createSpec() (*GroupMembership, *sqlgraph.CreateSpec) {
+func (_c *GroupUsersCreate) createSpec() (*GroupUsers, *sqlgraph.CreateSpec) {
 	var (
-		_node = &GroupMembership{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(groupmembership.Table, sqlgraph.NewFieldSpec(groupmembership.FieldID, field.TypeInt))
+		_node = &GroupUsers{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(groupusers.Table, sqlgraph.NewFieldSpec(groupusers.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(groupmembership.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(groupusers.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(groupmembership.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(groupusers.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.GroupID(); ok {
-		_spec.SetField(groupmembership.FieldGroupID, field.TypeInt, value)
+		_spec.SetField(groupusers.FieldGroupID, field.TypeInt, value)
 		_node.GroupID = value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(groupmembership.FieldUserID, field.TypeInt, value)
+		_spec.SetField(groupusers.FieldUserID, field.TypeInt, value)
 		_node.UserID = value
 	}
 	return _node, _spec
 }
 
-// GroupMembershipCreateBulk is the builder for creating many GroupMembership entities in bulk.
-type GroupMembershipCreateBulk struct {
+// GroupUsersCreateBulk is the builder for creating many GroupUsers entities in bulk.
+type GroupUsersCreateBulk struct {
 	config
 	err      error
-	builders []*GroupMembershipCreate
+	builders []*GroupUsersCreate
 }
 
-// Save creates the GroupMembership entities in the database.
-func (_c *GroupMembershipCreateBulk) Save(ctx context.Context) ([]*GroupMembership, error) {
+// Save creates the GroupUsers entities in the database.
+func (_c *GroupUsersCreateBulk) Save(ctx context.Context) ([]*GroupUsers, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*GroupMembership, len(_c.builders))
+	nodes := make([]*GroupUsers, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*GroupMembershipMutation)
+				mutation, ok := m.(*GroupUsersMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -241,7 +241,7 @@ func (_c *GroupMembershipCreateBulk) Save(ctx context.Context) ([]*GroupMembersh
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *GroupMembershipCreateBulk) SaveX(ctx context.Context) []*GroupMembership {
+func (_c *GroupUsersCreateBulk) SaveX(ctx context.Context) []*GroupUsers {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -250,13 +250,13 @@ func (_c *GroupMembershipCreateBulk) SaveX(ctx context.Context) []*GroupMembersh
 }
 
 // Exec executes the query.
-func (_c *GroupMembershipCreateBulk) Exec(ctx context.Context) error {
+func (_c *GroupUsersCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *GroupMembershipCreateBulk) ExecX(ctx context.Context) {
+func (_c *GroupUsersCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
