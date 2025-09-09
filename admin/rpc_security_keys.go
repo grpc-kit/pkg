@@ -5,7 +5,11 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
+	"fmt"
+	"math/big"
 
+	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion"
@@ -81,7 +85,43 @@ func (a *KnownAdminAPI) GetOAuth2Discovery(ctx context.Context, req *emptypb.Emp
 
 // GetOAuth2JSONWebKeys 获取内置 OpenID 公钥
 func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.Empty) (*adminv1.OAuth2JSONWebKeys, error) {
-	result := &adminv1.OAuth2JSONWebKeys{}
+	result := &adminv1.OAuth2JSONWebKeys{
+		Keys: make([]*adminv1.OAuth2JSONWebKeys_Key, 0),
+	}
+
+	sk, err := a.config.db.SecurityKeys.Query().
+		Select(securitykeys.FieldPublicKey).
+		Order(securitykeys.ByID()).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	derBytes := crypto.Base64Decode(sk.PublicKey)
+	pubInterface, err := x509.ParsePKIXPublicKey(derBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	publicKey, ok := pubInterface.(*rsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("not an RSA public key")
+	}
+
+	// 将模数 N 和指数 E 转换为 Base64URL 编码
+	n := base64.RawURLEncoding.EncodeToString(publicKey.N.Bytes())
+	e := base64.RawURLEncoding.EncodeToString(big.NewInt(int64(publicKey.E)).Bytes())
+
+	tmp := &adminv1.OAuth2JSONWebKeys_Key{
+		Kty: "RSA",
+		Use: "sig",
+		Alg: "RS256",
+		E:   e,
+		N:   n,
+		Kid: uuid.New().String(),
+	}
+
+	result.Keys = append(result.Keys, tmp)
 
 	return result, nil
 }

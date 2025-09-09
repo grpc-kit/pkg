@@ -2,6 +2,8 @@ package admin
 
 import (
 	"context"
+	"crypto/rsa"
+	"crypto/x509"
 	"fmt"
 	"strconv"
 	"strings"
@@ -10,6 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion/authusersocial"
+	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -23,7 +26,9 @@ type socialUsers struct {
 	logger *logrus.Entry
 	db     *lion.Client
 
-	aesKey       []byte
+	aesKey     []byte
+	privateKey *rsa.PrivateKey
+
 	ProviderName string
 	AuthProvider *lion.AuthProviders
 }
@@ -48,10 +53,29 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 		return nil, err
 	}
 
+	sk, err := db.SecurityKeys.Query().
+		Select(securitykeys.FieldPrivateKeyEncrypted).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	derBytes, err := crypto.DecryptAES(aesKey, sk.PrivateKeyEncrypted)
+	if err != nil {
+		return nil, err
+	}
+
+	// 解析为 PKCS#1 格式（这是您的格式）
+	privateKey, err := x509.ParsePKCS1PrivateKey(derBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse PKCS#1 private key: %v", err)
+	}
+
 	s := &socialUsers{
 		logger:       logger,
 		db:           db,
 		aesKey:       aesKey,
+		privateKey:   privateKey,
 		ProviderName: providerName,
 		AuthProvider: ap,
 	}
@@ -113,7 +137,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		idToken.SetSubject(strconv.Itoa(userID))
 
 		// 生成 jwt 返回客户端
-		accessToken, err = idToken.GetAccessToken(oauth2Token.AccessToken)
+		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey)
 		if err != nil {
 			return accessToken, err
 		}

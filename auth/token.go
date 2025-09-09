@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/rsa"
 	"fmt"
 	"time"
 
@@ -68,6 +69,15 @@ func (i *IDTokenClaims) GetAccessToken(signeKey string) (string, error) {
 	key := crypto.SHA256([]byte(signeKey))
 
 	ss, err := jwt.NewWithClaims(jwt.SigningMethodHS256, i).SignedString([]byte(key))
+	if err != nil {
+		return ss, err
+	}
+
+	return ss, nil
+}
+
+func (i *IDTokenClaims) GetAccessTokenRSA(signeKey *rsa.PrivateKey) (string, error) {
+	ss, err := jwt.NewWithClaims(jwt.SigningMethodRS256, i).SignedString(signeKey)
 	if err != nil {
 		return ss, err
 	}
