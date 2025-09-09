@@ -79,9 +79,9 @@ func (a *KnownAdminAPI) GetOAuth2Discovery(ctx context.Context, req *emptypb.Emp
 	return result, nil
 }
 
-// GetOAuth2Certs 获取内置 OpenID 公钥
-func (a *KnownAdminAPI) GetOAuth2Certs(ctx context.Context, req *emptypb.Empty) (*adminv1.OAuth2Certs, error) {
-	result := &adminv1.OAuth2Certs{}
+// GetOAuth2JSONWebKeys 获取内置 OpenID 公钥
+func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.Empty) (*adminv1.OAuth2JSONWebKeys, error) {
+	result := &adminv1.OAuth2JSONWebKeys{}
 
 	return result, nil
 }

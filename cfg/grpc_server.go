@@ -572,8 +572,8 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthToken",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback",
-			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Certs",
-			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery":
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery",
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2JSONWebKeys":
 			ctx = c.Security.withUserID(ctx, "0")
 			ctx = c.Security.withUsername(ctx, UsernameAnonymous)
 			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeNone)
