@@ -70,7 +70,7 @@ func (a *KnownAdminAPI) GetOAuth2Discovery(ctx context.Context, req *emptypb.Emp
 	result.Issuer = provider
 	result.AuthorizationEndpoint = provider + "/authorize"
 	result.TokenEndpoint = provider + "/token"
-	result.JwksUri = provider + "/certs"
+	result.JwksUri = provider + "/jwks"
 
 	result.ResponseTypesSupported = []string{"none"}
 	result.SubjectTypesSupported = []string{"public"}
