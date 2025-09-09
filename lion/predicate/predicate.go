@@ -9,12 +9,6 @@ import (
 // AuthProviders is the predicate function for authproviders builders.
 type AuthProviders func(*sql.Selector)
 
-// AuthUserLocal is the predicate function for authuserlocal builders.
-type AuthUserLocal func(*sql.Selector)
-
-// AuthUserSocial is the predicate function for authusersocial builders.
-type AuthUserSocial func(*sql.Selector)
-
 // Demo is the predicate function for demo builders.
 type Demo func(*sql.Selector)
 
@@ -53,6 +47,12 @@ type SecurityKeys func(*sql.Selector)
 
 // UserAttributes is the predicate function for userattributes builders.
 type UserAttributes func(*sql.Selector)
+
+// UserAuthLocal is the predicate function for userauthlocal builders.
+type UserAuthLocal func(*sql.Selector)
+
+// UserAuthSocial is the predicate function for userauthsocial builders.
+type UserAuthSocial func(*sql.Selector)
 
 // Users is the predicate function for users builders.
 type Users func(*sql.Selector)

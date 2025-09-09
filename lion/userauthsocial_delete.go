@@ -8,30 +8,30 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/authuserlocal"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/userauthsocial"
 )
 
-// AuthUserLocalDelete is the builder for deleting a AuthUserLocal entity.
-type AuthUserLocalDelete struct {
+// UserAuthSocialDelete is the builder for deleting a UserAuthSocial entity.
+type UserAuthSocialDelete struct {
 	config
 	hooks    []Hook
-	mutation *AuthUserLocalMutation
+	mutation *UserAuthSocialMutation
 }
 
-// Where appends a list predicates to the AuthUserLocalDelete builder.
-func (_d *AuthUserLocalDelete) Where(ps ...predicate.AuthUserLocal) *AuthUserLocalDelete {
+// Where appends a list predicates to the UserAuthSocialDelete builder.
+func (_d *UserAuthSocialDelete) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *AuthUserLocalDelete) Exec(ctx context.Context) (int, error) {
+func (_d *UserAuthSocialDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *AuthUserLocalDelete) ExecX(ctx context.Context) int {
+func (_d *UserAuthSocialDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *AuthUserLocalDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *AuthUserLocalDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(authuserlocal.Table, sqlgraph.NewFieldSpec(authuserlocal.FieldID, field.TypeInt))
+func (_d *UserAuthSocialDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(userauthsocial.Table, sqlgraph.NewFieldSpec(userauthsocial.FieldID, field.TypeInt))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *AuthUserLocalDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// AuthUserLocalDeleteOne is the builder for deleting a single AuthUserLocal entity.
-type AuthUserLocalDeleteOne struct {
-	_d *AuthUserLocalDelete
+// UserAuthSocialDeleteOne is the builder for deleting a single UserAuthSocial entity.
+type UserAuthSocialDeleteOne struct {
+	_d *UserAuthSocialDelete
 }
 
-// Where appends a list predicates to the AuthUserLocalDelete builder.
-func (_d *AuthUserLocalDeleteOne) Where(ps ...predicate.AuthUserLocal) *AuthUserLocalDeleteOne {
+// Where appends a list predicates to the UserAuthSocialDelete builder.
+func (_d *UserAuthSocialDeleteOne) Where(ps ...predicate.UserAuthSocial) *UserAuthSocialDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *AuthUserLocalDeleteOne) Exec(ctx context.Context) error {
+func (_d *UserAuthSocialDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{authuserlocal.Label}
+		return &NotFoundError{userauthsocial.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *AuthUserLocalDeleteOne) ExecX(ctx context.Context) {
+func (_d *UserAuthSocialDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

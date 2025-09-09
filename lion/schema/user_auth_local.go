@@ -7,13 +7,13 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// AuthUserLocal 存储本地用户的认证信息（如密码）
-type AuthUserLocal struct {
+// UserAuthLocal 存储本地用户的认证信息（如密码）
+type UserAuthLocal struct {
 	ent.Schema
 }
 
 // Fields of the table.
-func (AuthUserLocal) Fields() []ent.Field {
+func (UserAuthLocal) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("user_id").
 			Unique().
@@ -42,20 +42,20 @@ func (AuthUserLocal) Fields() []ent.Field {
 }
 
 // Edges of the table.
-func (AuthUserLocal) Edges() []ent.Edge {
+func (UserAuthLocal) Edges() []ent.Edge {
 	return nil
 }
 
 // Mixin of the table.
-func (AuthUserLocal) Mixin() []ent.Mixin {
+func (UserAuthLocal) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
 	}
 }
 
 // Annotations 自定义表名
-func (AuthUserLocal) Annotations() []schema.Annotation {
+func (UserAuthLocal) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_auth_user_local"},
+		entsql.Annotation{Table: "lion_user_auth_local"},
 	}
 }

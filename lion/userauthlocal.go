@@ -9,11 +9,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/authuserlocal"
+	"github.com/grpc-kit/pkg/lion/userauthlocal"
 )
 
-// AuthUserLocal is the model entity for the AuthUserLocal schema.
-type AuthUserLocal struct {
+// UserAuthLocal is the model entity for the UserAuthLocal schema.
+type UserAuthLocal struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -39,17 +39,17 @@ type AuthUserLocal struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*AuthUserLocal) scanValues(columns []string) ([]any, error) {
+func (*UserAuthLocal) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case authuserlocal.FieldPasswordHash, authuserlocal.FieldMfaSecretEncrypted:
+		case userauthlocal.FieldPasswordHash, userauthlocal.FieldMfaSecretEncrypted:
 			values[i] = new([]byte)
-		case authuserlocal.FieldMfaEnabled:
+		case userauthlocal.FieldMfaEnabled:
 			values[i] = new(sql.NullBool)
-		case authuserlocal.FieldID, authuserlocal.FieldUserID:
+		case userauthlocal.FieldID, userauthlocal.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case authuserlocal.FieldCreatedAt, authuserlocal.FieldUpdatedAt, authuserlocal.FieldDeletedAt, authuserlocal.FieldPasswordChangedAt, authuserlocal.FieldPasswordExpiresAt:
+		case userauthlocal.FieldCreatedAt, userauthlocal.FieldUpdatedAt, userauthlocal.FieldDeletedAt, userauthlocal.FieldPasswordChangedAt, userauthlocal.FieldPasswordExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -59,70 +59,70 @@ func (*AuthUserLocal) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the AuthUserLocal fields.
-func (_m *AuthUserLocal) assignValues(columns []string, values []any) error {
+// to the UserAuthLocal fields.
+func (_m *UserAuthLocal) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case authuserlocal.FieldID:
+		case userauthlocal.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case authuserlocal.FieldCreatedAt:
+		case userauthlocal.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case authuserlocal.FieldUpdatedAt:
+		case userauthlocal.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case authuserlocal.FieldDeletedAt:
+		case userauthlocal.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case authuserlocal.FieldUserID:
+		case userauthlocal.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				_m.UserID = int(value.Int64)
 			}
-		case authuserlocal.FieldPasswordHash:
+		case userauthlocal.FieldPasswordHash:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field password_hash", values[i])
 			} else if value != nil {
 				_m.PasswordHash = *value
 			}
-		case authuserlocal.FieldMfaEnabled:
+		case userauthlocal.FieldMfaEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field mfa_enabled", values[i])
 			} else if value.Valid {
 				_m.MfaEnabled = value.Bool
 			}
-		case authuserlocal.FieldMfaSecretEncrypted:
+		case userauthlocal.FieldMfaSecretEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field mfa_secret_encrypted", values[i])
 			} else if value != nil {
 				_m.MfaSecretEncrypted = *value
 			}
-		case authuserlocal.FieldPasswordChangedAt:
+		case userauthlocal.FieldPasswordChangedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field password_changed_at", values[i])
 			} else if value.Valid {
 				_m.PasswordChangedAt = new(time.Time)
 				*_m.PasswordChangedAt = value.Time
 			}
-		case authuserlocal.FieldPasswordExpiresAt:
+		case userauthlocal.FieldPasswordExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field password_expires_at", values[i])
 			} else if value.Valid {
@@ -136,34 +136,34 @@ func (_m *AuthUserLocal) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the AuthUserLocal.
+// Value returns the ent.Value that was dynamically selected and assigned to the UserAuthLocal.
 // This includes values selected through modifiers, order, etc.
-func (_m *AuthUserLocal) Value(name string) (ent.Value, error) {
+func (_m *UserAuthLocal) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// Update returns a builder for updating this AuthUserLocal.
-// Note that you need to call AuthUserLocal.Unwrap() before calling this method if this AuthUserLocal
+// Update returns a builder for updating this UserAuthLocal.
+// Note that you need to call UserAuthLocal.Unwrap() before calling this method if this UserAuthLocal
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *AuthUserLocal) Update() *AuthUserLocalUpdateOne {
-	return NewAuthUserLocalClient(_m.config).UpdateOne(_m)
+func (_m *UserAuthLocal) Update() *UserAuthLocalUpdateOne {
+	return NewUserAuthLocalClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the AuthUserLocal entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the UserAuthLocal entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *AuthUserLocal) Unwrap() *AuthUserLocal {
+func (_m *UserAuthLocal) Unwrap() *UserAuthLocal {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: AuthUserLocal is not a transactional entity")
+		panic("lion: UserAuthLocal is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *AuthUserLocal) String() string {
+func (_m *UserAuthLocal) String() string {
 	var builder strings.Builder
-	builder.WriteString("AuthUserLocal(")
+	builder.WriteString("UserAuthLocal(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -200,5 +200,5 @@ func (_m *AuthUserLocal) String() string {
 	return builder.String()
 }
 
-// AuthUserLocals is a parsable slice of AuthUserLocal.
-type AuthUserLocals []*AuthUserLocal
+// UserAuthLocals is a parsable slice of UserAuthLocal.
+type UserAuthLocals []*UserAuthLocal

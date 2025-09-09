@@ -16,8 +16,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/authproviders"
-	"github.com/grpc-kit/pkg/lion/authuserlocal"
-	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
@@ -31,6 +29,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/roleusermapping"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/userattributes"
+	"github.com/grpc-kit/pkg/lion/userauthlocal"
+	"github.com/grpc-kit/pkg/lion/userauthsocial"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -41,10 +41,6 @@ type Client struct {
 	Schema *migrate.Schema
 	// AuthProviders is the client for interacting with the AuthProviders builders.
 	AuthProviders *AuthProvidersClient
-	// AuthUserLocal is the client for interacting with the AuthUserLocal builders.
-	AuthUserLocal *AuthUserLocalClient
-	// AuthUserSocial is the client for interacting with the AuthUserSocial builders.
-	AuthUserSocial *AuthUserSocialClient
 	// Demo is the client for interacting with the Demo builders.
 	Demo *DemoClient
 	// DepartmentLeaders is the client for interacting with the DepartmentLeaders builders.
@@ -71,6 +67,10 @@ type Client struct {
 	SecurityKeys *SecurityKeysClient
 	// UserAttributes is the client for interacting with the UserAttributes builders.
 	UserAttributes *UserAttributesClient
+	// UserAuthLocal is the client for interacting with the UserAuthLocal builders.
+	UserAuthLocal *UserAuthLocalClient
+	// UserAuthSocial is the client for interacting with the UserAuthSocial builders.
+	UserAuthSocial *UserAuthSocialClient
 	// Users is the client for interacting with the Users builders.
 	Users *UsersClient
 }
@@ -85,8 +85,6 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.AuthProviders = NewAuthProvidersClient(c.config)
-	c.AuthUserLocal = NewAuthUserLocalClient(c.config)
-	c.AuthUserSocial = NewAuthUserSocialClient(c.config)
 	c.Demo = NewDemoClient(c.config)
 	c.DepartmentLeaders = NewDepartmentLeadersClient(c.config)
 	c.Departments = NewDepartmentsClient(c.config)
@@ -100,6 +98,8 @@ func (c *Client) init() {
 	c.Roles = NewRolesClient(c.config)
 	c.SecurityKeys = NewSecurityKeysClient(c.config)
 	c.UserAttributes = NewUserAttributesClient(c.config)
+	c.UserAuthLocal = NewUserAuthLocalClient(c.config)
+	c.UserAuthSocial = NewUserAuthSocialClient(c.config)
 	c.Users = NewUsersClient(c.config)
 }
 
@@ -194,8 +194,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:               ctx,
 		config:            cfg,
 		AuthProviders:     NewAuthProvidersClient(cfg),
-		AuthUserLocal:     NewAuthUserLocalClient(cfg),
-		AuthUserSocial:    NewAuthUserSocialClient(cfg),
 		Demo:              NewDemoClient(cfg),
 		DepartmentLeaders: NewDepartmentLeadersClient(cfg),
 		Departments:       NewDepartmentsClient(cfg),
@@ -209,6 +207,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Roles:             NewRolesClient(cfg),
 		SecurityKeys:      NewSecurityKeysClient(cfg),
 		UserAttributes:    NewUserAttributesClient(cfg),
+		UserAuthLocal:     NewUserAuthLocalClient(cfg),
+		UserAuthSocial:    NewUserAuthSocialClient(cfg),
 		Users:             NewUsersClient(cfg),
 	}, nil
 }
@@ -230,8 +230,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:               ctx,
 		config:            cfg,
 		AuthProviders:     NewAuthProvidersClient(cfg),
-		AuthUserLocal:     NewAuthUserLocalClient(cfg),
-		AuthUserSocial:    NewAuthUserSocialClient(cfg),
 		Demo:              NewDemoClient(cfg),
 		DepartmentLeaders: NewDepartmentLeadersClient(cfg),
 		Departments:       NewDepartmentsClient(cfg),
@@ -245,6 +243,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Roles:             NewRolesClient(cfg),
 		SecurityKeys:      NewSecurityKeysClient(cfg),
 		UserAttributes:    NewUserAttributesClient(cfg),
+		UserAuthLocal:     NewUserAuthLocalClient(cfg),
+		UserAuthSocial:    NewUserAuthSocialClient(cfg),
 		Users:             NewUsersClient(cfg),
 	}, nil
 }
@@ -275,10 +275,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AuthProviders, c.AuthUserLocal, c.AuthUserSocial, c.Demo, c.DepartmentLeaders,
-		c.Departments, c.GroupMembership, c.Groups, c.Menus, c.Permissions,
-		c.RoleGroupMapping, c.RoleMenuMapping, c.RoleUserMapping, c.Roles,
-		c.SecurityKeys, c.UserAttributes, c.Users,
+		c.AuthProviders, c.Demo, c.DepartmentLeaders, c.Departments, c.GroupMembership,
+		c.Groups, c.Menus, c.Permissions, c.RoleGroupMapping, c.RoleMenuMapping,
+		c.RoleUserMapping, c.Roles, c.SecurityKeys, c.UserAttributes, c.UserAuthLocal,
+		c.UserAuthSocial, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -288,10 +288,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AuthProviders, c.AuthUserLocal, c.AuthUserSocial, c.Demo, c.DepartmentLeaders,
-		c.Departments, c.GroupMembership, c.Groups, c.Menus, c.Permissions,
-		c.RoleGroupMapping, c.RoleMenuMapping, c.RoleUserMapping, c.Roles,
-		c.SecurityKeys, c.UserAttributes, c.Users,
+		c.AuthProviders, c.Demo, c.DepartmentLeaders, c.Departments, c.GroupMembership,
+		c.Groups, c.Menus, c.Permissions, c.RoleGroupMapping, c.RoleMenuMapping,
+		c.RoleUserMapping, c.Roles, c.SecurityKeys, c.UserAttributes, c.UserAuthLocal,
+		c.UserAuthSocial, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -302,10 +302,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *AuthProvidersMutation:
 		return c.AuthProviders.mutate(ctx, m)
-	case *AuthUserLocalMutation:
-		return c.AuthUserLocal.mutate(ctx, m)
-	case *AuthUserSocialMutation:
-		return c.AuthUserSocial.mutate(ctx, m)
 	case *DemoMutation:
 		return c.Demo.mutate(ctx, m)
 	case *DepartmentLeadersMutation:
@@ -332,6 +328,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.SecurityKeys.mutate(ctx, m)
 	case *UserAttributesMutation:
 		return c.UserAttributes.mutate(ctx, m)
+	case *UserAuthLocalMutation:
+		return c.UserAuthLocal.mutate(ctx, m)
+	case *UserAuthSocialMutation:
+		return c.UserAuthSocial.mutate(ctx, m)
 	case *UsersMutation:
 		return c.Users.mutate(ctx, m)
 	default:
@@ -469,272 +469,6 @@ func (c *AuthProvidersClient) mutate(ctx context.Context, m *AuthProvidersMutati
 		return (&AuthProvidersDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown AuthProviders mutation op: %q", m.Op())
-	}
-}
-
-// AuthUserLocalClient is a client for the AuthUserLocal schema.
-type AuthUserLocalClient struct {
-	config
-}
-
-// NewAuthUserLocalClient returns a client for the AuthUserLocal from the given config.
-func NewAuthUserLocalClient(c config) *AuthUserLocalClient {
-	return &AuthUserLocalClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `authuserlocal.Hooks(f(g(h())))`.
-func (c *AuthUserLocalClient) Use(hooks ...Hook) {
-	c.hooks.AuthUserLocal = append(c.hooks.AuthUserLocal, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `authuserlocal.Intercept(f(g(h())))`.
-func (c *AuthUserLocalClient) Intercept(interceptors ...Interceptor) {
-	c.inters.AuthUserLocal = append(c.inters.AuthUserLocal, interceptors...)
-}
-
-// Create returns a builder for creating a AuthUserLocal entity.
-func (c *AuthUserLocalClient) Create() *AuthUserLocalCreate {
-	mutation := newAuthUserLocalMutation(c.config, OpCreate)
-	return &AuthUserLocalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of AuthUserLocal entities.
-func (c *AuthUserLocalClient) CreateBulk(builders ...*AuthUserLocalCreate) *AuthUserLocalCreateBulk {
-	return &AuthUserLocalCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *AuthUserLocalClient) MapCreateBulk(slice any, setFunc func(*AuthUserLocalCreate, int)) *AuthUserLocalCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &AuthUserLocalCreateBulk{err: fmt.Errorf("calling to AuthUserLocalClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*AuthUserLocalCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &AuthUserLocalCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for AuthUserLocal.
-func (c *AuthUserLocalClient) Update() *AuthUserLocalUpdate {
-	mutation := newAuthUserLocalMutation(c.config, OpUpdate)
-	return &AuthUserLocalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *AuthUserLocalClient) UpdateOne(_m *AuthUserLocal) *AuthUserLocalUpdateOne {
-	mutation := newAuthUserLocalMutation(c.config, OpUpdateOne, withAuthUserLocal(_m))
-	return &AuthUserLocalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *AuthUserLocalClient) UpdateOneID(id int) *AuthUserLocalUpdateOne {
-	mutation := newAuthUserLocalMutation(c.config, OpUpdateOne, withAuthUserLocalID(id))
-	return &AuthUserLocalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for AuthUserLocal.
-func (c *AuthUserLocalClient) Delete() *AuthUserLocalDelete {
-	mutation := newAuthUserLocalMutation(c.config, OpDelete)
-	return &AuthUserLocalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *AuthUserLocalClient) DeleteOne(_m *AuthUserLocal) *AuthUserLocalDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AuthUserLocalClient) DeleteOneID(id int) *AuthUserLocalDeleteOne {
-	builder := c.Delete().Where(authuserlocal.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &AuthUserLocalDeleteOne{builder}
-}
-
-// Query returns a query builder for AuthUserLocal.
-func (c *AuthUserLocalClient) Query() *AuthUserLocalQuery {
-	return &AuthUserLocalQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeAuthUserLocal},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a AuthUserLocal entity by its id.
-func (c *AuthUserLocalClient) Get(ctx context.Context, id int) (*AuthUserLocal, error) {
-	return c.Query().Where(authuserlocal.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *AuthUserLocalClient) GetX(ctx context.Context, id int) *AuthUserLocal {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *AuthUserLocalClient) Hooks() []Hook {
-	return c.hooks.AuthUserLocal
-}
-
-// Interceptors returns the client interceptors.
-func (c *AuthUserLocalClient) Interceptors() []Interceptor {
-	return c.inters.AuthUserLocal
-}
-
-func (c *AuthUserLocalClient) mutate(ctx context.Context, m *AuthUserLocalMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&AuthUserLocalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&AuthUserLocalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&AuthUserLocalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&AuthUserLocalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("lion: unknown AuthUserLocal mutation op: %q", m.Op())
-	}
-}
-
-// AuthUserSocialClient is a client for the AuthUserSocial schema.
-type AuthUserSocialClient struct {
-	config
-}
-
-// NewAuthUserSocialClient returns a client for the AuthUserSocial from the given config.
-func NewAuthUserSocialClient(c config) *AuthUserSocialClient {
-	return &AuthUserSocialClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `authusersocial.Hooks(f(g(h())))`.
-func (c *AuthUserSocialClient) Use(hooks ...Hook) {
-	c.hooks.AuthUserSocial = append(c.hooks.AuthUserSocial, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `authusersocial.Intercept(f(g(h())))`.
-func (c *AuthUserSocialClient) Intercept(interceptors ...Interceptor) {
-	c.inters.AuthUserSocial = append(c.inters.AuthUserSocial, interceptors...)
-}
-
-// Create returns a builder for creating a AuthUserSocial entity.
-func (c *AuthUserSocialClient) Create() *AuthUserSocialCreate {
-	mutation := newAuthUserSocialMutation(c.config, OpCreate)
-	return &AuthUserSocialCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of AuthUserSocial entities.
-func (c *AuthUserSocialClient) CreateBulk(builders ...*AuthUserSocialCreate) *AuthUserSocialCreateBulk {
-	return &AuthUserSocialCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *AuthUserSocialClient) MapCreateBulk(slice any, setFunc func(*AuthUserSocialCreate, int)) *AuthUserSocialCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &AuthUserSocialCreateBulk{err: fmt.Errorf("calling to AuthUserSocialClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*AuthUserSocialCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &AuthUserSocialCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for AuthUserSocial.
-func (c *AuthUserSocialClient) Update() *AuthUserSocialUpdate {
-	mutation := newAuthUserSocialMutation(c.config, OpUpdate)
-	return &AuthUserSocialUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *AuthUserSocialClient) UpdateOne(_m *AuthUserSocial) *AuthUserSocialUpdateOne {
-	mutation := newAuthUserSocialMutation(c.config, OpUpdateOne, withAuthUserSocial(_m))
-	return &AuthUserSocialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *AuthUserSocialClient) UpdateOneID(id int) *AuthUserSocialUpdateOne {
-	mutation := newAuthUserSocialMutation(c.config, OpUpdateOne, withAuthUserSocialID(id))
-	return &AuthUserSocialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for AuthUserSocial.
-func (c *AuthUserSocialClient) Delete() *AuthUserSocialDelete {
-	mutation := newAuthUserSocialMutation(c.config, OpDelete)
-	return &AuthUserSocialDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *AuthUserSocialClient) DeleteOne(_m *AuthUserSocial) *AuthUserSocialDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AuthUserSocialClient) DeleteOneID(id int) *AuthUserSocialDeleteOne {
-	builder := c.Delete().Where(authusersocial.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &AuthUserSocialDeleteOne{builder}
-}
-
-// Query returns a query builder for AuthUserSocial.
-func (c *AuthUserSocialClient) Query() *AuthUserSocialQuery {
-	return &AuthUserSocialQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeAuthUserSocial},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a AuthUserSocial entity by its id.
-func (c *AuthUserSocialClient) Get(ctx context.Context, id int) (*AuthUserSocial, error) {
-	return c.Query().Where(authusersocial.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *AuthUserSocialClient) GetX(ctx context.Context, id int) *AuthUserSocial {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *AuthUserSocialClient) Hooks() []Hook {
-	return c.hooks.AuthUserSocial
-}
-
-// Interceptors returns the client interceptors.
-func (c *AuthUserSocialClient) Interceptors() []Interceptor {
-	return c.inters.AuthUserSocial
-}
-
-func (c *AuthUserSocialClient) mutate(ctx context.Context, m *AuthUserSocialMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&AuthUserSocialCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&AuthUserSocialUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&AuthUserSocialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&AuthUserSocialDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("lion: unknown AuthUserSocial mutation op: %q", m.Op())
 	}
 }
 
@@ -2691,6 +2425,272 @@ func (c *UserAttributesClient) mutate(ctx context.Context, m *UserAttributesMuta
 	}
 }
 
+// UserAuthLocalClient is a client for the UserAuthLocal schema.
+type UserAuthLocalClient struct {
+	config
+}
+
+// NewUserAuthLocalClient returns a client for the UserAuthLocal from the given config.
+func NewUserAuthLocalClient(c config) *UserAuthLocalClient {
+	return &UserAuthLocalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userauthlocal.Hooks(f(g(h())))`.
+func (c *UserAuthLocalClient) Use(hooks ...Hook) {
+	c.hooks.UserAuthLocal = append(c.hooks.UserAuthLocal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userauthlocal.Intercept(f(g(h())))`.
+func (c *UserAuthLocalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserAuthLocal = append(c.inters.UserAuthLocal, interceptors...)
+}
+
+// Create returns a builder for creating a UserAuthLocal entity.
+func (c *UserAuthLocalClient) Create() *UserAuthLocalCreate {
+	mutation := newUserAuthLocalMutation(c.config, OpCreate)
+	return &UserAuthLocalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserAuthLocal entities.
+func (c *UserAuthLocalClient) CreateBulk(builders ...*UserAuthLocalCreate) *UserAuthLocalCreateBulk {
+	return &UserAuthLocalCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserAuthLocalClient) MapCreateBulk(slice any, setFunc func(*UserAuthLocalCreate, int)) *UserAuthLocalCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserAuthLocalCreateBulk{err: fmt.Errorf("calling to UserAuthLocalClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserAuthLocalCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserAuthLocalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserAuthLocal.
+func (c *UserAuthLocalClient) Update() *UserAuthLocalUpdate {
+	mutation := newUserAuthLocalMutation(c.config, OpUpdate)
+	return &UserAuthLocalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserAuthLocalClient) UpdateOne(_m *UserAuthLocal) *UserAuthLocalUpdateOne {
+	mutation := newUserAuthLocalMutation(c.config, OpUpdateOne, withUserAuthLocal(_m))
+	return &UserAuthLocalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserAuthLocalClient) UpdateOneID(id int) *UserAuthLocalUpdateOne {
+	mutation := newUserAuthLocalMutation(c.config, OpUpdateOne, withUserAuthLocalID(id))
+	return &UserAuthLocalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserAuthLocal.
+func (c *UserAuthLocalClient) Delete() *UserAuthLocalDelete {
+	mutation := newUserAuthLocalMutation(c.config, OpDelete)
+	return &UserAuthLocalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserAuthLocalClient) DeleteOne(_m *UserAuthLocal) *UserAuthLocalDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserAuthLocalClient) DeleteOneID(id int) *UserAuthLocalDeleteOne {
+	builder := c.Delete().Where(userauthlocal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserAuthLocalDeleteOne{builder}
+}
+
+// Query returns a query builder for UserAuthLocal.
+func (c *UserAuthLocalClient) Query() *UserAuthLocalQuery {
+	return &UserAuthLocalQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserAuthLocal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserAuthLocal entity by its id.
+func (c *UserAuthLocalClient) Get(ctx context.Context, id int) (*UserAuthLocal, error) {
+	return c.Query().Where(userauthlocal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserAuthLocalClient) GetX(ctx context.Context, id int) *UserAuthLocal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UserAuthLocalClient) Hooks() []Hook {
+	return c.hooks.UserAuthLocal
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserAuthLocalClient) Interceptors() []Interceptor {
+	return c.inters.UserAuthLocal
+}
+
+func (c *UserAuthLocalClient) mutate(ctx context.Context, m *UserAuthLocalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserAuthLocalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserAuthLocalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserAuthLocalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserAuthLocalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown UserAuthLocal mutation op: %q", m.Op())
+	}
+}
+
+// UserAuthSocialClient is a client for the UserAuthSocial schema.
+type UserAuthSocialClient struct {
+	config
+}
+
+// NewUserAuthSocialClient returns a client for the UserAuthSocial from the given config.
+func NewUserAuthSocialClient(c config) *UserAuthSocialClient {
+	return &UserAuthSocialClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userauthsocial.Hooks(f(g(h())))`.
+func (c *UserAuthSocialClient) Use(hooks ...Hook) {
+	c.hooks.UserAuthSocial = append(c.hooks.UserAuthSocial, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userauthsocial.Intercept(f(g(h())))`.
+func (c *UserAuthSocialClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserAuthSocial = append(c.inters.UserAuthSocial, interceptors...)
+}
+
+// Create returns a builder for creating a UserAuthSocial entity.
+func (c *UserAuthSocialClient) Create() *UserAuthSocialCreate {
+	mutation := newUserAuthSocialMutation(c.config, OpCreate)
+	return &UserAuthSocialCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserAuthSocial entities.
+func (c *UserAuthSocialClient) CreateBulk(builders ...*UserAuthSocialCreate) *UserAuthSocialCreateBulk {
+	return &UserAuthSocialCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserAuthSocialClient) MapCreateBulk(slice any, setFunc func(*UserAuthSocialCreate, int)) *UserAuthSocialCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserAuthSocialCreateBulk{err: fmt.Errorf("calling to UserAuthSocialClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserAuthSocialCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserAuthSocialCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserAuthSocial.
+func (c *UserAuthSocialClient) Update() *UserAuthSocialUpdate {
+	mutation := newUserAuthSocialMutation(c.config, OpUpdate)
+	return &UserAuthSocialUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserAuthSocialClient) UpdateOne(_m *UserAuthSocial) *UserAuthSocialUpdateOne {
+	mutation := newUserAuthSocialMutation(c.config, OpUpdateOne, withUserAuthSocial(_m))
+	return &UserAuthSocialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserAuthSocialClient) UpdateOneID(id int) *UserAuthSocialUpdateOne {
+	mutation := newUserAuthSocialMutation(c.config, OpUpdateOne, withUserAuthSocialID(id))
+	return &UserAuthSocialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserAuthSocial.
+func (c *UserAuthSocialClient) Delete() *UserAuthSocialDelete {
+	mutation := newUserAuthSocialMutation(c.config, OpDelete)
+	return &UserAuthSocialDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserAuthSocialClient) DeleteOne(_m *UserAuthSocial) *UserAuthSocialDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserAuthSocialClient) DeleteOneID(id int) *UserAuthSocialDeleteOne {
+	builder := c.Delete().Where(userauthsocial.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserAuthSocialDeleteOne{builder}
+}
+
+// Query returns a query builder for UserAuthSocial.
+func (c *UserAuthSocialClient) Query() *UserAuthSocialQuery {
+	return &UserAuthSocialQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserAuthSocial},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserAuthSocial entity by its id.
+func (c *UserAuthSocialClient) Get(ctx context.Context, id int) (*UserAuthSocial, error) {
+	return c.Query().Where(userauthsocial.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserAuthSocialClient) GetX(ctx context.Context, id int) *UserAuthSocial {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UserAuthSocialClient) Hooks() []Hook {
+	return c.hooks.UserAuthSocial
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserAuthSocialClient) Interceptors() []Interceptor {
+	return c.inters.UserAuthSocial
+}
+
+func (c *UserAuthSocialClient) mutate(ctx context.Context, m *UserAuthSocialMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserAuthSocialCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserAuthSocialUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserAuthSocialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserAuthSocialDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown UserAuthSocial mutation op: %q", m.Op())
+	}
+}
+
 // UsersClient is a client for the Users schema.
 type UsersClient struct {
 	config
@@ -2859,15 +2859,14 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AuthProviders, AuthUserLocal, AuthUserSocial, Demo, DepartmentLeaders,
-		Departments, GroupMembership, Groups, Menus, Permissions, RoleGroupMapping,
-		RoleMenuMapping, RoleUserMapping, Roles, SecurityKeys, UserAttributes,
-		Users []ent.Hook
+		AuthProviders, Demo, DepartmentLeaders, Departments, GroupMembership, Groups,
+		Menus, Permissions, RoleGroupMapping, RoleMenuMapping, RoleUserMapping, Roles,
+		SecurityKeys, UserAttributes, UserAuthLocal, UserAuthSocial, Users []ent.Hook
 	}
 	inters struct {
-		AuthProviders, AuthUserLocal, AuthUserSocial, Demo, DepartmentLeaders,
-		Departments, GroupMembership, Groups, Menus, Permissions, RoleGroupMapping,
-		RoleMenuMapping, RoleUserMapping, Roles, SecurityKeys, UserAttributes,
+		AuthProviders, Demo, DepartmentLeaders, Departments, GroupMembership, Groups,
+		Menus, Permissions, RoleGroupMapping, RoleMenuMapping, RoleUserMapping, Roles,
+		SecurityKeys, UserAttributes, UserAuthLocal, UserAuthSocial,
 		Users []ent.Interceptor
 	}
 )

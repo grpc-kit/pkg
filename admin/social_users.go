@@ -11,7 +11,7 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
-	"github.com/grpc-kit/pkg/lion/authusersocial"
+	"github.com/grpc-kit/pkg/lion/userauthsocial"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/sirupsen/logrus"
@@ -147,10 +147,10 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 }
 
 func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, idToken *auth.IDTokenClaims) (int, error) {
-	existUserID, err := s.db.AuthUserSocial.Query().
+	existUserID, err := s.db.UserAuthSocial.Query().
 		Where(
-			authusersocial.ProviderNameEQ(s.ProviderName),
-			authusersocial.ProviderUserIDEQ(idToken.Subject),
+			userauthsocial.ProviderNameEQ(s.ProviderName),
+			userauthsocial.ProviderUserIDEQ(idToken.Subject),
 		).
 		OnlyID(ctx)
 	if err != nil && !lion.IsNotFound(err) {
@@ -202,7 +202,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			refreshTokenEnc, err = crypto.EncryptAES(s.aesKey, []byte(oauth2Token.RefreshToken))
 		}
 
-		_, err = tx.AuthUserSocial.Create().
+		_, err = tx.UserAuthSocial.Create().
 			SetUserID(newUser.ID).
 			SetProviderName(s.ProviderName).
 			SetProviderUserID(idToken.Subject).
@@ -229,8 +229,8 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			refreshTokenEnc, err = crypto.EncryptAES(s.aesKey, []byte(oauth2Token.RefreshToken))
 		}
 
-		s.db.AuthUserSocial.Update().
-			Where(authusersocial.IDEQ(existUserID)).
+		s.db.UserAuthSocial.Update().
+			Where(userauthsocial.IDEQ(existUserID)).
 			SetAccessTokenEncrypted(accessTokenEnc).
 			SetRefreshTokenEncrypted(refreshTokenEnc).
 			SetTokenExpiresAt(oauth2Token.Expiry)
@@ -279,10 +279,10 @@ func (s *socialUsers) weixinExchange(ctx context.Context, code string) (*wechatC
 }
 
 func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2SessionResponse) (int, error) {
-	existUserID, err := s.db.AuthUserSocial.Query().
+	existUserID, err := s.db.UserAuthSocial.Query().
 		Where(
-			authusersocial.ProviderNameEQ(s.ProviderName),
-			authusersocial.ProviderUserIDEQ(resp.Openid),
+			userauthsocial.ProviderNameEQ(s.ProviderName),
+			userauthsocial.ProviderUserIDEQ(resp.Openid),
 		).
 		OnlyID(ctx)
 	if err != nil && !lion.IsNotFound(err) {
@@ -334,7 +334,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 			refreshTokenEnc = accessTokenEnc
 		}
 
-		_, err = tx.AuthUserSocial.Create().
+		_, err = tx.UserAuthSocial.Create().
 			SetUserID(newUser.ID).
 			SetProviderName(s.ProviderName).
 			SetProviderUserID(resp.Openid).

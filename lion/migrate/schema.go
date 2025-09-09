@@ -33,52 +33,6 @@ var (
 		Columns:    LionAuthProvidersColumns,
 		PrimaryKey: []*schema.Column{LionAuthProvidersColumns[0]},
 	}
-	// LionAuthUserLocalColumns holds the columns for the "lion_auth_user_local" table.
-	LionAuthUserLocalColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "user_id", Type: field.TypeInt, Unique: true},
-		{Name: "password_hash", Type: field.TypeBytes},
-		{Name: "mfa_enabled", Type: field.TypeBool, Default: false},
-		{Name: "mfa_secret_encrypted", Type: field.TypeBytes},
-		{Name: "password_changed_at", Type: field.TypeTime, Nullable: true},
-		{Name: "password_expires_at", Type: field.TypeTime, Nullable: true},
-	}
-	// LionAuthUserLocalTable holds the schema information for the "lion_auth_user_local" table.
-	LionAuthUserLocalTable = &schema.Table{
-		Name:       "lion_auth_user_local",
-		Columns:    LionAuthUserLocalColumns,
-		PrimaryKey: []*schema.Column{LionAuthUserLocalColumns[0]},
-	}
-	// LionAuthUserSocialColumns holds the columns for the "lion_auth_user_social" table.
-	LionAuthUserSocialColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "user_id", Type: field.TypeInt},
-		{Name: "provider_name", Type: field.TypeString},
-		{Name: "provider_user_id", Type: field.TypeString},
-		{Name: "provider_union_id", Type: field.TypeString, Nullable: true},
-		{Name: "access_token_encrypted", Type: field.TypeBytes, Nullable: true},
-		{Name: "refresh_token_encrypted", Type: field.TypeBytes, Nullable: true},
-		{Name: "token_expires_at", Type: field.TypeTime, Nullable: true},
-	}
-	// LionAuthUserSocialTable holds the schema information for the "lion_auth_user_social" table.
-	LionAuthUserSocialTable = &schema.Table{
-		Name:       "lion_auth_user_social",
-		Columns:    LionAuthUserSocialColumns,
-		PrimaryKey: []*schema.Column{LionAuthUserSocialColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "authusersocial_user_id_provider_name",
-				Unique:  true,
-				Columns: []*schema.Column{LionAuthUserSocialColumns[4], LionAuthUserSocialColumns[5]},
-			},
-		},
-	}
 	// LionDemoColumns holds the columns for the "lion_demo" table.
 	LionDemoColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -366,6 +320,52 @@ var (
 			},
 		},
 	}
+	// LionUserAuthLocalColumns holds the columns for the "lion_user_auth_local" table.
+	LionUserAuthLocalColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "user_id", Type: field.TypeInt, Unique: true},
+		{Name: "password_hash", Type: field.TypeBytes},
+		{Name: "mfa_enabled", Type: field.TypeBool, Default: false},
+		{Name: "mfa_secret_encrypted", Type: field.TypeBytes},
+		{Name: "password_changed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "password_expires_at", Type: field.TypeTime, Nullable: true},
+	}
+	// LionUserAuthLocalTable holds the schema information for the "lion_user_auth_local" table.
+	LionUserAuthLocalTable = &schema.Table{
+		Name:       "lion_user_auth_local",
+		Columns:    LionUserAuthLocalColumns,
+		PrimaryKey: []*schema.Column{LionUserAuthLocalColumns[0]},
+	}
+	// LionUserAuthSocialColumns holds the columns for the "lion_user_auth_social" table.
+	LionUserAuthSocialColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "provider_name", Type: field.TypeString},
+		{Name: "provider_user_id", Type: field.TypeString},
+		{Name: "provider_union_id", Type: field.TypeString, Nullable: true},
+		{Name: "access_token_encrypted", Type: field.TypeBytes, Nullable: true},
+		{Name: "refresh_token_encrypted", Type: field.TypeBytes, Nullable: true},
+		{Name: "token_expires_at", Type: field.TypeTime, Nullable: true},
+	}
+	// LionUserAuthSocialTable holds the schema information for the "lion_user_auth_social" table.
+	LionUserAuthSocialTable = &schema.Table{
+		Name:       "lion_user_auth_social",
+		Columns:    LionUserAuthSocialColumns,
+		PrimaryKey: []*schema.Column{LionUserAuthSocialColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "userauthsocial_user_id_provider_name",
+				Unique:  true,
+				Columns: []*schema.Column{LionUserAuthSocialColumns[4], LionUserAuthSocialColumns[5]},
+			},
+		},
+	}
 	// LionUsersColumns holds the columns for the "lion_users" table.
 	LionUsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -404,8 +404,6 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		LionAuthProvidersTable,
-		LionAuthUserLocalTable,
-		LionAuthUserSocialTable,
 		LionDemoTable,
 		LionDepartmentLeadersTable,
 		LionDepartmentsTable,
@@ -419,6 +417,8 @@ var (
 		LionRolesTable,
 		LionSecurityKeysTable,
 		LionUserAttributesTable,
+		LionUserAuthLocalTable,
+		LionUserAuthSocialTable,
 		LionUsersTable,
 	}
 )
@@ -426,12 +426,6 @@ var (
 func init() {
 	LionAuthProvidersTable.Annotation = &entsql.Annotation{
 		Table: "lion_auth_providers",
-	}
-	LionAuthUserLocalTable.Annotation = &entsql.Annotation{
-		Table: "lion_auth_user_local",
-	}
-	LionAuthUserSocialTable.Annotation = &entsql.Annotation{
-		Table: "lion_auth_user_social",
 	}
 	LionDemoTable.Annotation = &entsql.Annotation{
 		Table: "lion_demo",
@@ -479,6 +473,12 @@ func init() {
 	}
 	LionUserAttributesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_attributes",
+	}
+	LionUserAuthLocalTable.Annotation = &entsql.Annotation{
+		Table: "lion_user_auth_local",
+	}
+	LionUserAuthSocialTable.Annotation = &entsql.Annotation{
+		Table: "lion_user_auth_social",
 	}
 	LionUsersTable.Annotation = &entsql.Annotation{
 		Table: "lion_users",

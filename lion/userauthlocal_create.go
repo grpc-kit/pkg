@@ -10,24 +10,24 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/authuserlocal"
+	"github.com/grpc-kit/pkg/lion/userauthlocal"
 )
 
-// AuthUserLocalCreate is the builder for creating a AuthUserLocal entity.
-type AuthUserLocalCreate struct {
+// UserAuthLocalCreate is the builder for creating a UserAuthLocal entity.
+type UserAuthLocalCreate struct {
 	config
-	mutation *AuthUserLocalMutation
+	mutation *UserAuthLocalMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *AuthUserLocalCreate) SetCreatedAt(v time.Time) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetCreatedAt(v time.Time) *UserAuthLocalCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *AuthUserLocalCreate) SetNillableCreatedAt(v *time.Time) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetNillableCreatedAt(v *time.Time) *UserAuthLocalCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -35,13 +35,13 @@ func (_c *AuthUserLocalCreate) SetNillableCreatedAt(v *time.Time) *AuthUserLocal
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *AuthUserLocalCreate) SetUpdatedAt(v time.Time) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetUpdatedAt(v time.Time) *UserAuthLocalCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *AuthUserLocalCreate) SetNillableUpdatedAt(v *time.Time) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetNillableUpdatedAt(v *time.Time) *UserAuthLocalCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -49,13 +49,13 @@ func (_c *AuthUserLocalCreate) SetNillableUpdatedAt(v *time.Time) *AuthUserLocal
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (_c *AuthUserLocalCreate) SetDeletedAt(v time.Time) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetDeletedAt(v time.Time) *UserAuthLocalCreate {
 	_c.mutation.SetDeletedAt(v)
 	return _c
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *AuthUserLocalCreate) SetNillableDeletedAt(v *time.Time) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetNillableDeletedAt(v *time.Time) *UserAuthLocalCreate {
 	if v != nil {
 		_c.SetDeletedAt(*v)
 	}
@@ -63,25 +63,25 @@ func (_c *AuthUserLocalCreate) SetNillableDeletedAt(v *time.Time) *AuthUserLocal
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *AuthUserLocalCreate) SetUserID(v int) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetUserID(v int) *UserAuthLocalCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetPasswordHash sets the "password_hash" field.
-func (_c *AuthUserLocalCreate) SetPasswordHash(v []byte) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetPasswordHash(v []byte) *UserAuthLocalCreate {
 	_c.mutation.SetPasswordHash(v)
 	return _c
 }
 
 // SetMfaEnabled sets the "mfa_enabled" field.
-func (_c *AuthUserLocalCreate) SetMfaEnabled(v bool) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetMfaEnabled(v bool) *UserAuthLocalCreate {
 	_c.mutation.SetMfaEnabled(v)
 	return _c
 }
 
 // SetNillableMfaEnabled sets the "mfa_enabled" field if the given value is not nil.
-func (_c *AuthUserLocalCreate) SetNillableMfaEnabled(v *bool) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetNillableMfaEnabled(v *bool) *UserAuthLocalCreate {
 	if v != nil {
 		_c.SetMfaEnabled(*v)
 	}
@@ -89,19 +89,19 @@ func (_c *AuthUserLocalCreate) SetNillableMfaEnabled(v *bool) *AuthUserLocalCrea
 }
 
 // SetMfaSecretEncrypted sets the "mfa_secret_encrypted" field.
-func (_c *AuthUserLocalCreate) SetMfaSecretEncrypted(v []byte) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetMfaSecretEncrypted(v []byte) *UserAuthLocalCreate {
 	_c.mutation.SetMfaSecretEncrypted(v)
 	return _c
 }
 
 // SetPasswordChangedAt sets the "password_changed_at" field.
-func (_c *AuthUserLocalCreate) SetPasswordChangedAt(v time.Time) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetPasswordChangedAt(v time.Time) *UserAuthLocalCreate {
 	_c.mutation.SetPasswordChangedAt(v)
 	return _c
 }
 
 // SetNillablePasswordChangedAt sets the "password_changed_at" field if the given value is not nil.
-func (_c *AuthUserLocalCreate) SetNillablePasswordChangedAt(v *time.Time) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetNillablePasswordChangedAt(v *time.Time) *UserAuthLocalCreate {
 	if v != nil {
 		_c.SetPasswordChangedAt(*v)
 	}
@@ -109,32 +109,32 @@ func (_c *AuthUserLocalCreate) SetNillablePasswordChangedAt(v *time.Time) *AuthU
 }
 
 // SetPasswordExpiresAt sets the "password_expires_at" field.
-func (_c *AuthUserLocalCreate) SetPasswordExpiresAt(v time.Time) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetPasswordExpiresAt(v time.Time) *UserAuthLocalCreate {
 	_c.mutation.SetPasswordExpiresAt(v)
 	return _c
 }
 
 // SetNillablePasswordExpiresAt sets the "password_expires_at" field if the given value is not nil.
-func (_c *AuthUserLocalCreate) SetNillablePasswordExpiresAt(v *time.Time) *AuthUserLocalCreate {
+func (_c *UserAuthLocalCreate) SetNillablePasswordExpiresAt(v *time.Time) *UserAuthLocalCreate {
 	if v != nil {
 		_c.SetPasswordExpiresAt(*v)
 	}
 	return _c
 }
 
-// Mutation returns the AuthUserLocalMutation object of the builder.
-func (_c *AuthUserLocalCreate) Mutation() *AuthUserLocalMutation {
+// Mutation returns the UserAuthLocalMutation object of the builder.
+func (_c *UserAuthLocalCreate) Mutation() *UserAuthLocalMutation {
 	return _c.mutation
 }
 
-// Save creates the AuthUserLocal in the database.
-func (_c *AuthUserLocalCreate) Save(ctx context.Context) (*AuthUserLocal, error) {
+// Save creates the UserAuthLocal in the database.
+func (_c *UserAuthLocalCreate) Save(ctx context.Context) (*UserAuthLocal, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *AuthUserLocalCreate) SaveX(ctx context.Context) *AuthUserLocal {
+func (_c *UserAuthLocalCreate) SaveX(ctx context.Context) *UserAuthLocal {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -143,72 +143,72 @@ func (_c *AuthUserLocalCreate) SaveX(ctx context.Context) *AuthUserLocal {
 }
 
 // Exec executes the query.
-func (_c *AuthUserLocalCreate) Exec(ctx context.Context) error {
+func (_c *UserAuthLocalCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *AuthUserLocalCreate) ExecX(ctx context.Context) {
+func (_c *UserAuthLocalCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *AuthUserLocalCreate) defaults() {
+func (_c *UserAuthLocalCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := authuserlocal.DefaultCreatedAt()
+		v := userauthlocal.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := authuserlocal.DefaultUpdatedAt()
+		v := userauthlocal.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := _c.mutation.MfaEnabled(); !ok {
-		v := authuserlocal.DefaultMfaEnabled
+		v := userauthlocal.DefaultMfaEnabled
 		_c.mutation.SetMfaEnabled(v)
 	}
 	if _, ok := _c.mutation.MfaSecretEncrypted(); !ok {
-		v := authuserlocal.DefaultMfaSecretEncrypted
+		v := userauthlocal.DefaultMfaSecretEncrypted
 		_c.mutation.SetMfaSecretEncrypted(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *AuthUserLocalCreate) check() error {
+func (_c *UserAuthLocalCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "AuthUserLocal.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "UserAuthLocal.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "AuthUserLocal.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserAuthLocal.updated_at"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "AuthUserLocal.user_id"`)}
+		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserAuthLocal.user_id"`)}
 	}
 	if v, ok := _c.mutation.UserID(); ok {
-		if err := authuserlocal.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "AuthUserLocal.user_id": %w`, err)}
+		if err := userauthlocal.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "UserAuthLocal.user_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.PasswordHash(); !ok {
-		return &ValidationError{Name: "password_hash", err: errors.New(`lion: missing required field "AuthUserLocal.password_hash"`)}
+		return &ValidationError{Name: "password_hash", err: errors.New(`lion: missing required field "UserAuthLocal.password_hash"`)}
 	}
 	if v, ok := _c.mutation.PasswordHash(); ok {
-		if err := authuserlocal.PasswordHashValidator(v); err != nil {
-			return &ValidationError{Name: "password_hash", err: fmt.Errorf(`lion: validator failed for field "AuthUserLocal.password_hash": %w`, err)}
+		if err := userauthlocal.PasswordHashValidator(v); err != nil {
+			return &ValidationError{Name: "password_hash", err: fmt.Errorf(`lion: validator failed for field "UserAuthLocal.password_hash": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.MfaEnabled(); !ok {
-		return &ValidationError{Name: "mfa_enabled", err: errors.New(`lion: missing required field "AuthUserLocal.mfa_enabled"`)}
+		return &ValidationError{Name: "mfa_enabled", err: errors.New(`lion: missing required field "UserAuthLocal.mfa_enabled"`)}
 	}
 	if _, ok := _c.mutation.MfaSecretEncrypted(); !ok {
-		return &ValidationError{Name: "mfa_secret_encrypted", err: errors.New(`lion: missing required field "AuthUserLocal.mfa_secret_encrypted"`)}
+		return &ValidationError{Name: "mfa_secret_encrypted", err: errors.New(`lion: missing required field "UserAuthLocal.mfa_secret_encrypted"`)}
 	}
 	return nil
 }
 
-func (_c *AuthUserLocalCreate) sqlSave(ctx context.Context) (*AuthUserLocal, error) {
+func (_c *UserAuthLocalCreate) sqlSave(ctx context.Context) (*UserAuthLocal, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -226,71 +226,71 @@ func (_c *AuthUserLocalCreate) sqlSave(ctx context.Context) (*AuthUserLocal, err
 	return _node, nil
 }
 
-func (_c *AuthUserLocalCreate) createSpec() (*AuthUserLocal, *sqlgraph.CreateSpec) {
+func (_c *UserAuthLocalCreate) createSpec() (*UserAuthLocal, *sqlgraph.CreateSpec) {
 	var (
-		_node = &AuthUserLocal{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(authuserlocal.Table, sqlgraph.NewFieldSpec(authuserlocal.FieldID, field.TypeInt))
+		_node = &UserAuthLocal{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(userauthlocal.Table, sqlgraph.NewFieldSpec(userauthlocal.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(authuserlocal.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(userauthlocal.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(authuserlocal.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(userauthlocal.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(authuserlocal.FieldDeletedAt, field.TypeTime, value)
+		_spec.SetField(userauthlocal.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(authuserlocal.FieldUserID, field.TypeInt, value)
+		_spec.SetField(userauthlocal.FieldUserID, field.TypeInt, value)
 		_node.UserID = value
 	}
 	if value, ok := _c.mutation.PasswordHash(); ok {
-		_spec.SetField(authuserlocal.FieldPasswordHash, field.TypeBytes, value)
+		_spec.SetField(userauthlocal.FieldPasswordHash, field.TypeBytes, value)
 		_node.PasswordHash = value
 	}
 	if value, ok := _c.mutation.MfaEnabled(); ok {
-		_spec.SetField(authuserlocal.FieldMfaEnabled, field.TypeBool, value)
+		_spec.SetField(userauthlocal.FieldMfaEnabled, field.TypeBool, value)
 		_node.MfaEnabled = value
 	}
 	if value, ok := _c.mutation.MfaSecretEncrypted(); ok {
-		_spec.SetField(authuserlocal.FieldMfaSecretEncrypted, field.TypeBytes, value)
+		_spec.SetField(userauthlocal.FieldMfaSecretEncrypted, field.TypeBytes, value)
 		_node.MfaSecretEncrypted = value
 	}
 	if value, ok := _c.mutation.PasswordChangedAt(); ok {
-		_spec.SetField(authuserlocal.FieldPasswordChangedAt, field.TypeTime, value)
+		_spec.SetField(userauthlocal.FieldPasswordChangedAt, field.TypeTime, value)
 		_node.PasswordChangedAt = &value
 	}
 	if value, ok := _c.mutation.PasswordExpiresAt(); ok {
-		_spec.SetField(authuserlocal.FieldPasswordExpiresAt, field.TypeTime, value)
+		_spec.SetField(userauthlocal.FieldPasswordExpiresAt, field.TypeTime, value)
 		_node.PasswordExpiresAt = &value
 	}
 	return _node, _spec
 }
 
-// AuthUserLocalCreateBulk is the builder for creating many AuthUserLocal entities in bulk.
-type AuthUserLocalCreateBulk struct {
+// UserAuthLocalCreateBulk is the builder for creating many UserAuthLocal entities in bulk.
+type UserAuthLocalCreateBulk struct {
 	config
 	err      error
-	builders []*AuthUserLocalCreate
+	builders []*UserAuthLocalCreate
 }
 
-// Save creates the AuthUserLocal entities in the database.
-func (_c *AuthUserLocalCreateBulk) Save(ctx context.Context) ([]*AuthUserLocal, error) {
+// Save creates the UserAuthLocal entities in the database.
+func (_c *UserAuthLocalCreateBulk) Save(ctx context.Context) ([]*UserAuthLocal, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*AuthUserLocal, len(_c.builders))
+	nodes := make([]*UserAuthLocal, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*AuthUserLocalMutation)
+				mutation, ok := m.(*UserAuthLocalMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -337,7 +337,7 @@ func (_c *AuthUserLocalCreateBulk) Save(ctx context.Context) ([]*AuthUserLocal, 
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *AuthUserLocalCreateBulk) SaveX(ctx context.Context) []*AuthUserLocal {
+func (_c *UserAuthLocalCreateBulk) SaveX(ctx context.Context) []*UserAuthLocal {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -346,13 +346,13 @@ func (_c *AuthUserLocalCreateBulk) SaveX(ctx context.Context) []*AuthUserLocal {
 }
 
 // Exec executes the query.
-func (_c *AuthUserLocalCreateBulk) Exec(ctx context.Context) error {
+func (_c *UserAuthLocalCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *AuthUserLocalCreateBulk) ExecX(ctx context.Context) {
+func (_c *UserAuthLocalCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

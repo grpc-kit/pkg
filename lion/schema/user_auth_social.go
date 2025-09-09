@@ -8,13 +8,13 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// AuthUserSocial 存储通过 OIDC 等社交登录的用户信息
-type AuthUserSocial struct {
+// UserAuthSocial 存储通过 OIDC 等社交登录的用户信息
+type UserAuthSocial struct {
 	ent.Schema
 }
 
 // Fields of the table.
-func (AuthUserSocial) Fields() []ent.Field {
+func (UserAuthSocial) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("user_id").
 			Positive().
@@ -44,7 +44,7 @@ func (AuthUserSocial) Fields() []ent.Field {
 }
 
 // Edges of the table.
-func (AuthUserSocial) Edges() []ent.Edge {
+func (UserAuthSocial) Edges() []ent.Edge {
 	/*
 		return []ent.Edge{
 			edge.To("user", Users{}.Type).Unique().Required().Field("user_id"),
@@ -54,14 +54,14 @@ func (AuthUserSocial) Edges() []ent.Edge {
 }
 
 // Mixin of the table.
-func (AuthUserSocial) Mixin() []ent.Mixin {
+func (UserAuthSocial) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
 	}
 }
 
 // Indexes of the table.
-func (AuthUserSocial) Indexes() []ent.Index {
+func (UserAuthSocial) Indexes() []ent.Index {
 	return []ent.Index{
 		// 保证在相同平台下 provider 与 user_id 的组合唯一
 		index.Fields("user_id", "provider_name").Unique(),
@@ -69,8 +69,8 @@ func (AuthUserSocial) Indexes() []ent.Index {
 }
 
 // Annotations 自定义表名
-func (AuthUserSocial) Annotations() []schema.Annotation {
+func (UserAuthSocial) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_auth_user_social"},
+		entsql.Annotation{Table: "lion_user_auth_social"},
 	}
 }

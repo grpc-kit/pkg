@@ -21,30 +21,6 @@ func (f AuthProvidersFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.AuthProvidersMutation", m)
 }
 
-// The AuthUserLocalFunc type is an adapter to allow the use of ordinary
-// function as AuthUserLocal mutator.
-type AuthUserLocalFunc func(context.Context, *lion.AuthUserLocalMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f AuthUserLocalFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.AuthUserLocalMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.AuthUserLocalMutation", m)
-}
-
-// The AuthUserSocialFunc type is an adapter to allow the use of ordinary
-// function as AuthUserSocial mutator.
-type AuthUserSocialFunc func(context.Context, *lion.AuthUserSocialMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f AuthUserSocialFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.AuthUserSocialMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.AuthUserSocialMutation", m)
-}
-
 // The DemoFunc type is an adapter to allow the use of ordinary
 // function as Demo mutator.
 type DemoFunc func(context.Context, *lion.DemoMutation) (lion.Value, error)
@@ -199,6 +175,30 @@ func (f UserAttributesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.V
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserAttributesMutation", m)
+}
+
+// The UserAuthLocalFunc type is an adapter to allow the use of ordinary
+// function as UserAuthLocal mutator.
+type UserAuthLocalFunc func(context.Context, *lion.UserAuthLocalMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserAuthLocalFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.UserAuthLocalMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserAuthLocalMutation", m)
+}
+
+// The UserAuthSocialFunc type is an adapter to allow the use of ordinary
+// function as UserAuthSocial mutator.
+type UserAuthSocialFunc func(context.Context, *lion.UserAuthSocialMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserAuthSocialFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.UserAuthSocialMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserAuthSocialMutation", m)
 }
 
 // The UsersFunc type is an adapter to allow the use of ordinary

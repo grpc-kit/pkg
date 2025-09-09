@@ -13,8 +13,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/authproviders"
-	"github.com/grpc-kit/pkg/lion/authuserlocal"
-	"github.com/grpc-kit/pkg/lion/authusersocial"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
@@ -28,6 +26,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/roleusermapping"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/userattributes"
+	"github.com/grpc-kit/pkg/lion/userauthlocal"
+	"github.com/grpc-kit/pkg/lion/userauthsocial"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -90,8 +90,6 @@ func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			authproviders.Table:     authproviders.ValidColumn,
-			authuserlocal.Table:     authuserlocal.ValidColumn,
-			authusersocial.Table:    authusersocial.ValidColumn,
 			demo.Table:              demo.ValidColumn,
 			departmentleaders.Table: departmentleaders.ValidColumn,
 			departments.Table:       departments.ValidColumn,
@@ -105,6 +103,8 @@ func checkColumn(t, c string) error {
 			roles.Table:             roles.ValidColumn,
 			securitykeys.Table:      securitykeys.ValidColumn,
 			userattributes.Table:    userattributes.ValidColumn,
+			userauthlocal.Table:     userauthlocal.ValidColumn,
+			userauthsocial.Table:    userauthsocial.ValidColumn,
 			users.Table:             users.ValidColumn,
 		})
 	})
