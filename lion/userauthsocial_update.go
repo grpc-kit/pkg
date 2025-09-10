@@ -34,26 +34,6 @@ func (_u *UserAuthSocialUpdate) SetUpdatedAt(v time.Time) *UserAuthSocialUpdate 
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *UserAuthSocialUpdate) SetDeletedAt(v time.Time) *UserAuthSocialUpdate {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *UserAuthSocialUpdate) SetNillableDeletedAt(v *time.Time) *UserAuthSocialUpdate {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *UserAuthSocialUpdate) ClearDeletedAt() *UserAuthSocialUpdate {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetProviderName sets the "provider_name" field.
 func (_u *UserAuthSocialUpdate) SetProviderName(v string) *UserAuthSocialUpdate {
 	_u.mutation.SetProviderName(v)
@@ -217,12 +197,6 @@ func (_u *UserAuthSocialUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userauthsocial.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(userauthsocial.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(userauthsocial.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.ProviderName(); ok {
 		_spec.SetField(userauthsocial.FieldProviderName, field.TypeString, value)
 	}
@@ -276,26 +250,6 @@ type UserAuthSocialUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *UserAuthSocialUpdateOne) SetUpdatedAt(v time.Time) *UserAuthSocialUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
-	return _u
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *UserAuthSocialUpdateOne) SetDeletedAt(v time.Time) *UserAuthSocialUpdateOne {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *UserAuthSocialUpdateOne) SetNillableDeletedAt(v *time.Time) *UserAuthSocialUpdateOne {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *UserAuthSocialUpdateOne) ClearDeletedAt() *UserAuthSocialUpdateOne {
-	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -491,12 +445,6 @@ func (_u *UserAuthSocialUpdateOne) sqlSave(ctx context.Context) (_node *UserAuth
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userauthsocial.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(userauthsocial.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(userauthsocial.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.ProviderName(); ok {
 		_spec.SetField(userauthsocial.FieldProviderName, field.TypeString, value)

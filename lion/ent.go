@@ -14,16 +14,16 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/demo"
-	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/permissions"
-	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
-	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/rolegroups"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/roleusermapping"
+	"github.com/grpc-kit/pkg/lion/roleusers"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/userauthlocal"
@@ -89,23 +89,23 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			authproviders.Table:     authproviders.ValidColumn,
-			demo.Table:              demo.ValidColumn,
-			departmentleaders.Table: departmentleaders.ValidColumn,
-			departments.Table:       departments.ValidColumn,
-			groupusers.Table:        groupusers.ValidColumn,
-			groups.Table:            groups.ValidColumn,
-			menus.Table:             menus.ValidColumn,
-			permissions.Table:       permissions.ValidColumn,
-			rolegroupmapping.Table:  rolegroupmapping.ValidColumn,
-			rolemenumapping.Table:   rolemenumapping.ValidColumn,
-			roleusermapping.Table:   roleusermapping.ValidColumn,
-			roles.Table:             roles.ValidColumn,
-			securitykeys.Table:      securitykeys.ValidColumn,
-			userattributes.Table:    userattributes.ValidColumn,
-			userauthlocal.Table:     userauthlocal.ValidColumn,
-			userauthsocial.Table:    userauthsocial.ValidColumn,
-			users.Table:             users.ValidColumn,
+			authproviders.Table:   authproviders.ValidColumn,
+			demo.Table:            demo.ValidColumn,
+			departmentusers.Table: departmentusers.ValidColumn,
+			departments.Table:     departments.ValidColumn,
+			groupusers.Table:      groupusers.ValidColumn,
+			groups.Table:          groups.ValidColumn,
+			menus.Table:           menus.ValidColumn,
+			permissions.Table:     permissions.ValidColumn,
+			rolegroups.Table:      rolegroups.ValidColumn,
+			rolemenus.Table:       rolemenus.ValidColumn,
+			roleusers.Table:       roleusers.ValidColumn,
+			roles.Table:           roles.ValidColumn,
+			securitykeys.Table:    securitykeys.ValidColumn,
+			userattributes.Table:  userattributes.ValidColumn,
+			userauthlocal.Table:   userauthlocal.ValidColumn,
+			userauthsocial.Table:  userauthsocial.ValidColumn,
+			users.Table:           users.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/menus"
-	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 )
 
 // MenusCreate is the builder for creating a Menus entity.
@@ -173,14 +173,14 @@ func (_c *MenusCreate) SetNillableHideChildrenInMenu(v *bool) *MenusCreate {
 	return _c
 }
 
-// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenuMapping entity by IDs.
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
 func (_c *MenusCreate) AddLionRoleMenuIDs(ids ...int) *MenusCreate {
 	_c.mutation.AddLionRoleMenuIDs(ids...)
 	return _c
 }
 
-// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenuMapping entity.
-func (_c *MenusCreate) AddLionRoleMenus(v ...*RoleMenuMapping) *MenusCreate {
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenus entity.
+func (_c *MenusCreate) AddLionRoleMenus(v ...*RoleMenus) *MenusCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -400,7 +400,7 @@ func (_c *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 			Columns: []string{menus.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

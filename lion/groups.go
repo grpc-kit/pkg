@@ -36,7 +36,7 @@ type Groups struct {
 // GroupsEdges holds the relations/edges for other nodes in the graph.
 type GroupsEdges struct {
 	// LionGroups holds the value of the lion_groups edge.
-	LionGroups []*RoleGroupMapping `json:"lion_groups,omitempty"`
+	LionGroups []*RoleGroups `json:"lion_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
@@ -44,7 +44,7 @@ type GroupsEdges struct {
 
 // LionGroupsOrErr returns the LionGroups value or an error if the edge
 // was not loaded in eager-loading.
-func (e GroupsEdges) LionGroupsOrErr() ([]*RoleGroupMapping, error) {
+func (e GroupsEdges) LionGroupsOrErr() ([]*RoleGroups, error) {
 	if e.loadedTypes[0] {
 		return e.LionGroups, nil
 	}
@@ -127,7 +127,7 @@ func (_m *Groups) Value(name string) (ent.Value, error) {
 }
 
 // QueryLionGroups queries the "lion_groups" edge of the Groups entity.
-func (_m *Groups) QueryLionGroups() *RoleGroupMappingQuery {
+func (_m *Groups) QueryLionGroups() *RoleGroupsQuery {
 	return NewGroupsClient(_m.config).QueryLionGroups(_m)
 }
 

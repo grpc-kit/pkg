@@ -31,24 +31,24 @@ const (
 	// Table holds the table name of the roles in the database.
 	Table = "lion_roles"
 	// LionRoleMenusTable is the table that holds the lion_role_menus relation/edge.
-	LionRoleMenusTable = "lion_role_menu_mapping"
-	// LionRoleMenusInverseTable is the table name for the RoleMenuMapping entity.
-	// It exists in this package in order to avoid circular dependency with the "rolemenumapping" package.
-	LionRoleMenusInverseTable = "lion_role_menu_mapping"
+	LionRoleMenusTable = "lion_role_menus"
+	// LionRoleMenusInverseTable is the table name for the RoleMenus entity.
+	// It exists in this package in order to avoid circular dependency with the "rolemenus" package.
+	LionRoleMenusInverseTable = "lion_role_menus"
 	// LionRoleMenusColumn is the table column denoting the lion_role_menus relation/edge.
 	LionRoleMenusColumn = "role_id"
 	// LionRoleUsersTable is the table that holds the lion_role_users relation/edge.
-	LionRoleUsersTable = "lion_role_user_mapping"
-	// LionRoleUsersInverseTable is the table name for the RoleUserMapping entity.
-	// It exists in this package in order to avoid circular dependency with the "roleusermapping" package.
-	LionRoleUsersInverseTable = "lion_role_user_mapping"
+	LionRoleUsersTable = "lion_role_users"
+	// LionRoleUsersInverseTable is the table name for the RoleUsers entity.
+	// It exists in this package in order to avoid circular dependency with the "roleusers" package.
+	LionRoleUsersInverseTable = "lion_role_users"
 	// LionRoleUsersColumn is the table column denoting the lion_role_users relation/edge.
 	LionRoleUsersColumn = "role_id"
 	// LionRoleGroupsTable is the table that holds the lion_role_groups relation/edge.
-	LionRoleGroupsTable = "lion_role_group_mapping"
-	// LionRoleGroupsInverseTable is the table name for the RoleGroupMapping entity.
-	// It exists in this package in order to avoid circular dependency with the "rolegroupmapping" package.
-	LionRoleGroupsInverseTable = "lion_role_group_mapping"
+	LionRoleGroupsTable = "lion_role_groups"
+	// LionRoleGroupsInverseTable is the table name for the RoleGroups entity.
+	// It exists in this package in order to avoid circular dependency with the "rolegroups" package.
+	LionRoleGroupsInverseTable = "lion_role_groups"
 	// LionRoleGroupsColumn is the table column denoting the lion_role_groups relation/edge.
 	LionRoleGroupsColumn = "role_id"
 )

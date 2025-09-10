@@ -7,7 +7,7 @@ import (
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/menus"
-	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/rpc"
 )
@@ -88,12 +88,12 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 	}
 
 	// 根据用户组 ID 列表获取菜单
-	mins, err := a.config.db.RoleMenuMapping.Query().
+	mins, err := a.config.db.RoleMenus.Query().
 		Select(
-			rolemenumapping.FieldMenuID,
+			rolemenus.FieldMenuID,
 		).
 		Where(
-			rolemenumapping.RoleIDIn(gids...),
+			rolemenus.RoleIDIn(gids...),
 		).
 		All(ctx)
 	if err != nil {

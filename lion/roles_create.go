@@ -10,10 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
-	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/rolegroups"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/roleusermapping"
+	"github.com/grpc-kit/pkg/lion/roleusers"
 )
 
 // RolesCreate is the builder for creating a Roles entity.
@@ -71,14 +71,14 @@ func (_c *RolesCreate) SetNillableDescription(v *string) *RolesCreate {
 	return _c
 }
 
-// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenuMapping entity by IDs.
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
 func (_c *RolesCreate) AddLionRoleMenuIDs(ids ...int) *RolesCreate {
 	_c.mutation.AddLionRoleMenuIDs(ids...)
 	return _c
 }
 
-// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenuMapping entity.
-func (_c *RolesCreate) AddLionRoleMenus(v ...*RoleMenuMapping) *RolesCreate {
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenus entity.
+func (_c *RolesCreate) AddLionRoleMenus(v ...*RoleMenus) *RolesCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -86,14 +86,14 @@ func (_c *RolesCreate) AddLionRoleMenus(v ...*RoleMenuMapping) *RolesCreate {
 	return _c.AddLionRoleMenuIDs(ids...)
 }
 
-// AddLionRoleUserIDs adds the "lion_role_users" edge to the RoleUserMapping entity by IDs.
+// AddLionRoleUserIDs adds the "lion_role_users" edge to the RoleUsers entity by IDs.
 func (_c *RolesCreate) AddLionRoleUserIDs(ids ...int) *RolesCreate {
 	_c.mutation.AddLionRoleUserIDs(ids...)
 	return _c
 }
 
-// AddLionRoleUsers adds the "lion_role_users" edges to the RoleUserMapping entity.
-func (_c *RolesCreate) AddLionRoleUsers(v ...*RoleUserMapping) *RolesCreate {
+// AddLionRoleUsers adds the "lion_role_users" edges to the RoleUsers entity.
+func (_c *RolesCreate) AddLionRoleUsers(v ...*RoleUsers) *RolesCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -101,14 +101,14 @@ func (_c *RolesCreate) AddLionRoleUsers(v ...*RoleUserMapping) *RolesCreate {
 	return _c.AddLionRoleUserIDs(ids...)
 }
 
-// AddLionRoleGroupIDs adds the "lion_role_groups" edge to the RoleGroupMapping entity by IDs.
+// AddLionRoleGroupIDs adds the "lion_role_groups" edge to the RoleGroups entity by IDs.
 func (_c *RolesCreate) AddLionRoleGroupIDs(ids ...int) *RolesCreate {
 	_c.mutation.AddLionRoleGroupIDs(ids...)
 	return _c
 }
 
-// AddLionRoleGroups adds the "lion_role_groups" edges to the RoleGroupMapping entity.
-func (_c *RolesCreate) AddLionRoleGroups(v ...*RoleGroupMapping) *RolesCreate {
+// AddLionRoleGroups adds the "lion_role_groups" edges to the RoleGroups entity.
+func (_c *RolesCreate) AddLionRoleGroups(v ...*RoleGroups) *RolesCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -234,7 +234,7 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 			Columns: []string{roles.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -250,7 +250,7 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 			Columns: []string{roles.LionRoleUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -266,7 +266,7 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 			Columns: []string{roles.LionRoleGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroupmapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -617,7 +617,7 @@ func HasLionRoleMenus() predicate.Menus {
 }
 
 // HasLionRoleMenusWith applies the HasEdge predicate on the "lion_role_menus" edge with a given conditions (other predicates).
-func HasLionRoleMenusWith(preds ...predicate.RoleMenuMapping) predicate.Menus {
+func HasLionRoleMenusWith(preds ...predicate.RoleMenus) predicate.Menus {
 	return predicate.Menus(func(s *sql.Selector) {
 		step := newLionRoleMenusStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

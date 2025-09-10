@@ -56,7 +56,7 @@ func (UserAuthSocial) Edges() []ent.Edge {
 // Mixin of the table.
 func (UserAuthSocial) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixin{},
+		TimeMixinWithoutDeleted{},
 	}
 }
 

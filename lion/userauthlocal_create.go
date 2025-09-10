@@ -48,20 +48,6 @@ func (_c *UserAuthLocalCreate) SetNillableUpdatedAt(v *time.Time) *UserAuthLocal
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *UserAuthLocalCreate) SetDeletedAt(v time.Time) *UserAuthLocalCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *UserAuthLocalCreate) SetNillableDeletedAt(v *time.Time) *UserAuthLocalCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetUserID sets the "user_id" field.
 func (_c *UserAuthLocalCreate) SetUserID(v int) *UserAuthLocalCreate {
 	_c.mutation.SetUserID(v)
@@ -238,10 +224,6 @@ func (_c *UserAuthLocalCreate) createSpec() (*UserAuthLocal, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(userauthlocal.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
-	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(userauthlocal.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.UserID(); ok {
 		_spec.SetField(userauthlocal.FieldUserID, field.TypeInt, value)

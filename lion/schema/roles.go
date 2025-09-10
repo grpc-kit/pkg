@@ -34,9 +34,9 @@ func (Roles) Fields() []ent.Field {
 func (Roles) Edges() []ent.Edge {
 	return []ent.Edge{
 		// 一个 Role 可以对应多个 RoleMenu (中间实体)
-		edge.To("lion_role_menus", RoleMenuMapping.Type),
-		edge.To("lion_role_users", RoleUserMapping.Type),
-		edge.To("lion_role_groups", RoleGroupMapping.Type),
+		edge.To("lion_role_menus", RoleMenus.Type),
+		edge.To("lion_role_users", RoleUsers.Type),
+		edge.To("lion_role_groups", RoleGroups.Type),
 	}
 }
 

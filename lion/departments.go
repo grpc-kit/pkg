@@ -39,20 +39,20 @@ type Departments struct {
 
 // DepartmentsEdges holds the relations/edges for other nodes in the graph.
 type DepartmentsEdges struct {
-	// LionDepartmentLeaders holds the value of the lion_department_leaders edge.
-	LionDepartmentLeaders []*DepartmentLeaders `json:"lion_department_leaders,omitempty"`
+	// LionDepartmentUsers holds the value of the lion_department_users edge.
+	LionDepartmentUsers []*DepartmentUsers `json:"lion_department_users,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// LionDepartmentLeadersOrErr returns the LionDepartmentLeaders value or an error if the edge
+// LionDepartmentUsersOrErr returns the LionDepartmentUsers value or an error if the edge
 // was not loaded in eager-loading.
-func (e DepartmentsEdges) LionDepartmentLeadersOrErr() ([]*DepartmentLeaders, error) {
+func (e DepartmentsEdges) LionDepartmentUsersOrErr() ([]*DepartmentUsers, error) {
 	if e.loadedTypes[0] {
-		return e.LionDepartmentLeaders, nil
+		return e.LionDepartmentUsers, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_department_leaders"}
+	return nil, &NotLoadedError{edge: "lion_department_users"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -142,9 +142,9 @@ func (_m *Departments) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionDepartmentLeaders queries the "lion_department_leaders" edge of the Departments entity.
-func (_m *Departments) QueryLionDepartmentLeaders() *DepartmentLeadersQuery {
-	return NewDepartmentsClient(_m.config).QueryLionDepartmentLeaders(_m)
+// QueryLionDepartmentUsers queries the "lion_department_users" edge of the Departments entity.
+func (_m *Departments) QueryLionDepartmentUsers() *DepartmentUsersQuery {
+	return NewDepartmentsClient(_m.config).QueryLionDepartmentUsers(_m)
 }
 
 // Update returns a builder for updating this Departments.

@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 )
 
 // MenusUpdate is the builder for updating Menus entities.
@@ -196,14 +196,14 @@ func (_u *MenusUpdate) SetNillableHideChildrenInMenu(v *bool) *MenusUpdate {
 	return _u
 }
 
-// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenuMapping entity by IDs.
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
 func (_u *MenusUpdate) AddLionRoleMenuIDs(ids ...int) *MenusUpdate {
 	_u.mutation.AddLionRoleMenuIDs(ids...)
 	return _u
 }
 
-// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenuMapping entity.
-func (_u *MenusUpdate) AddLionRoleMenus(v ...*RoleMenuMapping) *MenusUpdate {
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenus entity.
+func (_u *MenusUpdate) AddLionRoleMenus(v ...*RoleMenus) *MenusUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -216,20 +216,20 @@ func (_u *MenusUpdate) Mutation() *MenusMutation {
 	return _u.mutation
 }
 
-// ClearLionRoleMenus clears all "lion_role_menus" edges to the RoleMenuMapping entity.
+// ClearLionRoleMenus clears all "lion_role_menus" edges to the RoleMenus entity.
 func (_u *MenusUpdate) ClearLionRoleMenus() *MenusUpdate {
 	_u.mutation.ClearLionRoleMenus()
 	return _u
 }
 
-// RemoveLionRoleMenuIDs removes the "lion_role_menus" edge to RoleMenuMapping entities by IDs.
+// RemoveLionRoleMenuIDs removes the "lion_role_menus" edge to RoleMenus entities by IDs.
 func (_u *MenusUpdate) RemoveLionRoleMenuIDs(ids ...int) *MenusUpdate {
 	_u.mutation.RemoveLionRoleMenuIDs(ids...)
 	return _u
 }
 
-// RemoveLionRoleMenus removes "lion_role_menus" edges to RoleMenuMapping entities.
-func (_u *MenusUpdate) RemoveLionRoleMenus(v ...*RoleMenuMapping) *MenusUpdate {
+// RemoveLionRoleMenus removes "lion_role_menus" edges to RoleMenus entities.
+func (_u *MenusUpdate) RemoveLionRoleMenus(v ...*RoleMenus) *MenusUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -355,7 +355,7 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{menus.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -368,7 +368,7 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{menus.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -384,7 +384,7 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{menus.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -579,14 +579,14 @@ func (_u *MenusUpdateOne) SetNillableHideChildrenInMenu(v *bool) *MenusUpdateOne
 	return _u
 }
 
-// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenuMapping entity by IDs.
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
 func (_u *MenusUpdateOne) AddLionRoleMenuIDs(ids ...int) *MenusUpdateOne {
 	_u.mutation.AddLionRoleMenuIDs(ids...)
 	return _u
 }
 
-// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenuMapping entity.
-func (_u *MenusUpdateOne) AddLionRoleMenus(v ...*RoleMenuMapping) *MenusUpdateOne {
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenus entity.
+func (_u *MenusUpdateOne) AddLionRoleMenus(v ...*RoleMenus) *MenusUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -599,20 +599,20 @@ func (_u *MenusUpdateOne) Mutation() *MenusMutation {
 	return _u.mutation
 }
 
-// ClearLionRoleMenus clears all "lion_role_menus" edges to the RoleMenuMapping entity.
+// ClearLionRoleMenus clears all "lion_role_menus" edges to the RoleMenus entity.
 func (_u *MenusUpdateOne) ClearLionRoleMenus() *MenusUpdateOne {
 	_u.mutation.ClearLionRoleMenus()
 	return _u
 }
 
-// RemoveLionRoleMenuIDs removes the "lion_role_menus" edge to RoleMenuMapping entities by IDs.
+// RemoveLionRoleMenuIDs removes the "lion_role_menus" edge to RoleMenus entities by IDs.
 func (_u *MenusUpdateOne) RemoveLionRoleMenuIDs(ids ...int) *MenusUpdateOne {
 	_u.mutation.RemoveLionRoleMenuIDs(ids...)
 	return _u
 }
 
-// RemoveLionRoleMenus removes "lion_role_menus" edges to RoleMenuMapping entities.
-func (_u *MenusUpdateOne) RemoveLionRoleMenus(v ...*RoleMenuMapping) *MenusUpdateOne {
+// RemoveLionRoleMenus removes "lion_role_menus" edges to RoleMenus entities.
+func (_u *MenusUpdateOne) RemoveLionRoleMenus(v ...*RoleMenus) *MenusUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -768,7 +768,7 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 			Columns: []string{menus.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -781,7 +781,7 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 			Columns: []string{menus.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -797,7 +797,7 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 			Columns: []string{menus.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

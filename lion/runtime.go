@@ -7,16 +7,16 @@ import (
 
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/demo"
-	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/permissions"
-	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
-	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/rolegroups"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/roleusermapping"
+	"github.com/grpc-kit/pkg/lion/roleusers"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/userattributes"
@@ -75,21 +75,21 @@ func init() {
 	demoDescName := demoFields[0].Descriptor()
 	// demo.DefaultName holds the default value on creation for the name field.
 	demo.DefaultName = demoDescName.Default.(string)
-	departmentleadersMixin := schema.DepartmentLeaders{}.Mixin()
-	departmentleadersMixinFields0 := departmentleadersMixin[0].Fields()
-	_ = departmentleadersMixinFields0
-	departmentleadersFields := schema.DepartmentLeaders{}.Fields()
-	_ = departmentleadersFields
-	// departmentleadersDescCreatedAt is the schema descriptor for created_at field.
-	departmentleadersDescCreatedAt := departmentleadersMixinFields0[0].Descriptor()
-	// departmentleaders.DefaultCreatedAt holds the default value on creation for the created_at field.
-	departmentleaders.DefaultCreatedAt = departmentleadersDescCreatedAt.Default.(func() time.Time)
-	// departmentleadersDescUpdatedAt is the schema descriptor for updated_at field.
-	departmentleadersDescUpdatedAt := departmentleadersMixinFields0[1].Descriptor()
-	// departmentleaders.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	departmentleaders.DefaultUpdatedAt = departmentleadersDescUpdatedAt.Default.(func() time.Time)
-	// departmentleaders.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	departmentleaders.UpdateDefaultUpdatedAt = departmentleadersDescUpdatedAt.UpdateDefault.(func() time.Time)
+	departmentusersMixin := schema.DepartmentUsers{}.Mixin()
+	departmentusersMixinFields0 := departmentusersMixin[0].Fields()
+	_ = departmentusersMixinFields0
+	departmentusersFields := schema.DepartmentUsers{}.Fields()
+	_ = departmentusersFields
+	// departmentusersDescCreatedAt is the schema descriptor for created_at field.
+	departmentusersDescCreatedAt := departmentusersMixinFields0[0].Descriptor()
+	// departmentusers.DefaultCreatedAt holds the default value on creation for the created_at field.
+	departmentusers.DefaultCreatedAt = departmentusersDescCreatedAt.Default.(func() time.Time)
+	// departmentusersDescUpdatedAt is the schema descriptor for updated_at field.
+	departmentusersDescUpdatedAt := departmentusersMixinFields0[1].Descriptor()
+	// departmentusers.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	departmentusers.DefaultUpdatedAt = departmentusersDescUpdatedAt.Default.(func() time.Time)
+	// departmentusers.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	departmentusers.UpdateDefaultUpdatedAt = departmentusersDescUpdatedAt.UpdateDefault.(func() time.Time)
 	departmentsMixin := schema.Departments{}.Mixin()
 	departmentsMixinFields0 := departmentsMixin[0].Fields()
 	_ = departmentsMixinFields0
@@ -323,75 +323,75 @@ func init() {
 			return nil
 		}
 	}()
-	rolegroupmappingMixin := schema.RoleGroupMapping{}.Mixin()
-	rolegroupmappingMixinFields0 := rolegroupmappingMixin[0].Fields()
-	_ = rolegroupmappingMixinFields0
-	rolegroupmappingFields := schema.RoleGroupMapping{}.Fields()
-	_ = rolegroupmappingFields
-	// rolegroupmappingDescCreatedAt is the schema descriptor for created_at field.
-	rolegroupmappingDescCreatedAt := rolegroupmappingMixinFields0[0].Descriptor()
-	// rolegroupmapping.DefaultCreatedAt holds the default value on creation for the created_at field.
-	rolegroupmapping.DefaultCreatedAt = rolegroupmappingDescCreatedAt.Default.(func() time.Time)
-	// rolegroupmappingDescUpdatedAt is the schema descriptor for updated_at field.
-	rolegroupmappingDescUpdatedAt := rolegroupmappingMixinFields0[1].Descriptor()
-	// rolegroupmapping.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	rolegroupmapping.DefaultUpdatedAt = rolegroupmappingDescUpdatedAt.Default.(func() time.Time)
-	// rolegroupmapping.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	rolegroupmapping.UpdateDefaultUpdatedAt = rolegroupmappingDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// rolegroupmappingDescRoleID is the schema descriptor for role_id field.
-	rolegroupmappingDescRoleID := rolegroupmappingFields[0].Descriptor()
-	// rolegroupmapping.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
-	rolegroupmapping.RoleIDValidator = rolegroupmappingDescRoleID.Validators[0].(func(int) error)
-	// rolegroupmappingDescGroupID is the schema descriptor for group_id field.
-	rolegroupmappingDescGroupID := rolegroupmappingFields[1].Descriptor()
-	// rolegroupmapping.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
-	rolegroupmapping.GroupIDValidator = rolegroupmappingDescGroupID.Validators[0].(func(int) error)
-	rolemenumappingMixin := schema.RoleMenuMapping{}.Mixin()
-	rolemenumappingMixinFields0 := rolemenumappingMixin[0].Fields()
-	_ = rolemenumappingMixinFields0
-	rolemenumappingFields := schema.RoleMenuMapping{}.Fields()
-	_ = rolemenumappingFields
-	// rolemenumappingDescCreatedAt is the schema descriptor for created_at field.
-	rolemenumappingDescCreatedAt := rolemenumappingMixinFields0[0].Descriptor()
-	// rolemenumapping.DefaultCreatedAt holds the default value on creation for the created_at field.
-	rolemenumapping.DefaultCreatedAt = rolemenumappingDescCreatedAt.Default.(func() time.Time)
-	// rolemenumappingDescUpdatedAt is the schema descriptor for updated_at field.
-	rolemenumappingDescUpdatedAt := rolemenumappingMixinFields0[1].Descriptor()
-	// rolemenumapping.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	rolemenumapping.DefaultUpdatedAt = rolemenumappingDescUpdatedAt.Default.(func() time.Time)
-	// rolemenumapping.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	rolemenumapping.UpdateDefaultUpdatedAt = rolemenumappingDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// rolemenumappingDescRoleID is the schema descriptor for role_id field.
-	rolemenumappingDescRoleID := rolemenumappingFields[0].Descriptor()
-	// rolemenumapping.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
-	rolemenumapping.RoleIDValidator = rolemenumappingDescRoleID.Validators[0].(func(int) error)
-	// rolemenumappingDescMenuID is the schema descriptor for menu_id field.
-	rolemenumappingDescMenuID := rolemenumappingFields[1].Descriptor()
-	// rolemenumapping.MenuIDValidator is a validator for the "menu_id" field. It is called by the builders before save.
-	rolemenumapping.MenuIDValidator = rolemenumappingDescMenuID.Validators[0].(func(int) error)
-	roleusermappingMixin := schema.RoleUserMapping{}.Mixin()
-	roleusermappingMixinFields0 := roleusermappingMixin[0].Fields()
-	_ = roleusermappingMixinFields0
-	roleusermappingFields := schema.RoleUserMapping{}.Fields()
-	_ = roleusermappingFields
-	// roleusermappingDescCreatedAt is the schema descriptor for created_at field.
-	roleusermappingDescCreatedAt := roleusermappingMixinFields0[0].Descriptor()
-	// roleusermapping.DefaultCreatedAt holds the default value on creation for the created_at field.
-	roleusermapping.DefaultCreatedAt = roleusermappingDescCreatedAt.Default.(func() time.Time)
-	// roleusermappingDescUpdatedAt is the schema descriptor for updated_at field.
-	roleusermappingDescUpdatedAt := roleusermappingMixinFields0[1].Descriptor()
-	// roleusermapping.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	roleusermapping.DefaultUpdatedAt = roleusermappingDescUpdatedAt.Default.(func() time.Time)
-	// roleusermapping.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	roleusermapping.UpdateDefaultUpdatedAt = roleusermappingDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// roleusermappingDescRoleID is the schema descriptor for role_id field.
-	roleusermappingDescRoleID := roleusermappingFields[0].Descriptor()
-	// roleusermapping.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
-	roleusermapping.RoleIDValidator = roleusermappingDescRoleID.Validators[0].(func(int) error)
-	// roleusermappingDescUserID is the schema descriptor for user_id field.
-	roleusermappingDescUserID := roleusermappingFields[1].Descriptor()
-	// roleusermapping.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	roleusermapping.UserIDValidator = roleusermappingDescUserID.Validators[0].(func(int) error)
+	rolegroupsMixin := schema.RoleGroups{}.Mixin()
+	rolegroupsMixinFields0 := rolegroupsMixin[0].Fields()
+	_ = rolegroupsMixinFields0
+	rolegroupsFields := schema.RoleGroups{}.Fields()
+	_ = rolegroupsFields
+	// rolegroupsDescCreatedAt is the schema descriptor for created_at field.
+	rolegroupsDescCreatedAt := rolegroupsMixinFields0[0].Descriptor()
+	// rolegroups.DefaultCreatedAt holds the default value on creation for the created_at field.
+	rolegroups.DefaultCreatedAt = rolegroupsDescCreatedAt.Default.(func() time.Time)
+	// rolegroupsDescUpdatedAt is the schema descriptor for updated_at field.
+	rolegroupsDescUpdatedAt := rolegroupsMixinFields0[1].Descriptor()
+	// rolegroups.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	rolegroups.DefaultUpdatedAt = rolegroupsDescUpdatedAt.Default.(func() time.Time)
+	// rolegroups.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	rolegroups.UpdateDefaultUpdatedAt = rolegroupsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// rolegroupsDescRoleID is the schema descriptor for role_id field.
+	rolegroupsDescRoleID := rolegroupsFields[0].Descriptor()
+	// rolegroups.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	rolegroups.RoleIDValidator = rolegroupsDescRoleID.Validators[0].(func(int) error)
+	// rolegroupsDescGroupID is the schema descriptor for group_id field.
+	rolegroupsDescGroupID := rolegroupsFields[1].Descriptor()
+	// rolegroups.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
+	rolegroups.GroupIDValidator = rolegroupsDescGroupID.Validators[0].(func(int) error)
+	rolemenusMixin := schema.RoleMenus{}.Mixin()
+	rolemenusMixinFields0 := rolemenusMixin[0].Fields()
+	_ = rolemenusMixinFields0
+	rolemenusFields := schema.RoleMenus{}.Fields()
+	_ = rolemenusFields
+	// rolemenusDescCreatedAt is the schema descriptor for created_at field.
+	rolemenusDescCreatedAt := rolemenusMixinFields0[0].Descriptor()
+	// rolemenus.DefaultCreatedAt holds the default value on creation for the created_at field.
+	rolemenus.DefaultCreatedAt = rolemenusDescCreatedAt.Default.(func() time.Time)
+	// rolemenusDescUpdatedAt is the schema descriptor for updated_at field.
+	rolemenusDescUpdatedAt := rolemenusMixinFields0[1].Descriptor()
+	// rolemenus.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	rolemenus.DefaultUpdatedAt = rolemenusDescUpdatedAt.Default.(func() time.Time)
+	// rolemenus.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	rolemenus.UpdateDefaultUpdatedAt = rolemenusDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// rolemenusDescRoleID is the schema descriptor for role_id field.
+	rolemenusDescRoleID := rolemenusFields[0].Descriptor()
+	// rolemenus.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	rolemenus.RoleIDValidator = rolemenusDescRoleID.Validators[0].(func(int) error)
+	// rolemenusDescMenuID is the schema descriptor for menu_id field.
+	rolemenusDescMenuID := rolemenusFields[1].Descriptor()
+	// rolemenus.MenuIDValidator is a validator for the "menu_id" field. It is called by the builders before save.
+	rolemenus.MenuIDValidator = rolemenusDescMenuID.Validators[0].(func(int) error)
+	roleusersMixin := schema.RoleUsers{}.Mixin()
+	roleusersMixinFields0 := roleusersMixin[0].Fields()
+	_ = roleusersMixinFields0
+	roleusersFields := schema.RoleUsers{}.Fields()
+	_ = roleusersFields
+	// roleusersDescCreatedAt is the schema descriptor for created_at field.
+	roleusersDescCreatedAt := roleusersMixinFields0[0].Descriptor()
+	// roleusers.DefaultCreatedAt holds the default value on creation for the created_at field.
+	roleusers.DefaultCreatedAt = roleusersDescCreatedAt.Default.(func() time.Time)
+	// roleusersDescUpdatedAt is the schema descriptor for updated_at field.
+	roleusersDescUpdatedAt := roleusersMixinFields0[1].Descriptor()
+	// roleusers.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	roleusers.DefaultUpdatedAt = roleusersDescUpdatedAt.Default.(func() time.Time)
+	// roleusers.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	roleusers.UpdateDefaultUpdatedAt = roleusersDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// roleusersDescRoleID is the schema descriptor for role_id field.
+	roleusersDescRoleID := roleusersFields[0].Descriptor()
+	// roleusers.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	roleusers.RoleIDValidator = roleusersDescRoleID.Validators[0].(func(int) error)
+	// roleusersDescUserID is the schema descriptor for user_id field.
+	roleusersDescUserID := roleusersFields[1].Descriptor()
+	// roleusers.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	roleusers.UserIDValidator = roleusersDescUserID.Validators[0].(func(int) error)
 	rolesMixin := schema.Roles{}.Mixin()
 	rolesMixinFields0 := rolesMixin[0].Fields()
 	_ = rolesMixinFields0

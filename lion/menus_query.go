@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 )
 
 // MenusQuery is the builder for querying Menus entities.
@@ -24,7 +24,7 @@ type MenusQuery struct {
 	order             []menus.OrderOption
 	inters            []Interceptor
 	predicates        []predicate.Menus
-	withLionRoleMenus *RoleMenuMappingQuery
+	withLionRoleMenus *RoleMenusQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,8 +62,8 @@ func (_q *MenusQuery) Order(o ...menus.OrderOption) *MenusQuery {
 }
 
 // QueryLionRoleMenus chains the current query on the "lion_role_menus" edge.
-func (_q *MenusQuery) QueryLionRoleMenus() *RoleMenuMappingQuery {
-	query := (&RoleMenuMappingClient{config: _q.config}).Query()
+func (_q *MenusQuery) QueryLionRoleMenus() *RoleMenusQuery {
+	query := (&RoleMenusClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -74,7 +74,7 @@ func (_q *MenusQuery) QueryLionRoleMenus() *RoleMenuMappingQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(menus.Table, menus.FieldID, selector),
-			sqlgraph.To(rolemenumapping.Table, rolemenumapping.FieldID),
+			sqlgraph.To(rolemenus.Table, rolemenus.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, menus.LionRoleMenusTable, menus.LionRoleMenusColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
@@ -284,8 +284,8 @@ func (_q *MenusQuery) Clone() *MenusQuery {
 
 // WithLionRoleMenus tells the query-builder to eager-load the nodes that are connected to
 // the "lion_role_menus" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *MenusQuery) WithLionRoleMenus(opts ...func(*RoleMenuMappingQuery)) *MenusQuery {
-	query := (&RoleMenuMappingClient{config: _q.config}).Query()
+func (_q *MenusQuery) WithLionRoleMenus(opts ...func(*RoleMenusQuery)) *MenusQuery {
+	query := (&RoleMenusClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -395,15 +395,15 @@ func (_q *MenusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Menus,
 	}
 	if query := _q.withLionRoleMenus; query != nil {
 		if err := _q.loadLionRoleMenus(ctx, query, nodes,
-			func(n *Menus) { n.Edges.LionRoleMenus = []*RoleMenuMapping{} },
-			func(n *Menus, e *RoleMenuMapping) { n.Edges.LionRoleMenus = append(n.Edges.LionRoleMenus, e) }); err != nil {
+			func(n *Menus) { n.Edges.LionRoleMenus = []*RoleMenus{} },
+			func(n *Menus, e *RoleMenus) { n.Edges.LionRoleMenus = append(n.Edges.LionRoleMenus, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *MenusQuery) loadLionRoleMenus(ctx context.Context, query *RoleMenuMappingQuery, nodes []*Menus, init func(*Menus), assign func(*Menus, *RoleMenuMapping)) error {
+func (_q *MenusQuery) loadLionRoleMenus(ctx context.Context, query *RoleMenusQuery, nodes []*Menus, init func(*Menus), assign func(*Menus, *RoleMenus)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Menus)
 	for i := range nodes {
@@ -414,9 +414,9 @@ func (_q *MenusQuery) loadLionRoleMenus(ctx context.Context, query *RoleMenuMapp
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(rolemenumapping.FieldMenuID)
+		query.ctx.AppendFieldOnce(rolemenus.FieldMenuID)
 	}
-	query.Where(predicate.RoleMenuMapping(func(s *sql.Selector) {
+	query.Where(predicate.RoleMenus(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(menus.LionRoleMenusColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)

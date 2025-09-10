@@ -297,7 +297,7 @@ func HasLionRoleMenus() predicate.Roles {
 }
 
 // HasLionRoleMenusWith applies the HasEdge predicate on the "lion_role_menus" edge with a given conditions (other predicates).
-func HasLionRoleMenusWith(preds ...predicate.RoleMenuMapping) predicate.Roles {
+func HasLionRoleMenusWith(preds ...predicate.RoleMenus) predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
 		step := newLionRoleMenusStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
@@ -320,7 +320,7 @@ func HasLionRoleUsers() predicate.Roles {
 }
 
 // HasLionRoleUsersWith applies the HasEdge predicate on the "lion_role_users" edge with a given conditions (other predicates).
-func HasLionRoleUsersWith(preds ...predicate.RoleUserMapping) predicate.Roles {
+func HasLionRoleUsersWith(preds ...predicate.RoleUsers) predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
 		step := newLionRoleUsersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
@@ -343,7 +343,7 @@ func HasLionRoleGroups() predicate.Roles {
 }
 
 // HasLionRoleGroupsWith applies the HasEdge predicate on the "lion_role_groups" edge with a given conditions (other predicates).
-func HasLionRoleGroupsWith(preds ...predicate.RoleGroupMapping) predicate.Roles {
+func HasLionRoleGroupsWith(preds ...predicate.RoleGroups) predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
 		step := newLionRoleGroupsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

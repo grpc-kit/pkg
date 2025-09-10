@@ -50,7 +50,7 @@ type Menus struct {
 // MenusEdges holds the relations/edges for other nodes in the graph.
 type MenusEdges struct {
 	// LionRoleMenus holds the value of the lion_role_menus edge.
-	LionRoleMenus []*RoleMenuMapping `json:"lion_role_menus,omitempty"`
+	LionRoleMenus []*RoleMenus `json:"lion_role_menus,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
@@ -58,7 +58,7 @@ type MenusEdges struct {
 
 // LionRoleMenusOrErr returns the LionRoleMenus value or an error if the edge
 // was not loaded in eager-loading.
-func (e MenusEdges) LionRoleMenusOrErr() ([]*RoleMenuMapping, error) {
+func (e MenusEdges) LionRoleMenusOrErr() ([]*RoleMenus, error) {
 	if e.loadedTypes[0] {
 		return e.LionRoleMenus, nil
 	}
@@ -185,7 +185,7 @@ func (_m *Menus) Value(name string) (ent.Value, error) {
 }
 
 // QueryLionRoleMenus queries the "lion_role_menus" edge of the Menus entity.
-func (_m *Menus) QueryLionRoleMenus() *RoleMenuMappingQuery {
+func (_m *Menus) QueryLionRoleMenus() *RoleMenusQuery {
 	return NewMenusClient(_m.config).QueryLionRoleMenus(_m)
 }
 

@@ -13,10 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
-	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/rolegroups"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/roleusermapping"
+	"github.com/grpc-kit/pkg/lion/roleusers"
 )
 
 // RolesQuery is the builder for querying Roles entities.
@@ -26,9 +26,9 @@ type RolesQuery struct {
 	order              []roles.OrderOption
 	inters             []Interceptor
 	predicates         []predicate.Roles
-	withLionRoleMenus  *RoleMenuMappingQuery
-	withLionRoleUsers  *RoleUserMappingQuery
-	withLionRoleGroups *RoleGroupMappingQuery
+	withLionRoleMenus  *RoleMenusQuery
+	withLionRoleUsers  *RoleUsersQuery
+	withLionRoleGroups *RoleGroupsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -66,8 +66,8 @@ func (_q *RolesQuery) Order(o ...roles.OrderOption) *RolesQuery {
 }
 
 // QueryLionRoleMenus chains the current query on the "lion_role_menus" edge.
-func (_q *RolesQuery) QueryLionRoleMenus() *RoleMenuMappingQuery {
-	query := (&RoleMenuMappingClient{config: _q.config}).Query()
+func (_q *RolesQuery) QueryLionRoleMenus() *RoleMenusQuery {
+	query := (&RoleMenusClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -78,7 +78,7 @@ func (_q *RolesQuery) QueryLionRoleMenus() *RoleMenuMappingQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(roles.Table, roles.FieldID, selector),
-			sqlgraph.To(rolemenumapping.Table, rolemenumapping.FieldID),
+			sqlgraph.To(rolemenus.Table, rolemenus.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleMenusTable, roles.LionRoleMenusColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
@@ -88,8 +88,8 @@ func (_q *RolesQuery) QueryLionRoleMenus() *RoleMenuMappingQuery {
 }
 
 // QueryLionRoleUsers chains the current query on the "lion_role_users" edge.
-func (_q *RolesQuery) QueryLionRoleUsers() *RoleUserMappingQuery {
-	query := (&RoleUserMappingClient{config: _q.config}).Query()
+func (_q *RolesQuery) QueryLionRoleUsers() *RoleUsersQuery {
+	query := (&RoleUsersClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -100,7 +100,7 @@ func (_q *RolesQuery) QueryLionRoleUsers() *RoleUserMappingQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(roles.Table, roles.FieldID, selector),
-			sqlgraph.To(roleusermapping.Table, roleusermapping.FieldID),
+			sqlgraph.To(roleusers.Table, roleusers.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleUsersTable, roles.LionRoleUsersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
@@ -110,8 +110,8 @@ func (_q *RolesQuery) QueryLionRoleUsers() *RoleUserMappingQuery {
 }
 
 // QueryLionRoleGroups chains the current query on the "lion_role_groups" edge.
-func (_q *RolesQuery) QueryLionRoleGroups() *RoleGroupMappingQuery {
-	query := (&RoleGroupMappingClient{config: _q.config}).Query()
+func (_q *RolesQuery) QueryLionRoleGroups() *RoleGroupsQuery {
+	query := (&RoleGroupsClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -122,7 +122,7 @@ func (_q *RolesQuery) QueryLionRoleGroups() *RoleGroupMappingQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(roles.Table, roles.FieldID, selector),
-			sqlgraph.To(rolegroupmapping.Table, rolegroupmapping.FieldID),
+			sqlgraph.To(rolegroups.Table, rolegroups.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleGroupsTable, roles.LionRoleGroupsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
@@ -334,8 +334,8 @@ func (_q *RolesQuery) Clone() *RolesQuery {
 
 // WithLionRoleMenus tells the query-builder to eager-load the nodes that are connected to
 // the "lion_role_menus" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *RolesQuery) WithLionRoleMenus(opts ...func(*RoleMenuMappingQuery)) *RolesQuery {
-	query := (&RoleMenuMappingClient{config: _q.config}).Query()
+func (_q *RolesQuery) WithLionRoleMenus(opts ...func(*RoleMenusQuery)) *RolesQuery {
+	query := (&RoleMenusClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -345,8 +345,8 @@ func (_q *RolesQuery) WithLionRoleMenus(opts ...func(*RoleMenuMappingQuery)) *Ro
 
 // WithLionRoleUsers tells the query-builder to eager-load the nodes that are connected to
 // the "lion_role_users" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *RolesQuery) WithLionRoleUsers(opts ...func(*RoleUserMappingQuery)) *RolesQuery {
-	query := (&RoleUserMappingClient{config: _q.config}).Query()
+func (_q *RolesQuery) WithLionRoleUsers(opts ...func(*RoleUsersQuery)) *RolesQuery {
+	query := (&RoleUsersClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -356,8 +356,8 @@ func (_q *RolesQuery) WithLionRoleUsers(opts ...func(*RoleUserMappingQuery)) *Ro
 
 // WithLionRoleGroups tells the query-builder to eager-load the nodes that are connected to
 // the "lion_role_groups" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *RolesQuery) WithLionRoleGroups(opts ...func(*RoleGroupMappingQuery)) *RolesQuery {
-	query := (&RoleGroupMappingClient{config: _q.config}).Query()
+func (_q *RolesQuery) WithLionRoleGroups(opts ...func(*RoleGroupsQuery)) *RolesQuery {
+	query := (&RoleGroupsClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -469,29 +469,29 @@ func (_q *RolesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Roles,
 	}
 	if query := _q.withLionRoleMenus; query != nil {
 		if err := _q.loadLionRoleMenus(ctx, query, nodes,
-			func(n *Roles) { n.Edges.LionRoleMenus = []*RoleMenuMapping{} },
-			func(n *Roles, e *RoleMenuMapping) { n.Edges.LionRoleMenus = append(n.Edges.LionRoleMenus, e) }); err != nil {
+			func(n *Roles) { n.Edges.LionRoleMenus = []*RoleMenus{} },
+			func(n *Roles, e *RoleMenus) { n.Edges.LionRoleMenus = append(n.Edges.LionRoleMenus, e) }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withLionRoleUsers; query != nil {
 		if err := _q.loadLionRoleUsers(ctx, query, nodes,
-			func(n *Roles) { n.Edges.LionRoleUsers = []*RoleUserMapping{} },
-			func(n *Roles, e *RoleUserMapping) { n.Edges.LionRoleUsers = append(n.Edges.LionRoleUsers, e) }); err != nil {
+			func(n *Roles) { n.Edges.LionRoleUsers = []*RoleUsers{} },
+			func(n *Roles, e *RoleUsers) { n.Edges.LionRoleUsers = append(n.Edges.LionRoleUsers, e) }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withLionRoleGroups; query != nil {
 		if err := _q.loadLionRoleGroups(ctx, query, nodes,
-			func(n *Roles) { n.Edges.LionRoleGroups = []*RoleGroupMapping{} },
-			func(n *Roles, e *RoleGroupMapping) { n.Edges.LionRoleGroups = append(n.Edges.LionRoleGroups, e) }); err != nil {
+			func(n *Roles) { n.Edges.LionRoleGroups = []*RoleGroups{} },
+			func(n *Roles, e *RoleGroups) { n.Edges.LionRoleGroups = append(n.Edges.LionRoleGroups, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *RolesQuery) loadLionRoleMenus(ctx context.Context, query *RoleMenuMappingQuery, nodes []*Roles, init func(*Roles), assign func(*Roles, *RoleMenuMapping)) error {
+func (_q *RolesQuery) loadLionRoleMenus(ctx context.Context, query *RoleMenusQuery, nodes []*Roles, init func(*Roles), assign func(*Roles, *RoleMenus)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Roles)
 	for i := range nodes {
@@ -502,9 +502,9 @@ func (_q *RolesQuery) loadLionRoleMenus(ctx context.Context, query *RoleMenuMapp
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(rolemenumapping.FieldRoleID)
+		query.ctx.AppendFieldOnce(rolemenus.FieldRoleID)
 	}
-	query.Where(predicate.RoleMenuMapping(func(s *sql.Selector) {
+	query.Where(predicate.RoleMenus(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(roles.LionRoleMenusColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
@@ -521,7 +521,7 @@ func (_q *RolesQuery) loadLionRoleMenus(ctx context.Context, query *RoleMenuMapp
 	}
 	return nil
 }
-func (_q *RolesQuery) loadLionRoleUsers(ctx context.Context, query *RoleUserMappingQuery, nodes []*Roles, init func(*Roles), assign func(*Roles, *RoleUserMapping)) error {
+func (_q *RolesQuery) loadLionRoleUsers(ctx context.Context, query *RoleUsersQuery, nodes []*Roles, init func(*Roles), assign func(*Roles, *RoleUsers)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Roles)
 	for i := range nodes {
@@ -532,9 +532,9 @@ func (_q *RolesQuery) loadLionRoleUsers(ctx context.Context, query *RoleUserMapp
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(roleusermapping.FieldRoleID)
+		query.ctx.AppendFieldOnce(roleusers.FieldRoleID)
 	}
-	query.Where(predicate.RoleUserMapping(func(s *sql.Selector) {
+	query.Where(predicate.RoleUsers(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(roles.LionRoleUsersColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
@@ -551,7 +551,7 @@ func (_q *RolesQuery) loadLionRoleUsers(ctx context.Context, query *RoleUserMapp
 	}
 	return nil
 }
-func (_q *RolesQuery) loadLionRoleGroups(ctx context.Context, query *RoleGroupMappingQuery, nodes []*Roles, init func(*Roles), assign func(*Roles, *RoleGroupMapping)) error {
+func (_q *RolesQuery) loadLionRoleGroups(ctx context.Context, query *RoleGroupsQuery, nodes []*Roles, init func(*Roles), assign func(*Roles, *RoleGroups)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Roles)
 	for i := range nodes {
@@ -562,9 +562,9 @@ func (_q *RolesQuery) loadLionRoleGroups(ctx context.Context, query *RoleGroupMa
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(rolegroupmapping.FieldRoleID)
+		query.ctx.AppendFieldOnce(rolegroups.FieldRoleID)
 	}
-	query.Where(predicate.RoleGroupMapping(func(s *sql.Selector) {
+	query.Where(predicate.RoleGroups(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(roles.LionRoleGroupsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)

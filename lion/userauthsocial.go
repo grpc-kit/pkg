@@ -21,8 +21,6 @@ type UserAuthSocial struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 用户ID，关联 lion_users 表
 	UserID int `json:"user_id,omitempty"`
 	// 认证提供分，来自 lion_oauth_providers 表 name 属性
@@ -51,7 +49,7 @@ func (*UserAuthSocial) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case userauthsocial.FieldProviderName, userauthsocial.FieldProviderUserID, userauthsocial.FieldProviderUnionID:
 			values[i] = new(sql.NullString)
-		case userauthsocial.FieldCreatedAt, userauthsocial.FieldUpdatedAt, userauthsocial.FieldDeletedAt, userauthsocial.FieldTokenExpiresAt:
+		case userauthsocial.FieldCreatedAt, userauthsocial.FieldUpdatedAt, userauthsocial.FieldTokenExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -85,13 +83,6 @@ func (_m *UserAuthSocial) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
-			}
-		case userauthsocial.FieldDeletedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
-			} else if value.Valid {
-				_m.DeletedAt = new(time.Time)
-				*_m.DeletedAt = value.Time
 			}
 		case userauthsocial.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -176,11 +167,6 @@ func (_m *UserAuthSocial) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	if v := _m.DeletedAt; v != nil {
-		builder.WriteString("deleted_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))

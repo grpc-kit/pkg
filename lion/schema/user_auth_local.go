@@ -49,7 +49,7 @@ func (UserAuthLocal) Edges() []ent.Edge {
 // Mixin of the table.
 func (UserAuthLocal) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixin{},
+		TimeMixinWithoutDeleted{},
 	}
 }
 

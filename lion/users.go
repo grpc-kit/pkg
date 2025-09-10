@@ -76,9 +76,9 @@ type Users struct {
 // UsersEdges holds the relations/edges for other nodes in the graph.
 type UsersEdges struct {
 	// LionUsers holds the value of the lion_users edge.
-	LionUsers []*RoleUserMapping `json:"lion_users,omitempty"`
-	// LionDepartmentLeaders holds the value of the lion_department_leaders edge.
-	LionDepartmentLeaders []*DepartmentLeaders `json:"lion_department_leaders,omitempty"`
+	LionUsers []*RoleUsers `json:"lion_users,omitempty"`
+	// LionDepartmentUsers holds the value of the lion_department_users edge.
+	LionDepartmentUsers []*DepartmentUsers `json:"lion_department_users,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -86,20 +86,20 @@ type UsersEdges struct {
 
 // LionUsersOrErr returns the LionUsers value or an error if the edge
 // was not loaded in eager-loading.
-func (e UsersEdges) LionUsersOrErr() ([]*RoleUserMapping, error) {
+func (e UsersEdges) LionUsersOrErr() ([]*RoleUsers, error) {
 	if e.loadedTypes[0] {
 		return e.LionUsers, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_users"}
 }
 
-// LionDepartmentLeadersOrErr returns the LionDepartmentLeaders value or an error if the edge
+// LionDepartmentUsersOrErr returns the LionDepartmentUsers value or an error if the edge
 // was not loaded in eager-loading.
-func (e UsersEdges) LionDepartmentLeadersOrErr() ([]*DepartmentLeaders, error) {
+func (e UsersEdges) LionDepartmentUsersOrErr() ([]*DepartmentUsers, error) {
 	if e.loadedTypes[1] {
-		return e.LionDepartmentLeaders, nil
+		return e.LionDepartmentUsers, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_department_leaders"}
+	return nil, &NotLoadedError{edge: "lion_department_users"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -303,13 +303,13 @@ func (_m *Users) Value(name string) (ent.Value, error) {
 }
 
 // QueryLionUsers queries the "lion_users" edge of the Users entity.
-func (_m *Users) QueryLionUsers() *RoleUserMappingQuery {
+func (_m *Users) QueryLionUsers() *RoleUsersQuery {
 	return NewUsersClient(_m.config).QueryLionUsers(_m)
 }
 
-// QueryLionDepartmentLeaders queries the "lion_department_leaders" edge of the Users entity.
-func (_m *Users) QueryLionDepartmentLeaders() *DepartmentLeadersQuery {
-	return NewUsersClient(_m.config).QueryLionDepartmentLeaders(_m)
+// QueryLionDepartmentUsers queries the "lion_department_users" edge of the Users entity.
+func (_m *Users) QueryLionDepartmentUsers() *DepartmentUsersQuery {
+	return NewUsersClient(_m.config).QueryLionDepartmentUsers(_m)
 }
 
 // Update returns a builder for updating this Users.

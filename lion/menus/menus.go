@@ -43,10 +43,10 @@ const (
 	// Table holds the table name of the menus in the database.
 	Table = "lion_menus"
 	// LionRoleMenusTable is the table that holds the lion_role_menus relation/edge.
-	LionRoleMenusTable = "lion_role_menu_mapping"
-	// LionRoleMenusInverseTable is the table name for the RoleMenuMapping entity.
-	// It exists in this package in order to avoid circular dependency with the "rolemenumapping" package.
-	LionRoleMenusInverseTable = "lion_role_menu_mapping"
+	LionRoleMenusTable = "lion_role_menus"
+	// LionRoleMenusInverseTable is the table name for the RoleMenus entity.
+	// It exists in this package in order to avoid circular dependency with the "rolemenus" package.
+	LionRoleMenusInverseTable = "lion_role_menus"
 	// LionRoleMenusColumn is the table column denoting the lion_role_menus relation/edge.
 	LionRoleMenusColumn = "menu_id"
 )

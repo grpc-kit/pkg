@@ -16,8 +16,8 @@ type Tx struct {
 	AuthProviders *AuthProvidersClient
 	// Demo is the client for interacting with the Demo builders.
 	Demo *DemoClient
-	// DepartmentLeaders is the client for interacting with the DepartmentLeaders builders.
-	DepartmentLeaders *DepartmentLeadersClient
+	// DepartmentUsers is the client for interacting with the DepartmentUsers builders.
+	DepartmentUsers *DepartmentUsersClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
 	// GroupUsers is the client for interacting with the GroupUsers builders.
@@ -28,12 +28,12 @@ type Tx struct {
 	Menus *MenusClient
 	// Permissions is the client for interacting with the Permissions builders.
 	Permissions *PermissionsClient
-	// RoleGroupMapping is the client for interacting with the RoleGroupMapping builders.
-	RoleGroupMapping *RoleGroupMappingClient
-	// RoleMenuMapping is the client for interacting with the RoleMenuMapping builders.
-	RoleMenuMapping *RoleMenuMappingClient
-	// RoleUserMapping is the client for interacting with the RoleUserMapping builders.
-	RoleUserMapping *RoleUserMappingClient
+	// RoleGroups is the client for interacting with the RoleGroups builders.
+	RoleGroups *RoleGroupsClient
+	// RoleMenus is the client for interacting with the RoleMenus builders.
+	RoleMenus *RoleMenusClient
+	// RoleUsers is the client for interacting with the RoleUsers builders.
+	RoleUsers *RoleUsersClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
 	// SecurityKeys is the client for interacting with the SecurityKeys builders.
@@ -179,15 +179,15 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
 	tx.Demo = NewDemoClient(tx.config)
-	tx.DepartmentLeaders = NewDepartmentLeadersClient(tx.config)
+	tx.DepartmentUsers = NewDepartmentUsersClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
 	tx.GroupUsers = NewGroupUsersClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
 	tx.Permissions = NewPermissionsClient(tx.config)
-	tx.RoleGroupMapping = NewRoleGroupMappingClient(tx.config)
-	tx.RoleMenuMapping = NewRoleMenuMappingClient(tx.config)
-	tx.RoleUserMapping = NewRoleUserMappingClient(tx.config)
+	tx.RoleGroups = NewRoleGroupsClient(tx.config)
+	tx.RoleMenus = NewRoleMenusClient(tx.config)
+	tx.RoleUsers = NewRoleUsersClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
 	tx.SecurityKeys = NewSecurityKeysClient(tx.config)
 	tx.UserAttributes = NewUserAttributesClient(tx.config)

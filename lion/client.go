@@ -17,16 +17,16 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/demo"
-	"github.com/grpc-kit/pkg/lion/departmentleaders"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/permissions"
-	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
-	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/rolegroups"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/roleusermapping"
+	"github.com/grpc-kit/pkg/lion/roleusers"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/userauthlocal"
@@ -43,8 +43,8 @@ type Client struct {
 	AuthProviders *AuthProvidersClient
 	// Demo is the client for interacting with the Demo builders.
 	Demo *DemoClient
-	// DepartmentLeaders is the client for interacting with the DepartmentLeaders builders.
-	DepartmentLeaders *DepartmentLeadersClient
+	// DepartmentUsers is the client for interacting with the DepartmentUsers builders.
+	DepartmentUsers *DepartmentUsersClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
 	// GroupUsers is the client for interacting with the GroupUsers builders.
@@ -55,12 +55,12 @@ type Client struct {
 	Menus *MenusClient
 	// Permissions is the client for interacting with the Permissions builders.
 	Permissions *PermissionsClient
-	// RoleGroupMapping is the client for interacting with the RoleGroupMapping builders.
-	RoleGroupMapping *RoleGroupMappingClient
-	// RoleMenuMapping is the client for interacting with the RoleMenuMapping builders.
-	RoleMenuMapping *RoleMenuMappingClient
-	// RoleUserMapping is the client for interacting with the RoleUserMapping builders.
-	RoleUserMapping *RoleUserMappingClient
+	// RoleGroups is the client for interacting with the RoleGroups builders.
+	RoleGroups *RoleGroupsClient
+	// RoleMenus is the client for interacting with the RoleMenus builders.
+	RoleMenus *RoleMenusClient
+	// RoleUsers is the client for interacting with the RoleUsers builders.
+	RoleUsers *RoleUsersClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
 	// SecurityKeys is the client for interacting with the SecurityKeys builders.
@@ -86,15 +86,15 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.AuthProviders = NewAuthProvidersClient(c.config)
 	c.Demo = NewDemoClient(c.config)
-	c.DepartmentLeaders = NewDepartmentLeadersClient(c.config)
+	c.DepartmentUsers = NewDepartmentUsersClient(c.config)
 	c.Departments = NewDepartmentsClient(c.config)
 	c.GroupUsers = NewGroupUsersClient(c.config)
 	c.Groups = NewGroupsClient(c.config)
 	c.Menus = NewMenusClient(c.config)
 	c.Permissions = NewPermissionsClient(c.config)
-	c.RoleGroupMapping = NewRoleGroupMappingClient(c.config)
-	c.RoleMenuMapping = NewRoleMenuMappingClient(c.config)
-	c.RoleUserMapping = NewRoleUserMappingClient(c.config)
+	c.RoleGroups = NewRoleGroupsClient(c.config)
+	c.RoleMenus = NewRoleMenusClient(c.config)
+	c.RoleUsers = NewRoleUsersClient(c.config)
 	c.Roles = NewRolesClient(c.config)
 	c.SecurityKeys = NewSecurityKeysClient(c.config)
 	c.UserAttributes = NewUserAttributesClient(c.config)
@@ -191,25 +191,25 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		AuthProviders:     NewAuthProvidersClient(cfg),
-		Demo:              NewDemoClient(cfg),
-		DepartmentLeaders: NewDepartmentLeadersClient(cfg),
-		Departments:       NewDepartmentsClient(cfg),
-		GroupUsers:        NewGroupUsersClient(cfg),
-		Groups:            NewGroupsClient(cfg),
-		Menus:             NewMenusClient(cfg),
-		Permissions:       NewPermissionsClient(cfg),
-		RoleGroupMapping:  NewRoleGroupMappingClient(cfg),
-		RoleMenuMapping:   NewRoleMenuMappingClient(cfg),
-		RoleUserMapping:   NewRoleUserMappingClient(cfg),
-		Roles:             NewRolesClient(cfg),
-		SecurityKeys:      NewSecurityKeysClient(cfg),
-		UserAttributes:    NewUserAttributesClient(cfg),
-		UserAuthLocal:     NewUserAuthLocalClient(cfg),
-		UserAuthSocial:    NewUserAuthSocialClient(cfg),
-		Users:             NewUsersClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		AuthProviders:   NewAuthProvidersClient(cfg),
+		Demo:            NewDemoClient(cfg),
+		DepartmentUsers: NewDepartmentUsersClient(cfg),
+		Departments:     NewDepartmentsClient(cfg),
+		GroupUsers:      NewGroupUsersClient(cfg),
+		Groups:          NewGroupsClient(cfg),
+		Menus:           NewMenusClient(cfg),
+		Permissions:     NewPermissionsClient(cfg),
+		RoleGroups:      NewRoleGroupsClient(cfg),
+		RoleMenus:       NewRoleMenusClient(cfg),
+		RoleUsers:       NewRoleUsersClient(cfg),
+		Roles:           NewRolesClient(cfg),
+		SecurityKeys:    NewSecurityKeysClient(cfg),
+		UserAttributes:  NewUserAttributesClient(cfg),
+		UserAuthLocal:   NewUserAuthLocalClient(cfg),
+		UserAuthSocial:  NewUserAuthSocialClient(cfg),
+		Users:           NewUsersClient(cfg),
 	}, nil
 }
 
@@ -227,25 +227,25 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:               ctx,
-		config:            cfg,
-		AuthProviders:     NewAuthProvidersClient(cfg),
-		Demo:              NewDemoClient(cfg),
-		DepartmentLeaders: NewDepartmentLeadersClient(cfg),
-		Departments:       NewDepartmentsClient(cfg),
-		GroupUsers:        NewGroupUsersClient(cfg),
-		Groups:            NewGroupsClient(cfg),
-		Menus:             NewMenusClient(cfg),
-		Permissions:       NewPermissionsClient(cfg),
-		RoleGroupMapping:  NewRoleGroupMappingClient(cfg),
-		RoleMenuMapping:   NewRoleMenuMappingClient(cfg),
-		RoleUserMapping:   NewRoleUserMappingClient(cfg),
-		Roles:             NewRolesClient(cfg),
-		SecurityKeys:      NewSecurityKeysClient(cfg),
-		UserAttributes:    NewUserAttributesClient(cfg),
-		UserAuthLocal:     NewUserAuthLocalClient(cfg),
-		UserAuthSocial:    NewUserAuthSocialClient(cfg),
-		Users:             NewUsersClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		AuthProviders:   NewAuthProvidersClient(cfg),
+		Demo:            NewDemoClient(cfg),
+		DepartmentUsers: NewDepartmentUsersClient(cfg),
+		Departments:     NewDepartmentsClient(cfg),
+		GroupUsers:      NewGroupUsersClient(cfg),
+		Groups:          NewGroupsClient(cfg),
+		Menus:           NewMenusClient(cfg),
+		Permissions:     NewPermissionsClient(cfg),
+		RoleGroups:      NewRoleGroupsClient(cfg),
+		RoleMenus:       NewRoleMenusClient(cfg),
+		RoleUsers:       NewRoleUsersClient(cfg),
+		Roles:           NewRolesClient(cfg),
+		SecurityKeys:    NewSecurityKeysClient(cfg),
+		UserAttributes:  NewUserAttributesClient(cfg),
+		UserAuthLocal:   NewUserAuthLocalClient(cfg),
+		UserAuthSocial:  NewUserAuthSocialClient(cfg),
+		Users:           NewUsersClient(cfg),
 	}, nil
 }
 
@@ -275,10 +275,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AuthProviders, c.Demo, c.DepartmentLeaders, c.Departments, c.GroupUsers,
-		c.Groups, c.Menus, c.Permissions, c.RoleGroupMapping, c.RoleMenuMapping,
-		c.RoleUserMapping, c.Roles, c.SecurityKeys, c.UserAttributes, c.UserAuthLocal,
-		c.UserAuthSocial, c.Users,
+		c.AuthProviders, c.Demo, c.DepartmentUsers, c.Departments, c.GroupUsers,
+		c.Groups, c.Menus, c.Permissions, c.RoleGroups, c.RoleMenus, c.RoleUsers,
+		c.Roles, c.SecurityKeys, c.UserAttributes, c.UserAuthLocal, c.UserAuthSocial,
+		c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -288,10 +288,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AuthProviders, c.Demo, c.DepartmentLeaders, c.Departments, c.GroupUsers,
-		c.Groups, c.Menus, c.Permissions, c.RoleGroupMapping, c.RoleMenuMapping,
-		c.RoleUserMapping, c.Roles, c.SecurityKeys, c.UserAttributes, c.UserAuthLocal,
-		c.UserAuthSocial, c.Users,
+		c.AuthProviders, c.Demo, c.DepartmentUsers, c.Departments, c.GroupUsers,
+		c.Groups, c.Menus, c.Permissions, c.RoleGroups, c.RoleMenus, c.RoleUsers,
+		c.Roles, c.SecurityKeys, c.UserAttributes, c.UserAuthLocal, c.UserAuthSocial,
+		c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -304,8 +304,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AuthProviders.mutate(ctx, m)
 	case *DemoMutation:
 		return c.Demo.mutate(ctx, m)
-	case *DepartmentLeadersMutation:
-		return c.DepartmentLeaders.mutate(ctx, m)
+	case *DepartmentUsersMutation:
+		return c.DepartmentUsers.mutate(ctx, m)
 	case *DepartmentsMutation:
 		return c.Departments.mutate(ctx, m)
 	case *GroupUsersMutation:
@@ -316,12 +316,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Menus.mutate(ctx, m)
 	case *PermissionsMutation:
 		return c.Permissions.mutate(ctx, m)
-	case *RoleGroupMappingMutation:
-		return c.RoleGroupMapping.mutate(ctx, m)
-	case *RoleMenuMappingMutation:
-		return c.RoleMenuMapping.mutate(ctx, m)
-	case *RoleUserMappingMutation:
-		return c.RoleUserMapping.mutate(ctx, m)
+	case *RoleGroupsMutation:
+		return c.RoleGroups.mutate(ctx, m)
+	case *RoleMenusMutation:
+		return c.RoleMenus.mutate(ctx, m)
+	case *RoleUsersMutation:
+		return c.RoleUsers.mutate(ctx, m)
 	case *RolesMutation:
 		return c.Roles.mutate(ctx, m)
 	case *SecurityKeysMutation:
@@ -605,107 +605,107 @@ func (c *DemoClient) mutate(ctx context.Context, m *DemoMutation) (Value, error)
 	}
 }
 
-// DepartmentLeadersClient is a client for the DepartmentLeaders schema.
-type DepartmentLeadersClient struct {
+// DepartmentUsersClient is a client for the DepartmentUsers schema.
+type DepartmentUsersClient struct {
 	config
 }
 
-// NewDepartmentLeadersClient returns a client for the DepartmentLeaders from the given config.
-func NewDepartmentLeadersClient(c config) *DepartmentLeadersClient {
-	return &DepartmentLeadersClient{config: c}
+// NewDepartmentUsersClient returns a client for the DepartmentUsers from the given config.
+func NewDepartmentUsersClient(c config) *DepartmentUsersClient {
+	return &DepartmentUsersClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `departmentleaders.Hooks(f(g(h())))`.
-func (c *DepartmentLeadersClient) Use(hooks ...Hook) {
-	c.hooks.DepartmentLeaders = append(c.hooks.DepartmentLeaders, hooks...)
+// A call to `Use(f, g, h)` equals to `departmentusers.Hooks(f(g(h())))`.
+func (c *DepartmentUsersClient) Use(hooks ...Hook) {
+	c.hooks.DepartmentUsers = append(c.hooks.DepartmentUsers, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `departmentleaders.Intercept(f(g(h())))`.
-func (c *DepartmentLeadersClient) Intercept(interceptors ...Interceptor) {
-	c.inters.DepartmentLeaders = append(c.inters.DepartmentLeaders, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `departmentusers.Intercept(f(g(h())))`.
+func (c *DepartmentUsersClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DepartmentUsers = append(c.inters.DepartmentUsers, interceptors...)
 }
 
-// Create returns a builder for creating a DepartmentLeaders entity.
-func (c *DepartmentLeadersClient) Create() *DepartmentLeadersCreate {
-	mutation := newDepartmentLeadersMutation(c.config, OpCreate)
-	return &DepartmentLeadersCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a DepartmentUsers entity.
+func (c *DepartmentUsersClient) Create() *DepartmentUsersCreate {
+	mutation := newDepartmentUsersMutation(c.config, OpCreate)
+	return &DepartmentUsersCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of DepartmentLeaders entities.
-func (c *DepartmentLeadersClient) CreateBulk(builders ...*DepartmentLeadersCreate) *DepartmentLeadersCreateBulk {
-	return &DepartmentLeadersCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of DepartmentUsers entities.
+func (c *DepartmentUsersClient) CreateBulk(builders ...*DepartmentUsersCreate) *DepartmentUsersCreateBulk {
+	return &DepartmentUsersCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *DepartmentLeadersClient) MapCreateBulk(slice any, setFunc func(*DepartmentLeadersCreate, int)) *DepartmentLeadersCreateBulk {
+func (c *DepartmentUsersClient) MapCreateBulk(slice any, setFunc func(*DepartmentUsersCreate, int)) *DepartmentUsersCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &DepartmentLeadersCreateBulk{err: fmt.Errorf("calling to DepartmentLeadersClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &DepartmentUsersCreateBulk{err: fmt.Errorf("calling to DepartmentUsersClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*DepartmentLeadersCreate, rv.Len())
+	builders := make([]*DepartmentUsersCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &DepartmentLeadersCreateBulk{config: c.config, builders: builders}
+	return &DepartmentUsersCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for DepartmentLeaders.
-func (c *DepartmentLeadersClient) Update() *DepartmentLeadersUpdate {
-	mutation := newDepartmentLeadersMutation(c.config, OpUpdate)
-	return &DepartmentLeadersUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for DepartmentUsers.
+func (c *DepartmentUsersClient) Update() *DepartmentUsersUpdate {
+	mutation := newDepartmentUsersMutation(c.config, OpUpdate)
+	return &DepartmentUsersUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *DepartmentLeadersClient) UpdateOne(_m *DepartmentLeaders) *DepartmentLeadersUpdateOne {
-	mutation := newDepartmentLeadersMutation(c.config, OpUpdateOne, withDepartmentLeaders(_m))
-	return &DepartmentLeadersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DepartmentUsersClient) UpdateOne(_m *DepartmentUsers) *DepartmentUsersUpdateOne {
+	mutation := newDepartmentUsersMutation(c.config, OpUpdateOne, withDepartmentUsers(_m))
+	return &DepartmentUsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *DepartmentLeadersClient) UpdateOneID(id int) *DepartmentLeadersUpdateOne {
-	mutation := newDepartmentLeadersMutation(c.config, OpUpdateOne, withDepartmentLeadersID(id))
-	return &DepartmentLeadersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DepartmentUsersClient) UpdateOneID(id int) *DepartmentUsersUpdateOne {
+	mutation := newDepartmentUsersMutation(c.config, OpUpdateOne, withDepartmentUsersID(id))
+	return &DepartmentUsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for DepartmentLeaders.
-func (c *DepartmentLeadersClient) Delete() *DepartmentLeadersDelete {
-	mutation := newDepartmentLeadersMutation(c.config, OpDelete)
-	return &DepartmentLeadersDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for DepartmentUsers.
+func (c *DepartmentUsersClient) Delete() *DepartmentUsersDelete {
+	mutation := newDepartmentUsersMutation(c.config, OpDelete)
+	return &DepartmentUsersDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *DepartmentLeadersClient) DeleteOne(_m *DepartmentLeaders) *DepartmentLeadersDeleteOne {
+func (c *DepartmentUsersClient) DeleteOne(_m *DepartmentUsers) *DepartmentUsersDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *DepartmentLeadersClient) DeleteOneID(id int) *DepartmentLeadersDeleteOne {
-	builder := c.Delete().Where(departmentleaders.ID(id))
+func (c *DepartmentUsersClient) DeleteOneID(id int) *DepartmentUsersDeleteOne {
+	builder := c.Delete().Where(departmentusers.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &DepartmentLeadersDeleteOne{builder}
+	return &DepartmentUsersDeleteOne{builder}
 }
 
-// Query returns a query builder for DepartmentLeaders.
-func (c *DepartmentLeadersClient) Query() *DepartmentLeadersQuery {
-	return &DepartmentLeadersQuery{
+// Query returns a query builder for DepartmentUsers.
+func (c *DepartmentUsersClient) Query() *DepartmentUsersQuery {
+	return &DepartmentUsersQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeDepartmentLeaders},
+		ctx:    &QueryContext{Type: TypeDepartmentUsers},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a DepartmentLeaders entity by its id.
-func (c *DepartmentLeadersClient) Get(ctx context.Context, id int) (*DepartmentLeaders, error) {
-	return c.Query().Where(departmentleaders.ID(id)).Only(ctx)
+// Get returns a DepartmentUsers entity by its id.
+func (c *DepartmentUsersClient) Get(ctx context.Context, id int) (*DepartmentUsers, error) {
+	return c.Query().Where(departmentusers.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *DepartmentLeadersClient) GetX(ctx context.Context, id int) *DepartmentLeaders {
+func (c *DepartmentUsersClient) GetX(ctx context.Context, id int) *DepartmentUsers {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -713,15 +713,15 @@ func (c *DepartmentLeadersClient) GetX(ctx context.Context, id int) *DepartmentL
 	return obj
 }
 
-// QueryLionDepartments queries the lion_departments edge of a DepartmentLeaders.
-func (c *DepartmentLeadersClient) QueryLionDepartments(_m *DepartmentLeaders) *DepartmentsQuery {
+// QueryLionDepartments queries the lion_departments edge of a DepartmentUsers.
+func (c *DepartmentUsersClient) QueryLionDepartments(_m *DepartmentUsers) *DepartmentsQuery {
 	query := (&DepartmentsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(departmentleaders.Table, departmentleaders.FieldID, id),
+			sqlgraph.From(departmentusers.Table, departmentusers.FieldID, id),
 			sqlgraph.To(departments.Table, departments.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, departmentleaders.LionDepartmentsTable, departmentleaders.LionDepartmentsColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, departmentusers.LionDepartmentsTable, departmentusers.LionDepartmentsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -729,15 +729,15 @@ func (c *DepartmentLeadersClient) QueryLionDepartments(_m *DepartmentLeaders) *D
 	return query
 }
 
-// QueryLionDepartmentLeaders queries the lion_department_leaders edge of a DepartmentLeaders.
-func (c *DepartmentLeadersClient) QueryLionDepartmentLeaders(_m *DepartmentLeaders) *UsersQuery {
+// QueryLionDepartmentUsers queries the lion_department_users edge of a DepartmentUsers.
+func (c *DepartmentUsersClient) QueryLionDepartmentUsers(_m *DepartmentUsers) *UsersQuery {
 	query := (&UsersClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(departmentleaders.Table, departmentleaders.FieldID, id),
+			sqlgraph.From(departmentusers.Table, departmentusers.FieldID, id),
 			sqlgraph.To(users.Table, users.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, departmentleaders.LionDepartmentLeadersTable, departmentleaders.LionDepartmentLeadersColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, departmentusers.LionDepartmentUsersTable, departmentusers.LionDepartmentUsersColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -746,27 +746,27 @@ func (c *DepartmentLeadersClient) QueryLionDepartmentLeaders(_m *DepartmentLeade
 }
 
 // Hooks returns the client hooks.
-func (c *DepartmentLeadersClient) Hooks() []Hook {
-	return c.hooks.DepartmentLeaders
+func (c *DepartmentUsersClient) Hooks() []Hook {
+	return c.hooks.DepartmentUsers
 }
 
 // Interceptors returns the client interceptors.
-func (c *DepartmentLeadersClient) Interceptors() []Interceptor {
-	return c.inters.DepartmentLeaders
+func (c *DepartmentUsersClient) Interceptors() []Interceptor {
+	return c.inters.DepartmentUsers
 }
 
-func (c *DepartmentLeadersClient) mutate(ctx context.Context, m *DepartmentLeadersMutation) (Value, error) {
+func (c *DepartmentUsersClient) mutate(ctx context.Context, m *DepartmentUsersMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&DepartmentLeadersCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DepartmentUsersCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&DepartmentLeadersUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DepartmentUsersUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&DepartmentLeadersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&DepartmentUsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&DepartmentLeadersDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&DepartmentUsersDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("lion: unknown DepartmentLeaders mutation op: %q", m.Op())
+		return nil, fmt.Errorf("lion: unknown DepartmentUsers mutation op: %q", m.Op())
 	}
 }
 
@@ -878,15 +878,15 @@ func (c *DepartmentsClient) GetX(ctx context.Context, id int) *Departments {
 	return obj
 }
 
-// QueryLionDepartmentLeaders queries the lion_department_leaders edge of a Departments.
-func (c *DepartmentsClient) QueryLionDepartmentLeaders(_m *Departments) *DepartmentLeadersQuery {
-	query := (&DepartmentLeadersClient{config: c.config}).Query()
+// QueryLionDepartmentUsers queries the lion_department_users edge of a Departments.
+func (c *DepartmentsClient) QueryLionDepartmentUsers(_m *Departments) *DepartmentUsersQuery {
+	query := (&DepartmentUsersClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(departments.Table, departments.FieldID, id),
-			sqlgraph.To(departmentleaders.Table, departmentleaders.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionDepartmentLeadersTable, departments.LionDepartmentLeadersColumn),
+			sqlgraph.To(departmentusers.Table, departmentusers.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionDepartmentUsersTable, departments.LionDepartmentUsersColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1161,13 +1161,13 @@ func (c *GroupsClient) GetX(ctx context.Context, id int) *Groups {
 }
 
 // QueryLionGroups queries the lion_groups edge of a Groups.
-func (c *GroupsClient) QueryLionGroups(_m *Groups) *RoleGroupMappingQuery {
-	query := (&RoleGroupMappingClient{config: c.config}).Query()
+func (c *GroupsClient) QueryLionGroups(_m *Groups) *RoleGroupsQuery {
+	query := (&RoleGroupsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groups.Table, groups.FieldID, id),
-			sqlgraph.To(rolegroupmapping.Table, rolegroupmapping.FieldID),
+			sqlgraph.To(rolegroups.Table, rolegroups.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, groups.LionGroupsTable, groups.LionGroupsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -1310,13 +1310,13 @@ func (c *MenusClient) GetX(ctx context.Context, id int) *Menus {
 }
 
 // QueryLionRoleMenus queries the lion_role_menus edge of a Menus.
-func (c *MenusClient) QueryLionRoleMenus(_m *Menus) *RoleMenuMappingQuery {
-	query := (&RoleMenuMappingClient{config: c.config}).Query()
+func (c *MenusClient) QueryLionRoleMenus(_m *Menus) *RoleMenusQuery {
+	query := (&RoleMenusClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(menus.Table, menus.FieldID, id),
-			sqlgraph.To(rolemenumapping.Table, rolemenumapping.FieldID),
+			sqlgraph.To(rolemenus.Table, rolemenus.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, menus.LionRoleMenusTable, menus.LionRoleMenusColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -1483,107 +1483,107 @@ func (c *PermissionsClient) mutate(ctx context.Context, m *PermissionsMutation) 
 	}
 }
 
-// RoleGroupMappingClient is a client for the RoleGroupMapping schema.
-type RoleGroupMappingClient struct {
+// RoleGroupsClient is a client for the RoleGroups schema.
+type RoleGroupsClient struct {
 	config
 }
 
-// NewRoleGroupMappingClient returns a client for the RoleGroupMapping from the given config.
-func NewRoleGroupMappingClient(c config) *RoleGroupMappingClient {
-	return &RoleGroupMappingClient{config: c}
+// NewRoleGroupsClient returns a client for the RoleGroups from the given config.
+func NewRoleGroupsClient(c config) *RoleGroupsClient {
+	return &RoleGroupsClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `rolegroupmapping.Hooks(f(g(h())))`.
-func (c *RoleGroupMappingClient) Use(hooks ...Hook) {
-	c.hooks.RoleGroupMapping = append(c.hooks.RoleGroupMapping, hooks...)
+// A call to `Use(f, g, h)` equals to `rolegroups.Hooks(f(g(h())))`.
+func (c *RoleGroupsClient) Use(hooks ...Hook) {
+	c.hooks.RoleGroups = append(c.hooks.RoleGroups, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `rolegroupmapping.Intercept(f(g(h())))`.
-func (c *RoleGroupMappingClient) Intercept(interceptors ...Interceptor) {
-	c.inters.RoleGroupMapping = append(c.inters.RoleGroupMapping, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `rolegroups.Intercept(f(g(h())))`.
+func (c *RoleGroupsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RoleGroups = append(c.inters.RoleGroups, interceptors...)
 }
 
-// Create returns a builder for creating a RoleGroupMapping entity.
-func (c *RoleGroupMappingClient) Create() *RoleGroupMappingCreate {
-	mutation := newRoleGroupMappingMutation(c.config, OpCreate)
-	return &RoleGroupMappingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a RoleGroups entity.
+func (c *RoleGroupsClient) Create() *RoleGroupsCreate {
+	mutation := newRoleGroupsMutation(c.config, OpCreate)
+	return &RoleGroupsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of RoleGroupMapping entities.
-func (c *RoleGroupMappingClient) CreateBulk(builders ...*RoleGroupMappingCreate) *RoleGroupMappingCreateBulk {
-	return &RoleGroupMappingCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of RoleGroups entities.
+func (c *RoleGroupsClient) CreateBulk(builders ...*RoleGroupsCreate) *RoleGroupsCreateBulk {
+	return &RoleGroupsCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *RoleGroupMappingClient) MapCreateBulk(slice any, setFunc func(*RoleGroupMappingCreate, int)) *RoleGroupMappingCreateBulk {
+func (c *RoleGroupsClient) MapCreateBulk(slice any, setFunc func(*RoleGroupsCreate, int)) *RoleGroupsCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &RoleGroupMappingCreateBulk{err: fmt.Errorf("calling to RoleGroupMappingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &RoleGroupsCreateBulk{err: fmt.Errorf("calling to RoleGroupsClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*RoleGroupMappingCreate, rv.Len())
+	builders := make([]*RoleGroupsCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &RoleGroupMappingCreateBulk{config: c.config, builders: builders}
+	return &RoleGroupsCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for RoleGroupMapping.
-func (c *RoleGroupMappingClient) Update() *RoleGroupMappingUpdate {
-	mutation := newRoleGroupMappingMutation(c.config, OpUpdate)
-	return &RoleGroupMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for RoleGroups.
+func (c *RoleGroupsClient) Update() *RoleGroupsUpdate {
+	mutation := newRoleGroupsMutation(c.config, OpUpdate)
+	return &RoleGroupsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *RoleGroupMappingClient) UpdateOne(_m *RoleGroupMapping) *RoleGroupMappingUpdateOne {
-	mutation := newRoleGroupMappingMutation(c.config, OpUpdateOne, withRoleGroupMapping(_m))
-	return &RoleGroupMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *RoleGroupsClient) UpdateOne(_m *RoleGroups) *RoleGroupsUpdateOne {
+	mutation := newRoleGroupsMutation(c.config, OpUpdateOne, withRoleGroups(_m))
+	return &RoleGroupsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RoleGroupMappingClient) UpdateOneID(id int) *RoleGroupMappingUpdateOne {
-	mutation := newRoleGroupMappingMutation(c.config, OpUpdateOne, withRoleGroupMappingID(id))
-	return &RoleGroupMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *RoleGroupsClient) UpdateOneID(id int) *RoleGroupsUpdateOne {
+	mutation := newRoleGroupsMutation(c.config, OpUpdateOne, withRoleGroupsID(id))
+	return &RoleGroupsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for RoleGroupMapping.
-func (c *RoleGroupMappingClient) Delete() *RoleGroupMappingDelete {
-	mutation := newRoleGroupMappingMutation(c.config, OpDelete)
-	return &RoleGroupMappingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for RoleGroups.
+func (c *RoleGroupsClient) Delete() *RoleGroupsDelete {
+	mutation := newRoleGroupsMutation(c.config, OpDelete)
+	return &RoleGroupsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *RoleGroupMappingClient) DeleteOne(_m *RoleGroupMapping) *RoleGroupMappingDeleteOne {
+func (c *RoleGroupsClient) DeleteOne(_m *RoleGroups) *RoleGroupsDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *RoleGroupMappingClient) DeleteOneID(id int) *RoleGroupMappingDeleteOne {
-	builder := c.Delete().Where(rolegroupmapping.ID(id))
+func (c *RoleGroupsClient) DeleteOneID(id int) *RoleGroupsDeleteOne {
+	builder := c.Delete().Where(rolegroups.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &RoleGroupMappingDeleteOne{builder}
+	return &RoleGroupsDeleteOne{builder}
 }
 
-// Query returns a query builder for RoleGroupMapping.
-func (c *RoleGroupMappingClient) Query() *RoleGroupMappingQuery {
-	return &RoleGroupMappingQuery{
+// Query returns a query builder for RoleGroups.
+func (c *RoleGroupsClient) Query() *RoleGroupsQuery {
+	return &RoleGroupsQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeRoleGroupMapping},
+		ctx:    &QueryContext{Type: TypeRoleGroups},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a RoleGroupMapping entity by its id.
-func (c *RoleGroupMappingClient) Get(ctx context.Context, id int) (*RoleGroupMapping, error) {
-	return c.Query().Where(rolegroupmapping.ID(id)).Only(ctx)
+// Get returns a RoleGroups entity by its id.
+func (c *RoleGroupsClient) Get(ctx context.Context, id int) (*RoleGroups, error) {
+	return c.Query().Where(rolegroups.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RoleGroupMappingClient) GetX(ctx context.Context, id int) *RoleGroupMapping {
+func (c *RoleGroupsClient) GetX(ctx context.Context, id int) *RoleGroups {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1591,15 +1591,15 @@ func (c *RoleGroupMappingClient) GetX(ctx context.Context, id int) *RoleGroupMap
 	return obj
 }
 
-// QueryLionRoles queries the lion_roles edge of a RoleGroupMapping.
-func (c *RoleGroupMappingClient) QueryLionRoles(_m *RoleGroupMapping) *RolesQuery {
+// QueryLionRoles queries the lion_roles edge of a RoleGroups.
+func (c *RoleGroupsClient) QueryLionRoles(_m *RoleGroups) *RolesQuery {
 	query := (&RolesClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(rolegroupmapping.Table, rolegroupmapping.FieldID, id),
+			sqlgraph.From(rolegroups.Table, rolegroups.FieldID, id),
 			sqlgraph.To(roles.Table, roles.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, rolegroupmapping.LionRolesTable, rolegroupmapping.LionRolesColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolegroups.LionRolesTable, rolegroups.LionRolesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1607,15 +1607,15 @@ func (c *RoleGroupMappingClient) QueryLionRoles(_m *RoleGroupMapping) *RolesQuer
 	return query
 }
 
-// QueryLionGroups queries the lion_groups edge of a RoleGroupMapping.
-func (c *RoleGroupMappingClient) QueryLionGroups(_m *RoleGroupMapping) *GroupsQuery {
+// QueryLionGroups queries the lion_groups edge of a RoleGroups.
+func (c *RoleGroupsClient) QueryLionGroups(_m *RoleGroups) *GroupsQuery {
 	query := (&GroupsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(rolegroupmapping.Table, rolegroupmapping.FieldID, id),
+			sqlgraph.From(rolegroups.Table, rolegroups.FieldID, id),
 			sqlgraph.To(groups.Table, groups.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, rolegroupmapping.LionGroupsTable, rolegroupmapping.LionGroupsColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolegroups.LionGroupsTable, rolegroups.LionGroupsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1624,131 +1624,131 @@ func (c *RoleGroupMappingClient) QueryLionGroups(_m *RoleGroupMapping) *GroupsQu
 }
 
 // Hooks returns the client hooks.
-func (c *RoleGroupMappingClient) Hooks() []Hook {
-	return c.hooks.RoleGroupMapping
+func (c *RoleGroupsClient) Hooks() []Hook {
+	return c.hooks.RoleGroups
 }
 
 // Interceptors returns the client interceptors.
-func (c *RoleGroupMappingClient) Interceptors() []Interceptor {
-	return c.inters.RoleGroupMapping
+func (c *RoleGroupsClient) Interceptors() []Interceptor {
+	return c.inters.RoleGroups
 }
 
-func (c *RoleGroupMappingClient) mutate(ctx context.Context, m *RoleGroupMappingMutation) (Value, error) {
+func (c *RoleGroupsClient) mutate(ctx context.Context, m *RoleGroupsMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&RoleGroupMappingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleGroupsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&RoleGroupMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleGroupsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&RoleGroupMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleGroupsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&RoleGroupMappingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&RoleGroupsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("lion: unknown RoleGroupMapping mutation op: %q", m.Op())
+		return nil, fmt.Errorf("lion: unknown RoleGroups mutation op: %q", m.Op())
 	}
 }
 
-// RoleMenuMappingClient is a client for the RoleMenuMapping schema.
-type RoleMenuMappingClient struct {
+// RoleMenusClient is a client for the RoleMenus schema.
+type RoleMenusClient struct {
 	config
 }
 
-// NewRoleMenuMappingClient returns a client for the RoleMenuMapping from the given config.
-func NewRoleMenuMappingClient(c config) *RoleMenuMappingClient {
-	return &RoleMenuMappingClient{config: c}
+// NewRoleMenusClient returns a client for the RoleMenus from the given config.
+func NewRoleMenusClient(c config) *RoleMenusClient {
+	return &RoleMenusClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `rolemenumapping.Hooks(f(g(h())))`.
-func (c *RoleMenuMappingClient) Use(hooks ...Hook) {
-	c.hooks.RoleMenuMapping = append(c.hooks.RoleMenuMapping, hooks...)
+// A call to `Use(f, g, h)` equals to `rolemenus.Hooks(f(g(h())))`.
+func (c *RoleMenusClient) Use(hooks ...Hook) {
+	c.hooks.RoleMenus = append(c.hooks.RoleMenus, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `rolemenumapping.Intercept(f(g(h())))`.
-func (c *RoleMenuMappingClient) Intercept(interceptors ...Interceptor) {
-	c.inters.RoleMenuMapping = append(c.inters.RoleMenuMapping, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `rolemenus.Intercept(f(g(h())))`.
+func (c *RoleMenusClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RoleMenus = append(c.inters.RoleMenus, interceptors...)
 }
 
-// Create returns a builder for creating a RoleMenuMapping entity.
-func (c *RoleMenuMappingClient) Create() *RoleMenuMappingCreate {
-	mutation := newRoleMenuMappingMutation(c.config, OpCreate)
-	return &RoleMenuMappingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a RoleMenus entity.
+func (c *RoleMenusClient) Create() *RoleMenusCreate {
+	mutation := newRoleMenusMutation(c.config, OpCreate)
+	return &RoleMenusCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of RoleMenuMapping entities.
-func (c *RoleMenuMappingClient) CreateBulk(builders ...*RoleMenuMappingCreate) *RoleMenuMappingCreateBulk {
-	return &RoleMenuMappingCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of RoleMenus entities.
+func (c *RoleMenusClient) CreateBulk(builders ...*RoleMenusCreate) *RoleMenusCreateBulk {
+	return &RoleMenusCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *RoleMenuMappingClient) MapCreateBulk(slice any, setFunc func(*RoleMenuMappingCreate, int)) *RoleMenuMappingCreateBulk {
+func (c *RoleMenusClient) MapCreateBulk(slice any, setFunc func(*RoleMenusCreate, int)) *RoleMenusCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &RoleMenuMappingCreateBulk{err: fmt.Errorf("calling to RoleMenuMappingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &RoleMenusCreateBulk{err: fmt.Errorf("calling to RoleMenusClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*RoleMenuMappingCreate, rv.Len())
+	builders := make([]*RoleMenusCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &RoleMenuMappingCreateBulk{config: c.config, builders: builders}
+	return &RoleMenusCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for RoleMenuMapping.
-func (c *RoleMenuMappingClient) Update() *RoleMenuMappingUpdate {
-	mutation := newRoleMenuMappingMutation(c.config, OpUpdate)
-	return &RoleMenuMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for RoleMenus.
+func (c *RoleMenusClient) Update() *RoleMenusUpdate {
+	mutation := newRoleMenusMutation(c.config, OpUpdate)
+	return &RoleMenusUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *RoleMenuMappingClient) UpdateOne(_m *RoleMenuMapping) *RoleMenuMappingUpdateOne {
-	mutation := newRoleMenuMappingMutation(c.config, OpUpdateOne, withRoleMenuMapping(_m))
-	return &RoleMenuMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *RoleMenusClient) UpdateOne(_m *RoleMenus) *RoleMenusUpdateOne {
+	mutation := newRoleMenusMutation(c.config, OpUpdateOne, withRoleMenus(_m))
+	return &RoleMenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RoleMenuMappingClient) UpdateOneID(id int) *RoleMenuMappingUpdateOne {
-	mutation := newRoleMenuMappingMutation(c.config, OpUpdateOne, withRoleMenuMappingID(id))
-	return &RoleMenuMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *RoleMenusClient) UpdateOneID(id int) *RoleMenusUpdateOne {
+	mutation := newRoleMenusMutation(c.config, OpUpdateOne, withRoleMenusID(id))
+	return &RoleMenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for RoleMenuMapping.
-func (c *RoleMenuMappingClient) Delete() *RoleMenuMappingDelete {
-	mutation := newRoleMenuMappingMutation(c.config, OpDelete)
-	return &RoleMenuMappingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for RoleMenus.
+func (c *RoleMenusClient) Delete() *RoleMenusDelete {
+	mutation := newRoleMenusMutation(c.config, OpDelete)
+	return &RoleMenusDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *RoleMenuMappingClient) DeleteOne(_m *RoleMenuMapping) *RoleMenuMappingDeleteOne {
+func (c *RoleMenusClient) DeleteOne(_m *RoleMenus) *RoleMenusDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *RoleMenuMappingClient) DeleteOneID(id int) *RoleMenuMappingDeleteOne {
-	builder := c.Delete().Where(rolemenumapping.ID(id))
+func (c *RoleMenusClient) DeleteOneID(id int) *RoleMenusDeleteOne {
+	builder := c.Delete().Where(rolemenus.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &RoleMenuMappingDeleteOne{builder}
+	return &RoleMenusDeleteOne{builder}
 }
 
-// Query returns a query builder for RoleMenuMapping.
-func (c *RoleMenuMappingClient) Query() *RoleMenuMappingQuery {
-	return &RoleMenuMappingQuery{
+// Query returns a query builder for RoleMenus.
+func (c *RoleMenusClient) Query() *RoleMenusQuery {
+	return &RoleMenusQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeRoleMenuMapping},
+		ctx:    &QueryContext{Type: TypeRoleMenus},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a RoleMenuMapping entity by its id.
-func (c *RoleMenuMappingClient) Get(ctx context.Context, id int) (*RoleMenuMapping, error) {
-	return c.Query().Where(rolemenumapping.ID(id)).Only(ctx)
+// Get returns a RoleMenus entity by its id.
+func (c *RoleMenusClient) Get(ctx context.Context, id int) (*RoleMenus, error) {
+	return c.Query().Where(rolemenus.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RoleMenuMappingClient) GetX(ctx context.Context, id int) *RoleMenuMapping {
+func (c *RoleMenusClient) GetX(ctx context.Context, id int) *RoleMenus {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1756,15 +1756,15 @@ func (c *RoleMenuMappingClient) GetX(ctx context.Context, id int) *RoleMenuMappi
 	return obj
 }
 
-// QueryLionRoles queries the lion_roles edge of a RoleMenuMapping.
-func (c *RoleMenuMappingClient) QueryLionRoles(_m *RoleMenuMapping) *RolesQuery {
+// QueryLionRoles queries the lion_roles edge of a RoleMenus.
+func (c *RoleMenusClient) QueryLionRoles(_m *RoleMenus) *RolesQuery {
 	query := (&RolesClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(rolemenumapping.Table, rolemenumapping.FieldID, id),
+			sqlgraph.From(rolemenus.Table, rolemenus.FieldID, id),
 			sqlgraph.To(roles.Table, roles.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, rolemenumapping.LionRolesTable, rolemenumapping.LionRolesColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolemenus.LionRolesTable, rolemenus.LionRolesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1772,15 +1772,15 @@ func (c *RoleMenuMappingClient) QueryLionRoles(_m *RoleMenuMapping) *RolesQuery 
 	return query
 }
 
-// QueryLionMenus queries the lion_menus edge of a RoleMenuMapping.
-func (c *RoleMenuMappingClient) QueryLionMenus(_m *RoleMenuMapping) *MenusQuery {
+// QueryLionMenus queries the lion_menus edge of a RoleMenus.
+func (c *RoleMenusClient) QueryLionMenus(_m *RoleMenus) *MenusQuery {
 	query := (&MenusClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(rolemenumapping.Table, rolemenumapping.FieldID, id),
+			sqlgraph.From(rolemenus.Table, rolemenus.FieldID, id),
 			sqlgraph.To(menus.Table, menus.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, rolemenumapping.LionMenusTable, rolemenumapping.LionMenusColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolemenus.LionMenusTable, rolemenus.LionMenusColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1789,131 +1789,131 @@ func (c *RoleMenuMappingClient) QueryLionMenus(_m *RoleMenuMapping) *MenusQuery 
 }
 
 // Hooks returns the client hooks.
-func (c *RoleMenuMappingClient) Hooks() []Hook {
-	return c.hooks.RoleMenuMapping
+func (c *RoleMenusClient) Hooks() []Hook {
+	return c.hooks.RoleMenus
 }
 
 // Interceptors returns the client interceptors.
-func (c *RoleMenuMappingClient) Interceptors() []Interceptor {
-	return c.inters.RoleMenuMapping
+func (c *RoleMenusClient) Interceptors() []Interceptor {
+	return c.inters.RoleMenus
 }
 
-func (c *RoleMenuMappingClient) mutate(ctx context.Context, m *RoleMenuMappingMutation) (Value, error) {
+func (c *RoleMenusClient) mutate(ctx context.Context, m *RoleMenusMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&RoleMenuMappingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleMenusCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&RoleMenuMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleMenusUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&RoleMenuMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleMenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&RoleMenuMappingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&RoleMenusDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("lion: unknown RoleMenuMapping mutation op: %q", m.Op())
+		return nil, fmt.Errorf("lion: unknown RoleMenus mutation op: %q", m.Op())
 	}
 }
 
-// RoleUserMappingClient is a client for the RoleUserMapping schema.
-type RoleUserMappingClient struct {
+// RoleUsersClient is a client for the RoleUsers schema.
+type RoleUsersClient struct {
 	config
 }
 
-// NewRoleUserMappingClient returns a client for the RoleUserMapping from the given config.
-func NewRoleUserMappingClient(c config) *RoleUserMappingClient {
-	return &RoleUserMappingClient{config: c}
+// NewRoleUsersClient returns a client for the RoleUsers from the given config.
+func NewRoleUsersClient(c config) *RoleUsersClient {
+	return &RoleUsersClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `roleusermapping.Hooks(f(g(h())))`.
-func (c *RoleUserMappingClient) Use(hooks ...Hook) {
-	c.hooks.RoleUserMapping = append(c.hooks.RoleUserMapping, hooks...)
+// A call to `Use(f, g, h)` equals to `roleusers.Hooks(f(g(h())))`.
+func (c *RoleUsersClient) Use(hooks ...Hook) {
+	c.hooks.RoleUsers = append(c.hooks.RoleUsers, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `roleusermapping.Intercept(f(g(h())))`.
-func (c *RoleUserMappingClient) Intercept(interceptors ...Interceptor) {
-	c.inters.RoleUserMapping = append(c.inters.RoleUserMapping, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `roleusers.Intercept(f(g(h())))`.
+func (c *RoleUsersClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RoleUsers = append(c.inters.RoleUsers, interceptors...)
 }
 
-// Create returns a builder for creating a RoleUserMapping entity.
-func (c *RoleUserMappingClient) Create() *RoleUserMappingCreate {
-	mutation := newRoleUserMappingMutation(c.config, OpCreate)
-	return &RoleUserMappingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a RoleUsers entity.
+func (c *RoleUsersClient) Create() *RoleUsersCreate {
+	mutation := newRoleUsersMutation(c.config, OpCreate)
+	return &RoleUsersCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of RoleUserMapping entities.
-func (c *RoleUserMappingClient) CreateBulk(builders ...*RoleUserMappingCreate) *RoleUserMappingCreateBulk {
-	return &RoleUserMappingCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of RoleUsers entities.
+func (c *RoleUsersClient) CreateBulk(builders ...*RoleUsersCreate) *RoleUsersCreateBulk {
+	return &RoleUsersCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *RoleUserMappingClient) MapCreateBulk(slice any, setFunc func(*RoleUserMappingCreate, int)) *RoleUserMappingCreateBulk {
+func (c *RoleUsersClient) MapCreateBulk(slice any, setFunc func(*RoleUsersCreate, int)) *RoleUsersCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &RoleUserMappingCreateBulk{err: fmt.Errorf("calling to RoleUserMappingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &RoleUsersCreateBulk{err: fmt.Errorf("calling to RoleUsersClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*RoleUserMappingCreate, rv.Len())
+	builders := make([]*RoleUsersCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &RoleUserMappingCreateBulk{config: c.config, builders: builders}
+	return &RoleUsersCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for RoleUserMapping.
-func (c *RoleUserMappingClient) Update() *RoleUserMappingUpdate {
-	mutation := newRoleUserMappingMutation(c.config, OpUpdate)
-	return &RoleUserMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for RoleUsers.
+func (c *RoleUsersClient) Update() *RoleUsersUpdate {
+	mutation := newRoleUsersMutation(c.config, OpUpdate)
+	return &RoleUsersUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *RoleUserMappingClient) UpdateOne(_m *RoleUserMapping) *RoleUserMappingUpdateOne {
-	mutation := newRoleUserMappingMutation(c.config, OpUpdateOne, withRoleUserMapping(_m))
-	return &RoleUserMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *RoleUsersClient) UpdateOne(_m *RoleUsers) *RoleUsersUpdateOne {
+	mutation := newRoleUsersMutation(c.config, OpUpdateOne, withRoleUsers(_m))
+	return &RoleUsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RoleUserMappingClient) UpdateOneID(id int) *RoleUserMappingUpdateOne {
-	mutation := newRoleUserMappingMutation(c.config, OpUpdateOne, withRoleUserMappingID(id))
-	return &RoleUserMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *RoleUsersClient) UpdateOneID(id int) *RoleUsersUpdateOne {
+	mutation := newRoleUsersMutation(c.config, OpUpdateOne, withRoleUsersID(id))
+	return &RoleUsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for RoleUserMapping.
-func (c *RoleUserMappingClient) Delete() *RoleUserMappingDelete {
-	mutation := newRoleUserMappingMutation(c.config, OpDelete)
-	return &RoleUserMappingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for RoleUsers.
+func (c *RoleUsersClient) Delete() *RoleUsersDelete {
+	mutation := newRoleUsersMutation(c.config, OpDelete)
+	return &RoleUsersDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *RoleUserMappingClient) DeleteOne(_m *RoleUserMapping) *RoleUserMappingDeleteOne {
+func (c *RoleUsersClient) DeleteOne(_m *RoleUsers) *RoleUsersDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *RoleUserMappingClient) DeleteOneID(id int) *RoleUserMappingDeleteOne {
-	builder := c.Delete().Where(roleusermapping.ID(id))
+func (c *RoleUsersClient) DeleteOneID(id int) *RoleUsersDeleteOne {
+	builder := c.Delete().Where(roleusers.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &RoleUserMappingDeleteOne{builder}
+	return &RoleUsersDeleteOne{builder}
 }
 
-// Query returns a query builder for RoleUserMapping.
-func (c *RoleUserMappingClient) Query() *RoleUserMappingQuery {
-	return &RoleUserMappingQuery{
+// Query returns a query builder for RoleUsers.
+func (c *RoleUsersClient) Query() *RoleUsersQuery {
+	return &RoleUsersQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeRoleUserMapping},
+		ctx:    &QueryContext{Type: TypeRoleUsers},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a RoleUserMapping entity by its id.
-func (c *RoleUserMappingClient) Get(ctx context.Context, id int) (*RoleUserMapping, error) {
-	return c.Query().Where(roleusermapping.ID(id)).Only(ctx)
+// Get returns a RoleUsers entity by its id.
+func (c *RoleUsersClient) Get(ctx context.Context, id int) (*RoleUsers, error) {
+	return c.Query().Where(roleusers.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RoleUserMappingClient) GetX(ctx context.Context, id int) *RoleUserMapping {
+func (c *RoleUsersClient) GetX(ctx context.Context, id int) *RoleUsers {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1921,15 +1921,15 @@ func (c *RoleUserMappingClient) GetX(ctx context.Context, id int) *RoleUserMappi
 	return obj
 }
 
-// QueryLionRoles queries the lion_roles edge of a RoleUserMapping.
-func (c *RoleUserMappingClient) QueryLionRoles(_m *RoleUserMapping) *RolesQuery {
+// QueryLionRoles queries the lion_roles edge of a RoleUsers.
+func (c *RoleUsersClient) QueryLionRoles(_m *RoleUsers) *RolesQuery {
 	query := (&RolesClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(roleusermapping.Table, roleusermapping.FieldID, id),
+			sqlgraph.From(roleusers.Table, roleusers.FieldID, id),
 			sqlgraph.To(roles.Table, roles.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, roleusermapping.LionRolesTable, roleusermapping.LionRolesColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, roleusers.LionRolesTable, roleusers.LionRolesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1937,15 +1937,15 @@ func (c *RoleUserMappingClient) QueryLionRoles(_m *RoleUserMapping) *RolesQuery 
 	return query
 }
 
-// QueryLionUsers queries the lion_users edge of a RoleUserMapping.
-func (c *RoleUserMappingClient) QueryLionUsers(_m *RoleUserMapping) *UsersQuery {
+// QueryLionUsers queries the lion_users edge of a RoleUsers.
+func (c *RoleUsersClient) QueryLionUsers(_m *RoleUsers) *UsersQuery {
 	query := (&UsersClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(roleusermapping.Table, roleusermapping.FieldID, id),
+			sqlgraph.From(roleusers.Table, roleusers.FieldID, id),
 			sqlgraph.To(users.Table, users.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, roleusermapping.LionUsersTable, roleusermapping.LionUsersColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, roleusers.LionUsersTable, roleusers.LionUsersColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1954,27 +1954,27 @@ func (c *RoleUserMappingClient) QueryLionUsers(_m *RoleUserMapping) *UsersQuery 
 }
 
 // Hooks returns the client hooks.
-func (c *RoleUserMappingClient) Hooks() []Hook {
-	return c.hooks.RoleUserMapping
+func (c *RoleUsersClient) Hooks() []Hook {
+	return c.hooks.RoleUsers
 }
 
 // Interceptors returns the client interceptors.
-func (c *RoleUserMappingClient) Interceptors() []Interceptor {
-	return c.inters.RoleUserMapping
+func (c *RoleUsersClient) Interceptors() []Interceptor {
+	return c.inters.RoleUsers
 }
 
-func (c *RoleUserMappingClient) mutate(ctx context.Context, m *RoleUserMappingMutation) (Value, error) {
+func (c *RoleUsersClient) mutate(ctx context.Context, m *RoleUsersMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&RoleUserMappingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleUsersCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&RoleUserMappingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleUsersUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&RoleUserMappingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleUsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&RoleUserMappingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&RoleUsersDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("lion: unknown RoleUserMapping mutation op: %q", m.Op())
+		return nil, fmt.Errorf("lion: unknown RoleUsers mutation op: %q", m.Op())
 	}
 }
 
@@ -2087,13 +2087,13 @@ func (c *RolesClient) GetX(ctx context.Context, id int) *Roles {
 }
 
 // QueryLionRoleMenus queries the lion_role_menus edge of a Roles.
-func (c *RolesClient) QueryLionRoleMenus(_m *Roles) *RoleMenuMappingQuery {
-	query := (&RoleMenuMappingClient{config: c.config}).Query()
+func (c *RolesClient) QueryLionRoleMenus(_m *Roles) *RoleMenusQuery {
+	query := (&RoleMenusClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(roles.Table, roles.FieldID, id),
-			sqlgraph.To(rolemenumapping.Table, rolemenumapping.FieldID),
+			sqlgraph.To(rolemenus.Table, rolemenus.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleMenusTable, roles.LionRoleMenusColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -2103,13 +2103,13 @@ func (c *RolesClient) QueryLionRoleMenus(_m *Roles) *RoleMenuMappingQuery {
 }
 
 // QueryLionRoleUsers queries the lion_role_users edge of a Roles.
-func (c *RolesClient) QueryLionRoleUsers(_m *Roles) *RoleUserMappingQuery {
-	query := (&RoleUserMappingClient{config: c.config}).Query()
+func (c *RolesClient) QueryLionRoleUsers(_m *Roles) *RoleUsersQuery {
+	query := (&RoleUsersClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(roles.Table, roles.FieldID, id),
-			sqlgraph.To(roleusermapping.Table, roleusermapping.FieldID),
+			sqlgraph.To(roleusers.Table, roleusers.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleUsersTable, roles.LionRoleUsersColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -2119,13 +2119,13 @@ func (c *RolesClient) QueryLionRoleUsers(_m *Roles) *RoleUserMappingQuery {
 }
 
 // QueryLionRoleGroups queries the lion_role_groups edge of a Roles.
-func (c *RolesClient) QueryLionRoleGroups(_m *Roles) *RoleGroupMappingQuery {
-	query := (&RoleGroupMappingClient{config: c.config}).Query()
+func (c *RolesClient) QueryLionRoleGroups(_m *Roles) *RoleGroupsQuery {
+	query := (&RoleGroupsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(roles.Table, roles.FieldID, id),
-			sqlgraph.To(rolegroupmapping.Table, rolegroupmapping.FieldID),
+			sqlgraph.To(rolegroups.Table, rolegroups.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleGroupsTable, roles.LionRoleGroupsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -2800,13 +2800,13 @@ func (c *UsersClient) GetX(ctx context.Context, id int) *Users {
 }
 
 // QueryLionUsers queries the lion_users edge of a Users.
-func (c *UsersClient) QueryLionUsers(_m *Users) *RoleUserMappingQuery {
-	query := (&RoleUserMappingClient{config: c.config}).Query()
+func (c *UsersClient) QueryLionUsers(_m *Users) *RoleUsersQuery {
+	query := (&RoleUsersClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(users.Table, users.FieldID, id),
-			sqlgraph.To(roleusermapping.Table, roleusermapping.FieldID),
+			sqlgraph.To(roleusers.Table, roleusers.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, users.LionUsersTable, users.LionUsersColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -2815,15 +2815,15 @@ func (c *UsersClient) QueryLionUsers(_m *Users) *RoleUserMappingQuery {
 	return query
 }
 
-// QueryLionDepartmentLeaders queries the lion_department_leaders edge of a Users.
-func (c *UsersClient) QueryLionDepartmentLeaders(_m *Users) *DepartmentLeadersQuery {
-	query := (&DepartmentLeadersClient{config: c.config}).Query()
+// QueryLionDepartmentUsers queries the lion_department_users edge of a Users.
+func (c *UsersClient) QueryLionDepartmentUsers(_m *Users) *DepartmentUsersQuery {
+	query := (&DepartmentUsersClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(users.Table, users.FieldID, id),
-			sqlgraph.To(departmentleaders.Table, departmentleaders.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, users.LionDepartmentLeadersTable, users.LionDepartmentLeadersColumn),
+			sqlgraph.To(departmentusers.Table, departmentusers.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, users.LionDepartmentUsersTable, users.LionDepartmentUsersColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2859,14 +2859,13 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AuthProviders, Demo, DepartmentLeaders, Departments, GroupUsers, Groups, Menus,
-		Permissions, RoleGroupMapping, RoleMenuMapping, RoleUserMapping, Roles,
-		SecurityKeys, UserAttributes, UserAuthLocal, UserAuthSocial, Users []ent.Hook
+		AuthProviders, Demo, DepartmentUsers, Departments, GroupUsers, Groups, Menus,
+		Permissions, RoleGroups, RoleMenus, RoleUsers, Roles, SecurityKeys,
+		UserAttributes, UserAuthLocal, UserAuthSocial, Users []ent.Hook
 	}
 	inters struct {
-		AuthProviders, Demo, DepartmentLeaders, Departments, GroupUsers, Groups, Menus,
-		Permissions, RoleGroupMapping, RoleMenuMapping, RoleUserMapping, Roles,
-		SecurityKeys, UserAttributes, UserAuthLocal, UserAuthSocial,
-		Users []ent.Interceptor
+		AuthProviders, Demo, DepartmentUsers, Departments, GroupUsers, Groups, Menus,
+		Permissions, RoleGroups, RoleMenus, RoleUsers, Roles, SecurityKeys,
+		UserAttributes, UserAuthLocal, UserAuthSocial, Users []ent.Interceptor
 	}
 )

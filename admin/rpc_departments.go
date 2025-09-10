@@ -7,7 +7,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/departmentleaders"
+	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -57,7 +57,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 
 	if req.Department.Leaders != nil {
 		for _, leader := range req.Department.Leaders {
-			tmp, err := tx.DepartmentLeaders.Create().
+			tmp, err := tx.DepartmentUsers.Create().
 				SetDepartmentID(dp.ID).
 				SetLeaderType(int(leader.Type)).
 				SetUserID(int(leader.UserId)).
@@ -93,8 +93,8 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 		return result, err
 	}
 
-	leaders, err := a.config.db.DepartmentLeaders.Query().
-		Where(departmentleaders.UserIDEQ(userIDInt)).
+	leaders, err := a.config.db.DepartmentUsers.Query().
+		Where(departmentusers.UserIDEQ(userIDInt)).
 		WithLionDepartments().All(ctx)
 	if err != nil {
 		return result, err
@@ -210,8 +210,8 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 	}
 
 	// 查领导
-	leaders, err := a.config.db.DepartmentLeaders.Query().
-		Where(departmentleaders.HasLionDepartmentsWith(departments.ID(dep.ID))).All(ctx)
+	leaders, err := a.config.db.DepartmentUsers.Query().
+		Where(departmentusers.HasLionDepartmentsWith(departments.ID(dep.ID))).All(ctx)
 
 	pbDep := &adminv1.Department{
 		Id:          int32(dep.ID),

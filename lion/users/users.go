@@ -66,24 +66,24 @@ const (
 	FieldDescription = "description"
 	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
 	EdgeLionUsers = "lion_users"
-	// EdgeLionDepartmentLeaders holds the string denoting the lion_department_leaders edge name in mutations.
-	EdgeLionDepartmentLeaders = "lion_department_leaders"
+	// EdgeLionDepartmentUsers holds the string denoting the lion_department_users edge name in mutations.
+	EdgeLionDepartmentUsers = "lion_department_users"
 	// Table holds the table name of the users in the database.
 	Table = "lion_users"
 	// LionUsersTable is the table that holds the lion_users relation/edge.
-	LionUsersTable = "lion_role_user_mapping"
-	// LionUsersInverseTable is the table name for the RoleUserMapping entity.
-	// It exists in this package in order to avoid circular dependency with the "roleusermapping" package.
-	LionUsersInverseTable = "lion_role_user_mapping"
+	LionUsersTable = "lion_role_users"
+	// LionUsersInverseTable is the table name for the RoleUsers entity.
+	// It exists in this package in order to avoid circular dependency with the "roleusers" package.
+	LionUsersInverseTable = "lion_role_users"
 	// LionUsersColumn is the table column denoting the lion_users relation/edge.
 	LionUsersColumn = "user_id"
-	// LionDepartmentLeadersTable is the table that holds the lion_department_leaders relation/edge.
-	LionDepartmentLeadersTable = "lion_department_leaders"
-	// LionDepartmentLeadersInverseTable is the table name for the DepartmentLeaders entity.
-	// It exists in this package in order to avoid circular dependency with the "departmentleaders" package.
-	LionDepartmentLeadersInverseTable = "lion_department_leaders"
-	// LionDepartmentLeadersColumn is the table column denoting the lion_department_leaders relation/edge.
-	LionDepartmentLeadersColumn = "user_id"
+	// LionDepartmentUsersTable is the table that holds the lion_department_users relation/edge.
+	LionDepartmentUsersTable = "lion_department_users"
+	// LionDepartmentUsersInverseTable is the table name for the DepartmentUsers entity.
+	// It exists in this package in order to avoid circular dependency with the "departmentusers" package.
+	LionDepartmentUsersInverseTable = "lion_department_users"
+	// LionDepartmentUsersColumn is the table column denoting the lion_department_users relation/edge.
+	LionDepartmentUsersColumn = "user_id"
 )
 
 // Columns holds all SQL columns for users fields.
@@ -305,17 +305,17 @@ func ByLionUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByLionDepartmentLeadersCount orders the results by lion_department_leaders count.
-func ByLionDepartmentLeadersCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionDepartmentUsersCount orders the results by lion_department_users count.
+func ByLionDepartmentUsersCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionDepartmentLeadersStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionDepartmentUsersStep(), opts...)
 	}
 }
 
-// ByLionDepartmentLeaders orders the results by lion_department_leaders terms.
-func ByLionDepartmentLeaders(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionDepartmentUsers orders the results by lion_department_users terms.
+func ByLionDepartmentUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentLeadersStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newLionUsersStep() *sqlgraph.Step {
@@ -325,10 +325,10 @@ func newLionUsersStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, LionUsersTable, LionUsersColumn),
 	)
 }
-func newLionDepartmentLeadersStep() *sqlgraph.Step {
+func newLionDepartmentUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionDepartmentLeadersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentLeadersTable, LionDepartmentLeadersColumn),
+		sqlgraph.To(LionDepartmentUsersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentUsersTable, LionDepartmentUsersColumn),
 	)
 }

@@ -445,21 +445,21 @@ func DescriptionContainsFold(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// HasLionDepartmentLeaders applies the HasEdge predicate on the "lion_department_leaders" edge.
-func HasLionDepartmentLeaders() predicate.Departments {
+// HasLionDepartmentUsers applies the HasEdge predicate on the "lion_department_users" edge.
+func HasLionDepartmentUsers() predicate.Departments {
 	return predicate.Departments(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentLeadersTable, LionDepartmentLeadersColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentUsersTable, LionDepartmentUsersColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLionDepartmentLeadersWith applies the HasEdge predicate on the "lion_department_leaders" edge with a given conditions (other predicates).
-func HasLionDepartmentLeadersWith(preds ...predicate.DepartmentLeaders) predicate.Departments {
+// HasLionDepartmentUsersWith applies the HasEdge predicate on the "lion_department_users" edge with a given conditions (other predicates).
+func HasLionDepartmentUsersWith(preds ...predicate.DepartmentUsers) predicate.Departments {
 	return predicate.Departments(func(s *sql.Selector) {
-		step := newLionDepartmentLeadersStep()
+		step := newLionDepartmentUsersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

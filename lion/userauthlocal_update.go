@@ -34,26 +34,6 @@ func (_u *UserAuthLocalUpdate) SetUpdatedAt(v time.Time) *UserAuthLocalUpdate {
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *UserAuthLocalUpdate) SetDeletedAt(v time.Time) *UserAuthLocalUpdate {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *UserAuthLocalUpdate) SetNillableDeletedAt(v *time.Time) *UserAuthLocalUpdate {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *UserAuthLocalUpdate) ClearDeletedAt() *UserAuthLocalUpdate {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetPasswordHash sets the "password_hash" field.
 func (_u *UserAuthLocalUpdate) SetPasswordHash(v []byte) *UserAuthLocalUpdate {
 	_u.mutation.SetPasswordHash(v)
@@ -186,12 +166,6 @@ func (_u *UserAuthLocalUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userauthlocal.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(userauthlocal.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(userauthlocal.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.PasswordHash(); ok {
 		_spec.SetField(userauthlocal.FieldPasswordHash, field.TypeBytes, value)
 	}
@@ -236,26 +210,6 @@ type UserAuthLocalUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *UserAuthLocalUpdateOne) SetUpdatedAt(v time.Time) *UserAuthLocalUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
-	return _u
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *UserAuthLocalUpdateOne) SetDeletedAt(v time.Time) *UserAuthLocalUpdateOne {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *UserAuthLocalUpdateOne) SetNillableDeletedAt(v *time.Time) *UserAuthLocalUpdateOne {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *UserAuthLocalUpdateOne) ClearDeletedAt() *UserAuthLocalUpdateOne {
-	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -420,12 +374,6 @@ func (_u *UserAuthLocalUpdateOne) sqlSave(ctx context.Context) (_node *UserAuthL
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userauthlocal.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(userauthlocal.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(userauthlocal.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.PasswordHash(); ok {
 		_spec.SetField(userauthlocal.FieldPasswordHash, field.TypeBytes, value)

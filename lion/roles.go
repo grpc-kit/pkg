@@ -34,11 +34,11 @@ type Roles struct {
 // RolesEdges holds the relations/edges for other nodes in the graph.
 type RolesEdges struct {
 	// LionRoleMenus holds the value of the lion_role_menus edge.
-	LionRoleMenus []*RoleMenuMapping `json:"lion_role_menus,omitempty"`
+	LionRoleMenus []*RoleMenus `json:"lion_role_menus,omitempty"`
 	// LionRoleUsers holds the value of the lion_role_users edge.
-	LionRoleUsers []*RoleUserMapping `json:"lion_role_users,omitempty"`
+	LionRoleUsers []*RoleUsers `json:"lion_role_users,omitempty"`
 	// LionRoleGroups holds the value of the lion_role_groups edge.
-	LionRoleGroups []*RoleGroupMapping `json:"lion_role_groups,omitempty"`
+	LionRoleGroups []*RoleGroups `json:"lion_role_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -46,7 +46,7 @@ type RolesEdges struct {
 
 // LionRoleMenusOrErr returns the LionRoleMenus value or an error if the edge
 // was not loaded in eager-loading.
-func (e RolesEdges) LionRoleMenusOrErr() ([]*RoleMenuMapping, error) {
+func (e RolesEdges) LionRoleMenusOrErr() ([]*RoleMenus, error) {
 	if e.loadedTypes[0] {
 		return e.LionRoleMenus, nil
 	}
@@ -55,7 +55,7 @@ func (e RolesEdges) LionRoleMenusOrErr() ([]*RoleMenuMapping, error) {
 
 // LionRoleUsersOrErr returns the LionRoleUsers value or an error if the edge
 // was not loaded in eager-loading.
-func (e RolesEdges) LionRoleUsersOrErr() ([]*RoleUserMapping, error) {
+func (e RolesEdges) LionRoleUsersOrErr() ([]*RoleUsers, error) {
 	if e.loadedTypes[1] {
 		return e.LionRoleUsers, nil
 	}
@@ -64,7 +64,7 @@ func (e RolesEdges) LionRoleUsersOrErr() ([]*RoleUserMapping, error) {
 
 // LionRoleGroupsOrErr returns the LionRoleGroups value or an error if the edge
 // was not loaded in eager-loading.
-func (e RolesEdges) LionRoleGroupsOrErr() ([]*RoleGroupMapping, error) {
+func (e RolesEdges) LionRoleGroupsOrErr() ([]*RoleGroups, error) {
 	if e.loadedTypes[2] {
 		return e.LionRoleGroups, nil
 	}
@@ -141,17 +141,17 @@ func (_m *Roles) Value(name string) (ent.Value, error) {
 }
 
 // QueryLionRoleMenus queries the "lion_role_menus" edge of the Roles entity.
-func (_m *Roles) QueryLionRoleMenus() *RoleMenuMappingQuery {
+func (_m *Roles) QueryLionRoleMenus() *RoleMenusQuery {
 	return NewRolesClient(_m.config).QueryLionRoleMenus(_m)
 }
 
 // QueryLionRoleUsers queries the "lion_role_users" edge of the Roles entity.
-func (_m *Roles) QueryLionRoleUsers() *RoleUserMappingQuery {
+func (_m *Roles) QueryLionRoleUsers() *RoleUsersQuery {
 	return NewRolesClient(_m.config).QueryLionRoleUsers(_m)
 }
 
 // QueryLionRoleGroups queries the "lion_role_groups" edge of the Roles entity.
-func (_m *Roles) QueryLionRoleGroups() *RoleGroupMappingQuery {
+func (_m *Roles) QueryLionRoleGroups() *RoleGroupsQuery {
 	return NewRolesClient(_m.config).QueryLionRoleGroups(_m)
 }
 

@@ -342,7 +342,7 @@ func HasLionGroups() predicate.Groups {
 }
 
 // HasLionGroupsWith applies the HasEdge predicate on the "lion_groups" edge with a given conditions (other predicates).
-func HasLionGroupsWith(preds ...predicate.RoleGroupMapping) predicate.Groups {
+func HasLionGroupsWith(preds ...predicate.RoleGroups) predicate.Groups {
 	return predicate.Groups(func(s *sql.Selector) {
 		step := newLionGroupsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

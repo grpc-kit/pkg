@@ -47,8 +47,8 @@ var (
 		Columns:    LionDemoColumns,
 		PrimaryKey: []*schema.Column{LionDemoColumns[0]},
 	}
-	// LionDepartmentLeadersColumns holds the columns for the "lion_department_leaders" table.
-	LionDepartmentLeadersColumns = []*schema.Column{
+	// LionDepartmentUsersColumns holds the columns for the "lion_department_users" table.
+	LionDepartmentUsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
@@ -56,21 +56,21 @@ var (
 		{Name: "department_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
-	// LionDepartmentLeadersTable holds the schema information for the "lion_department_leaders" table.
-	LionDepartmentLeadersTable = &schema.Table{
-		Name:       "lion_department_leaders",
-		Columns:    LionDepartmentLeadersColumns,
-		PrimaryKey: []*schema.Column{LionDepartmentLeadersColumns[0]},
+	// LionDepartmentUsersTable holds the schema information for the "lion_department_users" table.
+	LionDepartmentUsersTable = &schema.Table{
+		Name:       "lion_department_users",
+		Columns:    LionDepartmentUsersColumns,
+		PrimaryKey: []*schema.Column{LionDepartmentUsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "lion_department_leaders_lion_departments_lion_department_leaders",
-				Columns:    []*schema.Column{LionDepartmentLeadersColumns[4]},
+				Symbol:     "lion_department_users_lion_departments_lion_department_users",
+				Columns:    []*schema.Column{LionDepartmentUsersColumns[4]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "lion_department_leaders_lion_users_lion_department_leaders",
-				Columns:    []*schema.Column{LionDepartmentLeadersColumns[5]},
+				Symbol:     "lion_department_users_lion_users_lion_department_users",
+				Columns:    []*schema.Column{LionDepartmentUsersColumns[5]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -164,108 +164,108 @@ var (
 		Columns:    LionPermissionsColumns,
 		PrimaryKey: []*schema.Column{LionPermissionsColumns[0]},
 	}
-	// LionRoleGroupMappingColumns holds the columns for the "lion_role_group_mapping" table.
-	LionRoleGroupMappingColumns = []*schema.Column{
+	// LionRoleGroupsColumns holds the columns for the "lion_role_groups" table.
+	LionRoleGroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "group_id", Type: field.TypeInt},
 		{Name: "role_id", Type: field.TypeInt},
 	}
-	// LionRoleGroupMappingTable holds the schema information for the "lion_role_group_mapping" table.
-	LionRoleGroupMappingTable = &schema.Table{
-		Name:       "lion_role_group_mapping",
-		Columns:    LionRoleGroupMappingColumns,
-		PrimaryKey: []*schema.Column{LionRoleGroupMappingColumns[0]},
+	// LionRoleGroupsTable holds the schema information for the "lion_role_groups" table.
+	LionRoleGroupsTable = &schema.Table{
+		Name:       "lion_role_groups",
+		Columns:    LionRoleGroupsColumns,
+		PrimaryKey: []*schema.Column{LionRoleGroupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "lion_role_group_mapping_lion_groups_lion_groups",
-				Columns:    []*schema.Column{LionRoleGroupMappingColumns[3]},
+				Symbol:     "lion_role_groups_lion_groups_lion_groups",
+				Columns:    []*schema.Column{LionRoleGroupsColumns[3]},
 				RefColumns: []*schema.Column{LionGroupsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "lion_role_group_mapping_lion_roles_lion_role_groups",
-				Columns:    []*schema.Column{LionRoleGroupMappingColumns[4]},
+				Symbol:     "lion_role_groups_lion_roles_lion_role_groups",
+				Columns:    []*schema.Column{LionRoleGroupsColumns[4]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "rolegroupmapping_role_id_group_id",
+				Name:    "rolegroups_role_id_group_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionRoleGroupMappingColumns[4], LionRoleGroupMappingColumns[3]},
+				Columns: []*schema.Column{LionRoleGroupsColumns[4], LionRoleGroupsColumns[3]},
 			},
 		},
 	}
-	// LionRoleMenuMappingColumns holds the columns for the "lion_role_menu_mapping" table.
-	LionRoleMenuMappingColumns = []*schema.Column{
+	// LionRoleMenusColumns holds the columns for the "lion_role_menus" table.
+	LionRoleMenusColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "menu_id", Type: field.TypeInt},
 		{Name: "role_id", Type: field.TypeInt},
 	}
-	// LionRoleMenuMappingTable holds the schema information for the "lion_role_menu_mapping" table.
-	LionRoleMenuMappingTable = &schema.Table{
-		Name:       "lion_role_menu_mapping",
-		Columns:    LionRoleMenuMappingColumns,
-		PrimaryKey: []*schema.Column{LionRoleMenuMappingColumns[0]},
+	// LionRoleMenusTable holds the schema information for the "lion_role_menus" table.
+	LionRoleMenusTable = &schema.Table{
+		Name:       "lion_role_menus",
+		Columns:    LionRoleMenusColumns,
+		PrimaryKey: []*schema.Column{LionRoleMenusColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "lion_role_menu_mapping_lion_menus_lion_role_menus",
-				Columns:    []*schema.Column{LionRoleMenuMappingColumns[3]},
+				Symbol:     "lion_role_menus_lion_menus_lion_role_menus",
+				Columns:    []*schema.Column{LionRoleMenusColumns[3]},
 				RefColumns: []*schema.Column{LionMenusColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "lion_role_menu_mapping_lion_roles_lion_role_menus",
-				Columns:    []*schema.Column{LionRoleMenuMappingColumns[4]},
+				Symbol:     "lion_role_menus_lion_roles_lion_role_menus",
+				Columns:    []*schema.Column{LionRoleMenusColumns[4]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "rolemenumapping_role_id_menu_id",
+				Name:    "rolemenus_role_id_menu_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionRoleMenuMappingColumns[4], LionRoleMenuMappingColumns[3]},
+				Columns: []*schema.Column{LionRoleMenusColumns[4], LionRoleMenusColumns[3]},
 			},
 		},
 	}
-	// LionRoleUserMappingColumns holds the columns for the "lion_role_user_mapping" table.
-	LionRoleUserMappingColumns = []*schema.Column{
+	// LionRoleUsersColumns holds the columns for the "lion_role_users" table.
+	LionRoleUsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "role_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
-	// LionRoleUserMappingTable holds the schema information for the "lion_role_user_mapping" table.
-	LionRoleUserMappingTable = &schema.Table{
-		Name:       "lion_role_user_mapping",
-		Columns:    LionRoleUserMappingColumns,
-		PrimaryKey: []*schema.Column{LionRoleUserMappingColumns[0]},
+	// LionRoleUsersTable holds the schema information for the "lion_role_users" table.
+	LionRoleUsersTable = &schema.Table{
+		Name:       "lion_role_users",
+		Columns:    LionRoleUsersColumns,
+		PrimaryKey: []*schema.Column{LionRoleUsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "lion_role_user_mapping_lion_roles_lion_role_users",
-				Columns:    []*schema.Column{LionRoleUserMappingColumns[3]},
+				Symbol:     "lion_role_users_lion_roles_lion_role_users",
+				Columns:    []*schema.Column{LionRoleUsersColumns[3]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "lion_role_user_mapping_lion_users_lion_users",
-				Columns:    []*schema.Column{LionRoleUserMappingColumns[4]},
+				Symbol:     "lion_role_users_lion_users_lion_users",
+				Columns:    []*schema.Column{LionRoleUsersColumns[4]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "roleusermapping_role_id_user_id",
+				Name:    "roleusers_role_id_user_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionRoleUserMappingColumns[3], LionRoleUserMappingColumns[4]},
+				Columns: []*schema.Column{LionRoleUsersColumns[3], LionRoleUsersColumns[4]},
 			},
 		},
 	}
@@ -325,7 +325,6 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_id", Type: field.TypeInt, Unique: true},
 		{Name: "password_hash", Type: field.TypeBytes},
 		{Name: "mfa_enabled", Type: field.TypeBool, Default: false},
@@ -344,7 +343,6 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_id", Type: field.TypeInt},
 		{Name: "provider_name", Type: field.TypeString},
 		{Name: "provider_user_id", Type: field.TypeString},
@@ -362,7 +360,7 @@ var (
 			{
 				Name:    "userauthsocial_user_id_provider_name",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserAuthSocialColumns[4], LionUserAuthSocialColumns[5]},
+				Columns: []*schema.Column{LionUserAuthSocialColumns[3], LionUserAuthSocialColumns[4]},
 			},
 		},
 	}
@@ -405,15 +403,15 @@ var (
 	Tables = []*schema.Table{
 		LionAuthProvidersTable,
 		LionDemoTable,
-		LionDepartmentLeadersTable,
+		LionDepartmentUsersTable,
 		LionDepartmentsTable,
 		LionGroupUsersTable,
 		LionGroupsTable,
 		LionMenusTable,
 		LionPermissionsTable,
-		LionRoleGroupMappingTable,
-		LionRoleMenuMappingTable,
-		LionRoleUserMappingTable,
+		LionRoleGroupsTable,
+		LionRoleMenusTable,
+		LionRoleUsersTable,
 		LionRolesTable,
 		LionSecurityKeysTable,
 		LionUserAttributesTable,
@@ -430,10 +428,10 @@ func init() {
 	LionDemoTable.Annotation = &entsql.Annotation{
 		Table: "lion_demo",
 	}
-	LionDepartmentLeadersTable.ForeignKeys[0].RefTable = LionDepartmentsTable
-	LionDepartmentLeadersTable.ForeignKeys[1].RefTable = LionUsersTable
-	LionDepartmentLeadersTable.Annotation = &entsql.Annotation{
-		Table: "lion_department_leaders",
+	LionDepartmentUsersTable.ForeignKeys[0].RefTable = LionDepartmentsTable
+	LionDepartmentUsersTable.ForeignKeys[1].RefTable = LionUsersTable
+	LionDepartmentUsersTable.Annotation = &entsql.Annotation{
+		Table: "lion_department_users",
 	}
 	LionDepartmentsTable.Annotation = &entsql.Annotation{
 		Table: "lion_departments",
@@ -450,20 +448,20 @@ func init() {
 	LionPermissionsTable.Annotation = &entsql.Annotation{
 		Table: "lion_permissions",
 	}
-	LionRoleGroupMappingTable.ForeignKeys[0].RefTable = LionGroupsTable
-	LionRoleGroupMappingTable.ForeignKeys[1].RefTable = LionRolesTable
-	LionRoleGroupMappingTable.Annotation = &entsql.Annotation{
-		Table: "lion_role_group_mapping",
+	LionRoleGroupsTable.ForeignKeys[0].RefTable = LionGroupsTable
+	LionRoleGroupsTable.ForeignKeys[1].RefTable = LionRolesTable
+	LionRoleGroupsTable.Annotation = &entsql.Annotation{
+		Table: "lion_role_groups",
 	}
-	LionRoleMenuMappingTable.ForeignKeys[0].RefTable = LionMenusTable
-	LionRoleMenuMappingTable.ForeignKeys[1].RefTable = LionRolesTable
-	LionRoleMenuMappingTable.Annotation = &entsql.Annotation{
-		Table: "lion_role_menu_mapping",
+	LionRoleMenusTable.ForeignKeys[0].RefTable = LionMenusTable
+	LionRoleMenusTable.ForeignKeys[1].RefTable = LionRolesTable
+	LionRoleMenusTable.Annotation = &entsql.Annotation{
+		Table: "lion_role_menus",
 	}
-	LionRoleUserMappingTable.ForeignKeys[0].RefTable = LionRolesTable
-	LionRoleUserMappingTable.ForeignKeys[1].RefTable = LionUsersTable
-	LionRoleUserMappingTable.Annotation = &entsql.Annotation{
-		Table: "lion_role_user_mapping",
+	LionRoleUsersTable.ForeignKeys[0].RefTable = LionRolesTable
+	LionRoleUsersTable.ForeignKeys[1].RefTable = LionUsersTable
+	LionRoleUsersTable.Annotation = &entsql.Annotation{
+		Table: "lion_role_users",
 	}
 	LionRolesTable.Annotation = &entsql.Annotation{
 		Table: "lion_roles",

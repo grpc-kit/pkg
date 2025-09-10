@@ -12,10 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/rolegroupmapping"
-	"github.com/grpc-kit/pkg/lion/rolemenumapping"
+	"github.com/grpc-kit/pkg/lion/rolegroups"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/roleusermapping"
+	"github.com/grpc-kit/pkg/lion/roleusers"
 )
 
 // RolesUpdate is the builder for updating Roles entities.
@@ -65,14 +65,14 @@ func (_u *RolesUpdate) SetNillableDescription(v *string) *RolesUpdate {
 	return _u
 }
 
-// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenuMapping entity by IDs.
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
 func (_u *RolesUpdate) AddLionRoleMenuIDs(ids ...int) *RolesUpdate {
 	_u.mutation.AddLionRoleMenuIDs(ids...)
 	return _u
 }
 
-// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenuMapping entity.
-func (_u *RolesUpdate) AddLionRoleMenus(v ...*RoleMenuMapping) *RolesUpdate {
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenus entity.
+func (_u *RolesUpdate) AddLionRoleMenus(v ...*RoleMenus) *RolesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -80,14 +80,14 @@ func (_u *RolesUpdate) AddLionRoleMenus(v ...*RoleMenuMapping) *RolesUpdate {
 	return _u.AddLionRoleMenuIDs(ids...)
 }
 
-// AddLionRoleUserIDs adds the "lion_role_users" edge to the RoleUserMapping entity by IDs.
+// AddLionRoleUserIDs adds the "lion_role_users" edge to the RoleUsers entity by IDs.
 func (_u *RolesUpdate) AddLionRoleUserIDs(ids ...int) *RolesUpdate {
 	_u.mutation.AddLionRoleUserIDs(ids...)
 	return _u
 }
 
-// AddLionRoleUsers adds the "lion_role_users" edges to the RoleUserMapping entity.
-func (_u *RolesUpdate) AddLionRoleUsers(v ...*RoleUserMapping) *RolesUpdate {
+// AddLionRoleUsers adds the "lion_role_users" edges to the RoleUsers entity.
+func (_u *RolesUpdate) AddLionRoleUsers(v ...*RoleUsers) *RolesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -95,14 +95,14 @@ func (_u *RolesUpdate) AddLionRoleUsers(v ...*RoleUserMapping) *RolesUpdate {
 	return _u.AddLionRoleUserIDs(ids...)
 }
 
-// AddLionRoleGroupIDs adds the "lion_role_groups" edge to the RoleGroupMapping entity by IDs.
+// AddLionRoleGroupIDs adds the "lion_role_groups" edge to the RoleGroups entity by IDs.
 func (_u *RolesUpdate) AddLionRoleGroupIDs(ids ...int) *RolesUpdate {
 	_u.mutation.AddLionRoleGroupIDs(ids...)
 	return _u
 }
 
-// AddLionRoleGroups adds the "lion_role_groups" edges to the RoleGroupMapping entity.
-func (_u *RolesUpdate) AddLionRoleGroups(v ...*RoleGroupMapping) *RolesUpdate {
+// AddLionRoleGroups adds the "lion_role_groups" edges to the RoleGroups entity.
+func (_u *RolesUpdate) AddLionRoleGroups(v ...*RoleGroups) *RolesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -115,20 +115,20 @@ func (_u *RolesUpdate) Mutation() *RolesMutation {
 	return _u.mutation
 }
 
-// ClearLionRoleMenus clears all "lion_role_menus" edges to the RoleMenuMapping entity.
+// ClearLionRoleMenus clears all "lion_role_menus" edges to the RoleMenus entity.
 func (_u *RolesUpdate) ClearLionRoleMenus() *RolesUpdate {
 	_u.mutation.ClearLionRoleMenus()
 	return _u
 }
 
-// RemoveLionRoleMenuIDs removes the "lion_role_menus" edge to RoleMenuMapping entities by IDs.
+// RemoveLionRoleMenuIDs removes the "lion_role_menus" edge to RoleMenus entities by IDs.
 func (_u *RolesUpdate) RemoveLionRoleMenuIDs(ids ...int) *RolesUpdate {
 	_u.mutation.RemoveLionRoleMenuIDs(ids...)
 	return _u
 }
 
-// RemoveLionRoleMenus removes "lion_role_menus" edges to RoleMenuMapping entities.
-func (_u *RolesUpdate) RemoveLionRoleMenus(v ...*RoleMenuMapping) *RolesUpdate {
+// RemoveLionRoleMenus removes "lion_role_menus" edges to RoleMenus entities.
+func (_u *RolesUpdate) RemoveLionRoleMenus(v ...*RoleMenus) *RolesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -136,20 +136,20 @@ func (_u *RolesUpdate) RemoveLionRoleMenus(v ...*RoleMenuMapping) *RolesUpdate {
 	return _u.RemoveLionRoleMenuIDs(ids...)
 }
 
-// ClearLionRoleUsers clears all "lion_role_users" edges to the RoleUserMapping entity.
+// ClearLionRoleUsers clears all "lion_role_users" edges to the RoleUsers entity.
 func (_u *RolesUpdate) ClearLionRoleUsers() *RolesUpdate {
 	_u.mutation.ClearLionRoleUsers()
 	return _u
 }
 
-// RemoveLionRoleUserIDs removes the "lion_role_users" edge to RoleUserMapping entities by IDs.
+// RemoveLionRoleUserIDs removes the "lion_role_users" edge to RoleUsers entities by IDs.
 func (_u *RolesUpdate) RemoveLionRoleUserIDs(ids ...int) *RolesUpdate {
 	_u.mutation.RemoveLionRoleUserIDs(ids...)
 	return _u
 }
 
-// RemoveLionRoleUsers removes "lion_role_users" edges to RoleUserMapping entities.
-func (_u *RolesUpdate) RemoveLionRoleUsers(v ...*RoleUserMapping) *RolesUpdate {
+// RemoveLionRoleUsers removes "lion_role_users" edges to RoleUsers entities.
+func (_u *RolesUpdate) RemoveLionRoleUsers(v ...*RoleUsers) *RolesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -157,20 +157,20 @@ func (_u *RolesUpdate) RemoveLionRoleUsers(v ...*RoleUserMapping) *RolesUpdate {
 	return _u.RemoveLionRoleUserIDs(ids...)
 }
 
-// ClearLionRoleGroups clears all "lion_role_groups" edges to the RoleGroupMapping entity.
+// ClearLionRoleGroups clears all "lion_role_groups" edges to the RoleGroups entity.
 func (_u *RolesUpdate) ClearLionRoleGroups() *RolesUpdate {
 	_u.mutation.ClearLionRoleGroups()
 	return _u
 }
 
-// RemoveLionRoleGroupIDs removes the "lion_role_groups" edge to RoleGroupMapping entities by IDs.
+// RemoveLionRoleGroupIDs removes the "lion_role_groups" edge to RoleGroups entities by IDs.
 func (_u *RolesUpdate) RemoveLionRoleGroupIDs(ids ...int) *RolesUpdate {
 	_u.mutation.RemoveLionRoleGroupIDs(ids...)
 	return _u
 }
 
-// RemoveLionRoleGroups removes "lion_role_groups" edges to RoleGroupMapping entities.
-func (_u *RolesUpdate) RemoveLionRoleGroups(v ...*RoleGroupMapping) *RolesUpdate {
+// RemoveLionRoleGroups removes "lion_role_groups" edges to RoleGroups entities.
+func (_u *RolesUpdate) RemoveLionRoleGroups(v ...*RoleGroups) *RolesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -253,7 +253,7 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{roles.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -266,7 +266,7 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{roles.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -282,7 +282,7 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{roles.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -298,7 +298,7 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{roles.LionRoleUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -311,7 +311,7 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{roles.LionRoleUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -327,7 +327,7 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{roles.LionRoleUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -343,7 +343,7 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{roles.LionRoleGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroupmapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -356,7 +356,7 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{roles.LionRoleGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroupmapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -372,7 +372,7 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{roles.LionRoleGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroupmapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -434,14 +434,14 @@ func (_u *RolesUpdateOne) SetNillableDescription(v *string) *RolesUpdateOne {
 	return _u
 }
 
-// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenuMapping entity by IDs.
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
 func (_u *RolesUpdateOne) AddLionRoleMenuIDs(ids ...int) *RolesUpdateOne {
 	_u.mutation.AddLionRoleMenuIDs(ids...)
 	return _u
 }
 
-// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenuMapping entity.
-func (_u *RolesUpdateOne) AddLionRoleMenus(v ...*RoleMenuMapping) *RolesUpdateOne {
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenus entity.
+func (_u *RolesUpdateOne) AddLionRoleMenus(v ...*RoleMenus) *RolesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -449,14 +449,14 @@ func (_u *RolesUpdateOne) AddLionRoleMenus(v ...*RoleMenuMapping) *RolesUpdateOn
 	return _u.AddLionRoleMenuIDs(ids...)
 }
 
-// AddLionRoleUserIDs adds the "lion_role_users" edge to the RoleUserMapping entity by IDs.
+// AddLionRoleUserIDs adds the "lion_role_users" edge to the RoleUsers entity by IDs.
 func (_u *RolesUpdateOne) AddLionRoleUserIDs(ids ...int) *RolesUpdateOne {
 	_u.mutation.AddLionRoleUserIDs(ids...)
 	return _u
 }
 
-// AddLionRoleUsers adds the "lion_role_users" edges to the RoleUserMapping entity.
-func (_u *RolesUpdateOne) AddLionRoleUsers(v ...*RoleUserMapping) *RolesUpdateOne {
+// AddLionRoleUsers adds the "lion_role_users" edges to the RoleUsers entity.
+func (_u *RolesUpdateOne) AddLionRoleUsers(v ...*RoleUsers) *RolesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -464,14 +464,14 @@ func (_u *RolesUpdateOne) AddLionRoleUsers(v ...*RoleUserMapping) *RolesUpdateOn
 	return _u.AddLionRoleUserIDs(ids...)
 }
 
-// AddLionRoleGroupIDs adds the "lion_role_groups" edge to the RoleGroupMapping entity by IDs.
+// AddLionRoleGroupIDs adds the "lion_role_groups" edge to the RoleGroups entity by IDs.
 func (_u *RolesUpdateOne) AddLionRoleGroupIDs(ids ...int) *RolesUpdateOne {
 	_u.mutation.AddLionRoleGroupIDs(ids...)
 	return _u
 }
 
-// AddLionRoleGroups adds the "lion_role_groups" edges to the RoleGroupMapping entity.
-func (_u *RolesUpdateOne) AddLionRoleGroups(v ...*RoleGroupMapping) *RolesUpdateOne {
+// AddLionRoleGroups adds the "lion_role_groups" edges to the RoleGroups entity.
+func (_u *RolesUpdateOne) AddLionRoleGroups(v ...*RoleGroups) *RolesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -484,20 +484,20 @@ func (_u *RolesUpdateOne) Mutation() *RolesMutation {
 	return _u.mutation
 }
 
-// ClearLionRoleMenus clears all "lion_role_menus" edges to the RoleMenuMapping entity.
+// ClearLionRoleMenus clears all "lion_role_menus" edges to the RoleMenus entity.
 func (_u *RolesUpdateOne) ClearLionRoleMenus() *RolesUpdateOne {
 	_u.mutation.ClearLionRoleMenus()
 	return _u
 }
 
-// RemoveLionRoleMenuIDs removes the "lion_role_menus" edge to RoleMenuMapping entities by IDs.
+// RemoveLionRoleMenuIDs removes the "lion_role_menus" edge to RoleMenus entities by IDs.
 func (_u *RolesUpdateOne) RemoveLionRoleMenuIDs(ids ...int) *RolesUpdateOne {
 	_u.mutation.RemoveLionRoleMenuIDs(ids...)
 	return _u
 }
 
-// RemoveLionRoleMenus removes "lion_role_menus" edges to RoleMenuMapping entities.
-func (_u *RolesUpdateOne) RemoveLionRoleMenus(v ...*RoleMenuMapping) *RolesUpdateOne {
+// RemoveLionRoleMenus removes "lion_role_menus" edges to RoleMenus entities.
+func (_u *RolesUpdateOne) RemoveLionRoleMenus(v ...*RoleMenus) *RolesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -505,20 +505,20 @@ func (_u *RolesUpdateOne) RemoveLionRoleMenus(v ...*RoleMenuMapping) *RolesUpdat
 	return _u.RemoveLionRoleMenuIDs(ids...)
 }
 
-// ClearLionRoleUsers clears all "lion_role_users" edges to the RoleUserMapping entity.
+// ClearLionRoleUsers clears all "lion_role_users" edges to the RoleUsers entity.
 func (_u *RolesUpdateOne) ClearLionRoleUsers() *RolesUpdateOne {
 	_u.mutation.ClearLionRoleUsers()
 	return _u
 }
 
-// RemoveLionRoleUserIDs removes the "lion_role_users" edge to RoleUserMapping entities by IDs.
+// RemoveLionRoleUserIDs removes the "lion_role_users" edge to RoleUsers entities by IDs.
 func (_u *RolesUpdateOne) RemoveLionRoleUserIDs(ids ...int) *RolesUpdateOne {
 	_u.mutation.RemoveLionRoleUserIDs(ids...)
 	return _u
 }
 
-// RemoveLionRoleUsers removes "lion_role_users" edges to RoleUserMapping entities.
-func (_u *RolesUpdateOne) RemoveLionRoleUsers(v ...*RoleUserMapping) *RolesUpdateOne {
+// RemoveLionRoleUsers removes "lion_role_users" edges to RoleUsers entities.
+func (_u *RolesUpdateOne) RemoveLionRoleUsers(v ...*RoleUsers) *RolesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -526,20 +526,20 @@ func (_u *RolesUpdateOne) RemoveLionRoleUsers(v ...*RoleUserMapping) *RolesUpdat
 	return _u.RemoveLionRoleUserIDs(ids...)
 }
 
-// ClearLionRoleGroups clears all "lion_role_groups" edges to the RoleGroupMapping entity.
+// ClearLionRoleGroups clears all "lion_role_groups" edges to the RoleGroups entity.
 func (_u *RolesUpdateOne) ClearLionRoleGroups() *RolesUpdateOne {
 	_u.mutation.ClearLionRoleGroups()
 	return _u
 }
 
-// RemoveLionRoleGroupIDs removes the "lion_role_groups" edge to RoleGroupMapping entities by IDs.
+// RemoveLionRoleGroupIDs removes the "lion_role_groups" edge to RoleGroups entities by IDs.
 func (_u *RolesUpdateOne) RemoveLionRoleGroupIDs(ids ...int) *RolesUpdateOne {
 	_u.mutation.RemoveLionRoleGroupIDs(ids...)
 	return _u
 }
 
-// RemoveLionRoleGroups removes "lion_role_groups" edges to RoleGroupMapping entities.
-func (_u *RolesUpdateOne) RemoveLionRoleGroups(v ...*RoleGroupMapping) *RolesUpdateOne {
+// RemoveLionRoleGroups removes "lion_role_groups" edges to RoleGroups entities.
+func (_u *RolesUpdateOne) RemoveLionRoleGroups(v ...*RoleGroups) *RolesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -652,7 +652,7 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 			Columns: []string{roles.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -665,7 +665,7 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 			Columns: []string{roles.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -681,7 +681,7 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 			Columns: []string{roles.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolemenumapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -697,7 +697,7 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 			Columns: []string{roles.LionRoleUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -710,7 +710,7 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 			Columns: []string{roles.LionRoleUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -726,7 +726,7 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 			Columns: []string{roles.LionRoleUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusermapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -742,7 +742,7 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 			Columns: []string{roles.LionRoleGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroupmapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -755,7 +755,7 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 			Columns: []string{roles.LionRoleGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroupmapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -771,7 +771,7 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 			Columns: []string{roles.LionRoleGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroupmapping.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
