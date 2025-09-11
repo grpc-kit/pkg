@@ -47,7 +47,7 @@ const (
 // 公共标准的 HTTP 请求头名称
 const (
 	// HTTPHeaderRequestID 全局请求ID
-	HTTPHeaderRequestID = "X-TR-REQUEST-ID"
+	HTTPHeaderRequestID = "X-REQUEST-ID"
 	// HTTPHeaderHost 主机头
 	HTTPHeaderHost = "Host"
 	// HTTPHeaderEtag 文件内容签名
