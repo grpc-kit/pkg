@@ -173,6 +173,21 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 	// 正常响应时调用，统一植入特定内容
 	forwardResponseOption := func(ctx context.Context, w http.ResponseWriter, msg proto.Message) error {
+		// 植入自定义 http 请求头
+		md, ok := runtime.ServerMetadataFromContext(ctx)
+		if ok {
+			for k, v := range md.HeaderMD {
+				// 必须以 "X-" 开头
+				if !strings.HasPrefix(strings.ToUpper(k), "X-") {
+					continue
+				}
+
+				for i := range v {
+					w.Header().Add(k, v[i])
+				}
+			}
+		}
+
 		// 禁用浏览器的 Content-Type 猜测行为
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		// 限制仅可在相同域名页面的 frame 中展示
