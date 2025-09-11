@@ -10,24 +10,24 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/securitykeys"
+	"github.com/grpc-kit/pkg/lion/credentials"
 )
 
-// SecurityKeysCreate is the builder for creating a SecurityKeys entity.
-type SecurityKeysCreate struct {
+// CredentialsCreate is the builder for creating a Credentials entity.
+type CredentialsCreate struct {
 	config
-	mutation *SecurityKeysMutation
+	mutation *CredentialsMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *SecurityKeysCreate) SetCreatedAt(v time.Time) *SecurityKeysCreate {
+func (_c *CredentialsCreate) SetCreatedAt(v time.Time) *CredentialsCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *SecurityKeysCreate) SetNillableCreatedAt(v *time.Time) *SecurityKeysCreate {
+func (_c *CredentialsCreate) SetNillableCreatedAt(v *time.Time) *CredentialsCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -35,13 +35,13 @@ func (_c *SecurityKeysCreate) SetNillableCreatedAt(v *time.Time) *SecurityKeysCr
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *SecurityKeysCreate) SetUpdatedAt(v time.Time) *SecurityKeysCreate {
+func (_c *CredentialsCreate) SetUpdatedAt(v time.Time) *CredentialsCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *SecurityKeysCreate) SetNillableUpdatedAt(v *time.Time) *SecurityKeysCreate {
+func (_c *CredentialsCreate) SetNillableUpdatedAt(v *time.Time) *CredentialsCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -49,30 +49,30 @@ func (_c *SecurityKeysCreate) SetNillableUpdatedAt(v *time.Time) *SecurityKeysCr
 }
 
 // SetPublicKey sets the "public_key" field.
-func (_c *SecurityKeysCreate) SetPublicKey(v string) *SecurityKeysCreate {
+func (_c *CredentialsCreate) SetPublicKey(v string) *CredentialsCreate {
 	_c.mutation.SetPublicKey(v)
 	return _c
 }
 
 // SetPrivateKeyEncrypted sets the "private_key_encrypted" field.
-func (_c *SecurityKeysCreate) SetPrivateKeyEncrypted(v []byte) *SecurityKeysCreate {
+func (_c *CredentialsCreate) SetPrivateKeyEncrypted(v []byte) *CredentialsCreate {
 	_c.mutation.SetPrivateKeyEncrypted(v)
 	return _c
 }
 
-// Mutation returns the SecurityKeysMutation object of the builder.
-func (_c *SecurityKeysCreate) Mutation() *SecurityKeysMutation {
+// Mutation returns the CredentialsMutation object of the builder.
+func (_c *CredentialsCreate) Mutation() *CredentialsMutation {
 	return _c.mutation
 }
 
-// Save creates the SecurityKeys in the database.
-func (_c *SecurityKeysCreate) Save(ctx context.Context) (*SecurityKeys, error) {
+// Save creates the Credentials in the database.
+func (_c *CredentialsCreate) Save(ctx context.Context) (*Credentials, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *SecurityKeysCreate) SaveX(ctx context.Context) *SecurityKeys {
+func (_c *CredentialsCreate) SaveX(ctx context.Context) *Credentials {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -81,58 +81,58 @@ func (_c *SecurityKeysCreate) SaveX(ctx context.Context) *SecurityKeys {
 }
 
 // Exec executes the query.
-func (_c *SecurityKeysCreate) Exec(ctx context.Context) error {
+func (_c *CredentialsCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *SecurityKeysCreate) ExecX(ctx context.Context) {
+func (_c *CredentialsCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *SecurityKeysCreate) defaults() {
+func (_c *CredentialsCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := securitykeys.DefaultCreatedAt()
+		v := credentials.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := securitykeys.DefaultUpdatedAt()
+		v := credentials.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *SecurityKeysCreate) check() error {
+func (_c *CredentialsCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "SecurityKeys.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "Credentials.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "SecurityKeys.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Credentials.updated_at"`)}
 	}
 	if _, ok := _c.mutation.PublicKey(); !ok {
-		return &ValidationError{Name: "public_key", err: errors.New(`lion: missing required field "SecurityKeys.public_key"`)}
+		return &ValidationError{Name: "public_key", err: errors.New(`lion: missing required field "Credentials.public_key"`)}
 	}
 	if v, ok := _c.mutation.PublicKey(); ok {
-		if err := securitykeys.PublicKeyValidator(v); err != nil {
-			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "SecurityKeys.public_key": %w`, err)}
+		if err := credentials.PublicKeyValidator(v); err != nil {
+			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "Credentials.public_key": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.PrivateKeyEncrypted(); !ok {
-		return &ValidationError{Name: "private_key_encrypted", err: errors.New(`lion: missing required field "SecurityKeys.private_key_encrypted"`)}
+		return &ValidationError{Name: "private_key_encrypted", err: errors.New(`lion: missing required field "Credentials.private_key_encrypted"`)}
 	}
 	if v, ok := _c.mutation.PrivateKeyEncrypted(); ok {
-		if err := securitykeys.PrivateKeyEncryptedValidator(v); err != nil {
-			return &ValidationError{Name: "private_key_encrypted", err: fmt.Errorf(`lion: validator failed for field "SecurityKeys.private_key_encrypted": %w`, err)}
+		if err := credentials.PrivateKeyEncryptedValidator(v); err != nil {
+			return &ValidationError{Name: "private_key_encrypted", err: fmt.Errorf(`lion: validator failed for field "Credentials.private_key_encrypted": %w`, err)}
 		}
 	}
 	return nil
 }
 
-func (_c *SecurityKeysCreate) sqlSave(ctx context.Context) (*SecurityKeys, error) {
+func (_c *CredentialsCreate) sqlSave(ctx context.Context) (*Credentials, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -150,51 +150,51 @@ func (_c *SecurityKeysCreate) sqlSave(ctx context.Context) (*SecurityKeys, error
 	return _node, nil
 }
 
-func (_c *SecurityKeysCreate) createSpec() (*SecurityKeys, *sqlgraph.CreateSpec) {
+func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 	var (
-		_node = &SecurityKeys{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(securitykeys.Table, sqlgraph.NewFieldSpec(securitykeys.FieldID, field.TypeInt))
+		_node = &Credentials{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(credentials.Table, sqlgraph.NewFieldSpec(credentials.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(securitykeys.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(credentials.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(securitykeys.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(credentials.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.PublicKey(); ok {
-		_spec.SetField(securitykeys.FieldPublicKey, field.TypeString, value)
+		_spec.SetField(credentials.FieldPublicKey, field.TypeString, value)
 		_node.PublicKey = value
 	}
 	if value, ok := _c.mutation.PrivateKeyEncrypted(); ok {
-		_spec.SetField(securitykeys.FieldPrivateKeyEncrypted, field.TypeBytes, value)
+		_spec.SetField(credentials.FieldPrivateKeyEncrypted, field.TypeBytes, value)
 		_node.PrivateKeyEncrypted = value
 	}
 	return _node, _spec
 }
 
-// SecurityKeysCreateBulk is the builder for creating many SecurityKeys entities in bulk.
-type SecurityKeysCreateBulk struct {
+// CredentialsCreateBulk is the builder for creating many Credentials entities in bulk.
+type CredentialsCreateBulk struct {
 	config
 	err      error
-	builders []*SecurityKeysCreate
+	builders []*CredentialsCreate
 }
 
-// Save creates the SecurityKeys entities in the database.
-func (_c *SecurityKeysCreateBulk) Save(ctx context.Context) ([]*SecurityKeys, error) {
+// Save creates the Credentials entities in the database.
+func (_c *CredentialsCreateBulk) Save(ctx context.Context) ([]*Credentials, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*SecurityKeys, len(_c.builders))
+	nodes := make([]*Credentials, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*SecurityKeysMutation)
+				mutation, ok := m.(*CredentialsMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -241,7 +241,7 @@ func (_c *SecurityKeysCreateBulk) Save(ctx context.Context) ([]*SecurityKeys, er
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *SecurityKeysCreateBulk) SaveX(ctx context.Context) []*SecurityKeys {
+func (_c *CredentialsCreateBulk) SaveX(ctx context.Context) []*Credentials {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -250,13 +250,13 @@ func (_c *SecurityKeysCreateBulk) SaveX(ctx context.Context) []*SecurityKeys {
 }
 
 // Exec executes the query.
-func (_c *SecurityKeysCreateBulk) Exec(ctx context.Context) error {
+func (_c *CredentialsCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *SecurityKeysCreateBulk) ExecX(ctx context.Context) {
+func (_c *CredentialsCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

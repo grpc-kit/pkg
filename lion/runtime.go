@@ -6,18 +6,19 @@ import (
 	"time"
 
 	"github.com/grpc-kit/pkg/lion/authproviders"
+	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/permissions"
+	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
-	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
@@ -56,6 +57,29 @@ func init() {
 	authprovidersDescClientSecretEncrypted := authprovidersFields[4].Descriptor()
 	// authproviders.DefaultClientSecretEncrypted holds the default value on creation for the client_secret_encrypted field.
 	authproviders.DefaultClientSecretEncrypted = authprovidersDescClientSecretEncrypted.Default.([]byte)
+	credentialsMixin := schema.Credentials{}.Mixin()
+	credentialsMixinFields0 := credentialsMixin[0].Fields()
+	_ = credentialsMixinFields0
+	credentialsFields := schema.Credentials{}.Fields()
+	_ = credentialsFields
+	// credentialsDescCreatedAt is the schema descriptor for created_at field.
+	credentialsDescCreatedAt := credentialsMixinFields0[0].Descriptor()
+	// credentials.DefaultCreatedAt holds the default value on creation for the created_at field.
+	credentials.DefaultCreatedAt = credentialsDescCreatedAt.Default.(func() time.Time)
+	// credentialsDescUpdatedAt is the schema descriptor for updated_at field.
+	credentialsDescUpdatedAt := credentialsMixinFields0[1].Descriptor()
+	// credentials.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	credentials.DefaultUpdatedAt = credentialsDescUpdatedAt.Default.(func() time.Time)
+	// credentials.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	credentials.UpdateDefaultUpdatedAt = credentialsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// credentialsDescPublicKey is the schema descriptor for public_key field.
+	credentialsDescPublicKey := credentialsFields[0].Descriptor()
+	// credentials.PublicKeyValidator is a validator for the "public_key" field. It is called by the builders before save.
+	credentials.PublicKeyValidator = credentialsDescPublicKey.Validators[0].(func(string) error)
+	// credentialsDescPrivateKeyEncrypted is the schema descriptor for private_key_encrypted field.
+	credentialsDescPrivateKeyEncrypted := credentialsFields[1].Descriptor()
+	// credentials.PrivateKeyEncryptedValidator is a validator for the "private_key_encrypted" field. It is called by the builders before save.
+	credentials.PrivateKeyEncryptedValidator = credentialsDescPrivateKeyEncrypted.Validators[0].(func([]byte) error)
 	demoMixin := schema.Demo{}.Mixin()
 	demoMixinFields0 := demoMixin[0].Fields()
 	_ = demoMixinFields0
@@ -238,6 +262,25 @@ func init() {
 			return nil
 		}
 	}()
+	policiesMixin := schema.Policies{}.Mixin()
+	policiesMixinFields0 := policiesMixin[0].Fields()
+	_ = policiesMixinFields0
+	policiesFields := schema.Policies{}.Fields()
+	_ = policiesFields
+	// policiesDescCreatedAt is the schema descriptor for created_at field.
+	policiesDescCreatedAt := policiesMixinFields0[0].Descriptor()
+	// policies.DefaultCreatedAt holds the default value on creation for the created_at field.
+	policies.DefaultCreatedAt = policiesDescCreatedAt.Default.(func() time.Time)
+	// policiesDescUpdatedAt is the schema descriptor for updated_at field.
+	policiesDescUpdatedAt := policiesMixinFields0[1].Descriptor()
+	// policies.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	policies.DefaultUpdatedAt = policiesDescUpdatedAt.Default.(func() time.Time)
+	// policies.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	policies.UpdateDefaultUpdatedAt = policiesDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// policiesDescName is the schema descriptor for name field.
+	policiesDescName := policiesFields[0].Descriptor()
+	// policies.DefaultName holds the default value on creation for the name field.
+	policies.DefaultName = policiesDescName.Default.(string)
 	resourcesMixin := schema.Resources{}.Mixin()
 	resourcesMixinFields0 := resourcesMixin[0].Fields()
 	_ = resourcesMixinFields0
@@ -407,29 +450,6 @@ func init() {
 	rolesDescDescription := rolesFields[1].Descriptor()
 	// roles.DefaultDescription holds the default value on creation for the description field.
 	roles.DefaultDescription = rolesDescDescription.Default.(string)
-	securitykeysMixin := schema.SecurityKeys{}.Mixin()
-	securitykeysMixinFields0 := securitykeysMixin[0].Fields()
-	_ = securitykeysMixinFields0
-	securitykeysFields := schema.SecurityKeys{}.Fields()
-	_ = securitykeysFields
-	// securitykeysDescCreatedAt is the schema descriptor for created_at field.
-	securitykeysDescCreatedAt := securitykeysMixinFields0[0].Descriptor()
-	// securitykeys.DefaultCreatedAt holds the default value on creation for the created_at field.
-	securitykeys.DefaultCreatedAt = securitykeysDescCreatedAt.Default.(func() time.Time)
-	// securitykeysDescUpdatedAt is the schema descriptor for updated_at field.
-	securitykeysDescUpdatedAt := securitykeysMixinFields0[1].Descriptor()
-	// securitykeys.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	securitykeys.DefaultUpdatedAt = securitykeysDescUpdatedAt.Default.(func() time.Time)
-	// securitykeys.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	securitykeys.UpdateDefaultUpdatedAt = securitykeysDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// securitykeysDescPublicKey is the schema descriptor for public_key field.
-	securitykeysDescPublicKey := securitykeysFields[0].Descriptor()
-	// securitykeys.PublicKeyValidator is a validator for the "public_key" field. It is called by the builders before save.
-	securitykeys.PublicKeyValidator = securitykeysDescPublicKey.Validators[0].(func(string) error)
-	// securitykeysDescPrivateKeyEncrypted is the schema descriptor for private_key_encrypted field.
-	securitykeysDescPrivateKeyEncrypted := securitykeysFields[1].Descriptor()
-	// securitykeys.PrivateKeyEncryptedValidator is a validator for the "private_key_encrypted" field. It is called by the builders before save.
-	securitykeys.PrivateKeyEncryptedValidator = securitykeysDescPrivateKeyEncrypted.Validators[0].(func([]byte) error)
 	usergroupsMixin := schema.UserGroups{}.Mixin()
 	usergroupsMixinFields0 := usergroupsMixin[0].Fields()
 	_ = usergroupsMixinFields0

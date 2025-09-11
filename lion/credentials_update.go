@@ -11,37 +11,37 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/securitykeys"
 )
 
-// SecurityKeysUpdate is the builder for updating SecurityKeys entities.
-type SecurityKeysUpdate struct {
+// CredentialsUpdate is the builder for updating Credentials entities.
+type CredentialsUpdate struct {
 	config
 	hooks    []Hook
-	mutation *SecurityKeysMutation
+	mutation *CredentialsMutation
 }
 
-// Where appends a list predicates to the SecurityKeysUpdate builder.
-func (_u *SecurityKeysUpdate) Where(ps ...predicate.SecurityKeys) *SecurityKeysUpdate {
+// Where appends a list predicates to the CredentialsUpdate builder.
+func (_u *CredentialsUpdate) Where(ps ...predicate.Credentials) *CredentialsUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *SecurityKeysUpdate) SetUpdatedAt(v time.Time) *SecurityKeysUpdate {
+func (_u *CredentialsUpdate) SetUpdatedAt(v time.Time) *CredentialsUpdate {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetPublicKey sets the "public_key" field.
-func (_u *SecurityKeysUpdate) SetPublicKey(v string) *SecurityKeysUpdate {
+func (_u *CredentialsUpdate) SetPublicKey(v string) *CredentialsUpdate {
 	_u.mutation.SetPublicKey(v)
 	return _u
 }
 
 // SetNillablePublicKey sets the "public_key" field if the given value is not nil.
-func (_u *SecurityKeysUpdate) SetNillablePublicKey(v *string) *SecurityKeysUpdate {
+func (_u *CredentialsUpdate) SetNillablePublicKey(v *string) *CredentialsUpdate {
 	if v != nil {
 		_u.SetPublicKey(*v)
 	}
@@ -49,24 +49,24 @@ func (_u *SecurityKeysUpdate) SetNillablePublicKey(v *string) *SecurityKeysUpdat
 }
 
 // SetPrivateKeyEncrypted sets the "private_key_encrypted" field.
-func (_u *SecurityKeysUpdate) SetPrivateKeyEncrypted(v []byte) *SecurityKeysUpdate {
+func (_u *CredentialsUpdate) SetPrivateKeyEncrypted(v []byte) *CredentialsUpdate {
 	_u.mutation.SetPrivateKeyEncrypted(v)
 	return _u
 }
 
-// Mutation returns the SecurityKeysMutation object of the builder.
-func (_u *SecurityKeysUpdate) Mutation() *SecurityKeysMutation {
+// Mutation returns the CredentialsMutation object of the builder.
+func (_u *CredentialsUpdate) Mutation() *CredentialsMutation {
 	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *SecurityKeysUpdate) Save(ctx context.Context) (int, error) {
+func (_u *CredentialsUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *SecurityKeysUpdate) SaveX(ctx context.Context) int {
+func (_u *CredentialsUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -75,46 +75,46 @@ func (_u *SecurityKeysUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *SecurityKeysUpdate) Exec(ctx context.Context) error {
+func (_u *CredentialsUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *SecurityKeysUpdate) ExecX(ctx context.Context) {
+func (_u *CredentialsUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *SecurityKeysUpdate) defaults() {
+func (_u *CredentialsUpdate) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := securitykeys.UpdateDefaultUpdatedAt()
+		v := credentials.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *SecurityKeysUpdate) check() error {
+func (_u *CredentialsUpdate) check() error {
 	if v, ok := _u.mutation.PublicKey(); ok {
-		if err := securitykeys.PublicKeyValidator(v); err != nil {
-			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "SecurityKeys.public_key": %w`, err)}
+		if err := credentials.PublicKeyValidator(v); err != nil {
+			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "Credentials.public_key": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.PrivateKeyEncrypted(); ok {
-		if err := securitykeys.PrivateKeyEncryptedValidator(v); err != nil {
-			return &ValidationError{Name: "private_key_encrypted", err: fmt.Errorf(`lion: validator failed for field "SecurityKeys.private_key_encrypted": %w`, err)}
+		if err := credentials.PrivateKeyEncryptedValidator(v); err != nil {
+			return &ValidationError{Name: "private_key_encrypted", err: fmt.Errorf(`lion: validator failed for field "Credentials.private_key_encrypted": %w`, err)}
 		}
 	}
 	return nil
 }
 
-func (_u *SecurityKeysUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+func (_u *CredentialsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(securitykeys.Table, securitykeys.Columns, sqlgraph.NewFieldSpec(securitykeys.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(credentials.Table, credentials.Columns, sqlgraph.NewFieldSpec(credentials.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -123,17 +123,17 @@ func (_u *SecurityKeysUpdate) sqlSave(ctx context.Context) (_node int, err error
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(securitykeys.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(credentials.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.PublicKey(); ok {
-		_spec.SetField(securitykeys.FieldPublicKey, field.TypeString, value)
+		_spec.SetField(credentials.FieldPublicKey, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.PrivateKeyEncrypted(); ok {
-		_spec.SetField(securitykeys.FieldPrivateKeyEncrypted, field.TypeBytes, value)
+		_spec.SetField(credentials.FieldPrivateKeyEncrypted, field.TypeBytes, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{securitykeys.Label}
+			err = &NotFoundError{credentials.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -143,28 +143,28 @@ func (_u *SecurityKeysUpdate) sqlSave(ctx context.Context) (_node int, err error
 	return _node, nil
 }
 
-// SecurityKeysUpdateOne is the builder for updating a single SecurityKeys entity.
-type SecurityKeysUpdateOne struct {
+// CredentialsUpdateOne is the builder for updating a single Credentials entity.
+type CredentialsUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *SecurityKeysMutation
+	mutation *CredentialsMutation
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *SecurityKeysUpdateOne) SetUpdatedAt(v time.Time) *SecurityKeysUpdateOne {
+func (_u *CredentialsUpdateOne) SetUpdatedAt(v time.Time) *CredentialsUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetPublicKey sets the "public_key" field.
-func (_u *SecurityKeysUpdateOne) SetPublicKey(v string) *SecurityKeysUpdateOne {
+func (_u *CredentialsUpdateOne) SetPublicKey(v string) *CredentialsUpdateOne {
 	_u.mutation.SetPublicKey(v)
 	return _u
 }
 
 // SetNillablePublicKey sets the "public_key" field if the given value is not nil.
-func (_u *SecurityKeysUpdateOne) SetNillablePublicKey(v *string) *SecurityKeysUpdateOne {
+func (_u *CredentialsUpdateOne) SetNillablePublicKey(v *string) *CredentialsUpdateOne {
 	if v != nil {
 		_u.SetPublicKey(*v)
 	}
@@ -172,37 +172,37 @@ func (_u *SecurityKeysUpdateOne) SetNillablePublicKey(v *string) *SecurityKeysUp
 }
 
 // SetPrivateKeyEncrypted sets the "private_key_encrypted" field.
-func (_u *SecurityKeysUpdateOne) SetPrivateKeyEncrypted(v []byte) *SecurityKeysUpdateOne {
+func (_u *CredentialsUpdateOne) SetPrivateKeyEncrypted(v []byte) *CredentialsUpdateOne {
 	_u.mutation.SetPrivateKeyEncrypted(v)
 	return _u
 }
 
-// Mutation returns the SecurityKeysMutation object of the builder.
-func (_u *SecurityKeysUpdateOne) Mutation() *SecurityKeysMutation {
+// Mutation returns the CredentialsMutation object of the builder.
+func (_u *CredentialsUpdateOne) Mutation() *CredentialsMutation {
 	return _u.mutation
 }
 
-// Where appends a list predicates to the SecurityKeysUpdate builder.
-func (_u *SecurityKeysUpdateOne) Where(ps ...predicate.SecurityKeys) *SecurityKeysUpdateOne {
+// Where appends a list predicates to the CredentialsUpdate builder.
+func (_u *CredentialsUpdateOne) Where(ps ...predicate.Credentials) *CredentialsUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *SecurityKeysUpdateOne) Select(field string, fields ...string) *SecurityKeysUpdateOne {
+func (_u *CredentialsUpdateOne) Select(field string, fields ...string) *CredentialsUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated SecurityKeys entity.
-func (_u *SecurityKeysUpdateOne) Save(ctx context.Context) (*SecurityKeys, error) {
+// Save executes the query and returns the updated Credentials entity.
+func (_u *CredentialsUpdateOne) Save(ctx context.Context) (*Credentials, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *SecurityKeysUpdateOne) SaveX(ctx context.Context) *SecurityKeys {
+func (_u *CredentialsUpdateOne) SaveX(ctx context.Context) *Credentials {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -211,59 +211,59 @@ func (_u *SecurityKeysUpdateOne) SaveX(ctx context.Context) *SecurityKeys {
 }
 
 // Exec executes the query on the entity.
-func (_u *SecurityKeysUpdateOne) Exec(ctx context.Context) error {
+func (_u *CredentialsUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *SecurityKeysUpdateOne) ExecX(ctx context.Context) {
+func (_u *CredentialsUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *SecurityKeysUpdateOne) defaults() {
+func (_u *CredentialsUpdateOne) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := securitykeys.UpdateDefaultUpdatedAt()
+		v := credentials.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *SecurityKeysUpdateOne) check() error {
+func (_u *CredentialsUpdateOne) check() error {
 	if v, ok := _u.mutation.PublicKey(); ok {
-		if err := securitykeys.PublicKeyValidator(v); err != nil {
-			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "SecurityKeys.public_key": %w`, err)}
+		if err := credentials.PublicKeyValidator(v); err != nil {
+			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "Credentials.public_key": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.PrivateKeyEncrypted(); ok {
-		if err := securitykeys.PrivateKeyEncryptedValidator(v); err != nil {
-			return &ValidationError{Name: "private_key_encrypted", err: fmt.Errorf(`lion: validator failed for field "SecurityKeys.private_key_encrypted": %w`, err)}
+		if err := credentials.PrivateKeyEncryptedValidator(v); err != nil {
+			return &ValidationError{Name: "private_key_encrypted", err: fmt.Errorf(`lion: validator failed for field "Credentials.private_key_encrypted": %w`, err)}
 		}
 	}
 	return nil
 }
 
-func (_u *SecurityKeysUpdateOne) sqlSave(ctx context.Context) (_node *SecurityKeys, err error) {
+func (_u *CredentialsUpdateOne) sqlSave(ctx context.Context) (_node *Credentials, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(securitykeys.Table, securitykeys.Columns, sqlgraph.NewFieldSpec(securitykeys.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(credentials.Table, credentials.Columns, sqlgraph.NewFieldSpec(credentials.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "SecurityKeys.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "Credentials.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, securitykeys.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, credentials.FieldID)
 		for _, f := range fields {
-			if !securitykeys.ValidColumn(f) {
+			if !credentials.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 			}
-			if f != securitykeys.FieldID {
+			if f != credentials.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -276,20 +276,20 @@ func (_u *SecurityKeysUpdateOne) sqlSave(ctx context.Context) (_node *SecurityKe
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(securitykeys.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(credentials.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.PublicKey(); ok {
-		_spec.SetField(securitykeys.FieldPublicKey, field.TypeString, value)
+		_spec.SetField(credentials.FieldPublicKey, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.PrivateKeyEncrypted(); ok {
-		_spec.SetField(securitykeys.FieldPrivateKeyEncrypted, field.TypeBytes, value)
+		_spec.SetField(credentials.FieldPrivateKeyEncrypted, field.TypeBytes, value)
 	}
-	_node = &SecurityKeys{config: _u.config}
+	_node = &Credentials{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{securitykeys.Label}
+			err = &NotFoundError{credentials.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

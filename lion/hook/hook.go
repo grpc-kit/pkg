@@ -21,6 +21,18 @@ func (f AuthProvidersFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.AuthProvidersMutation", m)
 }
 
+// The CredentialsFunc type is an adapter to allow the use of ordinary
+// function as Credentials mutator.
+type CredentialsFunc func(context.Context, *lion.CredentialsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CredentialsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.CredentialsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.CredentialsMutation", m)
+}
+
 // The DemoFunc type is an adapter to allow the use of ordinary
 // function as Demo mutator.
 type DemoFunc func(context.Context, *lion.DemoMutation) (lion.Value, error)
@@ -93,6 +105,18 @@ func (f PermissionsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.PermissionsMutation", m)
 }
 
+// The PoliciesFunc type is an adapter to allow the use of ordinary
+// function as Policies mutator.
+type PoliciesFunc func(context.Context, *lion.PoliciesMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PoliciesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.PoliciesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.PoliciesMutation", m)
+}
+
 // The ResourcesFunc type is an adapter to allow the use of ordinary
 // function as Resources mutator.
 type ResourcesFunc func(context.Context, *lion.ResourcesMutation) (lion.Value, error)
@@ -139,18 +163,6 @@ func (f RolesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, err
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RolesMutation", m)
-}
-
-// The SecurityKeysFunc type is an adapter to allow the use of ordinary
-// function as SecurityKeys mutator.
-type SecurityKeysFunc func(context.Context, *lion.SecurityKeysMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f SecurityKeysFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.SecurityKeysMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.SecurityKeysMutation", m)
 }
 
 // The UserGroupsFunc type is an adapter to allow the use of ordinary

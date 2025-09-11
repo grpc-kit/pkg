@@ -11,68 +11,68 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/securitykeys"
 )
 
-// SecurityKeysQuery is the builder for querying SecurityKeys entities.
-type SecurityKeysQuery struct {
+// PoliciesQuery is the builder for querying Policies entities.
+type PoliciesQuery struct {
 	config
 	ctx        *QueryContext
-	order      []securitykeys.OrderOption
+	order      []policies.OrderOption
 	inters     []Interceptor
-	predicates []predicate.SecurityKeys
+	predicates []predicate.Policies
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the SecurityKeysQuery builder.
-func (_q *SecurityKeysQuery) Where(ps ...predicate.SecurityKeys) *SecurityKeysQuery {
+// Where adds a new predicate for the PoliciesQuery builder.
+func (_q *PoliciesQuery) Where(ps ...predicate.Policies) *PoliciesQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *SecurityKeysQuery) Limit(limit int) *SecurityKeysQuery {
+func (_q *PoliciesQuery) Limit(limit int) *PoliciesQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *SecurityKeysQuery) Offset(offset int) *SecurityKeysQuery {
+func (_q *PoliciesQuery) Offset(offset int) *PoliciesQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *SecurityKeysQuery) Unique(unique bool) *SecurityKeysQuery {
+func (_q *PoliciesQuery) Unique(unique bool) *PoliciesQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *SecurityKeysQuery) Order(o ...securitykeys.OrderOption) *SecurityKeysQuery {
+func (_q *PoliciesQuery) Order(o ...policies.OrderOption) *PoliciesQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// First returns the first SecurityKeys entity from the query.
-// Returns a *NotFoundError when no SecurityKeys was found.
-func (_q *SecurityKeysQuery) First(ctx context.Context) (*SecurityKeys, error) {
+// First returns the first Policies entity from the query.
+// Returns a *NotFoundError when no Policies was found.
+func (_q *PoliciesQuery) First(ctx context.Context) (*Policies, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{securitykeys.Label}
+		return nil, &NotFoundError{policies.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *SecurityKeysQuery) FirstX(ctx context.Context) *SecurityKeys {
+func (_q *PoliciesQuery) FirstX(ctx context.Context) *Policies {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -80,22 +80,22 @@ func (_q *SecurityKeysQuery) FirstX(ctx context.Context) *SecurityKeys {
 	return node
 }
 
-// FirstID returns the first SecurityKeys ID from the query.
-// Returns a *NotFoundError when no SecurityKeys ID was found.
-func (_q *SecurityKeysQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first Policies ID from the query.
+// Returns a *NotFoundError when no Policies ID was found.
+func (_q *PoliciesQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{securitykeys.Label}
+		err = &NotFoundError{policies.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *SecurityKeysQuery) FirstIDX(ctx context.Context) int {
+func (_q *PoliciesQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -103,10 +103,10 @@ func (_q *SecurityKeysQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single SecurityKeys entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one SecurityKeys entity is found.
-// Returns a *NotFoundError when no SecurityKeys entities are found.
-func (_q *SecurityKeysQuery) Only(ctx context.Context) (*SecurityKeys, error) {
+// Only returns a single Policies entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Policies entity is found.
+// Returns a *NotFoundError when no Policies entities are found.
+func (_q *PoliciesQuery) Only(ctx context.Context) (*Policies, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -115,14 +115,14 @@ func (_q *SecurityKeysQuery) Only(ctx context.Context) (*SecurityKeys, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{securitykeys.Label}
+		return nil, &NotFoundError{policies.Label}
 	default:
-		return nil, &NotSingularError{securitykeys.Label}
+		return nil, &NotSingularError{policies.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *SecurityKeysQuery) OnlyX(ctx context.Context) *SecurityKeys {
+func (_q *PoliciesQuery) OnlyX(ctx context.Context) *Policies {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -130,10 +130,10 @@ func (_q *SecurityKeysQuery) OnlyX(ctx context.Context) *SecurityKeys {
 	return node
 }
 
-// OnlyID is like Only, but returns the only SecurityKeys ID in the query.
-// Returns a *NotSingularError when more than one SecurityKeys ID is found.
+// OnlyID is like Only, but returns the only Policies ID in the query.
+// Returns a *NotSingularError when more than one Policies ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *SecurityKeysQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *PoliciesQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -142,15 +142,15 @@ func (_q *SecurityKeysQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{securitykeys.Label}
+		err = &NotFoundError{policies.Label}
 	default:
-		err = &NotSingularError{securitykeys.Label}
+		err = &NotSingularError{policies.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *SecurityKeysQuery) OnlyIDX(ctx context.Context) int {
+func (_q *PoliciesQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -158,18 +158,18 @@ func (_q *SecurityKeysQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of SecurityKeysSlice.
-func (_q *SecurityKeysQuery) All(ctx context.Context) ([]*SecurityKeys, error) {
+// All executes the query and returns a list of PoliciesSlice.
+func (_q *PoliciesQuery) All(ctx context.Context) ([]*Policies, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*SecurityKeys, *SecurityKeysQuery]()
-	return withInterceptors[[]*SecurityKeys](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Policies, *PoliciesQuery]()
+	return withInterceptors[[]*Policies](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *SecurityKeysQuery) AllX(ctx context.Context) []*SecurityKeys {
+func (_q *PoliciesQuery) AllX(ctx context.Context) []*Policies {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -177,20 +177,20 @@ func (_q *SecurityKeysQuery) AllX(ctx context.Context) []*SecurityKeys {
 	return nodes
 }
 
-// IDs executes the query and returns a list of SecurityKeys IDs.
-func (_q *SecurityKeysQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of Policies IDs.
+func (_q *PoliciesQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(securitykeys.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(policies.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *SecurityKeysQuery) IDsX(ctx context.Context) []int {
+func (_q *PoliciesQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -199,16 +199,16 @@ func (_q *SecurityKeysQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *SecurityKeysQuery) Count(ctx context.Context) (int, error) {
+func (_q *PoliciesQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*SecurityKeysQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*PoliciesQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *SecurityKeysQuery) CountX(ctx context.Context) int {
+func (_q *PoliciesQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -217,7 +217,7 @@ func (_q *SecurityKeysQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *SecurityKeysQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *PoliciesQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -230,7 +230,7 @@ func (_q *SecurityKeysQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *SecurityKeysQuery) ExistX(ctx context.Context) bool {
+func (_q *PoliciesQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -238,18 +238,18 @@ func (_q *SecurityKeysQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the SecurityKeysQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the PoliciesQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *SecurityKeysQuery) Clone() *SecurityKeysQuery {
+func (_q *PoliciesQuery) Clone() *PoliciesQuery {
 	if _q == nil {
 		return nil
 	}
-	return &SecurityKeysQuery{
+	return &PoliciesQuery{
 		config:     _q.config,
 		ctx:        _q.ctx.Clone(),
-		order:      append([]securitykeys.OrderOption{}, _q.order...),
+		order:      append([]policies.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.SecurityKeys{}, _q.predicates...),
+		predicates: append([]predicate.Policies{}, _q.predicates...),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -266,15 +266,15 @@ func (_q *SecurityKeysQuery) Clone() *SecurityKeysQuery {
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.SecurityKeys.Query().
-//		GroupBy(securitykeys.FieldCreatedAt).
+//	client.Policies.Query().
+//		GroupBy(policies.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (_q *SecurityKeysQuery) GroupBy(field string, fields ...string) *SecurityKeysGroupBy {
+func (_q *PoliciesQuery) GroupBy(field string, fields ...string) *PoliciesGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &SecurityKeysGroupBy{build: _q}
+	grbuild := &PoliciesGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = securitykeys.Label
+	grbuild.label = policies.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -288,23 +288,23 @@ func (_q *SecurityKeysQuery) GroupBy(field string, fields ...string) *SecurityKe
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.SecurityKeys.Query().
-//		Select(securitykeys.FieldCreatedAt).
+//	client.Policies.Query().
+//		Select(policies.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *SecurityKeysQuery) Select(fields ...string) *SecurityKeysSelect {
+func (_q *PoliciesQuery) Select(fields ...string) *PoliciesSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &SecurityKeysSelect{SecurityKeysQuery: _q}
-	sbuild.label = securitykeys.Label
+	sbuild := &PoliciesSelect{PoliciesQuery: _q}
+	sbuild.label = policies.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a SecurityKeysSelect configured with the given aggregations.
-func (_q *SecurityKeysQuery) Aggregate(fns ...AggregateFunc) *SecurityKeysSelect {
+// Aggregate returns a PoliciesSelect configured with the given aggregations.
+func (_q *PoliciesQuery) Aggregate(fns ...AggregateFunc) *PoliciesSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *SecurityKeysQuery) prepareQuery(ctx context.Context) error {
+func (_q *PoliciesQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
@@ -316,7 +316,7 @@ func (_q *SecurityKeysQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !securitykeys.ValidColumn(f) {
+		if !policies.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
@@ -330,16 +330,16 @@ func (_q *SecurityKeysQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *SecurityKeysQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*SecurityKeys, error) {
+func (_q *PoliciesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Policies, error) {
 	var (
-		nodes = []*SecurityKeys{}
+		nodes = []*Policies{}
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*SecurityKeys).scanValues(nil, columns)
+		return (*Policies).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &SecurityKeys{config: _q.config}
+		node := &Policies{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
@@ -355,7 +355,7 @@ func (_q *SecurityKeysQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	return nodes, nil
 }
 
-func (_q *SecurityKeysQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *PoliciesQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -364,8 +364,8 @@ func (_q *SecurityKeysQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *SecurityKeysQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(securitykeys.Table, securitykeys.Columns, sqlgraph.NewFieldSpec(securitykeys.FieldID, field.TypeInt))
+func (_q *PoliciesQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(policies.Table, policies.Columns, sqlgraph.NewFieldSpec(policies.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -374,9 +374,9 @@ func (_q *SecurityKeysQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, securitykeys.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, policies.FieldID)
 		for i := range fields {
-			if fields[i] != securitykeys.FieldID {
+			if fields[i] != policies.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -404,12 +404,12 @@ func (_q *SecurityKeysQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *SecurityKeysQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *PoliciesQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(securitykeys.Table)
+	t1 := builder.Table(policies.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = securitykeys.Columns
+		columns = policies.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -436,28 +436,28 @@ func (_q *SecurityKeysQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// SecurityKeysGroupBy is the group-by builder for SecurityKeys entities.
-type SecurityKeysGroupBy struct {
+// PoliciesGroupBy is the group-by builder for Policies entities.
+type PoliciesGroupBy struct {
 	selector
-	build *SecurityKeysQuery
+	build *PoliciesQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *SecurityKeysGroupBy) Aggregate(fns ...AggregateFunc) *SecurityKeysGroupBy {
+func (_g *PoliciesGroupBy) Aggregate(fns ...AggregateFunc) *PoliciesGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *SecurityKeysGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *PoliciesGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SecurityKeysQuery, *SecurityKeysGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*PoliciesQuery, *PoliciesGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *SecurityKeysGroupBy) sqlScan(ctx context.Context, root *SecurityKeysQuery, v any) error {
+func (_g *PoliciesGroupBy) sqlScan(ctx context.Context, root *PoliciesQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -484,28 +484,28 @@ func (_g *SecurityKeysGroupBy) sqlScan(ctx context.Context, root *SecurityKeysQu
 	return sql.ScanSlice(rows, v)
 }
 
-// SecurityKeysSelect is the builder for selecting fields of SecurityKeys entities.
-type SecurityKeysSelect struct {
-	*SecurityKeysQuery
+// PoliciesSelect is the builder for selecting fields of Policies entities.
+type PoliciesSelect struct {
+	*PoliciesQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *SecurityKeysSelect) Aggregate(fns ...AggregateFunc) *SecurityKeysSelect {
+func (_s *PoliciesSelect) Aggregate(fns ...AggregateFunc) *PoliciesSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *SecurityKeysSelect) Scan(ctx context.Context, v any) error {
+func (_s *PoliciesSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SecurityKeysQuery, *SecurityKeysSelect](ctx, _s.SecurityKeysQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*PoliciesQuery, *PoliciesSelect](ctx, _s.PoliciesQuery, _s, _s.inters, v)
 }
 
-func (_s *SecurityKeysSelect) sqlScan(ctx context.Context, root *SecurityKeysQuery, v any) error {
+func (_s *PoliciesSelect) sqlScan(ctx context.Context, root *PoliciesQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

@@ -7,13 +7,13 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// SecurityKeys holds the schema definition for the Demo entity.
-type SecurityKeys struct {
+// Credentials holds the schema definition for the Demo entity.
+type Credentials struct {
 	ent.Schema
 }
 
 // Fields of the table.
-func (SecurityKeys) Fields() []ent.Field {
+func (Credentials) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("public_key").
 			NotEmpty().
@@ -26,20 +26,20 @@ func (SecurityKeys) Fields() []ent.Field {
 }
 
 // Edges of the table.
-func (SecurityKeys) Edges() []ent.Edge {
+func (Credentials) Edges() []ent.Edge {
 	return nil
 }
 
 // Mixin of the table.
-func (SecurityKeys) Mixin() []ent.Mixin {
+func (Credentials) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
 	}
 }
 
 // Annotations 自定义表名
-func (SecurityKeys) Annotations() []schema.Annotation {
+func (Credentials) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_security_keys"},
+		entsql.Annotation{Table: "lion_credentials"},
 	}
 }

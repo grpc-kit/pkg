@@ -33,6 +33,20 @@ var (
 		Columns:    LionAuthProvidersColumns,
 		PrimaryKey: []*schema.Column{LionAuthProvidersColumns[0]},
 	}
+	// LionCredentialsColumns holds the columns for the "lion_credentials" table.
+	LionCredentialsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "public_key", Type: field.TypeString},
+		{Name: "private_key_encrypted", Type: field.TypeBytes},
+	}
+	// LionCredentialsTable holds the schema information for the "lion_credentials" table.
+	LionCredentialsTable = &schema.Table{
+		Name:       "lion_credentials",
+		Columns:    LionCredentialsColumns,
+		PrimaryKey: []*schema.Column{LionCredentialsColumns[0]},
+	}
 	// LionDemoColumns holds the columns for the "lion_demo" table.
 	LionDemoColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -156,6 +170,20 @@ var (
 		Columns:    LionPermissionsColumns,
 		PrimaryKey: []*schema.Column{LionPermissionsColumns[0]},
 	}
+	// LionPoliciesColumns holds the columns for the "lion_policies" table.
+	LionPoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString, Default: "grpc-kit"},
+	}
+	// LionPoliciesTable holds the schema information for the "lion_policies" table.
+	LionPoliciesTable = &schema.Table{
+		Name:       "lion_policies",
+		Columns:    LionPoliciesColumns,
+		PrimaryKey: []*schema.Column{LionPoliciesColumns[0]},
+	}
 	// LionResourcesColumns holds the columns for the "lion_resources" table.
 	LionResourcesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -240,20 +268,6 @@ var (
 		Name:       "lion_roles",
 		Columns:    LionRolesColumns,
 		PrimaryKey: []*schema.Column{LionRolesColumns[0]},
-	}
-	// LionSecurityKeysColumns holds the columns for the "lion_security_keys" table.
-	LionSecurityKeysColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "public_key", Type: field.TypeString},
-		{Name: "private_key_encrypted", Type: field.TypeBytes},
-	}
-	// LionSecurityKeysTable holds the schema information for the "lion_security_keys" table.
-	LionSecurityKeysTable = &schema.Table{
-		Name:       "lion_security_keys",
-		Columns:    LionSecurityKeysColumns,
-		PrimaryKey: []*schema.Column{LionSecurityKeysColumns[0]},
 	}
 	// LionUserGroupsColumns holds the columns for the "lion_user_groups" table.
 	LionUserGroupsColumns = []*schema.Column{
@@ -403,17 +417,18 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		LionAuthProvidersTable,
+		LionCredentialsTable,
 		LionDemoTable,
 		LionDepartmentUsersTable,
 		LionDepartmentsTable,
 		LionGroupRolesTable,
 		LionGroupsTable,
 		LionPermissionsTable,
+		LionPoliciesTable,
 		LionResourcesTable,
 		LionRolePermissionsTable,
 		LionRoleResourcesTable,
 		LionRolesTable,
-		LionSecurityKeysTable,
 		LionUserGroupsTable,
 		LionUserIdentitiesTable,
 		LionUserProfilesTable,
@@ -425,6 +440,9 @@ var (
 func init() {
 	LionAuthProvidersTable.Annotation = &entsql.Annotation{
 		Table: "lion_auth_providers",
+	}
+	LionCredentialsTable.Annotation = &entsql.Annotation{
+		Table: "lion_credentials",
 	}
 	LionDemoTable.Annotation = &entsql.Annotation{
 		Table: "lion_demo",
@@ -448,6 +466,9 @@ func init() {
 	LionPermissionsTable.Annotation = &entsql.Annotation{
 		Table: "lion_permissions",
 	}
+	LionPoliciesTable.Annotation = &entsql.Annotation{
+		Table: "lion_policies",
+	}
 	LionResourcesTable.Annotation = &entsql.Annotation{
 		Table: "lion_resources",
 	}
@@ -461,9 +482,6 @@ func init() {
 	}
 	LionRolesTable.Annotation = &entsql.Annotation{
 		Table: "lion_roles",
-	}
-	LionSecurityKeysTable.Annotation = &entsql.Annotation{
-		Table: "lion_security_keys",
 	}
 	LionUserGroupsTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_groups",

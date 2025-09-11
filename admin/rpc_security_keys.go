@@ -13,7 +13,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/securitykeys"
+	"github.com/grpc-kit/pkg/lion/credentials"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -28,7 +28,7 @@ func (a *KnownAdminAPI) CreateSecurityKey(ctx context.Context, req *adminv1.Crea
 		return nil, err
 	}
 
-	key, err := tx.SecurityKeys.Query().Select(securitykeys.FieldPublicKey).Only(ctx)
+	key, err := tx.Credentials.Query().Select(credentials.FieldPublicKey).Only(ctx)
 	if err != nil && !lion.IsNotFound(err) {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (a *KnownAdminAPI) CreateSecurityKey(ctx context.Context, req *adminv1.Crea
 			return nil, err
 		}
 
-		tx.SecurityKeys.Create().
+		tx.Credentials.Create().
 			SetPublicKey(crypto.Base64Encode(publicKeyBytes)).
 			SetPrivateKeyEncrypted(privateKeyEnc).SaveX(ctx)
 
@@ -89,9 +89,9 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 		Keys: make([]*adminv1.OAuth2JSONWebKeys_Key, 0),
 	}
 
-	sk, err := a.config.db.SecurityKeys.Query().
-		Select(securitykeys.FieldPublicKey).
-		Order(securitykeys.ByID()).
+	sk, err := a.config.db.Credentials.Query().
+		Select(credentials.FieldPublicKey).
+		Order(credentials.ByID()).
 		Only(ctx)
 	if err != nil {
 		return nil, err

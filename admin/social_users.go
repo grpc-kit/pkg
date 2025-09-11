@@ -11,7 +11,7 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
-	"github.com/grpc-kit/pkg/lion/securitykeys"
+	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
@@ -56,8 +56,8 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 		return nil, err
 	}
 
-	sk, err := db.SecurityKeys.Query().
-		Select(securitykeys.FieldPrivateKeyEncrypted).
+	sk, err := db.Credentials.Query().
+		Select(credentials.FieldPrivateKeyEncrypted).
 		Only(ctx)
 	if err != nil {
 		return nil, err

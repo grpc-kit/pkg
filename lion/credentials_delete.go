@@ -8,30 +8,30 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/securitykeys"
 )
 
-// SecurityKeysDelete is the builder for deleting a SecurityKeys entity.
-type SecurityKeysDelete struct {
+// CredentialsDelete is the builder for deleting a Credentials entity.
+type CredentialsDelete struct {
 	config
 	hooks    []Hook
-	mutation *SecurityKeysMutation
+	mutation *CredentialsMutation
 }
 
-// Where appends a list predicates to the SecurityKeysDelete builder.
-func (_d *SecurityKeysDelete) Where(ps ...predicate.SecurityKeys) *SecurityKeysDelete {
+// Where appends a list predicates to the CredentialsDelete builder.
+func (_d *CredentialsDelete) Where(ps ...predicate.Credentials) *CredentialsDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *SecurityKeysDelete) Exec(ctx context.Context) (int, error) {
+func (_d *CredentialsDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *SecurityKeysDelete) ExecX(ctx context.Context) int {
+func (_d *CredentialsDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *SecurityKeysDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *SecurityKeysDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(securitykeys.Table, sqlgraph.NewFieldSpec(securitykeys.FieldID, field.TypeInt))
+func (_d *CredentialsDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(credentials.Table, sqlgraph.NewFieldSpec(credentials.FieldID, field.TypeInt))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *SecurityKeysDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// SecurityKeysDeleteOne is the builder for deleting a single SecurityKeys entity.
-type SecurityKeysDeleteOne struct {
-	_d *SecurityKeysDelete
+// CredentialsDeleteOne is the builder for deleting a single Credentials entity.
+type CredentialsDeleteOne struct {
+	_d *CredentialsDelete
 }
 
-// Where appends a list predicates to the SecurityKeysDelete builder.
-func (_d *SecurityKeysDeleteOne) Where(ps ...predicate.SecurityKeys) *SecurityKeysDeleteOne {
+// Where appends a list predicates to the CredentialsDelete builder.
+func (_d *CredentialsDeleteOne) Where(ps ...predicate.Credentials) *CredentialsDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *SecurityKeysDeleteOne) Exec(ctx context.Context) error {
+func (_d *CredentialsDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{securitykeys.Label}
+		return &NotFoundError{credentials.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *SecurityKeysDeleteOne) ExecX(ctx context.Context) {
+func (_d *CredentialsDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

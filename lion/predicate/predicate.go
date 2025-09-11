@@ -9,6 +9,9 @@ import (
 // AuthProviders is the predicate function for authproviders builders.
 type AuthProviders func(*sql.Selector)
 
+// Credentials is the predicate function for credentials builders.
+type Credentials func(*sql.Selector)
+
 // Demo is the predicate function for demo builders.
 type Demo func(*sql.Selector)
 
@@ -27,6 +30,9 @@ type Groups func(*sql.Selector)
 // Permissions is the predicate function for permissions builders.
 type Permissions func(*sql.Selector)
 
+// Policies is the predicate function for policies builders.
+type Policies func(*sql.Selector)
+
 // Resources is the predicate function for resources builders.
 type Resources func(*sql.Selector)
 
@@ -38,9 +44,6 @@ type RoleResources func(*sql.Selector)
 
 // Roles is the predicate function for roles builders.
 type Roles func(*sql.Selector)
-
-// SecurityKeys is the predicate function for securitykeys builders.
-type SecurityKeys func(*sql.Selector)
 
 // UserGroups is the predicate function for usergroups builders.
 type UserGroups func(*sql.Selector)
