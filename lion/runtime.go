@@ -11,9 +11,10 @@ import (
 	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/permissions"
-	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/resources"
+	"github.com/grpc-kit/pkg/lion/rolepermissions"
+	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
@@ -204,91 +205,6 @@ func init() {
 	groupsDescDescription := groupsFields[2].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
-	menusMixin := schema.Menus{}.Mixin()
-	menusMixinFields0 := menusMixin[0].Fields()
-	_ = menusMixinFields0
-	menusFields := schema.Menus{}.Fields()
-	_ = menusFields
-	// menusDescCreatedAt is the schema descriptor for created_at field.
-	menusDescCreatedAt := menusMixinFields0[0].Descriptor()
-	// menus.DefaultCreatedAt holds the default value on creation for the created_at field.
-	menus.DefaultCreatedAt = menusDescCreatedAt.Default.(func() time.Time)
-	// menusDescUpdatedAt is the schema descriptor for updated_at field.
-	menusDescUpdatedAt := menusMixinFields0[1].Descriptor()
-	// menus.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	menus.DefaultUpdatedAt = menusDescUpdatedAt.Default.(func() time.Time)
-	// menus.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	menus.UpdateDefaultUpdatedAt = menusDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// menusDescParentID is the schema descriptor for parent_id field.
-	menusDescParentID := menusFields[0].Descriptor()
-	// menus.DefaultParentID holds the default value on creation for the parent_id field.
-	menus.DefaultParentID = menusDescParentID.Default.(int)
-	// menusDescName is the schema descriptor for name field.
-	menusDescName := menusFields[1].Descriptor()
-	// menus.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	menus.NameValidator = func() func(string) error {
-		validators := menusDescName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(name string) error {
-			for _, fn := range fns {
-				if err := fn(name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// menusDescPath is the schema descriptor for path field.
-	menusDescPath := menusFields[2].Descriptor()
-	// menus.PathValidator is a validator for the "path" field. It is called by the builders before save.
-	menus.PathValidator = func() func(string) error {
-		validators := menusDescPath.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(_path string) error {
-			for _, fn := range fns {
-				if err := fn(_path); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// menusDescI18nName is the schema descriptor for i18n_name field.
-	menusDescI18nName := menusFields[3].Descriptor()
-	// menus.DefaultI18nName holds the default value on creation for the i18n_name field.
-	menus.DefaultI18nName = menusDescI18nName.Default.(string)
-	// menusDescIcon is the schema descriptor for icon field.
-	menusDescIcon := menusFields[4].Descriptor()
-	// menus.DefaultIcon holds the default value on creation for the icon field.
-	menus.DefaultIcon = menusDescIcon.Default.(string)
-	// menus.IconValidator is a validator for the "icon" field. It is called by the builders before save.
-	menus.IconValidator = menusDescIcon.Validators[0].(func(string) error)
-	// menusDescOrderWeight is the schema descriptor for order_weight field.
-	menusDescOrderWeight := menusFields[5].Descriptor()
-	// menus.DefaultOrderWeight holds the default value on creation for the order_weight field.
-	menus.DefaultOrderWeight = menusDescOrderWeight.Default.(int)
-	// menusDescMenuType is the schema descriptor for menu_type field.
-	menusDescMenuType := menusFields[6].Descriptor()
-	// menus.DefaultMenuType holds the default value on creation for the menu_type field.
-	menus.DefaultMenuType = menusDescMenuType.Default.(int)
-	// menusDescEnabled is the schema descriptor for enabled field.
-	menusDescEnabled := menusFields[7].Descriptor()
-	// menus.DefaultEnabled holds the default value on creation for the enabled field.
-	menus.DefaultEnabled = menusDescEnabled.Default.(bool)
-	// menusDescHideInMenu is the schema descriptor for hide_in_menu field.
-	menusDescHideInMenu := menusFields[8].Descriptor()
-	// menus.DefaultHideInMenu holds the default value on creation for the hide_in_menu field.
-	menus.DefaultHideInMenu = menusDescHideInMenu.Default.(bool)
-	// menusDescHideChildrenInMenu is the schema descriptor for hide_children_in_menu field.
-	menusDescHideChildrenInMenu := menusFields[9].Descriptor()
-	// menus.DefaultHideChildrenInMenu holds the default value on creation for the hide_children_in_menu field.
-	menus.DefaultHideChildrenInMenu = menusDescHideChildrenInMenu.Default.(bool)
 	permissionsMixin := schema.Permissions{}.Mixin()
 	permissionsMixinFields0 := permissionsMixin[0].Fields()
 	_ = permissionsMixinFields0
@@ -322,29 +238,137 @@ func init() {
 			return nil
 		}
 	}()
-	rolemenusMixin := schema.RoleMenus{}.Mixin()
-	rolemenusMixinFields0 := rolemenusMixin[0].Fields()
-	_ = rolemenusMixinFields0
-	rolemenusFields := schema.RoleMenus{}.Fields()
-	_ = rolemenusFields
-	// rolemenusDescCreatedAt is the schema descriptor for created_at field.
-	rolemenusDescCreatedAt := rolemenusMixinFields0[0].Descriptor()
-	// rolemenus.DefaultCreatedAt holds the default value on creation for the created_at field.
-	rolemenus.DefaultCreatedAt = rolemenusDescCreatedAt.Default.(func() time.Time)
-	// rolemenusDescUpdatedAt is the schema descriptor for updated_at field.
-	rolemenusDescUpdatedAt := rolemenusMixinFields0[1].Descriptor()
-	// rolemenus.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	rolemenus.DefaultUpdatedAt = rolemenusDescUpdatedAt.Default.(func() time.Time)
-	// rolemenus.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	rolemenus.UpdateDefaultUpdatedAt = rolemenusDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// rolemenusDescRoleID is the schema descriptor for role_id field.
-	rolemenusDescRoleID := rolemenusFields[0].Descriptor()
-	// rolemenus.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
-	rolemenus.RoleIDValidator = rolemenusDescRoleID.Validators[0].(func(int) error)
-	// rolemenusDescMenuID is the schema descriptor for menu_id field.
-	rolemenusDescMenuID := rolemenusFields[1].Descriptor()
-	// rolemenus.MenuIDValidator is a validator for the "menu_id" field. It is called by the builders before save.
-	rolemenus.MenuIDValidator = rolemenusDescMenuID.Validators[0].(func(int) error)
+	resourcesMixin := schema.Resources{}.Mixin()
+	resourcesMixinFields0 := resourcesMixin[0].Fields()
+	_ = resourcesMixinFields0
+	resourcesFields := schema.Resources{}.Fields()
+	_ = resourcesFields
+	// resourcesDescCreatedAt is the schema descriptor for created_at field.
+	resourcesDescCreatedAt := resourcesMixinFields0[0].Descriptor()
+	// resources.DefaultCreatedAt holds the default value on creation for the created_at field.
+	resources.DefaultCreatedAt = resourcesDescCreatedAt.Default.(func() time.Time)
+	// resourcesDescUpdatedAt is the schema descriptor for updated_at field.
+	resourcesDescUpdatedAt := resourcesMixinFields0[1].Descriptor()
+	// resources.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	resources.DefaultUpdatedAt = resourcesDescUpdatedAt.Default.(func() time.Time)
+	// resources.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	resources.UpdateDefaultUpdatedAt = resourcesDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// resourcesDescParentID is the schema descriptor for parent_id field.
+	resourcesDescParentID := resourcesFields[0].Descriptor()
+	// resources.DefaultParentID holds the default value on creation for the parent_id field.
+	resources.DefaultParentID = resourcesDescParentID.Default.(int)
+	// resourcesDescName is the schema descriptor for name field.
+	resourcesDescName := resourcesFields[1].Descriptor()
+	// resources.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	resources.NameValidator = func() func(string) error {
+		validators := resourcesDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// resourcesDescPath is the schema descriptor for path field.
+	resourcesDescPath := resourcesFields[2].Descriptor()
+	// resources.PathValidator is a validator for the "path" field. It is called by the builders before save.
+	resources.PathValidator = func() func(string) error {
+		validators := resourcesDescPath.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(_path string) error {
+			for _, fn := range fns {
+				if err := fn(_path); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// resourcesDescI18nName is the schema descriptor for i18n_name field.
+	resourcesDescI18nName := resourcesFields[3].Descriptor()
+	// resources.DefaultI18nName holds the default value on creation for the i18n_name field.
+	resources.DefaultI18nName = resourcesDescI18nName.Default.(string)
+	// resourcesDescIcon is the schema descriptor for icon field.
+	resourcesDescIcon := resourcesFields[4].Descriptor()
+	// resources.DefaultIcon holds the default value on creation for the icon field.
+	resources.DefaultIcon = resourcesDescIcon.Default.(string)
+	// resources.IconValidator is a validator for the "icon" field. It is called by the builders before save.
+	resources.IconValidator = resourcesDescIcon.Validators[0].(func(string) error)
+	// resourcesDescOrderWeight is the schema descriptor for order_weight field.
+	resourcesDescOrderWeight := resourcesFields[5].Descriptor()
+	// resources.DefaultOrderWeight holds the default value on creation for the order_weight field.
+	resources.DefaultOrderWeight = resourcesDescOrderWeight.Default.(int)
+	// resourcesDescMenuType is the schema descriptor for menu_type field.
+	resourcesDescMenuType := resourcesFields[6].Descriptor()
+	// resources.DefaultMenuType holds the default value on creation for the menu_type field.
+	resources.DefaultMenuType = resourcesDescMenuType.Default.(int)
+	// resourcesDescEnabled is the schema descriptor for enabled field.
+	resourcesDescEnabled := resourcesFields[7].Descriptor()
+	// resources.DefaultEnabled holds the default value on creation for the enabled field.
+	resources.DefaultEnabled = resourcesDescEnabled.Default.(bool)
+	// resourcesDescHideInMenu is the schema descriptor for hide_in_menu field.
+	resourcesDescHideInMenu := resourcesFields[8].Descriptor()
+	// resources.DefaultHideInMenu holds the default value on creation for the hide_in_menu field.
+	resources.DefaultHideInMenu = resourcesDescHideInMenu.Default.(bool)
+	// resourcesDescHideChildrenInMenu is the schema descriptor for hide_children_in_menu field.
+	resourcesDescHideChildrenInMenu := resourcesFields[9].Descriptor()
+	// resources.DefaultHideChildrenInMenu holds the default value on creation for the hide_children_in_menu field.
+	resources.DefaultHideChildrenInMenu = resourcesDescHideChildrenInMenu.Default.(bool)
+	rolepermissionsMixin := schema.RolePermissions{}.Mixin()
+	rolepermissionsMixinFields0 := rolepermissionsMixin[0].Fields()
+	_ = rolepermissionsMixinFields0
+	rolepermissionsFields := schema.RolePermissions{}.Fields()
+	_ = rolepermissionsFields
+	// rolepermissionsDescCreatedAt is the schema descriptor for created_at field.
+	rolepermissionsDescCreatedAt := rolepermissionsMixinFields0[0].Descriptor()
+	// rolepermissions.DefaultCreatedAt holds the default value on creation for the created_at field.
+	rolepermissions.DefaultCreatedAt = rolepermissionsDescCreatedAt.Default.(func() time.Time)
+	// rolepermissionsDescUpdatedAt is the schema descriptor for updated_at field.
+	rolepermissionsDescUpdatedAt := rolepermissionsMixinFields0[1].Descriptor()
+	// rolepermissions.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	rolepermissions.DefaultUpdatedAt = rolepermissionsDescUpdatedAt.Default.(func() time.Time)
+	// rolepermissions.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	rolepermissions.UpdateDefaultUpdatedAt = rolepermissionsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// rolepermissionsDescRoleID is the schema descriptor for role_id field.
+	rolepermissionsDescRoleID := rolepermissionsFields[0].Descriptor()
+	// rolepermissions.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	rolepermissions.RoleIDValidator = rolepermissionsDescRoleID.Validators[0].(func(int) error)
+	// rolepermissionsDescPermissionID is the schema descriptor for permission_id field.
+	rolepermissionsDescPermissionID := rolepermissionsFields[1].Descriptor()
+	// rolepermissions.PermissionIDValidator is a validator for the "permission_id" field. It is called by the builders before save.
+	rolepermissions.PermissionIDValidator = rolepermissionsDescPermissionID.Validators[0].(func(int) error)
+	roleresourcesMixin := schema.RoleResources{}.Mixin()
+	roleresourcesMixinFields0 := roleresourcesMixin[0].Fields()
+	_ = roleresourcesMixinFields0
+	roleresourcesFields := schema.RoleResources{}.Fields()
+	_ = roleresourcesFields
+	// roleresourcesDescCreatedAt is the schema descriptor for created_at field.
+	roleresourcesDescCreatedAt := roleresourcesMixinFields0[0].Descriptor()
+	// roleresources.DefaultCreatedAt holds the default value on creation for the created_at field.
+	roleresources.DefaultCreatedAt = roleresourcesDescCreatedAt.Default.(func() time.Time)
+	// roleresourcesDescUpdatedAt is the schema descriptor for updated_at field.
+	roleresourcesDescUpdatedAt := roleresourcesMixinFields0[1].Descriptor()
+	// roleresources.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	roleresources.DefaultUpdatedAt = roleresourcesDescUpdatedAt.Default.(func() time.Time)
+	// roleresources.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	roleresources.UpdateDefaultUpdatedAt = roleresourcesDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// roleresourcesDescRoleID is the schema descriptor for role_id field.
+	roleresourcesDescRoleID := roleresourcesFields[0].Descriptor()
+	// roleresources.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	roleresources.RoleIDValidator = roleresourcesDescRoleID.Validators[0].(func(int) error)
+	// roleresourcesDescResourceID is the schema descriptor for resource_id field.
+	roleresourcesDescResourceID := roleresourcesFields[1].Descriptor()
+	// roleresources.ResourceIDValidator is a validator for the "resource_id" field. It is called by the builders before save.
+	roleresources.ResourceIDValidator = roleresourcesDescResourceID.Validators[0].(func(int) error)
 	rolesMixin := schema.Roles{}.Mixin()
 	rolesMixinFields0 := rolesMixin[0].Fields()
 	_ = rolesMixinFields0

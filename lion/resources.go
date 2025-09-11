@@ -9,11 +9,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/resources"
 )
 
-// Menus is the model entity for the Menus schema.
-type Menus struct {
+// Resources is the model entity for the Resources schema.
+type Resources struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -42,41 +42,41 @@ type Menus struct {
 	// 是否隐藏该节点的子菜单
 	HideChildrenInMenu bool `json:"hide_children_in_menu,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the MenusQuery when eager-loading is set.
-	Edges        MenusEdges `json:"edges"`
+	// The values are being populated by the ResourcesQuery when eager-loading is set.
+	Edges        ResourcesEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// MenusEdges holds the relations/edges for other nodes in the graph.
-type MenusEdges struct {
-	// LionRoleMenus holds the value of the lion_role_menus edge.
-	LionRoleMenus []*RoleMenus `json:"lion_role_menus,omitempty"`
+// ResourcesEdges holds the relations/edges for other nodes in the graph.
+type ResourcesEdges struct {
+	// LionRoleResources holds the value of the lion_role_resources edge.
+	LionRoleResources []*RoleResources `json:"lion_role_resources,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// LionRoleMenusOrErr returns the LionRoleMenus value or an error if the edge
+// LionRoleResourcesOrErr returns the LionRoleResources value or an error if the edge
 // was not loaded in eager-loading.
-func (e MenusEdges) LionRoleMenusOrErr() ([]*RoleMenus, error) {
+func (e ResourcesEdges) LionRoleResourcesOrErr() ([]*RoleResources, error) {
 	if e.loadedTypes[0] {
-		return e.LionRoleMenus, nil
+		return e.LionRoleResources, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_role_menus"}
+	return nil, &NotLoadedError{edge: "lion_role_resources"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Menus) scanValues(columns []string) ([]any, error) {
+func (*Resources) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case menus.FieldEnabled, menus.FieldHideInMenu, menus.FieldHideChildrenInMenu:
+		case resources.FieldEnabled, resources.FieldHideInMenu, resources.FieldHideChildrenInMenu:
 			values[i] = new(sql.NullBool)
-		case menus.FieldID, menus.FieldParentID, menus.FieldOrderWeight, menus.FieldMenuType:
+		case resources.FieldID, resources.FieldParentID, resources.FieldOrderWeight, resources.FieldMenuType:
 			values[i] = new(sql.NullInt64)
-		case menus.FieldName, menus.FieldPath, menus.FieldI18nName, menus.FieldIcon:
+		case resources.FieldName, resources.FieldPath, resources.FieldI18nName, resources.FieldIcon:
 			values[i] = new(sql.NullString)
-		case menus.FieldCreatedAt, menus.FieldUpdatedAt:
+		case resources.FieldCreatedAt, resources.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -86,86 +86,86 @@ func (*Menus) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Menus fields.
-func (_m *Menus) assignValues(columns []string, values []any) error {
+// to the Resources fields.
+func (_m *Resources) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case menus.FieldID:
+		case resources.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case menus.FieldCreatedAt:
+		case resources.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case menus.FieldUpdatedAt:
+		case resources.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case menus.FieldParentID:
+		case resources.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
 				_m.ParentID = int(value.Int64)
 			}
-		case menus.FieldName:
+		case resources.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case menus.FieldPath:
+		case resources.FieldPath:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field path", values[i])
 			} else if value.Valid {
 				_m.Path = value.String
 			}
-		case menus.FieldI18nName:
+		case resources.FieldI18nName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
 			} else if value.Valid {
 				_m.I18nName = value.String
 			}
-		case menus.FieldIcon:
+		case resources.FieldIcon:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field icon", values[i])
 			} else if value.Valid {
 				_m.Icon = value.String
 			}
-		case menus.FieldOrderWeight:
+		case resources.FieldOrderWeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field order_weight", values[i])
 			} else if value.Valid {
 				_m.OrderWeight = int(value.Int64)
 			}
-		case menus.FieldMenuType:
+		case resources.FieldMenuType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field menu_type", values[i])
 			} else if value.Valid {
 				_m.MenuType = int(value.Int64)
 			}
-		case menus.FieldEnabled:
+		case resources.FieldEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field enabled", values[i])
 			} else if value.Valid {
 				_m.Enabled = value.Bool
 			}
-		case menus.FieldHideInMenu:
+		case resources.FieldHideInMenu:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field hide_in_menu", values[i])
 			} else if value.Valid {
 				_m.HideInMenu = value.Bool
 			}
-		case menus.FieldHideChildrenInMenu:
+		case resources.FieldHideChildrenInMenu:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field hide_children_in_menu", values[i])
 			} else if value.Valid {
@@ -178,39 +178,39 @@ func (_m *Menus) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the Menus.
+// Value returns the ent.Value that was dynamically selected and assigned to the Resources.
 // This includes values selected through modifiers, order, etc.
-func (_m *Menus) Value(name string) (ent.Value, error) {
+func (_m *Resources) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionRoleMenus queries the "lion_role_menus" edge of the Menus entity.
-func (_m *Menus) QueryLionRoleMenus() *RoleMenusQuery {
-	return NewMenusClient(_m.config).QueryLionRoleMenus(_m)
+// QueryLionRoleResources queries the "lion_role_resources" edge of the Resources entity.
+func (_m *Resources) QueryLionRoleResources() *RoleResourcesQuery {
+	return NewResourcesClient(_m.config).QueryLionRoleResources(_m)
 }
 
-// Update returns a builder for updating this Menus.
-// Note that you need to call Menus.Unwrap() before calling this method if this Menus
+// Update returns a builder for updating this Resources.
+// Note that you need to call Resources.Unwrap() before calling this method if this Resources
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *Menus) Update() *MenusUpdateOne {
-	return NewMenusClient(_m.config).UpdateOne(_m)
+func (_m *Resources) Update() *ResourcesUpdateOne {
+	return NewResourcesClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the Menus entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Resources entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *Menus) Unwrap() *Menus {
+func (_m *Resources) Unwrap() *Resources {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: Menus is not a transactional entity")
+		panic("lion: Resources is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *Menus) String() string {
+func (_m *Resources) String() string {
 	var builder strings.Builder
-	builder.WriteString("Menus(")
+	builder.WriteString("Resources(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -251,5 +251,5 @@ func (_m *Menus) String() string {
 	return builder.String()
 }
 
-// MenusSlice is a parsable slice of Menus.
-type MenusSlice []*Menus
+// ResourcesSlice is a parsable slice of Resources.
+type ResourcesSlice []*Resources

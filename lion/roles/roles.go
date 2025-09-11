@@ -22,21 +22,21 @@ const (
 	FieldName = "name"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLionRoleMenus holds the string denoting the lion_role_menus edge name in mutations.
-	EdgeLionRoleMenus = "lion_role_menus"
+	// EdgeLionRoleResources holds the string denoting the lion_role_resources edge name in mutations.
+	EdgeLionRoleResources = "lion_role_resources"
 	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
 	EdgeLionUserRoles = "lion_user_roles"
 	// EdgeLionRoleGroups holds the string denoting the lion_role_groups edge name in mutations.
 	EdgeLionRoleGroups = "lion_role_groups"
 	// Table holds the table name of the roles in the database.
 	Table = "lion_roles"
-	// LionRoleMenusTable is the table that holds the lion_role_menus relation/edge.
-	LionRoleMenusTable = "lion_role_menus"
-	// LionRoleMenusInverseTable is the table name for the RoleMenus entity.
-	// It exists in this package in order to avoid circular dependency with the "rolemenus" package.
-	LionRoleMenusInverseTable = "lion_role_menus"
-	// LionRoleMenusColumn is the table column denoting the lion_role_menus relation/edge.
-	LionRoleMenusColumn = "role_id"
+	// LionRoleResourcesTable is the table that holds the lion_role_resources relation/edge.
+	LionRoleResourcesTable = "lion_role_resources"
+	// LionRoleResourcesInverseTable is the table name for the RoleResources entity.
+	// It exists in this package in order to avoid circular dependency with the "roleresources" package.
+	LionRoleResourcesInverseTable = "lion_role_resources"
+	// LionRoleResourcesColumn is the table column denoting the lion_role_resources relation/edge.
+	LionRoleResourcesColumn = "role_id"
 	// LionUserRolesTable is the table that holds the lion_user_roles relation/edge.
 	LionUserRolesTable = "lion_user_roles"
 	// LionUserRolesInverseTable is the table name for the UserRoles entity.
@@ -113,17 +113,17 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLionRoleMenusCount orders the results by lion_role_menus count.
-func ByLionRoleMenusCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionRoleResourcesCount orders the results by lion_role_resources count.
+func ByLionRoleResourcesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionRoleMenusStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionRoleResourcesStep(), opts...)
 	}
 }
 
-// ByLionRoleMenus orders the results by lion_role_menus terms.
-func ByLionRoleMenus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionRoleResources orders the results by lion_role_resources terms.
+func ByLionRoleResources(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionRoleMenusStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionRoleResourcesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -154,11 +154,11 @@ func ByLionRoleGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionRoleGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newLionRoleMenusStep() *sqlgraph.Step {
+func newLionRoleResourcesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionRoleMenusInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleMenusTable, LionRoleMenusColumn),
+		sqlgraph.To(LionRoleResourcesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleResourcesTable, LionRoleResourcesColumn),
 	)
 }
 func newLionUserRolesStep() *sqlgraph.Step {

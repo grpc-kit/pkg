@@ -18,9 +18,10 @@ import (
 	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/permissions"
-	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/resources"
+	"github.com/grpc-kit/pkg/lion/rolepermissions"
+	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
 	"github.com/grpc-kit/pkg/lion/usergroups"
@@ -94,9 +95,10 @@ func checkColumn(t, c string) error {
 			departments.Table:     departments.ValidColumn,
 			grouproles.Table:      grouproles.ValidColumn,
 			groups.Table:          groups.ValidColumn,
-			menus.Table:           menus.ValidColumn,
 			permissions.Table:     permissions.ValidColumn,
-			rolemenus.Table:       rolemenus.ValidColumn,
+			resources.Table:       resources.ValidColumn,
+			rolepermissions.Table: rolepermissions.ValidColumn,
+			roleresources.Table:   roleresources.ValidColumn,
 			roles.Table:           roles.ValidColumn,
 			securitykeys.Table:    securitykeys.ValidColumn,
 			usergroups.Table:      usergroups.ValidColumn,

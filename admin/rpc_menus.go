@@ -6,8 +6,8 @@ import (
 	"sort"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
-	"github.com/grpc-kit/pkg/lion/menus"
-	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/resources"
+	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/rpc"
 )
@@ -88,12 +88,12 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 	}
 
 	// 根据用户组 ID 列表获取菜单
-	mins, err := a.config.db.RoleMenus.Query().
+	mins, err := a.config.db.RoleResources.Query().
 		Select(
-			rolemenus.FieldMenuID,
+			roleresources.FieldResourceID,
 		).
 		Where(
-			rolemenus.RoleIDIn(gids...),
+			roleresources.RoleIDIn(gids...),
 		).
 		All(ctx)
 	if err != nil {
@@ -102,25 +102,25 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 
 	mids := make([]int, 0)
 	for _, x := range mins {
-		mids = append(mids, x.MenuID)
+		mids = append(mids, x.ResourceID)
 	}
 
 	// 根据菜单 ID 获取菜单详情
-	rids, err := a.config.db.Menus.Query().
+	rids, err := a.config.db.Resources.Query().
 		Select(
-			menus.FieldID,
-			menus.FieldParentID,
-			menus.FieldName,
-			menus.FieldPath,
-			menus.FieldI18nName,
-			menus.FieldIcon,
-			menus.FieldOrderWeight,
-			menus.FieldEnabled,
-			menus.FieldHideInMenu,
-			menus.FieldHideChildrenInMenu,
+			resources.FieldID,
+			resources.FieldParentID,
+			resources.FieldName,
+			resources.FieldPath,
+			resources.FieldI18nName,
+			resources.FieldIcon,
+			resources.FieldOrderWeight,
+			resources.FieldEnabled,
+			resources.FieldHideInMenu,
+			resources.FieldHideChildrenInMenu,
 		).
 		Where(
-			menus.IDIn(mids...),
+			resources.IDIn(mids...),
 		).
 		All(ctx)
 	if err != nil {

@@ -10,26 +10,26 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/menus"
-	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/resources"
+	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 )
 
-// RoleMenusCreate is the builder for creating a RoleMenus entity.
-type RoleMenusCreate struct {
+// RoleResourcesCreate is the builder for creating a RoleResources entity.
+type RoleResourcesCreate struct {
 	config
-	mutation *RoleMenusMutation
+	mutation *RoleResourcesMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *RoleMenusCreate) SetCreatedAt(v time.Time) *RoleMenusCreate {
+func (_c *RoleResourcesCreate) SetCreatedAt(v time.Time) *RoleResourcesCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *RoleMenusCreate) SetNillableCreatedAt(v *time.Time) *RoleMenusCreate {
+func (_c *RoleResourcesCreate) SetNillableCreatedAt(v *time.Time) *RoleResourcesCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -37,13 +37,13 @@ func (_c *RoleMenusCreate) SetNillableCreatedAt(v *time.Time) *RoleMenusCreate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *RoleMenusCreate) SetUpdatedAt(v time.Time) *RoleMenusCreate {
+func (_c *RoleResourcesCreate) SetUpdatedAt(v time.Time) *RoleResourcesCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *RoleMenusCreate) SetNillableUpdatedAt(v *time.Time) *RoleMenusCreate {
+func (_c *RoleResourcesCreate) SetNillableUpdatedAt(v *time.Time) *RoleResourcesCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -51,52 +51,52 @@ func (_c *RoleMenusCreate) SetNillableUpdatedAt(v *time.Time) *RoleMenusCreate {
 }
 
 // SetRoleID sets the "role_id" field.
-func (_c *RoleMenusCreate) SetRoleID(v int) *RoleMenusCreate {
+func (_c *RoleResourcesCreate) SetRoleID(v int) *RoleResourcesCreate {
 	_c.mutation.SetRoleID(v)
 	return _c
 }
 
-// SetMenuID sets the "menu_id" field.
-func (_c *RoleMenusCreate) SetMenuID(v int) *RoleMenusCreate {
-	_c.mutation.SetMenuID(v)
+// SetResourceID sets the "resource_id" field.
+func (_c *RoleResourcesCreate) SetResourceID(v int) *RoleResourcesCreate {
+	_c.mutation.SetResourceID(v)
 	return _c
 }
 
 // SetLionRolesID sets the "lion_roles" edge to the Roles entity by ID.
-func (_c *RoleMenusCreate) SetLionRolesID(id int) *RoleMenusCreate {
+func (_c *RoleResourcesCreate) SetLionRolesID(id int) *RoleResourcesCreate {
 	_c.mutation.SetLionRolesID(id)
 	return _c
 }
 
 // SetLionRoles sets the "lion_roles" edge to the Roles entity.
-func (_c *RoleMenusCreate) SetLionRoles(v *Roles) *RoleMenusCreate {
+func (_c *RoleResourcesCreate) SetLionRoles(v *Roles) *RoleResourcesCreate {
 	return _c.SetLionRolesID(v.ID)
 }
 
-// SetLionMenusID sets the "lion_menus" edge to the Menus entity by ID.
-func (_c *RoleMenusCreate) SetLionMenusID(id int) *RoleMenusCreate {
-	_c.mutation.SetLionMenusID(id)
+// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
+func (_c *RoleResourcesCreate) SetLionResourcesID(id int) *RoleResourcesCreate {
+	_c.mutation.SetLionResourcesID(id)
 	return _c
 }
 
-// SetLionMenus sets the "lion_menus" edge to the Menus entity.
-func (_c *RoleMenusCreate) SetLionMenus(v *Menus) *RoleMenusCreate {
-	return _c.SetLionMenusID(v.ID)
+// SetLionResources sets the "lion_resources" edge to the Resources entity.
+func (_c *RoleResourcesCreate) SetLionResources(v *Resources) *RoleResourcesCreate {
+	return _c.SetLionResourcesID(v.ID)
 }
 
-// Mutation returns the RoleMenusMutation object of the builder.
-func (_c *RoleMenusCreate) Mutation() *RoleMenusMutation {
+// Mutation returns the RoleResourcesMutation object of the builder.
+func (_c *RoleResourcesCreate) Mutation() *RoleResourcesMutation {
 	return _c.mutation
 }
 
-// Save creates the RoleMenus in the database.
-func (_c *RoleMenusCreate) Save(ctx context.Context) (*RoleMenus, error) {
+// Save creates the RoleResources in the database.
+func (_c *RoleResourcesCreate) Save(ctx context.Context) (*RoleResources, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *RoleMenusCreate) SaveX(ctx context.Context) *RoleMenus {
+func (_c *RoleResourcesCreate) SaveX(ctx context.Context) *RoleResources {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -105,64 +105,64 @@ func (_c *RoleMenusCreate) SaveX(ctx context.Context) *RoleMenus {
 }
 
 // Exec executes the query.
-func (_c *RoleMenusCreate) Exec(ctx context.Context) error {
+func (_c *RoleResourcesCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *RoleMenusCreate) ExecX(ctx context.Context) {
+func (_c *RoleResourcesCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *RoleMenusCreate) defaults() {
+func (_c *RoleResourcesCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := rolemenus.DefaultCreatedAt()
+		v := roleresources.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := rolemenus.DefaultUpdatedAt()
+		v := roleresources.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *RoleMenusCreate) check() error {
+func (_c *RoleResourcesCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "RoleMenus.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "RoleResources.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "RoleMenus.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "RoleResources.updated_at"`)}
 	}
 	if _, ok := _c.mutation.RoleID(); !ok {
-		return &ValidationError{Name: "role_id", err: errors.New(`lion: missing required field "RoleMenus.role_id"`)}
+		return &ValidationError{Name: "role_id", err: errors.New(`lion: missing required field "RoleResources.role_id"`)}
 	}
 	if v, ok := _c.mutation.RoleID(); ok {
-		if err := rolemenus.RoleIDValidator(v); err != nil {
-			return &ValidationError{Name: "role_id", err: fmt.Errorf(`lion: validator failed for field "RoleMenus.role_id": %w`, err)}
+		if err := roleresources.RoleIDValidator(v); err != nil {
+			return &ValidationError{Name: "role_id", err: fmt.Errorf(`lion: validator failed for field "RoleResources.role_id": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.MenuID(); !ok {
-		return &ValidationError{Name: "menu_id", err: errors.New(`lion: missing required field "RoleMenus.menu_id"`)}
+	if _, ok := _c.mutation.ResourceID(); !ok {
+		return &ValidationError{Name: "resource_id", err: errors.New(`lion: missing required field "RoleResources.resource_id"`)}
 	}
-	if v, ok := _c.mutation.MenuID(); ok {
-		if err := rolemenus.MenuIDValidator(v); err != nil {
-			return &ValidationError{Name: "menu_id", err: fmt.Errorf(`lion: validator failed for field "RoleMenus.menu_id": %w`, err)}
+	if v, ok := _c.mutation.ResourceID(); ok {
+		if err := roleresources.ResourceIDValidator(v); err != nil {
+			return &ValidationError{Name: "resource_id", err: fmt.Errorf(`lion: validator failed for field "RoleResources.resource_id": %w`, err)}
 		}
 	}
 	if len(_c.mutation.LionRolesIDs()) == 0 {
-		return &ValidationError{Name: "lion_roles", err: errors.New(`lion: missing required edge "RoleMenus.lion_roles"`)}
+		return &ValidationError{Name: "lion_roles", err: errors.New(`lion: missing required edge "RoleResources.lion_roles"`)}
 	}
-	if len(_c.mutation.LionMenusIDs()) == 0 {
-		return &ValidationError{Name: "lion_menus", err: errors.New(`lion: missing required edge "RoleMenus.lion_menus"`)}
+	if len(_c.mutation.LionResourcesIDs()) == 0 {
+		return &ValidationError{Name: "lion_resources", err: errors.New(`lion: missing required edge "RoleResources.lion_resources"`)}
 	}
 	return nil
 }
 
-func (_c *RoleMenusCreate) sqlSave(ctx context.Context) (*RoleMenus, error) {
+func (_c *RoleResourcesCreate) sqlSave(ctx context.Context) (*RoleResources, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -180,25 +180,25 @@ func (_c *RoleMenusCreate) sqlSave(ctx context.Context) (*RoleMenus, error) {
 	return _node, nil
 }
 
-func (_c *RoleMenusCreate) createSpec() (*RoleMenus, *sqlgraph.CreateSpec) {
+func (_c *RoleResourcesCreate) createSpec() (*RoleResources, *sqlgraph.CreateSpec) {
 	var (
-		_node = &RoleMenus{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(rolemenus.Table, sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt))
+		_node = &RoleResources{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(roleresources.Table, sqlgraph.NewFieldSpec(roleresources.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(rolemenus.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(roleresources.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(rolemenus.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(roleresources.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if nodes := _c.mutation.LionRolesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   rolemenus.LionRolesTable,
-			Columns: []string{rolemenus.LionRolesColumn},
+			Table:   roleresources.LionRolesTable,
+			Columns: []string{roleresources.LionRolesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
@@ -210,47 +210,47 @@ func (_c *RoleMenusCreate) createSpec() (*RoleMenus, *sqlgraph.CreateSpec) {
 		_node.RoleID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LionMenusIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionResourcesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   rolemenus.LionMenusTable,
-			Columns: []string{rolemenus.LionMenusColumn},
+			Table:   roleresources.LionResourcesTable,
+			Columns: []string{roleresources.LionResourcesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.MenuID = nodes[0]
+		_node.ResourceID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
 
-// RoleMenusCreateBulk is the builder for creating many RoleMenus entities in bulk.
-type RoleMenusCreateBulk struct {
+// RoleResourcesCreateBulk is the builder for creating many RoleResources entities in bulk.
+type RoleResourcesCreateBulk struct {
 	config
 	err      error
-	builders []*RoleMenusCreate
+	builders []*RoleResourcesCreate
 }
 
-// Save creates the RoleMenus entities in the database.
-func (_c *RoleMenusCreateBulk) Save(ctx context.Context) ([]*RoleMenus, error) {
+// Save creates the RoleResources entities in the database.
+func (_c *RoleResourcesCreateBulk) Save(ctx context.Context) ([]*RoleResources, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*RoleMenus, len(_c.builders))
+	nodes := make([]*RoleResources, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*RoleMenusMutation)
+				mutation, ok := m.(*RoleResourcesMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -297,7 +297,7 @@ func (_c *RoleMenusCreateBulk) Save(ctx context.Context) ([]*RoleMenus, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *RoleMenusCreateBulk) SaveX(ctx context.Context) []*RoleMenus {
+func (_c *RoleResourcesCreateBulk) SaveX(ctx context.Context) []*RoleResources {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -306,13 +306,13 @@ func (_c *RoleMenusCreateBulk) SaveX(ctx context.Context) []*RoleMenus {
 }
 
 // Exec executes the query.
-func (_c *RoleMenusCreateBulk) Exec(ctx context.Context) error {
+func (_c *RoleResourcesCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *RoleMenusCreateBulk) ExecX(ctx context.Context) {
+func (_c *RoleResourcesCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

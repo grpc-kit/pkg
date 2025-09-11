@@ -33,8 +33,8 @@ type Roles struct {
 
 // RolesEdges holds the relations/edges for other nodes in the graph.
 type RolesEdges struct {
-	// LionRoleMenus holds the value of the lion_role_menus edge.
-	LionRoleMenus []*RoleMenus `json:"lion_role_menus,omitempty"`
+	// LionRoleResources holds the value of the lion_role_resources edge.
+	LionRoleResources []*RoleResources `json:"lion_role_resources,omitempty"`
 	// LionUserRoles holds the value of the lion_user_roles edge.
 	LionUserRoles []*UserRoles `json:"lion_user_roles,omitempty"`
 	// LionRoleGroups holds the value of the lion_role_groups edge.
@@ -44,13 +44,13 @@ type RolesEdges struct {
 	loadedTypes [3]bool
 }
 
-// LionRoleMenusOrErr returns the LionRoleMenus value or an error if the edge
+// LionRoleResourcesOrErr returns the LionRoleResources value or an error if the edge
 // was not loaded in eager-loading.
-func (e RolesEdges) LionRoleMenusOrErr() ([]*RoleMenus, error) {
+func (e RolesEdges) LionRoleResourcesOrErr() ([]*RoleResources, error) {
 	if e.loadedTypes[0] {
-		return e.LionRoleMenus, nil
+		return e.LionRoleResources, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_role_menus"}
+	return nil, &NotLoadedError{edge: "lion_role_resources"}
 }
 
 // LionUserRolesOrErr returns the LionUserRoles value or an error if the edge
@@ -140,9 +140,9 @@ func (_m *Roles) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionRoleMenus queries the "lion_role_menus" edge of the Roles entity.
-func (_m *Roles) QueryLionRoleMenus() *RoleMenusQuery {
-	return NewRolesClient(_m.config).QueryLionRoleMenus(_m)
+// QueryLionRoleResources queries the "lion_role_resources" edge of the Roles entity.
+func (_m *Roles) QueryLionRoleResources() *RoleResourcesQuery {
+	return NewRolesClient(_m.config).QueryLionRoleResources(_m)
 }
 
 // QueryLionUserRoles queries the "lion_user_roles" edge of the Roles entity.

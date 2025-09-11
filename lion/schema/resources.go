@@ -8,13 +8,13 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// Menus holds the schema definition for the Demo entity.
-type Menus struct {
+// Resources holds the schema definition for the Demo entity.
+type Resources struct {
 	ent.Schema
 }
 
 // Fields of the table.
-func (Menus) Fields() []ent.Field {
+func (Resources) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("parent_id").
 			Default(0).
@@ -53,23 +53,23 @@ func (Menus) Fields() []ent.Field {
 }
 
 // Edges of the table.
-func (Menus) Edges() []ent.Edge {
+func (Resources) Edges() []ent.Edge {
 	return []ent.Edge{
 		// 一个 Menu 可以对应多个 RoleMenu (中间实体)
-		edge.To("lion_role_menus", RoleMenus.Type),
+		edge.To("lion_role_resources", RoleResources.Type),
 	}
 }
 
 // Mixin of the table.
-func (Menus) Mixin() []ent.Mixin {
+func (Resources) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
 	}
 }
 
 // Annotations 自定义表名
-func (Menus) Annotations() []schema.Annotation {
+func (Resources) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_menus"},
+		entsql.Annotation{Table: "lion_resources"},
 	}
 }

@@ -8,30 +8,30 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/resources"
 )
 
-// MenusDelete is the builder for deleting a Menus entity.
-type MenusDelete struct {
+// ResourcesDelete is the builder for deleting a Resources entity.
+type ResourcesDelete struct {
 	config
 	hooks    []Hook
-	mutation *MenusMutation
+	mutation *ResourcesMutation
 }
 
-// Where appends a list predicates to the MenusDelete builder.
-func (_d *MenusDelete) Where(ps ...predicate.Menus) *MenusDelete {
+// Where appends a list predicates to the ResourcesDelete builder.
+func (_d *ResourcesDelete) Where(ps ...predicate.Resources) *ResourcesDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *MenusDelete) Exec(ctx context.Context) (int, error) {
+func (_d *ResourcesDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *MenusDelete) ExecX(ctx context.Context) int {
+func (_d *ResourcesDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *MenusDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *MenusDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(menus.Table, sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt))
+func (_d *ResourcesDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(resources.Table, sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *MenusDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// MenusDeleteOne is the builder for deleting a single Menus entity.
-type MenusDeleteOne struct {
-	_d *MenusDelete
+// ResourcesDeleteOne is the builder for deleting a single Resources entity.
+type ResourcesDeleteOne struct {
+	_d *ResourcesDelete
 }
 
-// Where appends a list predicates to the MenusDelete builder.
-func (_d *MenusDeleteOne) Where(ps ...predicate.Menus) *MenusDeleteOne {
+// Where appends a list predicates to the ResourcesDelete builder.
+func (_d *ResourcesDeleteOne) Where(ps ...predicate.Resources) *ResourcesDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *MenusDeleteOne) Exec(ctx context.Context) error {
+func (_d *ResourcesDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{menus.Label}
+		return &NotFoundError{resources.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *MenusDeleteOne) ExecX(ctx context.Context) {
+func (_d *ResourcesDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

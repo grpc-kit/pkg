@@ -24,14 +24,17 @@ type GroupRoles func(*sql.Selector)
 // Groups is the predicate function for groups builders.
 type Groups func(*sql.Selector)
 
-// Menus is the predicate function for menus builders.
-type Menus func(*sql.Selector)
-
 // Permissions is the predicate function for permissions builders.
 type Permissions func(*sql.Selector)
 
-// RoleMenus is the predicate function for rolemenus builders.
-type RoleMenus func(*sql.Selector)
+// Resources is the predicate function for resources builders.
+type Resources func(*sql.Selector)
+
+// RolePermissions is the predicate function for rolepermissions builders.
+type RolePermissions func(*sql.Selector)
+
+// RoleResources is the predicate function for roleresources builders.
+type RoleResources func(*sql.Selector)
 
 // Roles is the predicate function for roles builders.
 type Roles func(*sql.Selector)

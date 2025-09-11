@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userroles"
 )
@@ -22,13 +22,13 @@ import (
 // RolesQuery is the builder for querying Roles entities.
 type RolesQuery struct {
 	config
-	ctx                *QueryContext
-	order              []roles.OrderOption
-	inters             []Interceptor
-	predicates         []predicate.Roles
-	withLionRoleMenus  *RoleMenusQuery
-	withLionUserRoles  *UserRolesQuery
-	withLionRoleGroups *GroupRolesQuery
+	ctx                   *QueryContext
+	order                 []roles.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.Roles
+	withLionRoleResources *RoleResourcesQuery
+	withLionUserRoles     *UserRolesQuery
+	withLionRoleGroups    *GroupRolesQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -65,9 +65,9 @@ func (_q *RolesQuery) Order(o ...roles.OrderOption) *RolesQuery {
 	return _q
 }
 
-// QueryLionRoleMenus chains the current query on the "lion_role_menus" edge.
-func (_q *RolesQuery) QueryLionRoleMenus() *RoleMenusQuery {
-	query := (&RoleMenusClient{config: _q.config}).Query()
+// QueryLionRoleResources chains the current query on the "lion_role_resources" edge.
+func (_q *RolesQuery) QueryLionRoleResources() *RoleResourcesQuery {
+	query := (&RoleResourcesClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -78,8 +78,8 @@ func (_q *RolesQuery) QueryLionRoleMenus() *RoleMenusQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(roles.Table, roles.FieldID, selector),
-			sqlgraph.To(rolemenus.Table, rolemenus.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleMenusTable, roles.LionRoleMenusColumn),
+			sqlgraph.To(roleresources.Table, roleresources.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleResourcesTable, roles.LionRoleResourcesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -318,28 +318,28 @@ func (_q *RolesQuery) Clone() *RolesQuery {
 		return nil
 	}
 	return &RolesQuery{
-		config:             _q.config,
-		ctx:                _q.ctx.Clone(),
-		order:              append([]roles.OrderOption{}, _q.order...),
-		inters:             append([]Interceptor{}, _q.inters...),
-		predicates:         append([]predicate.Roles{}, _q.predicates...),
-		withLionRoleMenus:  _q.withLionRoleMenus.Clone(),
-		withLionUserRoles:  _q.withLionUserRoles.Clone(),
-		withLionRoleGroups: _q.withLionRoleGroups.Clone(),
+		config:                _q.config,
+		ctx:                   _q.ctx.Clone(),
+		order:                 append([]roles.OrderOption{}, _q.order...),
+		inters:                append([]Interceptor{}, _q.inters...),
+		predicates:            append([]predicate.Roles{}, _q.predicates...),
+		withLionRoleResources: _q.withLionRoleResources.Clone(),
+		withLionUserRoles:     _q.withLionUserRoles.Clone(),
+		withLionRoleGroups:    _q.withLionRoleGroups.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithLionRoleMenus tells the query-builder to eager-load the nodes that are connected to
-// the "lion_role_menus" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *RolesQuery) WithLionRoleMenus(opts ...func(*RoleMenusQuery)) *RolesQuery {
-	query := (&RoleMenusClient{config: _q.config}).Query()
+// WithLionRoleResources tells the query-builder to eager-load the nodes that are connected to
+// the "lion_role_resources" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *RolesQuery) WithLionRoleResources(opts ...func(*RoleResourcesQuery)) *RolesQuery {
+	query := (&RoleResourcesClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withLionRoleMenus = query
+	_q.withLionRoleResources = query
 	return _q
 }
 
@@ -444,7 +444,7 @@ func (_q *RolesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Roles,
 		nodes       = []*Roles{}
 		_spec       = _q.querySpec()
 		loadedTypes = [3]bool{
-			_q.withLionRoleMenus != nil,
+			_q.withLionRoleResources != nil,
 			_q.withLionUserRoles != nil,
 			_q.withLionRoleGroups != nil,
 		}
@@ -467,10 +467,10 @@ func (_q *RolesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Roles,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withLionRoleMenus; query != nil {
-		if err := _q.loadLionRoleMenus(ctx, query, nodes,
-			func(n *Roles) { n.Edges.LionRoleMenus = []*RoleMenus{} },
-			func(n *Roles, e *RoleMenus) { n.Edges.LionRoleMenus = append(n.Edges.LionRoleMenus, e) }); err != nil {
+	if query := _q.withLionRoleResources; query != nil {
+		if err := _q.loadLionRoleResources(ctx, query, nodes,
+			func(n *Roles) { n.Edges.LionRoleResources = []*RoleResources{} },
+			func(n *Roles, e *RoleResources) { n.Edges.LionRoleResources = append(n.Edges.LionRoleResources, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -491,7 +491,7 @@ func (_q *RolesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Roles,
 	return nodes, nil
 }
 
-func (_q *RolesQuery) loadLionRoleMenus(ctx context.Context, query *RoleMenusQuery, nodes []*Roles, init func(*Roles), assign func(*Roles, *RoleMenus)) error {
+func (_q *RolesQuery) loadLionRoleResources(ctx context.Context, query *RoleResourcesQuery, nodes []*Roles, init func(*Roles), assign func(*Roles, *RoleResources)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Roles)
 	for i := range nodes {
@@ -502,10 +502,10 @@ func (_q *RolesQuery) loadLionRoleMenus(ctx context.Context, query *RoleMenusQue
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(rolemenus.FieldRoleID)
+		query.ctx.AppendFieldOnce(roleresources.FieldRoleID)
 	}
-	query.Where(predicate.RoleMenus(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(roles.LionRoleMenusColumn), fks...))
+	query.Where(predicate.RoleResources(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(roles.LionRoleResourcesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
