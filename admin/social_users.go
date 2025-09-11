@@ -11,8 +11,9 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
-	"github.com/grpc-kit/pkg/lion/userauthsocial"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
+	"github.com/grpc-kit/pkg/lion/userauthsocial"
+	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -31,6 +32,8 @@ type socialUsers struct {
 
 	ProviderName string
 	AuthProvider *lion.AuthProviders
+
+	Groups []string `json:"groups"`
 }
 
 func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
@@ -65,7 +68,7 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 		return nil, err
 	}
 
-	// 解析为 PKCS#1 格式（这是您的格式）
+	// 解析为 PKCS#1 格式
 	privateKey, err := x509.ParsePKCS1PrivateKey(derBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse PKCS#1 private key: %v", err)
@@ -101,8 +104,13 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return "", err
 		}
 
+		if err = s.setUserRoles(ctx, userID); err != nil {
+			return "", err
+		}
+
 		// 填充 idToken 内容
 		idToken.SetSubject(strconv.Itoa(userID))
+		idToken.SetGroups(s.Groups)
 
 		accessToken, err = idToken.GetAccessToken(resp.SessionKey)
 		if err != nil {
@@ -133,8 +141,13 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return accessToken, err
 		}
 
+		if err = s.setUserRoles(ctx, userID); err != nil {
+			return "", err
+		}
+
 		// 填充 idToken 内容
 		idToken.SetSubject(strconv.Itoa(userID))
+		idToken.SetGroups(s.Groups)
 
 		// 生成 jwt 返回客户端
 		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey)
@@ -234,6 +247,8 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 			SetAccessTokenEncrypted(accessTokenEnc).
 			SetRefreshTokenEncrypted(refreshTokenEnc).
 			SetTokenExpiresAt(oauth2Token.Expiry)
+
+		// 设置用户组
 	}
 
 	return existUserID, nil
@@ -355,4 +370,27 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 	}
 
 	return existUserID, nil
+}
+
+func (s *socialUsers) setUserRoles(ctx context.Context, userID int) error {
+	rs, err := s.db.UserRoles.Query().
+		Select(
+			userroles.FieldRoleID,
+			userroles.FieldUserID,
+		).
+		Where(userroles.UserIDEQ(userID)).
+		WithLionRoles().
+		All(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, r := range rs {
+		if r.Edges.LionRoles == nil {
+			continue
+		}
+		s.Groups = append(s.Groups, r.Edges.LionRoles.Name)
+	}
+
+	return nil
 }
