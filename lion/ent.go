@@ -23,9 +23,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
-	"github.com/grpc-kit/pkg/lion/userauthlocal"
-	"github.com/grpc-kit/pkg/lion/userauthsocial"
 	"github.com/grpc-kit/pkg/lion/usergroups"
+	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
@@ -100,9 +99,8 @@ func checkColumn(t, c string) error {
 			rolemenus.Table:       rolemenus.ValidColumn,
 			roles.Table:           roles.ValidColumn,
 			securitykeys.Table:    securitykeys.ValidColumn,
-			userauthlocal.Table:   userauthlocal.ValidColumn,
-			userauthsocial.Table:  userauthsocial.ValidColumn,
 			usergroups.Table:      usergroups.ValidColumn,
+			useridentities.Table:  useridentities.ValidColumn,
 			userprofiles.Table:    userprofiles.ValidColumn,
 			userroles.Table:       userroles.ValidColumn,
 			users.Table:           users.ValidColumn,

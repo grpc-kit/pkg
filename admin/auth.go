@@ -1,4 +1,5 @@
 package admin
+/*
 
 import (
 	"context"
@@ -57,3 +58,4 @@ func (a *KnownAdminAPI) authLogin(w http.ResponseWriter, r *http.Request) {
 	// { code: 0, data: { token: 'xxx' }, message: '登录成功' }
 	w.Write([]byte(`{ "code": 0, "data": { "token": "xxx" }, "message": "登录成功" }`))
 }
+*/

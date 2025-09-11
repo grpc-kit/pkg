@@ -34,12 +34,10 @@ type Tx struct {
 	Roles *RolesClient
 	// SecurityKeys is the client for interacting with the SecurityKeys builders.
 	SecurityKeys *SecurityKeysClient
-	// UserAuthLocal is the client for interacting with the UserAuthLocal builders.
-	UserAuthLocal *UserAuthLocalClient
-	// UserAuthSocial is the client for interacting with the UserAuthSocial builders.
-	UserAuthSocial *UserAuthSocialClient
 	// UserGroups is the client for interacting with the UserGroups builders.
 	UserGroups *UserGroupsClient
+	// UserIdentities is the client for interacting with the UserIdentities builders.
+	UserIdentities *UserIdentitiesClient
 	// UserProfiles is the client for interacting with the UserProfiles builders.
 	UserProfiles *UserProfilesClient
 	// UserRoles is the client for interacting with the UserRoles builders.
@@ -188,9 +186,8 @@ func (tx *Tx) init() {
 	tx.RoleMenus = NewRoleMenusClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
 	tx.SecurityKeys = NewSecurityKeysClient(tx.config)
-	tx.UserAuthLocal = NewUserAuthLocalClient(tx.config)
-	tx.UserAuthSocial = NewUserAuthSocialClient(tx.config)
 	tx.UserGroups = NewUserGroupsClient(tx.config)
+	tx.UserIdentities = NewUserIdentitiesClient(tx.config)
 	tx.UserProfiles = NewUserProfilesClient(tx.config)
 	tx.UserRoles = NewUserRolesClient(tx.config)
 	tx.Users = NewUsersClient(tx.config)

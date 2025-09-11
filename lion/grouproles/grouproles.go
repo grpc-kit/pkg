@@ -27,16 +27,16 @@ const (
 	// EdgeLionRoles holds the string denoting the lion_roles edge name in mutations.
 	EdgeLionRoles = "lion_roles"
 	// Table holds the table name of the grouproles in the database.
-	Table = "lion_groups_role"
+	Table = "lion_group_roles"
 	// LionGroupsTable is the table that holds the lion_groups relation/edge.
-	LionGroupsTable = "lion_groups_role"
+	LionGroupsTable = "lion_group_roles"
 	// LionGroupsInverseTable is the table name for the Groups entity.
 	// It exists in this package in order to avoid circular dependency with the "groups" package.
 	LionGroupsInverseTable = "lion_groups"
 	// LionGroupsColumn is the table column denoting the lion_groups relation/edge.
 	LionGroupsColumn = "group_id"
 	// LionRolesTable is the table that holds the lion_roles relation/edge.
-	LionRolesTable = "lion_groups_role"
+	LionRolesTable = "lion_group_roles"
 	// LionRolesInverseTable is the table name for the Roles entity.
 	// It exists in this package in order to avoid circular dependency with the "roles" package.
 	LionRolesInverseTable = "lion_roles"

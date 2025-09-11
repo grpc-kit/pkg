@@ -45,10 +45,10 @@ const (
 	// LionUserRolesColumn is the table column denoting the lion_user_roles relation/edge.
 	LionUserRolesColumn = "role_id"
 	// LionRoleGroupsTable is the table that holds the lion_role_groups relation/edge.
-	LionRoleGroupsTable = "lion_groups_role"
+	LionRoleGroupsTable = "lion_group_roles"
 	// LionRoleGroupsInverseTable is the table name for the GroupRoles entity.
 	// It exists in this package in order to avoid circular dependency with the "grouproles" package.
-	LionRoleGroupsInverseTable = "lion_groups_role"
+	LionRoleGroupsInverseTable = "lion_group_roles"
 	// LionRoleGroupsColumn is the table column denoting the lion_role_groups relation/edge.
 	LionRoleGroupsColumn = "role_id"
 )

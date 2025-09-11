@@ -1,5 +1,6 @@
 package schema
 
+/*
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
@@ -59,3 +60,4 @@ func (UserAuthLocal) Annotations() []schema.Annotation {
 		entsql.Annotation{Table: "lion_user_auth_local"},
 	}
 }
+*/

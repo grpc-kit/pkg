@@ -39,14 +39,11 @@ type Roles func(*sql.Selector)
 // SecurityKeys is the predicate function for securitykeys builders.
 type SecurityKeys func(*sql.Selector)
 
-// UserAuthLocal is the predicate function for userauthlocal builders.
-type UserAuthLocal func(*sql.Selector)
-
-// UserAuthSocial is the predicate function for userauthsocial builders.
-type UserAuthSocial func(*sql.Selector)
-
 // UserGroups is the predicate function for usergroups builders.
 type UserGroups func(*sql.Selector)
+
+// UserIdentities is the predicate function for useridentities builders.
+type UserIdentities func(*sql.Selector)
 
 // UserProfiles is the predicate function for userprofiles builders.
 type UserProfiles func(*sql.Selector)

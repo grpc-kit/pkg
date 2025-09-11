@@ -141,30 +141,6 @@ func (f SecurityKeysFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Val
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.SecurityKeysMutation", m)
 }
 
-// The UserAuthLocalFunc type is an adapter to allow the use of ordinary
-// function as UserAuthLocal mutator.
-type UserAuthLocalFunc func(context.Context, *lion.UserAuthLocalMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f UserAuthLocalFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.UserAuthLocalMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserAuthLocalMutation", m)
-}
-
-// The UserAuthSocialFunc type is an adapter to allow the use of ordinary
-// function as UserAuthSocial mutator.
-type UserAuthSocialFunc func(context.Context, *lion.UserAuthSocialMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f UserAuthSocialFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.UserAuthSocialMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserAuthSocialMutation", m)
-}
-
 // The UserGroupsFunc type is an adapter to allow the use of ordinary
 // function as UserGroups mutator.
 type UserGroupsFunc func(context.Context, *lion.UserGroupsMutation) (lion.Value, error)
@@ -175,6 +151,18 @@ func (f UserGroupsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserGroupsMutation", m)
+}
+
+// The UserIdentitiesFunc type is an adapter to allow the use of ordinary
+// function as UserIdentities mutator.
+type UserIdentitiesFunc func(context.Context, *lion.UserIdentitiesMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserIdentitiesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.UserIdentitiesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserIdentitiesMutation", m)
 }
 
 // The UserProfilesFunc type is an adapter to allow the use of ordinary

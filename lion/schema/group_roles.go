@@ -63,6 +63,6 @@ func (GroupRoles) Indexes() []ent.Index {
 // Annotations 自定义表名
 func (GroupRoles) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_groups_role"},
+		entsql.Annotation{Table: "lion_group_roles"},
 	}
 }

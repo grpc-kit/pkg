@@ -8,13 +8,13 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// UserAuthSocial 存储通过 OIDC 等社交登录的用户信息
-type UserAuthSocial struct {
+// UserIdentities 存储通过 OIDC 等社交登录的用户信息
+type UserIdentities struct {
 	ent.Schema
 }
 
 // Fields of the table.
-func (UserAuthSocial) Fields() []ent.Field {
+func (UserIdentities) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("user_id").
 			Positive().
@@ -29,6 +29,24 @@ func (UserAuthSocial) Fields() []ent.Field {
 		field.String("provider_union_id").
 			Optional().
 			Comment("第三方平台统一标识，如微信的 UnionID"),
+		field.String("password_hash").
+			Default("").
+			Comment("哈希后的密码"),
+		field.Bool("mfa_enabled").
+			Default(false).
+			Comment("是否启用 MFA"),
+		field.Bytes("mfa_secret_encrypted").
+			Sensitive().
+			Default([]byte("")).
+			Comment("加密后的 MFA 密钥"),
+		field.Time("password_changed_at").
+			Optional().
+			Nillable().
+			Comment("密码最后一次更改时间"),
+		field.Time("password_expires_at").
+			Optional().
+			Nillable().
+			Comment("密码过期时间"),
 		field.Bytes("access_token_encrypted").
 			Sensitive().
 			Optional().
@@ -44,7 +62,7 @@ func (UserAuthSocial) Fields() []ent.Field {
 }
 
 // Edges of the table.
-func (UserAuthSocial) Edges() []ent.Edge {
+func (UserIdentities) Edges() []ent.Edge {
 	/*
 		return []ent.Edge{
 			edge.To("user", Users{}.Type).Unique().Required().Field("user_id"),
@@ -54,14 +72,14 @@ func (UserAuthSocial) Edges() []ent.Edge {
 }
 
 // Mixin of the table.
-func (UserAuthSocial) Mixin() []ent.Mixin {
+func (UserIdentities) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
 	}
 }
 
 // Indexes of the table.
-func (UserAuthSocial) Indexes() []ent.Index {
+func (UserIdentities) Indexes() []ent.Index {
 	return []ent.Index{
 		// 保证在相同平台下 provider 与 user_id 的组合唯一
 		index.Fields("user_id", "provider_name").Unique(),
@@ -69,8 +87,8 @@ func (UserAuthSocial) Indexes() []ent.Index {
 }
 
 // Annotations 自定义表名
-func (UserAuthSocial) Annotations() []schema.Annotation {
+func (UserIdentities) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_user_auth_social"},
+		entsql.Annotation{Table: "lion_user_identities"},
 	}
 }
