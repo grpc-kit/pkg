@@ -174,30 +174,7 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 	// 正常响应时调用，统一植入特定内容
 	forwardResponseOption := func(ctx context.Context, w http.ResponseWriter, msg proto.Message) error {
 		// 植入自定义 http 请求头
-		md, ok := runtime.ServerMetadataFromContext(ctx)
-		if ok {
-			for k, v := range md.HeaderMD {
-				// 必须以 "X-" 开头
-				if !strings.HasPrefix(strings.ToUpper(k), "X-") {
-					continue
-				}
-
-				for i := range v {
-					w.Header().Add(k, v[i])
-				}
-			}
-		}
-
-		// 禁用浏览器的 Content-Type 猜测行为
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		// 限制仅可在相同域名页面的 frame 中展示
-		w.Header().Set("X-Frame-Options", "sameorigin")
-		// 防范 XSS 攻击，检测到攻击，浏览器将不会清除页面，而是阻止页面加载
-		w.Header().Set("X-XSS-Protection", "1; mode=block")
-		// 访问一个 HTTPS 网站，要求浏览器总是通过 HTTPS 访问它
-		// w.Header().Set("Strict-Transport-Security", "max-age=172800")
-		// 返回请求ID，如果存在 trace.id 的话，否则返回默认值
-		w.Header().Set(HTTPHeaderRequestID, c.Observables.calcRequestID(ctx))
+		c.setHTTPResponseHeaders(ctx, w)
 
 		// tracing 不可用或当前无法记录上报事件
 		span := trace.SpanFromContext(ctx)
@@ -514,7 +491,7 @@ func (c *LocalConfig) GetClientUnaryInterceptor() []grpc.UnaryClientInterceptor 
 	*/
 
 	var opts []grpc.UnaryClientInterceptor
-	opts = append(opts, otelgrpc.UnaryClientInterceptor())
+	// opts = append(opts, otelgrpc.UnaryClientInterceptor())
 	//opts = append(opts, grpcprometheus.UnaryClientInterceptor)
 	// opts = append(opts, grpcopentracing.UnaryClientInterceptor())
 	// opts = append(opts, grpclogrus.UnaryClientInterceptor(c.logger, logReqFilterOpts...))
@@ -701,6 +678,43 @@ func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) erro
 	}
 
 	return nil
+}
+
+func (c *LocalConfig) setHTTPResponseHeaders(ctx context.Context, w http.ResponseWriter) {
+	md, ok := runtime.ServerMetadataFromContext(ctx)
+	if ok {
+		for k, v := range md.HeaderMD {
+			// 必须以 "X-" 开头
+			if !strings.HasPrefix(strings.ToUpper(k), "X-") {
+				continue
+			}
+
+			for i := range v {
+				w.Header().Add(k, v[i])
+			}
+		}
+		for k, v := range md.TrailerMD {
+			// 必须以 "X-" 开头
+			if !strings.HasPrefix(strings.ToUpper(k), "X-") {
+				continue
+			}
+
+			for i := range v {
+				w.Header().Add(k, v[i])
+			}
+		}
+	}
+
+	// 禁用浏览器的 Content-Type 猜测行为
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	// 限制仅可在相同域名页面的 frame 中展示
+	w.Header().Set("X-Frame-Options", "sameorigin")
+	// 防范 XSS 攻击，检测到攻击，浏览器将不会清除页面，而是阻止页面加载
+	w.Header().Set("X-XSS-Protection", "1; mode=block")
+	// 访问一个 HTTPS 网站，要求浏览器总是通过 HTTPS 访问它
+	// w.Header().Set("Strict-Transport-Security", "max-age=172800")
+	// 返回请求ID，如果存在 trace.id 的话，否则返回默认值
+	w.Header().Set(HTTPHeaderRequestID, c.Observables.calcRequestID(ctx))
 }
 
 func httpHandleGetVersion() http.HandlerFunc {
