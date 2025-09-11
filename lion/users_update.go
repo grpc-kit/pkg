@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/roleusers"
+	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -369,14 +369,14 @@ func (_u *UsersUpdate) SetNillableDescription(v *string) *UsersUpdate {
 	return _u
 }
 
-// AddLionUserIDs adds the "lion_users" edge to the RoleUsers entity by IDs.
+// AddLionUserIDs adds the "lion_users" edge to the UserRoles entity by IDs.
 func (_u *UsersUpdate) AddLionUserIDs(ids ...int) *UsersUpdate {
 	_u.mutation.AddLionUserIDs(ids...)
 	return _u
 }
 
-// AddLionUsers adds the "lion_users" edges to the RoleUsers entity.
-func (_u *UsersUpdate) AddLionUsers(v ...*RoleUsers) *UsersUpdate {
+// AddLionUsers adds the "lion_users" edges to the UserRoles entity.
+func (_u *UsersUpdate) AddLionUsers(v ...*UserRoles) *UsersUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -404,20 +404,20 @@ func (_u *UsersUpdate) Mutation() *UsersMutation {
 	return _u.mutation
 }
 
-// ClearLionUsers clears all "lion_users" edges to the RoleUsers entity.
+// ClearLionUsers clears all "lion_users" edges to the UserRoles entity.
 func (_u *UsersUpdate) ClearLionUsers() *UsersUpdate {
 	_u.mutation.ClearLionUsers()
 	return _u
 }
 
-// RemoveLionUserIDs removes the "lion_users" edge to RoleUsers entities by IDs.
+// RemoveLionUserIDs removes the "lion_users" edge to UserRoles entities by IDs.
 func (_u *UsersUpdate) RemoveLionUserIDs(ids ...int) *UsersUpdate {
 	_u.mutation.RemoveLionUserIDs(ids...)
 	return _u
 }
 
-// RemoveLionUsers removes "lion_users" edges to RoleUsers entities.
-func (_u *UsersUpdate) RemoveLionUsers(v ...*RoleUsers) *UsersUpdate {
+// RemoveLionUsers removes "lion_users" edges to UserRoles entities.
+func (_u *UsersUpdate) RemoveLionUsers(v ...*UserRoles) *UsersUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -618,7 +618,7 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{users.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -631,7 +631,7 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{users.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -647,7 +647,7 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{users.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1059,14 +1059,14 @@ func (_u *UsersUpdateOne) SetNillableDescription(v *string) *UsersUpdateOne {
 	return _u
 }
 
-// AddLionUserIDs adds the "lion_users" edge to the RoleUsers entity by IDs.
+// AddLionUserIDs adds the "lion_users" edge to the UserRoles entity by IDs.
 func (_u *UsersUpdateOne) AddLionUserIDs(ids ...int) *UsersUpdateOne {
 	_u.mutation.AddLionUserIDs(ids...)
 	return _u
 }
 
-// AddLionUsers adds the "lion_users" edges to the RoleUsers entity.
-func (_u *UsersUpdateOne) AddLionUsers(v ...*RoleUsers) *UsersUpdateOne {
+// AddLionUsers adds the "lion_users" edges to the UserRoles entity.
+func (_u *UsersUpdateOne) AddLionUsers(v ...*UserRoles) *UsersUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -1094,20 +1094,20 @@ func (_u *UsersUpdateOne) Mutation() *UsersMutation {
 	return _u.mutation
 }
 
-// ClearLionUsers clears all "lion_users" edges to the RoleUsers entity.
+// ClearLionUsers clears all "lion_users" edges to the UserRoles entity.
 func (_u *UsersUpdateOne) ClearLionUsers() *UsersUpdateOne {
 	_u.mutation.ClearLionUsers()
 	return _u
 }
 
-// RemoveLionUserIDs removes the "lion_users" edge to RoleUsers entities by IDs.
+// RemoveLionUserIDs removes the "lion_users" edge to UserRoles entities by IDs.
 func (_u *UsersUpdateOne) RemoveLionUserIDs(ids ...int) *UsersUpdateOne {
 	_u.mutation.RemoveLionUserIDs(ids...)
 	return _u
 }
 
-// RemoveLionUsers removes "lion_users" edges to RoleUsers entities.
-func (_u *UsersUpdateOne) RemoveLionUsers(v ...*RoleUsers) *UsersUpdateOne {
+// RemoveLionUsers removes "lion_users" edges to UserRoles entities.
+func (_u *UsersUpdateOne) RemoveLionUsers(v ...*UserRoles) *UsersUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -1338,7 +1338,7 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 			Columns: []string{users.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1351,7 +1351,7 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 			Columns: []string{users.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1367,7 +1367,7 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 			Columns: []string{users.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

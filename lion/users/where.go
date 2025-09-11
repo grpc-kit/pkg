@@ -1457,7 +1457,7 @@ func HasLionUsers() predicate.Users {
 }
 
 // HasLionUsersWith applies the HasEdge predicate on the "lion_users" edge with a given conditions (other predicates).
-func HasLionUsersWith(preds ...predicate.RoleUsers) predicate.Users {
+func HasLionUsersWith(preds ...predicate.UserRoles) predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
 		step := newLionUsersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

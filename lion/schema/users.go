@@ -106,7 +106,7 @@ func (Users) Fields() []ent.Field {
 func (Users) Edges() []ent.Edge {
 	return []ent.Edge{
 		// 一个 Role 可以对应多个 RoleMenu (中间实体)
-		edge.To("lion_users", RoleUsers.Type),
+		edge.To("lion_users", UserRoles.Type),
 		edge.To("lion_department_users", DepartmentUsers.Type),
 		/*
 			edge.From("lion_departments", Departments.Type).

@@ -11,7 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departmentusers"
-	"github.com/grpc-kit/pkg/lion/roleusers"
+	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -324,14 +324,14 @@ func (_c *UsersCreate) SetNillableDescription(v *string) *UsersCreate {
 	return _c
 }
 
-// AddLionUserIDs adds the "lion_users" edge to the RoleUsers entity by IDs.
+// AddLionUserIDs adds the "lion_users" edge to the UserRoles entity by IDs.
 func (_c *UsersCreate) AddLionUserIDs(ids ...int) *UsersCreate {
 	_c.mutation.AddLionUserIDs(ids...)
 	return _c
 }
 
-// AddLionUsers adds the "lion_users" edges to the RoleUsers entity.
-func (_c *UsersCreate) AddLionUsers(v ...*RoleUsers) *UsersCreate {
+// AddLionUsers adds the "lion_users" edges to the UserRoles entity.
+func (_c *UsersCreate) AddLionUsers(v ...*UserRoles) *UsersCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -694,7 +694,7 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 			Columns: []string{users.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

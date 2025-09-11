@@ -29,10 +29,10 @@ const (
 	// Table holds the table name of the groups in the database.
 	Table = "lion_groups"
 	// LionGroupsTable is the table that holds the lion_groups relation/edge.
-	LionGroupsTable = "lion_role_groups"
-	// LionGroupsInverseTable is the table name for the RoleGroups entity.
-	// It exists in this package in order to avoid circular dependency with the "rolegroups" package.
-	LionGroupsInverseTable = "lion_role_groups"
+	LionGroupsTable = "lion_groups_role"
+	// LionGroupsInverseTable is the table name for the GroupRoles entity.
+	// It exists in this package in order to avoid circular dependency with the "grouproles" package.
+	LionGroupsInverseTable = "lion_groups_role"
 	// LionGroupsColumn is the table column denoting the lion_groups relation/edge.
 	LionGroupsColumn = "group_id"
 )

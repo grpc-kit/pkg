@@ -76,7 +76,7 @@ type Users struct {
 // UsersEdges holds the relations/edges for other nodes in the graph.
 type UsersEdges struct {
 	// LionUsers holds the value of the lion_users edge.
-	LionUsers []*RoleUsers `json:"lion_users,omitempty"`
+	LionUsers []*UserRoles `json:"lion_users,omitempty"`
 	// LionDepartmentUsers holds the value of the lion_department_users edge.
 	LionDepartmentUsers []*DepartmentUsers `json:"lion_department_users,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -86,7 +86,7 @@ type UsersEdges struct {
 
 // LionUsersOrErr returns the LionUsers value or an error if the edge
 // was not loaded in eager-loading.
-func (e UsersEdges) LionUsersOrErr() ([]*RoleUsers, error) {
+func (e UsersEdges) LionUsersOrErr() ([]*UserRoles, error) {
 	if e.loadedTypes[0] {
 		return e.LionUsers, nil
 	}
@@ -303,7 +303,7 @@ func (_m *Users) Value(name string) (ent.Value, error) {
 }
 
 // QueryLionUsers queries the "lion_users" edge of the Users entity.
-func (_m *Users) QueryLionUsers() *RoleUsersQuery {
+func (_m *Users) QueryLionUsers() *UserRolesQuery {
 	return NewUsersClient(_m.config).QueryLionUsers(_m)
 }
 

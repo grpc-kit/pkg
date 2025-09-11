@@ -16,18 +16,18 @@ import (
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/departmentusers"
+	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/groupusers"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/permissions"
-	"github.com/grpc-kit/pkg/lion/rolegroups"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/roleusers"
 	"github.com/grpc-kit/pkg/lion/securitykeys"
-	"github.com/grpc-kit/pkg/lion/userattributes"
 	"github.com/grpc-kit/pkg/lion/userauthlocal"
 	"github.com/grpc-kit/pkg/lion/userauthsocial"
+	"github.com/grpc-kit/pkg/lion/usergroups"
+	"github.com/grpc-kit/pkg/lion/userprofiles"
+	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -93,18 +93,18 @@ func checkColumn(t, c string) error {
 			demo.Table:            demo.ValidColumn,
 			departmentusers.Table: departmentusers.ValidColumn,
 			departments.Table:     departments.ValidColumn,
-			groupusers.Table:      groupusers.ValidColumn,
+			grouproles.Table:      grouproles.ValidColumn,
 			groups.Table:          groups.ValidColumn,
 			menus.Table:           menus.ValidColumn,
 			permissions.Table:     permissions.ValidColumn,
-			rolegroups.Table:      rolegroups.ValidColumn,
 			rolemenus.Table:       rolemenus.ValidColumn,
-			roleusers.Table:       roleusers.ValidColumn,
 			roles.Table:           roles.ValidColumn,
 			securitykeys.Table:    securitykeys.ValidColumn,
-			userattributes.Table:  userattributes.ValidColumn,
 			userauthlocal.Table:   userauthlocal.ValidColumn,
 			userauthsocial.Table:  userauthsocial.ValidColumn,
+			usergroups.Table:      usergroups.ValidColumn,
+			userprofiles.Table:    userprofiles.ValidColumn,
+			userroles.Table:       userroles.ValidColumn,
 			users.Table:           users.ValidColumn,
 		})
 	})

@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/rolegroups"
 )
 
 // GroupsUpdate is the builder for updating Groups entities.
@@ -63,14 +63,14 @@ func (_u *GroupsUpdate) SetNillableDescription(v *string) *GroupsUpdate {
 	return _u
 }
 
-// AddLionGroupIDs adds the "lion_groups" edge to the RoleGroups entity by IDs.
+// AddLionGroupIDs adds the "lion_groups" edge to the GroupRoles entity by IDs.
 func (_u *GroupsUpdate) AddLionGroupIDs(ids ...int) *GroupsUpdate {
 	_u.mutation.AddLionGroupIDs(ids...)
 	return _u
 }
 
-// AddLionGroups adds the "lion_groups" edges to the RoleGroups entity.
-func (_u *GroupsUpdate) AddLionGroups(v ...*RoleGroups) *GroupsUpdate {
+// AddLionGroups adds the "lion_groups" edges to the GroupRoles entity.
+func (_u *GroupsUpdate) AddLionGroups(v ...*GroupRoles) *GroupsUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -83,20 +83,20 @@ func (_u *GroupsUpdate) Mutation() *GroupsMutation {
 	return _u.mutation
 }
 
-// ClearLionGroups clears all "lion_groups" edges to the RoleGroups entity.
+// ClearLionGroups clears all "lion_groups" edges to the GroupRoles entity.
 func (_u *GroupsUpdate) ClearLionGroups() *GroupsUpdate {
 	_u.mutation.ClearLionGroups()
 	return _u
 }
 
-// RemoveLionGroupIDs removes the "lion_groups" edge to RoleGroups entities by IDs.
+// RemoveLionGroupIDs removes the "lion_groups" edge to GroupRoles entities by IDs.
 func (_u *GroupsUpdate) RemoveLionGroupIDs(ids ...int) *GroupsUpdate {
 	_u.mutation.RemoveLionGroupIDs(ids...)
 	return _u
 }
 
-// RemoveLionGroups removes "lion_groups" edges to RoleGroups entities.
-func (_u *GroupsUpdate) RemoveLionGroups(v ...*RoleGroups) *GroupsUpdate {
+// RemoveLionGroups removes "lion_groups" edges to GroupRoles entities.
+func (_u *GroupsUpdate) RemoveLionGroups(v ...*GroupRoles) *GroupsUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -179,7 +179,7 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{groups.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -192,7 +192,7 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{groups.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -208,7 +208,7 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{groups.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -270,14 +270,14 @@ func (_u *GroupsUpdateOne) SetNillableDescription(v *string) *GroupsUpdateOne {
 	return _u
 }
 
-// AddLionGroupIDs adds the "lion_groups" edge to the RoleGroups entity by IDs.
+// AddLionGroupIDs adds the "lion_groups" edge to the GroupRoles entity by IDs.
 func (_u *GroupsUpdateOne) AddLionGroupIDs(ids ...int) *GroupsUpdateOne {
 	_u.mutation.AddLionGroupIDs(ids...)
 	return _u
 }
 
-// AddLionGroups adds the "lion_groups" edges to the RoleGroups entity.
-func (_u *GroupsUpdateOne) AddLionGroups(v ...*RoleGroups) *GroupsUpdateOne {
+// AddLionGroups adds the "lion_groups" edges to the GroupRoles entity.
+func (_u *GroupsUpdateOne) AddLionGroups(v ...*GroupRoles) *GroupsUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -290,20 +290,20 @@ func (_u *GroupsUpdateOne) Mutation() *GroupsMutation {
 	return _u.mutation
 }
 
-// ClearLionGroups clears all "lion_groups" edges to the RoleGroups entity.
+// ClearLionGroups clears all "lion_groups" edges to the GroupRoles entity.
 func (_u *GroupsUpdateOne) ClearLionGroups() *GroupsUpdateOne {
 	_u.mutation.ClearLionGroups()
 	return _u
 }
 
-// RemoveLionGroupIDs removes the "lion_groups" edge to RoleGroups entities by IDs.
+// RemoveLionGroupIDs removes the "lion_groups" edge to GroupRoles entities by IDs.
 func (_u *GroupsUpdateOne) RemoveLionGroupIDs(ids ...int) *GroupsUpdateOne {
 	_u.mutation.RemoveLionGroupIDs(ids...)
 	return _u
 }
 
-// RemoveLionGroups removes "lion_groups" edges to RoleGroups entities.
-func (_u *GroupsUpdateOne) RemoveLionGroups(v ...*RoleGroups) *GroupsUpdateOne {
+// RemoveLionGroups removes "lion_groups" edges to GroupRoles entities.
+func (_u *GroupsUpdateOne) RemoveLionGroups(v ...*GroupRoles) *GroupsUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -416,7 +416,7 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 			Columns: []string{groups.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -429,7 +429,7 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 			Columns: []string{groups.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -445,7 +445,7 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 			Columns: []string{groups.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

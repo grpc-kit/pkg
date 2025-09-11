@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/rolegroups"
 )
 
 // GroupsCreate is the builder for creating a Groups entity.
@@ -83,14 +83,14 @@ func (_c *GroupsCreate) SetNillableDescription(v *string) *GroupsCreate {
 	return _c
 }
 
-// AddLionGroupIDs adds the "lion_groups" edge to the RoleGroups entity by IDs.
+// AddLionGroupIDs adds the "lion_groups" edge to the GroupRoles entity by IDs.
 func (_c *GroupsCreate) AddLionGroupIDs(ids ...int) *GroupsCreate {
 	_c.mutation.AddLionGroupIDs(ids...)
 	return _c
 }
 
-// AddLionGroups adds the "lion_groups" edges to the RoleGroups entity.
-func (_c *GroupsCreate) AddLionGroups(v ...*RoleGroups) *GroupsCreate {
+// AddLionGroups adds the "lion_groups" edges to the GroupRoles entity.
+func (_c *GroupsCreate) AddLionGroups(v ...*GroupRoles) *GroupsCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -232,7 +232,7 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 			Columns: []string{groups.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

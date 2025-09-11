@@ -20,30 +20,30 @@ type Tx struct {
 	DepartmentUsers *DepartmentUsersClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
-	// GroupUsers is the client for interacting with the GroupUsers builders.
-	GroupUsers *GroupUsersClient
+	// GroupRoles is the client for interacting with the GroupRoles builders.
+	GroupRoles *GroupRolesClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
 	// Menus is the client for interacting with the Menus builders.
 	Menus *MenusClient
 	// Permissions is the client for interacting with the Permissions builders.
 	Permissions *PermissionsClient
-	// RoleGroups is the client for interacting with the RoleGroups builders.
-	RoleGroups *RoleGroupsClient
 	// RoleMenus is the client for interacting with the RoleMenus builders.
 	RoleMenus *RoleMenusClient
-	// RoleUsers is the client for interacting with the RoleUsers builders.
-	RoleUsers *RoleUsersClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
 	// SecurityKeys is the client for interacting with the SecurityKeys builders.
 	SecurityKeys *SecurityKeysClient
-	// UserAttributes is the client for interacting with the UserAttributes builders.
-	UserAttributes *UserAttributesClient
 	// UserAuthLocal is the client for interacting with the UserAuthLocal builders.
 	UserAuthLocal *UserAuthLocalClient
 	// UserAuthSocial is the client for interacting with the UserAuthSocial builders.
 	UserAuthSocial *UserAuthSocialClient
+	// UserGroups is the client for interacting with the UserGroups builders.
+	UserGroups *UserGroupsClient
+	// UserProfiles is the client for interacting with the UserProfiles builders.
+	UserProfiles *UserProfilesClient
+	// UserRoles is the client for interacting with the UserRoles builders.
+	UserRoles *UserRolesClient
 	// Users is the client for interacting with the Users builders.
 	Users *UsersClient
 
@@ -181,18 +181,18 @@ func (tx *Tx) init() {
 	tx.Demo = NewDemoClient(tx.config)
 	tx.DepartmentUsers = NewDepartmentUsersClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
-	tx.GroupUsers = NewGroupUsersClient(tx.config)
+	tx.GroupRoles = NewGroupRolesClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
 	tx.Permissions = NewPermissionsClient(tx.config)
-	tx.RoleGroups = NewRoleGroupsClient(tx.config)
 	tx.RoleMenus = NewRoleMenusClient(tx.config)
-	tx.RoleUsers = NewRoleUsersClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
 	tx.SecurityKeys = NewSecurityKeysClient(tx.config)
-	tx.UserAttributes = NewUserAttributesClient(tx.config)
 	tx.UserAuthLocal = NewUserAuthLocalClient(tx.config)
 	tx.UserAuthSocial = NewUserAuthSocialClient(tx.config)
+	tx.UserGroups = NewUserGroupsClient(tx.config)
+	tx.UserProfiles = NewUserProfilesClient(tx.config)
+	tx.UserRoles = NewUserRolesClient(tx.config)
 	tx.Users = NewUsersClient(tx.config)
 }
 

@@ -24,8 +24,8 @@ const (
 	FieldDescription = "description"
 	// EdgeLionRoleMenus holds the string denoting the lion_role_menus edge name in mutations.
 	EdgeLionRoleMenus = "lion_role_menus"
-	// EdgeLionRoleUsers holds the string denoting the lion_role_users edge name in mutations.
-	EdgeLionRoleUsers = "lion_role_users"
+	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
+	EdgeLionUserRoles = "lion_user_roles"
 	// EdgeLionRoleGroups holds the string denoting the lion_role_groups edge name in mutations.
 	EdgeLionRoleGroups = "lion_role_groups"
 	// Table holds the table name of the roles in the database.
@@ -37,18 +37,18 @@ const (
 	LionRoleMenusInverseTable = "lion_role_menus"
 	// LionRoleMenusColumn is the table column denoting the lion_role_menus relation/edge.
 	LionRoleMenusColumn = "role_id"
-	// LionRoleUsersTable is the table that holds the lion_role_users relation/edge.
-	LionRoleUsersTable = "lion_role_users"
-	// LionRoleUsersInverseTable is the table name for the RoleUsers entity.
-	// It exists in this package in order to avoid circular dependency with the "roleusers" package.
-	LionRoleUsersInverseTable = "lion_role_users"
-	// LionRoleUsersColumn is the table column denoting the lion_role_users relation/edge.
-	LionRoleUsersColumn = "role_id"
+	// LionUserRolesTable is the table that holds the lion_user_roles relation/edge.
+	LionUserRolesTable = "lion_user_roles"
+	// LionUserRolesInverseTable is the table name for the UserRoles entity.
+	// It exists in this package in order to avoid circular dependency with the "userroles" package.
+	LionUserRolesInverseTable = "lion_user_roles"
+	// LionUserRolesColumn is the table column denoting the lion_user_roles relation/edge.
+	LionUserRolesColumn = "role_id"
 	// LionRoleGroupsTable is the table that holds the lion_role_groups relation/edge.
-	LionRoleGroupsTable = "lion_role_groups"
-	// LionRoleGroupsInverseTable is the table name for the RoleGroups entity.
-	// It exists in this package in order to avoid circular dependency with the "rolegroups" package.
-	LionRoleGroupsInverseTable = "lion_role_groups"
+	LionRoleGroupsTable = "lion_groups_role"
+	// LionRoleGroupsInverseTable is the table name for the GroupRoles entity.
+	// It exists in this package in order to avoid circular dependency with the "grouproles" package.
+	LionRoleGroupsInverseTable = "lion_groups_role"
 	// LionRoleGroupsColumn is the table column denoting the lion_role_groups relation/edge.
 	LionRoleGroupsColumn = "role_id"
 )
@@ -127,17 +127,17 @@ func ByLionRoleMenus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByLionRoleUsersCount orders the results by lion_role_users count.
-func ByLionRoleUsersCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionUserRolesCount orders the results by lion_user_roles count.
+func ByLionUserRolesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionRoleUsersStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionUserRolesStep(), opts...)
 	}
 }
 
-// ByLionRoleUsers orders the results by lion_role_users terms.
-func ByLionRoleUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionUserRoles orders the results by lion_user_roles terms.
+func ByLionUserRoles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionRoleUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionUserRolesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -161,11 +161,11 @@ func newLionRoleMenusStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleMenusTable, LionRoleMenusColumn),
 	)
 }
-func newLionRoleUsersStep() *sqlgraph.Step {
+func newLionUserRolesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionRoleUsersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleUsersTable, LionRoleUsersColumn),
+		sqlgraph.To(LionUserRolesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionUserRolesTable, LionUserRolesColumn),
 	)
 }
 func newLionRoleGroupsStep() *sqlgraph.Step {

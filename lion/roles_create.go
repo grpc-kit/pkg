@@ -10,10 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/rolegroups"
+	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/roleusers"
+	"github.com/grpc-kit/pkg/lion/userroles"
 )
 
 // RolesCreate is the builder for creating a Roles entity.
@@ -86,29 +86,29 @@ func (_c *RolesCreate) AddLionRoleMenus(v ...*RoleMenus) *RolesCreate {
 	return _c.AddLionRoleMenuIDs(ids...)
 }
 
-// AddLionRoleUserIDs adds the "lion_role_users" edge to the RoleUsers entity by IDs.
-func (_c *RolesCreate) AddLionRoleUserIDs(ids ...int) *RolesCreate {
-	_c.mutation.AddLionRoleUserIDs(ids...)
+// AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by IDs.
+func (_c *RolesCreate) AddLionUserRoleIDs(ids ...int) *RolesCreate {
+	_c.mutation.AddLionUserRoleIDs(ids...)
 	return _c
 }
 
-// AddLionRoleUsers adds the "lion_role_users" edges to the RoleUsers entity.
-func (_c *RolesCreate) AddLionRoleUsers(v ...*RoleUsers) *RolesCreate {
+// AddLionUserRoles adds the "lion_user_roles" edges to the UserRoles entity.
+func (_c *RolesCreate) AddLionUserRoles(v ...*UserRoles) *RolesCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddLionRoleUserIDs(ids...)
+	return _c.AddLionUserRoleIDs(ids...)
 }
 
-// AddLionRoleGroupIDs adds the "lion_role_groups" edge to the RoleGroups entity by IDs.
+// AddLionRoleGroupIDs adds the "lion_role_groups" edge to the GroupRoles entity by IDs.
 func (_c *RolesCreate) AddLionRoleGroupIDs(ids ...int) *RolesCreate {
 	_c.mutation.AddLionRoleGroupIDs(ids...)
 	return _c
 }
 
-// AddLionRoleGroups adds the "lion_role_groups" edges to the RoleGroups entity.
-func (_c *RolesCreate) AddLionRoleGroups(v ...*RoleGroups) *RolesCreate {
+// AddLionRoleGroups adds the "lion_role_groups" edges to the GroupRoles entity.
+func (_c *RolesCreate) AddLionRoleGroups(v ...*GroupRoles) *RolesCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -242,15 +242,15 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LionRoleUsersIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionUserRolesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionRoleUsersTable,
-			Columns: []string{roles.LionRoleUsersColumn},
+			Table:   roles.LionUserRolesTable,
+			Columns: []string{roles.LionUserRolesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -266,7 +266,7 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 			Columns: []string{roles.LionRoleGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolegroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

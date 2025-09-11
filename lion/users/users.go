@@ -71,10 +71,10 @@ const (
 	// Table holds the table name of the users in the database.
 	Table = "lion_users"
 	// LionUsersTable is the table that holds the lion_users relation/edge.
-	LionUsersTable = "lion_role_users"
-	// LionUsersInverseTable is the table name for the RoleUsers entity.
-	// It exists in this package in order to avoid circular dependency with the "roleusers" package.
-	LionUsersInverseTable = "lion_role_users"
+	LionUsersTable = "lion_user_roles"
+	// LionUsersInverseTable is the table name for the UserRoles entity.
+	// It exists in this package in order to avoid circular dependency with the "userroles" package.
+	LionUsersInverseTable = "lion_user_roles"
 	// LionUsersColumn is the table column denoting the lion_users relation/edge.
 	LionUsersColumn = "user_id"
 	// LionDepartmentUsersTable is the table that holds the lion_department_users relation/edge.

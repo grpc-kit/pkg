@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/rolegroups"
 )
 
 // GroupsQuery is the builder for querying Groups entities.
@@ -24,7 +24,7 @@ type GroupsQuery struct {
 	order          []groups.OrderOption
 	inters         []Interceptor
 	predicates     []predicate.Groups
-	withLionGroups *RoleGroupsQuery
+	withLionGroups *GroupRolesQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,8 +62,8 @@ func (_q *GroupsQuery) Order(o ...groups.OrderOption) *GroupsQuery {
 }
 
 // QueryLionGroups chains the current query on the "lion_groups" edge.
-func (_q *GroupsQuery) QueryLionGroups() *RoleGroupsQuery {
-	query := (&RoleGroupsClient{config: _q.config}).Query()
+func (_q *GroupsQuery) QueryLionGroups() *GroupRolesQuery {
+	query := (&GroupRolesClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -74,7 +74,7 @@ func (_q *GroupsQuery) QueryLionGroups() *RoleGroupsQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groups.Table, groups.FieldID, selector),
-			sqlgraph.To(rolegroups.Table, rolegroups.FieldID),
+			sqlgraph.To(grouproles.Table, grouproles.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, groups.LionGroupsTable, groups.LionGroupsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
@@ -284,8 +284,8 @@ func (_q *GroupsQuery) Clone() *GroupsQuery {
 
 // WithLionGroups tells the query-builder to eager-load the nodes that are connected to
 // the "lion_groups" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *GroupsQuery) WithLionGroups(opts ...func(*RoleGroupsQuery)) *GroupsQuery {
-	query := (&RoleGroupsClient{config: _q.config}).Query()
+func (_q *GroupsQuery) WithLionGroups(opts ...func(*GroupRolesQuery)) *GroupsQuery {
+	query := (&GroupRolesClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -395,15 +395,15 @@ func (_q *GroupsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group
 	}
 	if query := _q.withLionGroups; query != nil {
 		if err := _q.loadLionGroups(ctx, query, nodes,
-			func(n *Groups) { n.Edges.LionGroups = []*RoleGroups{} },
-			func(n *Groups, e *RoleGroups) { n.Edges.LionGroups = append(n.Edges.LionGroups, e) }); err != nil {
+			func(n *Groups) { n.Edges.LionGroups = []*GroupRoles{} },
+			func(n *Groups, e *GroupRoles) { n.Edges.LionGroups = append(n.Edges.LionGroups, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *GroupsQuery) loadLionGroups(ctx context.Context, query *RoleGroupsQuery, nodes []*Groups, init func(*Groups), assign func(*Groups, *RoleGroups)) error {
+func (_q *GroupsQuery) loadLionGroups(ctx context.Context, query *GroupRolesQuery, nodes []*Groups, init func(*Groups), assign func(*Groups, *GroupRoles)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Groups)
 	for i := range nodes {
@@ -414,9 +414,9 @@ func (_q *GroupsQuery) loadLionGroups(ctx context.Context, query *RoleGroupsQuer
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(rolegroups.FieldGroupID)
+		query.ctx.AppendFieldOnce(grouproles.FieldGroupID)
 	}
-	query.Where(predicate.RoleGroups(func(s *sql.Selector) {
+	query.Where(predicate.GroupRoles(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(groups.LionGroupsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)

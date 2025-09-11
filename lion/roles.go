@@ -35,10 +35,10 @@ type Roles struct {
 type RolesEdges struct {
 	// LionRoleMenus holds the value of the lion_role_menus edge.
 	LionRoleMenus []*RoleMenus `json:"lion_role_menus,omitempty"`
-	// LionRoleUsers holds the value of the lion_role_users edge.
-	LionRoleUsers []*RoleUsers `json:"lion_role_users,omitempty"`
+	// LionUserRoles holds the value of the lion_user_roles edge.
+	LionUserRoles []*UserRoles `json:"lion_user_roles,omitempty"`
 	// LionRoleGroups holds the value of the lion_role_groups edge.
-	LionRoleGroups []*RoleGroups `json:"lion_role_groups,omitempty"`
+	LionRoleGroups []*GroupRoles `json:"lion_role_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -53,18 +53,18 @@ func (e RolesEdges) LionRoleMenusOrErr() ([]*RoleMenus, error) {
 	return nil, &NotLoadedError{edge: "lion_role_menus"}
 }
 
-// LionRoleUsersOrErr returns the LionRoleUsers value or an error if the edge
+// LionUserRolesOrErr returns the LionUserRoles value or an error if the edge
 // was not loaded in eager-loading.
-func (e RolesEdges) LionRoleUsersOrErr() ([]*RoleUsers, error) {
+func (e RolesEdges) LionUserRolesOrErr() ([]*UserRoles, error) {
 	if e.loadedTypes[1] {
-		return e.LionRoleUsers, nil
+		return e.LionUserRoles, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_role_users"}
+	return nil, &NotLoadedError{edge: "lion_user_roles"}
 }
 
 // LionRoleGroupsOrErr returns the LionRoleGroups value or an error if the edge
 // was not loaded in eager-loading.
-func (e RolesEdges) LionRoleGroupsOrErr() ([]*RoleGroups, error) {
+func (e RolesEdges) LionRoleGroupsOrErr() ([]*GroupRoles, error) {
 	if e.loadedTypes[2] {
 		return e.LionRoleGroups, nil
 	}
@@ -145,13 +145,13 @@ func (_m *Roles) QueryLionRoleMenus() *RoleMenusQuery {
 	return NewRolesClient(_m.config).QueryLionRoleMenus(_m)
 }
 
-// QueryLionRoleUsers queries the "lion_role_users" edge of the Roles entity.
-func (_m *Roles) QueryLionRoleUsers() *RoleUsersQuery {
-	return NewRolesClient(_m.config).QueryLionRoleUsers(_m)
+// QueryLionUserRoles queries the "lion_user_roles" edge of the Roles entity.
+func (_m *Roles) QueryLionUserRoles() *UserRolesQuery {
+	return NewRolesClient(_m.config).QueryLionUserRoles(_m)
 }
 
 // QueryLionRoleGroups queries the "lion_role_groups" edge of the Roles entity.
-func (_m *Roles) QueryLionRoleGroups() *RoleGroupsQuery {
+func (_m *Roles) QueryLionRoleGroups() *GroupRolesQuery {
 	return NewRolesClient(_m.config).QueryLionRoleGroups(_m)
 }
 
