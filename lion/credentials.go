@@ -21,11 +21,23 @@ type Credentials struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// 凭据名称
+	Name string `json:"name,omitempty"`
+	// 类型: api_key, jwt, jwks, license, ssh_key
+	Type string `json:"type,omitempty"`
+	// 应用 ID
+	Appid string `json:"appid,omitempty"`
+	// 应用 Key 或 Client Secret
+	AppkeyEncrypted []byte `json:"appkey_encrypted,omitempty"`
 	// 公钥 base64 编码存储
 	PublicKey string `json:"public_key,omitempty"`
 	// 私钥对称加密存储
 	PrivateKeyEncrypted []byte `json:"-"`
-	selectValues        sql.SelectValues
+	// 用途: oidc, license, api_gateway ...
+	Usage string `json:"usage,omitempty"`
+	// 密码过期时间
+	ExpiresAt    *time.Time `json:"expires_at,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -33,13 +45,13 @@ func (*Credentials) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case credentials.FieldPrivateKeyEncrypted:
+		case credentials.FieldAppkeyEncrypted, credentials.FieldPrivateKeyEncrypted:
 			values[i] = new([]byte)
 		case credentials.FieldID:
 			values[i] = new(sql.NullInt64)
-		case credentials.FieldPublicKey:
+		case credentials.FieldName, credentials.FieldType, credentials.FieldAppid, credentials.FieldPublicKey, credentials.FieldUsage:
 			values[i] = new(sql.NullString)
-		case credentials.FieldCreatedAt, credentials.FieldUpdatedAt:
+		case credentials.FieldCreatedAt, credentials.FieldUpdatedAt, credentials.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -74,6 +86,30 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case credentials.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				_m.Name = value.String
+			}
+		case credentials.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				_m.Type = value.String
+			}
+		case credentials.FieldAppid:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field appid", values[i])
+			} else if value.Valid {
+				_m.Appid = value.String
+			}
+		case credentials.FieldAppkeyEncrypted:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field appkey_encrypted", values[i])
+			} else if value != nil {
+				_m.AppkeyEncrypted = *value
+			}
 		case credentials.FieldPublicKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field public_key", values[i])
@@ -85,6 +121,19 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field private_key_encrypted", values[i])
 			} else if value != nil {
 				_m.PrivateKeyEncrypted = *value
+			}
+		case credentials.FieldUsage:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field usage", values[i])
+			} else if value.Valid {
+				_m.Usage = value.String
+			}
+		case credentials.FieldExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
+			} else if value.Valid {
+				_m.ExpiresAt = new(time.Time)
+				*_m.ExpiresAt = value.Time
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -128,10 +177,30 @@ func (_m *Credentials) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("type=")
+	builder.WriteString(_m.Type)
+	builder.WriteString(", ")
+	builder.WriteString("appid=")
+	builder.WriteString(_m.Appid)
+	builder.WriteString(", ")
+	builder.WriteString("appkey_encrypted=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AppkeyEncrypted))
+	builder.WriteString(", ")
 	builder.WriteString("public_key=")
 	builder.WriteString(_m.PublicKey)
 	builder.WriteString(", ")
 	builder.WriteString("private_key_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("usage=")
+	builder.WriteString(_m.Usage)
+	builder.WriteString(", ")
+	if v := _m.ExpiresAt; v != nil {
+		builder.WriteString("expires_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

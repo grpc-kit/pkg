@@ -34,6 +34,54 @@ func (_u *CredentialsUpdate) SetUpdatedAt(v time.Time) *CredentialsUpdate {
 	return _u
 }
 
+// SetName sets the "name" field.
+func (_u *CredentialsUpdate) SetName(v string) *CredentialsUpdate {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *CredentialsUpdate) SetNillableName(v *string) *CredentialsUpdate {
+	if v != nil {
+		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetType sets the "type" field.
+func (_u *CredentialsUpdate) SetType(v string) *CredentialsUpdate {
+	_u.mutation.SetType(v)
+	return _u
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_u *CredentialsUpdate) SetNillableType(v *string) *CredentialsUpdate {
+	if v != nil {
+		_u.SetType(*v)
+	}
+	return _u
+}
+
+// SetAppid sets the "appid" field.
+func (_u *CredentialsUpdate) SetAppid(v string) *CredentialsUpdate {
+	_u.mutation.SetAppid(v)
+	return _u
+}
+
+// SetNillableAppid sets the "appid" field if the given value is not nil.
+func (_u *CredentialsUpdate) SetNillableAppid(v *string) *CredentialsUpdate {
+	if v != nil {
+		_u.SetAppid(*v)
+	}
+	return _u
+}
+
+// SetAppkeyEncrypted sets the "appkey_encrypted" field.
+func (_u *CredentialsUpdate) SetAppkeyEncrypted(v []byte) *CredentialsUpdate {
+	_u.mutation.SetAppkeyEncrypted(v)
+	return _u
+}
+
 // SetPublicKey sets the "public_key" field.
 func (_u *CredentialsUpdate) SetPublicKey(v string) *CredentialsUpdate {
 	_u.mutation.SetPublicKey(v)
@@ -51,6 +99,40 @@ func (_u *CredentialsUpdate) SetNillablePublicKey(v *string) *CredentialsUpdate 
 // SetPrivateKeyEncrypted sets the "private_key_encrypted" field.
 func (_u *CredentialsUpdate) SetPrivateKeyEncrypted(v []byte) *CredentialsUpdate {
 	_u.mutation.SetPrivateKeyEncrypted(v)
+	return _u
+}
+
+// SetUsage sets the "usage" field.
+func (_u *CredentialsUpdate) SetUsage(v string) *CredentialsUpdate {
+	_u.mutation.SetUsage(v)
+	return _u
+}
+
+// SetNillableUsage sets the "usage" field if the given value is not nil.
+func (_u *CredentialsUpdate) SetNillableUsage(v *string) *CredentialsUpdate {
+	if v != nil {
+		_u.SetUsage(*v)
+	}
+	return _u
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (_u *CredentialsUpdate) SetExpiresAt(v time.Time) *CredentialsUpdate {
+	_u.mutation.SetExpiresAt(v)
+	return _u
+}
+
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_u *CredentialsUpdate) SetNillableExpiresAt(v *time.Time) *CredentialsUpdate {
+	if v != nil {
+		_u.SetExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (_u *CredentialsUpdate) ClearExpiresAt() *CredentialsUpdate {
+	_u.mutation.ClearExpiresAt()
 	return _u
 }
 
@@ -102,11 +184,6 @@ func (_u *CredentialsUpdate) check() error {
 			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "Credentials.public_key": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.PrivateKeyEncrypted(); ok {
-		if err := credentials.PrivateKeyEncryptedValidator(v); err != nil {
-			return &ValidationError{Name: "private_key_encrypted", err: fmt.Errorf(`lion: validator failed for field "Credentials.private_key_encrypted": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -125,11 +202,32 @@ func (_u *CredentialsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(credentials.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(credentials.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.GetType(); ok {
+		_spec.SetField(credentials.FieldType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Appid(); ok {
+		_spec.SetField(credentials.FieldAppid, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AppkeyEncrypted(); ok {
+		_spec.SetField(credentials.FieldAppkeyEncrypted, field.TypeBytes, value)
+	}
 	if value, ok := _u.mutation.PublicKey(); ok {
 		_spec.SetField(credentials.FieldPublicKey, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.PrivateKeyEncrypted(); ok {
 		_spec.SetField(credentials.FieldPrivateKeyEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.Usage(); ok {
+		_spec.SetField(credentials.FieldUsage, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ExpiresAt(); ok {
+		_spec.SetField(credentials.FieldExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiresAtCleared() {
+		_spec.ClearField(credentials.FieldExpiresAt, field.TypeTime)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -157,6 +255,54 @@ func (_u *CredentialsUpdateOne) SetUpdatedAt(v time.Time) *CredentialsUpdateOne 
 	return _u
 }
 
+// SetName sets the "name" field.
+func (_u *CredentialsUpdateOne) SetName(v string) *CredentialsUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *CredentialsUpdateOne) SetNillableName(v *string) *CredentialsUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetType sets the "type" field.
+func (_u *CredentialsUpdateOne) SetType(v string) *CredentialsUpdateOne {
+	_u.mutation.SetType(v)
+	return _u
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_u *CredentialsUpdateOne) SetNillableType(v *string) *CredentialsUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
+	}
+	return _u
+}
+
+// SetAppid sets the "appid" field.
+func (_u *CredentialsUpdateOne) SetAppid(v string) *CredentialsUpdateOne {
+	_u.mutation.SetAppid(v)
+	return _u
+}
+
+// SetNillableAppid sets the "appid" field if the given value is not nil.
+func (_u *CredentialsUpdateOne) SetNillableAppid(v *string) *CredentialsUpdateOne {
+	if v != nil {
+		_u.SetAppid(*v)
+	}
+	return _u
+}
+
+// SetAppkeyEncrypted sets the "appkey_encrypted" field.
+func (_u *CredentialsUpdateOne) SetAppkeyEncrypted(v []byte) *CredentialsUpdateOne {
+	_u.mutation.SetAppkeyEncrypted(v)
+	return _u
+}
+
 // SetPublicKey sets the "public_key" field.
 func (_u *CredentialsUpdateOne) SetPublicKey(v string) *CredentialsUpdateOne {
 	_u.mutation.SetPublicKey(v)
@@ -174,6 +320,40 @@ func (_u *CredentialsUpdateOne) SetNillablePublicKey(v *string) *CredentialsUpda
 // SetPrivateKeyEncrypted sets the "private_key_encrypted" field.
 func (_u *CredentialsUpdateOne) SetPrivateKeyEncrypted(v []byte) *CredentialsUpdateOne {
 	_u.mutation.SetPrivateKeyEncrypted(v)
+	return _u
+}
+
+// SetUsage sets the "usage" field.
+func (_u *CredentialsUpdateOne) SetUsage(v string) *CredentialsUpdateOne {
+	_u.mutation.SetUsage(v)
+	return _u
+}
+
+// SetNillableUsage sets the "usage" field if the given value is not nil.
+func (_u *CredentialsUpdateOne) SetNillableUsage(v *string) *CredentialsUpdateOne {
+	if v != nil {
+		_u.SetUsage(*v)
+	}
+	return _u
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (_u *CredentialsUpdateOne) SetExpiresAt(v time.Time) *CredentialsUpdateOne {
+	_u.mutation.SetExpiresAt(v)
+	return _u
+}
+
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_u *CredentialsUpdateOne) SetNillableExpiresAt(v *time.Time) *CredentialsUpdateOne {
+	if v != nil {
+		_u.SetExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (_u *CredentialsUpdateOne) ClearExpiresAt() *CredentialsUpdateOne {
+	_u.mutation.ClearExpiresAt()
 	return _u
 }
 
@@ -238,11 +418,6 @@ func (_u *CredentialsUpdateOne) check() error {
 			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "Credentials.public_key": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.PrivateKeyEncrypted(); ok {
-		if err := credentials.PrivateKeyEncryptedValidator(v); err != nil {
-			return &ValidationError{Name: "private_key_encrypted", err: fmt.Errorf(`lion: validator failed for field "Credentials.private_key_encrypted": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -278,11 +453,32 @@ func (_u *CredentialsUpdateOne) sqlSave(ctx context.Context) (_node *Credentials
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(credentials.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(credentials.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.GetType(); ok {
+		_spec.SetField(credentials.FieldType, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Appid(); ok {
+		_spec.SetField(credentials.FieldAppid, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.AppkeyEncrypted(); ok {
+		_spec.SetField(credentials.FieldAppkeyEncrypted, field.TypeBytes, value)
+	}
 	if value, ok := _u.mutation.PublicKey(); ok {
 		_spec.SetField(credentials.FieldPublicKey, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.PrivateKeyEncrypted(); ok {
 		_spec.SetField(credentials.FieldPrivateKeyEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.Usage(); ok {
+		_spec.SetField(credentials.FieldUsage, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ExpiresAt(); ok {
+		_spec.SetField(credentials.FieldExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiresAtCleared() {
+		_spec.ClearField(credentials.FieldExpiresAt, field.TypeTime)
 	}
 	_node = &Credentials{config: _u.config}
 	_spec.Assign = _node.assignValues

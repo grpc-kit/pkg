@@ -1119,8 +1119,14 @@ type CredentialsMutation struct {
 	id                    *int
 	created_at            *time.Time
 	updated_at            *time.Time
+	name                  *string
+	_type                 *string
+	appid                 *string
+	appkey_encrypted      *[]byte
 	public_key            *string
 	private_key_encrypted *[]byte
+	usage                 *string
+	expires_at            *time.Time
 	clearedFields         map[string]struct{}
 	done                  bool
 	oldValue              func(context.Context) (*Credentials, error)
@@ -1297,6 +1303,150 @@ func (m *CredentialsMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// SetName sets the "name" field.
+func (m *CredentialsMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CredentialsMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Credentials entity.
+// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialsMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CredentialsMutation) ResetName() {
+	m.name = nil
+}
+
+// SetType sets the "type" field.
+func (m *CredentialsMutation) SetType(s string) {
+	m._type = &s
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *CredentialsMutation) GetType() (r string, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the Credentials entity.
+// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialsMutation) OldType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *CredentialsMutation) ResetType() {
+	m._type = nil
+}
+
+// SetAppid sets the "appid" field.
+func (m *CredentialsMutation) SetAppid(s string) {
+	m.appid = &s
+}
+
+// Appid returns the value of the "appid" field in the mutation.
+func (m *CredentialsMutation) Appid() (r string, exists bool) {
+	v := m.appid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppid returns the old "appid" field's value of the Credentials entity.
+// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialsMutation) OldAppid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppid: %w", err)
+	}
+	return oldValue.Appid, nil
+}
+
+// ResetAppid resets all changes to the "appid" field.
+func (m *CredentialsMutation) ResetAppid() {
+	m.appid = nil
+}
+
+// SetAppkeyEncrypted sets the "appkey_encrypted" field.
+func (m *CredentialsMutation) SetAppkeyEncrypted(b []byte) {
+	m.appkey_encrypted = &b
+}
+
+// AppkeyEncrypted returns the value of the "appkey_encrypted" field in the mutation.
+func (m *CredentialsMutation) AppkeyEncrypted() (r []byte, exists bool) {
+	v := m.appkey_encrypted
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppkeyEncrypted returns the old "appkey_encrypted" field's value of the Credentials entity.
+// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialsMutation) OldAppkeyEncrypted(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppkeyEncrypted is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppkeyEncrypted requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppkeyEncrypted: %w", err)
+	}
+	return oldValue.AppkeyEncrypted, nil
+}
+
+// ResetAppkeyEncrypted resets all changes to the "appkey_encrypted" field.
+func (m *CredentialsMutation) ResetAppkeyEncrypted() {
+	m.appkey_encrypted = nil
+}
+
 // SetPublicKey sets the "public_key" field.
 func (m *CredentialsMutation) SetPublicKey(s string) {
 	m.public_key = &s
@@ -1369,6 +1519,91 @@ func (m *CredentialsMutation) ResetPrivateKeyEncrypted() {
 	m.private_key_encrypted = nil
 }
 
+// SetUsage sets the "usage" field.
+func (m *CredentialsMutation) SetUsage(s string) {
+	m.usage = &s
+}
+
+// Usage returns the value of the "usage" field in the mutation.
+func (m *CredentialsMutation) Usage() (r string, exists bool) {
+	v := m.usage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUsage returns the old "usage" field's value of the Credentials entity.
+// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialsMutation) OldUsage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUsage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUsage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUsage: %w", err)
+	}
+	return oldValue.Usage, nil
+}
+
+// ResetUsage resets all changes to the "usage" field.
+func (m *CredentialsMutation) ResetUsage() {
+	m.usage = nil
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (m *CredentialsMutation) SetExpiresAt(t time.Time) {
+	m.expires_at = &t
+}
+
+// ExpiresAt returns the value of the "expires_at" field in the mutation.
+func (m *CredentialsMutation) ExpiresAt() (r time.Time, exists bool) {
+	v := m.expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiresAt returns the old "expires_at" field's value of the Credentials entity.
+// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialsMutation) OldExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiresAt: %w", err)
+	}
+	return oldValue.ExpiresAt, nil
+}
+
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (m *CredentialsMutation) ClearExpiresAt() {
+	m.expires_at = nil
+	m.clearedFields[credentials.FieldExpiresAt] = struct{}{}
+}
+
+// ExpiresAtCleared returns if the "expires_at" field was cleared in this mutation.
+func (m *CredentialsMutation) ExpiresAtCleared() bool {
+	_, ok := m.clearedFields[credentials.FieldExpiresAt]
+	return ok
+}
+
+// ResetExpiresAt resets all changes to the "expires_at" field.
+func (m *CredentialsMutation) ResetExpiresAt() {
+	m.expires_at = nil
+	delete(m.clearedFields, credentials.FieldExpiresAt)
+}
+
 // Where appends a list predicates to the CredentialsMutation builder.
 func (m *CredentialsMutation) Where(ps ...predicate.Credentials) {
 	m.predicates = append(m.predicates, ps...)
@@ -1403,18 +1638,36 @@ func (m *CredentialsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CredentialsMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, credentials.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, credentials.FieldUpdatedAt)
 	}
+	if m.name != nil {
+		fields = append(fields, credentials.FieldName)
+	}
+	if m._type != nil {
+		fields = append(fields, credentials.FieldType)
+	}
+	if m.appid != nil {
+		fields = append(fields, credentials.FieldAppid)
+	}
+	if m.appkey_encrypted != nil {
+		fields = append(fields, credentials.FieldAppkeyEncrypted)
+	}
 	if m.public_key != nil {
 		fields = append(fields, credentials.FieldPublicKey)
 	}
 	if m.private_key_encrypted != nil {
 		fields = append(fields, credentials.FieldPrivateKeyEncrypted)
+	}
+	if m.usage != nil {
+		fields = append(fields, credentials.FieldUsage)
+	}
+	if m.expires_at != nil {
+		fields = append(fields, credentials.FieldExpiresAt)
 	}
 	return fields
 }
@@ -1428,10 +1681,22 @@ func (m *CredentialsMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case credentials.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case credentials.FieldName:
+		return m.Name()
+	case credentials.FieldType:
+		return m.GetType()
+	case credentials.FieldAppid:
+		return m.Appid()
+	case credentials.FieldAppkeyEncrypted:
+		return m.AppkeyEncrypted()
 	case credentials.FieldPublicKey:
 		return m.PublicKey()
 	case credentials.FieldPrivateKeyEncrypted:
 		return m.PrivateKeyEncrypted()
+	case credentials.FieldUsage:
+		return m.Usage()
+	case credentials.FieldExpiresAt:
+		return m.ExpiresAt()
 	}
 	return nil, false
 }
@@ -1445,10 +1710,22 @@ func (m *CredentialsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldCreatedAt(ctx)
 	case credentials.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case credentials.FieldName:
+		return m.OldName(ctx)
+	case credentials.FieldType:
+		return m.OldType(ctx)
+	case credentials.FieldAppid:
+		return m.OldAppid(ctx)
+	case credentials.FieldAppkeyEncrypted:
+		return m.OldAppkeyEncrypted(ctx)
 	case credentials.FieldPublicKey:
 		return m.OldPublicKey(ctx)
 	case credentials.FieldPrivateKeyEncrypted:
 		return m.OldPrivateKeyEncrypted(ctx)
+	case credentials.FieldUsage:
+		return m.OldUsage(ctx)
+	case credentials.FieldExpiresAt:
+		return m.OldExpiresAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Credentials field %s", name)
 }
@@ -1472,6 +1749,34 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
+	case credentials.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case credentials.FieldType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case credentials.FieldAppid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppid(v)
+		return nil
+	case credentials.FieldAppkeyEncrypted:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppkeyEncrypted(v)
+		return nil
 	case credentials.FieldPublicKey:
 		v, ok := value.(string)
 		if !ok {
@@ -1485,6 +1790,20 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPrivateKeyEncrypted(v)
+		return nil
+	case credentials.FieldUsage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUsage(v)
+		return nil
+	case credentials.FieldExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiresAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Credentials field %s", name)
@@ -1515,7 +1834,11 @@ func (m *CredentialsMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CredentialsMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(credentials.FieldExpiresAt) {
+		fields = append(fields, credentials.FieldExpiresAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1528,6 +1851,11 @@ func (m *CredentialsMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CredentialsMutation) ClearField(name string) error {
+	switch name {
+	case credentials.FieldExpiresAt:
+		m.ClearExpiresAt()
+		return nil
+	}
 	return fmt.Errorf("unknown Credentials nullable field %s", name)
 }
 
@@ -1541,11 +1869,29 @@ func (m *CredentialsMutation) ResetField(name string) error {
 	case credentials.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
+	case credentials.FieldName:
+		m.ResetName()
+		return nil
+	case credentials.FieldType:
+		m.ResetType()
+		return nil
+	case credentials.FieldAppid:
+		m.ResetAppid()
+		return nil
+	case credentials.FieldAppkeyEncrypted:
+		m.ResetAppkeyEncrypted()
+		return nil
 	case credentials.FieldPublicKey:
 		m.ResetPublicKey()
 		return nil
 	case credentials.FieldPrivateKeyEncrypted:
 		m.ResetPrivateKeyEncrypted()
+		return nil
+	case credentials.FieldUsage:
+		m.ResetUsage()
+		return nil
+	case credentials.FieldExpiresAt:
+		m.ResetExpiresAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Credentials field %s", name)

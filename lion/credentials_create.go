@@ -48,6 +48,30 @@ func (_c *CredentialsCreate) SetNillableUpdatedAt(v *time.Time) *CredentialsCrea
 	return _c
 }
 
+// SetName sets the "name" field.
+func (_c *CredentialsCreate) SetName(v string) *CredentialsCreate {
+	_c.mutation.SetName(v)
+	return _c
+}
+
+// SetType sets the "type" field.
+func (_c *CredentialsCreate) SetType(v string) *CredentialsCreate {
+	_c.mutation.SetType(v)
+	return _c
+}
+
+// SetAppid sets the "appid" field.
+func (_c *CredentialsCreate) SetAppid(v string) *CredentialsCreate {
+	_c.mutation.SetAppid(v)
+	return _c
+}
+
+// SetAppkeyEncrypted sets the "appkey_encrypted" field.
+func (_c *CredentialsCreate) SetAppkeyEncrypted(v []byte) *CredentialsCreate {
+	_c.mutation.SetAppkeyEncrypted(v)
+	return _c
+}
+
 // SetPublicKey sets the "public_key" field.
 func (_c *CredentialsCreate) SetPublicKey(v string) *CredentialsCreate {
 	_c.mutation.SetPublicKey(v)
@@ -57,6 +81,26 @@ func (_c *CredentialsCreate) SetPublicKey(v string) *CredentialsCreate {
 // SetPrivateKeyEncrypted sets the "private_key_encrypted" field.
 func (_c *CredentialsCreate) SetPrivateKeyEncrypted(v []byte) *CredentialsCreate {
 	_c.mutation.SetPrivateKeyEncrypted(v)
+	return _c
+}
+
+// SetUsage sets the "usage" field.
+func (_c *CredentialsCreate) SetUsage(v string) *CredentialsCreate {
+	_c.mutation.SetUsage(v)
+	return _c
+}
+
+// SetExpiresAt sets the "expires_at" field.
+func (_c *CredentialsCreate) SetExpiresAt(v time.Time) *CredentialsCreate {
+	_c.mutation.SetExpiresAt(v)
+	return _c
+}
+
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_c *CredentialsCreate) SetNillableExpiresAt(v *time.Time) *CredentialsCreate {
+	if v != nil {
+		_c.SetExpiresAt(*v)
+	}
 	return _c
 }
 
@@ -103,6 +147,14 @@ func (_c *CredentialsCreate) defaults() {
 		v := credentials.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.AppkeyEncrypted(); !ok {
+		v := credentials.DefaultAppkeyEncrypted
+		_c.mutation.SetAppkeyEncrypted(v)
+	}
+	if _, ok := _c.mutation.PrivateKeyEncrypted(); !ok {
+		v := credentials.DefaultPrivateKeyEncrypted
+		_c.mutation.SetPrivateKeyEncrypted(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -112,6 +164,18 @@ func (_c *CredentialsCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Credentials.updated_at"`)}
+	}
+	if _, ok := _c.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Credentials.name"`)}
+	}
+	if _, ok := _c.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "Credentials.type"`)}
+	}
+	if _, ok := _c.mutation.Appid(); !ok {
+		return &ValidationError{Name: "appid", err: errors.New(`lion: missing required field "Credentials.appid"`)}
+	}
+	if _, ok := _c.mutation.AppkeyEncrypted(); !ok {
+		return &ValidationError{Name: "appkey_encrypted", err: errors.New(`lion: missing required field "Credentials.appkey_encrypted"`)}
 	}
 	if _, ok := _c.mutation.PublicKey(); !ok {
 		return &ValidationError{Name: "public_key", err: errors.New(`lion: missing required field "Credentials.public_key"`)}
@@ -124,10 +188,8 @@ func (_c *CredentialsCreate) check() error {
 	if _, ok := _c.mutation.PrivateKeyEncrypted(); !ok {
 		return &ValidationError{Name: "private_key_encrypted", err: errors.New(`lion: missing required field "Credentials.private_key_encrypted"`)}
 	}
-	if v, ok := _c.mutation.PrivateKeyEncrypted(); ok {
-		if err := credentials.PrivateKeyEncryptedValidator(v); err != nil {
-			return &ValidationError{Name: "private_key_encrypted", err: fmt.Errorf(`lion: validator failed for field "Credentials.private_key_encrypted": %w`, err)}
-		}
+	if _, ok := _c.mutation.Usage(); !ok {
+		return &ValidationError{Name: "usage", err: errors.New(`lion: missing required field "Credentials.usage"`)}
 	}
 	return nil
 }
@@ -163,6 +225,22 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 		_spec.SetField(credentials.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.Name(); ok {
+		_spec.SetField(credentials.FieldName, field.TypeString, value)
+		_node.Name = value
+	}
+	if value, ok := _c.mutation.GetType(); ok {
+		_spec.SetField(credentials.FieldType, field.TypeString, value)
+		_node.Type = value
+	}
+	if value, ok := _c.mutation.Appid(); ok {
+		_spec.SetField(credentials.FieldAppid, field.TypeString, value)
+		_node.Appid = value
+	}
+	if value, ok := _c.mutation.AppkeyEncrypted(); ok {
+		_spec.SetField(credentials.FieldAppkeyEncrypted, field.TypeBytes, value)
+		_node.AppkeyEncrypted = value
+	}
 	if value, ok := _c.mutation.PublicKey(); ok {
 		_spec.SetField(credentials.FieldPublicKey, field.TypeString, value)
 		_node.PublicKey = value
@@ -170,6 +248,14 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.PrivateKeyEncrypted(); ok {
 		_spec.SetField(credentials.FieldPrivateKeyEncrypted, field.TypeBytes, value)
 		_node.PrivateKeyEncrypted = value
+	}
+	if value, ok := _c.mutation.Usage(); ok {
+		_spec.SetField(credentials.FieldUsage, field.TypeString, value)
+		_node.Usage = value
+	}
+	if value, ok := _c.mutation.ExpiresAt(); ok {
+		_spec.SetField(credentials.FieldExpiresAt, field.TypeTime, value)
+		_node.ExpiresAt = &value
 	}
 	return _node, _spec
 }

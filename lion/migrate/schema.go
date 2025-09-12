@@ -38,8 +38,14 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "name", Type: field.TypeString},
+		{Name: "type", Type: field.TypeString},
+		{Name: "appid", Type: field.TypeString, Unique: true},
+		{Name: "appkey_encrypted", Type: field.TypeBytes},
 		{Name: "public_key", Type: field.TypeString},
 		{Name: "private_key_encrypted", Type: field.TypeBytes},
+		{Name: "usage", Type: field.TypeString},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 	}
 	// LionCredentialsTable holds the schema information for the "lion_credentials" table.
 	LionCredentialsTable = &schema.Table{

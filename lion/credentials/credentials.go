@@ -17,10 +17,22 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
+	// FieldAppid holds the string denoting the appid field in the database.
+	FieldAppid = "appid"
+	// FieldAppkeyEncrypted holds the string denoting the appkey_encrypted field in the database.
+	FieldAppkeyEncrypted = "appkey_encrypted"
 	// FieldPublicKey holds the string denoting the public_key field in the database.
 	FieldPublicKey = "public_key"
 	// FieldPrivateKeyEncrypted holds the string denoting the private_key_encrypted field in the database.
 	FieldPrivateKeyEncrypted = "private_key_encrypted"
+	// FieldUsage holds the string denoting the usage field in the database.
+	FieldUsage = "usage"
+	// FieldExpiresAt holds the string denoting the expires_at field in the database.
+	FieldExpiresAt = "expires_at"
 	// Table holds the table name of the credentials in the database.
 	Table = "lion_credentials"
 )
@@ -30,8 +42,14 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldName,
+	FieldType,
+	FieldAppid,
+	FieldAppkeyEncrypted,
 	FieldPublicKey,
 	FieldPrivateKeyEncrypted,
+	FieldUsage,
+	FieldExpiresAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -51,10 +69,12 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultAppkeyEncrypted holds the default value on creation for the "appkey_encrypted" field.
+	DefaultAppkeyEncrypted []byte
 	// PublicKeyValidator is a validator for the "public_key" field. It is called by the builders before save.
 	PublicKeyValidator func(string) error
-	// PrivateKeyEncryptedValidator is a validator for the "private_key_encrypted" field. It is called by the builders before save.
-	PrivateKeyEncryptedValidator func([]byte) error
+	// DefaultPrivateKeyEncrypted holds the default value on creation for the "private_key_encrypted" field.
+	DefaultPrivateKeyEncrypted []byte
 )
 
 // OrderOption defines the ordering options for the Credentials queries.
@@ -75,7 +95,32 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByAppid orders the results by the appid field.
+func ByAppid(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAppid, opts...).ToFunc()
+}
+
 // ByPublicKey orders the results by the public_key field.
 func ByPublicKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPublicKey, opts...).ToFunc()
+}
+
+// ByUsage orders the results by the usage field.
+func ByUsage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUsage, opts...).ToFunc()
+}
+
+// ByExpiresAt orders the results by the expires_at field.
+func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
 }

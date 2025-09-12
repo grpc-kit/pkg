@@ -72,14 +72,18 @@ func init() {
 	credentials.DefaultUpdatedAt = credentialsDescUpdatedAt.Default.(func() time.Time)
 	// credentials.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	credentials.UpdateDefaultUpdatedAt = credentialsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// credentialsDescAppkeyEncrypted is the schema descriptor for appkey_encrypted field.
+	credentialsDescAppkeyEncrypted := credentialsFields[3].Descriptor()
+	// credentials.DefaultAppkeyEncrypted holds the default value on creation for the appkey_encrypted field.
+	credentials.DefaultAppkeyEncrypted = credentialsDescAppkeyEncrypted.Default.([]byte)
 	// credentialsDescPublicKey is the schema descriptor for public_key field.
-	credentialsDescPublicKey := credentialsFields[0].Descriptor()
+	credentialsDescPublicKey := credentialsFields[4].Descriptor()
 	// credentials.PublicKeyValidator is a validator for the "public_key" field. It is called by the builders before save.
 	credentials.PublicKeyValidator = credentialsDescPublicKey.Validators[0].(func(string) error)
 	// credentialsDescPrivateKeyEncrypted is the schema descriptor for private_key_encrypted field.
-	credentialsDescPrivateKeyEncrypted := credentialsFields[1].Descriptor()
-	// credentials.PrivateKeyEncryptedValidator is a validator for the "private_key_encrypted" field. It is called by the builders before save.
-	credentials.PrivateKeyEncryptedValidator = credentialsDescPrivateKeyEncrypted.Validators[0].(func([]byte) error)
+	credentialsDescPrivateKeyEncrypted := credentialsFields[5].Descriptor()
+	// credentials.DefaultPrivateKeyEncrypted holds the default value on creation for the private_key_encrypted field.
+	credentials.DefaultPrivateKeyEncrypted = credentialsDescPrivateKeyEncrypted.Default.([]byte)
 	demoMixin := schema.Demo{}.Mixin()
 	demoMixinFields0 := demoMixin[0].Fields()
 	_ = demoMixinFields0
