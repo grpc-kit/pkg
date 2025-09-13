@@ -35,7 +35,6 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
-	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
 	"github.com/grpc-kit/pkg/vars"
@@ -252,16 +251,19 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		// t := &statusv1.TracingRequest{Id: requestID}
 		// s = s.AppendDetail(t)
 
-		body := &statusv1.ErrorResponse{
-			Error: s.Status,
-		}
+		/*
+			body := &statusv1.ErrorResponse{
+				Error: s.Status,
+			}
 
-		rawBody, err := protojson.Marshal(body)
-		if err != nil {
-			s = errs.Internal(ctx).WithMessage(err.Error())
-			body.Error = s.Status
-			rawBody, _ = protojson.Marshal(body)
-		}
+			rawBody, err := protojson.Marshal(body)
+			if err != nil {
+				s = errs.Internal(ctx).WithMessage(err.Error())
+				body.Error = s.Status
+				rawBody, _ = protojson.Marshal(body)
+			}
+		*/
+		rawBody := s.ErrorResponseBody(ctx)
 
 		// 接口请求错误情况下，均会记录响应体
 		if !ignoreTracing {

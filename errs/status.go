@@ -9,6 +9,8 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/protoadapt"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -250,6 +252,31 @@ func (s *Status) AppendDetail(detail protoadapt.MessageV1) *Status {
 // HTTPStatusCode 用于转换错误代码为标准HTTP状态码
 func (s *Status) HTTPStatusCode() int {
 	return mapping(codes.Code(s.Code))
+}
+
+// ErrorResponseBody 返回客户端 http 错误响应内容
+func (s *Status) ErrorResponseBody(ctx context.Context) []byte {
+	body := &statusv1.ErrorResponse{
+		Error: s.Status,
+	}
+
+	// 深拷贝，避免修改原始对象
+	t, ok := proto.Clone(s.Status).(*statusv1.Status)
+	if ok {
+		body.Error = t
+		body.Error.Code = int32(s.HTTPStatusCode())
+	}
+
+	// 如果类型断言失败，说明 clone 出来类型不对
+
+	rawBody, err := protojson.Marshal(body)
+	if err != nil {
+		s = Internal(ctx).WithMessage(err.Error())
+		body.Error = s.Status
+		rawBody, _ = protojson.Marshal(body)
+	}
+
+	return rawBody
 }
 
 // GRPCStatus 用于返回google grpc status.Status结构
