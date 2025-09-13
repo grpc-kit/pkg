@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"strings"
 	"time"
 
 	"entgo.io/ent"
@@ -56,4 +57,9 @@ func (TimeMixinWithoutDeleted) Fields() []ent.Field {
 				entsql.Default("CURRENT_TIMESTAMP"),
 			),
 	}
+}
+
+// FieldNameNormalize 移除字段名末尾的 "_encrypted", "_hash" 使其与 proto 等定义一致
+func FieldNameNormalize(name string) string {
+	return strings.ReplaceAll(name, "_encrypted", "")
 }
