@@ -42,7 +42,8 @@ func initializeCipher(aesKey []byte) (cipher.Block, error) {
 // EncryptAES 对字符串进行 AES 加密
 func EncryptAES(aesKey, plainText []byte) ([]byte, error) {
 	if len(plainText) == 0 {
-		return nil, fmt.Errorf("plain text cannot be empty")
+		// return nil, fmt.Errorf("plain text cannot be empty")
+		return []byte(""), nil
 	}
 
 	block, err := initializeCipher(aesKey)
@@ -68,7 +69,8 @@ func EncryptAES(aesKey, plainText []byte) ([]byte, error) {
 // DecryptAES 对 AES 加密字符串解密
 func DecryptAES(aesKey, cipherText []byte) ([]byte, error) {
 	if len(cipherText) == 0 {
-		return nil, fmt.Errorf("cipher text cannot be empty")
+		// return nil, fmt.Errorf("cipher text cannot be empty")
+		return []byte(""), nil
 	}
 
 	block, err := initializeCipher(aesKey)
@@ -93,4 +95,20 @@ func DecryptAES(aesKey, cipherText []byte) ([]byte, error) {
 	}
 
 	return plaintext, nil
+}
+
+func EncryptAESMust(aesKey, plainText []byte) []byte {
+	cipherText, err := EncryptAES(aesKey, plainText)
+	if err != nil {
+		return plainText
+	}
+	return cipherText
+}
+
+func DecryptAESMust(aesKey, cipherText []byte) []byte {
+	plainText, err := DecryptAES(aesKey, cipherText)
+	if err != nil {
+		return cipherText
+	}
+	return plainText
 }
