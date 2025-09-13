@@ -14,6 +14,7 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/departmentusers"
+	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/proto"
@@ -359,6 +360,138 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 // UpdateUser 更新用户信息
 func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserRequest) (*adminv1.User, error) {
 	result := &adminv1.User{}
+
+	// TODO; 验证权限
+
+	if req.UpdateMask != nil && len(req.UpdateMask.Paths) != 0 {
+		x := a.config.db.Users.Update()
+
+		for _, path := range req.UpdateMask.Paths {
+			a.logger.Infof("update mask path: %v", path)
+
+			switch path {
+			case users.FieldStatus:
+				x.SetStatus(int(req.User.Status))
+			case schema.FieldNameNormalize(users.FieldRealnameEncrypted):
+				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.Realname))
+				if err == nil {
+					x.SetRealnameEncrypted(encBody)
+				}
+			case schema.FieldNameNormalize(users.FieldIdcardEncrypted):
+				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.Idcard))
+				if err == nil {
+					x.SetRealnameEncrypted(encBody)
+				}
+			case users.FieldNickname:
+				x.SetNickname(req.User.Nickname)
+			case users.FieldProfile:
+				x.SetProfile(req.User.Profile)
+			case users.FieldPicture:
+				x.SetPicture(req.User.Picture)
+			case users.FieldWebsite:
+				x.SetWebsite(req.User.Website)
+			case schema.FieldNameNormalize(users.FieldEmailEncrypted):
+				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.Email))
+				if err == nil {
+					x.SetRealnameEncrypted(encBody)
+				}
+			case users.FieldEmailVerified:
+				x.SetEmailVerified(req.User.EmailVerified)
+			case users.FieldGender:
+				x.SetGender(int(req.User.Gender))
+			case users.FieldBirthdate:
+				x.SetBirthdate(req.User.Birthday.AsTime())
+			case users.FieldZoneinfo:
+				x.SetZoneinfo(req.User.Zoneinfo)
+			case users.FieldLocale:
+				x.SetLocale(req.User.Locale)
+			case "phone_number.national_number":
+				rawBody, err := proto.Marshal(req.User.PhoneNumber)
+				if err != nil {
+					continue
+				}
+				encBody, err := crypto.EncryptAES(a.config.aesKey, rawBody)
+				if err == nil {
+					x.SetPhoneNumberEncrypted(encBody)
+				}
+			case users.FieldPhoneNumberVerified:
+				x.SetPhoneNumberVerified(req.User.PhoneNumberVerified)
+			}
+		}
+
+		_, err := x.Where(users.IDEQ(int(req.User.Id))).Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
+// GetUser 获取用户详情
+func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest) (*adminv1.User, error) {
+	var selectViewFields []string
+
+	basicViewFields := []string{
+		users.FieldID,
+		users.FieldUsername,
+		users.FieldStatus,
+		users.FieldNickname,
+		users.FieldProfile,
+		users.FieldPicture,
+		users.FieldWebsite,
+		users.FieldZoneinfo,
+		users.FieldLocale,
+	}
+
+	fullViewFields := append(basicViewFields, []string{
+		users.FieldRealnameEncrypted,
+		users.FieldIdcardEncrypted,
+		users.FieldEmailEncrypted,
+		users.FieldEmailVerified,
+		users.FieldGender,
+		users.FieldBirthdate,
+		users.FieldPhoneNumberEncrypted,
+		users.FieldPhoneNumberVerified,
+		users.FieldAddressEncrypted,
+		users.FieldDepartmentID,
+		users.FieldDescription,
+	}...)
+
+	selectViewFields = fullViewFields
+
+	// TODO; 验证权限
+	row, err := a.config.db.Users.Query().
+		Select(selectViewFields...).
+		Where(users.IDEQ(int(req.Id))).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var phoneNumber adminv1.PhoneNumber
+	phoneNumberByte := crypto.DecryptAESMust(a.config.aesKey, row.PhoneNumberEncrypted)
+	_ = proto.Unmarshal(phoneNumberByte, &phoneNumber)
+
+	result := &adminv1.User{
+		Id:                  int32(row.ID),
+		Username:            row.Username,
+		Status:              adminv1.UserStatus(row.Status),
+		Realname:            string(crypto.DecryptAESMust(a.config.aesKey, row.RealnameEncrypted)),
+		Idcard:              string(crypto.DecryptAESMust(a.config.aesKey, row.IdcardEncrypted)),
+		Nickname:            row.Nickname,
+		Profile:             row.Profile,
+		Picture:             row.Picture,
+		Website:             row.Website,
+		Email:               string(crypto.DecryptAESMust(a.config.aesKey, row.EmailEncrypted)),
+		EmailVerified:       row.EmailVerified,
+		Gender:              adminv1.Gender(row.Gender),
+		Birthday:            timestamppb.New(row.Birthdate),
+		Zoneinfo:            row.Zoneinfo,
+		Locale:              row.Locale,
+		PhoneNumber:         &phoneNumber,
+		PhoneNumberVerified: row.PhoneNumberVerified,
+	}
 
 	return result, nil
 }

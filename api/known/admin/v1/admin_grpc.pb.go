@@ -38,9 +38,10 @@ type KnownAdminClient interface {
 	DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateDepartment(ctx context.Context, in *UpdateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	// 用户相关
-	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
+	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
+	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
 	// 安全相关
 	CreateSecurityKey(ctx context.Context, in *CreateSecurityKeyRequest, opts ...grpc.CallOption) (*SecurityKey, error)
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
@@ -163,9 +164,9 @@ func (c *knownAdminClient) UpdateDepartment(ctx context.Context, in *UpdateDepar
 	return out, nil
 }
 
-func (c *knownAdminClient) ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error) {
-	out := new(ListUsersResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers", in, out, opts...)
+func (c *knownAdminClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -184,6 +185,15 @@ func (c *knownAdminClient) CreateUser(ctx context.Context, in *CreateUserRequest
 func (c *knownAdminClient) UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error) {
+	out := new(ListUsersResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -236,9 +246,10 @@ type KnownAdminServer interface {
 	DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*emptypb.Empty, error)
 	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error)
 	// 用户相关
-	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
+	GetUser(context.Context, *GetUserRequest) (*User, error)
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
+	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
 	// 安全相关
 	CreateSecurityKey(context.Context, *CreateSecurityKeyRequest) (*SecurityKey, error)
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
@@ -285,14 +296,17 @@ func (UnimplementedKnownAdminServer) DeleteDepartment(context.Context, *DeleteDe
 func (UnimplementedKnownAdminServer) UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateDepartment not implemented")
 }
-func (UnimplementedKnownAdminServer) ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
+func (UnimplementedKnownAdminServer) GetUser(context.Context, *GetUserRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateUser(context.Context, *CreateUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
 func (UnimplementedKnownAdminServer) UpdateUser(context.Context, *UpdateUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
+}
+func (UnimplementedKnownAdminServer) ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateSecurityKey(context.Context, *CreateSecurityKeyRequest) (*SecurityKey, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSecurityKey not implemented")
@@ -531,20 +545,20 @@ func _KnownAdmin_UpdateDepartment_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_ListUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListUsersRequest)
+func _KnownAdmin_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).ListUsers(ctx, in)
+		return srv.(KnownAdminServer).GetUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListUsers(ctx, req.(*ListUsersRequest))
+		return srv.(KnownAdminServer).GetUser(ctx, req.(*GetUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -581,6 +595,24 @@ func _KnownAdmin_UpdateUser_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).UpdateUser(ctx, req.(*UpdateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListUsers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListUsers(ctx, req.(*ListUsersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -695,8 +727,8 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_UpdateDepartment_Handler,
 		},
 		{
-			MethodName: "ListUsers",
-			Handler:    _KnownAdmin_ListUsers_Handler,
+			MethodName: "GetUser",
+			Handler:    _KnownAdmin_GetUser_Handler,
 		},
 		{
 			MethodName: "CreateUser",
@@ -705,6 +737,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUser",
 			Handler:    _KnownAdmin_UpdateUser_Handler,
+		},
+		{
+			MethodName: "ListUsers",
+			Handler:    _KnownAdmin_ListUsers_Handler,
 		},
 		{
 			MethodName: "CreateSecurityKey",
