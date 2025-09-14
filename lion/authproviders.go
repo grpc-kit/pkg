@@ -21,12 +21,10 @@ type AuthProviders struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 认证提供方名称
 	Name string `json:"name,omitempty"`
 	// 支持的认证提供方
-	Type authproviders.Type `json:"type,omitempty"`
+	Type int `json:"type,omitempty"`
 	// ClientID holds the value of the "client_id" field.
 	ClientID string `json:"client_id,omitempty"`
 	// Enabled holds the value of the "enabled" field.
@@ -45,7 +43,28 @@ type AuthProviders struct {
 	TokenEndpoint string `json:"token_endpoint,omitempty"`
 	// UserinfoEndpoint holds the value of the "userinfo_endpoint" field.
 	UserinfoEndpoint string `json:"userinfo_endpoint,omitempty"`
-	selectValues     sql.SelectValues
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the AuthProvidersQuery when eager-loading is set.
+	Edges        AuthProvidersEdges `json:"edges"`
+	selectValues sql.SelectValues
+}
+
+// AuthProvidersEdges holds the relations/edges for other nodes in the graph.
+type AuthProvidersEdges struct {
+	// LionUserIdentities holds the value of the lion_user_identities edge.
+	LionUserIdentities []*UserIdentities `json:"lion_user_identities,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// LionUserIdentitiesOrErr returns the LionUserIdentities value or an error if the edge
+// was not loaded in eager-loading.
+func (e AuthProvidersEdges) LionUserIdentitiesOrErr() ([]*UserIdentities, error) {
+	if e.loadedTypes[0] {
+		return e.LionUserIdentities, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_user_identities"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -57,11 +76,11 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case authproviders.FieldEnabled:
 			values[i] = new(sql.NullBool)
-		case authproviders.FieldID:
+		case authproviders.FieldID, authproviders.FieldType:
 			values[i] = new(sql.NullInt64)
-		case authproviders.FieldName, authproviders.FieldType, authproviders.FieldClientID, authproviders.FieldScopes, authproviders.FieldRedirectURI, authproviders.FieldIssuer, authproviders.FieldAuthorizationEndpoint, authproviders.FieldTokenEndpoint, authproviders.FieldUserinfoEndpoint:
+		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldScopes, authproviders.FieldRedirectURI, authproviders.FieldIssuer, authproviders.FieldAuthorizationEndpoint, authproviders.FieldTokenEndpoint, authproviders.FieldUserinfoEndpoint:
 			values[i] = new(sql.NullString)
-		case authproviders.FieldCreatedAt, authproviders.FieldUpdatedAt, authproviders.FieldDeletedAt:
+		case authproviders.FieldCreatedAt, authproviders.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -96,13 +115,6 @@ func (_m *AuthProviders) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case authproviders.FieldDeletedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
-			} else if value.Valid {
-				_m.DeletedAt = new(time.Time)
-				*_m.DeletedAt = value.Time
-			}
 		case authproviders.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -110,10 +122,10 @@ func (_m *AuthProviders) assignValues(columns []string, values []any) error {
 				_m.Name = value.String
 			}
 		case authproviders.FieldType:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				_m.Type = authproviders.Type(value.String)
+				_m.Type = int(value.Int64)
 			}
 		case authproviders.FieldClientID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -182,6 +194,11 @@ func (_m *AuthProviders) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
+// QueryLionUserIdentities queries the "lion_user_identities" edge of the AuthProviders entity.
+func (_m *AuthProviders) QueryLionUserIdentities() *UserIdentitiesQuery {
+	return NewAuthProvidersClient(_m.config).QueryLionUserIdentities(_m)
+}
+
 // Update returns a builder for updating this AuthProviders.
 // Note that you need to call AuthProviders.Unwrap() before calling this method if this AuthProviders
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -210,11 +227,6 @@ func (_m *AuthProviders) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	if v := _m.DeletedAt; v != nil {
-		builder.WriteString("deleted_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)

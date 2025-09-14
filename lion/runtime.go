@@ -78,8 +78,8 @@ func init() {
 	credentials.DefaultAppkeyEncrypted = credentialsDescAppkeyEncrypted.Default.([]byte)
 	// credentialsDescPublicKey is the schema descriptor for public_key field.
 	credentialsDescPublicKey := credentialsFields[4].Descriptor()
-	// credentials.PublicKeyValidator is a validator for the "public_key" field. It is called by the builders before save.
-	credentials.PublicKeyValidator = credentialsDescPublicKey.Validators[0].(func(string) error)
+	// credentials.DefaultPublicKey holds the default value on creation for the public_key field.
+	credentials.DefaultPublicKey = credentialsDescPublicKey.Default.(string)
 	// credentialsDescPrivateKeyEncrypted is the schema descriptor for private_key_encrypted field.
 	credentialsDescPrivateKeyEncrypted := credentialsFields[5].Descriptor()
 	// credentials.DefaultPrivateKeyEncrypted holds the default value on creation for the private_key_encrypted field.
@@ -496,10 +496,6 @@ func init() {
 	useridentitiesDescUserID := useridentitiesFields[0].Descriptor()
 	// useridentities.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	useridentities.UserIDValidator = useridentitiesDescUserID.Validators[0].(func(int) error)
-	// useridentitiesDescProviderName is the schema descriptor for provider_name field.
-	useridentitiesDescProviderName := useridentitiesFields[1].Descriptor()
-	// useridentities.ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
-	useridentities.ProviderNameValidator = useridentitiesDescProviderName.Validators[0].(func(string) error)
 	// useridentitiesDescProviderUserID is the schema descriptor for provider_user_id field.
 	useridentitiesDescProviderUserID := useridentitiesFields[2].Descriptor()
 	// useridentities.ProviderUserIDValidator is a validator for the "provider_user_id" field. It is called by the builders before save.

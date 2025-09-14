@@ -14,9 +14,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"LOCAL", "LDAP", "OIDC", "OAUTH2", "GITHUB", "GOOGLE", "WECHAT"}},
+		{Name: "type", Type: field.TypeInt},
 		{Name: "client_id", Type: field.TypeString, Default: ""},
 		{Name: "enabled", Type: field.TypeBool, Default: false},
 		{Name: "client_secret_encrypted", Type: field.TypeBytes},
@@ -39,10 +38,10 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "name", Type: field.TypeString},
-		{Name: "type", Type: field.TypeString},
+		{Name: "type", Type: field.TypeInt},
 		{Name: "appid", Type: field.TypeString, Unique: true},
 		{Name: "appkey_encrypted", Type: field.TypeBytes},
-		{Name: "public_key", Type: field.TypeString},
+		{Name: "public_key", Type: field.TypeString, Default: ""},
 		{Name: "private_key_encrypted", Type: field.TypeBytes},
 		{Name: "usage", Type: field.TypeString},
 		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
@@ -301,29 +300,43 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "user_id", Type: field.TypeInt},
-		{Name: "provider_name", Type: field.TypeString},
 		{Name: "provider_user_id", Type: field.TypeString},
 		{Name: "provider_union_id", Type: field.TypeString, Nullable: true},
 		{Name: "password_hash", Type: field.TypeString, Default: ""},
 		{Name: "mfa_enabled", Type: field.TypeBool, Default: false},
 		{Name: "mfa_secret_encrypted", Type: field.TypeBytes},
-		{Name: "password_changed_at", Type: field.TypeTime, Nullable: true},
-		{Name: "password_expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "access_token_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "refresh_token_encrypted", Type: field.TypeBytes, Nullable: true},
+		{Name: "password_changed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "password_expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "token_expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "provider_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
 	}
 	// LionUserIdentitiesTable holds the schema information for the "lion_user_identities" table.
 	LionUserIdentitiesTable = &schema.Table{
 		Name:       "lion_user_identities",
 		Columns:    LionUserIdentitiesColumns,
 		PrimaryKey: []*schema.Column{LionUserIdentitiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_user_identities_lion_auth_providers_lion_user_identities",
+				Columns:    []*schema.Column{LionUserIdentitiesColumns[13]},
+				RefColumns: []*schema.Column{LionAuthProvidersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "lion_user_identities_lion_users_lion_user_identities",
+				Columns:    []*schema.Column{LionUserIdentitiesColumns[14]},
+				RefColumns: []*schema.Column{LionUsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "useridentities_user_id_provider_name",
+				Name:    "useridentities_user_id_provider_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserIdentitiesColumns[3], LionUserIdentitiesColumns[4]},
+				Columns: []*schema.Column{LionUserIdentitiesColumns[14], LionUserIdentitiesColumns[13]},
 			},
 		},
 	}
@@ -371,7 +384,7 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "lion_user_roles_lion_users_lion_users",
+				Symbol:     "lion_user_roles_lion_users_lion_user_roles",
 				Columns:    []*schema.Column{LionUserRolesColumns[4]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
@@ -492,6 +505,8 @@ func init() {
 	LionUserGroupsTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_groups",
 	}
+	LionUserIdentitiesTable.ForeignKeys[0].RefTable = LionAuthProvidersTable
+	LionUserIdentitiesTable.ForeignKeys[1].RefTable = LionUsersTable
 	LionUserIdentitiesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_identities",
 	}

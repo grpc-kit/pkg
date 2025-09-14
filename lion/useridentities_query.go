@@ -11,17 +11,21 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // UserIdentitiesQuery is the builder for querying UserIdentities entities.
 type UserIdentitiesQuery struct {
 	config
-	ctx        *QueryContext
-	order      []useridentities.OrderOption
-	inters     []Interceptor
-	predicates []predicate.UserIdentities
+	ctx                   *QueryContext
+	order                 []useridentities.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.UserIdentities
+	withLionUsers         *UsersQuery
+	withLionAuthProviders *AuthProvidersQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +60,50 @@ func (_q *UserIdentitiesQuery) Unique(unique bool) *UserIdentitiesQuery {
 func (_q *UserIdentitiesQuery) Order(o ...useridentities.OrderOption) *UserIdentitiesQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryLionUsers chains the current query on the "lion_users" edge.
+func (_q *UserIdentitiesQuery) QueryLionUsers() *UsersQuery {
+	query := (&UsersClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(useridentities.Table, useridentities.FieldID, selector),
+			sqlgraph.To(users.Table, users.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, useridentities.LionUsersTable, useridentities.LionUsersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLionAuthProviders chains the current query on the "lion_auth_providers" edge.
+func (_q *UserIdentitiesQuery) QueryLionAuthProviders() *AuthProvidersQuery {
+	query := (&AuthProvidersClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(useridentities.Table, useridentities.FieldID, selector),
+			sqlgraph.To(authproviders.Table, authproviders.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, useridentities.LionAuthProvidersTable, useridentities.LionAuthProvidersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first UserIdentities entity from the query.
@@ -245,15 +293,39 @@ func (_q *UserIdentitiesQuery) Clone() *UserIdentitiesQuery {
 		return nil
 	}
 	return &UserIdentitiesQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]useridentities.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.UserIdentities{}, _q.predicates...),
+		config:                _q.config,
+		ctx:                   _q.ctx.Clone(),
+		order:                 append([]useridentities.OrderOption{}, _q.order...),
+		inters:                append([]Interceptor{}, _q.inters...),
+		predicates:            append([]predicate.UserIdentities{}, _q.predicates...),
+		withLionUsers:         _q.withLionUsers.Clone(),
+		withLionAuthProviders: _q.withLionAuthProviders.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithLionUsers tells the query-builder to eager-load the nodes that are connected to
+// the "lion_users" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserIdentitiesQuery) WithLionUsers(opts ...func(*UsersQuery)) *UserIdentitiesQuery {
+	query := (&UsersClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionUsers = query
+	return _q
+}
+
+// WithLionAuthProviders tells the query-builder to eager-load the nodes that are connected to
+// the "lion_auth_providers" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserIdentitiesQuery) WithLionAuthProviders(opts ...func(*AuthProvidersQuery)) *UserIdentitiesQuery {
+	query := (&AuthProvidersClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionAuthProviders = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +404,12 @@ func (_q *UserIdentitiesQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *UserIdentitiesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UserIdentities, error) {
 	var (
-		nodes = []*UserIdentities{}
-		_spec = _q.querySpec()
+		nodes       = []*UserIdentities{}
+		_spec       = _q.querySpec()
+		loadedTypes = [2]bool{
+			_q.withLionUsers != nil,
+			_q.withLionAuthProviders != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*UserIdentities).scanValues(nil, columns)
@@ -341,6 +417,7 @@ func (_q *UserIdentitiesQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &UserIdentities{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +429,78 @@ func (_q *UserIdentitiesQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withLionUsers; query != nil {
+		if err := _q.loadLionUsers(ctx, query, nodes, nil,
+			func(n *UserIdentities, e *Users) { n.Edges.LionUsers = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLionAuthProviders; query != nil {
+		if err := _q.loadLionAuthProviders(ctx, query, nodes, nil,
+			func(n *UserIdentities, e *AuthProviders) { n.Edges.LionAuthProviders = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *UserIdentitiesQuery) loadLionUsers(ctx context.Context, query *UsersQuery, nodes []*UserIdentities, init func(*UserIdentities), assign func(*UserIdentities, *Users)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*UserIdentities)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(users.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *UserIdentitiesQuery) loadLionAuthProviders(ctx context.Context, query *AuthProvidersQuery, nodes []*UserIdentities, init func(*UserIdentities), assign func(*UserIdentities, *AuthProviders)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*UserIdentities)
+	for i := range nodes {
+		fk := nodes[i].ProviderID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(authproviders.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "provider_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (_q *UserIdentitiesQuery) sqlCount(ctx context.Context) (int, error) {
@@ -379,6 +527,12 @@ func (_q *UserIdentitiesQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != useridentities.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withLionUsers != nil {
+			_spec.Node.AddColumnOnce(useridentities.FieldUserID)
+		}
+		if _q.withLionAuthProviders != nil {
+			_spec.Node.AddColumnOnce(useridentities.FieldProviderID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

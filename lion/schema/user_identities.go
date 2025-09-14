@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -18,11 +19,9 @@ func (UserIdentities) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("user_id").
 			Positive().
-			Immutable().
 			Comment("用户ID，关联 lion_users 表"),
-		field.String("provider_name").
-			NotEmpty().
-			Comment("认证提供分，来自 lion_oauth_providers 表 name 属性"),
+		field.Int("provider_id").
+			Comment("认证提供方，来自 lion_oauth_providers 表 id 属性"),
 		field.String("provider_user_id").
 			NotEmpty().
 			Comment("第三方平台用户唯一标识，如微信的 OpenID"),
@@ -31,7 +30,8 @@ func (UserIdentities) Fields() []ent.Field {
 			Comment("第三方平台统一标识，如微信的 UnionID"),
 		field.String("password_hash").
 			Default("").
-			Comment("哈希后的密码"),
+			Sensitive().
+			Comment("使用 bcrypt 哈希后的密码"),
 		field.Bool("mfa_enabled").
 			Default(false).
 			Comment("是否启用 MFA"),
@@ -39,14 +39,6 @@ func (UserIdentities) Fields() []ent.Field {
 			Sensitive().
 			Default([]byte("")).
 			Comment("加密后的 MFA 密钥"),
-		field.Time("password_changed_at").
-			Optional().
-			Nillable().
-			Comment("密码最后一次更改时间"),
-		field.Time("password_expires_at").
-			Optional().
-			Nillable().
-			Comment("密码过期时间"),
 		field.Bytes("access_token_encrypted").
 			Sensitive().
 			Optional().
@@ -55,6 +47,14 @@ func (UserIdentities) Fields() []ent.Field {
 			Sensitive().
 			Optional().
 			Comment("加密后的刷新令牌"),
+		field.Time("password_changed_at").
+			Optional().
+			Nillable().
+			Comment("密码最后一次更改时间"),
+		field.Time("password_expires_at").
+			Optional().
+			Nillable().
+			Comment("密码过期时间"),
 		field.Time("token_expires_at").
 			Optional().
 			Comment("访问令牌的过期时间"),
@@ -63,12 +63,18 @@ func (UserIdentities) Fields() []ent.Field {
 
 // Edges of the table.
 func (UserIdentities) Edges() []ent.Edge {
-	/*
-		return []ent.Edge{
-			edge.To("user", Users{}.Type).Unique().Required().Field("user_id"),
-		}
-	*/
-	return nil
+	return []ent.Edge{
+		edge.From("lion_users", Users.Type).
+			Ref("lion_user_identities").
+			Field("user_id").
+			Unique().
+			Required(),
+		edge.From("lion_auth_providers", AuthProviders.Type).
+			Ref("lion_user_identities").
+			Field("provider_id").
+			Unique().
+			Required(),
+	}
 }
 
 // Mixin of the table.
@@ -82,7 +88,8 @@ func (UserIdentities) Mixin() []ent.Mixin {
 func (UserIdentities) Indexes() []ent.Index {
 	return []ent.Index{
 		// 保证在相同平台下 provider 与 user_id 的组合唯一
-		index.Fields("user_id", "provider_name").Unique(),
+		index.Fields("user_id", "provider_id").Unique(),
+		// index.Fields("provider_id", "provider_user_id").Unique(),
 	}
 }
 

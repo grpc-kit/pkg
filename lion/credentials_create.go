@@ -55,7 +55,7 @@ func (_c *CredentialsCreate) SetName(v string) *CredentialsCreate {
 }
 
 // SetType sets the "type" field.
-func (_c *CredentialsCreate) SetType(v string) *CredentialsCreate {
+func (_c *CredentialsCreate) SetType(v int) *CredentialsCreate {
 	_c.mutation.SetType(v)
 	return _c
 }
@@ -75,6 +75,14 @@ func (_c *CredentialsCreate) SetAppkeyEncrypted(v []byte) *CredentialsCreate {
 // SetPublicKey sets the "public_key" field.
 func (_c *CredentialsCreate) SetPublicKey(v string) *CredentialsCreate {
 	_c.mutation.SetPublicKey(v)
+	return _c
+}
+
+// SetNillablePublicKey sets the "public_key" field if the given value is not nil.
+func (_c *CredentialsCreate) SetNillablePublicKey(v *string) *CredentialsCreate {
+	if v != nil {
+		_c.SetPublicKey(*v)
+	}
 	return _c
 }
 
@@ -151,6 +159,10 @@ func (_c *CredentialsCreate) defaults() {
 		v := credentials.DefaultAppkeyEncrypted
 		_c.mutation.SetAppkeyEncrypted(v)
 	}
+	if _, ok := _c.mutation.PublicKey(); !ok {
+		v := credentials.DefaultPublicKey
+		_c.mutation.SetPublicKey(v)
+	}
 	if _, ok := _c.mutation.PrivateKeyEncrypted(); !ok {
 		v := credentials.DefaultPrivateKeyEncrypted
 		_c.mutation.SetPrivateKeyEncrypted(v)
@@ -179,11 +191,6 @@ func (_c *CredentialsCreate) check() error {
 	}
 	if _, ok := _c.mutation.PublicKey(); !ok {
 		return &ValidationError{Name: "public_key", err: errors.New(`lion: missing required field "Credentials.public_key"`)}
-	}
-	if v, ok := _c.mutation.PublicKey(); ok {
-		if err := credentials.PublicKeyValidator(v); err != nil {
-			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "Credentials.public_key": %w`, err)}
-		}
 	}
 	if _, ok := _c.mutation.PrivateKeyEncrypted(); !ok {
 		return &ValidationError{Name: "private_key_encrypted", err: errors.New(`lion: missing required field "Credentials.private_key_encrypted"`)}
@@ -230,7 +237,7 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 		_node.Name = value
 	}
 	if value, ok := _c.mutation.GetType(); ok {
-		_spec.SetField(credentials.FieldType, field.TypeString, value)
+		_spec.SetField(credentials.FieldType, field.TypeInt, value)
 		_node.Type = value
 	}
 	if value, ok := _c.mutation.Appid(); ok {

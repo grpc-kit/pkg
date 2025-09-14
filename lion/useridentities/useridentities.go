@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -19,8 +20,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// FieldProviderName holds the string denoting the provider_name field in the database.
-	FieldProviderName = "provider_name"
+	// FieldProviderID holds the string denoting the provider_id field in the database.
+	FieldProviderID = "provider_id"
 	// FieldProviderUserID holds the string denoting the provider_user_id field in the database.
 	FieldProviderUserID = "provider_user_id"
 	// FieldProviderUnionID holds the string denoting the provider_union_id field in the database.
@@ -31,18 +32,36 @@ const (
 	FieldMfaEnabled = "mfa_enabled"
 	// FieldMfaSecretEncrypted holds the string denoting the mfa_secret_encrypted field in the database.
 	FieldMfaSecretEncrypted = "mfa_secret_encrypted"
-	// FieldPasswordChangedAt holds the string denoting the password_changed_at field in the database.
-	FieldPasswordChangedAt = "password_changed_at"
-	// FieldPasswordExpiresAt holds the string denoting the password_expires_at field in the database.
-	FieldPasswordExpiresAt = "password_expires_at"
 	// FieldAccessTokenEncrypted holds the string denoting the access_token_encrypted field in the database.
 	FieldAccessTokenEncrypted = "access_token_encrypted"
 	// FieldRefreshTokenEncrypted holds the string denoting the refresh_token_encrypted field in the database.
 	FieldRefreshTokenEncrypted = "refresh_token_encrypted"
+	// FieldPasswordChangedAt holds the string denoting the password_changed_at field in the database.
+	FieldPasswordChangedAt = "password_changed_at"
+	// FieldPasswordExpiresAt holds the string denoting the password_expires_at field in the database.
+	FieldPasswordExpiresAt = "password_expires_at"
 	// FieldTokenExpiresAt holds the string denoting the token_expires_at field in the database.
 	FieldTokenExpiresAt = "token_expires_at"
+	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
+	EdgeLionUsers = "lion_users"
+	// EdgeLionAuthProviders holds the string denoting the lion_auth_providers edge name in mutations.
+	EdgeLionAuthProviders = "lion_auth_providers"
 	// Table holds the table name of the useridentities in the database.
 	Table = "lion_user_identities"
+	// LionUsersTable is the table that holds the lion_users relation/edge.
+	LionUsersTable = "lion_user_identities"
+	// LionUsersInverseTable is the table name for the Users entity.
+	// It exists in this package in order to avoid circular dependency with the "users" package.
+	LionUsersInverseTable = "lion_users"
+	// LionUsersColumn is the table column denoting the lion_users relation/edge.
+	LionUsersColumn = "user_id"
+	// LionAuthProvidersTable is the table that holds the lion_auth_providers relation/edge.
+	LionAuthProvidersTable = "lion_user_identities"
+	// LionAuthProvidersInverseTable is the table name for the AuthProviders entity.
+	// It exists in this package in order to avoid circular dependency with the "authproviders" package.
+	LionAuthProvidersInverseTable = "lion_auth_providers"
+	// LionAuthProvidersColumn is the table column denoting the lion_auth_providers relation/edge.
+	LionAuthProvidersColumn = "provider_id"
 )
 
 // Columns holds all SQL columns for useridentities fields.
@@ -51,16 +70,16 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldUserID,
-	FieldProviderName,
+	FieldProviderID,
 	FieldProviderUserID,
 	FieldProviderUnionID,
 	FieldPasswordHash,
 	FieldMfaEnabled,
 	FieldMfaSecretEncrypted,
-	FieldPasswordChangedAt,
-	FieldPasswordExpiresAt,
 	FieldAccessTokenEncrypted,
 	FieldRefreshTokenEncrypted,
+	FieldPasswordChangedAt,
+	FieldPasswordExpiresAt,
 	FieldTokenExpiresAt,
 }
 
@@ -83,8 +102,6 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	UserIDValidator func(int) error
-	// ProviderNameValidator is a validator for the "provider_name" field. It is called by the builders before save.
-	ProviderNameValidator func(string) error
 	// ProviderUserIDValidator is a validator for the "provider_user_id" field. It is called by the builders before save.
 	ProviderUserIDValidator func(string) error
 	// DefaultPasswordHash holds the default value on creation for the "password_hash" field.
@@ -118,9 +135,9 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
-// ByProviderName orders the results by the provider_name field.
-func ByProviderName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProviderName, opts...).ToFunc()
+// ByProviderID orders the results by the provider_id field.
+func ByProviderID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderID, opts...).ToFunc()
 }
 
 // ByProviderUserID orders the results by the provider_user_id field.
@@ -156,4 +173,32 @@ func ByPasswordExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 // ByTokenExpiresAt orders the results by the token_expires_at field.
 func ByTokenExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTokenExpiresAt, opts...).ToFunc()
+}
+
+// ByLionUsersField orders the results by lion_users field.
+func ByLionUsersField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionUsersStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLionAuthProvidersField orders the results by lion_auth_providers field.
+func ByLionAuthProvidersField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionAuthProvidersStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newLionUsersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionUsersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionUsersTable, LionUsersColumn),
+	)
+}
+func newLionAuthProvidersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionAuthProvidersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionAuthProvidersTable, LionAuthProvidersColumn),
+	)
 }

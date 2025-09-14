@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departmentusers"
+	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 )
@@ -324,19 +325,34 @@ func (_c *UsersCreate) SetNillableDescription(v *string) *UsersCreate {
 	return _c
 }
 
-// AddLionUserIDs adds the "lion_users" edge to the UserRoles entity by IDs.
-func (_c *UsersCreate) AddLionUserIDs(ids ...int) *UsersCreate {
-	_c.mutation.AddLionUserIDs(ids...)
+// AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by IDs.
+func (_c *UsersCreate) AddLionUserRoleIDs(ids ...int) *UsersCreate {
+	_c.mutation.AddLionUserRoleIDs(ids...)
 	return _c
 }
 
-// AddLionUsers adds the "lion_users" edges to the UserRoles entity.
-func (_c *UsersCreate) AddLionUsers(v ...*UserRoles) *UsersCreate {
+// AddLionUserRoles adds the "lion_user_roles" edges to the UserRoles entity.
+func (_c *UsersCreate) AddLionUserRoles(v ...*UserRoles) *UsersCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddLionUserIDs(ids...)
+	return _c.AddLionUserRoleIDs(ids...)
+}
+
+// AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by IDs.
+func (_c *UsersCreate) AddLionUserIdentityIDs(ids ...int) *UsersCreate {
+	_c.mutation.AddLionUserIdentityIDs(ids...)
+	return _c
+}
+
+// AddLionUserIdentities adds the "lion_user_identities" edges to the UserIdentities entity.
+func (_c *UsersCreate) AddLionUserIdentities(v ...*UserIdentities) *UsersCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionUserIdentityIDs(ids...)
 }
 
 // AddLionDepartmentUserIDs adds the "lion_department_users" edge to the DepartmentUsers entity by IDs.
@@ -686,15 +702,31 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionUserRolesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   users.LionUsersTable,
-			Columns: []string{users.LionUsersColumn},
+			Table:   users.LionUserRolesTable,
+			Columns: []string{users.LionUserRolesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionUserIdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   users.LionUserIdentitiesTable,
+			Columns: []string{users.LionUserIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentities.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -64,19 +64,28 @@ const (
 	FieldDepartmentID = "department_id"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
-	EdgeLionUsers = "lion_users"
+	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
+	EdgeLionUserRoles = "lion_user_roles"
+	// EdgeLionUserIdentities holds the string denoting the lion_user_identities edge name in mutations.
+	EdgeLionUserIdentities = "lion_user_identities"
 	// EdgeLionDepartmentUsers holds the string denoting the lion_department_users edge name in mutations.
 	EdgeLionDepartmentUsers = "lion_department_users"
 	// Table holds the table name of the users in the database.
 	Table = "lion_users"
-	// LionUsersTable is the table that holds the lion_users relation/edge.
-	LionUsersTable = "lion_user_roles"
-	// LionUsersInverseTable is the table name for the UserRoles entity.
+	// LionUserRolesTable is the table that holds the lion_user_roles relation/edge.
+	LionUserRolesTable = "lion_user_roles"
+	// LionUserRolesInverseTable is the table name for the UserRoles entity.
 	// It exists in this package in order to avoid circular dependency with the "userroles" package.
-	LionUsersInverseTable = "lion_user_roles"
-	// LionUsersColumn is the table column denoting the lion_users relation/edge.
-	LionUsersColumn = "user_id"
+	LionUserRolesInverseTable = "lion_user_roles"
+	// LionUserRolesColumn is the table column denoting the lion_user_roles relation/edge.
+	LionUserRolesColumn = "user_id"
+	// LionUserIdentitiesTable is the table that holds the lion_user_identities relation/edge.
+	LionUserIdentitiesTable = "lion_user_identities"
+	// LionUserIdentitiesInverseTable is the table name for the UserIdentities entity.
+	// It exists in this package in order to avoid circular dependency with the "useridentities" package.
+	LionUserIdentitiesInverseTable = "lion_user_identities"
+	// LionUserIdentitiesColumn is the table column denoting the lion_user_identities relation/edge.
+	LionUserIdentitiesColumn = "user_id"
 	// LionDepartmentUsersTable is the table that holds the lion_department_users relation/edge.
 	LionDepartmentUsersTable = "lion_department_users"
 	// LionDepartmentUsersInverseTable is the table name for the DepartmentUsers entity.
@@ -291,17 +300,31 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLionUsersCount orders the results by lion_users count.
-func ByLionUsersCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionUserRolesCount orders the results by lion_user_roles count.
+func ByLionUserRolesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionUsersStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionUserRolesStep(), opts...)
 	}
 }
 
-// ByLionUsers orders the results by lion_users terms.
-func ByLionUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionUserRoles orders the results by lion_user_roles terms.
+func ByLionUserRoles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionUserRolesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByLionUserIdentitiesCount orders the results by lion_user_identities count.
+func ByLionUserIdentitiesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionUserIdentitiesStep(), opts...)
+	}
+}
+
+// ByLionUserIdentities orders the results by lion_user_identities terms.
+func ByLionUserIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionUserIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -318,11 +341,18 @@ func ByLionDepartmentUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOpti
 		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newLionUsersStep() *sqlgraph.Step {
+func newLionUserRolesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionUsersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionUsersTable, LionUsersColumn),
+		sqlgraph.To(LionUserRolesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionUserRolesTable, LionUserRolesColumn),
+	)
+}
+func newLionUserIdentitiesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionUserIdentitiesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionUserIdentitiesTable, LionUserIdentitiesColumn),
 	)
 }
 func newLionDepartmentUsersStep() *sqlgraph.Step {

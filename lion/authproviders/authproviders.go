@@ -3,10 +3,10 @@
 package authproviders
 
 import (
-	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -18,8 +18,6 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
-	FieldDeletedAt = "deleted_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldType holds the string denoting the type field in the database.
@@ -42,8 +40,17 @@ const (
 	FieldTokenEndpoint = "token_endpoint"
 	// FieldUserinfoEndpoint holds the string denoting the userinfo_endpoint field in the database.
 	FieldUserinfoEndpoint = "userinfo_endpoint"
+	// EdgeLionUserIdentities holds the string denoting the lion_user_identities edge name in mutations.
+	EdgeLionUserIdentities = "lion_user_identities"
 	// Table holds the table name of the authproviders in the database.
 	Table = "lion_auth_providers"
+	// LionUserIdentitiesTable is the table that holds the lion_user_identities relation/edge.
+	LionUserIdentitiesTable = "lion_user_identities"
+	// LionUserIdentitiesInverseTable is the table name for the UserIdentities entity.
+	// It exists in this package in order to avoid circular dependency with the "useridentities" package.
+	LionUserIdentitiesInverseTable = "lion_user_identities"
+	// LionUserIdentitiesColumn is the table column denoting the lion_user_identities relation/edge.
+	LionUserIdentitiesColumn = "provider_id"
 )
 
 // Columns holds all SQL columns for authproviders fields.
@@ -51,7 +58,6 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-	FieldDeletedAt,
 	FieldName,
 	FieldType,
 	FieldClientID,
@@ -90,34 +96,6 @@ var (
 	DefaultClientSecretEncrypted []byte
 )
 
-// Type defines the type for the "type" enum field.
-type Type string
-
-// Type values.
-const (
-	TypeLOCAL  Type = "LOCAL"
-	TypeLDAP   Type = "LDAP"
-	TypeOIDC   Type = "OIDC"
-	TypeOAUTH2 Type = "OAUTH2"
-	TypeGITHUB Type = "GITHUB"
-	TypeGOOGLE Type = "GOOGLE"
-	TypeWECHAT Type = "WECHAT"
-)
-
-func (_type Type) String() string {
-	return string(_type)
-}
-
-// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
-func TypeValidator(_type Type) error {
-	switch _type {
-	case TypeLOCAL, TypeLDAP, TypeOIDC, TypeOAUTH2, TypeGITHUB, TypeGOOGLE, TypeWECHAT:
-		return nil
-	default:
-		return fmt.Errorf("authproviders: invalid enum value for type field: %q", _type)
-	}
-}
-
 // OrderOption defines the ordering options for the AuthProviders queries.
 type OrderOption func(*sql.Selector)
 
@@ -134,11 +112,6 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
-}
-
-// ByDeletedAt orders the results by the deleted_at field.
-func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
@@ -189,4 +162,25 @@ func ByTokenEndpoint(opts ...sql.OrderTermOption) OrderOption {
 // ByUserinfoEndpoint orders the results by the userinfo_endpoint field.
 func ByUserinfoEndpoint(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserinfoEndpoint, opts...).ToFunc()
+}
+
+// ByLionUserIdentitiesCount orders the results by lion_user_identities count.
+func ByLionUserIdentitiesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionUserIdentitiesStep(), opts...)
+	}
+}
+
+// ByLionUserIdentities orders the results by lion_user_identities terms.
+func ByLionUserIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionUserIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newLionUserIdentitiesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionUserIdentitiesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionUserIdentitiesTable, LionUserIdentitiesColumn),
+	)
 }

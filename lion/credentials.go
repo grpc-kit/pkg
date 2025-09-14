@@ -24,7 +24,7 @@ type Credentials struct {
 	// 凭据名称
 	Name string `json:"name,omitempty"`
 	// 类型: api_key, jwt, jwks, license, ssh_key
-	Type string `json:"type,omitempty"`
+	Type int `json:"type,omitempty"`
 	// 应用 ID
 	Appid string `json:"appid,omitempty"`
 	// 应用 Key 或 Client Secret
@@ -47,9 +47,9 @@ func (*Credentials) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case credentials.FieldAppkeyEncrypted, credentials.FieldPrivateKeyEncrypted:
 			values[i] = new([]byte)
-		case credentials.FieldID:
+		case credentials.FieldID, credentials.FieldType:
 			values[i] = new(sql.NullInt64)
-		case credentials.FieldName, credentials.FieldType, credentials.FieldAppid, credentials.FieldPublicKey, credentials.FieldUsage:
+		case credentials.FieldName, credentials.FieldAppid, credentials.FieldPublicKey, credentials.FieldUsage:
 			values[i] = new(sql.NullString)
 		case credentials.FieldCreatedAt, credentials.FieldUpdatedAt, credentials.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -93,10 +93,10 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 				_m.Name = value.String
 			}
 		case credentials.FieldType:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				_m.Type = value.String
+				_m.Type = int(value.Int64)
 			}
 		case credentials.FieldAppid:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -181,7 +181,7 @@ func (_m *Credentials) String() string {
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("type=")
-	builder.WriteString(_m.Type)
+	builder.WriteString(fmt.Sprintf("%v", _m.Type))
 	builder.WriteString(", ")
 	builder.WriteString("appid=")
 	builder.WriteString(_m.Appid)

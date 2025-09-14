@@ -64,27 +64,30 @@ const (
 // AuthProvidersMutation represents an operation that mutates the AuthProviders nodes in the graph.
 type AuthProvidersMutation struct {
 	config
-	op                      Op
-	typ                     string
-	id                      *int
-	created_at              *time.Time
-	updated_at              *time.Time
-	deleted_at              *time.Time
-	name                    *string
-	_type                   *authproviders.Type
-	client_id               *string
-	enabled                 *bool
-	client_secret_encrypted *[]byte
-	scopes                  *string
-	redirect_uri            *string
-	issuer                  *string
-	authorization_endpoint  *string
-	token_endpoint          *string
-	userinfo_endpoint       *string
-	clearedFields           map[string]struct{}
-	done                    bool
-	oldValue                func(context.Context) (*AuthProviders, error)
-	predicates              []predicate.AuthProviders
+	op                          Op
+	typ                         string
+	id                          *int
+	created_at                  *time.Time
+	updated_at                  *time.Time
+	name                        *string
+	_type                       *int
+	add_type                    *int
+	client_id                   *string
+	enabled                     *bool
+	client_secret_encrypted     *[]byte
+	scopes                      *string
+	redirect_uri                *string
+	issuer                      *string
+	authorization_endpoint      *string
+	token_endpoint              *string
+	userinfo_endpoint           *string
+	clearedFields               map[string]struct{}
+	lion_user_identities        map[int]struct{}
+	removedlion_user_identities map[int]struct{}
+	clearedlion_user_identities bool
+	done                        bool
+	oldValue                    func(context.Context) (*AuthProviders, error)
+	predicates                  []predicate.AuthProviders
 }
 
 var _ ent.Mutation = (*AuthProvidersMutation)(nil)
@@ -257,55 +260,6 @@ func (m *AuthProvidersMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (m *AuthProvidersMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *AuthProvidersMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the AuthProviders entity.
-// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *AuthProvidersMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[authproviders.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *AuthProvidersMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[authproviders.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *AuthProvidersMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, authproviders.FieldDeletedAt)
-}
-
 // SetName sets the "name" field.
 func (m *AuthProvidersMutation) SetName(s string) {
 	m.name = &s
@@ -343,12 +297,13 @@ func (m *AuthProvidersMutation) ResetName() {
 }
 
 // SetType sets the "type" field.
-func (m *AuthProvidersMutation) SetType(a authproviders.Type) {
-	m._type = &a
+func (m *AuthProvidersMutation) SetType(i int) {
+	m._type = &i
+	m.add_type = nil
 }
 
 // GetType returns the value of the "type" field in the mutation.
-func (m *AuthProvidersMutation) GetType() (r authproviders.Type, exists bool) {
+func (m *AuthProvidersMutation) GetType() (r int, exists bool) {
 	v := m._type
 	if v == nil {
 		return
@@ -359,7 +314,7 @@ func (m *AuthProvidersMutation) GetType() (r authproviders.Type, exists bool) {
 // OldType returns the old "type" field's value of the AuthProviders entity.
 // If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldType(ctx context.Context) (v authproviders.Type, err error) {
+func (m *AuthProvidersMutation) OldType(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldType is only allowed on UpdateOne operations")
 	}
@@ -373,9 +328,28 @@ func (m *AuthProvidersMutation) OldType(ctx context.Context) (v authproviders.Ty
 	return oldValue.Type, nil
 }
 
+// AddType adds i to the "type" field.
+func (m *AuthProvidersMutation) AddType(i int) {
+	if m.add_type != nil {
+		*m.add_type += i
+	} else {
+		m.add_type = &i
+	}
+}
+
+// AddedType returns the value that was added to the "type" field in this mutation.
+func (m *AuthProvidersMutation) AddedType() (r int, exists bool) {
+	v := m.add_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetType resets all changes to the "type" field.
 func (m *AuthProvidersMutation) ResetType() {
 	m._type = nil
+	m.add_type = nil
 }
 
 // SetClientID sets the "client_id" field.
@@ -702,6 +676,60 @@ func (m *AuthProvidersMutation) ResetUserinfoEndpoint() {
 	m.userinfo_endpoint = nil
 }
 
+// AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by ids.
+func (m *AuthProvidersMutation) AddLionUserIdentityIDs(ids ...int) {
+	if m.lion_user_identities == nil {
+		m.lion_user_identities = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lion_user_identities[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLionUserIdentities clears the "lion_user_identities" edge to the UserIdentities entity.
+func (m *AuthProvidersMutation) ClearLionUserIdentities() {
+	m.clearedlion_user_identities = true
+}
+
+// LionUserIdentitiesCleared reports if the "lion_user_identities" edge to the UserIdentities entity was cleared.
+func (m *AuthProvidersMutation) LionUserIdentitiesCleared() bool {
+	return m.clearedlion_user_identities
+}
+
+// RemoveLionUserIdentityIDs removes the "lion_user_identities" edge to the UserIdentities entity by IDs.
+func (m *AuthProvidersMutation) RemoveLionUserIdentityIDs(ids ...int) {
+	if m.removedlion_user_identities == nil {
+		m.removedlion_user_identities = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lion_user_identities, ids[i])
+		m.removedlion_user_identities[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLionUserIdentities returns the removed IDs of the "lion_user_identities" edge to the UserIdentities entity.
+func (m *AuthProvidersMutation) RemovedLionUserIdentitiesIDs() (ids []int) {
+	for id := range m.removedlion_user_identities {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LionUserIdentitiesIDs returns the "lion_user_identities" edge IDs in the mutation.
+func (m *AuthProvidersMutation) LionUserIdentitiesIDs() (ids []int) {
+	for id := range m.lion_user_identities {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLionUserIdentities resets all changes to the "lion_user_identities" edge.
+func (m *AuthProvidersMutation) ResetLionUserIdentities() {
+	m.lion_user_identities = nil
+	m.clearedlion_user_identities = false
+	m.removedlion_user_identities = nil
+}
+
 // Where appends a list predicates to the AuthProvidersMutation builder.
 func (m *AuthProvidersMutation) Where(ps ...predicate.AuthProviders) {
 	m.predicates = append(m.predicates, ps...)
@@ -736,15 +764,12 @@ func (m *AuthProvidersMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AuthProvidersMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, authproviders.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, authproviders.FieldUpdatedAt)
-	}
-	if m.deleted_at != nil {
-		fields = append(fields, authproviders.FieldDeletedAt)
 	}
 	if m.name != nil {
 		fields = append(fields, authproviders.FieldName)
@@ -791,8 +816,6 @@ func (m *AuthProvidersMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case authproviders.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case authproviders.FieldDeletedAt:
-		return m.DeletedAt()
 	case authproviders.FieldName:
 		return m.Name()
 	case authproviders.FieldType:
@@ -828,8 +851,6 @@ func (m *AuthProvidersMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldCreatedAt(ctx)
 	case authproviders.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case authproviders.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
 	case authproviders.FieldName:
 		return m.OldName(ctx)
 	case authproviders.FieldType:
@@ -875,13 +896,6 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case authproviders.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
 	case authproviders.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -890,7 +904,7 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 		m.SetName(v)
 		return nil
 	case authproviders.FieldType:
-		v, ok := value.(authproviders.Type)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -966,13 +980,21 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *AuthProvidersMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.add_type != nil {
+		fields = append(fields, authproviders.FieldType)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *AuthProvidersMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case authproviders.FieldType:
+		return m.AddedType()
+	}
 	return nil, false
 }
 
@@ -981,6 +1003,13 @@ func (m *AuthProvidersMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *AuthProvidersMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case authproviders.FieldType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddType(v)
+		return nil
 	}
 	return fmt.Errorf("unknown AuthProviders numeric field %s", name)
 }
@@ -988,11 +1017,7 @@ func (m *AuthProvidersMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *AuthProvidersMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(authproviders.FieldDeletedAt) {
-		fields = append(fields, authproviders.FieldDeletedAt)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1005,11 +1030,6 @@ func (m *AuthProvidersMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *AuthProvidersMutation) ClearField(name string) error {
-	switch name {
-	case authproviders.FieldDeletedAt:
-		m.ClearDeletedAt()
-		return nil
-	}
 	return fmt.Errorf("unknown AuthProviders nullable field %s", name)
 }
 
@@ -1022,9 +1042,6 @@ func (m *AuthProvidersMutation) ResetField(name string) error {
 		return nil
 	case authproviders.FieldUpdatedAt:
 		m.ResetUpdatedAt()
-		return nil
-	case authproviders.FieldDeletedAt:
-		m.ResetDeletedAt()
 		return nil
 	case authproviders.FieldName:
 		m.ResetName()
@@ -1065,49 +1082,85 @@ func (m *AuthProvidersMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AuthProvidersMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.lion_user_identities != nil {
+		edges = append(edges, authproviders.EdgeLionUserIdentities)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *AuthProvidersMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case authproviders.EdgeLionUserIdentities:
+		ids := make([]ent.Value, 0, len(m.lion_user_identities))
+		for id := range m.lion_user_identities {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AuthProvidersMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedlion_user_identities != nil {
+		edges = append(edges, authproviders.EdgeLionUserIdentities)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *AuthProvidersMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case authproviders.EdgeLionUserIdentities:
+		ids := make([]ent.Value, 0, len(m.removedlion_user_identities))
+		for id := range m.removedlion_user_identities {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AuthProvidersMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedlion_user_identities {
+		edges = append(edges, authproviders.EdgeLionUserIdentities)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *AuthProvidersMutation) EdgeCleared(name string) bool {
+	switch name {
+	case authproviders.EdgeLionUserIdentities:
+		return m.clearedlion_user_identities
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *AuthProvidersMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown AuthProviders unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *AuthProvidersMutation) ResetEdge(name string) error {
+	switch name {
+	case authproviders.EdgeLionUserIdentities:
+		m.ResetLionUserIdentities()
+		return nil
+	}
 	return fmt.Errorf("unknown AuthProviders edge %s", name)
 }
 
@@ -1120,7 +1173,8 @@ type CredentialsMutation struct {
 	created_at            *time.Time
 	updated_at            *time.Time
 	name                  *string
-	_type                 *string
+	_type                 *int
+	add_type              *int
 	appid                 *string
 	appkey_encrypted      *[]byte
 	public_key            *string
@@ -1340,12 +1394,13 @@ func (m *CredentialsMutation) ResetName() {
 }
 
 // SetType sets the "type" field.
-func (m *CredentialsMutation) SetType(s string) {
-	m._type = &s
+func (m *CredentialsMutation) SetType(i int) {
+	m._type = &i
+	m.add_type = nil
 }
 
 // GetType returns the value of the "type" field in the mutation.
-func (m *CredentialsMutation) GetType() (r string, exists bool) {
+func (m *CredentialsMutation) GetType() (r int, exists bool) {
 	v := m._type
 	if v == nil {
 		return
@@ -1356,7 +1411,7 @@ func (m *CredentialsMutation) GetType() (r string, exists bool) {
 // OldType returns the old "type" field's value of the Credentials entity.
 // If the Credentials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldType(ctx context.Context) (v string, err error) {
+func (m *CredentialsMutation) OldType(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldType is only allowed on UpdateOne operations")
 	}
@@ -1370,9 +1425,28 @@ func (m *CredentialsMutation) OldType(ctx context.Context) (v string, err error)
 	return oldValue.Type, nil
 }
 
+// AddType adds i to the "type" field.
+func (m *CredentialsMutation) AddType(i int) {
+	if m.add_type != nil {
+		*m.add_type += i
+	} else {
+		m.add_type = &i
+	}
+}
+
+// AddedType returns the value that was added to the "type" field in this mutation.
+func (m *CredentialsMutation) AddedType() (r int, exists bool) {
+	v := m.add_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetType resets all changes to the "type" field.
 func (m *CredentialsMutation) ResetType() {
 	m._type = nil
+	m.add_type = nil
 }
 
 // SetAppid sets the "appid" field.
@@ -1757,7 +1831,7 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 		m.SetName(v)
 		return nil
 	case credentials.FieldType:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1812,13 +1886,21 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CredentialsMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.add_type != nil {
+		fields = append(fields, credentials.FieldType)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CredentialsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case credentials.FieldType:
+		return m.AddedType()
+	}
 	return nil, false
 }
 
@@ -1827,6 +1909,13 @@ func (m *CredentialsMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CredentialsMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case credentials.FieldType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddType(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Credentials numeric field %s", name)
 }
@@ -9799,28 +9888,29 @@ func (m *UserGroupsMutation) ResetEdge(name string) error {
 // UserIdentitiesMutation represents an operation that mutates the UserIdentities nodes in the graph.
 type UserIdentitiesMutation struct {
 	config
-	op                      Op
-	typ                     string
-	id                      *int
-	created_at              *time.Time
-	updated_at              *time.Time
-	user_id                 *int
-	adduser_id              *int
-	provider_name           *string
-	provider_user_id        *string
-	provider_union_id       *string
-	password_hash           *string
-	mfa_enabled             *bool
-	mfa_secret_encrypted    *[]byte
-	password_changed_at     *time.Time
-	password_expires_at     *time.Time
-	access_token_encrypted  *[]byte
-	refresh_token_encrypted *[]byte
-	token_expires_at        *time.Time
-	clearedFields           map[string]struct{}
-	done                    bool
-	oldValue                func(context.Context) (*UserIdentities, error)
-	predicates              []predicate.UserIdentities
+	op                         Op
+	typ                        string
+	id                         *int
+	created_at                 *time.Time
+	updated_at                 *time.Time
+	provider_user_id           *string
+	provider_union_id          *string
+	password_hash              *string
+	mfa_enabled                *bool
+	mfa_secret_encrypted       *[]byte
+	access_token_encrypted     *[]byte
+	refresh_token_encrypted    *[]byte
+	password_changed_at        *time.Time
+	password_expires_at        *time.Time
+	token_expires_at           *time.Time
+	clearedFields              map[string]struct{}
+	lion_users                 *int
+	clearedlion_users          bool
+	lion_auth_providers        *int
+	clearedlion_auth_providers bool
+	done                       bool
+	oldValue                   func(context.Context) (*UserIdentities, error)
+	predicates                 []predicate.UserIdentities
 }
 
 var _ ent.Mutation = (*UserIdentitiesMutation)(nil)
@@ -9995,13 +10085,12 @@ func (m *UserIdentitiesMutation) ResetUpdatedAt() {
 
 // SetUserID sets the "user_id" field.
 func (m *UserIdentitiesMutation) SetUserID(i int) {
-	m.user_id = &i
-	m.adduser_id = nil
+	m.lion_users = &i
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
 func (m *UserIdentitiesMutation) UserID() (r int, exists bool) {
-	v := m.user_id
+	v := m.lion_users
 	if v == nil {
 		return
 	}
@@ -10025,64 +10114,45 @@ func (m *UserIdentitiesMutation) OldUserID(ctx context.Context) (v int, err erro
 	return oldValue.UserID, nil
 }
 
-// AddUserID adds i to the "user_id" field.
-func (m *UserIdentitiesMutation) AddUserID(i int) {
-	if m.adduser_id != nil {
-		*m.adduser_id += i
-	} else {
-		m.adduser_id = &i
-	}
-}
-
-// AddedUserID returns the value that was added to the "user_id" field in this mutation.
-func (m *UserIdentitiesMutation) AddedUserID() (r int, exists bool) {
-	v := m.adduser_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetUserID resets all changes to the "user_id" field.
 func (m *UserIdentitiesMutation) ResetUserID() {
-	m.user_id = nil
-	m.adduser_id = nil
+	m.lion_users = nil
 }
 
-// SetProviderName sets the "provider_name" field.
-func (m *UserIdentitiesMutation) SetProviderName(s string) {
-	m.provider_name = &s
+// SetProviderID sets the "provider_id" field.
+func (m *UserIdentitiesMutation) SetProviderID(i int) {
+	m.lion_auth_providers = &i
 }
 
-// ProviderName returns the value of the "provider_name" field in the mutation.
-func (m *UserIdentitiesMutation) ProviderName() (r string, exists bool) {
-	v := m.provider_name
+// ProviderID returns the value of the "provider_id" field in the mutation.
+func (m *UserIdentitiesMutation) ProviderID() (r int, exists bool) {
+	v := m.lion_auth_providers
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldProviderName returns the old "provider_name" field's value of the UserIdentities entity.
+// OldProviderID returns the old "provider_id" field's value of the UserIdentities entity.
 // If the UserIdentities object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserIdentitiesMutation) OldProviderName(ctx context.Context) (v string, err error) {
+func (m *UserIdentitiesMutation) OldProviderID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProviderName is only allowed on UpdateOne operations")
+		return v, errors.New("OldProviderID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProviderName requires an ID field in the mutation")
+		return v, errors.New("OldProviderID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProviderName: %w", err)
+		return v, fmt.Errorf("querying old value for OldProviderID: %w", err)
 	}
-	return oldValue.ProviderName, nil
+	return oldValue.ProviderID, nil
 }
 
-// ResetProviderName resets all changes to the "provider_name" field.
-func (m *UserIdentitiesMutation) ResetProviderName() {
-	m.provider_name = nil
+// ResetProviderID resets all changes to the "provider_id" field.
+func (m *UserIdentitiesMutation) ResetProviderID() {
+	m.lion_auth_providers = nil
 }
 
 // SetProviderUserID sets the "provider_user_id" field.
@@ -10278,104 +10348,6 @@ func (m *UserIdentitiesMutation) ResetMfaSecretEncrypted() {
 	m.mfa_secret_encrypted = nil
 }
 
-// SetPasswordChangedAt sets the "password_changed_at" field.
-func (m *UserIdentitiesMutation) SetPasswordChangedAt(t time.Time) {
-	m.password_changed_at = &t
-}
-
-// PasswordChangedAt returns the value of the "password_changed_at" field in the mutation.
-func (m *UserIdentitiesMutation) PasswordChangedAt() (r time.Time, exists bool) {
-	v := m.password_changed_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPasswordChangedAt returns the old "password_changed_at" field's value of the UserIdentities entity.
-// If the UserIdentities object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserIdentitiesMutation) OldPasswordChangedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPasswordChangedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPasswordChangedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPasswordChangedAt: %w", err)
-	}
-	return oldValue.PasswordChangedAt, nil
-}
-
-// ClearPasswordChangedAt clears the value of the "password_changed_at" field.
-func (m *UserIdentitiesMutation) ClearPasswordChangedAt() {
-	m.password_changed_at = nil
-	m.clearedFields[useridentities.FieldPasswordChangedAt] = struct{}{}
-}
-
-// PasswordChangedAtCleared returns if the "password_changed_at" field was cleared in this mutation.
-func (m *UserIdentitiesMutation) PasswordChangedAtCleared() bool {
-	_, ok := m.clearedFields[useridentities.FieldPasswordChangedAt]
-	return ok
-}
-
-// ResetPasswordChangedAt resets all changes to the "password_changed_at" field.
-func (m *UserIdentitiesMutation) ResetPasswordChangedAt() {
-	m.password_changed_at = nil
-	delete(m.clearedFields, useridentities.FieldPasswordChangedAt)
-}
-
-// SetPasswordExpiresAt sets the "password_expires_at" field.
-func (m *UserIdentitiesMutation) SetPasswordExpiresAt(t time.Time) {
-	m.password_expires_at = &t
-}
-
-// PasswordExpiresAt returns the value of the "password_expires_at" field in the mutation.
-func (m *UserIdentitiesMutation) PasswordExpiresAt() (r time.Time, exists bool) {
-	v := m.password_expires_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPasswordExpiresAt returns the old "password_expires_at" field's value of the UserIdentities entity.
-// If the UserIdentities object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserIdentitiesMutation) OldPasswordExpiresAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPasswordExpiresAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPasswordExpiresAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPasswordExpiresAt: %w", err)
-	}
-	return oldValue.PasswordExpiresAt, nil
-}
-
-// ClearPasswordExpiresAt clears the value of the "password_expires_at" field.
-func (m *UserIdentitiesMutation) ClearPasswordExpiresAt() {
-	m.password_expires_at = nil
-	m.clearedFields[useridentities.FieldPasswordExpiresAt] = struct{}{}
-}
-
-// PasswordExpiresAtCleared returns if the "password_expires_at" field was cleared in this mutation.
-func (m *UserIdentitiesMutation) PasswordExpiresAtCleared() bool {
-	_, ok := m.clearedFields[useridentities.FieldPasswordExpiresAt]
-	return ok
-}
-
-// ResetPasswordExpiresAt resets all changes to the "password_expires_at" field.
-func (m *UserIdentitiesMutation) ResetPasswordExpiresAt() {
-	m.password_expires_at = nil
-	delete(m.clearedFields, useridentities.FieldPasswordExpiresAt)
-}
-
 // SetAccessTokenEncrypted sets the "access_token_encrypted" field.
 func (m *UserIdentitiesMutation) SetAccessTokenEncrypted(b []byte) {
 	m.access_token_encrypted = &b
@@ -10474,6 +10446,104 @@ func (m *UserIdentitiesMutation) ResetRefreshTokenEncrypted() {
 	delete(m.clearedFields, useridentities.FieldRefreshTokenEncrypted)
 }
 
+// SetPasswordChangedAt sets the "password_changed_at" field.
+func (m *UserIdentitiesMutation) SetPasswordChangedAt(t time.Time) {
+	m.password_changed_at = &t
+}
+
+// PasswordChangedAt returns the value of the "password_changed_at" field in the mutation.
+func (m *UserIdentitiesMutation) PasswordChangedAt() (r time.Time, exists bool) {
+	v := m.password_changed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPasswordChangedAt returns the old "password_changed_at" field's value of the UserIdentities entity.
+// If the UserIdentities object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserIdentitiesMutation) OldPasswordChangedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPasswordChangedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPasswordChangedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPasswordChangedAt: %w", err)
+	}
+	return oldValue.PasswordChangedAt, nil
+}
+
+// ClearPasswordChangedAt clears the value of the "password_changed_at" field.
+func (m *UserIdentitiesMutation) ClearPasswordChangedAt() {
+	m.password_changed_at = nil
+	m.clearedFields[useridentities.FieldPasswordChangedAt] = struct{}{}
+}
+
+// PasswordChangedAtCleared returns if the "password_changed_at" field was cleared in this mutation.
+func (m *UserIdentitiesMutation) PasswordChangedAtCleared() bool {
+	_, ok := m.clearedFields[useridentities.FieldPasswordChangedAt]
+	return ok
+}
+
+// ResetPasswordChangedAt resets all changes to the "password_changed_at" field.
+func (m *UserIdentitiesMutation) ResetPasswordChangedAt() {
+	m.password_changed_at = nil
+	delete(m.clearedFields, useridentities.FieldPasswordChangedAt)
+}
+
+// SetPasswordExpiresAt sets the "password_expires_at" field.
+func (m *UserIdentitiesMutation) SetPasswordExpiresAt(t time.Time) {
+	m.password_expires_at = &t
+}
+
+// PasswordExpiresAt returns the value of the "password_expires_at" field in the mutation.
+func (m *UserIdentitiesMutation) PasswordExpiresAt() (r time.Time, exists bool) {
+	v := m.password_expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPasswordExpiresAt returns the old "password_expires_at" field's value of the UserIdentities entity.
+// If the UserIdentities object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserIdentitiesMutation) OldPasswordExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPasswordExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPasswordExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPasswordExpiresAt: %w", err)
+	}
+	return oldValue.PasswordExpiresAt, nil
+}
+
+// ClearPasswordExpiresAt clears the value of the "password_expires_at" field.
+func (m *UserIdentitiesMutation) ClearPasswordExpiresAt() {
+	m.password_expires_at = nil
+	m.clearedFields[useridentities.FieldPasswordExpiresAt] = struct{}{}
+}
+
+// PasswordExpiresAtCleared returns if the "password_expires_at" field was cleared in this mutation.
+func (m *UserIdentitiesMutation) PasswordExpiresAtCleared() bool {
+	_, ok := m.clearedFields[useridentities.FieldPasswordExpiresAt]
+	return ok
+}
+
+// ResetPasswordExpiresAt resets all changes to the "password_expires_at" field.
+func (m *UserIdentitiesMutation) ResetPasswordExpiresAt() {
+	m.password_expires_at = nil
+	delete(m.clearedFields, useridentities.FieldPasswordExpiresAt)
+}
+
 // SetTokenExpiresAt sets the "token_expires_at" field.
 func (m *UserIdentitiesMutation) SetTokenExpiresAt(t time.Time) {
 	m.token_expires_at = &t
@@ -10523,6 +10593,86 @@ func (m *UserIdentitiesMutation) ResetTokenExpiresAt() {
 	delete(m.clearedFields, useridentities.FieldTokenExpiresAt)
 }
 
+// SetLionUsersID sets the "lion_users" edge to the Users entity by id.
+func (m *UserIdentitiesMutation) SetLionUsersID(id int) {
+	m.lion_users = &id
+}
+
+// ClearLionUsers clears the "lion_users" edge to the Users entity.
+func (m *UserIdentitiesMutation) ClearLionUsers() {
+	m.clearedlion_users = true
+	m.clearedFields[useridentities.FieldUserID] = struct{}{}
+}
+
+// LionUsersCleared reports if the "lion_users" edge to the Users entity was cleared.
+func (m *UserIdentitiesMutation) LionUsersCleared() bool {
+	return m.clearedlion_users
+}
+
+// LionUsersID returns the "lion_users" edge ID in the mutation.
+func (m *UserIdentitiesMutation) LionUsersID() (id int, exists bool) {
+	if m.lion_users != nil {
+		return *m.lion_users, true
+	}
+	return
+}
+
+// LionUsersIDs returns the "lion_users" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionUsersID instead. It exists only for internal usage by the builders.
+func (m *UserIdentitiesMutation) LionUsersIDs() (ids []int) {
+	if id := m.lion_users; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionUsers resets all changes to the "lion_users" edge.
+func (m *UserIdentitiesMutation) ResetLionUsers() {
+	m.lion_users = nil
+	m.clearedlion_users = false
+}
+
+// SetLionAuthProvidersID sets the "lion_auth_providers" edge to the AuthProviders entity by id.
+func (m *UserIdentitiesMutation) SetLionAuthProvidersID(id int) {
+	m.lion_auth_providers = &id
+}
+
+// ClearLionAuthProviders clears the "lion_auth_providers" edge to the AuthProviders entity.
+func (m *UserIdentitiesMutation) ClearLionAuthProviders() {
+	m.clearedlion_auth_providers = true
+	m.clearedFields[useridentities.FieldProviderID] = struct{}{}
+}
+
+// LionAuthProvidersCleared reports if the "lion_auth_providers" edge to the AuthProviders entity was cleared.
+func (m *UserIdentitiesMutation) LionAuthProvidersCleared() bool {
+	return m.clearedlion_auth_providers
+}
+
+// LionAuthProvidersID returns the "lion_auth_providers" edge ID in the mutation.
+func (m *UserIdentitiesMutation) LionAuthProvidersID() (id int, exists bool) {
+	if m.lion_auth_providers != nil {
+		return *m.lion_auth_providers, true
+	}
+	return
+}
+
+// LionAuthProvidersIDs returns the "lion_auth_providers" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionAuthProvidersID instead. It exists only for internal usage by the builders.
+func (m *UserIdentitiesMutation) LionAuthProvidersIDs() (ids []int) {
+	if id := m.lion_auth_providers; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionAuthProviders resets all changes to the "lion_auth_providers" edge.
+func (m *UserIdentitiesMutation) ResetLionAuthProviders() {
+	m.lion_auth_providers = nil
+	m.clearedlion_auth_providers = false
+}
+
 // Where appends a list predicates to the UserIdentitiesMutation builder.
 func (m *UserIdentitiesMutation) Where(ps ...predicate.UserIdentities) {
 	m.predicates = append(m.predicates, ps...)
@@ -10564,11 +10714,11 @@ func (m *UserIdentitiesMutation) Fields() []string {
 	if m.updated_at != nil {
 		fields = append(fields, useridentities.FieldUpdatedAt)
 	}
-	if m.user_id != nil {
+	if m.lion_users != nil {
 		fields = append(fields, useridentities.FieldUserID)
 	}
-	if m.provider_name != nil {
-		fields = append(fields, useridentities.FieldProviderName)
+	if m.lion_auth_providers != nil {
+		fields = append(fields, useridentities.FieldProviderID)
 	}
 	if m.provider_user_id != nil {
 		fields = append(fields, useridentities.FieldProviderUserID)
@@ -10585,17 +10735,17 @@ func (m *UserIdentitiesMutation) Fields() []string {
 	if m.mfa_secret_encrypted != nil {
 		fields = append(fields, useridentities.FieldMfaSecretEncrypted)
 	}
-	if m.password_changed_at != nil {
-		fields = append(fields, useridentities.FieldPasswordChangedAt)
-	}
-	if m.password_expires_at != nil {
-		fields = append(fields, useridentities.FieldPasswordExpiresAt)
-	}
 	if m.access_token_encrypted != nil {
 		fields = append(fields, useridentities.FieldAccessTokenEncrypted)
 	}
 	if m.refresh_token_encrypted != nil {
 		fields = append(fields, useridentities.FieldRefreshTokenEncrypted)
+	}
+	if m.password_changed_at != nil {
+		fields = append(fields, useridentities.FieldPasswordChangedAt)
+	}
+	if m.password_expires_at != nil {
+		fields = append(fields, useridentities.FieldPasswordExpiresAt)
 	}
 	if m.token_expires_at != nil {
 		fields = append(fields, useridentities.FieldTokenExpiresAt)
@@ -10614,8 +10764,8 @@ func (m *UserIdentitiesMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case useridentities.FieldUserID:
 		return m.UserID()
-	case useridentities.FieldProviderName:
-		return m.ProviderName()
+	case useridentities.FieldProviderID:
+		return m.ProviderID()
 	case useridentities.FieldProviderUserID:
 		return m.ProviderUserID()
 	case useridentities.FieldProviderUnionID:
@@ -10626,14 +10776,14 @@ func (m *UserIdentitiesMutation) Field(name string) (ent.Value, bool) {
 		return m.MfaEnabled()
 	case useridentities.FieldMfaSecretEncrypted:
 		return m.MfaSecretEncrypted()
-	case useridentities.FieldPasswordChangedAt:
-		return m.PasswordChangedAt()
-	case useridentities.FieldPasswordExpiresAt:
-		return m.PasswordExpiresAt()
 	case useridentities.FieldAccessTokenEncrypted:
 		return m.AccessTokenEncrypted()
 	case useridentities.FieldRefreshTokenEncrypted:
 		return m.RefreshTokenEncrypted()
+	case useridentities.FieldPasswordChangedAt:
+		return m.PasswordChangedAt()
+	case useridentities.FieldPasswordExpiresAt:
+		return m.PasswordExpiresAt()
 	case useridentities.FieldTokenExpiresAt:
 		return m.TokenExpiresAt()
 	}
@@ -10651,8 +10801,8 @@ func (m *UserIdentitiesMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldUpdatedAt(ctx)
 	case useridentities.FieldUserID:
 		return m.OldUserID(ctx)
-	case useridentities.FieldProviderName:
-		return m.OldProviderName(ctx)
+	case useridentities.FieldProviderID:
+		return m.OldProviderID(ctx)
 	case useridentities.FieldProviderUserID:
 		return m.OldProviderUserID(ctx)
 	case useridentities.FieldProviderUnionID:
@@ -10663,14 +10813,14 @@ func (m *UserIdentitiesMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldMfaEnabled(ctx)
 	case useridentities.FieldMfaSecretEncrypted:
 		return m.OldMfaSecretEncrypted(ctx)
-	case useridentities.FieldPasswordChangedAt:
-		return m.OldPasswordChangedAt(ctx)
-	case useridentities.FieldPasswordExpiresAt:
-		return m.OldPasswordExpiresAt(ctx)
 	case useridentities.FieldAccessTokenEncrypted:
 		return m.OldAccessTokenEncrypted(ctx)
 	case useridentities.FieldRefreshTokenEncrypted:
 		return m.OldRefreshTokenEncrypted(ctx)
+	case useridentities.FieldPasswordChangedAt:
+		return m.OldPasswordChangedAt(ctx)
+	case useridentities.FieldPasswordExpiresAt:
+		return m.OldPasswordExpiresAt(ctx)
 	case useridentities.FieldTokenExpiresAt:
 		return m.OldTokenExpiresAt(ctx)
 	}
@@ -10703,12 +10853,12 @@ func (m *UserIdentitiesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUserID(v)
 		return nil
-	case useridentities.FieldProviderName:
-		v, ok := value.(string)
+	case useridentities.FieldProviderID:
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetProviderName(v)
+		m.SetProviderID(v)
 		return nil
 	case useridentities.FieldProviderUserID:
 		v, ok := value.(string)
@@ -10745,20 +10895,6 @@ func (m *UserIdentitiesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMfaSecretEncrypted(v)
 		return nil
-	case useridentities.FieldPasswordChangedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPasswordChangedAt(v)
-		return nil
-	case useridentities.FieldPasswordExpiresAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPasswordExpiresAt(v)
-		return nil
 	case useridentities.FieldAccessTokenEncrypted:
 		v, ok := value.([]byte)
 		if !ok {
@@ -10772,6 +10908,20 @@ func (m *UserIdentitiesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRefreshTokenEncrypted(v)
+		return nil
+	case useridentities.FieldPasswordChangedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPasswordChangedAt(v)
+		return nil
+	case useridentities.FieldPasswordExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPasswordExpiresAt(v)
 		return nil
 	case useridentities.FieldTokenExpiresAt:
 		v, ok := value.(time.Time)
@@ -10788,9 +10938,6 @@ func (m *UserIdentitiesMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *UserIdentitiesMutation) AddedFields() []string {
 	var fields []string
-	if m.adduser_id != nil {
-		fields = append(fields, useridentities.FieldUserID)
-	}
 	return fields
 }
 
@@ -10799,8 +10946,6 @@ func (m *UserIdentitiesMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *UserIdentitiesMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case useridentities.FieldUserID:
-		return m.AddedUserID()
 	}
 	return nil, false
 }
@@ -10810,13 +10955,6 @@ func (m *UserIdentitiesMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserIdentitiesMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case useridentities.FieldUserID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUserID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown UserIdentities numeric field %s", name)
 }
@@ -10828,17 +10966,17 @@ func (m *UserIdentitiesMutation) ClearedFields() []string {
 	if m.FieldCleared(useridentities.FieldProviderUnionID) {
 		fields = append(fields, useridentities.FieldProviderUnionID)
 	}
-	if m.FieldCleared(useridentities.FieldPasswordChangedAt) {
-		fields = append(fields, useridentities.FieldPasswordChangedAt)
-	}
-	if m.FieldCleared(useridentities.FieldPasswordExpiresAt) {
-		fields = append(fields, useridentities.FieldPasswordExpiresAt)
-	}
 	if m.FieldCleared(useridentities.FieldAccessTokenEncrypted) {
 		fields = append(fields, useridentities.FieldAccessTokenEncrypted)
 	}
 	if m.FieldCleared(useridentities.FieldRefreshTokenEncrypted) {
 		fields = append(fields, useridentities.FieldRefreshTokenEncrypted)
+	}
+	if m.FieldCleared(useridentities.FieldPasswordChangedAt) {
+		fields = append(fields, useridentities.FieldPasswordChangedAt)
+	}
+	if m.FieldCleared(useridentities.FieldPasswordExpiresAt) {
+		fields = append(fields, useridentities.FieldPasswordExpiresAt)
 	}
 	if m.FieldCleared(useridentities.FieldTokenExpiresAt) {
 		fields = append(fields, useridentities.FieldTokenExpiresAt)
@@ -10860,17 +10998,17 @@ func (m *UserIdentitiesMutation) ClearField(name string) error {
 	case useridentities.FieldProviderUnionID:
 		m.ClearProviderUnionID()
 		return nil
-	case useridentities.FieldPasswordChangedAt:
-		m.ClearPasswordChangedAt()
-		return nil
-	case useridentities.FieldPasswordExpiresAt:
-		m.ClearPasswordExpiresAt()
-		return nil
 	case useridentities.FieldAccessTokenEncrypted:
 		m.ClearAccessTokenEncrypted()
 		return nil
 	case useridentities.FieldRefreshTokenEncrypted:
 		m.ClearRefreshTokenEncrypted()
+		return nil
+	case useridentities.FieldPasswordChangedAt:
+		m.ClearPasswordChangedAt()
+		return nil
+	case useridentities.FieldPasswordExpiresAt:
+		m.ClearPasswordExpiresAt()
 		return nil
 	case useridentities.FieldTokenExpiresAt:
 		m.ClearTokenExpiresAt()
@@ -10892,8 +11030,8 @@ func (m *UserIdentitiesMutation) ResetField(name string) error {
 	case useridentities.FieldUserID:
 		m.ResetUserID()
 		return nil
-	case useridentities.FieldProviderName:
-		m.ResetProviderName()
+	case useridentities.FieldProviderID:
+		m.ResetProviderID()
 		return nil
 	case useridentities.FieldProviderUserID:
 		m.ResetProviderUserID()
@@ -10910,17 +11048,17 @@ func (m *UserIdentitiesMutation) ResetField(name string) error {
 	case useridentities.FieldMfaSecretEncrypted:
 		m.ResetMfaSecretEncrypted()
 		return nil
-	case useridentities.FieldPasswordChangedAt:
-		m.ResetPasswordChangedAt()
-		return nil
-	case useridentities.FieldPasswordExpiresAt:
-		m.ResetPasswordExpiresAt()
-		return nil
 	case useridentities.FieldAccessTokenEncrypted:
 		m.ResetAccessTokenEncrypted()
 		return nil
 	case useridentities.FieldRefreshTokenEncrypted:
 		m.ResetRefreshTokenEncrypted()
+		return nil
+	case useridentities.FieldPasswordChangedAt:
+		m.ResetPasswordChangedAt()
+		return nil
+	case useridentities.FieldPasswordExpiresAt:
+		m.ResetPasswordExpiresAt()
 		return nil
 	case useridentities.FieldTokenExpiresAt:
 		m.ResetTokenExpiresAt()
@@ -10931,19 +11069,35 @@ func (m *UserIdentitiesMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserIdentitiesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.lion_users != nil {
+		edges = append(edges, useridentities.EdgeLionUsers)
+	}
+	if m.lion_auth_providers != nil {
+		edges = append(edges, useridentities.EdgeLionAuthProviders)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *UserIdentitiesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case useridentities.EdgeLionUsers:
+		if id := m.lion_users; id != nil {
+			return []ent.Value{*id}
+		}
+	case useridentities.EdgeLionAuthProviders:
+		if id := m.lion_auth_providers; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserIdentitiesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -10955,25 +11109,53 @@ func (m *UserIdentitiesMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserIdentitiesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.clearedlion_users {
+		edges = append(edges, useridentities.EdgeLionUsers)
+	}
+	if m.clearedlion_auth_providers {
+		edges = append(edges, useridentities.EdgeLionAuthProviders)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *UserIdentitiesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case useridentities.EdgeLionUsers:
+		return m.clearedlion_users
+	case useridentities.EdgeLionAuthProviders:
+		return m.clearedlion_auth_providers
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *UserIdentitiesMutation) ClearEdge(name string) error {
+	switch name {
+	case useridentities.EdgeLionUsers:
+		m.ClearLionUsers()
+		return nil
+	case useridentities.EdgeLionAuthProviders:
+		m.ClearLionAuthProviders()
+		return nil
+	}
 	return fmt.Errorf("unknown UserIdentities unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *UserIdentitiesMutation) ResetEdge(name string) error {
+	switch name {
+	case useridentities.EdgeLionUsers:
+		m.ResetLionUsers()
+		return nil
+	case useridentities.EdgeLionAuthProviders:
+		m.ResetLionAuthProviders()
+		return nil
+	}
 	return fmt.Errorf("unknown UserIdentities edge %s", name)
 }
 
@@ -12283,9 +12465,12 @@ type UsersMutation struct {
 	adddepartment_id             *int
 	description                  *string
 	clearedFields                map[string]struct{}
-	lion_users                   map[int]struct{}
-	removedlion_users            map[int]struct{}
-	clearedlion_users            bool
+	lion_user_roles              map[int]struct{}
+	removedlion_user_roles       map[int]struct{}
+	clearedlion_user_roles       bool
+	lion_user_identities         map[int]struct{}
+	removedlion_user_identities  map[int]struct{}
+	clearedlion_user_identities  bool
 	lion_department_users        map[int]struct{}
 	removedlion_department_users map[int]struct{}
 	clearedlion_department_users bool
@@ -13417,58 +13602,112 @@ func (m *UsersMutation) ResetDescription() {
 	m.description = nil
 }
 
-// AddLionUserIDs adds the "lion_users" edge to the UserRoles entity by ids.
-func (m *UsersMutation) AddLionUserIDs(ids ...int) {
-	if m.lion_users == nil {
-		m.lion_users = make(map[int]struct{})
+// AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by ids.
+func (m *UsersMutation) AddLionUserRoleIDs(ids ...int) {
+	if m.lion_user_roles == nil {
+		m.lion_user_roles = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.lion_users[ids[i]] = struct{}{}
+		m.lion_user_roles[ids[i]] = struct{}{}
 	}
 }
 
-// ClearLionUsers clears the "lion_users" edge to the UserRoles entity.
-func (m *UsersMutation) ClearLionUsers() {
-	m.clearedlion_users = true
+// ClearLionUserRoles clears the "lion_user_roles" edge to the UserRoles entity.
+func (m *UsersMutation) ClearLionUserRoles() {
+	m.clearedlion_user_roles = true
 }
 
-// LionUsersCleared reports if the "lion_users" edge to the UserRoles entity was cleared.
-func (m *UsersMutation) LionUsersCleared() bool {
-	return m.clearedlion_users
+// LionUserRolesCleared reports if the "lion_user_roles" edge to the UserRoles entity was cleared.
+func (m *UsersMutation) LionUserRolesCleared() bool {
+	return m.clearedlion_user_roles
 }
 
-// RemoveLionUserIDs removes the "lion_users" edge to the UserRoles entity by IDs.
-func (m *UsersMutation) RemoveLionUserIDs(ids ...int) {
-	if m.removedlion_users == nil {
-		m.removedlion_users = make(map[int]struct{})
+// RemoveLionUserRoleIDs removes the "lion_user_roles" edge to the UserRoles entity by IDs.
+func (m *UsersMutation) RemoveLionUserRoleIDs(ids ...int) {
+	if m.removedlion_user_roles == nil {
+		m.removedlion_user_roles = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.lion_users, ids[i])
-		m.removedlion_users[ids[i]] = struct{}{}
+		delete(m.lion_user_roles, ids[i])
+		m.removedlion_user_roles[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedLionUsers returns the removed IDs of the "lion_users" edge to the UserRoles entity.
-func (m *UsersMutation) RemovedLionUsersIDs() (ids []int) {
-	for id := range m.removedlion_users {
+// RemovedLionUserRoles returns the removed IDs of the "lion_user_roles" edge to the UserRoles entity.
+func (m *UsersMutation) RemovedLionUserRolesIDs() (ids []int) {
+	for id := range m.removedlion_user_roles {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// LionUsersIDs returns the "lion_users" edge IDs in the mutation.
-func (m *UsersMutation) LionUsersIDs() (ids []int) {
-	for id := range m.lion_users {
+// LionUserRolesIDs returns the "lion_user_roles" edge IDs in the mutation.
+func (m *UsersMutation) LionUserRolesIDs() (ids []int) {
+	for id := range m.lion_user_roles {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetLionUsers resets all changes to the "lion_users" edge.
-func (m *UsersMutation) ResetLionUsers() {
-	m.lion_users = nil
-	m.clearedlion_users = false
-	m.removedlion_users = nil
+// ResetLionUserRoles resets all changes to the "lion_user_roles" edge.
+func (m *UsersMutation) ResetLionUserRoles() {
+	m.lion_user_roles = nil
+	m.clearedlion_user_roles = false
+	m.removedlion_user_roles = nil
+}
+
+// AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by ids.
+func (m *UsersMutation) AddLionUserIdentityIDs(ids ...int) {
+	if m.lion_user_identities == nil {
+		m.lion_user_identities = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lion_user_identities[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLionUserIdentities clears the "lion_user_identities" edge to the UserIdentities entity.
+func (m *UsersMutation) ClearLionUserIdentities() {
+	m.clearedlion_user_identities = true
+}
+
+// LionUserIdentitiesCleared reports if the "lion_user_identities" edge to the UserIdentities entity was cleared.
+func (m *UsersMutation) LionUserIdentitiesCleared() bool {
+	return m.clearedlion_user_identities
+}
+
+// RemoveLionUserIdentityIDs removes the "lion_user_identities" edge to the UserIdentities entity by IDs.
+func (m *UsersMutation) RemoveLionUserIdentityIDs(ids ...int) {
+	if m.removedlion_user_identities == nil {
+		m.removedlion_user_identities = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lion_user_identities, ids[i])
+		m.removedlion_user_identities[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLionUserIdentities returns the removed IDs of the "lion_user_identities" edge to the UserIdentities entity.
+func (m *UsersMutation) RemovedLionUserIdentitiesIDs() (ids []int) {
+	for id := range m.removedlion_user_identities {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LionUserIdentitiesIDs returns the "lion_user_identities" edge IDs in the mutation.
+func (m *UsersMutation) LionUserIdentitiesIDs() (ids []int) {
+	for id := range m.lion_user_identities {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLionUserIdentities resets all changes to the "lion_user_identities" edge.
+func (m *UsersMutation) ResetLionUserIdentities() {
+	m.lion_user_identities = nil
+	m.clearedlion_user_identities = false
+	m.removedlion_user_identities = nil
 }
 
 // AddLionDepartmentUserIDs adds the "lion_department_users" edge to the DepartmentUsers entity by ids.
@@ -14138,9 +14377,12 @@ func (m *UsersMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UsersMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.lion_users != nil {
-		edges = append(edges, users.EdgeLionUsers)
+	edges := make([]string, 0, 3)
+	if m.lion_user_roles != nil {
+		edges = append(edges, users.EdgeLionUserRoles)
+	}
+	if m.lion_user_identities != nil {
+		edges = append(edges, users.EdgeLionUserIdentities)
 	}
 	if m.lion_department_users != nil {
 		edges = append(edges, users.EdgeLionDepartmentUsers)
@@ -14152,9 +14394,15 @@ func (m *UsersMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *UsersMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case users.EdgeLionUsers:
-		ids := make([]ent.Value, 0, len(m.lion_users))
-		for id := range m.lion_users {
+	case users.EdgeLionUserRoles:
+		ids := make([]ent.Value, 0, len(m.lion_user_roles))
+		for id := range m.lion_user_roles {
+			ids = append(ids, id)
+		}
+		return ids
+	case users.EdgeLionUserIdentities:
+		ids := make([]ent.Value, 0, len(m.lion_user_identities))
+		for id := range m.lion_user_identities {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14170,9 +14418,12 @@ func (m *UsersMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UsersMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedlion_users != nil {
-		edges = append(edges, users.EdgeLionUsers)
+	edges := make([]string, 0, 3)
+	if m.removedlion_user_roles != nil {
+		edges = append(edges, users.EdgeLionUserRoles)
+	}
+	if m.removedlion_user_identities != nil {
+		edges = append(edges, users.EdgeLionUserIdentities)
 	}
 	if m.removedlion_department_users != nil {
 		edges = append(edges, users.EdgeLionDepartmentUsers)
@@ -14184,9 +14435,15 @@ func (m *UsersMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *UsersMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case users.EdgeLionUsers:
-		ids := make([]ent.Value, 0, len(m.removedlion_users))
-		for id := range m.removedlion_users {
+	case users.EdgeLionUserRoles:
+		ids := make([]ent.Value, 0, len(m.removedlion_user_roles))
+		for id := range m.removedlion_user_roles {
+			ids = append(ids, id)
+		}
+		return ids
+	case users.EdgeLionUserIdentities:
+		ids := make([]ent.Value, 0, len(m.removedlion_user_identities))
+		for id := range m.removedlion_user_identities {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14202,9 +14459,12 @@ func (m *UsersMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UsersMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedlion_users {
-		edges = append(edges, users.EdgeLionUsers)
+	edges := make([]string, 0, 3)
+	if m.clearedlion_user_roles {
+		edges = append(edges, users.EdgeLionUserRoles)
+	}
+	if m.clearedlion_user_identities {
+		edges = append(edges, users.EdgeLionUserIdentities)
 	}
 	if m.clearedlion_department_users {
 		edges = append(edges, users.EdgeLionDepartmentUsers)
@@ -14216,8 +14476,10 @@ func (m *UsersMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *UsersMutation) EdgeCleared(name string) bool {
 	switch name {
-	case users.EdgeLionUsers:
-		return m.clearedlion_users
+	case users.EdgeLionUserRoles:
+		return m.clearedlion_user_roles
+	case users.EdgeLionUserIdentities:
+		return m.clearedlion_user_identities
 	case users.EdgeLionDepartmentUsers:
 		return m.clearedlion_department_users
 	}
@@ -14236,8 +14498,11 @@ func (m *UsersMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *UsersMutation) ResetEdge(name string) error {
 	switch name {
-	case users.EdgeLionUsers:
-		m.ResetLionUsers()
+	case users.EdgeLionUserRoles:
+		m.ResetLionUserRoles()
+		return nil
+	case users.EdgeLionUserIdentities:
+		m.ResetLionUserIdentities()
 		return nil
 	case users.EdgeLionDepartmentUsers:
 		m.ResetLionDepartmentUsers()

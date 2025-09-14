@@ -11,8 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // UserIdentitiesUpdate is the builder for updating UserIdentities entities.
@@ -34,16 +36,30 @@ func (_u *UserIdentitiesUpdate) SetUpdatedAt(v time.Time) *UserIdentitiesUpdate 
 	return _u
 }
 
-// SetProviderName sets the "provider_name" field.
-func (_u *UserIdentitiesUpdate) SetProviderName(v string) *UserIdentitiesUpdate {
-	_u.mutation.SetProviderName(v)
+// SetUserID sets the "user_id" field.
+func (_u *UserIdentitiesUpdate) SetUserID(v int) *UserIdentitiesUpdate {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
-// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
-func (_u *UserIdentitiesUpdate) SetNillableProviderName(v *string) *UserIdentitiesUpdate {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *UserIdentitiesUpdate) SetNillableUserID(v *int) *UserIdentitiesUpdate {
 	if v != nil {
-		_u.SetProviderName(*v)
+		_u.SetUserID(*v)
+	}
+	return _u
+}
+
+// SetProviderID sets the "provider_id" field.
+func (_u *UserIdentitiesUpdate) SetProviderID(v int) *UserIdentitiesUpdate {
+	_u.mutation.SetProviderID(v)
+	return _u
+}
+
+// SetNillableProviderID sets the "provider_id" field if the given value is not nil.
+func (_u *UserIdentitiesUpdate) SetNillableProviderID(v *int) *UserIdentitiesUpdate {
+	if v != nil {
+		_u.SetProviderID(*v)
 	}
 	return _u
 }
@@ -116,6 +132,30 @@ func (_u *UserIdentitiesUpdate) SetMfaSecretEncrypted(v []byte) *UserIdentitiesU
 	return _u
 }
 
+// SetAccessTokenEncrypted sets the "access_token_encrypted" field.
+func (_u *UserIdentitiesUpdate) SetAccessTokenEncrypted(v []byte) *UserIdentitiesUpdate {
+	_u.mutation.SetAccessTokenEncrypted(v)
+	return _u
+}
+
+// ClearAccessTokenEncrypted clears the value of the "access_token_encrypted" field.
+func (_u *UserIdentitiesUpdate) ClearAccessTokenEncrypted() *UserIdentitiesUpdate {
+	_u.mutation.ClearAccessTokenEncrypted()
+	return _u
+}
+
+// SetRefreshTokenEncrypted sets the "refresh_token_encrypted" field.
+func (_u *UserIdentitiesUpdate) SetRefreshTokenEncrypted(v []byte) *UserIdentitiesUpdate {
+	_u.mutation.SetRefreshTokenEncrypted(v)
+	return _u
+}
+
+// ClearRefreshTokenEncrypted clears the value of the "refresh_token_encrypted" field.
+func (_u *UserIdentitiesUpdate) ClearRefreshTokenEncrypted() *UserIdentitiesUpdate {
+	_u.mutation.ClearRefreshTokenEncrypted()
+	return _u
+}
+
 // SetPasswordChangedAt sets the "password_changed_at" field.
 func (_u *UserIdentitiesUpdate) SetPasswordChangedAt(v time.Time) *UserIdentitiesUpdate {
 	_u.mutation.SetPasswordChangedAt(v)
@@ -156,30 +196,6 @@ func (_u *UserIdentitiesUpdate) ClearPasswordExpiresAt() *UserIdentitiesUpdate {
 	return _u
 }
 
-// SetAccessTokenEncrypted sets the "access_token_encrypted" field.
-func (_u *UserIdentitiesUpdate) SetAccessTokenEncrypted(v []byte) *UserIdentitiesUpdate {
-	_u.mutation.SetAccessTokenEncrypted(v)
-	return _u
-}
-
-// ClearAccessTokenEncrypted clears the value of the "access_token_encrypted" field.
-func (_u *UserIdentitiesUpdate) ClearAccessTokenEncrypted() *UserIdentitiesUpdate {
-	_u.mutation.ClearAccessTokenEncrypted()
-	return _u
-}
-
-// SetRefreshTokenEncrypted sets the "refresh_token_encrypted" field.
-func (_u *UserIdentitiesUpdate) SetRefreshTokenEncrypted(v []byte) *UserIdentitiesUpdate {
-	_u.mutation.SetRefreshTokenEncrypted(v)
-	return _u
-}
-
-// ClearRefreshTokenEncrypted clears the value of the "refresh_token_encrypted" field.
-func (_u *UserIdentitiesUpdate) ClearRefreshTokenEncrypted() *UserIdentitiesUpdate {
-	_u.mutation.ClearRefreshTokenEncrypted()
-	return _u
-}
-
 // SetTokenExpiresAt sets the "token_expires_at" field.
 func (_u *UserIdentitiesUpdate) SetTokenExpiresAt(v time.Time) *UserIdentitiesUpdate {
 	_u.mutation.SetTokenExpiresAt(v)
@@ -200,9 +216,43 @@ func (_u *UserIdentitiesUpdate) ClearTokenExpiresAt() *UserIdentitiesUpdate {
 	return _u
 }
 
+// SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
+func (_u *UserIdentitiesUpdate) SetLionUsersID(id int) *UserIdentitiesUpdate {
+	_u.mutation.SetLionUsersID(id)
+	return _u
+}
+
+// SetLionUsers sets the "lion_users" edge to the Users entity.
+func (_u *UserIdentitiesUpdate) SetLionUsers(v *Users) *UserIdentitiesUpdate {
+	return _u.SetLionUsersID(v.ID)
+}
+
+// SetLionAuthProvidersID sets the "lion_auth_providers" edge to the AuthProviders entity by ID.
+func (_u *UserIdentitiesUpdate) SetLionAuthProvidersID(id int) *UserIdentitiesUpdate {
+	_u.mutation.SetLionAuthProvidersID(id)
+	return _u
+}
+
+// SetLionAuthProviders sets the "lion_auth_providers" edge to the AuthProviders entity.
+func (_u *UserIdentitiesUpdate) SetLionAuthProviders(v *AuthProviders) *UserIdentitiesUpdate {
+	return _u.SetLionAuthProvidersID(v.ID)
+}
+
 // Mutation returns the UserIdentitiesMutation object of the builder.
 func (_u *UserIdentitiesUpdate) Mutation() *UserIdentitiesMutation {
 	return _u.mutation
+}
+
+// ClearLionUsers clears the "lion_users" edge to the Users entity.
+func (_u *UserIdentitiesUpdate) ClearLionUsers() *UserIdentitiesUpdate {
+	_u.mutation.ClearLionUsers()
+	return _u
+}
+
+// ClearLionAuthProviders clears the "lion_auth_providers" edge to the AuthProviders entity.
+func (_u *UserIdentitiesUpdate) ClearLionAuthProviders() *UserIdentitiesUpdate {
+	_u.mutation.ClearLionAuthProviders()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -243,15 +293,21 @@ func (_u *UserIdentitiesUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *UserIdentitiesUpdate) check() error {
-	if v, ok := _u.mutation.ProviderName(); ok {
-		if err := useridentities.ProviderNameValidator(v); err != nil {
-			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`lion: validator failed for field "UserIdentities.provider_name": %w`, err)}
+	if v, ok := _u.mutation.UserID(); ok {
+		if err := useridentities.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "UserIdentities.user_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.ProviderUserID(); ok {
 		if err := useridentities.ProviderUserIDValidator(v); err != nil {
 			return &ValidationError{Name: "provider_user_id", err: fmt.Errorf(`lion: validator failed for field "UserIdentities.provider_user_id": %w`, err)}
 		}
+	}
+	if _u.mutation.LionUsersCleared() && len(_u.mutation.LionUsersIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "UserIdentities.lion_users"`)
+	}
+	if _u.mutation.LionAuthProvidersCleared() && len(_u.mutation.LionAuthProvidersIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "UserIdentities.lion_auth_providers"`)
 	}
 	return nil
 }
@@ -271,9 +327,6 @@ func (_u *UserIdentitiesUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(useridentities.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.ProviderName(); ok {
-		_spec.SetField(useridentities.FieldProviderName, field.TypeString, value)
-	}
 	if value, ok := _u.mutation.ProviderUserID(); ok {
 		_spec.SetField(useridentities.FieldProviderUserID, field.TypeString, value)
 	}
@@ -292,18 +345,6 @@ func (_u *UserIdentitiesUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if value, ok := _u.mutation.MfaSecretEncrypted(); ok {
 		_spec.SetField(useridentities.FieldMfaSecretEncrypted, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.PasswordChangedAt(); ok {
-		_spec.SetField(useridentities.FieldPasswordChangedAt, field.TypeTime, value)
-	}
-	if _u.mutation.PasswordChangedAtCleared() {
-		_spec.ClearField(useridentities.FieldPasswordChangedAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.PasswordExpiresAt(); ok {
-		_spec.SetField(useridentities.FieldPasswordExpiresAt, field.TypeTime, value)
-	}
-	if _u.mutation.PasswordExpiresAtCleared() {
-		_spec.ClearField(useridentities.FieldPasswordExpiresAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.AccessTokenEncrypted(); ok {
 		_spec.SetField(useridentities.FieldAccessTokenEncrypted, field.TypeBytes, value)
 	}
@@ -316,11 +357,81 @@ func (_u *UserIdentitiesUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if _u.mutation.RefreshTokenEncryptedCleared() {
 		_spec.ClearField(useridentities.FieldRefreshTokenEncrypted, field.TypeBytes)
 	}
+	if value, ok := _u.mutation.PasswordChangedAt(); ok {
+		_spec.SetField(useridentities.FieldPasswordChangedAt, field.TypeTime, value)
+	}
+	if _u.mutation.PasswordChangedAtCleared() {
+		_spec.ClearField(useridentities.FieldPasswordChangedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.PasswordExpiresAt(); ok {
+		_spec.SetField(useridentities.FieldPasswordExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.PasswordExpiresAtCleared() {
+		_spec.ClearField(useridentities.FieldPasswordExpiresAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.TokenExpiresAt(); ok {
 		_spec.SetField(useridentities.FieldTokenExpiresAt, field.TypeTime, value)
 	}
 	if _u.mutation.TokenExpiresAtCleared() {
 		_spec.ClearField(useridentities.FieldTokenExpiresAt, field.TypeTime)
+	}
+	if _u.mutation.LionUsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   useridentities.LionUsersTable,
+			Columns: []string{useridentities.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   useridentities.LionUsersTable,
+			Columns: []string{useridentities.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LionAuthProvidersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   useridentities.LionAuthProvidersTable,
+			Columns: []string{useridentities.LionAuthProvidersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionAuthProvidersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   useridentities.LionAuthProvidersTable,
+			Columns: []string{useridentities.LionAuthProvidersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -348,16 +459,30 @@ func (_u *UserIdentitiesUpdateOne) SetUpdatedAt(v time.Time) *UserIdentitiesUpda
 	return _u
 }
 
-// SetProviderName sets the "provider_name" field.
-func (_u *UserIdentitiesUpdateOne) SetProviderName(v string) *UserIdentitiesUpdateOne {
-	_u.mutation.SetProviderName(v)
+// SetUserID sets the "user_id" field.
+func (_u *UserIdentitiesUpdateOne) SetUserID(v int) *UserIdentitiesUpdateOne {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
-// SetNillableProviderName sets the "provider_name" field if the given value is not nil.
-func (_u *UserIdentitiesUpdateOne) SetNillableProviderName(v *string) *UserIdentitiesUpdateOne {
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (_u *UserIdentitiesUpdateOne) SetNillableUserID(v *int) *UserIdentitiesUpdateOne {
 	if v != nil {
-		_u.SetProviderName(*v)
+		_u.SetUserID(*v)
+	}
+	return _u
+}
+
+// SetProviderID sets the "provider_id" field.
+func (_u *UserIdentitiesUpdateOne) SetProviderID(v int) *UserIdentitiesUpdateOne {
+	_u.mutation.SetProviderID(v)
+	return _u
+}
+
+// SetNillableProviderID sets the "provider_id" field if the given value is not nil.
+func (_u *UserIdentitiesUpdateOne) SetNillableProviderID(v *int) *UserIdentitiesUpdateOne {
+	if v != nil {
+		_u.SetProviderID(*v)
 	}
 	return _u
 }
@@ -430,6 +555,30 @@ func (_u *UserIdentitiesUpdateOne) SetMfaSecretEncrypted(v []byte) *UserIdentiti
 	return _u
 }
 
+// SetAccessTokenEncrypted sets the "access_token_encrypted" field.
+func (_u *UserIdentitiesUpdateOne) SetAccessTokenEncrypted(v []byte) *UserIdentitiesUpdateOne {
+	_u.mutation.SetAccessTokenEncrypted(v)
+	return _u
+}
+
+// ClearAccessTokenEncrypted clears the value of the "access_token_encrypted" field.
+func (_u *UserIdentitiesUpdateOne) ClearAccessTokenEncrypted() *UserIdentitiesUpdateOne {
+	_u.mutation.ClearAccessTokenEncrypted()
+	return _u
+}
+
+// SetRefreshTokenEncrypted sets the "refresh_token_encrypted" field.
+func (_u *UserIdentitiesUpdateOne) SetRefreshTokenEncrypted(v []byte) *UserIdentitiesUpdateOne {
+	_u.mutation.SetRefreshTokenEncrypted(v)
+	return _u
+}
+
+// ClearRefreshTokenEncrypted clears the value of the "refresh_token_encrypted" field.
+func (_u *UserIdentitiesUpdateOne) ClearRefreshTokenEncrypted() *UserIdentitiesUpdateOne {
+	_u.mutation.ClearRefreshTokenEncrypted()
+	return _u
+}
+
 // SetPasswordChangedAt sets the "password_changed_at" field.
 func (_u *UserIdentitiesUpdateOne) SetPasswordChangedAt(v time.Time) *UserIdentitiesUpdateOne {
 	_u.mutation.SetPasswordChangedAt(v)
@@ -470,30 +619,6 @@ func (_u *UserIdentitiesUpdateOne) ClearPasswordExpiresAt() *UserIdentitiesUpdat
 	return _u
 }
 
-// SetAccessTokenEncrypted sets the "access_token_encrypted" field.
-func (_u *UserIdentitiesUpdateOne) SetAccessTokenEncrypted(v []byte) *UserIdentitiesUpdateOne {
-	_u.mutation.SetAccessTokenEncrypted(v)
-	return _u
-}
-
-// ClearAccessTokenEncrypted clears the value of the "access_token_encrypted" field.
-func (_u *UserIdentitiesUpdateOne) ClearAccessTokenEncrypted() *UserIdentitiesUpdateOne {
-	_u.mutation.ClearAccessTokenEncrypted()
-	return _u
-}
-
-// SetRefreshTokenEncrypted sets the "refresh_token_encrypted" field.
-func (_u *UserIdentitiesUpdateOne) SetRefreshTokenEncrypted(v []byte) *UserIdentitiesUpdateOne {
-	_u.mutation.SetRefreshTokenEncrypted(v)
-	return _u
-}
-
-// ClearRefreshTokenEncrypted clears the value of the "refresh_token_encrypted" field.
-func (_u *UserIdentitiesUpdateOne) ClearRefreshTokenEncrypted() *UserIdentitiesUpdateOne {
-	_u.mutation.ClearRefreshTokenEncrypted()
-	return _u
-}
-
 // SetTokenExpiresAt sets the "token_expires_at" field.
 func (_u *UserIdentitiesUpdateOne) SetTokenExpiresAt(v time.Time) *UserIdentitiesUpdateOne {
 	_u.mutation.SetTokenExpiresAt(v)
@@ -514,9 +639,43 @@ func (_u *UserIdentitiesUpdateOne) ClearTokenExpiresAt() *UserIdentitiesUpdateOn
 	return _u
 }
 
+// SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
+func (_u *UserIdentitiesUpdateOne) SetLionUsersID(id int) *UserIdentitiesUpdateOne {
+	_u.mutation.SetLionUsersID(id)
+	return _u
+}
+
+// SetLionUsers sets the "lion_users" edge to the Users entity.
+func (_u *UserIdentitiesUpdateOne) SetLionUsers(v *Users) *UserIdentitiesUpdateOne {
+	return _u.SetLionUsersID(v.ID)
+}
+
+// SetLionAuthProvidersID sets the "lion_auth_providers" edge to the AuthProviders entity by ID.
+func (_u *UserIdentitiesUpdateOne) SetLionAuthProvidersID(id int) *UserIdentitiesUpdateOne {
+	_u.mutation.SetLionAuthProvidersID(id)
+	return _u
+}
+
+// SetLionAuthProviders sets the "lion_auth_providers" edge to the AuthProviders entity.
+func (_u *UserIdentitiesUpdateOne) SetLionAuthProviders(v *AuthProviders) *UserIdentitiesUpdateOne {
+	return _u.SetLionAuthProvidersID(v.ID)
+}
+
 // Mutation returns the UserIdentitiesMutation object of the builder.
 func (_u *UserIdentitiesUpdateOne) Mutation() *UserIdentitiesMutation {
 	return _u.mutation
+}
+
+// ClearLionUsers clears the "lion_users" edge to the Users entity.
+func (_u *UserIdentitiesUpdateOne) ClearLionUsers() *UserIdentitiesUpdateOne {
+	_u.mutation.ClearLionUsers()
+	return _u
+}
+
+// ClearLionAuthProviders clears the "lion_auth_providers" edge to the AuthProviders entity.
+func (_u *UserIdentitiesUpdateOne) ClearLionAuthProviders() *UserIdentitiesUpdateOne {
+	_u.mutation.ClearLionAuthProviders()
+	return _u
 }
 
 // Where appends a list predicates to the UserIdentitiesUpdate builder.
@@ -570,15 +729,21 @@ func (_u *UserIdentitiesUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *UserIdentitiesUpdateOne) check() error {
-	if v, ok := _u.mutation.ProviderName(); ok {
-		if err := useridentities.ProviderNameValidator(v); err != nil {
-			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`lion: validator failed for field "UserIdentities.provider_name": %w`, err)}
+	if v, ok := _u.mutation.UserID(); ok {
+		if err := useridentities.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "UserIdentities.user_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.ProviderUserID(); ok {
 		if err := useridentities.ProviderUserIDValidator(v); err != nil {
 			return &ValidationError{Name: "provider_user_id", err: fmt.Errorf(`lion: validator failed for field "UserIdentities.provider_user_id": %w`, err)}
 		}
+	}
+	if _u.mutation.LionUsersCleared() && len(_u.mutation.LionUsersIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "UserIdentities.lion_users"`)
+	}
+	if _u.mutation.LionAuthProvidersCleared() && len(_u.mutation.LionAuthProvidersIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "UserIdentities.lion_auth_providers"`)
 	}
 	return nil
 }
@@ -615,9 +780,6 @@ func (_u *UserIdentitiesUpdateOne) sqlSave(ctx context.Context) (_node *UserIden
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(useridentities.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.ProviderName(); ok {
-		_spec.SetField(useridentities.FieldProviderName, field.TypeString, value)
-	}
 	if value, ok := _u.mutation.ProviderUserID(); ok {
 		_spec.SetField(useridentities.FieldProviderUserID, field.TypeString, value)
 	}
@@ -636,18 +798,6 @@ func (_u *UserIdentitiesUpdateOne) sqlSave(ctx context.Context) (_node *UserIden
 	if value, ok := _u.mutation.MfaSecretEncrypted(); ok {
 		_spec.SetField(useridentities.FieldMfaSecretEncrypted, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.PasswordChangedAt(); ok {
-		_spec.SetField(useridentities.FieldPasswordChangedAt, field.TypeTime, value)
-	}
-	if _u.mutation.PasswordChangedAtCleared() {
-		_spec.ClearField(useridentities.FieldPasswordChangedAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.PasswordExpiresAt(); ok {
-		_spec.SetField(useridentities.FieldPasswordExpiresAt, field.TypeTime, value)
-	}
-	if _u.mutation.PasswordExpiresAtCleared() {
-		_spec.ClearField(useridentities.FieldPasswordExpiresAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.AccessTokenEncrypted(); ok {
 		_spec.SetField(useridentities.FieldAccessTokenEncrypted, field.TypeBytes, value)
 	}
@@ -660,11 +810,81 @@ func (_u *UserIdentitiesUpdateOne) sqlSave(ctx context.Context) (_node *UserIden
 	if _u.mutation.RefreshTokenEncryptedCleared() {
 		_spec.ClearField(useridentities.FieldRefreshTokenEncrypted, field.TypeBytes)
 	}
+	if value, ok := _u.mutation.PasswordChangedAt(); ok {
+		_spec.SetField(useridentities.FieldPasswordChangedAt, field.TypeTime, value)
+	}
+	if _u.mutation.PasswordChangedAtCleared() {
+		_spec.ClearField(useridentities.FieldPasswordChangedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.PasswordExpiresAt(); ok {
+		_spec.SetField(useridentities.FieldPasswordExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.PasswordExpiresAtCleared() {
+		_spec.ClearField(useridentities.FieldPasswordExpiresAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.TokenExpiresAt(); ok {
 		_spec.SetField(useridentities.FieldTokenExpiresAt, field.TypeTime, value)
 	}
 	if _u.mutation.TokenExpiresAtCleared() {
 		_spec.ClearField(useridentities.FieldTokenExpiresAt, field.TypeTime)
+	}
+	if _u.mutation.LionUsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   useridentities.LionUsersTable,
+			Columns: []string{useridentities.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   useridentities.LionUsersTable,
+			Columns: []string{useridentities.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LionAuthProvidersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   useridentities.LionAuthProvidersTable,
+			Columns: []string{useridentities.LionAuthProvidersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionAuthProvidersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   useridentities.LionAuthProvidersTable,
+			Columns: []string{useridentities.LionAuthProvidersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &UserIdentities{config: _u.config}
 	_spec.Assign = _node.assignValues

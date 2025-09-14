@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/authproviders"
+	"github.com/grpc-kit/pkg/lion/useridentities"
 )
 
 // AuthProvidersCreate is the builder for creating a AuthProviders entity.
@@ -48,20 +49,6 @@ func (_c *AuthProvidersCreate) SetNillableUpdatedAt(v *time.Time) *AuthProviders
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *AuthProvidersCreate) SetDeletedAt(v time.Time) *AuthProvidersCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *AuthProvidersCreate) SetNillableDeletedAt(v *time.Time) *AuthProvidersCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetName sets the "name" field.
 func (_c *AuthProvidersCreate) SetName(v string) *AuthProvidersCreate {
 	_c.mutation.SetName(v)
@@ -69,7 +56,7 @@ func (_c *AuthProvidersCreate) SetName(v string) *AuthProvidersCreate {
 }
 
 // SetType sets the "type" field.
-func (_c *AuthProvidersCreate) SetType(v authproviders.Type) *AuthProvidersCreate {
+func (_c *AuthProvidersCreate) SetType(v int) *AuthProvidersCreate {
 	_c.mutation.SetType(v)
 	return _c
 }
@@ -144,6 +131,21 @@ func (_c *AuthProvidersCreate) SetUserinfoEndpoint(v string) *AuthProvidersCreat
 	return _c
 }
 
+// AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by IDs.
+func (_c *AuthProvidersCreate) AddLionUserIdentityIDs(ids ...int) *AuthProvidersCreate {
+	_c.mutation.AddLionUserIdentityIDs(ids...)
+	return _c
+}
+
+// AddLionUserIdentities adds the "lion_user_identities" edges to the UserIdentities entity.
+func (_c *AuthProvidersCreate) AddLionUserIdentities(v ...*UserIdentities) *AuthProvidersCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionUserIdentityIDs(ids...)
+}
+
 // Mutation returns the AuthProvidersMutation object of the builder.
 func (_c *AuthProvidersCreate) Mutation() *AuthProvidersMutation {
 	return _c.mutation
@@ -215,11 +217,6 @@ func (_c *AuthProvidersCreate) check() error {
 	if _, ok := _c.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "AuthProviders.type"`)}
 	}
-	if v, ok := _c.mutation.GetType(); ok {
-		if err := authproviders.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.type": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.ClientID(); !ok {
 		return &ValidationError{Name: "client_id", err: errors.New(`lion: missing required field "AuthProviders.client_id"`)}
 	}
@@ -281,16 +278,12 @@ func (_c *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSpe
 		_spec.SetField(authproviders.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(authproviders.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
-	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := _c.mutation.GetType(); ok {
-		_spec.SetField(authproviders.FieldType, field.TypeEnum, value)
+		_spec.SetField(authproviders.FieldType, field.TypeInt, value)
 		_node.Type = value
 	}
 	if value, ok := _c.mutation.ClientID(); ok {
@@ -328,6 +321,22 @@ func (_c *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.UserinfoEndpoint(); ok {
 		_spec.SetField(authproviders.FieldUserinfoEndpoint, field.TypeString, value)
 		_node.UserinfoEndpoint = value
+	}
+	if nodes := _c.mutation.LionUserIdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   authproviders.LionUserIdentitiesTable,
+			Columns: []string{authproviders.LionUserIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentities.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

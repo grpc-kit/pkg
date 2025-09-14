@@ -49,16 +49,23 @@ func (_u *CredentialsUpdate) SetNillableName(v *string) *CredentialsUpdate {
 }
 
 // SetType sets the "type" field.
-func (_u *CredentialsUpdate) SetType(v string) *CredentialsUpdate {
+func (_u *CredentialsUpdate) SetType(v int) *CredentialsUpdate {
+	_u.mutation.ResetType()
 	_u.mutation.SetType(v)
 	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_u *CredentialsUpdate) SetNillableType(v *string) *CredentialsUpdate {
+func (_u *CredentialsUpdate) SetNillableType(v *int) *CredentialsUpdate {
 	if v != nil {
 		_u.SetType(*v)
 	}
+	return _u
+}
+
+// AddType adds value to the "type" field.
+func (_u *CredentialsUpdate) AddType(v int) *CredentialsUpdate {
+	_u.mutation.AddType(v)
 	return _u
 }
 
@@ -177,20 +184,7 @@ func (_u *CredentialsUpdate) defaults() {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_u *CredentialsUpdate) check() error {
-	if v, ok := _u.mutation.PublicKey(); ok {
-		if err := credentials.PublicKeyValidator(v); err != nil {
-			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "Credentials.public_key": %w`, err)}
-		}
-	}
-	return nil
-}
-
 func (_u *CredentialsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	if err := _u.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(credentials.Table, credentials.Columns, sqlgraph.NewFieldSpec(credentials.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -206,7 +200,10 @@ func (_u *CredentialsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		_spec.SetField(credentials.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(credentials.FieldType, field.TypeString, value)
+		_spec.SetField(credentials.FieldType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedType(); ok {
+		_spec.AddField(credentials.FieldType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Appid(); ok {
 		_spec.SetField(credentials.FieldAppid, field.TypeString, value)
@@ -270,16 +267,23 @@ func (_u *CredentialsUpdateOne) SetNillableName(v *string) *CredentialsUpdateOne
 }
 
 // SetType sets the "type" field.
-func (_u *CredentialsUpdateOne) SetType(v string) *CredentialsUpdateOne {
+func (_u *CredentialsUpdateOne) SetType(v int) *CredentialsUpdateOne {
+	_u.mutation.ResetType()
 	_u.mutation.SetType(v)
 	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_u *CredentialsUpdateOne) SetNillableType(v *string) *CredentialsUpdateOne {
+func (_u *CredentialsUpdateOne) SetNillableType(v *int) *CredentialsUpdateOne {
 	if v != nil {
 		_u.SetType(*v)
 	}
+	return _u
+}
+
+// AddType adds value to the "type" field.
+func (_u *CredentialsUpdateOne) AddType(v int) *CredentialsUpdateOne {
+	_u.mutation.AddType(v)
 	return _u
 }
 
@@ -411,20 +415,7 @@ func (_u *CredentialsUpdateOne) defaults() {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_u *CredentialsUpdateOne) check() error {
-	if v, ok := _u.mutation.PublicKey(); ok {
-		if err := credentials.PublicKeyValidator(v); err != nil {
-			return &ValidationError{Name: "public_key", err: fmt.Errorf(`lion: validator failed for field "Credentials.public_key": %w`, err)}
-		}
-	}
-	return nil
-}
-
 func (_u *CredentialsUpdateOne) sqlSave(ctx context.Context) (_node *Credentials, err error) {
-	if err := _u.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(credentials.Table, credentials.Columns, sqlgraph.NewFieldSpec(credentials.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -457,7 +448,10 @@ func (_u *CredentialsUpdateOne) sqlSave(ctx context.Context) (_node *Credentials
 		_spec.SetField(credentials.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(credentials.FieldType, field.TypeString, value)
+		_spec.SetField(credentials.FieldType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedType(); ok {
+		_spec.AddField(credentials.FieldType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Appid(); ok {
 		_spec.SetField(credentials.FieldAppid, field.TypeString, value)

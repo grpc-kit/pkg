@@ -1445,21 +1445,44 @@ func DescriptionContainsFold(v string) predicate.Users {
 	return predicate.Users(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// HasLionUsers applies the HasEdge predicate on the "lion_users" edge.
-func HasLionUsers() predicate.Users {
+// HasLionUserRoles applies the HasEdge predicate on the "lion_user_roles" edge.
+func HasLionUserRoles() predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionUsersTable, LionUsersColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionUserRolesTable, LionUserRolesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLionUsersWith applies the HasEdge predicate on the "lion_users" edge with a given conditions (other predicates).
-func HasLionUsersWith(preds ...predicate.UserRoles) predicate.Users {
+// HasLionUserRolesWith applies the HasEdge predicate on the "lion_user_roles" edge with a given conditions (other predicates).
+func HasLionUserRolesWith(preds ...predicate.UserRoles) predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
-		step := newLionUsersStep()
+		step := newLionUserRolesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLionUserIdentities applies the HasEdge predicate on the "lion_user_identities" edge.
+func HasLionUserIdentities() predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionUserIdentitiesTable, LionUserIdentitiesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionUserIdentitiesWith applies the HasEdge predicate on the "lion_user_identities" edge with a given conditions (other predicates).
+func HasLionUserIdentitiesWith(preds ...predicate.UserIdentities) predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		step := newLionUserIdentitiesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

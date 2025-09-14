@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/useridentities"
 )
 
 // AuthProvidersUpdate is the builder for updating AuthProviders entities.
@@ -34,26 +35,6 @@ func (_u *AuthProvidersUpdate) SetUpdatedAt(v time.Time) *AuthProvidersUpdate {
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *AuthProvidersUpdate) SetDeletedAt(v time.Time) *AuthProvidersUpdate {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *AuthProvidersUpdate) SetNillableDeletedAt(v *time.Time) *AuthProvidersUpdate {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *AuthProvidersUpdate) ClearDeletedAt() *AuthProvidersUpdate {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetName sets the "name" field.
 func (_u *AuthProvidersUpdate) SetName(v string) *AuthProvidersUpdate {
 	_u.mutation.SetName(v)
@@ -69,16 +50,23 @@ func (_u *AuthProvidersUpdate) SetNillableName(v *string) *AuthProvidersUpdate {
 }
 
 // SetType sets the "type" field.
-func (_u *AuthProvidersUpdate) SetType(v authproviders.Type) *AuthProvidersUpdate {
+func (_u *AuthProvidersUpdate) SetType(v int) *AuthProvidersUpdate {
+	_u.mutation.ResetType()
 	_u.mutation.SetType(v)
 	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_u *AuthProvidersUpdate) SetNillableType(v *authproviders.Type) *AuthProvidersUpdate {
+func (_u *AuthProvidersUpdate) SetNillableType(v *int) *AuthProvidersUpdate {
 	if v != nil {
 		_u.SetType(*v)
 	}
+	return _u
+}
+
+// AddType adds value to the "type" field.
+func (_u *AuthProvidersUpdate) AddType(v int) *AuthProvidersUpdate {
+	_u.mutation.AddType(v)
 	return _u
 }
 
@@ -200,9 +188,45 @@ func (_u *AuthProvidersUpdate) SetNillableUserinfoEndpoint(v *string) *AuthProvi
 	return _u
 }
 
+// AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by IDs.
+func (_u *AuthProvidersUpdate) AddLionUserIdentityIDs(ids ...int) *AuthProvidersUpdate {
+	_u.mutation.AddLionUserIdentityIDs(ids...)
+	return _u
+}
+
+// AddLionUserIdentities adds the "lion_user_identities" edges to the UserIdentities entity.
+func (_u *AuthProvidersUpdate) AddLionUserIdentities(v ...*UserIdentities) *AuthProvidersUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionUserIdentityIDs(ids...)
+}
+
 // Mutation returns the AuthProvidersMutation object of the builder.
 func (_u *AuthProvidersUpdate) Mutation() *AuthProvidersMutation {
 	return _u.mutation
+}
+
+// ClearLionUserIdentities clears all "lion_user_identities" edges to the UserIdentities entity.
+func (_u *AuthProvidersUpdate) ClearLionUserIdentities() *AuthProvidersUpdate {
+	_u.mutation.ClearLionUserIdentities()
+	return _u
+}
+
+// RemoveLionUserIdentityIDs removes the "lion_user_identities" edge to UserIdentities entities by IDs.
+func (_u *AuthProvidersUpdate) RemoveLionUserIdentityIDs(ids ...int) *AuthProvidersUpdate {
+	_u.mutation.RemoveLionUserIdentityIDs(ids...)
+	return _u
+}
+
+// RemoveLionUserIdentities removes "lion_user_identities" edges to UserIdentities entities.
+func (_u *AuthProvidersUpdate) RemoveLionUserIdentities(v ...*UserIdentities) *AuthProvidersUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionUserIdentityIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -241,20 +265,7 @@ func (_u *AuthProvidersUpdate) defaults() {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_u *AuthProvidersUpdate) check() error {
-	if v, ok := _u.mutation.GetType(); ok {
-		if err := authproviders.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.type": %w`, err)}
-		}
-	}
-	return nil
-}
-
 func (_u *AuthProvidersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
-	if err := _u.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(authproviders.Table, authproviders.Columns, sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -266,17 +277,14 @@ func (_u *AuthProvidersUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(authproviders.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(authproviders.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(authproviders.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(authproviders.FieldType, field.TypeEnum, value)
+		_spec.SetField(authproviders.FieldType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedType(); ok {
+		_spec.AddField(authproviders.FieldType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
@@ -305,6 +313,51 @@ func (_u *AuthProvidersUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if value, ok := _u.mutation.UserinfoEndpoint(); ok {
 		_spec.SetField(authproviders.FieldUserinfoEndpoint, field.TypeString, value)
 	}
+	if _u.mutation.LionUserIdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   authproviders.LionUserIdentitiesTable,
+			Columns: []string{authproviders.LionUserIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentities.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionUserIdentitiesIDs(); len(nodes) > 0 && !_u.mutation.LionUserIdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   authproviders.LionUserIdentitiesTable,
+			Columns: []string{authproviders.LionUserIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentities.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionUserIdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   authproviders.LionUserIdentitiesTable,
+			Columns: []string{authproviders.LionUserIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentities.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{authproviders.Label}
@@ -331,26 +384,6 @@ func (_u *AuthProvidersUpdateOne) SetUpdatedAt(v time.Time) *AuthProvidersUpdate
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *AuthProvidersUpdateOne) SetDeletedAt(v time.Time) *AuthProvidersUpdateOne {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *AuthProvidersUpdateOne) SetNillableDeletedAt(v *time.Time) *AuthProvidersUpdateOne {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *AuthProvidersUpdateOne) ClearDeletedAt() *AuthProvidersUpdateOne {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetName sets the "name" field.
 func (_u *AuthProvidersUpdateOne) SetName(v string) *AuthProvidersUpdateOne {
 	_u.mutation.SetName(v)
@@ -366,16 +399,23 @@ func (_u *AuthProvidersUpdateOne) SetNillableName(v *string) *AuthProvidersUpdat
 }
 
 // SetType sets the "type" field.
-func (_u *AuthProvidersUpdateOne) SetType(v authproviders.Type) *AuthProvidersUpdateOne {
+func (_u *AuthProvidersUpdateOne) SetType(v int) *AuthProvidersUpdateOne {
+	_u.mutation.ResetType()
 	_u.mutation.SetType(v)
 	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_u *AuthProvidersUpdateOne) SetNillableType(v *authproviders.Type) *AuthProvidersUpdateOne {
+func (_u *AuthProvidersUpdateOne) SetNillableType(v *int) *AuthProvidersUpdateOne {
 	if v != nil {
 		_u.SetType(*v)
 	}
+	return _u
+}
+
+// AddType adds value to the "type" field.
+func (_u *AuthProvidersUpdateOne) AddType(v int) *AuthProvidersUpdateOne {
+	_u.mutation.AddType(v)
 	return _u
 }
 
@@ -497,9 +537,45 @@ func (_u *AuthProvidersUpdateOne) SetNillableUserinfoEndpoint(v *string) *AuthPr
 	return _u
 }
 
+// AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by IDs.
+func (_u *AuthProvidersUpdateOne) AddLionUserIdentityIDs(ids ...int) *AuthProvidersUpdateOne {
+	_u.mutation.AddLionUserIdentityIDs(ids...)
+	return _u
+}
+
+// AddLionUserIdentities adds the "lion_user_identities" edges to the UserIdentities entity.
+func (_u *AuthProvidersUpdateOne) AddLionUserIdentities(v ...*UserIdentities) *AuthProvidersUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionUserIdentityIDs(ids...)
+}
+
 // Mutation returns the AuthProvidersMutation object of the builder.
 func (_u *AuthProvidersUpdateOne) Mutation() *AuthProvidersMutation {
 	return _u.mutation
+}
+
+// ClearLionUserIdentities clears all "lion_user_identities" edges to the UserIdentities entity.
+func (_u *AuthProvidersUpdateOne) ClearLionUserIdentities() *AuthProvidersUpdateOne {
+	_u.mutation.ClearLionUserIdentities()
+	return _u
+}
+
+// RemoveLionUserIdentityIDs removes the "lion_user_identities" edge to UserIdentities entities by IDs.
+func (_u *AuthProvidersUpdateOne) RemoveLionUserIdentityIDs(ids ...int) *AuthProvidersUpdateOne {
+	_u.mutation.RemoveLionUserIdentityIDs(ids...)
+	return _u
+}
+
+// RemoveLionUserIdentities removes "lion_user_identities" edges to UserIdentities entities.
+func (_u *AuthProvidersUpdateOne) RemoveLionUserIdentities(v ...*UserIdentities) *AuthProvidersUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionUserIdentityIDs(ids...)
 }
 
 // Where appends a list predicates to the AuthProvidersUpdate builder.
@@ -551,20 +627,7 @@ func (_u *AuthProvidersUpdateOne) defaults() {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_u *AuthProvidersUpdateOne) check() error {
-	if v, ok := _u.mutation.GetType(); ok {
-		if err := authproviders.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.type": %w`, err)}
-		}
-	}
-	return nil
-}
-
 func (_u *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthProviders, err error) {
-	if err := _u.check(); err != nil {
-		return _node, err
-	}
 	_spec := sqlgraph.NewUpdateSpec(authproviders.Table, authproviders.Columns, sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -593,17 +656,14 @@ func (_u *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthProvi
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(authproviders.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(authproviders.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(authproviders.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(authproviders.FieldType, field.TypeEnum, value)
+		_spec.SetField(authproviders.FieldType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedType(); ok {
+		_spec.AddField(authproviders.FieldType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
@@ -631,6 +691,51 @@ func (_u *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthProvi
 	}
 	if value, ok := _u.mutation.UserinfoEndpoint(); ok {
 		_spec.SetField(authproviders.FieldUserinfoEndpoint, field.TypeString, value)
+	}
+	if _u.mutation.LionUserIdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   authproviders.LionUserIdentitiesTable,
+			Columns: []string{authproviders.LionUserIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentities.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionUserIdentitiesIDs(); len(nodes) > 0 && !_u.mutation.LionUserIdentitiesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   authproviders.LionUserIdentitiesTable,
+			Columns: []string{authproviders.LionUserIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentities.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionUserIdentitiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   authproviders.LionUserIdentitiesTable,
+			Columns: []string{authproviders.LionUserIdentitiesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(useridentities.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &AuthProviders{config: _u.config}
 	_spec.Assign = _node.assignValues

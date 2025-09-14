@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -64,14 +65,14 @@ func UpdatedAt(v time.Time) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
-func DeletedAt(v time.Time) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldDeletedAt, v))
-}
-
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldName, v))
+}
+
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldType, v))
 }
 
 // ClientID applies equality check predicate on the "client_id" field. It's identical to ClientIDEQ.
@@ -199,56 +200,6 @@ func UpdatedAtLTE(v time.Time) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
-// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
-func DeletedAtEQ(v time.Time) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldDeletedAt, v))
-}
-
-// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
-func DeletedAtNEQ(v time.Time) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNEQ(FieldDeletedAt, v))
-}
-
-// DeletedAtIn applies the In predicate on the "deleted_at" field.
-func DeletedAtIn(vs ...time.Time) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldIn(FieldDeletedAt, vs...))
-}
-
-// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
-func DeletedAtNotIn(vs ...time.Time) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNotIn(FieldDeletedAt, vs...))
-}
-
-// DeletedAtGT applies the GT predicate on the "deleted_at" field.
-func DeletedAtGT(v time.Time) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGT(FieldDeletedAt, v))
-}
-
-// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
-func DeletedAtGTE(v time.Time) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGTE(FieldDeletedAt, v))
-}
-
-// DeletedAtLT applies the LT predicate on the "deleted_at" field.
-func DeletedAtLT(v time.Time) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLT(FieldDeletedAt, v))
-}
-
-// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
-func DeletedAtLTE(v time.Time) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLTE(FieldDeletedAt, v))
-}
-
-// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
-func DeletedAtIsNil() predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldIsNull(FieldDeletedAt))
-}
-
-// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
-func DeletedAtNotNil() predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNotNull(FieldDeletedAt))
-}
-
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldName, v))
@@ -315,23 +266,43 @@ func NameContainsFold(v string) predicate.AuthProviders {
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v Type) predicate.AuthProviders {
+func TypeEQ(v int) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldType, v))
 }
 
 // TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v Type) predicate.AuthProviders {
+func TypeNEQ(v int) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldNEQ(FieldType, v))
 }
 
 // TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...Type) predicate.AuthProviders {
+func TypeIn(vs ...int) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldIn(FieldType, vs...))
 }
 
 // TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...Type) predicate.AuthProviders {
+func TypeNotIn(vs ...int) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldNotIn(FieldType, vs...))
+}
+
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGT(FieldType, v))
+}
+
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGTE(FieldType, v))
+}
+
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLT(FieldType, v))
+}
+
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLTE(FieldType, v))
 }
 
 // ClientIDEQ applies the EQ predicate on the "client_id" field.
@@ -837,6 +808,29 @@ func UserinfoEndpointEqualFold(v string) predicate.AuthProviders {
 // UserinfoEndpointContainsFold applies the ContainsFold predicate on the "userinfo_endpoint" field.
 func UserinfoEndpointContainsFold(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldContainsFold(FieldUserinfoEndpoint, v))
+}
+
+// HasLionUserIdentities applies the HasEdge predicate on the "lion_user_identities" edge.
+func HasLionUserIdentities() predicate.AuthProviders {
+	return predicate.AuthProviders(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionUserIdentitiesTable, LionUserIdentitiesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionUserIdentitiesWith applies the HasEdge predicate on the "lion_user_identities" edge with a given conditions (other predicates).
+func HasLionUserIdentitiesWith(preds ...predicate.UserIdentities) predicate.AuthProviders {
+	return predicate.AuthProviders(func(s *sql.Selector) {
+		step := newLionUserIdentitiesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

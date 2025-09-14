@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -69,9 +70,9 @@ func UserID(v int) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldEQ(FieldUserID, v))
 }
 
-// ProviderName applies equality check predicate on the "provider_name" field. It's identical to ProviderNameEQ.
-func ProviderName(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldEQ(FieldProviderName, v))
+// ProviderID applies equality check predicate on the "provider_id" field. It's identical to ProviderIDEQ.
+func ProviderID(v int) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldEQ(FieldProviderID, v))
 }
 
 // ProviderUserID applies equality check predicate on the "provider_user_id" field. It's identical to ProviderUserIDEQ.
@@ -99,16 +100,6 @@ func MfaSecretEncrypted(v []byte) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldEQ(FieldMfaSecretEncrypted, v))
 }
 
-// PasswordChangedAt applies equality check predicate on the "password_changed_at" field. It's identical to PasswordChangedAtEQ.
-func PasswordChangedAt(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldEQ(FieldPasswordChangedAt, v))
-}
-
-// PasswordExpiresAt applies equality check predicate on the "password_expires_at" field. It's identical to PasswordExpiresAtEQ.
-func PasswordExpiresAt(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldEQ(FieldPasswordExpiresAt, v))
-}
-
 // AccessTokenEncrypted applies equality check predicate on the "access_token_encrypted" field. It's identical to AccessTokenEncryptedEQ.
 func AccessTokenEncrypted(v []byte) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldEQ(FieldAccessTokenEncrypted, v))
@@ -117,6 +108,16 @@ func AccessTokenEncrypted(v []byte) predicate.UserIdentities {
 // RefreshTokenEncrypted applies equality check predicate on the "refresh_token_encrypted" field. It's identical to RefreshTokenEncryptedEQ.
 func RefreshTokenEncrypted(v []byte) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldEQ(FieldRefreshTokenEncrypted, v))
+}
+
+// PasswordChangedAt applies equality check predicate on the "password_changed_at" field. It's identical to PasswordChangedAtEQ.
+func PasswordChangedAt(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldEQ(FieldPasswordChangedAt, v))
+}
+
+// PasswordExpiresAt applies equality check predicate on the "password_expires_at" field. It's identical to PasswordExpiresAtEQ.
+func PasswordExpiresAt(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldEQ(FieldPasswordExpiresAt, v))
 }
 
 // TokenExpiresAt applies equality check predicate on the "token_expires_at" field. It's identical to TokenExpiresAtEQ.
@@ -224,89 +225,24 @@ func UserIDNotIn(vs ...int) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldNotIn(FieldUserID, vs...))
 }
 
-// UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v int) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldGT(FieldUserID, v))
+// ProviderIDEQ applies the EQ predicate on the "provider_id" field.
+func ProviderIDEQ(v int) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldEQ(FieldProviderID, v))
 }
 
-// UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v int) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldGTE(FieldUserID, v))
+// ProviderIDNEQ applies the NEQ predicate on the "provider_id" field.
+func ProviderIDNEQ(v int) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNEQ(FieldProviderID, v))
 }
 
-// UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v int) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldLT(FieldUserID, v))
+// ProviderIDIn applies the In predicate on the "provider_id" field.
+func ProviderIDIn(vs ...int) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldIn(FieldProviderID, vs...))
 }
 
-// UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v int) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldLTE(FieldUserID, v))
-}
-
-// ProviderNameEQ applies the EQ predicate on the "provider_name" field.
-func ProviderNameEQ(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldEQ(FieldProviderName, v))
-}
-
-// ProviderNameNEQ applies the NEQ predicate on the "provider_name" field.
-func ProviderNameNEQ(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldNEQ(FieldProviderName, v))
-}
-
-// ProviderNameIn applies the In predicate on the "provider_name" field.
-func ProviderNameIn(vs ...string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldIn(FieldProviderName, vs...))
-}
-
-// ProviderNameNotIn applies the NotIn predicate on the "provider_name" field.
-func ProviderNameNotIn(vs ...string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldNotIn(FieldProviderName, vs...))
-}
-
-// ProviderNameGT applies the GT predicate on the "provider_name" field.
-func ProviderNameGT(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldGT(FieldProviderName, v))
-}
-
-// ProviderNameGTE applies the GTE predicate on the "provider_name" field.
-func ProviderNameGTE(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldGTE(FieldProviderName, v))
-}
-
-// ProviderNameLT applies the LT predicate on the "provider_name" field.
-func ProviderNameLT(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldLT(FieldProviderName, v))
-}
-
-// ProviderNameLTE applies the LTE predicate on the "provider_name" field.
-func ProviderNameLTE(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldLTE(FieldProviderName, v))
-}
-
-// ProviderNameContains applies the Contains predicate on the "provider_name" field.
-func ProviderNameContains(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldContains(FieldProviderName, v))
-}
-
-// ProviderNameHasPrefix applies the HasPrefix predicate on the "provider_name" field.
-func ProviderNameHasPrefix(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldHasPrefix(FieldProviderName, v))
-}
-
-// ProviderNameHasSuffix applies the HasSuffix predicate on the "provider_name" field.
-func ProviderNameHasSuffix(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldHasSuffix(FieldProviderName, v))
-}
-
-// ProviderNameEqualFold applies the EqualFold predicate on the "provider_name" field.
-func ProviderNameEqualFold(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldEqualFold(FieldProviderName, v))
-}
-
-// ProviderNameContainsFold applies the ContainsFold predicate on the "provider_name" field.
-func ProviderNameContainsFold(v string) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldContainsFold(FieldProviderName, v))
+// ProviderIDNotIn applies the NotIn predicate on the "provider_id" field.
+func ProviderIDNotIn(vs ...int) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNotIn(FieldProviderID, vs...))
 }
 
 // ProviderUserIDEQ applies the EQ predicate on the "provider_user_id" field.
@@ -564,106 +500,6 @@ func MfaSecretEncryptedLTE(v []byte) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldLTE(FieldMfaSecretEncrypted, v))
 }
 
-// PasswordChangedAtEQ applies the EQ predicate on the "password_changed_at" field.
-func PasswordChangedAtEQ(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldEQ(FieldPasswordChangedAt, v))
-}
-
-// PasswordChangedAtNEQ applies the NEQ predicate on the "password_changed_at" field.
-func PasswordChangedAtNEQ(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldNEQ(FieldPasswordChangedAt, v))
-}
-
-// PasswordChangedAtIn applies the In predicate on the "password_changed_at" field.
-func PasswordChangedAtIn(vs ...time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldIn(FieldPasswordChangedAt, vs...))
-}
-
-// PasswordChangedAtNotIn applies the NotIn predicate on the "password_changed_at" field.
-func PasswordChangedAtNotIn(vs ...time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldNotIn(FieldPasswordChangedAt, vs...))
-}
-
-// PasswordChangedAtGT applies the GT predicate on the "password_changed_at" field.
-func PasswordChangedAtGT(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldGT(FieldPasswordChangedAt, v))
-}
-
-// PasswordChangedAtGTE applies the GTE predicate on the "password_changed_at" field.
-func PasswordChangedAtGTE(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldGTE(FieldPasswordChangedAt, v))
-}
-
-// PasswordChangedAtLT applies the LT predicate on the "password_changed_at" field.
-func PasswordChangedAtLT(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldLT(FieldPasswordChangedAt, v))
-}
-
-// PasswordChangedAtLTE applies the LTE predicate on the "password_changed_at" field.
-func PasswordChangedAtLTE(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldLTE(FieldPasswordChangedAt, v))
-}
-
-// PasswordChangedAtIsNil applies the IsNil predicate on the "password_changed_at" field.
-func PasswordChangedAtIsNil() predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldIsNull(FieldPasswordChangedAt))
-}
-
-// PasswordChangedAtNotNil applies the NotNil predicate on the "password_changed_at" field.
-func PasswordChangedAtNotNil() predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldNotNull(FieldPasswordChangedAt))
-}
-
-// PasswordExpiresAtEQ applies the EQ predicate on the "password_expires_at" field.
-func PasswordExpiresAtEQ(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldEQ(FieldPasswordExpiresAt, v))
-}
-
-// PasswordExpiresAtNEQ applies the NEQ predicate on the "password_expires_at" field.
-func PasswordExpiresAtNEQ(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldNEQ(FieldPasswordExpiresAt, v))
-}
-
-// PasswordExpiresAtIn applies the In predicate on the "password_expires_at" field.
-func PasswordExpiresAtIn(vs ...time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldIn(FieldPasswordExpiresAt, vs...))
-}
-
-// PasswordExpiresAtNotIn applies the NotIn predicate on the "password_expires_at" field.
-func PasswordExpiresAtNotIn(vs ...time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldNotIn(FieldPasswordExpiresAt, vs...))
-}
-
-// PasswordExpiresAtGT applies the GT predicate on the "password_expires_at" field.
-func PasswordExpiresAtGT(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldGT(FieldPasswordExpiresAt, v))
-}
-
-// PasswordExpiresAtGTE applies the GTE predicate on the "password_expires_at" field.
-func PasswordExpiresAtGTE(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldGTE(FieldPasswordExpiresAt, v))
-}
-
-// PasswordExpiresAtLT applies the LT predicate on the "password_expires_at" field.
-func PasswordExpiresAtLT(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldLT(FieldPasswordExpiresAt, v))
-}
-
-// PasswordExpiresAtLTE applies the LTE predicate on the "password_expires_at" field.
-func PasswordExpiresAtLTE(v time.Time) predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldLTE(FieldPasswordExpiresAt, v))
-}
-
-// PasswordExpiresAtIsNil applies the IsNil predicate on the "password_expires_at" field.
-func PasswordExpiresAtIsNil() predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldIsNull(FieldPasswordExpiresAt))
-}
-
-// PasswordExpiresAtNotNil applies the NotNil predicate on the "password_expires_at" field.
-func PasswordExpiresAtNotNil() predicate.UserIdentities {
-	return predicate.UserIdentities(sql.FieldNotNull(FieldPasswordExpiresAt))
-}
-
 // AccessTokenEncryptedEQ applies the EQ predicate on the "access_token_encrypted" field.
 func AccessTokenEncryptedEQ(v []byte) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldEQ(FieldAccessTokenEncrypted, v))
@@ -764,6 +600,106 @@ func RefreshTokenEncryptedNotNil() predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldNotNull(FieldRefreshTokenEncrypted))
 }
 
+// PasswordChangedAtEQ applies the EQ predicate on the "password_changed_at" field.
+func PasswordChangedAtEQ(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldEQ(FieldPasswordChangedAt, v))
+}
+
+// PasswordChangedAtNEQ applies the NEQ predicate on the "password_changed_at" field.
+func PasswordChangedAtNEQ(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNEQ(FieldPasswordChangedAt, v))
+}
+
+// PasswordChangedAtIn applies the In predicate on the "password_changed_at" field.
+func PasswordChangedAtIn(vs ...time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldIn(FieldPasswordChangedAt, vs...))
+}
+
+// PasswordChangedAtNotIn applies the NotIn predicate on the "password_changed_at" field.
+func PasswordChangedAtNotIn(vs ...time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNotIn(FieldPasswordChangedAt, vs...))
+}
+
+// PasswordChangedAtGT applies the GT predicate on the "password_changed_at" field.
+func PasswordChangedAtGT(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldGT(FieldPasswordChangedAt, v))
+}
+
+// PasswordChangedAtGTE applies the GTE predicate on the "password_changed_at" field.
+func PasswordChangedAtGTE(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldGTE(FieldPasswordChangedAt, v))
+}
+
+// PasswordChangedAtLT applies the LT predicate on the "password_changed_at" field.
+func PasswordChangedAtLT(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldLT(FieldPasswordChangedAt, v))
+}
+
+// PasswordChangedAtLTE applies the LTE predicate on the "password_changed_at" field.
+func PasswordChangedAtLTE(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldLTE(FieldPasswordChangedAt, v))
+}
+
+// PasswordChangedAtIsNil applies the IsNil predicate on the "password_changed_at" field.
+func PasswordChangedAtIsNil() predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldIsNull(FieldPasswordChangedAt))
+}
+
+// PasswordChangedAtNotNil applies the NotNil predicate on the "password_changed_at" field.
+func PasswordChangedAtNotNil() predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNotNull(FieldPasswordChangedAt))
+}
+
+// PasswordExpiresAtEQ applies the EQ predicate on the "password_expires_at" field.
+func PasswordExpiresAtEQ(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldEQ(FieldPasswordExpiresAt, v))
+}
+
+// PasswordExpiresAtNEQ applies the NEQ predicate on the "password_expires_at" field.
+func PasswordExpiresAtNEQ(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNEQ(FieldPasswordExpiresAt, v))
+}
+
+// PasswordExpiresAtIn applies the In predicate on the "password_expires_at" field.
+func PasswordExpiresAtIn(vs ...time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldIn(FieldPasswordExpiresAt, vs...))
+}
+
+// PasswordExpiresAtNotIn applies the NotIn predicate on the "password_expires_at" field.
+func PasswordExpiresAtNotIn(vs ...time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNotIn(FieldPasswordExpiresAt, vs...))
+}
+
+// PasswordExpiresAtGT applies the GT predicate on the "password_expires_at" field.
+func PasswordExpiresAtGT(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldGT(FieldPasswordExpiresAt, v))
+}
+
+// PasswordExpiresAtGTE applies the GTE predicate on the "password_expires_at" field.
+func PasswordExpiresAtGTE(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldGTE(FieldPasswordExpiresAt, v))
+}
+
+// PasswordExpiresAtLT applies the LT predicate on the "password_expires_at" field.
+func PasswordExpiresAtLT(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldLT(FieldPasswordExpiresAt, v))
+}
+
+// PasswordExpiresAtLTE applies the LTE predicate on the "password_expires_at" field.
+func PasswordExpiresAtLTE(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldLTE(FieldPasswordExpiresAt, v))
+}
+
+// PasswordExpiresAtIsNil applies the IsNil predicate on the "password_expires_at" field.
+func PasswordExpiresAtIsNil() predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldIsNull(FieldPasswordExpiresAt))
+}
+
+// PasswordExpiresAtNotNil applies the NotNil predicate on the "password_expires_at" field.
+func PasswordExpiresAtNotNil() predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNotNull(FieldPasswordExpiresAt))
+}
+
 // TokenExpiresAtEQ applies the EQ predicate on the "token_expires_at" field.
 func TokenExpiresAtEQ(v time.Time) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldEQ(FieldTokenExpiresAt, v))
@@ -812,6 +748,52 @@ func TokenExpiresAtIsNil() predicate.UserIdentities {
 // TokenExpiresAtNotNil applies the NotNil predicate on the "token_expires_at" field.
 func TokenExpiresAtNotNil() predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldNotNull(FieldTokenExpiresAt))
+}
+
+// HasLionUsers applies the HasEdge predicate on the "lion_users" edge.
+func HasLionUsers() predicate.UserIdentities {
+	return predicate.UserIdentities(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionUsersTable, LionUsersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionUsersWith applies the HasEdge predicate on the "lion_users" edge with a given conditions (other predicates).
+func HasLionUsersWith(preds ...predicate.Users) predicate.UserIdentities {
+	return predicate.UserIdentities(func(s *sql.Selector) {
+		step := newLionUsersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLionAuthProviders applies the HasEdge predicate on the "lion_auth_providers" edge.
+func HasLionAuthProviders() predicate.UserIdentities {
+	return predicate.UserIdentities(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionAuthProvidersTable, LionAuthProvidersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionAuthProvidersWith applies the HasEdge predicate on the "lion_auth_providers" edge with a given conditions (other predicates).
+func HasLionAuthProvidersWith(preds ...predicate.AuthProviders) predicate.UserIdentities {
+	return predicate.UserIdentities(func(s *sql.Selector) {
+		step := newLionAuthProvidersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

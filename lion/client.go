@@ -455,6 +455,22 @@ func (c *AuthProvidersClient) GetX(ctx context.Context, id int) *AuthProviders {
 	return obj
 }
 
+// QueryLionUserIdentities queries the lion_user_identities edge of a AuthProviders.
+func (c *AuthProvidersClient) QueryLionUserIdentities(_m *AuthProviders) *UserIdentitiesQuery {
+	query := (&UserIdentitiesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(authproviders.Table, authproviders.FieldID, id),
+			sqlgraph.To(useridentities.Table, useridentities.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, authproviders.LionUserIdentitiesTable, authproviders.LionUserIdentitiesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *AuthProvidersClient) Hooks() []Hook {
 	return c.hooks.AuthProviders
@@ -2509,6 +2525,38 @@ func (c *UserIdentitiesClient) GetX(ctx context.Context, id int) *UserIdentities
 	return obj
 }
 
+// QueryLionUsers queries the lion_users edge of a UserIdentities.
+func (c *UserIdentitiesClient) QueryLionUsers(_m *UserIdentities) *UsersQuery {
+	query := (&UsersClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(useridentities.Table, useridentities.FieldID, id),
+			sqlgraph.To(users.Table, users.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, useridentities.LionUsersTable, useridentities.LionUsersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionAuthProviders queries the lion_auth_providers edge of a UserIdentities.
+func (c *UserIdentitiesClient) QueryLionAuthProviders(_m *UserIdentities) *AuthProvidersQuery {
+	query := (&AuthProvidersClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(useridentities.Table, useridentities.FieldID, id),
+			sqlgraph.To(authproviders.Table, authproviders.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, useridentities.LionAuthProvidersTable, useridentities.LionAuthProvidersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserIdentitiesClient) Hooks() []Hook {
 	return c.hooks.UserIdentities
@@ -2940,15 +2988,31 @@ func (c *UsersClient) GetX(ctx context.Context, id int) *Users {
 	return obj
 }
 
-// QueryLionUsers queries the lion_users edge of a Users.
-func (c *UsersClient) QueryLionUsers(_m *Users) *UserRolesQuery {
+// QueryLionUserRoles queries the lion_user_roles edge of a Users.
+func (c *UsersClient) QueryLionUserRoles(_m *Users) *UserRolesQuery {
 	query := (&UserRolesClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(users.Table, users.FieldID, id),
 			sqlgraph.To(userroles.Table, userroles.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, users.LionUsersTable, users.LionUsersColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, users.LionUserRolesTable, users.LionUserRolesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionUserIdentities queries the lion_user_identities edge of a Users.
+func (c *UsersClient) QueryLionUserIdentities(_m *Users) *UserIdentitiesQuery {
+	query := (&UserIdentitiesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(users.Table, users.FieldID, id),
+			sqlgraph.To(useridentities.Table, useridentities.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, users.LionUserIdentitiesTable, users.LionUserIdentitiesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

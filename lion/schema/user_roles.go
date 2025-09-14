@@ -33,7 +33,7 @@ func (UserRoles) Edges() []ent.Edge {
 	return []ent.Edge{
 		// 每条 RoleMenu 记录必须属于一个 Menu
 		edge.From("lion_users", Users.Type).
-			Ref("lion_users").
+			Ref("lion_user_roles").
 			Field("user_id").
 			Unique().
 			Required(),

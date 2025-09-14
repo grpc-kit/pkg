@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -18,8 +19,7 @@ func (AuthProviders) Fields() []ent.Field {
 		field.String("name").
 			Unique().
 			Comment("认证提供方名称"),
-		field.Enum("type").
-			Values("LOCAL", "LDAP", "OIDC", "OAUTH2", "GITHUB", "GOOGLE", "WECHAT").
+		field.Int("type").
 			Comment("支持的认证提供方"),
 		field.String("client_id").
 			Default(""),
@@ -49,13 +49,15 @@ func (AuthProviders) Fields() []ent.Field {
 
 // Edges of the table.
 func (AuthProviders) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("lion_user_identities", UserIdentities.Type),
+	}
 }
 
 // Mixin of the table.
 func (AuthProviders) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixin{},
+		TimeMixinWithoutDeleted{},
 	}
 }
 

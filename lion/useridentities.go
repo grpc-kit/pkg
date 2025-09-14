@@ -9,7 +9,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // UserIdentities is the model entity for the UserIdentities schema.
@@ -23,29 +25,65 @@ type UserIdentities struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// 用户ID，关联 lion_users 表
 	UserID int `json:"user_id,omitempty"`
-	// 认证提供分，来自 lion_oauth_providers 表 name 属性
-	ProviderName string `json:"provider_name,omitempty"`
+	// 认证提供方，来自 lion_oauth_providers 表 id 属性
+	ProviderID int `json:"provider_id,omitempty"`
 	// 第三方平台用户唯一标识，如微信的 OpenID
 	ProviderUserID string `json:"provider_user_id,omitempty"`
 	// 第三方平台统一标识，如微信的 UnionID
 	ProviderUnionID string `json:"provider_union_id,omitempty"`
-	// 哈希后的密码
-	PasswordHash string `json:"password_hash,omitempty"`
+	// 使用 bcrypt 哈希后的密码
+	PasswordHash string `json:"-"`
 	// 是否启用 MFA
 	MfaEnabled bool `json:"mfa_enabled,omitempty"`
 	// 加密后的 MFA 密钥
 	MfaSecretEncrypted []byte `json:"-"`
-	// 密码最后一次更改时间
-	PasswordChangedAt *time.Time `json:"password_changed_at,omitempty"`
-	// 密码过期时间
-	PasswordExpiresAt *time.Time `json:"password_expires_at,omitempty"`
 	// 加密后的访问令牌
 	AccessTokenEncrypted []byte `json:"-"`
 	// 加密后的刷新令牌
 	RefreshTokenEncrypted []byte `json:"-"`
+	// 密码最后一次更改时间
+	PasswordChangedAt *time.Time `json:"password_changed_at,omitempty"`
+	// 密码过期时间
+	PasswordExpiresAt *time.Time `json:"password_expires_at,omitempty"`
 	// 访问令牌的过期时间
 	TokenExpiresAt time.Time `json:"token_expires_at,omitempty"`
-	selectValues   sql.SelectValues
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserIdentitiesQuery when eager-loading is set.
+	Edges        UserIdentitiesEdges `json:"edges"`
+	selectValues sql.SelectValues
+}
+
+// UserIdentitiesEdges holds the relations/edges for other nodes in the graph.
+type UserIdentitiesEdges struct {
+	// LionUsers holds the value of the lion_users edge.
+	LionUsers *Users `json:"lion_users,omitempty"`
+	// LionAuthProviders holds the value of the lion_auth_providers edge.
+	LionAuthProviders *AuthProviders `json:"lion_auth_providers,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// LionUsersOrErr returns the LionUsers value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserIdentitiesEdges) LionUsersOrErr() (*Users, error) {
+	if e.LionUsers != nil {
+		return e.LionUsers, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: users.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_users"}
+}
+
+// LionAuthProvidersOrErr returns the LionAuthProviders value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserIdentitiesEdges) LionAuthProvidersOrErr() (*AuthProviders, error) {
+	if e.LionAuthProviders != nil {
+		return e.LionAuthProviders, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: authproviders.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_auth_providers"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -57,9 +95,9 @@ func (*UserIdentities) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case useridentities.FieldMfaEnabled:
 			values[i] = new(sql.NullBool)
-		case useridentities.FieldID, useridentities.FieldUserID:
+		case useridentities.FieldID, useridentities.FieldUserID, useridentities.FieldProviderID:
 			values[i] = new(sql.NullInt64)
-		case useridentities.FieldProviderName, useridentities.FieldProviderUserID, useridentities.FieldProviderUnionID, useridentities.FieldPasswordHash:
+		case useridentities.FieldProviderUserID, useridentities.FieldProviderUnionID, useridentities.FieldPasswordHash:
 			values[i] = new(sql.NullString)
 		case useridentities.FieldCreatedAt, useridentities.FieldUpdatedAt, useridentities.FieldPasswordChangedAt, useridentities.FieldPasswordExpiresAt, useridentities.FieldTokenExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -102,11 +140,11 @@ func (_m *UserIdentities) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UserID = int(value.Int64)
 			}
-		case useridentities.FieldProviderName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field provider_name", values[i])
+		case useridentities.FieldProviderID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_id", values[i])
 			} else if value.Valid {
-				_m.ProviderName = value.String
+				_m.ProviderID = int(value.Int64)
 			}
 		case useridentities.FieldProviderUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -138,6 +176,18 @@ func (_m *UserIdentities) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.MfaSecretEncrypted = *value
 			}
+		case useridentities.FieldAccessTokenEncrypted:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field access_token_encrypted", values[i])
+			} else if value != nil {
+				_m.AccessTokenEncrypted = *value
+			}
+		case useridentities.FieldRefreshTokenEncrypted:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field refresh_token_encrypted", values[i])
+			} else if value != nil {
+				_m.RefreshTokenEncrypted = *value
+			}
 		case useridentities.FieldPasswordChangedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field password_changed_at", values[i])
@@ -151,18 +201,6 @@ func (_m *UserIdentities) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.PasswordExpiresAt = new(time.Time)
 				*_m.PasswordExpiresAt = value.Time
-			}
-		case useridentities.FieldAccessTokenEncrypted:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field access_token_encrypted", values[i])
-			} else if value != nil {
-				_m.AccessTokenEncrypted = *value
-			}
-		case useridentities.FieldRefreshTokenEncrypted:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field refresh_token_encrypted", values[i])
-			} else if value != nil {
-				_m.RefreshTokenEncrypted = *value
 			}
 		case useridentities.FieldTokenExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -181,6 +219,16 @@ func (_m *UserIdentities) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *UserIdentities) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionUsers queries the "lion_users" edge of the UserIdentities entity.
+func (_m *UserIdentities) QueryLionUsers() *UsersQuery {
+	return NewUserIdentitiesClient(_m.config).QueryLionUsers(_m)
+}
+
+// QueryLionAuthProviders queries the "lion_auth_providers" edge of the UserIdentities entity.
+func (_m *UserIdentities) QueryLionAuthProviders() *AuthProvidersQuery {
+	return NewUserIdentitiesClient(_m.config).QueryLionAuthProviders(_m)
 }
 
 // Update returns a builder for updating this UserIdentities.
@@ -215,8 +263,8 @@ func (_m *UserIdentities) String() string {
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
-	builder.WriteString("provider_name=")
-	builder.WriteString(_m.ProviderName)
+	builder.WriteString("provider_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProviderID))
 	builder.WriteString(", ")
 	builder.WriteString("provider_user_id=")
 	builder.WriteString(_m.ProviderUserID)
@@ -224,13 +272,16 @@ func (_m *UserIdentities) String() string {
 	builder.WriteString("provider_union_id=")
 	builder.WriteString(_m.ProviderUnionID)
 	builder.WriteString(", ")
-	builder.WriteString("password_hash=")
-	builder.WriteString(_m.PasswordHash)
+	builder.WriteString("password_hash=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("mfa_enabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MfaEnabled))
 	builder.WriteString(", ")
 	builder.WriteString("mfa_secret_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("access_token_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("refresh_token_encrypted=<sensitive>")
 	builder.WriteString(", ")
 	if v := _m.PasswordChangedAt; v != nil {
 		builder.WriteString("password_changed_at=")
@@ -241,10 +292,6 @@ func (_m *UserIdentities) String() string {
 		builder.WriteString("password_expires_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
-	builder.WriteString(", ")
-	builder.WriteString("access_token_encrypted=<sensitive>")
-	builder.WriteString(", ")
-	builder.WriteString("refresh_token_encrypted=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("token_expires_at=")
 	builder.WriteString(_m.TokenExpiresAt.Format(time.ANSIC))

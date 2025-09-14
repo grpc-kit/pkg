@@ -71,8 +71,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultAppkeyEncrypted holds the default value on creation for the "appkey_encrypted" field.
 	DefaultAppkeyEncrypted []byte
-	// PublicKeyValidator is a validator for the "public_key" field. It is called by the builders before save.
-	PublicKeyValidator func(string) error
+	// DefaultPublicKey holds the default value on creation for the "public_key" field.
+	DefaultPublicKey string
 	// DefaultPrivateKeyEncrypted holds the default value on creation for the "private_key_encrypted" field.
 	DefaultPrivateKeyEncrypted []byte
 )

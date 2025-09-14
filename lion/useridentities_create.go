@@ -10,7 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // UserIdentitiesCreate is the builder for creating a UserIdentities entity.
@@ -54,9 +56,9 @@ func (_c *UserIdentitiesCreate) SetUserID(v int) *UserIdentitiesCreate {
 	return _c
 }
 
-// SetProviderName sets the "provider_name" field.
-func (_c *UserIdentitiesCreate) SetProviderName(v string) *UserIdentitiesCreate {
-	_c.mutation.SetProviderName(v)
+// SetProviderID sets the "provider_id" field.
+func (_c *UserIdentitiesCreate) SetProviderID(v int) *UserIdentitiesCreate {
+	_c.mutation.SetProviderID(v)
 	return _c
 }
 
@@ -114,6 +116,18 @@ func (_c *UserIdentitiesCreate) SetMfaSecretEncrypted(v []byte) *UserIdentitiesC
 	return _c
 }
 
+// SetAccessTokenEncrypted sets the "access_token_encrypted" field.
+func (_c *UserIdentitiesCreate) SetAccessTokenEncrypted(v []byte) *UserIdentitiesCreate {
+	_c.mutation.SetAccessTokenEncrypted(v)
+	return _c
+}
+
+// SetRefreshTokenEncrypted sets the "refresh_token_encrypted" field.
+func (_c *UserIdentitiesCreate) SetRefreshTokenEncrypted(v []byte) *UserIdentitiesCreate {
+	_c.mutation.SetRefreshTokenEncrypted(v)
+	return _c
+}
+
 // SetPasswordChangedAt sets the "password_changed_at" field.
 func (_c *UserIdentitiesCreate) SetPasswordChangedAt(v time.Time) *UserIdentitiesCreate {
 	_c.mutation.SetPasswordChangedAt(v)
@@ -142,18 +156,6 @@ func (_c *UserIdentitiesCreate) SetNillablePasswordExpiresAt(v *time.Time) *User
 	return _c
 }
 
-// SetAccessTokenEncrypted sets the "access_token_encrypted" field.
-func (_c *UserIdentitiesCreate) SetAccessTokenEncrypted(v []byte) *UserIdentitiesCreate {
-	_c.mutation.SetAccessTokenEncrypted(v)
-	return _c
-}
-
-// SetRefreshTokenEncrypted sets the "refresh_token_encrypted" field.
-func (_c *UserIdentitiesCreate) SetRefreshTokenEncrypted(v []byte) *UserIdentitiesCreate {
-	_c.mutation.SetRefreshTokenEncrypted(v)
-	return _c
-}
-
 // SetTokenExpiresAt sets the "token_expires_at" field.
 func (_c *UserIdentitiesCreate) SetTokenExpiresAt(v time.Time) *UserIdentitiesCreate {
 	_c.mutation.SetTokenExpiresAt(v)
@@ -166,6 +168,28 @@ func (_c *UserIdentitiesCreate) SetNillableTokenExpiresAt(v *time.Time) *UserIde
 		_c.SetTokenExpiresAt(*v)
 	}
 	return _c
+}
+
+// SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
+func (_c *UserIdentitiesCreate) SetLionUsersID(id int) *UserIdentitiesCreate {
+	_c.mutation.SetLionUsersID(id)
+	return _c
+}
+
+// SetLionUsers sets the "lion_users" edge to the Users entity.
+func (_c *UserIdentitiesCreate) SetLionUsers(v *Users) *UserIdentitiesCreate {
+	return _c.SetLionUsersID(v.ID)
+}
+
+// SetLionAuthProvidersID sets the "lion_auth_providers" edge to the AuthProviders entity by ID.
+func (_c *UserIdentitiesCreate) SetLionAuthProvidersID(id int) *UserIdentitiesCreate {
+	_c.mutation.SetLionAuthProvidersID(id)
+	return _c
+}
+
+// SetLionAuthProviders sets the "lion_auth_providers" edge to the AuthProviders entity.
+func (_c *UserIdentitiesCreate) SetLionAuthProviders(v *AuthProviders) *UserIdentitiesCreate {
+	return _c.SetLionAuthProvidersID(v.ID)
 }
 
 // Mutation returns the UserIdentitiesMutation object of the builder.
@@ -241,13 +265,8 @@ func (_c *UserIdentitiesCreate) check() error {
 			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "UserIdentities.user_id": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.ProviderName(); !ok {
-		return &ValidationError{Name: "provider_name", err: errors.New(`lion: missing required field "UserIdentities.provider_name"`)}
-	}
-	if v, ok := _c.mutation.ProviderName(); ok {
-		if err := useridentities.ProviderNameValidator(v); err != nil {
-			return &ValidationError{Name: "provider_name", err: fmt.Errorf(`lion: validator failed for field "UserIdentities.provider_name": %w`, err)}
-		}
+	if _, ok := _c.mutation.ProviderID(); !ok {
+		return &ValidationError{Name: "provider_id", err: errors.New(`lion: missing required field "UserIdentities.provider_id"`)}
 	}
 	if _, ok := _c.mutation.ProviderUserID(); !ok {
 		return &ValidationError{Name: "provider_user_id", err: errors.New(`lion: missing required field "UserIdentities.provider_user_id"`)}
@@ -265,6 +284,12 @@ func (_c *UserIdentitiesCreate) check() error {
 	}
 	if _, ok := _c.mutation.MfaSecretEncrypted(); !ok {
 		return &ValidationError{Name: "mfa_secret_encrypted", err: errors.New(`lion: missing required field "UserIdentities.mfa_secret_encrypted"`)}
+	}
+	if len(_c.mutation.LionUsersIDs()) == 0 {
+		return &ValidationError{Name: "lion_users", err: errors.New(`lion: missing required edge "UserIdentities.lion_users"`)}
+	}
+	if len(_c.mutation.LionAuthProvidersIDs()) == 0 {
+		return &ValidationError{Name: "lion_auth_providers", err: errors.New(`lion: missing required edge "UserIdentities.lion_auth_providers"`)}
 	}
 	return nil
 }
@@ -300,14 +325,6 @@ func (_c *UserIdentitiesCreate) createSpec() (*UserIdentities, *sqlgraph.CreateS
 		_spec.SetField(useridentities.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(useridentities.FieldUserID, field.TypeInt, value)
-		_node.UserID = value
-	}
-	if value, ok := _c.mutation.ProviderName(); ok {
-		_spec.SetField(useridentities.FieldProviderName, field.TypeString, value)
-		_node.ProviderName = value
-	}
 	if value, ok := _c.mutation.ProviderUserID(); ok {
 		_spec.SetField(useridentities.FieldProviderUserID, field.TypeString, value)
 		_node.ProviderUserID = value
@@ -328,14 +345,6 @@ func (_c *UserIdentitiesCreate) createSpec() (*UserIdentities, *sqlgraph.CreateS
 		_spec.SetField(useridentities.FieldMfaSecretEncrypted, field.TypeBytes, value)
 		_node.MfaSecretEncrypted = value
 	}
-	if value, ok := _c.mutation.PasswordChangedAt(); ok {
-		_spec.SetField(useridentities.FieldPasswordChangedAt, field.TypeTime, value)
-		_node.PasswordChangedAt = &value
-	}
-	if value, ok := _c.mutation.PasswordExpiresAt(); ok {
-		_spec.SetField(useridentities.FieldPasswordExpiresAt, field.TypeTime, value)
-		_node.PasswordExpiresAt = &value
-	}
 	if value, ok := _c.mutation.AccessTokenEncrypted(); ok {
 		_spec.SetField(useridentities.FieldAccessTokenEncrypted, field.TypeBytes, value)
 		_node.AccessTokenEncrypted = value
@@ -344,9 +353,51 @@ func (_c *UserIdentitiesCreate) createSpec() (*UserIdentities, *sqlgraph.CreateS
 		_spec.SetField(useridentities.FieldRefreshTokenEncrypted, field.TypeBytes, value)
 		_node.RefreshTokenEncrypted = value
 	}
+	if value, ok := _c.mutation.PasswordChangedAt(); ok {
+		_spec.SetField(useridentities.FieldPasswordChangedAt, field.TypeTime, value)
+		_node.PasswordChangedAt = &value
+	}
+	if value, ok := _c.mutation.PasswordExpiresAt(); ok {
+		_spec.SetField(useridentities.FieldPasswordExpiresAt, field.TypeTime, value)
+		_node.PasswordExpiresAt = &value
+	}
 	if value, ok := _c.mutation.TokenExpiresAt(); ok {
 		_spec.SetField(useridentities.FieldTokenExpiresAt, field.TypeTime, value)
 		_node.TokenExpiresAt = value
+	}
+	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   useridentities.LionUsersTable,
+			Columns: []string{useridentities.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionAuthProvidersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   useridentities.LionAuthProvidersTable,
+			Columns: []string{useridentities.LionAuthProvidersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authproviders.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ProviderID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
