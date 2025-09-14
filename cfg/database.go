@@ -138,7 +138,9 @@ func (c *LocalConfig) GetAdminDatabaseLion() (*lion.Client, error) {
 	}
 
 	db := lion.NewClient(lion.Driver(driver))
-	db.Schema.Create(context.TODO())
+	if err = db.Schema.Create(context.TODO()); err != nil {
+		c.logger.Warnf("lion migrate err: %v", err)
+	}
 
 	return db, nil
 }
