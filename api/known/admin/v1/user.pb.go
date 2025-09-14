@@ -454,6 +454,72 @@ func (x *GetUserRequest) GetUsername() string {
 	return ""
 }
 
+type CreateUserIdentityRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// ID 用户 ID，全局唯一标识
+	Id int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// 用户名，系统登录凭证，通常唯一
+	Username string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	// PasswordHash 用户密码在本地使用 sha256 哈希结果
+	PasswordHash string `protobuf:"bytes,3,opt,name=password_hash,json=passwordHash,proto3" json:"password_hash,omitempty"`
+}
+
+func (x *CreateUserIdentityRequest) Reset() {
+	*x = CreateUserIdentityRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_user_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateUserIdentityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateUserIdentityRequest) ProtoMessage() {}
+
+func (x *CreateUserIdentityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_user_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateUserIdentityRequest.ProtoReflect.Descriptor instead.
+func (*CreateUserIdentityRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_user_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CreateUserIdentityRequest) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *CreateUserIdentityRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *CreateUserIdentityRequest) GetPasswordHash() string {
+	if x != nil {
+		return x.PasswordHash
+	}
+	return ""
+}
+
 var File_known_admin_v1_user_proto protoreflect.FileDescriptor
 
 var file_known_admin_v1_user_proto_rawDesc = []byte{
@@ -515,11 +581,18 @@ var file_known_admin_v1_user_proto_rawDesc = []byte{
 	0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73,
 	0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73,
-	0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
-	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b,
-	0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x6c, 0x0a, 0x19, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x55, 0x73, 0x65, 0x72, 0x49, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12,
+	0x23, 0x0a, 0x0d, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x5f, 0x68, 0x61, 0x73, 0x68,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64,
+	0x48, 0x61, 0x73, 0x68, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63,
+	0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f,
+	0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f,
+	0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -535,23 +608,24 @@ func file_known_admin_v1_user_proto_rawDescGZIP() []byte {
 }
 
 var file_known_admin_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_known_admin_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_known_admin_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_known_admin_v1_user_proto_goTypes = []interface{}{
-	(ListUsersRequest_UserView)(0), // 0: grpc_kit.api.known.admin.v1.ListUsersRequest.UserView
-	(*ListUsersRequest)(nil),       // 1: grpc_kit.api.known.admin.v1.ListUsersRequest
-	(*ListUsersResponse)(nil),      // 2: grpc_kit.api.known.admin.v1.ListUsersResponse
-	(*CreateUserRequest)(nil),      // 3: grpc_kit.api.known.admin.v1.CreateUserRequest
-	(*UpdateUserRequest)(nil),      // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest
-	(*GetUserRequest)(nil),         // 5: grpc_kit.api.known.admin.v1.GetUserRequest
-	(*User)(nil),                   // 6: grpc_kit.api.known.admin.v1.User
-	(*fieldmaskpb.FieldMask)(nil),  // 7: google.protobuf.FieldMask
+	(ListUsersRequest_UserView)(0),    // 0: grpc_kit.api.known.admin.v1.ListUsersRequest.UserView
+	(*ListUsersRequest)(nil),          // 1: grpc_kit.api.known.admin.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),         // 2: grpc_kit.api.known.admin.v1.ListUsersResponse
+	(*CreateUserRequest)(nil),         // 3: grpc_kit.api.known.admin.v1.CreateUserRequest
+	(*UpdateUserRequest)(nil),         // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest
+	(*GetUserRequest)(nil),            // 5: grpc_kit.api.known.admin.v1.GetUserRequest
+	(*CreateUserIdentityRequest)(nil), // 6: grpc_kit.api.known.admin.v1.CreateUserIdentityRequest
+	(*User)(nil),                      // 7: grpc_kit.api.known.admin.v1.User
+	(*fieldmaskpb.FieldMask)(nil),     // 8: google.protobuf.FieldMask
 }
 var file_known_admin_v1_user_proto_depIdxs = []int32{
 	0, // 0: grpc_kit.api.known.admin.v1.ListUsersRequest.view:type_name -> grpc_kit.api.known.admin.v1.ListUsersRequest.UserView
-	6, // 1: grpc_kit.api.known.admin.v1.ListUsersResponse.users:type_name -> grpc_kit.api.known.admin.v1.User
-	6, // 2: grpc_kit.api.known.admin.v1.CreateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
-	6, // 3: grpc_kit.api.known.admin.v1.UpdateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
-	7, // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
+	7, // 1: grpc_kit.api.known.admin.v1.ListUsersResponse.users:type_name -> grpc_kit.api.known.admin.v1.User
+	7, // 2: grpc_kit.api.known.admin.v1.CreateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
+	7, // 3: grpc_kit.api.known.admin.v1.UpdateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
+	8, // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
@@ -626,6 +700,18 @@ func file_known_admin_v1_user_proto_init() {
 				return nil
 			}
 		}
+		file_known_admin_v1_user_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateUserIdentityRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_known_admin_v1_user_proto_msgTypes[0].OneofWrappers = []interface{}{
 		(*ListUsersRequest_PageToken)(nil),
@@ -637,7 +723,7 @@ func file_known_admin_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_user_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

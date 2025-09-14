@@ -32,6 +32,7 @@ type KnownAdminClient interface {
 	GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error)
 	ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error)
 	ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error)
+	CreateAuthProvider(ctx context.Context, in *CreateAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error)
 	// 部门相关
 	CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
@@ -43,7 +44,7 @@ type KnownAdminClient interface {
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
 	// 安全相关
-	CreateSecurityKey(ctx context.Context, in *CreateSecurityKeyRequest, opts ...grpc.CallOption) (*SecurityKey, error)
+	CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*Credential, error)
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2JSONWebKeys, error)
 }
@@ -128,6 +129,15 @@ func (c *knownAdminClient) ListRoles(ctx context.Context, in *ListRolesRequest, 
 	return out, nil
 }
 
+func (c *knownAdminClient) CreateAuthProvider(ctx context.Context, in *CreateAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error) {
+	out := new(AuthProvider)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthProvider", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error) {
 	out := new(Department)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartment", in, out, opts...)
@@ -200,9 +210,9 @@ func (c *knownAdminClient) ListUsers(ctx context.Context, in *ListUsersRequest, 
 	return out, nil
 }
 
-func (c *knownAdminClient) CreateSecurityKey(ctx context.Context, in *CreateSecurityKeyRequest, opts ...grpc.CallOption) (*SecurityKey, error) {
-	out := new(SecurityKey)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateSecurityKey", in, out, opts...)
+func (c *knownAdminClient) CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*Credential, error) {
+	out := new(Credential)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateCredential", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -240,6 +250,7 @@ type KnownAdminServer interface {
 	GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error)
 	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
+	CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error)
 	// 部门相关
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
@@ -251,7 +262,7 @@ type KnownAdminServer interface {
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
 	// 安全相关
-	CreateSecurityKey(context.Context, *CreateSecurityKeyRequest) (*SecurityKey, error)
+	CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error)
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(context.Context, *emptypb.Empty) (*OAuth2JSONWebKeys, error)
 }
@@ -284,6 +295,9 @@ func (UnimplementedKnownAdminServer) ListMenus(context.Context, *ListMenusReques
 func (UnimplementedKnownAdminServer) ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRoles not implemented")
 }
+func (UnimplementedKnownAdminServer) CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthProvider not implemented")
+}
 func (UnimplementedKnownAdminServer) CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDepartment not implemented")
 }
@@ -308,8 +322,8 @@ func (UnimplementedKnownAdminServer) UpdateUser(context.Context, *UpdateUserRequ
 func (UnimplementedKnownAdminServer) ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
 }
-func (UnimplementedKnownAdminServer) CreateSecurityKey(context.Context, *CreateSecurityKeyRequest) (*SecurityKey, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateSecurityKey not implemented")
+func (UnimplementedKnownAdminServer) CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCredential not implemented")
 }
 func (UnimplementedKnownAdminServer) GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2Discovery not implemented")
@@ -473,6 +487,24 @@ func _KnownAdmin_ListRoles_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_CreateAuthProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAuthProviderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateAuthProvider(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthProvider",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateAuthProvider(ctx, req.(*CreateAuthProviderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_CreateDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDepartmentRequest)
 	if err := dec(in); err != nil {
@@ -617,20 +649,20 @@ func _KnownAdmin_ListUsers_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_CreateSecurityKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateSecurityKeyRequest)
+func _KnownAdmin_CreateCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCredentialRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateSecurityKey(ctx, in)
+		return srv.(KnownAdminServer).CreateCredential(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateSecurityKey",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateCredential",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateSecurityKey(ctx, req.(*CreateSecurityKeyRequest))
+		return srv.(KnownAdminServer).CreateCredential(ctx, req.(*CreateCredentialRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -711,6 +743,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_ListRoles_Handler,
 		},
 		{
+			MethodName: "CreateAuthProvider",
+			Handler:    _KnownAdmin_CreateAuthProvider_Handler,
+		},
+		{
 			MethodName: "CreateDepartment",
 			Handler:    _KnownAdmin_CreateDepartment_Handler,
 		},
@@ -743,8 +779,8 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_ListUsers_Handler,
 		},
 		{
-			MethodName: "CreateSecurityKey",
-			Handler:    _KnownAdmin_CreateSecurityKey_Handler,
+			MethodName: "CreateCredential",
+			Handler:    _KnownAdmin_CreateCredential_Handler,
 		},
 		{
 			MethodName: "GetOAuth2Discovery",
