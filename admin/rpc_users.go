@@ -335,7 +335,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		result.Users = append(result.Users, &adminv1.User{
 			Id:                  int32(user.ID),
 			Username:            user.Username,
-			Status:              adminv1.UserStatus(user.Status),
+			Status:              adminv1.User_UserStatus(user.Status),
 			Realname:            string(realname),
 			Idcard:              string(idcard),
 			Nickname:            user.Nickname,
@@ -344,7 +344,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 			Website:             user.Website,
 			Email:               string(email),
 			EmailVerified:       user.EmailVerified,
-			Gender:              adminv1.Gender(user.Gender),
+			Gender:              adminv1.User_Gender(user.Gender),
 			Birthday:            timestamppb.New(user.Birthdate),
 			Zoneinfo:            user.Zoneinfo,
 			Locale:              user.Locale,
@@ -380,7 +380,7 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 			case schema.FieldNameNormalize(users.FieldIdcardEncrypted):
 				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.Idcard))
 				if err == nil {
-					x.SetRealnameEncrypted(encBody)
+					x.SetIdcardEncrypted(encBody)
 				}
 			case users.FieldNickname:
 				x.SetNickname(req.User.Nickname)
@@ -393,7 +393,7 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 			case schema.FieldNameNormalize(users.FieldEmailEncrypted):
 				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.Email))
 				if err == nil {
-					x.SetRealnameEncrypted(encBody)
+					x.SetEmailEncrypted(encBody)
 				}
 			case users.FieldEmailVerified:
 				x.SetEmailVerified(req.User.EmailVerified)
@@ -416,6 +416,15 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 				}
 			case users.FieldPhoneNumberVerified:
 				x.SetPhoneNumberVerified(req.User.PhoneNumberVerified)
+			case "address.street_address":
+				rawBody, err := proto.Marshal(req.User.Address)
+				if err != nil {
+					continue
+				}
+				encBody, err := crypto.EncryptAES(a.config.aesKey, rawBody)
+				if err == nil {
+					x.SetAddressEncrypted(encBody)
+				}
 			}
 		}
 
@@ -473,10 +482,14 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 	phoneNumberByte := crypto.DecryptAESMust(a.config.aesKey, row.PhoneNumberEncrypted)
 	_ = proto.Unmarshal(phoneNumberByte, &phoneNumber)
 
+	var address adminv1.Address
+	addressByte := crypto.DecryptAESMust(a.config.aesKey, row.AddressEncrypted)
+	_ = proto.Unmarshal(addressByte, &address)
+
 	result := &adminv1.User{
 		Id:                  int32(row.ID),
 		Username:            row.Username,
-		Status:              adminv1.UserStatus(row.Status),
+		Status:              adminv1.User_UserStatus(row.Status),
 		Realname:            string(crypto.DecryptAESMust(a.config.aesKey, row.RealnameEncrypted)),
 		Idcard:              string(crypto.DecryptAESMust(a.config.aesKey, row.IdcardEncrypted)),
 		Nickname:            row.Nickname,
@@ -485,12 +498,13 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 		Website:             row.Website,
 		Email:               string(crypto.DecryptAESMust(a.config.aesKey, row.EmailEncrypted)),
 		EmailVerified:       row.EmailVerified,
-		Gender:              adminv1.Gender(row.Gender),
+		Gender:              adminv1.User_Gender(row.Gender),
 		Birthday:            timestamppb.New(row.Birthdate),
 		Zoneinfo:            row.Zoneinfo,
 		Locale:              row.Locale,
 		PhoneNumber:         &phoneNumber,
 		PhoneNumberVerified: row.PhoneNumberVerified,
+		Address:             &address,
 	}
 
 	return result, nil

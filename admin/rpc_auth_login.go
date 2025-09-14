@@ -103,21 +103,23 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 	}
 
 	selectFields := []string{
-		"name",
-		"type",
-		"client_id",
-		"enabled",
-		"scopes",
-		"redirect_uri",
-		"issuer",
-		"authorization_endpoint",
-		"token_endpoint",
-		"userinfo_endpoint",
+		authproviders.FieldID,
+		authproviders.FieldName,
+		authproviders.FieldType,
+		authproviders.FieldClientID,
+		authproviders.FieldEnabled,
+		authproviders.FieldScopes,
+		authproviders.FieldRedirectURI,
+		authproviders.FieldIssuer,
+		authproviders.FieldAuthorizationEndpoint,
+		authproviders.FieldTokenEndpoint,
+		authproviders.FieldUserinfoEndpoint,
 	}
 
 	rows := db.AuthProviders.Query().Select(selectFields...).AllX(ctx)
 	for _, row := range rows {
 		p := &adminv1.AuthProvider{
+			Id:                    int32(row.ID),
 			Name:                  row.Name,
 			ClientId:              row.ClientID,
 			Enabled:               row.Enabled,
@@ -127,23 +129,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 			UserinfoEndpoint:      row.UserinfoEndpoint,
 			Scopes:                row.Scopes,
 			RedirectUri:           row.RedirectURI,
-		}
-
-		switch row.Type {
-		case authproviders.TypeLOCAL:
-			p.Type = adminv1.AuthProvider_LOCAL
-		case authproviders.TypeLDAP:
-			p.Type = adminv1.AuthProvider_LDAP
-		case authproviders.TypeOIDC:
-			p.Type = adminv1.AuthProvider_OIDC
-		case authproviders.TypeOAUTH2:
-			p.Type = adminv1.AuthProvider_OAUTH2
-		case authproviders.TypeGITHUB:
-			p.Type = adminv1.AuthProvider_GITHUB
-		case authproviders.TypeWECHAT:
-			p.Type = adminv1.AuthProvider_WECHAT
-		case authproviders.TypeGOOGLE:
-			p.Type = adminv1.AuthProvider_GOOGLE
+			Type:                  adminv1.AuthProvider_ProviderType(row.Type),
 		}
 
 		result.Providers = append(result.Providers, p)
@@ -162,27 +148,6 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 	}
 
 	for _, p := range req.Providers {
-		providerType := authproviders.TypeLDAP
-		switch p.GetType() {
-		case adminv1.AuthProvider_LOCAL:
-			providerType = authproviders.TypeLOCAL
-		case adminv1.AuthProvider_LDAP:
-			providerType = authproviders.TypeLDAP
-		case adminv1.AuthProvider_OIDC:
-			providerType = authproviders.TypeOIDC
-		case adminv1.AuthProvider_OAUTH2:
-			providerType = authproviders.TypeOAUTH2
-		case adminv1.AuthProvider_GITHUB:
-			providerType = authproviders.TypeGITHUB
-		case adminv1.AuthProvider_WECHAT:
-			providerType = authproviders.TypeWECHAT
-		case adminv1.AuthProvider_GOOGLE:
-			providerType = authproviders.TypeGOOGLE
-		default:
-			a.logger.Warnf("auth provider name not found %v", p.Type.String())
-			continue
-		}
-
 		name := p.Name
 		existID, err := db.AuthProviders.Query().Where(authproviders.NameEQ(name)).OnlyID(ctx)
 		if err != nil && !lion.IsNotFound(err) {
@@ -198,7 +163,7 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 		if existID == 0 {
 			_, err = db.AuthProviders.Create().
 				SetName(name).
-				SetType(providerType).
+				SetType(int(p.GetType())).
 				SetEnabled(p.Enabled).
 				SetClientID(p.ClientId).
 				SetClientSecretEncrypted(clientSecretEnc).
@@ -243,6 +208,42 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 			return nil, err
 		}
 	}
+
+	return result, nil
+}
+
+// CreateAuthProvider 创建认证提供方
+func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.CreateAuthProviderRequest) (*adminv1.AuthProvider, error) {
+	result := &adminv1.AuthProvider{}
+
+	// TODO; 权限验证
+	x, err := a.config.db.AuthProviders.Create().
+		SetName(req.Provider.Name).
+		SetType(int(req.Provider.Type)).
+		SetEnabled(req.Provider.Enabled).
+		SetClientID(req.Provider.ClientId).
+		SetClientSecretEncrypted(crypto.EncryptAESMust(a.config.aesKey, []byte(req.Provider.ClientSecret))).
+		SetIssuer(req.Provider.Issuer).
+		SetAuthorizationEndpoint(req.Provider.AuthorizationEndpoint).
+		SetTokenEndpoint(req.Provider.TokenEndpoint).
+		SetUserinfoEndpoint(req.Provider.UserinfoEndpoint).
+		SetScopes(req.Provider.Scopes).
+		SetRedirectURI(req.Provider.RedirectUri).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result.Id = int32(x.ID)
+	result.Name = x.Name
+	result.Type = adminv1.AuthProvider_ProviderType(x.Type)
+	result.ClientId = x.ClientID
+	result.Enabled = x.Enabled
+	result.RedirectUri = x.RedirectURI
+	result.Scopes = x.Scopes
+	result.AuthorizationEndpoint = x.AuthorizationEndpoint
+	result.TokenEndpoint = x.TokenEndpoint
+	result.UserinfoEndpoint = x.UserinfoEndpoint
 
 	return result, nil
 }

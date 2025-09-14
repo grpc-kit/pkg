@@ -10,6 +10,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/useridentities"
@@ -39,6 +40,7 @@ type socialUsers struct {
 func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
 	ap, err := db.AuthProviders.Query().
 		Select(
+			authproviders.FieldID,
 			authproviders.FieldName,
 			authproviders.FieldType,
 			authproviders.FieldEnabled,
@@ -92,8 +94,11 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 
 	idToken := &auth.IDTokenClaims{}
 
-	switch s.AuthProvider.Type {
-	case authproviders.TypeWECHAT:
+	// TODO
+	fmt.Println("get oauth2 token 1")
+
+	switch adminv1.AuthProvider_ProviderType(s.AuthProvider.Type) {
+	case adminv1.AuthProvider_WECHAT:
 		resp, err := s.weixinExchange(ctx, code)
 		if err != nil {
 			return "", err
@@ -118,7 +123,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		}
 
 		return accessToken, nil
-	case authproviders.TypeOIDC:
+	case adminv1.AuthProvider_OIDC:
 		oauth2Token, err := s.oauth2Exchange(ctx, code)
 		if err != nil {
 			return accessToken, err
@@ -162,7 +167,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, idToken *auth.IDTokenClaims) (int, error) {
 	existUserID, err := s.db.UserIdentities.Query().
 		Where(
-			useridentities.ProviderNameEQ(s.ProviderName),
+			useridentities.ProviderID(s.AuthProvider.ID),
 			useridentities.ProviderUserIDEQ(idToken.Subject),
 		).
 		OnlyID(ctx)
@@ -217,7 +222,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 
 		_, err = tx.UserIdentities.Create().
 			SetUserID(newUser.ID).
-			SetProviderName(s.ProviderName).
+			SetProviderID(s.AuthProvider.ID).
 			SetProviderUserID(idToken.Subject).
 			SetAccessTokenEncrypted(accessTokenEnc).
 			SetRefreshTokenEncrypted(refreshTokenEnc).
@@ -296,7 +301,7 @@ func (s *socialUsers) weixinExchange(ctx context.Context, code string) (*wechatC
 func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2SessionResponse) (int, error) {
 	existUserID, err := s.db.UserIdentities.Query().
 		Where(
-			useridentities.ProviderNameEQ(s.ProviderName),
+			useridentities.ProviderIDEQ(s.AuthProvider.ID),
 			useridentities.ProviderUserIDEQ(resp.Openid),
 		).
 		OnlyID(ctx)
@@ -351,7 +356,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 
 		_, err = tx.UserIdentities.Create().
 			SetUserID(newUser.ID).
-			SetProviderName(s.ProviderName).
+			SetProviderID(s.AuthProvider.ID).
 			SetProviderUserID(resp.Openid).
 			SetAccessTokenEncrypted(accessTokenEnc).
 			SetRefreshTokenEncrypted(refreshTokenEnc).

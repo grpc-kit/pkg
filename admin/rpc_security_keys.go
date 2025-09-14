@@ -17,9 +17,9 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// CreateSecurityKey 生成签名密钥
-func (a *KnownAdminAPI) CreateSecurityKey(ctx context.Context, req *adminv1.CreateSecurityKeyRequest) (*adminv1.SecurityKey, error) {
-	result := &adminv1.SecurityKey{}
+// CreateCredential 生成签名密钥
+func (a *KnownAdminAPI) CreateCredential(ctx context.Context, req *adminv1.CreateCredentialRequest) (*adminv1.Credential, error) {
+	result := &adminv1.Credential{}
 
 	// 仅允许存在一条记录，如已存在多次创建返回已存在内容
 
@@ -51,7 +51,16 @@ func (a *KnownAdminAPI) CreateSecurityKey(ctx context.Context, req *adminv1.Crea
 			return nil, err
 		}
 
+		appid := uuid.New().String()
+		if req.Credential.Appid != "" {
+			appid = req.Credential.Appid
+		}
+
 		tx.Credentials.Create().
+			SetName(req.Credential.Name).
+			SetType(int(req.Credential.Type)).
+			SetAppid(appid).
+			SetUsage(req.Credential.Usage).
 			SetPublicKey(crypto.Base64Encode(publicKeyBytes)).
 			SetPrivateKeyEncrypted(privateKeyEnc).SaveX(ctx)
 
@@ -90,7 +99,10 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 	}
 
 	sk, err := a.config.db.Credentials.Query().
-		Select(credentials.FieldPublicKey).
+		Select(
+			credentials.FieldAppid,
+			credentials.FieldPublicKey,
+		).
 		Order(credentials.ByID()).
 		Only(ctx)
 	if err != nil {
@@ -118,7 +130,7 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 		Alg: "RS256",
 		E:   e,
 		N:   n,
-		Kid: uuid.New().String(),
+		Kid: sk.Appid,
 	}
 
 	result.Keys = append(result.Keys, tmp)
