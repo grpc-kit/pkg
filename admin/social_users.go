@@ -94,10 +94,9 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 
 	idToken := &auth.IDTokenClaims{}
 
-	// TODO
-	fmt.Println("get oauth2 token 1")
-
 	switch adminv1.AuthProvider_ProviderType(s.AuthProvider.Type) {
+	case adminv1.AuthProvider_LOCAL:
+
 	case adminv1.AuthProvider_WECHAT:
 		resp, err := s.weixinExchange(ctx, code)
 		if err != nil {
@@ -162,6 +161,54 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 	}
 
 	return accessToken, nil
+}
+
+func (s *socialUsers) PasswordCheck(ctx context.Context, username, password string) (string, bool, error) {
+	u, err := s.db.Users.Query().
+		Select(
+			users.FieldID,
+		).
+		Where(
+			users.UsernameEQ(username),
+			users.StatusEQ(int(adminv1.User_ACTIVE.Number())),
+		).
+		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
+			q.Select(
+				useridentities.FieldPasswordHash,
+			)
+		}).
+		Only(ctx)
+	if err != nil {
+		return "", false, err
+	}
+
+	if len(u.Edges.LionUserIdentities) == 0 {
+		return "", false, nil
+	}
+
+	if err := crypto.BcryptCompare(u.Edges.LionUserIdentities[0].PasswordHash, password); err != nil {
+		return "", false, nil
+	}
+
+	if err = s.setUserRoles(ctx, u.ID); err != nil {
+	}
+
+	idToken := &auth.IDTokenClaims{}
+	// 填充 idToken 内容
+	idToken.SetSubject(strconv.Itoa(u.ID))
+	idToken.SetGroups(s.Groups)
+
+	// 生成 jwt 返回客户端
+	accessToken, err := idToken.GetAccessTokenRSA(s.privateKey)
+	if err != nil {
+		return "", false, err
+	}
+
+	return accessToken, true, nil
+}
+
+func (s *socialUsers) GetAccessToken(expiresIn int32, appid string) {
+
 }
 
 func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, idToken *auth.IDTokenClaims) (int, error) {

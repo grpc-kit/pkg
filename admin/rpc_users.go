@@ -13,8 +13,10 @@ import (
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/schema"
+	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/proto"
@@ -367,7 +369,7 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 		x := a.config.db.Users.Update()
 
 		for _, path := range req.UpdateMask.Paths {
-			a.logger.Infof("update mask path: %v", path)
+			// a.logger.Infof("update mask path: %v", path)
 
 			switch path {
 			case users.FieldStatus:
@@ -424,6 +426,48 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 				encBody, err := crypto.EncryptAES(a.config.aesKey, rawBody)
 				if err == nil {
 					x.SetAddressEncrypted(encBody)
+				}
+			case "identities":
+				for _, v := range req.GetUser().Identities {
+					if v.ProviderName != "local" {
+						continue
+					}
+
+					provider, err := a.config.db.AuthProviders.Query().
+						Select(
+							authproviders.FieldName,
+						).
+						Where(authproviders.NameEQ(v.ProviderName)).
+						WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
+							q.Select(
+								useridentities.FieldID,
+								useridentities.FieldUserID,
+								useridentities.FieldProviderID,
+								useridentities.FieldProviderUserID,
+							).Where(
+								useridentities.UserIDEQ(int(req.User.Id)),
+							)
+						}).
+						Only(ctx)
+					if err != nil {
+						return nil, err
+					}
+
+					// 不存在则新建
+					if len(provider.Edges.LionUserIdentities) == 0 {
+						a.config.db.UserIdentities.Create().
+							SetUserID(int(req.User.Id)).
+							SetProviderID(provider.ID).
+							SetProviderUserID(strconv.Itoa(int(req.User.Id))).
+							SetPasswordHash(crypto.BcryptHashMust(v.PasswordHash)).Save(ctx)
+					} else {
+						a.config.db.UserIdentities.Update().
+							SetPasswordHash(crypto.BcryptHashMust(v.PasswordHash)).
+							Where(
+								useridentities.UserIDEQ(int(req.User.Id)),
+								useridentities.ProviderIDEQ(provider.ID),
+							).Save(ctx)
+					}
 				}
 			}
 		}

@@ -20,33 +20,57 @@ func (a *KnownAdminAPI) GetConfig(ctx context.Context, req *adminv1.GetConfigReq
 func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.CreateAuthLoginRequest) (*adminv1.CreateAuthLoginResponse, error) {
 	result := &adminv1.CreateAuthLoginResponse{TokenType: "Bearer"}
 
-	// TODO; 当前先支持静态用户登录
-	if a.config.staticUsers == nil {
-		return nil, errs.Unauthenticated(ctx)
-	}
+	var accessToken string
 
 	if req.Username == "" {
 		return nil, errs.Unauthenticated(ctx)
 	}
 
-	u, ok := a.config.staticUsers.Valid(req.Username, req.PasswordHash)
-	if !ok {
-		return nil, errs.Unauthenticated(ctx)
-	}
-
+	// TODO; 不允许创建过长过期的 token
 	expiresIn := req.ExpiresIn
 	if expiresIn <= 0 {
 		expiresIn = 24 * 60 * 60
 	}
 
-	// TODO; 不允许创建过长过期的 token
-
-	tk, err := u.GetAccessToken(expiresIn, "")
-	if err != nil {
-		return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+	hasDBEnabled := false
+	db, err := a.GetLionClient()
+	if err == nil && db != nil {
+		hasDBEnabled = true
 	}
 
-	result.AccessToken = tk
+	if a.config.staticUsers == nil && hasDBEnabled == false {
+		return nil, errs.Unauthenticated(ctx)
+	}
+
+	// 优先本地静态用户验证
+	u, ok := a.config.staticUsers.Valid(req.Username, req.PasswordHash)
+	if ok {
+		tk, err := u.GetAccessToken(expiresIn, "")
+		if err != nil {
+			return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+		}
+
+		accessToken = tk
+	} else {
+		// 尝试数据库验证
+		// 根据不同的 provider_name 选择个性处理方式
+		su, err := newSocialUsers(ctx, a.logger, a.config.aesKey, db, "local")
+		if err != nil {
+			return nil, err
+		}
+
+		tk, ok, err := su.PasswordCheck(ctx, req.Username, req.PasswordHash)
+		if err != nil {
+			return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+		}
+		if !ok {
+			return nil, errs.Unauthenticated(ctx)
+		}
+
+		accessToken = tk
+	}
+
+	result.AccessToken = accessToken
 	result.ExpiresIn = expiresIn
 
 	return result, nil

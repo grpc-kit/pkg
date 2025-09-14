@@ -43,6 +43,7 @@ type KnownAdminClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
+	// rpc CreateUserIdentity(CreateUserIdentityRequest) returns(User);
 	// 安全相关
 	CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*Credential, error)
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
@@ -261,6 +262,7 @@ type KnownAdminServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
+	// rpc CreateUserIdentity(CreateUserIdentityRequest) returns(User);
 	// 安全相关
 	CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error)
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
