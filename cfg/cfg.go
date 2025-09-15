@@ -354,20 +354,24 @@ func (c *LocalConfig) Register(ctx context.Context,
 			c.logger.Warnf("enabled the built-in admin service, but encountered an error connecting to the database. err: %v", err)
 		}
 
-		adminIns := admin.New(
+		admOpts := []admin.Options{
 			admin.WithLogger(c.logger),
 			admin.WithLionClient(client),
-			admin.WithAESKey([]byte(c.Services.SecurityKey)), // TODO; a test key
-			/*
-				admin.WithOIDCProvider(
+			admin.WithAESKey([]byte(c.Services.SecurityKey)),
+			admin.WithStaticUsers(su),
+		}
+
+		if c.Security != nil && c.Security.Authentication != nil && c.Security.Authentication.OIDCProvider != nil {
+			if c.Security.Authentication.OIDCProvider.Issuer != "" && c.Security.Authentication.OIDCProvider.Config != nil {
+				admOpts = append(admOpts, admin.WithOIDCProvider(
 					c.Security.Authentication.OIDCProvider.Issuer,
 					c.Security.Authentication.OIDCProvider.Config.ClientID,
 					c.Security.Authentication.OIDCProvider.Config.ClientSecret,
-				),
-			*/
-			admin.WithStaticUsers(su),
-		)
+				))
+			}
+		}
 
+		adminIns := admin.New(admOpts...)
 		adminv1.RegisterKnownAdminServer(c.rpcServer.Server(), adminIns)
 	}
 	// TODO; 植入默认 admin api 服务

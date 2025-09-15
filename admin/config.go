@@ -13,7 +13,7 @@ type config struct {
 	aesKey []byte
 
 	// oidc 认证域名
-	provider string
+	issuer string
 	// oidc 客户端ID
 	clientID string
 	// oidc 客户端密钥
@@ -43,9 +43,9 @@ func WithLionClient(client *lion.Client) Options {
 }
 
 // WithOIDCProvider 设置 oidc 认证的基础信息
-func WithOIDCProvider(provider, clientID, clientSecret string) Options {
+func WithOIDCProvider(issuer, clientID, clientSecret string) Options {
 	return func(c *config) {
-		c.provider = provider
+		c.issuer = issuer
 		c.clientID = clientID
 		c.clientSecret = clientSecret
 	}

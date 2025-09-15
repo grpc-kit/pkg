@@ -78,12 +78,16 @@ func (a *KnownAdminAPI) CreateCredential(ctx context.Context, req *adminv1.Creat
 func (a *KnownAdminAPI) GetOAuth2Discovery(ctx context.Context, req *emptypb.Empty) (*adminv1.OAuth2Discovery, error) {
 	result := &adminv1.OAuth2Discovery{}
 
-	provider := "http://127.0.0.1:8080/builtin/admin/api/v1/oatuh2"
+	issuer := "http://127.0.0.1:8080/builtin/admin/api/v1/oatuh2"
 
-	result.Issuer = provider
-	result.AuthorizationEndpoint = provider + "/authorize"
-	result.TokenEndpoint = provider + "/token"
-	result.JwksUri = provider + "/jwks"
+	if a.config.issuer != "" {
+		issuer = a.config.issuer
+	}
+
+	result.Issuer = issuer
+	result.AuthorizationEndpoint = issuer + "/authorize"
+	result.TokenEndpoint = issuer + "/token"
+	result.JwksUri = issuer + "/jwks"
 
 	result.ResponseTypesSupported = []string{"none"}
 	result.SubjectTypesSupported = []string{"public"}
