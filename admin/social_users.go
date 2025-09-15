@@ -197,6 +197,8 @@ func (s *socialUsers) PasswordCheck(ctx context.Context, username, password stri
 	// 填充 idToken 内容
 	idToken.SetSubject(strconv.Itoa(u.ID))
 	idToken.SetGroups(s.Groups)
+	idToken.SetExpiresAt(24 * 60 * 60)
+	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 
 	// 生成 jwt 返回客户端
 	accessToken, err := idToken.GetAccessTokenRSA(s.privateKey)
