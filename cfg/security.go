@@ -118,7 +118,6 @@ func (c *LocalConfig) initSecurity() error {
 
 			provider, err := oidc.NewProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer)
 			if err != nil {
-				c.logger.Errorf("oidc authenticator: initializing plugin: %v", err)
 				return false, err
 			}
 			verifier := provider.Verifier(oidcConfig)
@@ -129,7 +128,15 @@ func (c *LocalConfig) initSecurity() error {
 
 		ok, err := initVerifierFn()
 		if !ok || err != nil {
-			go wait.PollUntil(time.Second*30, initVerifierFn, ctx.Done())
+			// 忽略首次失败的错误，在使用内置 oidc 服务时可能存在服务未启动的情况
+			// c.logger.Errorf("oidc authenticator: initializing plugin: %v", err)
+
+			go func() {
+				err = wait.PollUntil(time.Second*30, initVerifierFn, ctx.Done())
+				if err != nil {
+					c.logger.Errorf("oidc authenticator: initializing plugin: %v", err)
+				}
+			}()
 		}
 	}
 
