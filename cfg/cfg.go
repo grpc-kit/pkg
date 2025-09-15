@@ -351,7 +351,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 	if c.Services.hasEnableIntegrationAdminServer() {
 		client, err := c.GetAdminDatabaseLion()
 		if err != nil {
-			c.logger.Warnf("enabled the built-in admin service, but encountered an error connecting to the database. err: %v", err)
+			c.logger.Infof("known admin service enabled but database not, some /builtin API will be unavailable.")
 		}
 
 		admOpts := []admin.Options{
