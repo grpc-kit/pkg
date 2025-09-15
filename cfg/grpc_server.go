@@ -730,6 +730,8 @@ func httpHandleGetVersion() http.HandlerFunc {
 
 func httpHandleHealthPing() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// TODO; 检测已开启服务的连接是否正常
+
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusOK)
 
