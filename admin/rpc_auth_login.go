@@ -153,7 +153,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 			UserinfoEndpoint:      row.UserinfoEndpoint,
 			Scopes:                row.Scopes,
 			RedirectUri:           row.RedirectURI,
-			Type:                  adminv1.AuthProvider_ProviderType(row.Type),
+			Type:                  adminv1.AuthProvider_Type(row.Type),
 		}
 
 		result.Providers = append(result.Providers, p)
@@ -260,7 +260,7 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 
 	result.Id = int32(x.ID)
 	result.Name = x.Name
-	result.Type = adminv1.AuthProvider_ProviderType(x.Type)
+	result.Type = adminv1.AuthProvider_Type(x.Type)
 	result.ClientId = x.ClientID
 	result.Enabled = x.Enabled
 	result.RedirectUri = x.RedirectURI

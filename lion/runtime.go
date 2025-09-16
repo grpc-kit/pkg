@@ -450,8 +450,20 @@ func init() {
 			return nil
 		}
 	}()
+	// rolesDescI18nName is the schema descriptor for i18n_name field.
+	rolesDescI18nName := rolesFields[1].Descriptor()
+	// roles.DefaultI18nName holds the default value on creation for the i18n_name field.
+	roles.DefaultI18nName = rolesDescI18nName.Default.(string)
+	// rolesDescProtected is the schema descriptor for protected field.
+	rolesDescProtected := rolesFields[2].Descriptor()
+	// roles.DefaultProtected holds the default value on creation for the protected field.
+	roles.DefaultProtected = rolesDescProtected.Default.(bool)
+	// rolesDescOrderWeight is the schema descriptor for order_weight field.
+	rolesDescOrderWeight := rolesFields[3].Descriptor()
+	// roles.DefaultOrderWeight holds the default value on creation for the order_weight field.
+	roles.DefaultOrderWeight = rolesDescOrderWeight.Default.(int)
 	// rolesDescDescription is the schema descriptor for description field.
-	rolesDescDescription := rolesFields[1].Descriptor()
+	rolesDescDescription := rolesFields[4].Descriptor()
 	// roles.DefaultDescription holds the default value on creation for the description field.
 	roles.DefaultDescription = rolesDescDescription.Default.(string)
 	usergroupsMixin := schema.UserGroups{}.Mixin()

@@ -94,10 +94,10 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 
 	idToken := &auth.IDTokenClaims{}
 
-	switch adminv1.AuthProvider_ProviderType(s.AuthProvider.Type) {
-	case adminv1.AuthProvider_LOCAL:
+	switch adminv1.AuthProvider_Type(s.AuthProvider.Type) {
+	case adminv1.AuthProvider_TYPE_LOCAL:
 
-	case adminv1.AuthProvider_WECHAT:
+	case adminv1.AuthProvider_TYPE_WECHAT:
 		resp, err := s.weixinExchange(ctx, code)
 		if err != nil {
 			return "", err
@@ -122,7 +122,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		}
 
 		return accessToken, nil
-	case adminv1.AuthProvider_OIDC:
+	case adminv1.AuthProvider_TYPE_OIDC:
 		oauth2Token, err := s.oauth2Exchange(ctx, code)
 		if err != nil {
 			return accessToken, err
@@ -170,7 +170,7 @@ func (s *socialUsers) PasswordCheck(ctx context.Context, username, password stri
 		).
 		Where(
 			users.UsernameEQ(username),
-			users.StatusEQ(int(adminv1.User_ACTIVE.Number())),
+			users.StatusEQ(int(adminv1.User_STATUS_ACTIVE.Number())),
 		).
 		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
 			q.Select(

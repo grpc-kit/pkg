@@ -51,6 +51,55 @@ func (_u *RolesUpdate) SetNillableName(v *string) *RolesUpdate {
 	return _u
 }
 
+// SetI18nName sets the "i18n_name" field.
+func (_u *RolesUpdate) SetI18nName(v string) *RolesUpdate {
+	_u.mutation.SetI18nName(v)
+	return _u
+}
+
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableI18nName(v *string) *RolesUpdate {
+	if v != nil {
+		_u.SetI18nName(*v)
+	}
+	return _u
+}
+
+// SetProtected sets the "protected" field.
+func (_u *RolesUpdate) SetProtected(v bool) *RolesUpdate {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableProtected(v *bool) *RolesUpdate {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
+// SetOrderWeight sets the "order_weight" field.
+func (_u *RolesUpdate) SetOrderWeight(v int) *RolesUpdate {
+	_u.mutation.ResetOrderWeight()
+	_u.mutation.SetOrderWeight(v)
+	return _u
+}
+
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableOrderWeight(v *int) *RolesUpdate {
+	if v != nil {
+		_u.SetOrderWeight(*v)
+	}
+	return _u
+}
+
+// AddOrderWeight adds value to the "order_weight" field.
+func (_u *RolesUpdate) AddOrderWeight(v int) *RolesUpdate {
+	_u.mutation.AddOrderWeight(v)
+	return _u
+}
+
 // SetDescription sets the "description" field.
 func (_u *RolesUpdate) SetDescription(v string) *RolesUpdate {
 	_u.mutation.SetDescription(v)
@@ -242,6 +291,18 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(roles.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.I18nName(); ok {
+		_spec.SetField(roles.FieldI18nName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.OrderWeight(); ok {
+		_spec.SetField(roles.FieldOrderWeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedOrderWeight(); ok {
+		_spec.AddField(roles.FieldOrderWeight, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(roles.FieldDescription, field.TypeString, value)
 	}
@@ -417,6 +478,55 @@ func (_u *RolesUpdateOne) SetNillableName(v *string) *RolesUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
 	}
+	return _u
+}
+
+// SetI18nName sets the "i18n_name" field.
+func (_u *RolesUpdateOne) SetI18nName(v string) *RolesUpdateOne {
+	_u.mutation.SetI18nName(v)
+	return _u
+}
+
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableI18nName(v *string) *RolesUpdateOne {
+	if v != nil {
+		_u.SetI18nName(*v)
+	}
+	return _u
+}
+
+// SetProtected sets the "protected" field.
+func (_u *RolesUpdateOne) SetProtected(v bool) *RolesUpdateOne {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableProtected(v *bool) *RolesUpdateOne {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
+// SetOrderWeight sets the "order_weight" field.
+func (_u *RolesUpdateOne) SetOrderWeight(v int) *RolesUpdateOne {
+	_u.mutation.ResetOrderWeight()
+	_u.mutation.SetOrderWeight(v)
+	return _u
+}
+
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableOrderWeight(v *int) *RolesUpdateOne {
+	if v != nil {
+		_u.SetOrderWeight(*v)
+	}
+	return _u
+}
+
+// AddOrderWeight adds value to the "order_weight" field.
+func (_u *RolesUpdateOne) AddOrderWeight(v int) *RolesUpdateOne {
+	_u.mutation.AddOrderWeight(v)
 	return _u
 }
 
@@ -640,6 +750,18 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(roles.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.I18nName(); ok {
+		_spec.SetField(roles.FieldI18nName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.OrderWeight(); ok {
+		_spec.SetField(roles.FieldOrderWeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedOrderWeight(); ok {
+		_spec.AddField(roles.FieldOrderWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(roles.FieldDescription, field.TypeString, value)

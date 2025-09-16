@@ -8590,6 +8590,10 @@ type RolesMutation struct {
 	created_at                 *time.Time
 	updated_at                 *time.Time
 	name                       *string
+	i18n_name                  *string
+	protected                  *bool
+	order_weight               *int
+	addorder_weight            *int
 	description                *string
 	clearedFields              map[string]struct{}
 	lion_role_resources        map[int]struct{}
@@ -8810,6 +8814,134 @@ func (m *RolesMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *RolesMutation) ResetName() {
 	m.name = nil
+}
+
+// SetI18nName sets the "i18n_name" field.
+func (m *RolesMutation) SetI18nName(s string) {
+	m.i18n_name = &s
+}
+
+// I18nName returns the value of the "i18n_name" field in the mutation.
+func (m *RolesMutation) I18nName() (r string, exists bool) {
+	v := m.i18n_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldI18nName returns the old "i18n_name" field's value of the Roles entity.
+// If the Roles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RolesMutation) OldI18nName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldI18nName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldI18nName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldI18nName: %w", err)
+	}
+	return oldValue.I18nName, nil
+}
+
+// ResetI18nName resets all changes to the "i18n_name" field.
+func (m *RolesMutation) ResetI18nName() {
+	m.i18n_name = nil
+}
+
+// SetProtected sets the "protected" field.
+func (m *RolesMutation) SetProtected(b bool) {
+	m.protected = &b
+}
+
+// Protected returns the value of the "protected" field in the mutation.
+func (m *RolesMutation) Protected() (r bool, exists bool) {
+	v := m.protected
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtected returns the old "protected" field's value of the Roles entity.
+// If the Roles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RolesMutation) OldProtected(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtected requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
+	}
+	return oldValue.Protected, nil
+}
+
+// ResetProtected resets all changes to the "protected" field.
+func (m *RolesMutation) ResetProtected() {
+	m.protected = nil
+}
+
+// SetOrderWeight sets the "order_weight" field.
+func (m *RolesMutation) SetOrderWeight(i int) {
+	m.order_weight = &i
+	m.addorder_weight = nil
+}
+
+// OrderWeight returns the value of the "order_weight" field in the mutation.
+func (m *RolesMutation) OrderWeight() (r int, exists bool) {
+	v := m.order_weight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderWeight returns the old "order_weight" field's value of the Roles entity.
+// If the Roles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RolesMutation) OldOrderWeight(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderWeight is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderWeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderWeight: %w", err)
+	}
+	return oldValue.OrderWeight, nil
+}
+
+// AddOrderWeight adds i to the "order_weight" field.
+func (m *RolesMutation) AddOrderWeight(i int) {
+	if m.addorder_weight != nil {
+		*m.addorder_weight += i
+	} else {
+		m.addorder_weight = &i
+	}
+}
+
+// AddedOrderWeight returns the value that was added to the "order_weight" field in this mutation.
+func (m *RolesMutation) AddedOrderWeight() (r int, exists bool) {
+	v := m.addorder_weight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOrderWeight resets all changes to the "order_weight" field.
+func (m *RolesMutation) ResetOrderWeight() {
+	m.order_weight = nil
+	m.addorder_weight = nil
 }
 
 // SetDescription sets the "description" field.
@@ -9044,7 +9176,7 @@ func (m *RolesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RolesMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, roles.FieldCreatedAt)
 	}
@@ -9053,6 +9185,15 @@ func (m *RolesMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, roles.FieldName)
+	}
+	if m.i18n_name != nil {
+		fields = append(fields, roles.FieldI18nName)
+	}
+	if m.protected != nil {
+		fields = append(fields, roles.FieldProtected)
+	}
+	if m.order_weight != nil {
+		fields = append(fields, roles.FieldOrderWeight)
 	}
 	if m.description != nil {
 		fields = append(fields, roles.FieldDescription)
@@ -9071,6 +9212,12 @@ func (m *RolesMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case roles.FieldName:
 		return m.Name()
+	case roles.FieldI18nName:
+		return m.I18nName()
+	case roles.FieldProtected:
+		return m.Protected()
+	case roles.FieldOrderWeight:
+		return m.OrderWeight()
 	case roles.FieldDescription:
 		return m.Description()
 	}
@@ -9088,6 +9235,12 @@ func (m *RolesMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldUpdatedAt(ctx)
 	case roles.FieldName:
 		return m.OldName(ctx)
+	case roles.FieldI18nName:
+		return m.OldI18nName(ctx)
+	case roles.FieldProtected:
+		return m.OldProtected(ctx)
+	case roles.FieldOrderWeight:
+		return m.OldOrderWeight(ctx)
 	case roles.FieldDescription:
 		return m.OldDescription(ctx)
 	}
@@ -9120,6 +9273,27 @@ func (m *RolesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case roles.FieldI18nName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetI18nName(v)
+		return nil
+	case roles.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
+		return nil
+	case roles.FieldOrderWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderWeight(v)
+		return nil
 	case roles.FieldDescription:
 		v, ok := value.(string)
 		if !ok {
@@ -9134,13 +9308,21 @@ func (m *RolesMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *RolesMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addorder_weight != nil {
+		fields = append(fields, roles.FieldOrderWeight)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *RolesMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case roles.FieldOrderWeight:
+		return m.AddedOrderWeight()
+	}
 	return nil, false
 }
 
@@ -9149,6 +9331,13 @@ func (m *RolesMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *RolesMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case roles.FieldOrderWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOrderWeight(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Roles numeric field %s", name)
 }
@@ -9184,6 +9373,15 @@ func (m *RolesMutation) ResetField(name string) error {
 		return nil
 	case roles.FieldName:
 		m.ResetName()
+		return nil
+	case roles.FieldI18nName:
+		m.ResetI18nName()
+		return nil
+	case roles.FieldProtected:
+		m.ResetProtected()
+		return nil
+	case roles.FieldOrderWeight:
+		m.ResetOrderWeight()
 		return nil
 	case roles.FieldDescription:
 		m.ResetDescription()

@@ -48,6 +48,8 @@ type KnownAdminClient interface {
 	CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*Credential, error)
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2JSONWebKeys, error)
+	// 数据库相关
+	CreateDatabaseInitialize(ctx context.Context, in *CreateDatabaseInitializeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type knownAdminClient struct {
@@ -238,6 +240,15 @@ func (c *knownAdminClient) GetOAuth2JSONWebKeys(ctx context.Context, in *emptypb
 	return out, nil
 }
 
+func (c *knownAdminClient) CreateDatabaseInitialize(ctx context.Context, in *CreateDatabaseInitializeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KnownAdminServer is the server API for KnownAdmin service.
 // All implementations should embed UnimplementedKnownAdminServer
 // for forward compatibility
@@ -267,6 +278,8 @@ type KnownAdminServer interface {
 	CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error)
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(context.Context, *emptypb.Empty) (*OAuth2JSONWebKeys, error)
+	// 数据库相关
+	CreateDatabaseInitialize(context.Context, *CreateDatabaseInitializeRequest) (*emptypb.Empty, error)
 }
 
 // UnimplementedKnownAdminServer should be embedded to have forward compatible implementations.
@@ -332,6 +345,9 @@ func (UnimplementedKnownAdminServer) GetOAuth2Discovery(context.Context, *emptyp
 }
 func (UnimplementedKnownAdminServer) GetOAuth2JSONWebKeys(context.Context, *emptypb.Empty) (*OAuth2JSONWebKeys, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2JSONWebKeys not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateDatabaseInitialize(context.Context, *CreateDatabaseInitializeRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDatabaseInitialize not implemented")
 }
 
 // UnsafeKnownAdminServer may be embedded to opt out of forward compatibility for this service.
@@ -705,6 +721,24 @@ func _KnownAdmin_GetOAuth2JSONWebKeys_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_CreateDatabaseInitialize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDatabaseInitializeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateDatabaseInitialize(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateDatabaseInitialize(ctx, req.(*CreateDatabaseInitializeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KnownAdmin_ServiceDesc is the grpc.ServiceDesc for KnownAdmin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -791,6 +825,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOAuth2JSONWebKeys",
 			Handler:    _KnownAdmin_GetOAuth2JSONWebKeys_Handler,
+		},
+		{
+			MethodName: "CreateDatabaseInitialize",
+			Handler:    _KnownAdmin_CreateDatabaseInitialize_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

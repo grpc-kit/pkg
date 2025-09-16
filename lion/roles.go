@@ -23,6 +23,12 @@ type Roles struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// 角色名称，仅支持字母、数字
 	Name string `json:"name,omitempty"`
+	// 国际化标识
+	I18nName string `json:"i18n_name,omitempty"`
+	// 是否保护字段，不允许 UI 修改
+	Protected bool `json:"protected,omitempty"`
+	// 排序权重，越小越靠前
+	OrderWeight int `json:"order_weight,omitempty"`
 	// 用途详细描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -76,9 +82,11 @@ func (*Roles) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case roles.FieldID:
+		case roles.FieldProtected:
+			values[i] = new(sql.NullBool)
+		case roles.FieldID, roles.FieldOrderWeight:
 			values[i] = new(sql.NullInt64)
-		case roles.FieldName, roles.FieldDescription:
+		case roles.FieldName, roles.FieldI18nName, roles.FieldDescription:
 			values[i] = new(sql.NullString)
 		case roles.FieldCreatedAt, roles.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -120,6 +128,24 @@ func (_m *Roles) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
+			}
+		case roles.FieldI18nName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
+			} else if value.Valid {
+				_m.I18nName = value.String
+			}
+		case roles.FieldProtected:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field protected", values[i])
+			} else if value.Valid {
+				_m.Protected = value.Bool
+			}
+		case roles.FieldOrderWeight:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field order_weight", values[i])
+			} else if value.Valid {
+				_m.OrderWeight = int(value.Int64)
 			}
 		case roles.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -186,6 +212,15 @@ func (_m *Roles) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("i18n_name=")
+	builder.WriteString(_m.I18nName)
+	builder.WriteString(", ")
+	builder.WriteString("protected=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
+	builder.WriteString(", ")
+	builder.WriteString("order_weight=")
+	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

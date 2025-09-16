@@ -20,6 +20,12 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldI18nName holds the string denoting the i18n_name field in the database.
+	FieldI18nName = "i18n_name"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
+	// FieldOrderWeight holds the string denoting the order_weight field in the database.
+	FieldOrderWeight = "order_weight"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// EdgeLionRoleResources holds the string denoting the lion_role_resources edge name in mutations.
@@ -59,6 +65,9 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldName,
+	FieldI18nName,
+	FieldProtected,
+	FieldOrderWeight,
 	FieldDescription,
 }
 
@@ -81,6 +90,12 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultI18nName holds the default value on creation for the "i18n_name" field.
+	DefaultI18nName string
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
+	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
+	DefaultOrderWeight int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -106,6 +121,21 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByI18nName orders the results by the i18n_name field.
+func ByI18nName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldI18nName, opts...).ToFunc()
+}
+
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
+}
+
+// ByOrderWeight orders the results by the order_weight field.
+func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

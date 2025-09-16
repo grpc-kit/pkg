@@ -24,6 +24,15 @@ func (Roles) Fields() []ent.Field {
 			Unique().
 			Match(regexp.MustCompile(`^[a-zA-Z0-9]+$`)).
 			Comment("角色名称，仅支持字母、数字"),
+		field.String("i18n_name").
+			Default("").
+			Comment("国际化标识"),
+		field.Bool("protected").
+			Default(false).
+			Comment("是否保护字段，不允许 UI 修改"),
+		field.Int("order_weight").
+			Default(0).
+			Comment("排序权重，越小越靠前"),
 		field.String("description").
 			Default("").
 			Comment("用途详细描述"),

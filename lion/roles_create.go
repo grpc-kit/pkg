@@ -57,6 +57,48 @@ func (_c *RolesCreate) SetName(v string) *RolesCreate {
 	return _c
 }
 
+// SetI18nName sets the "i18n_name" field.
+func (_c *RolesCreate) SetI18nName(v string) *RolesCreate {
+	_c.mutation.SetI18nName(v)
+	return _c
+}
+
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_c *RolesCreate) SetNillableI18nName(v *string) *RolesCreate {
+	if v != nil {
+		_c.SetI18nName(*v)
+	}
+	return _c
+}
+
+// SetProtected sets the "protected" field.
+func (_c *RolesCreate) SetProtected(v bool) *RolesCreate {
+	_c.mutation.SetProtected(v)
+	return _c
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_c *RolesCreate) SetNillableProtected(v *bool) *RolesCreate {
+	if v != nil {
+		_c.SetProtected(*v)
+	}
+	return _c
+}
+
+// SetOrderWeight sets the "order_weight" field.
+func (_c *RolesCreate) SetOrderWeight(v int) *RolesCreate {
+	_c.mutation.SetOrderWeight(v)
+	return _c
+}
+
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_c *RolesCreate) SetNillableOrderWeight(v *int) *RolesCreate {
+	if v != nil {
+		_c.SetOrderWeight(*v)
+	}
+	return _c
+}
+
 // SetDescription sets the "description" field.
 func (_c *RolesCreate) SetDescription(v string) *RolesCreate {
 	_c.mutation.SetDescription(v)
@@ -159,6 +201,18 @@ func (_c *RolesCreate) defaults() {
 		v := roles.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.I18nName(); !ok {
+		v := roles.DefaultI18nName
+		_c.mutation.SetI18nName(v)
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		v := roles.DefaultProtected
+		_c.mutation.SetProtected(v)
+	}
+	if _, ok := _c.mutation.OrderWeight(); !ok {
+		v := roles.DefaultOrderWeight
+		_c.mutation.SetOrderWeight(v)
+	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := roles.DefaultDescription
 		_c.mutation.SetDescription(v)
@@ -180,6 +234,15 @@ func (_c *RolesCreate) check() error {
 		if err := roles.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Roles.name": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.I18nName(); !ok {
+		return &ValidationError{Name: "i18n_name", err: errors.New(`lion: missing required field "Roles.i18n_name"`)}
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Roles.protected"`)}
+	}
+	if _, ok := _c.mutation.OrderWeight(); !ok {
+		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Roles.order_weight"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Roles.description"`)}
@@ -221,6 +284,18 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(roles.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.I18nName(); ok {
+		_spec.SetField(roles.FieldI18nName, field.TypeString, value)
+		_node.I18nName = value
+	}
+	if value, ok := _c.mutation.Protected(); ok {
+		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
+		_node.Protected = value
+	}
+	if value, ok := _c.mutation.OrderWeight(); ok {
+		_spec.SetField(roles.FieldOrderWeight, field.TypeInt, value)
+		_node.OrderWeight = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(roles.FieldDescription, field.TypeString, value)

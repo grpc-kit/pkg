@@ -70,6 +70,21 @@ func Name(v string) predicate.Roles {
 	return predicate.Roles(sql.FieldEQ(FieldName, v))
 }
 
+// I18nName applies equality check predicate on the "i18n_name" field. It's identical to I18nNameEQ.
+func I18nName(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldI18nName, v))
+}
+
+// Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
+func Protected(v bool) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldProtected, v))
+}
+
+// OrderWeight applies equality check predicate on the "order_weight" field. It's identical to OrderWeightEQ.
+func OrderWeight(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldOrderWeight, v))
+}
+
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.Roles {
 	return predicate.Roles(sql.FieldEQ(FieldDescription, v))
@@ -218,6 +233,121 @@ func NameEqualFold(v string) predicate.Roles {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Roles {
 	return predicate.Roles(sql.FieldContainsFold(FieldName, v))
+}
+
+// I18nNameEQ applies the EQ predicate on the "i18n_name" field.
+func I18nNameEQ(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldI18nName, v))
+}
+
+// I18nNameNEQ applies the NEQ predicate on the "i18n_name" field.
+func I18nNameNEQ(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldNEQ(FieldI18nName, v))
+}
+
+// I18nNameIn applies the In predicate on the "i18n_name" field.
+func I18nNameIn(vs ...string) predicate.Roles {
+	return predicate.Roles(sql.FieldIn(FieldI18nName, vs...))
+}
+
+// I18nNameNotIn applies the NotIn predicate on the "i18n_name" field.
+func I18nNameNotIn(vs ...string) predicate.Roles {
+	return predicate.Roles(sql.FieldNotIn(FieldI18nName, vs...))
+}
+
+// I18nNameGT applies the GT predicate on the "i18n_name" field.
+func I18nNameGT(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldGT(FieldI18nName, v))
+}
+
+// I18nNameGTE applies the GTE predicate on the "i18n_name" field.
+func I18nNameGTE(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldGTE(FieldI18nName, v))
+}
+
+// I18nNameLT applies the LT predicate on the "i18n_name" field.
+func I18nNameLT(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldLT(FieldI18nName, v))
+}
+
+// I18nNameLTE applies the LTE predicate on the "i18n_name" field.
+func I18nNameLTE(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldLTE(FieldI18nName, v))
+}
+
+// I18nNameContains applies the Contains predicate on the "i18n_name" field.
+func I18nNameContains(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldContains(FieldI18nName, v))
+}
+
+// I18nNameHasPrefix applies the HasPrefix predicate on the "i18n_name" field.
+func I18nNameHasPrefix(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldHasPrefix(FieldI18nName, v))
+}
+
+// I18nNameHasSuffix applies the HasSuffix predicate on the "i18n_name" field.
+func I18nNameHasSuffix(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldHasSuffix(FieldI18nName, v))
+}
+
+// I18nNameEqualFold applies the EqualFold predicate on the "i18n_name" field.
+func I18nNameEqualFold(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldEqualFold(FieldI18nName, v))
+}
+
+// I18nNameContainsFold applies the ContainsFold predicate on the "i18n_name" field.
+func I18nNameContainsFold(v string) predicate.Roles {
+	return predicate.Roles(sql.FieldContainsFold(FieldI18nName, v))
+}
+
+// ProtectedEQ applies the EQ predicate on the "protected" field.
+func ProtectedEQ(v bool) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldProtected, v))
+}
+
+// ProtectedNEQ applies the NEQ predicate on the "protected" field.
+func ProtectedNEQ(v bool) predicate.Roles {
+	return predicate.Roles(sql.FieldNEQ(FieldProtected, v))
+}
+
+// OrderWeightEQ applies the EQ predicate on the "order_weight" field.
+func OrderWeightEQ(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldOrderWeight, v))
+}
+
+// OrderWeightNEQ applies the NEQ predicate on the "order_weight" field.
+func OrderWeightNEQ(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldNEQ(FieldOrderWeight, v))
+}
+
+// OrderWeightIn applies the In predicate on the "order_weight" field.
+func OrderWeightIn(vs ...int) predicate.Roles {
+	return predicate.Roles(sql.FieldIn(FieldOrderWeight, vs...))
+}
+
+// OrderWeightNotIn applies the NotIn predicate on the "order_weight" field.
+func OrderWeightNotIn(vs ...int) predicate.Roles {
+	return predicate.Roles(sql.FieldNotIn(FieldOrderWeight, vs...))
+}
+
+// OrderWeightGT applies the GT predicate on the "order_weight" field.
+func OrderWeightGT(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldGT(FieldOrderWeight, v))
+}
+
+// OrderWeightGTE applies the GTE predicate on the "order_weight" field.
+func OrderWeightGTE(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldGTE(FieldOrderWeight, v))
+}
+
+// OrderWeightLT applies the LT predicate on the "order_weight" field.
+func OrderWeightLT(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldLT(FieldOrderWeight, v))
+}
+
+// OrderWeightLTE applies the LTE predicate on the "order_weight" field.
+func OrderWeightLTE(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldLTE(FieldOrderWeight, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.
