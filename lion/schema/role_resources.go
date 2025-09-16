@@ -24,7 +24,10 @@ func (RoleResources) Fields() []ent.Field {
 		field.Int("resource_id").
 			Positive().
 			// Immutable().
-			Comment("关联 lion_resources 表的菜单 ID"),
+			Comment("关联 lion_resources 表的资源 ID"),
+		field.Int("resource_type").
+			Optional().
+			Comment("关联 lion_resources 表的资源类型"),
 	}
 }
 

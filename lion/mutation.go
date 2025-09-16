@@ -7972,6 +7972,8 @@ type RoleResourcesMutation struct {
 	id                    *int
 	created_at            *time.Time
 	updated_at            *time.Time
+	resource_type         *int
+	addresource_type      *int
 	clearedFields         map[string]struct{}
 	lion_roles            *int
 	clearedlion_roles     bool
@@ -8224,6 +8226,76 @@ func (m *RoleResourcesMutation) ResetResourceID() {
 	m.lion_resources = nil
 }
 
+// SetResourceType sets the "resource_type" field.
+func (m *RoleResourcesMutation) SetResourceType(i int) {
+	m.resource_type = &i
+	m.addresource_type = nil
+}
+
+// ResourceType returns the value of the "resource_type" field in the mutation.
+func (m *RoleResourcesMutation) ResourceType() (r int, exists bool) {
+	v := m.resource_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceType returns the old "resource_type" field's value of the RoleResources entity.
+// If the RoleResources object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RoleResourcesMutation) OldResourceType(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceType: %w", err)
+	}
+	return oldValue.ResourceType, nil
+}
+
+// AddResourceType adds i to the "resource_type" field.
+func (m *RoleResourcesMutation) AddResourceType(i int) {
+	if m.addresource_type != nil {
+		*m.addresource_type += i
+	} else {
+		m.addresource_type = &i
+	}
+}
+
+// AddedResourceType returns the value that was added to the "resource_type" field in this mutation.
+func (m *RoleResourcesMutation) AddedResourceType() (r int, exists bool) {
+	v := m.addresource_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearResourceType clears the value of the "resource_type" field.
+func (m *RoleResourcesMutation) ClearResourceType() {
+	m.resource_type = nil
+	m.addresource_type = nil
+	m.clearedFields[roleresources.FieldResourceType] = struct{}{}
+}
+
+// ResourceTypeCleared returns if the "resource_type" field was cleared in this mutation.
+func (m *RoleResourcesMutation) ResourceTypeCleared() bool {
+	_, ok := m.clearedFields[roleresources.FieldResourceType]
+	return ok
+}
+
+// ResetResourceType resets all changes to the "resource_type" field.
+func (m *RoleResourcesMutation) ResetResourceType() {
+	m.resource_type = nil
+	m.addresource_type = nil
+	delete(m.clearedFields, roleresources.FieldResourceType)
+}
+
 // SetLionRolesID sets the "lion_roles" edge to the Roles entity by id.
 func (m *RoleResourcesMutation) SetLionRolesID(id int) {
 	m.lion_roles = &id
@@ -8338,7 +8410,7 @@ func (m *RoleResourcesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RoleResourcesMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, roleresources.FieldCreatedAt)
 	}
@@ -8350,6 +8422,9 @@ func (m *RoleResourcesMutation) Fields() []string {
 	}
 	if m.lion_resources != nil {
 		fields = append(fields, roleresources.FieldResourceID)
+	}
+	if m.resource_type != nil {
+		fields = append(fields, roleresources.FieldResourceType)
 	}
 	return fields
 }
@@ -8367,6 +8442,8 @@ func (m *RoleResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.RoleID()
 	case roleresources.FieldResourceID:
 		return m.ResourceID()
+	case roleresources.FieldResourceType:
+		return m.ResourceType()
 	}
 	return nil, false
 }
@@ -8384,6 +8461,8 @@ func (m *RoleResourcesMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldRoleID(ctx)
 	case roleresources.FieldResourceID:
 		return m.OldResourceID(ctx)
+	case roleresources.FieldResourceType:
+		return m.OldResourceType(ctx)
 	}
 	return nil, fmt.Errorf("unknown RoleResources field %s", name)
 }
@@ -8421,6 +8500,13 @@ func (m *RoleResourcesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetResourceID(v)
 		return nil
+	case roleresources.FieldResourceType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceType(v)
+		return nil
 	}
 	return fmt.Errorf("unknown RoleResources field %s", name)
 }
@@ -8429,6 +8515,9 @@ func (m *RoleResourcesMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *RoleResourcesMutation) AddedFields() []string {
 	var fields []string
+	if m.addresource_type != nil {
+		fields = append(fields, roleresources.FieldResourceType)
+	}
 	return fields
 }
 
@@ -8437,6 +8526,8 @@ func (m *RoleResourcesMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *RoleResourcesMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case roleresources.FieldResourceType:
+		return m.AddedResourceType()
 	}
 	return nil, false
 }
@@ -8446,6 +8537,13 @@ func (m *RoleResourcesMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *RoleResourcesMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case roleresources.FieldResourceType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddResourceType(v)
+		return nil
 	}
 	return fmt.Errorf("unknown RoleResources numeric field %s", name)
 }
@@ -8453,7 +8551,11 @@ func (m *RoleResourcesMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *RoleResourcesMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(roleresources.FieldResourceType) {
+		fields = append(fields, roleresources.FieldResourceType)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -8466,6 +8568,11 @@ func (m *RoleResourcesMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *RoleResourcesMutation) ClearField(name string) error {
+	switch name {
+	case roleresources.FieldResourceType:
+		m.ClearResourceType()
+		return nil
+	}
 	return fmt.Errorf("unknown RoleResources nullable field %s", name)
 }
 
@@ -8484,6 +8591,9 @@ func (m *RoleResourcesMutation) ResetField(name string) error {
 		return nil
 	case roleresources.FieldResourceID:
 		m.ResetResourceID()
+		return nil
+	case roleresources.FieldResourceType:
+		m.ResetResourceType()
 		return nil
 	}
 	return fmt.Errorf("unknown RoleResources field %s", name)

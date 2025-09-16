@@ -230,6 +230,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "resource_type", Type: field.TypeInt, Nullable: true},
 		{Name: "resource_id", Type: field.TypeInt},
 		{Name: "role_id", Type: field.TypeInt},
 	}
@@ -241,13 +242,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_role_resources_lion_resources_lion_role_resources",
-				Columns:    []*schema.Column{LionRoleResourcesColumns[3]},
+				Columns:    []*schema.Column{LionRoleResourcesColumns[4]},
 				RefColumns: []*schema.Column{LionResourcesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_role_resources_lion_roles_lion_role_resources",
-				Columns:    []*schema.Column{LionRoleResourcesColumns[4]},
+				Columns:    []*schema.Column{LionRoleResourcesColumns[5]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -256,7 +257,7 @@ var (
 			{
 				Name:    "roleresources_role_id_resource_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionRoleResourcesColumns[4], LionRoleResourcesColumns[3]},
+				Columns: []*schema.Column{LionRoleResourcesColumns[5], LionRoleResourcesColumns[4]},
 			},
 		},
 	}

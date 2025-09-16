@@ -25,8 +25,10 @@ type RoleResources struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// 关联 lion_role 表的用户组 ID
 	RoleID int `json:"role_id,omitempty"`
-	// 关联 lion_resources 表的菜单 ID
+	// 关联 lion_resources 表的资源 ID
 	ResourceID int `json:"resource_id,omitempty"`
+	// 关联 lion_resources 表的资源类型
+	ResourceType int `json:"resource_type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RoleResourcesQuery when eager-loading is set.
 	Edges        RoleResourcesEdges `json:"edges"`
@@ -71,7 +73,7 @@ func (*RoleResources) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case roleresources.FieldID, roleresources.FieldRoleID, roleresources.FieldResourceID:
+		case roleresources.FieldID, roleresources.FieldRoleID, roleresources.FieldResourceID, roleresources.FieldResourceType:
 			values[i] = new(sql.NullInt64)
 		case roleresources.FieldCreatedAt, roleresources.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -119,6 +121,12 @@ func (_m *RoleResources) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field resource_id", values[i])
 			} else if value.Valid {
 				_m.ResourceID = int(value.Int64)
+			}
+		case roleresources.FieldResourceType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_type", values[i])
+			} else if value.Valid {
+				_m.ResourceType = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -177,6 +185,9 @@ func (_m *RoleResources) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("resource_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ResourceID))
+	builder.WriteString(", ")
+	builder.WriteString("resource_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ResourceType))
 	builder.WriteByte(')')
 	return builder.String()
 }

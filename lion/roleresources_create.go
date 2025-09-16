@@ -62,6 +62,20 @@ func (_c *RoleResourcesCreate) SetResourceID(v int) *RoleResourcesCreate {
 	return _c
 }
 
+// SetResourceType sets the "resource_type" field.
+func (_c *RoleResourcesCreate) SetResourceType(v int) *RoleResourcesCreate {
+	_c.mutation.SetResourceType(v)
+	return _c
+}
+
+// SetNillableResourceType sets the "resource_type" field if the given value is not nil.
+func (_c *RoleResourcesCreate) SetNillableResourceType(v *int) *RoleResourcesCreate {
+	if v != nil {
+		_c.SetResourceType(*v)
+	}
+	return _c
+}
+
 // SetLionRolesID sets the "lion_roles" edge to the Roles entity by ID.
 func (_c *RoleResourcesCreate) SetLionRolesID(id int) *RoleResourcesCreate {
 	_c.mutation.SetLionRolesID(id)
@@ -192,6 +206,10 @@ func (_c *RoleResourcesCreate) createSpec() (*RoleResources, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(roleresources.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.ResourceType(); ok {
+		_spec.SetField(roleresources.FieldResourceType, field.TypeInt, value)
+		_node.ResourceType = value
 	}
 	if nodes := _c.mutation.LionRolesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

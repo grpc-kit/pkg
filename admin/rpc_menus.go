@@ -128,11 +128,11 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 	}
 
 	// 构建树状菜单
-	menuMap := make(map[int32]*adminv1.Menu)
-	var roots []*adminv1.Menu
+	menuMap := make(map[int32]*adminv1.Resource)
+	var roots []*adminv1.Resource
 
 	for _, m := range rids {
-		menu := &adminv1.Menu{
+		menu := &adminv1.Resource{
 			Id:                 int32(m.ID),
 			ParentId:           int32(m.ParentID),
 			Name:               m.Name,

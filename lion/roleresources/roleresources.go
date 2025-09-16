@@ -22,6 +22,8 @@ const (
 	FieldRoleID = "role_id"
 	// FieldResourceID holds the string denoting the resource_id field in the database.
 	FieldResourceID = "resource_id"
+	// FieldResourceType holds the string denoting the resource_type field in the database.
+	FieldResourceType = "resource_type"
 	// EdgeLionRoles holds the string denoting the lion_roles edge name in mutations.
 	EdgeLionRoles = "lion_roles"
 	// EdgeLionResources holds the string denoting the lion_resources edge name in mutations.
@@ -51,6 +53,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldRoleID,
 	FieldResourceID,
+	FieldResourceType,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -102,6 +105,11 @@ func ByRoleID(opts ...sql.OrderTermOption) OrderOption {
 // ByResourceID orders the results by the resource_id field.
 func ByResourceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResourceID, opts...).ToFunc()
+}
+
+// ByResourceType orders the results by the resource_type field.
+func ByResourceType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceType, opts...).ToFunc()
 }
 
 // ByLionRolesField orders the results by lion_roles field.
