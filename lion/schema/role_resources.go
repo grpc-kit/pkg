@@ -37,8 +37,8 @@ func (RoleResources) Edges() []ent.Edge {
 		// 每条 RoleMenu 记录必须属于一个 Role
 		edge.From("lion_roles", Roles.Type).
 			Ref("lion_role_resources"). // 与 Role 实体中的 edge.To("role_resources", ...) 的 Ref 名称对应
-			Field("role_id"). // 明确外键字段名（可选，但推荐显式声明）
-			Unique(). // 一条 RoleMenu 记录只属于一个 Role
+			Field("role_id").           // 明确外键字段名（可选，但推荐显式声明）
+			Unique().                   // 一条 RoleMenu 记录只属于一个 Role
 			Required(),
 		// 每条 RoleMenu 记录必须属于一个 Menu
 		edge.From("lion_resources", Resources.Type).
