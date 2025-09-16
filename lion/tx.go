@@ -32,6 +32,8 @@ type Tx struct {
 	Policies *PoliciesClient
 	// Resources is the client for interacting with the Resources builders.
 	Resources *ResourcesClient
+	// RoleDepartments is the client for interacting with the RoleDepartments builders.
+	RoleDepartments *RoleDepartmentsClient
 	// RolePermissions is the client for interacting with the RolePermissions builders.
 	RolePermissions *RolePermissionsClient
 	// RoleResources is the client for interacting with the RoleResources builders.
@@ -189,6 +191,7 @@ func (tx *Tx) init() {
 	tx.Permissions = NewPermissionsClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
 	tx.Resources = NewResourcesClient(tx.config)
+	tx.RoleDepartments = NewRoleDepartmentsClient(tx.config)
 	tx.RolePermissions = NewRolePermissionsClient(tx.config)
 	tx.RoleResources = NewRoleResourcesClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)

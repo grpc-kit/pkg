@@ -28,10 +28,19 @@ const (
 	FieldOrderWeight = "order_weight"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// EdgeLionRoleDepartments holds the string denoting the lion_role_departments edge name in mutations.
+	EdgeLionRoleDepartments = "lion_role_departments"
 	// EdgeLionDepartmentUsers holds the string denoting the lion_department_users edge name in mutations.
 	EdgeLionDepartmentUsers = "lion_department_users"
 	// Table holds the table name of the departments in the database.
 	Table = "lion_departments"
+	// LionRoleDepartmentsTable is the table that holds the lion_role_departments relation/edge.
+	LionRoleDepartmentsTable = "lion_role_departments"
+	// LionRoleDepartmentsInverseTable is the table name for the RoleDepartments entity.
+	// It exists in this package in order to avoid circular dependency with the "roledepartments" package.
+	LionRoleDepartmentsInverseTable = "lion_role_departments"
+	// LionRoleDepartmentsColumn is the table column denoting the lion_role_departments relation/edge.
+	LionRoleDepartmentsColumn = "department_id"
 	// LionDepartmentUsersTable is the table that holds the lion_department_users relation/edge.
 	LionDepartmentUsersTable = "lion_department_users"
 	// LionDepartmentUsersInverseTable is the table name for the DepartmentUsers entity.
@@ -125,6 +134,20 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
+// ByLionRoleDepartmentsCount orders the results by lion_role_departments count.
+func ByLionRoleDepartmentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionRoleDepartmentsStep(), opts...)
+	}
+}
+
+// ByLionRoleDepartments orders the results by lion_role_departments terms.
+func ByLionRoleDepartments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionRoleDepartmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByLionDepartmentUsersCount orders the results by lion_department_users count.
 func ByLionDepartmentUsersCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -137,6 +160,13 @@ func ByLionDepartmentUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOpti
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
+}
+func newLionRoleDepartmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionRoleDepartmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleDepartmentsTable, LionRoleDepartmentsColumn),
+	)
 }
 func newLionDepartmentUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

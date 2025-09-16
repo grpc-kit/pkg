@@ -46,6 +46,7 @@ func (Roles) Edges() []ent.Edge {
 		edge.To("lion_role_resources", RoleResources.Type),
 		edge.To("lion_user_roles", UserRoles.Type),
 		edge.To("lion_role_groups", GroupRoles.Type),
+		edge.To("lion_role_departments", RoleDepartments.Type),
 	}
 }
 

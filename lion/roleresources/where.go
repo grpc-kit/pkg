@@ -75,11 +75,6 @@ func ResourceID(v int) predicate.RoleResources {
 	return predicate.RoleResources(sql.FieldEQ(FieldResourceID, v))
 }
 
-// ResourceType applies equality check predicate on the "resource_type" field. It's identical to ResourceTypeEQ.
-func ResourceType(v int) predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldEQ(FieldResourceType, v))
-}
-
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.RoleResources {
 	return predicate.RoleResources(sql.FieldEQ(FieldCreatedAt, v))
@@ -198,56 +193,6 @@ func ResourceIDIn(vs ...int) predicate.RoleResources {
 // ResourceIDNotIn applies the NotIn predicate on the "resource_id" field.
 func ResourceIDNotIn(vs ...int) predicate.RoleResources {
 	return predicate.RoleResources(sql.FieldNotIn(FieldResourceID, vs...))
-}
-
-// ResourceTypeEQ applies the EQ predicate on the "resource_type" field.
-func ResourceTypeEQ(v int) predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldEQ(FieldResourceType, v))
-}
-
-// ResourceTypeNEQ applies the NEQ predicate on the "resource_type" field.
-func ResourceTypeNEQ(v int) predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldNEQ(FieldResourceType, v))
-}
-
-// ResourceTypeIn applies the In predicate on the "resource_type" field.
-func ResourceTypeIn(vs ...int) predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldIn(FieldResourceType, vs...))
-}
-
-// ResourceTypeNotIn applies the NotIn predicate on the "resource_type" field.
-func ResourceTypeNotIn(vs ...int) predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldNotIn(FieldResourceType, vs...))
-}
-
-// ResourceTypeGT applies the GT predicate on the "resource_type" field.
-func ResourceTypeGT(v int) predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldGT(FieldResourceType, v))
-}
-
-// ResourceTypeGTE applies the GTE predicate on the "resource_type" field.
-func ResourceTypeGTE(v int) predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldGTE(FieldResourceType, v))
-}
-
-// ResourceTypeLT applies the LT predicate on the "resource_type" field.
-func ResourceTypeLT(v int) predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldLT(FieldResourceType, v))
-}
-
-// ResourceTypeLTE applies the LTE predicate on the "resource_type" field.
-func ResourceTypeLTE(v int) predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldLTE(FieldResourceType, v))
-}
-
-// ResourceTypeIsNil applies the IsNil predicate on the "resource_type" field.
-func ResourceTypeIsNil() predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldIsNull(FieldResourceType))
-}
-
-// ResourceTypeNotNil applies the NotNil predicate on the "resource_type" field.
-func ResourceTypeNotNil() predicate.RoleResources {
-	return predicate.RoleResources(sql.FieldNotNull(FieldResourceType))
 }
 
 // HasLionRoles applies the HasEdge predicate on the "lion_roles" edge.

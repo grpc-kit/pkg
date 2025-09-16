@@ -9,7 +9,7 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// RoleResources 角色关联的菜单项
+// RoleResources 角色关联的部门
 type RoleResources struct {
 	ent.Schema
 }
@@ -20,14 +20,11 @@ func (RoleResources) Fields() []ent.Field {
 		field.Int("role_id").
 			Positive().
 			// Immutable().
-			Comment("关联 lion_role 表的用户组 ID"),
+			Comment("关联 lion_roles 表的用户组 ID"),
 		field.Int("resource_id").
 			Positive().
 			// Immutable().
 			Comment("关联 lion_resources 表的资源 ID"),
-		field.Int("resource_type").
-			Optional().
-			Comment("关联 lion_resources 表的资源类型"),
 	}
 }
 

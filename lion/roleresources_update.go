@@ -64,33 +64,6 @@ func (_u *RoleResourcesUpdate) SetNillableResourceID(v *int) *RoleResourcesUpdat
 	return _u
 }
 
-// SetResourceType sets the "resource_type" field.
-func (_u *RoleResourcesUpdate) SetResourceType(v int) *RoleResourcesUpdate {
-	_u.mutation.ResetResourceType()
-	_u.mutation.SetResourceType(v)
-	return _u
-}
-
-// SetNillableResourceType sets the "resource_type" field if the given value is not nil.
-func (_u *RoleResourcesUpdate) SetNillableResourceType(v *int) *RoleResourcesUpdate {
-	if v != nil {
-		_u.SetResourceType(*v)
-	}
-	return _u
-}
-
-// AddResourceType adds value to the "resource_type" field.
-func (_u *RoleResourcesUpdate) AddResourceType(v int) *RoleResourcesUpdate {
-	_u.mutation.AddResourceType(v)
-	return _u
-}
-
-// ClearResourceType clears the value of the "resource_type" field.
-func (_u *RoleResourcesUpdate) ClearResourceType() *RoleResourcesUpdate {
-	_u.mutation.ClearResourceType()
-	return _u
-}
-
 // SetLionRolesID sets the "lion_roles" edge to the Roles entity by ID.
 func (_u *RoleResourcesUpdate) SetLionRolesID(id int) *RoleResourcesUpdate {
 	_u.mutation.SetLionRolesID(id)
@@ -202,15 +175,6 @@ func (_u *RoleResourcesUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(roleresources.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.ResourceType(); ok {
-		_spec.SetField(roleresources.FieldResourceType, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedResourceType(); ok {
-		_spec.AddField(roleresources.FieldResourceType, field.TypeInt, value)
-	}
-	if _u.mutation.ResourceTypeCleared() {
-		_spec.ClearField(roleresources.FieldResourceType, field.TypeInt)
-	}
 	if _u.mutation.LionRolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -320,33 +284,6 @@ func (_u *RoleResourcesUpdateOne) SetNillableResourceID(v *int) *RoleResourcesUp
 	if v != nil {
 		_u.SetResourceID(*v)
 	}
-	return _u
-}
-
-// SetResourceType sets the "resource_type" field.
-func (_u *RoleResourcesUpdateOne) SetResourceType(v int) *RoleResourcesUpdateOne {
-	_u.mutation.ResetResourceType()
-	_u.mutation.SetResourceType(v)
-	return _u
-}
-
-// SetNillableResourceType sets the "resource_type" field if the given value is not nil.
-func (_u *RoleResourcesUpdateOne) SetNillableResourceType(v *int) *RoleResourcesUpdateOne {
-	if v != nil {
-		_u.SetResourceType(*v)
-	}
-	return _u
-}
-
-// AddResourceType adds value to the "resource_type" field.
-func (_u *RoleResourcesUpdateOne) AddResourceType(v int) *RoleResourcesUpdateOne {
-	_u.mutation.AddResourceType(v)
-	return _u
-}
-
-// ClearResourceType clears the value of the "resource_type" field.
-func (_u *RoleResourcesUpdateOne) ClearResourceType() *RoleResourcesUpdateOne {
-	_u.mutation.ClearResourceType()
 	return _u
 }
 
@@ -490,15 +427,6 @@ func (_u *RoleResourcesUpdateOne) sqlSave(ctx context.Context) (_node *RoleResou
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(roleresources.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.ResourceType(); ok {
-		_spec.SetField(roleresources.FieldResourceType, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedResourceType(); ok {
-		_spec.AddField(roleresources.FieldResourceType, field.TypeInt, value)
-	}
-	if _u.mutation.ResourceTypeCleared() {
-		_spec.ClearField(roleresources.FieldResourceType, field.TypeInt)
 	}
 	if _u.mutation.LionRolesCleared() {
 		edge := &sqlgraph.EdgeSpec{

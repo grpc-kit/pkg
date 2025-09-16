@@ -22,6 +22,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
+	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
@@ -51,6 +52,7 @@ const (
 	TypePermissions     = "Permissions"
 	TypePolicies        = "Policies"
 	TypeResources       = "Resources"
+	TypeRoleDepartments = "RoleDepartments"
 	TypeRolePermissions = "RolePermissions"
 	TypeRoleResources   = "RoleResources"
 	TypeRoles           = "Roles"
@@ -3264,6 +3266,9 @@ type DepartmentsMutation struct {
 	addorder_weight              *int
 	description                  *string
 	clearedFields                map[string]struct{}
+	lion_role_departments        map[int]struct{}
+	removedlion_role_departments map[int]struct{}
+	clearedlion_role_departments bool
 	lion_department_users        map[int]struct{}
 	removedlion_department_users map[int]struct{}
 	clearedlion_department_users bool
@@ -3662,6 +3667,60 @@ func (m *DepartmentsMutation) ResetDescription() {
 	m.description = nil
 }
 
+// AddLionRoleDepartmentIDs adds the "lion_role_departments" edge to the RoleDepartments entity by ids.
+func (m *DepartmentsMutation) AddLionRoleDepartmentIDs(ids ...int) {
+	if m.lion_role_departments == nil {
+		m.lion_role_departments = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lion_role_departments[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLionRoleDepartments clears the "lion_role_departments" edge to the RoleDepartments entity.
+func (m *DepartmentsMutation) ClearLionRoleDepartments() {
+	m.clearedlion_role_departments = true
+}
+
+// LionRoleDepartmentsCleared reports if the "lion_role_departments" edge to the RoleDepartments entity was cleared.
+func (m *DepartmentsMutation) LionRoleDepartmentsCleared() bool {
+	return m.clearedlion_role_departments
+}
+
+// RemoveLionRoleDepartmentIDs removes the "lion_role_departments" edge to the RoleDepartments entity by IDs.
+func (m *DepartmentsMutation) RemoveLionRoleDepartmentIDs(ids ...int) {
+	if m.removedlion_role_departments == nil {
+		m.removedlion_role_departments = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lion_role_departments, ids[i])
+		m.removedlion_role_departments[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLionRoleDepartments returns the removed IDs of the "lion_role_departments" edge to the RoleDepartments entity.
+func (m *DepartmentsMutation) RemovedLionRoleDepartmentsIDs() (ids []int) {
+	for id := range m.removedlion_role_departments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LionRoleDepartmentsIDs returns the "lion_role_departments" edge IDs in the mutation.
+func (m *DepartmentsMutation) LionRoleDepartmentsIDs() (ids []int) {
+	for id := range m.lion_role_departments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLionRoleDepartments resets all changes to the "lion_role_departments" edge.
+func (m *DepartmentsMutation) ResetLionRoleDepartments() {
+	m.lion_role_departments = nil
+	m.clearedlion_role_departments = false
+	m.removedlion_role_departments = nil
+}
+
 // AddLionDepartmentUserIDs adds the "lion_department_users" edge to the DepartmentUsers entity by ids.
 func (m *DepartmentsMutation) AddLionDepartmentUserIDs(ids ...int) {
 	if m.lion_department_users == nil {
@@ -3978,7 +4037,10 @@ func (m *DepartmentsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DepartmentsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.lion_role_departments != nil {
+		edges = append(edges, departments.EdgeLionRoleDepartments)
+	}
 	if m.lion_department_users != nil {
 		edges = append(edges, departments.EdgeLionDepartmentUsers)
 	}
@@ -3989,6 +4051,12 @@ func (m *DepartmentsMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *DepartmentsMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case departments.EdgeLionRoleDepartments:
+		ids := make([]ent.Value, 0, len(m.lion_role_departments))
+		for id := range m.lion_role_departments {
+			ids = append(ids, id)
+		}
+		return ids
 	case departments.EdgeLionDepartmentUsers:
 		ids := make([]ent.Value, 0, len(m.lion_department_users))
 		for id := range m.lion_department_users {
@@ -4001,7 +4069,10 @@ func (m *DepartmentsMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DepartmentsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedlion_role_departments != nil {
+		edges = append(edges, departments.EdgeLionRoleDepartments)
+	}
 	if m.removedlion_department_users != nil {
 		edges = append(edges, departments.EdgeLionDepartmentUsers)
 	}
@@ -4012,6 +4083,12 @@ func (m *DepartmentsMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *DepartmentsMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case departments.EdgeLionRoleDepartments:
+		ids := make([]ent.Value, 0, len(m.removedlion_role_departments))
+		for id := range m.removedlion_role_departments {
+			ids = append(ids, id)
+		}
+		return ids
 	case departments.EdgeLionDepartmentUsers:
 		ids := make([]ent.Value, 0, len(m.removedlion_department_users))
 		for id := range m.removedlion_department_users {
@@ -4024,7 +4101,10 @@ func (m *DepartmentsMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DepartmentsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.clearedlion_role_departments {
+		edges = append(edges, departments.EdgeLionRoleDepartments)
+	}
 	if m.clearedlion_department_users {
 		edges = append(edges, departments.EdgeLionDepartmentUsers)
 	}
@@ -4035,6 +4115,8 @@ func (m *DepartmentsMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *DepartmentsMutation) EdgeCleared(name string) bool {
 	switch name {
+	case departments.EdgeLionRoleDepartments:
+		return m.clearedlion_role_departments
 	case departments.EdgeLionDepartmentUsers:
 		return m.clearedlion_department_users
 	}
@@ -4053,6 +4135,9 @@ func (m *DepartmentsMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *DepartmentsMutation) ResetEdge(name string) error {
 	switch name {
+	case departments.EdgeLionRoleDepartments:
+		m.ResetLionRoleDepartments()
+		return nil
 	case departments.EdgeLionDepartmentUsers:
 		m.ResetLionDepartmentUsers()
 		return nil
@@ -7407,6 +7492,623 @@ func (m *ResourcesMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Resources edge %s", name)
 }
 
+// RoleDepartmentsMutation represents an operation that mutates the RoleDepartments nodes in the graph.
+type RoleDepartmentsMutation struct {
+	config
+	op                      Op
+	typ                     string
+	id                      *int
+	created_at              *time.Time
+	updated_at              *time.Time
+	clearedFields           map[string]struct{}
+	lion_roles              *int
+	clearedlion_roles       bool
+	lion_departments        *int
+	clearedlion_departments bool
+	done                    bool
+	oldValue                func(context.Context) (*RoleDepartments, error)
+	predicates              []predicate.RoleDepartments
+}
+
+var _ ent.Mutation = (*RoleDepartmentsMutation)(nil)
+
+// roledepartmentsOption allows management of the mutation configuration using functional options.
+type roledepartmentsOption func(*RoleDepartmentsMutation)
+
+// newRoleDepartmentsMutation creates new mutation for the RoleDepartments entity.
+func newRoleDepartmentsMutation(c config, op Op, opts ...roledepartmentsOption) *RoleDepartmentsMutation {
+	m := &RoleDepartmentsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeRoleDepartments,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withRoleDepartmentsID sets the ID field of the mutation.
+func withRoleDepartmentsID(id int) roledepartmentsOption {
+	return func(m *RoleDepartmentsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *RoleDepartments
+		)
+		m.oldValue = func(ctx context.Context) (*RoleDepartments, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().RoleDepartments.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withRoleDepartments sets the old RoleDepartments of the mutation.
+func withRoleDepartments(node *RoleDepartments) roledepartmentsOption {
+	return func(m *RoleDepartmentsMutation) {
+		m.oldValue = func(context.Context) (*RoleDepartments, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m RoleDepartmentsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m RoleDepartmentsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("lion: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *RoleDepartmentsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *RoleDepartmentsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().RoleDepartments.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *RoleDepartmentsMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *RoleDepartmentsMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the RoleDepartments entity.
+// If the RoleDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RoleDepartmentsMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *RoleDepartmentsMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *RoleDepartmentsMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *RoleDepartmentsMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the RoleDepartments entity.
+// If the RoleDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RoleDepartmentsMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *RoleDepartmentsMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetRoleID sets the "role_id" field.
+func (m *RoleDepartmentsMutation) SetRoleID(i int) {
+	m.lion_roles = &i
+}
+
+// RoleID returns the value of the "role_id" field in the mutation.
+func (m *RoleDepartmentsMutation) RoleID() (r int, exists bool) {
+	v := m.lion_roles
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoleID returns the old "role_id" field's value of the RoleDepartments entity.
+// If the RoleDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RoleDepartmentsMutation) OldRoleID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRoleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRoleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoleID: %w", err)
+	}
+	return oldValue.RoleID, nil
+}
+
+// ResetRoleID resets all changes to the "role_id" field.
+func (m *RoleDepartmentsMutation) ResetRoleID() {
+	m.lion_roles = nil
+}
+
+// SetDepartmentID sets the "department_id" field.
+func (m *RoleDepartmentsMutation) SetDepartmentID(i int) {
+	m.lion_departments = &i
+}
+
+// DepartmentID returns the value of the "department_id" field in the mutation.
+func (m *RoleDepartmentsMutation) DepartmentID() (r int, exists bool) {
+	v := m.lion_departments
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDepartmentID returns the old "department_id" field's value of the RoleDepartments entity.
+// If the RoleDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RoleDepartmentsMutation) OldDepartmentID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDepartmentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDepartmentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDepartmentID: %w", err)
+	}
+	return oldValue.DepartmentID, nil
+}
+
+// ResetDepartmentID resets all changes to the "department_id" field.
+func (m *RoleDepartmentsMutation) ResetDepartmentID() {
+	m.lion_departments = nil
+}
+
+// SetLionRolesID sets the "lion_roles" edge to the Roles entity by id.
+func (m *RoleDepartmentsMutation) SetLionRolesID(id int) {
+	m.lion_roles = &id
+}
+
+// ClearLionRoles clears the "lion_roles" edge to the Roles entity.
+func (m *RoleDepartmentsMutation) ClearLionRoles() {
+	m.clearedlion_roles = true
+	m.clearedFields[roledepartments.FieldRoleID] = struct{}{}
+}
+
+// LionRolesCleared reports if the "lion_roles" edge to the Roles entity was cleared.
+func (m *RoleDepartmentsMutation) LionRolesCleared() bool {
+	return m.clearedlion_roles
+}
+
+// LionRolesID returns the "lion_roles" edge ID in the mutation.
+func (m *RoleDepartmentsMutation) LionRolesID() (id int, exists bool) {
+	if m.lion_roles != nil {
+		return *m.lion_roles, true
+	}
+	return
+}
+
+// LionRolesIDs returns the "lion_roles" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionRolesID instead. It exists only for internal usage by the builders.
+func (m *RoleDepartmentsMutation) LionRolesIDs() (ids []int) {
+	if id := m.lion_roles; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionRoles resets all changes to the "lion_roles" edge.
+func (m *RoleDepartmentsMutation) ResetLionRoles() {
+	m.lion_roles = nil
+	m.clearedlion_roles = false
+}
+
+// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by id.
+func (m *RoleDepartmentsMutation) SetLionDepartmentsID(id int) {
+	m.lion_departments = &id
+}
+
+// ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
+func (m *RoleDepartmentsMutation) ClearLionDepartments() {
+	m.clearedlion_departments = true
+	m.clearedFields[roledepartments.FieldDepartmentID] = struct{}{}
+}
+
+// LionDepartmentsCleared reports if the "lion_departments" edge to the Departments entity was cleared.
+func (m *RoleDepartmentsMutation) LionDepartmentsCleared() bool {
+	return m.clearedlion_departments
+}
+
+// LionDepartmentsID returns the "lion_departments" edge ID in the mutation.
+func (m *RoleDepartmentsMutation) LionDepartmentsID() (id int, exists bool) {
+	if m.lion_departments != nil {
+		return *m.lion_departments, true
+	}
+	return
+}
+
+// LionDepartmentsIDs returns the "lion_departments" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionDepartmentsID instead. It exists only for internal usage by the builders.
+func (m *RoleDepartmentsMutation) LionDepartmentsIDs() (ids []int) {
+	if id := m.lion_departments; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionDepartments resets all changes to the "lion_departments" edge.
+func (m *RoleDepartmentsMutation) ResetLionDepartments() {
+	m.lion_departments = nil
+	m.clearedlion_departments = false
+}
+
+// Where appends a list predicates to the RoleDepartmentsMutation builder.
+func (m *RoleDepartmentsMutation) Where(ps ...predicate.RoleDepartments) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the RoleDepartmentsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *RoleDepartmentsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.RoleDepartments, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *RoleDepartmentsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *RoleDepartmentsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (RoleDepartments).
+func (m *RoleDepartmentsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *RoleDepartmentsMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.created_at != nil {
+		fields = append(fields, roledepartments.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, roledepartments.FieldUpdatedAt)
+	}
+	if m.lion_roles != nil {
+		fields = append(fields, roledepartments.FieldRoleID)
+	}
+	if m.lion_departments != nil {
+		fields = append(fields, roledepartments.FieldDepartmentID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *RoleDepartmentsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case roledepartments.FieldCreatedAt:
+		return m.CreatedAt()
+	case roledepartments.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case roledepartments.FieldRoleID:
+		return m.RoleID()
+	case roledepartments.FieldDepartmentID:
+		return m.DepartmentID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *RoleDepartmentsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case roledepartments.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case roledepartments.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case roledepartments.FieldRoleID:
+		return m.OldRoleID(ctx)
+	case roledepartments.FieldDepartmentID:
+		return m.OldDepartmentID(ctx)
+	}
+	return nil, fmt.Errorf("unknown RoleDepartments field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RoleDepartmentsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case roledepartments.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case roledepartments.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case roledepartments.FieldRoleID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoleID(v)
+		return nil
+	case roledepartments.FieldDepartmentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDepartmentID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown RoleDepartments field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *RoleDepartmentsMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *RoleDepartmentsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RoleDepartmentsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown RoleDepartments numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *RoleDepartmentsMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *RoleDepartmentsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *RoleDepartmentsMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown RoleDepartments nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *RoleDepartmentsMutation) ResetField(name string) error {
+	switch name {
+	case roledepartments.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case roledepartments.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case roledepartments.FieldRoleID:
+		m.ResetRoleID()
+		return nil
+	case roledepartments.FieldDepartmentID:
+		m.ResetDepartmentID()
+		return nil
+	}
+	return fmt.Errorf("unknown RoleDepartments field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *RoleDepartmentsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.lion_roles != nil {
+		edges = append(edges, roledepartments.EdgeLionRoles)
+	}
+	if m.lion_departments != nil {
+		edges = append(edges, roledepartments.EdgeLionDepartments)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *RoleDepartmentsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case roledepartments.EdgeLionRoles:
+		if id := m.lion_roles; id != nil {
+			return []ent.Value{*id}
+		}
+	case roledepartments.EdgeLionDepartments:
+		if id := m.lion_departments; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *RoleDepartmentsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *RoleDepartmentsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *RoleDepartmentsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedlion_roles {
+		edges = append(edges, roledepartments.EdgeLionRoles)
+	}
+	if m.clearedlion_departments {
+		edges = append(edges, roledepartments.EdgeLionDepartments)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *RoleDepartmentsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case roledepartments.EdgeLionRoles:
+		return m.clearedlion_roles
+	case roledepartments.EdgeLionDepartments:
+		return m.clearedlion_departments
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *RoleDepartmentsMutation) ClearEdge(name string) error {
+	switch name {
+	case roledepartments.EdgeLionRoles:
+		m.ClearLionRoles()
+		return nil
+	case roledepartments.EdgeLionDepartments:
+		m.ClearLionDepartments()
+		return nil
+	}
+	return fmt.Errorf("unknown RoleDepartments unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *RoleDepartmentsMutation) ResetEdge(name string) error {
+	switch name {
+	case roledepartments.EdgeLionRoles:
+		m.ResetLionRoles()
+		return nil
+	case roledepartments.EdgeLionDepartments:
+		m.ResetLionDepartments()
+		return nil
+	}
+	return fmt.Errorf("unknown RoleDepartments edge %s", name)
+}
+
 // RolePermissionsMutation represents an operation that mutates the RolePermissions nodes in the graph.
 type RolePermissionsMutation struct {
 	config
@@ -7972,8 +8674,6 @@ type RoleResourcesMutation struct {
 	id                    *int
 	created_at            *time.Time
 	updated_at            *time.Time
-	resource_type         *int
-	addresource_type      *int
 	clearedFields         map[string]struct{}
 	lion_roles            *int
 	clearedlion_roles     bool
@@ -8226,76 +8926,6 @@ func (m *RoleResourcesMutation) ResetResourceID() {
 	m.lion_resources = nil
 }
 
-// SetResourceType sets the "resource_type" field.
-func (m *RoleResourcesMutation) SetResourceType(i int) {
-	m.resource_type = &i
-	m.addresource_type = nil
-}
-
-// ResourceType returns the value of the "resource_type" field in the mutation.
-func (m *RoleResourcesMutation) ResourceType() (r int, exists bool) {
-	v := m.resource_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldResourceType returns the old "resource_type" field's value of the RoleResources entity.
-// If the RoleResources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RoleResourcesMutation) OldResourceType(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldResourceType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldResourceType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldResourceType: %w", err)
-	}
-	return oldValue.ResourceType, nil
-}
-
-// AddResourceType adds i to the "resource_type" field.
-func (m *RoleResourcesMutation) AddResourceType(i int) {
-	if m.addresource_type != nil {
-		*m.addresource_type += i
-	} else {
-		m.addresource_type = &i
-	}
-}
-
-// AddedResourceType returns the value that was added to the "resource_type" field in this mutation.
-func (m *RoleResourcesMutation) AddedResourceType() (r int, exists bool) {
-	v := m.addresource_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearResourceType clears the value of the "resource_type" field.
-func (m *RoleResourcesMutation) ClearResourceType() {
-	m.resource_type = nil
-	m.addresource_type = nil
-	m.clearedFields[roleresources.FieldResourceType] = struct{}{}
-}
-
-// ResourceTypeCleared returns if the "resource_type" field was cleared in this mutation.
-func (m *RoleResourcesMutation) ResourceTypeCleared() bool {
-	_, ok := m.clearedFields[roleresources.FieldResourceType]
-	return ok
-}
-
-// ResetResourceType resets all changes to the "resource_type" field.
-func (m *RoleResourcesMutation) ResetResourceType() {
-	m.resource_type = nil
-	m.addresource_type = nil
-	delete(m.clearedFields, roleresources.FieldResourceType)
-}
-
 // SetLionRolesID sets the "lion_roles" edge to the Roles entity by id.
 func (m *RoleResourcesMutation) SetLionRolesID(id int) {
 	m.lion_roles = &id
@@ -8410,7 +9040,7 @@ func (m *RoleResourcesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RoleResourcesMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 4)
 	if m.created_at != nil {
 		fields = append(fields, roleresources.FieldCreatedAt)
 	}
@@ -8422,9 +9052,6 @@ func (m *RoleResourcesMutation) Fields() []string {
 	}
 	if m.lion_resources != nil {
 		fields = append(fields, roleresources.FieldResourceID)
-	}
-	if m.resource_type != nil {
-		fields = append(fields, roleresources.FieldResourceType)
 	}
 	return fields
 }
@@ -8442,8 +9069,6 @@ func (m *RoleResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.RoleID()
 	case roleresources.FieldResourceID:
 		return m.ResourceID()
-	case roleresources.FieldResourceType:
-		return m.ResourceType()
 	}
 	return nil, false
 }
@@ -8461,8 +9086,6 @@ func (m *RoleResourcesMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldRoleID(ctx)
 	case roleresources.FieldResourceID:
 		return m.OldResourceID(ctx)
-	case roleresources.FieldResourceType:
-		return m.OldResourceType(ctx)
 	}
 	return nil, fmt.Errorf("unknown RoleResources field %s", name)
 }
@@ -8500,13 +9123,6 @@ func (m *RoleResourcesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetResourceID(v)
 		return nil
-	case roleresources.FieldResourceType:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetResourceType(v)
-		return nil
 	}
 	return fmt.Errorf("unknown RoleResources field %s", name)
 }
@@ -8515,9 +9131,6 @@ func (m *RoleResourcesMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *RoleResourcesMutation) AddedFields() []string {
 	var fields []string
-	if m.addresource_type != nil {
-		fields = append(fields, roleresources.FieldResourceType)
-	}
 	return fields
 }
 
@@ -8526,8 +9139,6 @@ func (m *RoleResourcesMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *RoleResourcesMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case roleresources.FieldResourceType:
-		return m.AddedResourceType()
 	}
 	return nil, false
 }
@@ -8537,13 +9148,6 @@ func (m *RoleResourcesMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *RoleResourcesMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case roleresources.FieldResourceType:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddResourceType(v)
-		return nil
 	}
 	return fmt.Errorf("unknown RoleResources numeric field %s", name)
 }
@@ -8551,11 +9155,7 @@ func (m *RoleResourcesMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *RoleResourcesMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(roleresources.FieldResourceType) {
-		fields = append(fields, roleresources.FieldResourceType)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -8568,11 +9168,6 @@ func (m *RoleResourcesMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *RoleResourcesMutation) ClearField(name string) error {
-	switch name {
-	case roleresources.FieldResourceType:
-		m.ClearResourceType()
-		return nil
-	}
 	return fmt.Errorf("unknown RoleResources nullable field %s", name)
 }
 
@@ -8591,9 +9186,6 @@ func (m *RoleResourcesMutation) ResetField(name string) error {
 		return nil
 	case roleresources.FieldResourceID:
 		m.ResetResourceID()
-		return nil
-	case roleresources.FieldResourceType:
-		m.ResetResourceType()
 		return nil
 	}
 	return fmt.Errorf("unknown RoleResources field %s", name)
@@ -8694,30 +9286,33 @@ func (m *RoleResourcesMutation) ResetEdge(name string) error {
 // RolesMutation represents an operation that mutates the Roles nodes in the graph.
 type RolesMutation struct {
 	config
-	op                         Op
-	typ                        string
-	id                         *int
-	created_at                 *time.Time
-	updated_at                 *time.Time
-	name                       *string
-	i18n_name                  *string
-	protected                  *bool
-	order_weight               *int
-	addorder_weight            *int
-	description                *string
-	clearedFields              map[string]struct{}
-	lion_role_resources        map[int]struct{}
-	removedlion_role_resources map[int]struct{}
-	clearedlion_role_resources bool
-	lion_user_roles            map[int]struct{}
-	removedlion_user_roles     map[int]struct{}
-	clearedlion_user_roles     bool
-	lion_role_groups           map[int]struct{}
-	removedlion_role_groups    map[int]struct{}
-	clearedlion_role_groups    bool
-	done                       bool
-	oldValue                   func(context.Context) (*Roles, error)
-	predicates                 []predicate.Roles
+	op                           Op
+	typ                          string
+	id                           *int
+	created_at                   *time.Time
+	updated_at                   *time.Time
+	name                         *string
+	i18n_name                    *string
+	protected                    *bool
+	order_weight                 *int
+	addorder_weight              *int
+	description                  *string
+	clearedFields                map[string]struct{}
+	lion_role_resources          map[int]struct{}
+	removedlion_role_resources   map[int]struct{}
+	clearedlion_role_resources   bool
+	lion_user_roles              map[int]struct{}
+	removedlion_user_roles       map[int]struct{}
+	clearedlion_user_roles       bool
+	lion_role_groups             map[int]struct{}
+	removedlion_role_groups      map[int]struct{}
+	clearedlion_role_groups      bool
+	lion_role_departments        map[int]struct{}
+	removedlion_role_departments map[int]struct{}
+	clearedlion_role_departments bool
+	done                         bool
+	oldValue                     func(context.Context) (*Roles, error)
+	predicates                   []predicate.Roles
 }
 
 var _ ent.Mutation = (*RolesMutation)(nil)
@@ -9252,6 +9847,60 @@ func (m *RolesMutation) ResetLionRoleGroups() {
 	m.removedlion_role_groups = nil
 }
 
+// AddLionRoleDepartmentIDs adds the "lion_role_departments" edge to the RoleDepartments entity by ids.
+func (m *RolesMutation) AddLionRoleDepartmentIDs(ids ...int) {
+	if m.lion_role_departments == nil {
+		m.lion_role_departments = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lion_role_departments[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLionRoleDepartments clears the "lion_role_departments" edge to the RoleDepartments entity.
+func (m *RolesMutation) ClearLionRoleDepartments() {
+	m.clearedlion_role_departments = true
+}
+
+// LionRoleDepartmentsCleared reports if the "lion_role_departments" edge to the RoleDepartments entity was cleared.
+func (m *RolesMutation) LionRoleDepartmentsCleared() bool {
+	return m.clearedlion_role_departments
+}
+
+// RemoveLionRoleDepartmentIDs removes the "lion_role_departments" edge to the RoleDepartments entity by IDs.
+func (m *RolesMutation) RemoveLionRoleDepartmentIDs(ids ...int) {
+	if m.removedlion_role_departments == nil {
+		m.removedlion_role_departments = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lion_role_departments, ids[i])
+		m.removedlion_role_departments[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLionRoleDepartments returns the removed IDs of the "lion_role_departments" edge to the RoleDepartments entity.
+func (m *RolesMutation) RemovedLionRoleDepartmentsIDs() (ids []int) {
+	for id := range m.removedlion_role_departments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LionRoleDepartmentsIDs returns the "lion_role_departments" edge IDs in the mutation.
+func (m *RolesMutation) LionRoleDepartmentsIDs() (ids []int) {
+	for id := range m.lion_role_departments {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLionRoleDepartments resets all changes to the "lion_role_departments" edge.
+func (m *RolesMutation) ResetLionRoleDepartments() {
+	m.lion_role_departments = nil
+	m.clearedlion_role_departments = false
+	m.removedlion_role_departments = nil
+}
+
 // Where appends a list predicates to the RolesMutation builder.
 func (m *RolesMutation) Where(ps ...predicate.Roles) {
 	m.predicates = append(m.predicates, ps...)
@@ -9502,7 +10151,7 @@ func (m *RolesMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RolesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.lion_role_resources != nil {
 		edges = append(edges, roles.EdgeLionRoleResources)
 	}
@@ -9511,6 +10160,9 @@ func (m *RolesMutation) AddedEdges() []string {
 	}
 	if m.lion_role_groups != nil {
 		edges = append(edges, roles.EdgeLionRoleGroups)
+	}
+	if m.lion_role_departments != nil {
+		edges = append(edges, roles.EdgeLionRoleDepartments)
 	}
 	return edges
 }
@@ -9537,13 +10189,19 @@ func (m *RolesMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case roles.EdgeLionRoleDepartments:
+		ids := make([]ent.Value, 0, len(m.lion_role_departments))
+		for id := range m.lion_role_departments {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RolesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedlion_role_resources != nil {
 		edges = append(edges, roles.EdgeLionRoleResources)
 	}
@@ -9552,6 +10210,9 @@ func (m *RolesMutation) RemovedEdges() []string {
 	}
 	if m.removedlion_role_groups != nil {
 		edges = append(edges, roles.EdgeLionRoleGroups)
+	}
+	if m.removedlion_role_departments != nil {
+		edges = append(edges, roles.EdgeLionRoleDepartments)
 	}
 	return edges
 }
@@ -9578,13 +10239,19 @@ func (m *RolesMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case roles.EdgeLionRoleDepartments:
+		ids := make([]ent.Value, 0, len(m.removedlion_role_departments))
+		for id := range m.removedlion_role_departments {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RolesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedlion_role_resources {
 		edges = append(edges, roles.EdgeLionRoleResources)
 	}
@@ -9593,6 +10260,9 @@ func (m *RolesMutation) ClearedEdges() []string {
 	}
 	if m.clearedlion_role_groups {
 		edges = append(edges, roles.EdgeLionRoleGroups)
+	}
+	if m.clearedlion_role_departments {
+		edges = append(edges, roles.EdgeLionRoleDepartments)
 	}
 	return edges
 }
@@ -9607,6 +10277,8 @@ func (m *RolesMutation) EdgeCleared(name string) bool {
 		return m.clearedlion_user_roles
 	case roles.EdgeLionRoleGroups:
 		return m.clearedlion_role_groups
+	case roles.EdgeLionRoleDepartments:
+		return m.clearedlion_role_departments
 	}
 	return false
 }
@@ -9631,6 +10303,9 @@ func (m *RolesMutation) ResetEdge(name string) error {
 		return nil
 	case roles.EdgeLionRoleGroups:
 		m.ResetLionRoleGroups()
+		return nil
+	case roles.EdgeLionRoleDepartments:
+		m.ResetLionRoleDepartments()
 		return nil
 	}
 	return fmt.Errorf("unknown Roles edge %s", name)

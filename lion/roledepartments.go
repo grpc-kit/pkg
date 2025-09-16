@@ -9,13 +9,13 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/roleresources"
+	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/roles"
 )
 
-// RoleResources is the model entity for the RoleResources schema.
-type RoleResources struct {
+// RoleDepartments is the model entity for the RoleDepartments schema.
+type RoleDepartments struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -23,22 +23,22 @@ type RoleResources struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// 关联 lion_roles 表的用户组 ID
+	// 关联 lion_role 表的用户组 ID
 	RoleID int `json:"role_id,omitempty"`
-	// 关联 lion_resources 表的资源 ID
-	ResourceID int `json:"resource_id,omitempty"`
+	// 关联 lion_departments 表的资源 ID
+	DepartmentID int `json:"department_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the RoleResourcesQuery when eager-loading is set.
-	Edges        RoleResourcesEdges `json:"edges"`
+	// The values are being populated by the RoleDepartmentsQuery when eager-loading is set.
+	Edges        RoleDepartmentsEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// RoleResourcesEdges holds the relations/edges for other nodes in the graph.
-type RoleResourcesEdges struct {
+// RoleDepartmentsEdges holds the relations/edges for other nodes in the graph.
+type RoleDepartmentsEdges struct {
 	// LionRoles holds the value of the lion_roles edge.
 	LionRoles *Roles `json:"lion_roles,omitempty"`
-	// LionResources holds the value of the lion_resources edge.
-	LionResources *Resources `json:"lion_resources,omitempty"`
+	// LionDepartments holds the value of the lion_departments edge.
+	LionDepartments *Departments `json:"lion_departments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -46,7 +46,7 @@ type RoleResourcesEdges struct {
 
 // LionRolesOrErr returns the LionRoles value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e RoleResourcesEdges) LionRolesOrErr() (*Roles, error) {
+func (e RoleDepartmentsEdges) LionRolesOrErr() (*Roles, error) {
 	if e.LionRoles != nil {
 		return e.LionRoles, nil
 	} else if e.loadedTypes[0] {
@@ -55,25 +55,25 @@ func (e RoleResourcesEdges) LionRolesOrErr() (*Roles, error) {
 	return nil, &NotLoadedError{edge: "lion_roles"}
 }
 
-// LionResourcesOrErr returns the LionResources value or an error if the edge
+// LionDepartmentsOrErr returns the LionDepartments value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e RoleResourcesEdges) LionResourcesOrErr() (*Resources, error) {
-	if e.LionResources != nil {
-		return e.LionResources, nil
+func (e RoleDepartmentsEdges) LionDepartmentsOrErr() (*Departments, error) {
+	if e.LionDepartments != nil {
+		return e.LionDepartments, nil
 	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: resources.Label}
+		return nil, &NotFoundError{label: departments.Label}
 	}
-	return nil, &NotLoadedError{edge: "lion_resources"}
+	return nil, &NotLoadedError{edge: "lion_departments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*RoleResources) scanValues(columns []string) ([]any, error) {
+func (*RoleDepartments) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case roleresources.FieldID, roleresources.FieldRoleID, roleresources.FieldResourceID:
+		case roledepartments.FieldID, roledepartments.FieldRoleID, roledepartments.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
-		case roleresources.FieldCreatedAt, roleresources.FieldUpdatedAt:
+		case roledepartments.FieldCreatedAt, roledepartments.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -83,42 +83,42 @@ func (*RoleResources) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the RoleResources fields.
-func (_m *RoleResources) assignValues(columns []string, values []any) error {
+// to the RoleDepartments fields.
+func (_m *RoleDepartments) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case roleresources.FieldID:
+		case roledepartments.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case roleresources.FieldCreatedAt:
+		case roledepartments.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case roleresources.FieldUpdatedAt:
+		case roledepartments.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case roleresources.FieldRoleID:
+		case roledepartments.FieldRoleID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field role_id", values[i])
 			} else if value.Valid {
 				_m.RoleID = int(value.Int64)
 			}
-		case roleresources.FieldResourceID:
+		case roledepartments.FieldDepartmentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field resource_id", values[i])
+				return fmt.Errorf("unexpected type %T for field department_id", values[i])
 			} else if value.Valid {
-				_m.ResourceID = int(value.Int64)
+				_m.DepartmentID = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -127,44 +127,44 @@ func (_m *RoleResources) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the RoleResources.
+// Value returns the ent.Value that was dynamically selected and assigned to the RoleDepartments.
 // This includes values selected through modifiers, order, etc.
-func (_m *RoleResources) Value(name string) (ent.Value, error) {
+func (_m *RoleDepartments) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionRoles queries the "lion_roles" edge of the RoleResources entity.
-func (_m *RoleResources) QueryLionRoles() *RolesQuery {
-	return NewRoleResourcesClient(_m.config).QueryLionRoles(_m)
+// QueryLionRoles queries the "lion_roles" edge of the RoleDepartments entity.
+func (_m *RoleDepartments) QueryLionRoles() *RolesQuery {
+	return NewRoleDepartmentsClient(_m.config).QueryLionRoles(_m)
 }
 
-// QueryLionResources queries the "lion_resources" edge of the RoleResources entity.
-func (_m *RoleResources) QueryLionResources() *ResourcesQuery {
-	return NewRoleResourcesClient(_m.config).QueryLionResources(_m)
+// QueryLionDepartments queries the "lion_departments" edge of the RoleDepartments entity.
+func (_m *RoleDepartments) QueryLionDepartments() *DepartmentsQuery {
+	return NewRoleDepartmentsClient(_m.config).QueryLionDepartments(_m)
 }
 
-// Update returns a builder for updating this RoleResources.
-// Note that you need to call RoleResources.Unwrap() before calling this method if this RoleResources
+// Update returns a builder for updating this RoleDepartments.
+// Note that you need to call RoleDepartments.Unwrap() before calling this method if this RoleDepartments
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *RoleResources) Update() *RoleResourcesUpdateOne {
-	return NewRoleResourcesClient(_m.config).UpdateOne(_m)
+func (_m *RoleDepartments) Update() *RoleDepartmentsUpdateOne {
+	return NewRoleDepartmentsClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the RoleResources entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the RoleDepartments entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *RoleResources) Unwrap() *RoleResources {
+func (_m *RoleDepartments) Unwrap() *RoleDepartments {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: RoleResources is not a transactional entity")
+		panic("lion: RoleDepartments is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *RoleResources) String() string {
+func (_m *RoleDepartments) String() string {
 	var builder strings.Builder
-	builder.WriteString("RoleResources(")
+	builder.WriteString("RoleDepartments(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -175,11 +175,11 @@ func (_m *RoleResources) String() string {
 	builder.WriteString("role_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RoleID))
 	builder.WriteString(", ")
-	builder.WriteString("resource_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ResourceID))
+	builder.WriteString("department_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentID))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// RoleResourcesSlice is a parsable slice of RoleResources.
-type RoleResourcesSlice []*RoleResources
+// RoleDepartmentsSlice is a parsable slice of RoleDepartments.
+type RoleDepartmentsSlice []*RoleDepartments

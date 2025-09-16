@@ -34,6 +34,8 @@ const (
 	EdgeLionUserRoles = "lion_user_roles"
 	// EdgeLionRoleGroups holds the string denoting the lion_role_groups edge name in mutations.
 	EdgeLionRoleGroups = "lion_role_groups"
+	// EdgeLionRoleDepartments holds the string denoting the lion_role_departments edge name in mutations.
+	EdgeLionRoleDepartments = "lion_role_departments"
 	// Table holds the table name of the roles in the database.
 	Table = "lion_roles"
 	// LionRoleResourcesTable is the table that holds the lion_role_resources relation/edge.
@@ -57,6 +59,13 @@ const (
 	LionRoleGroupsInverseTable = "lion_group_roles"
 	// LionRoleGroupsColumn is the table column denoting the lion_role_groups relation/edge.
 	LionRoleGroupsColumn = "role_id"
+	// LionRoleDepartmentsTable is the table that holds the lion_role_departments relation/edge.
+	LionRoleDepartmentsTable = "lion_role_departments"
+	// LionRoleDepartmentsInverseTable is the table name for the RoleDepartments entity.
+	// It exists in this package in order to avoid circular dependency with the "roledepartments" package.
+	LionRoleDepartmentsInverseTable = "lion_role_departments"
+	// LionRoleDepartmentsColumn is the table column denoting the lion_role_departments relation/edge.
+	LionRoleDepartmentsColumn = "role_id"
 )
 
 // Columns holds all SQL columns for roles fields.
@@ -184,6 +193,20 @@ func ByLionRoleGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionRoleGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByLionRoleDepartmentsCount orders the results by lion_role_departments count.
+func ByLionRoleDepartmentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionRoleDepartmentsStep(), opts...)
+	}
+}
+
+// ByLionRoleDepartments orders the results by lion_role_departments terms.
+func ByLionRoleDepartments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionRoleDepartmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newLionRoleResourcesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -203,5 +226,12 @@ func newLionRoleGroupsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionRoleGroupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleGroupsTable, LionRoleGroupsColumn),
+	)
+}
+func newLionRoleDepartmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionRoleDepartmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleDepartmentsTable, LionRoleDepartmentsColumn),
 	)
 }
