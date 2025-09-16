@@ -2,13 +2,15 @@ package admin
 
 import (
 	"context"
-	"strconv"
+	"sort"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/departmentusers"
+	"github.com/grpc-kit/pkg/lion/roledepartments"
+	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -83,39 +85,141 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDepartmentsRequest) (*adminv1.ListDepartmentsResponse, error) {
 	result := &adminv1.ListDepartmentsResponse{}
 
-	userIDStr, ok := rpc.GetUserIDFromContext(ctx)
-	if !ok {
-		return result, errs.Unauthenticated(ctx).WithMessage("user id not found")
-	}
-
-	userIDInt, err := strconv.Atoi(userIDStr)
-	if err != nil {
-		return result, err
-	}
-
-	leaders, err := a.config.db.DepartmentUsers.Query().
-		Where(departmentusers.UserIDEQ(userIDInt)).
-		WithLionDepartments().All(ctx)
-	if err != nil {
-		return result, err
-	}
-
-	var deps []*adminv1.Department
-	for _, l := range leaders {
-		dep := l.Edges.LionDepartments
-		if dep == nil {
-			continue
+	/*
+		userIDStr, ok := rpc.GetUserIDFromContext(ctx)
+		if !ok {
+			return result, errs.Unauthenticated(ctx).WithMessage("user id not found")
 		}
 
-		tree, err := a.buildDepartmentTree(ctx, dep)
+		userIDInt, err := strconv.Atoi(userIDStr)
+		if err != nil {
+			return result, err
+		}
+	*/
+
+	// 从 jwt 中获取用户组
+	gs, ok := rpc.GetGroupsFromContext(ctx)
+	if !ok {
+		return result, errs.PermissionDenied(ctx).WithMessage("not found groups")
+	}
+
+	ridObj, err := a.config.db.Roles.Query().
+		Select(
+			roles.FieldID,
+		).
+		Where(
+			roles.NameIn(gs...),
+		).
+		All(ctx)
+	if err != nil {
+		return result, err
+	}
+	if len(ridObj) == 0 {
+		return result, errs.PermissionDenied(ctx).WithMessage("user not in any role")
+	}
+
+	rids := make([]int, 0)
+	for _, rid := range ridObj {
+		rids = append(rids, rid.ID)
+	}
+
+	res, err := a.config.db.RoleDepartments.Query().Select(
+		roledepartments.FieldRoleID,
+		roledepartments.FieldDepartmentID,
+	).Where(
+		roledepartments.RoleIDIn(rids...),
+	).All(ctx)
+	if err != nil {
+		return result, err
+	}
+
+	depIDs := make([]int, 0)
+	for _, v := range res {
+		depIDs = append(depIDs, v.DepartmentID)
+	}
+
+	depObj, err := a.config.db.Departments.Query().
+		Select().
+		Where(
+			departments.IDIn(depIDs...),
+		).All(ctx)
+	if err != nil {
+		return result, err
+	}
+
+	// 构建树状菜单
+	menuMap := make(map[int32]*adminv1.Department)
+	var roots []*adminv1.Department
+
+	for _, m := range depObj {
+		menu := &adminv1.Department{
+			Id:          int32(m.ID),
+			ParentId:    int32(m.ParentID),
+			Name:        m.Name,
+			I18NName:    I18NNameParse(m.I18nName),
+			OrderWeight: int32(m.OrderWeight),
+		}
+		menuMap[int32(m.ID)] = menu
+	}
+
+	for _, menu := range menuMap {
+		/*
+			if menu.ParentId == 0 {
+				roots = append(roots, menu)
+				continue
+			}
+		*/
+
+		if parent, ok := menuMap[menu.ParentId]; ok {
+			parent.Children = append(parent.Children, menu)
+		}
+	}
+
+	// TODO；如果不存在 "parent_id=0" 的情况，动态找出最上层节点
+	hasParent := make(map[int32]bool)
+	for _, menu := range menuMap {
+		if _, ok := menuMap[menu.ParentId]; ok {
+			hasParent[menu.Id] = true
+		}
+	}
+	for _, menu := range menuMap {
+		if !hasParent[menu.Id] { // 没有父节点
+			roots = append(roots, menu)
+		}
+	}
+
+	// 可选：对根菜单排序
+	sort.Slice(roots, func(i, j int) bool {
+		return roots[i].OrderWeight < roots[j].OrderWeight
+	})
+
+	result.Departments = roots
+
+	/*
+		leaders, err := a.config.db.DepartmentUsers.Query().
+			Where(departmentusers.UserIDEQ(userIDInt)).
+			WithLionDepartments().All(ctx)
 		if err != nil {
 			return result, err
 		}
 
-		deps = append(deps, tree)
-	}
+		var deps []*adminv1.Department
+		for _, l := range leaders {
+			dep := l.Edges.LionDepartments
+			if dep == nil {
+				continue
+			}
 
-	result.Departments = deps
+			tree, err := a.buildDepartmentTree(ctx, dep)
+			if err != nil {
+				return result, err
+			}
+
+			deps = append(deps, tree)
+		}
+	*/
+
+	// result.Departments = deps
 
 	return result, nil
 }
