@@ -85,14 +85,14 @@ func Status(v int) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldStatus, v))
 }
 
-// IdcardEncrypted applies equality check predicate on the "idcard_encrypted" field. It's identical to IdcardEncryptedEQ.
-func IdcardEncrypted(v []byte) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldIdcardEncrypted, v))
+// NationalIDEncrypted applies equality check predicate on the "national_id_encrypted" field. It's identical to NationalIDEncryptedEQ.
+func NationalIDEncrypted(v []byte) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldNationalIDEncrypted, v))
 }
 
-// IdcardHash applies equality check predicate on the "idcard_hash" field. It's identical to IdcardHashEQ.
-func IdcardHash(v string) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldIdcardHash, v))
+// NationalIDHash applies equality check predicate on the "national_id_hash" field. It's identical to NationalIDHashEQ.
+func NationalIDHash(v string) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldNationalIDHash, v))
 }
 
 // Nickname applies equality check predicate on the "nickname" field. It's identical to NicknameEQ.
@@ -455,119 +455,119 @@ func StatusLTE(v int) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldStatus, v))
 }
 
-// IdcardEncryptedEQ applies the EQ predicate on the "idcard_encrypted" field.
-func IdcardEncryptedEQ(v []byte) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldIdcardEncrypted, v))
+// NationalIDEncryptedEQ applies the EQ predicate on the "national_id_encrypted" field.
+func NationalIDEncryptedEQ(v []byte) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldNationalIDEncrypted, v))
 }
 
-// IdcardEncryptedNEQ applies the NEQ predicate on the "idcard_encrypted" field.
-func IdcardEncryptedNEQ(v []byte) predicate.Users {
-	return predicate.Users(sql.FieldNEQ(FieldIdcardEncrypted, v))
+// NationalIDEncryptedNEQ applies the NEQ predicate on the "national_id_encrypted" field.
+func NationalIDEncryptedNEQ(v []byte) predicate.Users {
+	return predicate.Users(sql.FieldNEQ(FieldNationalIDEncrypted, v))
 }
 
-// IdcardEncryptedIn applies the In predicate on the "idcard_encrypted" field.
-func IdcardEncryptedIn(vs ...[]byte) predicate.Users {
-	return predicate.Users(sql.FieldIn(FieldIdcardEncrypted, vs...))
+// NationalIDEncryptedIn applies the In predicate on the "national_id_encrypted" field.
+func NationalIDEncryptedIn(vs ...[]byte) predicate.Users {
+	return predicate.Users(sql.FieldIn(FieldNationalIDEncrypted, vs...))
 }
 
-// IdcardEncryptedNotIn applies the NotIn predicate on the "idcard_encrypted" field.
-func IdcardEncryptedNotIn(vs ...[]byte) predicate.Users {
-	return predicate.Users(sql.FieldNotIn(FieldIdcardEncrypted, vs...))
+// NationalIDEncryptedNotIn applies the NotIn predicate on the "national_id_encrypted" field.
+func NationalIDEncryptedNotIn(vs ...[]byte) predicate.Users {
+	return predicate.Users(sql.FieldNotIn(FieldNationalIDEncrypted, vs...))
 }
 
-// IdcardEncryptedGT applies the GT predicate on the "idcard_encrypted" field.
-func IdcardEncryptedGT(v []byte) predicate.Users {
-	return predicate.Users(sql.FieldGT(FieldIdcardEncrypted, v))
+// NationalIDEncryptedGT applies the GT predicate on the "national_id_encrypted" field.
+func NationalIDEncryptedGT(v []byte) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldNationalIDEncrypted, v))
 }
 
-// IdcardEncryptedGTE applies the GTE predicate on the "idcard_encrypted" field.
-func IdcardEncryptedGTE(v []byte) predicate.Users {
-	return predicate.Users(sql.FieldGTE(FieldIdcardEncrypted, v))
+// NationalIDEncryptedGTE applies the GTE predicate on the "national_id_encrypted" field.
+func NationalIDEncryptedGTE(v []byte) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldNationalIDEncrypted, v))
 }
 
-// IdcardEncryptedLT applies the LT predicate on the "idcard_encrypted" field.
-func IdcardEncryptedLT(v []byte) predicate.Users {
-	return predicate.Users(sql.FieldLT(FieldIdcardEncrypted, v))
+// NationalIDEncryptedLT applies the LT predicate on the "national_id_encrypted" field.
+func NationalIDEncryptedLT(v []byte) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldNationalIDEncrypted, v))
 }
 
-// IdcardEncryptedLTE applies the LTE predicate on the "idcard_encrypted" field.
-func IdcardEncryptedLTE(v []byte) predicate.Users {
-	return predicate.Users(sql.FieldLTE(FieldIdcardEncrypted, v))
+// NationalIDEncryptedLTE applies the LTE predicate on the "national_id_encrypted" field.
+func NationalIDEncryptedLTE(v []byte) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldNationalIDEncrypted, v))
 }
 
-// IdcardHashEQ applies the EQ predicate on the "idcard_hash" field.
-func IdcardHashEQ(v string) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldIdcardHash, v))
+// NationalIDHashEQ applies the EQ predicate on the "national_id_hash" field.
+func NationalIDHashEQ(v string) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldNationalIDHash, v))
 }
 
-// IdcardHashNEQ applies the NEQ predicate on the "idcard_hash" field.
-func IdcardHashNEQ(v string) predicate.Users {
-	return predicate.Users(sql.FieldNEQ(FieldIdcardHash, v))
+// NationalIDHashNEQ applies the NEQ predicate on the "national_id_hash" field.
+func NationalIDHashNEQ(v string) predicate.Users {
+	return predicate.Users(sql.FieldNEQ(FieldNationalIDHash, v))
 }
 
-// IdcardHashIn applies the In predicate on the "idcard_hash" field.
-func IdcardHashIn(vs ...string) predicate.Users {
-	return predicate.Users(sql.FieldIn(FieldIdcardHash, vs...))
+// NationalIDHashIn applies the In predicate on the "national_id_hash" field.
+func NationalIDHashIn(vs ...string) predicate.Users {
+	return predicate.Users(sql.FieldIn(FieldNationalIDHash, vs...))
 }
 
-// IdcardHashNotIn applies the NotIn predicate on the "idcard_hash" field.
-func IdcardHashNotIn(vs ...string) predicate.Users {
-	return predicate.Users(sql.FieldNotIn(FieldIdcardHash, vs...))
+// NationalIDHashNotIn applies the NotIn predicate on the "national_id_hash" field.
+func NationalIDHashNotIn(vs ...string) predicate.Users {
+	return predicate.Users(sql.FieldNotIn(FieldNationalIDHash, vs...))
 }
 
-// IdcardHashGT applies the GT predicate on the "idcard_hash" field.
-func IdcardHashGT(v string) predicate.Users {
-	return predicate.Users(sql.FieldGT(FieldIdcardHash, v))
+// NationalIDHashGT applies the GT predicate on the "national_id_hash" field.
+func NationalIDHashGT(v string) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldNationalIDHash, v))
 }
 
-// IdcardHashGTE applies the GTE predicate on the "idcard_hash" field.
-func IdcardHashGTE(v string) predicate.Users {
-	return predicate.Users(sql.FieldGTE(FieldIdcardHash, v))
+// NationalIDHashGTE applies the GTE predicate on the "national_id_hash" field.
+func NationalIDHashGTE(v string) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldNationalIDHash, v))
 }
 
-// IdcardHashLT applies the LT predicate on the "idcard_hash" field.
-func IdcardHashLT(v string) predicate.Users {
-	return predicate.Users(sql.FieldLT(FieldIdcardHash, v))
+// NationalIDHashLT applies the LT predicate on the "national_id_hash" field.
+func NationalIDHashLT(v string) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldNationalIDHash, v))
 }
 
-// IdcardHashLTE applies the LTE predicate on the "idcard_hash" field.
-func IdcardHashLTE(v string) predicate.Users {
-	return predicate.Users(sql.FieldLTE(FieldIdcardHash, v))
+// NationalIDHashLTE applies the LTE predicate on the "national_id_hash" field.
+func NationalIDHashLTE(v string) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldNationalIDHash, v))
 }
 
-// IdcardHashContains applies the Contains predicate on the "idcard_hash" field.
-func IdcardHashContains(v string) predicate.Users {
-	return predicate.Users(sql.FieldContains(FieldIdcardHash, v))
+// NationalIDHashContains applies the Contains predicate on the "national_id_hash" field.
+func NationalIDHashContains(v string) predicate.Users {
+	return predicate.Users(sql.FieldContains(FieldNationalIDHash, v))
 }
 
-// IdcardHashHasPrefix applies the HasPrefix predicate on the "idcard_hash" field.
-func IdcardHashHasPrefix(v string) predicate.Users {
-	return predicate.Users(sql.FieldHasPrefix(FieldIdcardHash, v))
+// NationalIDHashHasPrefix applies the HasPrefix predicate on the "national_id_hash" field.
+func NationalIDHashHasPrefix(v string) predicate.Users {
+	return predicate.Users(sql.FieldHasPrefix(FieldNationalIDHash, v))
 }
 
-// IdcardHashHasSuffix applies the HasSuffix predicate on the "idcard_hash" field.
-func IdcardHashHasSuffix(v string) predicate.Users {
-	return predicate.Users(sql.FieldHasSuffix(FieldIdcardHash, v))
+// NationalIDHashHasSuffix applies the HasSuffix predicate on the "national_id_hash" field.
+func NationalIDHashHasSuffix(v string) predicate.Users {
+	return predicate.Users(sql.FieldHasSuffix(FieldNationalIDHash, v))
 }
 
-// IdcardHashIsNil applies the IsNil predicate on the "idcard_hash" field.
-func IdcardHashIsNil() predicate.Users {
-	return predicate.Users(sql.FieldIsNull(FieldIdcardHash))
+// NationalIDHashIsNil applies the IsNil predicate on the "national_id_hash" field.
+func NationalIDHashIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldNationalIDHash))
 }
 
-// IdcardHashNotNil applies the NotNil predicate on the "idcard_hash" field.
-func IdcardHashNotNil() predicate.Users {
-	return predicate.Users(sql.FieldNotNull(FieldIdcardHash))
+// NationalIDHashNotNil applies the NotNil predicate on the "national_id_hash" field.
+func NationalIDHashNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldNationalIDHash))
 }
 
-// IdcardHashEqualFold applies the EqualFold predicate on the "idcard_hash" field.
-func IdcardHashEqualFold(v string) predicate.Users {
-	return predicate.Users(sql.FieldEqualFold(FieldIdcardHash, v))
+// NationalIDHashEqualFold applies the EqualFold predicate on the "national_id_hash" field.
+func NationalIDHashEqualFold(v string) predicate.Users {
+	return predicate.Users(sql.FieldEqualFold(FieldNationalIDHash, v))
 }
 
-// IdcardHashContainsFold applies the ContainsFold predicate on the "idcard_hash" field.
-func IdcardHashContainsFold(v string) predicate.Users {
-	return predicate.Users(sql.FieldContainsFold(FieldIdcardHash, v))
+// NationalIDHashContainsFold applies the ContainsFold predicate on the "national_id_hash" field.
+func NationalIDHashContainsFold(v string) predicate.Users {
+	return predicate.Users(sql.FieldContainsFold(FieldNationalIDHash, v))
 }
 
 // NicknameEQ applies the EQ predicate on the "nickname" field.

@@ -75,12 +75,12 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		}
 		userCreate.SetRealnameEncrypted(realname)
 	}
-	if req.User.GetIdcard() != "" {
-		idcard, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.GetIdcard()))
+	if req.User.GetNationalId() != "" {
+		idcard, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.GetNationalId()))
 		if err != nil {
 			return nil, err
 		}
-		userCreate.SetIdcardEncrypted(idcard)
+		userCreate.SetNationalIDEncrypted(idcard)
 	}
 	if req.GetUser().GetNickname() != "" {
 		userCreate.SetNickname(req.GetUser().GetNickname())
@@ -136,7 +136,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		Id:          int32(thisUser.ID),
 		Username:    thisUser.Username,
 		Realname:    req.GetUser().Realname,
-		Idcard:      req.GetUser().Idcard,
+		NationalId:  req.GetUser().NationalId,
 		Email:       req.GetUser().Email,
 		PhoneNumber: req.GetUser().PhoneNumber,
 		Nickname:    thisUser.Nickname,
@@ -172,7 +172,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 
 	fullViewFields := append(basicViewFields, []string{
 		users.FieldRealnameEncrypted,
-		users.FieldIdcardEncrypted,
+		users.FieldNationalIDEncrypted,
 		users.FieldEmailEncrypted,
 		users.FieldEmailVerified,
 		users.FieldGender,
@@ -326,7 +326,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 
 	for _, user := range searchUsers {
 		realname, _ := crypto.DecryptAES(a.config.aesKey, user.RealnameEncrypted)
-		idcard, _ := crypto.DecryptAES(a.config.aesKey, user.IdcardEncrypted)
+		idcard, _ := crypto.DecryptAES(a.config.aesKey, user.NationalIDEncrypted)
 		email, _ := crypto.DecryptAES(a.config.aesKey, user.EmailEncrypted)
 		phoneNumberByte, _ := crypto.DecryptAES(a.config.aesKey, user.PhoneNumberEncrypted)
 		// address, _ := crypto.DecryptAES(a.config.aesKey, user.AddressEncrypted)
@@ -339,7 +339,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 			Username:            user.Username,
 			Status:              adminv1.User_Status(user.Status),
 			Realname:            string(realname),
-			Idcard:              string(idcard),
+			NationalId:          string(idcard),
 			Nickname:            user.Nickname,
 			Profile:             user.Profile,
 			Picture:             user.Picture,
@@ -379,10 +379,10 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 				if err == nil {
 					x.SetRealnameEncrypted(encBody)
 				}
-			case schema.FieldNameNormalize(users.FieldIdcardEncrypted):
-				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.Idcard))
+			case schema.FieldNameNormalize(users.FieldNationalIDEncrypted):
+				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.NationalId))
 				if err == nil {
-					x.SetIdcardEncrypted(encBody)
+					x.SetNationalIDEncrypted(encBody)
 				}
 			case users.FieldNickname:
 				x.SetNickname(req.User.Nickname)
@@ -499,7 +499,7 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 
 	fullViewFields := append(basicViewFields, []string{
 		users.FieldRealnameEncrypted,
-		users.FieldIdcardEncrypted,
+		users.FieldNationalIDEncrypted,
 		users.FieldEmailEncrypted,
 		users.FieldEmailVerified,
 		users.FieldGender,
@@ -535,7 +535,7 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 		Username:            row.Username,
 		Status:              adminv1.User_Status(row.Status),
 		Realname:            string(crypto.DecryptAESMust(a.config.aesKey, row.RealnameEncrypted)),
-		Idcard:              string(crypto.DecryptAESMust(a.config.aesKey, row.IdcardEncrypted)),
+		NationalId:          string(crypto.DecryptAESMust(a.config.aesKey, row.NationalIDEncrypted)),
 		Nickname:            row.Nickname,
 		Profile:             row.Profile,
 		Picture:             row.Picture,

@@ -26,10 +26,10 @@ const (
 	FieldRealnameEncrypted = "realname_encrypted"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-	// FieldIdcardEncrypted holds the string denoting the idcard_encrypted field in the database.
-	FieldIdcardEncrypted = "idcard_encrypted"
-	// FieldIdcardHash holds the string denoting the idcard_hash field in the database.
-	FieldIdcardHash = "idcard_hash"
+	// FieldNationalIDEncrypted holds the string denoting the national_id_encrypted field in the database.
+	FieldNationalIDEncrypted = "national_id_encrypted"
+	// FieldNationalIDHash holds the string denoting the national_id_hash field in the database.
+	FieldNationalIDHash = "national_id_hash"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
 	// FieldProfile holds the string denoting the profile field in the database.
@@ -104,8 +104,8 @@ var Columns = []string{
 	FieldUsername,
 	FieldRealnameEncrypted,
 	FieldStatus,
-	FieldIdcardEncrypted,
-	FieldIdcardHash,
+	FieldNationalIDEncrypted,
+	FieldNationalIDHash,
 	FieldNickname,
 	FieldProfile,
 	FieldPicture,
@@ -148,10 +148,10 @@ var (
 	DefaultRealnameEncrypted []byte
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus int
-	// DefaultIdcardEncrypted holds the default value on creation for the "idcard_encrypted" field.
-	DefaultIdcardEncrypted []byte
-	// DefaultIdcardHash holds the default value on creation for the "idcard_hash" field.
-	DefaultIdcardHash string
+	// DefaultNationalIDEncrypted holds the default value on creation for the "national_id_encrypted" field.
+	DefaultNationalIDEncrypted []byte
+	// DefaultNationalIDHash holds the default value on creation for the "national_id_hash" field.
+	DefaultNationalIDHash string
 	// DefaultNickname holds the default value on creation for the "nickname" field.
 	DefaultNickname string
 	// DefaultProfile holds the default value on creation for the "profile" field.
@@ -225,9 +225,9 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }
 
-// ByIdcardHash orders the results by the idcard_hash field.
-func ByIdcardHash(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIdcardHash, opts...).ToFunc()
+// ByNationalIDHash orders the results by the national_id_hash field.
+func ByNationalIDHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNationalIDHash, opts...).ToFunc()
 }
 
 // ByNickname orders the results by the nickname field.

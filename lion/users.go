@@ -30,9 +30,9 @@ type Users struct {
 	// 用户状态
 	Status int `json:"status,omitempty"`
 	// 用户身份证号码
-	IdcardEncrypted []byte `json:"-"`
+	NationalIDEncrypted []byte `json:"-"`
 	// 用户的身份证号码哈希，用于唯一值判断
-	IdcardHash string `json:"idcard_hash,omitempty"`
+	NationalIDHash string `json:"national_id_hash,omitempty"`
 	// 用户的昵称，用于页面展示
 	Nickname string `json:"nickname,omitempty"`
 	// 用户个人简介等
@@ -118,13 +118,13 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case users.FieldRealnameEncrypted, users.FieldIdcardEncrypted, users.FieldEmailEncrypted, users.FieldPhoneNumberEncrypted, users.FieldAddressEncrypted:
+		case users.FieldRealnameEncrypted, users.FieldNationalIDEncrypted, users.FieldEmailEncrypted, users.FieldPhoneNumberEncrypted, users.FieldAddressEncrypted:
 			values[i] = new([]byte)
 		case users.FieldEmailVerified, users.FieldPhoneNumberVerified:
 			values[i] = new(sql.NullBool)
 		case users.FieldID, users.FieldStatus, users.FieldGender, users.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
-		case users.FieldUsername, users.FieldIdcardHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
+		case users.FieldUsername, users.FieldNationalIDHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
 			values[i] = new(sql.NullString)
 		case users.FieldCreatedAt, users.FieldUpdatedAt, users.FieldDeletedAt, users.FieldBirthdate:
 			values[i] = new(sql.NullTime)
@@ -186,17 +186,17 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Status = int(value.Int64)
 			}
-		case users.FieldIdcardEncrypted:
+		case users.FieldNationalIDEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field idcard_encrypted", values[i])
+				return fmt.Errorf("unexpected type %T for field national_id_encrypted", values[i])
 			} else if value != nil {
-				_m.IdcardEncrypted = *value
+				_m.NationalIDEncrypted = *value
 			}
-		case users.FieldIdcardHash:
+		case users.FieldNationalIDHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field idcard_hash", values[i])
+				return fmt.Errorf("unexpected type %T for field national_id_hash", values[i])
 			} else if value.Valid {
-				_m.IdcardHash = value.String
+				_m.NationalIDHash = value.String
 			}
 		case users.FieldNickname:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -370,10 +370,10 @@ func (_m *Users) String() string {
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
-	builder.WriteString("idcard_encrypted=<sensitive>")
+	builder.WriteString("national_id_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	builder.WriteString("idcard_hash=")
-	builder.WriteString(_m.IdcardHash)
+	builder.WriteString("national_id_hash=")
+	builder.WriteString(_m.NationalIDHash)
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
 	builder.WriteString(_m.Nickname)

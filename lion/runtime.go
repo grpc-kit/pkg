@@ -640,14 +640,14 @@ func init() {
 	usersDescStatus := usersFields[2].Descriptor()
 	// users.DefaultStatus holds the default value on creation for the status field.
 	users.DefaultStatus = usersDescStatus.Default.(int)
-	// usersDescIdcardEncrypted is the schema descriptor for idcard_encrypted field.
-	usersDescIdcardEncrypted := usersFields[3].Descriptor()
-	// users.DefaultIdcardEncrypted holds the default value on creation for the idcard_encrypted field.
-	users.DefaultIdcardEncrypted = usersDescIdcardEncrypted.Default.([]byte)
-	// usersDescIdcardHash is the schema descriptor for idcard_hash field.
-	usersDescIdcardHash := usersFields[4].Descriptor()
-	// users.DefaultIdcardHash holds the default value on creation for the idcard_hash field.
-	users.DefaultIdcardHash = usersDescIdcardHash.Default.(string)
+	// usersDescNationalIDEncrypted is the schema descriptor for national_id_encrypted field.
+	usersDescNationalIDEncrypted := usersFields[3].Descriptor()
+	// users.DefaultNationalIDEncrypted holds the default value on creation for the national_id_encrypted field.
+	users.DefaultNationalIDEncrypted = usersDescNationalIDEncrypted.Default.([]byte)
+	// usersDescNationalIDHash is the schema descriptor for national_id_hash field.
+	usersDescNationalIDHash := usersFields[4].Descriptor()
+	// users.DefaultNationalIDHash holds the default value on creation for the national_id_hash field.
+	users.DefaultNationalIDHash = usersDescNationalIDHash.Default.(string)
 	// usersDescNickname is the schema descriptor for nickname field.
 	usersDescNickname := usersFields[5].Descriptor()
 	// users.DefaultNickname holds the default value on creation for the nickname field.

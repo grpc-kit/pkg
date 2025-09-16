@@ -32,11 +32,11 @@ func (Users) Fields() []ent.Field {
 		field.Int("status").
 			Default(0).
 			Comment("用户状态"),
-		field.Bytes("idcard_encrypted").
+		field.Bytes("national_id_encrypted").
 			Sensitive().
 			Default([]byte{}).
 			Comment("用户身份证号码"),
-		field.String("idcard_hash").
+		field.String("national_id_hash").
 			Optional().
 			Default("").
 			Comment("用户的身份证号码哈希，用于唯一值判断"),

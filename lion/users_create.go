@@ -91,22 +91,22 @@ func (_c *UsersCreate) SetNillableStatus(v *int) *UsersCreate {
 	return _c
 }
 
-// SetIdcardEncrypted sets the "idcard_encrypted" field.
-func (_c *UsersCreate) SetIdcardEncrypted(v []byte) *UsersCreate {
-	_c.mutation.SetIdcardEncrypted(v)
+// SetNationalIDEncrypted sets the "national_id_encrypted" field.
+func (_c *UsersCreate) SetNationalIDEncrypted(v []byte) *UsersCreate {
+	_c.mutation.SetNationalIDEncrypted(v)
 	return _c
 }
 
-// SetIdcardHash sets the "idcard_hash" field.
-func (_c *UsersCreate) SetIdcardHash(v string) *UsersCreate {
-	_c.mutation.SetIdcardHash(v)
+// SetNationalIDHash sets the "national_id_hash" field.
+func (_c *UsersCreate) SetNationalIDHash(v string) *UsersCreate {
+	_c.mutation.SetNationalIDHash(v)
 	return _c
 }
 
-// SetNillableIdcardHash sets the "idcard_hash" field if the given value is not nil.
-func (_c *UsersCreate) SetNillableIdcardHash(v *string) *UsersCreate {
+// SetNillableNationalIDHash sets the "national_id_hash" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableNationalIDHash(v *string) *UsersCreate {
 	if v != nil {
-		_c.SetIdcardHash(*v)
+		_c.SetNationalIDHash(*v)
 	}
 	return _c
 }
@@ -421,13 +421,13 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
-	if _, ok := _c.mutation.IdcardEncrypted(); !ok {
-		v := users.DefaultIdcardEncrypted
-		_c.mutation.SetIdcardEncrypted(v)
+	if _, ok := _c.mutation.NationalIDEncrypted(); !ok {
+		v := users.DefaultNationalIDEncrypted
+		_c.mutation.SetNationalIDEncrypted(v)
 	}
-	if _, ok := _c.mutation.IdcardHash(); !ok {
-		v := users.DefaultIdcardHash
-		_c.mutation.SetIdcardHash(v)
+	if _, ok := _c.mutation.NationalIDHash(); !ok {
+		v := users.DefaultNationalIDHash
+		_c.mutation.SetNationalIDHash(v)
 	}
 	if _, ok := _c.mutation.Nickname(); !ok {
 		v := users.DefaultNickname
@@ -521,8 +521,8 @@ func (_c *UsersCreate) check() error {
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`lion: missing required field "Users.status"`)}
 	}
-	if _, ok := _c.mutation.IdcardEncrypted(); !ok {
-		return &ValidationError{Name: "idcard_encrypted", err: errors.New(`lion: missing required field "Users.idcard_encrypted"`)}
+	if _, ok := _c.mutation.NationalIDEncrypted(); !ok {
+		return &ValidationError{Name: "national_id_encrypted", err: errors.New(`lion: missing required field "Users.national_id_encrypted"`)}
 	}
 	if _, ok := _c.mutation.Nickname(); !ok {
 		return &ValidationError{Name: "nickname", err: errors.New(`lion: missing required field "Users.nickname"`)}
@@ -626,13 +626,13 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_spec.SetField(users.FieldStatus, field.TypeInt, value)
 		_node.Status = value
 	}
-	if value, ok := _c.mutation.IdcardEncrypted(); ok {
-		_spec.SetField(users.FieldIdcardEncrypted, field.TypeBytes, value)
-		_node.IdcardEncrypted = value
+	if value, ok := _c.mutation.NationalIDEncrypted(); ok {
+		_spec.SetField(users.FieldNationalIDEncrypted, field.TypeBytes, value)
+		_node.NationalIDEncrypted = value
 	}
-	if value, ok := _c.mutation.IdcardHash(); ok {
-		_spec.SetField(users.FieldIdcardHash, field.TypeString, value)
-		_node.IdcardHash = value
+	if value, ok := _c.mutation.NationalIDHash(); ok {
+		_spec.SetField(users.FieldNationalIDHash, field.TypeString, value)
+		_node.NationalIDHash = value
 	}
 	if value, ok := _c.mutation.Nickname(); ok {
 		_spec.SetField(users.FieldNickname, field.TypeString, value)

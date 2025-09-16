@@ -13426,8 +13426,8 @@ type UsersMutation struct {
 	realname_encrypted           *[]byte
 	status                       *int
 	addstatus                    *int
-	idcard_encrypted             *[]byte
-	idcard_hash                  *string
+	national_id_encrypted        *[]byte
+	national_id_hash             *string
 	nickname                     *string
 	profile                      *string
 	picture                      *string
@@ -13809,89 +13809,89 @@ func (m *UsersMutation) ResetStatus() {
 	m.addstatus = nil
 }
 
-// SetIdcardEncrypted sets the "idcard_encrypted" field.
-func (m *UsersMutation) SetIdcardEncrypted(b []byte) {
-	m.idcard_encrypted = &b
+// SetNationalIDEncrypted sets the "national_id_encrypted" field.
+func (m *UsersMutation) SetNationalIDEncrypted(b []byte) {
+	m.national_id_encrypted = &b
 }
 
-// IdcardEncrypted returns the value of the "idcard_encrypted" field in the mutation.
-func (m *UsersMutation) IdcardEncrypted() (r []byte, exists bool) {
-	v := m.idcard_encrypted
+// NationalIDEncrypted returns the value of the "national_id_encrypted" field in the mutation.
+func (m *UsersMutation) NationalIDEncrypted() (r []byte, exists bool) {
+	v := m.national_id_encrypted
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldIdcardEncrypted returns the old "idcard_encrypted" field's value of the Users entity.
+// OldNationalIDEncrypted returns the old "national_id_encrypted" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldIdcardEncrypted(ctx context.Context) (v []byte, err error) {
+func (m *UsersMutation) OldNationalIDEncrypted(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIdcardEncrypted is only allowed on UpdateOne operations")
+		return v, errors.New("OldNationalIDEncrypted is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIdcardEncrypted requires an ID field in the mutation")
+		return v, errors.New("OldNationalIDEncrypted requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIdcardEncrypted: %w", err)
+		return v, fmt.Errorf("querying old value for OldNationalIDEncrypted: %w", err)
 	}
-	return oldValue.IdcardEncrypted, nil
+	return oldValue.NationalIDEncrypted, nil
 }
 
-// ResetIdcardEncrypted resets all changes to the "idcard_encrypted" field.
-func (m *UsersMutation) ResetIdcardEncrypted() {
-	m.idcard_encrypted = nil
+// ResetNationalIDEncrypted resets all changes to the "national_id_encrypted" field.
+func (m *UsersMutation) ResetNationalIDEncrypted() {
+	m.national_id_encrypted = nil
 }
 
-// SetIdcardHash sets the "idcard_hash" field.
-func (m *UsersMutation) SetIdcardHash(s string) {
-	m.idcard_hash = &s
+// SetNationalIDHash sets the "national_id_hash" field.
+func (m *UsersMutation) SetNationalIDHash(s string) {
+	m.national_id_hash = &s
 }
 
-// IdcardHash returns the value of the "idcard_hash" field in the mutation.
-func (m *UsersMutation) IdcardHash() (r string, exists bool) {
-	v := m.idcard_hash
+// NationalIDHash returns the value of the "national_id_hash" field in the mutation.
+func (m *UsersMutation) NationalIDHash() (r string, exists bool) {
+	v := m.national_id_hash
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldIdcardHash returns the old "idcard_hash" field's value of the Users entity.
+// OldNationalIDHash returns the old "national_id_hash" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldIdcardHash(ctx context.Context) (v string, err error) {
+func (m *UsersMutation) OldNationalIDHash(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIdcardHash is only allowed on UpdateOne operations")
+		return v, errors.New("OldNationalIDHash is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIdcardHash requires an ID field in the mutation")
+		return v, errors.New("OldNationalIDHash requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIdcardHash: %w", err)
+		return v, fmt.Errorf("querying old value for OldNationalIDHash: %w", err)
 	}
-	return oldValue.IdcardHash, nil
+	return oldValue.NationalIDHash, nil
 }
 
-// ClearIdcardHash clears the value of the "idcard_hash" field.
-func (m *UsersMutation) ClearIdcardHash() {
-	m.idcard_hash = nil
-	m.clearedFields[users.FieldIdcardHash] = struct{}{}
+// ClearNationalIDHash clears the value of the "national_id_hash" field.
+func (m *UsersMutation) ClearNationalIDHash() {
+	m.national_id_hash = nil
+	m.clearedFields[users.FieldNationalIDHash] = struct{}{}
 }
 
-// IdcardHashCleared returns if the "idcard_hash" field was cleared in this mutation.
-func (m *UsersMutation) IdcardHashCleared() bool {
-	_, ok := m.clearedFields[users.FieldIdcardHash]
+// NationalIDHashCleared returns if the "national_id_hash" field was cleared in this mutation.
+func (m *UsersMutation) NationalIDHashCleared() bool {
+	_, ok := m.clearedFields[users.FieldNationalIDHash]
 	return ok
 }
 
-// ResetIdcardHash resets all changes to the "idcard_hash" field.
-func (m *UsersMutation) ResetIdcardHash() {
-	m.idcard_hash = nil
-	delete(m.clearedFields, users.FieldIdcardHash)
+// ResetNationalIDHash resets all changes to the "national_id_hash" field.
+func (m *UsersMutation) ResetNationalIDHash() {
+	m.national_id_hash = nil
+	delete(m.clearedFields, users.FieldNationalIDHash)
 }
 
 // SetNickname sets the "nickname" field.
@@ -14800,11 +14800,11 @@ func (m *UsersMutation) Fields() []string {
 	if m.status != nil {
 		fields = append(fields, users.FieldStatus)
 	}
-	if m.idcard_encrypted != nil {
-		fields = append(fields, users.FieldIdcardEncrypted)
+	if m.national_id_encrypted != nil {
+		fields = append(fields, users.FieldNationalIDEncrypted)
 	}
-	if m.idcard_hash != nil {
-		fields = append(fields, users.FieldIdcardHash)
+	if m.national_id_hash != nil {
+		fields = append(fields, users.FieldNationalIDHash)
 	}
 	if m.nickname != nil {
 		fields = append(fields, users.FieldNickname)
@@ -14877,10 +14877,10 @@ func (m *UsersMutation) Field(name string) (ent.Value, bool) {
 		return m.RealnameEncrypted()
 	case users.FieldStatus:
 		return m.Status()
-	case users.FieldIdcardEncrypted:
-		return m.IdcardEncrypted()
-	case users.FieldIdcardHash:
-		return m.IdcardHash()
+	case users.FieldNationalIDEncrypted:
+		return m.NationalIDEncrypted()
+	case users.FieldNationalIDHash:
+		return m.NationalIDHash()
 	case users.FieldNickname:
 		return m.Nickname()
 	case users.FieldProfile:
@@ -14936,10 +14936,10 @@ func (m *UsersMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldRealnameEncrypted(ctx)
 	case users.FieldStatus:
 		return m.OldStatus(ctx)
-	case users.FieldIdcardEncrypted:
-		return m.OldIdcardEncrypted(ctx)
-	case users.FieldIdcardHash:
-		return m.OldIdcardHash(ctx)
+	case users.FieldNationalIDEncrypted:
+		return m.OldNationalIDEncrypted(ctx)
+	case users.FieldNationalIDHash:
+		return m.OldNationalIDHash(ctx)
 	case users.FieldNickname:
 		return m.OldNickname(ctx)
 	case users.FieldProfile:
@@ -15025,19 +15025,19 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStatus(v)
 		return nil
-	case users.FieldIdcardEncrypted:
+	case users.FieldNationalIDEncrypted:
 		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetIdcardEncrypted(v)
+		m.SetNationalIDEncrypted(v)
 		return nil
-	case users.FieldIdcardHash:
+	case users.FieldNationalIDHash:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetIdcardHash(v)
+		m.SetNationalIDHash(v)
 		return nil
 	case users.FieldNickname:
 		v, ok := value.(string)
@@ -15230,8 +15230,8 @@ func (m *UsersMutation) ClearedFields() []string {
 	if m.FieldCleared(users.FieldDeletedAt) {
 		fields = append(fields, users.FieldDeletedAt)
 	}
-	if m.FieldCleared(users.FieldIdcardHash) {
-		fields = append(fields, users.FieldIdcardHash)
+	if m.FieldCleared(users.FieldNationalIDHash) {
+		fields = append(fields, users.FieldNationalIDHash)
 	}
 	if m.FieldCleared(users.FieldEmailHash) {
 		fields = append(fields, users.FieldEmailHash)
@@ -15259,8 +15259,8 @@ func (m *UsersMutation) ClearField(name string) error {
 	case users.FieldDeletedAt:
 		m.ClearDeletedAt()
 		return nil
-	case users.FieldIdcardHash:
-		m.ClearIdcardHash()
+	case users.FieldNationalIDHash:
+		m.ClearNationalIDHash()
 		return nil
 	case users.FieldEmailHash:
 		m.ClearEmailHash()
@@ -15297,11 +15297,11 @@ func (m *UsersMutation) ResetField(name string) error {
 	case users.FieldStatus:
 		m.ResetStatus()
 		return nil
-	case users.FieldIdcardEncrypted:
-		m.ResetIdcardEncrypted()
+	case users.FieldNationalIDEncrypted:
+		m.ResetNationalIDEncrypted()
 		return nil
-	case users.FieldIdcardHash:
-		m.ResetIdcardHash()
+	case users.FieldNationalIDHash:
+		m.ResetNationalIDHash()
 		return nil
 	case users.FieldNickname:
 		m.ResetNickname()

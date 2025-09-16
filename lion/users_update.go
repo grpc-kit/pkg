@@ -98,29 +98,29 @@ func (_u *UsersUpdate) AddStatus(v int) *UsersUpdate {
 	return _u
 }
 
-// SetIdcardEncrypted sets the "idcard_encrypted" field.
-func (_u *UsersUpdate) SetIdcardEncrypted(v []byte) *UsersUpdate {
-	_u.mutation.SetIdcardEncrypted(v)
+// SetNationalIDEncrypted sets the "national_id_encrypted" field.
+func (_u *UsersUpdate) SetNationalIDEncrypted(v []byte) *UsersUpdate {
+	_u.mutation.SetNationalIDEncrypted(v)
 	return _u
 }
 
-// SetIdcardHash sets the "idcard_hash" field.
-func (_u *UsersUpdate) SetIdcardHash(v string) *UsersUpdate {
-	_u.mutation.SetIdcardHash(v)
+// SetNationalIDHash sets the "national_id_hash" field.
+func (_u *UsersUpdate) SetNationalIDHash(v string) *UsersUpdate {
+	_u.mutation.SetNationalIDHash(v)
 	return _u
 }
 
-// SetNillableIdcardHash sets the "idcard_hash" field if the given value is not nil.
-func (_u *UsersUpdate) SetNillableIdcardHash(v *string) *UsersUpdate {
+// SetNillableNationalIDHash sets the "national_id_hash" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableNationalIDHash(v *string) *UsersUpdate {
 	if v != nil {
-		_u.SetIdcardHash(*v)
+		_u.SetNationalIDHash(*v)
 	}
 	return _u
 }
 
-// ClearIdcardHash clears the value of the "idcard_hash" field.
-func (_u *UsersUpdate) ClearIdcardHash() *UsersUpdate {
-	_u.mutation.ClearIdcardHash()
+// ClearNationalIDHash clears the value of the "national_id_hash" field.
+func (_u *UsersUpdate) ClearNationalIDHash() *UsersUpdate {
+	_u.mutation.ClearNationalIDHash()
 	return _u
 }
 
@@ -572,14 +572,14 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedStatus(); ok {
 		_spec.AddField(users.FieldStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.IdcardEncrypted(); ok {
-		_spec.SetField(users.FieldIdcardEncrypted, field.TypeBytes, value)
+	if value, ok := _u.mutation.NationalIDEncrypted(); ok {
+		_spec.SetField(users.FieldNationalIDEncrypted, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.IdcardHash(); ok {
-		_spec.SetField(users.FieldIdcardHash, field.TypeString, value)
+	if value, ok := _u.mutation.NationalIDHash(); ok {
+		_spec.SetField(users.FieldNationalIDHash, field.TypeString, value)
 	}
-	if _u.mutation.IdcardHashCleared() {
-		_spec.ClearField(users.FieldIdcardHash, field.TypeString)
+	if _u.mutation.NationalIDHashCleared() {
+		_spec.ClearField(users.FieldNationalIDHash, field.TypeString)
 	}
 	if value, ok := _u.mutation.Nickname(); ok {
 		_spec.SetField(users.FieldNickname, field.TypeString, value)
@@ -869,29 +869,29 @@ func (_u *UsersUpdateOne) AddStatus(v int) *UsersUpdateOne {
 	return _u
 }
 
-// SetIdcardEncrypted sets the "idcard_encrypted" field.
-func (_u *UsersUpdateOne) SetIdcardEncrypted(v []byte) *UsersUpdateOne {
-	_u.mutation.SetIdcardEncrypted(v)
+// SetNationalIDEncrypted sets the "national_id_encrypted" field.
+func (_u *UsersUpdateOne) SetNationalIDEncrypted(v []byte) *UsersUpdateOne {
+	_u.mutation.SetNationalIDEncrypted(v)
 	return _u
 }
 
-// SetIdcardHash sets the "idcard_hash" field.
-func (_u *UsersUpdateOne) SetIdcardHash(v string) *UsersUpdateOne {
-	_u.mutation.SetIdcardHash(v)
+// SetNationalIDHash sets the "national_id_hash" field.
+func (_u *UsersUpdateOne) SetNationalIDHash(v string) *UsersUpdateOne {
+	_u.mutation.SetNationalIDHash(v)
 	return _u
 }
 
-// SetNillableIdcardHash sets the "idcard_hash" field if the given value is not nil.
-func (_u *UsersUpdateOne) SetNillableIdcardHash(v *string) *UsersUpdateOne {
+// SetNillableNationalIDHash sets the "national_id_hash" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableNationalIDHash(v *string) *UsersUpdateOne {
 	if v != nil {
-		_u.SetIdcardHash(*v)
+		_u.SetNationalIDHash(*v)
 	}
 	return _u
 }
 
-// ClearIdcardHash clears the value of the "idcard_hash" field.
-func (_u *UsersUpdateOne) ClearIdcardHash() *UsersUpdateOne {
-	_u.mutation.ClearIdcardHash()
+// ClearNationalIDHash clears the value of the "national_id_hash" field.
+func (_u *UsersUpdateOne) ClearNationalIDHash() *UsersUpdateOne {
+	_u.mutation.ClearNationalIDHash()
 	return _u
 }
 
@@ -1373,14 +1373,14 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if value, ok := _u.mutation.AddedStatus(); ok {
 		_spec.AddField(users.FieldStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.IdcardEncrypted(); ok {
-		_spec.SetField(users.FieldIdcardEncrypted, field.TypeBytes, value)
+	if value, ok := _u.mutation.NationalIDEncrypted(); ok {
+		_spec.SetField(users.FieldNationalIDEncrypted, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.IdcardHash(); ok {
-		_spec.SetField(users.FieldIdcardHash, field.TypeString, value)
+	if value, ok := _u.mutation.NationalIDHash(); ok {
+		_spec.SetField(users.FieldNationalIDHash, field.TypeString, value)
 	}
-	if _u.mutation.IdcardHashCleared() {
-		_spec.ClearField(users.FieldIdcardHash, field.TypeString)
+	if _u.mutation.NationalIDHashCleared() {
+		_spec.ClearField(users.FieldNationalIDHash, field.TypeString)
 	}
 	if value, ok := _u.mutation.Nickname(); ok {
 		_spec.SetField(users.FieldNickname, field.TypeString, value)
