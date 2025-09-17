@@ -11,7 +11,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -49,6 +48,14 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		return result, err
 	}
 
+	// 自动插入对超级管理员插入权限
+	ros, err := tx.Roles.Query().Select(roles.FieldID).Where(roles.NameEQ("superadmin")).Only(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return result, err
+	}
+	_, err = tx.RoleDepartments.Create().SetRoleID(ros.ID).SetDepartmentID(dp.ID).Save(ctx)
+
 	result = &adminv1.Department{
 		Id:          int32(dp.ID),
 		Name:        dp.Name,
@@ -85,42 +92,9 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDepartmentsRequest) (*adminv1.ListDepartmentsResponse, error) {
 	result := &adminv1.ListDepartmentsResponse{}
 
-	/*
-		userIDStr, ok := rpc.GetUserIDFromContext(ctx)
-		if !ok {
-			return result, errs.Unauthenticated(ctx).WithMessage("user id not found")
-		}
-
-		userIDInt, err := strconv.Atoi(userIDStr)
-		if err != nil {
-			return result, err
-		}
-	*/
-
-	// 从 jwt 中获取用户组
-	gs, ok := rpc.GetGroupsFromContext(ctx)
-	if !ok {
-		return result, errs.PermissionDenied(ctx).WithMessage("not found groups")
-	}
-
-	ridObj, err := a.config.db.Roles.Query().
-		Select(
-			roles.FieldID,
-		).
-		Where(
-			roles.NameIn(gs...),
-		).
-		All(ctx)
+	rids, err := a.getUserRoleID(ctx)
 	if err != nil {
 		return result, err
-	}
-	if len(ridObj) == 0 {
-		return result, errs.PermissionDenied(ctx).WithMessage("user not in any role")
-	}
-
-	rids := make([]int, 0)
-	for _, rid := range ridObj {
-		rids = append(rids, rid.ID)
 	}
 
 	res, err := a.config.db.RoleDepartments.Query().Select(
