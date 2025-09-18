@@ -33,6 +33,9 @@ type KnownAdminClient interface {
 	ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error)
 	CreateAuthProvider(ctx context.Context, in *CreateAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error)
 	// 角色相关
+	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error)
+	UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*Role, error)
+	DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListRoles(ctx context.Context, in *ListRolesRequest, opts ...grpc.CallOption) (*ListRolesResponse, error)
 	ListRoleUsers(ctx context.Context, in *ListRoleUsersRequest, opts ...grpc.CallOption) (*ListRoleUsersResponse, error)
 	DeleteRoleUser(ctx context.Context, in *DeleteRoleUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -129,6 +132,33 @@ func (c *knownAdminClient) ListMenus(ctx context.Context, in *ListMenusRequest, 
 func (c *knownAdminClient) CreateAuthProvider(ctx context.Context, in *CreateAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error) {
 	out := new(AuthProvider)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthProvider", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error) {
+	out := new(Role)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*Role, error) {
+	out := new(Role)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRole", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -284,6 +314,9 @@ type KnownAdminServer interface {
 	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
 	CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error)
 	// 角色相关
+	CreateRole(context.Context, *CreateRoleRequest) (*Role, error)
+	UpdateRole(context.Context, *UpdateRoleRequest) (*Role, error)
+	DeleteRole(context.Context, *DeleteRoleRequest) (*emptypb.Empty, error)
 	ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error)
 	ListRoleUsers(context.Context, *ListRoleUsersRequest) (*ListRoleUsersResponse, error)
 	DeleteRoleUser(context.Context, *DeleteRoleUserRequest) (*emptypb.Empty, error)
@@ -333,6 +366,15 @@ func (UnimplementedKnownAdminServer) ListMenus(context.Context, *ListMenusReques
 }
 func (UnimplementedKnownAdminServer) CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthProvider not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateRole(context.Context, *CreateRoleRequest) (*Role, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateRole not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateRole(context.Context, *UpdateRoleRequest) (*Role, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateRole not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteRole(context.Context, *DeleteRoleRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteRole not implemented")
 }
 func (UnimplementedKnownAdminServer) ListRoles(context.Context, *ListRolesRequest) (*ListRolesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRoles not implemented")
@@ -531,6 +573,60 @@ func _KnownAdmin_CreateAuthProvider_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).CreateAuthProvider(ctx, req.(*CreateAuthProviderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateRole(ctx, req.(*CreateRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateRole(ctx, req.(*UpdateRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteRole(ctx, req.(*DeleteRoleRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -843,6 +939,18 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateAuthProvider",
 			Handler:    _KnownAdmin_CreateAuthProvider_Handler,
+		},
+		{
+			MethodName: "CreateRole",
+			Handler:    _KnownAdmin_CreateRole_Handler,
+		},
+		{
+			MethodName: "UpdateRole",
+			Handler:    _KnownAdmin_UpdateRole_Handler,
+		},
+		{
+			MethodName: "DeleteRole",
+			Handler:    _KnownAdmin_DeleteRole_Handler,
 		},
 		{
 			MethodName: "ListRoles",

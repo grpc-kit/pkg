@@ -15,6 +15,7 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/departmentusers"
+	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
@@ -151,11 +152,6 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersRequest) (*adminv1.ListUsersResponse, error) {
 	result := &adminv1.ListUsersResponse{}
 
-	userIDInt, err := GetUserID(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	var selectViewFields []string
 
 	basicViewFields := []string{
@@ -193,32 +189,63 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 
 	// 默认查看所有用户（仅部门管理下所有可见）
 	// 先找到 user 对应的 department_id
-	leaders, err := a.config.db.DepartmentUsers.
-		Query().
-		Select(
-			departmentusers.FieldID,
-			departmentusers.FieldLeaderType,
-			departmentusers.FieldDepartmentID,
-			departmentusers.FieldUserID,
-		).
-		Where(departmentusers.UserID(userIDInt)).
-		WithLionDepartments().
-		All(ctx)
+	/*
+		userIDInt, err := GetUserID(ctx)
+		if err != nil {
+			return nil, err
+		}
+	*/
+	/*
+		leaders, err := a.config.db.DepartmentUsers.
+			Query().
+			Select(
+				departmentusers.FieldID,
+				departmentusers.FieldLeaderType,
+				departmentusers.FieldDepartmentID,
+				departmentusers.FieldUserID,
+			).
+			Where(departmentusers.UserID(userIDInt)).
+			WithLionDepartments().
+			All(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		var allIDs []int
+		for _, leader := range leaders {
+			dept := leader.Edges.LionDepartments
+			if dept == nil {
+				continue
+			}
+			ids, err := a.getAllSubDeptIDs(ctx, dept.ID)
+			if err != nil {
+				return nil, err
+			}
+			allIDs = append(allIDs, ids...)
+		}
+	*/
+
+	roleIDs, err := a.getUserRoleID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	var allIDs []int
-	for _, leader := range leaders {
-		dept := leader.Edges.LionDepartments
-		if dept == nil {
-			continue
-		}
-		ids, err := a.getAllSubDeptIDs(ctx, dept.ID)
-		if err != nil {
-			return nil, err
-		}
-		allIDs = append(allIDs, ids...)
+
+	rdObj, err := a.config.db.RoleDepartments.Query().
+		Select(
+			roledepartments.FieldDepartmentID,
+			roledepartments.FieldRoleID,
+		).
+		Where(
+			roledepartments.RoleIDIn(roleIDs...),
+		).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range rdObj {
+		allIDs = append(allIDs, v.DepartmentID)
 	}
 
 	// TODO; 先简单提取部门 ID
