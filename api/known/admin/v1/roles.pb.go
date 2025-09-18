@@ -512,6 +512,61 @@ func (x *DeleteRoleUserRequest) GetUserId() int32 {
 	return 0
 }
 
+type AssignRoleToUserRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoleId int32   `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	Users  []*User `protobuf:"bytes,2,rep,name=users,proto3" json:"users,omitempty"`
+}
+
+func (x *AssignRoleToUserRequest) Reset() {
+	*x = AssignRoleToUserRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AssignRoleToUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AssignRoleToUserRequest) ProtoMessage() {}
+
+func (x *AssignRoleToUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AssignRoleToUserRequest.ProtoReflect.Descriptor instead.
+func (*AssignRoleToUserRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *AssignRoleToUserRequest) GetRoleId() int32 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *AssignRoleToUserRequest) GetUsers() []*User {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
 var File_known_admin_v1_roles_proto protoreflect.FileDescriptor
 
 var file_known_admin_v1_roles_proto_rawDesc = []byte{
@@ -571,11 +626,17 @@ var file_known_admin_v1_roles_proto_rawDesc = []byte{
 	0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
 	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75, 0x73, 0x65,
-	0x72, 0x49, 0x64, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61,
-	0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76,
-	0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x72, 0x49, 0x64, 0x22, 0x6b, 0x0a, 0x17, 0x41, 0x73, 0x73, 0x69, 0x67, 0x6e, 0x52, 0x6f, 0x6c,
+	0x65, 0x54, 0x6f, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17,
+	0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x37, 0x0a, 0x05, 0x75, 0x73, 0x65, 0x72, 0x73,
+	0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69,
+	0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69,
+	0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x05, 0x75, 0x73, 0x65, 0x72, 0x73,
+	0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67,
+	0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f,
+	0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61,
+	0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -590,31 +651,33 @@ func file_known_admin_v1_roles_proto_rawDescGZIP() []byte {
 	return file_known_admin_v1_roles_proto_rawDescData
 }
 
-var file_known_admin_v1_roles_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_known_admin_v1_roles_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_known_admin_v1_roles_proto_goTypes = []interface{}{
-	(*CreateRoleRequest)(nil),     // 0: grpc_kit.api.known.admin.v1.CreateRoleRequest
-	(*UpdateRoleRequest)(nil),     // 1: grpc_kit.api.known.admin.v1.UpdateRoleRequest
-	(*DeleteRoleRequest)(nil),     // 2: grpc_kit.api.known.admin.v1.DeleteRoleRequest
-	(*ListRolesRequest)(nil),      // 3: grpc_kit.api.known.admin.v1.ListRolesRequest
-	(*ListRolesResponse)(nil),     // 4: grpc_kit.api.known.admin.v1.ListRolesResponse
-	(*ListRoleUsersRequest)(nil),  // 5: grpc_kit.api.known.admin.v1.ListRoleUsersRequest
-	(*ListRoleUsersResponse)(nil), // 6: grpc_kit.api.known.admin.v1.ListRoleUsersResponse
-	(*DeleteRoleUserRequest)(nil), // 7: grpc_kit.api.known.admin.v1.DeleteRoleUserRequest
-	(*Role)(nil),                  // 8: grpc_kit.api.known.admin.v1.Role
-	(*fieldmaskpb.FieldMask)(nil), // 9: google.protobuf.FieldMask
-	(*User)(nil),                  // 10: grpc_kit.api.known.admin.v1.User
+	(*CreateRoleRequest)(nil),       // 0: grpc_kit.api.known.admin.v1.CreateRoleRequest
+	(*UpdateRoleRequest)(nil),       // 1: grpc_kit.api.known.admin.v1.UpdateRoleRequest
+	(*DeleteRoleRequest)(nil),       // 2: grpc_kit.api.known.admin.v1.DeleteRoleRequest
+	(*ListRolesRequest)(nil),        // 3: grpc_kit.api.known.admin.v1.ListRolesRequest
+	(*ListRolesResponse)(nil),       // 4: grpc_kit.api.known.admin.v1.ListRolesResponse
+	(*ListRoleUsersRequest)(nil),    // 5: grpc_kit.api.known.admin.v1.ListRoleUsersRequest
+	(*ListRoleUsersResponse)(nil),   // 6: grpc_kit.api.known.admin.v1.ListRoleUsersResponse
+	(*DeleteRoleUserRequest)(nil),   // 7: grpc_kit.api.known.admin.v1.DeleteRoleUserRequest
+	(*AssignRoleToUserRequest)(nil), // 8: grpc_kit.api.known.admin.v1.AssignRoleToUserRequest
+	(*Role)(nil),                    // 9: grpc_kit.api.known.admin.v1.Role
+	(*fieldmaskpb.FieldMask)(nil),   // 10: google.protobuf.FieldMask
+	(*User)(nil),                    // 11: grpc_kit.api.known.admin.v1.User
 }
 var file_known_admin_v1_roles_proto_depIdxs = []int32{
-	8,  // 0: grpc_kit.api.known.admin.v1.CreateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
-	8,  // 1: grpc_kit.api.known.admin.v1.UpdateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
-	9,  // 2: grpc_kit.api.known.admin.v1.UpdateRoleRequest.update_mask:type_name -> google.protobuf.FieldMask
-	8,  // 3: grpc_kit.api.known.admin.v1.ListRolesResponse.roles:type_name -> grpc_kit.api.known.admin.v1.Role
-	10, // 4: grpc_kit.api.known.admin.v1.ListRoleUsersResponse.users:type_name -> grpc_kit.api.known.admin.v1.User
-	5,  // [5:5] is the sub-list for method output_type
-	5,  // [5:5] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	9,  // 0: grpc_kit.api.known.admin.v1.CreateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
+	9,  // 1: grpc_kit.api.known.admin.v1.UpdateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
+	10, // 2: grpc_kit.api.known.admin.v1.UpdateRoleRequest.update_mask:type_name -> google.protobuf.FieldMask
+	9,  // 3: grpc_kit.api.known.admin.v1.ListRolesResponse.roles:type_name -> grpc_kit.api.known.admin.v1.Role
+	11, // 4: grpc_kit.api.known.admin.v1.ListRoleUsersResponse.users:type_name -> grpc_kit.api.known.admin.v1.User
+	11, // 5: grpc_kit.api.known.admin.v1.AssignRoleToUserRequest.users:type_name -> grpc_kit.api.known.admin.v1.User
+	6,  // [6:6] is the sub-list for method output_type
+	6,  // [6:6] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_roles_proto_init() }
@@ -720,6 +783,18 @@ func file_known_admin_v1_roles_proto_init() {
 				return nil
 			}
 		}
+		file_known_admin_v1_roles_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AssignRoleToUserRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_known_admin_v1_roles_proto_msgTypes[5].OneofWrappers = []interface{}{
 		(*ListRoleUsersRequest_PageToken)(nil),
@@ -731,7 +806,7 @@ func file_known_admin_v1_roles_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_roles_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

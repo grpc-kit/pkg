@@ -255,3 +255,21 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 
 	return result, nil
 }
+
+// AssignRoleToUser 角色分配用户
+func (a *KnownAdminAPI) AssignRoleToUser(ctx context.Context, req *adminv1.AssignRoleToUserRequest) (*emptypb.Empty, error) {
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(req.Users) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("users is empty")
+	}
+
+	for _, userID := range req.Users {
+		_, _ = db.UserRoles.Create().SetRoleID(int(req.RoleId)).SetUserID(int(userID.Id)).Save(ctx)
+	}
+
+	return &emptypb.Empty{}, nil
+}
