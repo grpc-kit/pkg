@@ -9,7 +9,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/permissions"
@@ -20,6 +19,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
@@ -104,21 +104,6 @@ func init() {
 	demoDescName := demoFields[0].Descriptor()
 	// demo.DefaultName holds the default value on creation for the name field.
 	demo.DefaultName = demoDescName.Default.(string)
-	departmentusersMixin := schema.DepartmentUsers{}.Mixin()
-	departmentusersMixinFields0 := departmentusersMixin[0].Fields()
-	_ = departmentusersMixinFields0
-	departmentusersFields := schema.DepartmentUsers{}.Fields()
-	_ = departmentusersFields
-	// departmentusersDescCreatedAt is the schema descriptor for created_at field.
-	departmentusersDescCreatedAt := departmentusersMixinFields0[0].Descriptor()
-	// departmentusers.DefaultCreatedAt holds the default value on creation for the created_at field.
-	departmentusers.DefaultCreatedAt = departmentusersDescCreatedAt.Default.(func() time.Time)
-	// departmentusersDescUpdatedAt is the schema descriptor for updated_at field.
-	departmentusersDescUpdatedAt := departmentusersMixinFields0[1].Descriptor()
-	// departmentusers.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	departmentusers.DefaultUpdatedAt = departmentusersDescUpdatedAt.Default.(func() time.Time)
-	// departmentusers.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	departmentusers.UpdateDefaultUpdatedAt = departmentusersDescUpdatedAt.UpdateDefault.(func() time.Time)
 	departmentsMixin := schema.Departments{}.Mixin()
 	departmentsMixinFields0 := departmentsMixin[0].Fields()
 	_ = departmentsMixinFields0
@@ -490,6 +475,21 @@ func init() {
 	rolesDescDescription := rolesFields[4].Descriptor()
 	// roles.DefaultDescription holds the default value on creation for the description field.
 	roles.DefaultDescription = rolesDescDescription.Default.(string)
+	userdepartmentsMixin := schema.UserDepartments{}.Mixin()
+	userdepartmentsMixinFields0 := userdepartmentsMixin[0].Fields()
+	_ = userdepartmentsMixinFields0
+	userdepartmentsFields := schema.UserDepartments{}.Fields()
+	_ = userdepartmentsFields
+	// userdepartmentsDescCreatedAt is the schema descriptor for created_at field.
+	userdepartmentsDescCreatedAt := userdepartmentsMixinFields0[0].Descriptor()
+	// userdepartments.DefaultCreatedAt holds the default value on creation for the created_at field.
+	userdepartments.DefaultCreatedAt = userdepartmentsDescCreatedAt.Default.(func() time.Time)
+	// userdepartmentsDescUpdatedAt is the schema descriptor for updated_at field.
+	userdepartmentsDescUpdatedAt := userdepartmentsMixinFields0[1].Descriptor()
+	// userdepartments.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	userdepartments.DefaultUpdatedAt = userdepartmentsDescUpdatedAt.Default.(func() time.Time)
+	// userdepartments.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	userdepartments.UpdateDefaultUpdatedAt = userdepartmentsDescUpdatedAt.UpdateDefault.(func() time.Time)
 	usergroupsMixin := schema.UserGroups{}.Mixin()
 	usergroupsMixinFields0 := usergroupsMixin[0].Fields()
 	_ = usergroupsMixinFields0

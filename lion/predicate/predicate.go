@@ -15,9 +15,6 @@ type Credentials func(*sql.Selector)
 // Demo is the predicate function for demo builders.
 type Demo func(*sql.Selector)
 
-// DepartmentUsers is the predicate function for departmentusers builders.
-type DepartmentUsers func(*sql.Selector)
-
 // Departments is the predicate function for departments builders.
 type Departments func(*sql.Selector)
 
@@ -47,6 +44,9 @@ type RoleResources func(*sql.Selector)
 
 // Roles is the predicate function for roles builders.
 type Roles func(*sql.Selector)
+
+// UserDepartments is the predicate function for userdepartments builders.
+type UserDepartments func(*sql.Selector)
 
 // UserGroups is the predicate function for usergroups builders.
 type UserGroups func(*sql.Selector)

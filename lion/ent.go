@@ -16,7 +16,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/permissions"
@@ -26,6 +25,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
@@ -94,7 +94,6 @@ func checkColumn(t, c string) error {
 			authproviders.Table:   authproviders.ValidColumn,
 			credentials.Table:     credentials.ValidColumn,
 			demo.Table:            demo.ValidColumn,
-			departmentusers.Table: departmentusers.ValidColumn,
 			departments.Table:     departments.ValidColumn,
 			grouproles.Table:      grouproles.ValidColumn,
 			groups.Table:          groups.ValidColumn,
@@ -105,6 +104,7 @@ func checkColumn(t, c string) error {
 			rolepermissions.Table: rolepermissions.ValidColumn,
 			roleresources.Table:   roleresources.ValidColumn,
 			roles.Table:           roles.ValidColumn,
+			userdepartments.Table: userdepartments.ValidColumn,
 			usergroups.Table:      usergroups.ValidColumn,
 			useridentities.Table:  useridentities.ValidColumn,
 			userprofiles.Table:    userprofiles.ValidColumn,

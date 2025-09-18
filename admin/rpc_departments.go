@@ -8,9 +8,10 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/roles"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
+	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -66,7 +67,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 
 	if req.Department.Leaders != nil {
 		for _, leader := range req.Department.Leaders {
-			tmp, err := tx.DepartmentUsers.Create().
+			tmp, err := tx.UserDepartments.Create().
 				SetDepartmentID(dp.ID).
 				SetLeaderType(int(leader.Type)).
 				SetUserID(int(leader.UserId)).
@@ -170,8 +171,8 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 	result.Departments = roots
 
 	/*
-		leaders, err := a.config.db.DepartmentUsers.Query().
-			Where(departmentusers.UserIDEQ(userIDInt)).
+		leaders, err := a.config.db.UserDepartments.Query().
+			Where(userdepartments.UserIDEQ(userIDInt)).
 			WithLionDepartments().All(ctx)
 		if err != nil {
 			return result, err
@@ -230,7 +231,7 @@ func (a *KnownAdminAPI) DeleteDepartment(ctx context.Context, req *adminv1.Delet
 	hasFound = checkDep(deps.Departments)
 	if hasFound {
 		// TODO; 还需判断该部门下是否有用户
-		count := a.config.db.Users.Query().CountX(ctx)
+		count := a.config.db.Users.Query().Where(users.DepartmentIDEQ(int(req.Id))).CountX(ctx)
 		if count > 0 {
 			return empty, errs.PermissionDenied(ctx).WithMessage("department has users")
 		}
@@ -288,8 +289,8 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 	}
 
 	// 查领导
-	leaders, err := a.config.db.DepartmentUsers.Query().
-		Where(departmentusers.HasLionDepartmentsWith(departments.ID(dep.ID))).All(ctx)
+	leaders, err := a.config.db.UserDepartments.Query().
+		Where(userdepartments.HasLionDepartmentsWith(departments.ID(dep.ID))).All(ctx)
 
 	pbDep := &adminv1.Department{
 		Id:          int32(dep.ID),

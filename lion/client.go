@@ -19,7 +19,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/permissions"
@@ -29,6 +28,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
@@ -47,8 +47,6 @@ type Client struct {
 	Credentials *CredentialsClient
 	// Demo is the client for interacting with the Demo builders.
 	Demo *DemoClient
-	// DepartmentUsers is the client for interacting with the DepartmentUsers builders.
-	DepartmentUsers *DepartmentUsersClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
 	// GroupRoles is the client for interacting with the GroupRoles builders.
@@ -69,6 +67,8 @@ type Client struct {
 	RoleResources *RoleResourcesClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
+	// UserDepartments is the client for interacting with the UserDepartments builders.
+	UserDepartments *UserDepartmentsClient
 	// UserGroups is the client for interacting with the UserGroups builders.
 	UserGroups *UserGroupsClient
 	// UserIdentities is the client for interacting with the UserIdentities builders.
@@ -93,7 +93,6 @@ func (c *Client) init() {
 	c.AuthProviders = NewAuthProvidersClient(c.config)
 	c.Credentials = NewCredentialsClient(c.config)
 	c.Demo = NewDemoClient(c.config)
-	c.DepartmentUsers = NewDepartmentUsersClient(c.config)
 	c.Departments = NewDepartmentsClient(c.config)
 	c.GroupRoles = NewGroupRolesClient(c.config)
 	c.Groups = NewGroupsClient(c.config)
@@ -104,6 +103,7 @@ func (c *Client) init() {
 	c.RolePermissions = NewRolePermissionsClient(c.config)
 	c.RoleResources = NewRoleResourcesClient(c.config)
 	c.Roles = NewRolesClient(c.config)
+	c.UserDepartments = NewUserDepartmentsClient(c.config)
 	c.UserGroups = NewUserGroupsClient(c.config)
 	c.UserIdentities = NewUserIdentitiesClient(c.config)
 	c.UserProfiles = NewUserProfilesClient(c.config)
@@ -204,7 +204,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AuthProviders:   NewAuthProvidersClient(cfg),
 		Credentials:     NewCredentialsClient(cfg),
 		Demo:            NewDemoClient(cfg),
-		DepartmentUsers: NewDepartmentUsersClient(cfg),
 		Departments:     NewDepartmentsClient(cfg),
 		GroupRoles:      NewGroupRolesClient(cfg),
 		Groups:          NewGroupsClient(cfg),
@@ -215,6 +214,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		RolePermissions: NewRolePermissionsClient(cfg),
 		RoleResources:   NewRoleResourcesClient(cfg),
 		Roles:           NewRolesClient(cfg),
+		UserDepartments: NewUserDepartmentsClient(cfg),
 		UserGroups:      NewUserGroupsClient(cfg),
 		UserIdentities:  NewUserIdentitiesClient(cfg),
 		UserProfiles:    NewUserProfilesClient(cfg),
@@ -242,7 +242,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AuthProviders:   NewAuthProvidersClient(cfg),
 		Credentials:     NewCredentialsClient(cfg),
 		Demo:            NewDemoClient(cfg),
-		DepartmentUsers: NewDepartmentUsersClient(cfg),
 		Departments:     NewDepartmentsClient(cfg),
 		GroupRoles:      NewGroupRolesClient(cfg),
 		Groups:          NewGroupsClient(cfg),
@@ -253,6 +252,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		RolePermissions: NewRolePermissionsClient(cfg),
 		RoleResources:   NewRoleResourcesClient(cfg),
 		Roles:           NewRolesClient(cfg),
+		UserDepartments: NewUserDepartmentsClient(cfg),
 		UserGroups:      NewUserGroupsClient(cfg),
 		UserIdentities:  NewUserIdentitiesClient(cfg),
 		UserProfiles:    NewUserProfilesClient(cfg),
@@ -287,10 +287,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AuthProviders, c.Credentials, c.Demo, c.DepartmentUsers, c.Departments,
-		c.GroupRoles, c.Groups, c.Permissions, c.Policies, c.Resources,
-		c.RoleDepartments, c.RolePermissions, c.RoleResources, c.Roles, c.UserGroups,
-		c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
+		c.AuthProviders, c.Credentials, c.Demo, c.Departments, c.GroupRoles, c.Groups,
+		c.Permissions, c.Policies, c.Resources, c.RoleDepartments, c.RolePermissions,
+		c.RoleResources, c.Roles, c.UserDepartments, c.UserGroups, c.UserIdentities,
+		c.UserProfiles, c.UserRoles, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -300,10 +300,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AuthProviders, c.Credentials, c.Demo, c.DepartmentUsers, c.Departments,
-		c.GroupRoles, c.Groups, c.Permissions, c.Policies, c.Resources,
-		c.RoleDepartments, c.RolePermissions, c.RoleResources, c.Roles, c.UserGroups,
-		c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
+		c.AuthProviders, c.Credentials, c.Demo, c.Departments, c.GroupRoles, c.Groups,
+		c.Permissions, c.Policies, c.Resources, c.RoleDepartments, c.RolePermissions,
+		c.RoleResources, c.Roles, c.UserDepartments, c.UserGroups, c.UserIdentities,
+		c.UserProfiles, c.UserRoles, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -318,8 +318,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Credentials.mutate(ctx, m)
 	case *DemoMutation:
 		return c.Demo.mutate(ctx, m)
-	case *DepartmentUsersMutation:
-		return c.DepartmentUsers.mutate(ctx, m)
 	case *DepartmentsMutation:
 		return c.Departments.mutate(ctx, m)
 	case *GroupRolesMutation:
@@ -340,6 +338,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RoleResources.mutate(ctx, m)
 	case *RolesMutation:
 		return c.Roles.mutate(ctx, m)
+	case *UserDepartmentsMutation:
+		return c.UserDepartments.mutate(ctx, m)
 	case *UserGroupsMutation:
 		return c.UserGroups.mutate(ctx, m)
 	case *UserIdentitiesMutation:
@@ -770,171 +770,6 @@ func (c *DemoClient) mutate(ctx context.Context, m *DemoMutation) (Value, error)
 	}
 }
 
-// DepartmentUsersClient is a client for the DepartmentUsers schema.
-type DepartmentUsersClient struct {
-	config
-}
-
-// NewDepartmentUsersClient returns a client for the DepartmentUsers from the given config.
-func NewDepartmentUsersClient(c config) *DepartmentUsersClient {
-	return &DepartmentUsersClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `departmentusers.Hooks(f(g(h())))`.
-func (c *DepartmentUsersClient) Use(hooks ...Hook) {
-	c.hooks.DepartmentUsers = append(c.hooks.DepartmentUsers, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `departmentusers.Intercept(f(g(h())))`.
-func (c *DepartmentUsersClient) Intercept(interceptors ...Interceptor) {
-	c.inters.DepartmentUsers = append(c.inters.DepartmentUsers, interceptors...)
-}
-
-// Create returns a builder for creating a DepartmentUsers entity.
-func (c *DepartmentUsersClient) Create() *DepartmentUsersCreate {
-	mutation := newDepartmentUsersMutation(c.config, OpCreate)
-	return &DepartmentUsersCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of DepartmentUsers entities.
-func (c *DepartmentUsersClient) CreateBulk(builders ...*DepartmentUsersCreate) *DepartmentUsersCreateBulk {
-	return &DepartmentUsersCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *DepartmentUsersClient) MapCreateBulk(slice any, setFunc func(*DepartmentUsersCreate, int)) *DepartmentUsersCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &DepartmentUsersCreateBulk{err: fmt.Errorf("calling to DepartmentUsersClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*DepartmentUsersCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &DepartmentUsersCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for DepartmentUsers.
-func (c *DepartmentUsersClient) Update() *DepartmentUsersUpdate {
-	mutation := newDepartmentUsersMutation(c.config, OpUpdate)
-	return &DepartmentUsersUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *DepartmentUsersClient) UpdateOne(_m *DepartmentUsers) *DepartmentUsersUpdateOne {
-	mutation := newDepartmentUsersMutation(c.config, OpUpdateOne, withDepartmentUsers(_m))
-	return &DepartmentUsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *DepartmentUsersClient) UpdateOneID(id int) *DepartmentUsersUpdateOne {
-	mutation := newDepartmentUsersMutation(c.config, OpUpdateOne, withDepartmentUsersID(id))
-	return &DepartmentUsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for DepartmentUsers.
-func (c *DepartmentUsersClient) Delete() *DepartmentUsersDelete {
-	mutation := newDepartmentUsersMutation(c.config, OpDelete)
-	return &DepartmentUsersDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *DepartmentUsersClient) DeleteOne(_m *DepartmentUsers) *DepartmentUsersDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *DepartmentUsersClient) DeleteOneID(id int) *DepartmentUsersDeleteOne {
-	builder := c.Delete().Where(departmentusers.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &DepartmentUsersDeleteOne{builder}
-}
-
-// Query returns a query builder for DepartmentUsers.
-func (c *DepartmentUsersClient) Query() *DepartmentUsersQuery {
-	return &DepartmentUsersQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeDepartmentUsers},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a DepartmentUsers entity by its id.
-func (c *DepartmentUsersClient) Get(ctx context.Context, id int) (*DepartmentUsers, error) {
-	return c.Query().Where(departmentusers.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *DepartmentUsersClient) GetX(ctx context.Context, id int) *DepartmentUsers {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryLionDepartments queries the lion_departments edge of a DepartmentUsers.
-func (c *DepartmentUsersClient) QueryLionDepartments(_m *DepartmentUsers) *DepartmentsQuery {
-	query := (&DepartmentsClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(departmentusers.Table, departmentusers.FieldID, id),
-			sqlgraph.To(departments.Table, departments.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, departmentusers.LionDepartmentsTable, departmentusers.LionDepartmentsColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryLionDepartmentUsers queries the lion_department_users edge of a DepartmentUsers.
-func (c *DepartmentUsersClient) QueryLionDepartmentUsers(_m *DepartmentUsers) *UsersQuery {
-	query := (&UsersClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(departmentusers.Table, departmentusers.FieldID, id),
-			sqlgraph.To(users.Table, users.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, departmentusers.LionDepartmentUsersTable, departmentusers.LionDepartmentUsersColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *DepartmentUsersClient) Hooks() []Hook {
-	return c.hooks.DepartmentUsers
-}
-
-// Interceptors returns the client interceptors.
-func (c *DepartmentUsersClient) Interceptors() []Interceptor {
-	return c.inters.DepartmentUsers
-}
-
-func (c *DepartmentUsersClient) mutate(ctx context.Context, m *DepartmentUsersMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&DepartmentUsersCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&DepartmentUsersUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&DepartmentUsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&DepartmentUsersDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("lion: unknown DepartmentUsers mutation op: %q", m.Op())
-	}
-}
-
 // DepartmentsClient is a client for the Departments schema.
 type DepartmentsClient struct {
 	config
@@ -1059,15 +894,15 @@ func (c *DepartmentsClient) QueryLionRoleDepartments(_m *Departments) *RoleDepar
 	return query
 }
 
-// QueryLionDepartmentUsers queries the lion_department_users edge of a Departments.
-func (c *DepartmentsClient) QueryLionDepartmentUsers(_m *Departments) *DepartmentUsersQuery {
-	query := (&DepartmentUsersClient{config: c.config}).Query()
+// QueryLionUserDepartments queries the lion_user_departments edge of a Departments.
+func (c *DepartmentsClient) QueryLionUserDepartments(_m *Departments) *UserDepartmentsQuery {
+	query := (&UserDepartmentsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(departments.Table, departments.FieldID, id),
-			sqlgraph.To(departmentusers.Table, departmentusers.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionDepartmentUsersTable, departments.LionDepartmentUsersColumn),
+			sqlgraph.To(userdepartments.Table, userdepartments.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionUserDepartmentsTable, departments.LionUserDepartmentsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2489,6 +2324,171 @@ func (c *RolesClient) mutate(ctx context.Context, m *RolesMutation) (Value, erro
 	}
 }
 
+// UserDepartmentsClient is a client for the UserDepartments schema.
+type UserDepartmentsClient struct {
+	config
+}
+
+// NewUserDepartmentsClient returns a client for the UserDepartments from the given config.
+func NewUserDepartmentsClient(c config) *UserDepartmentsClient {
+	return &UserDepartmentsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userdepartments.Hooks(f(g(h())))`.
+func (c *UserDepartmentsClient) Use(hooks ...Hook) {
+	c.hooks.UserDepartments = append(c.hooks.UserDepartments, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userdepartments.Intercept(f(g(h())))`.
+func (c *UserDepartmentsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserDepartments = append(c.inters.UserDepartments, interceptors...)
+}
+
+// Create returns a builder for creating a UserDepartments entity.
+func (c *UserDepartmentsClient) Create() *UserDepartmentsCreate {
+	mutation := newUserDepartmentsMutation(c.config, OpCreate)
+	return &UserDepartmentsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserDepartments entities.
+func (c *UserDepartmentsClient) CreateBulk(builders ...*UserDepartmentsCreate) *UserDepartmentsCreateBulk {
+	return &UserDepartmentsCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserDepartmentsClient) MapCreateBulk(slice any, setFunc func(*UserDepartmentsCreate, int)) *UserDepartmentsCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserDepartmentsCreateBulk{err: fmt.Errorf("calling to UserDepartmentsClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserDepartmentsCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserDepartmentsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserDepartments.
+func (c *UserDepartmentsClient) Update() *UserDepartmentsUpdate {
+	mutation := newUserDepartmentsMutation(c.config, OpUpdate)
+	return &UserDepartmentsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserDepartmentsClient) UpdateOne(_m *UserDepartments) *UserDepartmentsUpdateOne {
+	mutation := newUserDepartmentsMutation(c.config, OpUpdateOne, withUserDepartments(_m))
+	return &UserDepartmentsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserDepartmentsClient) UpdateOneID(id int) *UserDepartmentsUpdateOne {
+	mutation := newUserDepartmentsMutation(c.config, OpUpdateOne, withUserDepartmentsID(id))
+	return &UserDepartmentsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserDepartments.
+func (c *UserDepartmentsClient) Delete() *UserDepartmentsDelete {
+	mutation := newUserDepartmentsMutation(c.config, OpDelete)
+	return &UserDepartmentsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserDepartmentsClient) DeleteOne(_m *UserDepartments) *UserDepartmentsDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserDepartmentsClient) DeleteOneID(id int) *UserDepartmentsDeleteOne {
+	builder := c.Delete().Where(userdepartments.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDepartmentsDeleteOne{builder}
+}
+
+// Query returns a query builder for UserDepartments.
+func (c *UserDepartmentsClient) Query() *UserDepartmentsQuery {
+	return &UserDepartmentsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserDepartments},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserDepartments entity by its id.
+func (c *UserDepartmentsClient) Get(ctx context.Context, id int) (*UserDepartments, error) {
+	return c.Query().Where(userdepartments.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserDepartmentsClient) GetX(ctx context.Context, id int) *UserDepartments {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryLionDepartments queries the lion_departments edge of a UserDepartments.
+func (c *UserDepartmentsClient) QueryLionDepartments(_m *UserDepartments) *DepartmentsQuery {
+	query := (&DepartmentsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userdepartments.Table, userdepartments.FieldID, id),
+			sqlgraph.To(departments.Table, departments.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, userdepartments.LionDepartmentsTable, userdepartments.LionDepartmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionUserDepartments queries the lion_user_departments edge of a UserDepartments.
+func (c *UserDepartmentsClient) QueryLionUserDepartments(_m *UserDepartments) *UsersQuery {
+	query := (&UsersClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userdepartments.Table, userdepartments.FieldID, id),
+			sqlgraph.To(users.Table, users.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, userdepartments.LionUserDepartmentsTable, userdepartments.LionUserDepartmentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserDepartmentsClient) Hooks() []Hook {
+	return c.hooks.UserDepartments
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserDepartmentsClient) Interceptors() []Interceptor {
+	return c.inters.UserDepartments
+}
+
+func (c *UserDepartmentsClient) mutate(ctx context.Context, m *UserDepartmentsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserDepartmentsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserDepartmentsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserDepartmentsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserDepartmentsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown UserDepartments mutation op: %q", m.Op())
+	}
+}
+
 // UserGroupsClient is a client for the UserGroups schema.
 type UserGroupsClient struct {
 	config
@@ -3225,15 +3225,15 @@ func (c *UsersClient) QueryLionUserIdentities(_m *Users) *UserIdentitiesQuery {
 	return query
 }
 
-// QueryLionDepartmentUsers queries the lion_department_users edge of a Users.
-func (c *UsersClient) QueryLionDepartmentUsers(_m *Users) *DepartmentUsersQuery {
-	query := (&DepartmentUsersClient{config: c.config}).Query()
+// QueryLionUserDepartments queries the lion_user_departments edge of a Users.
+func (c *UsersClient) QueryLionUserDepartments(_m *Users) *UserDepartmentsQuery {
+	query := (&UserDepartmentsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(users.Table, users.FieldID, id),
-			sqlgraph.To(departmentusers.Table, departmentusers.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, users.LionDepartmentUsersTable, users.LionDepartmentUsersColumn),
+			sqlgraph.To(userdepartments.Table, userdepartments.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, users.LionUserDepartmentsTable, users.LionUserDepartmentsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -3269,15 +3269,15 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AuthProviders, Credentials, Demo, DepartmentUsers, Departments, GroupRoles,
-		Groups, Permissions, Policies, Resources, RoleDepartments, RolePermissions,
-		RoleResources, Roles, UserGroups, UserIdentities, UserProfiles, UserRoles,
+		AuthProviders, Credentials, Demo, Departments, GroupRoles, Groups, Permissions,
+		Policies, Resources, RoleDepartments, RolePermissions, RoleResources, Roles,
+		UserDepartments, UserGroups, UserIdentities, UserProfiles, UserRoles,
 		Users []ent.Hook
 	}
 	inters struct {
-		AuthProviders, Credentials, Demo, DepartmentUsers, Departments, GroupRoles,
-		Groups, Permissions, Policies, Resources, RoleDepartments, RolePermissions,
-		RoleResources, Roles, UserGroups, UserIdentities, UserProfiles, UserRoles,
+		AuthProviders, Credentials, Demo, Departments, GroupRoles, Groups, Permissions,
+		Policies, Resources, RoleDepartments, RolePermissions, RoleResources, Roles,
+		UserDepartments, UserGroups, UserIdentities, UserProfiles, UserRoles,
 		Users []ent.Interceptor
 	}
 )

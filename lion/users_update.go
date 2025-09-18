@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
@@ -400,19 +400,19 @@ func (_u *UsersUpdate) AddLionUserIdentities(v ...*UserIdentities) *UsersUpdate 
 	return _u.AddLionUserIdentityIDs(ids...)
 }
 
-// AddLionDepartmentUserIDs adds the "lion_department_users" edge to the DepartmentUsers entity by IDs.
-func (_u *UsersUpdate) AddLionDepartmentUserIDs(ids ...int) *UsersUpdate {
-	_u.mutation.AddLionDepartmentUserIDs(ids...)
+// AddLionUserDepartmentIDs adds the "lion_user_departments" edge to the UserDepartments entity by IDs.
+func (_u *UsersUpdate) AddLionUserDepartmentIDs(ids ...int) *UsersUpdate {
+	_u.mutation.AddLionUserDepartmentIDs(ids...)
 	return _u
 }
 
-// AddLionDepartmentUsers adds the "lion_department_users" edges to the DepartmentUsers entity.
-func (_u *UsersUpdate) AddLionDepartmentUsers(v ...*DepartmentUsers) *UsersUpdate {
+// AddLionUserDepartments adds the "lion_user_departments" edges to the UserDepartments entity.
+func (_u *UsersUpdate) AddLionUserDepartments(v ...*UserDepartments) *UsersUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddLionDepartmentUserIDs(ids...)
+	return _u.AddLionUserDepartmentIDs(ids...)
 }
 
 // Mutation returns the UsersMutation object of the builder.
@@ -462,25 +462,25 @@ func (_u *UsersUpdate) RemoveLionUserIdentities(v ...*UserIdentities) *UsersUpda
 	return _u.RemoveLionUserIdentityIDs(ids...)
 }
 
-// ClearLionDepartmentUsers clears all "lion_department_users" edges to the DepartmentUsers entity.
-func (_u *UsersUpdate) ClearLionDepartmentUsers() *UsersUpdate {
-	_u.mutation.ClearLionDepartmentUsers()
+// ClearLionUserDepartments clears all "lion_user_departments" edges to the UserDepartments entity.
+func (_u *UsersUpdate) ClearLionUserDepartments() *UsersUpdate {
+	_u.mutation.ClearLionUserDepartments()
 	return _u
 }
 
-// RemoveLionDepartmentUserIDs removes the "lion_department_users" edge to DepartmentUsers entities by IDs.
-func (_u *UsersUpdate) RemoveLionDepartmentUserIDs(ids ...int) *UsersUpdate {
-	_u.mutation.RemoveLionDepartmentUserIDs(ids...)
+// RemoveLionUserDepartmentIDs removes the "lion_user_departments" edge to UserDepartments entities by IDs.
+func (_u *UsersUpdate) RemoveLionUserDepartmentIDs(ids ...int) *UsersUpdate {
+	_u.mutation.RemoveLionUserDepartmentIDs(ids...)
 	return _u
 }
 
-// RemoveLionDepartmentUsers removes "lion_department_users" edges to DepartmentUsers entities.
-func (_u *UsersUpdate) RemoveLionDepartmentUsers(v ...*DepartmentUsers) *UsersUpdate {
+// RemoveLionUserDepartments removes "lion_user_departments" edges to UserDepartments entities.
+func (_u *UsersUpdate) RemoveLionUserDepartments(v ...*UserDepartments) *UsersUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveLionDepartmentUserIDs(ids...)
+	return _u.RemoveLionUserDepartmentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -737,28 +737,28 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionDepartmentUsersCleared() {
+	if _u.mutation.LionUserDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   users.LionDepartmentUsersTable,
-			Columns: []string{users.LionDepartmentUsersColumn},
+			Table:   users.LionUserDepartmentsTable,
+			Columns: []string{users.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLionDepartmentUsersIDs(); len(nodes) > 0 && !_u.mutation.LionDepartmentUsersCleared() {
+	if nodes := _u.mutation.RemovedLionUserDepartmentsIDs(); len(nodes) > 0 && !_u.mutation.LionUserDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   users.LionDepartmentUsersTable,
-			Columns: []string{users.LionDepartmentUsersColumn},
+			Table:   users.LionUserDepartmentsTable,
+			Columns: []string{users.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -766,15 +766,15 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionDepartmentUsersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionUserDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   users.LionDepartmentUsersTable,
-			Columns: []string{users.LionDepartmentUsersColumn},
+			Table:   users.LionUserDepartmentsTable,
+			Columns: []string{users.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1171,19 +1171,19 @@ func (_u *UsersUpdateOne) AddLionUserIdentities(v ...*UserIdentities) *UsersUpda
 	return _u.AddLionUserIdentityIDs(ids...)
 }
 
-// AddLionDepartmentUserIDs adds the "lion_department_users" edge to the DepartmentUsers entity by IDs.
-func (_u *UsersUpdateOne) AddLionDepartmentUserIDs(ids ...int) *UsersUpdateOne {
-	_u.mutation.AddLionDepartmentUserIDs(ids...)
+// AddLionUserDepartmentIDs adds the "lion_user_departments" edge to the UserDepartments entity by IDs.
+func (_u *UsersUpdateOne) AddLionUserDepartmentIDs(ids ...int) *UsersUpdateOne {
+	_u.mutation.AddLionUserDepartmentIDs(ids...)
 	return _u
 }
 
-// AddLionDepartmentUsers adds the "lion_department_users" edges to the DepartmentUsers entity.
-func (_u *UsersUpdateOne) AddLionDepartmentUsers(v ...*DepartmentUsers) *UsersUpdateOne {
+// AddLionUserDepartments adds the "lion_user_departments" edges to the UserDepartments entity.
+func (_u *UsersUpdateOne) AddLionUserDepartments(v ...*UserDepartments) *UsersUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddLionDepartmentUserIDs(ids...)
+	return _u.AddLionUserDepartmentIDs(ids...)
 }
 
 // Mutation returns the UsersMutation object of the builder.
@@ -1233,25 +1233,25 @@ func (_u *UsersUpdateOne) RemoveLionUserIdentities(v ...*UserIdentities) *UsersU
 	return _u.RemoveLionUserIdentityIDs(ids...)
 }
 
-// ClearLionDepartmentUsers clears all "lion_department_users" edges to the DepartmentUsers entity.
-func (_u *UsersUpdateOne) ClearLionDepartmentUsers() *UsersUpdateOne {
-	_u.mutation.ClearLionDepartmentUsers()
+// ClearLionUserDepartments clears all "lion_user_departments" edges to the UserDepartments entity.
+func (_u *UsersUpdateOne) ClearLionUserDepartments() *UsersUpdateOne {
+	_u.mutation.ClearLionUserDepartments()
 	return _u
 }
 
-// RemoveLionDepartmentUserIDs removes the "lion_department_users" edge to DepartmentUsers entities by IDs.
-func (_u *UsersUpdateOne) RemoveLionDepartmentUserIDs(ids ...int) *UsersUpdateOne {
-	_u.mutation.RemoveLionDepartmentUserIDs(ids...)
+// RemoveLionUserDepartmentIDs removes the "lion_user_departments" edge to UserDepartments entities by IDs.
+func (_u *UsersUpdateOne) RemoveLionUserDepartmentIDs(ids ...int) *UsersUpdateOne {
+	_u.mutation.RemoveLionUserDepartmentIDs(ids...)
 	return _u
 }
 
-// RemoveLionDepartmentUsers removes "lion_department_users" edges to DepartmentUsers entities.
-func (_u *UsersUpdateOne) RemoveLionDepartmentUsers(v ...*DepartmentUsers) *UsersUpdateOne {
+// RemoveLionUserDepartments removes "lion_user_departments" edges to UserDepartments entities.
+func (_u *UsersUpdateOne) RemoveLionUserDepartments(v ...*UserDepartments) *UsersUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveLionDepartmentUserIDs(ids...)
+	return _u.RemoveLionUserDepartmentIDs(ids...)
 }
 
 // Where appends a list predicates to the UsersUpdate builder.
@@ -1538,28 +1538,28 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionDepartmentUsersCleared() {
+	if _u.mutation.LionUserDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   users.LionDepartmentUsersTable,
-			Columns: []string{users.LionDepartmentUsersColumn},
+			Table:   users.LionUserDepartmentsTable,
+			Columns: []string{users.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLionDepartmentUsersIDs(); len(nodes) > 0 && !_u.mutation.LionDepartmentUsersCleared() {
+	if nodes := _u.mutation.RemovedLionUserDepartmentsIDs(); len(nodes) > 0 && !_u.mutation.LionUserDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   users.LionDepartmentUsersTable,
-			Columns: []string{users.LionDepartmentUsersColumn},
+			Table:   users.LionUserDepartmentsTable,
+			Columns: []string{users.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1567,15 +1567,15 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionDepartmentUsersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionUserDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   users.LionDepartmentUsersTable,
-			Columns: []string{users.LionDepartmentUsersColumn},
+			Table:   users.LionUserDepartmentsTable,
+			Columns: []string{users.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -8,30 +8,30 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 )
 
-// DepartmentUsersDelete is the builder for deleting a DepartmentUsers entity.
-type DepartmentUsersDelete struct {
+// UserDepartmentsDelete is the builder for deleting a UserDepartments entity.
+type UserDepartmentsDelete struct {
 	config
 	hooks    []Hook
-	mutation *DepartmentUsersMutation
+	mutation *UserDepartmentsMutation
 }
 
-// Where appends a list predicates to the DepartmentUsersDelete builder.
-func (_d *DepartmentUsersDelete) Where(ps ...predicate.DepartmentUsers) *DepartmentUsersDelete {
+// Where appends a list predicates to the UserDepartmentsDelete builder.
+func (_d *UserDepartmentsDelete) Where(ps ...predicate.UserDepartments) *UserDepartmentsDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *DepartmentUsersDelete) Exec(ctx context.Context) (int, error) {
+func (_d *UserDepartmentsDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *DepartmentUsersDelete) ExecX(ctx context.Context) int {
+func (_d *UserDepartmentsDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *DepartmentUsersDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *DepartmentUsersDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(departmentusers.Table, sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt))
+func (_d *UserDepartmentsDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(userdepartments.Table, sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *DepartmentUsersDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// DepartmentUsersDeleteOne is the builder for deleting a single DepartmentUsers entity.
-type DepartmentUsersDeleteOne struct {
-	_d *DepartmentUsersDelete
+// UserDepartmentsDeleteOne is the builder for deleting a single UserDepartments entity.
+type UserDepartmentsDeleteOne struct {
+	_d *UserDepartmentsDelete
 }
 
-// Where appends a list predicates to the DepartmentUsersDelete builder.
-func (_d *DepartmentUsersDeleteOne) Where(ps ...predicate.DepartmentUsers) *DepartmentUsersDeleteOne {
+// Where appends a list predicates to the UserDepartmentsDelete builder.
+func (_d *UserDepartmentsDeleteOne) Where(ps ...predicate.UserDepartments) *UserDepartmentsDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *DepartmentUsersDeleteOne) Exec(ctx context.Context) error {
+func (_d *UserDepartmentsDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{departmentusers.Label}
+		return &NotFoundError{userdepartments.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *DepartmentUsersDeleteOne) ExecX(ctx context.Context) {
+func (_d *UserDepartmentsDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

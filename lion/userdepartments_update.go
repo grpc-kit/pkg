@@ -12,38 +12,38 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
-// DepartmentUsersUpdate is the builder for updating DepartmentUsers entities.
-type DepartmentUsersUpdate struct {
+// UserDepartmentsUpdate is the builder for updating UserDepartments entities.
+type UserDepartmentsUpdate struct {
 	config
 	hooks    []Hook
-	mutation *DepartmentUsersMutation
+	mutation *UserDepartmentsMutation
 }
 
-// Where appends a list predicates to the DepartmentUsersUpdate builder.
-func (_u *DepartmentUsersUpdate) Where(ps ...predicate.DepartmentUsers) *DepartmentUsersUpdate {
+// Where appends a list predicates to the UserDepartmentsUpdate builder.
+func (_u *UserDepartmentsUpdate) Where(ps ...predicate.UserDepartments) *UserDepartmentsUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *DepartmentUsersUpdate) SetUpdatedAt(v time.Time) *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) SetUpdatedAt(v time.Time) *UserDepartmentsUpdate {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetDepartmentID sets the "department_id" field.
-func (_u *DepartmentUsersUpdate) SetDepartmentID(v int) *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) SetDepartmentID(v int) *UserDepartmentsUpdate {
 	_u.mutation.SetDepartmentID(v)
 	return _u
 }
 
 // SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_u *DepartmentUsersUpdate) SetNillableDepartmentID(v *int) *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) SetNillableDepartmentID(v *int) *UserDepartmentsUpdate {
 	if v != nil {
 		_u.SetDepartmentID(*v)
 	}
@@ -51,14 +51,14 @@ func (_u *DepartmentUsersUpdate) SetNillableDepartmentID(v *int) *DepartmentUser
 }
 
 // SetLeaderType sets the "leader_type" field.
-func (_u *DepartmentUsersUpdate) SetLeaderType(v int) *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) SetLeaderType(v int) *UserDepartmentsUpdate {
 	_u.mutation.ResetLeaderType()
 	_u.mutation.SetLeaderType(v)
 	return _u
 }
 
 // SetNillableLeaderType sets the "leader_type" field if the given value is not nil.
-func (_u *DepartmentUsersUpdate) SetNillableLeaderType(v *int) *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) SetNillableLeaderType(v *int) *UserDepartmentsUpdate {
 	if v != nil {
 		_u.SetLeaderType(*v)
 	}
@@ -66,19 +66,19 @@ func (_u *DepartmentUsersUpdate) SetNillableLeaderType(v *int) *DepartmentUsersU
 }
 
 // AddLeaderType adds value to the "leader_type" field.
-func (_u *DepartmentUsersUpdate) AddLeaderType(v int) *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) AddLeaderType(v int) *UserDepartmentsUpdate {
 	_u.mutation.AddLeaderType(v)
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *DepartmentUsersUpdate) SetUserID(v int) *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) SetUserID(v int) *UserDepartmentsUpdate {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *DepartmentUsersUpdate) SetNillableUserID(v *int) *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) SetNillableUserID(v *int) *UserDepartmentsUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -86,52 +86,52 @@ func (_u *DepartmentUsersUpdate) SetNillableUserID(v *int) *DepartmentUsersUpdat
 }
 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_u *DepartmentUsersUpdate) SetLionDepartmentsID(id int) *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) SetLionDepartmentsID(id int) *UserDepartmentsUpdate {
 	_u.mutation.SetLionDepartmentsID(id)
 	return _u
 }
 
 // SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_u *DepartmentUsersUpdate) SetLionDepartments(v *Departments) *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) SetLionDepartments(v *Departments) *UserDepartmentsUpdate {
 	return _u.SetLionDepartmentsID(v.ID)
 }
 
-// SetLionDepartmentUsersID sets the "lion_department_users" edge to the Users entity by ID.
-func (_u *DepartmentUsersUpdate) SetLionDepartmentUsersID(id int) *DepartmentUsersUpdate {
-	_u.mutation.SetLionDepartmentUsersID(id)
+// SetLionUserDepartmentsID sets the "lion_user_departments" edge to the Users entity by ID.
+func (_u *UserDepartmentsUpdate) SetLionUserDepartmentsID(id int) *UserDepartmentsUpdate {
+	_u.mutation.SetLionUserDepartmentsID(id)
 	return _u
 }
 
-// SetLionDepartmentUsers sets the "lion_department_users" edge to the Users entity.
-func (_u *DepartmentUsersUpdate) SetLionDepartmentUsers(v *Users) *DepartmentUsersUpdate {
-	return _u.SetLionDepartmentUsersID(v.ID)
+// SetLionUserDepartments sets the "lion_user_departments" edge to the Users entity.
+func (_u *UserDepartmentsUpdate) SetLionUserDepartments(v *Users) *UserDepartmentsUpdate {
+	return _u.SetLionUserDepartmentsID(v.ID)
 }
 
-// Mutation returns the DepartmentUsersMutation object of the builder.
-func (_u *DepartmentUsersUpdate) Mutation() *DepartmentUsersMutation {
+// Mutation returns the UserDepartmentsMutation object of the builder.
+func (_u *UserDepartmentsUpdate) Mutation() *UserDepartmentsMutation {
 	return _u.mutation
 }
 
 // ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
-func (_u *DepartmentUsersUpdate) ClearLionDepartments() *DepartmentUsersUpdate {
+func (_u *UserDepartmentsUpdate) ClearLionDepartments() *UserDepartmentsUpdate {
 	_u.mutation.ClearLionDepartments()
 	return _u
 }
 
-// ClearLionDepartmentUsers clears the "lion_department_users" edge to the Users entity.
-func (_u *DepartmentUsersUpdate) ClearLionDepartmentUsers() *DepartmentUsersUpdate {
-	_u.mutation.ClearLionDepartmentUsers()
+// ClearLionUserDepartments clears the "lion_user_departments" edge to the Users entity.
+func (_u *UserDepartmentsUpdate) ClearLionUserDepartments() *UserDepartmentsUpdate {
+	_u.mutation.ClearLionUserDepartments()
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *DepartmentUsersUpdate) Save(ctx context.Context) (int, error) {
+func (_u *UserDepartmentsUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *DepartmentUsersUpdate) SaveX(ctx context.Context) int {
+func (_u *UserDepartmentsUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -140,42 +140,42 @@ func (_u *DepartmentUsersUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *DepartmentUsersUpdate) Exec(ctx context.Context) error {
+func (_u *UserDepartmentsUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *DepartmentUsersUpdate) ExecX(ctx context.Context) {
+func (_u *UserDepartmentsUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *DepartmentUsersUpdate) defaults() {
+func (_u *UserDepartmentsUpdate) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := departmentusers.UpdateDefaultUpdatedAt()
+		v := userdepartments.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *DepartmentUsersUpdate) check() error {
+func (_u *UserDepartmentsUpdate) check() error {
 	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "DepartmentUsers.lion_departments"`)
+		return errors.New(`lion: clearing a required unique edge "UserDepartments.lion_departments"`)
 	}
-	if _u.mutation.LionDepartmentUsersCleared() && len(_u.mutation.LionDepartmentUsersIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "DepartmentUsers.lion_department_users"`)
+	if _u.mutation.LionUserDepartmentsCleared() && len(_u.mutation.LionUserDepartmentsIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "UserDepartments.lion_user_departments"`)
 	}
 	return nil
 }
 
-func (_u *DepartmentUsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(departmentusers.Table, departmentusers.Columns, sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(userdepartments.Table, userdepartments.Columns, sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -184,20 +184,20 @@ func (_u *DepartmentUsersUpdate) sqlSave(ctx context.Context) (_node int, err er
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(departmentusers.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(userdepartments.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.LeaderType(); ok {
-		_spec.SetField(departmentusers.FieldLeaderType, field.TypeInt, value)
+		_spec.SetField(userdepartments.FieldLeaderType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedLeaderType(); ok {
-		_spec.AddField(departmentusers.FieldLeaderType, field.TypeInt, value)
+		_spec.AddField(userdepartments.FieldLeaderType, field.TypeInt, value)
 	}
 	if _u.mutation.LionDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentusers.LionDepartmentsTable,
-			Columns: []string{departmentusers.LionDepartmentsColumn},
+			Table:   userdepartments.LionDepartmentsTable,
+			Columns: []string{userdepartments.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -209,8 +209,8 @@ func (_u *DepartmentUsersUpdate) sqlSave(ctx context.Context) (_node int, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentusers.LionDepartmentsTable,
-			Columns: []string{departmentusers.LionDepartmentsColumn},
+			Table:   userdepartments.LionDepartmentsTable,
+			Columns: []string{userdepartments.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -221,12 +221,12 @@ func (_u *DepartmentUsersUpdate) sqlSave(ctx context.Context) (_node int, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionDepartmentUsersCleared() {
+	if _u.mutation.LionUserDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentusers.LionDepartmentUsersTable,
-			Columns: []string{departmentusers.LionDepartmentUsersColumn},
+			Table:   userdepartments.LionUserDepartmentsTable,
+			Columns: []string{userdepartments.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -234,12 +234,12 @@ func (_u *DepartmentUsersUpdate) sqlSave(ctx context.Context) (_node int, err er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionDepartmentUsersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionUserDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentusers.LionDepartmentUsersTable,
-			Columns: []string{departmentusers.LionDepartmentUsersColumn},
+			Table:   userdepartments.LionUserDepartmentsTable,
+			Columns: []string{userdepartments.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -252,7 +252,7 @@ func (_u *DepartmentUsersUpdate) sqlSave(ctx context.Context) (_node int, err er
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{departmentusers.Label}
+			err = &NotFoundError{userdepartments.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -262,28 +262,28 @@ func (_u *DepartmentUsersUpdate) sqlSave(ctx context.Context) (_node int, err er
 	return _node, nil
 }
 
-// DepartmentUsersUpdateOne is the builder for updating a single DepartmentUsers entity.
-type DepartmentUsersUpdateOne struct {
+// UserDepartmentsUpdateOne is the builder for updating a single UserDepartments entity.
+type UserDepartmentsUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *DepartmentUsersMutation
+	mutation *UserDepartmentsMutation
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *DepartmentUsersUpdateOne) SetUpdatedAt(v time.Time) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) SetUpdatedAt(v time.Time) *UserDepartmentsUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetDepartmentID sets the "department_id" field.
-func (_u *DepartmentUsersUpdateOne) SetDepartmentID(v int) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) SetDepartmentID(v int) *UserDepartmentsUpdateOne {
 	_u.mutation.SetDepartmentID(v)
 	return _u
 }
 
 // SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_u *DepartmentUsersUpdateOne) SetNillableDepartmentID(v *int) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) SetNillableDepartmentID(v *int) *UserDepartmentsUpdateOne {
 	if v != nil {
 		_u.SetDepartmentID(*v)
 	}
@@ -291,14 +291,14 @@ func (_u *DepartmentUsersUpdateOne) SetNillableDepartmentID(v *int) *DepartmentU
 }
 
 // SetLeaderType sets the "leader_type" field.
-func (_u *DepartmentUsersUpdateOne) SetLeaderType(v int) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) SetLeaderType(v int) *UserDepartmentsUpdateOne {
 	_u.mutation.ResetLeaderType()
 	_u.mutation.SetLeaderType(v)
 	return _u
 }
 
 // SetNillableLeaderType sets the "leader_type" field if the given value is not nil.
-func (_u *DepartmentUsersUpdateOne) SetNillableLeaderType(v *int) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) SetNillableLeaderType(v *int) *UserDepartmentsUpdateOne {
 	if v != nil {
 		_u.SetLeaderType(*v)
 	}
@@ -306,19 +306,19 @@ func (_u *DepartmentUsersUpdateOne) SetNillableLeaderType(v *int) *DepartmentUse
 }
 
 // AddLeaderType adds value to the "leader_type" field.
-func (_u *DepartmentUsersUpdateOne) AddLeaderType(v int) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) AddLeaderType(v int) *UserDepartmentsUpdateOne {
 	_u.mutation.AddLeaderType(v)
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *DepartmentUsersUpdateOne) SetUserID(v int) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) SetUserID(v int) *UserDepartmentsUpdateOne {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *DepartmentUsersUpdateOne) SetNillableUserID(v *int) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) SetNillableUserID(v *int) *UserDepartmentsUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -326,65 +326,65 @@ func (_u *DepartmentUsersUpdateOne) SetNillableUserID(v *int) *DepartmentUsersUp
 }
 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_u *DepartmentUsersUpdateOne) SetLionDepartmentsID(id int) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) SetLionDepartmentsID(id int) *UserDepartmentsUpdateOne {
 	_u.mutation.SetLionDepartmentsID(id)
 	return _u
 }
 
 // SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_u *DepartmentUsersUpdateOne) SetLionDepartments(v *Departments) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) SetLionDepartments(v *Departments) *UserDepartmentsUpdateOne {
 	return _u.SetLionDepartmentsID(v.ID)
 }
 
-// SetLionDepartmentUsersID sets the "lion_department_users" edge to the Users entity by ID.
-func (_u *DepartmentUsersUpdateOne) SetLionDepartmentUsersID(id int) *DepartmentUsersUpdateOne {
-	_u.mutation.SetLionDepartmentUsersID(id)
+// SetLionUserDepartmentsID sets the "lion_user_departments" edge to the Users entity by ID.
+func (_u *UserDepartmentsUpdateOne) SetLionUserDepartmentsID(id int) *UserDepartmentsUpdateOne {
+	_u.mutation.SetLionUserDepartmentsID(id)
 	return _u
 }
 
-// SetLionDepartmentUsers sets the "lion_department_users" edge to the Users entity.
-func (_u *DepartmentUsersUpdateOne) SetLionDepartmentUsers(v *Users) *DepartmentUsersUpdateOne {
-	return _u.SetLionDepartmentUsersID(v.ID)
+// SetLionUserDepartments sets the "lion_user_departments" edge to the Users entity.
+func (_u *UserDepartmentsUpdateOne) SetLionUserDepartments(v *Users) *UserDepartmentsUpdateOne {
+	return _u.SetLionUserDepartmentsID(v.ID)
 }
 
-// Mutation returns the DepartmentUsersMutation object of the builder.
-func (_u *DepartmentUsersUpdateOne) Mutation() *DepartmentUsersMutation {
+// Mutation returns the UserDepartmentsMutation object of the builder.
+func (_u *UserDepartmentsUpdateOne) Mutation() *UserDepartmentsMutation {
 	return _u.mutation
 }
 
 // ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
-func (_u *DepartmentUsersUpdateOne) ClearLionDepartments() *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) ClearLionDepartments() *UserDepartmentsUpdateOne {
 	_u.mutation.ClearLionDepartments()
 	return _u
 }
 
-// ClearLionDepartmentUsers clears the "lion_department_users" edge to the Users entity.
-func (_u *DepartmentUsersUpdateOne) ClearLionDepartmentUsers() *DepartmentUsersUpdateOne {
-	_u.mutation.ClearLionDepartmentUsers()
+// ClearLionUserDepartments clears the "lion_user_departments" edge to the Users entity.
+func (_u *UserDepartmentsUpdateOne) ClearLionUserDepartments() *UserDepartmentsUpdateOne {
+	_u.mutation.ClearLionUserDepartments()
 	return _u
 }
 
-// Where appends a list predicates to the DepartmentUsersUpdate builder.
-func (_u *DepartmentUsersUpdateOne) Where(ps ...predicate.DepartmentUsers) *DepartmentUsersUpdateOne {
+// Where appends a list predicates to the UserDepartmentsUpdate builder.
+func (_u *UserDepartmentsUpdateOne) Where(ps ...predicate.UserDepartments) *UserDepartmentsUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *DepartmentUsersUpdateOne) Select(field string, fields ...string) *DepartmentUsersUpdateOne {
+func (_u *UserDepartmentsUpdateOne) Select(field string, fields ...string) *UserDepartmentsUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated DepartmentUsers entity.
-func (_u *DepartmentUsersUpdateOne) Save(ctx context.Context) (*DepartmentUsers, error) {
+// Save executes the query and returns the updated UserDepartments entity.
+func (_u *UserDepartmentsUpdateOne) Save(ctx context.Context) (*UserDepartments, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *DepartmentUsersUpdateOne) SaveX(ctx context.Context) *DepartmentUsers {
+func (_u *UserDepartmentsUpdateOne) SaveX(ctx context.Context) *UserDepartments {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -393,55 +393,55 @@ func (_u *DepartmentUsersUpdateOne) SaveX(ctx context.Context) *DepartmentUsers 
 }
 
 // Exec executes the query on the entity.
-func (_u *DepartmentUsersUpdateOne) Exec(ctx context.Context) error {
+func (_u *UserDepartmentsUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *DepartmentUsersUpdateOne) ExecX(ctx context.Context) {
+func (_u *UserDepartmentsUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *DepartmentUsersUpdateOne) defaults() {
+func (_u *UserDepartmentsUpdateOne) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := departmentusers.UpdateDefaultUpdatedAt()
+		v := userdepartments.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *DepartmentUsersUpdateOne) check() error {
+func (_u *UserDepartmentsUpdateOne) check() error {
 	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "DepartmentUsers.lion_departments"`)
+		return errors.New(`lion: clearing a required unique edge "UserDepartments.lion_departments"`)
 	}
-	if _u.mutation.LionDepartmentUsersCleared() && len(_u.mutation.LionDepartmentUsersIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "DepartmentUsers.lion_department_users"`)
+	if _u.mutation.LionUserDepartmentsCleared() && len(_u.mutation.LionUserDepartmentsIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "UserDepartments.lion_user_departments"`)
 	}
 	return nil
 }
 
-func (_u *DepartmentUsersUpdateOne) sqlSave(ctx context.Context) (_node *DepartmentUsers, err error) {
+func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDepartments, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(departmentusers.Table, departmentusers.Columns, sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(userdepartments.Table, userdepartments.Columns, sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "DepartmentUsers.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "UserDepartments.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, departmentusers.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, userdepartments.FieldID)
 		for _, f := range fields {
-			if !departmentusers.ValidColumn(f) {
+			if !userdepartments.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 			}
-			if f != departmentusers.FieldID {
+			if f != userdepartments.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -454,20 +454,20 @@ func (_u *DepartmentUsersUpdateOne) sqlSave(ctx context.Context) (_node *Departm
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(departmentusers.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(userdepartments.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.LeaderType(); ok {
-		_spec.SetField(departmentusers.FieldLeaderType, field.TypeInt, value)
+		_spec.SetField(userdepartments.FieldLeaderType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedLeaderType(); ok {
-		_spec.AddField(departmentusers.FieldLeaderType, field.TypeInt, value)
+		_spec.AddField(userdepartments.FieldLeaderType, field.TypeInt, value)
 	}
 	if _u.mutation.LionDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentusers.LionDepartmentsTable,
-			Columns: []string{departmentusers.LionDepartmentsColumn},
+			Table:   userdepartments.LionDepartmentsTable,
+			Columns: []string{userdepartments.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -479,8 +479,8 @@ func (_u *DepartmentUsersUpdateOne) sqlSave(ctx context.Context) (_node *Departm
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentusers.LionDepartmentsTable,
-			Columns: []string{departmentusers.LionDepartmentsColumn},
+			Table:   userdepartments.LionDepartmentsTable,
+			Columns: []string{userdepartments.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -491,12 +491,12 @@ func (_u *DepartmentUsersUpdateOne) sqlSave(ctx context.Context) (_node *Departm
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionDepartmentUsersCleared() {
+	if _u.mutation.LionUserDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentusers.LionDepartmentUsersTable,
-			Columns: []string{departmentusers.LionDepartmentUsersColumn},
+			Table:   userdepartments.LionUserDepartmentsTable,
+			Columns: []string{userdepartments.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -504,12 +504,12 @@ func (_u *DepartmentUsersUpdateOne) sqlSave(ctx context.Context) (_node *Departm
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionDepartmentUsersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionUserDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentusers.LionDepartmentUsersTable,
-			Columns: []string{departmentusers.LionDepartmentUsersColumn},
+			Table:   userdepartments.LionUserDepartmentsTable,
+			Columns: []string{userdepartments.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -520,12 +520,12 @@ func (_u *DepartmentUsersUpdateOne) sqlSave(ctx context.Context) (_node *Departm
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &DepartmentUsers{config: _u.config}
+	_node = &UserDepartments{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{departmentusers.Label}
+			err = &NotFoundError{userdepartments.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

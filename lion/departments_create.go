@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
 	"github.com/grpc-kit/pkg/lion/roledepartments"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 )
 
 // DepartmentsCreate is the builder for creating a Departments entity.
@@ -127,19 +127,19 @@ func (_c *DepartmentsCreate) AddLionRoleDepartments(v ...*RoleDepartments) *Depa
 	return _c.AddLionRoleDepartmentIDs(ids...)
 }
 
-// AddLionDepartmentUserIDs adds the "lion_department_users" edge to the DepartmentUsers entity by IDs.
-func (_c *DepartmentsCreate) AddLionDepartmentUserIDs(ids ...int) *DepartmentsCreate {
-	_c.mutation.AddLionDepartmentUserIDs(ids...)
+// AddLionUserDepartmentIDs adds the "lion_user_departments" edge to the UserDepartments entity by IDs.
+func (_c *DepartmentsCreate) AddLionUserDepartmentIDs(ids ...int) *DepartmentsCreate {
+	_c.mutation.AddLionUserDepartmentIDs(ids...)
 	return _c
 }
 
-// AddLionDepartmentUsers adds the "lion_department_users" edges to the DepartmentUsers entity.
-func (_c *DepartmentsCreate) AddLionDepartmentUsers(v ...*DepartmentUsers) *DepartmentsCreate {
+// AddLionUserDepartments adds the "lion_user_departments" edges to the UserDepartments entity.
+func (_c *DepartmentsCreate) AddLionUserDepartments(v ...*UserDepartments) *DepartmentsCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddLionDepartmentUserIDs(ids...)
+	return _c.AddLionUserDepartmentIDs(ids...)
 }
 
 // Mutation returns the DepartmentsMutation object of the builder.
@@ -301,15 +301,15 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LionDepartmentUsersIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionUserDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   departments.LionDepartmentUsersTable,
-			Columns: []string{departments.LionDepartmentUsersColumn},
+			Table:   departments.LionUserDepartmentsTable,
+			Columns: []string{departments.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

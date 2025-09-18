@@ -14,7 +14,7 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/useridentities"
@@ -45,15 +45,15 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 
 	// 默认查看所有用户（仅部门管理下所有可见）
 	// 先找到 user 对应的 department_id
-	leaders, err := a.config.db.DepartmentUsers.
+	leaders, err := a.config.db.UserDepartments.
 		Query().
 		Select(
-			departmentusers.FieldID,
-			departmentusers.FieldLeaderType,
-			departmentusers.FieldDepartmentID,
-			departmentusers.FieldUserID,
+			userdepartments.FieldID,
+			userdepartments.FieldLeaderType,
+			userdepartments.FieldDepartmentID,
+			userdepartments.FieldUserID,
 		).
-		Where(departmentusers.UserID(userIDInt)).
+		Where(userdepartments.UserID(userIDInt)).
 		WithLionDepartments().
 		All(ctx)
 	if err != nil {
@@ -196,15 +196,15 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		}
 	*/
 	/*
-		leaders, err := a.config.db.DepartmentUsers.
+		leaders, err := a.config.db.UserDepartments.
 			Query().
 			Select(
-				departmentusers.FieldID,
-				departmentusers.FieldLeaderType,
-				departmentusers.FieldDepartmentID,
-				departmentusers.FieldUserID,
+				userdepartments.FieldID,
+				userdepartments.FieldLeaderType,
+				userdepartments.FieldDepartmentID,
+				userdepartments.FieldUserID,
 			).
-			Where(departmentusers.UserID(userIDInt)).
+			Where(userdepartments.UserID(userIDInt)).
 			WithLionDepartments().
 			All(ctx)
 		if err != nil {

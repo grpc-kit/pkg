@@ -45,18 +45,6 @@ func (f DemoFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DemoMutation", m)
 }
 
-// The DepartmentUsersFunc type is an adapter to allow the use of ordinary
-// function as DepartmentUsers mutator.
-type DepartmentUsersFunc func(context.Context, *lion.DepartmentUsersMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f DepartmentUsersFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.DepartmentUsersMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DepartmentUsersMutation", m)
-}
-
 // The DepartmentsFunc type is an adapter to allow the use of ordinary
 // function as Departments mutator.
 type DepartmentsFunc func(context.Context, *lion.DepartmentsMutation) (lion.Value, error)
@@ -175,6 +163,18 @@ func (f RolesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, err
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RolesMutation", m)
+}
+
+// The UserDepartmentsFunc type is an adapter to allow the use of ordinary
+// function as UserDepartments mutator.
+type UserDepartmentsFunc func(context.Context, *lion.UserDepartmentsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserDepartmentsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.UserDepartmentsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserDepartmentsMutation", m)
 }
 
 // The UserGroupsFunc type is an adapter to allow the use of ordinary

@@ -79,8 +79,8 @@ type UsersEdges struct {
 	LionUserRoles []*UserRoles `json:"lion_user_roles,omitempty"`
 	// LionUserIdentities holds the value of the lion_user_identities edge.
 	LionUserIdentities []*UserIdentities `json:"lion_user_identities,omitempty"`
-	// LionDepartmentUsers holds the value of the lion_department_users edge.
-	LionDepartmentUsers []*DepartmentUsers `json:"lion_department_users,omitempty"`
+	// LionUserDepartments holds the value of the lion_user_departments edge.
+	LionUserDepartments []*UserDepartments `json:"lion_user_departments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -104,13 +104,13 @@ func (e UsersEdges) LionUserIdentitiesOrErr() ([]*UserIdentities, error) {
 	return nil, &NotLoadedError{edge: "lion_user_identities"}
 }
 
-// LionDepartmentUsersOrErr returns the LionDepartmentUsers value or an error if the edge
+// LionUserDepartmentsOrErr returns the LionUserDepartments value or an error if the edge
 // was not loaded in eager-loading.
-func (e UsersEdges) LionDepartmentUsersOrErr() ([]*DepartmentUsers, error) {
+func (e UsersEdges) LionUserDepartmentsOrErr() ([]*UserDepartments, error) {
 	if e.loadedTypes[2] {
-		return e.LionDepartmentUsers, nil
+		return e.LionUserDepartments, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_department_users"}
+	return nil, &NotLoadedError{edge: "lion_user_departments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -323,9 +323,9 @@ func (_m *Users) QueryLionUserIdentities() *UserIdentitiesQuery {
 	return NewUsersClient(_m.config).QueryLionUserIdentities(_m)
 }
 
-// QueryLionDepartmentUsers queries the "lion_department_users" edge of the Users entity.
-func (_m *Users) QueryLionDepartmentUsers() *DepartmentUsersQuery {
-	return NewUsersClient(_m.config).QueryLionDepartmentUsers(_m)
+// QueryLionUserDepartments queries the "lion_user_departments" edge of the Users entity.
+func (_m *Users) QueryLionUserDepartments() *UserDepartmentsQuery {
+	return NewUsersClient(_m.config).QueryLionUserDepartments(_m)
 }
 
 // Update returns a builder for updating this Users.

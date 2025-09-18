@@ -8,13 +8,13 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// DepartmentUsers holds the schema definition for the Demo entity.
-type DepartmentUsers struct {
+// UserDepartments holds the schema definition for the Demo entity.
+type UserDepartments struct {
 	ent.Schema
 }
 
 // Fields of the table.
-func (DepartmentUsers) Fields() []ent.Field {
+func (UserDepartments) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("department_id").
 			Comment("部门 ID"),
@@ -26,16 +26,16 @@ func (DepartmentUsers) Fields() []ent.Field {
 }
 
 // Edges of the table.
-func (DepartmentUsers) Edges() []ent.Edge {
+func (UserDepartments) Edges() []ent.Edge {
 	return []ent.Edge{
 		// 一个 Menu 可以对应多个 RoleMenu (中间实体)
 		edge.From("lion_departments", Departments.Type).
-			Ref("lion_department_users").
+			Ref("lion_user_departments").
 			Field("department_id").
 			Unique().
 			Required(),
-		edge.From("lion_department_users", Users.Type).
-			Ref("lion_department_users").
+		edge.From("lion_user_departments", Users.Type).
+			Ref("lion_user_departments").
 			Field("user_id").
 			Unique().
 			Required(),
@@ -43,15 +43,15 @@ func (DepartmentUsers) Edges() []ent.Edge {
 }
 
 // Mixin of the table.
-func (DepartmentUsers) Mixin() []ent.Mixin {
+func (UserDepartments) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
 	}
 }
 
 // Annotations 自定义表名
-func (DepartmentUsers) Annotations() []schema.Annotation {
+func (UserDepartments) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_department_users"},
+		entsql.Annotation{Table: "lion_user_departments"},
 	}
 }

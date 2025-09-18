@@ -11,25 +11,25 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
-// DepartmentUsersCreate is the builder for creating a DepartmentUsers entity.
-type DepartmentUsersCreate struct {
+// UserDepartmentsCreate is the builder for creating a UserDepartments entity.
+type UserDepartmentsCreate struct {
 	config
-	mutation *DepartmentUsersMutation
+	mutation *UserDepartmentsMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *DepartmentUsersCreate) SetCreatedAt(v time.Time) *DepartmentUsersCreate {
+func (_c *UserDepartmentsCreate) SetCreatedAt(v time.Time) *UserDepartmentsCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *DepartmentUsersCreate) SetNillableCreatedAt(v *time.Time) *DepartmentUsersCreate {
+func (_c *UserDepartmentsCreate) SetNillableCreatedAt(v *time.Time) *UserDepartmentsCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -37,13 +37,13 @@ func (_c *DepartmentUsersCreate) SetNillableCreatedAt(v *time.Time) *DepartmentU
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *DepartmentUsersCreate) SetUpdatedAt(v time.Time) *DepartmentUsersCreate {
+func (_c *UserDepartmentsCreate) SetUpdatedAt(v time.Time) *UserDepartmentsCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *DepartmentUsersCreate) SetNillableUpdatedAt(v *time.Time) *DepartmentUsersCreate {
+func (_c *UserDepartmentsCreate) SetNillableUpdatedAt(v *time.Time) *UserDepartmentsCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -51,58 +51,58 @@ func (_c *DepartmentUsersCreate) SetNillableUpdatedAt(v *time.Time) *DepartmentU
 }
 
 // SetDepartmentID sets the "department_id" field.
-func (_c *DepartmentUsersCreate) SetDepartmentID(v int) *DepartmentUsersCreate {
+func (_c *UserDepartmentsCreate) SetDepartmentID(v int) *UserDepartmentsCreate {
 	_c.mutation.SetDepartmentID(v)
 	return _c
 }
 
 // SetLeaderType sets the "leader_type" field.
-func (_c *DepartmentUsersCreate) SetLeaderType(v int) *DepartmentUsersCreate {
+func (_c *UserDepartmentsCreate) SetLeaderType(v int) *UserDepartmentsCreate {
 	_c.mutation.SetLeaderType(v)
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *DepartmentUsersCreate) SetUserID(v int) *DepartmentUsersCreate {
+func (_c *UserDepartmentsCreate) SetUserID(v int) *UserDepartmentsCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_c *DepartmentUsersCreate) SetLionDepartmentsID(id int) *DepartmentUsersCreate {
+func (_c *UserDepartmentsCreate) SetLionDepartmentsID(id int) *UserDepartmentsCreate {
 	_c.mutation.SetLionDepartmentsID(id)
 	return _c
 }
 
 // SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_c *DepartmentUsersCreate) SetLionDepartments(v *Departments) *DepartmentUsersCreate {
+func (_c *UserDepartmentsCreate) SetLionDepartments(v *Departments) *UserDepartmentsCreate {
 	return _c.SetLionDepartmentsID(v.ID)
 }
 
-// SetLionDepartmentUsersID sets the "lion_department_users" edge to the Users entity by ID.
-func (_c *DepartmentUsersCreate) SetLionDepartmentUsersID(id int) *DepartmentUsersCreate {
-	_c.mutation.SetLionDepartmentUsersID(id)
+// SetLionUserDepartmentsID sets the "lion_user_departments" edge to the Users entity by ID.
+func (_c *UserDepartmentsCreate) SetLionUserDepartmentsID(id int) *UserDepartmentsCreate {
+	_c.mutation.SetLionUserDepartmentsID(id)
 	return _c
 }
 
-// SetLionDepartmentUsers sets the "lion_department_users" edge to the Users entity.
-func (_c *DepartmentUsersCreate) SetLionDepartmentUsers(v *Users) *DepartmentUsersCreate {
-	return _c.SetLionDepartmentUsersID(v.ID)
+// SetLionUserDepartments sets the "lion_user_departments" edge to the Users entity.
+func (_c *UserDepartmentsCreate) SetLionUserDepartments(v *Users) *UserDepartmentsCreate {
+	return _c.SetLionUserDepartmentsID(v.ID)
 }
 
-// Mutation returns the DepartmentUsersMutation object of the builder.
-func (_c *DepartmentUsersCreate) Mutation() *DepartmentUsersMutation {
+// Mutation returns the UserDepartmentsMutation object of the builder.
+func (_c *UserDepartmentsCreate) Mutation() *UserDepartmentsMutation {
 	return _c.mutation
 }
 
-// Save creates the DepartmentUsers in the database.
-func (_c *DepartmentUsersCreate) Save(ctx context.Context) (*DepartmentUsers, error) {
+// Save creates the UserDepartments in the database.
+func (_c *UserDepartmentsCreate) Save(ctx context.Context) (*UserDepartments, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *DepartmentUsersCreate) SaveX(ctx context.Context) *DepartmentUsers {
+func (_c *UserDepartmentsCreate) SaveX(ctx context.Context) *UserDepartments {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -111,57 +111,57 @@ func (_c *DepartmentUsersCreate) SaveX(ctx context.Context) *DepartmentUsers {
 }
 
 // Exec executes the query.
-func (_c *DepartmentUsersCreate) Exec(ctx context.Context) error {
+func (_c *UserDepartmentsCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *DepartmentUsersCreate) ExecX(ctx context.Context) {
+func (_c *UserDepartmentsCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *DepartmentUsersCreate) defaults() {
+func (_c *UserDepartmentsCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := departmentusers.DefaultCreatedAt()
+		v := userdepartments.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := departmentusers.DefaultUpdatedAt()
+		v := userdepartments.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *DepartmentUsersCreate) check() error {
+func (_c *UserDepartmentsCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "DepartmentUsers.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "UserDepartments.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "DepartmentUsers.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserDepartments.updated_at"`)}
 	}
 	if _, ok := _c.mutation.DepartmentID(); !ok {
-		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "DepartmentUsers.department_id"`)}
+		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "UserDepartments.department_id"`)}
 	}
 	if _, ok := _c.mutation.LeaderType(); !ok {
-		return &ValidationError{Name: "leader_type", err: errors.New(`lion: missing required field "DepartmentUsers.leader_type"`)}
+		return &ValidationError{Name: "leader_type", err: errors.New(`lion: missing required field "UserDepartments.leader_type"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "DepartmentUsers.user_id"`)}
+		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserDepartments.user_id"`)}
 	}
 	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
-		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "DepartmentUsers.lion_departments"`)}
+		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "UserDepartments.lion_departments"`)}
 	}
-	if len(_c.mutation.LionDepartmentUsersIDs()) == 0 {
-		return &ValidationError{Name: "lion_department_users", err: errors.New(`lion: missing required edge "DepartmentUsers.lion_department_users"`)}
+	if len(_c.mutation.LionUserDepartmentsIDs()) == 0 {
+		return &ValidationError{Name: "lion_user_departments", err: errors.New(`lion: missing required edge "UserDepartments.lion_user_departments"`)}
 	}
 	return nil
 }
 
-func (_c *DepartmentUsersCreate) sqlSave(ctx context.Context) (*DepartmentUsers, error) {
+func (_c *UserDepartmentsCreate) sqlSave(ctx context.Context) (*UserDepartments, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -179,29 +179,29 @@ func (_c *DepartmentUsersCreate) sqlSave(ctx context.Context) (*DepartmentUsers,
 	return _node, nil
 }
 
-func (_c *DepartmentUsersCreate) createSpec() (*DepartmentUsers, *sqlgraph.CreateSpec) {
+func (_c *UserDepartmentsCreate) createSpec() (*UserDepartments, *sqlgraph.CreateSpec) {
 	var (
-		_node = &DepartmentUsers{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(departmentusers.Table, sqlgraph.NewFieldSpec(departmentusers.FieldID, field.TypeInt))
+		_node = &UserDepartments{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(userdepartments.Table, sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(departmentusers.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(userdepartments.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(departmentusers.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(userdepartments.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.LeaderType(); ok {
-		_spec.SetField(departmentusers.FieldLeaderType, field.TypeInt, value)
+		_spec.SetField(userdepartments.FieldLeaderType, field.TypeInt, value)
 		_node.LeaderType = value
 	}
 	if nodes := _c.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentusers.LionDepartmentsTable,
-			Columns: []string{departmentusers.LionDepartmentsColumn},
+			Table:   userdepartments.LionDepartmentsTable,
+			Columns: []string{userdepartments.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -213,12 +213,12 @@ func (_c *DepartmentUsersCreate) createSpec() (*DepartmentUsers, *sqlgraph.Creat
 		_node.DepartmentID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LionDepartmentUsersIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionUserDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentusers.LionDepartmentUsersTable,
-			Columns: []string{departmentusers.LionDepartmentUsersColumn},
+			Table:   userdepartments.LionUserDepartmentsTable,
+			Columns: []string{userdepartments.LionUserDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -233,27 +233,27 @@ func (_c *DepartmentUsersCreate) createSpec() (*DepartmentUsers, *sqlgraph.Creat
 	return _node, _spec
 }
 
-// DepartmentUsersCreateBulk is the builder for creating many DepartmentUsers entities in bulk.
-type DepartmentUsersCreateBulk struct {
+// UserDepartmentsCreateBulk is the builder for creating many UserDepartments entities in bulk.
+type UserDepartmentsCreateBulk struct {
 	config
 	err      error
-	builders []*DepartmentUsersCreate
+	builders []*UserDepartmentsCreate
 }
 
-// Save creates the DepartmentUsers entities in the database.
-func (_c *DepartmentUsersCreateBulk) Save(ctx context.Context) ([]*DepartmentUsers, error) {
+// Save creates the UserDepartments entities in the database.
+func (_c *UserDepartmentsCreateBulk) Save(ctx context.Context) ([]*UserDepartments, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*DepartmentUsers, len(_c.builders))
+	nodes := make([]*UserDepartments, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*DepartmentUsersMutation)
+				mutation, ok := m.(*UserDepartmentsMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -300,7 +300,7 @@ func (_c *DepartmentUsersCreateBulk) Save(ctx context.Context) ([]*DepartmentUse
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *DepartmentUsersCreateBulk) SaveX(ctx context.Context) []*DepartmentUsers {
+func (_c *UserDepartmentsCreateBulk) SaveX(ctx context.Context) []*UserDepartments {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -309,13 +309,13 @@ func (_c *DepartmentUsersCreateBulk) SaveX(ctx context.Context) []*DepartmentUse
 }
 
 // Exec executes the query.
-func (_c *DepartmentUsersCreateBulk) Exec(ctx context.Context) error {
+func (_c *UserDepartmentsCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *DepartmentUsersCreateBulk) ExecX(ctx context.Context) {
+func (_c *UserDepartmentsCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

@@ -10,12 +10,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/departmentusers"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
-// DepartmentUsers is the model entity for the DepartmentUsers schema.
-type DepartmentUsers struct {
+// UserDepartments is the model entity for the UserDepartments schema.
+type UserDepartments struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -30,17 +30,17 @@ type DepartmentUsers struct {
 	// 用户 ID
 	UserID int `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the DepartmentUsersQuery when eager-loading is set.
-	Edges        DepartmentUsersEdges `json:"edges"`
+	// The values are being populated by the UserDepartmentsQuery when eager-loading is set.
+	Edges        UserDepartmentsEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// DepartmentUsersEdges holds the relations/edges for other nodes in the graph.
-type DepartmentUsersEdges struct {
+// UserDepartmentsEdges holds the relations/edges for other nodes in the graph.
+type UserDepartmentsEdges struct {
 	// LionDepartments holds the value of the lion_departments edge.
 	LionDepartments *Departments `json:"lion_departments,omitempty"`
-	// LionDepartmentUsers holds the value of the lion_department_users edge.
-	LionDepartmentUsers *Users `json:"lion_department_users,omitempty"`
+	// LionUserDepartments holds the value of the lion_user_departments edge.
+	LionUserDepartments *Users `json:"lion_user_departments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -48,7 +48,7 @@ type DepartmentUsersEdges struct {
 
 // LionDepartmentsOrErr returns the LionDepartments value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e DepartmentUsersEdges) LionDepartmentsOrErr() (*Departments, error) {
+func (e UserDepartmentsEdges) LionDepartmentsOrErr() (*Departments, error) {
 	if e.LionDepartments != nil {
 		return e.LionDepartments, nil
 	} else if e.loadedTypes[0] {
@@ -57,25 +57,25 @@ func (e DepartmentUsersEdges) LionDepartmentsOrErr() (*Departments, error) {
 	return nil, &NotLoadedError{edge: "lion_departments"}
 }
 
-// LionDepartmentUsersOrErr returns the LionDepartmentUsers value or an error if the edge
+// LionUserDepartmentsOrErr returns the LionUserDepartments value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e DepartmentUsersEdges) LionDepartmentUsersOrErr() (*Users, error) {
-	if e.LionDepartmentUsers != nil {
-		return e.LionDepartmentUsers, nil
+func (e UserDepartmentsEdges) LionUserDepartmentsOrErr() (*Users, error) {
+	if e.LionUserDepartments != nil {
+		return e.LionUserDepartments, nil
 	} else if e.loadedTypes[1] {
 		return nil, &NotFoundError{label: users.Label}
 	}
-	return nil, &NotLoadedError{edge: "lion_department_users"}
+	return nil, &NotLoadedError{edge: "lion_user_departments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*DepartmentUsers) scanValues(columns []string) ([]any, error) {
+func (*UserDepartments) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case departmentusers.FieldID, departmentusers.FieldDepartmentID, departmentusers.FieldLeaderType, departmentusers.FieldUserID:
+		case userdepartments.FieldID, userdepartments.FieldDepartmentID, userdepartments.FieldLeaderType, userdepartments.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case departmentusers.FieldCreatedAt, departmentusers.FieldUpdatedAt:
+		case userdepartments.FieldCreatedAt, userdepartments.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -85,44 +85,44 @@ func (*DepartmentUsers) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the DepartmentUsers fields.
-func (_m *DepartmentUsers) assignValues(columns []string, values []any) error {
+// to the UserDepartments fields.
+func (_m *UserDepartments) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case departmentusers.FieldID:
+		case userdepartments.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case departmentusers.FieldCreatedAt:
+		case userdepartments.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case departmentusers.FieldUpdatedAt:
+		case userdepartments.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case departmentusers.FieldDepartmentID:
+		case userdepartments.FieldDepartmentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field department_id", values[i])
 			} else if value.Valid {
 				_m.DepartmentID = int(value.Int64)
 			}
-		case departmentusers.FieldLeaderType:
+		case userdepartments.FieldLeaderType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field leader_type", values[i])
 			} else if value.Valid {
 				_m.LeaderType = int(value.Int64)
 			}
-		case departmentusers.FieldUserID:
+		case userdepartments.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
@@ -135,44 +135,44 @@ func (_m *DepartmentUsers) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the DepartmentUsers.
+// Value returns the ent.Value that was dynamically selected and assigned to the UserDepartments.
 // This includes values selected through modifiers, order, etc.
-func (_m *DepartmentUsers) Value(name string) (ent.Value, error) {
+func (_m *UserDepartments) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionDepartments queries the "lion_departments" edge of the DepartmentUsers entity.
-func (_m *DepartmentUsers) QueryLionDepartments() *DepartmentsQuery {
-	return NewDepartmentUsersClient(_m.config).QueryLionDepartments(_m)
+// QueryLionDepartments queries the "lion_departments" edge of the UserDepartments entity.
+func (_m *UserDepartments) QueryLionDepartments() *DepartmentsQuery {
+	return NewUserDepartmentsClient(_m.config).QueryLionDepartments(_m)
 }
 
-// QueryLionDepartmentUsers queries the "lion_department_users" edge of the DepartmentUsers entity.
-func (_m *DepartmentUsers) QueryLionDepartmentUsers() *UsersQuery {
-	return NewDepartmentUsersClient(_m.config).QueryLionDepartmentUsers(_m)
+// QueryLionUserDepartments queries the "lion_user_departments" edge of the UserDepartments entity.
+func (_m *UserDepartments) QueryLionUserDepartments() *UsersQuery {
+	return NewUserDepartmentsClient(_m.config).QueryLionUserDepartments(_m)
 }
 
-// Update returns a builder for updating this DepartmentUsers.
-// Note that you need to call DepartmentUsers.Unwrap() before calling this method if this DepartmentUsers
+// Update returns a builder for updating this UserDepartments.
+// Note that you need to call UserDepartments.Unwrap() before calling this method if this UserDepartments
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *DepartmentUsers) Update() *DepartmentUsersUpdateOne {
-	return NewDepartmentUsersClient(_m.config).UpdateOne(_m)
+func (_m *UserDepartments) Update() *UserDepartmentsUpdateOne {
+	return NewUserDepartmentsClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the DepartmentUsers entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the UserDepartments entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *DepartmentUsers) Unwrap() *DepartmentUsers {
+func (_m *UserDepartments) Unwrap() *UserDepartments {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: DepartmentUsers is not a transactional entity")
+		panic("lion: UserDepartments is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *DepartmentUsers) String() string {
+func (_m *UserDepartments) String() string {
 	var builder strings.Builder
-	builder.WriteString("DepartmentUsers(")
+	builder.WriteString("UserDepartments(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -192,5 +192,5 @@ func (_m *DepartmentUsers) String() string {
 	return builder.String()
 }
 
-// DepartmentUsersSlice is a parsable slice of DepartmentUsers.
-type DepartmentUsersSlice []*DepartmentUsers
+// UserDepartmentsSlice is a parsable slice of UserDepartments.
+type UserDepartmentsSlice []*UserDepartments
