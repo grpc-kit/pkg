@@ -21,26 +21,32 @@ type Resources struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// 父菜单 ID，为 0 表示顶级菜单
+	// 父资源 ID，为 0 表示顶级资源
 	ParentID int `json:"parent_id,omitempty"`
-	// 菜单名称
+	// 资源名称
 	Name string `json:"name,omitempty"`
-	// 菜单路径
-	Path string `json:"path,omitempty"`
 	// 国际化标识
 	I18nName string `json:"i18n_name,omitempty"`
-	// 图标名称，如 UserOutlined
-	Icon string `json:"icon,omitempty"`
 	// 排序权重，越小越靠前
 	OrderWeight int `json:"order_weight,omitempty"`
-	// 菜单用途类型，如 1=admin 后台
-	MenuType int `json:"menu_type,omitempty"`
-	// 是否启用该菜单项，禁用后完全不可访问
+	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
+	Type int `json:"type,omitempty"`
+	// 作用范围，对应 api/known/admin/v1/common.proto 中定义
+	Scope int `json:"scope,omitempty"`
+	// 是否启用该资源项，禁用后完全不可访问
 	Enabled bool `json:"enabled,omitempty"`
-	// 是否在菜单中隐藏该节点
-	HideInMenu bool `json:"hide_in_menu,omitempty"`
-	// 是否隐藏该节点的子菜单
-	HideChildrenInMenu bool `json:"hide_children_in_menu,omitempty"`
+	// 是否在资源列表中隐藏该节点
+	Hidden bool `json:"hidden,omitempty"`
+	// 是否隐藏该资源节点的子项
+	HideChildren bool `json:"hide_children,omitempty"`
+	// 资源路径
+	Path string `json:"path,omitempty"`
+	// 图标名称，如 UserOutlined
+	Icon string `json:"icon,omitempty"`
+	// 组件名称，如 UserOutlined
+	Component string `json:"component,omitempty"`
+	// 详细描述
+	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ResourcesQuery when eager-loading is set.
 	Edges        ResourcesEdges `json:"edges"`
@@ -70,11 +76,11 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case resources.FieldEnabled, resources.FieldHideInMenu, resources.FieldHideChildrenInMenu:
+		case resources.FieldEnabled, resources.FieldHidden, resources.FieldHideChildren:
 			values[i] = new(sql.NullBool)
-		case resources.FieldID, resources.FieldParentID, resources.FieldOrderWeight, resources.FieldMenuType:
+		case resources.FieldID, resources.FieldParentID, resources.FieldOrderWeight, resources.FieldType, resources.FieldScope:
 			values[i] = new(sql.NullInt64)
-		case resources.FieldName, resources.FieldPath, resources.FieldI18nName, resources.FieldIcon:
+		case resources.FieldName, resources.FieldI18nName, resources.FieldPath, resources.FieldIcon, resources.FieldComponent, resources.FieldDescription:
 			values[i] = new(sql.NullString)
 		case resources.FieldCreatedAt, resources.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -123,23 +129,11 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case resources.FieldPath:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field path", values[i])
-			} else if value.Valid {
-				_m.Path = value.String
-			}
 		case resources.FieldI18nName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
 			} else if value.Valid {
 				_m.I18nName = value.String
-			}
-		case resources.FieldIcon:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field icon", values[i])
-			} else if value.Valid {
-				_m.Icon = value.String
 			}
 		case resources.FieldOrderWeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -147,11 +141,17 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.OrderWeight = int(value.Int64)
 			}
-		case resources.FieldMenuType:
+		case resources.FieldType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field menu_type", values[i])
+				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				_m.MenuType = int(value.Int64)
+				_m.Type = int(value.Int64)
+			}
+		case resources.FieldScope:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field scope", values[i])
+			} else if value.Valid {
+				_m.Scope = int(value.Int64)
 			}
 		case resources.FieldEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -159,17 +159,41 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Enabled = value.Bool
 			}
-		case resources.FieldHideInMenu:
+		case resources.FieldHidden:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field hide_in_menu", values[i])
+				return fmt.Errorf("unexpected type %T for field hidden", values[i])
 			} else if value.Valid {
-				_m.HideInMenu = value.Bool
+				_m.Hidden = value.Bool
 			}
-		case resources.FieldHideChildrenInMenu:
+		case resources.FieldHideChildren:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field hide_children_in_menu", values[i])
+				return fmt.Errorf("unexpected type %T for field hide_children", values[i])
 			} else if value.Valid {
-				_m.HideChildrenInMenu = value.Bool
+				_m.HideChildren = value.Bool
+			}
+		case resources.FieldPath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field path", values[i])
+			} else if value.Valid {
+				_m.Path = value.String
+			}
+		case resources.FieldIcon:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field icon", values[i])
+			} else if value.Valid {
+				_m.Icon = value.String
+			}
+		case resources.FieldComponent:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field component", values[i])
+			} else if value.Valid {
+				_m.Component = value.String
+			}
+		case resources.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -224,29 +248,38 @@ func (_m *Resources) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("path=")
-	builder.WriteString(_m.Path)
-	builder.WriteString(", ")
 	builder.WriteString("i18n_name=")
 	builder.WriteString(_m.I18nName)
-	builder.WriteString(", ")
-	builder.WriteString("icon=")
-	builder.WriteString(_m.Icon)
 	builder.WriteString(", ")
 	builder.WriteString("order_weight=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
 	builder.WriteString(", ")
-	builder.WriteString("menu_type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MenuType))
+	builder.WriteString("type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Type))
+	builder.WriteString(", ")
+	builder.WriteString("scope=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Scope))
 	builder.WriteString(", ")
 	builder.WriteString("enabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))
 	builder.WriteString(", ")
-	builder.WriteString("hide_in_menu=")
-	builder.WriteString(fmt.Sprintf("%v", _m.HideInMenu))
+	builder.WriteString("hidden=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Hidden))
 	builder.WriteString(", ")
-	builder.WriteString("hide_children_in_menu=")
-	builder.WriteString(fmt.Sprintf("%v", _m.HideChildrenInMenu))
+	builder.WriteString("hide_children=")
+	builder.WriteString(fmt.Sprintf("%v", _m.HideChildren))
+	builder.WriteString(", ")
+	builder.WriteString("path=")
+	builder.WriteString(_m.Path)
+	builder.WriteString(", ")
+	builder.WriteString("icon=")
+	builder.WriteString(_m.Icon)
+	builder.WriteString(", ")
+	builder.WriteString("component=")
+	builder.WriteString(_m.Component)
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

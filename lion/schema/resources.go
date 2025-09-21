@@ -18,37 +18,47 @@ func (Resources) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("parent_id").
 			Default(0).
-			Comment("父菜单 ID，为 0 表示顶级菜单"),
+			Comment("父资源 ID，为 0 表示顶级资源"),
 		field.String("name").
 			MaxLen(128).
 			NotEmpty().
-			Comment("菜单名称"),
-		field.String("path").
-			MaxLen(255).
-			NotEmpty().
-			Comment("菜单路径"),
+			Comment("资源名称"),
 		field.String("i18n_name").
 			Default("").
 			Comment("国际化标识"),
+		field.Int("order_weight").
+			Default(0).
+			Comment("排序权重，越小越靠前"),
+		field.Int("type").
+			Default(0).
+			Comment("用途类型，对应 api/known/admin/v1/common.proto 中定义"),
+		field.Int("scope").
+			Default(0).
+			Comment("作用范围，对应 api/known/admin/v1/common.proto 中定义"),
+		field.Bool("enabled").
+			Default(true).
+			Comment("是否启用该资源项，禁用后完全不可访问"),
+		field.Bool("hidden").
+			Default(false).
+			Comment("是否在资源列表中隐藏该节点"),
+		field.Bool("hide_children").
+			Default(false).
+			Comment("是否隐藏该资源节点的子项"),
+		field.String("path").
+			MaxLen(512).
+			Default("").
+			Comment("资源路径"),
 		field.String("icon").
 			MaxLen(256).
 			Default("").
 			Comment("图标名称，如 UserOutlined"),
-		field.Int("order_weight").
-			Default(0).
-			Comment("排序权重，越小越靠前"),
-		field.Int("menu_type").
-			Default(0).
-			Comment("菜单用途类型，如 1=admin 后台"),
-		field.Bool("enabled").
-			Default(true).
-			Comment("是否启用该菜单项，禁用后完全不可访问"),
-		field.Bool("hide_in_menu").
-			Default(false).
-			Comment("是否在菜单中隐藏该节点"),
-		field.Bool("hide_children_in_menu").
-			Default(false).
-			Comment("是否隐藏该节点的子菜单"),
+		field.String("component").
+			MaxLen(256).
+			Default("").
+			Comment("组件名称，如 UserOutlined"),
+		field.String("description").
+			Default("").
+			Comment("详细描述"),
 	}
 }
 

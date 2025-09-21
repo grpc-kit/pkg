@@ -308,54 +308,56 @@ func init() {
 			return nil
 		}
 	}()
-	// resourcesDescPath is the schema descriptor for path field.
-	resourcesDescPath := resourcesFields[2].Descriptor()
-	// resources.PathValidator is a validator for the "path" field. It is called by the builders before save.
-	resources.PathValidator = func() func(string) error {
-		validators := resourcesDescPath.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(_path string) error {
-			for _, fn := range fns {
-				if err := fn(_path); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
 	// resourcesDescI18nName is the schema descriptor for i18n_name field.
-	resourcesDescI18nName := resourcesFields[3].Descriptor()
+	resourcesDescI18nName := resourcesFields[2].Descriptor()
 	// resources.DefaultI18nName holds the default value on creation for the i18n_name field.
 	resources.DefaultI18nName = resourcesDescI18nName.Default.(string)
+	// resourcesDescOrderWeight is the schema descriptor for order_weight field.
+	resourcesDescOrderWeight := resourcesFields[3].Descriptor()
+	// resources.DefaultOrderWeight holds the default value on creation for the order_weight field.
+	resources.DefaultOrderWeight = resourcesDescOrderWeight.Default.(int)
+	// resourcesDescType is the schema descriptor for type field.
+	resourcesDescType := resourcesFields[4].Descriptor()
+	// resources.DefaultType holds the default value on creation for the type field.
+	resources.DefaultType = resourcesDescType.Default.(int)
+	// resourcesDescScope is the schema descriptor for scope field.
+	resourcesDescScope := resourcesFields[5].Descriptor()
+	// resources.DefaultScope holds the default value on creation for the scope field.
+	resources.DefaultScope = resourcesDescScope.Default.(int)
+	// resourcesDescEnabled is the schema descriptor for enabled field.
+	resourcesDescEnabled := resourcesFields[6].Descriptor()
+	// resources.DefaultEnabled holds the default value on creation for the enabled field.
+	resources.DefaultEnabled = resourcesDescEnabled.Default.(bool)
+	// resourcesDescHidden is the schema descriptor for hidden field.
+	resourcesDescHidden := resourcesFields[7].Descriptor()
+	// resources.DefaultHidden holds the default value on creation for the hidden field.
+	resources.DefaultHidden = resourcesDescHidden.Default.(bool)
+	// resourcesDescHideChildren is the schema descriptor for hide_children field.
+	resourcesDescHideChildren := resourcesFields[8].Descriptor()
+	// resources.DefaultHideChildren holds the default value on creation for the hide_children field.
+	resources.DefaultHideChildren = resourcesDescHideChildren.Default.(bool)
+	// resourcesDescPath is the schema descriptor for path field.
+	resourcesDescPath := resourcesFields[9].Descriptor()
+	// resources.DefaultPath holds the default value on creation for the path field.
+	resources.DefaultPath = resourcesDescPath.Default.(string)
+	// resources.PathValidator is a validator for the "path" field. It is called by the builders before save.
+	resources.PathValidator = resourcesDescPath.Validators[0].(func(string) error)
 	// resourcesDescIcon is the schema descriptor for icon field.
-	resourcesDescIcon := resourcesFields[4].Descriptor()
+	resourcesDescIcon := resourcesFields[10].Descriptor()
 	// resources.DefaultIcon holds the default value on creation for the icon field.
 	resources.DefaultIcon = resourcesDescIcon.Default.(string)
 	// resources.IconValidator is a validator for the "icon" field. It is called by the builders before save.
 	resources.IconValidator = resourcesDescIcon.Validators[0].(func(string) error)
-	// resourcesDescOrderWeight is the schema descriptor for order_weight field.
-	resourcesDescOrderWeight := resourcesFields[5].Descriptor()
-	// resources.DefaultOrderWeight holds the default value on creation for the order_weight field.
-	resources.DefaultOrderWeight = resourcesDescOrderWeight.Default.(int)
-	// resourcesDescMenuType is the schema descriptor for menu_type field.
-	resourcesDescMenuType := resourcesFields[6].Descriptor()
-	// resources.DefaultMenuType holds the default value on creation for the menu_type field.
-	resources.DefaultMenuType = resourcesDescMenuType.Default.(int)
-	// resourcesDescEnabled is the schema descriptor for enabled field.
-	resourcesDescEnabled := resourcesFields[7].Descriptor()
-	// resources.DefaultEnabled holds the default value on creation for the enabled field.
-	resources.DefaultEnabled = resourcesDescEnabled.Default.(bool)
-	// resourcesDescHideInMenu is the schema descriptor for hide_in_menu field.
-	resourcesDescHideInMenu := resourcesFields[8].Descriptor()
-	// resources.DefaultHideInMenu holds the default value on creation for the hide_in_menu field.
-	resources.DefaultHideInMenu = resourcesDescHideInMenu.Default.(bool)
-	// resourcesDescHideChildrenInMenu is the schema descriptor for hide_children_in_menu field.
-	resourcesDescHideChildrenInMenu := resourcesFields[9].Descriptor()
-	// resources.DefaultHideChildrenInMenu holds the default value on creation for the hide_children_in_menu field.
-	resources.DefaultHideChildrenInMenu = resourcesDescHideChildrenInMenu.Default.(bool)
+	// resourcesDescComponent is the schema descriptor for component field.
+	resourcesDescComponent := resourcesFields[11].Descriptor()
+	// resources.DefaultComponent holds the default value on creation for the component field.
+	resources.DefaultComponent = resourcesDescComponent.Default.(string)
+	// resources.ComponentValidator is a validator for the "component" field. It is called by the builders before save.
+	resources.ComponentValidator = resourcesDescComponent.Validators[0].(func(string) error)
+	// resourcesDescDescription is the schema descriptor for description field.
+	resourcesDescDescription := resourcesFields[12].Descriptor()
+	// resources.DefaultDescription holds the default value on creation for the description field.
+	resources.DefaultDescription = resourcesDescDescription.Default.(string)
 	roledepartmentsMixin := schema.RoleDepartments{}.Mixin()
 	roledepartmentsMixinFields0 := roledepartmentsMixin[0].Fields()
 	_ = roledepartmentsMixinFields0

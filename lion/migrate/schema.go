@@ -167,14 +167,17 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "name", Type: field.TypeString, Size: 128},
-		{Name: "path", Type: field.TypeString, Size: 255},
 		{Name: "i18n_name", Type: field.TypeString, Default: ""},
-		{Name: "icon", Type: field.TypeString, Size: 256, Default: ""},
 		{Name: "order_weight", Type: field.TypeInt, Default: 0},
-		{Name: "menu_type", Type: field.TypeInt, Default: 0},
+		{Name: "type", Type: field.TypeInt, Default: 0},
+		{Name: "scope", Type: field.TypeInt, Default: 0},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
-		{Name: "hide_in_menu", Type: field.TypeBool, Default: false},
-		{Name: "hide_children_in_menu", Type: field.TypeBool, Default: false},
+		{Name: "hidden", Type: field.TypeBool, Default: false},
+		{Name: "hide_children", Type: field.TypeBool, Default: false},
+		{Name: "path", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "icon", Type: field.TypeString, Size: 256, Default: ""},
+		{Name: "component", Type: field.TypeString, Size: 256, Default: ""},
+		{Name: "description", Type: field.TypeString, Default: ""},
 	}
 	// LionResourcesTable holds the schema information for the "lion_resources" table.
 	LionResourcesTable = &schema.Table{

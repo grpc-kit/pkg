@@ -69,12 +69,6 @@ func (_c *ResourcesCreate) SetName(v string) *ResourcesCreate {
 	return _c
 }
 
-// SetPath sets the "path" field.
-func (_c *ResourcesCreate) SetPath(v string) *ResourcesCreate {
-	_c.mutation.SetPath(v)
-	return _c
-}
-
 // SetI18nName sets the "i18n_name" field.
 func (_c *ResourcesCreate) SetI18nName(v string) *ResourcesCreate {
 	_c.mutation.SetI18nName(v)
@@ -85,20 +79,6 @@ func (_c *ResourcesCreate) SetI18nName(v string) *ResourcesCreate {
 func (_c *ResourcesCreate) SetNillableI18nName(v *string) *ResourcesCreate {
 	if v != nil {
 		_c.SetI18nName(*v)
-	}
-	return _c
-}
-
-// SetIcon sets the "icon" field.
-func (_c *ResourcesCreate) SetIcon(v string) *ResourcesCreate {
-	_c.mutation.SetIcon(v)
-	return _c
-}
-
-// SetNillableIcon sets the "icon" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableIcon(v *string) *ResourcesCreate {
-	if v != nil {
-		_c.SetIcon(*v)
 	}
 	return _c
 }
@@ -117,16 +97,30 @@ func (_c *ResourcesCreate) SetNillableOrderWeight(v *int) *ResourcesCreate {
 	return _c
 }
 
-// SetMenuType sets the "menu_type" field.
-func (_c *ResourcesCreate) SetMenuType(v int) *ResourcesCreate {
-	_c.mutation.SetMenuType(v)
+// SetType sets the "type" field.
+func (_c *ResourcesCreate) SetType(v int) *ResourcesCreate {
+	_c.mutation.SetType(v)
 	return _c
 }
 
-// SetNillableMenuType sets the "menu_type" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableMenuType(v *int) *ResourcesCreate {
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableType(v *int) *ResourcesCreate {
 	if v != nil {
-		_c.SetMenuType(*v)
+		_c.SetType(*v)
+	}
+	return _c
+}
+
+// SetScope sets the "scope" field.
+func (_c *ResourcesCreate) SetScope(v int) *ResourcesCreate {
+	_c.mutation.SetScope(v)
+	return _c
+}
+
+// SetNillableScope sets the "scope" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableScope(v *int) *ResourcesCreate {
+	if v != nil {
+		_c.SetScope(*v)
 	}
 	return _c
 }
@@ -145,30 +139,86 @@ func (_c *ResourcesCreate) SetNillableEnabled(v *bool) *ResourcesCreate {
 	return _c
 }
 
-// SetHideInMenu sets the "hide_in_menu" field.
-func (_c *ResourcesCreate) SetHideInMenu(v bool) *ResourcesCreate {
-	_c.mutation.SetHideInMenu(v)
+// SetHidden sets the "hidden" field.
+func (_c *ResourcesCreate) SetHidden(v bool) *ResourcesCreate {
+	_c.mutation.SetHidden(v)
 	return _c
 }
 
-// SetNillableHideInMenu sets the "hide_in_menu" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableHideInMenu(v *bool) *ResourcesCreate {
+// SetNillableHidden sets the "hidden" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableHidden(v *bool) *ResourcesCreate {
 	if v != nil {
-		_c.SetHideInMenu(*v)
+		_c.SetHidden(*v)
 	}
 	return _c
 }
 
-// SetHideChildrenInMenu sets the "hide_children_in_menu" field.
-func (_c *ResourcesCreate) SetHideChildrenInMenu(v bool) *ResourcesCreate {
-	_c.mutation.SetHideChildrenInMenu(v)
+// SetHideChildren sets the "hide_children" field.
+func (_c *ResourcesCreate) SetHideChildren(v bool) *ResourcesCreate {
+	_c.mutation.SetHideChildren(v)
 	return _c
 }
 
-// SetNillableHideChildrenInMenu sets the "hide_children_in_menu" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableHideChildrenInMenu(v *bool) *ResourcesCreate {
+// SetNillableHideChildren sets the "hide_children" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableHideChildren(v *bool) *ResourcesCreate {
 	if v != nil {
-		_c.SetHideChildrenInMenu(*v)
+		_c.SetHideChildren(*v)
+	}
+	return _c
+}
+
+// SetPath sets the "path" field.
+func (_c *ResourcesCreate) SetPath(v string) *ResourcesCreate {
+	_c.mutation.SetPath(v)
+	return _c
+}
+
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillablePath(v *string) *ResourcesCreate {
+	if v != nil {
+		_c.SetPath(*v)
+	}
+	return _c
+}
+
+// SetIcon sets the "icon" field.
+func (_c *ResourcesCreate) SetIcon(v string) *ResourcesCreate {
+	_c.mutation.SetIcon(v)
+	return _c
+}
+
+// SetNillableIcon sets the "icon" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableIcon(v *string) *ResourcesCreate {
+	if v != nil {
+		_c.SetIcon(*v)
+	}
+	return _c
+}
+
+// SetComponent sets the "component" field.
+func (_c *ResourcesCreate) SetComponent(v string) *ResourcesCreate {
+	_c.mutation.SetComponent(v)
+	return _c
+}
+
+// SetNillableComponent sets the "component" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableComponent(v *string) *ResourcesCreate {
+	if v != nil {
+		_c.SetComponent(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *ResourcesCreate) SetDescription(v string) *ResourcesCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableDescription(v *string) *ResourcesCreate {
+	if v != nil {
+		_c.SetDescription(*v)
 	}
 	return _c
 }
@@ -239,29 +289,45 @@ func (_c *ResourcesCreate) defaults() {
 		v := resources.DefaultI18nName
 		_c.mutation.SetI18nName(v)
 	}
-	if _, ok := _c.mutation.Icon(); !ok {
-		v := resources.DefaultIcon
-		_c.mutation.SetIcon(v)
-	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		v := resources.DefaultOrderWeight
 		_c.mutation.SetOrderWeight(v)
 	}
-	if _, ok := _c.mutation.MenuType(); !ok {
-		v := resources.DefaultMenuType
-		_c.mutation.SetMenuType(v)
+	if _, ok := _c.mutation.GetType(); !ok {
+		v := resources.DefaultType
+		_c.mutation.SetType(v)
+	}
+	if _, ok := _c.mutation.Scope(); !ok {
+		v := resources.DefaultScope
+		_c.mutation.SetScope(v)
 	}
 	if _, ok := _c.mutation.Enabled(); !ok {
 		v := resources.DefaultEnabled
 		_c.mutation.SetEnabled(v)
 	}
-	if _, ok := _c.mutation.HideInMenu(); !ok {
-		v := resources.DefaultHideInMenu
-		_c.mutation.SetHideInMenu(v)
+	if _, ok := _c.mutation.Hidden(); !ok {
+		v := resources.DefaultHidden
+		_c.mutation.SetHidden(v)
 	}
-	if _, ok := _c.mutation.HideChildrenInMenu(); !ok {
-		v := resources.DefaultHideChildrenInMenu
-		_c.mutation.SetHideChildrenInMenu(v)
+	if _, ok := _c.mutation.HideChildren(); !ok {
+		v := resources.DefaultHideChildren
+		_c.mutation.SetHideChildren(v)
+	}
+	if _, ok := _c.mutation.Path(); !ok {
+		v := resources.DefaultPath
+		_c.mutation.SetPath(v)
+	}
+	if _, ok := _c.mutation.Icon(); !ok {
+		v := resources.DefaultIcon
+		_c.mutation.SetIcon(v)
+	}
+	if _, ok := _c.mutation.Component(); !ok {
+		v := resources.DefaultComponent
+		_c.mutation.SetComponent(v)
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := resources.DefaultDescription
+		_c.mutation.SetDescription(v)
 	}
 }
 
@@ -284,6 +350,27 @@ func (_c *ResourcesCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Resources.name": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.I18nName(); !ok {
+		return &ValidationError{Name: "i18n_name", err: errors.New(`lion: missing required field "Resources.i18n_name"`)}
+	}
+	if _, ok := _c.mutation.OrderWeight(); !ok {
+		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Resources.order_weight"`)}
+	}
+	if _, ok := _c.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "Resources.type"`)}
+	}
+	if _, ok := _c.mutation.Scope(); !ok {
+		return &ValidationError{Name: "scope", err: errors.New(`lion: missing required field "Resources.scope"`)}
+	}
+	if _, ok := _c.mutation.Enabled(); !ok {
+		return &ValidationError{Name: "enabled", err: errors.New(`lion: missing required field "Resources.enabled"`)}
+	}
+	if _, ok := _c.mutation.Hidden(); !ok {
+		return &ValidationError{Name: "hidden", err: errors.New(`lion: missing required field "Resources.hidden"`)}
+	}
+	if _, ok := _c.mutation.HideChildren(); !ok {
+		return &ValidationError{Name: "hide_children", err: errors.New(`lion: missing required field "Resources.hide_children"`)}
+	}
 	if _, ok := _c.mutation.Path(); !ok {
 		return &ValidationError{Name: "path", err: errors.New(`lion: missing required field "Resources.path"`)}
 	}
@@ -291,9 +378,6 @@ func (_c *ResourcesCreate) check() error {
 		if err := resources.PathValidator(v); err != nil {
 			return &ValidationError{Name: "path", err: fmt.Errorf(`lion: validator failed for field "Resources.path": %w`, err)}
 		}
-	}
-	if _, ok := _c.mutation.I18nName(); !ok {
-		return &ValidationError{Name: "i18n_name", err: errors.New(`lion: missing required field "Resources.i18n_name"`)}
 	}
 	if _, ok := _c.mutation.Icon(); !ok {
 		return &ValidationError{Name: "icon", err: errors.New(`lion: missing required field "Resources.icon"`)}
@@ -303,20 +387,16 @@ func (_c *ResourcesCreate) check() error {
 			return &ValidationError{Name: "icon", err: fmt.Errorf(`lion: validator failed for field "Resources.icon": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.OrderWeight(); !ok {
-		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Resources.order_weight"`)}
+	if _, ok := _c.mutation.Component(); !ok {
+		return &ValidationError{Name: "component", err: errors.New(`lion: missing required field "Resources.component"`)}
 	}
-	if _, ok := _c.mutation.MenuType(); !ok {
-		return &ValidationError{Name: "menu_type", err: errors.New(`lion: missing required field "Resources.menu_type"`)}
+	if v, ok := _c.mutation.Component(); ok {
+		if err := resources.ComponentValidator(v); err != nil {
+			return &ValidationError{Name: "component", err: fmt.Errorf(`lion: validator failed for field "Resources.component": %w`, err)}
+		}
 	}
-	if _, ok := _c.mutation.Enabled(); !ok {
-		return &ValidationError{Name: "enabled", err: errors.New(`lion: missing required field "Resources.enabled"`)}
-	}
-	if _, ok := _c.mutation.HideInMenu(); !ok {
-		return &ValidationError{Name: "hide_in_menu", err: errors.New(`lion: missing required field "Resources.hide_in_menu"`)}
-	}
-	if _, ok := _c.mutation.HideChildrenInMenu(); !ok {
-		return &ValidationError{Name: "hide_children_in_menu", err: errors.New(`lion: missing required field "Resources.hide_children_in_menu"`)}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Resources.description"`)}
 	}
 	return nil
 }
@@ -360,37 +440,49 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.Path(); ok {
-		_spec.SetField(resources.FieldPath, field.TypeString, value)
-		_node.Path = value
-	}
 	if value, ok := _c.mutation.I18nName(); ok {
 		_spec.SetField(resources.FieldI18nName, field.TypeString, value)
 		_node.I18nName = value
-	}
-	if value, ok := _c.mutation.Icon(); ok {
-		_spec.SetField(resources.FieldIcon, field.TypeString, value)
-		_node.Icon = value
 	}
 	if value, ok := _c.mutation.OrderWeight(); ok {
 		_spec.SetField(resources.FieldOrderWeight, field.TypeInt, value)
 		_node.OrderWeight = value
 	}
-	if value, ok := _c.mutation.MenuType(); ok {
-		_spec.SetField(resources.FieldMenuType, field.TypeInt, value)
-		_node.MenuType = value
+	if value, ok := _c.mutation.GetType(); ok {
+		_spec.SetField(resources.FieldType, field.TypeInt, value)
+		_node.Type = value
+	}
+	if value, ok := _c.mutation.Scope(); ok {
+		_spec.SetField(resources.FieldScope, field.TypeInt, value)
+		_node.Scope = value
 	}
 	if value, ok := _c.mutation.Enabled(); ok {
 		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
 		_node.Enabled = value
 	}
-	if value, ok := _c.mutation.HideInMenu(); ok {
-		_spec.SetField(resources.FieldHideInMenu, field.TypeBool, value)
-		_node.HideInMenu = value
+	if value, ok := _c.mutation.Hidden(); ok {
+		_spec.SetField(resources.FieldHidden, field.TypeBool, value)
+		_node.Hidden = value
 	}
-	if value, ok := _c.mutation.HideChildrenInMenu(); ok {
-		_spec.SetField(resources.FieldHideChildrenInMenu, field.TypeBool, value)
-		_node.HideChildrenInMenu = value
+	if value, ok := _c.mutation.HideChildren(); ok {
+		_spec.SetField(resources.FieldHideChildren, field.TypeBool, value)
+		_node.HideChildren = value
+	}
+	if value, ok := _c.mutation.Path(); ok {
+		_spec.SetField(resources.FieldPath, field.TypeString, value)
+		_node.Path = value
+	}
+	if value, ok := _c.mutation.Icon(); ok {
+		_spec.SetField(resources.FieldIcon, field.TypeString, value)
+		_node.Icon = value
+	}
+	if value, ok := _c.mutation.Component(); ok {
+		_spec.SetField(resources.FieldComponent, field.TypeString, value)
+		_node.Component = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(resources.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if nodes := _c.mutation.LionRoleResourcesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

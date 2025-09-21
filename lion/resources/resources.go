@@ -22,22 +22,28 @@ const (
 	FieldParentID = "parent_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldPath holds the string denoting the path field in the database.
-	FieldPath = "path"
 	// FieldI18nName holds the string denoting the i18n_name field in the database.
 	FieldI18nName = "i18n_name"
-	// FieldIcon holds the string denoting the icon field in the database.
-	FieldIcon = "icon"
 	// FieldOrderWeight holds the string denoting the order_weight field in the database.
 	FieldOrderWeight = "order_weight"
-	// FieldMenuType holds the string denoting the menu_type field in the database.
-	FieldMenuType = "menu_type"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
+	// FieldScope holds the string denoting the scope field in the database.
+	FieldScope = "scope"
 	// FieldEnabled holds the string denoting the enabled field in the database.
 	FieldEnabled = "enabled"
-	// FieldHideInMenu holds the string denoting the hide_in_menu field in the database.
-	FieldHideInMenu = "hide_in_menu"
-	// FieldHideChildrenInMenu holds the string denoting the hide_children_in_menu field in the database.
-	FieldHideChildrenInMenu = "hide_children_in_menu"
+	// FieldHidden holds the string denoting the hidden field in the database.
+	FieldHidden = "hidden"
+	// FieldHideChildren holds the string denoting the hide_children field in the database.
+	FieldHideChildren = "hide_children"
+	// FieldPath holds the string denoting the path field in the database.
+	FieldPath = "path"
+	// FieldIcon holds the string denoting the icon field in the database.
+	FieldIcon = "icon"
+	// FieldComponent holds the string denoting the component field in the database.
+	FieldComponent = "component"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// EdgeLionRoleResources holds the string denoting the lion_role_resources edge name in mutations.
 	EdgeLionRoleResources = "lion_role_resources"
 	// Table holds the table name of the resources in the database.
@@ -58,14 +64,17 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldParentID,
 	FieldName,
-	FieldPath,
 	FieldI18nName,
-	FieldIcon,
 	FieldOrderWeight,
-	FieldMenuType,
+	FieldType,
+	FieldScope,
 	FieldEnabled,
-	FieldHideInMenu,
-	FieldHideChildrenInMenu,
+	FieldHidden,
+	FieldHideChildren,
+	FieldPath,
+	FieldIcon,
+	FieldComponent,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -89,24 +98,34 @@ var (
 	DefaultParentID int
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// PathValidator is a validator for the "path" field. It is called by the builders before save.
-	PathValidator func(string) error
 	// DefaultI18nName holds the default value on creation for the "i18n_name" field.
 	DefaultI18nName string
+	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
+	DefaultOrderWeight int
+	// DefaultType holds the default value on creation for the "type" field.
+	DefaultType int
+	// DefaultScope holds the default value on creation for the "scope" field.
+	DefaultScope int
+	// DefaultEnabled holds the default value on creation for the "enabled" field.
+	DefaultEnabled bool
+	// DefaultHidden holds the default value on creation for the "hidden" field.
+	DefaultHidden bool
+	// DefaultHideChildren holds the default value on creation for the "hide_children" field.
+	DefaultHideChildren bool
+	// DefaultPath holds the default value on creation for the "path" field.
+	DefaultPath string
+	// PathValidator is a validator for the "path" field. It is called by the builders before save.
+	PathValidator func(string) error
 	// DefaultIcon holds the default value on creation for the "icon" field.
 	DefaultIcon string
 	// IconValidator is a validator for the "icon" field. It is called by the builders before save.
 	IconValidator func(string) error
-	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
-	DefaultOrderWeight int
-	// DefaultMenuType holds the default value on creation for the "menu_type" field.
-	DefaultMenuType int
-	// DefaultEnabled holds the default value on creation for the "enabled" field.
-	DefaultEnabled bool
-	// DefaultHideInMenu holds the default value on creation for the "hide_in_menu" field.
-	DefaultHideInMenu bool
-	// DefaultHideChildrenInMenu holds the default value on creation for the "hide_children_in_menu" field.
-	DefaultHideChildrenInMenu bool
+	// DefaultComponent holds the default value on creation for the "component" field.
+	DefaultComponent string
+	// ComponentValidator is a validator for the "component" field. It is called by the builders before save.
+	ComponentValidator func(string) error
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
 )
 
 // OrderOption defines the ordering options for the Resources queries.
@@ -137,19 +156,9 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByPath orders the results by the path field.
-func ByPath(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPath, opts...).ToFunc()
-}
-
 // ByI18nName orders the results by the i18n_name field.
 func ByI18nName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldI18nName, opts...).ToFunc()
-}
-
-// ByIcon orders the results by the icon field.
-func ByIcon(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIcon, opts...).ToFunc()
 }
 
 // ByOrderWeight orders the results by the order_weight field.
@@ -157,9 +166,14 @@ func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
 }
 
-// ByMenuType orders the results by the menu_type field.
-func ByMenuType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldMenuType, opts...).ToFunc()
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByScope orders the results by the scope field.
+func ByScope(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScope, opts...).ToFunc()
 }
 
 // ByEnabled orders the results by the enabled field.
@@ -167,14 +181,34 @@ func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
 }
 
-// ByHideInMenu orders the results by the hide_in_menu field.
-func ByHideInMenu(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHideInMenu, opts...).ToFunc()
+// ByHidden orders the results by the hidden field.
+func ByHidden(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHidden, opts...).ToFunc()
 }
 
-// ByHideChildrenInMenu orders the results by the hide_children_in_menu field.
-func ByHideChildrenInMenu(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHideChildrenInMenu, opts...).ToFunc()
+// ByHideChildren orders the results by the hide_children field.
+func ByHideChildren(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHideChildren, opts...).ToFunc()
+}
+
+// ByPath orders the results by the path field.
+func ByPath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPath, opts...).ToFunc()
+}
+
+// ByIcon orders the results by the icon field.
+func ByIcon(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIcon, opts...).ToFunc()
+}
+
+// ByComponent orders the results by the component field.
+func ByComponent(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldComponent, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByLionRoleResourcesCount orders the results by lion_role_resources count.

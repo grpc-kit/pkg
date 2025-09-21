@@ -10,11 +10,12 @@ import (
 	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/rpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// ListMenus 获取菜单列表
-func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusRequest) (*adminv1.ListMenusResponse, error) {
-	result := &adminv1.ListMenusResponse{}
+// ListResources 获取资源列表
+func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListResourcesRequest) (*adminv1.ListResourcesResponse, error) {
+	result := &adminv1.ListResourcesResponse{}
 
 	// TODO；读取该用户的缓存
 
@@ -111,13 +112,18 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 			resources.FieldID,
 			resources.FieldParentID,
 			resources.FieldName,
-			resources.FieldPath,
 			resources.FieldI18nName,
-			resources.FieldIcon,
 			resources.FieldOrderWeight,
+			resources.FieldType,
+			resources.FieldScope,
 			resources.FieldEnabled,
-			resources.FieldHideInMenu,
-			resources.FieldHideChildrenInMenu,
+			resources.FieldHidden,
+			resources.FieldHideChildren,
+			resources.FieldPath,
+			resources.FieldIcon,
+			resources.FieldComponent,
+			resources.FieldCreatedAt,
+			resources.FieldUpdatedAt,
 		).
 		Where(
 			resources.IDIn(mids...),
@@ -133,17 +139,23 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 
 	for _, m := range rids {
 		menu := &adminv1.Resource{
-			Id:                 int32(m.ID),
-			ParentId:           int32(m.ParentID),
-			Name:               m.Name,
-			Path:               m.Path,
-			I18NName:           m.I18nName,
-			Icon:               m.Icon,
-			OrderWeight:        int32(m.OrderWeight),
-			Enabled:            m.Enabled,
-			HideInMenu:         m.HideInMenu,
-			HideChildrenInMenu: m.HideChildrenInMenu,
+			Id:           int32(m.ID),
+			ParentId:     int32(m.ParentID),
+			Name:         m.Name,
+			I18NName:     I18NNameParse(m.I18nName),
+			OrderWeight:  int32(m.OrderWeight),
+			Type:         adminv1.Resource_Type(m.Type),
+			Scope:        adminv1.Resource_Scope(m.Scope),
+			Enabled:      m.Enabled,
+			Hidden:       m.Hidden,
+			HideChildren: m.HideChildren,
+			Path:         m.Path,
+			Icon:         m.Icon,
+			Component:    m.Component,
+			CreatedAt:    timestamppb.New(m.CreatedAt),
+			UpdatedAt:    timestamppb.New(m.UpdatedAt),
 		}
+
 		menuMap[int32(m.ID)] = menu
 	}
 
@@ -165,7 +177,7 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 
 	// TODO；写入该用户的缓存
 
-	result.Menus = roots
+	result.Resources = roots
 
 	return result, nil
 }

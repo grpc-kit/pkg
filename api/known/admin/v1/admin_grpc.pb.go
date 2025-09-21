@@ -30,8 +30,9 @@ type KnownAdminClient interface {
 	ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error)
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 	GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error)
-	ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error)
 	CreateAuthProvider(ctx context.Context, in *CreateAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error)
+	// 资源管理
+	ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error)
 	// 角色相关
 	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error)
 	UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*Role, error)
@@ -121,18 +122,18 @@ func (c *knownAdminClient) GetAuthCallback(ctx context.Context, in *GetAuthCallb
 	return out, nil
 }
 
-func (c *knownAdminClient) ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error) {
-	out := new(ListMenusResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus", in, out, opts...)
+func (c *knownAdminClient) CreateAuthProvider(ctx context.Context, in *CreateAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error) {
+	out := new(AuthProvider)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthProvider", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) CreateAuthProvider(ctx context.Context, in *CreateAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error) {
-	out := new(AuthProvider)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthProvider", in, out, opts...)
+func (c *knownAdminClient) ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error) {
+	out := new(ListResourcesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResources", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -321,8 +322,9 @@ type KnownAdminServer interface {
 	ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error)
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 	GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error)
-	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
 	CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error)
+	// 资源管理
+	ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error)
 	// 角色相关
 	CreateRole(context.Context, *CreateRoleRequest) (*Role, error)
 	UpdateRole(context.Context, *UpdateRoleRequest) (*Role, error)
@@ -372,11 +374,11 @@ func (UnimplementedKnownAdminServer) UpsertAuthProviders(context.Context, *Upser
 func (UnimplementedKnownAdminServer) GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAuthCallback not implemented")
 }
-func (UnimplementedKnownAdminServer) ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMenus not implemented")
-}
 func (UnimplementedKnownAdminServer) CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthProvider not implemented")
+}
+func (UnimplementedKnownAdminServer) ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListResources not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateRole(context.Context, *CreateRoleRequest) (*Role, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRole not implemented")
@@ -555,24 +557,6 @@ func _KnownAdmin_GetAuthCallback_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_ListMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListMenusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListMenus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListMenus(ctx, req.(*ListMenusRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _KnownAdmin_CreateAuthProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateAuthProviderRequest)
 	if err := dec(in); err != nil {
@@ -587,6 +571,24 @@ func _KnownAdmin_CreateAuthProvider_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).CreateAuthProvider(ctx, req.(*CreateAuthProviderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListResourcesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListResources(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResources",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListResources(ctx, req.(*ListResourcesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -965,12 +967,12 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_GetAuthCallback_Handler,
 		},
 		{
-			MethodName: "ListMenus",
-			Handler:    _KnownAdmin_ListMenus_Handler,
-		},
-		{
 			MethodName: "CreateAuthProvider",
 			Handler:    _KnownAdmin_CreateAuthProvider_Handler,
+		},
+		{
+			MethodName: "ListResources",
+			Handler:    _KnownAdmin_ListResources_Handler,
 		},
 		{
 			MethodName: "CreateRole",
