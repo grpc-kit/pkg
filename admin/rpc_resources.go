@@ -10,6 +10,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/rpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -180,4 +181,30 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	result.Resources = roots
 
 	return result, nil
+}
+
+// CreateResource 创建资源
+func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateResourceRequest) (*adminv1.Resource, error) {
+	result := &adminv1.Resource{}
+
+	// TODO;
+
+	return result, nil
+}
+
+// UpdateResource 更新资源
+func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateResourceRequest) (*adminv1.Resource, error) {
+	result := &adminv1.Resource{}
+
+	// TODO;
+
+	return result, nil
+}
+
+// DeleteResource 删除资源
+func (a *KnownAdminAPI) DeleteResource(ctx context.Context, req *adminv1.DeleteResourceRequest) (*emptypb.Empty, error) {
+
+	// TODO;
+
+	return &emptypb.Empty{}, nil
 }
