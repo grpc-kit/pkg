@@ -17,8 +17,8 @@ func (a *KnownAdminAPI) GetConfig(ctx context.Context, req *adminv1.GetConfigReq
 }
 
 // CreateAuthLogin 创建登录认证
-func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.CreateAuthLoginRequest) (*adminv1.CreateAuthLoginResponse, error) {
-	result := &adminv1.CreateAuthLoginResponse{TokenType: "Bearer"}
+func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.CreateAuthLoginRequest) (*adminv1.AuthToken, error) {
+	result := &adminv1.AuthToken{TokenType: "Bearer"}
 
 	var accessToken string
 
@@ -77,13 +77,13 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 }
 
 // CreateAuthToken 创建认证令牌
-func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.CreateAuthTokenRequest) (*adminv1.CreateAuthTokenResponse, error) {
+func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.CreateAuthTokenRequest) (*adminv1.AuthToken, error) {
 	appid := req.Appid
 	if appid == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("create token must with appid")
 	}
 
-	result := &adminv1.CreateAuthTokenResponse{}
+	result := &adminv1.AuthToken{}
 
 	// TODO; 当前先支持静态用户登录
 	if a.config.staticUsers == nil {
