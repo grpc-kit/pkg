@@ -93,10 +93,11 @@ type LocalConfig struct {
 	Automations *AutomationsConfig `json:",omitempty"` // 流程编排配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
-	logger    *logrus.Entry
-	srvdis    sd.Registry
-	rpcConfig *rpc.Config
-	rpcServer *rpc.Server
+	logger      *logrus.Entry
+	srvdis      sd.Registry
+	rpcConfig   *rpc.Config
+	rpcServer   *rpc.Server
+	adminServer *admin.KnownAdminAPI
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
@@ -373,6 +374,8 @@ func (c *LocalConfig) Register(ctx context.Context,
 
 		adminIns := admin.New(admOpts...)
 		adminv1.RegisterKnownAdminServer(c.rpcServer.Server(), adminIns)
+
+		c.adminServer = adminIns
 	}
 	// TODO; 植入默认 admin api 服务
 
@@ -639,6 +642,15 @@ func (c *LocalConfig) GetCloudEvents() (eventclient.Client, error) {
 	}
 
 	return c.CloudEvents.eventClient, nil
+}
+
+// GetIntegrationAdminServer 用于获取集成管理服务
+func (c *LocalConfig) GetIntegrationAdminServer() (*admin.KnownAdminAPI, error) {
+	if c.adminServer == nil {
+		return nil, fmt.Errorf("integration admin server is nil")
+	}
+
+	return c.adminServer, nil
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {
