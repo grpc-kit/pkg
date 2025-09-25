@@ -14,7 +14,6 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/useridentities"
@@ -38,31 +37,34 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	}
 
 	// 只能在自己部门下创建，且为部门负责人
-	userIDInt, err := GetUserID(ctx)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		userIDInt, err := GetUserID(ctx)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	// 默认查看所有用户（仅部门管理下所有可见）
 	// 先找到 user 对应的 department_id
-	leaders, err := a.config.db.UserDepartments.
-		Query().
-		Select(
-			userdepartments.FieldID,
-			userdepartments.FieldLeaderType,
-			userdepartments.FieldDepartmentID,
-			userdepartments.FieldUserID,
-		).
-		Where(userdepartments.UserID(userIDInt)).
-		WithLionDepartments().
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(leaders) == 0 {
-		return nil, errs.PermissionDenied(ctx).WithMessage("you are not allowed to create user")
-	}
+	/*
+		leaders, err := a.config.db.UserDepartments.
+			Query().
+			Select(
+				userdepartments.FieldID,
+				userdepartments.FieldLeaderType,
+				userdepartments.FieldDepartmentID,
+				userdepartments.FieldUserID,
+			).
+			Where(userdepartments.UserID(userIDInt)).
+			WithLionDepartments().
+			All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if len(leaders) == 0 {
+			return nil, errs.PermissionDenied(ctx).WithMessage("you are not allowed to create user")
+		}
+	*/
 
 	// TODO；还需验证创建的用户必须是负责部门内
 
