@@ -2,8 +2,13 @@ package admin
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 
+	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -19,7 +24,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 
-	if db.Roles.Query().Select(roles.FieldID).CountX(ctx) != 0 {
+	if count := db.Roles.Query().Select(roles.FieldID).CountX(ctx); count != 0 {
 		return result, nil
 	}
 
@@ -29,8 +34,39 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 
 	tx.Roles.CreateBulk(
-		db.Roles.Create().SetName("superadmin").SetProtected(true).SetDescription("超级管理员"),
-	)
+		tx.Roles.Create().
+			SetName("superadmin").
+			SetProtected(true).
+			SetDescription("超级管理员"),
+	).SaveX(ctx)
+
+	tx.AuthProviders.CreateBulk(
+		tx.AuthProviders.Create().
+			SetName("local").
+			SetType(int(adminv1.AuthProvider_TYPE_LOCAL.Number())).
+			SetEnabled(true),
+	).SaveX(ctx)
+
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, err
+	}
+	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return nil, err
+	}
+	privateKeyEnc, err := crypto.EncryptAES(a.config.aesKey, privateKeyBytes)
+	if err != nil {
+		return nil, err
+	}
+	tx.Credentials.Create().
+		SetName("key1").
+		SetType(int(adminv1.Credential_TYPE_JWKS.Number())).
+		SetAppid(uuid.New().String()).
+		SetUsage("sig").
+		SetPublicKey(crypto.Base64Encode(publicKeyBytes)).
+		SetPrivateKeyEncrypted(privateKeyEnc).SaveX(ctx)
 
 	tx.Commit()
 
