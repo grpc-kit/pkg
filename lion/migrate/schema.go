@@ -19,12 +19,12 @@ var (
 		{Name: "client_id", Type: field.TypeString, Default: ""},
 		{Name: "enabled", Type: field.TypeBool, Default: false},
 		{Name: "client_secret_encrypted", Type: field.TypeBytes},
-		{Name: "scopes", Type: field.TypeString},
-		{Name: "redirect_uri", Type: field.TypeString},
-		{Name: "issuer", Type: field.TypeString},
-		{Name: "authorization_endpoint", Type: field.TypeString},
-		{Name: "token_endpoint", Type: field.TypeString},
-		{Name: "userinfo_endpoint", Type: field.TypeString},
+		{Name: "scopes", Type: field.TypeString, Default: ""},
+		{Name: "redirect_uri", Type: field.TypeString, Default: ""},
+		{Name: "issuer", Type: field.TypeString, Default: ""},
+		{Name: "authorization_endpoint", Type: field.TypeString, Default: ""},
+		{Name: "token_endpoint", Type: field.TypeString, Default: ""},
+		{Name: "userinfo_endpoint", Type: field.TypeString, Default: ""},
 	}
 	// LionAuthProvidersTable holds the schema information for the "lion_auth_providers" table.
 	LionAuthProvidersTable = &schema.Table{

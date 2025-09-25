@@ -25,8 +25,8 @@ const _ = grpc.SupportPackageIsVersion7
 type KnownAdminClient interface {
 	GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*GetConfigResponse, error)
 	// 认证鉴权
-	CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*CreateAuthLoginResponse, error)
-	CreateAuthToken(ctx context.Context, in *CreateAuthTokenRequest, opts ...grpc.CallOption) (*CreateAuthTokenResponse, error)
+	CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*AuthToken, error)
+	CreateAuthToken(ctx context.Context, in *CreateAuthTokenRequest, opts ...grpc.CallOption) (*AuthToken, error)
 	ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error)
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 	GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error)
@@ -80,8 +80,8 @@ func (c *knownAdminClient) GetConfig(ctx context.Context, in *GetConfigRequest, 
 	return out, nil
 }
 
-func (c *knownAdminClient) CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*CreateAuthLoginResponse, error) {
-	out := new(CreateAuthLoginResponse)
+func (c *knownAdminClient) CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*AuthToken, error) {
+	out := new(AuthToken)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -89,8 +89,8 @@ func (c *knownAdminClient) CreateAuthLogin(ctx context.Context, in *CreateAuthLo
 	return out, nil
 }
 
-func (c *knownAdminClient) CreateAuthToken(ctx context.Context, in *CreateAuthTokenRequest, opts ...grpc.CallOption) (*CreateAuthTokenResponse, error) {
-	out := new(CreateAuthTokenResponse)
+func (c *knownAdminClient) CreateAuthToken(ctx context.Context, in *CreateAuthTokenRequest, opts ...grpc.CallOption) (*AuthToken, error) {
+	out := new(AuthToken)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthToken", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -347,8 +347,8 @@ func (c *knownAdminClient) CreateDatabaseInitialize(ctx context.Context, in *Cre
 type KnownAdminServer interface {
 	GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error)
 	// 认证鉴权
-	CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*CreateAuthLoginResponse, error)
-	CreateAuthToken(context.Context, *CreateAuthTokenRequest) (*CreateAuthTokenResponse, error)
+	CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*AuthToken, error)
+	CreateAuthToken(context.Context, *CreateAuthTokenRequest) (*AuthToken, error)
 	ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error)
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 	GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error)
@@ -392,10 +392,10 @@ type UnimplementedKnownAdminServer struct {
 func (UnimplementedKnownAdminServer) GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
 }
-func (UnimplementedKnownAdminServer) CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*CreateAuthLoginResponse, error) {
+func (UnimplementedKnownAdminServer) CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*AuthToken, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthLogin not implemented")
 }
-func (UnimplementedKnownAdminServer) CreateAuthToken(context.Context, *CreateAuthTokenRequest) (*CreateAuthTokenResponse, error) {
+func (UnimplementedKnownAdminServer) CreateAuthToken(context.Context, *CreateAuthTokenRequest) (*AuthToken, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthToken not implemented")
 }
 func (UnimplementedKnownAdminServer) ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error) {

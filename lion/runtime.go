@@ -58,6 +58,30 @@ func init() {
 	authprovidersDescClientSecretEncrypted := authprovidersFields[4].Descriptor()
 	// authproviders.DefaultClientSecretEncrypted holds the default value on creation for the client_secret_encrypted field.
 	authproviders.DefaultClientSecretEncrypted = authprovidersDescClientSecretEncrypted.Default.([]byte)
+	// authprovidersDescScopes is the schema descriptor for scopes field.
+	authprovidersDescScopes := authprovidersFields[5].Descriptor()
+	// authproviders.DefaultScopes holds the default value on creation for the scopes field.
+	authproviders.DefaultScopes = authprovidersDescScopes.Default.(string)
+	// authprovidersDescRedirectURI is the schema descriptor for redirect_uri field.
+	authprovidersDescRedirectURI := authprovidersFields[6].Descriptor()
+	// authproviders.DefaultRedirectURI holds the default value on creation for the redirect_uri field.
+	authproviders.DefaultRedirectURI = authprovidersDescRedirectURI.Default.(string)
+	// authprovidersDescIssuer is the schema descriptor for issuer field.
+	authprovidersDescIssuer := authprovidersFields[7].Descriptor()
+	// authproviders.DefaultIssuer holds the default value on creation for the issuer field.
+	authproviders.DefaultIssuer = authprovidersDescIssuer.Default.(string)
+	// authprovidersDescAuthorizationEndpoint is the schema descriptor for authorization_endpoint field.
+	authprovidersDescAuthorizationEndpoint := authprovidersFields[8].Descriptor()
+	// authproviders.DefaultAuthorizationEndpoint holds the default value on creation for the authorization_endpoint field.
+	authproviders.DefaultAuthorizationEndpoint = authprovidersDescAuthorizationEndpoint.Default.(string)
+	// authprovidersDescTokenEndpoint is the schema descriptor for token_endpoint field.
+	authprovidersDescTokenEndpoint := authprovidersFields[9].Descriptor()
+	// authproviders.DefaultTokenEndpoint holds the default value on creation for the token_endpoint field.
+	authproviders.DefaultTokenEndpoint = authprovidersDescTokenEndpoint.Default.(string)
+	// authprovidersDescUserinfoEndpoint is the schema descriptor for userinfo_endpoint field.
+	authprovidersDescUserinfoEndpoint := authprovidersFields[10].Descriptor()
+	// authproviders.DefaultUserinfoEndpoint holds the default value on creation for the userinfo_endpoint field.
+	authproviders.DefaultUserinfoEndpoint = authprovidersDescUserinfoEndpoint.Default.(string)
 	credentialsMixin := schema.Credentials{}.Mixin()
 	credentialsMixinFields0 := credentialsMixin[0].Fields()
 	_ = credentialsMixinFields0

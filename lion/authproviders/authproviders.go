@@ -94,6 +94,18 @@ var (
 	DefaultEnabled bool
 	// DefaultClientSecretEncrypted holds the default value on creation for the "client_secret_encrypted" field.
 	DefaultClientSecretEncrypted []byte
+	// DefaultScopes holds the default value on creation for the "scopes" field.
+	DefaultScopes string
+	// DefaultRedirectURI holds the default value on creation for the "redirect_uri" field.
+	DefaultRedirectURI string
+	// DefaultIssuer holds the default value on creation for the "issuer" field.
+	DefaultIssuer string
+	// DefaultAuthorizationEndpoint holds the default value on creation for the "authorization_endpoint" field.
+	DefaultAuthorizationEndpoint string
+	// DefaultTokenEndpoint holds the default value on creation for the "token_endpoint" field.
+	DefaultTokenEndpoint string
+	// DefaultUserinfoEndpoint holds the default value on creation for the "userinfo_endpoint" field.
+	DefaultUserinfoEndpoint string
 )
 
 // OrderOption defines the ordering options for the AuthProviders queries.

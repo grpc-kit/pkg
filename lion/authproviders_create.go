@@ -101,9 +101,25 @@ func (_c *AuthProvidersCreate) SetScopes(v string) *AuthProvidersCreate {
 	return _c
 }
 
+// SetNillableScopes sets the "scopes" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableScopes(v *string) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetScopes(*v)
+	}
+	return _c
+}
+
 // SetRedirectURI sets the "redirect_uri" field.
 func (_c *AuthProvidersCreate) SetRedirectURI(v string) *AuthProvidersCreate {
 	_c.mutation.SetRedirectURI(v)
+	return _c
+}
+
+// SetNillableRedirectURI sets the "redirect_uri" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableRedirectURI(v *string) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetRedirectURI(*v)
+	}
 	return _c
 }
 
@@ -113,9 +129,25 @@ func (_c *AuthProvidersCreate) SetIssuer(v string) *AuthProvidersCreate {
 	return _c
 }
 
+// SetNillableIssuer sets the "issuer" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableIssuer(v *string) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetIssuer(*v)
+	}
+	return _c
+}
+
 // SetAuthorizationEndpoint sets the "authorization_endpoint" field.
 func (_c *AuthProvidersCreate) SetAuthorizationEndpoint(v string) *AuthProvidersCreate {
 	_c.mutation.SetAuthorizationEndpoint(v)
+	return _c
+}
+
+// SetNillableAuthorizationEndpoint sets the "authorization_endpoint" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableAuthorizationEndpoint(v *string) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetAuthorizationEndpoint(*v)
+	}
 	return _c
 }
 
@@ -125,9 +157,25 @@ func (_c *AuthProvidersCreate) SetTokenEndpoint(v string) *AuthProvidersCreate {
 	return _c
 }
 
+// SetNillableTokenEndpoint sets the "token_endpoint" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableTokenEndpoint(v *string) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetTokenEndpoint(*v)
+	}
+	return _c
+}
+
 // SetUserinfoEndpoint sets the "userinfo_endpoint" field.
 func (_c *AuthProvidersCreate) SetUserinfoEndpoint(v string) *AuthProvidersCreate {
 	_c.mutation.SetUserinfoEndpoint(v)
+	return _c
+}
+
+// SetNillableUserinfoEndpoint sets the "userinfo_endpoint" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableUserinfoEndpoint(v *string) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetUserinfoEndpoint(*v)
+	}
 	return _c
 }
 
@@ -200,6 +248,30 @@ func (_c *AuthProvidersCreate) defaults() {
 	if _, ok := _c.mutation.ClientSecretEncrypted(); !ok {
 		v := authproviders.DefaultClientSecretEncrypted
 		_c.mutation.SetClientSecretEncrypted(v)
+	}
+	if _, ok := _c.mutation.Scopes(); !ok {
+		v := authproviders.DefaultScopes
+		_c.mutation.SetScopes(v)
+	}
+	if _, ok := _c.mutation.RedirectURI(); !ok {
+		v := authproviders.DefaultRedirectURI
+		_c.mutation.SetRedirectURI(v)
+	}
+	if _, ok := _c.mutation.Issuer(); !ok {
+		v := authproviders.DefaultIssuer
+		_c.mutation.SetIssuer(v)
+	}
+	if _, ok := _c.mutation.AuthorizationEndpoint(); !ok {
+		v := authproviders.DefaultAuthorizationEndpoint
+		_c.mutation.SetAuthorizationEndpoint(v)
+	}
+	if _, ok := _c.mutation.TokenEndpoint(); !ok {
+		v := authproviders.DefaultTokenEndpoint
+		_c.mutation.SetTokenEndpoint(v)
+	}
+	if _, ok := _c.mutation.UserinfoEndpoint(); !ok {
+		v := authproviders.DefaultUserinfoEndpoint
+		_c.mutation.SetUserinfoEndpoint(v)
 	}
 }
 

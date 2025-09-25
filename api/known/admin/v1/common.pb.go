@@ -1545,6 +1545,71 @@ func (x *OAuth2JSONWebKeys) GetKeys() []*OAuth2JSONWebKeys_Key {
 	return nil
 }
 
+// AuthToken 登录成功响应
+// 参考 rfc 规范：https://www.rfc-editor.org/rfc/rfc6749#section-5
+type AuthToken struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	AccessToken string `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	TokenType   string `protobuf:"bytes,2,opt,name=token_type,json=tokenType,proto3" json:"token_type,omitempty"`
+	ExpiresIn   int32  `protobuf:"varint,3,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"`
+}
+
+func (x *AuthToken) Reset() {
+	*x = AuthToken{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_common_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AuthToken) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthToken) ProtoMessage() {}
+
+func (x *AuthToken) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_common_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthToken.ProtoReflect.Descriptor instead.
+func (*AuthToken) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_common_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *AuthToken) GetAccessToken() string {
+	if x != nil {
+		return x.AccessToken
+	}
+	return ""
+}
+
+func (x *AuthToken) GetTokenType() string {
+	if x != nil {
+		return x.TokenType
+	}
+	return ""
+}
+
+func (x *AuthToken) GetExpiresIn() int32 {
+	if x != nil {
+		return x.ExpiresIn
+	}
+	return 0
+}
+
 type User_Identity struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1558,7 +1623,7 @@ type User_Identity struct {
 func (x *User_Identity) Reset() {
 	*x = User_Identity{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_common_proto_msgTypes[11]
+		mi := &file_known_admin_v1_common_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1571,7 +1636,7 @@ func (x *User_Identity) String() string {
 func (*User_Identity) ProtoMessage() {}
 
 func (x *User_Identity) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_common_proto_msgTypes[11]
+	mi := &file_known_admin_v1_common_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1624,7 +1689,7 @@ type OAuth2JSONWebKeys_Key struct {
 func (x *OAuth2JSONWebKeys_Key) Reset() {
 	*x = OAuth2JSONWebKeys_Key{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_common_proto_msgTypes[12]
+		mi := &file_known_admin_v1_common_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1637,7 +1702,7 @@ func (x *OAuth2JSONWebKeys_Key) String() string {
 func (*OAuth2JSONWebKeys_Key) ProtoMessage() {}
 
 func (x *OAuth2JSONWebKeys_Key) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_common_proto_msgTypes[12]
+	mi := &file_known_admin_v1_common_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1967,11 +2032,18 @@ var file_known_admin_v1_common_proto_rawDesc = []byte{
 	0x67, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x61, 0x6c, 0x67, 0x12, 0x0c, 0x0a, 0x01,
 	0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x01, 0x65, 0x12, 0x0c, 0x0a, 0x01, 0x6e, 0x18,
 	0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x01, 0x6e, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x69, 0x64, 0x18,
-	0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x69, 0x64, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69,
-	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69,
-	0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f,
-	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x69, 0x64, 0x22, 0x6c, 0x0a, 0x09, 0x41, 0x75,
+	0x74, 0x68, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x21, 0x0a, 0x0c, 0x61, 0x63, 0x63, 0x65, 0x73,
+	0x73, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x61,
+	0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x6f,
+	0x6b, 0x65, 0x6e, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09,
+	0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1d, 0x0a, 0x0a, 0x65, 0x78, 0x70,
+	0x69, 0x72, 0x65, 0x73, 0x5f, 0x69, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x65,
+	0x78, 0x70, 0x69, 0x72, 0x65, 0x73, 0x49, 0x6e, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68,
+	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f,
+	0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64,
+	0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1987,7 +2059,7 @@ func file_known_admin_v1_common_proto_rawDescGZIP() []byte {
 }
 
 var file_known_admin_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
-var file_known_admin_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_known_admin_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_known_admin_v1_common_proto_goTypes = []interface{}{
 	(Resource_Type)(0),            // 0: grpc_kit.api.known.admin.v1.Resource.Type
 	(Resource_Scope)(0),           // 1: grpc_kit.api.known.admin.v1.Resource.Scope
@@ -2006,9 +2078,10 @@ var file_known_admin_v1_common_proto_goTypes = []interface{}{
 	(*AuthProvider)(nil),          // 14: grpc_kit.api.known.admin.v1.AuthProvider
 	(*Credential)(nil),            // 15: grpc_kit.api.known.admin.v1.Credential
 	(*OAuth2JSONWebKeys)(nil),     // 16: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys
-	(*User_Identity)(nil),         // 17: grpc_kit.api.known.admin.v1.User.Identity
-	(*OAuth2JSONWebKeys_Key)(nil), // 18: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
-	(*timestamppb.Timestamp)(nil), // 19: google.protobuf.Timestamp
+	(*AuthToken)(nil),             // 17: grpc_kit.api.known.admin.v1.AuthToken
+	(*User_Identity)(nil),         // 18: grpc_kit.api.known.admin.v1.User.Identity
+	(*OAuth2JSONWebKeys_Key)(nil), // 19: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
+	(*timestamppb.Timestamp)(nil), // 20: google.protobuf.Timestamp
 }
 var file_known_admin_v1_common_proto_depIdxs = []int32{
 	7,  // 0: grpc_kit.api.known.admin.v1.Department.i18n_name:type_name -> grpc_kit.api.known.admin.v1.I18NName
@@ -2018,20 +2091,20 @@ var file_known_admin_v1_common_proto_depIdxs = []int32{
 	0,  // 4: grpc_kit.api.known.admin.v1.Resource.type:type_name -> grpc_kit.api.known.admin.v1.Resource.Type
 	1,  // 5: grpc_kit.api.known.admin.v1.Resource.scope:type_name -> grpc_kit.api.known.admin.v1.Resource.Scope
 	11, // 6: grpc_kit.api.known.admin.v1.Resource.children:type_name -> grpc_kit.api.known.admin.v1.Resource
-	19, // 7: grpc_kit.api.known.admin.v1.Resource.created_at:type_name -> google.protobuf.Timestamp
-	19, // 8: grpc_kit.api.known.admin.v1.Resource.updated_at:type_name -> google.protobuf.Timestamp
+	20, // 7: grpc_kit.api.known.admin.v1.Resource.created_at:type_name -> google.protobuf.Timestamp
+	20, // 8: grpc_kit.api.known.admin.v1.Resource.updated_at:type_name -> google.protobuf.Timestamp
 	3,  // 9: grpc_kit.api.known.admin.v1.User.status:type_name -> grpc_kit.api.known.admin.v1.User.Status
 	2,  // 10: grpc_kit.api.known.admin.v1.User.gender:type_name -> grpc_kit.api.known.admin.v1.User.Gender
-	19, // 11: grpc_kit.api.known.admin.v1.User.birthday:type_name -> google.protobuf.Timestamp
+	20, // 11: grpc_kit.api.known.admin.v1.User.birthday:type_name -> google.protobuf.Timestamp
 	9,  // 12: grpc_kit.api.known.admin.v1.User.phone_number:type_name -> grpc_kit.api.known.admin.v1.PhoneNumber
 	8,  // 13: grpc_kit.api.known.admin.v1.User.address:type_name -> grpc_kit.api.known.admin.v1.Address
 	10, // 14: grpc_kit.api.known.admin.v1.User.department:type_name -> grpc_kit.api.known.admin.v1.Department
-	17, // 15: grpc_kit.api.known.admin.v1.User.identities:type_name -> grpc_kit.api.known.admin.v1.User.Identity
+	18, // 15: grpc_kit.api.known.admin.v1.User.identities:type_name -> grpc_kit.api.known.admin.v1.User.Identity
 	7,  // 16: grpc_kit.api.known.admin.v1.Role.i18n_name:type_name -> grpc_kit.api.known.admin.v1.I18NName
 	4,  // 17: grpc_kit.api.known.admin.v1.AuthProvider.type:type_name -> grpc_kit.api.known.admin.v1.AuthProvider.Type
 	5,  // 18: grpc_kit.api.known.admin.v1.Credential.type:type_name -> grpc_kit.api.known.admin.v1.Credential.Type
-	19, // 19: grpc_kit.api.known.admin.v1.Credential.expires_at:type_name -> google.protobuf.Timestamp
-	18, // 20: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.keys:type_name -> grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
+	20, // 19: grpc_kit.api.known.admin.v1.Credential.expires_at:type_name -> google.protobuf.Timestamp
+	19, // 20: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.keys:type_name -> grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
 	21, // [21:21] is the sub-list for method output_type
 	21, // [21:21] is the sub-list for method input_type
 	21, // [21:21] is the sub-list for extension type_name
@@ -2178,7 +2251,7 @@ func file_known_admin_v1_common_proto_init() {
 			}
 		}
 		file_known_admin_v1_common_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*User_Identity); i {
+			switch v := v.(*AuthToken); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2190,6 +2263,18 @@ func file_known_admin_v1_common_proto_init() {
 			}
 		}
 		file_known_admin_v1_common_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*User_Identity); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_common_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OAuth2JSONWebKeys_Key); i {
 			case 0:
 				return &v.state
@@ -2208,7 +2293,7 @@ func file_known_admin_v1_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_common_proto_rawDesc,
 			NumEnums:      6,
-			NumMessages:   13,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
