@@ -13,13 +13,15 @@ import (
 // 部分参考：https://openid.net/specs/openid-connect-core-1_0.html#IDToken
 type IDTokenClaims struct {
 	jwt.RegisteredClaims
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
+	Email         string `json:"email,omitempty"`
+	EmailVerified bool   `json:"email_verified,omitempty"`
 	// 注意：在这里 "Groups" 对应平台 "lion_roles" 表中的 "name" 而非 "lion_groups" 内容。
 	Groups          []string          `json:"groups,omitempty"`
 	FederatedClaims map[string]string `json:"federated_claims,omitempty"`
 	Appid           string            `json:"appid,omitempty"`
-	Tenant          string            `json:"tenant"`
+	Tenant          string            `json:"tenant,omitempty"`
+	Username        string            `json:"username,omitempty"`
+	Nickname        string            `json:"nickname,omitempty"`
 }
 
 // ParseIDTokenClaims 解析 token
