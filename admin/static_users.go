@@ -45,6 +45,8 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 		FederatedClaims: nil,
 		Appid:           appid,
 		Tenant:          tenant,
+		Username:        s.Username,
+		Nickname:        s.Username,
 	}
 
 	ss, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(s.PasswordHash))

@@ -167,6 +167,8 @@ func (s *socialUsers) PasswordCheck(ctx context.Context, username, password stri
 	u, err := s.db.Users.Query().
 		Select(
 			users.FieldID,
+			users.FieldUsername,
+			users.FieldNickname,
 		).
 		Where(
 			users.UsernameEQ(username),
@@ -193,7 +195,10 @@ func (s *socialUsers) PasswordCheck(ctx context.Context, username, password stri
 	if err = s.setUserRoles(ctx, u.ID); err != nil {
 	}
 
-	idToken := &auth.IDTokenClaims{}
+	idToken := &auth.IDTokenClaims{
+		Username: u.Username,
+		Nickname: u.Nickname,
+	}
 	// 填充 idToken 内容
 	idToken.SetSubject(strconv.Itoa(u.ID))
 	idToken.SetGroups(s.Groups)

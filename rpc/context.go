@@ -9,7 +9,7 @@ const (
 	// idTokenKey 用于存放当前jwt的解析后的数据结构
 	idTokenKey contextKey = iota
 
-	// usernameKey 用于存放当前用户名，http base对应username，jwt对应email
+	// usernameKey 用于存放当前用户名，http base对应username，jwt对应username
 	usernameKey
 
 	// authenticationTypeKey 用于存放当前认证方式
