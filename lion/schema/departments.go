@@ -42,6 +42,7 @@ func (Departments) Edges() []ent.Edge {
 		// edge.To("lion_users", Users.Type),
 		edge.To("lion_role_departments", RoleDepartments.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 		edge.To("lion_user_departments", UserDepartments.Type),
+		edge.To("lion_groups", Groups.Type),
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -21,8 +22,26 @@ const (
 	FieldUserID = "user_id"
 	// FieldGroupID holds the string denoting the group_id field in the database.
 	FieldGroupID = "group_id"
+	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
+	EdgeLionUsers = "lion_users"
+	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
+	EdgeLionGroups = "lion_groups"
 	// Table holds the table name of the usergroups in the database.
 	Table = "lion_user_groups"
+	// LionUsersTable is the table that holds the lion_users relation/edge.
+	LionUsersTable = "lion_user_groups"
+	// LionUsersInverseTable is the table name for the Users entity.
+	// It exists in this package in order to avoid circular dependency with the "users" package.
+	LionUsersInverseTable = "lion_users"
+	// LionUsersColumn is the table column denoting the lion_users relation/edge.
+	LionUsersColumn = "user_id"
+	// LionGroupsTable is the table that holds the lion_groups relation/edge.
+	LionGroupsTable = "lion_user_groups"
+	// LionGroupsInverseTable is the table name for the Groups entity.
+	// It exists in this package in order to avoid circular dependency with the "groups" package.
+	LionGroupsInverseTable = "lion_groups"
+	// LionGroupsColumn is the table column denoting the lion_groups relation/edge.
+	LionGroupsColumn = "group_id"
 )
 
 // Columns holds all SQL columns for usergroups fields.
@@ -83,4 +102,32 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 // ByGroupID orders the results by the group_id field.
 func ByGroupID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGroupID, opts...).ToFunc()
+}
+
+// ByLionUsersField orders the results by lion_users field.
+func ByLionUsersField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionUsersStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLionGroupsField orders the results by lion_groups field.
+func ByLionGroupsField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionGroupsStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newLionUsersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionUsersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionUsersTable, LionUsersColumn),
+	)
+}
+func newLionGroupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionGroupsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionGroupsTable, LionGroupsColumn),
+	)
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -174,26 +175,6 @@ func UserIDNotIn(vs ...int) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldNotIn(FieldUserID, vs...))
 }
 
-// UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGT(FieldUserID, v))
-}
-
-// UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGTE(FieldUserID, v))
-}
-
-// UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLT(FieldUserID, v))
-}
-
-// UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLTE(FieldUserID, v))
-}
-
 // GroupIDEQ applies the EQ predicate on the "group_id" field.
 func GroupIDEQ(v int) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldEQ(FieldGroupID, v))
@@ -214,24 +195,50 @@ func GroupIDNotIn(vs ...int) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldNotIn(FieldGroupID, vs...))
 }
 
-// GroupIDGT applies the GT predicate on the "group_id" field.
-func GroupIDGT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGT(FieldGroupID, v))
+// HasLionUsers applies the HasEdge predicate on the "lion_users" edge.
+func HasLionUsers() predicate.UserGroups {
+	return predicate.UserGroups(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionUsersTable, LionUsersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
 }
 
-// GroupIDGTE applies the GTE predicate on the "group_id" field.
-func GroupIDGTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGTE(FieldGroupID, v))
+// HasLionUsersWith applies the HasEdge predicate on the "lion_users" edge with a given conditions (other predicates).
+func HasLionUsersWith(preds ...predicate.Users) predicate.UserGroups {
+	return predicate.UserGroups(func(s *sql.Selector) {
+		step := newLionUsersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
-// GroupIDLT applies the LT predicate on the "group_id" field.
-func GroupIDLT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLT(FieldGroupID, v))
+// HasLionGroups applies the HasEdge predicate on the "lion_groups" edge.
+func HasLionGroups() predicate.UserGroups {
+	return predicate.UserGroups(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionGroupsTable, LionGroupsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
 }
 
-// GroupIDLTE applies the LTE predicate on the "group_id" field.
-func GroupIDLTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLTE(FieldGroupID, v))
+// HasLionGroupsWith applies the HasEdge predicate on the "lion_groups" edge with a given conditions (other predicates).
+func HasLionGroupsWith(preds ...predicate.Groups) predicate.UserGroups {
+	return predicate.UserGroups(func(s *sql.Selector) {
+		step := newLionGroupsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

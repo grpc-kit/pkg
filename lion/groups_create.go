@@ -10,8 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
+	"github.com/grpc-kit/pkg/lion/usergroups"
 )
 
 // GroupsCreate is the builder for creating a Groups entity.
@@ -98,6 +100,32 @@ func (_c *GroupsCreate) AddLionGroups(v ...*GroupRoles) *GroupsCreate {
 	return _c.AddLionGroupIDs(ids...)
 }
 
+// AddLionUserGroupIDs adds the "lion_user_groups" edge to the UserGroups entity by IDs.
+func (_c *GroupsCreate) AddLionUserGroupIDs(ids ...int) *GroupsCreate {
+	_c.mutation.AddLionUserGroupIDs(ids...)
+	return _c
+}
+
+// AddLionUserGroups adds the "lion_user_groups" edges to the UserGroups entity.
+func (_c *GroupsCreate) AddLionUserGroups(v ...*UserGroups) *GroupsCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionUserGroupIDs(ids...)
+}
+
+// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
+func (_c *GroupsCreate) SetLionDepartmentsID(id int) *GroupsCreate {
+	_c.mutation.SetLionDepartmentsID(id)
+	return _c
+}
+
+// SetLionDepartments sets the "lion_departments" edge to the Departments entity.
+func (_c *GroupsCreate) SetLionDepartments(v *Departments) *GroupsCreate {
+	return _c.SetLionDepartmentsID(v.ID)
+}
+
 // Mutation returns the GroupsMutation object of the builder.
 func (_c *GroupsCreate) Mutation() *GroupsMutation {
 	return _c.mutation
@@ -170,13 +198,11 @@ func (_c *GroupsCreate) check() error {
 	if _, ok := _c.mutation.DepartmentID(); !ok {
 		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "Groups.department_id"`)}
 	}
-	if v, ok := _c.mutation.DepartmentID(); ok {
-		if err := groups.DepartmentIDValidator(v); err != nil {
-			return &ValidationError{Name: "department_id", err: fmt.Errorf(`lion: validator failed for field "Groups.department_id": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Groups.description"`)}
+	}
+	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
+		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "Groups.lion_departments"`)}
 	}
 	return nil
 }
@@ -216,10 +242,6 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.DepartmentID(); ok {
-		_spec.SetField(groups.FieldDepartmentID, field.TypeInt, value)
-		_node.DepartmentID = value
-	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
 		_node.Description = value
@@ -238,6 +260,39 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionUserGroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   groups.LionUserGroupsTable,
+			Columns: []string{groups.LionUserGroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   groups.LionDepartmentsTable,
+			Columns: []string{groups.LionDepartmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.DepartmentID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

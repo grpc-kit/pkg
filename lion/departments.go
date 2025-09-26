@@ -43,9 +43,11 @@ type DepartmentsEdges struct {
 	LionRoleDepartments []*RoleDepartments `json:"lion_role_departments,omitempty"`
 	// LionUserDepartments holds the value of the lion_user_departments edge.
 	LionUserDepartments []*UserDepartments `json:"lion_user_departments,omitempty"`
+	// LionGroups holds the value of the lion_groups edge.
+	LionGroups []*Groups `json:"lion_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // LionRoleDepartmentsOrErr returns the LionRoleDepartments value or an error if the edge
@@ -64,6 +66,15 @@ func (e DepartmentsEdges) LionUserDepartmentsOrErr() ([]*UserDepartments, error)
 		return e.LionUserDepartments, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_user_departments"}
+}
+
+// LionGroupsOrErr returns the LionGroups value or an error if the edge
+// was not loaded in eager-loading.
+func (e DepartmentsEdges) LionGroupsOrErr() ([]*Groups, error) {
+	if e.loadedTypes[2] {
+		return e.LionGroups, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_groups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -161,6 +172,11 @@ func (_m *Departments) QueryLionRoleDepartments() *RoleDepartmentsQuery {
 // QueryLionUserDepartments queries the "lion_user_departments" edge of the Departments entity.
 func (_m *Departments) QueryLionUserDepartments() *UserDepartmentsQuery {
 	return NewDepartmentsClient(_m.config).QueryLionUserDepartments(_m)
+}
+
+// QueryLionGroups queries the "lion_groups" edge of the Departments entity.
+func (_m *Departments) QueryLionGroups() *GroupsQuery {
+	return NewDepartmentsClient(_m.config).QueryLionGroups(_m)
 }
 
 // Update returns a builder for updating this Departments.

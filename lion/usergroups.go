@@ -9,7 +9,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/usergroups"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // UserGroups is the model entity for the UserGroups schema.
@@ -24,8 +26,44 @@ type UserGroups struct {
 	// 关联 lion_users 表的用户 ID
 	UserID int `json:"user_id,omitempty"`
 	// 关联 lion_groups 表的用户组 ID
-	GroupID      int `json:"group_id,omitempty"`
+	GroupID int `json:"group_id,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserGroupsQuery when eager-loading is set.
+	Edges        UserGroupsEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// UserGroupsEdges holds the relations/edges for other nodes in the graph.
+type UserGroupsEdges struct {
+	// LionUsers holds the value of the lion_users edge.
+	LionUsers *Users `json:"lion_users,omitempty"`
+	// LionGroups holds the value of the lion_groups edge.
+	LionGroups *Groups `json:"lion_groups,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// LionUsersOrErr returns the LionUsers value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserGroupsEdges) LionUsersOrErr() (*Users, error) {
+	if e.LionUsers != nil {
+		return e.LionUsers, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: users.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_users"}
+}
+
+// LionGroupsOrErr returns the LionGroups value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserGroupsEdges) LionGroupsOrErr() (*Groups, error) {
+	if e.LionGroups != nil {
+		return e.LionGroups, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: groups.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_groups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -93,6 +131,16 @@ func (_m *UserGroups) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *UserGroups) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionUsers queries the "lion_users" edge of the UserGroups entity.
+func (_m *UserGroups) QueryLionUsers() *UsersQuery {
+	return NewUserGroupsClient(_m.config).QueryLionUsers(_m)
+}
+
+// QueryLionGroups queries the "lion_groups" edge of the UserGroups entity.
+func (_m *UserGroups) QueryLionGroups() *GroupsQuery {
+	return NewUserGroupsClient(_m.config).QueryLionGroups(_m)
 }
 
 // Update returns a builder for updating this UserGroups.

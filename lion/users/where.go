@@ -1468,6 +1468,29 @@ func HasLionUserRolesWith(preds ...predicate.UserRoles) predicate.Users {
 	})
 }
 
+// HasLionUserGroups applies the HasEdge predicate on the "lion_user_groups" edge.
+func HasLionUserGroups() predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionUserGroupsTable, LionUserGroupsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionUserGroupsWith applies the HasEdge predicate on the "lion_user_groups" edge with a given conditions (other predicates).
+func HasLionUserGroupsWith(preds ...predicate.UserGroups) predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		step := newLionUserGroupsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasLionUserIdentities applies the HasEdge predicate on the "lion_user_identities" edge.
 func HasLionUserIdentities() predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {

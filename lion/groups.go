@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
 )
 
@@ -37,9 +38,13 @@ type Groups struct {
 type GroupsEdges struct {
 	// LionGroups holds the value of the lion_groups edge.
 	LionGroups []*GroupRoles `json:"lion_groups,omitempty"`
+	// LionUserGroups holds the value of the lion_user_groups edge.
+	LionUserGroups []*UserGroups `json:"lion_user_groups,omitempty"`
+	// LionDepartments holds the value of the lion_departments edge.
+	LionDepartments *Departments `json:"lion_departments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // LionGroupsOrErr returns the LionGroups value or an error if the edge
@@ -49,6 +54,26 @@ func (e GroupsEdges) LionGroupsOrErr() ([]*GroupRoles, error) {
 		return e.LionGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_groups"}
+}
+
+// LionUserGroupsOrErr returns the LionUserGroups value or an error if the edge
+// was not loaded in eager-loading.
+func (e GroupsEdges) LionUserGroupsOrErr() ([]*UserGroups, error) {
+	if e.loadedTypes[1] {
+		return e.LionUserGroups, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_user_groups"}
+}
+
+// LionDepartmentsOrErr returns the LionDepartments value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e GroupsEdges) LionDepartmentsOrErr() (*Departments, error) {
+	if e.LionDepartments != nil {
+		return e.LionDepartments, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: departments.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_departments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -129,6 +154,16 @@ func (_m *Groups) Value(name string) (ent.Value, error) {
 // QueryLionGroups queries the "lion_groups" edge of the Groups entity.
 func (_m *Groups) QueryLionGroups() *GroupRolesQuery {
 	return NewGroupsClient(_m.config).QueryLionGroups(_m)
+}
+
+// QueryLionUserGroups queries the "lion_user_groups" edge of the Groups entity.
+func (_m *Groups) QueryLionUserGroups() *UserGroupsQuery {
+	return NewGroupsClient(_m.config).QueryLionUserGroups(_m)
+}
+
+// QueryLionDepartments queries the "lion_departments" edge of the Groups entity.
+func (_m *Groups) QueryLionDepartments() *DepartmentsQuery {
+	return NewGroupsClient(_m.config).QueryLionDepartments(_m)
 }
 
 // Update returns a builder for updating this Groups.

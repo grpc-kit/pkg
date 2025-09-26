@@ -66,6 +66,8 @@ const (
 	FieldDescription = "description"
 	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
 	EdgeLionUserRoles = "lion_user_roles"
+	// EdgeLionUserGroups holds the string denoting the lion_user_groups edge name in mutations.
+	EdgeLionUserGroups = "lion_user_groups"
 	// EdgeLionUserIdentities holds the string denoting the lion_user_identities edge name in mutations.
 	EdgeLionUserIdentities = "lion_user_identities"
 	// EdgeLionUserDepartments holds the string denoting the lion_user_departments edge name in mutations.
@@ -79,6 +81,13 @@ const (
 	LionUserRolesInverseTable = "lion_user_roles"
 	// LionUserRolesColumn is the table column denoting the lion_user_roles relation/edge.
 	LionUserRolesColumn = "user_id"
+	// LionUserGroupsTable is the table that holds the lion_user_groups relation/edge.
+	LionUserGroupsTable = "lion_user_groups"
+	// LionUserGroupsInverseTable is the table name for the UserGroups entity.
+	// It exists in this package in order to avoid circular dependency with the "usergroups" package.
+	LionUserGroupsInverseTable = "lion_user_groups"
+	// LionUserGroupsColumn is the table column denoting the lion_user_groups relation/edge.
+	LionUserGroupsColumn = "user_id"
 	// LionUserIdentitiesTable is the table that holds the lion_user_identities relation/edge.
 	LionUserIdentitiesTable = "lion_user_identities"
 	// LionUserIdentitiesInverseTable is the table name for the UserIdentities entity.
@@ -314,6 +323,20 @@ func ByLionUserRoles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByLionUserGroupsCount orders the results by lion_user_groups count.
+func ByLionUserGroupsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionUserGroupsStep(), opts...)
+	}
+}
+
+// ByLionUserGroups orders the results by lion_user_groups terms.
+func ByLionUserGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionUserGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByLionUserIdentitiesCount orders the results by lion_user_identities count.
 func ByLionUserIdentitiesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -346,6 +369,13 @@ func newLionUserRolesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionUserRolesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionUserRolesTable, LionUserRolesColumn),
+	)
+}
+func newLionUserGroupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionUserGroupsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionUserGroupsTable, LionUserGroupsColumn),
 	)
 }
 func newLionUserIdentitiesStep() *sqlgraph.Step {

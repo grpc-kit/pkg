@@ -237,8 +237,6 @@ func init() {
 	groupsDescDepartmentID := groupsFields[1].Descriptor()
 	// groups.DefaultDepartmentID holds the default value on creation for the department_id field.
 	groups.DefaultDepartmentID = groupsDescDepartmentID.Default.(int)
-	// groups.DepartmentIDValidator is a validator for the "department_id" field. It is called by the builders before save.
-	groups.DepartmentIDValidator = groupsDescDepartmentID.Validators[0].(func(int) error)
 	// groupsDescDescription is the schema descriptor for description field.
 	groupsDescDescription := groupsFields[2].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.

@@ -910,6 +910,22 @@ func (c *DepartmentsClient) QueryLionUserDepartments(_m *Departments) *UserDepar
 	return query
 }
 
+// QueryLionGroups queries the lion_groups edge of a Departments.
+func (c *DepartmentsClient) QueryLionGroups(_m *Departments) *GroupsQuery {
+	query := (&GroupsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(departments.Table, departments.FieldID, id),
+			sqlgraph.To(groups.Table, groups.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionGroupsTable, departments.LionGroupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DepartmentsClient) Hooks() []Hook {
 	return c.hooks.Departments
@@ -1217,6 +1233,38 @@ func (c *GroupsClient) QueryLionGroups(_m *Groups) *GroupRolesQuery {
 			sqlgraph.From(groups.Table, groups.FieldID, id),
 			sqlgraph.To(grouproles.Table, grouproles.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, groups.LionGroupsTable, groups.LionGroupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionUserGroups queries the lion_user_groups edge of a Groups.
+func (c *GroupsClient) QueryLionUserGroups(_m *Groups) *UserGroupsQuery {
+	query := (&UserGroupsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(groups.Table, groups.FieldID, id),
+			sqlgraph.To(usergroups.Table, usergroups.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, groups.LionUserGroupsTable, groups.LionUserGroupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionDepartments queries the lion_departments edge of a Groups.
+func (c *GroupsClient) QueryLionDepartments(_m *Groups) *DepartmentsQuery {
+	query := (&DepartmentsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(groups.Table, groups.FieldID, id),
+			sqlgraph.To(departments.Table, departments.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, groups.LionDepartmentsTable, groups.LionDepartmentsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2597,6 +2645,38 @@ func (c *UserGroupsClient) GetX(ctx context.Context, id int) *UserGroups {
 	return obj
 }
 
+// QueryLionUsers queries the lion_users edge of a UserGroups.
+func (c *UserGroupsClient) QueryLionUsers(_m *UserGroups) *UsersQuery {
+	query := (&UsersClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usergroups.Table, usergroups.FieldID, id),
+			sqlgraph.To(users.Table, users.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, usergroups.LionUsersTable, usergroups.LionUsersColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionGroups queries the lion_groups edge of a UserGroups.
+func (c *UserGroupsClient) QueryLionGroups(_m *UserGroups) *GroupsQuery {
+	query := (&GroupsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usergroups.Table, usergroups.FieldID, id),
+			sqlgraph.To(groups.Table, groups.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, usergroups.LionGroupsTable, usergroups.LionGroupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserGroupsClient) Hooks() []Hook {
 	return c.hooks.UserGroups
@@ -3202,6 +3282,22 @@ func (c *UsersClient) QueryLionUserRoles(_m *Users) *UserRolesQuery {
 			sqlgraph.From(users.Table, users.FieldID, id),
 			sqlgraph.To(userroles.Table, userroles.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, users.LionUserRolesTable, users.LionUserRolesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionUserGroups queries the lion_user_groups edge of a Users.
+func (c *UsersClient) QueryLionUserGroups(_m *Users) *UserGroupsQuery {
+	query := (&UserGroupsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(users.Table, users.FieldID, id),
+			sqlgraph.To(usergroups.Table, usergroups.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, users.LionUserGroupsTable, users.LionUserGroupsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

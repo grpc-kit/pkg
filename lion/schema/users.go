@@ -107,6 +107,7 @@ func (Users) Edges() []ent.Edge {
 	return []ent.Edge{
 		// 一个 Role 可以对应多个 RoleMenu (中间实体)
 		edge.To("lion_user_roles", UserRoles.Type),
+		edge.To("lion_user_groups", UserGroups.Type),
 		edge.To("lion_user_identities", UserIdentities.Type),
 		edge.To("lion_user_departments", UserDepartments.Type),
 		/*

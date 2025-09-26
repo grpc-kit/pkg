@@ -26,6 +26,10 @@ const (
 	FieldDescription = "description"
 	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
 	EdgeLionGroups = "lion_groups"
+	// EdgeLionUserGroups holds the string denoting the lion_user_groups edge name in mutations.
+	EdgeLionUserGroups = "lion_user_groups"
+	// EdgeLionDepartments holds the string denoting the lion_departments edge name in mutations.
+	EdgeLionDepartments = "lion_departments"
 	// Table holds the table name of the groups in the database.
 	Table = "lion_groups"
 	// LionGroupsTable is the table that holds the lion_groups relation/edge.
@@ -35,6 +39,20 @@ const (
 	LionGroupsInverseTable = "lion_group_roles"
 	// LionGroupsColumn is the table column denoting the lion_groups relation/edge.
 	LionGroupsColumn = "group_id"
+	// LionUserGroupsTable is the table that holds the lion_user_groups relation/edge.
+	LionUserGroupsTable = "lion_user_groups"
+	// LionUserGroupsInverseTable is the table name for the UserGroups entity.
+	// It exists in this package in order to avoid circular dependency with the "usergroups" package.
+	LionUserGroupsInverseTable = "lion_user_groups"
+	// LionUserGroupsColumn is the table column denoting the lion_user_groups relation/edge.
+	LionUserGroupsColumn = "group_id"
+	// LionDepartmentsTable is the table that holds the lion_departments relation/edge.
+	LionDepartmentsTable = "lion_groups"
+	// LionDepartmentsInverseTable is the table name for the Departments entity.
+	// It exists in this package in order to avoid circular dependency with the "departments" package.
+	LionDepartmentsInverseTable = "lion_departments"
+	// LionDepartmentsColumn is the table column denoting the lion_departments relation/edge.
+	LionDepartmentsColumn = "department_id"
 )
 
 // Columns holds all SQL columns for groups fields.
@@ -68,8 +86,6 @@ var (
 	NameValidator func(string) error
 	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
 	DefaultDepartmentID int
-	// DepartmentIDValidator is a validator for the "department_id" field. It is called by the builders before save.
-	DepartmentIDValidator func(int) error
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -120,10 +136,45 @@ func ByLionGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByLionUserGroupsCount orders the results by lion_user_groups count.
+func ByLionUserGroupsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionUserGroupsStep(), opts...)
+	}
+}
+
+// ByLionUserGroups orders the results by lion_user_groups terms.
+func ByLionUserGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionUserGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByLionDepartmentsField orders the results by lion_departments field.
+func ByLionDepartmentsField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentsStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newLionGroupsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionGroupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionGroupsTable, LionGroupsColumn),
+	)
+}
+func newLionUserGroupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionUserGroupsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionUserGroupsTable, LionUserGroupsColumn),
+	)
+}
+func newLionDepartmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionDepartmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentsTable, LionDepartmentsColumn),
 	)
 }

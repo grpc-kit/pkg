@@ -11,17 +11,21 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/usergroups"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // UserGroupsQuery is the builder for querying UserGroups entities.
 type UserGroupsQuery struct {
 	config
-	ctx        *QueryContext
-	order      []usergroups.OrderOption
-	inters     []Interceptor
-	predicates []predicate.UserGroups
+	ctx            *QueryContext
+	order          []usergroups.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.UserGroups
+	withLionUsers  *UsersQuery
+	withLionGroups *GroupsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +60,50 @@ func (_q *UserGroupsQuery) Unique(unique bool) *UserGroupsQuery {
 func (_q *UserGroupsQuery) Order(o ...usergroups.OrderOption) *UserGroupsQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryLionUsers chains the current query on the "lion_users" edge.
+func (_q *UserGroupsQuery) QueryLionUsers() *UsersQuery {
+	query := (&UsersClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usergroups.Table, usergroups.FieldID, selector),
+			sqlgraph.To(users.Table, users.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, usergroups.LionUsersTable, usergroups.LionUsersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLionGroups chains the current query on the "lion_groups" edge.
+func (_q *UserGroupsQuery) QueryLionGroups() *GroupsQuery {
+	query := (&GroupsClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usergroups.Table, usergroups.FieldID, selector),
+			sqlgraph.To(groups.Table, groups.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, usergroups.LionGroupsTable, usergroups.LionGroupsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first UserGroups entity from the query.
@@ -245,15 +293,39 @@ func (_q *UserGroupsQuery) Clone() *UserGroupsQuery {
 		return nil
 	}
 	return &UserGroupsQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]usergroups.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.UserGroups{}, _q.predicates...),
+		config:         _q.config,
+		ctx:            _q.ctx.Clone(),
+		order:          append([]usergroups.OrderOption{}, _q.order...),
+		inters:         append([]Interceptor{}, _q.inters...),
+		predicates:     append([]predicate.UserGroups{}, _q.predicates...),
+		withLionUsers:  _q.withLionUsers.Clone(),
+		withLionGroups: _q.withLionGroups.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithLionUsers tells the query-builder to eager-load the nodes that are connected to
+// the "lion_users" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserGroupsQuery) WithLionUsers(opts ...func(*UsersQuery)) *UserGroupsQuery {
+	query := (&UsersClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionUsers = query
+	return _q
+}
+
+// WithLionGroups tells the query-builder to eager-load the nodes that are connected to
+// the "lion_groups" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserGroupsQuery) WithLionGroups(opts ...func(*GroupsQuery)) *UserGroupsQuery {
+	query := (&GroupsClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionGroups = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +404,12 @@ func (_q *UserGroupsQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *UserGroupsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UserGroups, error) {
 	var (
-		nodes = []*UserGroups{}
-		_spec = _q.querySpec()
+		nodes       = []*UserGroups{}
+		_spec       = _q.querySpec()
+		loadedTypes = [2]bool{
+			_q.withLionUsers != nil,
+			_q.withLionGroups != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*UserGroups).scanValues(nil, columns)
@@ -341,6 +417,7 @@ func (_q *UserGroupsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*U
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &UserGroups{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +429,78 @@ func (_q *UserGroupsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*U
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withLionUsers; query != nil {
+		if err := _q.loadLionUsers(ctx, query, nodes, nil,
+			func(n *UserGroups, e *Users) { n.Edges.LionUsers = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLionGroups; query != nil {
+		if err := _q.loadLionGroups(ctx, query, nodes, nil,
+			func(n *UserGroups, e *Groups) { n.Edges.LionGroups = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *UserGroupsQuery) loadLionUsers(ctx context.Context, query *UsersQuery, nodes []*UserGroups, init func(*UserGroups), assign func(*UserGroups, *Users)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*UserGroups)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(users.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *UserGroupsQuery) loadLionGroups(ctx context.Context, query *GroupsQuery, nodes []*UserGroups, init func(*UserGroups), assign func(*UserGroups, *Groups)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*UserGroups)
+	for i := range nodes {
+		fk := nodes[i].GroupID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(groups.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (_q *UserGroupsQuery) sqlCount(ctx context.Context) (int, error) {
@@ -379,6 +527,12 @@ func (_q *UserGroupsQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != usergroups.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withLionUsers != nil {
+			_spec.Node.AddColumnOnce(usergroups.FieldUserID)
+		}
+		if _q.withLionGroups != nil {
+			_spec.Node.AddColumnOnce(usergroups.FieldGroupID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

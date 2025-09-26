@@ -22,8 +22,6 @@ func (Groups) Fields() []ent.Field {
 			NotEmpty().
 			Comment("用户组名"),
 		field.Int("department_id").
-			Positive().
-			Immutable().
 			Default(0).
 			Comment("关联 lion_departments 表的 ID"),
 		field.String("description").
@@ -37,6 +35,12 @@ func (Groups) Edges() []ent.Edge {
 	return []ent.Edge{
 		// 一个 Role 可以对应多个 RoleMenu (中间实体)
 		edge.To("lion_groups", GroupRoles.Type),
+		edge.To("lion_user_groups", UserGroups.Type),
+		edge.From("lion_departments", Departments.Type).
+			Ref("lion_groups").
+			Field("department_id").
+			Unique().
+			Required(),
 	}
 }
 

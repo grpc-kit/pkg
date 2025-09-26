@@ -10,7 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/usergroups"
+	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // UserGroupsCreate is the builder for creating a UserGroups entity.
@@ -58,6 +60,28 @@ func (_c *UserGroupsCreate) SetUserID(v int) *UserGroupsCreate {
 func (_c *UserGroupsCreate) SetGroupID(v int) *UserGroupsCreate {
 	_c.mutation.SetGroupID(v)
 	return _c
+}
+
+// SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
+func (_c *UserGroupsCreate) SetLionUsersID(id int) *UserGroupsCreate {
+	_c.mutation.SetLionUsersID(id)
+	return _c
+}
+
+// SetLionUsers sets the "lion_users" edge to the Users entity.
+func (_c *UserGroupsCreate) SetLionUsers(v *Users) *UserGroupsCreate {
+	return _c.SetLionUsersID(v.ID)
+}
+
+// SetLionGroupsID sets the "lion_groups" edge to the Groups entity by ID.
+func (_c *UserGroupsCreate) SetLionGroupsID(id int) *UserGroupsCreate {
+	_c.mutation.SetLionGroupsID(id)
+	return _c
+}
+
+// SetLionGroups sets the "lion_groups" edge to the Groups entity.
+func (_c *UserGroupsCreate) SetLionGroups(v *Groups) *UserGroupsCreate {
+	return _c.SetLionGroupsID(v.ID)
 }
 
 // Mutation returns the UserGroupsMutation object of the builder.
@@ -129,6 +153,12 @@ func (_c *UserGroupsCreate) check() error {
 			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.group_id": %w`, err)}
 		}
 	}
+	if len(_c.mutation.LionUsersIDs()) == 0 {
+		return &ValidationError{Name: "lion_users", err: errors.New(`lion: missing required edge "UserGroups.lion_users"`)}
+	}
+	if len(_c.mutation.LionGroupsIDs()) == 0 {
+		return &ValidationError{Name: "lion_groups", err: errors.New(`lion: missing required edge "UserGroups.lion_groups"`)}
+	}
 	return nil
 }
 
@@ -163,13 +193,39 @@ func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
 		_spec.SetField(usergroups.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.UserID(); ok {
-		_spec.SetField(usergroups.FieldUserID, field.TypeInt, value)
-		_node.UserID = value
+	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   usergroups.LionUsersTable,
+			Columns: []string{usergroups.LionUsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if value, ok := _c.mutation.GroupID(); ok {
-		_spec.SetField(usergroups.FieldGroupID, field.TypeInt, value)
-		_node.GroupID = value
+	if nodes := _c.mutation.LionGroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   usergroups.LionGroupsTable,
+			Columns: []string{usergroups.LionGroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(groups.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.GroupID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
