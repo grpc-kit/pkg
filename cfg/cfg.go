@@ -22,6 +22,7 @@ import (
 	"github.com/grpc-kit/pkg/admin"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
@@ -98,6 +99,7 @@ type LocalConfig struct {
 	rpcConfig   *rpc.Config
 	rpcServer   *rpc.Server
 	adminServer *admin.KnownAdminAPI
+	lionClient  *lion.Client
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
@@ -375,6 +377,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 		adminIns := admin.New(admOpts...)
 		adminv1.RegisterKnownAdminServer(c.rpcServer.Server(), adminIns)
 
+		c.lionClient = client
 		c.adminServer = adminIns
 	}
 	// TODO; 植入默认 admin api 服务

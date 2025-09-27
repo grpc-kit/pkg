@@ -132,6 +132,10 @@ func (c *LocalConfig) GetDatabaseEntSQLDriver() (*entsql.Driver, error) {
 // GetAdminDatabaseLion 用于测试 Lion 配置
 // TODO: 这里用于测试 lion 数据库
 func (c *LocalConfig) GetAdminDatabaseLion() (*lion.Client, error) {
+	if c.lionClient != nil {
+		return c.lionClient, nil
+	}
+
 	driver, err := c.GetDatabaseEntSQLDriver()
 	if err != nil {
 		return nil, err
