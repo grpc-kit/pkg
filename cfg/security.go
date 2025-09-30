@@ -118,7 +118,9 @@ func (c *LocalConfig) initSecurity() error {
 
 			provider, err := oidc.NewProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer)
 			if err != nil {
-				return false, err
+				c.logger.Debugf("oidc new provider failed will be retry: %v", err)
+				// 这里返回错误后，就不会触发后续的重试
+				return false, nil
 			}
 			verifier := provider.Verifier(oidcConfig)
 			c.Security.setVerifier(verifier)
@@ -126,18 +128,25 @@ func (c *LocalConfig) initSecurity() error {
 			return true, nil
 		}
 
-		ok, err := initVerifierFn()
-		if !ok || err != nil {
-			// 忽略首次失败的错误，在使用内置 oidc 服务时可能存在服务未启动的情况
-			// c.logger.Errorf("oidc authenticator: initializing plugin: %v", err)
+		// 初始化 oidc 认证器， 等待 verifier 初始化完成
+		go func(initVerifierFn func() (done bool, err error)) {
+			if err := wait.ExponentialBackoffWithContext(ctx, wait.Backoff{
+				Duration: time.Second * 1,  // 初始间隔
+				Factor:   2,                // 每次翻倍
+				Jitter:   0.0,              // 随机抖动，避免同时请求
+				Steps:    300,              // 最大重试次数
+				Cap:      time.Second * 30, // 最大间隔
+			}, func() (done bool, err error) {
+				// 初始化 oidc 认证器， 等待 verifier 初始化完成
+				// fmt.Println("start oidc authenticator: initializing plugin")
 
-			go func() {
-				err = wait.PollUntil(time.Second*30, initVerifierFn, ctx.Done())
-				if err != nil {
-					c.logger.Errorf("oidc authenticator: initializing plugin: %v", err)
-				}
-			}()
-		}
+				return initVerifierFn()
+			}); err != nil {
+				c.logger.Errorf("oidc new provider verifier failed, initializing plugin exit err: %v", err)
+			}
+
+			c.logger.Infof("oid verifier is ready and polling for /.well-known/openid-configuration has been stopped")
+		}(initVerifierFn)
 	}
 
 	return nil
