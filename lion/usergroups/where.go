@@ -80,14 +80,14 @@ func GroupID(v int) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldEQ(FieldGroupID, v))
 }
 
-// Role applies equality check predicate on the "role" field. It's identical to RoleEQ.
-func Role(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldRole, v))
+// MemberRole applies equality check predicate on the "member_role" field. It's identical to MemberRoleEQ.
+func MemberRole(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldEQ(FieldMemberRole, v))
 }
 
-// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
-func Status(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldStatus, v))
+// MemberStatus applies equality check predicate on the "member_status" field. It's identical to MemberStatusEQ.
+func MemberStatus(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldEQ(FieldMemberStatus, v))
 }
 
 // JoinedAt applies equality check predicate on the "joined_at" field. It's identical to JoinedAtEQ.
@@ -290,84 +290,84 @@ func GroupIDNotIn(vs ...int) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldNotIn(FieldGroupID, vs...))
 }
 
-// RoleEQ applies the EQ predicate on the "role" field.
-func RoleEQ(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldRole, v))
+// MemberRoleEQ applies the EQ predicate on the "member_role" field.
+func MemberRoleEQ(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldEQ(FieldMemberRole, v))
 }
 
-// RoleNEQ applies the NEQ predicate on the "role" field.
-func RoleNEQ(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNEQ(FieldRole, v))
+// MemberRoleNEQ applies the NEQ predicate on the "member_role" field.
+func MemberRoleNEQ(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldNEQ(FieldMemberRole, v))
 }
 
-// RoleIn applies the In predicate on the "role" field.
-func RoleIn(vs ...int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldIn(FieldRole, vs...))
+// MemberRoleIn applies the In predicate on the "member_role" field.
+func MemberRoleIn(vs ...int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldIn(FieldMemberRole, vs...))
 }
 
-// RoleNotIn applies the NotIn predicate on the "role" field.
-func RoleNotIn(vs ...int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNotIn(FieldRole, vs...))
+// MemberRoleNotIn applies the NotIn predicate on the "member_role" field.
+func MemberRoleNotIn(vs ...int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldNotIn(FieldMemberRole, vs...))
 }
 
-// RoleGT applies the GT predicate on the "role" field.
-func RoleGT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGT(FieldRole, v))
+// MemberRoleGT applies the GT predicate on the "member_role" field.
+func MemberRoleGT(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldGT(FieldMemberRole, v))
 }
 
-// RoleGTE applies the GTE predicate on the "role" field.
-func RoleGTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGTE(FieldRole, v))
+// MemberRoleGTE applies the GTE predicate on the "member_role" field.
+func MemberRoleGTE(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldGTE(FieldMemberRole, v))
 }
 
-// RoleLT applies the LT predicate on the "role" field.
-func RoleLT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLT(FieldRole, v))
+// MemberRoleLT applies the LT predicate on the "member_role" field.
+func MemberRoleLT(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldLT(FieldMemberRole, v))
 }
 
-// RoleLTE applies the LTE predicate on the "role" field.
-func RoleLTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLTE(FieldRole, v))
+// MemberRoleLTE applies the LTE predicate on the "member_role" field.
+func MemberRoleLTE(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldLTE(FieldMemberRole, v))
 }
 
-// StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldStatus, v))
+// MemberStatusEQ applies the EQ predicate on the "member_status" field.
+func MemberStatusEQ(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldEQ(FieldMemberStatus, v))
 }
 
-// StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNEQ(FieldStatus, v))
+// MemberStatusNEQ applies the NEQ predicate on the "member_status" field.
+func MemberStatusNEQ(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldNEQ(FieldMemberStatus, v))
 }
 
-// StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldIn(FieldStatus, vs...))
+// MemberStatusIn applies the In predicate on the "member_status" field.
+func MemberStatusIn(vs ...int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldIn(FieldMemberStatus, vs...))
 }
 
-// StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNotIn(FieldStatus, vs...))
+// MemberStatusNotIn applies the NotIn predicate on the "member_status" field.
+func MemberStatusNotIn(vs ...int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldNotIn(FieldMemberStatus, vs...))
 }
 
-// StatusGT applies the GT predicate on the "status" field.
-func StatusGT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGT(FieldStatus, v))
+// MemberStatusGT applies the GT predicate on the "member_status" field.
+func MemberStatusGT(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldGT(FieldMemberStatus, v))
 }
 
-// StatusGTE applies the GTE predicate on the "status" field.
-func StatusGTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGTE(FieldStatus, v))
+// MemberStatusGTE applies the GTE predicate on the "member_status" field.
+func MemberStatusGTE(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldGTE(FieldMemberStatus, v))
 }
 
-// StatusLT applies the LT predicate on the "status" field.
-func StatusLT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLT(FieldStatus, v))
+// MemberStatusLT applies the LT predicate on the "member_status" field.
+func MemberStatusLT(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldLT(FieldMemberStatus, v))
 }
 
-// StatusLTE applies the LTE predicate on the "status" field.
-func StatusLTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLTE(FieldStatus, v))
+// MemberStatusLTE applies the LTE predicate on the "member_status" field.
+func MemberStatusLTE(v int) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldLTE(FieldMemberStatus, v))
 }
 
 // JoinedAtEQ applies the EQ predicate on the "joined_at" field.

@@ -11554,10 +11554,10 @@ type UserGroupsMutation struct {
 	created_at         *time.Time
 	updated_at         *time.Time
 	deleted_at         *time.Time
-	role               *int
-	addrole            *int
-	status             *int
-	addstatus          *int
+	member_role        *int
+	addmember_role     *int
+	member_status      *int
+	addmember_status   *int
 	joined_at          *time.Time
 	expired_at         *time.Time
 	created_by         *int
@@ -11873,116 +11873,116 @@ func (m *UserGroupsMutation) ResetGroupID() {
 	m.lion_groups = nil
 }
 
-// SetRole sets the "role" field.
-func (m *UserGroupsMutation) SetRole(i int) {
-	m.role = &i
-	m.addrole = nil
+// SetMemberRole sets the "member_role" field.
+func (m *UserGroupsMutation) SetMemberRole(i int) {
+	m.member_role = &i
+	m.addmember_role = nil
 }
 
-// Role returns the value of the "role" field in the mutation.
-func (m *UserGroupsMutation) Role() (r int, exists bool) {
-	v := m.role
+// MemberRole returns the value of the "member_role" field in the mutation.
+func (m *UserGroupsMutation) MemberRole() (r int, exists bool) {
+	v := m.member_role
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldRole returns the old "role" field's value of the UserGroups entity.
+// OldMemberRole returns the old "member_role" field's value of the UserGroups entity.
 // If the UserGroups object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserGroupsMutation) OldRole(ctx context.Context) (v int, err error) {
+func (m *UserGroupsMutation) OldMemberRole(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRole is only allowed on UpdateOne operations")
+		return v, errors.New("OldMemberRole is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRole requires an ID field in the mutation")
+		return v, errors.New("OldMemberRole requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRole: %w", err)
+		return v, fmt.Errorf("querying old value for OldMemberRole: %w", err)
 	}
-	return oldValue.Role, nil
+	return oldValue.MemberRole, nil
 }
 
-// AddRole adds i to the "role" field.
-func (m *UserGroupsMutation) AddRole(i int) {
-	if m.addrole != nil {
-		*m.addrole += i
+// AddMemberRole adds i to the "member_role" field.
+func (m *UserGroupsMutation) AddMemberRole(i int) {
+	if m.addmember_role != nil {
+		*m.addmember_role += i
 	} else {
-		m.addrole = &i
+		m.addmember_role = &i
 	}
 }
 
-// AddedRole returns the value that was added to the "role" field in this mutation.
-func (m *UserGroupsMutation) AddedRole() (r int, exists bool) {
-	v := m.addrole
+// AddedMemberRole returns the value that was added to the "member_role" field in this mutation.
+func (m *UserGroupsMutation) AddedMemberRole() (r int, exists bool) {
+	v := m.addmember_role
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetRole resets all changes to the "role" field.
-func (m *UserGroupsMutation) ResetRole() {
-	m.role = nil
-	m.addrole = nil
+// ResetMemberRole resets all changes to the "member_role" field.
+func (m *UserGroupsMutation) ResetMemberRole() {
+	m.member_role = nil
+	m.addmember_role = nil
 }
 
-// SetStatus sets the "status" field.
-func (m *UserGroupsMutation) SetStatus(i int) {
-	m.status = &i
-	m.addstatus = nil
+// SetMemberStatus sets the "member_status" field.
+func (m *UserGroupsMutation) SetMemberStatus(i int) {
+	m.member_status = &i
+	m.addmember_status = nil
 }
 
-// Status returns the value of the "status" field in the mutation.
-func (m *UserGroupsMutation) Status() (r int, exists bool) {
-	v := m.status
+// MemberStatus returns the value of the "member_status" field in the mutation.
+func (m *UserGroupsMutation) MemberStatus() (r int, exists bool) {
+	v := m.member_status
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldStatus returns the old "status" field's value of the UserGroups entity.
+// OldMemberStatus returns the old "member_status" field's value of the UserGroups entity.
 // If the UserGroups object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserGroupsMutation) OldStatus(ctx context.Context) (v int, err error) {
+func (m *UserGroupsMutation) OldMemberStatus(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+		return v, errors.New("OldMemberStatus is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldStatus requires an ID field in the mutation")
+		return v, errors.New("OldMemberStatus requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+		return v, fmt.Errorf("querying old value for OldMemberStatus: %w", err)
 	}
-	return oldValue.Status, nil
+	return oldValue.MemberStatus, nil
 }
 
-// AddStatus adds i to the "status" field.
-func (m *UserGroupsMutation) AddStatus(i int) {
-	if m.addstatus != nil {
-		*m.addstatus += i
+// AddMemberStatus adds i to the "member_status" field.
+func (m *UserGroupsMutation) AddMemberStatus(i int) {
+	if m.addmember_status != nil {
+		*m.addmember_status += i
 	} else {
-		m.addstatus = &i
+		m.addmember_status = &i
 	}
 }
 
-// AddedStatus returns the value that was added to the "status" field in this mutation.
-func (m *UserGroupsMutation) AddedStatus() (r int, exists bool) {
-	v := m.addstatus
+// AddedMemberStatus returns the value that was added to the "member_status" field in this mutation.
+func (m *UserGroupsMutation) AddedMemberStatus() (r int, exists bool) {
+	v := m.addmember_status
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetStatus resets all changes to the "status" field.
-func (m *UserGroupsMutation) ResetStatus() {
-	m.status = nil
-	m.addstatus = nil
+// ResetMemberStatus resets all changes to the "member_status" field.
+func (m *UserGroupsMutation) ResetMemberStatus() {
+	m.member_status = nil
+	m.addmember_status = nil
 }
 
 // SetJoinedAt sets the "joined_at" field.
@@ -12438,11 +12438,11 @@ func (m *UserGroupsMutation) Fields() []string {
 	if m.lion_groups != nil {
 		fields = append(fields, usergroups.FieldGroupID)
 	}
-	if m.role != nil {
-		fields = append(fields, usergroups.FieldRole)
+	if m.member_role != nil {
+		fields = append(fields, usergroups.FieldMemberRole)
 	}
-	if m.status != nil {
-		fields = append(fields, usergroups.FieldStatus)
+	if m.member_status != nil {
+		fields = append(fields, usergroups.FieldMemberStatus)
 	}
 	if m.joined_at != nil {
 		fields = append(fields, usergroups.FieldJoinedAt)
@@ -12480,10 +12480,10 @@ func (m *UserGroupsMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case usergroups.FieldGroupID:
 		return m.GroupID()
-	case usergroups.FieldRole:
-		return m.Role()
-	case usergroups.FieldStatus:
-		return m.Status()
+	case usergroups.FieldMemberRole:
+		return m.MemberRole()
+	case usergroups.FieldMemberStatus:
+		return m.MemberStatus()
 	case usergroups.FieldJoinedAt:
 		return m.JoinedAt()
 	case usergroups.FieldExpiredAt:
@@ -12515,10 +12515,10 @@ func (m *UserGroupsMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldUserID(ctx)
 	case usergroups.FieldGroupID:
 		return m.OldGroupID(ctx)
-	case usergroups.FieldRole:
-		return m.OldRole(ctx)
-	case usergroups.FieldStatus:
-		return m.OldStatus(ctx)
+	case usergroups.FieldMemberRole:
+		return m.OldMemberRole(ctx)
+	case usergroups.FieldMemberStatus:
+		return m.OldMemberStatus(ctx)
 	case usergroups.FieldJoinedAt:
 		return m.OldJoinedAt(ctx)
 	case usergroups.FieldExpiredAt:
@@ -12575,19 +12575,19 @@ func (m *UserGroupsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetGroupID(v)
 		return nil
-	case usergroups.FieldRole:
+	case usergroups.FieldMemberRole:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetRole(v)
+		m.SetMemberRole(v)
 		return nil
-	case usergroups.FieldStatus:
+	case usergroups.FieldMemberStatus:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetStatus(v)
+		m.SetMemberStatus(v)
 		return nil
 	case usergroups.FieldJoinedAt:
 		v, ok := value.(time.Time)
@@ -12639,11 +12639,11 @@ func (m *UserGroupsMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *UserGroupsMutation) AddedFields() []string {
 	var fields []string
-	if m.addrole != nil {
-		fields = append(fields, usergroups.FieldRole)
+	if m.addmember_role != nil {
+		fields = append(fields, usergroups.FieldMemberRole)
 	}
-	if m.addstatus != nil {
-		fields = append(fields, usergroups.FieldStatus)
+	if m.addmember_status != nil {
+		fields = append(fields, usergroups.FieldMemberStatus)
 	}
 	if m.addcreated_by != nil {
 		fields = append(fields, usergroups.FieldCreatedBy)
@@ -12659,10 +12659,10 @@ func (m *UserGroupsMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *UserGroupsMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case usergroups.FieldRole:
-		return m.AddedRole()
-	case usergroups.FieldStatus:
-		return m.AddedStatus()
+	case usergroups.FieldMemberRole:
+		return m.AddedMemberRole()
+	case usergroups.FieldMemberStatus:
+		return m.AddedMemberStatus()
 	case usergroups.FieldCreatedBy:
 		return m.AddedCreatedBy()
 	case usergroups.FieldUpdatedBy:
@@ -12676,19 +12676,19 @@ func (m *UserGroupsMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserGroupsMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case usergroups.FieldRole:
+	case usergroups.FieldMemberRole:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddRole(v)
+		m.AddMemberRole(v)
 		return nil
-	case usergroups.FieldStatus:
+	case usergroups.FieldMemberStatus:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddStatus(v)
+		m.AddMemberStatus(v)
 		return nil
 	case usergroups.FieldCreatedBy:
 		v, ok := value.(int)
@@ -12785,11 +12785,11 @@ func (m *UserGroupsMutation) ResetField(name string) error {
 	case usergroups.FieldGroupID:
 		m.ResetGroupID()
 		return nil
-	case usergroups.FieldRole:
-		m.ResetRole()
+	case usergroups.FieldMemberRole:
+		m.ResetMemberRole()
 		return nil
-	case usergroups.FieldStatus:
-		m.ResetStatus()
+	case usergroups.FieldMemberStatus:
+		m.ResetMemberStatus()
 		return nil
 	case usergroups.FieldJoinedAt:
 		m.ResetJoinedAt()

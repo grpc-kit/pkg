@@ -76,30 +76,30 @@ func (_c *UserGroupsCreate) SetGroupID(v int) *UserGroupsCreate {
 	return _c
 }
 
-// SetRole sets the "role" field.
-func (_c *UserGroupsCreate) SetRole(v int) *UserGroupsCreate {
-	_c.mutation.SetRole(v)
+// SetMemberRole sets the "member_role" field.
+func (_c *UserGroupsCreate) SetMemberRole(v int) *UserGroupsCreate {
+	_c.mutation.SetMemberRole(v)
 	return _c
 }
 
-// SetNillableRole sets the "role" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableRole(v *int) *UserGroupsCreate {
+// SetNillableMemberRole sets the "member_role" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableMemberRole(v *int) *UserGroupsCreate {
 	if v != nil {
-		_c.SetRole(*v)
+		_c.SetMemberRole(*v)
 	}
 	return _c
 }
 
-// SetStatus sets the "status" field.
-func (_c *UserGroupsCreate) SetStatus(v int) *UserGroupsCreate {
-	_c.mutation.SetStatus(v)
+// SetMemberStatus sets the "member_status" field.
+func (_c *UserGroupsCreate) SetMemberStatus(v int) *UserGroupsCreate {
+	_c.mutation.SetMemberStatus(v)
 	return _c
 }
 
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableStatus(v *int) *UserGroupsCreate {
+// SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableMemberStatus(v *int) *UserGroupsCreate {
 	if v != nil {
-		_c.SetStatus(*v)
+		_c.SetMemberStatus(*v)
 	}
 	return _c
 }
@@ -259,13 +259,13 @@ func (_c *UserGroupsCreate) defaults() {
 		v := usergroups.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := _c.mutation.Role(); !ok {
-		v := usergroups.DefaultRole
-		_c.mutation.SetRole(v)
+	if _, ok := _c.mutation.MemberRole(); !ok {
+		v := usergroups.DefaultMemberRole
+		_c.mutation.SetMemberRole(v)
 	}
-	if _, ok := _c.mutation.Status(); !ok {
-		v := usergroups.DefaultStatus
-		_c.mutation.SetStatus(v)
+	if _, ok := _c.mutation.MemberStatus(); !ok {
+		v := usergroups.DefaultMemberStatus
+		_c.mutation.SetMemberStatus(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := usergroups.DefaultDescription
@@ -297,11 +297,11 @@ func (_c *UserGroupsCreate) check() error {
 			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.group_id": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Role(); !ok {
-		return &ValidationError{Name: "role", err: errors.New(`lion: missing required field "UserGroups.role"`)}
+	if _, ok := _c.mutation.MemberRole(); !ok {
+		return &ValidationError{Name: "member_role", err: errors.New(`lion: missing required field "UserGroups.member_role"`)}
 	}
-	if _, ok := _c.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New(`lion: missing required field "UserGroups.status"`)}
+	if _, ok := _c.mutation.MemberStatus(); !ok {
+		return &ValidationError{Name: "member_status", err: errors.New(`lion: missing required field "UserGroups.member_status"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "UserGroups.description"`)}
@@ -361,13 +361,13 @@ func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
 		_spec.SetField(usergroups.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := _c.mutation.Role(); ok {
-		_spec.SetField(usergroups.FieldRole, field.TypeInt, value)
-		_node.Role = value
+	if value, ok := _c.mutation.MemberRole(); ok {
+		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)
+		_node.MemberRole = value
 	}
-	if value, ok := _c.mutation.Status(); ok {
-		_spec.SetField(usergroups.FieldStatus, field.TypeInt, value)
-		_node.Status = value
+	if value, ok := _c.mutation.MemberStatus(); ok {
+		_spec.SetField(usergroups.FieldMemberStatus, field.TypeInt, value)
+		_node.MemberStatus = value
 	}
 	if value, ok := _c.mutation.JoinedAt(); ok {
 		_spec.SetField(usergroups.FieldJoinedAt, field.TypeTime, value)

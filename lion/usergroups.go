@@ -31,9 +31,9 @@ type UserGroups struct {
 	// 群组 ID，关联群组表
 	GroupID int `json:"group_id,omitempty"`
 	// 用户在群组中的角色：0-未指定，1-所有者，2-管理员，3-普通成员，4-访客
-	Role int `json:"role,omitempty"`
+	MemberRole int `json:"member_role,omitempty"`
 	// 用户群组关系状态：0-未知状态，1-待激活，2-正常启用，3-被邀请，4-禁用，5-被拒绝，6-已退出
-	Status int `json:"status,omitempty"`
+	MemberStatus int `json:"member_status,omitempty"`
 	// 用户加入群组的时间
 	JoinedAt time.Time `json:"joined_at,omitempty"`
 	// 关系有效期，用于临时成员管理，0表示永久有效
@@ -90,7 +90,7 @@ func (*UserGroups) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case usergroups.FieldID, usergroups.FieldUserID, usergroups.FieldGroupID, usergroups.FieldRole, usergroups.FieldStatus, usergroups.FieldCreatedBy, usergroups.FieldUpdatedBy:
+		case usergroups.FieldID, usergroups.FieldUserID, usergroups.FieldGroupID, usergroups.FieldMemberRole, usergroups.FieldMemberStatus, usergroups.FieldCreatedBy, usergroups.FieldUpdatedBy:
 			values[i] = new(sql.NullInt64)
 		case usergroups.FieldMetadata, usergroups.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -148,17 +148,17 @@ func (_m *UserGroups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.GroupID = int(value.Int64)
 			}
-		case usergroups.FieldRole:
+		case usergroups.FieldMemberRole:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field role", values[i])
+				return fmt.Errorf("unexpected type %T for field member_role", values[i])
 			} else if value.Valid {
-				_m.Role = int(value.Int64)
+				_m.MemberRole = int(value.Int64)
 			}
-		case usergroups.FieldStatus:
+		case usergroups.FieldMemberStatus:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field status", values[i])
+				return fmt.Errorf("unexpected type %T for field member_status", values[i])
 			} else if value.Valid {
-				_m.Status = int(value.Int64)
+				_m.MemberStatus = int(value.Int64)
 			}
 		case usergroups.FieldJoinedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -259,11 +259,11 @@ func (_m *UserGroups) String() string {
 	builder.WriteString("group_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GroupID))
 	builder.WriteString(", ")
-	builder.WriteString("role=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Role))
+	builder.WriteString("member_role=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MemberRole))
 	builder.WriteString(", ")
-	builder.WriteString("status=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString("member_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MemberStatus))
 	builder.WriteString(", ")
 	builder.WriteString("joined_at=")
 	builder.WriteString(_m.JoinedAt.Format(time.ANSIC))

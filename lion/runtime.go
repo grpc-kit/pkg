@@ -577,14 +577,14 @@ func init() {
 	usergroupsDescGroupID := usergroupsFields[2].Descriptor()
 	// usergroups.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
 	usergroups.GroupIDValidator = usergroupsDescGroupID.Validators[0].(func(int) error)
-	// usergroupsDescRole is the schema descriptor for role field.
-	usergroupsDescRole := usergroupsFields[3].Descriptor()
-	// usergroups.DefaultRole holds the default value on creation for the role field.
-	usergroups.DefaultRole = usergroupsDescRole.Default.(int)
-	// usergroupsDescStatus is the schema descriptor for status field.
-	usergroupsDescStatus := usergroupsFields[4].Descriptor()
-	// usergroups.DefaultStatus holds the default value on creation for the status field.
-	usergroups.DefaultStatus = usergroupsDescStatus.Default.(int)
+	// usergroupsDescMemberRole is the schema descriptor for member_role field.
+	usergroupsDescMemberRole := usergroupsFields[3].Descriptor()
+	// usergroups.DefaultMemberRole holds the default value on creation for the member_role field.
+	usergroups.DefaultMemberRole = usergroupsDescMemberRole.Default.(int)
+	// usergroupsDescMemberStatus is the schema descriptor for member_status field.
+	usergroupsDescMemberStatus := usergroupsFields[4].Descriptor()
+	// usergroups.DefaultMemberStatus holds the default value on creation for the member_status field.
+	usergroups.DefaultMemberStatus = usergroupsDescMemberStatus.Default.(int)
 	// usergroupsDescDescription is the schema descriptor for description field.
 	usergroupsDescDescription := usergroupsFields[10].Descriptor()
 	// usergroups.DefaultDescription holds the default value on creation for the description field.

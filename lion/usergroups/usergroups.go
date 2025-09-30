@@ -24,10 +24,10 @@ const (
 	FieldUserID = "user_id"
 	// FieldGroupID holds the string denoting the group_id field in the database.
 	FieldGroupID = "group_id"
-	// FieldRole holds the string denoting the role field in the database.
-	FieldRole = "role"
-	// FieldStatus holds the string denoting the status field in the database.
-	FieldStatus = "status"
+	// FieldMemberRole holds the string denoting the member_role field in the database.
+	FieldMemberRole = "member_role"
+	// FieldMemberStatus holds the string denoting the member_status field in the database.
+	FieldMemberStatus = "member_status"
 	// FieldJoinedAt holds the string denoting the joined_at field in the database.
 	FieldJoinedAt = "joined_at"
 	// FieldExpiredAt holds the string denoting the expired_at field in the database.
@@ -70,8 +70,8 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldUserID,
 	FieldGroupID,
-	FieldRole,
-	FieldStatus,
+	FieldMemberRole,
+	FieldMemberStatus,
 	FieldJoinedAt,
 	FieldExpiredAt,
 	FieldCreatedBy,
@@ -101,10 +101,10 @@ var (
 	UserIDValidator func(int) error
 	// GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
 	GroupIDValidator func(int) error
-	// DefaultRole holds the default value on creation for the "role" field.
-	DefaultRole int
-	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus int
+	// DefaultMemberRole holds the default value on creation for the "member_role" field.
+	DefaultMemberRole int
+	// DefaultMemberStatus holds the default value on creation for the "member_status" field.
+	DefaultMemberStatus int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -144,14 +144,14 @@ func ByGroupID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGroupID, opts...).ToFunc()
 }
 
-// ByRole orders the results by the role field.
-func ByRole(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRole, opts...).ToFunc()
+// ByMemberRole orders the results by the member_role field.
+func ByMemberRole(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMemberRole, opts...).ToFunc()
 }
 
-// ByStatus orders the results by the status field.
-func ByStatus(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+// ByMemberStatus orders the results by the member_status field.
+func ByMemberStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMemberStatus, opts...).ToFunc()
 }
 
 // ByJoinedAt orders the results by the joined_at field.

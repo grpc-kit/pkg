@@ -84,45 +84,45 @@ func (_u *UserGroupsUpdate) SetNillableGroupID(v *int) *UserGroupsUpdate {
 	return _u
 }
 
-// SetRole sets the "role" field.
-func (_u *UserGroupsUpdate) SetRole(v int) *UserGroupsUpdate {
-	_u.mutation.ResetRole()
-	_u.mutation.SetRole(v)
+// SetMemberRole sets the "member_role" field.
+func (_u *UserGroupsUpdate) SetMemberRole(v int) *UserGroupsUpdate {
+	_u.mutation.ResetMemberRole()
+	_u.mutation.SetMemberRole(v)
 	return _u
 }
 
-// SetNillableRole sets the "role" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableRole(v *int) *UserGroupsUpdate {
+// SetNillableMemberRole sets the "member_role" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableMemberRole(v *int) *UserGroupsUpdate {
 	if v != nil {
-		_u.SetRole(*v)
+		_u.SetMemberRole(*v)
 	}
 	return _u
 }
 
-// AddRole adds value to the "role" field.
-func (_u *UserGroupsUpdate) AddRole(v int) *UserGroupsUpdate {
-	_u.mutation.AddRole(v)
+// AddMemberRole adds value to the "member_role" field.
+func (_u *UserGroupsUpdate) AddMemberRole(v int) *UserGroupsUpdate {
+	_u.mutation.AddMemberRole(v)
 	return _u
 }
 
-// SetStatus sets the "status" field.
-func (_u *UserGroupsUpdate) SetStatus(v int) *UserGroupsUpdate {
-	_u.mutation.ResetStatus()
-	_u.mutation.SetStatus(v)
+// SetMemberStatus sets the "member_status" field.
+func (_u *UserGroupsUpdate) SetMemberStatus(v int) *UserGroupsUpdate {
+	_u.mutation.ResetMemberStatus()
+	_u.mutation.SetMemberStatus(v)
 	return _u
 }
 
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableStatus(v *int) *UserGroupsUpdate {
+// SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableMemberStatus(v *int) *UserGroupsUpdate {
 	if v != nil {
-		_u.SetStatus(*v)
+		_u.SetMemberStatus(*v)
 	}
 	return _u
 }
 
-// AddStatus adds value to the "status" field.
-func (_u *UserGroupsUpdate) AddStatus(v int) *UserGroupsUpdate {
-	_u.mutation.AddStatus(v)
+// AddMemberStatus adds value to the "member_status" field.
+func (_u *UserGroupsUpdate) AddMemberStatus(v int) *UserGroupsUpdate {
+	_u.mutation.AddMemberStatus(v)
 	return _u
 }
 
@@ -371,17 +371,17 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(usergroups.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Role(); ok {
-		_spec.SetField(usergroups.FieldRole, field.TypeInt, value)
+	if value, ok := _u.mutation.MemberRole(); ok {
+		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedRole(); ok {
-		_spec.AddField(usergroups.FieldRole, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedMemberRole(); ok {
+		_spec.AddField(usergroups.FieldMemberRole, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(usergroups.FieldStatus, field.TypeInt, value)
+	if value, ok := _u.mutation.MemberStatus(); ok {
+		_spec.SetField(usergroups.FieldMemberStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedStatus(); ok {
-		_spec.AddField(usergroups.FieldStatus, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedMemberStatus(); ok {
+		_spec.AddField(usergroups.FieldMemberStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.JoinedAt(); ok {
 		_spec.SetField(usergroups.FieldJoinedAt, field.TypeTime, value)
@@ -554,45 +554,45 @@ func (_u *UserGroupsUpdateOne) SetNillableGroupID(v *int) *UserGroupsUpdateOne {
 	return _u
 }
 
-// SetRole sets the "role" field.
-func (_u *UserGroupsUpdateOne) SetRole(v int) *UserGroupsUpdateOne {
-	_u.mutation.ResetRole()
-	_u.mutation.SetRole(v)
+// SetMemberRole sets the "member_role" field.
+func (_u *UserGroupsUpdateOne) SetMemberRole(v int) *UserGroupsUpdateOne {
+	_u.mutation.ResetMemberRole()
+	_u.mutation.SetMemberRole(v)
 	return _u
 }
 
-// SetNillableRole sets the "role" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableRole(v *int) *UserGroupsUpdateOne {
+// SetNillableMemberRole sets the "member_role" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableMemberRole(v *int) *UserGroupsUpdateOne {
 	if v != nil {
-		_u.SetRole(*v)
+		_u.SetMemberRole(*v)
 	}
 	return _u
 }
 
-// AddRole adds value to the "role" field.
-func (_u *UserGroupsUpdateOne) AddRole(v int) *UserGroupsUpdateOne {
-	_u.mutation.AddRole(v)
+// AddMemberRole adds value to the "member_role" field.
+func (_u *UserGroupsUpdateOne) AddMemberRole(v int) *UserGroupsUpdateOne {
+	_u.mutation.AddMemberRole(v)
 	return _u
 }
 
-// SetStatus sets the "status" field.
-func (_u *UserGroupsUpdateOne) SetStatus(v int) *UserGroupsUpdateOne {
-	_u.mutation.ResetStatus()
-	_u.mutation.SetStatus(v)
+// SetMemberStatus sets the "member_status" field.
+func (_u *UserGroupsUpdateOne) SetMemberStatus(v int) *UserGroupsUpdateOne {
+	_u.mutation.ResetMemberStatus()
+	_u.mutation.SetMemberStatus(v)
 	return _u
 }
 
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableStatus(v *int) *UserGroupsUpdateOne {
+// SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableMemberStatus(v *int) *UserGroupsUpdateOne {
 	if v != nil {
-		_u.SetStatus(*v)
+		_u.SetMemberStatus(*v)
 	}
 	return _u
 }
 
-// AddStatus adds value to the "status" field.
-func (_u *UserGroupsUpdateOne) AddStatus(v int) *UserGroupsUpdateOne {
-	_u.mutation.AddStatus(v)
+// AddMemberStatus adds value to the "member_status" field.
+func (_u *UserGroupsUpdateOne) AddMemberStatus(v int) *UserGroupsUpdateOne {
+	_u.mutation.AddMemberStatus(v)
 	return _u
 }
 
@@ -871,17 +871,17 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(usergroups.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Role(); ok {
-		_spec.SetField(usergroups.FieldRole, field.TypeInt, value)
+	if value, ok := _u.mutation.MemberRole(); ok {
+		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedRole(); ok {
-		_spec.AddField(usergroups.FieldRole, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedMemberRole(); ok {
+		_spec.AddField(usergroups.FieldMemberRole, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(usergroups.FieldStatus, field.TypeInt, value)
+	if value, ok := _u.mutation.MemberStatus(); ok {
+		_spec.SetField(usergroups.FieldMemberStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedStatus(); ok {
-		_spec.AddField(usergroups.FieldStatus, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedMemberStatus(); ok {
+		_spec.AddField(usergroups.FieldMemberStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.JoinedAt(); ok {
 		_spec.SetField(usergroups.FieldJoinedAt, field.TypeTime, value)
