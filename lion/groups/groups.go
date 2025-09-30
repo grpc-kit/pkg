@@ -18,12 +18,34 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
+	// FieldI18nName holds the string denoting the i18n_name field in the database.
+	FieldI18nName = "i18n_name"
+	// FieldOrderWeight holds the string denoting the order_weight field in the database.
+	FieldOrderWeight = "order_weight"
+	// FieldParentID holds the string denoting the parent_id field in the database.
+	FieldParentID = "parent_id"
+	// FieldMaxMembers holds the string denoting the max_members field in the database.
+	FieldMaxMembers = "max_members"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
+	// FieldExternalID holds the string denoting the external_id field in the database.
+	FieldExternalID = "external_id"
 	// FieldDepartmentID holds the string denoting the department_id field in the database.
 	FieldDepartmentID = "department_id"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
+	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
+	FieldUpdatedBy = "updated_by"
 	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
 	EdgeLionGroups = "lion_groups"
 	// EdgeLionUserGroups holds the string denoting the lion_user_groups edge name in mutations.
@@ -60,9 +82,20 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldName,
+	FieldType,
+	FieldStatus,
+	FieldI18nName,
+	FieldOrderWeight,
+	FieldParentID,
+	FieldMaxMembers,
+	FieldMetadata,
+	FieldExternalID,
 	FieldDepartmentID,
 	FieldDescription,
+	FieldCreatedBy,
+	FieldUpdatedBy,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -84,10 +117,30 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultType holds the default value on creation for the "type" field.
+	DefaultType int
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus int
+	// DefaultI18nName holds the default value on creation for the "i18n_name" field.
+	DefaultI18nName string
+	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
+	DefaultOrderWeight int
+	// DefaultParentID holds the default value on creation for the "parent_id" field.
+	DefaultParentID int
+	// DefaultMaxMembers holds the default value on creation for the "max_members" field.
+	DefaultMaxMembers int
+	// DefaultMetadata holds the default value on creation for the "metadata" field.
+	DefaultMetadata string
+	// DefaultExternalID holds the default value on creation for the "external_id" field.
+	DefaultExternalID string
 	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
 	DefaultDepartmentID int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
+	// DefaultCreatedBy holds the default value on creation for the "created_by" field.
+	DefaultCreatedBy int
+	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
+	DefaultUpdatedBy int
 )
 
 // OrderOption defines the ordering options for the Groups queries.
@@ -108,9 +161,54 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByI18nName orders the results by the i18n_name field.
+func ByI18nName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldI18nName, opts...).ToFunc()
+}
+
+// ByOrderWeight orders the results by the order_weight field.
+func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
+}
+
+// ByParentID orders the results by the parent_id field.
+func ByParentID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldParentID, opts...).ToFunc()
+}
+
+// ByMaxMembers orders the results by the max_members field.
+func ByMaxMembers(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxMembers, opts...).ToFunc()
+}
+
+// ByMetadata orders the results by the metadata field.
+func ByMetadata(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMetadata, opts...).ToFunc()
+}
+
+// ByExternalID orders the results by the external_id field.
+func ByExternalID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExternalID, opts...).ToFunc()
 }
 
 // ByDepartmentID orders the results by the department_id field.
@@ -121,6 +219,16 @@ func ByDepartmentID(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByUpdatedBy orders the results by the updated_by field.
+func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
 }
 
 // ByLionGroupsCount orders the results by lion_groups count.

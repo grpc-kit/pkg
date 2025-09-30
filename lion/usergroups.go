@@ -18,15 +18,34 @@ import (
 type UserGroups struct {
 	config `json:"-"`
 	// ID of the ent.
+	// 用户群组关系 ID，全局唯一标识
 	ID int `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// 关联 lion_users 表的用户 ID
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// 用户 ID，关联用户表
 	UserID int `json:"user_id,omitempty"`
-	// 关联 lion_groups 表的用户组 ID
+	// 群组 ID，关联群组表
 	GroupID int `json:"group_id,omitempty"`
+	// 用户在群组中的角色：0-未指定，1-所有者，2-管理员，3-普通成员，4-访客
+	Role int `json:"role,omitempty"`
+	// 用户群组关系状态：0-未知状态，1-待激活，2-正常启用，3-被邀请，4-禁用，5-被拒绝，6-已退出
+	Status int `json:"status,omitempty"`
+	// 用户加入群组的时间
+	JoinedAt time.Time `json:"joined_at,omitempty"`
+	// 关系有效期，用于临时成员管理，0表示永久有效
+	ExpiredAt time.Time `json:"expired_at,omitempty"`
+	// 创建者 ID，记录创建该关系的用户
+	CreatedBy int `json:"created_by,omitempty"`
+	// 最后更新者 ID，记录最后修改该关系的用户
+	UpdatedBy int `json:"updated_by,omitempty"`
+	// 元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储
+	Metadata string `json:"metadata,omitempty"`
+	// 用户组描述
+	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserGroupsQuery when eager-loading is set.
 	Edges        UserGroupsEdges `json:"edges"`
@@ -71,9 +90,11 @@ func (*UserGroups) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case usergroups.FieldID, usergroups.FieldUserID, usergroups.FieldGroupID:
+		case usergroups.FieldID, usergroups.FieldUserID, usergroups.FieldGroupID, usergroups.FieldRole, usergroups.FieldStatus, usergroups.FieldCreatedBy, usergroups.FieldUpdatedBy:
 			values[i] = new(sql.NullInt64)
-		case usergroups.FieldCreatedAt, usergroups.FieldUpdatedAt:
+		case usergroups.FieldMetadata, usergroups.FieldDescription:
+			values[i] = new(sql.NullString)
+		case usergroups.FieldCreatedAt, usergroups.FieldUpdatedAt, usergroups.FieldDeletedAt, usergroups.FieldJoinedAt, usergroups.FieldExpiredAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -108,6 +129,13 @@ func (_m *UserGroups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case usergroups.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
+			}
 		case usergroups.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
@@ -119,6 +147,54 @@ func (_m *UserGroups) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field group_id", values[i])
 			} else if value.Valid {
 				_m.GroupID = int(value.Int64)
+			}
+		case usergroups.FieldRole:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field role", values[i])
+			} else if value.Valid {
+				_m.Role = int(value.Int64)
+			}
+		case usergroups.FieldStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				_m.Status = int(value.Int64)
+			}
+		case usergroups.FieldJoinedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field joined_at", values[i])
+			} else if value.Valid {
+				_m.JoinedAt = value.Time
+			}
+		case usergroups.FieldExpiredAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expired_at", values[i])
+			} else if value.Valid {
+				_m.ExpiredAt = value.Time
+			}
+		case usergroups.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = int(value.Int64)
+			}
+		case usergroups.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = int(value.Int64)
+			}
+		case usergroups.FieldMetadata:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
+			} else if value.Valid {
+				_m.Metadata = value.String
+			}
+		case usergroups.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -172,11 +248,40 @@ func (_m *UserGroups) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("group_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GroupID))
+	builder.WriteString(", ")
+	builder.WriteString("role=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Role))
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString(", ")
+	builder.WriteString("joined_at=")
+	builder.WriteString(_m.JoinedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("expired_at=")
+	builder.WriteString(_m.ExpiredAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("metadata=")
+	builder.WriteString(_m.Metadata)
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

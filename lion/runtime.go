@@ -233,14 +233,54 @@ func init() {
 			return nil
 		}
 	}()
+	// groupsDescType is the schema descriptor for type field.
+	groupsDescType := groupsFields[1].Descriptor()
+	// groups.DefaultType holds the default value on creation for the type field.
+	groups.DefaultType = groupsDescType.Default.(int)
+	// groupsDescStatus is the schema descriptor for status field.
+	groupsDescStatus := groupsFields[2].Descriptor()
+	// groups.DefaultStatus holds the default value on creation for the status field.
+	groups.DefaultStatus = groupsDescStatus.Default.(int)
+	// groupsDescI18nName is the schema descriptor for i18n_name field.
+	groupsDescI18nName := groupsFields[3].Descriptor()
+	// groups.DefaultI18nName holds the default value on creation for the i18n_name field.
+	groups.DefaultI18nName = groupsDescI18nName.Default.(string)
+	// groupsDescOrderWeight is the schema descriptor for order_weight field.
+	groupsDescOrderWeight := groupsFields[4].Descriptor()
+	// groups.DefaultOrderWeight holds the default value on creation for the order_weight field.
+	groups.DefaultOrderWeight = groupsDescOrderWeight.Default.(int)
+	// groupsDescParentID is the schema descriptor for parent_id field.
+	groupsDescParentID := groupsFields[5].Descriptor()
+	// groups.DefaultParentID holds the default value on creation for the parent_id field.
+	groups.DefaultParentID = groupsDescParentID.Default.(int)
+	// groupsDescMaxMembers is the schema descriptor for max_members field.
+	groupsDescMaxMembers := groupsFields[6].Descriptor()
+	// groups.DefaultMaxMembers holds the default value on creation for the max_members field.
+	groups.DefaultMaxMembers = groupsDescMaxMembers.Default.(int)
+	// groupsDescMetadata is the schema descriptor for metadata field.
+	groupsDescMetadata := groupsFields[7].Descriptor()
+	// groups.DefaultMetadata holds the default value on creation for the metadata field.
+	groups.DefaultMetadata = groupsDescMetadata.Default.(string)
+	// groupsDescExternalID is the schema descriptor for external_id field.
+	groupsDescExternalID := groupsFields[8].Descriptor()
+	// groups.DefaultExternalID holds the default value on creation for the external_id field.
+	groups.DefaultExternalID = groupsDescExternalID.Default.(string)
 	// groupsDescDepartmentID is the schema descriptor for department_id field.
-	groupsDescDepartmentID := groupsFields[1].Descriptor()
+	groupsDescDepartmentID := groupsFields[9].Descriptor()
 	// groups.DefaultDepartmentID holds the default value on creation for the department_id field.
 	groups.DefaultDepartmentID = groupsDescDepartmentID.Default.(int)
 	// groupsDescDescription is the schema descriptor for description field.
-	groupsDescDescription := groupsFields[2].Descriptor()
+	groupsDescDescription := groupsFields[10].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
+	// groupsDescCreatedBy is the schema descriptor for created_by field.
+	groupsDescCreatedBy := groupsFields[11].Descriptor()
+	// groups.DefaultCreatedBy holds the default value on creation for the created_by field.
+	groups.DefaultCreatedBy = groupsDescCreatedBy.Default.(int)
+	// groupsDescUpdatedBy is the schema descriptor for updated_by field.
+	groupsDescUpdatedBy := groupsFields[12].Descriptor()
+	// groups.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	groups.DefaultUpdatedBy = groupsDescUpdatedBy.Default.(int)
 	permissionsMixin := schema.Permissions{}.Mixin()
 	permissionsMixinFields0 := permissionsMixin[0].Fields()
 	_ = permissionsMixinFields0
@@ -530,13 +570,29 @@ func init() {
 	// usergroups.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	usergroups.UpdateDefaultUpdatedAt = usergroupsDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// usergroupsDescUserID is the schema descriptor for user_id field.
-	usergroupsDescUserID := usergroupsFields[0].Descriptor()
+	usergroupsDescUserID := usergroupsFields[1].Descriptor()
 	// usergroups.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	usergroups.UserIDValidator = usergroupsDescUserID.Validators[0].(func(int) error)
 	// usergroupsDescGroupID is the schema descriptor for group_id field.
-	usergroupsDescGroupID := usergroupsFields[1].Descriptor()
+	usergroupsDescGroupID := usergroupsFields[2].Descriptor()
 	// usergroups.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
 	usergroups.GroupIDValidator = usergroupsDescGroupID.Validators[0].(func(int) error)
+	// usergroupsDescRole is the schema descriptor for role field.
+	usergroupsDescRole := usergroupsFields[3].Descriptor()
+	// usergroups.DefaultRole holds the default value on creation for the role field.
+	usergroups.DefaultRole = usergroupsDescRole.Default.(int)
+	// usergroupsDescStatus is the schema descriptor for status field.
+	usergroupsDescStatus := usergroupsFields[4].Descriptor()
+	// usergroups.DefaultStatus holds the default value on creation for the status field.
+	usergroups.DefaultStatus = usergroupsDescStatus.Default.(int)
+	// usergroupsDescDescription is the schema descriptor for description field.
+	usergroupsDescDescription := usergroupsFields[10].Descriptor()
+	// usergroups.DefaultDescription holds the default value on creation for the description field.
+	usergroups.DefaultDescription = usergroupsDescDescription.Default.(string)
+	// usergroupsDescID is the schema descriptor for id field.
+	usergroupsDescID := usergroupsFields[0].Descriptor()
+	// usergroups.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	usergroups.IDValidator = usergroupsDescID.Validators[0].(func(int) error)
 	useridentitiesMixin := schema.UserIdentities{}.Mixin()
 	useridentitiesMixinFields0 := useridentitiesMixin[0].Fields()
 	_ = useridentitiesMixinFields0

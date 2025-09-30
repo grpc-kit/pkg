@@ -51,9 +51,135 @@ func (_c *GroupsCreate) SetNillableUpdatedAt(v *time.Time) *GroupsCreate {
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *GroupsCreate) SetDeletedAt(v time.Time) *GroupsCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableDeletedAt(v *time.Time) *GroupsCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *GroupsCreate) SetName(v string) *GroupsCreate {
 	_c.mutation.SetName(v)
+	return _c
+}
+
+// SetType sets the "type" field.
+func (_c *GroupsCreate) SetType(v int) *GroupsCreate {
+	_c.mutation.SetType(v)
+	return _c
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableType(v *int) *GroupsCreate {
+	if v != nil {
+		_c.SetType(*v)
+	}
+	return _c
+}
+
+// SetStatus sets the "status" field.
+func (_c *GroupsCreate) SetStatus(v int) *GroupsCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableStatus(v *int) *GroupsCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetI18nName sets the "i18n_name" field.
+func (_c *GroupsCreate) SetI18nName(v string) *GroupsCreate {
+	_c.mutation.SetI18nName(v)
+	return _c
+}
+
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableI18nName(v *string) *GroupsCreate {
+	if v != nil {
+		_c.SetI18nName(*v)
+	}
+	return _c
+}
+
+// SetOrderWeight sets the "order_weight" field.
+func (_c *GroupsCreate) SetOrderWeight(v int) *GroupsCreate {
+	_c.mutation.SetOrderWeight(v)
+	return _c
+}
+
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableOrderWeight(v *int) *GroupsCreate {
+	if v != nil {
+		_c.SetOrderWeight(*v)
+	}
+	return _c
+}
+
+// SetParentID sets the "parent_id" field.
+func (_c *GroupsCreate) SetParentID(v int) *GroupsCreate {
+	_c.mutation.SetParentID(v)
+	return _c
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableParentID(v *int) *GroupsCreate {
+	if v != nil {
+		_c.SetParentID(*v)
+	}
+	return _c
+}
+
+// SetMaxMembers sets the "max_members" field.
+func (_c *GroupsCreate) SetMaxMembers(v int) *GroupsCreate {
+	_c.mutation.SetMaxMembers(v)
+	return _c
+}
+
+// SetNillableMaxMembers sets the "max_members" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableMaxMembers(v *int) *GroupsCreate {
+	if v != nil {
+		_c.SetMaxMembers(*v)
+	}
+	return _c
+}
+
+// SetMetadata sets the "metadata" field.
+func (_c *GroupsCreate) SetMetadata(v string) *GroupsCreate {
+	_c.mutation.SetMetadata(v)
+	return _c
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableMetadata(v *string) *GroupsCreate {
+	if v != nil {
+		_c.SetMetadata(*v)
+	}
+	return _c
+}
+
+// SetExternalID sets the "external_id" field.
+func (_c *GroupsCreate) SetExternalID(v string) *GroupsCreate {
+	_c.mutation.SetExternalID(v)
+	return _c
+}
+
+// SetNillableExternalID sets the "external_id" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableExternalID(v *string) *GroupsCreate {
+	if v != nil {
+		_c.SetExternalID(*v)
+	}
 	return _c
 }
 
@@ -81,6 +207,34 @@ func (_c *GroupsCreate) SetDescription(v string) *GroupsCreate {
 func (_c *GroupsCreate) SetNillableDescription(v *string) *GroupsCreate {
 	if v != nil {
 		_c.SetDescription(*v)
+	}
+	return _c
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_c *GroupsCreate) SetCreatedBy(v int) *GroupsCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableCreatedBy(v *int) *GroupsCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *GroupsCreate) SetUpdatedBy(v int) *GroupsCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableUpdatedBy(v *int) *GroupsCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
 	}
 	return _c
 }
@@ -169,6 +323,38 @@ func (_c *GroupsCreate) defaults() {
 		v := groups.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.GetType(); !ok {
+		v := groups.DefaultType
+		_c.mutation.SetType(v)
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := groups.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.I18nName(); !ok {
+		v := groups.DefaultI18nName
+		_c.mutation.SetI18nName(v)
+	}
+	if _, ok := _c.mutation.OrderWeight(); !ok {
+		v := groups.DefaultOrderWeight
+		_c.mutation.SetOrderWeight(v)
+	}
+	if _, ok := _c.mutation.ParentID(); !ok {
+		v := groups.DefaultParentID
+		_c.mutation.SetParentID(v)
+	}
+	if _, ok := _c.mutation.MaxMembers(); !ok {
+		v := groups.DefaultMaxMembers
+		_c.mutation.SetMaxMembers(v)
+	}
+	if _, ok := _c.mutation.Metadata(); !ok {
+		v := groups.DefaultMetadata
+		_c.mutation.SetMetadata(v)
+	}
+	if _, ok := _c.mutation.ExternalID(); !ok {
+		v := groups.DefaultExternalID
+		_c.mutation.SetExternalID(v)
+	}
 	if _, ok := _c.mutation.DepartmentID(); !ok {
 		v := groups.DefaultDepartmentID
 		_c.mutation.SetDepartmentID(v)
@@ -176,6 +362,14 @@ func (_c *GroupsCreate) defaults() {
 	if _, ok := _c.mutation.Description(); !ok {
 		v := groups.DefaultDescription
 		_c.mutation.SetDescription(v)
+	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		v := groups.DefaultCreatedBy
+		_c.mutation.SetCreatedBy(v)
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		v := groups.DefaultUpdatedBy
+		_c.mutation.SetUpdatedBy(v)
 	}
 }
 
@@ -195,11 +389,41 @@ func (_c *GroupsCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Groups.name": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "Groups.type"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`lion: missing required field "Groups.status"`)}
+	}
+	if _, ok := _c.mutation.I18nName(); !ok {
+		return &ValidationError{Name: "i18n_name", err: errors.New(`lion: missing required field "Groups.i18n_name"`)}
+	}
+	if _, ok := _c.mutation.OrderWeight(); !ok {
+		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Groups.order_weight"`)}
+	}
+	if _, ok := _c.mutation.ParentID(); !ok {
+		return &ValidationError{Name: "parent_id", err: errors.New(`lion: missing required field "Groups.parent_id"`)}
+	}
+	if _, ok := _c.mutation.MaxMembers(); !ok {
+		return &ValidationError{Name: "max_members", err: errors.New(`lion: missing required field "Groups.max_members"`)}
+	}
+	if _, ok := _c.mutation.Metadata(); !ok {
+		return &ValidationError{Name: "metadata", err: errors.New(`lion: missing required field "Groups.metadata"`)}
+	}
+	if _, ok := _c.mutation.ExternalID(); !ok {
+		return &ValidationError{Name: "external_id", err: errors.New(`lion: missing required field "Groups.external_id"`)}
+	}
 	if _, ok := _c.mutation.DepartmentID(); !ok {
 		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "Groups.department_id"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Groups.description"`)}
+	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "Groups.created_by"`)}
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "Groups.updated_by"`)}
 	}
 	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
 		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "Groups.lion_departments"`)}
@@ -238,13 +462,57 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_spec.SetField(groups.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(groups.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := _c.mutation.GetType(); ok {
+		_spec.SetField(groups.FieldType, field.TypeInt, value)
+		_node.Type = value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(groups.FieldStatus, field.TypeInt, value)
+		_node.Status = value
+	}
+	if value, ok := _c.mutation.I18nName(); ok {
+		_spec.SetField(groups.FieldI18nName, field.TypeString, value)
+		_node.I18nName = value
+	}
+	if value, ok := _c.mutation.OrderWeight(); ok {
+		_spec.SetField(groups.FieldOrderWeight, field.TypeInt, value)
+		_node.OrderWeight = value
+	}
+	if value, ok := _c.mutation.ParentID(); ok {
+		_spec.SetField(groups.FieldParentID, field.TypeInt, value)
+		_node.ParentID = value
+	}
+	if value, ok := _c.mutation.MaxMembers(); ok {
+		_spec.SetField(groups.FieldMaxMembers, field.TypeInt, value)
+		_node.MaxMembers = value
+	}
+	if value, ok := _c.mutation.Metadata(); ok {
+		_spec.SetField(groups.FieldMetadata, field.TypeString, value)
+		_node.Metadata = value
+	}
+	if value, ok := _c.mutation.ExternalID(); ok {
+		_spec.SetField(groups.FieldExternalID, field.TypeString, value)
+		_node.ExternalID = value
+	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(groups.FieldCreatedBy, field.TypeInt, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(groups.FieldUpdatedBy, field.TypeInt, value)
+		_node.UpdatedBy = value
 	}
 	if nodes := _c.mutation.LionGroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

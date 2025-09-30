@@ -37,6 +37,26 @@ func (_u *GroupsUpdate) SetUpdatedAt(v time.Time) *GroupsUpdate {
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *GroupsUpdate) SetDeletedAt(v time.Time) *GroupsUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableDeletedAt(v *time.Time) *GroupsUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *GroupsUpdate) ClearDeletedAt() *GroupsUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *GroupsUpdate) SetName(v string) *GroupsUpdate {
 	_u.mutation.SetName(v)
@@ -47,6 +67,153 @@ func (_u *GroupsUpdate) SetName(v string) *GroupsUpdate {
 func (_u *GroupsUpdate) SetNillableName(v *string) *GroupsUpdate {
 	if v != nil {
 		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetType sets the "type" field.
+func (_u *GroupsUpdate) SetType(v int) *GroupsUpdate {
+	_u.mutation.ResetType()
+	_u.mutation.SetType(v)
+	return _u
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableType(v *int) *GroupsUpdate {
+	if v != nil {
+		_u.SetType(*v)
+	}
+	return _u
+}
+
+// AddType adds value to the "type" field.
+func (_u *GroupsUpdate) AddType(v int) *GroupsUpdate {
+	_u.mutation.AddType(v)
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *GroupsUpdate) SetStatus(v int) *GroupsUpdate {
+	_u.mutation.ResetStatus()
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableStatus(v *int) *GroupsUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// AddStatus adds value to the "status" field.
+func (_u *GroupsUpdate) AddStatus(v int) *GroupsUpdate {
+	_u.mutation.AddStatus(v)
+	return _u
+}
+
+// SetI18nName sets the "i18n_name" field.
+func (_u *GroupsUpdate) SetI18nName(v string) *GroupsUpdate {
+	_u.mutation.SetI18nName(v)
+	return _u
+}
+
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableI18nName(v *string) *GroupsUpdate {
+	if v != nil {
+		_u.SetI18nName(*v)
+	}
+	return _u
+}
+
+// SetOrderWeight sets the "order_weight" field.
+func (_u *GroupsUpdate) SetOrderWeight(v int) *GroupsUpdate {
+	_u.mutation.ResetOrderWeight()
+	_u.mutation.SetOrderWeight(v)
+	return _u
+}
+
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableOrderWeight(v *int) *GroupsUpdate {
+	if v != nil {
+		_u.SetOrderWeight(*v)
+	}
+	return _u
+}
+
+// AddOrderWeight adds value to the "order_weight" field.
+func (_u *GroupsUpdate) AddOrderWeight(v int) *GroupsUpdate {
+	_u.mutation.AddOrderWeight(v)
+	return _u
+}
+
+// SetParentID sets the "parent_id" field.
+func (_u *GroupsUpdate) SetParentID(v int) *GroupsUpdate {
+	_u.mutation.ResetParentID()
+	_u.mutation.SetParentID(v)
+	return _u
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableParentID(v *int) *GroupsUpdate {
+	if v != nil {
+		_u.SetParentID(*v)
+	}
+	return _u
+}
+
+// AddParentID adds value to the "parent_id" field.
+func (_u *GroupsUpdate) AddParentID(v int) *GroupsUpdate {
+	_u.mutation.AddParentID(v)
+	return _u
+}
+
+// SetMaxMembers sets the "max_members" field.
+func (_u *GroupsUpdate) SetMaxMembers(v int) *GroupsUpdate {
+	_u.mutation.ResetMaxMembers()
+	_u.mutation.SetMaxMembers(v)
+	return _u
+}
+
+// SetNillableMaxMembers sets the "max_members" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableMaxMembers(v *int) *GroupsUpdate {
+	if v != nil {
+		_u.SetMaxMembers(*v)
+	}
+	return _u
+}
+
+// AddMaxMembers adds value to the "max_members" field.
+func (_u *GroupsUpdate) AddMaxMembers(v int) *GroupsUpdate {
+	_u.mutation.AddMaxMembers(v)
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *GroupsUpdate) SetMetadata(v string) *GroupsUpdate {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableMetadata(v *string) *GroupsUpdate {
+	if v != nil {
+		_u.SetMetadata(*v)
+	}
+	return _u
+}
+
+// SetExternalID sets the "external_id" field.
+func (_u *GroupsUpdate) SetExternalID(v string) *GroupsUpdate {
+	_u.mutation.SetExternalID(v)
+	return _u
+}
+
+// SetNillableExternalID sets the "external_id" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableExternalID(v *string) *GroupsUpdate {
+	if v != nil {
+		_u.SetExternalID(*v)
 	}
 	return _u
 }
@@ -76,6 +243,48 @@ func (_u *GroupsUpdate) SetNillableDescription(v *string) *GroupsUpdate {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *GroupsUpdate) SetCreatedBy(v int) *GroupsUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableCreatedBy(v *int) *GroupsUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *GroupsUpdate) AddCreatedBy(v int) *GroupsUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *GroupsUpdate) SetUpdatedBy(v int) *GroupsUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableUpdatedBy(v *int) *GroupsUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *GroupsUpdate) AddUpdatedBy(v int) *GroupsUpdate {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -237,11 +446,68 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(groups.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(groups.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(groups.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.GetType(); ok {
+		_spec.SetField(groups.FieldType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedType(); ok {
+		_spec.AddField(groups.FieldType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(groups.FieldStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStatus(); ok {
+		_spec.AddField(groups.FieldStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.I18nName(); ok {
+		_spec.SetField(groups.FieldI18nName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OrderWeight(); ok {
+		_spec.SetField(groups.FieldOrderWeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedOrderWeight(); ok {
+		_spec.AddField(groups.FieldOrderWeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ParentID(); ok {
+		_spec.SetField(groups.FieldParentID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedParentID(); ok {
+		_spec.AddField(groups.FieldParentID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MaxMembers(); ok {
+		_spec.SetField(groups.FieldMaxMembers, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMaxMembers(); ok {
+		_spec.AddField(groups.FieldMaxMembers, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(groups.FieldMetadata, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ExternalID(); ok {
+		_spec.SetField(groups.FieldExternalID, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(groups.FieldCreatedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(groups.FieldCreatedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(groups.FieldUpdatedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(groups.FieldUpdatedBy, field.TypeInt, value)
 	}
 	if _u.mutation.LionGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -388,6 +654,26 @@ func (_u *GroupsUpdateOne) SetUpdatedAt(v time.Time) *GroupsUpdateOne {
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *GroupsUpdateOne) SetDeletedAt(v time.Time) *GroupsUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableDeletedAt(v *time.Time) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *GroupsUpdateOne) ClearDeletedAt() *GroupsUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *GroupsUpdateOne) SetName(v string) *GroupsUpdateOne {
 	_u.mutation.SetName(v)
@@ -398,6 +684,153 @@ func (_u *GroupsUpdateOne) SetName(v string) *GroupsUpdateOne {
 func (_u *GroupsUpdateOne) SetNillableName(v *string) *GroupsUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetType sets the "type" field.
+func (_u *GroupsUpdateOne) SetType(v int) *GroupsUpdateOne {
+	_u.mutation.ResetType()
+	_u.mutation.SetType(v)
+	return _u
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableType(v *int) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
+	}
+	return _u
+}
+
+// AddType adds value to the "type" field.
+func (_u *GroupsUpdateOne) AddType(v int) *GroupsUpdateOne {
+	_u.mutation.AddType(v)
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *GroupsUpdateOne) SetStatus(v int) *GroupsUpdateOne {
+	_u.mutation.ResetStatus()
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableStatus(v *int) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// AddStatus adds value to the "status" field.
+func (_u *GroupsUpdateOne) AddStatus(v int) *GroupsUpdateOne {
+	_u.mutation.AddStatus(v)
+	return _u
+}
+
+// SetI18nName sets the "i18n_name" field.
+func (_u *GroupsUpdateOne) SetI18nName(v string) *GroupsUpdateOne {
+	_u.mutation.SetI18nName(v)
+	return _u
+}
+
+// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableI18nName(v *string) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetI18nName(*v)
+	}
+	return _u
+}
+
+// SetOrderWeight sets the "order_weight" field.
+func (_u *GroupsUpdateOne) SetOrderWeight(v int) *GroupsUpdateOne {
+	_u.mutation.ResetOrderWeight()
+	_u.mutation.SetOrderWeight(v)
+	return _u
+}
+
+// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableOrderWeight(v *int) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetOrderWeight(*v)
+	}
+	return _u
+}
+
+// AddOrderWeight adds value to the "order_weight" field.
+func (_u *GroupsUpdateOne) AddOrderWeight(v int) *GroupsUpdateOne {
+	_u.mutation.AddOrderWeight(v)
+	return _u
+}
+
+// SetParentID sets the "parent_id" field.
+func (_u *GroupsUpdateOne) SetParentID(v int) *GroupsUpdateOne {
+	_u.mutation.ResetParentID()
+	_u.mutation.SetParentID(v)
+	return _u
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableParentID(v *int) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetParentID(*v)
+	}
+	return _u
+}
+
+// AddParentID adds value to the "parent_id" field.
+func (_u *GroupsUpdateOne) AddParentID(v int) *GroupsUpdateOne {
+	_u.mutation.AddParentID(v)
+	return _u
+}
+
+// SetMaxMembers sets the "max_members" field.
+func (_u *GroupsUpdateOne) SetMaxMembers(v int) *GroupsUpdateOne {
+	_u.mutation.ResetMaxMembers()
+	_u.mutation.SetMaxMembers(v)
+	return _u
+}
+
+// SetNillableMaxMembers sets the "max_members" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableMaxMembers(v *int) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetMaxMembers(*v)
+	}
+	return _u
+}
+
+// AddMaxMembers adds value to the "max_members" field.
+func (_u *GroupsUpdateOne) AddMaxMembers(v int) *GroupsUpdateOne {
+	_u.mutation.AddMaxMembers(v)
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *GroupsUpdateOne) SetMetadata(v string) *GroupsUpdateOne {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableMetadata(v *string) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetMetadata(*v)
+	}
+	return _u
+}
+
+// SetExternalID sets the "external_id" field.
+func (_u *GroupsUpdateOne) SetExternalID(v string) *GroupsUpdateOne {
+	_u.mutation.SetExternalID(v)
+	return _u
+}
+
+// SetNillableExternalID sets the "external_id" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableExternalID(v *string) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetExternalID(*v)
 	}
 	return _u
 }
@@ -427,6 +860,48 @@ func (_u *GroupsUpdateOne) SetNillableDescription(v *string) *GroupsUpdateOne {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *GroupsUpdateOne) SetCreatedBy(v int) *GroupsUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableCreatedBy(v *int) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *GroupsUpdateOne) AddCreatedBy(v int) *GroupsUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *GroupsUpdateOne) SetUpdatedBy(v int) *GroupsUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableUpdatedBy(v *int) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *GroupsUpdateOne) AddUpdatedBy(v int) *GroupsUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -618,11 +1093,68 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(groups.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(groups.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(groups.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.GetType(); ok {
+		_spec.SetField(groups.FieldType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedType(); ok {
+		_spec.AddField(groups.FieldType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(groups.FieldStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStatus(); ok {
+		_spec.AddField(groups.FieldStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.I18nName(); ok {
+		_spec.SetField(groups.FieldI18nName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.OrderWeight(); ok {
+		_spec.SetField(groups.FieldOrderWeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedOrderWeight(); ok {
+		_spec.AddField(groups.FieldOrderWeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ParentID(); ok {
+		_spec.SetField(groups.FieldParentID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedParentID(); ok {
+		_spec.AddField(groups.FieldParentID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MaxMembers(); ok {
+		_spec.SetField(groups.FieldMaxMembers, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMaxMembers(); ok {
+		_spec.AddField(groups.FieldMaxMembers, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(groups.FieldMetadata, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ExternalID(); ok {
+		_spec.SetField(groups.FieldExternalID, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(groups.FieldCreatedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(groups.FieldCreatedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(groups.FieldUpdatedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(groups.FieldUpdatedBy, field.TypeInt, value)
 	}
 	if _u.mutation.LionGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{

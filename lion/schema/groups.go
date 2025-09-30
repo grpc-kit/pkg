@@ -21,12 +21,42 @@ func (Groups) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("用户组名"),
+		field.Int("type").
+			Default(0).
+			Comment("群组类型，对应 api/known/admin/v1/common.proto 中定义"),
+		field.Int("status").
+			Default(0).
+			Comment("群组状态，对应 api/known/admin/v1/common.proto 中定义"),
+		field.String("i18n_name").
+			Default("").
+			Comment("国际化名称，支持多语言显示"),
+		field.Int("order_weight").
+			Default(0).
+			Comment("排序权重，数字越小越靠前"),
+		field.Int("parent_id").
+			Default(0).
+			Comment("父群组ID，为0表示顶级群组"),
+		field.Int("max_members").
+			Default(0).
+			Comment("群组最大成员数量限制，0表示不限制"),
+		field.String("metadata").
+			Default("").
+			Comment("元数据，用于存储自定义属性，JSON格式"),
+		field.String("external_id").
+			Default("").
+			Comment("外部系统ID，用于与外部系统集成"),
 		field.Int("department_id").
 			Default(0).
 			Comment("关联 lion_departments 表的 ID"),
 		field.String("description").
 			Default("").
 			Comment("用户组描述"),
+		field.Int("created_by").
+			Default(0).
+			Comment("群组创建者/所有者ID"),
+		field.Int("updated_by").
+			Default(0).
+			Comment("群组最后更新者ID"),
 	}
 }
 
@@ -47,7 +77,7 @@ func (Groups) Edges() []ent.Edge {
 // Mixin of the table.
 func (Groups) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixinWithoutDeleted{},
+		TimeMixin{},
 	}
 }
 

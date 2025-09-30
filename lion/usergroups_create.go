@@ -50,6 +50,20 @@ func (_c *UserGroupsCreate) SetNillableUpdatedAt(v *time.Time) *UserGroupsCreate
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *UserGroupsCreate) SetDeletedAt(v time.Time) *UserGroupsCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableDeletedAt(v *time.Time) *UserGroupsCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *UserGroupsCreate) SetUserID(v int) *UserGroupsCreate {
 	_c.mutation.SetUserID(v)
@@ -59,6 +73,124 @@ func (_c *UserGroupsCreate) SetUserID(v int) *UserGroupsCreate {
 // SetGroupID sets the "group_id" field.
 func (_c *UserGroupsCreate) SetGroupID(v int) *UserGroupsCreate {
 	_c.mutation.SetGroupID(v)
+	return _c
+}
+
+// SetRole sets the "role" field.
+func (_c *UserGroupsCreate) SetRole(v int) *UserGroupsCreate {
+	_c.mutation.SetRole(v)
+	return _c
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableRole(v *int) *UserGroupsCreate {
+	if v != nil {
+		_c.SetRole(*v)
+	}
+	return _c
+}
+
+// SetStatus sets the "status" field.
+func (_c *UserGroupsCreate) SetStatus(v int) *UserGroupsCreate {
+	_c.mutation.SetStatus(v)
+	return _c
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableStatus(v *int) *UserGroupsCreate {
+	if v != nil {
+		_c.SetStatus(*v)
+	}
+	return _c
+}
+
+// SetJoinedAt sets the "joined_at" field.
+func (_c *UserGroupsCreate) SetJoinedAt(v time.Time) *UserGroupsCreate {
+	_c.mutation.SetJoinedAt(v)
+	return _c
+}
+
+// SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableJoinedAt(v *time.Time) *UserGroupsCreate {
+	if v != nil {
+		_c.SetJoinedAt(*v)
+	}
+	return _c
+}
+
+// SetExpiredAt sets the "expired_at" field.
+func (_c *UserGroupsCreate) SetExpiredAt(v time.Time) *UserGroupsCreate {
+	_c.mutation.SetExpiredAt(v)
+	return _c
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableExpiredAt(v *time.Time) *UserGroupsCreate {
+	if v != nil {
+		_c.SetExpiredAt(*v)
+	}
+	return _c
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_c *UserGroupsCreate) SetCreatedBy(v int) *UserGroupsCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableCreatedBy(v *int) *UserGroupsCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *UserGroupsCreate) SetUpdatedBy(v int) *UserGroupsCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableUpdatedBy(v *int) *UserGroupsCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
+// SetMetadata sets the "metadata" field.
+func (_c *UserGroupsCreate) SetMetadata(v string) *UserGroupsCreate {
+	_c.mutation.SetMetadata(v)
+	return _c
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableMetadata(v *string) *UserGroupsCreate {
+	if v != nil {
+		_c.SetMetadata(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *UserGroupsCreate) SetDescription(v string) *UserGroupsCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableDescription(v *string) *UserGroupsCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
+// SetID sets the "id" field.
+func (_c *UserGroupsCreate) SetID(v int) *UserGroupsCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -127,6 +259,18 @@ func (_c *UserGroupsCreate) defaults() {
 		v := usergroups.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.Role(); !ok {
+		v := usergroups.DefaultRole
+		_c.mutation.SetRole(v)
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		v := usergroups.DefaultStatus
+		_c.mutation.SetStatus(v)
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := usergroups.DefaultDescription
+		_c.mutation.SetDescription(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -153,6 +297,20 @@ func (_c *UserGroupsCreate) check() error {
 			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.group_id": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.Role(); !ok {
+		return &ValidationError{Name: "role", err: errors.New(`lion: missing required field "UserGroups.role"`)}
+	}
+	if _, ok := _c.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`lion: missing required field "UserGroups.status"`)}
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "UserGroups.description"`)}
+	}
+	if v, ok := _c.mutation.ID(); ok {
+		if err := usergroups.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.id": %w`, err)}
+		}
+	}
 	if len(_c.mutation.LionUsersIDs()) == 0 {
 		return &ValidationError{Name: "lion_users", err: errors.New(`lion: missing required edge "UserGroups.lion_users"`)}
 	}
@@ -173,8 +331,10 @@ func (_c *UserGroupsCreate) sqlSave(ctx context.Context) (*UserGroups, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int(id)
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
@@ -185,6 +345,10 @@ func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
 		_node = &UserGroups{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(usergroups.Table, sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt))
 	)
+	if id, ok := _c.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(usergroups.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -192,6 +356,42 @@ func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(usergroups.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(usergroups.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
+	if value, ok := _c.mutation.Role(); ok {
+		_spec.SetField(usergroups.FieldRole, field.TypeInt, value)
+		_node.Role = value
+	}
+	if value, ok := _c.mutation.Status(); ok {
+		_spec.SetField(usergroups.FieldStatus, field.TypeInt, value)
+		_node.Status = value
+	}
+	if value, ok := _c.mutation.JoinedAt(); ok {
+		_spec.SetField(usergroups.FieldJoinedAt, field.TypeTime, value)
+		_node.JoinedAt = value
+	}
+	if value, ok := _c.mutation.ExpiredAt(); ok {
+		_spec.SetField(usergroups.FieldExpiredAt, field.TypeTime, value)
+		_node.ExpiredAt = value
+	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt, value)
+		_node.UpdatedBy = value
+	}
+	if value, ok := _c.mutation.Metadata(); ok {
+		_spec.SetField(usergroups.FieldMetadata, field.TypeString, value)
+		_node.Metadata = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(usergroups.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -275,7 +475,7 @@ func (_c *UserGroupsCreateBulk) Save(ctx context.Context) ([]*UserGroups, error)
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}

@@ -18,10 +18,28 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldGroupID holds the string denoting the group_id field in the database.
 	FieldGroupID = "group_id"
+	// FieldRole holds the string denoting the role field in the database.
+	FieldRole = "role"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
+	// FieldJoinedAt holds the string denoting the joined_at field in the database.
+	FieldJoinedAt = "joined_at"
+	// FieldExpiredAt holds the string denoting the expired_at field in the database.
+	FieldExpiredAt = "expired_at"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
+	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
+	FieldUpdatedBy = "updated_by"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
 	EdgeLionUsers = "lion_users"
 	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
@@ -49,8 +67,17 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldUserID,
 	FieldGroupID,
+	FieldRole,
+	FieldStatus,
+	FieldJoinedAt,
+	FieldExpiredAt,
+	FieldCreatedBy,
+	FieldUpdatedBy,
+	FieldMetadata,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -74,6 +101,14 @@ var (
 	UserIDValidator func(int) error
 	// GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
 	GroupIDValidator func(int) error
+	// DefaultRole holds the default value on creation for the "role" field.
+	DefaultRole int
+	// DefaultStatus holds the default value on creation for the "status" field.
+	DefaultStatus int
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
+	// IDValidator is a validator for the "id" field. It is called by the builders before save.
+	IDValidator func(int) error
 )
 
 // OrderOption defines the ordering options for the UserGroups queries.
@@ -94,6 +129,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
@@ -102,6 +142,46 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 // ByGroupID orders the results by the group_id field.
 func ByGroupID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGroupID, opts...).ToFunc()
+}
+
+// ByRole orders the results by the role field.
+func ByRole(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRole, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByJoinedAt orders the results by the joined_at field.
+func ByJoinedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldJoinedAt, opts...).ToFunc()
+}
+
+// ByExpiredAt orders the results by the expired_at field.
+func ByExpiredAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpiredAt, opts...).ToFunc()
+}
+
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByUpdatedBy orders the results by the updated_by field.
+func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
+}
+
+// ByMetadata orders the results by the metadata field.
+func ByMetadata(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMetadata, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByLionUsersField orders the results by lion_users field.

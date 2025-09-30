@@ -36,6 +36,26 @@ func (_u *UserGroupsUpdate) SetUpdatedAt(v time.Time) *UserGroupsUpdate {
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *UserGroupsUpdate) SetDeletedAt(v time.Time) *UserGroupsUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableDeletedAt(v *time.Time) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *UserGroupsUpdate) ClearDeletedAt() *UserGroupsUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetUserID sets the "user_id" field.
 func (_u *UserGroupsUpdate) SetUserID(v int) *UserGroupsUpdate {
 	_u.mutation.SetUserID(v)
@@ -60,6 +80,176 @@ func (_u *UserGroupsUpdate) SetGroupID(v int) *UserGroupsUpdate {
 func (_u *UserGroupsUpdate) SetNillableGroupID(v *int) *UserGroupsUpdate {
 	if v != nil {
 		_u.SetGroupID(*v)
+	}
+	return _u
+}
+
+// SetRole sets the "role" field.
+func (_u *UserGroupsUpdate) SetRole(v int) *UserGroupsUpdate {
+	_u.mutation.ResetRole()
+	_u.mutation.SetRole(v)
+	return _u
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableRole(v *int) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetRole(*v)
+	}
+	return _u
+}
+
+// AddRole adds value to the "role" field.
+func (_u *UserGroupsUpdate) AddRole(v int) *UserGroupsUpdate {
+	_u.mutation.AddRole(v)
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *UserGroupsUpdate) SetStatus(v int) *UserGroupsUpdate {
+	_u.mutation.ResetStatus()
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableStatus(v *int) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// AddStatus adds value to the "status" field.
+func (_u *UserGroupsUpdate) AddStatus(v int) *UserGroupsUpdate {
+	_u.mutation.AddStatus(v)
+	return _u
+}
+
+// SetJoinedAt sets the "joined_at" field.
+func (_u *UserGroupsUpdate) SetJoinedAt(v time.Time) *UserGroupsUpdate {
+	_u.mutation.SetJoinedAt(v)
+	return _u
+}
+
+// SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableJoinedAt(v *time.Time) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetJoinedAt(*v)
+	}
+	return _u
+}
+
+// ClearJoinedAt clears the value of the "joined_at" field.
+func (_u *UserGroupsUpdate) ClearJoinedAt() *UserGroupsUpdate {
+	_u.mutation.ClearJoinedAt()
+	return _u
+}
+
+// SetExpiredAt sets the "expired_at" field.
+func (_u *UserGroupsUpdate) SetExpiredAt(v time.Time) *UserGroupsUpdate {
+	_u.mutation.SetExpiredAt(v)
+	return _u
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableExpiredAt(v *time.Time) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetExpiredAt(*v)
+	}
+	return _u
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (_u *UserGroupsUpdate) ClearExpiredAt() *UserGroupsUpdate {
+	_u.mutation.ClearExpiredAt()
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *UserGroupsUpdate) SetCreatedBy(v int) *UserGroupsUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableCreatedBy(v *int) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *UserGroupsUpdate) AddCreatedBy(v int) *UserGroupsUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *UserGroupsUpdate) ClearCreatedBy() *UserGroupsUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *UserGroupsUpdate) SetUpdatedBy(v int) *UserGroupsUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableUpdatedBy(v *int) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *UserGroupsUpdate) AddUpdatedBy(v int) *UserGroupsUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *UserGroupsUpdate) ClearUpdatedBy() *UserGroupsUpdate {
+	_u.mutation.ClearUpdatedBy()
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *UserGroupsUpdate) SetMetadata(v string) *UserGroupsUpdate {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableMetadata(v *string) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetMetadata(*v)
+	}
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *UserGroupsUpdate) ClearMetadata() *UserGroupsUpdate {
+	_u.mutation.ClearMetadata()
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *UserGroupsUpdate) SetDescription(v string) *UserGroupsUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableDescription(v *string) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
 	return _u
 }
@@ -175,6 +365,63 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(usergroups.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(usergroups.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(usergroups.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Role(); ok {
+		_spec.SetField(usergroups.FieldRole, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRole(); ok {
+		_spec.AddField(usergroups.FieldRole, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(usergroups.FieldStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStatus(); ok {
+		_spec.AddField(usergroups.FieldStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.JoinedAt(); ok {
+		_spec.SetField(usergroups.FieldJoinedAt, field.TypeTime, value)
+	}
+	if _u.mutation.JoinedAtCleared() {
+		_spec.ClearField(usergroups.FieldJoinedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ExpiredAt(); ok {
+		_spec.SetField(usergroups.FieldExpiredAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiredAtCleared() {
+		_spec.ClearField(usergroups.FieldExpiredAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(usergroups.FieldCreatedBy, field.TypeInt, value)
+	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(usergroups.FieldCreatedBy, field.TypeInt)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(usergroups.FieldUpdatedBy, field.TypeInt, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(usergroups.FieldUpdatedBy, field.TypeInt)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(usergroups.FieldMetadata, field.TypeString, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(usergroups.FieldMetadata, field.TypeString)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(usergroups.FieldDescription, field.TypeString, value)
+	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -259,6 +506,26 @@ func (_u *UserGroupsUpdateOne) SetUpdatedAt(v time.Time) *UserGroupsUpdateOne {
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *UserGroupsUpdateOne) SetDeletedAt(v time.Time) *UserGroupsUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableDeletedAt(v *time.Time) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *UserGroupsUpdateOne) ClearDeletedAt() *UserGroupsUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetUserID sets the "user_id" field.
 func (_u *UserGroupsUpdateOne) SetUserID(v int) *UserGroupsUpdateOne {
 	_u.mutation.SetUserID(v)
@@ -283,6 +550,176 @@ func (_u *UserGroupsUpdateOne) SetGroupID(v int) *UserGroupsUpdateOne {
 func (_u *UserGroupsUpdateOne) SetNillableGroupID(v *int) *UserGroupsUpdateOne {
 	if v != nil {
 		_u.SetGroupID(*v)
+	}
+	return _u
+}
+
+// SetRole sets the "role" field.
+func (_u *UserGroupsUpdateOne) SetRole(v int) *UserGroupsUpdateOne {
+	_u.mutation.ResetRole()
+	_u.mutation.SetRole(v)
+	return _u
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableRole(v *int) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetRole(*v)
+	}
+	return _u
+}
+
+// AddRole adds value to the "role" field.
+func (_u *UserGroupsUpdateOne) AddRole(v int) *UserGroupsUpdateOne {
+	_u.mutation.AddRole(v)
+	return _u
+}
+
+// SetStatus sets the "status" field.
+func (_u *UserGroupsUpdateOne) SetStatus(v int) *UserGroupsUpdateOne {
+	_u.mutation.ResetStatus()
+	_u.mutation.SetStatus(v)
+	return _u
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableStatus(v *int) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// AddStatus adds value to the "status" field.
+func (_u *UserGroupsUpdateOne) AddStatus(v int) *UserGroupsUpdateOne {
+	_u.mutation.AddStatus(v)
+	return _u
+}
+
+// SetJoinedAt sets the "joined_at" field.
+func (_u *UserGroupsUpdateOne) SetJoinedAt(v time.Time) *UserGroupsUpdateOne {
+	_u.mutation.SetJoinedAt(v)
+	return _u
+}
+
+// SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableJoinedAt(v *time.Time) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetJoinedAt(*v)
+	}
+	return _u
+}
+
+// ClearJoinedAt clears the value of the "joined_at" field.
+func (_u *UserGroupsUpdateOne) ClearJoinedAt() *UserGroupsUpdateOne {
+	_u.mutation.ClearJoinedAt()
+	return _u
+}
+
+// SetExpiredAt sets the "expired_at" field.
+func (_u *UserGroupsUpdateOne) SetExpiredAt(v time.Time) *UserGroupsUpdateOne {
+	_u.mutation.SetExpiredAt(v)
+	return _u
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableExpiredAt(v *time.Time) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetExpiredAt(*v)
+	}
+	return _u
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (_u *UserGroupsUpdateOne) ClearExpiredAt() *UserGroupsUpdateOne {
+	_u.mutation.ClearExpiredAt()
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *UserGroupsUpdateOne) SetCreatedBy(v int) *UserGroupsUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableCreatedBy(v *int) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *UserGroupsUpdateOne) AddCreatedBy(v int) *UserGroupsUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *UserGroupsUpdateOne) ClearCreatedBy() *UserGroupsUpdateOne {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *UserGroupsUpdateOne) SetUpdatedBy(v int) *UserGroupsUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableUpdatedBy(v *int) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *UserGroupsUpdateOne) AddUpdatedBy(v int) *UserGroupsUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *UserGroupsUpdateOne) ClearUpdatedBy() *UserGroupsUpdateOne {
+	_u.mutation.ClearUpdatedBy()
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *UserGroupsUpdateOne) SetMetadata(v string) *UserGroupsUpdateOne {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableMetadata(v *string) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetMetadata(*v)
+	}
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *UserGroupsUpdateOne) ClearMetadata() *UserGroupsUpdateOne {
+	_u.mutation.ClearMetadata()
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *UserGroupsUpdateOne) SetDescription(v string) *UserGroupsUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableDescription(v *string) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
 	return _u
 }
@@ -427,6 +864,63 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(usergroups.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(usergroups.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(usergroups.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Role(); ok {
+		_spec.SetField(usergroups.FieldRole, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRole(); ok {
+		_spec.AddField(usergroups.FieldRole, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Status(); ok {
+		_spec.SetField(usergroups.FieldStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStatus(); ok {
+		_spec.AddField(usergroups.FieldStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.JoinedAt(); ok {
+		_spec.SetField(usergroups.FieldJoinedAt, field.TypeTime, value)
+	}
+	if _u.mutation.JoinedAtCleared() {
+		_spec.ClearField(usergroups.FieldJoinedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ExpiredAt(); ok {
+		_spec.SetField(usergroups.FieldExpiredAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiredAtCleared() {
+		_spec.ClearField(usergroups.FieldExpiredAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(usergroups.FieldCreatedBy, field.TypeInt, value)
+	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(usergroups.FieldCreatedBy, field.TypeInt)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(usergroups.FieldUpdatedBy, field.TypeInt, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(usergroups.FieldUpdatedBy, field.TypeInt)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(usergroups.FieldMetadata, field.TypeString, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(usergroups.FieldMetadata, field.TypeString)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(usergroups.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{

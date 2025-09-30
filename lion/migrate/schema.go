@@ -123,8 +123,19 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
+		{Name: "type", Type: field.TypeInt, Default: 0},
+		{Name: "status", Type: field.TypeInt, Default: 0},
+		{Name: "i18n_name", Type: field.TypeString, Default: ""},
+		{Name: "order_weight", Type: field.TypeInt, Default: 0},
+		{Name: "parent_id", Type: field.TypeInt, Default: 0},
+		{Name: "max_members", Type: field.TypeInt, Default: 0},
+		{Name: "metadata", Type: field.TypeString, Default: ""},
+		{Name: "external_id", Type: field.TypeString, Default: ""},
 		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "created_by", Type: field.TypeInt, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt, Default: 0},
 		{Name: "department_id", Type: field.TypeInt, Default: 0},
 	}
 	// LionGroupsTable holds the schema information for the "lion_groups" table.
@@ -135,7 +146,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_groups_lion_departments_lion_groups",
-				Columns:    []*schema.Column{LionGroupsColumns[5]},
+				Columns:    []*schema.Column{LionGroupsColumns[16]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -328,6 +339,15 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "role", Type: field.TypeInt, Default: 0},
+		{Name: "status", Type: field.TypeInt, Default: 0},
+		{Name: "joined_at", Type: field.TypeTime, Nullable: true},
+		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_by", Type: field.TypeInt, Nullable: true},
+		{Name: "updated_by", Type: field.TypeInt, Nullable: true},
+		{Name: "metadata", Type: field.TypeString, Nullable: true},
+		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "group_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
@@ -339,13 +359,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_user_groups_lion_groups_lion_user_groups",
-				Columns:    []*schema.Column{LionUserGroupsColumns[3]},
+				Columns:    []*schema.Column{LionUserGroupsColumns[12]},
 				RefColumns: []*schema.Column{LionGroupsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_user_groups_lion_users_lion_user_groups",
-				Columns:    []*schema.Column{LionUserGroupsColumns[4]},
+				Columns:    []*schema.Column{LionUserGroupsColumns[13]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -354,7 +374,7 @@ var (
 			{
 				Name:    "usergroups_user_id_group_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserGroupsColumns[4], LionUserGroupsColumns[3]},
+				Columns: []*schema.Column{LionUserGroupsColumns[13], LionUserGroupsColumns[12]},
 			},
 		},
 	}

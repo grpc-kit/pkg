@@ -65,9 +65,54 @@ func UpdatedAt(v time.Time) predicate.Groups {
 	return predicate.Groups(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldDeletedAt, v))
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Groups {
 	return predicate.Groups(sql.FieldEQ(FieldName, v))
+}
+
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldType, v))
+}
+
+// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
+func Status(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldStatus, v))
+}
+
+// I18nName applies equality check predicate on the "i18n_name" field. It's identical to I18nNameEQ.
+func I18nName(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldI18nName, v))
+}
+
+// OrderWeight applies equality check predicate on the "order_weight" field. It's identical to OrderWeightEQ.
+func OrderWeight(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldOrderWeight, v))
+}
+
+// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
+func ParentID(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldParentID, v))
+}
+
+// MaxMembers applies equality check predicate on the "max_members" field. It's identical to MaxMembersEQ.
+func MaxMembers(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldMaxMembers, v))
+}
+
+// Metadata applies equality check predicate on the "metadata" field. It's identical to MetadataEQ.
+func Metadata(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldMetadata, v))
+}
+
+// ExternalID applies equality check predicate on the "external_id" field. It's identical to ExternalIDEQ.
+func ExternalID(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldExternalID, v))
 }
 
 // DepartmentID applies equality check predicate on the "department_id" field. It's identical to DepartmentIDEQ.
@@ -78,6 +123,16 @@ func DepartmentID(v int) predicate.Groups {
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.Groups {
 	return predicate.Groups(sql.FieldEQ(FieldDescription, v))
+}
+
+// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
+func CreatedBy(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
+func UpdatedBy(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -160,6 +215,56 @@ func UpdatedAtLTE(v time.Time) predicate.Groups {
 	return predicate.Groups(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.Groups {
+	return predicate.Groups(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.Groups {
+	return predicate.Groups(sql.FieldNotNull(FieldDeletedAt))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Groups {
 	return predicate.Groups(sql.FieldEQ(FieldName, v))
@@ -223,6 +328,401 @@ func NameEqualFold(v string) predicate.Groups {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Groups {
 	return predicate.Groups(sql.FieldContainsFold(FieldName, v))
+}
+
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldType, v))
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldType, v))
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldType, vs...))
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldType, vs...))
+}
+
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldType, v))
+}
+
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldType, v))
+}
+
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldType, v))
+}
+
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldType, v))
+}
+
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldStatus, v))
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldStatus, v))
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldStatus, vs...))
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// StatusGT applies the GT predicate on the "status" field.
+func StatusGT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldStatus, v))
+}
+
+// StatusGTE applies the GTE predicate on the "status" field.
+func StatusGTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldStatus, v))
+}
+
+// StatusLT applies the LT predicate on the "status" field.
+func StatusLT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldStatus, v))
+}
+
+// StatusLTE applies the LTE predicate on the "status" field.
+func StatusLTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldStatus, v))
+}
+
+// I18nNameEQ applies the EQ predicate on the "i18n_name" field.
+func I18nNameEQ(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldI18nName, v))
+}
+
+// I18nNameNEQ applies the NEQ predicate on the "i18n_name" field.
+func I18nNameNEQ(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldI18nName, v))
+}
+
+// I18nNameIn applies the In predicate on the "i18n_name" field.
+func I18nNameIn(vs ...string) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldI18nName, vs...))
+}
+
+// I18nNameNotIn applies the NotIn predicate on the "i18n_name" field.
+func I18nNameNotIn(vs ...string) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldI18nName, vs...))
+}
+
+// I18nNameGT applies the GT predicate on the "i18n_name" field.
+func I18nNameGT(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldI18nName, v))
+}
+
+// I18nNameGTE applies the GTE predicate on the "i18n_name" field.
+func I18nNameGTE(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldI18nName, v))
+}
+
+// I18nNameLT applies the LT predicate on the "i18n_name" field.
+func I18nNameLT(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldI18nName, v))
+}
+
+// I18nNameLTE applies the LTE predicate on the "i18n_name" field.
+func I18nNameLTE(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldI18nName, v))
+}
+
+// I18nNameContains applies the Contains predicate on the "i18n_name" field.
+func I18nNameContains(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldContains(FieldI18nName, v))
+}
+
+// I18nNameHasPrefix applies the HasPrefix predicate on the "i18n_name" field.
+func I18nNameHasPrefix(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldHasPrefix(FieldI18nName, v))
+}
+
+// I18nNameHasSuffix applies the HasSuffix predicate on the "i18n_name" field.
+func I18nNameHasSuffix(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldHasSuffix(FieldI18nName, v))
+}
+
+// I18nNameEqualFold applies the EqualFold predicate on the "i18n_name" field.
+func I18nNameEqualFold(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEqualFold(FieldI18nName, v))
+}
+
+// I18nNameContainsFold applies the ContainsFold predicate on the "i18n_name" field.
+func I18nNameContainsFold(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldContainsFold(FieldI18nName, v))
+}
+
+// OrderWeightEQ applies the EQ predicate on the "order_weight" field.
+func OrderWeightEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldOrderWeight, v))
+}
+
+// OrderWeightNEQ applies the NEQ predicate on the "order_weight" field.
+func OrderWeightNEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldOrderWeight, v))
+}
+
+// OrderWeightIn applies the In predicate on the "order_weight" field.
+func OrderWeightIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldOrderWeight, vs...))
+}
+
+// OrderWeightNotIn applies the NotIn predicate on the "order_weight" field.
+func OrderWeightNotIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldOrderWeight, vs...))
+}
+
+// OrderWeightGT applies the GT predicate on the "order_weight" field.
+func OrderWeightGT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldOrderWeight, v))
+}
+
+// OrderWeightGTE applies the GTE predicate on the "order_weight" field.
+func OrderWeightGTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldOrderWeight, v))
+}
+
+// OrderWeightLT applies the LT predicate on the "order_weight" field.
+func OrderWeightLT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldOrderWeight, v))
+}
+
+// OrderWeightLTE applies the LTE predicate on the "order_weight" field.
+func OrderWeightLTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldOrderWeight, v))
+}
+
+// ParentIDEQ applies the EQ predicate on the "parent_id" field.
+func ParentIDEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldParentID, v))
+}
+
+// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
+func ParentIDNEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldParentID, v))
+}
+
+// ParentIDIn applies the In predicate on the "parent_id" field.
+func ParentIDIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldParentID, vs...))
+}
+
+// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
+func ParentIDNotIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldParentID, vs...))
+}
+
+// ParentIDGT applies the GT predicate on the "parent_id" field.
+func ParentIDGT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldParentID, v))
+}
+
+// ParentIDGTE applies the GTE predicate on the "parent_id" field.
+func ParentIDGTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldParentID, v))
+}
+
+// ParentIDLT applies the LT predicate on the "parent_id" field.
+func ParentIDLT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldParentID, v))
+}
+
+// ParentIDLTE applies the LTE predicate on the "parent_id" field.
+func ParentIDLTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldParentID, v))
+}
+
+// MaxMembersEQ applies the EQ predicate on the "max_members" field.
+func MaxMembersEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldMaxMembers, v))
+}
+
+// MaxMembersNEQ applies the NEQ predicate on the "max_members" field.
+func MaxMembersNEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldMaxMembers, v))
+}
+
+// MaxMembersIn applies the In predicate on the "max_members" field.
+func MaxMembersIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldMaxMembers, vs...))
+}
+
+// MaxMembersNotIn applies the NotIn predicate on the "max_members" field.
+func MaxMembersNotIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldMaxMembers, vs...))
+}
+
+// MaxMembersGT applies the GT predicate on the "max_members" field.
+func MaxMembersGT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldMaxMembers, v))
+}
+
+// MaxMembersGTE applies the GTE predicate on the "max_members" field.
+func MaxMembersGTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldMaxMembers, v))
+}
+
+// MaxMembersLT applies the LT predicate on the "max_members" field.
+func MaxMembersLT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldMaxMembers, v))
+}
+
+// MaxMembersLTE applies the LTE predicate on the "max_members" field.
+func MaxMembersLTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldMaxMembers, v))
+}
+
+// MetadataEQ applies the EQ predicate on the "metadata" field.
+func MetadataEQ(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldMetadata, v))
+}
+
+// MetadataNEQ applies the NEQ predicate on the "metadata" field.
+func MetadataNEQ(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldMetadata, v))
+}
+
+// MetadataIn applies the In predicate on the "metadata" field.
+func MetadataIn(vs ...string) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldMetadata, vs...))
+}
+
+// MetadataNotIn applies the NotIn predicate on the "metadata" field.
+func MetadataNotIn(vs ...string) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldMetadata, vs...))
+}
+
+// MetadataGT applies the GT predicate on the "metadata" field.
+func MetadataGT(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldMetadata, v))
+}
+
+// MetadataGTE applies the GTE predicate on the "metadata" field.
+func MetadataGTE(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldMetadata, v))
+}
+
+// MetadataLT applies the LT predicate on the "metadata" field.
+func MetadataLT(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldMetadata, v))
+}
+
+// MetadataLTE applies the LTE predicate on the "metadata" field.
+func MetadataLTE(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldMetadata, v))
+}
+
+// MetadataContains applies the Contains predicate on the "metadata" field.
+func MetadataContains(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldContains(FieldMetadata, v))
+}
+
+// MetadataHasPrefix applies the HasPrefix predicate on the "metadata" field.
+func MetadataHasPrefix(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldHasPrefix(FieldMetadata, v))
+}
+
+// MetadataHasSuffix applies the HasSuffix predicate on the "metadata" field.
+func MetadataHasSuffix(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldHasSuffix(FieldMetadata, v))
+}
+
+// MetadataEqualFold applies the EqualFold predicate on the "metadata" field.
+func MetadataEqualFold(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEqualFold(FieldMetadata, v))
+}
+
+// MetadataContainsFold applies the ContainsFold predicate on the "metadata" field.
+func MetadataContainsFold(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldContainsFold(FieldMetadata, v))
+}
+
+// ExternalIDEQ applies the EQ predicate on the "external_id" field.
+func ExternalIDEQ(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldExternalID, v))
+}
+
+// ExternalIDNEQ applies the NEQ predicate on the "external_id" field.
+func ExternalIDNEQ(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldExternalID, v))
+}
+
+// ExternalIDIn applies the In predicate on the "external_id" field.
+func ExternalIDIn(vs ...string) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldExternalID, vs...))
+}
+
+// ExternalIDNotIn applies the NotIn predicate on the "external_id" field.
+func ExternalIDNotIn(vs ...string) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldExternalID, vs...))
+}
+
+// ExternalIDGT applies the GT predicate on the "external_id" field.
+func ExternalIDGT(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldExternalID, v))
+}
+
+// ExternalIDGTE applies the GTE predicate on the "external_id" field.
+func ExternalIDGTE(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldExternalID, v))
+}
+
+// ExternalIDLT applies the LT predicate on the "external_id" field.
+func ExternalIDLT(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldExternalID, v))
+}
+
+// ExternalIDLTE applies the LTE predicate on the "external_id" field.
+func ExternalIDLTE(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldExternalID, v))
+}
+
+// ExternalIDContains applies the Contains predicate on the "external_id" field.
+func ExternalIDContains(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldContains(FieldExternalID, v))
+}
+
+// ExternalIDHasPrefix applies the HasPrefix predicate on the "external_id" field.
+func ExternalIDHasPrefix(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldHasPrefix(FieldExternalID, v))
+}
+
+// ExternalIDHasSuffix applies the HasSuffix predicate on the "external_id" field.
+func ExternalIDHasSuffix(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldHasSuffix(FieldExternalID, v))
+}
+
+// ExternalIDEqualFold applies the EqualFold predicate on the "external_id" field.
+func ExternalIDEqualFold(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEqualFold(FieldExternalID, v))
+}
+
+// ExternalIDContainsFold applies the ContainsFold predicate on the "external_id" field.
+func ExternalIDContainsFold(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldContainsFold(FieldExternalID, v))
 }
 
 // DepartmentIDEQ applies the EQ predicate on the "department_id" field.
@@ -308,6 +808,86 @@ func DescriptionEqualFold(v string) predicate.Groups {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Groups {
 	return predicate.Groups(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// CreatedByEQ applies the EQ predicate on the "created_by" field.
+func CreatedByEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
+func CreatedByNEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldCreatedBy, v))
+}
+
+// CreatedByIn applies the In predicate on the "created_by" field.
+func CreatedByIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
+func CreatedByNotIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByGT applies the GT predicate on the "created_by" field.
+func CreatedByGT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldCreatedBy, v))
+}
+
+// CreatedByGTE applies the GTE predicate on the "created_by" field.
+func CreatedByGTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldCreatedBy, v))
+}
+
+// CreatedByLT applies the LT predicate on the "created_by" field.
+func CreatedByLT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldCreatedBy, v))
+}
+
+// CreatedByLTE applies the LTE predicate on the "created_by" field.
+func CreatedByLTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldCreatedBy, v))
+}
+
+// UpdatedByEQ applies the EQ predicate on the "updated_by" field.
+func UpdatedByEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
+func UpdatedByNEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByIn applies the In predicate on the "updated_by" field.
+func UpdatedByIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
+func UpdatedByNotIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByGT applies the GT predicate on the "updated_by" field.
+func UpdatedByGT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldUpdatedBy, v))
+}
+
+// UpdatedByGTE applies the GTE predicate on the "updated_by" field.
+func UpdatedByGTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByLT applies the LT predicate on the "updated_by" field.
+func UpdatedByLT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldUpdatedBy, v))
+}
+
+// UpdatedByLTE applies the LTE predicate on the "updated_by" field.
+func UpdatedByLTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldUpdatedBy, v))
 }
 
 // HasLionGroups applies the HasEdge predicate on the "lion_groups" edge.
