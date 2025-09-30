@@ -455,6 +455,231 @@ func (x *ListGroupMembersResponse) GetTotalSize() int32 {
 	return 0
 }
 
+type CreateGroupMembersRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源名称，用于限定范围。
+	// 格式示例: "organizations/123" 或 "projects/456"。
+	Parent       string       `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	GroupMembers []*UserGroup `protobuf:"bytes,2,rep,name=group_members,json=groupMembers,proto3" json:"group_members,omitempty"`
+}
+
+func (x *CreateGroupMembersRequest) Reset() {
+	*x = CreateGroupMembersRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_group_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateGroupMembersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateGroupMembersRequest) ProtoMessage() {}
+
+func (x *CreateGroupMembersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_group_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateGroupMembersRequest.ProtoReflect.Descriptor instead.
+func (*CreateGroupMembersRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_group_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *CreateGroupMembersRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *CreateGroupMembersRequest) GetGroupMembers() []*UserGroup {
+	if x != nil {
+		return x.GroupMembers
+	}
+	return nil
+}
+
+type CreateGroupMembersResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CreateGroupMembersResponse) Reset() {
+	*x = CreateGroupMembersResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_group_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateGroupMembersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateGroupMembersResponse) ProtoMessage() {}
+
+func (x *CreateGroupMembersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_group_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateGroupMembersResponse.ProtoReflect.Descriptor instead.
+func (*CreateGroupMembersResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_group_proto_rawDescGZIP(), []int{8}
+}
+
+type DeleteGroupMemberRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源名称，用于限定范围。
+	// 格式示例: "organizations/123" 或 "projects/456"。
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	UserId int32  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+}
+
+func (x *DeleteGroupMemberRequest) Reset() {
+	*x = DeleteGroupMemberRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_group_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeleteGroupMemberRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteGroupMemberRequest) ProtoMessage() {}
+
+func (x *DeleteGroupMemberRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_group_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteGroupMemberRequest.ProtoReflect.Descriptor instead.
+func (*DeleteGroupMemberRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_group_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *DeleteGroupMemberRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *DeleteGroupMemberRequest) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type UpdateGroupMemberRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源名称，用于限定范围。
+	// 格式示例: "organizations/123" 或 "projects/456"。
+	Parent      string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	UserId      int32                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	GroupMember *UserGroup             `protobuf:"bytes,3,opt,name=group_member,json=groupMember,proto3" json:"group_member,omitempty"`
+	UpdateMask  *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+}
+
+func (x *UpdateGroupMemberRequest) Reset() {
+	*x = UpdateGroupMemberRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_group_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateGroupMemberRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateGroupMemberRequest) ProtoMessage() {}
+
+func (x *UpdateGroupMemberRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_group_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateGroupMemberRequest.ProtoReflect.Descriptor instead.
+func (*UpdateGroupMemberRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_group_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *UpdateGroupMemberRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *UpdateGroupMemberRequest) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *UpdateGroupMemberRequest) GetGroupMember() *UserGroup {
+	if x != nil {
+		return x.GroupMember
+	}
+	return nil
+}
+
+func (x *UpdateGroupMemberRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.UpdateMask
+	}
+	return nil
+}
+
 var File_known_admin_v1_group_proto protoreflect.FileDescriptor
 
 var file_known_admin_v1_group_proto_rawDesc = []byte{
@@ -512,10 +737,39 @@ var file_known_admin_v1_group_proto_rawDesc = []byte{
 	0x01, 0x28, 0x09, 0x52, 0x0d, 0x6e, 0x65, 0x78, 0x74, 0x50, 0x61, 0x67, 0x65, 0x54, 0x6f, 0x6b,
 	0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x73, 0x69, 0x7a, 0x65,
 	0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x53, 0x69, 0x7a,
-	0x65, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
-	0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69,
-	0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b,
-	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x22, 0x80, 0x01, 0x0a, 0x19, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x47, 0x72, 0x6f, 0x75,
+	0x70, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x16, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x12, 0x4b, 0x0a, 0x0d, 0x67, 0x72, 0x6f, 0x75, 0x70,
+	0x5f, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x26,
+	0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e,
+	0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65,
+	0x72, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x52, 0x0c, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x65, 0x6d,
+	0x62, 0x65, 0x72, 0x73, 0x22, 0x1c, 0x0a, 0x1a, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x47, 0x72,
+	0x6f, 0x75, 0x70, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x4b, 0x0a, 0x18, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x47, 0x72, 0x6f, 0x75,
+	0x70, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16,
+	0x0a, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06,
+	0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69,
+	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22,
+	0xd3, 0x01, 0x0a, 0x18, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x4d,
+	0x65, 0x6d, 0x62, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06,
+	0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x70, 0x61,
+	0x72, 0x65, 0x6e, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x49, 0x0a,
+	0x0c, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x26, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76,
+	0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x52, 0x0b, 0x67, 0x72, 0x6f,
+	0x75, 0x70, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x3b, 0x0a, 0x0b, 0x75, 0x70, 0x64, 0x61,
+	0x74, 0x65, 0x5f, 0x6d, 0x61, 0x73, 0x6b, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e,
+	0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e,
+	0x46, 0x69, 0x65, 0x6c, 0x64, 0x4d, 0x61, 0x73, 0x6b, 0x52, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x4d, 0x61, 0x73, 0x6b, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
+	0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67,
+	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e,
+	0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -530,30 +784,37 @@ func file_known_admin_v1_group_proto_rawDescGZIP() []byte {
 	return file_known_admin_v1_group_proto_rawDescData
 }
 
-var file_known_admin_v1_group_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_known_admin_v1_group_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_known_admin_v1_group_proto_goTypes = []interface{}{
-	(*CreateGroupRequest)(nil),       // 0: grpc_kit.api.known.admin.v1.CreateGroupRequest
-	(*ListGroupsRequest)(nil),        // 1: grpc_kit.api.known.admin.v1.ListGroupsRequest
-	(*ListGroupsResponse)(nil),       // 2: grpc_kit.api.known.admin.v1.ListGroupsResponse
-	(*UpdateGroupRequest)(nil),       // 3: grpc_kit.api.known.admin.v1.UpdateGroupRequest
-	(*DeleteGroupRequest)(nil),       // 4: grpc_kit.api.known.admin.v1.DeleteGroupRequest
-	(*ListGroupMembersRequest)(nil),  // 5: grpc_kit.api.known.admin.v1.ListGroupMembersRequest
-	(*ListGroupMembersResponse)(nil), // 6: grpc_kit.api.known.admin.v1.ListGroupMembersResponse
-	(*Group)(nil),                    // 7: grpc_kit.api.known.admin.v1.Group
-	(*fieldmaskpb.FieldMask)(nil),    // 8: google.protobuf.FieldMask
-	(*UserGroup)(nil),                // 9: grpc_kit.api.known.admin.v1.UserGroup
+	(*CreateGroupRequest)(nil),         // 0: grpc_kit.api.known.admin.v1.CreateGroupRequest
+	(*ListGroupsRequest)(nil),          // 1: grpc_kit.api.known.admin.v1.ListGroupsRequest
+	(*ListGroupsResponse)(nil),         // 2: grpc_kit.api.known.admin.v1.ListGroupsResponse
+	(*UpdateGroupRequest)(nil),         // 3: grpc_kit.api.known.admin.v1.UpdateGroupRequest
+	(*DeleteGroupRequest)(nil),         // 4: grpc_kit.api.known.admin.v1.DeleteGroupRequest
+	(*ListGroupMembersRequest)(nil),    // 5: grpc_kit.api.known.admin.v1.ListGroupMembersRequest
+	(*ListGroupMembersResponse)(nil),   // 6: grpc_kit.api.known.admin.v1.ListGroupMembersResponse
+	(*CreateGroupMembersRequest)(nil),  // 7: grpc_kit.api.known.admin.v1.CreateGroupMembersRequest
+	(*CreateGroupMembersResponse)(nil), // 8: grpc_kit.api.known.admin.v1.CreateGroupMembersResponse
+	(*DeleteGroupMemberRequest)(nil),   // 9: grpc_kit.api.known.admin.v1.DeleteGroupMemberRequest
+	(*UpdateGroupMemberRequest)(nil),   // 10: grpc_kit.api.known.admin.v1.UpdateGroupMemberRequest
+	(*Group)(nil),                      // 11: grpc_kit.api.known.admin.v1.Group
+	(*fieldmaskpb.FieldMask)(nil),      // 12: google.protobuf.FieldMask
+	(*UserGroup)(nil),                  // 13: grpc_kit.api.known.admin.v1.UserGroup
 }
 var file_known_admin_v1_group_proto_depIdxs = []int32{
-	7, // 0: grpc_kit.api.known.admin.v1.CreateGroupRequest.group:type_name -> grpc_kit.api.known.admin.v1.Group
-	7, // 1: grpc_kit.api.known.admin.v1.ListGroupsResponse.groups:type_name -> grpc_kit.api.known.admin.v1.Group
-	7, // 2: grpc_kit.api.known.admin.v1.UpdateGroupRequest.group:type_name -> grpc_kit.api.known.admin.v1.Group
-	8, // 3: grpc_kit.api.known.admin.v1.UpdateGroupRequest.update_mask:type_name -> google.protobuf.FieldMask
-	9, // 4: grpc_kit.api.known.admin.v1.ListGroupMembersResponse.group_members:type_name -> grpc_kit.api.known.admin.v1.UserGroup
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	11, // 0: grpc_kit.api.known.admin.v1.CreateGroupRequest.group:type_name -> grpc_kit.api.known.admin.v1.Group
+	11, // 1: grpc_kit.api.known.admin.v1.ListGroupsResponse.groups:type_name -> grpc_kit.api.known.admin.v1.Group
+	11, // 2: grpc_kit.api.known.admin.v1.UpdateGroupRequest.group:type_name -> grpc_kit.api.known.admin.v1.Group
+	12, // 3: grpc_kit.api.known.admin.v1.UpdateGroupRequest.update_mask:type_name -> google.protobuf.FieldMask
+	13, // 4: grpc_kit.api.known.admin.v1.ListGroupMembersResponse.group_members:type_name -> grpc_kit.api.known.admin.v1.UserGroup
+	13, // 5: grpc_kit.api.known.admin.v1.CreateGroupMembersRequest.group_members:type_name -> grpc_kit.api.known.admin.v1.UserGroup
+	13, // 6: grpc_kit.api.known.admin.v1.UpdateGroupMemberRequest.group_member:type_name -> grpc_kit.api.known.admin.v1.UserGroup
+	12, // 7: grpc_kit.api.known.admin.v1.UpdateGroupMemberRequest.update_mask:type_name -> google.protobuf.FieldMask
+	8,  // [8:8] is the sub-list for method output_type
+	8,  // [8:8] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_group_proto_init() }
@@ -647,6 +908,54 @@ func file_known_admin_v1_group_proto_init() {
 				return nil
 			}
 		}
+		file_known_admin_v1_group_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateGroupMembersRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_group_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateGroupMembersResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_group_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeleteGroupMemberRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_group_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateGroupMemberRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_known_admin_v1_group_proto_msgTypes[5].OneofWrappers = []interface{}{
 		(*ListGroupMembersRequest_PageToken)(nil),
@@ -658,7 +967,7 @@ func file_known_admin_v1_group_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_group_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
