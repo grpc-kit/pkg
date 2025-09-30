@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -33,6 +34,31 @@ func I18NNameParse(rawBody string) *adminv1.I18NName {
 	}
 
 	_ = protojson.Unmarshal([]byte(rawBody), result)
+
+	return result
+}
+
+func MetadataJSON(metadata map[string]string) string {
+	if metadata == nil {
+		return ""
+	}
+
+	rawBody, err := json.Marshal(metadata)
+	if err != nil {
+		return ""
+	}
+
+	return string(rawBody)
+}
+
+func MetadataParse(rawBody string) map[string]string {
+	result := map[string]string{}
+
+	if rawBody == "" {
+		return result
+	}
+
+	_ = json.Unmarshal([]byte(rawBody), &result)
 
 	return result
 }

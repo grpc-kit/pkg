@@ -58,6 +58,10 @@ func (a *KnownAdminAPI) ListRoleUsers(ctx context.Context, req *adminv1.ListRole
 		userroles.RoleIDEQ(roleID),
 	).All(ctx)
 
+	if err != nil {
+		return nil, err
+	}
+
 	uidInts := make([]int, len(uidObjs))
 	for i, uidObj := range uidObjs {
 		uidInts[i] = int(uidObj.UserID)
