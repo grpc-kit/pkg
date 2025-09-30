@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 	"strconv"
+	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/usergroups"
@@ -247,8 +248,8 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 	members, err := db.UserGroups.Query().Select(
 		usergroups.FieldUserID,
 		usergroups.FieldGroupID,
-		usergroups.FieldRole,
-		usergroups.FieldStatus,
+		usergroups.FieldMemberRole,
+		usergroups.FieldMemberStatus,
 		usergroups.FieldCreatedBy,
 		usergroups.FieldUpdatedBy,
 		usergroups.FieldCreatedAt,
@@ -274,17 +275,140 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 		}
 
 		result.GroupMembers = append(result.GroupMembers, &adminv1.UserGroup{
-			Id:        int32(member.ID),
-			UserId:    int32(member.UserID),
-			GroupId:   int32(member.GroupID),
-			Role:      adminv1.UserGroup_Role(member.Role),
-			Status:    adminv1.UserGroup_Status(member.Status),
-			CreatedBy: int32(member.CreatedBy),
-			UpdatedBy: int32(member.UpdatedBy),
-			CreatedAt: timestamppb.New(member.CreatedAt),
-			Username:  member.Edges.LionUsers.Username,
-			Nickname:  member.Edges.LionUsers.Nickname,
+			Id:           int32(member.ID),
+			UserId:       int32(member.UserID),
+			Username:     member.Edges.LionUsers.Username,
+			Nickname:     member.Edges.LionUsers.Nickname,
+			GroupId:      int32(member.GroupID),
+			MemberRole:   adminv1.UserGroup_Role(member.MemberRole),
+			MemberStatus: adminv1.UserGroup_Status(member.MemberStatus),
+			JoinedAt:     timestamppb.New(member.JoinedAt),
+			ExpiredAt:    timestamppb.New(member.ExpiredAt),
+			CreatedBy:    int32(member.CreatedBy),
+			UpdatedBy:    int32(member.UpdatedBy),
+			CreatedAt:    timestamppb.New(member.CreatedAt),
+			UpdatedAt:    timestamppb.New(member.UpdatedAt),
+			Description:  member.Description,
 		})
+	}
+
+	return result, nil
+}
+
+// CreateGroupMembers 创建群组成员
+func (a *KnownAdminAPI) CreateGroupMembers(ctx context.Context, req *adminv1.CreateGroupMembersRequest) (*adminv1.CreateGroupMembersResponse, error) {
+	result := &adminv1.CreateGroupMembersResponse{}
+
+	if req.Parent == "" {
+		return result, errs.InvalidArgument(ctx).WithMessage("request body parent is empty")
+	}
+
+	userID, err := GetUserID(ctx)
+	if err != nil {
+		return result, err
+	}
+
+	groupID, err := strconv.Atoi(req.Parent)
+	if err != nil {
+		return result, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	allMembers := make([]*lion.UserGroupsCreate, 0)
+
+	for _, member := range req.GroupMembers {
+		user := db.UserGroups.Create().
+			SetUserID(int(member.UserId)).
+			SetGroupID(groupID).
+			SetMemberRole(int(member.MemberRole)).
+			SetMemberStatus(int(member.MemberStatus)).
+			SetCreatedBy(userID).
+			SetUpdatedBy(userID).
+			SetJoinedAt(time.Now()).
+			SetDescription(member.Description)
+
+		allMembers = append(allMembers, user)
+	}
+
+	_, err = db.UserGroups.CreateBulk(allMembers...).Save(ctx)
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+// DeleteGroupMember 删除群组成员
+func (a *KnownAdminAPI) DeleteGroupMember(ctx context.Context, req *adminv1.DeleteGroupMemberRequest) (*emptypb.Empty, error) {
+	groupID, err := strconv.Atoi(req.Parent)
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	// 执行删除
+	_, err = db.UserGroups.Delete().
+		Where(
+			usergroups.GroupID(groupID),
+			usergroups.UserID(int(req.UserId)),
+		).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+// UpdateGroupMember 更新群组成员
+func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.UpdateGroupMemberRequest) (*adminv1.UserGroup, error) {
+	result := &adminv1.UserGroup{}
+
+	if req.Parent == "" {
+		return result, errs.InvalidArgument(ctx).WithMessage("request body parent is empty")
+	}
+
+	userID, err := GetUserID(ctx)
+	if err != nil {
+		return result, err
+	}
+
+	groupID, err := strconv.Atoi(req.Parent)
+	if err != nil {
+		return result, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	if req.UpdateMask != nil && len(req.UpdateMask.Paths) != 0 {
+		x := db.UserGroups.Update()
+
+		for _, field := range req.UpdateMask.Paths {
+			switch field {
+			case usergroups.FieldMemberRole:
+				x.SetMemberRole(int(req.GroupMember.MemberRole))
+			case usergroups.FieldMemberStatus:
+				x.SetMemberStatus(int(req.GroupMember.MemberStatus))
+			case usergroups.FieldDescription:
+				x.SetDescription(req.GroupMember.Description)
+			}
+		}
+
+		x.SetUpdatedBy(userID).
+			SetUpdatedAt(time.Now()).Where(
+			usergroups.GroupIDEQ(groupID),
+			usergroups.UserIDEQ(int(req.UserId)),
+		).Save(ctx)
 	}
 
 	return result, nil
