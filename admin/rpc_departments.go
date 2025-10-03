@@ -4,6 +4,8 @@ import (
 	"context"
 	"sort"
 
+	"google.golang.org/protobuf/types/known/emptypb"
+
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
@@ -12,7 +14,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/users"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // CreateDepartment 创建部门
@@ -260,12 +261,18 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 
 		for _, path := range req.UpdateMask.Paths {
 			switch path {
-			case "name":
+			case departments.FieldName:
 				x.SetName(req.Department.Name)
 			case "i18n_name.en_us":
 			// TODO;
-			case "order_weight":
+			case departments.FieldOrderWeight:
 				x.SetOrderWeight(int(req.Department.OrderWeight))
+			case departments.FieldParentID:
+				if req.Department.ParentId == 0 || req.Department.ParentId == req.Department.Id {
+					continue
+				}
+
+				x.SetParentID(int(req.Department.ParentId))
 			}
 		}
 
