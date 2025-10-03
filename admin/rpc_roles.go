@@ -86,7 +86,7 @@ func (a *KnownAdminAPI) ListRoleUsers(ctx context.Context, req *adminv1.ListRole
 
 	for _, user := range userObjs {
 		result.Users = append(result.Users, &adminv1.User{
-			Id:       int32(user.ID),
+			Id:       int64(user.ID),
 			Username: user.Username,
 			Status:   adminv1.User_Status(user.Status),
 			Nickname: user.Nickname,

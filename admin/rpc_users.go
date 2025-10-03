@@ -136,7 +136,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	}
 
 	result = &adminv1.User{
-		Id:          int32(thisUser.ID),
+		Id:          int64(thisUser.ID),
 		Username:    thisUser.Username,
 		Realname:    req.GetUser().Realname,
 		NationalId:  req.GetUser().NationalId,
@@ -364,7 +364,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		_ = proto.Unmarshal(phoneNumberByte, &phoneNumber)
 
 		result.Users = append(result.Users, &adminv1.User{
-			Id:                  int32(user.ID),
+			Id:                  int64(user.ID),
 			Username:            user.Username,
 			Status:              adminv1.User_Status(user.Status),
 			Realname:            string(realname),
@@ -560,7 +560,7 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 	_ = proto.Unmarshal(addressByte, &address)
 
 	result := &adminv1.User{
-		Id:                  int32(row.ID),
+		Id:                  int64(row.ID),
 		Username:            row.Username,
 		Status:              adminv1.User_Status(row.Status),
 		Realname:            string(crypto.DecryptAESMust(a.config.aesKey, row.RealnameEncrypted)),
