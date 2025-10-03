@@ -93,7 +93,7 @@ func (Users) Fields() []ent.Field {
 			Default([]byte{}).
 			Comment("用户的地址信息"),
 		field.Int("department_id").
-			Default(0).
+			Default(1).
 			Comment("部门 ID"),
 		field.String("description").
 			Default("").
@@ -110,13 +110,11 @@ func (Users) Edges() []ent.Edge {
 		edge.To("lion_user_groups", UserGroups.Type),
 		edge.To("lion_user_identities", UserIdentities.Type),
 		edge.To("lion_user_departments", UserDepartments.Type),
-		/*
-			edge.From("lion_departments", Departments.Type).
-				Ref("lion_users").
-				Field("department_id").
-				Unique().
-				Required(),
-		*/
+		edge.From("lion_departments", Departments.Type).
+			Ref("lion_users").
+			Field("department_id").
+			Unique().
+			Required(),
 	}
 }
 
