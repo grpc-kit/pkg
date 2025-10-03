@@ -80,6 +80,11 @@ func RealnameEncrypted(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldRealnameEncrypted, v))
 }
 
+// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
+func Type(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldType, v))
+}
+
 // Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
 func Status(v int) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldStatus, v))
@@ -168,11 +173,6 @@ func PhoneNumberVerified(v bool) predicate.Users {
 // AddressEncrypted applies equality check predicate on the "address_encrypted" field. It's identical to AddressEncryptedEQ.
 func AddressEncrypted(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldAddressEncrypted, v))
-}
-
-// DepartmentID applies equality check predicate on the "department_id" field. It's identical to DepartmentIDEQ.
-func DepartmentID(v int) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldDepartmentID, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
@@ -415,6 +415,56 @@ func RealnameEncryptedLTE(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldRealnameEncrypted, v))
 }
 
+// RealnameEncryptedIsNil applies the IsNil predicate on the "realname_encrypted" field.
+func RealnameEncryptedIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldRealnameEncrypted))
+}
+
+// RealnameEncryptedNotNil applies the NotNil predicate on the "realname_encrypted" field.
+func RealnameEncryptedNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldRealnameEncrypted))
+}
+
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldType, v))
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldNEQ(FieldType, v))
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldIn(FieldType, vs...))
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldNotIn(FieldType, vs...))
+}
+
+// TypeGT applies the GT predicate on the "type" field.
+func TypeGT(v int) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldType, v))
+}
+
+// TypeGTE applies the GTE predicate on the "type" field.
+func TypeGTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldType, v))
+}
+
+// TypeLT applies the LT predicate on the "type" field.
+func TypeLT(v int) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldType, v))
+}
+
+// TypeLTE applies the LTE predicate on the "type" field.
+func TypeLTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldType, v))
+}
+
 // StatusEQ applies the EQ predicate on the "status" field.
 func StatusEQ(v int) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldStatus, v))
@@ -493,6 +543,16 @@ func NationalIDEncryptedLT(v []byte) predicate.Users {
 // NationalIDEncryptedLTE applies the LTE predicate on the "national_id_encrypted" field.
 func NationalIDEncryptedLTE(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldNationalIDEncrypted, v))
+}
+
+// NationalIDEncryptedIsNil applies the IsNil predicate on the "national_id_encrypted" field.
+func NationalIDEncryptedIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldNationalIDEncrypted))
+}
+
+// NationalIDEncryptedNotNil applies the NotNil predicate on the "national_id_encrypted" field.
+func NationalIDEncryptedNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldNationalIDEncrypted))
 }
 
 // NationalIDHashEQ applies the EQ predicate on the "national_id_hash" field.
@@ -870,6 +930,16 @@ func EmailEncryptedLTE(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldEmailEncrypted, v))
 }
 
+// EmailEncryptedIsNil applies the IsNil predicate on the "email_encrypted" field.
+func EmailEncryptedIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldEmailEncrypted))
+}
+
+// EmailEncryptedNotNil applies the NotNil predicate on the "email_encrypted" field.
+func EmailEncryptedNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldEmailEncrypted))
+}
+
 // EmailHashEQ applies the EQ predicate on the "email_hash" field.
 func EmailHashEQ(v string) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldEmailHash, v))
@@ -1215,6 +1285,16 @@ func PhoneNumberEncryptedLTE(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldPhoneNumberEncrypted, v))
 }
 
+// PhoneNumberEncryptedIsNil applies the IsNil predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldPhoneNumberEncrypted))
+}
+
+// PhoneNumberEncryptedNotNil applies the NotNil predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldPhoneNumberEncrypted))
+}
+
 // PhoneNumberHashEQ applies the EQ predicate on the "phone_number_hash" field.
 func PhoneNumberHashEQ(v string) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldPhoneNumberHash, v))
@@ -1340,44 +1420,14 @@ func AddressEncryptedLTE(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldAddressEncrypted, v))
 }
 
-// DepartmentIDEQ applies the EQ predicate on the "department_id" field.
-func DepartmentIDEQ(v int) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldDepartmentID, v))
+// AddressEncryptedIsNil applies the IsNil predicate on the "address_encrypted" field.
+func AddressEncryptedIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldAddressEncrypted))
 }
 
-// DepartmentIDNEQ applies the NEQ predicate on the "department_id" field.
-func DepartmentIDNEQ(v int) predicate.Users {
-	return predicate.Users(sql.FieldNEQ(FieldDepartmentID, v))
-}
-
-// DepartmentIDIn applies the In predicate on the "department_id" field.
-func DepartmentIDIn(vs ...int) predicate.Users {
-	return predicate.Users(sql.FieldIn(FieldDepartmentID, vs...))
-}
-
-// DepartmentIDNotIn applies the NotIn predicate on the "department_id" field.
-func DepartmentIDNotIn(vs ...int) predicate.Users {
-	return predicate.Users(sql.FieldNotIn(FieldDepartmentID, vs...))
-}
-
-// DepartmentIDGT applies the GT predicate on the "department_id" field.
-func DepartmentIDGT(v int) predicate.Users {
-	return predicate.Users(sql.FieldGT(FieldDepartmentID, v))
-}
-
-// DepartmentIDGTE applies the GTE predicate on the "department_id" field.
-func DepartmentIDGTE(v int) predicate.Users {
-	return predicate.Users(sql.FieldGTE(FieldDepartmentID, v))
-}
-
-// DepartmentIDLT applies the LT predicate on the "department_id" field.
-func DepartmentIDLT(v int) predicate.Users {
-	return predicate.Users(sql.FieldLT(FieldDepartmentID, v))
-}
-
-// DepartmentIDLTE applies the LTE predicate on the "department_id" field.
-func DepartmentIDLTE(v int) predicate.Users {
-	return predicate.Users(sql.FieldLTE(FieldDepartmentID, v))
+// AddressEncryptedNotNil applies the NotNil predicate on the "address_encrypted" field.
+func AddressEncryptedNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldAddressEncrypted))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.

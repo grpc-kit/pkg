@@ -29,6 +29,11 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		return nil, err
 	}
 
+	departmentID := int(req.Group.DepartmentId)
+	if departmentID == 0 {
+		departmentID = 1
+	}
+
 	group, err := db.Groups.Create().
 		SetName(req.Group.Name).
 		SetType(int(req.Group.Type.Number())).
@@ -39,7 +44,7 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		SetMaxMembers(int(req.Group.MaxMembers)).
 		SetMetadata(MetadataJSON(req.Group.Metadata)).
 		SetExternalID(req.Group.ExternalId).
-		SetDepartmentID(int(req.Group.DepartmentId)).
+		SetDepartmentID(departmentID).
 		SetDescription(req.Group.Description).
 		SetCreatedBy(int(req.Group.CreatedBy)).
 		SetUpdatedBy(int(req.Group.UpdatedBy)).
@@ -59,7 +64,7 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		MaxMembers:   int32(group.MaxMembers),
 		Metadata:     MetadataParse(group.Metadata),
 		ExternalId:   group.ExternalID,
-		DepartmentId: int32(group.DepartmentID),
+		DepartmentId: int32(departmentID),
 		Description:  group.Description,
 		CreatedBy:    int32(group.CreatedBy),
 		UpdatedBy:    int32(group.UpdatedBy),

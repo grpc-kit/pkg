@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
@@ -16,10 +17,12 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/schema"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -117,9 +120,11 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	if req.GetUser().Birthday == nil {
 		// userCreate.SetBirthdate(time.)
 	}
-	if req.GetUser().GetDepartment() != nil {
-		userCreate.SetDepartmentID(int(req.User.GetDepartment().GetId()))
-	}
+	/*
+		if req.GetUser().GetDepartment() != nil {
+			userCreate.SetDepartmentID(int(req.User.GetDepartment().GetId()))
+		}
+	*/
 
 	thisUser, err := userCreate.Save(ctx)
 	if err != nil {
@@ -166,6 +171,8 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		users.FieldWebsite,
 		users.FieldZoneinfo,
 		users.FieldLocale,
+		users.FieldCreatedAt,
+		users.FieldUpdatedAt,
 	}
 
 	fullViewFields := append(basicViewFields, []string{
@@ -178,7 +185,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		users.FieldPhoneNumberEncrypted,
 		users.FieldPhoneNumberVerified,
 		users.FieldAddressEncrypted,
-		users.FieldDepartmentID,
+		// users.FieldDepartmentID,
 		users.FieldDescription,
 	}...)
 
@@ -232,7 +239,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		return nil, err
 	}
 
-	var allIDs []int
+	var allDepartmentIDs []int
 
 	rdObj, err := a.config.db.RoleDepartments.Query().
 		Select(
@@ -247,7 +254,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	}
 
 	for _, v := range rdObj {
-		allIDs = append(allIDs, v.DepartmentID)
+		allDepartmentIDs = append(allDepartmentIDs, v.DepartmentID)
 	}
 
 	// TODO; 先简单提取部门 ID
@@ -256,7 +263,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		if ok {
 			// 判断该部门 ID 是否在 allIDs 中
 			hasAllowDepartment := false
-			for _, v := range allIDs {
+			for _, v := range allDepartmentIDs {
 				if v == departmentID {
 					hasAllowDepartment = true
 					break
@@ -267,7 +274,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 			}
 
 			// 重新获取所有子部门
-			allIDs, err = a.getAllSubDeptIDs(ctx, departmentID)
+			allDepartmentIDs, err = a.getAllSubDeptIDs(ctx, departmentID)
 			if err != nil {
 				return nil, err
 			}
@@ -294,8 +301,23 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		}
 	}
 
+	allUserIDs := make([]int, 0)
+
+	dps, err := a.config.db.UserDepartments.Query().
+		Select(
+			userdepartments.FieldUserID,
+		).Where(
+		userdepartments.DepartmentIDIn(allDepartmentIDs...),
+	).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range dps {
+		allUserIDs = append(allUserIDs, v.UserID)
+	}
+
 	userQuery := a.config.db.Users.Query()
-	userQuery = userQuery.Where(users.DepartmentIDIn(allIDs...))
+	userQuery = userQuery.Where(users.IDIn(allUserIDs...))
 	if !req.GetShowDeleted() {
 		userQuery = userQuery.Where(users.DeletedAtIsNil())
 	}
@@ -381,6 +403,8 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 			Locale:              user.Locale,
 			PhoneNumber:         &phoneNumber,
 			PhoneNumberVerified: user.PhoneNumberVerified,
+			CreatedAt:           timestamppb.New(user.CreatedAt),
+			UpdatedAt:           timestamppb.New(user.UpdatedAt),
 			// Address:             address,
 		})
 	}
@@ -401,8 +425,29 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 			// a.logger.Infof("update mask path: %v", path)
 
 			switch path {
+			// 基本信息
+			case users.FieldUsername:
+				x.SetUsername(req.User.Username)
+			case users.FieldNickname:
+				x.SetNickname(req.User.Nickname)
+			case users.FieldProfile:
+				x.SetProfile(req.User.Profile)
+			case users.FieldPicture:
+				x.SetPicture(req.User.Picture)
+			case users.FieldWebsite:
+				x.SetWebsite(req.User.Website)
+			case users.FieldZoneinfo:
+				x.SetZoneinfo(req.User.Zoneinfo)
+			case users.FieldLocale:
+				x.SetLocale(req.User.Locale)
+			case users.FieldType:
+				x.SetType(int(req.User.Type))
 			case users.FieldStatus:
 				x.SetStatus(int(req.User.Status))
+
+				// 身份信息
+			case users.FieldGender:
+				x.SetGender(int(req.User.Gender))
 			case schema.FieldNameNormalize(users.FieldRealnameEncrypted):
 				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.Realname))
 				if err == nil {
@@ -413,29 +458,19 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 				if err == nil {
 					x.SetNationalIDEncrypted(encBody)
 				}
-			case users.FieldNickname:
-				x.SetNickname(req.User.Nickname)
-			case users.FieldProfile:
-				x.SetProfile(req.User.Profile)
-			case users.FieldPicture:
-				x.SetPicture(req.User.Picture)
-			case users.FieldWebsite:
-				x.SetWebsite(req.User.Website)
+			case users.FieldBirthdate:
+				x.SetBirthdate(req.User.Birthday.AsTime())
+
+				// 联系信息
+			case users.FieldEmailVerified:
+				x.SetEmailVerified(req.User.EmailVerified)
 			case schema.FieldNameNormalize(users.FieldEmailEncrypted):
 				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.Email))
 				if err == nil {
 					x.SetEmailEncrypted(encBody)
 				}
-			case users.FieldEmailVerified:
-				x.SetEmailVerified(req.User.EmailVerified)
-			case users.FieldGender:
-				x.SetGender(int(req.User.Gender))
-			case users.FieldBirthdate:
-				x.SetBirthdate(req.User.Birthday.AsTime())
-			case users.FieldZoneinfo:
-				x.SetZoneinfo(req.User.Zoneinfo)
-			case users.FieldLocale:
-				x.SetLocale(req.User.Locale)
+			case users.FieldPhoneNumberVerified:
+				x.SetPhoneNumberVerified(req.User.PhoneNumberVerified)
 			case "phone_number.national_number":
 				rawBody, err := proto.Marshal(req.User.PhoneNumber)
 				if err != nil {
@@ -445,8 +480,8 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 				if err == nil {
 					x.SetPhoneNumberEncrypted(encBody)
 				}
-			case users.FieldPhoneNumberVerified:
-				x.SetPhoneNumberVerified(req.User.PhoneNumberVerified)
+
+				// 地址信息
 			case "address.street_address":
 				rawBody, err := proto.Marshal(req.User.Address)
 				if err != nil {
@@ -455,48 +490,6 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 				encBody, err := crypto.EncryptAES(a.config.aesKey, rawBody)
 				if err == nil {
 					x.SetAddressEncrypted(encBody)
-				}
-			case "identities":
-				for _, v := range req.GetUser().Identities {
-					if v.ProviderName != "local" {
-						continue
-					}
-
-					provider, err := a.config.db.AuthProviders.Query().
-						Select(
-							authproviders.FieldName,
-						).
-						Where(authproviders.NameEQ(v.ProviderName)).
-						WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
-							q.Select(
-								useridentities.FieldID,
-								useridentities.FieldUserID,
-								useridentities.FieldProviderID,
-								useridentities.FieldProviderUserID,
-							).Where(
-								useridentities.UserIDEQ(int(req.User.Id)),
-							)
-						}).
-						Only(ctx)
-					if err != nil {
-						return nil, err
-					}
-
-					// 不存在则新建
-					if len(provider.Edges.LionUserIdentities) == 0 {
-						a.config.db.UserIdentities.Create().
-							SetUserID(int(req.User.Id)).
-							SetProviderID(provider.ID).
-							SetProviderUserID(strconv.Itoa(int(req.User.Id))).
-							SetPasswordHash(crypto.BcryptHashMust(v.PasswordHash)).Save(ctx)
-					} else {
-						a.config.db.UserIdentities.Update().
-							SetPasswordHash(crypto.BcryptHashMust(v.PasswordHash)).
-							Where(
-								useridentities.UserIDEQ(int(req.User.Id)),
-								useridentities.ProviderIDEQ(provider.ID),
-							).Save(ctx)
-					}
 				}
 			}
 		}
@@ -536,7 +529,6 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 		users.FieldPhoneNumberEncrypted,
 		users.FieldPhoneNumberVerified,
 		users.FieldAddressEncrypted,
-		users.FieldDepartmentID,
 		users.FieldDescription,
 	}...)
 
@@ -581,6 +573,62 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 	}
 
 	return result, nil
+}
+
+// UpdateUserPassword 修改用户密码
+func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.UpdateUserPasswordRequest) (*emptypb.Empty, error) {
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	tx, err := db.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	provider, err := tx.AuthProviders.Query().
+		Select(
+			authproviders.FieldName,
+		).
+		Where(authproviders.TypeEQ(int(adminv1.AuthProvider_TYPE_LOCAL.Number()))).
+		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
+			q.Select(
+				useridentities.FieldID,
+				useridentities.FieldUserID,
+				useridentities.FieldProviderID,
+				useridentities.FieldProviderUserID,
+			).Where(
+				useridentities.UserIDEQ(int(req.UserId)),
+			)
+		}).
+		Only(ctx)
+	if err != nil {
+		defer tx.Rollback()
+		return nil, err
+	}
+
+	// 不存在则新建
+	if len(provider.Edges.LionUserIdentities) == 0 {
+		tx.UserIdentities.Create().
+			SetUserID(int(req.UserId)).
+			SetProviderID(provider.ID).
+			SetProviderUserID(strconv.Itoa(int(req.UserId))).
+			SetPasswordChangedAt(time.Now()).
+			SetPasswordHash(crypto.BcryptHashMust(req.NewPasswordHash)).Save(ctx)
+	} else {
+		tx.UserIdentities.Update().
+			SetPasswordChangedAt(time.Now()).
+			SetPasswordHash(crypto.BcryptHashMust(req.NewPasswordHash)).
+			Where(
+				useridentities.UserIDEQ(int(req.UserId)),
+				useridentities.ProviderIDEQ(provider.ID),
+			).Save(ctx)
+	}
+
+	tx.Commit()
+
+	return &emptypb.Empty{}, nil
 }
 
 func (a *KnownAdminAPI) getDepartmentID(filter string) (int, bool) {

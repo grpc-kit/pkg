@@ -13,7 +13,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
-	"github.com/grpc-kit/pkg/lion/users"
 )
 
 // CreateDepartment 创建部门
@@ -232,17 +231,19 @@ func (a *KnownAdminAPI) DeleteDepartment(ctx context.Context, req *adminv1.Delet
 	hasFound = checkDep(deps.Departments)
 	if hasFound {
 		// TODO; 还需判断该部门下是否有用户
-		count := a.config.db.Users.Query().Where(users.DepartmentIDEQ(int(req.Id))).CountX(ctx)
-		if count > 0 {
-			return empty, errs.PermissionDenied(ctx).WithMessage("department has users")
-		}
+		/*
+			count := a.config.db.Users.Query().Where(users.DepartmentIDEQ(int(req.Id))).CountX(ctx)
+			if count > 0 {
+				return empty, errs.PermissionDenied(ctx).WithMessage("department has users")
+			}
 
-		_, err = a.config.db.Departments.Delete().
-			Where(
-				departments.ID(int(req.Id)),
-			).Exec(ctx)
+			_, err = a.config.db.Departments.Delete().
+				Where(
+					departments.ID(int(req.Id)),
+				).Exec(ctx)
 
-		return empty, err
+			return empty, err
+		*/
 	}
 
 	return empty, errs.PermissionDenied(ctx)

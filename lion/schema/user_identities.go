@@ -58,6 +58,10 @@ func (UserIdentities) Fields() []ent.Field {
 		field.Time("token_expires_at").
 			Optional().
 			Comment("访问令牌的过期时间"),
+		field.Time("last_login_at").
+			Optional().
+			Nillable().
+			Comment("最后登录时间"),
 	}
 }
 

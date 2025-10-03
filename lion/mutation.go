@@ -12923,6 +12923,7 @@ type UserIdentitiesMutation struct {
 	password_changed_at        *time.Time
 	password_expires_at        *time.Time
 	token_expires_at           *time.Time
+	last_login_at              *time.Time
 	clearedFields              map[string]struct{}
 	lion_users                 *int
 	clearedlion_users          bool
@@ -13613,6 +13614,55 @@ func (m *UserIdentitiesMutation) ResetTokenExpiresAt() {
 	delete(m.clearedFields, useridentities.FieldTokenExpiresAt)
 }
 
+// SetLastLoginAt sets the "last_login_at" field.
+func (m *UserIdentitiesMutation) SetLastLoginAt(t time.Time) {
+	m.last_login_at = &t
+}
+
+// LastLoginAt returns the value of the "last_login_at" field in the mutation.
+func (m *UserIdentitiesMutation) LastLoginAt() (r time.Time, exists bool) {
+	v := m.last_login_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastLoginAt returns the old "last_login_at" field's value of the UserIdentities entity.
+// If the UserIdentities object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserIdentitiesMutation) OldLastLoginAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastLoginAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastLoginAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastLoginAt: %w", err)
+	}
+	return oldValue.LastLoginAt, nil
+}
+
+// ClearLastLoginAt clears the value of the "last_login_at" field.
+func (m *UserIdentitiesMutation) ClearLastLoginAt() {
+	m.last_login_at = nil
+	m.clearedFields[useridentities.FieldLastLoginAt] = struct{}{}
+}
+
+// LastLoginAtCleared returns if the "last_login_at" field was cleared in this mutation.
+func (m *UserIdentitiesMutation) LastLoginAtCleared() bool {
+	_, ok := m.clearedFields[useridentities.FieldLastLoginAt]
+	return ok
+}
+
+// ResetLastLoginAt resets all changes to the "last_login_at" field.
+func (m *UserIdentitiesMutation) ResetLastLoginAt() {
+	m.last_login_at = nil
+	delete(m.clearedFields, useridentities.FieldLastLoginAt)
+}
+
 // SetLionUsersID sets the "lion_users" edge to the Users entity by id.
 func (m *UserIdentitiesMutation) SetLionUsersID(id int) {
 	m.lion_users = &id
@@ -13727,7 +13777,7 @@ func (m *UserIdentitiesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserIdentitiesMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 15)
 	if m.created_at != nil {
 		fields = append(fields, useridentities.FieldCreatedAt)
 	}
@@ -13770,6 +13820,9 @@ func (m *UserIdentitiesMutation) Fields() []string {
 	if m.token_expires_at != nil {
 		fields = append(fields, useridentities.FieldTokenExpiresAt)
 	}
+	if m.last_login_at != nil {
+		fields = append(fields, useridentities.FieldLastLoginAt)
+	}
 	return fields
 }
 
@@ -13806,6 +13859,8 @@ func (m *UserIdentitiesMutation) Field(name string) (ent.Value, bool) {
 		return m.PasswordExpiresAt()
 	case useridentities.FieldTokenExpiresAt:
 		return m.TokenExpiresAt()
+	case useridentities.FieldLastLoginAt:
+		return m.LastLoginAt()
 	}
 	return nil, false
 }
@@ -13843,6 +13898,8 @@ func (m *UserIdentitiesMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldPasswordExpiresAt(ctx)
 	case useridentities.FieldTokenExpiresAt:
 		return m.OldTokenExpiresAt(ctx)
+	case useridentities.FieldLastLoginAt:
+		return m.OldLastLoginAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown UserIdentities field %s", name)
 }
@@ -13950,6 +14007,13 @@ func (m *UserIdentitiesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTokenExpiresAt(v)
 		return nil
+	case useridentities.FieldLastLoginAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastLoginAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown UserIdentities field %s", name)
 }
@@ -14001,6 +14065,9 @@ func (m *UserIdentitiesMutation) ClearedFields() []string {
 	if m.FieldCleared(useridentities.FieldTokenExpiresAt) {
 		fields = append(fields, useridentities.FieldTokenExpiresAt)
 	}
+	if m.FieldCleared(useridentities.FieldLastLoginAt) {
+		fields = append(fields, useridentities.FieldLastLoginAt)
+	}
 	return fields
 }
 
@@ -14032,6 +14099,9 @@ func (m *UserIdentitiesMutation) ClearField(name string) error {
 		return nil
 	case useridentities.FieldTokenExpiresAt:
 		m.ClearTokenExpiresAt()
+		return nil
+	case useridentities.FieldLastLoginAt:
+		m.ClearLastLoginAt()
 		return nil
 	}
 	return fmt.Errorf("unknown UserIdentities nullable field %s", name)
@@ -14082,6 +14152,9 @@ func (m *UserIdentitiesMutation) ResetField(name string) error {
 		return nil
 	case useridentities.FieldTokenExpiresAt:
 		m.ResetTokenExpiresAt()
+		return nil
+	case useridentities.FieldLastLoginAt:
+		m.ResetLastLoginAt()
 		return nil
 	}
 	return fmt.Errorf("unknown UserIdentities field %s", name)
@@ -15461,6 +15534,8 @@ type UsersMutation struct {
 	deleted_at                   *time.Time
 	username                     *string
 	realname_encrypted           *[]byte
+	_type                        *int
+	add_type                     *int
 	status                       *int
 	addstatus                    *int
 	national_id_encrypted        *[]byte
@@ -15481,8 +15556,6 @@ type UsersMutation struct {
 	phone_number_hash            *string
 	phone_number_verified        *bool
 	address_encrypted            *[]byte
-	department_id                *int
-	adddepartment_id             *int
 	description                  *string
 	clearedFields                map[string]struct{}
 	lion_user_roles              map[int]struct{}
@@ -15788,9 +15861,78 @@ func (m *UsersMutation) OldRealnameEncrypted(ctx context.Context) (v []byte, err
 	return oldValue.RealnameEncrypted, nil
 }
 
+// ClearRealnameEncrypted clears the value of the "realname_encrypted" field.
+func (m *UsersMutation) ClearRealnameEncrypted() {
+	m.realname_encrypted = nil
+	m.clearedFields[users.FieldRealnameEncrypted] = struct{}{}
+}
+
+// RealnameEncryptedCleared returns if the "realname_encrypted" field was cleared in this mutation.
+func (m *UsersMutation) RealnameEncryptedCleared() bool {
+	_, ok := m.clearedFields[users.FieldRealnameEncrypted]
+	return ok
+}
+
 // ResetRealnameEncrypted resets all changes to the "realname_encrypted" field.
 func (m *UsersMutation) ResetRealnameEncrypted() {
 	m.realname_encrypted = nil
+	delete(m.clearedFields, users.FieldRealnameEncrypted)
+}
+
+// SetType sets the "type" field.
+func (m *UsersMutation) SetType(i int) {
+	m._type = &i
+	m.add_type = nil
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *UsersMutation) GetType() (r int, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the Users entity.
+// If the Users object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UsersMutation) OldType(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// AddType adds i to the "type" field.
+func (m *UsersMutation) AddType(i int) {
+	if m.add_type != nil {
+		*m.add_type += i
+	} else {
+		m.add_type = &i
+	}
+}
+
+// AddedType returns the value that was added to the "type" field in this mutation.
+func (m *UsersMutation) AddedType() (r int, exists bool) {
+	v := m.add_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *UsersMutation) ResetType() {
+	m._type = nil
+	m.add_type = nil
 }
 
 // SetStatus sets the "status" field.
@@ -15880,9 +16022,22 @@ func (m *UsersMutation) OldNationalIDEncrypted(ctx context.Context) (v []byte, e
 	return oldValue.NationalIDEncrypted, nil
 }
 
+// ClearNationalIDEncrypted clears the value of the "national_id_encrypted" field.
+func (m *UsersMutation) ClearNationalIDEncrypted() {
+	m.national_id_encrypted = nil
+	m.clearedFields[users.FieldNationalIDEncrypted] = struct{}{}
+}
+
+// NationalIDEncryptedCleared returns if the "national_id_encrypted" field was cleared in this mutation.
+func (m *UsersMutation) NationalIDEncryptedCleared() bool {
+	_, ok := m.clearedFields[users.FieldNationalIDEncrypted]
+	return ok
+}
+
 // ResetNationalIDEncrypted resets all changes to the "national_id_encrypted" field.
 func (m *UsersMutation) ResetNationalIDEncrypted() {
 	m.national_id_encrypted = nil
+	delete(m.clearedFields, users.FieldNationalIDEncrypted)
 }
 
 // SetNationalIDHash sets the "national_id_hash" field.
@@ -16109,9 +16264,22 @@ func (m *UsersMutation) OldEmailEncrypted(ctx context.Context) (v []byte, err er
 	return oldValue.EmailEncrypted, nil
 }
 
+// ClearEmailEncrypted clears the value of the "email_encrypted" field.
+func (m *UsersMutation) ClearEmailEncrypted() {
+	m.email_encrypted = nil
+	m.clearedFields[users.FieldEmailEncrypted] = struct{}{}
+}
+
+// EmailEncryptedCleared returns if the "email_encrypted" field was cleared in this mutation.
+func (m *UsersMutation) EmailEncryptedCleared() bool {
+	_, ok := m.clearedFields[users.FieldEmailEncrypted]
+	return ok
+}
+
 // ResetEmailEncrypted resets all changes to the "email_encrypted" field.
 func (m *UsersMutation) ResetEmailEncrypted() {
 	m.email_encrypted = nil
+	delete(m.clearedFields, users.FieldEmailEncrypted)
 }
 
 // SetEmailHash sets the "email_hash" field.
@@ -16407,9 +16575,22 @@ func (m *UsersMutation) OldPhoneNumberEncrypted(ctx context.Context) (v []byte, 
 	return oldValue.PhoneNumberEncrypted, nil
 }
 
+// ClearPhoneNumberEncrypted clears the value of the "phone_number_encrypted" field.
+func (m *UsersMutation) ClearPhoneNumberEncrypted() {
+	m.phone_number_encrypted = nil
+	m.clearedFields[users.FieldPhoneNumberEncrypted] = struct{}{}
+}
+
+// PhoneNumberEncryptedCleared returns if the "phone_number_encrypted" field was cleared in this mutation.
+func (m *UsersMutation) PhoneNumberEncryptedCleared() bool {
+	_, ok := m.clearedFields[users.FieldPhoneNumberEncrypted]
+	return ok
+}
+
 // ResetPhoneNumberEncrypted resets all changes to the "phone_number_encrypted" field.
 func (m *UsersMutation) ResetPhoneNumberEncrypted() {
 	m.phone_number_encrypted = nil
+	delete(m.clearedFields, users.FieldPhoneNumberEncrypted)
 }
 
 // SetPhoneNumberHash sets the "phone_number_hash" field.
@@ -16528,65 +16709,22 @@ func (m *UsersMutation) OldAddressEncrypted(ctx context.Context) (v []byte, err 
 	return oldValue.AddressEncrypted, nil
 }
 
+// ClearAddressEncrypted clears the value of the "address_encrypted" field.
+func (m *UsersMutation) ClearAddressEncrypted() {
+	m.address_encrypted = nil
+	m.clearedFields[users.FieldAddressEncrypted] = struct{}{}
+}
+
+// AddressEncryptedCleared returns if the "address_encrypted" field was cleared in this mutation.
+func (m *UsersMutation) AddressEncryptedCleared() bool {
+	_, ok := m.clearedFields[users.FieldAddressEncrypted]
+	return ok
+}
+
 // ResetAddressEncrypted resets all changes to the "address_encrypted" field.
 func (m *UsersMutation) ResetAddressEncrypted() {
 	m.address_encrypted = nil
-}
-
-// SetDepartmentID sets the "department_id" field.
-func (m *UsersMutation) SetDepartmentID(i int) {
-	m.department_id = &i
-	m.adddepartment_id = nil
-}
-
-// DepartmentID returns the value of the "department_id" field in the mutation.
-func (m *UsersMutation) DepartmentID() (r int, exists bool) {
-	v := m.department_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDepartmentID returns the old "department_id" field's value of the Users entity.
-// If the Users object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldDepartmentID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDepartmentID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDepartmentID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDepartmentID: %w", err)
-	}
-	return oldValue.DepartmentID, nil
-}
-
-// AddDepartmentID adds i to the "department_id" field.
-func (m *UsersMutation) AddDepartmentID(i int) {
-	if m.adddepartment_id != nil {
-		*m.adddepartment_id += i
-	} else {
-		m.adddepartment_id = &i
-	}
-}
-
-// AddedDepartmentID returns the value that was added to the "department_id" field in this mutation.
-func (m *UsersMutation) AddedDepartmentID() (r int, exists bool) {
-	v := m.adddepartment_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetDepartmentID resets all changes to the "department_id" field.
-func (m *UsersMutation) ResetDepartmentID() {
-	m.department_id = nil
-	m.adddepartment_id = nil
+	delete(m.clearedFields, users.FieldAddressEncrypted)
 }
 
 // SetDescription sets the "description" field.
@@ -16891,6 +17029,9 @@ func (m *UsersMutation) Fields() []string {
 	if m.realname_encrypted != nil {
 		fields = append(fields, users.FieldRealnameEncrypted)
 	}
+	if m._type != nil {
+		fields = append(fields, users.FieldType)
+	}
 	if m.status != nil {
 		fields = append(fields, users.FieldStatus)
 	}
@@ -16945,9 +17086,6 @@ func (m *UsersMutation) Fields() []string {
 	if m.address_encrypted != nil {
 		fields = append(fields, users.FieldAddressEncrypted)
 	}
-	if m.department_id != nil {
-		fields = append(fields, users.FieldDepartmentID)
-	}
 	if m.description != nil {
 		fields = append(fields, users.FieldDescription)
 	}
@@ -16969,6 +17107,8 @@ func (m *UsersMutation) Field(name string) (ent.Value, bool) {
 		return m.Username()
 	case users.FieldRealnameEncrypted:
 		return m.RealnameEncrypted()
+	case users.FieldType:
+		return m.GetType()
 	case users.FieldStatus:
 		return m.Status()
 	case users.FieldNationalIDEncrypted:
@@ -17005,8 +17145,6 @@ func (m *UsersMutation) Field(name string) (ent.Value, bool) {
 		return m.PhoneNumberVerified()
 	case users.FieldAddressEncrypted:
 		return m.AddressEncrypted()
-	case users.FieldDepartmentID:
-		return m.DepartmentID()
 	case users.FieldDescription:
 		return m.Description()
 	}
@@ -17028,6 +17166,8 @@ func (m *UsersMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldUsername(ctx)
 	case users.FieldRealnameEncrypted:
 		return m.OldRealnameEncrypted(ctx)
+	case users.FieldType:
+		return m.OldType(ctx)
 	case users.FieldStatus:
 		return m.OldStatus(ctx)
 	case users.FieldNationalIDEncrypted:
@@ -17064,8 +17204,6 @@ func (m *UsersMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldPhoneNumberVerified(ctx)
 	case users.FieldAddressEncrypted:
 		return m.OldAddressEncrypted(ctx)
-	case users.FieldDepartmentID:
-		return m.OldDepartmentID(ctx)
 	case users.FieldDescription:
 		return m.OldDescription(ctx)
 	}
@@ -17111,6 +17249,13 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRealnameEncrypted(v)
+		return nil
+	case users.FieldType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
 		return nil
 	case users.FieldStatus:
 		v, ok := value.(int)
@@ -17238,13 +17383,6 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAddressEncrypted(v)
 		return nil
-	case users.FieldDepartmentID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDepartmentID(v)
-		return nil
 	case users.FieldDescription:
 		v, ok := value.(string)
 		if !ok {
@@ -17260,14 +17398,14 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *UsersMutation) AddedFields() []string {
 	var fields []string
+	if m.add_type != nil {
+		fields = append(fields, users.FieldType)
+	}
 	if m.addstatus != nil {
 		fields = append(fields, users.FieldStatus)
 	}
 	if m.addgender != nil {
 		fields = append(fields, users.FieldGender)
-	}
-	if m.adddepartment_id != nil {
-		fields = append(fields, users.FieldDepartmentID)
 	}
 	return fields
 }
@@ -17277,12 +17415,12 @@ func (m *UsersMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *UsersMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case users.FieldType:
+		return m.AddedType()
 	case users.FieldStatus:
 		return m.AddedStatus()
 	case users.FieldGender:
 		return m.AddedGender()
-	case users.FieldDepartmentID:
-		return m.AddedDepartmentID()
 	}
 	return nil, false
 }
@@ -17292,6 +17430,13 @@ func (m *UsersMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UsersMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case users.FieldType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddType(v)
+		return nil
 	case users.FieldStatus:
 		v, ok := value.(int)
 		if !ok {
@@ -17306,13 +17451,6 @@ func (m *UsersMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddGender(v)
 		return nil
-	case users.FieldDepartmentID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddDepartmentID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Users numeric field %s", name)
 }
@@ -17324,8 +17462,17 @@ func (m *UsersMutation) ClearedFields() []string {
 	if m.FieldCleared(users.FieldDeletedAt) {
 		fields = append(fields, users.FieldDeletedAt)
 	}
+	if m.FieldCleared(users.FieldRealnameEncrypted) {
+		fields = append(fields, users.FieldRealnameEncrypted)
+	}
+	if m.FieldCleared(users.FieldNationalIDEncrypted) {
+		fields = append(fields, users.FieldNationalIDEncrypted)
+	}
 	if m.FieldCleared(users.FieldNationalIDHash) {
 		fields = append(fields, users.FieldNationalIDHash)
+	}
+	if m.FieldCleared(users.FieldEmailEncrypted) {
+		fields = append(fields, users.FieldEmailEncrypted)
 	}
 	if m.FieldCleared(users.FieldEmailHash) {
 		fields = append(fields, users.FieldEmailHash)
@@ -17333,8 +17480,14 @@ func (m *UsersMutation) ClearedFields() []string {
 	if m.FieldCleared(users.FieldBirthdate) {
 		fields = append(fields, users.FieldBirthdate)
 	}
+	if m.FieldCleared(users.FieldPhoneNumberEncrypted) {
+		fields = append(fields, users.FieldPhoneNumberEncrypted)
+	}
 	if m.FieldCleared(users.FieldPhoneNumberHash) {
 		fields = append(fields, users.FieldPhoneNumberHash)
+	}
+	if m.FieldCleared(users.FieldAddressEncrypted) {
+		fields = append(fields, users.FieldAddressEncrypted)
 	}
 	return fields
 }
@@ -17353,8 +17506,17 @@ func (m *UsersMutation) ClearField(name string) error {
 	case users.FieldDeletedAt:
 		m.ClearDeletedAt()
 		return nil
+	case users.FieldRealnameEncrypted:
+		m.ClearRealnameEncrypted()
+		return nil
+	case users.FieldNationalIDEncrypted:
+		m.ClearNationalIDEncrypted()
+		return nil
 	case users.FieldNationalIDHash:
 		m.ClearNationalIDHash()
+		return nil
+	case users.FieldEmailEncrypted:
+		m.ClearEmailEncrypted()
 		return nil
 	case users.FieldEmailHash:
 		m.ClearEmailHash()
@@ -17362,8 +17524,14 @@ func (m *UsersMutation) ClearField(name string) error {
 	case users.FieldBirthdate:
 		m.ClearBirthdate()
 		return nil
+	case users.FieldPhoneNumberEncrypted:
+		m.ClearPhoneNumberEncrypted()
+		return nil
 	case users.FieldPhoneNumberHash:
 		m.ClearPhoneNumberHash()
+		return nil
+	case users.FieldAddressEncrypted:
+		m.ClearAddressEncrypted()
 		return nil
 	}
 	return fmt.Errorf("unknown Users nullable field %s", name)
@@ -17387,6 +17555,9 @@ func (m *UsersMutation) ResetField(name string) error {
 		return nil
 	case users.FieldRealnameEncrypted:
 		m.ResetRealnameEncrypted()
+		return nil
+	case users.FieldType:
+		m.ResetType()
 		return nil
 	case users.FieldStatus:
 		m.ResetStatus()
@@ -17441,9 +17612,6 @@ func (m *UsersMutation) ResetField(name string) error {
 		return nil
 	case users.FieldAddressEncrypted:
 		m.ResetAddressEncrypted()
-		return nil
-	case users.FieldDepartmentID:
-		m.ResetDepartmentID()
 		return nil
 	case users.FieldDescription:
 		m.ResetDescription()

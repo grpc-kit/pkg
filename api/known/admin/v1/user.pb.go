@@ -454,6 +454,80 @@ func (x *GetUserRequest) GetUsername() string {
 	return ""
 }
 
+type UpdateUserPasswordRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// ID 用户 ID，全局唯一标识
+	UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// 用户名，系统登录凭证，通常唯一
+	Username string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	// PasswordHash 用户密码在本地使用 sha256 哈希结果
+	NewPasswordHash string `protobuf:"bytes,3,opt,name=new_password_hash,json=newPasswordHash,proto3" json:"new_password_hash,omitempty"`
+	OldPasswordHash string `protobuf:"bytes,4,opt,name=old_password_hash,json=oldPasswordHash,proto3" json:"old_password_hash,omitempty"`
+}
+
+func (x *UpdateUserPasswordRequest) Reset() {
+	*x = UpdateUserPasswordRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_user_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateUserPasswordRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateUserPasswordRequest) ProtoMessage() {}
+
+func (x *UpdateUserPasswordRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_user_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateUserPasswordRequest.ProtoReflect.Descriptor instead.
+func (*UpdateUserPasswordRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_user_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateUserPasswordRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *UpdateUserPasswordRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *UpdateUserPasswordRequest) GetNewPasswordHash() string {
+	if x != nil {
+		return x.NewPasswordHash
+	}
+	return ""
+}
+
+func (x *UpdateUserPasswordRequest) GetOldPasswordHash() string {
+	if x != nil {
+		return x.OldPasswordHash
+	}
+	return ""
+}
+
 var File_known_admin_v1_user_proto protoreflect.FileDescriptor
 
 var file_known_admin_v1_user_proto_rawDesc = []byte{
@@ -515,11 +589,21 @@ var file_known_admin_v1_user_proto_rawDesc = []byte{
 	0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73,
 	0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73,
-	0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
-	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b,
-	0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0xa8, 0x01, 0x0a, 0x19, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x55, 0x73, 0x65, 0x72, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x1a, 0x0a,
+	0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x2a, 0x0a, 0x11, 0x6e, 0x65, 0x77,
+	0x5f, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x6e, 0x65, 0x77, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72,
+	0x64, 0x48, 0x61, 0x73, 0x68, 0x12, 0x2a, 0x0a, 0x11, 0x6f, 0x6c, 0x64, 0x5f, 0x70, 0x61, 0x73,
+	0x73, 0x77, 0x6f, 0x72, 0x64, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0f, 0x6f, 0x6c, 0x64, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x48, 0x61, 0x73,
+	0x68, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
+	0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69,
+	0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b,
+	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -535,23 +619,24 @@ func file_known_admin_v1_user_proto_rawDescGZIP() []byte {
 }
 
 var file_known_admin_v1_user_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_known_admin_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_known_admin_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_known_admin_v1_user_proto_goTypes = []interface{}{
-	(ListUsersRequest_UserView)(0), // 0: grpc_kit.api.known.admin.v1.ListUsersRequest.UserView
-	(*ListUsersRequest)(nil),       // 1: grpc_kit.api.known.admin.v1.ListUsersRequest
-	(*ListUsersResponse)(nil),      // 2: grpc_kit.api.known.admin.v1.ListUsersResponse
-	(*CreateUserRequest)(nil),      // 3: grpc_kit.api.known.admin.v1.CreateUserRequest
-	(*UpdateUserRequest)(nil),      // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest
-	(*GetUserRequest)(nil),         // 5: grpc_kit.api.known.admin.v1.GetUserRequest
-	(*User)(nil),                   // 6: grpc_kit.api.known.admin.v1.User
-	(*fieldmaskpb.FieldMask)(nil),  // 7: google.protobuf.FieldMask
+	(ListUsersRequest_UserView)(0),    // 0: grpc_kit.api.known.admin.v1.ListUsersRequest.UserView
+	(*ListUsersRequest)(nil),          // 1: grpc_kit.api.known.admin.v1.ListUsersRequest
+	(*ListUsersResponse)(nil),         // 2: grpc_kit.api.known.admin.v1.ListUsersResponse
+	(*CreateUserRequest)(nil),         // 3: grpc_kit.api.known.admin.v1.CreateUserRequest
+	(*UpdateUserRequest)(nil),         // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest
+	(*GetUserRequest)(nil),            // 5: grpc_kit.api.known.admin.v1.GetUserRequest
+	(*UpdateUserPasswordRequest)(nil), // 6: grpc_kit.api.known.admin.v1.UpdateUserPasswordRequest
+	(*User)(nil),                      // 7: grpc_kit.api.known.admin.v1.User
+	(*fieldmaskpb.FieldMask)(nil),     // 8: google.protobuf.FieldMask
 }
 var file_known_admin_v1_user_proto_depIdxs = []int32{
 	0, // 0: grpc_kit.api.known.admin.v1.ListUsersRequest.view:type_name -> grpc_kit.api.known.admin.v1.ListUsersRequest.UserView
-	6, // 1: grpc_kit.api.known.admin.v1.ListUsersResponse.users:type_name -> grpc_kit.api.known.admin.v1.User
-	6, // 2: grpc_kit.api.known.admin.v1.CreateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
-	6, // 3: grpc_kit.api.known.admin.v1.UpdateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
-	7, // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
+	7, // 1: grpc_kit.api.known.admin.v1.ListUsersResponse.users:type_name -> grpc_kit.api.known.admin.v1.User
+	7, // 2: grpc_kit.api.known.admin.v1.CreateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
+	7, // 3: grpc_kit.api.known.admin.v1.UpdateUserRequest.user:type_name -> grpc_kit.api.known.admin.v1.User
+	8, // 4: grpc_kit.api.known.admin.v1.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
@@ -626,6 +711,18 @@ func file_known_admin_v1_user_proto_init() {
 				return nil
 			}
 		}
+		file_known_admin_v1_user_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateUserPasswordRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_known_admin_v1_user_proto_msgTypes[0].OneofWrappers = []interface{}{
 		(*ListUsersRequest_PageToken)(nil),
@@ -637,7 +734,7 @@ func file_known_admin_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_user_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

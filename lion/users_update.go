@@ -78,6 +78,33 @@ func (_u *UsersUpdate) SetRealnameEncrypted(v []byte) *UsersUpdate {
 	return _u
 }
 
+// ClearRealnameEncrypted clears the value of the "realname_encrypted" field.
+func (_u *UsersUpdate) ClearRealnameEncrypted() *UsersUpdate {
+	_u.mutation.ClearRealnameEncrypted()
+	return _u
+}
+
+// SetType sets the "type" field.
+func (_u *UsersUpdate) SetType(v int) *UsersUpdate {
+	_u.mutation.ResetType()
+	_u.mutation.SetType(v)
+	return _u
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableType(v *int) *UsersUpdate {
+	if v != nil {
+		_u.SetType(*v)
+	}
+	return _u
+}
+
+// AddType adds value to the "type" field.
+func (_u *UsersUpdate) AddType(v int) *UsersUpdate {
+	_u.mutation.AddType(v)
+	return _u
+}
+
 // SetStatus sets the "status" field.
 func (_u *UsersUpdate) SetStatus(v int) *UsersUpdate {
 	_u.mutation.ResetStatus()
@@ -102,6 +129,12 @@ func (_u *UsersUpdate) AddStatus(v int) *UsersUpdate {
 // SetNationalIDEncrypted sets the "national_id_encrypted" field.
 func (_u *UsersUpdate) SetNationalIDEncrypted(v []byte) *UsersUpdate {
 	_u.mutation.SetNationalIDEncrypted(v)
+	return _u
+}
+
+// ClearNationalIDEncrypted clears the value of the "national_id_encrypted" field.
+func (_u *UsersUpdate) ClearNationalIDEncrypted() *UsersUpdate {
+	_u.mutation.ClearNationalIDEncrypted()
 	return _u
 }
 
@@ -184,6 +217,12 @@ func (_u *UsersUpdate) SetNillableWebsite(v *string) *UsersUpdate {
 // SetEmailEncrypted sets the "email_encrypted" field.
 func (_u *UsersUpdate) SetEmailEncrypted(v []byte) *UsersUpdate {
 	_u.mutation.SetEmailEncrypted(v)
+	return _u
+}
+
+// ClearEmailEncrypted clears the value of the "email_encrypted" field.
+func (_u *UsersUpdate) ClearEmailEncrypted() *UsersUpdate {
+	_u.mutation.ClearEmailEncrypted()
 	return _u
 }
 
@@ -296,6 +335,12 @@ func (_u *UsersUpdate) SetPhoneNumberEncrypted(v []byte) *UsersUpdate {
 	return _u
 }
 
+// ClearPhoneNumberEncrypted clears the value of the "phone_number_encrypted" field.
+func (_u *UsersUpdate) ClearPhoneNumberEncrypted() *UsersUpdate {
+	_u.mutation.ClearPhoneNumberEncrypted()
+	return _u
+}
+
 // SetPhoneNumberHash sets the "phone_number_hash" field.
 func (_u *UsersUpdate) SetPhoneNumberHash(v string) *UsersUpdate {
 	_u.mutation.SetPhoneNumberHash(v)
@@ -336,24 +381,9 @@ func (_u *UsersUpdate) SetAddressEncrypted(v []byte) *UsersUpdate {
 	return _u
 }
 
-// SetDepartmentID sets the "department_id" field.
-func (_u *UsersUpdate) SetDepartmentID(v int) *UsersUpdate {
-	_u.mutation.ResetDepartmentID()
-	_u.mutation.SetDepartmentID(v)
-	return _u
-}
-
-// SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_u *UsersUpdate) SetNillableDepartmentID(v *int) *UsersUpdate {
-	if v != nil {
-		_u.SetDepartmentID(*v)
-	}
-	return _u
-}
-
-// AddDepartmentID adds value to the "department_id" field.
-func (_u *UsersUpdate) AddDepartmentID(v int) *UsersUpdate {
-	_u.mutation.AddDepartmentID(v)
+// ClearAddressEncrypted clears the value of the "address_encrypted" field.
+func (_u *UsersUpdate) ClearAddressEncrypted() *UsersUpdate {
+	_u.mutation.ClearAddressEncrypted()
 	return _u
 }
 
@@ -603,6 +633,15 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.RealnameEncrypted(); ok {
 		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
 	}
+	if _u.mutation.RealnameEncryptedCleared() {
+		_spec.ClearField(users.FieldRealnameEncrypted, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.GetType(); ok {
+		_spec.SetField(users.FieldType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedType(); ok {
+		_spec.AddField(users.FieldType, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(users.FieldStatus, field.TypeInt, value)
 	}
@@ -611,6 +650,9 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.NationalIDEncrypted(); ok {
 		_spec.SetField(users.FieldNationalIDEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.NationalIDEncryptedCleared() {
+		_spec.ClearField(users.FieldNationalIDEncrypted, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.NationalIDHash(); ok {
 		_spec.SetField(users.FieldNationalIDHash, field.TypeString, value)
@@ -632,6 +674,9 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.EmailEncrypted(); ok {
 		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.EmailEncryptedCleared() {
+		_spec.ClearField(users.FieldEmailEncrypted, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.EmailHash(); ok {
 		_spec.SetField(users.FieldEmailHash, field.TypeString, value)
@@ -663,6 +708,9 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.PhoneNumberEncrypted(); ok {
 		_spec.SetField(users.FieldPhoneNumberEncrypted, field.TypeBytes, value)
 	}
+	if _u.mutation.PhoneNumberEncryptedCleared() {
+		_spec.ClearField(users.FieldPhoneNumberEncrypted, field.TypeBytes)
+	}
 	if value, ok := _u.mutation.PhoneNumberHash(); ok {
 		_spec.SetField(users.FieldPhoneNumberHash, field.TypeString, value)
 	}
@@ -675,11 +723,8 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.DepartmentID(); ok {
-		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedDepartmentID(); ok {
-		_spec.AddField(users.FieldDepartmentID, field.TypeInt, value)
+	if _u.mutation.AddressEncryptedCleared() {
+		_spec.ClearField(users.FieldAddressEncrypted, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
@@ -930,6 +975,33 @@ func (_u *UsersUpdateOne) SetRealnameEncrypted(v []byte) *UsersUpdateOne {
 	return _u
 }
 
+// ClearRealnameEncrypted clears the value of the "realname_encrypted" field.
+func (_u *UsersUpdateOne) ClearRealnameEncrypted() *UsersUpdateOne {
+	_u.mutation.ClearRealnameEncrypted()
+	return _u
+}
+
+// SetType sets the "type" field.
+func (_u *UsersUpdateOne) SetType(v int) *UsersUpdateOne {
+	_u.mutation.ResetType()
+	_u.mutation.SetType(v)
+	return _u
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableType(v *int) *UsersUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
+	}
+	return _u
+}
+
+// AddType adds value to the "type" field.
+func (_u *UsersUpdateOne) AddType(v int) *UsersUpdateOne {
+	_u.mutation.AddType(v)
+	return _u
+}
+
 // SetStatus sets the "status" field.
 func (_u *UsersUpdateOne) SetStatus(v int) *UsersUpdateOne {
 	_u.mutation.ResetStatus()
@@ -954,6 +1026,12 @@ func (_u *UsersUpdateOne) AddStatus(v int) *UsersUpdateOne {
 // SetNationalIDEncrypted sets the "national_id_encrypted" field.
 func (_u *UsersUpdateOne) SetNationalIDEncrypted(v []byte) *UsersUpdateOne {
 	_u.mutation.SetNationalIDEncrypted(v)
+	return _u
+}
+
+// ClearNationalIDEncrypted clears the value of the "national_id_encrypted" field.
+func (_u *UsersUpdateOne) ClearNationalIDEncrypted() *UsersUpdateOne {
+	_u.mutation.ClearNationalIDEncrypted()
 	return _u
 }
 
@@ -1036,6 +1114,12 @@ func (_u *UsersUpdateOne) SetNillableWebsite(v *string) *UsersUpdateOne {
 // SetEmailEncrypted sets the "email_encrypted" field.
 func (_u *UsersUpdateOne) SetEmailEncrypted(v []byte) *UsersUpdateOne {
 	_u.mutation.SetEmailEncrypted(v)
+	return _u
+}
+
+// ClearEmailEncrypted clears the value of the "email_encrypted" field.
+func (_u *UsersUpdateOne) ClearEmailEncrypted() *UsersUpdateOne {
+	_u.mutation.ClearEmailEncrypted()
 	return _u
 }
 
@@ -1148,6 +1232,12 @@ func (_u *UsersUpdateOne) SetPhoneNumberEncrypted(v []byte) *UsersUpdateOne {
 	return _u
 }
 
+// ClearPhoneNumberEncrypted clears the value of the "phone_number_encrypted" field.
+func (_u *UsersUpdateOne) ClearPhoneNumberEncrypted() *UsersUpdateOne {
+	_u.mutation.ClearPhoneNumberEncrypted()
+	return _u
+}
+
 // SetPhoneNumberHash sets the "phone_number_hash" field.
 func (_u *UsersUpdateOne) SetPhoneNumberHash(v string) *UsersUpdateOne {
 	_u.mutation.SetPhoneNumberHash(v)
@@ -1188,24 +1278,9 @@ func (_u *UsersUpdateOne) SetAddressEncrypted(v []byte) *UsersUpdateOne {
 	return _u
 }
 
-// SetDepartmentID sets the "department_id" field.
-func (_u *UsersUpdateOne) SetDepartmentID(v int) *UsersUpdateOne {
-	_u.mutation.ResetDepartmentID()
-	_u.mutation.SetDepartmentID(v)
-	return _u
-}
-
-// SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_u *UsersUpdateOne) SetNillableDepartmentID(v *int) *UsersUpdateOne {
-	if v != nil {
-		_u.SetDepartmentID(*v)
-	}
-	return _u
-}
-
-// AddDepartmentID adds value to the "department_id" field.
-func (_u *UsersUpdateOne) AddDepartmentID(v int) *UsersUpdateOne {
-	_u.mutation.AddDepartmentID(v)
+// ClearAddressEncrypted clears the value of the "address_encrypted" field.
+func (_u *UsersUpdateOne) ClearAddressEncrypted() *UsersUpdateOne {
+	_u.mutation.ClearAddressEncrypted()
 	return _u
 }
 
@@ -1485,6 +1560,15 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if value, ok := _u.mutation.RealnameEncrypted(); ok {
 		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
 	}
+	if _u.mutation.RealnameEncryptedCleared() {
+		_spec.ClearField(users.FieldRealnameEncrypted, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.GetType(); ok {
+		_spec.SetField(users.FieldType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedType(); ok {
+		_spec.AddField(users.FieldType, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(users.FieldStatus, field.TypeInt, value)
 	}
@@ -1493,6 +1577,9 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if value, ok := _u.mutation.NationalIDEncrypted(); ok {
 		_spec.SetField(users.FieldNationalIDEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.NationalIDEncryptedCleared() {
+		_spec.ClearField(users.FieldNationalIDEncrypted, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.NationalIDHash(); ok {
 		_spec.SetField(users.FieldNationalIDHash, field.TypeString, value)
@@ -1514,6 +1601,9 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if value, ok := _u.mutation.EmailEncrypted(); ok {
 		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.EmailEncryptedCleared() {
+		_spec.ClearField(users.FieldEmailEncrypted, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.EmailHash(); ok {
 		_spec.SetField(users.FieldEmailHash, field.TypeString, value)
@@ -1545,6 +1635,9 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if value, ok := _u.mutation.PhoneNumberEncrypted(); ok {
 		_spec.SetField(users.FieldPhoneNumberEncrypted, field.TypeBytes, value)
 	}
+	if _u.mutation.PhoneNumberEncryptedCleared() {
+		_spec.ClearField(users.FieldPhoneNumberEncrypted, field.TypeBytes)
+	}
 	if value, ok := _u.mutation.PhoneNumberHash(); ok {
 		_spec.SetField(users.FieldPhoneNumberHash, field.TypeString, value)
 	}
@@ -1557,11 +1650,8 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if value, ok := _u.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
 	}
-	if value, ok := _u.mutation.DepartmentID(); ok {
-		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedDepartmentID(); ok {
-		_spec.AddField(users.FieldDepartmentID, field.TypeInt, value)
+	if _u.mutation.AddressEncryptedCleared() {
+		_spec.ClearField(users.FieldAddressEncrypted, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)

@@ -170,6 +170,20 @@ func (_c *UserIdentitiesCreate) SetNillableTokenExpiresAt(v *time.Time) *UserIde
 	return _c
 }
 
+// SetLastLoginAt sets the "last_login_at" field.
+func (_c *UserIdentitiesCreate) SetLastLoginAt(v time.Time) *UserIdentitiesCreate {
+	_c.mutation.SetLastLoginAt(v)
+	return _c
+}
+
+// SetNillableLastLoginAt sets the "last_login_at" field if the given value is not nil.
+func (_c *UserIdentitiesCreate) SetNillableLastLoginAt(v *time.Time) *UserIdentitiesCreate {
+	if v != nil {
+		_c.SetLastLoginAt(*v)
+	}
+	return _c
+}
+
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
 func (_c *UserIdentitiesCreate) SetLionUsersID(id int) *UserIdentitiesCreate {
 	_c.mutation.SetLionUsersID(id)
@@ -364,6 +378,10 @@ func (_c *UserIdentitiesCreate) createSpec() (*UserIdentities, *sqlgraph.CreateS
 	if value, ok := _c.mutation.TokenExpiresAt(); ok {
 		_spec.SetField(useridentities.FieldTokenExpiresAt, field.TypeTime, value)
 		_node.TokenExpiresAt = value
+	}
+	if value, ok := _c.mutation.LastLoginAt(); ok {
+		_spec.SetField(useridentities.FieldLastLoginAt, field.TypeTime, value)
+		_node.LastLoginAt = &value
 	}
 	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

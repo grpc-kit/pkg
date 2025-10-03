@@ -27,6 +27,8 @@ type Users struct {
 	Username string `json:"username,omitempty"`
 	// 用户的真实姓名
 	RealnameEncrypted []byte `json:"-"`
+	// 用户类型
+	Type int `json:"type,omitempty"`
 	// 用户状态
 	Status int `json:"status,omitempty"`
 	// 用户身份证号码
@@ -63,8 +65,6 @@ type Users struct {
 	PhoneNumberVerified bool `json:"phone_number_verified,omitempty"`
 	// 用户的地址信息
 	AddressEncrypted []byte `json:"-"`
-	// 部门 ID
-	DepartmentID int `json:"department_id,omitempty"`
 	// 用户详细描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -133,7 +133,7 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case users.FieldEmailVerified, users.FieldPhoneNumberVerified:
 			values[i] = new(sql.NullBool)
-		case users.FieldID, users.FieldStatus, users.FieldGender, users.FieldDepartmentID:
+		case users.FieldID, users.FieldType, users.FieldStatus, users.FieldGender:
 			values[i] = new(sql.NullInt64)
 		case users.FieldUsername, users.FieldNationalIDHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -190,6 +190,12 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field realname_encrypted", values[i])
 			} else if value != nil {
 				_m.RealnameEncrypted = *value
+			}
+		case users.FieldType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				_m.Type = int(value.Int64)
 			}
 		case users.FieldStatus:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -299,12 +305,6 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.AddressEncrypted = *value
 			}
-		case users.FieldDepartmentID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field department_id", values[i])
-			} else if value.Valid {
-				_m.DepartmentID = int(value.Int64)
-			}
 		case users.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
@@ -383,6 +383,9 @@ func (_m *Users) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("realname_encrypted=<sensitive>")
 	builder.WriteString(", ")
+	builder.WriteString("type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Type))
+	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
@@ -432,9 +435,6 @@ func (_m *Users) String() string {
 	builder.WriteString(fmt.Sprintf("%v", _m.PhoneNumberVerified))
 	builder.WriteString(", ")
 	builder.WriteString("address_encrypted=<sensitive>")
-	builder.WriteString(", ")
-	builder.WriteString("department_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentID))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

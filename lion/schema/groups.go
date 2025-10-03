@@ -46,7 +46,7 @@ func (Groups) Fields() []ent.Field {
 			Default("").
 			Comment("外部系统ID，用于与外部系统集成"),
 		field.Int("department_id").
-			Default(0).
+			Default(1).
 			Comment("关联 lion_departments 表的 ID"),
 		field.String("description").
 			Default("").

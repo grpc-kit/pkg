@@ -78,6 +78,20 @@ func (_c *UsersCreate) SetRealnameEncrypted(v []byte) *UsersCreate {
 	return _c
 }
 
+// SetType sets the "type" field.
+func (_c *UsersCreate) SetType(v int) *UsersCreate {
+	_c.mutation.SetType(v)
+	return _c
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableType(v *int) *UsersCreate {
+	if v != nil {
+		_c.SetType(*v)
+	}
+	return _c
+}
+
 // SetStatus sets the "status" field.
 func (_c *UsersCreate) SetStatus(v int) *UsersCreate {
 	_c.mutation.SetStatus(v)
@@ -298,20 +312,6 @@ func (_c *UsersCreate) SetAddressEncrypted(v []byte) *UsersCreate {
 	return _c
 }
 
-// SetDepartmentID sets the "department_id" field.
-func (_c *UsersCreate) SetDepartmentID(v int) *UsersCreate {
-	_c.mutation.SetDepartmentID(v)
-	return _c
-}
-
-// SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_c *UsersCreate) SetNillableDepartmentID(v *int) *UsersCreate {
-	if v != nil {
-		_c.SetDepartmentID(*v)
-	}
-	return _c
-}
-
 // SetDescription sets the "description" field.
 func (_c *UsersCreate) SetDescription(v string) *UsersCreate {
 	_c.mutation.SetDescription(v)
@@ -429,17 +429,13 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := _c.mutation.RealnameEncrypted(); !ok {
-		v := users.DefaultRealnameEncrypted
-		_c.mutation.SetRealnameEncrypted(v)
+	if _, ok := _c.mutation.GetType(); !ok {
+		v := users.DefaultType
+		_c.mutation.SetType(v)
 	}
 	if _, ok := _c.mutation.Status(); !ok {
 		v := users.DefaultStatus
 		_c.mutation.SetStatus(v)
-	}
-	if _, ok := _c.mutation.NationalIDEncrypted(); !ok {
-		v := users.DefaultNationalIDEncrypted
-		_c.mutation.SetNationalIDEncrypted(v)
 	}
 	if _, ok := _c.mutation.NationalIDHash(); !ok {
 		v := users.DefaultNationalIDHash
@@ -460,10 +456,6 @@ func (_c *UsersCreate) defaults() {
 	if _, ok := _c.mutation.Website(); !ok {
 		v := users.DefaultWebsite
 		_c.mutation.SetWebsite(v)
-	}
-	if _, ok := _c.mutation.EmailEncrypted(); !ok {
-		v := users.DefaultEmailEncrypted
-		_c.mutation.SetEmailEncrypted(v)
 	}
 	if _, ok := _c.mutation.EmailHash(); !ok {
 		v := users.DefaultEmailHash
@@ -489,10 +481,6 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultLocale
 		_c.mutation.SetLocale(v)
 	}
-	if _, ok := _c.mutation.PhoneNumberEncrypted(); !ok {
-		v := users.DefaultPhoneNumberEncrypted
-		_c.mutation.SetPhoneNumberEncrypted(v)
-	}
 	if _, ok := _c.mutation.PhoneNumberHash(); !ok {
 		v := users.DefaultPhoneNumberHash
 		_c.mutation.SetPhoneNumberHash(v)
@@ -500,14 +488,6 @@ func (_c *UsersCreate) defaults() {
 	if _, ok := _c.mutation.PhoneNumberVerified(); !ok {
 		v := users.DefaultPhoneNumberVerified
 		_c.mutation.SetPhoneNumberVerified(v)
-	}
-	if _, ok := _c.mutation.AddressEncrypted(); !ok {
-		v := users.DefaultAddressEncrypted
-		_c.mutation.SetAddressEncrypted(v)
-	}
-	if _, ok := _c.mutation.DepartmentID(); !ok {
-		v := users.DefaultDepartmentID
-		_c.mutation.SetDepartmentID(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := users.DefaultDescription
@@ -531,14 +511,11 @@ func (_c *UsersCreate) check() error {
 			return &ValidationError{Name: "username", err: fmt.Errorf(`lion: validator failed for field "Users.username": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.RealnameEncrypted(); !ok {
-		return &ValidationError{Name: "realname_encrypted", err: errors.New(`lion: missing required field "Users.realname_encrypted"`)}
+	if _, ok := _c.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "Users.type"`)}
 	}
 	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`lion: missing required field "Users.status"`)}
-	}
-	if _, ok := _c.mutation.NationalIDEncrypted(); !ok {
-		return &ValidationError{Name: "national_id_encrypted", err: errors.New(`lion: missing required field "Users.national_id_encrypted"`)}
 	}
 	if _, ok := _c.mutation.Nickname(); !ok {
 		return &ValidationError{Name: "nickname", err: errors.New(`lion: missing required field "Users.nickname"`)}
@@ -557,9 +534,6 @@ func (_c *UsersCreate) check() error {
 	if _, ok := _c.mutation.Website(); !ok {
 		return &ValidationError{Name: "website", err: errors.New(`lion: missing required field "Users.website"`)}
 	}
-	if _, ok := _c.mutation.EmailEncrypted(); !ok {
-		return &ValidationError{Name: "email_encrypted", err: errors.New(`lion: missing required field "Users.email_encrypted"`)}
-	}
 	if _, ok := _c.mutation.EmailVerified(); !ok {
 		return &ValidationError{Name: "email_verified", err: errors.New(`lion: missing required field "Users.email_verified"`)}
 	}
@@ -572,17 +546,8 @@ func (_c *UsersCreate) check() error {
 	if _, ok := _c.mutation.Locale(); !ok {
 		return &ValidationError{Name: "locale", err: errors.New(`lion: missing required field "Users.locale"`)}
 	}
-	if _, ok := _c.mutation.PhoneNumberEncrypted(); !ok {
-		return &ValidationError{Name: "phone_number_encrypted", err: errors.New(`lion: missing required field "Users.phone_number_encrypted"`)}
-	}
 	if _, ok := _c.mutation.PhoneNumberVerified(); !ok {
 		return &ValidationError{Name: "phone_number_verified", err: errors.New(`lion: missing required field "Users.phone_number_verified"`)}
-	}
-	if _, ok := _c.mutation.AddressEncrypted(); !ok {
-		return &ValidationError{Name: "address_encrypted", err: errors.New(`lion: missing required field "Users.address_encrypted"`)}
-	}
-	if _, ok := _c.mutation.DepartmentID(); !ok {
-		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "Users.department_id"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Users.description"`)}
@@ -637,6 +602,10 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.RealnameEncrypted(); ok {
 		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
 		_node.RealnameEncrypted = value
+	}
+	if value, ok := _c.mutation.GetType(); ok {
+		_spec.SetField(users.FieldType, field.TypeInt, value)
+		_node.Type = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(users.FieldStatus, field.TypeInt, value)
@@ -709,10 +678,6 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.AddressEncrypted(); ok {
 		_spec.SetField(users.FieldAddressEncrypted, field.TypeBytes, value)
 		_node.AddressEncrypted = value
-	}
-	if value, ok := _c.mutation.DepartmentID(); ok {
-		_spec.SetField(users.FieldDepartmentID, field.TypeInt, value)
-		_node.DepartmentID = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)

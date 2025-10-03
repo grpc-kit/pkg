@@ -136,7 +136,7 @@ var (
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "created_by", Type: field.TypeInt, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt, Default: 0},
-		{Name: "department_id", Type: field.TypeInt, Default: 0},
+		{Name: "department_id", Type: field.TypeInt, Default: 1},
 	}
 	// LionGroupsTable holds the schema information for the "lion_groups" table.
 	LionGroupsTable = &schema.Table{
@@ -393,6 +393,7 @@ var (
 		{Name: "password_changed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "password_expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "token_expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "last_login_at", Type: field.TypeTime, Nullable: true},
 		{Name: "provider_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
@@ -404,13 +405,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_user_identities_lion_auth_providers_lion_user_identities",
-				Columns:    []*schema.Column{LionUserIdentitiesColumns[13]},
+				Columns:    []*schema.Column{LionUserIdentitiesColumns[14]},
 				RefColumns: []*schema.Column{LionAuthProvidersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_user_identities_lion_users_lion_user_identities",
-				Columns:    []*schema.Column{LionUserIdentitiesColumns[14]},
+				Columns:    []*schema.Column{LionUserIdentitiesColumns[15]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -419,7 +420,7 @@ var (
 			{
 				Name:    "useridentities_user_id_provider_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserIdentitiesColumns[14], LionUserIdentitiesColumns[13]},
+				Columns: []*schema.Column{LionUserIdentitiesColumns[15], LionUserIdentitiesColumns[14]},
 			},
 		},
 	}
@@ -488,26 +489,26 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "username", Type: field.TypeString, Unique: true, Size: 255},
-		{Name: "realname_encrypted", Type: field.TypeBytes},
+		{Name: "realname_encrypted", Type: field.TypeBytes, Nullable: true},
+		{Name: "type", Type: field.TypeInt, Default: 0},
 		{Name: "status", Type: field.TypeInt, Default: 0},
-		{Name: "national_id_encrypted", Type: field.TypeBytes},
+		{Name: "national_id_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "national_id_hash", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "nickname", Type: field.TypeString, Default: ""},
 		{Name: "profile", Type: field.TypeString, Size: 500, Default: ""},
 		{Name: "picture", Type: field.TypeString, Default: ""},
 		{Name: "website", Type: field.TypeString, Default: ""},
-		{Name: "email_encrypted", Type: field.TypeBytes},
+		{Name: "email_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "email_hash", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "email_verified", Type: field.TypeBool, Default: false},
 		{Name: "gender", Type: field.TypeInt, Default: 0},
 		{Name: "birthdate", Type: field.TypeTime, Nullable: true},
 		{Name: "zoneinfo", Type: field.TypeString, Default: ""},
 		{Name: "locale", Type: field.TypeString, Default: ""},
-		{Name: "phone_number_encrypted", Type: field.TypeBytes},
+		{Name: "phone_number_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "phone_number_hash", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "phone_number_verified", Type: field.TypeBool, Default: false},
-		{Name: "address_encrypted", Type: field.TypeBytes},
-		{Name: "department_id", Type: field.TypeInt, Default: 0},
+		{Name: "address_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "description", Type: field.TypeString, Size: 4096, Default: ""},
 	}
 	// LionUsersTable holds the schema information for the "lion_users" table.

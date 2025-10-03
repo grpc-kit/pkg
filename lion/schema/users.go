@@ -27,14 +27,17 @@ func (Users) Fields() []ent.Field {
 			Comment("首选用户名，用于系统识别与登录，仅支持字母、数字、下划线、点号"),
 		field.Bytes("realname_encrypted").
 			Sensitive().
-			Default([]byte{}).
+			Optional(). // 可选字段
 			Comment("用户的真实姓名"),
+		field.Int("type").
+			Default(0).
+			Comment("用户类型"),
 		field.Int("status").
 			Default(0).
 			Comment("用户状态"),
 		field.Bytes("national_id_encrypted").
 			Sensitive().
-			Default([]byte{}).
+			Optional(). // 可选字段
 			Comment("用户身份证号码"),
 		field.String("national_id_hash").
 			Optional().
@@ -55,7 +58,7 @@ func (Users) Fields() []ent.Field {
 			Comment("用户的个人网站 URL"),
 		field.Bytes("email_encrypted").
 			Sensitive().
-			Default([]byte{}).
+			Optional(). // 可选字段
 			Comment("用户的邮箱地址"),
 		field.String("email_hash").
 			Optional().
@@ -79,7 +82,7 @@ func (Users) Fields() []ent.Field {
 			Comment("用户的语言/地区偏好，如：zh-CN"),
 		field.Bytes("phone_number_encrypted").
 			Sensitive().
-			Default([]byte{}).
+			Optional(). // 可选字段
 			Comment("用户的手机号码，加密存储"),
 		field.String("phone_number_hash").
 			Optional().
@@ -90,11 +93,13 @@ func (Users) Fields() []ent.Field {
 			Comment("手机号是否验证过"),
 		field.Bytes("address_encrypted").
 			Sensitive().
-			Default([]byte{}).
+			Optional(). // 可选字段
 			Comment("用户的地址信息"),
-		field.Int("department_id").
-			Default(1).
-			Comment("部门 ID"),
+		/*
+			field.Int("department_id").
+				Default(1).
+				Comment("部门 ID"),
+		*/
 		field.String("description").
 			Default("").
 			MaxLen(4096).
@@ -110,11 +115,13 @@ func (Users) Edges() []ent.Edge {
 		edge.To("lion_user_groups", UserGroups.Type),
 		edge.To("lion_user_identities", UserIdentities.Type),
 		edge.To("lion_user_departments", UserDepartments.Type),
-		edge.From("lion_departments", Departments.Type).
-			Ref("lion_users").
-			Field("department_id").
-			Unique().
-			Required(),
+		/*
+			edge.From("lion_departments", Departments.Type).
+				Ref("lion_users").
+				Field("department_id").
+				Unique().
+				Required(),
+		*/
 	}
 }
 

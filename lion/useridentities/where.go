@@ -125,6 +125,11 @@ func TokenExpiresAt(v time.Time) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldEQ(FieldTokenExpiresAt, v))
 }
 
+// LastLoginAt applies equality check predicate on the "last_login_at" field. It's identical to LastLoginAtEQ.
+func LastLoginAt(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldEQ(FieldLastLoginAt, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldEQ(FieldCreatedAt, v))
@@ -748,6 +753,56 @@ func TokenExpiresAtIsNil() predicate.UserIdentities {
 // TokenExpiresAtNotNil applies the NotNil predicate on the "token_expires_at" field.
 func TokenExpiresAtNotNil() predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldNotNull(FieldTokenExpiresAt))
+}
+
+// LastLoginAtEQ applies the EQ predicate on the "last_login_at" field.
+func LastLoginAtEQ(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldEQ(FieldLastLoginAt, v))
+}
+
+// LastLoginAtNEQ applies the NEQ predicate on the "last_login_at" field.
+func LastLoginAtNEQ(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNEQ(FieldLastLoginAt, v))
+}
+
+// LastLoginAtIn applies the In predicate on the "last_login_at" field.
+func LastLoginAtIn(vs ...time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldIn(FieldLastLoginAt, vs...))
+}
+
+// LastLoginAtNotIn applies the NotIn predicate on the "last_login_at" field.
+func LastLoginAtNotIn(vs ...time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNotIn(FieldLastLoginAt, vs...))
+}
+
+// LastLoginAtGT applies the GT predicate on the "last_login_at" field.
+func LastLoginAtGT(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldGT(FieldLastLoginAt, v))
+}
+
+// LastLoginAtGTE applies the GTE predicate on the "last_login_at" field.
+func LastLoginAtGTE(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldGTE(FieldLastLoginAt, v))
+}
+
+// LastLoginAtLT applies the LT predicate on the "last_login_at" field.
+func LastLoginAtLT(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldLT(FieldLastLoginAt, v))
+}
+
+// LastLoginAtLTE applies the LTE predicate on the "last_login_at" field.
+func LastLoginAtLTE(v time.Time) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldLTE(FieldLastLoginAt, v))
+}
+
+// LastLoginAtIsNil applies the IsNil predicate on the "last_login_at" field.
+func LastLoginAtIsNil() predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldIsNull(FieldLastLoginAt))
+}
+
+// LastLoginAtNotNil applies the NotNil predicate on the "last_login_at" field.
+func LastLoginAtNotNil() predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNotNull(FieldLastLoginAt))
 }
 
 // HasLionUsers applies the HasEdge predicate on the "lion_users" edge.

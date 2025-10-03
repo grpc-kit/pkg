@@ -216,6 +216,26 @@ func (_u *UserIdentitiesUpdate) ClearTokenExpiresAt() *UserIdentitiesUpdate {
 	return _u
 }
 
+// SetLastLoginAt sets the "last_login_at" field.
+func (_u *UserIdentitiesUpdate) SetLastLoginAt(v time.Time) *UserIdentitiesUpdate {
+	_u.mutation.SetLastLoginAt(v)
+	return _u
+}
+
+// SetNillableLastLoginAt sets the "last_login_at" field if the given value is not nil.
+func (_u *UserIdentitiesUpdate) SetNillableLastLoginAt(v *time.Time) *UserIdentitiesUpdate {
+	if v != nil {
+		_u.SetLastLoginAt(*v)
+	}
+	return _u
+}
+
+// ClearLastLoginAt clears the value of the "last_login_at" field.
+func (_u *UserIdentitiesUpdate) ClearLastLoginAt() *UserIdentitiesUpdate {
+	_u.mutation.ClearLastLoginAt()
+	return _u
+}
+
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
 func (_u *UserIdentitiesUpdate) SetLionUsersID(id int) *UserIdentitiesUpdate {
 	_u.mutation.SetLionUsersID(id)
@@ -374,6 +394,12 @@ func (_u *UserIdentitiesUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if _u.mutation.TokenExpiresAtCleared() {
 		_spec.ClearField(useridentities.FieldTokenExpiresAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LastLoginAt(); ok {
+		_spec.SetField(useridentities.FieldLastLoginAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastLoginAtCleared() {
+		_spec.ClearField(useridentities.FieldLastLoginAt, field.TypeTime)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -639,6 +665,26 @@ func (_u *UserIdentitiesUpdateOne) ClearTokenExpiresAt() *UserIdentitiesUpdateOn
 	return _u
 }
 
+// SetLastLoginAt sets the "last_login_at" field.
+func (_u *UserIdentitiesUpdateOne) SetLastLoginAt(v time.Time) *UserIdentitiesUpdateOne {
+	_u.mutation.SetLastLoginAt(v)
+	return _u
+}
+
+// SetNillableLastLoginAt sets the "last_login_at" field if the given value is not nil.
+func (_u *UserIdentitiesUpdateOne) SetNillableLastLoginAt(v *time.Time) *UserIdentitiesUpdateOne {
+	if v != nil {
+		_u.SetLastLoginAt(*v)
+	}
+	return _u
+}
+
+// ClearLastLoginAt clears the value of the "last_login_at" field.
+func (_u *UserIdentitiesUpdateOne) ClearLastLoginAt() *UserIdentitiesUpdateOne {
+	_u.mutation.ClearLastLoginAt()
+	return _u
+}
+
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
 func (_u *UserIdentitiesUpdateOne) SetLionUsersID(id int) *UserIdentitiesUpdateOne {
 	_u.mutation.SetLionUsersID(id)
@@ -827,6 +873,12 @@ func (_u *UserIdentitiesUpdateOne) sqlSave(ctx context.Context) (_node *UserIden
 	}
 	if _u.mutation.TokenExpiresAtCleared() {
 		_spec.ClearField(useridentities.FieldTokenExpiresAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.LastLoginAt(); ok {
+		_spec.SetField(useridentities.FieldLastLoginAt, field.TypeTime, value)
+	}
+	if _u.mutation.LastLoginAtCleared() {
+		_spec.ClearField(useridentities.FieldLastLoginAt, field.TypeTime)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{

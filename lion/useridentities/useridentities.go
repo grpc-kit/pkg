@@ -42,6 +42,8 @@ const (
 	FieldPasswordExpiresAt = "password_expires_at"
 	// FieldTokenExpiresAt holds the string denoting the token_expires_at field in the database.
 	FieldTokenExpiresAt = "token_expires_at"
+	// FieldLastLoginAt holds the string denoting the last_login_at field in the database.
+	FieldLastLoginAt = "last_login_at"
 	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
 	EdgeLionUsers = "lion_users"
 	// EdgeLionAuthProviders holds the string denoting the lion_auth_providers edge name in mutations.
@@ -81,6 +83,7 @@ var Columns = []string{
 	FieldPasswordChangedAt,
 	FieldPasswordExpiresAt,
 	FieldTokenExpiresAt,
+	FieldLastLoginAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -173,6 +176,11 @@ func ByPasswordExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 // ByTokenExpiresAt orders the results by the token_expires_at field.
 func ByTokenExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTokenExpiresAt, opts...).ToFunc()
+}
+
+// ByLastLoginAt orders the results by the last_login_at field.
+func ByLastLoginAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastLoginAt, opts...).ToFunc()
 }
 
 // ByLionUsersField orders the results by lion_users field.

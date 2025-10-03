@@ -24,6 +24,8 @@ const (
 	FieldUsername = "username"
 	// FieldRealnameEncrypted holds the string denoting the realname_encrypted field in the database.
 	FieldRealnameEncrypted = "realname_encrypted"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldNationalIDEncrypted holds the string denoting the national_id_encrypted field in the database.
@@ -60,8 +62,6 @@ const (
 	FieldPhoneNumberVerified = "phone_number_verified"
 	// FieldAddressEncrypted holds the string denoting the address_encrypted field in the database.
 	FieldAddressEncrypted = "address_encrypted"
-	// FieldDepartmentID holds the string denoting the department_id field in the database.
-	FieldDepartmentID = "department_id"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
@@ -112,6 +112,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldUsername,
 	FieldRealnameEncrypted,
+	FieldType,
 	FieldStatus,
 	FieldNationalIDEncrypted,
 	FieldNationalIDHash,
@@ -130,7 +131,6 @@ var Columns = []string{
 	FieldPhoneNumberHash,
 	FieldPhoneNumberVerified,
 	FieldAddressEncrypted,
-	FieldDepartmentID,
 	FieldDescription,
 }
 
@@ -153,12 +153,10 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
 	UsernameValidator func(string) error
-	// DefaultRealnameEncrypted holds the default value on creation for the "realname_encrypted" field.
-	DefaultRealnameEncrypted []byte
+	// DefaultType holds the default value on creation for the "type" field.
+	DefaultType int
 	// DefaultStatus holds the default value on creation for the "status" field.
 	DefaultStatus int
-	// DefaultNationalIDEncrypted holds the default value on creation for the "national_id_encrypted" field.
-	DefaultNationalIDEncrypted []byte
 	// DefaultNationalIDHash holds the default value on creation for the "national_id_hash" field.
 	DefaultNationalIDHash string
 	// DefaultNickname holds the default value on creation for the "nickname" field.
@@ -171,8 +169,6 @@ var (
 	DefaultPicture string
 	// DefaultWebsite holds the default value on creation for the "website" field.
 	DefaultWebsite string
-	// DefaultEmailEncrypted holds the default value on creation for the "email_encrypted" field.
-	DefaultEmailEncrypted []byte
 	// DefaultEmailHash holds the default value on creation for the "email_hash" field.
 	DefaultEmailHash string
 	// DefaultEmailVerified holds the default value on creation for the "email_verified" field.
@@ -185,16 +181,10 @@ var (
 	DefaultZoneinfo string
 	// DefaultLocale holds the default value on creation for the "locale" field.
 	DefaultLocale string
-	// DefaultPhoneNumberEncrypted holds the default value on creation for the "phone_number_encrypted" field.
-	DefaultPhoneNumberEncrypted []byte
 	// DefaultPhoneNumberHash holds the default value on creation for the "phone_number_hash" field.
 	DefaultPhoneNumberHash string
 	// DefaultPhoneNumberVerified holds the default value on creation for the "phone_number_verified" field.
 	DefaultPhoneNumberVerified bool
-	// DefaultAddressEncrypted holds the default value on creation for the "address_encrypted" field.
-	DefaultAddressEncrypted []byte
-	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
-	DefaultDepartmentID int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
@@ -227,6 +217,11 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUsername orders the results by the username field.
 func ByUsername(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUsername, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.
@@ -297,11 +292,6 @@ func ByPhoneNumberHash(opts ...sql.OrderTermOption) OrderOption {
 // ByPhoneNumberVerified orders the results by the phone_number_verified field.
 func ByPhoneNumberVerified(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPhoneNumberVerified, opts...).ToFunc()
-}
-
-// ByDepartmentID orders the results by the department_id field.
-func ByDepartmentID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDepartmentID, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

@@ -47,6 +47,8 @@ type UserIdentities struct {
 	PasswordExpiresAt *time.Time `json:"password_expires_at,omitempty"`
 	// 访问令牌的过期时间
 	TokenExpiresAt time.Time `json:"token_expires_at,omitempty"`
+	// 最后登录时间
+	LastLoginAt *time.Time `json:"last_login_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserIdentitiesQuery when eager-loading is set.
 	Edges        UserIdentitiesEdges `json:"edges"`
@@ -99,7 +101,7 @@ func (*UserIdentities) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case useridentities.FieldProviderUserID, useridentities.FieldProviderUnionID, useridentities.FieldPasswordHash:
 			values[i] = new(sql.NullString)
-		case useridentities.FieldCreatedAt, useridentities.FieldUpdatedAt, useridentities.FieldPasswordChangedAt, useridentities.FieldPasswordExpiresAt, useridentities.FieldTokenExpiresAt:
+		case useridentities.FieldCreatedAt, useridentities.FieldUpdatedAt, useridentities.FieldPasswordChangedAt, useridentities.FieldPasswordExpiresAt, useridentities.FieldTokenExpiresAt, useridentities.FieldLastLoginAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -208,6 +210,13 @@ func (_m *UserIdentities) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.TokenExpiresAt = value.Time
 			}
+		case useridentities.FieldLastLoginAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_login_at", values[i])
+			} else if value.Valid {
+				_m.LastLoginAt = new(time.Time)
+				*_m.LastLoginAt = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -295,6 +304,11 @@ func (_m *UserIdentities) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("token_expires_at=")
 	builder.WriteString(_m.TokenExpiresAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := _m.LastLoginAt; v != nil {
+		builder.WriteString("last_login_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }
