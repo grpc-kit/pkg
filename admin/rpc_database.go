@@ -47,6 +47,18 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetEnabled(true),
 	).SaveX(ctx)
 
+	tx.Departments.CreateBulk(
+		tx.Departments.Create().
+			SetName("root").
+			SetI18nName(I18NNameJSON(&adminv1.I18NName{
+				ZhCn: "根目录",
+				EnUs: "root",
+				JaJp: "ルートディレクトリ",
+			})).
+			SetOrderWeight(1).
+			SetParentID(0),
+	).SaveX(ctx)
+
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, err
