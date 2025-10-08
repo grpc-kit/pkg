@@ -554,6 +554,18 @@ func init() {
 	userdepartments.DefaultUpdatedAt = userdepartmentsDescUpdatedAt.Default.(func() time.Time)
 	// userdepartments.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	userdepartments.UpdateDefaultUpdatedAt = userdepartmentsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userdepartmentsDescMemberRole is the schema descriptor for member_role field.
+	userdepartmentsDescMemberRole := userdepartmentsFields[2].Descriptor()
+	// userdepartments.DefaultMemberRole holds the default value on creation for the member_role field.
+	userdepartments.DefaultMemberRole = userdepartmentsDescMemberRole.Default.(int)
+	// userdepartmentsDescMemberStatus is the schema descriptor for member_status field.
+	userdepartmentsDescMemberStatus := userdepartmentsFields[3].Descriptor()
+	// userdepartments.DefaultMemberStatus holds the default value on creation for the member_status field.
+	userdepartments.DefaultMemberStatus = userdepartmentsDescMemberStatus.Default.(int)
+	// userdepartmentsDescDescription is the schema descriptor for description field.
+	userdepartmentsDescDescription := userdepartmentsFields[8].Descriptor()
+	// userdepartments.DefaultDescription holds the default value on creation for the description field.
+	userdepartments.DefaultDescription = userdepartmentsDescDescription.Default.(string)
 	usergroupsMixin := schema.UserGroups{}.Mixin()
 	usergroupsMixinFields0 := usergroupsMixin[0].Fields()
 	_ = usergroupsMixinFields0

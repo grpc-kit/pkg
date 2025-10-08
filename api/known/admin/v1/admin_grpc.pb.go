@@ -49,6 +49,7 @@ type KnownAdminClient interface {
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
 	DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateDepartment(ctx context.Context, in *UpdateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
+	ListDepartmentMembers(ctx context.Context, in *ListDepartmentMembersRequest, opts ...grpc.CallOption) (*ListDepartmentMembersResponse, error)
 	// 用户相关
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
@@ -279,6 +280,15 @@ func (c *knownAdminClient) UpdateDepartment(ctx context.Context, in *UpdateDepar
 	return out, nil
 }
 
+func (c *knownAdminClient) ListDepartmentMembers(ctx context.Context, in *ListDepartmentMembersRequest, opts ...grpc.CallOption) (*ListDepartmentMembersResponse, error) {
+	out := new(ListDepartmentMembersResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListDepartmentMembers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetUser", in, out, opts...)
@@ -462,6 +472,7 @@ type KnownAdminServer interface {
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
 	DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*emptypb.Empty, error)
 	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error)
+	ListDepartmentMembers(context.Context, *ListDepartmentMembersRequest) (*ListDepartmentMembersResponse, error)
 	// 用户相关
 	GetUser(context.Context, *GetUserRequest) (*User, error)
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
@@ -555,6 +566,9 @@ func (UnimplementedKnownAdminServer) DeleteDepartment(context.Context, *DeleteDe
 }
 func (UnimplementedKnownAdminServer) UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateDepartment not implemented")
+}
+func (UnimplementedKnownAdminServer) ListDepartmentMembers(context.Context, *ListDepartmentMembersRequest) (*ListDepartmentMembersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDepartmentMembers not implemented")
 }
 func (UnimplementedKnownAdminServer) GetUser(context.Context, *GetUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
@@ -1015,6 +1029,24 @@ func _KnownAdmin_UpdateDepartment_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_ListDepartmentMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDepartmentMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListDepartmentMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListDepartmentMembers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListDepartmentMembers(ctx, req.(*ListDepartmentMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserRequest)
 	if err := dec(in); err != nil {
@@ -1415,6 +1447,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateDepartment",
 			Handler:    _KnownAdmin_UpdateDepartment_Handler,
+		},
+		{
+			MethodName: "ListDepartmentMembers",
+			Handler:    _KnownAdmin_ListDepartmentMembers_Handler,
 		},
 		{
 			MethodName: "GetUser",

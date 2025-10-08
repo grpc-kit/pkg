@@ -10844,21 +10844,30 @@ func (m *RolesMutation) ResetEdge(name string) error {
 // UserDepartmentsMutation represents an operation that mutates the UserDepartments nodes in the graph.
 type UserDepartmentsMutation struct {
 	config
-	op                           Op
-	typ                          string
-	id                           *int
-	created_at                   *time.Time
-	updated_at                   *time.Time
-	leader_type                  *int
-	addleader_type               *int
-	clearedFields                map[string]struct{}
-	lion_departments             *int
-	clearedlion_departments      bool
-	lion_user_departments        *int
-	clearedlion_user_departments bool
-	done                         bool
-	oldValue                     func(context.Context) (*UserDepartments, error)
-	predicates                   []predicate.UserDepartments
+	op                      Op
+	typ                     string
+	id                      *int
+	created_at              *time.Time
+	updated_at              *time.Time
+	member_role             *int
+	addmember_role          *int
+	member_status           *int
+	addmember_status        *int
+	expired_at              *time.Time
+	created_by              *int
+	addcreated_by           *int
+	updated_by              *int
+	addupdated_by           *int
+	metadata                *string
+	description             *string
+	clearedFields           map[string]struct{}
+	lion_departments        *int
+	clearedlion_departments bool
+	lion_users              *int
+	clearedlion_users       bool
+	done                    bool
+	oldValue                func(context.Context) (*UserDepartments, error)
+	predicates              []predicate.UserDepartments
 }
 
 var _ ent.Mutation = (*UserDepartmentsMutation)(nil)
@@ -11067,70 +11076,14 @@ func (m *UserDepartmentsMutation) ResetDepartmentID() {
 	m.lion_departments = nil
 }
 
-// SetLeaderType sets the "leader_type" field.
-func (m *UserDepartmentsMutation) SetLeaderType(i int) {
-	m.leader_type = &i
-	m.addleader_type = nil
-}
-
-// LeaderType returns the value of the "leader_type" field in the mutation.
-func (m *UserDepartmentsMutation) LeaderType() (r int, exists bool) {
-	v := m.leader_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLeaderType returns the old "leader_type" field's value of the UserDepartments entity.
-// If the UserDepartments object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserDepartmentsMutation) OldLeaderType(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLeaderType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLeaderType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLeaderType: %w", err)
-	}
-	return oldValue.LeaderType, nil
-}
-
-// AddLeaderType adds i to the "leader_type" field.
-func (m *UserDepartmentsMutation) AddLeaderType(i int) {
-	if m.addleader_type != nil {
-		*m.addleader_type += i
-	} else {
-		m.addleader_type = &i
-	}
-}
-
-// AddedLeaderType returns the value that was added to the "leader_type" field in this mutation.
-func (m *UserDepartmentsMutation) AddedLeaderType() (r int, exists bool) {
-	v := m.addleader_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetLeaderType resets all changes to the "leader_type" field.
-func (m *UserDepartmentsMutation) ResetLeaderType() {
-	m.leader_type = nil
-	m.addleader_type = nil
-}
-
 // SetUserID sets the "user_id" field.
 func (m *UserDepartmentsMutation) SetUserID(i int) {
-	m.lion_user_departments = &i
+	m.lion_users = &i
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
 func (m *UserDepartmentsMutation) UserID() (r int, exists bool) {
-	v := m.lion_user_departments
+	v := m.lion_users
 	if v == nil {
 		return
 	}
@@ -11156,7 +11109,393 @@ func (m *UserDepartmentsMutation) OldUserID(ctx context.Context) (v int, err err
 
 // ResetUserID resets all changes to the "user_id" field.
 func (m *UserDepartmentsMutation) ResetUserID() {
-	m.lion_user_departments = nil
+	m.lion_users = nil
+}
+
+// SetMemberRole sets the "member_role" field.
+func (m *UserDepartmentsMutation) SetMemberRole(i int) {
+	m.member_role = &i
+	m.addmember_role = nil
+}
+
+// MemberRole returns the value of the "member_role" field in the mutation.
+func (m *UserDepartmentsMutation) MemberRole() (r int, exists bool) {
+	v := m.member_role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMemberRole returns the old "member_role" field's value of the UserDepartments entity.
+// If the UserDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserDepartmentsMutation) OldMemberRole(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMemberRole is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMemberRole requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMemberRole: %w", err)
+	}
+	return oldValue.MemberRole, nil
+}
+
+// AddMemberRole adds i to the "member_role" field.
+func (m *UserDepartmentsMutation) AddMemberRole(i int) {
+	if m.addmember_role != nil {
+		*m.addmember_role += i
+	} else {
+		m.addmember_role = &i
+	}
+}
+
+// AddedMemberRole returns the value that was added to the "member_role" field in this mutation.
+func (m *UserDepartmentsMutation) AddedMemberRole() (r int, exists bool) {
+	v := m.addmember_role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMemberRole resets all changes to the "member_role" field.
+func (m *UserDepartmentsMutation) ResetMemberRole() {
+	m.member_role = nil
+	m.addmember_role = nil
+}
+
+// SetMemberStatus sets the "member_status" field.
+func (m *UserDepartmentsMutation) SetMemberStatus(i int) {
+	m.member_status = &i
+	m.addmember_status = nil
+}
+
+// MemberStatus returns the value of the "member_status" field in the mutation.
+func (m *UserDepartmentsMutation) MemberStatus() (r int, exists bool) {
+	v := m.member_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMemberStatus returns the old "member_status" field's value of the UserDepartments entity.
+// If the UserDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserDepartmentsMutation) OldMemberStatus(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMemberStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMemberStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMemberStatus: %w", err)
+	}
+	return oldValue.MemberStatus, nil
+}
+
+// AddMemberStatus adds i to the "member_status" field.
+func (m *UserDepartmentsMutation) AddMemberStatus(i int) {
+	if m.addmember_status != nil {
+		*m.addmember_status += i
+	} else {
+		m.addmember_status = &i
+	}
+}
+
+// AddedMemberStatus returns the value that was added to the "member_status" field in this mutation.
+func (m *UserDepartmentsMutation) AddedMemberStatus() (r int, exists bool) {
+	v := m.addmember_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMemberStatus resets all changes to the "member_status" field.
+func (m *UserDepartmentsMutation) ResetMemberStatus() {
+	m.member_status = nil
+	m.addmember_status = nil
+}
+
+// SetExpiredAt sets the "expired_at" field.
+func (m *UserDepartmentsMutation) SetExpiredAt(t time.Time) {
+	m.expired_at = &t
+}
+
+// ExpiredAt returns the value of the "expired_at" field in the mutation.
+func (m *UserDepartmentsMutation) ExpiredAt() (r time.Time, exists bool) {
+	v := m.expired_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiredAt returns the old "expired_at" field's value of the UserDepartments entity.
+// If the UserDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserDepartmentsMutation) OldExpiredAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiredAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiredAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiredAt: %w", err)
+	}
+	return oldValue.ExpiredAt, nil
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (m *UserDepartmentsMutation) ClearExpiredAt() {
+	m.expired_at = nil
+	m.clearedFields[userdepartments.FieldExpiredAt] = struct{}{}
+}
+
+// ExpiredAtCleared returns if the "expired_at" field was cleared in this mutation.
+func (m *UserDepartmentsMutation) ExpiredAtCleared() bool {
+	_, ok := m.clearedFields[userdepartments.FieldExpiredAt]
+	return ok
+}
+
+// ResetExpiredAt resets all changes to the "expired_at" field.
+func (m *UserDepartmentsMutation) ResetExpiredAt() {
+	m.expired_at = nil
+	delete(m.clearedFields, userdepartments.FieldExpiredAt)
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (m *UserDepartmentsMutation) SetCreatedBy(i int) {
+	m.created_by = &i
+	m.addcreated_by = nil
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *UserDepartmentsMutation) CreatedBy() (r int, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the UserDepartments entity.
+// If the UserDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserDepartmentsMutation) OldCreatedBy(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// AddCreatedBy adds i to the "created_by" field.
+func (m *UserDepartmentsMutation) AddCreatedBy(i int) {
+	if m.addcreated_by != nil {
+		*m.addcreated_by += i
+	} else {
+		m.addcreated_by = &i
+	}
+}
+
+// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
+func (m *UserDepartmentsMutation) AddedCreatedBy() (r int, exists bool) {
+	v := m.addcreated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (m *UserDepartmentsMutation) ClearCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	m.clearedFields[userdepartments.FieldCreatedBy] = struct{}{}
+}
+
+// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
+func (m *UserDepartmentsMutation) CreatedByCleared() bool {
+	_, ok := m.clearedFields[userdepartments.FieldCreatedBy]
+	return ok
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *UserDepartmentsMutation) ResetCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	delete(m.clearedFields, userdepartments.FieldCreatedBy)
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (m *UserDepartmentsMutation) SetUpdatedBy(i int) {
+	m.updated_by = &i
+	m.addupdated_by = nil
+}
+
+// UpdatedBy returns the value of the "updated_by" field in the mutation.
+func (m *UserDepartmentsMutation) UpdatedBy() (r int, exists bool) {
+	v := m.updated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedBy returns the old "updated_by" field's value of the UserDepartments entity.
+// If the UserDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserDepartmentsMutation) OldUpdatedBy(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedBy: %w", err)
+	}
+	return oldValue.UpdatedBy, nil
+}
+
+// AddUpdatedBy adds i to the "updated_by" field.
+func (m *UserDepartmentsMutation) AddUpdatedBy(i int) {
+	if m.addupdated_by != nil {
+		*m.addupdated_by += i
+	} else {
+		m.addupdated_by = &i
+	}
+}
+
+// AddedUpdatedBy returns the value that was added to the "updated_by" field in this mutation.
+func (m *UserDepartmentsMutation) AddedUpdatedBy() (r int, exists bool) {
+	v := m.addupdated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (m *UserDepartmentsMutation) ClearUpdatedBy() {
+	m.updated_by = nil
+	m.addupdated_by = nil
+	m.clearedFields[userdepartments.FieldUpdatedBy] = struct{}{}
+}
+
+// UpdatedByCleared returns if the "updated_by" field was cleared in this mutation.
+func (m *UserDepartmentsMutation) UpdatedByCleared() bool {
+	_, ok := m.clearedFields[userdepartments.FieldUpdatedBy]
+	return ok
+}
+
+// ResetUpdatedBy resets all changes to the "updated_by" field.
+func (m *UserDepartmentsMutation) ResetUpdatedBy() {
+	m.updated_by = nil
+	m.addupdated_by = nil
+	delete(m.clearedFields, userdepartments.FieldUpdatedBy)
+}
+
+// SetMetadata sets the "metadata" field.
+func (m *UserDepartmentsMutation) SetMetadata(s string) {
+	m.metadata = &s
+}
+
+// Metadata returns the value of the "metadata" field in the mutation.
+func (m *UserDepartmentsMutation) Metadata() (r string, exists bool) {
+	v := m.metadata
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetadata returns the old "metadata" field's value of the UserDepartments entity.
+// If the UserDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserDepartmentsMutation) OldMetadata(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetadata requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetadata: %w", err)
+	}
+	return oldValue.Metadata, nil
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (m *UserDepartmentsMutation) ClearMetadata() {
+	m.metadata = nil
+	m.clearedFields[userdepartments.FieldMetadata] = struct{}{}
+}
+
+// MetadataCleared returns if the "metadata" field was cleared in this mutation.
+func (m *UserDepartmentsMutation) MetadataCleared() bool {
+	_, ok := m.clearedFields[userdepartments.FieldMetadata]
+	return ok
+}
+
+// ResetMetadata resets all changes to the "metadata" field.
+func (m *UserDepartmentsMutation) ResetMetadata() {
+	m.metadata = nil
+	delete(m.clearedFields, userdepartments.FieldMetadata)
+}
+
+// SetDescription sets the "description" field.
+func (m *UserDepartmentsMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *UserDepartmentsMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the UserDepartments entity.
+// If the UserDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserDepartmentsMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *UserDepartmentsMutation) ResetDescription() {
+	m.description = nil
 }
 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by id.
@@ -11199,44 +11538,44 @@ func (m *UserDepartmentsMutation) ResetLionDepartments() {
 	m.clearedlion_departments = false
 }
 
-// SetLionUserDepartmentsID sets the "lion_user_departments" edge to the Users entity by id.
-func (m *UserDepartmentsMutation) SetLionUserDepartmentsID(id int) {
-	m.lion_user_departments = &id
+// SetLionUsersID sets the "lion_users" edge to the Users entity by id.
+func (m *UserDepartmentsMutation) SetLionUsersID(id int) {
+	m.lion_users = &id
 }
 
-// ClearLionUserDepartments clears the "lion_user_departments" edge to the Users entity.
-func (m *UserDepartmentsMutation) ClearLionUserDepartments() {
-	m.clearedlion_user_departments = true
+// ClearLionUsers clears the "lion_users" edge to the Users entity.
+func (m *UserDepartmentsMutation) ClearLionUsers() {
+	m.clearedlion_users = true
 	m.clearedFields[userdepartments.FieldUserID] = struct{}{}
 }
 
-// LionUserDepartmentsCleared reports if the "lion_user_departments" edge to the Users entity was cleared.
-func (m *UserDepartmentsMutation) LionUserDepartmentsCleared() bool {
-	return m.clearedlion_user_departments
+// LionUsersCleared reports if the "lion_users" edge to the Users entity was cleared.
+func (m *UserDepartmentsMutation) LionUsersCleared() bool {
+	return m.clearedlion_users
 }
 
-// LionUserDepartmentsID returns the "lion_user_departments" edge ID in the mutation.
-func (m *UserDepartmentsMutation) LionUserDepartmentsID() (id int, exists bool) {
-	if m.lion_user_departments != nil {
-		return *m.lion_user_departments, true
+// LionUsersID returns the "lion_users" edge ID in the mutation.
+func (m *UserDepartmentsMutation) LionUsersID() (id int, exists bool) {
+	if m.lion_users != nil {
+		return *m.lion_users, true
 	}
 	return
 }
 
-// LionUserDepartmentsIDs returns the "lion_user_departments" edge IDs in the mutation.
+// LionUsersIDs returns the "lion_users" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// LionUserDepartmentsID instead. It exists only for internal usage by the builders.
-func (m *UserDepartmentsMutation) LionUserDepartmentsIDs() (ids []int) {
-	if id := m.lion_user_departments; id != nil {
+// LionUsersID instead. It exists only for internal usage by the builders.
+func (m *UserDepartmentsMutation) LionUsersIDs() (ids []int) {
+	if id := m.lion_users; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetLionUserDepartments resets all changes to the "lion_user_departments" edge.
-func (m *UserDepartmentsMutation) ResetLionUserDepartments() {
-	m.lion_user_departments = nil
-	m.clearedlion_user_departments = false
+// ResetLionUsers resets all changes to the "lion_users" edge.
+func (m *UserDepartmentsMutation) ResetLionUsers() {
+	m.lion_users = nil
+	m.clearedlion_users = false
 }
 
 // Where appends a list predicates to the UserDepartmentsMutation builder.
@@ -11273,7 +11612,7 @@ func (m *UserDepartmentsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserDepartmentsMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, userdepartments.FieldCreatedAt)
 	}
@@ -11283,11 +11622,29 @@ func (m *UserDepartmentsMutation) Fields() []string {
 	if m.lion_departments != nil {
 		fields = append(fields, userdepartments.FieldDepartmentID)
 	}
-	if m.leader_type != nil {
-		fields = append(fields, userdepartments.FieldLeaderType)
-	}
-	if m.lion_user_departments != nil {
+	if m.lion_users != nil {
 		fields = append(fields, userdepartments.FieldUserID)
+	}
+	if m.member_role != nil {
+		fields = append(fields, userdepartments.FieldMemberRole)
+	}
+	if m.member_status != nil {
+		fields = append(fields, userdepartments.FieldMemberStatus)
+	}
+	if m.expired_at != nil {
+		fields = append(fields, userdepartments.FieldExpiredAt)
+	}
+	if m.created_by != nil {
+		fields = append(fields, userdepartments.FieldCreatedBy)
+	}
+	if m.updated_by != nil {
+		fields = append(fields, userdepartments.FieldUpdatedBy)
+	}
+	if m.metadata != nil {
+		fields = append(fields, userdepartments.FieldMetadata)
+	}
+	if m.description != nil {
+		fields = append(fields, userdepartments.FieldDescription)
 	}
 	return fields
 }
@@ -11303,10 +11660,22 @@ func (m *UserDepartmentsMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case userdepartments.FieldDepartmentID:
 		return m.DepartmentID()
-	case userdepartments.FieldLeaderType:
-		return m.LeaderType()
 	case userdepartments.FieldUserID:
 		return m.UserID()
+	case userdepartments.FieldMemberRole:
+		return m.MemberRole()
+	case userdepartments.FieldMemberStatus:
+		return m.MemberStatus()
+	case userdepartments.FieldExpiredAt:
+		return m.ExpiredAt()
+	case userdepartments.FieldCreatedBy:
+		return m.CreatedBy()
+	case userdepartments.FieldUpdatedBy:
+		return m.UpdatedBy()
+	case userdepartments.FieldMetadata:
+		return m.Metadata()
+	case userdepartments.FieldDescription:
+		return m.Description()
 	}
 	return nil, false
 }
@@ -11322,10 +11691,22 @@ func (m *UserDepartmentsMutation) OldField(ctx context.Context, name string) (en
 		return m.OldUpdatedAt(ctx)
 	case userdepartments.FieldDepartmentID:
 		return m.OldDepartmentID(ctx)
-	case userdepartments.FieldLeaderType:
-		return m.OldLeaderType(ctx)
 	case userdepartments.FieldUserID:
 		return m.OldUserID(ctx)
+	case userdepartments.FieldMemberRole:
+		return m.OldMemberRole(ctx)
+	case userdepartments.FieldMemberStatus:
+		return m.OldMemberStatus(ctx)
+	case userdepartments.FieldExpiredAt:
+		return m.OldExpiredAt(ctx)
+	case userdepartments.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
+	case userdepartments.FieldUpdatedBy:
+		return m.OldUpdatedBy(ctx)
+	case userdepartments.FieldMetadata:
+		return m.OldMetadata(ctx)
+	case userdepartments.FieldDescription:
+		return m.OldDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown UserDepartments field %s", name)
 }
@@ -11356,19 +11737,61 @@ func (m *UserDepartmentsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDepartmentID(v)
 		return nil
-	case userdepartments.FieldLeaderType:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLeaderType(v)
-		return nil
 	case userdepartments.FieldUserID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserID(v)
+		return nil
+	case userdepartments.FieldMemberRole:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMemberRole(v)
+		return nil
+	case userdepartments.FieldMemberStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMemberStatus(v)
+		return nil
+	case userdepartments.FieldExpiredAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiredAt(v)
+		return nil
+	case userdepartments.FieldCreatedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
+	case userdepartments.FieldUpdatedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedBy(v)
+		return nil
+	case userdepartments.FieldMetadata:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetadata(v)
+		return nil
+	case userdepartments.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
 		return nil
 	}
 	return fmt.Errorf("unknown UserDepartments field %s", name)
@@ -11378,8 +11801,17 @@ func (m *UserDepartmentsMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *UserDepartmentsMutation) AddedFields() []string {
 	var fields []string
-	if m.addleader_type != nil {
-		fields = append(fields, userdepartments.FieldLeaderType)
+	if m.addmember_role != nil {
+		fields = append(fields, userdepartments.FieldMemberRole)
+	}
+	if m.addmember_status != nil {
+		fields = append(fields, userdepartments.FieldMemberStatus)
+	}
+	if m.addcreated_by != nil {
+		fields = append(fields, userdepartments.FieldCreatedBy)
+	}
+	if m.addupdated_by != nil {
+		fields = append(fields, userdepartments.FieldUpdatedBy)
 	}
 	return fields
 }
@@ -11389,8 +11821,14 @@ func (m *UserDepartmentsMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *UserDepartmentsMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case userdepartments.FieldLeaderType:
-		return m.AddedLeaderType()
+	case userdepartments.FieldMemberRole:
+		return m.AddedMemberRole()
+	case userdepartments.FieldMemberStatus:
+		return m.AddedMemberStatus()
+	case userdepartments.FieldCreatedBy:
+		return m.AddedCreatedBy()
+	case userdepartments.FieldUpdatedBy:
+		return m.AddedUpdatedBy()
 	}
 	return nil, false
 }
@@ -11400,12 +11838,33 @@ func (m *UserDepartmentsMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserDepartmentsMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case userdepartments.FieldLeaderType:
+	case userdepartments.FieldMemberRole:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddLeaderType(v)
+		m.AddMemberRole(v)
+		return nil
+	case userdepartments.FieldMemberStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMemberStatus(v)
+		return nil
+	case userdepartments.FieldCreatedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedBy(v)
+		return nil
+	case userdepartments.FieldUpdatedBy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdatedBy(v)
 		return nil
 	}
 	return fmt.Errorf("unknown UserDepartments numeric field %s", name)
@@ -11414,7 +11873,20 @@ func (m *UserDepartmentsMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *UserDepartmentsMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(userdepartments.FieldExpiredAt) {
+		fields = append(fields, userdepartments.FieldExpiredAt)
+	}
+	if m.FieldCleared(userdepartments.FieldCreatedBy) {
+		fields = append(fields, userdepartments.FieldCreatedBy)
+	}
+	if m.FieldCleared(userdepartments.FieldUpdatedBy) {
+		fields = append(fields, userdepartments.FieldUpdatedBy)
+	}
+	if m.FieldCleared(userdepartments.FieldMetadata) {
+		fields = append(fields, userdepartments.FieldMetadata)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -11427,6 +11899,20 @@ func (m *UserDepartmentsMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserDepartmentsMutation) ClearField(name string) error {
+	switch name {
+	case userdepartments.FieldExpiredAt:
+		m.ClearExpiredAt()
+		return nil
+	case userdepartments.FieldCreatedBy:
+		m.ClearCreatedBy()
+		return nil
+	case userdepartments.FieldUpdatedBy:
+		m.ClearUpdatedBy()
+		return nil
+	case userdepartments.FieldMetadata:
+		m.ClearMetadata()
+		return nil
+	}
 	return fmt.Errorf("unknown UserDepartments nullable field %s", name)
 }
 
@@ -11443,11 +11929,29 @@ func (m *UserDepartmentsMutation) ResetField(name string) error {
 	case userdepartments.FieldDepartmentID:
 		m.ResetDepartmentID()
 		return nil
-	case userdepartments.FieldLeaderType:
-		m.ResetLeaderType()
-		return nil
 	case userdepartments.FieldUserID:
 		m.ResetUserID()
+		return nil
+	case userdepartments.FieldMemberRole:
+		m.ResetMemberRole()
+		return nil
+	case userdepartments.FieldMemberStatus:
+		m.ResetMemberStatus()
+		return nil
+	case userdepartments.FieldExpiredAt:
+		m.ResetExpiredAt()
+		return nil
+	case userdepartments.FieldCreatedBy:
+		m.ResetCreatedBy()
+		return nil
+	case userdepartments.FieldUpdatedBy:
+		m.ResetUpdatedBy()
+		return nil
+	case userdepartments.FieldMetadata:
+		m.ResetMetadata()
+		return nil
+	case userdepartments.FieldDescription:
+		m.ResetDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown UserDepartments field %s", name)
@@ -11459,8 +11963,8 @@ func (m *UserDepartmentsMutation) AddedEdges() []string {
 	if m.lion_departments != nil {
 		edges = append(edges, userdepartments.EdgeLionDepartments)
 	}
-	if m.lion_user_departments != nil {
-		edges = append(edges, userdepartments.EdgeLionUserDepartments)
+	if m.lion_users != nil {
+		edges = append(edges, userdepartments.EdgeLionUsers)
 	}
 	return edges
 }
@@ -11473,8 +11977,8 @@ func (m *UserDepartmentsMutation) AddedIDs(name string) []ent.Value {
 		if id := m.lion_departments; id != nil {
 			return []ent.Value{*id}
 		}
-	case userdepartments.EdgeLionUserDepartments:
-		if id := m.lion_user_departments; id != nil {
+	case userdepartments.EdgeLionUsers:
+		if id := m.lion_users; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -11499,8 +12003,8 @@ func (m *UserDepartmentsMutation) ClearedEdges() []string {
 	if m.clearedlion_departments {
 		edges = append(edges, userdepartments.EdgeLionDepartments)
 	}
-	if m.clearedlion_user_departments {
-		edges = append(edges, userdepartments.EdgeLionUserDepartments)
+	if m.clearedlion_users {
+		edges = append(edges, userdepartments.EdgeLionUsers)
 	}
 	return edges
 }
@@ -11511,8 +12015,8 @@ func (m *UserDepartmentsMutation) EdgeCleared(name string) bool {
 	switch name {
 	case userdepartments.EdgeLionDepartments:
 		return m.clearedlion_departments
-	case userdepartments.EdgeLionUserDepartments:
-		return m.clearedlion_user_departments
+	case userdepartments.EdgeLionUsers:
+		return m.clearedlion_users
 	}
 	return false
 }
@@ -11524,8 +12028,8 @@ func (m *UserDepartmentsMutation) ClearEdge(name string) error {
 	case userdepartments.EdgeLionDepartments:
 		m.ClearLionDepartments()
 		return nil
-	case userdepartments.EdgeLionUserDepartments:
-		m.ClearLionUserDepartments()
+	case userdepartments.EdgeLionUsers:
+		m.ClearLionUsers()
 		return nil
 	}
 	return fmt.Errorf("unknown UserDepartments unique edge %s", name)
@@ -11538,8 +12042,8 @@ func (m *UserDepartmentsMutation) ResetEdge(name string) error {
 	case userdepartments.EdgeLionDepartments:
 		m.ResetLionDepartments()
 		return nil
-	case userdepartments.EdgeLionUserDepartments:
-		m.ResetLionUserDepartments()
+	case userdepartments.EdgeLionUsers:
+		m.ResetLionUsers()
 		return nil
 	}
 	return fmt.Errorf("unknown UserDepartments edge %s", name)

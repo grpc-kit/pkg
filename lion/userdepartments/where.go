@@ -70,14 +70,44 @@ func DepartmentID(v int) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldEQ(FieldDepartmentID, v))
 }
 
-// LeaderType applies equality check predicate on the "leader_type" field. It's identical to LeaderTypeEQ.
-func LeaderType(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldEQ(FieldLeaderType, v))
-}
-
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldEQ(FieldUserID, v))
+}
+
+// MemberRole applies equality check predicate on the "member_role" field. It's identical to MemberRoleEQ.
+func MemberRole(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldMemberRole, v))
+}
+
+// MemberStatus applies equality check predicate on the "member_status" field. It's identical to MemberStatusEQ.
+func MemberStatus(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldMemberStatus, v))
+}
+
+// ExpiredAt applies equality check predicate on the "expired_at" field. It's identical to ExpiredAtEQ.
+func ExpiredAt(v time.Time) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldExpiredAt, v))
+}
+
+// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
+func CreatedBy(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
+func UpdatedBy(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// Metadata applies equality check predicate on the "metadata" field. It's identical to MetadataEQ.
+func Metadata(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldMetadata, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldDescription, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -180,46 +210,6 @@ func DepartmentIDNotIn(vs ...int) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldNotIn(FieldDepartmentID, vs...))
 }
 
-// LeaderTypeEQ applies the EQ predicate on the "leader_type" field.
-func LeaderTypeEQ(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldEQ(FieldLeaderType, v))
-}
-
-// LeaderTypeNEQ applies the NEQ predicate on the "leader_type" field.
-func LeaderTypeNEQ(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldNEQ(FieldLeaderType, v))
-}
-
-// LeaderTypeIn applies the In predicate on the "leader_type" field.
-func LeaderTypeIn(vs ...int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldIn(FieldLeaderType, vs...))
-}
-
-// LeaderTypeNotIn applies the NotIn predicate on the "leader_type" field.
-func LeaderTypeNotIn(vs ...int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldNotIn(FieldLeaderType, vs...))
-}
-
-// LeaderTypeGT applies the GT predicate on the "leader_type" field.
-func LeaderTypeGT(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldGT(FieldLeaderType, v))
-}
-
-// LeaderTypeGTE applies the GTE predicate on the "leader_type" field.
-func LeaderTypeGTE(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldGTE(FieldLeaderType, v))
-}
-
-// LeaderTypeLT applies the LT predicate on the "leader_type" field.
-func LeaderTypeLT(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldLT(FieldLeaderType, v))
-}
-
-// LeaderTypeLTE applies the LTE predicate on the "leader_type" field.
-func LeaderTypeLTE(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldLTE(FieldLeaderType, v))
-}
-
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldEQ(FieldUserID, v))
@@ -238,6 +228,376 @@ func UserIDIn(vs ...int) predicate.UserDepartments {
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
 func UserIDNotIn(vs ...int) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// MemberRoleEQ applies the EQ predicate on the "member_role" field.
+func MemberRoleEQ(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldMemberRole, v))
+}
+
+// MemberRoleNEQ applies the NEQ predicate on the "member_role" field.
+func MemberRoleNEQ(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNEQ(FieldMemberRole, v))
+}
+
+// MemberRoleIn applies the In predicate on the "member_role" field.
+func MemberRoleIn(vs ...int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIn(FieldMemberRole, vs...))
+}
+
+// MemberRoleNotIn applies the NotIn predicate on the "member_role" field.
+func MemberRoleNotIn(vs ...int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotIn(FieldMemberRole, vs...))
+}
+
+// MemberRoleGT applies the GT predicate on the "member_role" field.
+func MemberRoleGT(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGT(FieldMemberRole, v))
+}
+
+// MemberRoleGTE applies the GTE predicate on the "member_role" field.
+func MemberRoleGTE(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGTE(FieldMemberRole, v))
+}
+
+// MemberRoleLT applies the LT predicate on the "member_role" field.
+func MemberRoleLT(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLT(FieldMemberRole, v))
+}
+
+// MemberRoleLTE applies the LTE predicate on the "member_role" field.
+func MemberRoleLTE(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLTE(FieldMemberRole, v))
+}
+
+// MemberStatusEQ applies the EQ predicate on the "member_status" field.
+func MemberStatusEQ(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldMemberStatus, v))
+}
+
+// MemberStatusNEQ applies the NEQ predicate on the "member_status" field.
+func MemberStatusNEQ(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNEQ(FieldMemberStatus, v))
+}
+
+// MemberStatusIn applies the In predicate on the "member_status" field.
+func MemberStatusIn(vs ...int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIn(FieldMemberStatus, vs...))
+}
+
+// MemberStatusNotIn applies the NotIn predicate on the "member_status" field.
+func MemberStatusNotIn(vs ...int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotIn(FieldMemberStatus, vs...))
+}
+
+// MemberStatusGT applies the GT predicate on the "member_status" field.
+func MemberStatusGT(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGT(FieldMemberStatus, v))
+}
+
+// MemberStatusGTE applies the GTE predicate on the "member_status" field.
+func MemberStatusGTE(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGTE(FieldMemberStatus, v))
+}
+
+// MemberStatusLT applies the LT predicate on the "member_status" field.
+func MemberStatusLT(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLT(FieldMemberStatus, v))
+}
+
+// MemberStatusLTE applies the LTE predicate on the "member_status" field.
+func MemberStatusLTE(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLTE(FieldMemberStatus, v))
+}
+
+// ExpiredAtEQ applies the EQ predicate on the "expired_at" field.
+func ExpiredAtEQ(v time.Time) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldExpiredAt, v))
+}
+
+// ExpiredAtNEQ applies the NEQ predicate on the "expired_at" field.
+func ExpiredAtNEQ(v time.Time) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNEQ(FieldExpiredAt, v))
+}
+
+// ExpiredAtIn applies the In predicate on the "expired_at" field.
+func ExpiredAtIn(vs ...time.Time) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIn(FieldExpiredAt, vs...))
+}
+
+// ExpiredAtNotIn applies the NotIn predicate on the "expired_at" field.
+func ExpiredAtNotIn(vs ...time.Time) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotIn(FieldExpiredAt, vs...))
+}
+
+// ExpiredAtGT applies the GT predicate on the "expired_at" field.
+func ExpiredAtGT(v time.Time) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGT(FieldExpiredAt, v))
+}
+
+// ExpiredAtGTE applies the GTE predicate on the "expired_at" field.
+func ExpiredAtGTE(v time.Time) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGTE(FieldExpiredAt, v))
+}
+
+// ExpiredAtLT applies the LT predicate on the "expired_at" field.
+func ExpiredAtLT(v time.Time) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLT(FieldExpiredAt, v))
+}
+
+// ExpiredAtLTE applies the LTE predicate on the "expired_at" field.
+func ExpiredAtLTE(v time.Time) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLTE(FieldExpiredAt, v))
+}
+
+// ExpiredAtIsNil applies the IsNil predicate on the "expired_at" field.
+func ExpiredAtIsNil() predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIsNull(FieldExpiredAt))
+}
+
+// ExpiredAtNotNil applies the NotNil predicate on the "expired_at" field.
+func ExpiredAtNotNil() predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotNull(FieldExpiredAt))
+}
+
+// CreatedByEQ applies the EQ predicate on the "created_by" field.
+func CreatedByEQ(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
+func CreatedByNEQ(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNEQ(FieldCreatedBy, v))
+}
+
+// CreatedByIn applies the In predicate on the "created_by" field.
+func CreatedByIn(vs ...int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
+func CreatedByNotIn(vs ...int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByGT applies the GT predicate on the "created_by" field.
+func CreatedByGT(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGT(FieldCreatedBy, v))
+}
+
+// CreatedByGTE applies the GTE predicate on the "created_by" field.
+func CreatedByGTE(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGTE(FieldCreatedBy, v))
+}
+
+// CreatedByLT applies the LT predicate on the "created_by" field.
+func CreatedByLT(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLT(FieldCreatedBy, v))
+}
+
+// CreatedByLTE applies the LTE predicate on the "created_by" field.
+func CreatedByLTE(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLTE(FieldCreatedBy, v))
+}
+
+// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
+func CreatedByIsNil() predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIsNull(FieldCreatedBy))
+}
+
+// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
+func CreatedByNotNil() predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotNull(FieldCreatedBy))
+}
+
+// UpdatedByEQ applies the EQ predicate on the "updated_by" field.
+func UpdatedByEQ(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
+func UpdatedByNEQ(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByIn applies the In predicate on the "updated_by" field.
+func UpdatedByIn(vs ...int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
+func UpdatedByNotIn(vs ...int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByGT applies the GT predicate on the "updated_by" field.
+func UpdatedByGT(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGT(FieldUpdatedBy, v))
+}
+
+// UpdatedByGTE applies the GTE predicate on the "updated_by" field.
+func UpdatedByGTE(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByLT applies the LT predicate on the "updated_by" field.
+func UpdatedByLT(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLT(FieldUpdatedBy, v))
+}
+
+// UpdatedByLTE applies the LTE predicate on the "updated_by" field.
+func UpdatedByLTE(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
+func UpdatedByIsNil() predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIsNull(FieldUpdatedBy))
+}
+
+// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
+func UpdatedByNotNil() predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotNull(FieldUpdatedBy))
+}
+
+// MetadataEQ applies the EQ predicate on the "metadata" field.
+func MetadataEQ(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldMetadata, v))
+}
+
+// MetadataNEQ applies the NEQ predicate on the "metadata" field.
+func MetadataNEQ(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNEQ(FieldMetadata, v))
+}
+
+// MetadataIn applies the In predicate on the "metadata" field.
+func MetadataIn(vs ...string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIn(FieldMetadata, vs...))
+}
+
+// MetadataNotIn applies the NotIn predicate on the "metadata" field.
+func MetadataNotIn(vs ...string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotIn(FieldMetadata, vs...))
+}
+
+// MetadataGT applies the GT predicate on the "metadata" field.
+func MetadataGT(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGT(FieldMetadata, v))
+}
+
+// MetadataGTE applies the GTE predicate on the "metadata" field.
+func MetadataGTE(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGTE(FieldMetadata, v))
+}
+
+// MetadataLT applies the LT predicate on the "metadata" field.
+func MetadataLT(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLT(FieldMetadata, v))
+}
+
+// MetadataLTE applies the LTE predicate on the "metadata" field.
+func MetadataLTE(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLTE(FieldMetadata, v))
+}
+
+// MetadataContains applies the Contains predicate on the "metadata" field.
+func MetadataContains(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldContains(FieldMetadata, v))
+}
+
+// MetadataHasPrefix applies the HasPrefix predicate on the "metadata" field.
+func MetadataHasPrefix(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldHasPrefix(FieldMetadata, v))
+}
+
+// MetadataHasSuffix applies the HasSuffix predicate on the "metadata" field.
+func MetadataHasSuffix(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldHasSuffix(FieldMetadata, v))
+}
+
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotNull(FieldMetadata))
+}
+
+// MetadataEqualFold applies the EqualFold predicate on the "metadata" field.
+func MetadataEqualFold(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEqualFold(FieldMetadata, v))
+}
+
+// MetadataContainsFold applies the ContainsFold predicate on the "metadata" field.
+func MetadataContainsFold(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldContainsFold(FieldMetadata, v))
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // HasLionDepartments applies the HasEdge predicate on the "lion_departments" edge.
@@ -263,21 +623,21 @@ func HasLionDepartmentsWith(preds ...predicate.Departments) predicate.UserDepart
 	})
 }
 
-// HasLionUserDepartments applies the HasEdge predicate on the "lion_user_departments" edge.
-func HasLionUserDepartments() predicate.UserDepartments {
+// HasLionUsers applies the HasEdge predicate on the "lion_users" edge.
+func HasLionUsers() predicate.UserDepartments {
 	return predicate.UserDepartments(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, LionUserDepartmentsTable, LionUserDepartmentsColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionUsersTable, LionUsersColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLionUserDepartmentsWith applies the HasEdge predicate on the "lion_user_departments" edge with a given conditions (other predicates).
-func HasLionUserDepartmentsWith(preds ...predicate.Users) predicate.UserDepartments {
+// HasLionUsersWith applies the HasEdge predicate on the "lion_users" edge with a given conditions (other predicates).
+func HasLionUsersWith(preds ...predicate.Users) predicate.UserDepartments {
 	return predicate.UserDepartments(func(s *sql.Selector) {
-		step := newLionUserDepartmentsStep()
+		step := newLionUsersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

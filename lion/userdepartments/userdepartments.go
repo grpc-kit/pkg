@@ -20,14 +20,26 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDepartmentID holds the string denoting the department_id field in the database.
 	FieldDepartmentID = "department_id"
-	// FieldLeaderType holds the string denoting the leader_type field in the database.
-	FieldLeaderType = "leader_type"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldMemberRole holds the string denoting the member_role field in the database.
+	FieldMemberRole = "member_role"
+	// FieldMemberStatus holds the string denoting the member_status field in the database.
+	FieldMemberStatus = "member_status"
+	// FieldExpiredAt holds the string denoting the expired_at field in the database.
+	FieldExpiredAt = "expired_at"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
+	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
+	FieldUpdatedBy = "updated_by"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// EdgeLionDepartments holds the string denoting the lion_departments edge name in mutations.
 	EdgeLionDepartments = "lion_departments"
-	// EdgeLionUserDepartments holds the string denoting the lion_user_departments edge name in mutations.
-	EdgeLionUserDepartments = "lion_user_departments"
+	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
+	EdgeLionUsers = "lion_users"
 	// Table holds the table name of the userdepartments in the database.
 	Table = "lion_user_departments"
 	// LionDepartmentsTable is the table that holds the lion_departments relation/edge.
@@ -37,13 +49,13 @@ const (
 	LionDepartmentsInverseTable = "lion_departments"
 	// LionDepartmentsColumn is the table column denoting the lion_departments relation/edge.
 	LionDepartmentsColumn = "department_id"
-	// LionUserDepartmentsTable is the table that holds the lion_user_departments relation/edge.
-	LionUserDepartmentsTable = "lion_user_departments"
-	// LionUserDepartmentsInverseTable is the table name for the Users entity.
+	// LionUsersTable is the table that holds the lion_users relation/edge.
+	LionUsersTable = "lion_user_departments"
+	// LionUsersInverseTable is the table name for the Users entity.
 	// It exists in this package in order to avoid circular dependency with the "users" package.
-	LionUserDepartmentsInverseTable = "lion_users"
-	// LionUserDepartmentsColumn is the table column denoting the lion_user_departments relation/edge.
-	LionUserDepartmentsColumn = "user_id"
+	LionUsersInverseTable = "lion_users"
+	// LionUsersColumn is the table column denoting the lion_users relation/edge.
+	LionUsersColumn = "user_id"
 )
 
 // Columns holds all SQL columns for userdepartments fields.
@@ -52,8 +64,14 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDepartmentID,
-	FieldLeaderType,
 	FieldUserID,
+	FieldMemberRole,
+	FieldMemberStatus,
+	FieldExpiredAt,
+	FieldCreatedBy,
+	FieldUpdatedBy,
+	FieldMetadata,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -73,6 +91,12 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultMemberRole holds the default value on creation for the "member_role" field.
+	DefaultMemberRole int
+	// DefaultMemberStatus holds the default value on creation for the "member_status" field.
+	DefaultMemberStatus int
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
 )
 
 // OrderOption defines the ordering options for the UserDepartments queries.
@@ -98,14 +122,44 @@ func ByDepartmentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDepartmentID, opts...).ToFunc()
 }
 
-// ByLeaderType orders the results by the leader_type field.
-func ByLeaderType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLeaderType, opts...).ToFunc()
-}
-
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByMemberRole orders the results by the member_role field.
+func ByMemberRole(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMemberRole, opts...).ToFunc()
+}
+
+// ByMemberStatus orders the results by the member_status field.
+func ByMemberStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMemberStatus, opts...).ToFunc()
+}
+
+// ByExpiredAt orders the results by the expired_at field.
+func ByExpiredAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpiredAt, opts...).ToFunc()
+}
+
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByUpdatedBy orders the results by the updated_by field.
+func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
+}
+
+// ByMetadata orders the results by the metadata field.
+func ByMetadata(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMetadata, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByLionDepartmentsField orders the results by lion_departments field.
@@ -115,10 +169,10 @@ func ByLionDepartmentsField(field string, opts ...sql.OrderTermOption) OrderOpti
 	}
 }
 
-// ByLionUserDepartmentsField orders the results by lion_user_departments field.
-func ByLionUserDepartmentsField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByLionUsersField orders the results by lion_users field.
+func ByLionUsersField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionUserDepartmentsStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newLionUsersStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newLionDepartmentsStep() *sqlgraph.Step {
@@ -128,10 +182,10 @@ func newLionDepartmentsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentsTable, LionDepartmentsColumn),
 	)
 }
-func newLionUserDepartmentsStep() *sqlgraph.Step {
+func newLionUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionUserDepartmentsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, LionUserDepartmentsTable, LionUserDepartmentsColumn),
+		sqlgraph.To(LionUsersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionUsersTable, LionUsersColumn),
 	)
 }

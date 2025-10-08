@@ -3,8 +3,11 @@ package admin
 import (
 	"context"
 	"sort"
+	"strconv"
 
+	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
@@ -62,26 +65,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		Name:        dp.Name,
 		I18NName:    I18NNameParse(dp.I18nName),
 		OrderWeight: int32(dp.OrderWeight),
-		Leaders:     make([]*adminv1.Leader, 0),
-	}
-
-	if req.Department.Leaders != nil {
-		for _, leader := range req.Department.Leaders {
-			tmp, err := tx.UserDepartments.Create().
-				SetDepartmentID(dp.ID).
-				SetLeaderType(int(leader.Type)).
-				SetUserID(int(leader.UserId)).
-				Save(ctx)
-			if err != nil {
-				_ = tx.Rollback()
-				return result, err
-			}
-
-			result.Leaders = append(result.Leaders, &adminv1.Leader{
-				Type:   int32(tmp.LeaderType),
-				UserId: int32(tmp.UserID),
-			})
-		}
+		Leaders:     make([]*adminv1.UserDepartment, 0),
 	}
 
 	_ = tx.Commit()
@@ -117,7 +101,16 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 		Select().
 		Where(
 			departments.IDIn(depIDs...),
-		).All(ctx)
+		).
+		WithLionUserDepartments(
+			func(query *lion.UserDepartmentsQuery) {
+				query.Where(
+					userdepartments.DepartmentIDIn(depIDs...),
+					userdepartments.MemberRoleIn(int(adminv1.UserDepartment_ROLE_OWNER.Number()), int(adminv1.UserDepartment_ROLE_ADMIN.Number())),
+				)
+				query.WithLionUsers()
+			}).
+		All(ctx)
 	if err != nil {
 		return result, err
 	}
@@ -133,18 +126,34 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Name:        m.Name,
 			I18NName:    I18NNameParse(m.I18nName),
 			OrderWeight: int32(m.OrderWeight),
+			Leaders:     make([]*adminv1.UserDepartment, 0),
 		}
+
+		if m.Edges.LionUserDepartments != nil {
+			for _, l := range m.Edges.LionUserDepartments {
+				leader := &adminv1.UserDepartment{
+					Id:           int32(l.ID),
+					UserId:       int64(l.UserID),
+					DepartmentId: int32(l.DepartmentID),
+					MemberStatus: adminv1.UserDepartment_Status(l.MemberStatus),
+					MemberRole:   adminv1.UserDepartment_Role(l.MemberRole),
+					CreatedAt:    timestamppb.New(l.CreatedAt),
+					UpdatedAt:    timestamppb.New(l.UpdatedAt),
+				}
+
+				if l.Edges.LionUsers != nil {
+					leader.Username = l.Edges.LionUsers.Username
+					leader.Nickname = l.Edges.LionUsers.Nickname
+				}
+
+				menu.Leaders = append(menu.Leaders, leader)
+			}
+		}
+
 		menuMap[int32(m.ID)] = menu
 	}
 
 	for _, menu := range menuMap {
-		/*
-			if menu.ParentId == 0 {
-				roots = append(roots, menu)
-				continue
-			}
-		*/
-
 		if parent, ok := menuMap[menu.ParentId]; ok {
 			parent.Children = append(parent.Children, menu)
 		}
@@ -286,6 +295,109 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 	return result, nil
 }
 
+// ListDepartmentMembers 获取部门成员
+func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.ListDepartmentMembersRequest) (*adminv1.ListDepartmentMembersResponse, error) {
+	result := &adminv1.ListDepartmentMembersResponse{}
+
+	if req.Parent == "" {
+		return result, errs.InvalidArgument(ctx).WithMessage("request body parent is empty")
+	}
+
+	departmentID, err := strconv.Atoi(req.Parent)
+	if err != nil {
+		return result, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	// 查找用户并实现分页
+	pageSize := int(req.GetPageSize())
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	userQuery := db.UserDepartments.Query().Where(
+		userdepartments.DepartmentIDEQ(departmentID),
+	)
+
+	// OrderBy
+	if req.GetOrderBy() != "" {
+		switch req.GetOrderBy() {
+		case "create_at desc":
+			userQuery = userQuery.Order(lion.Desc(userdepartments.FieldCreatedAt))
+		case "create_at asc":
+			userQuery = userQuery.Order(lion.Asc(userdepartments.FieldCreatedAt))
+		default:
+			// 默认按 ID 升序
+			userQuery = userQuery.Order(lion.Desc(userdepartments.FieldID))
+		}
+	} else {
+		userQuery = userQuery.Order(lion.Desc(userdepartments.FieldID))
+	}
+
+	totalSize, err := userQuery.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result.TotalSize = int32(totalSize)
+
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListDepartmentMembersRequest_Offset:
+		// Offset 分页
+		userQuery = userQuery.Offset(int(p.Offset))
+	case *adminv1.ListDepartmentMembersRequest_PageToken:
+		// Cursor 分页
+		// TODO;
+	}
+
+	userQuery = userQuery.Limit(pageSize)
+
+	members, err := userQuery.Select(
+		userdepartments.FieldUserID,
+		userdepartments.FieldDepartmentID,
+		userdepartments.FieldMemberRole,
+		userdepartments.FieldMemberStatus,
+		userdepartments.FieldCreatedAt,
+		userdepartments.FieldUpdatedAt,
+	).WithLionUsers(func(query *lion.UsersQuery) {
+		query.Select(
+			users.FieldID,
+			users.FieldUsername,
+			users.FieldNickname,
+		)
+	}).All(ctx)
+
+	for _, member := range members {
+		user := member.Edges.LionUsers
+		if user == nil {
+			continue
+		}
+
+		result.DepartmentMembers = append(result.DepartmentMembers, &adminv1.UserDepartment{
+			Id:           int32(int64(member.ID)),
+			UserId:       int64(member.UserID),
+			Username:     member.Edges.LionUsers.Username,
+			Nickname:     member.Edges.LionUsers.Nickname,
+			DepartmentId: int32(member.DepartmentID),
+			MemberRole:   adminv1.UserDepartment_Role(member.MemberRole),
+			MemberStatus: adminv1.UserDepartment_Status(member.MemberStatus),
+			ExpiredAt:    timestamppb.New(member.ExpiredAt),
+			CreatedAt:    timestamppb.New(member.CreatedAt),
+			UpdatedAt:    timestamppb.New(member.UpdatedAt),
+			Description:  member.Description,
+		})
+	}
+
+	return result, nil
+}
+
 // 构建部门树
 func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Departments) (*adminv1.Department, error) {
 	// 查子部门
@@ -296,24 +408,13 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 		return nil, err
 	}
 
-	// 查领导
-	leaders, err := a.config.db.UserDepartments.Query().
-		Where(userdepartments.HasLionDepartmentsWith(departments.ID(dep.ID))).All(ctx)
-
 	pbDep := &adminv1.Department{
 		Id:          int32(dep.ID),
 		ParentId:    int32(dep.ParentID),
 		Name:        dep.Name,
 		I18NName:    I18NNameParse(dep.I18nName),
 		OrderWeight: int32(dep.OrderWeight),
-		Leaders:     make([]*adminv1.Leader, 0),
-	}
-
-	for _, l := range leaders {
-		pbDep.Leaders = append(pbDep.Leaders, &adminv1.Leader{
-			Type:   int32(l.LeaderType),
-			UserId: int32(l.UserID),
-		})
+		Leaders:     make([]*adminv1.UserDepartment, 0),
 	}
 
 	// 递归子部门

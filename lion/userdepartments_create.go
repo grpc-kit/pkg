@@ -56,15 +56,107 @@ func (_c *UserDepartmentsCreate) SetDepartmentID(v int) *UserDepartmentsCreate {
 	return _c
 }
 
-// SetLeaderType sets the "leader_type" field.
-func (_c *UserDepartmentsCreate) SetLeaderType(v int) *UserDepartmentsCreate {
-	_c.mutation.SetLeaderType(v)
-	return _c
-}
-
 // SetUserID sets the "user_id" field.
 func (_c *UserDepartmentsCreate) SetUserID(v int) *UserDepartmentsCreate {
 	_c.mutation.SetUserID(v)
+	return _c
+}
+
+// SetMemberRole sets the "member_role" field.
+func (_c *UserDepartmentsCreate) SetMemberRole(v int) *UserDepartmentsCreate {
+	_c.mutation.SetMemberRole(v)
+	return _c
+}
+
+// SetNillableMemberRole sets the "member_role" field if the given value is not nil.
+func (_c *UserDepartmentsCreate) SetNillableMemberRole(v *int) *UserDepartmentsCreate {
+	if v != nil {
+		_c.SetMemberRole(*v)
+	}
+	return _c
+}
+
+// SetMemberStatus sets the "member_status" field.
+func (_c *UserDepartmentsCreate) SetMemberStatus(v int) *UserDepartmentsCreate {
+	_c.mutation.SetMemberStatus(v)
+	return _c
+}
+
+// SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
+func (_c *UserDepartmentsCreate) SetNillableMemberStatus(v *int) *UserDepartmentsCreate {
+	if v != nil {
+		_c.SetMemberStatus(*v)
+	}
+	return _c
+}
+
+// SetExpiredAt sets the "expired_at" field.
+func (_c *UserDepartmentsCreate) SetExpiredAt(v time.Time) *UserDepartmentsCreate {
+	_c.mutation.SetExpiredAt(v)
+	return _c
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (_c *UserDepartmentsCreate) SetNillableExpiredAt(v *time.Time) *UserDepartmentsCreate {
+	if v != nil {
+		_c.SetExpiredAt(*v)
+	}
+	return _c
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_c *UserDepartmentsCreate) SetCreatedBy(v int) *UserDepartmentsCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *UserDepartmentsCreate) SetNillableCreatedBy(v *int) *UserDepartmentsCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *UserDepartmentsCreate) SetUpdatedBy(v int) *UserDepartmentsCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *UserDepartmentsCreate) SetNillableUpdatedBy(v *int) *UserDepartmentsCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
+// SetMetadata sets the "metadata" field.
+func (_c *UserDepartmentsCreate) SetMetadata(v string) *UserDepartmentsCreate {
+	_c.mutation.SetMetadata(v)
+	return _c
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_c *UserDepartmentsCreate) SetNillableMetadata(v *string) *UserDepartmentsCreate {
+	if v != nil {
+		_c.SetMetadata(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *UserDepartmentsCreate) SetDescription(v string) *UserDepartmentsCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *UserDepartmentsCreate) SetNillableDescription(v *string) *UserDepartmentsCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
 	return _c
 }
 
@@ -79,15 +171,15 @@ func (_c *UserDepartmentsCreate) SetLionDepartments(v *Departments) *UserDepartm
 	return _c.SetLionDepartmentsID(v.ID)
 }
 
-// SetLionUserDepartmentsID sets the "lion_user_departments" edge to the Users entity by ID.
-func (_c *UserDepartmentsCreate) SetLionUserDepartmentsID(id int) *UserDepartmentsCreate {
-	_c.mutation.SetLionUserDepartmentsID(id)
+// SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
+func (_c *UserDepartmentsCreate) SetLionUsersID(id int) *UserDepartmentsCreate {
+	_c.mutation.SetLionUsersID(id)
 	return _c
 }
 
-// SetLionUserDepartments sets the "lion_user_departments" edge to the Users entity.
-func (_c *UserDepartmentsCreate) SetLionUserDepartments(v *Users) *UserDepartmentsCreate {
-	return _c.SetLionUserDepartmentsID(v.ID)
+// SetLionUsers sets the "lion_users" edge to the Users entity.
+func (_c *UserDepartmentsCreate) SetLionUsers(v *Users) *UserDepartmentsCreate {
+	return _c.SetLionUsersID(v.ID)
 }
 
 // Mutation returns the UserDepartmentsMutation object of the builder.
@@ -133,6 +225,18 @@ func (_c *UserDepartmentsCreate) defaults() {
 		v := userdepartments.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.MemberRole(); !ok {
+		v := userdepartments.DefaultMemberRole
+		_c.mutation.SetMemberRole(v)
+	}
+	if _, ok := _c.mutation.MemberStatus(); !ok {
+		v := userdepartments.DefaultMemberStatus
+		_c.mutation.SetMemberStatus(v)
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := userdepartments.DefaultDescription
+		_c.mutation.SetDescription(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -146,17 +250,23 @@ func (_c *UserDepartmentsCreate) check() error {
 	if _, ok := _c.mutation.DepartmentID(); !ok {
 		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "UserDepartments.department_id"`)}
 	}
-	if _, ok := _c.mutation.LeaderType(); !ok {
-		return &ValidationError{Name: "leader_type", err: errors.New(`lion: missing required field "UserDepartments.leader_type"`)}
-	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserDepartments.user_id"`)}
+	}
+	if _, ok := _c.mutation.MemberRole(); !ok {
+		return &ValidationError{Name: "member_role", err: errors.New(`lion: missing required field "UserDepartments.member_role"`)}
+	}
+	if _, ok := _c.mutation.MemberStatus(); !ok {
+		return &ValidationError{Name: "member_status", err: errors.New(`lion: missing required field "UserDepartments.member_status"`)}
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "UserDepartments.description"`)}
 	}
 	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
 		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "UserDepartments.lion_departments"`)}
 	}
-	if len(_c.mutation.LionUserDepartmentsIDs()) == 0 {
-		return &ValidationError{Name: "lion_user_departments", err: errors.New(`lion: missing required edge "UserDepartments.lion_user_departments"`)}
+	if len(_c.mutation.LionUsersIDs()) == 0 {
+		return &ValidationError{Name: "lion_users", err: errors.New(`lion: missing required edge "UserDepartments.lion_users"`)}
 	}
 	return nil
 }
@@ -192,9 +302,33 @@ func (_c *UserDepartmentsCreate) createSpec() (*UserDepartments, *sqlgraph.Creat
 		_spec.SetField(userdepartments.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.LeaderType(); ok {
-		_spec.SetField(userdepartments.FieldLeaderType, field.TypeInt, value)
-		_node.LeaderType = value
+	if value, ok := _c.mutation.MemberRole(); ok {
+		_spec.SetField(userdepartments.FieldMemberRole, field.TypeInt, value)
+		_node.MemberRole = value
+	}
+	if value, ok := _c.mutation.MemberStatus(); ok {
+		_spec.SetField(userdepartments.FieldMemberStatus, field.TypeInt, value)
+		_node.MemberStatus = value
+	}
+	if value, ok := _c.mutation.ExpiredAt(); ok {
+		_spec.SetField(userdepartments.FieldExpiredAt, field.TypeTime, value)
+		_node.ExpiredAt = value
+	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(userdepartments.FieldCreatedBy, field.TypeInt, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(userdepartments.FieldUpdatedBy, field.TypeInt, value)
+		_node.UpdatedBy = value
+	}
+	if value, ok := _c.mutation.Metadata(); ok {
+		_spec.SetField(userdepartments.FieldMetadata, field.TypeString, value)
+		_node.Metadata = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(userdepartments.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if nodes := _c.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -213,12 +347,12 @@ func (_c *UserDepartmentsCreate) createSpec() (*UserDepartments, *sqlgraph.Creat
 		_node.DepartmentID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LionUserDepartmentsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionUserDepartmentsTable,
-			Columns: []string{userdepartments.LionUserDepartmentsColumn},
+			Table:   userdepartments.LionUsersTable,
+			Columns: []string{userdepartments.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),

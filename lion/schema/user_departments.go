@@ -18,10 +18,29 @@ func (UserDepartments) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("department_id").
 			Comment("部门 ID"),
-		field.Int("leader_type").
-			Comment("负责人类型"),
 		field.Int("user_id").
 			Comment("用户 ID"),
+		field.Int("member_role").
+			Default(0).
+			Comment("用户在群组中的角色：0-未指定，1-所有者，2-管理员，3-普通成员，4-访客"),
+		field.Int("member_status").
+			Default(0).
+			Comment("用户群组关系状态：0-未知状态，1-待激活，2-正常启用，3-被邀请，4-禁用，5-被拒绝，6-已退出"),
+		field.Time("expired_at").
+			Optional().
+			Comment("关系有效期，用于临时成员管理，0表示永久有效"),
+		field.Int("created_by").
+			Optional().
+			Comment("创建者 ID，记录创建该关系的用户"),
+		field.Int("updated_by").
+			Optional().
+			Comment("最后更新者 ID，记录最后修改该关系的用户"),
+		field.String("metadata").
+			Optional().
+			Comment("元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储"),
+		field.String("description").
+			Default("").
+			Comment("用户组描述"),
 	}
 }
 
@@ -34,7 +53,7 @@ func (UserDepartments) Edges() []ent.Edge {
 			Field("department_id").
 			Unique().
 			Required(),
-		edge.From("lion_user_departments", Users.Type).
+		edge.From("lion_users", Users.Type).
 			Ref("lion_user_departments").
 			Field("user_id").
 			Unique().

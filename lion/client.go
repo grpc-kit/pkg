@@ -2496,15 +2496,15 @@ func (c *UserDepartmentsClient) QueryLionDepartments(_m *UserDepartments) *Depar
 	return query
 }
 
-// QueryLionUserDepartments queries the lion_user_departments edge of a UserDepartments.
-func (c *UserDepartmentsClient) QueryLionUserDepartments(_m *UserDepartments) *UsersQuery {
+// QueryLionUsers queries the lion_users edge of a UserDepartments.
+func (c *UserDepartmentsClient) QueryLionUsers(_m *UserDepartments) *UsersQuery {
 	query := (&UsersClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(userdepartments.Table, userdepartments.FieldID, id),
 			sqlgraph.To(users.Table, users.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, userdepartments.LionUserDepartmentsTable, userdepartments.LionUserDepartmentsColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, userdepartments.LionUsersTable, userdepartments.LionUsersColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

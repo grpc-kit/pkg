@@ -310,7 +310,13 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "leader_type", Type: field.TypeInt},
+		{Name: "member_role", Type: field.TypeInt, Default: 0},
+		{Name: "member_status", Type: field.TypeInt, Default: 0},
+		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_by", Type: field.TypeInt, Nullable: true},
+		{Name: "updated_by", Type: field.TypeInt, Nullable: true},
+		{Name: "metadata", Type: field.TypeString, Nullable: true},
+		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "department_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
@@ -322,13 +328,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_user_departments_lion_departments_lion_user_departments",
-				Columns:    []*schema.Column{LionUserDepartmentsColumns[4]},
+				Columns:    []*schema.Column{LionUserDepartmentsColumns[10]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_user_departments_lion_users_lion_user_departments",
-				Columns:    []*schema.Column{LionUserDepartmentsColumns[5]},
+				Columns:    []*schema.Column{LionUserDepartmentsColumns[11]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
