@@ -397,6 +397,31 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 	return result, nil
 }
 
+// CreateDepartmentMembers 创建部门成员
+func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv1.CreateDepartmentMembersRequest) (*adminv1.CreateDepartmentMembersResponse, error) {
+	result := &adminv1.CreateDepartmentMembersResponse{}
+
+	// TODO;
+
+	return result, nil
+}
+
+// UpdateDepartmentMembers 更新部门成员
+func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv1.UpdateDepartmentMembersRequest) (*adminv1.UpdateDepartmentMembersResponse, error) {
+	result := &adminv1.UpdateDepartmentMembersResponse{}
+
+	// TODO;
+
+	return result, nil
+}
+
+// DeleteDepartmentMember 删除部门成员
+func (a *KnownAdminAPI) DeleteDepartmentMember(ctx context.Context, req *adminv1.DeleteDepartmentMemberRequest) (*emptypb.Empty, error) {
+	// TODO;
+
+	return &emptypb.Empty{}, errs.PermissionDenied(ctx)
+}
+
 // 构建部门树
 func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Departments) (*adminv1.Department, error) {
 	// 查子部门
