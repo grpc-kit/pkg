@@ -233,7 +233,7 @@ func (a *KnownAdminAPI) DeleteGroup(ctx context.Context, req *adminv1.DeleteGrou
 // ListGroupMembers 获取群组成员列表
 func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListGroupMembersRequest) (*adminv1.ListGroupMembersResponse, error) {
 	result := &adminv1.ListGroupMembersResponse{
-		GroupMembers: make([]*adminv1.UserGroup, 0),
+		GroupMembers: make([]*adminv1.GroupMember, 0),
 	}
 
 	if req.Parent == "" {
@@ -279,14 +279,14 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 			continue
 		}
 
-		result.GroupMembers = append(result.GroupMembers, &adminv1.UserGroup{
+		result.GroupMembers = append(result.GroupMembers, &adminv1.GroupMember{
 			Id:           int32(member.ID),
 			UserId:       int32(member.UserID),
 			Username:     member.Edges.LionUsers.Username,
 			Nickname:     member.Edges.LionUsers.Nickname,
 			GroupId:      int32(member.GroupID),
-			MemberRole:   adminv1.UserGroup_Role(member.MemberRole),
-			MemberStatus: adminv1.UserGroup_Status(member.MemberStatus),
+			MemberRole:   adminv1.GroupMember_Role(member.MemberRole),
+			MemberStatus: adminv1.GroupMember_Status(member.MemberStatus),
 			JoinedAt:     timestamppb.New(member.JoinedAt),
 			ExpiredAt:    timestamppb.New(member.ExpiredAt),
 			CreatedBy:    int32(member.CreatedBy),
@@ -373,8 +373,8 @@ func (a *KnownAdminAPI) DeleteGroupMember(ctx context.Context, req *adminv1.Dele
 }
 
 // UpdateGroupMember 更新群组成员
-func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.UpdateGroupMemberRequest) (*adminv1.UserGroup, error) {
-	result := &adminv1.UserGroup{}
+func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.UpdateGroupMemberRequest) (*adminv1.GroupMember, error) {
+	result := &adminv1.GroupMember{}
 
 	if req.Parent == "" {
 		return result, errs.InvalidArgument(ctx).WithMessage("request body parent is empty")
