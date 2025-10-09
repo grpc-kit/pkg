@@ -389,7 +389,7 @@ type ListDepartmentMembersResponse struct {
 	unknownFields protoimpl.UnknownFields
 
 	// 符合查询条件的用户资源。
-	DepartmentMembers []*UserDepartment `protobuf:"bytes,1,rep,name=department_members,json=departmentMembers,proto3" json:"department_members,omitempty"`
+	DepartmentMembers []*DepartmentMember `protobuf:"bytes,1,rep,name=department_members,json=departmentMembers,proto3" json:"department_members,omitempty"`
 	// 用于获取下一页结果的 token。
 	// - 如果为空，表示没有更多结果。
 	// - 客户端不需要理解其内容，只需原样传回。
@@ -434,7 +434,7 @@ func (*ListDepartmentMembersResponse) Descriptor() ([]byte, []int) {
 	return file_known_admin_v1_department_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ListDepartmentMembersResponse) GetDepartmentMembers() []*UserDepartment {
+func (x *ListDepartmentMembersResponse) GetDepartmentMembers() []*DepartmentMember {
 	if x != nil {
 		return x.DepartmentMembers
 	}
@@ -451,6 +451,247 @@ func (x *ListDepartmentMembersResponse) GetNextPageToken() string {
 func (x *ListDepartmentMembersResponse) GetTotalSize() int32 {
 	if x != nil {
 		return x.TotalSize
+	}
+	return 0
+}
+
+type CreateDepartmentMembersRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	DepartmentId      int32               `protobuf:"varint,1,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	DepartmentMembers []*DepartmentMember `protobuf:"bytes,2,rep,name=department_members,json=departmentMembers,proto3" json:"department_members,omitempty"`
+}
+
+func (x *CreateDepartmentMembersRequest) Reset() {
+	*x = CreateDepartmentMembersRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_department_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateDepartmentMembersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateDepartmentMembersRequest) ProtoMessage() {}
+
+func (x *CreateDepartmentMembersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_department_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateDepartmentMembersRequest.ProtoReflect.Descriptor instead.
+func (*CreateDepartmentMembersRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_department_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *CreateDepartmentMembersRequest) GetDepartmentId() int32 {
+	if x != nil {
+		return x.DepartmentId
+	}
+	return 0
+}
+
+func (x *CreateDepartmentMembersRequest) GetDepartmentMembers() []*DepartmentMember {
+	if x != nil {
+		return x.DepartmentMembers
+	}
+	return nil
+}
+
+type CreateDepartmentMembersResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CreateDepartmentMembersResponse) Reset() {
+	*x = CreateDepartmentMembersResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_department_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateDepartmentMembersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateDepartmentMembersResponse) ProtoMessage() {}
+
+func (x *CreateDepartmentMembersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_department_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateDepartmentMembersResponse.ProtoReflect.Descriptor instead.
+func (*CreateDepartmentMembersResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_department_proto_rawDescGZIP(), []int{8}
+}
+
+type UpdateDepartmentMembersRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	DepartmentId      int32               `protobuf:"varint,1,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	DepartmentMembers []*DepartmentMember `protobuf:"bytes,2,rep,name=department_members,json=departmentMembers,proto3" json:"department_members,omitempty"`
+}
+
+func (x *UpdateDepartmentMembersRequest) Reset() {
+	*x = UpdateDepartmentMembersRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_department_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateDepartmentMembersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDepartmentMembersRequest) ProtoMessage() {}
+
+func (x *UpdateDepartmentMembersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_department_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDepartmentMembersRequest.ProtoReflect.Descriptor instead.
+func (*UpdateDepartmentMembersRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_department_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *UpdateDepartmentMembersRequest) GetDepartmentId() int32 {
+	if x != nil {
+		return x.DepartmentId
+	}
+	return 0
+}
+
+func (x *UpdateDepartmentMembersRequest) GetDepartmentMembers() []*DepartmentMember {
+	if x != nil {
+		return x.DepartmentMembers
+	}
+	return nil
+}
+
+type UpdateDepartmentMembersResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *UpdateDepartmentMembersResponse) Reset() {
+	*x = UpdateDepartmentMembersResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_department_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateDepartmentMembersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateDepartmentMembersResponse) ProtoMessage() {}
+
+func (x *UpdateDepartmentMembersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_department_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateDepartmentMembersResponse.ProtoReflect.Descriptor instead.
+func (*UpdateDepartmentMembersResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_department_proto_rawDescGZIP(), []int{10}
+}
+
+type DeleteDepartmentMemberRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	DepartmentId int32 `protobuf:"varint,1,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	UserId       int64 `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+}
+
+func (x *DeleteDepartmentMemberRequest) Reset() {
+	*x = DeleteDepartmentMemberRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_department_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeleteDepartmentMemberRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDepartmentMemberRequest) ProtoMessage() {}
+
+func (x *DeleteDepartmentMemberRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_department_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDepartmentMemberRequest.ProtoReflect.Descriptor instead.
+func (*DeleteDepartmentMemberRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_department_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *DeleteDepartmentMemberRequest) GetDepartmentId() int32 {
+	if x != nil {
+		return x.DepartmentId
+	}
+	return 0
+}
+
+func (x *DeleteDepartmentMemberRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
 	}
 	return 0
 }
@@ -506,23 +747,54 @@ var file_known_admin_v1_department_proto_rawDesc = []byte{
 	0x06, 0x66, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x12, 0x19, 0x0a, 0x08, 0x6f, 0x72, 0x64, 0x65, 0x72,
 	0x5f, 0x62, 0x79, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6f, 0x72, 0x64, 0x65, 0x72,
 	0x42, 0x79, 0x42, 0x0c, 0x0a, 0x0a, 0x70, 0x61, 0x67, 0x69, 0x6e, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x22, 0xc2, 0x01, 0x0a, 0x1d, 0x4c, 0x69, 0x73, 0x74, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d,
+	0x22, 0xc4, 0x01, 0x0a, 0x1d, 0x4c, 0x69, 0x73, 0x74, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d,
 	0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x12, 0x5a, 0x0a, 0x12, 0x64, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74,
-	0x5f, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2b,
+	0x73, 0x65, 0x12, 0x5c, 0x0a, 0x12, 0x64, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74,
+	0x5f, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2d,
 	0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e,
-	0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65,
-	0x72, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x11, 0x64, 0x65, 0x70,
-	0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x12, 0x26,
-	0x0a, 0x0f, 0x6e, 0x65, 0x78, 0x74, 0x5f, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x74, 0x6f, 0x6b, 0x65,
-	0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x6e, 0x65, 0x78, 0x74, 0x50, 0x61, 0x67,
-	0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x5f,
-	0x73, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x74, 0x6f, 0x74, 0x61,
-	0x6c, 0x53, 0x69, 0x7a, 0x65, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
-	0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67,
-	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e,
-	0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x65, 0x70,
+	0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x52, 0x11, 0x64,
+	0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73,
+	0x12, 0x26, 0x0a, 0x0f, 0x6e, 0x65, 0x78, 0x74, 0x5f, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x74, 0x6f,
+	0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x6e, 0x65, 0x78, 0x74, 0x50,
+	0x61, 0x67, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x6f, 0x74, 0x61,
+	0x6c, 0x5f, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x74, 0x6f,
+	0x74, 0x61, 0x6c, 0x53, 0x69, 0x7a, 0x65, 0x22, 0xa3, 0x01, 0x0a, 0x1e, 0x43, 0x72, 0x65, 0x61,
+	0x74, 0x65, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d, 0x62,
+	0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x23, 0x0a, 0x0d, 0x64, 0x65,
+	0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x0c, 0x64, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x12,
+	0x5c, 0x0a, 0x12, 0x64, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x6d, 0x65,
+	0x6d, 0x62, 0x65, 0x72, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2d, 0x2e, 0x67, 0x72,
+	0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e,
+	0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74,
+	0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x52, 0x11, 0x64, 0x65, 0x70, 0x61,
+	0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x22, 0x21, 0x0a,
+	0x1f, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e,
+	0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x22, 0xa3, 0x01, 0x0a, 0x1e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x44, 0x65, 0x70, 0x61, 0x72,
+	0x74, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x23, 0x0a, 0x0d, 0x64, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e,
+	0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0c, 0x64, 0x65, 0x70, 0x61,
+	0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x12, 0x5c, 0x0a, 0x12, 0x64, 0x65, 0x70, 0x61,
+	0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x18, 0x02,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x2d, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e,
+	0x76, 0x31, 0x2e, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d,
+	0x62, 0x65, 0x72, 0x52, 0x11, 0x64, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x4d,
+	0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x22, 0x21, 0x0a, 0x1f, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72,
+	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x5d, 0x0a, 0x1d, 0x44, 0x65, 0x6c,
+	0x65, 0x74, 0x65, 0x44, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x4d, 0x65, 0x6d,
+	0x62, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x23, 0x0a, 0x0d, 0x64, 0x65,
+	0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x0c, 0x64, 0x65, 0x70, 0x61, 0x72, 0x74, 0x6d, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x12,
+	0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68,
+	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f,
+	0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64,
+	0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -537,30 +809,37 @@ func file_known_admin_v1_department_proto_rawDescGZIP() []byte {
 	return file_known_admin_v1_department_proto_rawDescData
 }
 
-var file_known_admin_v1_department_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_known_admin_v1_department_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_known_admin_v1_department_proto_goTypes = []interface{}{
-	(*CreateDepartmentRequest)(nil),       // 0: grpc_kit.api.known.admin.v1.CreateDepartmentRequest
-	(*ListDepartmentsRequest)(nil),        // 1: grpc_kit.api.known.admin.v1.ListDepartmentsRequest
-	(*ListDepartmentsResponse)(nil),       // 2: grpc_kit.api.known.admin.v1.ListDepartmentsResponse
-	(*DeleteDepartmentRequest)(nil),       // 3: grpc_kit.api.known.admin.v1.DeleteDepartmentRequest
-	(*UpdateDepartmentRequest)(nil),       // 4: grpc_kit.api.known.admin.v1.UpdateDepartmentRequest
-	(*ListDepartmentMembersRequest)(nil),  // 5: grpc_kit.api.known.admin.v1.ListDepartmentMembersRequest
-	(*ListDepartmentMembersResponse)(nil), // 6: grpc_kit.api.known.admin.v1.ListDepartmentMembersResponse
-	(*Department)(nil),                    // 7: grpc_kit.api.known.admin.v1.Department
-	(*fieldmaskpb.FieldMask)(nil),         // 8: google.protobuf.FieldMask
-	(*UserDepartment)(nil),                // 9: grpc_kit.api.known.admin.v1.UserDepartment
+	(*CreateDepartmentRequest)(nil),         // 0: grpc_kit.api.known.admin.v1.CreateDepartmentRequest
+	(*ListDepartmentsRequest)(nil),          // 1: grpc_kit.api.known.admin.v1.ListDepartmentsRequest
+	(*ListDepartmentsResponse)(nil),         // 2: grpc_kit.api.known.admin.v1.ListDepartmentsResponse
+	(*DeleteDepartmentRequest)(nil),         // 3: grpc_kit.api.known.admin.v1.DeleteDepartmentRequest
+	(*UpdateDepartmentRequest)(nil),         // 4: grpc_kit.api.known.admin.v1.UpdateDepartmentRequest
+	(*ListDepartmentMembersRequest)(nil),    // 5: grpc_kit.api.known.admin.v1.ListDepartmentMembersRequest
+	(*ListDepartmentMembersResponse)(nil),   // 6: grpc_kit.api.known.admin.v1.ListDepartmentMembersResponse
+	(*CreateDepartmentMembersRequest)(nil),  // 7: grpc_kit.api.known.admin.v1.CreateDepartmentMembersRequest
+	(*CreateDepartmentMembersResponse)(nil), // 8: grpc_kit.api.known.admin.v1.CreateDepartmentMembersResponse
+	(*UpdateDepartmentMembersRequest)(nil),  // 9: grpc_kit.api.known.admin.v1.UpdateDepartmentMembersRequest
+	(*UpdateDepartmentMembersResponse)(nil), // 10: grpc_kit.api.known.admin.v1.UpdateDepartmentMembersResponse
+	(*DeleteDepartmentMemberRequest)(nil),   // 11: grpc_kit.api.known.admin.v1.DeleteDepartmentMemberRequest
+	(*Department)(nil),                      // 12: grpc_kit.api.known.admin.v1.Department
+	(*fieldmaskpb.FieldMask)(nil),           // 13: google.protobuf.FieldMask
+	(*DepartmentMember)(nil),                // 14: grpc_kit.api.known.admin.v1.DepartmentMember
 }
 var file_known_admin_v1_department_proto_depIdxs = []int32{
-	7, // 0: grpc_kit.api.known.admin.v1.CreateDepartmentRequest.department:type_name -> grpc_kit.api.known.admin.v1.Department
-	7, // 1: grpc_kit.api.known.admin.v1.ListDepartmentsResponse.departments:type_name -> grpc_kit.api.known.admin.v1.Department
-	7, // 2: grpc_kit.api.known.admin.v1.UpdateDepartmentRequest.department:type_name -> grpc_kit.api.known.admin.v1.Department
-	8, // 3: grpc_kit.api.known.admin.v1.UpdateDepartmentRequest.update_mask:type_name -> google.protobuf.FieldMask
-	9, // 4: grpc_kit.api.known.admin.v1.ListDepartmentMembersResponse.department_members:type_name -> grpc_kit.api.known.admin.v1.UserDepartment
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	12, // 0: grpc_kit.api.known.admin.v1.CreateDepartmentRequest.department:type_name -> grpc_kit.api.known.admin.v1.Department
+	12, // 1: grpc_kit.api.known.admin.v1.ListDepartmentsResponse.departments:type_name -> grpc_kit.api.known.admin.v1.Department
+	12, // 2: grpc_kit.api.known.admin.v1.UpdateDepartmentRequest.department:type_name -> grpc_kit.api.known.admin.v1.Department
+	13, // 3: grpc_kit.api.known.admin.v1.UpdateDepartmentRequest.update_mask:type_name -> google.protobuf.FieldMask
+	14, // 4: grpc_kit.api.known.admin.v1.ListDepartmentMembersResponse.department_members:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember
+	14, // 5: grpc_kit.api.known.admin.v1.CreateDepartmentMembersRequest.department_members:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember
+	14, // 6: grpc_kit.api.known.admin.v1.UpdateDepartmentMembersRequest.department_members:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember
+	7,  // [7:7] is the sub-list for method output_type
+	7,  // [7:7] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_department_proto_init() }
@@ -654,6 +933,66 @@ func file_known_admin_v1_department_proto_init() {
 				return nil
 			}
 		}
+		file_known_admin_v1_department_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateDepartmentMembersRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_department_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateDepartmentMembersResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_department_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateDepartmentMembersRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_department_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateDepartmentMembersResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_department_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeleteDepartmentMemberRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_known_admin_v1_department_proto_msgTypes[5].OneofWrappers = []interface{}{
 		(*ListDepartmentMembersRequest_PageToken)(nil),
@@ -665,7 +1004,7 @@ func file_known_admin_v1_department_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_department_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

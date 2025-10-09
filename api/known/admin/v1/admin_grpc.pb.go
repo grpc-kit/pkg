@@ -50,6 +50,9 @@ type KnownAdminClient interface {
 	DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateDepartment(ctx context.Context, in *UpdateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartmentMembers(ctx context.Context, in *ListDepartmentMembersRequest, opts ...grpc.CallOption) (*ListDepartmentMembersResponse, error)
+	CreateDepartmentMembers(ctx context.Context, in *CreateDepartmentMembersRequest, opts ...grpc.CallOption) (*CreateDepartmentMembersResponse, error)
+	UpdateDepartmentMembers(ctx context.Context, in *UpdateDepartmentMembersRequest, opts ...grpc.CallOption) (*UpdateDepartmentMembersResponse, error)
+	DeleteDepartmentMember(ctx context.Context, in *DeleteDepartmentMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 用户相关
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
@@ -65,7 +68,7 @@ type KnownAdminClient interface {
 	ListGroupMembers(ctx context.Context, in *ListGroupMembersRequest, opts ...grpc.CallOption) (*ListGroupMembersResponse, error)
 	CreateGroupMembers(ctx context.Context, in *CreateGroupMembersRequest, opts ...grpc.CallOption) (*CreateGroupMembersResponse, error)
 	DeleteGroupMember(ctx context.Context, in *DeleteGroupMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	UpdateGroupMember(ctx context.Context, in *UpdateGroupMemberRequest, opts ...grpc.CallOption) (*UserGroup, error)
+	UpdateGroupMember(ctx context.Context, in *UpdateGroupMemberRequest, opts ...grpc.CallOption) (*GroupMember, error)
 	// 安全相关
 	CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*Credential, error)
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
@@ -289,6 +292,33 @@ func (c *knownAdminClient) ListDepartmentMembers(ctx context.Context, in *ListDe
 	return out, nil
 }
 
+func (c *knownAdminClient) CreateDepartmentMembers(ctx context.Context, in *CreateDepartmentMembersRequest, opts ...grpc.CallOption) (*CreateDepartmentMembersResponse, error) {
+	out := new(CreateDepartmentMembersResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartmentMembers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateDepartmentMembers(ctx context.Context, in *UpdateDepartmentMembersRequest, opts ...grpc.CallOption) (*UpdateDepartmentMembersResponse, error) {
+	out := new(UpdateDepartmentMembersResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartmentMembers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteDepartmentMember(ctx context.Context, in *DeleteDepartmentMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteDepartmentMember", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetUser", in, out, opts...)
@@ -397,8 +427,8 @@ func (c *knownAdminClient) DeleteGroupMember(ctx context.Context, in *DeleteGrou
 	return out, nil
 }
 
-func (c *knownAdminClient) UpdateGroupMember(ctx context.Context, in *UpdateGroupMemberRequest, opts ...grpc.CallOption) (*UserGroup, error) {
-	out := new(UserGroup)
+func (c *knownAdminClient) UpdateGroupMember(ctx context.Context, in *UpdateGroupMemberRequest, opts ...grpc.CallOption) (*GroupMember, error) {
+	out := new(GroupMember)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGroupMember", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -473,6 +503,9 @@ type KnownAdminServer interface {
 	DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*emptypb.Empty, error)
 	UpdateDepartment(context.Context, *UpdateDepartmentRequest) (*Department, error)
 	ListDepartmentMembers(context.Context, *ListDepartmentMembersRequest) (*ListDepartmentMembersResponse, error)
+	CreateDepartmentMembers(context.Context, *CreateDepartmentMembersRequest) (*CreateDepartmentMembersResponse, error)
+	UpdateDepartmentMembers(context.Context, *UpdateDepartmentMembersRequest) (*UpdateDepartmentMembersResponse, error)
+	DeleteDepartmentMember(context.Context, *DeleteDepartmentMemberRequest) (*emptypb.Empty, error)
 	// 用户相关
 	GetUser(context.Context, *GetUserRequest) (*User, error)
 	CreateUser(context.Context, *CreateUserRequest) (*User, error)
@@ -488,7 +521,7 @@ type KnownAdminServer interface {
 	ListGroupMembers(context.Context, *ListGroupMembersRequest) (*ListGroupMembersResponse, error)
 	CreateGroupMembers(context.Context, *CreateGroupMembersRequest) (*CreateGroupMembersResponse, error)
 	DeleteGroupMember(context.Context, *DeleteGroupMemberRequest) (*emptypb.Empty, error)
-	UpdateGroupMember(context.Context, *UpdateGroupMemberRequest) (*UserGroup, error)
+	UpdateGroupMember(context.Context, *UpdateGroupMemberRequest) (*GroupMember, error)
 	// 安全相关
 	CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error)
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
@@ -570,6 +603,15 @@ func (UnimplementedKnownAdminServer) UpdateDepartment(context.Context, *UpdateDe
 func (UnimplementedKnownAdminServer) ListDepartmentMembers(context.Context, *ListDepartmentMembersRequest) (*ListDepartmentMembersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDepartmentMembers not implemented")
 }
+func (UnimplementedKnownAdminServer) CreateDepartmentMembers(context.Context, *CreateDepartmentMembersRequest) (*CreateDepartmentMembersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateDepartmentMembers not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateDepartmentMembers(context.Context, *UpdateDepartmentMembersRequest) (*UpdateDepartmentMembersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateDepartmentMembers not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteDepartmentMember(context.Context, *DeleteDepartmentMemberRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteDepartmentMember not implemented")
+}
 func (UnimplementedKnownAdminServer) GetUser(context.Context, *GetUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
@@ -606,7 +648,7 @@ func (UnimplementedKnownAdminServer) CreateGroupMembers(context.Context, *Create
 func (UnimplementedKnownAdminServer) DeleteGroupMember(context.Context, *DeleteGroupMemberRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteGroupMember not implemented")
 }
-func (UnimplementedKnownAdminServer) UpdateGroupMember(context.Context, *UpdateGroupMemberRequest) (*UserGroup, error) {
+func (UnimplementedKnownAdminServer) UpdateGroupMember(context.Context, *UpdateGroupMemberRequest) (*GroupMember, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateGroupMember not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error) {
@@ -1047,6 +1089,60 @@ func _KnownAdmin_ListDepartmentMembers_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_CreateDepartmentMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateDepartmentMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateDepartmentMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartmentMembers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateDepartmentMembers(ctx, req.(*CreateDepartmentMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateDepartmentMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDepartmentMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateDepartmentMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateDepartmentMembers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateDepartmentMembers(ctx, req.(*UpdateDepartmentMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteDepartmentMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDepartmentMemberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteDepartmentMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteDepartmentMember",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteDepartmentMember(ctx, req.(*DeleteDepartmentMemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserRequest)
 	if err := dec(in); err != nil {
@@ -1451,6 +1547,18 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListDepartmentMembers",
 			Handler:    _KnownAdmin_ListDepartmentMembers_Handler,
+		},
+		{
+			MethodName: "CreateDepartmentMembers",
+			Handler:    _KnownAdmin_CreateDepartmentMembers_Handler,
+		},
+		{
+			MethodName: "UpdateDepartmentMembers",
+			Handler:    _KnownAdmin_UpdateDepartmentMembers_Handler,
+		},
+		{
+			MethodName: "DeleteDepartmentMember",
+			Handler:    _KnownAdmin_DeleteDepartmentMember_Handler,
 		},
 		{
 			MethodName: "GetUser",
