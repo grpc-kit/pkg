@@ -401,7 +401,42 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv1.CreateDepartmentMembersRequest) (*adminv1.CreateDepartmentMembersResponse, error) {
 	result := &adminv1.CreateDepartmentMembersResponse{}
 
-	// TODO;
+	// TODO; 检查权限
+
+	departmentID := req.DepartmentId
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	depMembers := make([]*lion.UserDepartmentsCreate, 0)
+
+	for _, member := range req.DepartmentMembers {
+		defaultRole := adminv1.DepartmentMember_ROLE_MEMBER
+		defaultStatus := adminv1.DepartmentMember_STATUS_ACTIVE
+
+		if member.MemberRole == adminv1.DepartmentMember_ROLE_UNSPECIFIED {
+			member.MemberRole = defaultRole
+		}
+		if member.MemberStatus == adminv1.DepartmentMember_STATUS_UNSPECIFIED {
+			member.MemberStatus = defaultStatus
+		}
+
+		depMembers = append(depMembers,
+			db.UserDepartments.Create().
+				SetUserID(int(member.UserId)).
+				SetDepartmentID(int(departmentID)).
+				SetMemberRole(int(defaultRole)).
+				SetMemberStatus(int(defaultStatus)).
+				SetDescription(member.Description),
+		)
+	}
+
+	_, err = db.UserDepartments.CreateBulk(depMembers...).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	return result, nil
 }
@@ -417,9 +452,27 @@ func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv
 
 // DeleteDepartmentMember 删除部门成员
 func (a *KnownAdminAPI) DeleteDepartmentMember(ctx context.Context, req *adminv1.DeleteDepartmentMemberRequest) (*emptypb.Empty, error) {
-	// TODO;
+	// TODO; 检查权限
 
-	return &emptypb.Empty{}, errs.PermissionDenied(ctx)
+	departmentID := req.DepartmentId
+	userID := req.UserId
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.UserDepartments.Delete().
+		Where(
+			userdepartments.UserIDEQ(int(userID)),
+			userdepartments.DepartmentIDEQ(int(departmentID)),
+		).
+		Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 // 构建部门树

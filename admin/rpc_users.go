@@ -204,35 +204,6 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 			return nil, err
 		}
 	*/
-	/*
-		leaders, err := a.config.db.UserDepartments.
-			Query().
-			Select(
-				userdepartments.FieldID,
-				userdepartments.FieldLeaderType,
-				userdepartments.FieldDepartmentID,
-				userdepartments.FieldUserID,
-			).
-			Where(userdepartments.UserID(userIDInt)).
-			WithLionDepartments().
-			All(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		var allIDs []int
-		for _, leader := range leaders {
-			dept := leader.Edges.LionDepartments
-			if dept == nil {
-				continue
-			}
-			ids, err := a.getAllSubDeptIDs(ctx, dept.ID)
-			if err != nil {
-				return nil, err
-			}
-			allIDs = append(allIDs, ids...)
-		}
-	*/
 
 	roleIDs, err := a.getUserRoleID(ctx)
 	if err != nil {

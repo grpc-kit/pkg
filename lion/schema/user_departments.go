@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // UserDepartments holds the schema definition for the Demo entity.
@@ -65,6 +66,13 @@ func (UserDepartments) Edges() []ent.Edge {
 func (UserDepartments) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
+	}
+}
+
+// Indexes of the table.
+func (UserDepartments) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("user_id", "department_id").Unique(),
 	}
 }
 
