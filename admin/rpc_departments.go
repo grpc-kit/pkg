@@ -65,7 +65,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		Name:        dp.Name,
 		I18NName:    I18NNameParse(dp.I18nName),
 		OrderWeight: int32(dp.OrderWeight),
-		Managers:    make([]*adminv1.UserDepartment, 0),
+		Managers:    make([]*adminv1.DepartmentMember, 0),
 	}
 
 	_ = tx.Commit()
@@ -106,7 +106,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			func(query *lion.UserDepartmentsQuery) {
 				query.Where(
 					userdepartments.DepartmentIDIn(depIDs...),
-					userdepartments.MemberRoleIn(int(adminv1.UserDepartment_ROLE_OWNER.Number()), int(adminv1.UserDepartment_ROLE_MANAGER.Number())),
+					userdepartments.MemberRoleIn(int(adminv1.DepartmentMember_ROLE_OWNER.Number()), int(adminv1.DepartmentMember_ROLE_MANAGER.Number())),
 				)
 				query.WithLionUsers()
 			}).
@@ -126,17 +126,17 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Name:        m.Name,
 			I18NName:    I18NNameParse(m.I18nName),
 			OrderWeight: int32(m.OrderWeight),
-			Managers:    make([]*adminv1.UserDepartment, 0),
+			Managers:    make([]*adminv1.DepartmentMember, 0),
 		}
 
 		if m.Edges.LionUserDepartments != nil {
 			for _, l := range m.Edges.LionUserDepartments {
-				leader := &adminv1.UserDepartment{
+				leader := &adminv1.DepartmentMember{
 					Id:           int32(l.ID),
 					UserId:       int64(l.UserID),
 					DepartmentId: int32(l.DepartmentID),
-					MemberStatus: adminv1.UserDepartment_Status(l.MemberStatus),
-					MemberRole:   adminv1.UserDepartment_Role(l.MemberRole),
+					MemberStatus: adminv1.DepartmentMember_Status(l.MemberStatus),
+					MemberRole:   adminv1.DepartmentMember_Role(l.MemberRole),
 					CreatedAt:    timestamppb.New(l.CreatedAt),
 					UpdatedAt:    timestamppb.New(l.UpdatedAt),
 				}
@@ -380,14 +380,14 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 			continue
 		}
 
-		result.DepartmentMembers = append(result.DepartmentMembers, &adminv1.UserDepartment{
+		result.DepartmentMembers = append(result.DepartmentMembers, &adminv1.DepartmentMember{
 			Id:           int32(int64(member.ID)),
 			UserId:       int64(member.UserID),
 			Username:     member.Edges.LionUsers.Username,
 			Nickname:     member.Edges.LionUsers.Nickname,
 			DepartmentId: int32(member.DepartmentID),
-			MemberRole:   adminv1.UserDepartment_Role(member.MemberRole),
-			MemberStatus: adminv1.UserDepartment_Status(member.MemberStatus),
+			MemberRole:   adminv1.DepartmentMember_Role(member.MemberRole),
+			MemberStatus: adminv1.DepartmentMember_Status(member.MemberStatus),
 			CreatedAt:    timestamppb.New(member.CreatedAt),
 			UpdatedAt:    timestamppb.New(member.UpdatedAt),
 			Description:  member.Description,
@@ -438,7 +438,7 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 		Name:        dep.Name,
 		I18NName:    I18NNameParse(dep.I18nName),
 		OrderWeight: int32(dep.OrderWeight),
-		Managers:    make([]*adminv1.UserDepartment, 0),
+		Managers:    make([]*adminv1.DepartmentMember, 0),
 	}
 
 	// 递归子部门
