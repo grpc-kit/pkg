@@ -44,7 +44,7 @@ type KnownAdminClient interface {
 	ListRoleUsers(ctx context.Context, in *ListRoleUsersRequest, opts ...grpc.CallOption) (*ListRoleUsersResponse, error)
 	DeleteRoleUser(ctx context.Context, in *DeleteRoleUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	AssignRoleToUser(ctx context.Context, in *AssignRoleToUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 部门相关
+	// 部门管理
 	CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
 	DeleteDepartment(ctx context.Context, in *DeleteDepartmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -467,7 +467,7 @@ type KnownAdminServer interface {
 	ListRoleUsers(context.Context, *ListRoleUsersRequest) (*ListRoleUsersResponse, error)
 	DeleteRoleUser(context.Context, *DeleteRoleUserRequest) (*emptypb.Empty, error)
 	AssignRoleToUser(context.Context, *AssignRoleToUserRequest) (*emptypb.Empty, error)
-	// 部门相关
+	// 部门管理
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
 	DeleteDepartment(context.Context, *DeleteDepartmentRequest) (*emptypb.Empty, error)

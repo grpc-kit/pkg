@@ -65,7 +65,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		Name:        dp.Name,
 		I18NName:    I18NNameParse(dp.I18nName),
 		OrderWeight: int32(dp.OrderWeight),
-		Leaders:     make([]*adminv1.UserDepartment, 0),
+		Managers:    make([]*adminv1.UserDepartment, 0),
 	}
 
 	_ = tx.Commit()
@@ -106,7 +106,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			func(query *lion.UserDepartmentsQuery) {
 				query.Where(
 					userdepartments.DepartmentIDIn(depIDs...),
-					userdepartments.MemberRoleIn(int(adminv1.UserDepartment_ROLE_OWNER.Number()), int(adminv1.UserDepartment_ROLE_ADMIN.Number())),
+					userdepartments.MemberRoleIn(int(adminv1.UserDepartment_ROLE_OWNER.Number()), int(adminv1.UserDepartment_ROLE_MANAGER.Number())),
 				)
 				query.WithLionUsers()
 			}).
@@ -126,7 +126,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Name:        m.Name,
 			I18NName:    I18NNameParse(m.I18nName),
 			OrderWeight: int32(m.OrderWeight),
-			Leaders:     make([]*adminv1.UserDepartment, 0),
+			Managers:    make([]*adminv1.UserDepartment, 0),
 		}
 
 		if m.Edges.LionUserDepartments != nil {
@@ -146,7 +146,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 					leader.Nickname = l.Edges.LionUsers.Nickname
 				}
 
-				menu.Leaders = append(menu.Leaders, leader)
+				menu.Managers = append(menu.Managers, leader)
 			}
 		}
 
@@ -388,7 +388,6 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 			DepartmentId: int32(member.DepartmentID),
 			MemberRole:   adminv1.UserDepartment_Role(member.MemberRole),
 			MemberStatus: adminv1.UserDepartment_Status(member.MemberStatus),
-			ExpiredAt:    timestamppb.New(member.ExpiredAt),
 			CreatedAt:    timestamppb.New(member.CreatedAt),
 			UpdatedAt:    timestamppb.New(member.UpdatedAt),
 			Description:  member.Description,
@@ -414,7 +413,7 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 		Name:        dep.Name,
 		I18NName:    I18NNameParse(dep.I18nName),
 		OrderWeight: int32(dep.OrderWeight),
-		Leaders:     make([]*adminv1.UserDepartment, 0),
+		Managers:    make([]*adminv1.UserDepartment, 0),
 	}
 
 	// 递归子部门
