@@ -136,7 +136,7 @@ func (c *LocalConfig) initSecurity() error {
 				Jitter:   0.0,             // 随机抖动，避免同时请求
 				Steps:    300,             // 最大重试次数
 				// Cap:      time.Second * 30, // 最大间隔
-			}, func() (done bool, err error) {
+			}, func(ctx context.Context) (done bool, err error) {
 				// 初始化 oidc 认证器， 等待 verifier 初始化完成
 				// fmt.Println("start oidc authenticator: initializing plugin")
 
