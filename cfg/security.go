@@ -280,7 +280,7 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 		}
 
 		if hasHS256Alg {
-			if !token.Valid {
+			if token == nil || !token.Valid {
 				return idToken, jwt.ErrInvalidKey
 			}
 
