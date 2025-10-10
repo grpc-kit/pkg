@@ -214,12 +214,14 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 			switch path {
 			case roles.FieldName:
 				x.SetName(req.Role.Name)
-			case roles.FieldI18nName + ".zh_cn":
-				if req.Role.I18NName != nil {
-					if req.Role.I18NName.ZhCn != "" {
-						x.SetI18nName(I18NNameJSON(req.Role.I18NName))
-					}
-				}
+				/*
+					case roles.FieldI18nName + ".zh_cn":
+						if req.Role.I18NName != nil {
+							if req.Role.I18NName.ZhCn != "" {
+								x.SetI18nName(I18NNameJSON(req.Role.I18NName))
+							}
+						}
+				*/
 			case roles.FieldOrderWeight:
 				x.SetOrderWeight(int(req.Role.OrderWeight))
 			case roles.FieldDescription:

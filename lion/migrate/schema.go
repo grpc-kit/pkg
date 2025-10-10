@@ -339,6 +339,13 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "userdepartments_user_id_department_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionUserDepartmentsColumns[11], LionUserDepartmentsColumns[10]},
+			},
+		},
 	}
 	// LionUserGroupsColumns holds the columns for the "lion_user_groups" table.
 	LionUserGroupsColumns = []*schema.Column{
