@@ -46,8 +46,8 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		SetExternalID(req.Group.ExternalId).
 		SetDepartmentID(departmentID).
 		SetDescription(req.Group.Description).
-		SetCreatedBy(int(req.Group.CreatedBy)).
-		SetUpdatedBy(int(req.Group.UpdatedBy)).
+		SetCreatedBy(int64(int(req.Group.CreatedBy))).
+		SetUpdatedBy(int64(int(req.Group.UpdatedBy))).
 		Save(ctx)
 	if err != nil {
 		return result, err
@@ -167,7 +167,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			case "description":
 				update.SetDescription(req.Group.Description)
 			case "updated_by":
-				update.SetUpdatedBy(int(req.Group.UpdatedBy))
+				update.SetUpdatedBy(int64(int(req.Group.UpdatedBy)))
 			}
 		}
 	} else {
@@ -184,7 +184,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			SetExternalID(req.Group.ExternalId).
 			SetDepartmentID(int(req.Group.DepartmentId)).
 			SetDescription(req.Group.Description).
-			SetUpdatedBy(int(req.Group.UpdatedBy))
+			SetUpdatedBy(int64(int(req.Group.UpdatedBy)))
 	}
 
 	// 执行更新
@@ -331,8 +331,8 @@ func (a *KnownAdminAPI) CreateGroupMembers(ctx context.Context, req *adminv1.Cre
 			SetGroupID(groupID).
 			SetMemberRole(int(member.MemberRole)).
 			SetMemberStatus(int(member.MemberStatus)).
-			SetCreatedBy(userID).
-			SetUpdatedBy(userID).
+			SetCreatedBy(int64(userID)).
+			SetUpdatedBy(int64(userID)).
 			SetJoinedAt(time.Now()).
 			SetDescription(member.Description)
 
@@ -409,7 +409,7 @@ func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.Upda
 			}
 		}
 
-		x.SetUpdatedBy(userID).
+		x.SetUpdatedBy(int64(userID)).
 			SetUpdatedAt(time.Now()).Where(
 			usergroups.GroupIDEQ(groupID),
 			usergroups.UserIDEQ(int(req.UserId)),
