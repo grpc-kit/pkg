@@ -15,9 +15,7 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
-	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/schema"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -155,9 +153,14 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	return result, nil
 }
 
-// ListUsers 列出用户列表
+// ListUsers 获取用户列表
 func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersRequest) (*adminv1.ListUsersResponse, error) {
 	result := &adminv1.ListUsersResponse{}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
 
 	var selectViewFields []string
 
@@ -196,14 +199,185 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		selectViewFields = basicViewFields
 	}
 
-	// 默认查看所有用户（仅部门管理下所有可见）
-	// 先找到 user 对应的 department_id
-	/*
-		userIDInt, err := GetUserID(ctx)
+	// 查找用户并实现分页
+	pageSize := int(req.GetPageSize())
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	var lastID int
+	if req.GetPageToken() != "" {
+		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid page_token: %w", err)
 		}
-	*/
+		if err := json.Unmarshal(data, &lastID); err != nil {
+			return nil, fmt.Errorf("invalid page_token format: %w", err)
+		}
+	}
+
+	userQuery := db.Users.Query()
+
+	// 是否有过滤属性
+	if req.GetFilterId() != "" {
+		uid, err := strconv.Atoi(req.GetFilterId())
+		if err != nil {
+			return nil, fmt.Errorf("invalid filter_id: %w", err)
+		}
+
+		userQuery = userQuery.Where(users.IDEQ(uid))
+	}
+	if req.GetFilterUsername() != "" {
+		userQuery = userQuery.Where(users.UsernameContains(req.GetFilterUsername()))
+	}
+	if req.GetFilterNickname() != "" {
+		userQuery = userQuery.Where(users.NicknameContains(req.GetFilterNickname()))
+	}
+	if req.GetFilterStatus() != "" {
+		status, err := strconv.Atoi(req.GetFilterStatus())
+		if err != nil {
+			return nil, fmt.Errorf("invalid filter_status: %w", err)
+		}
+		userQuery = userQuery.Where(users.StatusEQ(status))
+	}
+	if !req.GetShowDeleted() {
+		userQuery = userQuery.Where(users.DeletedAtIsNil())
+	}
+
+	// OrderBy
+	if req.GetOrderBy() != "" {
+		switch req.GetOrderBy() {
+		case "create_time desc":
+			userQuery = userQuery.Order(lion.Desc(users.FieldCreatedAt))
+		case "create_time asc":
+			userQuery = userQuery.Order(lion.Asc(users.FieldCreatedAt))
+		case "nickname asc":
+			userQuery = userQuery.Order(lion.Asc(users.FieldNickname))
+		case "nickname desc":
+			userQuery = userQuery.Order(lion.Desc(users.FieldNickname))
+		default:
+			// 默认按 ID 升序
+			userQuery = userQuery.Order(lion.Desc(users.FieldID))
+		}
+	} else {
+		userQuery = userQuery.Order(lion.Desc(users.FieldID))
+	}
+
+	totalSize, err := userQuery.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListUsersRequest_Offset:
+		// Offset 分页
+		userQuery = userQuery.Offset(int(p.Offset))
+	case *adminv1.ListUsersRequest_PageToken:
+		// Cursor 分页
+		if lastID > 0 {
+			userQuery = userQuery.Where(users.IDGT(lastID))
+		}
+	}
+
+	userQuery = userQuery.Limit(pageSize)
+
+	searchUsers, err := userQuery.Select(selectViewFields...).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// --- 构造 next_page_token ---
+	var nextPageToken string
+	if len(searchUsers) == pageSize {
+		last := searchUsers[len(searchUsers)-1].ID
+		tokenData, _ := json.Marshal(last)
+		nextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	}
+
+	result.NextPageToken = nextPageToken
+	result.TotalSize = int32(totalSize)
+
+	for _, user := range searchUsers {
+		realname, _ := crypto.DecryptAES(a.config.aesKey, user.RealnameEncrypted)
+		idcard, _ := crypto.DecryptAES(a.config.aesKey, user.NationalIDEncrypted)
+		email, _ := crypto.DecryptAES(a.config.aesKey, user.EmailEncrypted)
+		phoneNumberByte, _ := crypto.DecryptAES(a.config.aesKey, user.PhoneNumberEncrypted)
+		// address, _ := crypto.DecryptAES(a.config.aesKey, user.AddressEncrypted)
+
+		var phoneNumber adminv1.PhoneNumber
+		_ = proto.Unmarshal(phoneNumberByte, &phoneNumber)
+
+		result.Users = append(result.Users, &adminv1.User{
+			Id:                  int64(user.ID),
+			Username:            user.Username,
+			Status:              adminv1.User_Status(user.Status),
+			Realname:            string(realname),
+			NationalId:          string(idcard),
+			Nickname:            user.Nickname,
+			Profile:             user.Profile,
+			Picture:             user.Picture,
+			Website:             user.Website,
+			Email:               string(email),
+			EmailVerified:       user.EmailVerified,
+			Gender:              adminv1.User_Gender(user.Gender),
+			Birthday:            timestamppb.New(user.Birthdate),
+			Zoneinfo:            user.Zoneinfo,
+			Locale:              user.Locale,
+			PhoneNumber:         &phoneNumber,
+			PhoneNumberVerified: user.PhoneNumberVerified,
+			CreatedAt:           timestamppb.New(user.CreatedAt),
+			UpdatedAt:           timestamppb.New(user.UpdatedAt),
+			// Address:             address,
+		})
+	}
+
+	return result, nil
+}
+
+// ListUsersV1 列出用户列表
+/*
+func (a *KnownAdminAPI) ListUsersV1(ctx context.Context, req *adminv1.ListUsersRequest) (*adminv1.ListUsersResponse, error) {
+	result := &adminv1.ListUsersResponse{}
+
+	var selectViewFields []string
+
+	basicViewFields := []string{
+		users.FieldID,
+		users.FieldUsername,
+		users.FieldStatus,
+		users.FieldNickname,
+		users.FieldProfile,
+		users.FieldPicture,
+		users.FieldWebsite,
+		users.FieldZoneinfo,
+		users.FieldLocale,
+		users.FieldCreatedAt,
+		users.FieldUpdatedAt,
+	}
+
+	fullViewFields := append(basicViewFields, []string{
+		users.FieldRealnameEncrypted,
+		users.FieldNationalIDEncrypted,
+		users.FieldEmailEncrypted,
+		users.FieldEmailVerified,
+		users.FieldGender,
+		users.FieldBirthdate,
+		users.FieldPhoneNumberEncrypted,
+		users.FieldPhoneNumberVerified,
+		users.FieldAddressEncrypted,
+		// users.FieldDepartmentID,
+		users.FieldDescription,
+	}...)
+
+	switch req.GetView() {
+	case adminv1.ListUsersRequest_USER_VIEW_FULL:
+		selectViewFields = fullViewFields
+	default:
+		selectViewFields = basicViewFields
+	}
 
 	roleIDs, err := a.getUserRoleID(ctx)
 	if err != nil {
@@ -382,6 +556,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 
 	return result, nil
 }
+*/
 
 // UpdateUser 更新用户信息
 func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserRequest) (*adminv1.User, error) {
