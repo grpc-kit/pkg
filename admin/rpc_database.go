@@ -50,23 +50,25 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	tx.Departments.CreateBulk(
 		tx.Departments.Create().
 			SetName("root").
-			SetI18nName(I18NNameJSON(&adminv1.I18NName{
-				// DefaultLanguage: adminv1.LanguageCode_EN_US,
-				Texts: []*adminv1.LocalizedText{
-					{
-						LanguageCode: adminv1.LanguageCode_ZH_CN,
-						Text:         "根目录",
+			/*
+				SetI18nName(I18NNameJSON(&adminv1.I18NName{
+					// DefaultLanguage: adminv1.LanguageCode_EN_US,
+					Texts: []*adminv1.LocalizedText{
+						{
+							LanguageCode: adminv1.LanguageCode_ZH_CN,
+							Text:         "根目录",
+						},
+						{
+							LanguageCode: adminv1.LanguageCode_EN_US,
+							Text:         "root",
+						},
+						{
+							LanguageCode: adminv1.LanguageCode_JA_JP,
+							Text:         "ルートディレクトリ",
+						},
 					},
-					{
-						LanguageCode: adminv1.LanguageCode_EN_US,
-						Text:         "root",
-					},
-					{
-						LanguageCode: adminv1.LanguageCode_JA_JP,
-						Text:         "ルートディレクトリ",
-					},
-				},
-			})).
+				})).
+			*/
 			SetOrderWeight(1).
 			SetParentID(0),
 	).SaveX(ctx)
