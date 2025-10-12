@@ -188,6 +188,28 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 	result := &adminv1.Resource{}
 
 	// TODO;
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = db.Resources.Create().
+		SetName(req.Resource.Name).
+		SetType(int(req.Resource.Type)).
+		SetScope(int(req.Resource.Scope)).
+		SetParentID(int(req.Resource.ParentId)).
+		SetPath(req.Resource.Path).
+		SetComponent(req.Resource.Component).
+		SetIcon(req.Resource.Icon).
+		SetOrderWeight(int(req.Resource.OrderWeight)).
+		SetEnabled(req.Resource.Enabled).
+		SetHidden(req.Resource.Hidden).
+		SetHideChildren(req.Resource.HideChildren).
+		Save(ctx)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return result, nil
 }
