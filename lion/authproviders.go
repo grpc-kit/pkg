@@ -21,6 +21,10 @@ type AuthProviders struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 认证提供方名称
 	Name string `json:"name,omitempty"`
 	// 支持的认证提供方
@@ -76,7 +80,7 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case authproviders.FieldEnabled:
 			values[i] = new(sql.NullBool)
-		case authproviders.FieldID, authproviders.FieldType:
+		case authproviders.FieldID, authproviders.FieldCreatedBy, authproviders.FieldUpdatedBy, authproviders.FieldType:
 			values[i] = new(sql.NullInt64)
 		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldScopes, authproviders.FieldRedirectURI, authproviders.FieldIssuer, authproviders.FieldAuthorizationEndpoint, authproviders.FieldTokenEndpoint, authproviders.FieldUserinfoEndpoint:
 			values[i] = new(sql.NullString)
@@ -114,6 +118,18 @@ func (_m *AuthProviders) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
+			}
+		case authproviders.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = value.Int64
+			}
+		case authproviders.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = value.Int64
 			}
 		case authproviders.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -227,6 +243,12 @@ func (_m *AuthProviders) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)

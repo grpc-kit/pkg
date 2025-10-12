@@ -18,20 +18,55 @@ func (Departments) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("parent_id").
 			Default(0).
-			Comment("父菜单 ID，为 0 表示顶级菜单"),
+			Comment("父部门ID，构建树形组织结构，值为 0 表示顶级部门"),
 		field.String("name").
-			MaxLen(128).
+			MaxLen(256).
 			NotEmpty().
-			Comment("部门名称"),
-		field.String("i18n_name").
-			Default("").
-			Comment("多国语言"),
-		field.Int("order_weight").
+			Comment("部门名称，用于系统内部显示和业务逻辑"),
+		field.JSON("i18n_name", map[string]string{}).
+			Optional().
+			Comment("国际化名称配置，支持多语言环境"),
+		field.Int("department_type").
 			Default(0).
-			Comment("排序权重，越小越靠前"),
+			Comment("部门类型分类：0-未指定，1-业务部门，2-支持部门，3-管理部门，4-虚拟部门"),
+		field.Int("department_status").
+			Default(1).
+			Comment("部门运营状态：0-未指定，1-正常运营，2-暂停运营，3-已解散，4-合并中"),
+		field.Int("order_weight").
+			Default(100).
+			Comment("部门排序权重，数值越小排序越靠前，建议使用 10 的倍数"),
+		field.Bytes("email_encrypted").
+			Sensitive().
+			Optional().
+			Comment("部门公共邮箱地址，加密存储"),
+		field.Bytes("phone_number_encrypted").
+			Sensitive().
+			Optional().
+			Comment("部门联系电话，加密存储"),
+		field.Bytes("address_encrypted").
+			Sensitive().
+			Optional().
+			Comment("部门办公地址，加密存储"),
+		field.String("cost_center_code").
+			Sensitive().
+			Optional().
+			Comment("成本中心编码，用于财务核算和成本控制"),
+		field.String("budget_item_code").
+			Sensitive().
+			Optional().
+			Comment("预算编码，用于预算管理和费用控制"),
+		field.Int("max_members").
+			Default(0).
+			Comment("部门最大成员数限制，值为 0 表示无限制"),
+		field.String("external_id").
+			Optional().
+			Comment("外部系统标识符，用于第三方系统集成"),
+		field.JSON("metadata", map[string]string{}).
+			Optional().
+			Comment("扩展元数据，存储自定义业务属性"),
 		field.String("description").
 			Default("").
-			Comment("详细描述"),
+			Comment("部门描述信息，详细说明部门职责和业务范围"),
 	}
 }
 
@@ -49,7 +84,8 @@ func (Departments) Edges() []ent.Edge {
 // Mixin of the table.
 func (Departments) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixinWithoutDeleted{},
+		TimeMixin{},
+		AuditMixin{},
 	}
 }
 

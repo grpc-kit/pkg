@@ -59,6 +59,21 @@ func (TimeMixinWithoutDeleted) Fields() []ent.Field {
 	}
 }
 
+// AuditMixin 创建或更新人员属性
+type AuditMixin struct {
+	mixin.Schema
+}
+
+// Fields xx
+func (AuditMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int64("created_by").
+			Default(0),
+		field.Int64("updated_by").
+			Default(0),
+	}
+}
+
 // FieldNameNormalize 移除字段名末尾的 "_encrypted", "_hash" 使其与 proto 等定义一致
 func FieldNameNormalize(name string) string {
 	return strings.ReplaceAll(name, "_encrypted", "")

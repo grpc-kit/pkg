@@ -30,12 +30,6 @@ func (UserDepartments) Fields() []ent.Field {
 		field.Time("expired_at").
 			Optional().
 			Comment("关系有效期，用于临时成员管理，0表示永久有效"),
-		field.Int("created_by").
-			Optional().
-			Comment("创建者 ID，记录创建该关系的用户"),
-		field.Int("updated_by").
-			Optional().
-			Comment("最后更新者 ID，记录最后修改该关系的用户"),
 		field.String("metadata").
 			Optional().
 			Comment("元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储"),
@@ -66,6 +60,7 @@ func (UserDepartments) Edges() []ent.Edge {
 func (UserDepartments) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
+		AuditMixin{},
 	}
 }
 

@@ -26,6 +26,10 @@ type UserGroups struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 用户 ID，关联用户表
 	UserID int `json:"user_id,omitempty"`
 	// 群组 ID，关联群组表
@@ -38,10 +42,6 @@ type UserGroups struct {
 	JoinedAt time.Time `json:"joined_at,omitempty"`
 	// 关系有效期，用于临时成员管理，0表示永久有效
 	ExpiredAt time.Time `json:"expired_at,omitempty"`
-	// 创建者 ID，记录创建该关系的用户
-	CreatedBy int `json:"created_by,omitempty"`
-	// 最后更新者 ID，记录最后修改该关系的用户
-	UpdatedBy int `json:"updated_by,omitempty"`
 	// 元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储
 	Metadata string `json:"metadata,omitempty"`
 	// 用户组描述
@@ -90,7 +90,7 @@ func (*UserGroups) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case usergroups.FieldID, usergroups.FieldUserID, usergroups.FieldGroupID, usergroups.FieldMemberRole, usergroups.FieldMemberStatus, usergroups.FieldCreatedBy, usergroups.FieldUpdatedBy:
+		case usergroups.FieldID, usergroups.FieldCreatedBy, usergroups.FieldUpdatedBy, usergroups.FieldUserID, usergroups.FieldGroupID, usergroups.FieldMemberRole, usergroups.FieldMemberStatus:
 			values[i] = new(sql.NullInt64)
 		case usergroups.FieldMetadata, usergroups.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -136,6 +136,18 @@ func (_m *UserGroups) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case usergroups.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = value.Int64
+			}
+		case usergroups.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = value.Int64
+			}
 		case usergroups.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
@@ -171,18 +183,6 @@ func (_m *UserGroups) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field expired_at", values[i])
 			} else if value.Valid {
 				_m.ExpiredAt = value.Time
-			}
-		case usergroups.FieldCreatedBy:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field created_by", values[i])
-			} else if value.Valid {
-				_m.CreatedBy = int(value.Int64)
-			}
-		case usergroups.FieldUpdatedBy:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
-			} else if value.Valid {
-				_m.UpdatedBy = int(value.Int64)
 			}
 		case usergroups.FieldMetadata:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -253,6 +253,12 @@ func (_m *UserGroups) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
+	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
@@ -270,12 +276,6 @@ func (_m *UserGroups) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("expired_at=")
 	builder.WriteString(_m.ExpiredAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("created_by=")
-	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
-	builder.WriteString(", ")
-	builder.WriteString("updated_by=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(_m.Metadata)

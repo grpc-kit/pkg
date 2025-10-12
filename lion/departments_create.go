@@ -51,6 +51,48 @@ func (_c *DepartmentsCreate) SetNillableUpdatedAt(v *time.Time) *DepartmentsCrea
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *DepartmentsCreate) SetDeletedAt(v time.Time) *DepartmentsCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableDeletedAt(v *time.Time) *DepartmentsCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_c *DepartmentsCreate) SetCreatedBy(v int64) *DepartmentsCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableCreatedBy(v *int64) *DepartmentsCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *DepartmentsCreate) SetUpdatedBy(v int64) *DepartmentsCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableUpdatedBy(v *int64) *DepartmentsCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
 // SetParentID sets the "parent_id" field.
 func (_c *DepartmentsCreate) SetParentID(v int) *DepartmentsCreate {
 	_c.mutation.SetParentID(v)
@@ -72,15 +114,35 @@ func (_c *DepartmentsCreate) SetName(v string) *DepartmentsCreate {
 }
 
 // SetI18nName sets the "i18n_name" field.
-func (_c *DepartmentsCreate) SetI18nName(v string) *DepartmentsCreate {
+func (_c *DepartmentsCreate) SetI18nName(v map[string]string) *DepartmentsCreate {
 	_c.mutation.SetI18nName(v)
 	return _c
 }
 
-// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
-func (_c *DepartmentsCreate) SetNillableI18nName(v *string) *DepartmentsCreate {
+// SetDepartmentType sets the "department_type" field.
+func (_c *DepartmentsCreate) SetDepartmentType(v int) *DepartmentsCreate {
+	_c.mutation.SetDepartmentType(v)
+	return _c
+}
+
+// SetNillableDepartmentType sets the "department_type" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableDepartmentType(v *int) *DepartmentsCreate {
 	if v != nil {
-		_c.SetI18nName(*v)
+		_c.SetDepartmentType(*v)
+	}
+	return _c
+}
+
+// SetDepartmentStatus sets the "department_status" field.
+func (_c *DepartmentsCreate) SetDepartmentStatus(v int) *DepartmentsCreate {
+	_c.mutation.SetDepartmentStatus(v)
+	return _c
+}
+
+// SetNillableDepartmentStatus sets the "department_status" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableDepartmentStatus(v *int) *DepartmentsCreate {
+	if v != nil {
+		_c.SetDepartmentStatus(*v)
 	}
 	return _c
 }
@@ -96,6 +158,86 @@ func (_c *DepartmentsCreate) SetNillableOrderWeight(v *int) *DepartmentsCreate {
 	if v != nil {
 		_c.SetOrderWeight(*v)
 	}
+	return _c
+}
+
+// SetEmailEncrypted sets the "email_encrypted" field.
+func (_c *DepartmentsCreate) SetEmailEncrypted(v []byte) *DepartmentsCreate {
+	_c.mutation.SetEmailEncrypted(v)
+	return _c
+}
+
+// SetPhoneNumberEncrypted sets the "phone_number_encrypted" field.
+func (_c *DepartmentsCreate) SetPhoneNumberEncrypted(v []byte) *DepartmentsCreate {
+	_c.mutation.SetPhoneNumberEncrypted(v)
+	return _c
+}
+
+// SetAddressEncrypted sets the "address_encrypted" field.
+func (_c *DepartmentsCreate) SetAddressEncrypted(v []byte) *DepartmentsCreate {
+	_c.mutation.SetAddressEncrypted(v)
+	return _c
+}
+
+// SetCostCenterCode sets the "cost_center_code" field.
+func (_c *DepartmentsCreate) SetCostCenterCode(v string) *DepartmentsCreate {
+	_c.mutation.SetCostCenterCode(v)
+	return _c
+}
+
+// SetNillableCostCenterCode sets the "cost_center_code" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableCostCenterCode(v *string) *DepartmentsCreate {
+	if v != nil {
+		_c.SetCostCenterCode(*v)
+	}
+	return _c
+}
+
+// SetBudgetItemCode sets the "budget_item_code" field.
+func (_c *DepartmentsCreate) SetBudgetItemCode(v string) *DepartmentsCreate {
+	_c.mutation.SetBudgetItemCode(v)
+	return _c
+}
+
+// SetNillableBudgetItemCode sets the "budget_item_code" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableBudgetItemCode(v *string) *DepartmentsCreate {
+	if v != nil {
+		_c.SetBudgetItemCode(*v)
+	}
+	return _c
+}
+
+// SetMaxMembers sets the "max_members" field.
+func (_c *DepartmentsCreate) SetMaxMembers(v int) *DepartmentsCreate {
+	_c.mutation.SetMaxMembers(v)
+	return _c
+}
+
+// SetNillableMaxMembers sets the "max_members" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableMaxMembers(v *int) *DepartmentsCreate {
+	if v != nil {
+		_c.SetMaxMembers(*v)
+	}
+	return _c
+}
+
+// SetExternalID sets the "external_id" field.
+func (_c *DepartmentsCreate) SetExternalID(v string) *DepartmentsCreate {
+	_c.mutation.SetExternalID(v)
+	return _c
+}
+
+// SetNillableExternalID sets the "external_id" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableExternalID(v *string) *DepartmentsCreate {
+	if v != nil {
+		_c.SetExternalID(*v)
+	}
+	return _c
+}
+
+// SetMetadata sets the "metadata" field.
+func (_c *DepartmentsCreate) SetMetadata(v map[string]string) *DepartmentsCreate {
+	_c.mutation.SetMetadata(v)
 	return _c
 }
 
@@ -201,17 +343,33 @@ func (_c *DepartmentsCreate) defaults() {
 		v := departments.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		v := departments.DefaultCreatedBy
+		_c.mutation.SetCreatedBy(v)
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		v := departments.DefaultUpdatedBy
+		_c.mutation.SetUpdatedBy(v)
+	}
 	if _, ok := _c.mutation.ParentID(); !ok {
 		v := departments.DefaultParentID
 		_c.mutation.SetParentID(v)
 	}
-	if _, ok := _c.mutation.I18nName(); !ok {
-		v := departments.DefaultI18nName
-		_c.mutation.SetI18nName(v)
+	if _, ok := _c.mutation.DepartmentType(); !ok {
+		v := departments.DefaultDepartmentType
+		_c.mutation.SetDepartmentType(v)
+	}
+	if _, ok := _c.mutation.DepartmentStatus(); !ok {
+		v := departments.DefaultDepartmentStatus
+		_c.mutation.SetDepartmentStatus(v)
 	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		v := departments.DefaultOrderWeight
 		_c.mutation.SetOrderWeight(v)
+	}
+	if _, ok := _c.mutation.MaxMembers(); !ok {
+		v := departments.DefaultMaxMembers
+		_c.mutation.SetMaxMembers(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := departments.DefaultDescription
@@ -227,6 +385,12 @@ func (_c *DepartmentsCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Departments.updated_at"`)}
 	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "Departments.created_by"`)}
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "Departments.updated_by"`)}
+	}
 	if _, ok := _c.mutation.ParentID(); !ok {
 		return &ValidationError{Name: "parent_id", err: errors.New(`lion: missing required field "Departments.parent_id"`)}
 	}
@@ -238,11 +402,17 @@ func (_c *DepartmentsCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Departments.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.I18nName(); !ok {
-		return &ValidationError{Name: "i18n_name", err: errors.New(`lion: missing required field "Departments.i18n_name"`)}
+	if _, ok := _c.mutation.DepartmentType(); !ok {
+		return &ValidationError{Name: "department_type", err: errors.New(`lion: missing required field "Departments.department_type"`)}
+	}
+	if _, ok := _c.mutation.DepartmentStatus(); !ok {
+		return &ValidationError{Name: "department_status", err: errors.New(`lion: missing required field "Departments.department_status"`)}
 	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Departments.order_weight"`)}
+	}
+	if _, ok := _c.mutation.MaxMembers(); !ok {
+		return &ValidationError{Name: "max_members", err: errors.New(`lion: missing required field "Departments.max_members"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Departments.description"`)}
@@ -281,6 +451,18 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 		_spec.SetField(departments.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(departments.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(departments.FieldCreatedBy, field.TypeInt64, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(departments.FieldUpdatedBy, field.TypeInt64, value)
+		_node.UpdatedBy = value
+	}
 	if value, ok := _c.mutation.ParentID(); ok {
 		_spec.SetField(departments.FieldParentID, field.TypeInt, value)
 		_node.ParentID = value
@@ -290,12 +472,52 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 		_node.Name = value
 	}
 	if value, ok := _c.mutation.I18nName(); ok {
-		_spec.SetField(departments.FieldI18nName, field.TypeString, value)
+		_spec.SetField(departments.FieldI18nName, field.TypeJSON, value)
 		_node.I18nName = value
+	}
+	if value, ok := _c.mutation.DepartmentType(); ok {
+		_spec.SetField(departments.FieldDepartmentType, field.TypeInt, value)
+		_node.DepartmentType = value
+	}
+	if value, ok := _c.mutation.DepartmentStatus(); ok {
+		_spec.SetField(departments.FieldDepartmentStatus, field.TypeInt, value)
+		_node.DepartmentStatus = value
 	}
 	if value, ok := _c.mutation.OrderWeight(); ok {
 		_spec.SetField(departments.FieldOrderWeight, field.TypeInt, value)
 		_node.OrderWeight = value
+	}
+	if value, ok := _c.mutation.EmailEncrypted(); ok {
+		_spec.SetField(departments.FieldEmailEncrypted, field.TypeBytes, value)
+		_node.EmailEncrypted = value
+	}
+	if value, ok := _c.mutation.PhoneNumberEncrypted(); ok {
+		_spec.SetField(departments.FieldPhoneNumberEncrypted, field.TypeBytes, value)
+		_node.PhoneNumberEncrypted = value
+	}
+	if value, ok := _c.mutation.AddressEncrypted(); ok {
+		_spec.SetField(departments.FieldAddressEncrypted, field.TypeBytes, value)
+		_node.AddressEncrypted = value
+	}
+	if value, ok := _c.mutation.CostCenterCode(); ok {
+		_spec.SetField(departments.FieldCostCenterCode, field.TypeString, value)
+		_node.CostCenterCode = value
+	}
+	if value, ok := _c.mutation.BudgetItemCode(); ok {
+		_spec.SetField(departments.FieldBudgetItemCode, field.TypeString, value)
+		_node.BudgetItemCode = value
+	}
+	if value, ok := _c.mutation.MaxMembers(); ok {
+		_spec.SetField(departments.FieldMaxMembers, field.TypeInt, value)
+		_node.MaxMembers = value
+	}
+	if value, ok := _c.mutation.ExternalID(); ok {
+		_spec.SetField(departments.FieldExternalID, field.TypeString, value)
+		_node.ExternalID = value
+	}
+	if value, ok := _c.mutation.Metadata(); ok {
+		_spec.SetField(departments.FieldMetadata, field.TypeJSON, value)
+		_node.Metadata = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(departments.FieldDescription, field.TypeString, value)

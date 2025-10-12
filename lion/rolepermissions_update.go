@@ -34,6 +34,48 @@ func (_u *RolePermissionsUpdate) SetUpdatedAt(v time.Time) *RolePermissionsUpdat
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *RolePermissionsUpdate) SetCreatedBy(v int64) *RolePermissionsUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *RolePermissionsUpdate) SetNillableCreatedBy(v *int64) *RolePermissionsUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *RolePermissionsUpdate) AddCreatedBy(v int64) *RolePermissionsUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *RolePermissionsUpdate) SetUpdatedBy(v int64) *RolePermissionsUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *RolePermissionsUpdate) SetNillableUpdatedBy(v *int64) *RolePermissionsUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *RolePermissionsUpdate) AddUpdatedBy(v int64) *RolePermissionsUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetRoleID sets the "role_id" field.
 func (_u *RolePermissionsUpdate) SetRoleID(v int) *RolePermissionsUpdate {
 	_u.mutation.ResetRoleID()
@@ -147,6 +189,18 @@ func (_u *RolePermissionsUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(rolepermissions.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(rolepermissions.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(rolepermissions.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(rolepermissions.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(rolepermissions.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.RoleID(); ok {
 		_spec.SetField(rolepermissions.FieldRoleID, field.TypeInt, value)
 	}
@@ -182,6 +236,48 @@ type RolePermissionsUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *RolePermissionsUpdateOne) SetUpdatedAt(v time.Time) *RolePermissionsUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *RolePermissionsUpdateOne) SetCreatedBy(v int64) *RolePermissionsUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *RolePermissionsUpdateOne) SetNillableCreatedBy(v *int64) *RolePermissionsUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *RolePermissionsUpdateOne) AddCreatedBy(v int64) *RolePermissionsUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *RolePermissionsUpdateOne) SetUpdatedBy(v int64) *RolePermissionsUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *RolePermissionsUpdateOne) SetNillableUpdatedBy(v *int64) *RolePermissionsUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *RolePermissionsUpdateOne) AddUpdatedBy(v int64) *RolePermissionsUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -327,6 +423,18 @@ func (_u *RolePermissionsUpdateOne) sqlSave(ctx context.Context) (_node *RolePer
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(rolepermissions.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(rolepermissions.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(rolepermissions.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(rolepermissions.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(rolepermissions.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.RoleID(); ok {
 		_spec.SetField(rolepermissions.FieldRoleID, field.TypeInt, value)

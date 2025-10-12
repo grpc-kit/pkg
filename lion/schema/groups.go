@@ -51,12 +51,6 @@ func (Groups) Fields() []ent.Field {
 		field.String("description").
 			Default("").
 			Comment("用户组描述"),
-		field.Int("created_by").
-			Default(0).
-			Comment("群组创建者/所有者ID"),
-		field.Int("updated_by").
-			Default(0).
-			Comment("群组最后更新者ID"),
 	}
 }
 
@@ -78,6 +72,7 @@ func (Groups) Edges() []ent.Edge {
 func (Groups) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
+		AuditMixin{},
 	}
 }
 

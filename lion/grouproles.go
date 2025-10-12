@@ -23,6 +23,10 @@ type GroupRoles struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 关联 lion_groups 表的菜单 ID
 	GroupID int `json:"group_id,omitempty"`
 	// 关联 lion_roles 表的用户组 ID
@@ -71,7 +75,7 @@ func (*GroupRoles) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case grouproles.FieldID, grouproles.FieldGroupID, grouproles.FieldRoleID:
+		case grouproles.FieldID, grouproles.FieldCreatedBy, grouproles.FieldUpdatedBy, grouproles.FieldGroupID, grouproles.FieldRoleID:
 			values[i] = new(sql.NullInt64)
 		case grouproles.FieldCreatedAt, grouproles.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -107,6 +111,18 @@ func (_m *GroupRoles) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
+			}
+		case grouproles.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = value.Int64
+			}
+		case grouproles.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = value.Int64
 			}
 		case grouproles.FieldGroupID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -171,6 +187,12 @@ func (_m *GroupRoles) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
 	builder.WriteString("group_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GroupID))

@@ -23,6 +23,10 @@ type Users struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 首选用户名，用于系统识别与登录，仅支持字母、数字、下划线、点号
 	Username string `json:"username,omitempty"`
 	// 用户的真实姓名
@@ -133,7 +137,7 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case users.FieldEmailVerified, users.FieldPhoneNumberVerified:
 			values[i] = new(sql.NullBool)
-		case users.FieldID, users.FieldType, users.FieldStatus, users.FieldGender:
+		case users.FieldID, users.FieldCreatedBy, users.FieldUpdatedBy, users.FieldType, users.FieldStatus, users.FieldGender:
 			values[i] = new(sql.NullInt64)
 		case users.FieldUsername, users.FieldNationalIDHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -178,6 +182,18 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
+			}
+		case users.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = value.Int64
+			}
+		case users.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = value.Int64
 			}
 		case users.FieldUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -377,6 +393,12 @@ func (_m *Users) String() string {
 		builder.WriteString("deleted_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
 	builder.WriteString("username=")
 	builder.WriteString(_m.Username)

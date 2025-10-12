@@ -35,6 +35,48 @@ func (_u *ResourcesUpdate) SetUpdatedAt(v time.Time) *ResourcesUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *ResourcesUpdate) SetCreatedBy(v int64) *ResourcesUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableCreatedBy(v *int64) *ResourcesUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *ResourcesUpdate) AddCreatedBy(v int64) *ResourcesUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *ResourcesUpdate) SetUpdatedBy(v int64) *ResourcesUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableUpdatedBy(v *int64) *ResourcesUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *ResourcesUpdate) AddUpdatedBy(v int64) *ResourcesUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetParentID sets the "parent_id" field.
 func (_u *ResourcesUpdate) SetParentID(v int) *ResourcesUpdate {
 	_u.mutation.ResetParentID()
@@ -362,6 +404,18 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(resources.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(resources.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(resources.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(resources.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(resources.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.ParentID(); ok {
 		_spec.SetField(resources.FieldParentID, field.TypeInt, value)
 	}
@@ -481,6 +535,48 @@ type ResourcesUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ResourcesUpdateOne) SetUpdatedAt(v time.Time) *ResourcesUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *ResourcesUpdateOne) SetCreatedBy(v int64) *ResourcesUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableCreatedBy(v *int64) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *ResourcesUpdateOne) AddCreatedBy(v int64) *ResourcesUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *ResourcesUpdateOne) SetUpdatedBy(v int64) *ResourcesUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableUpdatedBy(v *int64) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *ResourcesUpdateOne) AddUpdatedBy(v int64) *ResourcesUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -840,6 +936,18 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(resources.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(resources.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(resources.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(resources.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(resources.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.ParentID(); ok {
 		_spec.SetField(resources.FieldParentID, field.TypeInt, value)

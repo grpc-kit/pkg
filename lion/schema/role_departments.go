@@ -50,6 +50,7 @@ func (RoleDepartments) Edges() []ent.Edge {
 func (RoleDepartments) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
+		AuditMixin{},
 	}
 }
 

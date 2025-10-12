@@ -48,6 +48,34 @@ func (_c *PermissionsCreate) SetNillableUpdatedAt(v *time.Time) *PermissionsCrea
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *PermissionsCreate) SetCreatedBy(v int64) *PermissionsCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *PermissionsCreate) SetNillableCreatedBy(v *int64) *PermissionsCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *PermissionsCreate) SetUpdatedBy(v int64) *PermissionsCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *PermissionsCreate) SetNillableUpdatedBy(v *int64) *PermissionsCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *PermissionsCreate) SetName(v string) *PermissionsCreate {
 	_c.mutation.SetName(v)
@@ -97,6 +125,14 @@ func (_c *PermissionsCreate) defaults() {
 		v := permissions.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		v := permissions.DefaultCreatedBy
+		_c.mutation.SetCreatedBy(v)
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		v := permissions.DefaultUpdatedBy
+		_c.mutation.SetUpdatedBy(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -106,6 +142,12 @@ func (_c *PermissionsCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Permissions.updated_at"`)}
+	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "Permissions.created_by"`)}
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "Permissions.updated_by"`)}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Permissions.name"`)}
@@ -148,6 +190,14 @@ func (_c *PermissionsCreate) createSpec() (*Permissions, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(permissions.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(permissions.FieldCreatedBy, field.TypeInt64, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(permissions.FieldUpdatedBy, field.TypeInt64, value)
+		_node.UpdatedBy = value
 	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(permissions.FieldName, field.TypeString, value)

@@ -50,6 +50,34 @@ func (_c *UserRolesCreate) SetNillableUpdatedAt(v *time.Time) *UserRolesCreate {
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *UserRolesCreate) SetCreatedBy(v int64) *UserRolesCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *UserRolesCreate) SetNillableCreatedBy(v *int64) *UserRolesCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *UserRolesCreate) SetUpdatedBy(v int64) *UserRolesCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *UserRolesCreate) SetNillableUpdatedBy(v *int64) *UserRolesCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *UserRolesCreate) SetUserID(v int) *UserRolesCreate {
 	_c.mutation.SetUserID(v)
@@ -127,6 +155,14 @@ func (_c *UserRolesCreate) defaults() {
 		v := userroles.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		v := userroles.DefaultCreatedBy
+		_c.mutation.SetCreatedBy(v)
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		v := userroles.DefaultUpdatedBy
+		_c.mutation.SetUpdatedBy(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -136,6 +172,12 @@ func (_c *UserRolesCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserRoles.updated_at"`)}
+	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "UserRoles.created_by"`)}
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "UserRoles.updated_by"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserRoles.user_id"`)}
@@ -192,6 +234,14 @@ func (_c *UserRolesCreate) createSpec() (*UserRoles, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(userroles.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(userroles.FieldCreatedBy, field.TypeInt64, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(userroles.FieldUpdatedBy, field.TypeInt64, value)
+		_node.UpdatedBy = value
 	}
 	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

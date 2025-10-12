@@ -85,6 +85,7 @@ func (UserIdentities) Edges() []ent.Edge {
 func (UserIdentities) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
+		AuditMixin{},
 	}
 }
 

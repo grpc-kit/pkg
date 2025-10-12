@@ -21,6 +21,10 @@ type Resources struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 父资源 ID，为 0 表示顶级资源
 	ParentID int `json:"parent_id,omitempty"`
 	// 资源名称
@@ -78,7 +82,7 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case resources.FieldEnabled, resources.FieldHidden, resources.FieldHideChildren:
 			values[i] = new(sql.NullBool)
-		case resources.FieldID, resources.FieldParentID, resources.FieldOrderWeight, resources.FieldType, resources.FieldScope:
+		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldOrderWeight, resources.FieldType, resources.FieldScope:
 			values[i] = new(sql.NullInt64)
 		case resources.FieldName, resources.FieldI18nName, resources.FieldPath, resources.FieldIcon, resources.FieldComponent, resources.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -116,6 +120,18 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
+			}
+		case resources.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = value.Int64
+			}
+		case resources.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = value.Int64
 			}
 		case resources.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -241,6 +257,12 @@ func (_m *Resources) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
 	builder.WriteString("parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))

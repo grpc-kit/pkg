@@ -65,6 +65,16 @@ func UpdatedAt(v time.Time) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
+func CreatedBy(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
+func UpdatedBy(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
 // DepartmentID applies equality check predicate on the "department_id" field. It's identical to DepartmentIDEQ.
 func DepartmentID(v int) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldEQ(FieldDepartmentID, v))
@@ -88,16 +98,6 @@ func MemberStatus(v int) predicate.UserDepartments {
 // ExpiredAt applies equality check predicate on the "expired_at" field. It's identical to ExpiredAtEQ.
 func ExpiredAt(v time.Time) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldEQ(FieldExpiredAt, v))
-}
-
-// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
-func CreatedBy(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldEQ(FieldCreatedBy, v))
-}
-
-// UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
-func UpdatedBy(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
 // Metadata applies equality check predicate on the "metadata" field. It's identical to MetadataEQ.
@@ -188,6 +188,86 @@ func UpdatedAtLT(v time.Time) predicate.UserDepartments {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// CreatedByEQ applies the EQ predicate on the "created_by" field.
+func CreatedByEQ(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
+func CreatedByNEQ(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNEQ(FieldCreatedBy, v))
+}
+
+// CreatedByIn applies the In predicate on the "created_by" field.
+func CreatedByIn(vs ...int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
+func CreatedByNotIn(vs ...int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByGT applies the GT predicate on the "created_by" field.
+func CreatedByGT(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGT(FieldCreatedBy, v))
+}
+
+// CreatedByGTE applies the GTE predicate on the "created_by" field.
+func CreatedByGTE(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGTE(FieldCreatedBy, v))
+}
+
+// CreatedByLT applies the LT predicate on the "created_by" field.
+func CreatedByLT(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLT(FieldCreatedBy, v))
+}
+
+// CreatedByLTE applies the LTE predicate on the "created_by" field.
+func CreatedByLTE(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLTE(FieldCreatedBy, v))
+}
+
+// UpdatedByEQ applies the EQ predicate on the "updated_by" field.
+func UpdatedByEQ(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
+func UpdatedByNEQ(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByIn applies the In predicate on the "updated_by" field.
+func UpdatedByIn(vs ...int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
+func UpdatedByNotIn(vs ...int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByGT applies the GT predicate on the "updated_by" field.
+func UpdatedByGT(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGT(FieldUpdatedBy, v))
+}
+
+// UpdatedByGTE applies the GTE predicate on the "updated_by" field.
+func UpdatedByGTE(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByLT applies the LT predicate on the "updated_by" field.
+func UpdatedByLT(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLT(FieldUpdatedBy, v))
+}
+
+// UpdatedByLTE applies the LTE predicate on the "updated_by" field.
+func UpdatedByLTE(v int64) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLTE(FieldUpdatedBy, v))
 }
 
 // DepartmentIDEQ applies the EQ predicate on the "department_id" field.
@@ -358,106 +438,6 @@ func ExpiredAtIsNil() predicate.UserDepartments {
 // ExpiredAtNotNil applies the NotNil predicate on the "expired_at" field.
 func ExpiredAtNotNil() predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldNotNull(FieldExpiredAt))
-}
-
-// CreatedByEQ applies the EQ predicate on the "created_by" field.
-func CreatedByEQ(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldEQ(FieldCreatedBy, v))
-}
-
-// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
-func CreatedByNEQ(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldNEQ(FieldCreatedBy, v))
-}
-
-// CreatedByIn applies the In predicate on the "created_by" field.
-func CreatedByIn(vs ...int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldIn(FieldCreatedBy, vs...))
-}
-
-// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
-func CreatedByNotIn(vs ...int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldNotIn(FieldCreatedBy, vs...))
-}
-
-// CreatedByGT applies the GT predicate on the "created_by" field.
-func CreatedByGT(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldGT(FieldCreatedBy, v))
-}
-
-// CreatedByGTE applies the GTE predicate on the "created_by" field.
-func CreatedByGTE(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldGTE(FieldCreatedBy, v))
-}
-
-// CreatedByLT applies the LT predicate on the "created_by" field.
-func CreatedByLT(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldLT(FieldCreatedBy, v))
-}
-
-// CreatedByLTE applies the LTE predicate on the "created_by" field.
-func CreatedByLTE(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldLTE(FieldCreatedBy, v))
-}
-
-// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
-func CreatedByIsNil() predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldIsNull(FieldCreatedBy))
-}
-
-// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
-func CreatedByNotNil() predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldNotNull(FieldCreatedBy))
-}
-
-// UpdatedByEQ applies the EQ predicate on the "updated_by" field.
-func UpdatedByEQ(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldEQ(FieldUpdatedBy, v))
-}
-
-// UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
-func UpdatedByNEQ(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldNEQ(FieldUpdatedBy, v))
-}
-
-// UpdatedByIn applies the In predicate on the "updated_by" field.
-func UpdatedByIn(vs ...int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldIn(FieldUpdatedBy, vs...))
-}
-
-// UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
-func UpdatedByNotIn(vs ...int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldNotIn(FieldUpdatedBy, vs...))
-}
-
-// UpdatedByGT applies the GT predicate on the "updated_by" field.
-func UpdatedByGT(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldGT(FieldUpdatedBy, v))
-}
-
-// UpdatedByGTE applies the GTE predicate on the "updated_by" field.
-func UpdatedByGTE(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldGTE(FieldUpdatedBy, v))
-}
-
-// UpdatedByLT applies the LT predicate on the "updated_by" field.
-func UpdatedByLT(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldLT(FieldUpdatedBy, v))
-}
-
-// UpdatedByLTE applies the LTE predicate on the "updated_by" field.
-func UpdatedByLTE(v int) predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldLTE(FieldUpdatedBy, v))
-}
-
-// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
-func UpdatedByIsNil() predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldIsNull(FieldUpdatedBy))
-}
-
-// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
-func UpdatedByNotNil() predicate.UserDepartments {
-	return predicate.UserDepartments(sql.FieldNotNull(FieldUpdatedBy))
 }
 
 // MetadataEQ applies the EQ predicate on the "metadata" field.

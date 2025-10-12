@@ -3,6 +3,7 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -21,15 +22,41 @@ type Departments struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// 父菜单 ID，为 0 表示顶级菜单
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy int64 `json:"updated_by,omitempty"`
+	// 父部门ID，构建树形组织结构，值为 0 表示顶级部门
 	ParentID int `json:"parent_id,omitempty"`
-	// 部门名称
+	// 部门名称，用于系统内部显示和业务逻辑
 	Name string `json:"name,omitempty"`
-	// 多国语言
-	I18nName string `json:"i18n_name,omitempty"`
-	// 排序权重，越小越靠前
+	// 国际化名称配置，支持多语言环境
+	I18nName map[string]string `json:"i18n_name,omitempty"`
+	// 部门类型分类：0-未指定，1-业务部门，2-支持部门，3-管理部门，4-虚拟部门
+	DepartmentType int `json:"department_type,omitempty"`
+	// 部门运营状态：0-未指定，1-正常运营，2-暂停运营，3-已解散，4-合并中
+	DepartmentStatus int `json:"department_status,omitempty"`
+	// 部门排序权重，数值越小排序越靠前，建议使用 10 的倍数
 	OrderWeight int `json:"order_weight,omitempty"`
-	// 详细描述
+	// 部门公共邮箱地址，加密存储
+	EmailEncrypted []byte `json:"-"`
+	// 部门联系电话，加密存储
+	PhoneNumberEncrypted []byte `json:"-"`
+	// 部门办公地址，加密存储
+	AddressEncrypted []byte `json:"-"`
+	// 成本中心编码，用于财务核算和成本控制
+	CostCenterCode string `json:"-"`
+	// 预算编码，用于预算管理和费用控制
+	BudgetItemCode string `json:"-"`
+	// 部门最大成员数限制，值为 0 表示无限制
+	MaxMembers int `json:"max_members,omitempty"`
+	// 外部系统标识符，用于第三方系统集成
+	ExternalID string `json:"external_id,omitempty"`
+	// 扩展元数据，存储自定义业务属性
+	Metadata map[string]string `json:"metadata,omitempty"`
+	// 部门描述信息，详细说明部门职责和业务范围
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DepartmentsQuery when eager-loading is set.
@@ -82,11 +109,13 @@ func (*Departments) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case departments.FieldID, departments.FieldParentID, departments.FieldOrderWeight:
+		case departments.FieldI18nName, departments.FieldEmailEncrypted, departments.FieldPhoneNumberEncrypted, departments.FieldAddressEncrypted, departments.FieldMetadata:
+			values[i] = new([]byte)
+		case departments.FieldID, departments.FieldCreatedBy, departments.FieldUpdatedBy, departments.FieldParentID, departments.FieldDepartmentType, departments.FieldDepartmentStatus, departments.FieldOrderWeight, departments.FieldMaxMembers:
 			values[i] = new(sql.NullInt64)
-		case departments.FieldName, departments.FieldI18nName, departments.FieldDescription:
+		case departments.FieldName, departments.FieldCostCenterCode, departments.FieldBudgetItemCode, departments.FieldExternalID, departments.FieldDescription:
 			values[i] = new(sql.NullString)
-		case departments.FieldCreatedAt, departments.FieldUpdatedAt:
+		case departments.FieldCreatedAt, departments.FieldUpdatedAt, departments.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -121,6 +150,25 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case departments.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
+			}
+		case departments.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = value.Int64
+			}
+		case departments.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = value.Int64
+			}
 		case departments.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
@@ -134,16 +182,80 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 				_m.Name = value.String
 			}
 		case departments.FieldI18nName:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.I18nName); err != nil {
+					return fmt.Errorf("unmarshal field i18n_name: %w", err)
+				}
+			}
+		case departments.FieldDepartmentType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field department_type", values[i])
 			} else if value.Valid {
-				_m.I18nName = value.String
+				_m.DepartmentType = int(value.Int64)
+			}
+		case departments.FieldDepartmentStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field department_status", values[i])
+			} else if value.Valid {
+				_m.DepartmentStatus = int(value.Int64)
 			}
 		case departments.FieldOrderWeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field order_weight", values[i])
 			} else if value.Valid {
 				_m.OrderWeight = int(value.Int64)
+			}
+		case departments.FieldEmailEncrypted:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field email_encrypted", values[i])
+			} else if value != nil {
+				_m.EmailEncrypted = *value
+			}
+		case departments.FieldPhoneNumberEncrypted:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field phone_number_encrypted", values[i])
+			} else if value != nil {
+				_m.PhoneNumberEncrypted = *value
+			}
+		case departments.FieldAddressEncrypted:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field address_encrypted", values[i])
+			} else if value != nil {
+				_m.AddressEncrypted = *value
+			}
+		case departments.FieldCostCenterCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cost_center_code", values[i])
+			} else if value.Valid {
+				_m.CostCenterCode = value.String
+			}
+		case departments.FieldBudgetItemCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field budget_item_code", values[i])
+			} else if value.Valid {
+				_m.BudgetItemCode = value.String
+			}
+		case departments.FieldMaxMembers:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field max_members", values[i])
+			} else if value.Valid {
+				_m.MaxMembers = int(value.Int64)
+			}
+		case departments.FieldExternalID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field external_id", values[i])
+			} else if value.Valid {
+				_m.ExternalID = value.String
+			}
+		case departments.FieldMetadata:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
 			}
 		case departments.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -208,6 +320,17 @@ func (_m *Departments) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
+	builder.WriteString(", ")
 	builder.WriteString("parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
 	builder.WriteString(", ")
@@ -215,10 +338,35 @@ func (_m *Departments) String() string {
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("i18n_name=")
-	builder.WriteString(_m.I18nName)
+	builder.WriteString(fmt.Sprintf("%v", _m.I18nName))
+	builder.WriteString(", ")
+	builder.WriteString("department_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentType))
+	builder.WriteString(", ")
+	builder.WriteString("department_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentStatus))
 	builder.WriteString(", ")
 	builder.WriteString("order_weight=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
+	builder.WriteString(", ")
+	builder.WriteString("email_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("phone_number_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("address_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("cost_center_code=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("budget_item_code=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("max_members=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MaxMembers))
+	builder.WriteString(", ")
+	builder.WriteString("external_id=")
+	builder.WriteString(_m.ExternalID)
+	builder.WriteString(", ")
+	builder.WriteString("metadata=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

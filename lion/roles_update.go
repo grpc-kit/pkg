@@ -38,6 +38,48 @@ func (_u *RolesUpdate) SetUpdatedAt(v time.Time) *RolesUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *RolesUpdate) SetCreatedBy(v int64) *RolesUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableCreatedBy(v *int64) *RolesUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *RolesUpdate) AddCreatedBy(v int64) *RolesUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *RolesUpdate) SetUpdatedBy(v int64) *RolesUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableUpdatedBy(v *int64) *RolesUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *RolesUpdate) AddUpdatedBy(v int64) *RolesUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *RolesUpdate) SetName(v string) *RolesUpdate {
 	_u.mutation.SetName(v)
@@ -325,6 +367,18 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(roles.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(roles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(roles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(roles.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(roles.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(roles.FieldName, field.TypeString, value)
 	}
@@ -546,6 +600,48 @@ type RolesUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *RolesUpdateOne) SetUpdatedAt(v time.Time) *RolesUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *RolesUpdateOne) SetCreatedBy(v int64) *RolesUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableCreatedBy(v *int64) *RolesUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *RolesUpdateOne) AddCreatedBy(v int64) *RolesUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *RolesUpdateOne) SetUpdatedBy(v int64) *RolesUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableUpdatedBy(v *int64) *RolesUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *RolesUpdateOne) AddUpdatedBy(v int64) *RolesUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -865,6 +961,18 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(roles.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(roles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(roles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(roles.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(roles.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(roles.FieldName, field.TypeString, value)

@@ -24,6 +24,10 @@ type Groups struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 用户组名
 	Name string `json:"name,omitempty"`
 	// 群组类型，对应 api/known/admin/v1/common.proto 中定义
@@ -46,10 +50,6 @@ type Groups struct {
 	DepartmentID int `json:"department_id,omitempty"`
 	// 用户组描述
 	Description string `json:"description,omitempty"`
-	// 群组创建者/所有者ID
-	CreatedBy int `json:"created_by,omitempty"`
-	// 群组最后更新者ID
-	UpdatedBy int `json:"updated_by,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupsQuery when eager-loading is set.
 	Edges        GroupsEdges `json:"edges"`
@@ -103,7 +103,7 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case groups.FieldID, groups.FieldType, groups.FieldStatus, groups.FieldOrderWeight, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID, groups.FieldCreatedBy, groups.FieldUpdatedBy:
+		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldType, groups.FieldStatus, groups.FieldOrderWeight, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
 		case groups.FieldName, groups.FieldI18nName, groups.FieldMetadata, groups.FieldExternalID, groups.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -148,6 +148,18 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
+			}
+		case groups.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = value.Int64
+			}
+		case groups.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = value.Int64
 			}
 		case groups.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -215,18 +227,6 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
-		case groups.FieldCreatedBy:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field created_by", values[i])
-			} else if value.Valid {
-				_m.CreatedBy = int(value.Int64)
-			}
-		case groups.FieldUpdatedBy:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
-			} else if value.Valid {
-				_m.UpdatedBy = int(value.Int64)
-			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -289,6 +289,12 @@ func (_m *Groups) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
@@ -321,12 +327,6 @@ func (_m *Groups) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
-	builder.WriteString(", ")
-	builder.WriteString("created_by=")
-	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
-	builder.WriteString(", ")
-	builder.WriteString("updated_by=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteByte(')')
 	return builder.String()
 }

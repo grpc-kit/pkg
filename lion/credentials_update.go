@@ -34,6 +34,48 @@ func (_u *CredentialsUpdate) SetUpdatedAt(v time.Time) *CredentialsUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *CredentialsUpdate) SetCreatedBy(v int64) *CredentialsUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *CredentialsUpdate) SetNillableCreatedBy(v *int64) *CredentialsUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *CredentialsUpdate) AddCreatedBy(v int64) *CredentialsUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *CredentialsUpdate) SetUpdatedBy(v int64) *CredentialsUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *CredentialsUpdate) SetNillableUpdatedBy(v *int64) *CredentialsUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *CredentialsUpdate) AddUpdatedBy(v int64) *CredentialsUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *CredentialsUpdate) SetName(v string) *CredentialsUpdate {
 	_u.mutation.SetName(v)
@@ -196,6 +238,18 @@ func (_u *CredentialsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(credentials.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(credentials.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(credentials.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(credentials.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(credentials.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(credentials.FieldName, field.TypeString, value)
 	}
@@ -249,6 +303,48 @@ type CredentialsUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *CredentialsUpdateOne) SetUpdatedAt(v time.Time) *CredentialsUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *CredentialsUpdateOne) SetCreatedBy(v int64) *CredentialsUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *CredentialsUpdateOne) SetNillableCreatedBy(v *int64) *CredentialsUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *CredentialsUpdateOne) AddCreatedBy(v int64) *CredentialsUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *CredentialsUpdateOne) SetUpdatedBy(v int64) *CredentialsUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *CredentialsUpdateOne) SetNillableUpdatedBy(v *int64) *CredentialsUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *CredentialsUpdateOne) AddUpdatedBy(v int64) *CredentialsUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -443,6 +539,18 @@ func (_u *CredentialsUpdateOne) sqlSave(ctx context.Context) (_node *Credentials
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(credentials.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(credentials.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(credentials.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(credentials.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(credentials.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(credentials.FieldName, field.TypeString, value)

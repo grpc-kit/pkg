@@ -21,6 +21,10 @@ type Credentials struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 凭据名称
 	Name string `json:"name,omitempty"`
 	// 类型: api_key, jwt, jwks, license, ssh_key
@@ -47,7 +51,7 @@ func (*Credentials) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case credentials.FieldAppkeyEncrypted, credentials.FieldPrivateKeyEncrypted:
 			values[i] = new([]byte)
-		case credentials.FieldID, credentials.FieldType:
+		case credentials.FieldID, credentials.FieldCreatedBy, credentials.FieldUpdatedBy, credentials.FieldType:
 			values[i] = new(sql.NullInt64)
 		case credentials.FieldName, credentials.FieldAppid, credentials.FieldPublicKey, credentials.FieldUsage:
 			values[i] = new(sql.NullString)
@@ -85,6 +89,18 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
+			}
+		case credentials.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = value.Int64
+			}
+		case credentials.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = value.Int64
 			}
 		case credentials.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -176,6 +192,12 @@ func (_m *Credentials) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)

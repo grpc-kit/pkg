@@ -36,6 +36,48 @@ func (_u *GroupRolesUpdate) SetUpdatedAt(v time.Time) *GroupRolesUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *GroupRolesUpdate) SetCreatedBy(v int64) *GroupRolesUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *GroupRolesUpdate) SetNillableCreatedBy(v *int64) *GroupRolesUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *GroupRolesUpdate) AddCreatedBy(v int64) *GroupRolesUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *GroupRolesUpdate) SetUpdatedBy(v int64) *GroupRolesUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *GroupRolesUpdate) SetNillableUpdatedBy(v *int64) *GroupRolesUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *GroupRolesUpdate) AddUpdatedBy(v int64) *GroupRolesUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetGroupID sets the "group_id" field.
 func (_u *GroupRolesUpdate) SetGroupID(v int) *GroupRolesUpdate {
 	_u.mutation.SetGroupID(v)
@@ -175,6 +217,18 @@ func (_u *GroupRolesUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(grouproles.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(grouproles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(grouproles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(grouproles.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(grouproles.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if _u.mutation.LionGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -256,6 +310,48 @@ type GroupRolesUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *GroupRolesUpdateOne) SetUpdatedAt(v time.Time) *GroupRolesUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *GroupRolesUpdateOne) SetCreatedBy(v int64) *GroupRolesUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *GroupRolesUpdateOne) SetNillableCreatedBy(v *int64) *GroupRolesUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *GroupRolesUpdateOne) AddCreatedBy(v int64) *GroupRolesUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *GroupRolesUpdateOne) SetUpdatedBy(v int64) *GroupRolesUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *GroupRolesUpdateOne) SetNillableUpdatedBy(v *int64) *GroupRolesUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *GroupRolesUpdateOne) AddUpdatedBy(v int64) *GroupRolesUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -427,6 +523,18 @@ func (_u *GroupRolesUpdateOne) sqlSave(ctx context.Context) (_node *GroupRoles, 
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(grouproles.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(grouproles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(grouproles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(grouproles.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(grouproles.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.LionGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{

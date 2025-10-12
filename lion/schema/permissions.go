@@ -31,6 +31,7 @@ func (Permissions) Edges() []ent.Edge {
 func (Permissions) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
+		AuditMixin{},
 	}
 }
 

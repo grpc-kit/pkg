@@ -64,6 +64,16 @@ func UpdatedAt(v time.Time) predicate.RolePermissions {
 	return predicate.RolePermissions(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
+func CreatedBy(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
+func UpdatedBy(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
 // RoleID applies equality check predicate on the "role_id" field. It's identical to RoleIDEQ.
 func RoleID(v int) predicate.RolePermissions {
 	return predicate.RolePermissions(sql.FieldEQ(FieldRoleID, v))
@@ -152,6 +162,86 @@ func UpdatedAtLT(v time.Time) predicate.RolePermissions {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.RolePermissions {
 	return predicate.RolePermissions(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// CreatedByEQ applies the EQ predicate on the "created_by" field.
+func CreatedByEQ(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
+func CreatedByNEQ(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldNEQ(FieldCreatedBy, v))
+}
+
+// CreatedByIn applies the In predicate on the "created_by" field.
+func CreatedByIn(vs ...int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
+func CreatedByNotIn(vs ...int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldNotIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByGT applies the GT predicate on the "created_by" field.
+func CreatedByGT(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldGT(FieldCreatedBy, v))
+}
+
+// CreatedByGTE applies the GTE predicate on the "created_by" field.
+func CreatedByGTE(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldGTE(FieldCreatedBy, v))
+}
+
+// CreatedByLT applies the LT predicate on the "created_by" field.
+func CreatedByLT(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldLT(FieldCreatedBy, v))
+}
+
+// CreatedByLTE applies the LTE predicate on the "created_by" field.
+func CreatedByLTE(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldLTE(FieldCreatedBy, v))
+}
+
+// UpdatedByEQ applies the EQ predicate on the "updated_by" field.
+func UpdatedByEQ(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
+func UpdatedByNEQ(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldNEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByIn applies the In predicate on the "updated_by" field.
+func UpdatedByIn(vs ...int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
+func UpdatedByNotIn(vs ...int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldNotIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByGT applies the GT predicate on the "updated_by" field.
+func UpdatedByGT(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldGT(FieldUpdatedBy, v))
+}
+
+// UpdatedByGTE applies the GTE predicate on the "updated_by" field.
+func UpdatedByGTE(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldGTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByLT applies the LT predicate on the "updated_by" field.
+func UpdatedByLT(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldLT(FieldUpdatedBy, v))
+}
+
+// UpdatedByLTE applies the LTE predicate on the "updated_by" field.
+func UpdatedByLTE(v int64) predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldLTE(FieldUpdatedBy, v))
 }
 
 // RoleIDEQ applies the EQ predicate on the "role_id" field.

@@ -23,6 +23,10 @@ type RoleDepartments struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int64 `json:"created_by,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 关联 lion_role 表的用户组 ID
 	RoleID int `json:"role_id,omitempty"`
 	// 关联 lion_departments 表的资源 ID
@@ -71,7 +75,7 @@ func (*RoleDepartments) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case roledepartments.FieldID, roledepartments.FieldRoleID, roledepartments.FieldDepartmentID:
+		case roledepartments.FieldID, roledepartments.FieldCreatedBy, roledepartments.FieldUpdatedBy, roledepartments.FieldRoleID, roledepartments.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
 		case roledepartments.FieldCreatedAt, roledepartments.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -107,6 +111,18 @@ func (_m *RoleDepartments) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
+			}
+		case roledepartments.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				_m.CreatedBy = value.Int64
+			}
+		case roledepartments.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				_m.UpdatedBy = value.Int64
 			}
 		case roledepartments.FieldRoleID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -171,6 +187,12 @@ func (_m *RoleDepartments) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
 	builder.WriteString("role_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RoleID))

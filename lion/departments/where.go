@@ -65,6 +65,21 @@ func UpdatedAt(v time.Time) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
+func CreatedBy(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
+func UpdatedBy(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
 // ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
 func ParentID(v int) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldParentID, v))
@@ -75,14 +90,54 @@ func Name(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldName, v))
 }
 
-// I18nName applies equality check predicate on the "i18n_name" field. It's identical to I18nNameEQ.
-func I18nName(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldEQ(FieldI18nName, v))
+// DepartmentType applies equality check predicate on the "department_type" field. It's identical to DepartmentTypeEQ.
+func DepartmentType(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldDepartmentType, v))
+}
+
+// DepartmentStatus applies equality check predicate on the "department_status" field. It's identical to DepartmentStatusEQ.
+func DepartmentStatus(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldDepartmentStatus, v))
 }
 
 // OrderWeight applies equality check predicate on the "order_weight" field. It's identical to OrderWeightEQ.
 func OrderWeight(v int) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldOrderWeight, v))
+}
+
+// EmailEncrypted applies equality check predicate on the "email_encrypted" field. It's identical to EmailEncryptedEQ.
+func EmailEncrypted(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldEmailEncrypted, v))
+}
+
+// PhoneNumberEncrypted applies equality check predicate on the "phone_number_encrypted" field. It's identical to PhoneNumberEncryptedEQ.
+func PhoneNumberEncrypted(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldPhoneNumberEncrypted, v))
+}
+
+// AddressEncrypted applies equality check predicate on the "address_encrypted" field. It's identical to AddressEncryptedEQ.
+func AddressEncrypted(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldAddressEncrypted, v))
+}
+
+// CostCenterCode applies equality check predicate on the "cost_center_code" field. It's identical to CostCenterCodeEQ.
+func CostCenterCode(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldCostCenterCode, v))
+}
+
+// BudgetItemCode applies equality check predicate on the "budget_item_code" field. It's identical to BudgetItemCodeEQ.
+func BudgetItemCode(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldBudgetItemCode, v))
+}
+
+// MaxMembers applies equality check predicate on the "max_members" field. It's identical to MaxMembersEQ.
+func MaxMembers(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldMaxMembers, v))
+}
+
+// ExternalID applies equality check predicate on the "external_id" field. It's identical to ExternalIDEQ.
+func ExternalID(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldExternalID, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
@@ -168,6 +223,136 @@ func UpdatedAtLT(v time.Time) predicate.Departments {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Departments {
 	return predicate.Departments(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.Departments {
+	return predicate.Departments(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.Departments {
+	return predicate.Departments(sql.FieldNotNull(FieldDeletedAt))
+}
+
+// CreatedByEQ applies the EQ predicate on the "created_by" field.
+func CreatedByEQ(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
+func CreatedByNEQ(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldCreatedBy, v))
+}
+
+// CreatedByIn applies the In predicate on the "created_by" field.
+func CreatedByIn(vs ...int64) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
+func CreatedByNotIn(vs ...int64) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByGT applies the GT predicate on the "created_by" field.
+func CreatedByGT(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldCreatedBy, v))
+}
+
+// CreatedByGTE applies the GTE predicate on the "created_by" field.
+func CreatedByGTE(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldCreatedBy, v))
+}
+
+// CreatedByLT applies the LT predicate on the "created_by" field.
+func CreatedByLT(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldCreatedBy, v))
+}
+
+// CreatedByLTE applies the LTE predicate on the "created_by" field.
+func CreatedByLTE(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldCreatedBy, v))
+}
+
+// UpdatedByEQ applies the EQ predicate on the "updated_by" field.
+func UpdatedByEQ(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
+func UpdatedByNEQ(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByIn applies the In predicate on the "updated_by" field.
+func UpdatedByIn(vs ...int64) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
+func UpdatedByNotIn(vs ...int64) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByGT applies the GT predicate on the "updated_by" field.
+func UpdatedByGT(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldUpdatedBy, v))
+}
+
+// UpdatedByGTE applies the GTE predicate on the "updated_by" field.
+func UpdatedByGTE(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByLT applies the LT predicate on the "updated_by" field.
+func UpdatedByLT(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldUpdatedBy, v))
+}
+
+// UpdatedByLTE applies the LTE predicate on the "updated_by" field.
+func UpdatedByLTE(v int64) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldUpdatedBy, v))
 }
 
 // ParentIDEQ applies the EQ predicate on the "parent_id" field.
@@ -275,69 +460,94 @@ func NameContainsFold(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldContainsFold(FieldName, v))
 }
 
-// I18nNameEQ applies the EQ predicate on the "i18n_name" field.
-func I18nNameEQ(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldEQ(FieldI18nName, v))
+// I18nNameIsNil applies the IsNil predicate on the "i18n_name" field.
+func I18nNameIsNil() predicate.Departments {
+	return predicate.Departments(sql.FieldIsNull(FieldI18nName))
 }
 
-// I18nNameNEQ applies the NEQ predicate on the "i18n_name" field.
-func I18nNameNEQ(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldNEQ(FieldI18nName, v))
+// I18nNameNotNil applies the NotNil predicate on the "i18n_name" field.
+func I18nNameNotNil() predicate.Departments {
+	return predicate.Departments(sql.FieldNotNull(FieldI18nName))
 }
 
-// I18nNameIn applies the In predicate on the "i18n_name" field.
-func I18nNameIn(vs ...string) predicate.Departments {
-	return predicate.Departments(sql.FieldIn(FieldI18nName, vs...))
+// DepartmentTypeEQ applies the EQ predicate on the "department_type" field.
+func DepartmentTypeEQ(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldDepartmentType, v))
 }
 
-// I18nNameNotIn applies the NotIn predicate on the "i18n_name" field.
-func I18nNameNotIn(vs ...string) predicate.Departments {
-	return predicate.Departments(sql.FieldNotIn(FieldI18nName, vs...))
+// DepartmentTypeNEQ applies the NEQ predicate on the "department_type" field.
+func DepartmentTypeNEQ(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldDepartmentType, v))
 }
 
-// I18nNameGT applies the GT predicate on the "i18n_name" field.
-func I18nNameGT(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldGT(FieldI18nName, v))
+// DepartmentTypeIn applies the In predicate on the "department_type" field.
+func DepartmentTypeIn(vs ...int) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldDepartmentType, vs...))
 }
 
-// I18nNameGTE applies the GTE predicate on the "i18n_name" field.
-func I18nNameGTE(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldGTE(FieldI18nName, v))
+// DepartmentTypeNotIn applies the NotIn predicate on the "department_type" field.
+func DepartmentTypeNotIn(vs ...int) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldDepartmentType, vs...))
 }
 
-// I18nNameLT applies the LT predicate on the "i18n_name" field.
-func I18nNameLT(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldLT(FieldI18nName, v))
+// DepartmentTypeGT applies the GT predicate on the "department_type" field.
+func DepartmentTypeGT(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldDepartmentType, v))
 }
 
-// I18nNameLTE applies the LTE predicate on the "i18n_name" field.
-func I18nNameLTE(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldLTE(FieldI18nName, v))
+// DepartmentTypeGTE applies the GTE predicate on the "department_type" field.
+func DepartmentTypeGTE(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldDepartmentType, v))
 }
 
-// I18nNameContains applies the Contains predicate on the "i18n_name" field.
-func I18nNameContains(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldContains(FieldI18nName, v))
+// DepartmentTypeLT applies the LT predicate on the "department_type" field.
+func DepartmentTypeLT(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldDepartmentType, v))
 }
 
-// I18nNameHasPrefix applies the HasPrefix predicate on the "i18n_name" field.
-func I18nNameHasPrefix(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldHasPrefix(FieldI18nName, v))
+// DepartmentTypeLTE applies the LTE predicate on the "department_type" field.
+func DepartmentTypeLTE(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldDepartmentType, v))
 }
 
-// I18nNameHasSuffix applies the HasSuffix predicate on the "i18n_name" field.
-func I18nNameHasSuffix(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldHasSuffix(FieldI18nName, v))
+// DepartmentStatusEQ applies the EQ predicate on the "department_status" field.
+func DepartmentStatusEQ(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldDepartmentStatus, v))
 }
 
-// I18nNameEqualFold applies the EqualFold predicate on the "i18n_name" field.
-func I18nNameEqualFold(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldEqualFold(FieldI18nName, v))
+// DepartmentStatusNEQ applies the NEQ predicate on the "department_status" field.
+func DepartmentStatusNEQ(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldDepartmentStatus, v))
 }
 
-// I18nNameContainsFold applies the ContainsFold predicate on the "i18n_name" field.
-func I18nNameContainsFold(v string) predicate.Departments {
-	return predicate.Departments(sql.FieldContainsFold(FieldI18nName, v))
+// DepartmentStatusIn applies the In predicate on the "department_status" field.
+func DepartmentStatusIn(vs ...int) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldDepartmentStatus, vs...))
+}
+
+// DepartmentStatusNotIn applies the NotIn predicate on the "department_status" field.
+func DepartmentStatusNotIn(vs ...int) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldDepartmentStatus, vs...))
+}
+
+// DepartmentStatusGT applies the GT predicate on the "department_status" field.
+func DepartmentStatusGT(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldDepartmentStatus, v))
+}
+
+// DepartmentStatusGTE applies the GTE predicate on the "department_status" field.
+func DepartmentStatusGTE(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldDepartmentStatus, v))
+}
+
+// DepartmentStatusLT applies the LT predicate on the "department_status" field.
+func DepartmentStatusLT(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldDepartmentStatus, v))
+}
+
+// DepartmentStatusLTE applies the LTE predicate on the "department_status" field.
+func DepartmentStatusLTE(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldDepartmentStatus, v))
 }
 
 // OrderWeightEQ applies the EQ predicate on the "order_weight" field.
@@ -378,6 +588,431 @@ func OrderWeightLT(v int) predicate.Departments {
 // OrderWeightLTE applies the LTE predicate on the "order_weight" field.
 func OrderWeightLTE(v int) predicate.Departments {
 	return predicate.Departments(sql.FieldLTE(FieldOrderWeight, v))
+}
+
+// EmailEncryptedEQ applies the EQ predicate on the "email_encrypted" field.
+func EmailEncryptedEQ(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldEmailEncrypted, v))
+}
+
+// EmailEncryptedNEQ applies the NEQ predicate on the "email_encrypted" field.
+func EmailEncryptedNEQ(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldEmailEncrypted, v))
+}
+
+// EmailEncryptedIn applies the In predicate on the "email_encrypted" field.
+func EmailEncryptedIn(vs ...[]byte) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldEmailEncrypted, vs...))
+}
+
+// EmailEncryptedNotIn applies the NotIn predicate on the "email_encrypted" field.
+func EmailEncryptedNotIn(vs ...[]byte) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldEmailEncrypted, vs...))
+}
+
+// EmailEncryptedGT applies the GT predicate on the "email_encrypted" field.
+func EmailEncryptedGT(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldEmailEncrypted, v))
+}
+
+// EmailEncryptedGTE applies the GTE predicate on the "email_encrypted" field.
+func EmailEncryptedGTE(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldEmailEncrypted, v))
+}
+
+// EmailEncryptedLT applies the LT predicate on the "email_encrypted" field.
+func EmailEncryptedLT(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldEmailEncrypted, v))
+}
+
+// EmailEncryptedLTE applies the LTE predicate on the "email_encrypted" field.
+func EmailEncryptedLTE(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldEmailEncrypted, v))
+}
+
+// EmailEncryptedIsNil applies the IsNil predicate on the "email_encrypted" field.
+func EmailEncryptedIsNil() predicate.Departments {
+	return predicate.Departments(sql.FieldIsNull(FieldEmailEncrypted))
+}
+
+// EmailEncryptedNotNil applies the NotNil predicate on the "email_encrypted" field.
+func EmailEncryptedNotNil() predicate.Departments {
+	return predicate.Departments(sql.FieldNotNull(FieldEmailEncrypted))
+}
+
+// PhoneNumberEncryptedEQ applies the EQ predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedEQ(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldPhoneNumberEncrypted, v))
+}
+
+// PhoneNumberEncryptedNEQ applies the NEQ predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedNEQ(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldPhoneNumberEncrypted, v))
+}
+
+// PhoneNumberEncryptedIn applies the In predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedIn(vs ...[]byte) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldPhoneNumberEncrypted, vs...))
+}
+
+// PhoneNumberEncryptedNotIn applies the NotIn predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedNotIn(vs ...[]byte) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldPhoneNumberEncrypted, vs...))
+}
+
+// PhoneNumberEncryptedGT applies the GT predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedGT(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldPhoneNumberEncrypted, v))
+}
+
+// PhoneNumberEncryptedGTE applies the GTE predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedGTE(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldPhoneNumberEncrypted, v))
+}
+
+// PhoneNumberEncryptedLT applies the LT predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedLT(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldPhoneNumberEncrypted, v))
+}
+
+// PhoneNumberEncryptedLTE applies the LTE predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedLTE(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldPhoneNumberEncrypted, v))
+}
+
+// PhoneNumberEncryptedIsNil applies the IsNil predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedIsNil() predicate.Departments {
+	return predicate.Departments(sql.FieldIsNull(FieldPhoneNumberEncrypted))
+}
+
+// PhoneNumberEncryptedNotNil applies the NotNil predicate on the "phone_number_encrypted" field.
+func PhoneNumberEncryptedNotNil() predicate.Departments {
+	return predicate.Departments(sql.FieldNotNull(FieldPhoneNumberEncrypted))
+}
+
+// AddressEncryptedEQ applies the EQ predicate on the "address_encrypted" field.
+func AddressEncryptedEQ(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldAddressEncrypted, v))
+}
+
+// AddressEncryptedNEQ applies the NEQ predicate on the "address_encrypted" field.
+func AddressEncryptedNEQ(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldAddressEncrypted, v))
+}
+
+// AddressEncryptedIn applies the In predicate on the "address_encrypted" field.
+func AddressEncryptedIn(vs ...[]byte) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldAddressEncrypted, vs...))
+}
+
+// AddressEncryptedNotIn applies the NotIn predicate on the "address_encrypted" field.
+func AddressEncryptedNotIn(vs ...[]byte) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldAddressEncrypted, vs...))
+}
+
+// AddressEncryptedGT applies the GT predicate on the "address_encrypted" field.
+func AddressEncryptedGT(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldAddressEncrypted, v))
+}
+
+// AddressEncryptedGTE applies the GTE predicate on the "address_encrypted" field.
+func AddressEncryptedGTE(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldAddressEncrypted, v))
+}
+
+// AddressEncryptedLT applies the LT predicate on the "address_encrypted" field.
+func AddressEncryptedLT(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldAddressEncrypted, v))
+}
+
+// AddressEncryptedLTE applies the LTE predicate on the "address_encrypted" field.
+func AddressEncryptedLTE(v []byte) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldAddressEncrypted, v))
+}
+
+// AddressEncryptedIsNil applies the IsNil predicate on the "address_encrypted" field.
+func AddressEncryptedIsNil() predicate.Departments {
+	return predicate.Departments(sql.FieldIsNull(FieldAddressEncrypted))
+}
+
+// AddressEncryptedNotNil applies the NotNil predicate on the "address_encrypted" field.
+func AddressEncryptedNotNil() predicate.Departments {
+	return predicate.Departments(sql.FieldNotNull(FieldAddressEncrypted))
+}
+
+// CostCenterCodeEQ applies the EQ predicate on the "cost_center_code" field.
+func CostCenterCodeEQ(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldCostCenterCode, v))
+}
+
+// CostCenterCodeNEQ applies the NEQ predicate on the "cost_center_code" field.
+func CostCenterCodeNEQ(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldCostCenterCode, v))
+}
+
+// CostCenterCodeIn applies the In predicate on the "cost_center_code" field.
+func CostCenterCodeIn(vs ...string) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldCostCenterCode, vs...))
+}
+
+// CostCenterCodeNotIn applies the NotIn predicate on the "cost_center_code" field.
+func CostCenterCodeNotIn(vs ...string) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldCostCenterCode, vs...))
+}
+
+// CostCenterCodeGT applies the GT predicate on the "cost_center_code" field.
+func CostCenterCodeGT(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldCostCenterCode, v))
+}
+
+// CostCenterCodeGTE applies the GTE predicate on the "cost_center_code" field.
+func CostCenterCodeGTE(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldCostCenterCode, v))
+}
+
+// CostCenterCodeLT applies the LT predicate on the "cost_center_code" field.
+func CostCenterCodeLT(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldCostCenterCode, v))
+}
+
+// CostCenterCodeLTE applies the LTE predicate on the "cost_center_code" field.
+func CostCenterCodeLTE(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldCostCenterCode, v))
+}
+
+// CostCenterCodeContains applies the Contains predicate on the "cost_center_code" field.
+func CostCenterCodeContains(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldContains(FieldCostCenterCode, v))
+}
+
+// CostCenterCodeHasPrefix applies the HasPrefix predicate on the "cost_center_code" field.
+func CostCenterCodeHasPrefix(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldHasPrefix(FieldCostCenterCode, v))
+}
+
+// CostCenterCodeHasSuffix applies the HasSuffix predicate on the "cost_center_code" field.
+func CostCenterCodeHasSuffix(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldHasSuffix(FieldCostCenterCode, v))
+}
+
+// CostCenterCodeIsNil applies the IsNil predicate on the "cost_center_code" field.
+func CostCenterCodeIsNil() predicate.Departments {
+	return predicate.Departments(sql.FieldIsNull(FieldCostCenterCode))
+}
+
+// CostCenterCodeNotNil applies the NotNil predicate on the "cost_center_code" field.
+func CostCenterCodeNotNil() predicate.Departments {
+	return predicate.Departments(sql.FieldNotNull(FieldCostCenterCode))
+}
+
+// CostCenterCodeEqualFold applies the EqualFold predicate on the "cost_center_code" field.
+func CostCenterCodeEqualFold(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEqualFold(FieldCostCenterCode, v))
+}
+
+// CostCenterCodeContainsFold applies the ContainsFold predicate on the "cost_center_code" field.
+func CostCenterCodeContainsFold(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldContainsFold(FieldCostCenterCode, v))
+}
+
+// BudgetItemCodeEQ applies the EQ predicate on the "budget_item_code" field.
+func BudgetItemCodeEQ(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldBudgetItemCode, v))
+}
+
+// BudgetItemCodeNEQ applies the NEQ predicate on the "budget_item_code" field.
+func BudgetItemCodeNEQ(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldBudgetItemCode, v))
+}
+
+// BudgetItemCodeIn applies the In predicate on the "budget_item_code" field.
+func BudgetItemCodeIn(vs ...string) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldBudgetItemCode, vs...))
+}
+
+// BudgetItemCodeNotIn applies the NotIn predicate on the "budget_item_code" field.
+func BudgetItemCodeNotIn(vs ...string) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldBudgetItemCode, vs...))
+}
+
+// BudgetItemCodeGT applies the GT predicate on the "budget_item_code" field.
+func BudgetItemCodeGT(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldBudgetItemCode, v))
+}
+
+// BudgetItemCodeGTE applies the GTE predicate on the "budget_item_code" field.
+func BudgetItemCodeGTE(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldBudgetItemCode, v))
+}
+
+// BudgetItemCodeLT applies the LT predicate on the "budget_item_code" field.
+func BudgetItemCodeLT(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldBudgetItemCode, v))
+}
+
+// BudgetItemCodeLTE applies the LTE predicate on the "budget_item_code" field.
+func BudgetItemCodeLTE(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldBudgetItemCode, v))
+}
+
+// BudgetItemCodeContains applies the Contains predicate on the "budget_item_code" field.
+func BudgetItemCodeContains(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldContains(FieldBudgetItemCode, v))
+}
+
+// BudgetItemCodeHasPrefix applies the HasPrefix predicate on the "budget_item_code" field.
+func BudgetItemCodeHasPrefix(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldHasPrefix(FieldBudgetItemCode, v))
+}
+
+// BudgetItemCodeHasSuffix applies the HasSuffix predicate on the "budget_item_code" field.
+func BudgetItemCodeHasSuffix(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldHasSuffix(FieldBudgetItemCode, v))
+}
+
+// BudgetItemCodeIsNil applies the IsNil predicate on the "budget_item_code" field.
+func BudgetItemCodeIsNil() predicate.Departments {
+	return predicate.Departments(sql.FieldIsNull(FieldBudgetItemCode))
+}
+
+// BudgetItemCodeNotNil applies the NotNil predicate on the "budget_item_code" field.
+func BudgetItemCodeNotNil() predicate.Departments {
+	return predicate.Departments(sql.FieldNotNull(FieldBudgetItemCode))
+}
+
+// BudgetItemCodeEqualFold applies the EqualFold predicate on the "budget_item_code" field.
+func BudgetItemCodeEqualFold(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEqualFold(FieldBudgetItemCode, v))
+}
+
+// BudgetItemCodeContainsFold applies the ContainsFold predicate on the "budget_item_code" field.
+func BudgetItemCodeContainsFold(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldContainsFold(FieldBudgetItemCode, v))
+}
+
+// MaxMembersEQ applies the EQ predicate on the "max_members" field.
+func MaxMembersEQ(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldMaxMembers, v))
+}
+
+// MaxMembersNEQ applies the NEQ predicate on the "max_members" field.
+func MaxMembersNEQ(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldMaxMembers, v))
+}
+
+// MaxMembersIn applies the In predicate on the "max_members" field.
+func MaxMembersIn(vs ...int) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldMaxMembers, vs...))
+}
+
+// MaxMembersNotIn applies the NotIn predicate on the "max_members" field.
+func MaxMembersNotIn(vs ...int) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldMaxMembers, vs...))
+}
+
+// MaxMembersGT applies the GT predicate on the "max_members" field.
+func MaxMembersGT(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldMaxMembers, v))
+}
+
+// MaxMembersGTE applies the GTE predicate on the "max_members" field.
+func MaxMembersGTE(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldMaxMembers, v))
+}
+
+// MaxMembersLT applies the LT predicate on the "max_members" field.
+func MaxMembersLT(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldMaxMembers, v))
+}
+
+// MaxMembersLTE applies the LTE predicate on the "max_members" field.
+func MaxMembersLTE(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldMaxMembers, v))
+}
+
+// ExternalIDEQ applies the EQ predicate on the "external_id" field.
+func ExternalIDEQ(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldExternalID, v))
+}
+
+// ExternalIDNEQ applies the NEQ predicate on the "external_id" field.
+func ExternalIDNEQ(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldExternalID, v))
+}
+
+// ExternalIDIn applies the In predicate on the "external_id" field.
+func ExternalIDIn(vs ...string) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldExternalID, vs...))
+}
+
+// ExternalIDNotIn applies the NotIn predicate on the "external_id" field.
+func ExternalIDNotIn(vs ...string) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldExternalID, vs...))
+}
+
+// ExternalIDGT applies the GT predicate on the "external_id" field.
+func ExternalIDGT(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldExternalID, v))
+}
+
+// ExternalIDGTE applies the GTE predicate on the "external_id" field.
+func ExternalIDGTE(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldExternalID, v))
+}
+
+// ExternalIDLT applies the LT predicate on the "external_id" field.
+func ExternalIDLT(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldExternalID, v))
+}
+
+// ExternalIDLTE applies the LTE predicate on the "external_id" field.
+func ExternalIDLTE(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldExternalID, v))
+}
+
+// ExternalIDContains applies the Contains predicate on the "external_id" field.
+func ExternalIDContains(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldContains(FieldExternalID, v))
+}
+
+// ExternalIDHasPrefix applies the HasPrefix predicate on the "external_id" field.
+func ExternalIDHasPrefix(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldHasPrefix(FieldExternalID, v))
+}
+
+// ExternalIDHasSuffix applies the HasSuffix predicate on the "external_id" field.
+func ExternalIDHasSuffix(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldHasSuffix(FieldExternalID, v))
+}
+
+// ExternalIDIsNil applies the IsNil predicate on the "external_id" field.
+func ExternalIDIsNil() predicate.Departments {
+	return predicate.Departments(sql.FieldIsNull(FieldExternalID))
+}
+
+// ExternalIDNotNil applies the NotNil predicate on the "external_id" field.
+func ExternalIDNotNil() predicate.Departments {
+	return predicate.Departments(sql.FieldNotNull(FieldExternalID))
+}
+
+// ExternalIDEqualFold applies the EqualFold predicate on the "external_id" field.
+func ExternalIDEqualFold(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldEqualFold(FieldExternalID, v))
+}
+
+// ExternalIDContainsFold applies the ContainsFold predicate on the "external_id" field.
+func ExternalIDContainsFold(v string) predicate.Departments {
+	return predicate.Departments(sql.FieldContainsFold(FieldExternalID, v))
+}
+
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.Departments {
+	return predicate.Departments(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.Departments {
+	return predicate.Departments(sql.FieldNotNull(FieldMetadata))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.

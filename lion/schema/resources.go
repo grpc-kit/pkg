@@ -74,6 +74,7 @@ func (Resources) Edges() []ent.Edge {
 func (Resources) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
+		AuditMixin{},
 	}
 }
 

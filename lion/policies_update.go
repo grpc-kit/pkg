@@ -54,6 +54,48 @@ func (_u *PoliciesUpdate) ClearDeletedAt() *PoliciesUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *PoliciesUpdate) SetCreatedBy(v int64) *PoliciesUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *PoliciesUpdate) SetNillableCreatedBy(v *int64) *PoliciesUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *PoliciesUpdate) AddCreatedBy(v int64) *PoliciesUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *PoliciesUpdate) SetUpdatedBy(v int64) *PoliciesUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *PoliciesUpdate) SetNillableUpdatedBy(v *int64) *PoliciesUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *PoliciesUpdate) AddUpdatedBy(v int64) *PoliciesUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *PoliciesUpdate) SetName(v string) *PoliciesUpdate {
 	_u.mutation.SetName(v)
@@ -127,6 +169,18 @@ func (_u *PoliciesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(policies.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(policies.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(policies.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(policies.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(policies.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(policies.FieldName, field.TypeString, value)
 	}
@@ -173,6 +227,48 @@ func (_u *PoliciesUpdateOne) SetNillableDeletedAt(v *time.Time) *PoliciesUpdateO
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (_u *PoliciesUpdateOne) ClearDeletedAt() *PoliciesUpdateOne {
 	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *PoliciesUpdateOne) SetCreatedBy(v int64) *PoliciesUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *PoliciesUpdateOne) SetNillableCreatedBy(v *int64) *PoliciesUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *PoliciesUpdateOne) AddCreatedBy(v int64) *PoliciesUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *PoliciesUpdateOne) SetUpdatedBy(v int64) *PoliciesUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *PoliciesUpdateOne) SetNillableUpdatedBy(v *int64) *PoliciesUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *PoliciesUpdateOne) AddUpdatedBy(v int64) *PoliciesUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -278,6 +374,18 @@ func (_u *PoliciesUpdateOne) sqlSave(ctx context.Context) (_node *Policies, err 
 	}
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(policies.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(policies.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(policies.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(policies.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(policies.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(policies.FieldName, field.TypeString, value)

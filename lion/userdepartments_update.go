@@ -36,6 +36,48 @@ func (_u *UserDepartmentsUpdate) SetUpdatedAt(v time.Time) *UserDepartmentsUpdat
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *UserDepartmentsUpdate) SetCreatedBy(v int64) *UserDepartmentsUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *UserDepartmentsUpdate) SetNillableCreatedBy(v *int64) *UserDepartmentsUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *UserDepartmentsUpdate) AddCreatedBy(v int64) *UserDepartmentsUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *UserDepartmentsUpdate) SetUpdatedBy(v int64) *UserDepartmentsUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *UserDepartmentsUpdate) SetNillableUpdatedBy(v *int64) *UserDepartmentsUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *UserDepartmentsUpdate) AddUpdatedBy(v int64) *UserDepartmentsUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetDepartmentID sets the "department_id" field.
 func (_u *UserDepartmentsUpdate) SetDepartmentID(v int) *UserDepartmentsUpdate {
 	_u.mutation.SetDepartmentID(v)
@@ -123,60 +165,6 @@ func (_u *UserDepartmentsUpdate) SetNillableExpiredAt(v *time.Time) *UserDepartm
 // ClearExpiredAt clears the value of the "expired_at" field.
 func (_u *UserDepartmentsUpdate) ClearExpiredAt() *UserDepartmentsUpdate {
 	_u.mutation.ClearExpiredAt()
-	return _u
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (_u *UserDepartmentsUpdate) SetCreatedBy(v int) *UserDepartmentsUpdate {
-	_u.mutation.ResetCreatedBy()
-	_u.mutation.SetCreatedBy(v)
-	return _u
-}
-
-// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableCreatedBy(v *int) *UserDepartmentsUpdate {
-	if v != nil {
-		_u.SetCreatedBy(*v)
-	}
-	return _u
-}
-
-// AddCreatedBy adds value to the "created_by" field.
-func (_u *UserDepartmentsUpdate) AddCreatedBy(v int) *UserDepartmentsUpdate {
-	_u.mutation.AddCreatedBy(v)
-	return _u
-}
-
-// ClearCreatedBy clears the value of the "created_by" field.
-func (_u *UserDepartmentsUpdate) ClearCreatedBy() *UserDepartmentsUpdate {
-	_u.mutation.ClearCreatedBy()
-	return _u
-}
-
-// SetUpdatedBy sets the "updated_by" field.
-func (_u *UserDepartmentsUpdate) SetUpdatedBy(v int) *UserDepartmentsUpdate {
-	_u.mutation.ResetUpdatedBy()
-	_u.mutation.SetUpdatedBy(v)
-	return _u
-}
-
-// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableUpdatedBy(v *int) *UserDepartmentsUpdate {
-	if v != nil {
-		_u.SetUpdatedBy(*v)
-	}
-	return _u
-}
-
-// AddUpdatedBy adds value to the "updated_by" field.
-func (_u *UserDepartmentsUpdate) AddUpdatedBy(v int) *UserDepartmentsUpdate {
-	_u.mutation.AddUpdatedBy(v)
-	return _u
-}
-
-// ClearUpdatedBy clears the value of the "updated_by" field.
-func (_u *UserDepartmentsUpdate) ClearUpdatedBy() *UserDepartmentsUpdate {
-	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -315,6 +303,18 @@ func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userdepartments.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.MemberRole(); ok {
 		_spec.SetField(userdepartments.FieldMemberRole, field.TypeInt, value)
 	}
@@ -332,24 +332,6 @@ func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err er
 	}
 	if _u.mutation.ExpiredAtCleared() {
 		_spec.ClearField(userdepartments.FieldExpiredAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(userdepartments.FieldCreatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(userdepartments.FieldCreatedBy, field.TypeInt, value)
-	}
-	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(userdepartments.FieldCreatedBy, field.TypeInt)
-	}
-	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(userdepartments.FieldUpdatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(userdepartments.FieldUpdatedBy, field.TypeInt, value)
-	}
-	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(userdepartments.FieldUpdatedBy, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(userdepartments.FieldMetadata, field.TypeString, value)
@@ -444,6 +426,48 @@ func (_u *UserDepartmentsUpdateOne) SetUpdatedAt(v time.Time) *UserDepartmentsUp
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *UserDepartmentsUpdateOne) SetCreatedBy(v int64) *UserDepartmentsUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *UserDepartmentsUpdateOne) SetNillableCreatedBy(v *int64) *UserDepartmentsUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *UserDepartmentsUpdateOne) AddCreatedBy(v int64) *UserDepartmentsUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *UserDepartmentsUpdateOne) SetUpdatedBy(v int64) *UserDepartmentsUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *UserDepartmentsUpdateOne) SetNillableUpdatedBy(v *int64) *UserDepartmentsUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *UserDepartmentsUpdateOne) AddUpdatedBy(v int64) *UserDepartmentsUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetDepartmentID sets the "department_id" field.
 func (_u *UserDepartmentsUpdateOne) SetDepartmentID(v int) *UserDepartmentsUpdateOne {
 	_u.mutation.SetDepartmentID(v)
@@ -531,60 +555,6 @@ func (_u *UserDepartmentsUpdateOne) SetNillableExpiredAt(v *time.Time) *UserDepa
 // ClearExpiredAt clears the value of the "expired_at" field.
 func (_u *UserDepartmentsUpdateOne) ClearExpiredAt() *UserDepartmentsUpdateOne {
 	_u.mutation.ClearExpiredAt()
-	return _u
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (_u *UserDepartmentsUpdateOne) SetCreatedBy(v int) *UserDepartmentsUpdateOne {
-	_u.mutation.ResetCreatedBy()
-	_u.mutation.SetCreatedBy(v)
-	return _u
-}
-
-// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableCreatedBy(v *int) *UserDepartmentsUpdateOne {
-	if v != nil {
-		_u.SetCreatedBy(*v)
-	}
-	return _u
-}
-
-// AddCreatedBy adds value to the "created_by" field.
-func (_u *UserDepartmentsUpdateOne) AddCreatedBy(v int) *UserDepartmentsUpdateOne {
-	_u.mutation.AddCreatedBy(v)
-	return _u
-}
-
-// ClearCreatedBy clears the value of the "created_by" field.
-func (_u *UserDepartmentsUpdateOne) ClearCreatedBy() *UserDepartmentsUpdateOne {
-	_u.mutation.ClearCreatedBy()
-	return _u
-}
-
-// SetUpdatedBy sets the "updated_by" field.
-func (_u *UserDepartmentsUpdateOne) SetUpdatedBy(v int) *UserDepartmentsUpdateOne {
-	_u.mutation.ResetUpdatedBy()
-	_u.mutation.SetUpdatedBy(v)
-	return _u
-}
-
-// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableUpdatedBy(v *int) *UserDepartmentsUpdateOne {
-	if v != nil {
-		_u.SetUpdatedBy(*v)
-	}
-	return _u
-}
-
-// AddUpdatedBy adds value to the "updated_by" field.
-func (_u *UserDepartmentsUpdateOne) AddUpdatedBy(v int) *UserDepartmentsUpdateOne {
-	_u.mutation.AddUpdatedBy(v)
-	return _u
-}
-
-// ClearUpdatedBy clears the value of the "updated_by" field.
-func (_u *UserDepartmentsUpdateOne) ClearUpdatedBy() *UserDepartmentsUpdateOne {
-	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -753,6 +723,18 @@ func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDep
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userdepartments.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.MemberRole(); ok {
 		_spec.SetField(userdepartments.FieldMemberRole, field.TypeInt, value)
 	}
@@ -770,24 +752,6 @@ func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDep
 	}
 	if _u.mutation.ExpiredAtCleared() {
 		_spec.ClearField(userdepartments.FieldExpiredAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(userdepartments.FieldCreatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(userdepartments.FieldCreatedBy, field.TypeInt, value)
-	}
-	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(userdepartments.FieldCreatedBy, field.TypeInt)
-	}
-	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(userdepartments.FieldUpdatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(userdepartments.FieldUpdatedBy, field.TypeInt, value)
-	}
-	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(userdepartments.FieldUpdatedBy, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(userdepartments.FieldMetadata, field.TypeString, value)

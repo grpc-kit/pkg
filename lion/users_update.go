@@ -58,6 +58,48 @@ func (_u *UsersUpdate) ClearDeletedAt() *UsersUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *UsersUpdate) SetCreatedBy(v int64) *UsersUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableCreatedBy(v *int64) *UsersUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *UsersUpdate) AddCreatedBy(v int64) *UsersUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *UsersUpdate) SetUpdatedBy(v int64) *UsersUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableUpdatedBy(v *int64) *UsersUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *UsersUpdate) AddUpdatedBy(v int64) *UsersUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetUsername sets the "username" field.
 func (_u *UsersUpdate) SetUsername(v string) *UsersUpdate {
 	_u.mutation.SetUsername(v)
@@ -627,6 +669,18 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(users.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(users.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(users.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(users.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(users.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(users.FieldUsername, field.TypeString, value)
 	}
@@ -952,6 +1006,48 @@ func (_u *UsersUpdateOne) SetNillableDeletedAt(v *time.Time) *UsersUpdateOne {
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (_u *UsersUpdateOne) ClearDeletedAt() *UsersUpdateOne {
 	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *UsersUpdateOne) SetCreatedBy(v int64) *UsersUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableCreatedBy(v *int64) *UsersUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *UsersUpdateOne) AddCreatedBy(v int64) *UsersUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *UsersUpdateOne) SetUpdatedBy(v int64) *UsersUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableUpdatedBy(v *int64) *UsersUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *UsersUpdateOne) AddUpdatedBy(v int64) *UsersUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -1553,6 +1649,18 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(users.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(users.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(users.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(users.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(users.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(users.FieldUsername, field.TypeString, value)

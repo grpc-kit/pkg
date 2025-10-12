@@ -64,6 +64,34 @@ func (_c *UserGroupsCreate) SetNillableDeletedAt(v *time.Time) *UserGroupsCreate
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *UserGroupsCreate) SetCreatedBy(v int64) *UserGroupsCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableCreatedBy(v *int64) *UserGroupsCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *UserGroupsCreate) SetUpdatedBy(v int64) *UserGroupsCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *UserGroupsCreate) SetNillableUpdatedBy(v *int64) *UserGroupsCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *UserGroupsCreate) SetUserID(v int) *UserGroupsCreate {
 	_c.mutation.SetUserID(v)
@@ -128,34 +156,6 @@ func (_c *UserGroupsCreate) SetExpiredAt(v time.Time) *UserGroupsCreate {
 func (_c *UserGroupsCreate) SetNillableExpiredAt(v *time.Time) *UserGroupsCreate {
 	if v != nil {
 		_c.SetExpiredAt(*v)
-	}
-	return _c
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (_c *UserGroupsCreate) SetCreatedBy(v int) *UserGroupsCreate {
-	_c.mutation.SetCreatedBy(v)
-	return _c
-}
-
-// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableCreatedBy(v *int) *UserGroupsCreate {
-	if v != nil {
-		_c.SetCreatedBy(*v)
-	}
-	return _c
-}
-
-// SetUpdatedBy sets the "updated_by" field.
-func (_c *UserGroupsCreate) SetUpdatedBy(v int) *UserGroupsCreate {
-	_c.mutation.SetUpdatedBy(v)
-	return _c
-}
-
-// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableUpdatedBy(v *int) *UserGroupsCreate {
-	if v != nil {
-		_c.SetUpdatedBy(*v)
 	}
 	return _c
 }
@@ -259,6 +259,14 @@ func (_c *UserGroupsCreate) defaults() {
 		v := usergroups.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		v := usergroups.DefaultCreatedBy
+		_c.mutation.SetCreatedBy(v)
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		v := usergroups.DefaultUpdatedBy
+		_c.mutation.SetUpdatedBy(v)
+	}
 	if _, ok := _c.mutation.MemberRole(); !ok {
 		v := usergroups.DefaultMemberRole
 		_c.mutation.SetMemberRole(v)
@@ -280,6 +288,12 @@ func (_c *UserGroupsCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserGroups.updated_at"`)}
+	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "UserGroups.created_by"`)}
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "UserGroups.updated_by"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserGroups.user_id"`)}
@@ -361,6 +375,14 @@ func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
 		_spec.SetField(usergroups.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt64, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+		_node.UpdatedBy = value
+	}
 	if value, ok := _c.mutation.MemberRole(); ok {
 		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)
 		_node.MemberRole = value
@@ -376,14 +398,6 @@ func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ExpiredAt(); ok {
 		_spec.SetField(usergroups.FieldExpiredAt, field.TypeTime, value)
 		_node.ExpiredAt = value
-	}
-	if value, ok := _c.mutation.CreatedBy(); ok {
-		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt, value)
-		_node.CreatedBy = value
-	}
-	if value, ok := _c.mutation.UpdatedBy(); ok {
-		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt, value)
-		_node.UpdatedBy = value
 	}
 	if value, ok := _c.mutation.Metadata(); ok {
 		_spec.SetField(usergroups.FieldMetadata, field.TypeString, value)

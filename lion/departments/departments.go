@@ -18,14 +18,40 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
+	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
+	FieldUpdatedBy = "updated_by"
 	// FieldParentID holds the string denoting the parent_id field in the database.
 	FieldParentID = "parent_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldI18nName holds the string denoting the i18n_name field in the database.
 	FieldI18nName = "i18n_name"
+	// FieldDepartmentType holds the string denoting the department_type field in the database.
+	FieldDepartmentType = "department_type"
+	// FieldDepartmentStatus holds the string denoting the department_status field in the database.
+	FieldDepartmentStatus = "department_status"
 	// FieldOrderWeight holds the string denoting the order_weight field in the database.
 	FieldOrderWeight = "order_weight"
+	// FieldEmailEncrypted holds the string denoting the email_encrypted field in the database.
+	FieldEmailEncrypted = "email_encrypted"
+	// FieldPhoneNumberEncrypted holds the string denoting the phone_number_encrypted field in the database.
+	FieldPhoneNumberEncrypted = "phone_number_encrypted"
+	// FieldAddressEncrypted holds the string denoting the address_encrypted field in the database.
+	FieldAddressEncrypted = "address_encrypted"
+	// FieldCostCenterCode holds the string denoting the cost_center_code field in the database.
+	FieldCostCenterCode = "cost_center_code"
+	// FieldBudgetItemCode holds the string denoting the budget_item_code field in the database.
+	FieldBudgetItemCode = "budget_item_code"
+	// FieldMaxMembers holds the string denoting the max_members field in the database.
+	FieldMaxMembers = "max_members"
+	// FieldExternalID holds the string denoting the external_id field in the database.
+	FieldExternalID = "external_id"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// EdgeLionRoleDepartments holds the string denoting the lion_role_departments edge name in mutations.
@@ -64,10 +90,23 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldDeletedAt,
+	FieldCreatedBy,
+	FieldUpdatedBy,
 	FieldParentID,
 	FieldName,
 	FieldI18nName,
+	FieldDepartmentType,
+	FieldDepartmentStatus,
 	FieldOrderWeight,
+	FieldEmailEncrypted,
+	FieldPhoneNumberEncrypted,
+	FieldAddressEncrypted,
+	FieldCostCenterCode,
+	FieldBudgetItemCode,
+	FieldMaxMembers,
+	FieldExternalID,
+	FieldMetadata,
 	FieldDescription,
 }
 
@@ -88,14 +127,22 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultCreatedBy holds the default value on creation for the "created_by" field.
+	DefaultCreatedBy int64
+	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
+	DefaultUpdatedBy int64
 	// DefaultParentID holds the default value on creation for the "parent_id" field.
 	DefaultParentID int
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultI18nName holds the default value on creation for the "i18n_name" field.
-	DefaultI18nName string
+	// DefaultDepartmentType holds the default value on creation for the "department_type" field.
+	DefaultDepartmentType int
+	// DefaultDepartmentStatus holds the default value on creation for the "department_status" field.
+	DefaultDepartmentStatus int
 	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
 	DefaultOrderWeight int
+	// DefaultMaxMembers holds the default value on creation for the "max_members" field.
+	DefaultMaxMembers int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -118,6 +165,21 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByUpdatedBy orders the results by the updated_by field.
+func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
+}
+
 // ByParentID orders the results by the parent_id field.
 func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentID, opts...).ToFunc()
@@ -128,14 +190,39 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByI18nName orders the results by the i18n_name field.
-func ByI18nName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldI18nName, opts...).ToFunc()
+// ByDepartmentType orders the results by the department_type field.
+func ByDepartmentType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDepartmentType, opts...).ToFunc()
+}
+
+// ByDepartmentStatus orders the results by the department_status field.
+func ByDepartmentStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDepartmentStatus, opts...).ToFunc()
 }
 
 // ByOrderWeight orders the results by the order_weight field.
 func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
+}
+
+// ByCostCenterCode orders the results by the cost_center_code field.
+func ByCostCenterCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCostCenterCode, opts...).ToFunc()
+}
+
+// ByBudgetItemCode orders the results by the budget_item_code field.
+func ByBudgetItemCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBudgetItemCode, opts...).ToFunc()
+}
+
+// ByMaxMembers orders the results by the max_members field.
+func ByMaxMembers(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxMembers, opts...).ToFunc()
+}
+
+// ByExternalID orders the results by the external_id field.
+func ByExternalID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExternalID, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

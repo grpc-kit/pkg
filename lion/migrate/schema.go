@@ -14,6 +14,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "type", Type: field.TypeInt},
 		{Name: "client_id", Type: field.TypeString, Default: ""},
@@ -37,6 +39,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString},
 		{Name: "type", Type: field.TypeInt},
 		{Name: "appid", Type: field.TypeString, Unique: true},
@@ -71,10 +75,23 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
-		{Name: "name", Type: field.TypeString, Size: 128},
-		{Name: "i18n_name", Type: field.TypeString, Default: ""},
-		{Name: "order_weight", Type: field.TypeInt, Default: 0},
+		{Name: "name", Type: field.TypeString, Size: 256},
+		{Name: "i18n_name", Type: field.TypeJSON, Nullable: true},
+		{Name: "department_type", Type: field.TypeInt, Default: 0},
+		{Name: "department_status", Type: field.TypeInt, Default: 1},
+		{Name: "order_weight", Type: field.TypeInt, Default: 100},
+		{Name: "email_encrypted", Type: field.TypeBytes, Nullable: true},
+		{Name: "phone_number_encrypted", Type: field.TypeBytes, Nullable: true},
+		{Name: "address_encrypted", Type: field.TypeBytes, Nullable: true},
+		{Name: "cost_center_code", Type: field.TypeString, Nullable: true},
+		{Name: "budget_item_code", Type: field.TypeString, Nullable: true},
+		{Name: "max_members", Type: field.TypeInt, Default: 0},
+		{Name: "external_id", Type: field.TypeString, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}
 	// LionDepartmentsTable holds the schema information for the "lion_departments" table.
@@ -88,6 +105,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "group_id", Type: field.TypeInt},
 		{Name: "role_id", Type: field.TypeInt},
 	}
@@ -99,13 +118,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_group_roles_lion_groups_lion_groups",
-				Columns:    []*schema.Column{LionGroupRolesColumns[3]},
+				Columns:    []*schema.Column{LionGroupRolesColumns[5]},
 				RefColumns: []*schema.Column{LionGroupsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_group_roles_lion_roles_lion_role_groups",
-				Columns:    []*schema.Column{LionGroupRolesColumns[4]},
+				Columns:    []*schema.Column{LionGroupRolesColumns[6]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -114,7 +133,7 @@ var (
 			{
 				Name:    "grouproles_group_id_role_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionGroupRolesColumns[3], LionGroupRolesColumns[4]},
+				Columns: []*schema.Column{LionGroupRolesColumns[5], LionGroupRolesColumns[6]},
 			},
 		},
 	}
@@ -124,6 +143,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
 		{Name: "type", Type: field.TypeInt, Default: 0},
 		{Name: "status", Type: field.TypeInt, Default: 0},
@@ -134,8 +155,6 @@ var (
 		{Name: "metadata", Type: field.TypeString, Default: ""},
 		{Name: "external_id", Type: field.TypeString, Default: ""},
 		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "created_by", Type: field.TypeInt, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt, Default: 0},
 		{Name: "department_id", Type: field.TypeInt, Default: 1},
 	}
 	// LionGroupsTable holds the schema information for the "lion_groups" table.
@@ -157,6 +176,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString, Size: 256},
 	}
 	// LionPermissionsTable holds the schema information for the "lion_permissions" table.
@@ -171,6 +192,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString, Default: "grpc-kit"},
 	}
 	// LionPoliciesTable holds the schema information for the "lion_policies" table.
@@ -184,6 +207,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "name", Type: field.TypeString, Size: 128},
 		{Name: "i18n_name", Type: field.TypeString, Default: ""},
@@ -209,6 +234,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "department_id", Type: field.TypeInt},
 		{Name: "role_id", Type: field.TypeInt},
 	}
@@ -220,13 +247,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_role_departments_lion_departments_lion_role_departments",
-				Columns:    []*schema.Column{LionRoleDepartmentsColumns[3]},
+				Columns:    []*schema.Column{LionRoleDepartmentsColumns[5]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "lion_role_departments_lion_roles_lion_role_departments",
-				Columns:    []*schema.Column{LionRoleDepartmentsColumns[4]},
+				Columns:    []*schema.Column{LionRoleDepartmentsColumns[6]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -235,7 +262,7 @@ var (
 			{
 				Name:    "roledepartments_role_id_department_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionRoleDepartmentsColumns[4], LionRoleDepartmentsColumns[3]},
+				Columns: []*schema.Column{LionRoleDepartmentsColumns[6], LionRoleDepartmentsColumns[5]},
 			},
 		},
 	}
@@ -244,6 +271,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "role_id", Type: field.TypeInt},
 		{Name: "permission_id", Type: field.TypeInt},
 	}
@@ -258,6 +287,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "resource_id", Type: field.TypeInt},
 		{Name: "role_id", Type: field.TypeInt},
 	}
@@ -269,13 +300,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_role_resources_lion_resources_lion_role_resources",
-				Columns:    []*schema.Column{LionRoleResourcesColumns[3]},
+				Columns:    []*schema.Column{LionRoleResourcesColumns[5]},
 				RefColumns: []*schema.Column{LionResourcesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_role_resources_lion_roles_lion_role_resources",
-				Columns:    []*schema.Column{LionRoleResourcesColumns[4]},
+				Columns:    []*schema.Column{LionRoleResourcesColumns[6]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -284,7 +315,7 @@ var (
 			{
 				Name:    "roleresources_role_id_resource_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionRoleResourcesColumns[4], LionRoleResourcesColumns[3]},
+				Columns: []*schema.Column{LionRoleResourcesColumns[6], LionRoleResourcesColumns[5]},
 			},
 		},
 	}
@@ -293,6 +324,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
 		{Name: "i18n_name", Type: field.TypeString, Default: ""},
 		{Name: "protected", Type: field.TypeBool, Default: false},
@@ -310,11 +343,11 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "member_role", Type: field.TypeInt, Default: 0},
 		{Name: "member_status", Type: field.TypeInt, Default: 0},
 		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
-		{Name: "created_by", Type: field.TypeInt, Nullable: true},
-		{Name: "updated_by", Type: field.TypeInt, Nullable: true},
 		{Name: "metadata", Type: field.TypeString, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "department_id", Type: field.TypeInt},
@@ -353,12 +386,12 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "member_role", Type: field.TypeInt, Default: 0},
 		{Name: "member_status", Type: field.TypeInt, Default: 0},
 		{Name: "joined_at", Type: field.TypeTime, Nullable: true},
 		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
-		{Name: "created_by", Type: field.TypeInt, Nullable: true},
-		{Name: "updated_by", Type: field.TypeInt, Nullable: true},
 		{Name: "metadata", Type: field.TypeString, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "group_id", Type: field.TypeInt},
@@ -396,6 +429,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "provider_user_id", Type: field.TypeString},
 		{Name: "provider_union_id", Type: field.TypeString, Nullable: true},
 		{Name: "password_hash", Type: field.TypeString, Default: ""},
@@ -418,13 +453,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_user_identities_lion_auth_providers_lion_user_identities",
-				Columns:    []*schema.Column{LionUserIdentitiesColumns[14]},
+				Columns:    []*schema.Column{LionUserIdentitiesColumns[16]},
 				RefColumns: []*schema.Column{LionAuthProvidersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_user_identities_lion_users_lion_user_identities",
-				Columns:    []*schema.Column{LionUserIdentitiesColumns[15]},
+				Columns:    []*schema.Column{LionUserIdentitiesColumns[17]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -433,7 +468,7 @@ var (
 			{
 				Name:    "useridentities_user_id_provider_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserIdentitiesColumns[15], LionUserIdentitiesColumns[14]},
+				Columns: []*schema.Column{LionUserIdentitiesColumns[17], LionUserIdentitiesColumns[16]},
 			},
 		},
 	}
@@ -465,6 +500,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "role_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
@@ -476,13 +513,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_user_roles_lion_roles_lion_user_roles",
-				Columns:    []*schema.Column{LionUserRolesColumns[3]},
+				Columns:    []*schema.Column{LionUserRolesColumns[5]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_user_roles_lion_users_lion_user_roles",
-				Columns:    []*schema.Column{LionUserRolesColumns[4]},
+				Columns:    []*schema.Column{LionUserRolesColumns[6]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -491,7 +528,7 @@ var (
 			{
 				Name:    "userroles_user_id_role_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserRolesColumns[4], LionUserRolesColumns[3]},
+				Columns: []*schema.Column{LionUserRolesColumns[6], LionUserRolesColumns[5]},
 			},
 		},
 	}
@@ -501,6 +538,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_by", Type: field.TypeInt64, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "username", Type: field.TypeString, Unique: true, Size: 255},
 		{Name: "realname_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "type", Type: field.TypeInt, Default: 0},

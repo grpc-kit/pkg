@@ -36,6 +36,48 @@ func (_u *UserRolesUpdate) SetUpdatedAt(v time.Time) *UserRolesUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *UserRolesUpdate) SetCreatedBy(v int64) *UserRolesUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *UserRolesUpdate) SetNillableCreatedBy(v *int64) *UserRolesUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *UserRolesUpdate) AddCreatedBy(v int64) *UserRolesUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *UserRolesUpdate) SetUpdatedBy(v int64) *UserRolesUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *UserRolesUpdate) SetNillableUpdatedBy(v *int64) *UserRolesUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *UserRolesUpdate) AddUpdatedBy(v int64) *UserRolesUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetUserID sets the "user_id" field.
 func (_u *UserRolesUpdate) SetUserID(v int) *UserRolesUpdate {
 	_u.mutation.SetUserID(v)
@@ -175,6 +217,18 @@ func (_u *UserRolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userroles.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(userroles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(userroles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(userroles.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(userroles.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -256,6 +310,48 @@ type UserRolesUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *UserRolesUpdateOne) SetUpdatedAt(v time.Time) *UserRolesUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *UserRolesUpdateOne) SetCreatedBy(v int64) *UserRolesUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *UserRolesUpdateOne) SetNillableCreatedBy(v *int64) *UserRolesUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *UserRolesUpdateOne) AddCreatedBy(v int64) *UserRolesUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *UserRolesUpdateOne) SetUpdatedBy(v int64) *UserRolesUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *UserRolesUpdateOne) SetNillableUpdatedBy(v *int64) *UserRolesUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *UserRolesUpdateOne) AddUpdatedBy(v int64) *UserRolesUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -427,6 +523,18 @@ func (_u *UserRolesUpdateOne) sqlSave(ctx context.Context) (_node *UserRoles, er
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(userroles.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(userroles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(userroles.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(userroles.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(userroles.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{

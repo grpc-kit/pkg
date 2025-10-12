@@ -49,6 +49,34 @@ func (_c *ResourcesCreate) SetNillableUpdatedAt(v *time.Time) *ResourcesCreate {
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *ResourcesCreate) SetCreatedBy(v int64) *ResourcesCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableCreatedBy(v *int64) *ResourcesCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *ResourcesCreate) SetUpdatedBy(v int64) *ResourcesCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableUpdatedBy(v *int64) *ResourcesCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
 // SetParentID sets the "parent_id" field.
 func (_c *ResourcesCreate) SetParentID(v int) *ResourcesCreate {
 	_c.mutation.SetParentID(v)
@@ -281,6 +309,14 @@ func (_c *ResourcesCreate) defaults() {
 		v := resources.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		v := resources.DefaultCreatedBy
+		_c.mutation.SetCreatedBy(v)
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		v := resources.DefaultUpdatedBy
+		_c.mutation.SetUpdatedBy(v)
+	}
 	if _, ok := _c.mutation.ParentID(); !ok {
 		v := resources.DefaultParentID
 		_c.mutation.SetParentID(v)
@@ -338,6 +374,12 @@ func (_c *ResourcesCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Resources.updated_at"`)}
+	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "Resources.created_by"`)}
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "Resources.updated_by"`)}
 	}
 	if _, ok := _c.mutation.ParentID(); !ok {
 		return &ValidationError{Name: "parent_id", err: errors.New(`lion: missing required field "Resources.parent_id"`)}
@@ -431,6 +473,14 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(resources.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(resources.FieldCreatedBy, field.TypeInt64, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(resources.FieldUpdatedBy, field.TypeInt64, value)
+		_node.UpdatedBy = value
 	}
 	if value, ok := _c.mutation.ParentID(); ok {
 		_spec.SetField(resources.FieldParentID, field.TypeInt, value)

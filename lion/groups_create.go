@@ -65,6 +65,34 @@ func (_c *GroupsCreate) SetNillableDeletedAt(v *time.Time) *GroupsCreate {
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *GroupsCreate) SetCreatedBy(v int64) *GroupsCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableCreatedBy(v *int64) *GroupsCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *GroupsCreate) SetUpdatedBy(v int64) *GroupsCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableUpdatedBy(v *int64) *GroupsCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
 // SetName sets the "name" field.
 func (_c *GroupsCreate) SetName(v string) *GroupsCreate {
 	_c.mutation.SetName(v)
@@ -211,34 +239,6 @@ func (_c *GroupsCreate) SetNillableDescription(v *string) *GroupsCreate {
 	return _c
 }
 
-// SetCreatedBy sets the "created_by" field.
-func (_c *GroupsCreate) SetCreatedBy(v int) *GroupsCreate {
-	_c.mutation.SetCreatedBy(v)
-	return _c
-}
-
-// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableCreatedBy(v *int) *GroupsCreate {
-	if v != nil {
-		_c.SetCreatedBy(*v)
-	}
-	return _c
-}
-
-// SetUpdatedBy sets the "updated_by" field.
-func (_c *GroupsCreate) SetUpdatedBy(v int) *GroupsCreate {
-	_c.mutation.SetUpdatedBy(v)
-	return _c
-}
-
-// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableUpdatedBy(v *int) *GroupsCreate {
-	if v != nil {
-		_c.SetUpdatedBy(*v)
-	}
-	return _c
-}
-
 // AddLionGroupIDs adds the "lion_groups" edge to the GroupRoles entity by IDs.
 func (_c *GroupsCreate) AddLionGroupIDs(ids ...int) *GroupsCreate {
 	_c.mutation.AddLionGroupIDs(ids...)
@@ -323,6 +323,14 @@ func (_c *GroupsCreate) defaults() {
 		v := groups.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		v := groups.DefaultCreatedBy
+		_c.mutation.SetCreatedBy(v)
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		v := groups.DefaultUpdatedBy
+		_c.mutation.SetUpdatedBy(v)
+	}
 	if _, ok := _c.mutation.GetType(); !ok {
 		v := groups.DefaultType
 		_c.mutation.SetType(v)
@@ -363,14 +371,6 @@ func (_c *GroupsCreate) defaults() {
 		v := groups.DefaultDescription
 		_c.mutation.SetDescription(v)
 	}
-	if _, ok := _c.mutation.CreatedBy(); !ok {
-		v := groups.DefaultCreatedBy
-		_c.mutation.SetCreatedBy(v)
-	}
-	if _, ok := _c.mutation.UpdatedBy(); !ok {
-		v := groups.DefaultUpdatedBy
-		_c.mutation.SetUpdatedBy(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -380,6 +380,12 @@ func (_c *GroupsCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Groups.updated_at"`)}
+	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "Groups.created_by"`)}
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "Groups.updated_by"`)}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Groups.name"`)}
@@ -418,12 +424,6 @@ func (_c *GroupsCreate) check() error {
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Groups.description"`)}
-	}
-	if _, ok := _c.mutation.CreatedBy(); !ok {
-		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "Groups.created_by"`)}
-	}
-	if _, ok := _c.mutation.UpdatedBy(); !ok {
-		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "Groups.updated_by"`)}
 	}
 	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
 		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "Groups.lion_departments"`)}
@@ -466,6 +466,14 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_spec.SetField(groups.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(groups.FieldCreatedBy, field.TypeInt64, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(groups.FieldUpdatedBy, field.TypeInt64, value)
+		_node.UpdatedBy = value
+	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -505,14 +513,6 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
 		_node.Description = value
-	}
-	if value, ok := _c.mutation.CreatedBy(); ok {
-		_spec.SetField(groups.FieldCreatedBy, field.TypeInt, value)
-		_node.CreatedBy = value
-	}
-	if value, ok := _c.mutation.UpdatedBy(); ok {
-		_spec.SetField(groups.FieldUpdatedBy, field.TypeInt, value)
-		_node.UpdatedBy = value
 	}
 	if nodes := _c.mutation.LionGroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

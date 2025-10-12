@@ -70,6 +70,16 @@ func DeletedAt(v time.Time) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
+func CreatedBy(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
+func UpdatedBy(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldEQ(FieldUserID, v))
@@ -98,16 +108,6 @@ func JoinedAt(v time.Time) predicate.UserGroups {
 // ExpiredAt applies equality check predicate on the "expired_at" field. It's identical to ExpiredAtEQ.
 func ExpiredAt(v time.Time) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldEQ(FieldExpiredAt, v))
-}
-
-// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
-func CreatedBy(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldCreatedBy, v))
-}
-
-// UpdatedBy applies equality check predicate on the "updated_by" field. It's identical to UpdatedByEQ.
-func UpdatedBy(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
 // Metadata applies equality check predicate on the "metadata" field. It's identical to MetadataEQ.
@@ -248,6 +248,86 @@ func DeletedAtIsNil() predicate.UserGroups {
 // DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
 func DeletedAtNotNil() predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldNotNull(FieldDeletedAt))
+}
+
+// CreatedByEQ applies the EQ predicate on the "created_by" field.
+func CreatedByEQ(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
+func CreatedByNEQ(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldNEQ(FieldCreatedBy, v))
+}
+
+// CreatedByIn applies the In predicate on the "created_by" field.
+func CreatedByIn(vs ...int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
+func CreatedByNotIn(vs ...int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldNotIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByGT applies the GT predicate on the "created_by" field.
+func CreatedByGT(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldGT(FieldCreatedBy, v))
+}
+
+// CreatedByGTE applies the GTE predicate on the "created_by" field.
+func CreatedByGTE(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldGTE(FieldCreatedBy, v))
+}
+
+// CreatedByLT applies the LT predicate on the "created_by" field.
+func CreatedByLT(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldLT(FieldCreatedBy, v))
+}
+
+// CreatedByLTE applies the LTE predicate on the "created_by" field.
+func CreatedByLTE(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldLTE(FieldCreatedBy, v))
+}
+
+// UpdatedByEQ applies the EQ predicate on the "updated_by" field.
+func UpdatedByEQ(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
+func UpdatedByNEQ(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldNEQ(FieldUpdatedBy, v))
+}
+
+// UpdatedByIn applies the In predicate on the "updated_by" field.
+func UpdatedByIn(vs ...int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
+func UpdatedByNotIn(vs ...int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldNotIn(FieldUpdatedBy, vs...))
+}
+
+// UpdatedByGT applies the GT predicate on the "updated_by" field.
+func UpdatedByGT(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldGT(FieldUpdatedBy, v))
+}
+
+// UpdatedByGTE applies the GTE predicate on the "updated_by" field.
+func UpdatedByGTE(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldGTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByLT applies the LT predicate on the "updated_by" field.
+func UpdatedByLT(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldLT(FieldUpdatedBy, v))
+}
+
+// UpdatedByLTE applies the LTE predicate on the "updated_by" field.
+func UpdatedByLTE(v int64) predicate.UserGroups {
+	return predicate.UserGroups(sql.FieldLTE(FieldUpdatedBy, v))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
@@ -468,106 +548,6 @@ func ExpiredAtIsNil() predicate.UserGroups {
 // ExpiredAtNotNil applies the NotNil predicate on the "expired_at" field.
 func ExpiredAtNotNil() predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldNotNull(FieldExpiredAt))
-}
-
-// CreatedByEQ applies the EQ predicate on the "created_by" field.
-func CreatedByEQ(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldCreatedBy, v))
-}
-
-// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
-func CreatedByNEQ(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNEQ(FieldCreatedBy, v))
-}
-
-// CreatedByIn applies the In predicate on the "created_by" field.
-func CreatedByIn(vs ...int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldIn(FieldCreatedBy, vs...))
-}
-
-// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
-func CreatedByNotIn(vs ...int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNotIn(FieldCreatedBy, vs...))
-}
-
-// CreatedByGT applies the GT predicate on the "created_by" field.
-func CreatedByGT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGT(FieldCreatedBy, v))
-}
-
-// CreatedByGTE applies the GTE predicate on the "created_by" field.
-func CreatedByGTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGTE(FieldCreatedBy, v))
-}
-
-// CreatedByLT applies the LT predicate on the "created_by" field.
-func CreatedByLT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLT(FieldCreatedBy, v))
-}
-
-// CreatedByLTE applies the LTE predicate on the "created_by" field.
-func CreatedByLTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLTE(FieldCreatedBy, v))
-}
-
-// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
-func CreatedByIsNil() predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldIsNull(FieldCreatedBy))
-}
-
-// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
-func CreatedByNotNil() predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNotNull(FieldCreatedBy))
-}
-
-// UpdatedByEQ applies the EQ predicate on the "updated_by" field.
-func UpdatedByEQ(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldUpdatedBy, v))
-}
-
-// UpdatedByNEQ applies the NEQ predicate on the "updated_by" field.
-func UpdatedByNEQ(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNEQ(FieldUpdatedBy, v))
-}
-
-// UpdatedByIn applies the In predicate on the "updated_by" field.
-func UpdatedByIn(vs ...int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldIn(FieldUpdatedBy, vs...))
-}
-
-// UpdatedByNotIn applies the NotIn predicate on the "updated_by" field.
-func UpdatedByNotIn(vs ...int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNotIn(FieldUpdatedBy, vs...))
-}
-
-// UpdatedByGT applies the GT predicate on the "updated_by" field.
-func UpdatedByGT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGT(FieldUpdatedBy, v))
-}
-
-// UpdatedByGTE applies the GTE predicate on the "updated_by" field.
-func UpdatedByGTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGTE(FieldUpdatedBy, v))
-}
-
-// UpdatedByLT applies the LT predicate on the "updated_by" field.
-func UpdatedByLT(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLT(FieldUpdatedBy, v))
-}
-
-// UpdatedByLTE applies the LTE predicate on the "updated_by" field.
-func UpdatedByLTE(v int) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLTE(FieldUpdatedBy, v))
-}
-
-// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
-func UpdatedByIsNil() predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldIsNull(FieldUpdatedBy))
-}
-
-// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
-func UpdatedByNotNil() predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNotNull(FieldUpdatedBy))
 }
 
 // MetadataEQ applies the EQ predicate on the "metadata" field.

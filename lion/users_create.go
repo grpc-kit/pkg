@@ -66,6 +66,34 @@ func (_c *UsersCreate) SetNillableDeletedAt(v *time.Time) *UsersCreate {
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *UsersCreate) SetCreatedBy(v int64) *UsersCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableCreatedBy(v *int64) *UsersCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *UsersCreate) SetUpdatedBy(v int64) *UsersCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableUpdatedBy(v *int64) *UsersCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
 // SetUsername sets the "username" field.
 func (_c *UsersCreate) SetUsername(v string) *UsersCreate {
 	_c.mutation.SetUsername(v)
@@ -429,6 +457,14 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		v := users.DefaultCreatedBy
+		_c.mutation.SetCreatedBy(v)
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		v := users.DefaultUpdatedBy
+		_c.mutation.SetUpdatedBy(v)
+	}
 	if _, ok := _c.mutation.GetType(); !ok {
 		v := users.DefaultType
 		_c.mutation.SetType(v)
@@ -502,6 +538,12 @@ func (_c *UsersCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Users.updated_at"`)}
+	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "Users.created_by"`)}
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "Users.updated_by"`)}
 	}
 	if _, ok := _c.mutation.Username(); !ok {
 		return &ValidationError{Name: "username", err: errors.New(`lion: missing required field "Users.username"`)}
@@ -594,6 +636,14 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(users.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
+	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(users.FieldCreatedBy, field.TypeInt64, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(users.FieldUpdatedBy, field.TypeInt64, value)
+		_node.UpdatedBy = value
 	}
 	if value, ok := _c.mutation.Username(); ok {
 		_spec.SetField(users.FieldUsername, field.TypeString, value)

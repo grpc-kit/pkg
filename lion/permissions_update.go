@@ -34,6 +34,48 @@ func (_u *PermissionsUpdate) SetUpdatedAt(v time.Time) *PermissionsUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *PermissionsUpdate) SetCreatedBy(v int64) *PermissionsUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *PermissionsUpdate) SetNillableCreatedBy(v *int64) *PermissionsUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *PermissionsUpdate) AddCreatedBy(v int64) *PermissionsUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *PermissionsUpdate) SetUpdatedBy(v int64) *PermissionsUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *PermissionsUpdate) SetNillableUpdatedBy(v *int64) *PermissionsUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *PermissionsUpdate) AddUpdatedBy(v int64) *PermissionsUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *PermissionsUpdate) SetName(v string) *PermissionsUpdate {
 	_u.mutation.SetName(v)
@@ -114,6 +156,18 @@ func (_u *PermissionsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(permissions.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(permissions.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(permissions.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(permissions.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(permissions.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(permissions.FieldName, field.TypeString, value)
 	}
@@ -140,6 +194,48 @@ type PermissionsUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *PermissionsUpdateOne) SetUpdatedAt(v time.Time) *PermissionsUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *PermissionsUpdateOne) SetCreatedBy(v int64) *PermissionsUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *PermissionsUpdateOne) SetNillableCreatedBy(v *int64) *PermissionsUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *PermissionsUpdateOne) AddCreatedBy(v int64) *PermissionsUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *PermissionsUpdateOne) SetUpdatedBy(v int64) *PermissionsUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *PermissionsUpdateOne) SetNillableUpdatedBy(v *int64) *PermissionsUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *PermissionsUpdateOne) AddUpdatedBy(v int64) *PermissionsUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -252,6 +348,18 @@ func (_u *PermissionsUpdateOne) sqlSave(ctx context.Context) (_node *Permissions
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(permissions.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(permissions.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(permissions.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(permissions.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(permissions.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(permissions.FieldName, field.TypeString, value)

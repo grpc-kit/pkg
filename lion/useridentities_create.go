@@ -50,6 +50,34 @@ func (_c *UserIdentitiesCreate) SetNillableUpdatedAt(v *time.Time) *UserIdentiti
 	return _c
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_c *UserIdentitiesCreate) SetCreatedBy(v int64) *UserIdentitiesCreate {
+	_c.mutation.SetCreatedBy(v)
+	return _c
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_c *UserIdentitiesCreate) SetNillableCreatedBy(v *int64) *UserIdentitiesCreate {
+	if v != nil {
+		_c.SetCreatedBy(*v)
+	}
+	return _c
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_c *UserIdentitiesCreate) SetUpdatedBy(v int64) *UserIdentitiesCreate {
+	_c.mutation.SetUpdatedBy(v)
+	return _c
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_c *UserIdentitiesCreate) SetNillableUpdatedBy(v *int64) *UserIdentitiesCreate {
+	if v != nil {
+		_c.SetUpdatedBy(*v)
+	}
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *UserIdentitiesCreate) SetUserID(v int) *UserIdentitiesCreate {
 	_c.mutation.SetUserID(v)
@@ -249,6 +277,14 @@ func (_c *UserIdentitiesCreate) defaults() {
 		v := useridentities.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		v := useridentities.DefaultCreatedBy
+		_c.mutation.SetCreatedBy(v)
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		v := useridentities.DefaultUpdatedBy
+		_c.mutation.SetUpdatedBy(v)
+	}
 	if _, ok := _c.mutation.PasswordHash(); !ok {
 		v := useridentities.DefaultPasswordHash
 		_c.mutation.SetPasswordHash(v)
@@ -270,6 +306,12 @@ func (_c *UserIdentitiesCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserIdentities.updated_at"`)}
+	}
+	if _, ok := _c.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "UserIdentities.created_by"`)}
+	}
+	if _, ok := _c.mutation.UpdatedBy(); !ok {
+		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "UserIdentities.updated_by"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserIdentities.user_id"`)}
@@ -338,6 +380,14 @@ func (_c *UserIdentitiesCreate) createSpec() (*UserIdentities, *sqlgraph.CreateS
 	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(useridentities.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := _c.mutation.CreatedBy(); ok {
+		_spec.SetField(useridentities.FieldCreatedBy, field.TypeInt64, value)
+		_node.CreatedBy = value
+	}
+	if value, ok := _c.mutation.UpdatedBy(); ok {
+		_spec.SetField(useridentities.FieldUpdatedBy, field.TypeInt64, value)
+		_node.UpdatedBy = value
 	}
 	if value, ok := _c.mutation.ProviderUserID(); ok {
 		_spec.SetField(useridentities.FieldProviderUserID, field.TypeString, value)

@@ -20,6 +20,10 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
+	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
+	FieldUpdatedBy = "updated_by"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
 	// FieldGroupID holds the string denoting the group_id field in the database.
@@ -32,10 +36,6 @@ const (
 	FieldJoinedAt = "joined_at"
 	// FieldExpiredAt holds the string denoting the expired_at field in the database.
 	FieldExpiredAt = "expired_at"
-	// FieldCreatedBy holds the string denoting the created_by field in the database.
-	FieldCreatedBy = "created_by"
-	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
-	FieldUpdatedBy = "updated_by"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
 	// FieldDescription holds the string denoting the description field in the database.
@@ -68,14 +68,14 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldCreatedBy,
+	FieldUpdatedBy,
 	FieldUserID,
 	FieldGroupID,
 	FieldMemberRole,
 	FieldMemberStatus,
 	FieldJoinedAt,
 	FieldExpiredAt,
-	FieldCreatedBy,
-	FieldUpdatedBy,
 	FieldMetadata,
 	FieldDescription,
 }
@@ -97,6 +97,10 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultCreatedBy holds the default value on creation for the "created_by" field.
+	DefaultCreatedBy int64
+	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
+	DefaultUpdatedBy int64
 	// UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	UserIDValidator func(int) error
 	// GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
@@ -134,6 +138,16 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByUpdatedBy orders the results by the updated_by field.
+func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
+}
+
 // ByUserID orders the results by the user_id field.
 func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
@@ -162,16 +176,6 @@ func ByJoinedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByExpiredAt orders the results by the expired_at field.
 func ByExpiredAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiredAt, opts...).ToFunc()
-}
-
-// ByCreatedBy orders the results by the created_by field.
-func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
-}
-
-// ByUpdatedBy orders the results by the updated_by field.
-func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
 }
 
 // ByMetadata orders the results by the metadata field.

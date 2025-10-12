@@ -37,6 +37,68 @@ func (_u *DepartmentsUpdate) SetUpdatedAt(v time.Time) *DepartmentsUpdate {
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *DepartmentsUpdate) SetDeletedAt(v time.Time) *DepartmentsUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableDeletedAt(v *time.Time) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *DepartmentsUpdate) ClearDeletedAt() *DepartmentsUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *DepartmentsUpdate) SetCreatedBy(v int64) *DepartmentsUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableCreatedBy(v *int64) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *DepartmentsUpdate) AddCreatedBy(v int64) *DepartmentsUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *DepartmentsUpdate) SetUpdatedBy(v int64) *DepartmentsUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableUpdatedBy(v *int64) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *DepartmentsUpdate) AddUpdatedBy(v int64) *DepartmentsUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetParentID sets the "parent_id" field.
 func (_u *DepartmentsUpdate) SetParentID(v int) *DepartmentsUpdate {
 	_u.mutation.ResetParentID()
@@ -73,16 +135,56 @@ func (_u *DepartmentsUpdate) SetNillableName(v *string) *DepartmentsUpdate {
 }
 
 // SetI18nName sets the "i18n_name" field.
-func (_u *DepartmentsUpdate) SetI18nName(v string) *DepartmentsUpdate {
+func (_u *DepartmentsUpdate) SetI18nName(v map[string]string) *DepartmentsUpdate {
 	_u.mutation.SetI18nName(v)
 	return _u
 }
 
-// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
-func (_u *DepartmentsUpdate) SetNillableI18nName(v *string) *DepartmentsUpdate {
+// ClearI18nName clears the value of the "i18n_name" field.
+func (_u *DepartmentsUpdate) ClearI18nName() *DepartmentsUpdate {
+	_u.mutation.ClearI18nName()
+	return _u
+}
+
+// SetDepartmentType sets the "department_type" field.
+func (_u *DepartmentsUpdate) SetDepartmentType(v int) *DepartmentsUpdate {
+	_u.mutation.ResetDepartmentType()
+	_u.mutation.SetDepartmentType(v)
+	return _u
+}
+
+// SetNillableDepartmentType sets the "department_type" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableDepartmentType(v *int) *DepartmentsUpdate {
 	if v != nil {
-		_u.SetI18nName(*v)
+		_u.SetDepartmentType(*v)
 	}
+	return _u
+}
+
+// AddDepartmentType adds value to the "department_type" field.
+func (_u *DepartmentsUpdate) AddDepartmentType(v int) *DepartmentsUpdate {
+	_u.mutation.AddDepartmentType(v)
+	return _u
+}
+
+// SetDepartmentStatus sets the "department_status" field.
+func (_u *DepartmentsUpdate) SetDepartmentStatus(v int) *DepartmentsUpdate {
+	_u.mutation.ResetDepartmentStatus()
+	_u.mutation.SetDepartmentStatus(v)
+	return _u
+}
+
+// SetNillableDepartmentStatus sets the "department_status" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableDepartmentStatus(v *int) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetDepartmentStatus(*v)
+	}
+	return _u
+}
+
+// AddDepartmentStatus adds value to the "department_status" field.
+func (_u *DepartmentsUpdate) AddDepartmentStatus(v int) *DepartmentsUpdate {
+	_u.mutation.AddDepartmentStatus(v)
 	return _u
 }
 
@@ -104,6 +206,135 @@ func (_u *DepartmentsUpdate) SetNillableOrderWeight(v *int) *DepartmentsUpdate {
 // AddOrderWeight adds value to the "order_weight" field.
 func (_u *DepartmentsUpdate) AddOrderWeight(v int) *DepartmentsUpdate {
 	_u.mutation.AddOrderWeight(v)
+	return _u
+}
+
+// SetEmailEncrypted sets the "email_encrypted" field.
+func (_u *DepartmentsUpdate) SetEmailEncrypted(v []byte) *DepartmentsUpdate {
+	_u.mutation.SetEmailEncrypted(v)
+	return _u
+}
+
+// ClearEmailEncrypted clears the value of the "email_encrypted" field.
+func (_u *DepartmentsUpdate) ClearEmailEncrypted() *DepartmentsUpdate {
+	_u.mutation.ClearEmailEncrypted()
+	return _u
+}
+
+// SetPhoneNumberEncrypted sets the "phone_number_encrypted" field.
+func (_u *DepartmentsUpdate) SetPhoneNumberEncrypted(v []byte) *DepartmentsUpdate {
+	_u.mutation.SetPhoneNumberEncrypted(v)
+	return _u
+}
+
+// ClearPhoneNumberEncrypted clears the value of the "phone_number_encrypted" field.
+func (_u *DepartmentsUpdate) ClearPhoneNumberEncrypted() *DepartmentsUpdate {
+	_u.mutation.ClearPhoneNumberEncrypted()
+	return _u
+}
+
+// SetAddressEncrypted sets the "address_encrypted" field.
+func (_u *DepartmentsUpdate) SetAddressEncrypted(v []byte) *DepartmentsUpdate {
+	_u.mutation.SetAddressEncrypted(v)
+	return _u
+}
+
+// ClearAddressEncrypted clears the value of the "address_encrypted" field.
+func (_u *DepartmentsUpdate) ClearAddressEncrypted() *DepartmentsUpdate {
+	_u.mutation.ClearAddressEncrypted()
+	return _u
+}
+
+// SetCostCenterCode sets the "cost_center_code" field.
+func (_u *DepartmentsUpdate) SetCostCenterCode(v string) *DepartmentsUpdate {
+	_u.mutation.SetCostCenterCode(v)
+	return _u
+}
+
+// SetNillableCostCenterCode sets the "cost_center_code" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableCostCenterCode(v *string) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetCostCenterCode(*v)
+	}
+	return _u
+}
+
+// ClearCostCenterCode clears the value of the "cost_center_code" field.
+func (_u *DepartmentsUpdate) ClearCostCenterCode() *DepartmentsUpdate {
+	_u.mutation.ClearCostCenterCode()
+	return _u
+}
+
+// SetBudgetItemCode sets the "budget_item_code" field.
+func (_u *DepartmentsUpdate) SetBudgetItemCode(v string) *DepartmentsUpdate {
+	_u.mutation.SetBudgetItemCode(v)
+	return _u
+}
+
+// SetNillableBudgetItemCode sets the "budget_item_code" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableBudgetItemCode(v *string) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetBudgetItemCode(*v)
+	}
+	return _u
+}
+
+// ClearBudgetItemCode clears the value of the "budget_item_code" field.
+func (_u *DepartmentsUpdate) ClearBudgetItemCode() *DepartmentsUpdate {
+	_u.mutation.ClearBudgetItemCode()
+	return _u
+}
+
+// SetMaxMembers sets the "max_members" field.
+func (_u *DepartmentsUpdate) SetMaxMembers(v int) *DepartmentsUpdate {
+	_u.mutation.ResetMaxMembers()
+	_u.mutation.SetMaxMembers(v)
+	return _u
+}
+
+// SetNillableMaxMembers sets the "max_members" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableMaxMembers(v *int) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetMaxMembers(*v)
+	}
+	return _u
+}
+
+// AddMaxMembers adds value to the "max_members" field.
+func (_u *DepartmentsUpdate) AddMaxMembers(v int) *DepartmentsUpdate {
+	_u.mutation.AddMaxMembers(v)
+	return _u
+}
+
+// SetExternalID sets the "external_id" field.
+func (_u *DepartmentsUpdate) SetExternalID(v string) *DepartmentsUpdate {
+	_u.mutation.SetExternalID(v)
+	return _u
+}
+
+// SetNillableExternalID sets the "external_id" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableExternalID(v *string) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetExternalID(*v)
+	}
+	return _u
+}
+
+// ClearExternalID clears the value of the "external_id" field.
+func (_u *DepartmentsUpdate) ClearExternalID() *DepartmentsUpdate {
+	_u.mutation.ClearExternalID()
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *DepartmentsUpdate) SetMetadata(v map[string]string) *DepartmentsUpdate {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *DepartmentsUpdate) ClearMetadata() *DepartmentsUpdate {
+	_u.mutation.ClearMetadata()
 	return _u
 }
 
@@ -295,6 +526,24 @@ func (_u *DepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(departments.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(departments.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(departments.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(departments.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(departments.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(departments.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(departments.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.ParentID(); ok {
 		_spec.SetField(departments.FieldParentID, field.TypeInt, value)
 	}
@@ -305,13 +554,76 @@ func (_u *DepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		_spec.SetField(departments.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(departments.FieldI18nName, field.TypeString, value)
+		_spec.SetField(departments.FieldI18nName, field.TypeJSON, value)
+	}
+	if _u.mutation.I18nNameCleared() {
+		_spec.ClearField(departments.FieldI18nName, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DepartmentType(); ok {
+		_spec.SetField(departments.FieldDepartmentType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDepartmentType(); ok {
+		_spec.AddField(departments.FieldDepartmentType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.DepartmentStatus(); ok {
+		_spec.SetField(departments.FieldDepartmentStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDepartmentStatus(); ok {
+		_spec.AddField(departments.FieldDepartmentStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.OrderWeight(); ok {
 		_spec.SetField(departments.FieldOrderWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedOrderWeight(); ok {
 		_spec.AddField(departments.FieldOrderWeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.EmailEncrypted(); ok {
+		_spec.SetField(departments.FieldEmailEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.EmailEncryptedCleared() {
+		_spec.ClearField(departments.FieldEmailEncrypted, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.PhoneNumberEncrypted(); ok {
+		_spec.SetField(departments.FieldPhoneNumberEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.PhoneNumberEncryptedCleared() {
+		_spec.ClearField(departments.FieldPhoneNumberEncrypted, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.AddressEncrypted(); ok {
+		_spec.SetField(departments.FieldAddressEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.AddressEncryptedCleared() {
+		_spec.ClearField(departments.FieldAddressEncrypted, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.CostCenterCode(); ok {
+		_spec.SetField(departments.FieldCostCenterCode, field.TypeString, value)
+	}
+	if _u.mutation.CostCenterCodeCleared() {
+		_spec.ClearField(departments.FieldCostCenterCode, field.TypeString)
+	}
+	if value, ok := _u.mutation.BudgetItemCode(); ok {
+		_spec.SetField(departments.FieldBudgetItemCode, field.TypeString, value)
+	}
+	if _u.mutation.BudgetItemCodeCleared() {
+		_spec.ClearField(departments.FieldBudgetItemCode, field.TypeString)
+	}
+	if value, ok := _u.mutation.MaxMembers(); ok {
+		_spec.SetField(departments.FieldMaxMembers, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMaxMembers(); ok {
+		_spec.AddField(departments.FieldMaxMembers, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ExternalID(); ok {
+		_spec.SetField(departments.FieldExternalID, field.TypeString, value)
+	}
+	if _u.mutation.ExternalIDCleared() {
+		_spec.ClearField(departments.FieldExternalID, field.TypeString)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(departments.FieldMetadata, field.TypeJSON, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(departments.FieldMetadata, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(departments.FieldDescription, field.TypeString, value)
@@ -477,6 +789,68 @@ func (_u *DepartmentsUpdateOne) SetUpdatedAt(v time.Time) *DepartmentsUpdateOne 
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *DepartmentsUpdateOne) SetDeletedAt(v time.Time) *DepartmentsUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableDeletedAt(v *time.Time) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *DepartmentsUpdateOne) ClearDeletedAt() *DepartmentsUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *DepartmentsUpdateOne) SetCreatedBy(v int64) *DepartmentsUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableCreatedBy(v *int64) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *DepartmentsUpdateOne) AddCreatedBy(v int64) *DepartmentsUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *DepartmentsUpdateOne) SetUpdatedBy(v int64) *DepartmentsUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableUpdatedBy(v *int64) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *DepartmentsUpdateOne) AddUpdatedBy(v int64) *DepartmentsUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetParentID sets the "parent_id" field.
 func (_u *DepartmentsUpdateOne) SetParentID(v int) *DepartmentsUpdateOne {
 	_u.mutation.ResetParentID()
@@ -513,16 +887,56 @@ func (_u *DepartmentsUpdateOne) SetNillableName(v *string) *DepartmentsUpdateOne
 }
 
 // SetI18nName sets the "i18n_name" field.
-func (_u *DepartmentsUpdateOne) SetI18nName(v string) *DepartmentsUpdateOne {
+func (_u *DepartmentsUpdateOne) SetI18nName(v map[string]string) *DepartmentsUpdateOne {
 	_u.mutation.SetI18nName(v)
 	return _u
 }
 
-// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
-func (_u *DepartmentsUpdateOne) SetNillableI18nName(v *string) *DepartmentsUpdateOne {
+// ClearI18nName clears the value of the "i18n_name" field.
+func (_u *DepartmentsUpdateOne) ClearI18nName() *DepartmentsUpdateOne {
+	_u.mutation.ClearI18nName()
+	return _u
+}
+
+// SetDepartmentType sets the "department_type" field.
+func (_u *DepartmentsUpdateOne) SetDepartmentType(v int) *DepartmentsUpdateOne {
+	_u.mutation.ResetDepartmentType()
+	_u.mutation.SetDepartmentType(v)
+	return _u
+}
+
+// SetNillableDepartmentType sets the "department_type" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableDepartmentType(v *int) *DepartmentsUpdateOne {
 	if v != nil {
-		_u.SetI18nName(*v)
+		_u.SetDepartmentType(*v)
 	}
+	return _u
+}
+
+// AddDepartmentType adds value to the "department_type" field.
+func (_u *DepartmentsUpdateOne) AddDepartmentType(v int) *DepartmentsUpdateOne {
+	_u.mutation.AddDepartmentType(v)
+	return _u
+}
+
+// SetDepartmentStatus sets the "department_status" field.
+func (_u *DepartmentsUpdateOne) SetDepartmentStatus(v int) *DepartmentsUpdateOne {
+	_u.mutation.ResetDepartmentStatus()
+	_u.mutation.SetDepartmentStatus(v)
+	return _u
+}
+
+// SetNillableDepartmentStatus sets the "department_status" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableDepartmentStatus(v *int) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetDepartmentStatus(*v)
+	}
+	return _u
+}
+
+// AddDepartmentStatus adds value to the "department_status" field.
+func (_u *DepartmentsUpdateOne) AddDepartmentStatus(v int) *DepartmentsUpdateOne {
+	_u.mutation.AddDepartmentStatus(v)
 	return _u
 }
 
@@ -544,6 +958,135 @@ func (_u *DepartmentsUpdateOne) SetNillableOrderWeight(v *int) *DepartmentsUpdat
 // AddOrderWeight adds value to the "order_weight" field.
 func (_u *DepartmentsUpdateOne) AddOrderWeight(v int) *DepartmentsUpdateOne {
 	_u.mutation.AddOrderWeight(v)
+	return _u
+}
+
+// SetEmailEncrypted sets the "email_encrypted" field.
+func (_u *DepartmentsUpdateOne) SetEmailEncrypted(v []byte) *DepartmentsUpdateOne {
+	_u.mutation.SetEmailEncrypted(v)
+	return _u
+}
+
+// ClearEmailEncrypted clears the value of the "email_encrypted" field.
+func (_u *DepartmentsUpdateOne) ClearEmailEncrypted() *DepartmentsUpdateOne {
+	_u.mutation.ClearEmailEncrypted()
+	return _u
+}
+
+// SetPhoneNumberEncrypted sets the "phone_number_encrypted" field.
+func (_u *DepartmentsUpdateOne) SetPhoneNumberEncrypted(v []byte) *DepartmentsUpdateOne {
+	_u.mutation.SetPhoneNumberEncrypted(v)
+	return _u
+}
+
+// ClearPhoneNumberEncrypted clears the value of the "phone_number_encrypted" field.
+func (_u *DepartmentsUpdateOne) ClearPhoneNumberEncrypted() *DepartmentsUpdateOne {
+	_u.mutation.ClearPhoneNumberEncrypted()
+	return _u
+}
+
+// SetAddressEncrypted sets the "address_encrypted" field.
+func (_u *DepartmentsUpdateOne) SetAddressEncrypted(v []byte) *DepartmentsUpdateOne {
+	_u.mutation.SetAddressEncrypted(v)
+	return _u
+}
+
+// ClearAddressEncrypted clears the value of the "address_encrypted" field.
+func (_u *DepartmentsUpdateOne) ClearAddressEncrypted() *DepartmentsUpdateOne {
+	_u.mutation.ClearAddressEncrypted()
+	return _u
+}
+
+// SetCostCenterCode sets the "cost_center_code" field.
+func (_u *DepartmentsUpdateOne) SetCostCenterCode(v string) *DepartmentsUpdateOne {
+	_u.mutation.SetCostCenterCode(v)
+	return _u
+}
+
+// SetNillableCostCenterCode sets the "cost_center_code" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableCostCenterCode(v *string) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetCostCenterCode(*v)
+	}
+	return _u
+}
+
+// ClearCostCenterCode clears the value of the "cost_center_code" field.
+func (_u *DepartmentsUpdateOne) ClearCostCenterCode() *DepartmentsUpdateOne {
+	_u.mutation.ClearCostCenterCode()
+	return _u
+}
+
+// SetBudgetItemCode sets the "budget_item_code" field.
+func (_u *DepartmentsUpdateOne) SetBudgetItemCode(v string) *DepartmentsUpdateOne {
+	_u.mutation.SetBudgetItemCode(v)
+	return _u
+}
+
+// SetNillableBudgetItemCode sets the "budget_item_code" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableBudgetItemCode(v *string) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetBudgetItemCode(*v)
+	}
+	return _u
+}
+
+// ClearBudgetItemCode clears the value of the "budget_item_code" field.
+func (_u *DepartmentsUpdateOne) ClearBudgetItemCode() *DepartmentsUpdateOne {
+	_u.mutation.ClearBudgetItemCode()
+	return _u
+}
+
+// SetMaxMembers sets the "max_members" field.
+func (_u *DepartmentsUpdateOne) SetMaxMembers(v int) *DepartmentsUpdateOne {
+	_u.mutation.ResetMaxMembers()
+	_u.mutation.SetMaxMembers(v)
+	return _u
+}
+
+// SetNillableMaxMembers sets the "max_members" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableMaxMembers(v *int) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetMaxMembers(*v)
+	}
+	return _u
+}
+
+// AddMaxMembers adds value to the "max_members" field.
+func (_u *DepartmentsUpdateOne) AddMaxMembers(v int) *DepartmentsUpdateOne {
+	_u.mutation.AddMaxMembers(v)
+	return _u
+}
+
+// SetExternalID sets the "external_id" field.
+func (_u *DepartmentsUpdateOne) SetExternalID(v string) *DepartmentsUpdateOne {
+	_u.mutation.SetExternalID(v)
+	return _u
+}
+
+// SetNillableExternalID sets the "external_id" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableExternalID(v *string) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetExternalID(*v)
+	}
+	return _u
+}
+
+// ClearExternalID clears the value of the "external_id" field.
+func (_u *DepartmentsUpdateOne) ClearExternalID() *DepartmentsUpdateOne {
+	_u.mutation.ClearExternalID()
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *DepartmentsUpdateOne) SetMetadata(v map[string]string) *DepartmentsUpdateOne {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *DepartmentsUpdateOne) ClearMetadata() *DepartmentsUpdateOne {
+	_u.mutation.ClearMetadata()
 	return _u
 }
 
@@ -765,6 +1308,24 @@ func (_u *DepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *Departments
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(departments.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(departments.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(departments.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(departments.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(departments.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(departments.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(departments.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.ParentID(); ok {
 		_spec.SetField(departments.FieldParentID, field.TypeInt, value)
 	}
@@ -775,13 +1336,76 @@ func (_u *DepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *Departments
 		_spec.SetField(departments.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(departments.FieldI18nName, field.TypeString, value)
+		_spec.SetField(departments.FieldI18nName, field.TypeJSON, value)
+	}
+	if _u.mutation.I18nNameCleared() {
+		_spec.ClearField(departments.FieldI18nName, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.DepartmentType(); ok {
+		_spec.SetField(departments.FieldDepartmentType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDepartmentType(); ok {
+		_spec.AddField(departments.FieldDepartmentType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.DepartmentStatus(); ok {
+		_spec.SetField(departments.FieldDepartmentStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedDepartmentStatus(); ok {
+		_spec.AddField(departments.FieldDepartmentStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.OrderWeight(); ok {
 		_spec.SetField(departments.FieldOrderWeight, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedOrderWeight(); ok {
 		_spec.AddField(departments.FieldOrderWeight, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.EmailEncrypted(); ok {
+		_spec.SetField(departments.FieldEmailEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.EmailEncryptedCleared() {
+		_spec.ClearField(departments.FieldEmailEncrypted, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.PhoneNumberEncrypted(); ok {
+		_spec.SetField(departments.FieldPhoneNumberEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.PhoneNumberEncryptedCleared() {
+		_spec.ClearField(departments.FieldPhoneNumberEncrypted, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.AddressEncrypted(); ok {
+		_spec.SetField(departments.FieldAddressEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.AddressEncryptedCleared() {
+		_spec.ClearField(departments.FieldAddressEncrypted, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.CostCenterCode(); ok {
+		_spec.SetField(departments.FieldCostCenterCode, field.TypeString, value)
+	}
+	if _u.mutation.CostCenterCodeCleared() {
+		_spec.ClearField(departments.FieldCostCenterCode, field.TypeString)
+	}
+	if value, ok := _u.mutation.BudgetItemCode(); ok {
+		_spec.SetField(departments.FieldBudgetItemCode, field.TypeString, value)
+	}
+	if _u.mutation.BudgetItemCodeCleared() {
+		_spec.ClearField(departments.FieldBudgetItemCode, field.TypeString)
+	}
+	if value, ok := _u.mutation.MaxMembers(); ok {
+		_spec.SetField(departments.FieldMaxMembers, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMaxMembers(); ok {
+		_spec.AddField(departments.FieldMaxMembers, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ExternalID(); ok {
+		_spec.SetField(departments.FieldExternalID, field.TypeString, value)
+	}
+	if _u.mutation.ExternalIDCleared() {
+		_spec.ClearField(departments.FieldExternalID, field.TypeString)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(departments.FieldMetadata, field.TypeJSON, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(departments.FieldMetadata, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(departments.FieldDescription, field.TypeString, value)

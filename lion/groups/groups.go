@@ -20,6 +20,10 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
+	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
+	FieldUpdatedBy = "updated_by"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldType holds the string denoting the type field in the database.
@@ -42,10 +46,6 @@ const (
 	FieldDepartmentID = "department_id"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// FieldCreatedBy holds the string denoting the created_by field in the database.
-	FieldCreatedBy = "created_by"
-	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
-	FieldUpdatedBy = "updated_by"
 	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
 	EdgeLionGroups = "lion_groups"
 	// EdgeLionUserGroups holds the string denoting the lion_user_groups edge name in mutations.
@@ -83,6 +83,8 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldCreatedBy,
+	FieldUpdatedBy,
 	FieldName,
 	FieldType,
 	FieldStatus,
@@ -94,8 +96,6 @@ var Columns = []string{
 	FieldExternalID,
 	FieldDepartmentID,
 	FieldDescription,
-	FieldCreatedBy,
-	FieldUpdatedBy,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -115,6 +115,10 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultCreatedBy holds the default value on creation for the "created_by" field.
+	DefaultCreatedBy int64
+	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
+	DefaultUpdatedBy int64
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 	// DefaultType holds the default value on creation for the "type" field.
@@ -137,10 +141,6 @@ var (
 	DefaultDepartmentID int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
-	// DefaultCreatedBy holds the default value on creation for the "created_by" field.
-	DefaultCreatedBy int
-	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
-	DefaultUpdatedBy int
 )
 
 // OrderOption defines the ordering options for the Groups queries.
@@ -164,6 +164,16 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
+}
+
+// ByUpdatedBy orders the results by the updated_by field.
+func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
@@ -219,16 +229,6 @@ func ByDepartmentID(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
-}
-
-// ByCreatedBy orders the results by the created_by field.
-func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
-}
-
-// ByUpdatedBy orders the results by the updated_by field.
-func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
 }
 
 // ByLionGroupsCount orders the results by lion_groups count.

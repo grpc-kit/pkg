@@ -57,6 +57,48 @@ func (_u *GroupsUpdate) ClearDeletedAt() *GroupsUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *GroupsUpdate) SetCreatedBy(v int64) *GroupsUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableCreatedBy(v *int64) *GroupsUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *GroupsUpdate) AddCreatedBy(v int64) *GroupsUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *GroupsUpdate) SetUpdatedBy(v int64) *GroupsUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableUpdatedBy(v *int64) *GroupsUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *GroupsUpdate) AddUpdatedBy(v int64) *GroupsUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetName sets the "name" field.
 func (_u *GroupsUpdate) SetName(v string) *GroupsUpdate {
 	_u.mutation.SetName(v)
@@ -246,48 +288,6 @@ func (_u *GroupsUpdate) SetNillableDescription(v *string) *GroupsUpdate {
 	return _u
 }
 
-// SetCreatedBy sets the "created_by" field.
-func (_u *GroupsUpdate) SetCreatedBy(v int) *GroupsUpdate {
-	_u.mutation.ResetCreatedBy()
-	_u.mutation.SetCreatedBy(v)
-	return _u
-}
-
-// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableCreatedBy(v *int) *GroupsUpdate {
-	if v != nil {
-		_u.SetCreatedBy(*v)
-	}
-	return _u
-}
-
-// AddCreatedBy adds value to the "created_by" field.
-func (_u *GroupsUpdate) AddCreatedBy(v int) *GroupsUpdate {
-	_u.mutation.AddCreatedBy(v)
-	return _u
-}
-
-// SetUpdatedBy sets the "updated_by" field.
-func (_u *GroupsUpdate) SetUpdatedBy(v int) *GroupsUpdate {
-	_u.mutation.ResetUpdatedBy()
-	_u.mutation.SetUpdatedBy(v)
-	return _u
-}
-
-// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableUpdatedBy(v *int) *GroupsUpdate {
-	if v != nil {
-		_u.SetUpdatedBy(*v)
-	}
-	return _u
-}
-
-// AddUpdatedBy adds value to the "updated_by" field.
-func (_u *GroupsUpdate) AddUpdatedBy(v int) *GroupsUpdate {
-	_u.mutation.AddUpdatedBy(v)
-	return _u
-}
-
 // AddLionGroupIDs adds the "lion_groups" edge to the GroupRoles entity by IDs.
 func (_u *GroupsUpdate) AddLionGroupIDs(ids ...int) *GroupsUpdate {
 	_u.mutation.AddLionGroupIDs(ids...)
@@ -452,6 +452,18 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(groups.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(groups.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(groups.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(groups.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(groups.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
 	}
@@ -496,18 +508,6 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(groups.FieldCreatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(groups.FieldCreatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(groups.FieldUpdatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(groups.FieldUpdatedBy, field.TypeInt, value)
 	}
 	if _u.mutation.LionGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -671,6 +671,48 @@ func (_u *GroupsUpdateOne) SetNillableDeletedAt(v *time.Time) *GroupsUpdateOne {
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (_u *GroupsUpdateOne) ClearDeletedAt() *GroupsUpdateOne {
 	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (_u *GroupsUpdateOne) SetCreatedBy(v int64) *GroupsUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableCreatedBy(v *int64) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *GroupsUpdateOne) AddCreatedBy(v int64) *GroupsUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *GroupsUpdateOne) SetUpdatedBy(v int64) *GroupsUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableUpdatedBy(v *int64) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *GroupsUpdateOne) AddUpdatedBy(v int64) *GroupsUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -860,48 +902,6 @@ func (_u *GroupsUpdateOne) SetNillableDescription(v *string) *GroupsUpdateOne {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
-	return _u
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (_u *GroupsUpdateOne) SetCreatedBy(v int) *GroupsUpdateOne {
-	_u.mutation.ResetCreatedBy()
-	_u.mutation.SetCreatedBy(v)
-	return _u
-}
-
-// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableCreatedBy(v *int) *GroupsUpdateOne {
-	if v != nil {
-		_u.SetCreatedBy(*v)
-	}
-	return _u
-}
-
-// AddCreatedBy adds value to the "created_by" field.
-func (_u *GroupsUpdateOne) AddCreatedBy(v int) *GroupsUpdateOne {
-	_u.mutation.AddCreatedBy(v)
-	return _u
-}
-
-// SetUpdatedBy sets the "updated_by" field.
-func (_u *GroupsUpdateOne) SetUpdatedBy(v int) *GroupsUpdateOne {
-	_u.mutation.ResetUpdatedBy()
-	_u.mutation.SetUpdatedBy(v)
-	return _u
-}
-
-// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableUpdatedBy(v *int) *GroupsUpdateOne {
-	if v != nil {
-		_u.SetUpdatedBy(*v)
-	}
-	return _u
-}
-
-// AddUpdatedBy adds value to the "updated_by" field.
-func (_u *GroupsUpdateOne) AddUpdatedBy(v int) *GroupsUpdateOne {
-	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
@@ -1099,6 +1099,18 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(groups.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(groups.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(groups.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(groups.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(groups.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
 	}
@@ -1143,18 +1155,6 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(groups.FieldCreatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(groups.FieldCreatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(groups.FieldUpdatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(groups.FieldUpdatedBy, field.TypeInt, value)
 	}
 	if _u.mutation.LionGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{

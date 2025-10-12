@@ -64,6 +64,7 @@ func (AuthProviders) Edges() []ent.Edge {
 func (AuthProviders) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
+		AuditMixin{},
 	}
 }
 

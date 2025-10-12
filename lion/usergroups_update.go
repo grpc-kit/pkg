@@ -56,6 +56,48 @@ func (_u *UserGroupsUpdate) ClearDeletedAt() *UserGroupsUpdate {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *UserGroupsUpdate) SetCreatedBy(v int64) *UserGroupsUpdate {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableCreatedBy(v *int64) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *UserGroupsUpdate) AddCreatedBy(v int64) *UserGroupsUpdate {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *UserGroupsUpdate) SetUpdatedBy(v int64) *UserGroupsUpdate {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *UserGroupsUpdate) SetNillableUpdatedBy(v *int64) *UserGroupsUpdate {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *UserGroupsUpdate) AddUpdatedBy(v int64) *UserGroupsUpdate {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetUserID sets the "user_id" field.
 func (_u *UserGroupsUpdate) SetUserID(v int) *UserGroupsUpdate {
 	_u.mutation.SetUserID(v)
@@ -163,60 +205,6 @@ func (_u *UserGroupsUpdate) SetNillableExpiredAt(v *time.Time) *UserGroupsUpdate
 // ClearExpiredAt clears the value of the "expired_at" field.
 func (_u *UserGroupsUpdate) ClearExpiredAt() *UserGroupsUpdate {
 	_u.mutation.ClearExpiredAt()
-	return _u
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (_u *UserGroupsUpdate) SetCreatedBy(v int) *UserGroupsUpdate {
-	_u.mutation.ResetCreatedBy()
-	_u.mutation.SetCreatedBy(v)
-	return _u
-}
-
-// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableCreatedBy(v *int) *UserGroupsUpdate {
-	if v != nil {
-		_u.SetCreatedBy(*v)
-	}
-	return _u
-}
-
-// AddCreatedBy adds value to the "created_by" field.
-func (_u *UserGroupsUpdate) AddCreatedBy(v int) *UserGroupsUpdate {
-	_u.mutation.AddCreatedBy(v)
-	return _u
-}
-
-// ClearCreatedBy clears the value of the "created_by" field.
-func (_u *UserGroupsUpdate) ClearCreatedBy() *UserGroupsUpdate {
-	_u.mutation.ClearCreatedBy()
-	return _u
-}
-
-// SetUpdatedBy sets the "updated_by" field.
-func (_u *UserGroupsUpdate) SetUpdatedBy(v int) *UserGroupsUpdate {
-	_u.mutation.ResetUpdatedBy()
-	_u.mutation.SetUpdatedBy(v)
-	return _u
-}
-
-// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableUpdatedBy(v *int) *UserGroupsUpdate {
-	if v != nil {
-		_u.SetUpdatedBy(*v)
-	}
-	return _u
-}
-
-// AddUpdatedBy adds value to the "updated_by" field.
-func (_u *UserGroupsUpdate) AddUpdatedBy(v int) *UserGroupsUpdate {
-	_u.mutation.AddUpdatedBy(v)
-	return _u
-}
-
-// ClearUpdatedBy clears the value of the "updated_by" field.
-func (_u *UserGroupsUpdate) ClearUpdatedBy() *UserGroupsUpdate {
-	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -371,6 +359,18 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(usergroups.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(usergroups.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.MemberRole(); ok {
 		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)
 	}
@@ -394,24 +394,6 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if _u.mutation.ExpiredAtCleared() {
 		_spec.ClearField(usergroups.FieldExpiredAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(usergroups.FieldCreatedBy, field.TypeInt, value)
-	}
-	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(usergroups.FieldCreatedBy, field.TypeInt)
-	}
-	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(usergroups.FieldUpdatedBy, field.TypeInt, value)
-	}
-	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(usergroups.FieldUpdatedBy, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(usergroups.FieldMetadata, field.TypeString, value)
@@ -526,6 +508,48 @@ func (_u *UserGroupsUpdateOne) ClearDeletedAt() *UserGroupsUpdateOne {
 	return _u
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (_u *UserGroupsUpdateOne) SetCreatedBy(v int64) *UserGroupsUpdateOne {
+	_u.mutation.ResetCreatedBy()
+	_u.mutation.SetCreatedBy(v)
+	return _u
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableCreatedBy(v *int64) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetCreatedBy(*v)
+	}
+	return _u
+}
+
+// AddCreatedBy adds value to the "created_by" field.
+func (_u *UserGroupsUpdateOne) AddCreatedBy(v int64) *UserGroupsUpdateOne {
+	_u.mutation.AddCreatedBy(v)
+	return _u
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (_u *UserGroupsUpdateOne) SetUpdatedBy(v int64) *UserGroupsUpdateOne {
+	_u.mutation.ResetUpdatedBy()
+	_u.mutation.SetUpdatedBy(v)
+	return _u
+}
+
+// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
+func (_u *UserGroupsUpdateOne) SetNillableUpdatedBy(v *int64) *UserGroupsUpdateOne {
+	if v != nil {
+		_u.SetUpdatedBy(*v)
+	}
+	return _u
+}
+
+// AddUpdatedBy adds value to the "updated_by" field.
+func (_u *UserGroupsUpdateOne) AddUpdatedBy(v int64) *UserGroupsUpdateOne {
+	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
 // SetUserID sets the "user_id" field.
 func (_u *UserGroupsUpdateOne) SetUserID(v int) *UserGroupsUpdateOne {
 	_u.mutation.SetUserID(v)
@@ -633,60 +657,6 @@ func (_u *UserGroupsUpdateOne) SetNillableExpiredAt(v *time.Time) *UserGroupsUpd
 // ClearExpiredAt clears the value of the "expired_at" field.
 func (_u *UserGroupsUpdateOne) ClearExpiredAt() *UserGroupsUpdateOne {
 	_u.mutation.ClearExpiredAt()
-	return _u
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (_u *UserGroupsUpdateOne) SetCreatedBy(v int) *UserGroupsUpdateOne {
-	_u.mutation.ResetCreatedBy()
-	_u.mutation.SetCreatedBy(v)
-	return _u
-}
-
-// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableCreatedBy(v *int) *UserGroupsUpdateOne {
-	if v != nil {
-		_u.SetCreatedBy(*v)
-	}
-	return _u
-}
-
-// AddCreatedBy adds value to the "created_by" field.
-func (_u *UserGroupsUpdateOne) AddCreatedBy(v int) *UserGroupsUpdateOne {
-	_u.mutation.AddCreatedBy(v)
-	return _u
-}
-
-// ClearCreatedBy clears the value of the "created_by" field.
-func (_u *UserGroupsUpdateOne) ClearCreatedBy() *UserGroupsUpdateOne {
-	_u.mutation.ClearCreatedBy()
-	return _u
-}
-
-// SetUpdatedBy sets the "updated_by" field.
-func (_u *UserGroupsUpdateOne) SetUpdatedBy(v int) *UserGroupsUpdateOne {
-	_u.mutation.ResetUpdatedBy()
-	_u.mutation.SetUpdatedBy(v)
-	return _u
-}
-
-// SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableUpdatedBy(v *int) *UserGroupsUpdateOne {
-	if v != nil {
-		_u.SetUpdatedBy(*v)
-	}
-	return _u
-}
-
-// AddUpdatedBy adds value to the "updated_by" field.
-func (_u *UserGroupsUpdateOne) AddUpdatedBy(v int) *UserGroupsUpdateOne {
-	_u.mutation.AddUpdatedBy(v)
-	return _u
-}
-
-// ClearUpdatedBy clears the value of the "updated_by" field.
-func (_u *UserGroupsUpdateOne) ClearUpdatedBy() *UserGroupsUpdateOne {
-	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -871,6 +841,18 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(usergroups.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CreatedBy(); ok {
+		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedCreatedBy(); ok {
+		_spec.AddField(usergroups.FieldCreatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.UpdatedBy(); ok {
+		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
+		_spec.AddField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+	}
 	if value, ok := _u.mutation.MemberRole(); ok {
 		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)
 	}
@@ -894,24 +876,6 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 	}
 	if _u.mutation.ExpiredAtCleared() {
 		_spec.ClearField(usergroups.FieldExpiredAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(usergroups.FieldCreatedBy, field.TypeInt, value)
-	}
-	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(usergroups.FieldCreatedBy, field.TypeInt)
-	}
-	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(usergroups.FieldUpdatedBy, field.TypeInt, value)
-	}
-	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(usergroups.FieldUpdatedBy, field.TypeInt)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(usergroups.FieldMetadata, field.TypeString, value)

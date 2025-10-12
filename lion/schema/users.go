@@ -129,6 +129,7 @@ func (Users) Edges() []ent.Edge {
 func (Users) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
+		AuditMixin{},
 	}
 }
 

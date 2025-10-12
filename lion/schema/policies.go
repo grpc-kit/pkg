@@ -28,6 +28,7 @@ func (Policies) Edges() []ent.Edge {
 func (Policies) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
+		AuditMixin{},
 	}
 }
 
