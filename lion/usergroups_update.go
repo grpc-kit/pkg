@@ -36,26 +36,6 @@ func (_u *UserGroupsUpdate) SetUpdatedAt(v time.Time) *UserGroupsUpdate {
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *UserGroupsUpdate) SetDeletedAt(v time.Time) *UserGroupsUpdate {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableDeletedAt(v *time.Time) *UserGroupsUpdate {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *UserGroupsUpdate) ClearDeletedAt() *UserGroupsUpdate {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetCreatedBy sets the "created_by" field.
 func (_u *UserGroupsUpdate) SetCreatedBy(v int64) *UserGroupsUpdate {
 	_u.mutation.ResetCreatedBy()
@@ -209,16 +189,8 @@ func (_u *UserGroupsUpdate) ClearExpiredAt() *UserGroupsUpdate {
 }
 
 // SetMetadata sets the "metadata" field.
-func (_u *UserGroupsUpdate) SetMetadata(v string) *UserGroupsUpdate {
+func (_u *UserGroupsUpdate) SetMetadata(v map[string]string) *UserGroupsUpdate {
 	_u.mutation.SetMetadata(v)
-	return _u
-}
-
-// SetNillableMetadata sets the "metadata" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableMetadata(v *string) *UserGroupsUpdate {
-	if v != nil {
-		_u.SetMetadata(*v)
-	}
 	return _u
 }
 
@@ -353,12 +325,6 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(usergroups.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(usergroups.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(usergroups.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
 		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt64, value)
 	}
@@ -396,10 +362,10 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		_spec.ClearField(usergroups.FieldExpiredAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
-		_spec.SetField(usergroups.FieldMetadata, field.TypeString, value)
+		_spec.SetField(usergroups.FieldMetadata, field.TypeJSON, value)
 	}
 	if _u.mutation.MetadataCleared() {
-		_spec.ClearField(usergroups.FieldMetadata, field.TypeString)
+		_spec.ClearField(usergroups.FieldMetadata, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(usergroups.FieldDescription, field.TypeString, value)
@@ -485,26 +451,6 @@ type UserGroupsUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *UserGroupsUpdateOne) SetUpdatedAt(v time.Time) *UserGroupsUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
-	return _u
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *UserGroupsUpdateOne) SetDeletedAt(v time.Time) *UserGroupsUpdateOne {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableDeletedAt(v *time.Time) *UserGroupsUpdateOne {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *UserGroupsUpdateOne) ClearDeletedAt() *UserGroupsUpdateOne {
-	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -661,16 +607,8 @@ func (_u *UserGroupsUpdateOne) ClearExpiredAt() *UserGroupsUpdateOne {
 }
 
 // SetMetadata sets the "metadata" field.
-func (_u *UserGroupsUpdateOne) SetMetadata(v string) *UserGroupsUpdateOne {
+func (_u *UserGroupsUpdateOne) SetMetadata(v map[string]string) *UserGroupsUpdateOne {
 	_u.mutation.SetMetadata(v)
-	return _u
-}
-
-// SetNillableMetadata sets the "metadata" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableMetadata(v *string) *UserGroupsUpdateOne {
-	if v != nil {
-		_u.SetMetadata(*v)
-	}
 	return _u
 }
 
@@ -835,12 +773,6 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(usergroups.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(usergroups.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(usergroups.FieldDeletedAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
 		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt64, value)
 	}
@@ -878,10 +810,10 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 		_spec.ClearField(usergroups.FieldExpiredAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
-		_spec.SetField(usergroups.FieldMetadata, field.TypeString, value)
+		_spec.SetField(usergroups.FieldMetadata, field.TypeJSON, value)
 	}
 	if _u.mutation.MetadataCleared() {
-		_spec.ClearField(usergroups.FieldMetadata, field.TypeString)
+		_spec.ClearField(usergroups.FieldMetadata, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(usergroups.FieldDescription, field.TypeString, value)

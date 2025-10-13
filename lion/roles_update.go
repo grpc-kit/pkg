@@ -38,6 +38,26 @@ func (_u *RolesUpdate) SetUpdatedAt(v time.Time) *RolesUpdate {
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *RolesUpdate) SetDeletedAt(v time.Time) *RolesUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableDeletedAt(v *time.Time) *RolesUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *RolesUpdate) ClearDeletedAt() *RolesUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetCreatedBy sets the "created_by" field.
 func (_u *RolesUpdate) SetCreatedBy(v int64) *RolesUpdate {
 	_u.mutation.ResetCreatedBy()
@@ -95,30 +115,56 @@ func (_u *RolesUpdate) SetNillableName(v *string) *RolesUpdate {
 }
 
 // SetI18nName sets the "i18n_name" field.
-func (_u *RolesUpdate) SetI18nName(v string) *RolesUpdate {
+func (_u *RolesUpdate) SetI18nName(v map[string]string) *RolesUpdate {
 	_u.mutation.SetI18nName(v)
 	return _u
 }
 
-// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
-func (_u *RolesUpdate) SetNillableI18nName(v *string) *RolesUpdate {
+// ClearI18nName clears the value of the "i18n_name" field.
+func (_u *RolesUpdate) ClearI18nName() *RolesUpdate {
+	_u.mutation.ClearI18nName()
+	return _u
+}
+
+// SetRoleType sets the "role_type" field.
+func (_u *RolesUpdate) SetRoleType(v int) *RolesUpdate {
+	_u.mutation.ResetRoleType()
+	_u.mutation.SetRoleType(v)
+	return _u
+}
+
+// SetNillableRoleType sets the "role_type" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableRoleType(v *int) *RolesUpdate {
 	if v != nil {
-		_u.SetI18nName(*v)
+		_u.SetRoleType(*v)
 	}
 	return _u
 }
 
-// SetProtected sets the "protected" field.
-func (_u *RolesUpdate) SetProtected(v bool) *RolesUpdate {
-	_u.mutation.SetProtected(v)
+// AddRoleType adds value to the "role_type" field.
+func (_u *RolesUpdate) AddRoleType(v int) *RolesUpdate {
+	_u.mutation.AddRoleType(v)
 	return _u
 }
 
-// SetNillableProtected sets the "protected" field if the given value is not nil.
-func (_u *RolesUpdate) SetNillableProtected(v *bool) *RolesUpdate {
+// SetRoleStatus sets the "role_status" field.
+func (_u *RolesUpdate) SetRoleStatus(v int) *RolesUpdate {
+	_u.mutation.ResetRoleStatus()
+	_u.mutation.SetRoleStatus(v)
+	return _u
+}
+
+// SetNillableRoleStatus sets the "role_status" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableRoleStatus(v *int) *RolesUpdate {
 	if v != nil {
-		_u.SetProtected(*v)
+		_u.SetRoleStatus(*v)
 	}
+	return _u
+}
+
+// AddRoleStatus adds value to the "role_status" field.
+func (_u *RolesUpdate) AddRoleStatus(v int) *RolesUpdate {
+	_u.mutation.AddRoleStatus(v)
 	return _u
 }
 
@@ -367,6 +413,12 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(roles.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(roles.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(roles.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
 		_spec.SetField(roles.FieldCreatedBy, field.TypeInt64, value)
 	}
@@ -383,10 +435,22 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(roles.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(roles.FieldI18nName, field.TypeString, value)
+		_spec.SetField(roles.FieldI18nName, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.Protected(); ok {
-		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
+	if _u.mutation.I18nNameCleared() {
+		_spec.ClearField(roles.FieldI18nName, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.RoleType(); ok {
+		_spec.SetField(roles.FieldRoleType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRoleType(); ok {
+		_spec.AddField(roles.FieldRoleType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.RoleStatus(); ok {
+		_spec.SetField(roles.FieldRoleStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRoleStatus(); ok {
+		_spec.AddField(roles.FieldRoleStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.OrderWeight(); ok {
 		_spec.SetField(roles.FieldOrderWeight, field.TypeInt, value)
@@ -603,6 +667,26 @@ func (_u *RolesUpdateOne) SetUpdatedAt(v time.Time) *RolesUpdateOne {
 	return _u
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *RolesUpdateOne) SetDeletedAt(v time.Time) *RolesUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableDeletedAt(v *time.Time) *RolesUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *RolesUpdateOne) ClearDeletedAt() *RolesUpdateOne {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetCreatedBy sets the "created_by" field.
 func (_u *RolesUpdateOne) SetCreatedBy(v int64) *RolesUpdateOne {
 	_u.mutation.ResetCreatedBy()
@@ -660,30 +744,56 @@ func (_u *RolesUpdateOne) SetNillableName(v *string) *RolesUpdateOne {
 }
 
 // SetI18nName sets the "i18n_name" field.
-func (_u *RolesUpdateOne) SetI18nName(v string) *RolesUpdateOne {
+func (_u *RolesUpdateOne) SetI18nName(v map[string]string) *RolesUpdateOne {
 	_u.mutation.SetI18nName(v)
 	return _u
 }
 
-// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
-func (_u *RolesUpdateOne) SetNillableI18nName(v *string) *RolesUpdateOne {
+// ClearI18nName clears the value of the "i18n_name" field.
+func (_u *RolesUpdateOne) ClearI18nName() *RolesUpdateOne {
+	_u.mutation.ClearI18nName()
+	return _u
+}
+
+// SetRoleType sets the "role_type" field.
+func (_u *RolesUpdateOne) SetRoleType(v int) *RolesUpdateOne {
+	_u.mutation.ResetRoleType()
+	_u.mutation.SetRoleType(v)
+	return _u
+}
+
+// SetNillableRoleType sets the "role_type" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableRoleType(v *int) *RolesUpdateOne {
 	if v != nil {
-		_u.SetI18nName(*v)
+		_u.SetRoleType(*v)
 	}
 	return _u
 }
 
-// SetProtected sets the "protected" field.
-func (_u *RolesUpdateOne) SetProtected(v bool) *RolesUpdateOne {
-	_u.mutation.SetProtected(v)
+// AddRoleType adds value to the "role_type" field.
+func (_u *RolesUpdateOne) AddRoleType(v int) *RolesUpdateOne {
+	_u.mutation.AddRoleType(v)
 	return _u
 }
 
-// SetNillableProtected sets the "protected" field if the given value is not nil.
-func (_u *RolesUpdateOne) SetNillableProtected(v *bool) *RolesUpdateOne {
+// SetRoleStatus sets the "role_status" field.
+func (_u *RolesUpdateOne) SetRoleStatus(v int) *RolesUpdateOne {
+	_u.mutation.ResetRoleStatus()
+	_u.mutation.SetRoleStatus(v)
+	return _u
+}
+
+// SetNillableRoleStatus sets the "role_status" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableRoleStatus(v *int) *RolesUpdateOne {
 	if v != nil {
-		_u.SetProtected(*v)
+		_u.SetRoleStatus(*v)
 	}
+	return _u
+}
+
+// AddRoleStatus adds value to the "role_status" field.
+func (_u *RolesUpdateOne) AddRoleStatus(v int) *RolesUpdateOne {
+	_u.mutation.AddRoleStatus(v)
 	return _u
 }
 
@@ -962,6 +1072,12 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(roles.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(roles.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(roles.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
 		_spec.SetField(roles.FieldCreatedBy, field.TypeInt64, value)
 	}
@@ -978,10 +1094,22 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 		_spec.SetField(roles.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(roles.FieldI18nName, field.TypeString, value)
+		_spec.SetField(roles.FieldI18nName, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.Protected(); ok {
-		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
+	if _u.mutation.I18nNameCleared() {
+		_spec.ClearField(roles.FieldI18nName, field.TypeJSON)
+	}
+	if value, ok := _u.mutation.RoleType(); ok {
+		_spec.SetField(roles.FieldRoleType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRoleType(); ok {
+		_spec.AddField(roles.FieldRoleType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.RoleStatus(); ok {
+		_spec.SetField(roles.FieldRoleStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRoleStatus(); ok {
+		_spec.AddField(roles.FieldRoleStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.OrderWeight(); ok {
 		_spec.SetField(roles.FieldOrderWeight, field.TypeInt, value)

@@ -115,8 +115,8 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			resources.FieldName,
 			resources.FieldI18nName,
 			resources.FieldOrderWeight,
-			resources.FieldType,
-			resources.FieldScope,
+			resources.FieldResourceType,
+			resources.FieldResourceScope,
 			resources.FieldEnabled,
 			resources.FieldHidden,
 			resources.FieldHideChildren,
@@ -143,10 +143,10 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			Id:           int32(m.ID),
 			ParentId:     int32(m.ParentID),
 			Name:         m.Name,
-			I18NName:     I18NNameParse(m.I18nName),
+			I18NName:     m.I18nName,
 			OrderWeight:  int32(m.OrderWeight),
-			Type:         adminv1.Resource_Type(m.Type),
-			Scope:        adminv1.Resource_Scope(m.Scope),
+			Type:         adminv1.Resource_Type(m.ResourceType),
+			Scope:        adminv1.Resource_Scope(m.ResourceScope),
 			Enabled:      m.Enabled,
 			Hidden:       m.Hidden,
 			HideChildren: m.HideChildren,
@@ -195,8 +195,8 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 
 	_, err = db.Resources.Create().
 		SetName(req.Resource.Name).
-		SetType(int(req.Resource.Type)).
-		SetScope(int(req.Resource.Scope)).
+		SetResourceType(int(req.Resource.Type)).
+		SetResourceScope(int(req.Resource.Scope)).
 		SetParentID(int(req.Resource.ParentId)).
 		SetPath(req.Resource.Path).
 		SetComponent(req.Resource.Component).

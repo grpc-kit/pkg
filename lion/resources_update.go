@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
@@ -32,6 +33,26 @@ func (_u *ResourcesUpdate) Where(ps ...predicate.Resources) *ResourcesUpdate {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ResourcesUpdate) SetUpdatedAt(v time.Time) *ResourcesUpdate {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *ResourcesUpdate) SetDeletedAt(v time.Time) *ResourcesUpdate {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableDeletedAt(v *time.Time) *ResourcesUpdate {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *ResourcesUpdate) ClearDeletedAt() *ResourcesUpdate {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -113,16 +134,14 @@ func (_u *ResourcesUpdate) SetNillableName(v *string) *ResourcesUpdate {
 }
 
 // SetI18nName sets the "i18n_name" field.
-func (_u *ResourcesUpdate) SetI18nName(v string) *ResourcesUpdate {
+func (_u *ResourcesUpdate) SetI18nName(v map[string]string) *ResourcesUpdate {
 	_u.mutation.SetI18nName(v)
 	return _u
 }
 
-// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
-func (_u *ResourcesUpdate) SetNillableI18nName(v *string) *ResourcesUpdate {
-	if v != nil {
-		_u.SetI18nName(*v)
-	}
+// ClearI18nName clears the value of the "i18n_name" field.
+func (_u *ResourcesUpdate) ClearI18nName() *ResourcesUpdate {
+	_u.mutation.ClearI18nName()
 	return _u
 }
 
@@ -147,45 +166,45 @@ func (_u *ResourcesUpdate) AddOrderWeight(v int) *ResourcesUpdate {
 	return _u
 }
 
-// SetType sets the "type" field.
-func (_u *ResourcesUpdate) SetType(v int) *ResourcesUpdate {
-	_u.mutation.ResetType()
-	_u.mutation.SetType(v)
+// SetResourceType sets the "resource_type" field.
+func (_u *ResourcesUpdate) SetResourceType(v int) *ResourcesUpdate {
+	_u.mutation.ResetResourceType()
+	_u.mutation.SetResourceType(v)
 	return _u
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *ResourcesUpdate) SetNillableType(v *int) *ResourcesUpdate {
+// SetNillableResourceType sets the "resource_type" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableResourceType(v *int) *ResourcesUpdate {
 	if v != nil {
-		_u.SetType(*v)
+		_u.SetResourceType(*v)
 	}
 	return _u
 }
 
-// AddType adds value to the "type" field.
-func (_u *ResourcesUpdate) AddType(v int) *ResourcesUpdate {
-	_u.mutation.AddType(v)
+// AddResourceType adds value to the "resource_type" field.
+func (_u *ResourcesUpdate) AddResourceType(v int) *ResourcesUpdate {
+	_u.mutation.AddResourceType(v)
 	return _u
 }
 
-// SetScope sets the "scope" field.
-func (_u *ResourcesUpdate) SetScope(v int) *ResourcesUpdate {
-	_u.mutation.ResetScope()
-	_u.mutation.SetScope(v)
+// SetResourceScope sets the "resource_scope" field.
+func (_u *ResourcesUpdate) SetResourceScope(v int) *ResourcesUpdate {
+	_u.mutation.ResetResourceScope()
+	_u.mutation.SetResourceScope(v)
 	return _u
 }
 
-// SetNillableScope sets the "scope" field if the given value is not nil.
-func (_u *ResourcesUpdate) SetNillableScope(v *int) *ResourcesUpdate {
+// SetNillableResourceScope sets the "resource_scope" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableResourceScope(v *int) *ResourcesUpdate {
 	if v != nil {
-		_u.SetScope(*v)
+		_u.SetResourceScope(*v)
 	}
 	return _u
 }
 
-// AddScope adds value to the "scope" field.
-func (_u *ResourcesUpdate) AddScope(v int) *ResourcesUpdate {
-	_u.mutation.AddScope(v)
+// AddResourceScope adds value to the "resource_scope" field.
+func (_u *ResourcesUpdate) AddResourceScope(v int) *ResourcesUpdate {
+	_u.mutation.AddResourceScope(v)
 	return _u
 }
 
@@ -284,6 +303,24 @@ func (_u *ResourcesUpdate) SetNillableDescription(v *string) *ResourcesUpdate {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
+	return _u
+}
+
+// SetPermissions sets the "permissions" field.
+func (_u *ResourcesUpdate) SetPermissions(v []string) *ResourcesUpdate {
+	_u.mutation.SetPermissions(v)
+	return _u
+}
+
+// AppendPermissions appends value to the "permissions" field.
+func (_u *ResourcesUpdate) AppendPermissions(v []string) *ResourcesUpdate {
+	_u.mutation.AppendPermissions(v)
+	return _u
+}
+
+// ClearPermissions clears the value of the "permissions" field.
+func (_u *ResourcesUpdate) ClearPermissions() *ResourcesUpdate {
+	_u.mutation.ClearPermissions()
 	return _u
 }
 
@@ -404,6 +441,12 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(resources.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(resources.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(resources.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
 		_spec.SetField(resources.FieldCreatedBy, field.TypeInt64, value)
 	}
@@ -426,7 +469,10 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(resources.FieldI18nName, field.TypeString, value)
+		_spec.SetField(resources.FieldI18nName, field.TypeJSON, value)
+	}
+	if _u.mutation.I18nNameCleared() {
+		_spec.ClearField(resources.FieldI18nName, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.OrderWeight(); ok {
 		_spec.SetField(resources.FieldOrderWeight, field.TypeInt, value)
@@ -434,17 +480,17 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedOrderWeight(); ok {
 		_spec.AddField(resources.FieldOrderWeight, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(resources.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.ResourceType(); ok {
+		_spec.SetField(resources.FieldResourceType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedType(); ok {
-		_spec.AddField(resources.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedResourceType(); ok {
+		_spec.AddField(resources.FieldResourceType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Scope(); ok {
-		_spec.SetField(resources.FieldScope, field.TypeInt, value)
+	if value, ok := _u.mutation.ResourceScope(); ok {
+		_spec.SetField(resources.FieldResourceScope, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedScope(); ok {
-		_spec.AddField(resources.FieldScope, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedResourceScope(); ok {
+		_spec.AddField(resources.FieldResourceScope, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Enabled(); ok {
 		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
@@ -466,6 +512,17 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Permissions(); ok {
+		_spec.SetField(resources.FieldPermissions, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedPermissions(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, resources.FieldPermissions, value)
+		})
+	}
+	if _u.mutation.PermissionsCleared() {
+		_spec.ClearField(resources.FieldPermissions, field.TypeJSON)
 	}
 	if _u.mutation.LionRoleResourcesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -535,6 +592,26 @@ type ResourcesUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ResourcesUpdateOne) SetUpdatedAt(v time.Time) *ResourcesUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
+	return _u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (_u *ResourcesUpdateOne) SetDeletedAt(v time.Time) *ResourcesUpdateOne {
+	_u.mutation.SetDeletedAt(v)
+	return _u
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableDeletedAt(v *time.Time) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetDeletedAt(*v)
+	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *ResourcesUpdateOne) ClearDeletedAt() *ResourcesUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -616,16 +693,14 @@ func (_u *ResourcesUpdateOne) SetNillableName(v *string) *ResourcesUpdateOne {
 }
 
 // SetI18nName sets the "i18n_name" field.
-func (_u *ResourcesUpdateOne) SetI18nName(v string) *ResourcesUpdateOne {
+func (_u *ResourcesUpdateOne) SetI18nName(v map[string]string) *ResourcesUpdateOne {
 	_u.mutation.SetI18nName(v)
 	return _u
 }
 
-// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
-func (_u *ResourcesUpdateOne) SetNillableI18nName(v *string) *ResourcesUpdateOne {
-	if v != nil {
-		_u.SetI18nName(*v)
-	}
+// ClearI18nName clears the value of the "i18n_name" field.
+func (_u *ResourcesUpdateOne) ClearI18nName() *ResourcesUpdateOne {
+	_u.mutation.ClearI18nName()
 	return _u
 }
 
@@ -650,45 +725,45 @@ func (_u *ResourcesUpdateOne) AddOrderWeight(v int) *ResourcesUpdateOne {
 	return _u
 }
 
-// SetType sets the "type" field.
-func (_u *ResourcesUpdateOne) SetType(v int) *ResourcesUpdateOne {
-	_u.mutation.ResetType()
-	_u.mutation.SetType(v)
+// SetResourceType sets the "resource_type" field.
+func (_u *ResourcesUpdateOne) SetResourceType(v int) *ResourcesUpdateOne {
+	_u.mutation.ResetResourceType()
+	_u.mutation.SetResourceType(v)
 	return _u
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *ResourcesUpdateOne) SetNillableType(v *int) *ResourcesUpdateOne {
+// SetNillableResourceType sets the "resource_type" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableResourceType(v *int) *ResourcesUpdateOne {
 	if v != nil {
-		_u.SetType(*v)
+		_u.SetResourceType(*v)
 	}
 	return _u
 }
 
-// AddType adds value to the "type" field.
-func (_u *ResourcesUpdateOne) AddType(v int) *ResourcesUpdateOne {
-	_u.mutation.AddType(v)
+// AddResourceType adds value to the "resource_type" field.
+func (_u *ResourcesUpdateOne) AddResourceType(v int) *ResourcesUpdateOne {
+	_u.mutation.AddResourceType(v)
 	return _u
 }
 
-// SetScope sets the "scope" field.
-func (_u *ResourcesUpdateOne) SetScope(v int) *ResourcesUpdateOne {
-	_u.mutation.ResetScope()
-	_u.mutation.SetScope(v)
+// SetResourceScope sets the "resource_scope" field.
+func (_u *ResourcesUpdateOne) SetResourceScope(v int) *ResourcesUpdateOne {
+	_u.mutation.ResetResourceScope()
+	_u.mutation.SetResourceScope(v)
 	return _u
 }
 
-// SetNillableScope sets the "scope" field if the given value is not nil.
-func (_u *ResourcesUpdateOne) SetNillableScope(v *int) *ResourcesUpdateOne {
+// SetNillableResourceScope sets the "resource_scope" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableResourceScope(v *int) *ResourcesUpdateOne {
 	if v != nil {
-		_u.SetScope(*v)
+		_u.SetResourceScope(*v)
 	}
 	return _u
 }
 
-// AddScope adds value to the "scope" field.
-func (_u *ResourcesUpdateOne) AddScope(v int) *ResourcesUpdateOne {
-	_u.mutation.AddScope(v)
+// AddResourceScope adds value to the "resource_scope" field.
+func (_u *ResourcesUpdateOne) AddResourceScope(v int) *ResourcesUpdateOne {
+	_u.mutation.AddResourceScope(v)
 	return _u
 }
 
@@ -787,6 +862,24 @@ func (_u *ResourcesUpdateOne) SetNillableDescription(v *string) *ResourcesUpdate
 	if v != nil {
 		_u.SetDescription(*v)
 	}
+	return _u
+}
+
+// SetPermissions sets the "permissions" field.
+func (_u *ResourcesUpdateOne) SetPermissions(v []string) *ResourcesUpdateOne {
+	_u.mutation.SetPermissions(v)
+	return _u
+}
+
+// AppendPermissions appends value to the "permissions" field.
+func (_u *ResourcesUpdateOne) AppendPermissions(v []string) *ResourcesUpdateOne {
+	_u.mutation.AppendPermissions(v)
+	return _u
+}
+
+// ClearPermissions clears the value of the "permissions" field.
+func (_u *ResourcesUpdateOne) ClearPermissions() *ResourcesUpdateOne {
+	_u.mutation.ClearPermissions()
 	return _u
 }
 
@@ -937,6 +1030,12 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(resources.FieldUpdatedAt, field.TypeTime, value)
 	}
+	if value, ok := _u.mutation.DeletedAt(); ok {
+		_spec.SetField(resources.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(resources.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
 		_spec.SetField(resources.FieldCreatedBy, field.TypeInt64, value)
 	}
@@ -959,7 +1058,10 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 		_spec.SetField(resources.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(resources.FieldI18nName, field.TypeString, value)
+		_spec.SetField(resources.FieldI18nName, field.TypeJSON, value)
+	}
+	if _u.mutation.I18nNameCleared() {
+		_spec.ClearField(resources.FieldI18nName, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.OrderWeight(); ok {
 		_spec.SetField(resources.FieldOrderWeight, field.TypeInt, value)
@@ -967,17 +1069,17 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	if value, ok := _u.mutation.AddedOrderWeight(); ok {
 		_spec.AddField(resources.FieldOrderWeight, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(resources.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.ResourceType(); ok {
+		_spec.SetField(resources.FieldResourceType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedType(); ok {
-		_spec.AddField(resources.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedResourceType(); ok {
+		_spec.AddField(resources.FieldResourceType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Scope(); ok {
-		_spec.SetField(resources.FieldScope, field.TypeInt, value)
+	if value, ok := _u.mutation.ResourceScope(); ok {
+		_spec.SetField(resources.FieldResourceScope, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedScope(); ok {
-		_spec.AddField(resources.FieldScope, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedResourceScope(); ok {
+		_spec.AddField(resources.FieldResourceScope, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Enabled(); ok {
 		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
@@ -999,6 +1101,17 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Permissions(); ok {
+		_spec.SetField(resources.FieldPermissions, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedPermissions(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, resources.FieldPermissions, value)
+		})
+	}
+	if _u.mutation.PermissionsCleared() {
+		_spec.ClearField(resources.FieldPermissions, field.TypeJSON)
 	}
 	if _u.mutation.LionRoleResourcesCleared() {
 		edge := &sqlgraph.EdgeSpec{

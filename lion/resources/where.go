@@ -65,6 +65,11 @@ func UpdatedAt(v time.Time) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldDeletedAt, v))
+}
+
 // CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
 func CreatedBy(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldCreatedBy, v))
@@ -85,24 +90,19 @@ func Name(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldName, v))
 }
 
-// I18nName applies equality check predicate on the "i18n_name" field. It's identical to I18nNameEQ.
-func I18nName(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldI18nName, v))
-}
-
 // OrderWeight applies equality check predicate on the "order_weight" field. It's identical to OrderWeightEQ.
 func OrderWeight(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldOrderWeight, v))
 }
 
-// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
-func Type(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldType, v))
+// ResourceType applies equality check predicate on the "resource_type" field. It's identical to ResourceTypeEQ.
+func ResourceType(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceType, v))
 }
 
-// Scope applies equality check predicate on the "scope" field. It's identical to ScopeEQ.
-func Scope(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldScope, v))
+// ResourceScope applies equality check predicate on the "resource_scope" field. It's identical to ResourceScopeEQ.
+func ResourceScope(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceScope, v))
 }
 
 // Enabled applies equality check predicate on the "enabled" field. It's identical to EnabledEQ.
@@ -218,6 +218,56 @@ func UpdatedAtLT(v time.Time) predicate.Resources {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.Resources {
 	return predicate.Resources(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.Resources {
+	return predicate.Resources(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.Resources {
+	return predicate.Resources(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // CreatedByEQ applies the EQ predicate on the "created_by" field.
@@ -405,69 +455,14 @@ func NameContainsFold(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldContainsFold(FieldName, v))
 }
 
-// I18nNameEQ applies the EQ predicate on the "i18n_name" field.
-func I18nNameEQ(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldI18nName, v))
+// I18nNameIsNil applies the IsNil predicate on the "i18n_name" field.
+func I18nNameIsNil() predicate.Resources {
+	return predicate.Resources(sql.FieldIsNull(FieldI18nName))
 }
 
-// I18nNameNEQ applies the NEQ predicate on the "i18n_name" field.
-func I18nNameNEQ(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldI18nName, v))
-}
-
-// I18nNameIn applies the In predicate on the "i18n_name" field.
-func I18nNameIn(vs ...string) predicate.Resources {
-	return predicate.Resources(sql.FieldIn(FieldI18nName, vs...))
-}
-
-// I18nNameNotIn applies the NotIn predicate on the "i18n_name" field.
-func I18nNameNotIn(vs ...string) predicate.Resources {
-	return predicate.Resources(sql.FieldNotIn(FieldI18nName, vs...))
-}
-
-// I18nNameGT applies the GT predicate on the "i18n_name" field.
-func I18nNameGT(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldGT(FieldI18nName, v))
-}
-
-// I18nNameGTE applies the GTE predicate on the "i18n_name" field.
-func I18nNameGTE(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldGTE(FieldI18nName, v))
-}
-
-// I18nNameLT applies the LT predicate on the "i18n_name" field.
-func I18nNameLT(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldLT(FieldI18nName, v))
-}
-
-// I18nNameLTE applies the LTE predicate on the "i18n_name" field.
-func I18nNameLTE(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldLTE(FieldI18nName, v))
-}
-
-// I18nNameContains applies the Contains predicate on the "i18n_name" field.
-func I18nNameContains(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldContains(FieldI18nName, v))
-}
-
-// I18nNameHasPrefix applies the HasPrefix predicate on the "i18n_name" field.
-func I18nNameHasPrefix(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldHasPrefix(FieldI18nName, v))
-}
-
-// I18nNameHasSuffix applies the HasSuffix predicate on the "i18n_name" field.
-func I18nNameHasSuffix(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldHasSuffix(FieldI18nName, v))
-}
-
-// I18nNameEqualFold applies the EqualFold predicate on the "i18n_name" field.
-func I18nNameEqualFold(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEqualFold(FieldI18nName, v))
-}
-
-// I18nNameContainsFold applies the ContainsFold predicate on the "i18n_name" field.
-func I18nNameContainsFold(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldContainsFold(FieldI18nName, v))
+// I18nNameNotNil applies the NotNil predicate on the "i18n_name" field.
+func I18nNameNotNil() predicate.Resources {
+	return predicate.Resources(sql.FieldNotNull(FieldI18nName))
 }
 
 // OrderWeightEQ applies the EQ predicate on the "order_weight" field.
@@ -510,84 +505,84 @@ func OrderWeightLTE(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldLTE(FieldOrderWeight, v))
 }
 
-// TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldType, v))
+// ResourceTypeEQ applies the EQ predicate on the "resource_type" field.
+func ResourceTypeEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceType, v))
 }
 
-// TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldType, v))
+// ResourceTypeNEQ applies the NEQ predicate on the "resource_type" field.
+func ResourceTypeNEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldResourceType, v))
 }
 
-// TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...int) predicate.Resources {
-	return predicate.Resources(sql.FieldIn(FieldType, vs...))
+// ResourceTypeIn applies the In predicate on the "resource_type" field.
+func ResourceTypeIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldResourceType, vs...))
 }
 
-// TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...int) predicate.Resources {
-	return predicate.Resources(sql.FieldNotIn(FieldType, vs...))
+// ResourceTypeNotIn applies the NotIn predicate on the "resource_type" field.
+func ResourceTypeNotIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldResourceType, vs...))
 }
 
-// TypeGT applies the GT predicate on the "type" field.
-func TypeGT(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldGT(FieldType, v))
+// ResourceTypeGT applies the GT predicate on the "resource_type" field.
+func ResourceTypeGT(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldResourceType, v))
 }
 
-// TypeGTE applies the GTE predicate on the "type" field.
-func TypeGTE(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldGTE(FieldType, v))
+// ResourceTypeGTE applies the GTE predicate on the "resource_type" field.
+func ResourceTypeGTE(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldResourceType, v))
 }
 
-// TypeLT applies the LT predicate on the "type" field.
-func TypeLT(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldLT(FieldType, v))
+// ResourceTypeLT applies the LT predicate on the "resource_type" field.
+func ResourceTypeLT(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldResourceType, v))
 }
 
-// TypeLTE applies the LTE predicate on the "type" field.
-func TypeLTE(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldLTE(FieldType, v))
+// ResourceTypeLTE applies the LTE predicate on the "resource_type" field.
+func ResourceTypeLTE(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldResourceType, v))
 }
 
-// ScopeEQ applies the EQ predicate on the "scope" field.
-func ScopeEQ(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldScope, v))
+// ResourceScopeEQ applies the EQ predicate on the "resource_scope" field.
+func ResourceScopeEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceScope, v))
 }
 
-// ScopeNEQ applies the NEQ predicate on the "scope" field.
-func ScopeNEQ(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldScope, v))
+// ResourceScopeNEQ applies the NEQ predicate on the "resource_scope" field.
+func ResourceScopeNEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldResourceScope, v))
 }
 
-// ScopeIn applies the In predicate on the "scope" field.
-func ScopeIn(vs ...int) predicate.Resources {
-	return predicate.Resources(sql.FieldIn(FieldScope, vs...))
+// ResourceScopeIn applies the In predicate on the "resource_scope" field.
+func ResourceScopeIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldResourceScope, vs...))
 }
 
-// ScopeNotIn applies the NotIn predicate on the "scope" field.
-func ScopeNotIn(vs ...int) predicate.Resources {
-	return predicate.Resources(sql.FieldNotIn(FieldScope, vs...))
+// ResourceScopeNotIn applies the NotIn predicate on the "resource_scope" field.
+func ResourceScopeNotIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldResourceScope, vs...))
 }
 
-// ScopeGT applies the GT predicate on the "scope" field.
-func ScopeGT(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldGT(FieldScope, v))
+// ResourceScopeGT applies the GT predicate on the "resource_scope" field.
+func ResourceScopeGT(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldResourceScope, v))
 }
 
-// ScopeGTE applies the GTE predicate on the "scope" field.
-func ScopeGTE(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldGTE(FieldScope, v))
+// ResourceScopeGTE applies the GTE predicate on the "resource_scope" field.
+func ResourceScopeGTE(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldResourceScope, v))
 }
 
-// ScopeLT applies the LT predicate on the "scope" field.
-func ScopeLT(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldLT(FieldScope, v))
+// ResourceScopeLT applies the LT predicate on the "resource_scope" field.
+func ResourceScopeLT(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldResourceScope, v))
 }
 
-// ScopeLTE applies the LTE predicate on the "scope" field.
-func ScopeLTE(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldLTE(FieldScope, v))
+// ResourceScopeLTE applies the LTE predicate on the "resource_scope" field.
+func ResourceScopeLTE(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldResourceScope, v))
 }
 
 // EnabledEQ applies the EQ predicate on the "enabled" field.
@@ -878,6 +873,16 @@ func DescriptionEqualFold(v string) predicate.Resources {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// PermissionsIsNil applies the IsNil predicate on the "permissions" field.
+func PermissionsIsNil() predicate.Resources {
+	return predicate.Resources(sql.FieldIsNull(FieldPermissions))
+}
+
+// PermissionsNotNil applies the NotNil predicate on the "permissions" field.
+func PermissionsNotNil() predicate.Resources {
+	return predicate.Resources(sql.FieldNotNull(FieldPermissions))
 }
 
 // HasLionRoleResources applies the HasEdge predicate on the "lion_role_resources" edge.

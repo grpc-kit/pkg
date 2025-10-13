@@ -90,14 +90,14 @@ func RealnameEncrypted(v []byte) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldRealnameEncrypted, v))
 }
 
-// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
-func Type(v int) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldType, v))
+// UserType applies equality check predicate on the "user_type" field. It's identical to UserTypeEQ.
+func UserType(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldUserType, v))
 }
 
-// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
-func Status(v int) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldStatus, v))
+// UserStatus applies equality check predicate on the "user_status" field. It's identical to UserStatusEQ.
+func UserStatus(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldUserStatus, v))
 }
 
 // NationalIDEncrypted applies equality check predicate on the "national_id_encrypted" field. It's identical to NationalIDEncryptedEQ.
@@ -155,9 +155,9 @@ func Birthdate(v time.Time) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldBirthdate, v))
 }
 
-// Zoneinfo applies equality check predicate on the "zoneinfo" field. It's identical to ZoneinfoEQ.
-func Zoneinfo(v string) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldZoneinfo, v))
+// Timezone applies equality check predicate on the "timezone" field. It's identical to TimezoneEQ.
+func Timezone(v string) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldTimezone, v))
 }
 
 // Locale applies equality check predicate on the "locale" field. It's identical to LocaleEQ.
@@ -515,84 +515,84 @@ func RealnameEncryptedNotNil() predicate.Users {
 	return predicate.Users(sql.FieldNotNull(FieldRealnameEncrypted))
 }
 
-// TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v int) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldType, v))
+// UserTypeEQ applies the EQ predicate on the "user_type" field.
+func UserTypeEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldUserType, v))
 }
 
-// TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v int) predicate.Users {
-	return predicate.Users(sql.FieldNEQ(FieldType, v))
+// UserTypeNEQ applies the NEQ predicate on the "user_type" field.
+func UserTypeNEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldNEQ(FieldUserType, v))
 }
 
-// TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...int) predicate.Users {
-	return predicate.Users(sql.FieldIn(FieldType, vs...))
+// UserTypeIn applies the In predicate on the "user_type" field.
+func UserTypeIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldIn(FieldUserType, vs...))
 }
 
-// TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...int) predicate.Users {
-	return predicate.Users(sql.FieldNotIn(FieldType, vs...))
+// UserTypeNotIn applies the NotIn predicate on the "user_type" field.
+func UserTypeNotIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldNotIn(FieldUserType, vs...))
 }
 
-// TypeGT applies the GT predicate on the "type" field.
-func TypeGT(v int) predicate.Users {
-	return predicate.Users(sql.FieldGT(FieldType, v))
+// UserTypeGT applies the GT predicate on the "user_type" field.
+func UserTypeGT(v int) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldUserType, v))
 }
 
-// TypeGTE applies the GTE predicate on the "type" field.
-func TypeGTE(v int) predicate.Users {
-	return predicate.Users(sql.FieldGTE(FieldType, v))
+// UserTypeGTE applies the GTE predicate on the "user_type" field.
+func UserTypeGTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldUserType, v))
 }
 
-// TypeLT applies the LT predicate on the "type" field.
-func TypeLT(v int) predicate.Users {
-	return predicate.Users(sql.FieldLT(FieldType, v))
+// UserTypeLT applies the LT predicate on the "user_type" field.
+func UserTypeLT(v int) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldUserType, v))
 }
 
-// TypeLTE applies the LTE predicate on the "type" field.
-func TypeLTE(v int) predicate.Users {
-	return predicate.Users(sql.FieldLTE(FieldType, v))
+// UserTypeLTE applies the LTE predicate on the "user_type" field.
+func UserTypeLTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldUserType, v))
 }
 
-// StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v int) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldStatus, v))
+// UserStatusEQ applies the EQ predicate on the "user_status" field.
+func UserStatusEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldUserStatus, v))
 }
 
-// StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v int) predicate.Users {
-	return predicate.Users(sql.FieldNEQ(FieldStatus, v))
+// UserStatusNEQ applies the NEQ predicate on the "user_status" field.
+func UserStatusNEQ(v int) predicate.Users {
+	return predicate.Users(sql.FieldNEQ(FieldUserStatus, v))
 }
 
-// StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...int) predicate.Users {
-	return predicate.Users(sql.FieldIn(FieldStatus, vs...))
+// UserStatusIn applies the In predicate on the "user_status" field.
+func UserStatusIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldIn(FieldUserStatus, vs...))
 }
 
-// StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...int) predicate.Users {
-	return predicate.Users(sql.FieldNotIn(FieldStatus, vs...))
+// UserStatusNotIn applies the NotIn predicate on the "user_status" field.
+func UserStatusNotIn(vs ...int) predicate.Users {
+	return predicate.Users(sql.FieldNotIn(FieldUserStatus, vs...))
 }
 
-// StatusGT applies the GT predicate on the "status" field.
-func StatusGT(v int) predicate.Users {
-	return predicate.Users(sql.FieldGT(FieldStatus, v))
+// UserStatusGT applies the GT predicate on the "user_status" field.
+func UserStatusGT(v int) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldUserStatus, v))
 }
 
-// StatusGTE applies the GTE predicate on the "status" field.
-func StatusGTE(v int) predicate.Users {
-	return predicate.Users(sql.FieldGTE(FieldStatus, v))
+// UserStatusGTE applies the GTE predicate on the "user_status" field.
+func UserStatusGTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldUserStatus, v))
 }
 
-// StatusLT applies the LT predicate on the "status" field.
-func StatusLT(v int) predicate.Users {
-	return predicate.Users(sql.FieldLT(FieldStatus, v))
+// UserStatusLT applies the LT predicate on the "user_status" field.
+func UserStatusLT(v int) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldUserStatus, v))
 }
 
-// StatusLTE applies the LTE predicate on the "status" field.
-func StatusLTE(v int) predicate.Users {
-	return predicate.Users(sql.FieldLTE(FieldStatus, v))
+// UserStatusLTE applies the LTE predicate on the "user_status" field.
+func UserStatusLTE(v int) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldUserStatus, v))
 }
 
 // NationalIDEncryptedEQ applies the EQ predicate on the "national_id_encrypted" field.
@@ -1205,69 +1205,69 @@ func BirthdateNotNil() predicate.Users {
 	return predicate.Users(sql.FieldNotNull(FieldBirthdate))
 }
 
-// ZoneinfoEQ applies the EQ predicate on the "zoneinfo" field.
-func ZoneinfoEQ(v string) predicate.Users {
-	return predicate.Users(sql.FieldEQ(FieldZoneinfo, v))
+// TimezoneEQ applies the EQ predicate on the "timezone" field.
+func TimezoneEQ(v string) predicate.Users {
+	return predicate.Users(sql.FieldEQ(FieldTimezone, v))
 }
 
-// ZoneinfoNEQ applies the NEQ predicate on the "zoneinfo" field.
-func ZoneinfoNEQ(v string) predicate.Users {
-	return predicate.Users(sql.FieldNEQ(FieldZoneinfo, v))
+// TimezoneNEQ applies the NEQ predicate on the "timezone" field.
+func TimezoneNEQ(v string) predicate.Users {
+	return predicate.Users(sql.FieldNEQ(FieldTimezone, v))
 }
 
-// ZoneinfoIn applies the In predicate on the "zoneinfo" field.
-func ZoneinfoIn(vs ...string) predicate.Users {
-	return predicate.Users(sql.FieldIn(FieldZoneinfo, vs...))
+// TimezoneIn applies the In predicate on the "timezone" field.
+func TimezoneIn(vs ...string) predicate.Users {
+	return predicate.Users(sql.FieldIn(FieldTimezone, vs...))
 }
 
-// ZoneinfoNotIn applies the NotIn predicate on the "zoneinfo" field.
-func ZoneinfoNotIn(vs ...string) predicate.Users {
-	return predicate.Users(sql.FieldNotIn(FieldZoneinfo, vs...))
+// TimezoneNotIn applies the NotIn predicate on the "timezone" field.
+func TimezoneNotIn(vs ...string) predicate.Users {
+	return predicate.Users(sql.FieldNotIn(FieldTimezone, vs...))
 }
 
-// ZoneinfoGT applies the GT predicate on the "zoneinfo" field.
-func ZoneinfoGT(v string) predicate.Users {
-	return predicate.Users(sql.FieldGT(FieldZoneinfo, v))
+// TimezoneGT applies the GT predicate on the "timezone" field.
+func TimezoneGT(v string) predicate.Users {
+	return predicate.Users(sql.FieldGT(FieldTimezone, v))
 }
 
-// ZoneinfoGTE applies the GTE predicate on the "zoneinfo" field.
-func ZoneinfoGTE(v string) predicate.Users {
-	return predicate.Users(sql.FieldGTE(FieldZoneinfo, v))
+// TimezoneGTE applies the GTE predicate on the "timezone" field.
+func TimezoneGTE(v string) predicate.Users {
+	return predicate.Users(sql.FieldGTE(FieldTimezone, v))
 }
 
-// ZoneinfoLT applies the LT predicate on the "zoneinfo" field.
-func ZoneinfoLT(v string) predicate.Users {
-	return predicate.Users(sql.FieldLT(FieldZoneinfo, v))
+// TimezoneLT applies the LT predicate on the "timezone" field.
+func TimezoneLT(v string) predicate.Users {
+	return predicate.Users(sql.FieldLT(FieldTimezone, v))
 }
 
-// ZoneinfoLTE applies the LTE predicate on the "zoneinfo" field.
-func ZoneinfoLTE(v string) predicate.Users {
-	return predicate.Users(sql.FieldLTE(FieldZoneinfo, v))
+// TimezoneLTE applies the LTE predicate on the "timezone" field.
+func TimezoneLTE(v string) predicate.Users {
+	return predicate.Users(sql.FieldLTE(FieldTimezone, v))
 }
 
-// ZoneinfoContains applies the Contains predicate on the "zoneinfo" field.
-func ZoneinfoContains(v string) predicate.Users {
-	return predicate.Users(sql.FieldContains(FieldZoneinfo, v))
+// TimezoneContains applies the Contains predicate on the "timezone" field.
+func TimezoneContains(v string) predicate.Users {
+	return predicate.Users(sql.FieldContains(FieldTimezone, v))
 }
 
-// ZoneinfoHasPrefix applies the HasPrefix predicate on the "zoneinfo" field.
-func ZoneinfoHasPrefix(v string) predicate.Users {
-	return predicate.Users(sql.FieldHasPrefix(FieldZoneinfo, v))
+// TimezoneHasPrefix applies the HasPrefix predicate on the "timezone" field.
+func TimezoneHasPrefix(v string) predicate.Users {
+	return predicate.Users(sql.FieldHasPrefix(FieldTimezone, v))
 }
 
-// ZoneinfoHasSuffix applies the HasSuffix predicate on the "zoneinfo" field.
-func ZoneinfoHasSuffix(v string) predicate.Users {
-	return predicate.Users(sql.FieldHasSuffix(FieldZoneinfo, v))
+// TimezoneHasSuffix applies the HasSuffix predicate on the "timezone" field.
+func TimezoneHasSuffix(v string) predicate.Users {
+	return predicate.Users(sql.FieldHasSuffix(FieldTimezone, v))
 }
 
-// ZoneinfoEqualFold applies the EqualFold predicate on the "zoneinfo" field.
-func ZoneinfoEqualFold(v string) predicate.Users {
-	return predicate.Users(sql.FieldEqualFold(FieldZoneinfo, v))
+// TimezoneEqualFold applies the EqualFold predicate on the "timezone" field.
+func TimezoneEqualFold(v string) predicate.Users {
+	return predicate.Users(sql.FieldEqualFold(FieldTimezone, v))
 }
 
-// ZoneinfoContainsFold applies the ContainsFold predicate on the "zoneinfo" field.
-func ZoneinfoContainsFold(v string) predicate.Users {
-	return predicate.Users(sql.FieldContainsFold(FieldZoneinfo, v))
+// TimezoneContainsFold applies the ContainsFold predicate on the "timezone" field.
+func TimezoneContainsFold(v string) predicate.Users {
+	return predicate.Users(sql.FieldContainsFold(FieldTimezone, v))
 }
 
 // LocaleEQ applies the EQ predicate on the "locale" field.

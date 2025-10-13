@@ -99,45 +99,37 @@ func (_c *GroupsCreate) SetName(v string) *GroupsCreate {
 	return _c
 }
 
-// SetType sets the "type" field.
-func (_c *GroupsCreate) SetType(v int) *GroupsCreate {
-	_c.mutation.SetType(v)
+// SetGroupType sets the "group_type" field.
+func (_c *GroupsCreate) SetGroupType(v int) *GroupsCreate {
+	_c.mutation.SetGroupType(v)
 	return _c
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableType(v *int) *GroupsCreate {
+// SetNillableGroupType sets the "group_type" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableGroupType(v *int) *GroupsCreate {
 	if v != nil {
-		_c.SetType(*v)
+		_c.SetGroupType(*v)
 	}
 	return _c
 }
 
-// SetStatus sets the "status" field.
-func (_c *GroupsCreate) SetStatus(v int) *GroupsCreate {
-	_c.mutation.SetStatus(v)
+// SetGroupStatus sets the "group_status" field.
+func (_c *GroupsCreate) SetGroupStatus(v int) *GroupsCreate {
+	_c.mutation.SetGroupStatus(v)
 	return _c
 }
 
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableStatus(v *int) *GroupsCreate {
+// SetNillableGroupStatus sets the "group_status" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableGroupStatus(v *int) *GroupsCreate {
 	if v != nil {
-		_c.SetStatus(*v)
+		_c.SetGroupStatus(*v)
 	}
 	return _c
 }
 
 // SetI18nName sets the "i18n_name" field.
-func (_c *GroupsCreate) SetI18nName(v string) *GroupsCreate {
+func (_c *GroupsCreate) SetI18nName(v map[string]string) *GroupsCreate {
 	_c.mutation.SetI18nName(v)
-	return _c
-}
-
-// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableI18nName(v *string) *GroupsCreate {
-	if v != nil {
-		_c.SetI18nName(*v)
-	}
 	return _c
 }
 
@@ -184,16 +176,8 @@ func (_c *GroupsCreate) SetNillableMaxMembers(v *int) *GroupsCreate {
 }
 
 // SetMetadata sets the "metadata" field.
-func (_c *GroupsCreate) SetMetadata(v string) *GroupsCreate {
+func (_c *GroupsCreate) SetMetadata(v map[string]string) *GroupsCreate {
 	_c.mutation.SetMetadata(v)
-	return _c
-}
-
-// SetNillableMetadata sets the "metadata" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableMetadata(v *string) *GroupsCreate {
-	if v != nil {
-		_c.SetMetadata(*v)
-	}
 	return _c
 }
 
@@ -331,17 +315,13 @@ func (_c *GroupsCreate) defaults() {
 		v := groups.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		v := groups.DefaultType
-		_c.mutation.SetType(v)
+	if _, ok := _c.mutation.GroupType(); !ok {
+		v := groups.DefaultGroupType
+		_c.mutation.SetGroupType(v)
 	}
-	if _, ok := _c.mutation.Status(); !ok {
-		v := groups.DefaultStatus
-		_c.mutation.SetStatus(v)
-	}
-	if _, ok := _c.mutation.I18nName(); !ok {
-		v := groups.DefaultI18nName
-		_c.mutation.SetI18nName(v)
+	if _, ok := _c.mutation.GroupStatus(); !ok {
+		v := groups.DefaultGroupStatus
+		_c.mutation.SetGroupStatus(v)
 	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		v := groups.DefaultOrderWeight
@@ -395,14 +375,11 @@ func (_c *GroupsCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Groups.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "Groups.type"`)}
+	if _, ok := _c.mutation.GroupType(); !ok {
+		return &ValidationError{Name: "group_type", err: errors.New(`lion: missing required field "Groups.group_type"`)}
 	}
-	if _, ok := _c.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New(`lion: missing required field "Groups.status"`)}
-	}
-	if _, ok := _c.mutation.I18nName(); !ok {
-		return &ValidationError{Name: "i18n_name", err: errors.New(`lion: missing required field "Groups.i18n_name"`)}
+	if _, ok := _c.mutation.GroupStatus(); !ok {
+		return &ValidationError{Name: "group_status", err: errors.New(`lion: missing required field "Groups.group_status"`)}
 	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Groups.order_weight"`)}
@@ -478,16 +455,16 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_spec.SetField(groups.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.GetType(); ok {
-		_spec.SetField(groups.FieldType, field.TypeInt, value)
-		_node.Type = value
+	if value, ok := _c.mutation.GroupType(); ok {
+		_spec.SetField(groups.FieldGroupType, field.TypeInt, value)
+		_node.GroupType = value
 	}
-	if value, ok := _c.mutation.Status(); ok {
-		_spec.SetField(groups.FieldStatus, field.TypeInt, value)
-		_node.Status = value
+	if value, ok := _c.mutation.GroupStatus(); ok {
+		_spec.SetField(groups.FieldGroupStatus, field.TypeInt, value)
+		_node.GroupStatus = value
 	}
 	if value, ok := _c.mutation.I18nName(); ok {
-		_spec.SetField(groups.FieldI18nName, field.TypeString, value)
+		_spec.SetField(groups.FieldI18nName, field.TypeJSON, value)
 		_node.I18nName = value
 	}
 	if value, ok := _c.mutation.OrderWeight(); ok {
@@ -503,7 +480,7 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_node.MaxMembers = value
 	}
 	if value, ok := _c.mutation.Metadata(); ok {
-		_spec.SetField(groups.FieldMetadata, field.TypeString, value)
+		_spec.SetField(groups.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
 	}
 	if value, ok := _c.mutation.ExternalID(); ok {

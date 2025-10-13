@@ -49,6 +49,20 @@ func (_c *ResourcesCreate) SetNillableUpdatedAt(v *time.Time) *ResourcesCreate {
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *ResourcesCreate) SetDeletedAt(v time.Time) *ResourcesCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableDeletedAt(v *time.Time) *ResourcesCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetCreatedBy sets the "created_by" field.
 func (_c *ResourcesCreate) SetCreatedBy(v int64) *ResourcesCreate {
 	_c.mutation.SetCreatedBy(v)
@@ -98,16 +112,8 @@ func (_c *ResourcesCreate) SetName(v string) *ResourcesCreate {
 }
 
 // SetI18nName sets the "i18n_name" field.
-func (_c *ResourcesCreate) SetI18nName(v string) *ResourcesCreate {
+func (_c *ResourcesCreate) SetI18nName(v map[string]string) *ResourcesCreate {
 	_c.mutation.SetI18nName(v)
-	return _c
-}
-
-// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableI18nName(v *string) *ResourcesCreate {
-	if v != nil {
-		_c.SetI18nName(*v)
-	}
 	return _c
 }
 
@@ -125,30 +131,30 @@ func (_c *ResourcesCreate) SetNillableOrderWeight(v *int) *ResourcesCreate {
 	return _c
 }
 
-// SetType sets the "type" field.
-func (_c *ResourcesCreate) SetType(v int) *ResourcesCreate {
-	_c.mutation.SetType(v)
+// SetResourceType sets the "resource_type" field.
+func (_c *ResourcesCreate) SetResourceType(v int) *ResourcesCreate {
+	_c.mutation.SetResourceType(v)
 	return _c
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableType(v *int) *ResourcesCreate {
+// SetNillableResourceType sets the "resource_type" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableResourceType(v *int) *ResourcesCreate {
 	if v != nil {
-		_c.SetType(*v)
+		_c.SetResourceType(*v)
 	}
 	return _c
 }
 
-// SetScope sets the "scope" field.
-func (_c *ResourcesCreate) SetScope(v int) *ResourcesCreate {
-	_c.mutation.SetScope(v)
+// SetResourceScope sets the "resource_scope" field.
+func (_c *ResourcesCreate) SetResourceScope(v int) *ResourcesCreate {
+	_c.mutation.SetResourceScope(v)
 	return _c
 }
 
-// SetNillableScope sets the "scope" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableScope(v *int) *ResourcesCreate {
+// SetNillableResourceScope sets the "resource_scope" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableResourceScope(v *int) *ResourcesCreate {
 	if v != nil {
-		_c.SetScope(*v)
+		_c.SetResourceScope(*v)
 	}
 	return _c
 }
@@ -251,6 +257,12 @@ func (_c *ResourcesCreate) SetNillableDescription(v *string) *ResourcesCreate {
 	return _c
 }
 
+// SetPermissions sets the "permissions" field.
+func (_c *ResourcesCreate) SetPermissions(v []string) *ResourcesCreate {
+	_c.mutation.SetPermissions(v)
+	return _c
+}
+
 // AddLionRoleResourceIDs adds the "lion_role_resources" edge to the RoleResources entity by IDs.
 func (_c *ResourcesCreate) AddLionRoleResourceIDs(ids ...int) *ResourcesCreate {
 	_c.mutation.AddLionRoleResourceIDs(ids...)
@@ -321,21 +333,17 @@ func (_c *ResourcesCreate) defaults() {
 		v := resources.DefaultParentID
 		_c.mutation.SetParentID(v)
 	}
-	if _, ok := _c.mutation.I18nName(); !ok {
-		v := resources.DefaultI18nName
-		_c.mutation.SetI18nName(v)
-	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		v := resources.DefaultOrderWeight
 		_c.mutation.SetOrderWeight(v)
 	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		v := resources.DefaultType
-		_c.mutation.SetType(v)
+	if _, ok := _c.mutation.ResourceType(); !ok {
+		v := resources.DefaultResourceType
+		_c.mutation.SetResourceType(v)
 	}
-	if _, ok := _c.mutation.Scope(); !ok {
-		v := resources.DefaultScope
-		_c.mutation.SetScope(v)
+	if _, ok := _c.mutation.ResourceScope(); !ok {
+		v := resources.DefaultResourceScope
+		_c.mutation.SetResourceScope(v)
 	}
 	if _, ok := _c.mutation.Enabled(); !ok {
 		v := resources.DefaultEnabled
@@ -392,17 +400,14 @@ func (_c *ResourcesCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Resources.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.I18nName(); !ok {
-		return &ValidationError{Name: "i18n_name", err: errors.New(`lion: missing required field "Resources.i18n_name"`)}
-	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Resources.order_weight"`)}
 	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "Resources.type"`)}
+	if _, ok := _c.mutation.ResourceType(); !ok {
+		return &ValidationError{Name: "resource_type", err: errors.New(`lion: missing required field "Resources.resource_type"`)}
 	}
-	if _, ok := _c.mutation.Scope(); !ok {
-		return &ValidationError{Name: "scope", err: errors.New(`lion: missing required field "Resources.scope"`)}
+	if _, ok := _c.mutation.ResourceScope(); !ok {
+		return &ValidationError{Name: "resource_scope", err: errors.New(`lion: missing required field "Resources.resource_scope"`)}
 	}
 	if _, ok := _c.mutation.Enabled(); !ok {
 		return &ValidationError{Name: "enabled", err: errors.New(`lion: missing required field "Resources.enabled"`)}
@@ -474,6 +479,10 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 		_spec.SetField(resources.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(resources.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
 		_spec.SetField(resources.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = value
@@ -491,20 +500,20 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 		_node.Name = value
 	}
 	if value, ok := _c.mutation.I18nName(); ok {
-		_spec.SetField(resources.FieldI18nName, field.TypeString, value)
+		_spec.SetField(resources.FieldI18nName, field.TypeJSON, value)
 		_node.I18nName = value
 	}
 	if value, ok := _c.mutation.OrderWeight(); ok {
 		_spec.SetField(resources.FieldOrderWeight, field.TypeInt, value)
 		_node.OrderWeight = value
 	}
-	if value, ok := _c.mutation.GetType(); ok {
-		_spec.SetField(resources.FieldType, field.TypeInt, value)
-		_node.Type = value
+	if value, ok := _c.mutation.ResourceType(); ok {
+		_spec.SetField(resources.FieldResourceType, field.TypeInt, value)
+		_node.ResourceType = value
 	}
-	if value, ok := _c.mutation.Scope(); ok {
-		_spec.SetField(resources.FieldScope, field.TypeInt, value)
-		_node.Scope = value
+	if value, ok := _c.mutation.ResourceScope(); ok {
+		_spec.SetField(resources.FieldResourceScope, field.TypeInt, value)
+		_node.ResourceScope = value
 	}
 	if value, ok := _c.mutation.Enabled(); ok {
 		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
@@ -533,6 +542,10 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := _c.mutation.Permissions(); ok {
+		_spec.SetField(resources.FieldPermissions, field.TypeJSON, value)
+		_node.Permissions = value
 	}
 	if nodes := _c.mutation.LionRoleResourcesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

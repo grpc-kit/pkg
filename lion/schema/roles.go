@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Roles holds the schema definition for the Demo entity.
@@ -24,12 +25,15 @@ func (Roles) Fields() []ent.Field {
 			Unique().
 			Match(regexp.MustCompile(`^[a-zA-Z0-9]+$`)).
 			Comment("角色名称，仅支持字母、数字"),
-		field.String("i18n_name").
-			Default("").
-			Comment("国际化标识"),
-		field.Bool("protected").
-			Default(false).
-			Comment("是否保护字段，不允许 UI 修改"),
+		field.JSON("i18n_name", map[string]string{}).
+			Optional().
+			Comment("角色国际化名称，支持多语言，对应 proto 中的 map<string, string> i18n_name"),
+		field.Int("role_type").
+			Default(0).
+			Comment("角色类型：TYPE_SYSTEM=系统内置角色，TYPE_CUSTOM=自定义角色，TYPE_TEMPLATE=模板角色"),
+		field.Int("role_status").
+			Default(0).
+			Comment("角色状态：STATUS_ACTIVE=正常启用，STATUS_DISABLED=禁用状态"),
 		field.Int("order_weight").
 			Default(0).
 			Comment("排序权重，越小越靠前"),
@@ -53,8 +57,16 @@ func (Roles) Edges() []ent.Edge {
 // Mixin of the table.
 func (Roles) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixinWithoutDeleted{},
+		TimeMixin{},
 		AuditMixin{},
+	}
+}
+
+// Indexes 定义索引
+func (Roles) Indexes() []ent.Index {
+	return []ent.Index{
+		// 角色名称唯一索引（已在字段定义中设置 Unique，这里作为补充）
+		index.Fields("name").Unique(),
 	}
 }
 

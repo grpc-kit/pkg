@@ -28,10 +28,10 @@ const (
 	FieldUsername = "username"
 	// FieldRealnameEncrypted holds the string denoting the realname_encrypted field in the database.
 	FieldRealnameEncrypted = "realname_encrypted"
-	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
-	// FieldStatus holds the string denoting the status field in the database.
-	FieldStatus = "status"
+	// FieldUserType holds the string denoting the user_type field in the database.
+	FieldUserType = "user_type"
+	// FieldUserStatus holds the string denoting the user_status field in the database.
+	FieldUserStatus = "user_status"
 	// FieldNationalIDEncrypted holds the string denoting the national_id_encrypted field in the database.
 	FieldNationalIDEncrypted = "national_id_encrypted"
 	// FieldNationalIDHash holds the string denoting the national_id_hash field in the database.
@@ -54,8 +54,8 @@ const (
 	FieldGender = "gender"
 	// FieldBirthdate holds the string denoting the birthdate field in the database.
 	FieldBirthdate = "birthdate"
-	// FieldZoneinfo holds the string denoting the zoneinfo field in the database.
-	FieldZoneinfo = "zoneinfo"
+	// FieldTimezone holds the string denoting the timezone field in the database.
+	FieldTimezone = "timezone"
 	// FieldLocale holds the string denoting the locale field in the database.
 	FieldLocale = "locale"
 	// FieldPhoneNumberEncrypted holds the string denoting the phone_number_encrypted field in the database.
@@ -68,6 +68,8 @@ const (
 	FieldAddressEncrypted = "address_encrypted"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
 	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
 	EdgeLionUserRoles = "lion_user_roles"
 	// EdgeLionUserGroups holds the string denoting the lion_user_groups edge name in mutations.
@@ -118,8 +120,8 @@ var Columns = []string{
 	FieldUpdatedBy,
 	FieldUsername,
 	FieldRealnameEncrypted,
-	FieldType,
-	FieldStatus,
+	FieldUserType,
+	FieldUserStatus,
 	FieldNationalIDEncrypted,
 	FieldNationalIDHash,
 	FieldNickname,
@@ -131,13 +133,14 @@ var Columns = []string{
 	FieldEmailVerified,
 	FieldGender,
 	FieldBirthdate,
-	FieldZoneinfo,
+	FieldTimezone,
 	FieldLocale,
 	FieldPhoneNumberEncrypted,
 	FieldPhoneNumberHash,
 	FieldPhoneNumberVerified,
 	FieldAddressEncrypted,
 	FieldDescription,
+	FieldMetadata,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -163,10 +166,10 @@ var (
 	DefaultUpdatedBy int64
 	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
 	UsernameValidator func(string) error
-	// DefaultType holds the default value on creation for the "type" field.
-	DefaultType int
-	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus int
+	// DefaultUserType holds the default value on creation for the "user_type" field.
+	DefaultUserType int
+	// DefaultUserStatus holds the default value on creation for the "user_status" field.
+	DefaultUserStatus int
 	// DefaultNationalIDHash holds the default value on creation for the "national_id_hash" field.
 	DefaultNationalIDHash string
 	// DefaultNickname holds the default value on creation for the "nickname" field.
@@ -187,8 +190,8 @@ var (
 	DefaultGender int
 	// DefaultBirthdate holds the default value on creation for the "birthdate" field.
 	DefaultBirthdate func() time.Time
-	// DefaultZoneinfo holds the default value on creation for the "zoneinfo" field.
-	DefaultZoneinfo string
+	// DefaultTimezone holds the default value on creation for the "timezone" field.
+	DefaultTimezone string
 	// DefaultLocale holds the default value on creation for the "locale" field.
 	DefaultLocale string
 	// DefaultPhoneNumberHash holds the default value on creation for the "phone_number_hash" field.
@@ -199,6 +202,8 @@ var (
 	DefaultDescription string
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	DescriptionValidator func(string) error
+	// DefaultMetadata holds the default value on creation for the "metadata" field.
+	DefaultMetadata map[string]string
 )
 
 // OrderOption defines the ordering options for the Users queries.
@@ -239,14 +244,14 @@ func ByUsername(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUsername, opts...).ToFunc()
 }
 
-// ByType orders the results by the type field.
-func ByType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldType, opts...).ToFunc()
+// ByUserType orders the results by the user_type field.
+func ByUserType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserType, opts...).ToFunc()
 }
 
-// ByStatus orders the results by the status field.
-func ByStatus(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+// ByUserStatus orders the results by the user_status field.
+func ByUserStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserStatus, opts...).ToFunc()
 }
 
 // ByNationalIDHash orders the results by the national_id_hash field.
@@ -294,9 +299,9 @@ func ByBirthdate(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBirthdate, opts...).ToFunc()
 }
 
-// ByZoneinfo orders the results by the zoneinfo field.
-func ByZoneinfo(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldZoneinfo, opts...).ToFunc()
+// ByTimezone orders the results by the timezone field.
+func ByTimezone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTimezone, opts...).ToFunc()
 }
 
 // ByLocale orders the results by the locale field.

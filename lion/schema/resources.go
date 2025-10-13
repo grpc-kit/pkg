@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Resources holds the schema definition for the Demo entity.
@@ -23,16 +24,16 @@ func (Resources) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("资源名称"),
-		field.String("i18n_name").
-			Default("").
-			Comment("国际化标识"),
+		field.JSON("i18n_name", map[string]string{}).
+			Optional().
+			Comment("国际化名称，支持多语言，如 {\"en\": \"User\", \"zh\": \"用户\"}"),
 		field.Int("order_weight").
 			Default(0).
 			Comment("排序权重，越小越靠前"),
-		field.Int("type").
+		field.Int("resource_type").
 			Default(0).
 			Comment("用途类型，对应 api/known/admin/v1/common.proto 中定义"),
-		field.Int("scope").
+		field.Int("resource_scope").
 			Default(0).
 			Comment("作用范围，对应 api/known/admin/v1/common.proto 中定义"),
 		field.Bool("enabled").
@@ -59,22 +60,43 @@ func (Resources) Fields() []ent.Field {
 		field.String("description").
 			Default("").
 			Comment("详细描述"),
+		field.JSON("permissions", []string{}).
+			Optional().
+			Comment("权限列表，对应 proto 中的 repeated string permissions"),
 	}
 }
 
 // Edges of the table.
 func (Resources) Edges() []ent.Edge {
 	return []ent.Edge{
-		// 一个 Menu 可以对应多个 RoleMenu (中间实体)
-		edge.To("lion_role_resources", RoleResources.Type),
+		// 一个 Resource 可以对应多个 RoleResources (中间实体)
+		edge.To("lion_role_resources", RoleResources.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 
 // Mixin of the table.
 func (Resources) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixinWithoutDeleted{},
+		TimeMixin{},
 		AuditMixin{},
+	}
+}
+
+// Indexes 定义索引
+func (Resources) Indexes() []ent.Index {
+	return []ent.Index{
+		// 父资源ID索引，用于快速查找子资源
+		index.Fields("parent_id"),
+		// 类型和作用域组合索引，用于按类型和作用域查询
+		index.Fields("resource_type", "resource_scope"),
+		// 启用状态索引，用于快速过滤启用的资源
+		index.Fields("enabled"),
+		// 排序权重索引，用于排序查询
+		index.Fields("order_weight"),
+		// 路径索引，用于路由匹配
+		index.Fields("path"),
+		// 父资源ID + 排序权重组合索引，用于同级资源排序
+		index.Fields("parent_id", "order_weight"),
 	}
 }
 

@@ -28,7 +28,7 @@ type AuthProviders struct {
 	// 认证提供方名称
 	Name string `json:"name,omitempty"`
 	// 支持的认证提供方
-	Type int `json:"type,omitempty"`
+	ProviderType int `json:"provider_type,omitempty"`
 	// ClientID holds the value of the "client_id" field.
 	ClientID string `json:"client_id,omitempty"`
 	// Enabled holds the value of the "enabled" field.
@@ -80,7 +80,7 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case authproviders.FieldEnabled:
 			values[i] = new(sql.NullBool)
-		case authproviders.FieldID, authproviders.FieldCreatedBy, authproviders.FieldUpdatedBy, authproviders.FieldType:
+		case authproviders.FieldID, authproviders.FieldCreatedBy, authproviders.FieldUpdatedBy, authproviders.FieldProviderType:
 			values[i] = new(sql.NullInt64)
 		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldScopes, authproviders.FieldRedirectURI, authproviders.FieldIssuer, authproviders.FieldAuthorizationEndpoint, authproviders.FieldTokenEndpoint, authproviders.FieldUserinfoEndpoint:
 			values[i] = new(sql.NullString)
@@ -137,11 +137,11 @@ func (_m *AuthProviders) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case authproviders.FieldType:
+		case authproviders.FieldProviderType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field type", values[i])
+				return fmt.Errorf("unexpected type %T for field provider_type", values[i])
 			} else if value.Valid {
-				_m.Type = int(value.Int64)
+				_m.ProviderType = int(value.Int64)
 			}
 		case authproviders.FieldClientID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -253,8 +253,8 @@ func (_m *AuthProviders) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Type))
+	builder.WriteString("provider_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProviderType))
 	builder.WriteString(", ")
 	builder.WriteString("client_id=")
 	builder.WriteString(_m.ClientID)

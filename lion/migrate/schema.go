@@ -17,9 +17,9 @@ var (
 		{Name: "created_by", Type: field.TypeInt64, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "type", Type: field.TypeInt},
+		{Name: "provider_type", Type: field.TypeInt},
 		{Name: "client_id", Type: field.TypeString, Default: ""},
-		{Name: "enabled", Type: field.TypeBool, Default: false},
+		{Name: "enabled", Type: field.TypeBool, Default: true},
 		{Name: "client_secret_encrypted", Type: field.TypeBytes},
 		{Name: "scopes", Type: field.TypeString, Default: ""},
 		{Name: "redirect_uri", Type: field.TypeString, Default: ""},
@@ -146,13 +146,13 @@ var (
 		{Name: "created_by", Type: field.TypeInt64, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
-		{Name: "type", Type: field.TypeInt, Default: 0},
-		{Name: "status", Type: field.TypeInt, Default: 0},
-		{Name: "i18n_name", Type: field.TypeString, Default: ""},
+		{Name: "group_type", Type: field.TypeInt, Default: 0},
+		{Name: "group_status", Type: field.TypeInt, Default: 0},
+		{Name: "i18n_name", Type: field.TypeJSON, Nullable: true},
 		{Name: "order_weight", Type: field.TypeInt, Default: 0},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "max_members", Type: field.TypeInt, Default: 0},
-		{Name: "metadata", Type: field.TypeString, Default: ""},
+		{Name: "metadata", Type: field.TypeJSON},
 		{Name: "external_id", Type: field.TypeString, Default: ""},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "department_id", Type: field.TypeInt, Default: 1},
@@ -168,6 +168,23 @@ var (
 				Columns:    []*schema.Column{LionGroupsColumns[16]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "groups_name",
+				Unique:  true,
+				Columns: []*schema.Column{LionGroupsColumns[6]},
+			},
+			{
+				Name:    "groups_group_type",
+				Unique:  false,
+				Columns: []*schema.Column{LionGroupsColumns[7]},
+			},
+			{
+				Name:    "groups_group_status",
+				Unique:  false,
+				Columns: []*schema.Column{LionGroupsColumns[8]},
 			},
 		},
 	}
@@ -207,14 +224,15 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_by", Type: field.TypeInt64, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "name", Type: field.TypeString, Size: 128},
-		{Name: "i18n_name", Type: field.TypeString, Default: ""},
+		{Name: "i18n_name", Type: field.TypeJSON, Nullable: true},
 		{Name: "order_weight", Type: field.TypeInt, Default: 0},
-		{Name: "type", Type: field.TypeInt, Default: 0},
-		{Name: "scope", Type: field.TypeInt, Default: 0},
+		{Name: "resource_type", Type: field.TypeInt, Default: 0},
+		{Name: "resource_scope", Type: field.TypeInt, Default: 0},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
 		{Name: "hidden", Type: field.TypeBool, Default: false},
 		{Name: "hide_children", Type: field.TypeBool, Default: false},
@@ -222,12 +240,45 @@ var (
 		{Name: "icon", Type: field.TypeString, Size: 256, Default: ""},
 		{Name: "component", Type: field.TypeString, Size: 256, Default: ""},
 		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "permissions", Type: field.TypeJSON, Nullable: true},
 	}
 	// LionResourcesTable holds the schema information for the "lion_resources" table.
 	LionResourcesTable = &schema.Table{
 		Name:       "lion_resources",
 		Columns:    LionResourcesColumns,
 		PrimaryKey: []*schema.Column{LionResourcesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "resources_parent_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionResourcesColumns[6]},
+			},
+			{
+				Name:    "resources_resource_type_resource_scope",
+				Unique:  false,
+				Columns: []*schema.Column{LionResourcesColumns[10], LionResourcesColumns[11]},
+			},
+			{
+				Name:    "resources_enabled",
+				Unique:  false,
+				Columns: []*schema.Column{LionResourcesColumns[12]},
+			},
+			{
+				Name:    "resources_order_weight",
+				Unique:  false,
+				Columns: []*schema.Column{LionResourcesColumns[9]},
+			},
+			{
+				Name:    "resources_path",
+				Unique:  false,
+				Columns: []*schema.Column{LionResourcesColumns[15]},
+			},
+			{
+				Name:    "resources_parent_id_order_weight",
+				Unique:  false,
+				Columns: []*schema.Column{LionResourcesColumns[6], LionResourcesColumns[9]},
+			},
+		},
 	}
 	// LionRoleDepartmentsColumns holds the columns for the "lion_role_departments" table.
 	LionRoleDepartmentsColumns = []*schema.Column{
@@ -249,7 +300,7 @@ var (
 				Symbol:     "lion_role_departments_lion_departments_lion_role_departments",
 				Columns:    []*schema.Column{LionRoleDepartmentsColumns[5]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
-				OnDelete:   schema.Cascade,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_role_departments_lion_roles_lion_role_departments",
@@ -302,7 +353,7 @@ var (
 				Symbol:     "lion_role_resources_lion_resources_lion_role_resources",
 				Columns:    []*schema.Column{LionRoleResourcesColumns[5]},
 				RefColumns: []*schema.Column{LionResourcesColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "lion_role_resources_lion_roles_lion_role_resources",
@@ -324,11 +375,13 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_by", Type: field.TypeInt64, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
-		{Name: "i18n_name", Type: field.TypeString, Default: ""},
-		{Name: "protected", Type: field.TypeBool, Default: false},
+		{Name: "i18n_name", Type: field.TypeJSON, Nullable: true},
+		{Name: "role_type", Type: field.TypeInt, Default: 0},
+		{Name: "role_status", Type: field.TypeInt, Default: 0},
 		{Name: "order_weight", Type: field.TypeInt, Default: 0},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}
@@ -337,6 +390,13 @@ var (
 		Name:       "lion_roles",
 		Columns:    LionRolesColumns,
 		PrimaryKey: []*schema.Column{LionRolesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "roles_name",
+				Unique:  true,
+				Columns: []*schema.Column{LionRolesColumns[6]},
+			},
+		},
 	}
 	// LionUserDepartmentsColumns holds the columns for the "lion_user_departments" table.
 	LionUserDepartmentsColumns = []*schema.Column{
@@ -385,14 +445,13 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_by", Type: field.TypeInt64, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "member_role", Type: field.TypeInt, Default: 0},
 		{Name: "member_status", Type: field.TypeInt, Default: 0},
 		{Name: "joined_at", Type: field.TypeTime, Nullable: true},
 		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
-		{Name: "metadata", Type: field.TypeString, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "group_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
@@ -405,13 +464,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_user_groups_lion_groups_lion_user_groups",
-				Columns:    []*schema.Column{LionUserGroupsColumns[12]},
+				Columns:    []*schema.Column{LionUserGroupsColumns[11]},
 				RefColumns: []*schema.Column{LionGroupsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_user_groups_lion_users_lion_user_groups",
-				Columns:    []*schema.Column{LionUserGroupsColumns[13]},
+				Columns:    []*schema.Column{LionUserGroupsColumns[12]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -420,7 +479,7 @@ var (
 			{
 				Name:    "usergroups_user_id_group_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserGroupsColumns[13], LionUserGroupsColumns[12]},
+				Columns: []*schema.Column{LionUserGroupsColumns[12], LionUserGroupsColumns[11]},
 			},
 		},
 	}
@@ -542,8 +601,8 @@ var (
 		{Name: "updated_by", Type: field.TypeInt64, Default: 0},
 		{Name: "username", Type: field.TypeString, Unique: true, Size: 255},
 		{Name: "realname_encrypted", Type: field.TypeBytes, Nullable: true},
-		{Name: "type", Type: field.TypeInt, Default: 0},
-		{Name: "status", Type: field.TypeInt, Default: 0},
+		{Name: "user_type", Type: field.TypeInt, Default: 0},
+		{Name: "user_status", Type: field.TypeInt, Default: 0},
 		{Name: "national_id_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "national_id_hash", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "nickname", Type: field.TypeString, Default: ""},
@@ -555,19 +614,87 @@ var (
 		{Name: "email_verified", Type: field.TypeBool, Default: false},
 		{Name: "gender", Type: field.TypeInt, Default: 0},
 		{Name: "birthdate", Type: field.TypeTime, Nullable: true},
-		{Name: "zoneinfo", Type: field.TypeString, Default: ""},
+		{Name: "timezone", Type: field.TypeString, Default: ""},
 		{Name: "locale", Type: field.TypeString, Default: ""},
 		{Name: "phone_number_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "phone_number_hash", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "phone_number_verified", Type: field.TypeBool, Default: false},
 		{Name: "address_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "description", Type: field.TypeString, Size: 4096, Default: ""},
+		{Name: "metadata", Type: field.TypeJSON},
 	}
 	// LionUsersTable holds the schema information for the "lion_users" table.
 	LionUsersTable = &schema.Table{
 		Name:       "lion_users",
 		Columns:    LionUsersColumns,
 		PrimaryKey: []*schema.Column{LionUsersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "users_username",
+				Unique:  true,
+				Columns: []*schema.Column{LionUsersColumns[6]},
+			},
+			{
+				Name:    "users_user_type",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[8]},
+			},
+			{
+				Name:    "users_user_status",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[9]},
+			},
+			{
+				Name:    "users_email_hash",
+				Unique:  true,
+				Columns: []*schema.Column{LionUsersColumns[17]},
+			},
+			{
+				Name:    "users_phone_number_hash",
+				Unique:  true,
+				Columns: []*schema.Column{LionUsersColumns[24]},
+			},
+			{
+				Name:    "users_national_id_hash",
+				Unique:  true,
+				Columns: []*schema.Column{LionUsersColumns[11]},
+			},
+			{
+				Name:    "users_email_verified",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[18]},
+			},
+			{
+				Name:    "users_phone_number_verified",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[25]},
+			},
+			{
+				Name:    "users_gender",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[19]},
+			},
+			{
+				Name:    "users_created_by",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[4]},
+			},
+			{
+				Name:    "users_updated_by",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[5]},
+			},
+			{
+				Name:    "users_user_type_user_status",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[8], LionUsersColumns[9]},
+			},
+			{
+				Name:    "users_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[1]},
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{

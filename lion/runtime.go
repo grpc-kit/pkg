@@ -291,18 +291,14 @@ func init() {
 			return nil
 		}
 	}()
-	// groupsDescType is the schema descriptor for type field.
-	groupsDescType := groupsFields[1].Descriptor()
-	// groups.DefaultType holds the default value on creation for the type field.
-	groups.DefaultType = groupsDescType.Default.(int)
-	// groupsDescStatus is the schema descriptor for status field.
-	groupsDescStatus := groupsFields[2].Descriptor()
-	// groups.DefaultStatus holds the default value on creation for the status field.
-	groups.DefaultStatus = groupsDescStatus.Default.(int)
-	// groupsDescI18nName is the schema descriptor for i18n_name field.
-	groupsDescI18nName := groupsFields[3].Descriptor()
-	// groups.DefaultI18nName holds the default value on creation for the i18n_name field.
-	groups.DefaultI18nName = groupsDescI18nName.Default.(string)
+	// groupsDescGroupType is the schema descriptor for group_type field.
+	groupsDescGroupType := groupsFields[1].Descriptor()
+	// groups.DefaultGroupType holds the default value on creation for the group_type field.
+	groups.DefaultGroupType = groupsDescGroupType.Default.(int)
+	// groupsDescGroupStatus is the schema descriptor for group_status field.
+	groupsDescGroupStatus := groupsFields[2].Descriptor()
+	// groups.DefaultGroupStatus holds the default value on creation for the group_status field.
+	groups.DefaultGroupStatus = groupsDescGroupStatus.Default.(int)
 	// groupsDescOrderWeight is the schema descriptor for order_weight field.
 	groupsDescOrderWeight := groupsFields[4].Descriptor()
 	// groups.DefaultOrderWeight holds the default value on creation for the order_weight field.
@@ -318,7 +314,7 @@ func init() {
 	// groupsDescMetadata is the schema descriptor for metadata field.
 	groupsDescMetadata := groupsFields[7].Descriptor()
 	// groups.DefaultMetadata holds the default value on creation for the metadata field.
-	groups.DefaultMetadata = groupsDescMetadata.Default.(string)
+	groups.DefaultMetadata = groupsDescMetadata.Default.(map[string]string)
 	// groupsDescExternalID is the schema descriptor for external_id field.
 	groupsDescExternalID := groupsFields[8].Descriptor()
 	// groups.DefaultExternalID holds the default value on creation for the external_id field.
@@ -450,22 +446,18 @@ func init() {
 			return nil
 		}
 	}()
-	// resourcesDescI18nName is the schema descriptor for i18n_name field.
-	resourcesDescI18nName := resourcesFields[2].Descriptor()
-	// resources.DefaultI18nName holds the default value on creation for the i18n_name field.
-	resources.DefaultI18nName = resourcesDescI18nName.Default.(string)
 	// resourcesDescOrderWeight is the schema descriptor for order_weight field.
 	resourcesDescOrderWeight := resourcesFields[3].Descriptor()
 	// resources.DefaultOrderWeight holds the default value on creation for the order_weight field.
 	resources.DefaultOrderWeight = resourcesDescOrderWeight.Default.(int)
-	// resourcesDescType is the schema descriptor for type field.
-	resourcesDescType := resourcesFields[4].Descriptor()
-	// resources.DefaultType holds the default value on creation for the type field.
-	resources.DefaultType = resourcesDescType.Default.(int)
-	// resourcesDescScope is the schema descriptor for scope field.
-	resourcesDescScope := resourcesFields[5].Descriptor()
-	// resources.DefaultScope holds the default value on creation for the scope field.
-	resources.DefaultScope = resourcesDescScope.Default.(int)
+	// resourcesDescResourceType is the schema descriptor for resource_type field.
+	resourcesDescResourceType := resourcesFields[4].Descriptor()
+	// resources.DefaultResourceType holds the default value on creation for the resource_type field.
+	resources.DefaultResourceType = resourcesDescResourceType.Default.(int)
+	// resourcesDescResourceScope is the schema descriptor for resource_scope field.
+	resourcesDescResourceScope := resourcesFields[5].Descriptor()
+	// resources.DefaultResourceScope holds the default value on creation for the resource_scope field.
+	resources.DefaultResourceScope = resourcesDescResourceScope.Default.(int)
 	// resourcesDescEnabled is the schema descriptor for enabled field.
 	resourcesDescEnabled := resourcesFields[6].Descriptor()
 	// resources.DefaultEnabled holds the default value on creation for the enabled field.
@@ -643,20 +635,20 @@ func init() {
 			return nil
 		}
 	}()
-	// rolesDescI18nName is the schema descriptor for i18n_name field.
-	rolesDescI18nName := rolesFields[1].Descriptor()
-	// roles.DefaultI18nName holds the default value on creation for the i18n_name field.
-	roles.DefaultI18nName = rolesDescI18nName.Default.(string)
-	// rolesDescProtected is the schema descriptor for protected field.
-	rolesDescProtected := rolesFields[2].Descriptor()
-	// roles.DefaultProtected holds the default value on creation for the protected field.
-	roles.DefaultProtected = rolesDescProtected.Default.(bool)
+	// rolesDescRoleType is the schema descriptor for role_type field.
+	rolesDescRoleType := rolesFields[2].Descriptor()
+	// roles.DefaultRoleType holds the default value on creation for the role_type field.
+	roles.DefaultRoleType = rolesDescRoleType.Default.(int)
+	// rolesDescRoleStatus is the schema descriptor for role_status field.
+	rolesDescRoleStatus := rolesFields[3].Descriptor()
+	// roles.DefaultRoleStatus holds the default value on creation for the role_status field.
+	roles.DefaultRoleStatus = rolesDescRoleStatus.Default.(int)
 	// rolesDescOrderWeight is the schema descriptor for order_weight field.
-	rolesDescOrderWeight := rolesFields[3].Descriptor()
+	rolesDescOrderWeight := rolesFields[4].Descriptor()
 	// roles.DefaultOrderWeight holds the default value on creation for the order_weight field.
 	roles.DefaultOrderWeight = rolesDescOrderWeight.Default.(int)
 	// rolesDescDescription is the schema descriptor for description field.
-	rolesDescDescription := rolesFields[4].Descriptor()
+	rolesDescDescription := rolesFields[5].Descriptor()
 	// roles.DefaultDescription holds the default value on creation for the description field.
 	roles.DefaultDescription = rolesDescDescription.Default.(string)
 	userdepartmentsMixin := schema.UserDepartments{}.Mixin()
@@ -894,14 +886,14 @@ func init() {
 			return nil
 		}
 	}()
-	// usersDescType is the schema descriptor for type field.
-	usersDescType := usersFields[2].Descriptor()
-	// users.DefaultType holds the default value on creation for the type field.
-	users.DefaultType = usersDescType.Default.(int)
-	// usersDescStatus is the schema descriptor for status field.
-	usersDescStatus := usersFields[3].Descriptor()
-	// users.DefaultStatus holds the default value on creation for the status field.
-	users.DefaultStatus = usersDescStatus.Default.(int)
+	// usersDescUserType is the schema descriptor for user_type field.
+	usersDescUserType := usersFields[2].Descriptor()
+	// users.DefaultUserType holds the default value on creation for the user_type field.
+	users.DefaultUserType = usersDescUserType.Default.(int)
+	// usersDescUserStatus is the schema descriptor for user_status field.
+	usersDescUserStatus := usersFields[3].Descriptor()
+	// users.DefaultUserStatus holds the default value on creation for the user_status field.
+	users.DefaultUserStatus = usersDescUserStatus.Default.(int)
 	// usersDescNationalIDHash is the schema descriptor for national_id_hash field.
 	usersDescNationalIDHash := usersFields[5].Descriptor()
 	// users.DefaultNationalIDHash holds the default value on creation for the national_id_hash field.
@@ -940,10 +932,10 @@ func init() {
 	usersDescBirthdate := usersFields[14].Descriptor()
 	// users.DefaultBirthdate holds the default value on creation for the birthdate field.
 	users.DefaultBirthdate = usersDescBirthdate.Default.(func() time.Time)
-	// usersDescZoneinfo is the schema descriptor for zoneinfo field.
-	usersDescZoneinfo := usersFields[15].Descriptor()
-	// users.DefaultZoneinfo holds the default value on creation for the zoneinfo field.
-	users.DefaultZoneinfo = usersDescZoneinfo.Default.(string)
+	// usersDescTimezone is the schema descriptor for timezone field.
+	usersDescTimezone := usersFields[15].Descriptor()
+	// users.DefaultTimezone holds the default value on creation for the timezone field.
+	users.DefaultTimezone = usersDescTimezone.Default.(string)
 	// usersDescLocale is the schema descriptor for locale field.
 	usersDescLocale := usersFields[16].Descriptor()
 	// users.DefaultLocale holds the default value on creation for the locale field.
@@ -962,4 +954,8 @@ func init() {
 	users.DefaultDescription = usersDescDescription.Default.(string)
 	// users.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	users.DescriptionValidator = usersDescDescription.Validators[0].(func(string) error)
+	// usersDescMetadata is the schema descriptor for metadata field.
+	usersDescMetadata := usersFields[22].Descriptor()
+	// users.DefaultMetadata holds the default value on creation for the metadata field.
+	users.DefaultMetadata = usersDescMetadata.Default.(map[string]string)
 }

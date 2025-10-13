@@ -106,30 +106,30 @@ func (_c *UsersCreate) SetRealnameEncrypted(v []byte) *UsersCreate {
 	return _c
 }
 
-// SetType sets the "type" field.
-func (_c *UsersCreate) SetType(v int) *UsersCreate {
-	_c.mutation.SetType(v)
+// SetUserType sets the "user_type" field.
+func (_c *UsersCreate) SetUserType(v int) *UsersCreate {
+	_c.mutation.SetUserType(v)
 	return _c
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_c *UsersCreate) SetNillableType(v *int) *UsersCreate {
+// SetNillableUserType sets the "user_type" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableUserType(v *int) *UsersCreate {
 	if v != nil {
-		_c.SetType(*v)
+		_c.SetUserType(*v)
 	}
 	return _c
 }
 
-// SetStatus sets the "status" field.
-func (_c *UsersCreate) SetStatus(v int) *UsersCreate {
-	_c.mutation.SetStatus(v)
+// SetUserStatus sets the "user_status" field.
+func (_c *UsersCreate) SetUserStatus(v int) *UsersCreate {
+	_c.mutation.SetUserStatus(v)
 	return _c
 }
 
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *UsersCreate) SetNillableStatus(v *int) *UsersCreate {
+// SetNillableUserStatus sets the "user_status" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableUserStatus(v *int) *UsersCreate {
 	if v != nil {
-		_c.SetStatus(*v)
+		_c.SetUserStatus(*v)
 	}
 	return _c
 }
@@ -272,16 +272,16 @@ func (_c *UsersCreate) SetNillableBirthdate(v *time.Time) *UsersCreate {
 	return _c
 }
 
-// SetZoneinfo sets the "zoneinfo" field.
-func (_c *UsersCreate) SetZoneinfo(v string) *UsersCreate {
-	_c.mutation.SetZoneinfo(v)
+// SetTimezone sets the "timezone" field.
+func (_c *UsersCreate) SetTimezone(v string) *UsersCreate {
+	_c.mutation.SetTimezone(v)
 	return _c
 }
 
-// SetNillableZoneinfo sets the "zoneinfo" field if the given value is not nil.
-func (_c *UsersCreate) SetNillableZoneinfo(v *string) *UsersCreate {
+// SetNillableTimezone sets the "timezone" field if the given value is not nil.
+func (_c *UsersCreate) SetNillableTimezone(v *string) *UsersCreate {
 	if v != nil {
-		_c.SetZoneinfo(*v)
+		_c.SetTimezone(*v)
 	}
 	return _c
 }
@@ -351,6 +351,12 @@ func (_c *UsersCreate) SetNillableDescription(v *string) *UsersCreate {
 	if v != nil {
 		_c.SetDescription(*v)
 	}
+	return _c
+}
+
+// SetMetadata sets the "metadata" field.
+func (_c *UsersCreate) SetMetadata(v map[string]string) *UsersCreate {
+	_c.mutation.SetMetadata(v)
 	return _c
 }
 
@@ -465,13 +471,13 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		v := users.DefaultType
-		_c.mutation.SetType(v)
+	if _, ok := _c.mutation.UserType(); !ok {
+		v := users.DefaultUserType
+		_c.mutation.SetUserType(v)
 	}
-	if _, ok := _c.mutation.Status(); !ok {
-		v := users.DefaultStatus
-		_c.mutation.SetStatus(v)
+	if _, ok := _c.mutation.UserStatus(); !ok {
+		v := users.DefaultUserStatus
+		_c.mutation.SetUserStatus(v)
 	}
 	if _, ok := _c.mutation.NationalIDHash(); !ok {
 		v := users.DefaultNationalIDHash
@@ -509,9 +515,9 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultBirthdate()
 		_c.mutation.SetBirthdate(v)
 	}
-	if _, ok := _c.mutation.Zoneinfo(); !ok {
-		v := users.DefaultZoneinfo
-		_c.mutation.SetZoneinfo(v)
+	if _, ok := _c.mutation.Timezone(); !ok {
+		v := users.DefaultTimezone
+		_c.mutation.SetTimezone(v)
 	}
 	if _, ok := _c.mutation.Locale(); !ok {
 		v := users.DefaultLocale
@@ -528,6 +534,10 @@ func (_c *UsersCreate) defaults() {
 	if _, ok := _c.mutation.Description(); !ok {
 		v := users.DefaultDescription
 		_c.mutation.SetDescription(v)
+	}
+	if _, ok := _c.mutation.Metadata(); !ok {
+		v := users.DefaultMetadata
+		_c.mutation.SetMetadata(v)
 	}
 }
 
@@ -553,11 +563,11 @@ func (_c *UsersCreate) check() error {
 			return &ValidationError{Name: "username", err: fmt.Errorf(`lion: validator failed for field "Users.username": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "Users.type"`)}
+	if _, ok := _c.mutation.UserType(); !ok {
+		return &ValidationError{Name: "user_type", err: errors.New(`lion: missing required field "Users.user_type"`)}
 	}
-	if _, ok := _c.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New(`lion: missing required field "Users.status"`)}
+	if _, ok := _c.mutation.UserStatus(); !ok {
+		return &ValidationError{Name: "user_status", err: errors.New(`lion: missing required field "Users.user_status"`)}
 	}
 	if _, ok := _c.mutation.Nickname(); !ok {
 		return &ValidationError{Name: "nickname", err: errors.New(`lion: missing required field "Users.nickname"`)}
@@ -582,8 +592,8 @@ func (_c *UsersCreate) check() error {
 	if _, ok := _c.mutation.Gender(); !ok {
 		return &ValidationError{Name: "gender", err: errors.New(`lion: missing required field "Users.gender"`)}
 	}
-	if _, ok := _c.mutation.Zoneinfo(); !ok {
-		return &ValidationError{Name: "zoneinfo", err: errors.New(`lion: missing required field "Users.zoneinfo"`)}
+	if _, ok := _c.mutation.Timezone(); !ok {
+		return &ValidationError{Name: "timezone", err: errors.New(`lion: missing required field "Users.timezone"`)}
 	}
 	if _, ok := _c.mutation.Locale(); !ok {
 		return &ValidationError{Name: "locale", err: errors.New(`lion: missing required field "Users.locale"`)}
@@ -598,6 +608,9 @@ func (_c *UsersCreate) check() error {
 		if err := users.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Metadata(); !ok {
+		return &ValidationError{Name: "metadata", err: errors.New(`lion: missing required field "Users.metadata"`)}
 	}
 	return nil
 }
@@ -653,13 +666,13 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_spec.SetField(users.FieldRealnameEncrypted, field.TypeBytes, value)
 		_node.RealnameEncrypted = value
 	}
-	if value, ok := _c.mutation.GetType(); ok {
-		_spec.SetField(users.FieldType, field.TypeInt, value)
-		_node.Type = value
+	if value, ok := _c.mutation.UserType(); ok {
+		_spec.SetField(users.FieldUserType, field.TypeInt, value)
+		_node.UserType = value
 	}
-	if value, ok := _c.mutation.Status(); ok {
-		_spec.SetField(users.FieldStatus, field.TypeInt, value)
-		_node.Status = value
+	if value, ok := _c.mutation.UserStatus(); ok {
+		_spec.SetField(users.FieldUserStatus, field.TypeInt, value)
+		_node.UserStatus = value
 	}
 	if value, ok := _c.mutation.NationalIDEncrypted(); ok {
 		_spec.SetField(users.FieldNationalIDEncrypted, field.TypeBytes, value)
@@ -705,9 +718,9 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		_spec.SetField(users.FieldBirthdate, field.TypeTime, value)
 		_node.Birthdate = value
 	}
-	if value, ok := _c.mutation.Zoneinfo(); ok {
-		_spec.SetField(users.FieldZoneinfo, field.TypeString, value)
-		_node.Zoneinfo = value
+	if value, ok := _c.mutation.Timezone(); ok {
+		_spec.SetField(users.FieldTimezone, field.TypeString, value)
+		_node.Timezone = value
 	}
 	if value, ok := _c.mutation.Locale(); ok {
 		_spec.SetField(users.FieldLocale, field.TypeString, value)
@@ -732,6 +745,10 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := _c.mutation.Metadata(); ok {
+		_spec.SetField(users.FieldMetadata, field.TypeJSON, value)
+		_node.Metadata = value
 	}
 	if nodes := _c.mutation.LionUserRolesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

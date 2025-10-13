@@ -83,9 +83,9 @@ func (_c *AuthProvidersCreate) SetName(v string) *AuthProvidersCreate {
 	return _c
 }
 
-// SetType sets the "type" field.
-func (_c *AuthProvidersCreate) SetType(v int) *AuthProvidersCreate {
-	_c.mutation.SetType(v)
+// SetProviderType sets the "provider_type" field.
+func (_c *AuthProvidersCreate) SetProviderType(v int) *AuthProvidersCreate {
+	_c.mutation.SetProviderType(v)
 	return _c
 }
 
@@ -328,8 +328,8 @@ func (_c *AuthProvidersCreate) check() error {
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "AuthProviders.name"`)}
 	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		return &ValidationError{Name: "type", err: errors.New(`lion: missing required field "AuthProviders.type"`)}
+	if _, ok := _c.mutation.ProviderType(); !ok {
+		return &ValidationError{Name: "provider_type", err: errors.New(`lion: missing required field "AuthProviders.provider_type"`)}
 	}
 	if _, ok := _c.mutation.ClientID(); !ok {
 		return &ValidationError{Name: "client_id", err: errors.New(`lion: missing required field "AuthProviders.client_id"`)}
@@ -404,9 +404,9 @@ func (_c *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSpe
 		_spec.SetField(authproviders.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.GetType(); ok {
-		_spec.SetField(authproviders.FieldType, field.TypeInt, value)
-		_node.Type = value
+	if value, ok := _c.mutation.ProviderType(); ok {
+		_spec.SetField(authproviders.FieldProviderType, field.TypeInt, value)
+		_node.ProviderType = value
 	}
 	if value, ok := _c.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)

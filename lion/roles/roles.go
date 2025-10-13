@@ -18,6 +18,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
 	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
@@ -26,8 +28,10 @@ const (
 	FieldName = "name"
 	// FieldI18nName holds the string denoting the i18n_name field in the database.
 	FieldI18nName = "i18n_name"
-	// FieldProtected holds the string denoting the protected field in the database.
-	FieldProtected = "protected"
+	// FieldRoleType holds the string denoting the role_type field in the database.
+	FieldRoleType = "role_type"
+	// FieldRoleStatus holds the string denoting the role_status field in the database.
+	FieldRoleStatus = "role_status"
 	// FieldOrderWeight holds the string denoting the order_weight field in the database.
 	FieldOrderWeight = "order_weight"
 	// FieldDescription holds the string denoting the description field in the database.
@@ -77,11 +81,13 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldName,
 	FieldI18nName,
-	FieldProtected,
+	FieldRoleType,
+	FieldRoleStatus,
 	FieldOrderWeight,
 	FieldDescription,
 }
@@ -109,10 +115,10 @@ var (
 	DefaultUpdatedBy int64
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultI18nName holds the default value on creation for the "i18n_name" field.
-	DefaultI18nName string
-	// DefaultProtected holds the default value on creation for the "protected" field.
-	DefaultProtected bool
+	// DefaultRoleType holds the default value on creation for the "role_type" field.
+	DefaultRoleType int
+	// DefaultRoleStatus holds the default value on creation for the "role_status" field.
+	DefaultRoleStatus int
 	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
 	DefaultOrderWeight int
 	// DefaultDescription holds the default value on creation for the "description" field.
@@ -137,6 +143,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
 // ByCreatedBy orders the results by the created_by field.
 func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
@@ -152,14 +163,14 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByI18nName orders the results by the i18n_name field.
-func ByI18nName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldI18nName, opts...).ToFunc()
+// ByRoleType orders the results by the role_type field.
+func ByRoleType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRoleType, opts...).ToFunc()
 }
 
-// ByProtected orders the results by the protected field.
-func ByProtected(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProtected, opts...).ToFunc()
+// ByRoleStatus orders the results by the role_status field.
+func ByRoleStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRoleStatus, opts...).ToFunc()
 }
 
 // ByOrderWeight orders the results by the order_weight field.

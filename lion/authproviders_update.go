@@ -91,24 +91,24 @@ func (_u *AuthProvidersUpdate) SetNillableName(v *string) *AuthProvidersUpdate {
 	return _u
 }
 
-// SetType sets the "type" field.
-func (_u *AuthProvidersUpdate) SetType(v int) *AuthProvidersUpdate {
-	_u.mutation.ResetType()
-	_u.mutation.SetType(v)
+// SetProviderType sets the "provider_type" field.
+func (_u *AuthProvidersUpdate) SetProviderType(v int) *AuthProvidersUpdate {
+	_u.mutation.ResetProviderType()
+	_u.mutation.SetProviderType(v)
 	return _u
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *AuthProvidersUpdate) SetNillableType(v *int) *AuthProvidersUpdate {
+// SetNillableProviderType sets the "provider_type" field if the given value is not nil.
+func (_u *AuthProvidersUpdate) SetNillableProviderType(v *int) *AuthProvidersUpdate {
 	if v != nil {
-		_u.SetType(*v)
+		_u.SetProviderType(*v)
 	}
 	return _u
 }
 
-// AddType adds value to the "type" field.
-func (_u *AuthProvidersUpdate) AddType(v int) *AuthProvidersUpdate {
-	_u.mutation.AddType(v)
+// AddProviderType adds value to the "provider_type" field.
+func (_u *AuthProvidersUpdate) AddProviderType(v int) *AuthProvidersUpdate {
+	_u.mutation.AddProviderType(v)
 	return _u
 }
 
@@ -334,11 +334,11 @@ func (_u *AuthProvidersUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(authproviders.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.ProviderType(); ok {
+		_spec.SetField(authproviders.FieldProviderType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedType(); ok {
-		_spec.AddField(authproviders.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedProviderType(); ok {
+		_spec.AddField(authproviders.FieldProviderType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
@@ -494,24 +494,24 @@ func (_u *AuthProvidersUpdateOne) SetNillableName(v *string) *AuthProvidersUpdat
 	return _u
 }
 
-// SetType sets the "type" field.
-func (_u *AuthProvidersUpdateOne) SetType(v int) *AuthProvidersUpdateOne {
-	_u.mutation.ResetType()
-	_u.mutation.SetType(v)
+// SetProviderType sets the "provider_type" field.
+func (_u *AuthProvidersUpdateOne) SetProviderType(v int) *AuthProvidersUpdateOne {
+	_u.mutation.ResetProviderType()
+	_u.mutation.SetProviderType(v)
 	return _u
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *AuthProvidersUpdateOne) SetNillableType(v *int) *AuthProvidersUpdateOne {
+// SetNillableProviderType sets the "provider_type" field if the given value is not nil.
+func (_u *AuthProvidersUpdateOne) SetNillableProviderType(v *int) *AuthProvidersUpdateOne {
 	if v != nil {
-		_u.SetType(*v)
+		_u.SetProviderType(*v)
 	}
 	return _u
 }
 
-// AddType adds value to the "type" field.
-func (_u *AuthProvidersUpdateOne) AddType(v int) *AuthProvidersUpdateOne {
-	_u.mutation.AddType(v)
+// AddProviderType adds value to the "provider_type" field.
+func (_u *AuthProvidersUpdateOne) AddProviderType(v int) *AuthProvidersUpdateOne {
+	_u.mutation.AddProviderType(v)
 	return _u
 }
 
@@ -767,11 +767,11 @@ func (_u *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthProvi
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(authproviders.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(authproviders.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.ProviderType(); ok {
+		_spec.SetField(authproviders.FieldProviderType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedType(); ok {
-		_spec.AddField(authproviders.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedProviderType(); ok {
+		_spec.AddField(authproviders.FieldProviderType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ClientID(); ok {
 		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)

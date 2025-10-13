@@ -3,6 +3,7 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -31,19 +32,19 @@ type Groups struct {
 	// 用户组名
 	Name string `json:"name,omitempty"`
 	// 群组类型，对应 api/known/admin/v1/common.proto 中定义
-	Type int `json:"type,omitempty"`
+	GroupType int `json:"group_type,omitempty"`
 	// 群组状态，对应 api/known/admin/v1/common.proto 中定义
-	Status int `json:"status,omitempty"`
+	GroupStatus int `json:"group_status,omitempty"`
 	// 国际化名称，支持多语言显示
-	I18nName string `json:"i18n_name,omitempty"`
+	I18nName map[string]string `json:"i18n_name,omitempty"`
 	// 排序权重，数字越小越靠前
 	OrderWeight int `json:"order_weight,omitempty"`
 	// 父群组ID，为0表示顶级群组
 	ParentID int `json:"parent_id,omitempty"`
 	// 群组最大成员数量限制，0表示不限制
 	MaxMembers int `json:"max_members,omitempty"`
-	// 元数据，用于存储自定义属性，JSON格式
-	Metadata string `json:"metadata,omitempty"`
+	// 元数据，用于存储自定义属性，对应 proto 中的 map<string, string> metadata
+	Metadata map[string]string `json:"metadata,omitempty"`
 	// 外部系统ID，用于与外部系统集成
 	ExternalID string `json:"external_id,omitempty"`
 	// 关联 lion_departments 表的 ID
@@ -103,9 +104,11 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldType, groups.FieldStatus, groups.FieldOrderWeight, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID:
+		case groups.FieldI18nName, groups.FieldMetadata:
+			values[i] = new([]byte)
+		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldOrderWeight, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
-		case groups.FieldName, groups.FieldI18nName, groups.FieldMetadata, groups.FieldExternalID, groups.FieldDescription:
+		case groups.FieldName, groups.FieldExternalID, groups.FieldDescription:
 			values[i] = new(sql.NullString)
 		case groups.FieldCreatedAt, groups.FieldUpdatedAt, groups.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -167,23 +170,25 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case groups.FieldType:
+		case groups.FieldGroupType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field type", values[i])
+				return fmt.Errorf("unexpected type %T for field group_type", values[i])
 			} else if value.Valid {
-				_m.Type = int(value.Int64)
+				_m.GroupType = int(value.Int64)
 			}
-		case groups.FieldStatus:
+		case groups.FieldGroupStatus:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field status", values[i])
+				return fmt.Errorf("unexpected type %T for field group_status", values[i])
 			} else if value.Valid {
-				_m.Status = int(value.Int64)
+				_m.GroupStatus = int(value.Int64)
 			}
 		case groups.FieldI18nName:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
-			} else if value.Valid {
-				_m.I18nName = value.String
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.I18nName); err != nil {
+					return fmt.Errorf("unmarshal field i18n_name: %w", err)
+				}
 			}
 		case groups.FieldOrderWeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -204,10 +209,12 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 				_m.MaxMembers = int(value.Int64)
 			}
 		case groups.FieldMetadata:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field metadata", values[i])
-			} else if value.Valid {
-				_m.Metadata = value.String
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
 			}
 		case groups.FieldExternalID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -298,14 +305,14 @@ func (_m *Groups) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Type))
+	builder.WriteString("group_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.GroupType))
 	builder.WriteString(", ")
-	builder.WriteString("status=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString("group_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.GroupStatus))
 	builder.WriteString(", ")
 	builder.WriteString("i18n_name=")
-	builder.WriteString(_m.I18nName)
+	builder.WriteString(fmt.Sprintf("%v", _m.I18nName))
 	builder.WriteString(", ")
 	builder.WriteString("order_weight=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
@@ -317,7 +324,7 @@ func (_m *Groups) String() string {
 	builder.WriteString(fmt.Sprintf("%v", _m.MaxMembers))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
-	builder.WriteString(_m.Metadata)
+	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
 	builder.WriteString("external_id=")
 	builder.WriteString(_m.ExternalID)

@@ -24,8 +24,8 @@ const (
 	FieldUpdatedBy = "updated_by"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
+	// FieldProviderType holds the string denoting the provider_type field in the database.
+	FieldProviderType = "provider_type"
 	// FieldClientID holds the string denoting the client_id field in the database.
 	FieldClientID = "client_id"
 	// FieldEnabled holds the string denoting the enabled field in the database.
@@ -65,7 +65,7 @@ var Columns = []string{
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldName,
-	FieldType,
+	FieldProviderType,
 	FieldClientID,
 	FieldEnabled,
 	FieldClientSecretEncrypted,
@@ -151,9 +151,9 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByType orders the results by the type field.
-func ByType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldType, opts...).ToFunc()
+// ByProviderType orders the results by the provider_type field.
+func ByProviderType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderType, opts...).ToFunc()
 }
 
 // ByClientID orders the results by the client_id field.

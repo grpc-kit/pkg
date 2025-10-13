@@ -3,6 +3,7 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -21,6 +22,8 @@ type Resources struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
@@ -29,14 +32,14 @@ type Resources struct {
 	ParentID int `json:"parent_id,omitempty"`
 	// 资源名称
 	Name string `json:"name,omitempty"`
-	// 国际化标识
-	I18nName string `json:"i18n_name,omitempty"`
+	// 国际化名称，支持多语言，如 {"en": "User", "zh": "用户"}
+	I18nName map[string]string `json:"i18n_name,omitempty"`
 	// 排序权重，越小越靠前
 	OrderWeight int `json:"order_weight,omitempty"`
 	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
-	Type int `json:"type,omitempty"`
+	ResourceType int `json:"resource_type,omitempty"`
 	// 作用范围，对应 api/known/admin/v1/common.proto 中定义
-	Scope int `json:"scope,omitempty"`
+	ResourceScope int `json:"resource_scope,omitempty"`
 	// 是否启用该资源项，禁用后完全不可访问
 	Enabled bool `json:"enabled,omitempty"`
 	// 是否在资源列表中隐藏该节点
@@ -51,6 +54,8 @@ type Resources struct {
 	Component string `json:"component,omitempty"`
 	// 详细描述
 	Description string `json:"description,omitempty"`
+	// 权限列表，对应 proto 中的 repeated string permissions
+	Permissions []string `json:"permissions,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ResourcesQuery when eager-loading is set.
 	Edges        ResourcesEdges `json:"edges"`
@@ -80,13 +85,15 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case resources.FieldI18nName, resources.FieldPermissions:
+			values[i] = new([]byte)
 		case resources.FieldEnabled, resources.FieldHidden, resources.FieldHideChildren:
 			values[i] = new(sql.NullBool)
-		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldOrderWeight, resources.FieldType, resources.FieldScope:
+		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldOrderWeight, resources.FieldResourceType, resources.FieldResourceScope:
 			values[i] = new(sql.NullInt64)
-		case resources.FieldName, resources.FieldI18nName, resources.FieldPath, resources.FieldIcon, resources.FieldComponent, resources.FieldDescription:
+		case resources.FieldName, resources.FieldPath, resources.FieldIcon, resources.FieldComponent, resources.FieldDescription:
 			values[i] = new(sql.NullString)
-		case resources.FieldCreatedAt, resources.FieldUpdatedAt:
+		case resources.FieldCreatedAt, resources.FieldUpdatedAt, resources.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -121,6 +128,13 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case resources.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
+			}
 		case resources.FieldCreatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_by", values[i])
@@ -146,10 +160,12 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 				_m.Name = value.String
 			}
 		case resources.FieldI18nName:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
-			} else if value.Valid {
-				_m.I18nName = value.String
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.I18nName); err != nil {
+					return fmt.Errorf("unmarshal field i18n_name: %w", err)
+				}
 			}
 		case resources.FieldOrderWeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -157,17 +173,17 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.OrderWeight = int(value.Int64)
 			}
-		case resources.FieldType:
+		case resources.FieldResourceType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field type", values[i])
+				return fmt.Errorf("unexpected type %T for field resource_type", values[i])
 			} else if value.Valid {
-				_m.Type = int(value.Int64)
+				_m.ResourceType = int(value.Int64)
 			}
-		case resources.FieldScope:
+		case resources.FieldResourceScope:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field scope", values[i])
+				return fmt.Errorf("unexpected type %T for field resource_scope", values[i])
 			} else if value.Valid {
-				_m.Scope = int(value.Int64)
+				_m.ResourceScope = int(value.Int64)
 			}
 		case resources.FieldEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -210,6 +226,14 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
 				_m.Description = value.String
+			}
+		case resources.FieldPermissions:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field permissions", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Permissions); err != nil {
+					return fmt.Errorf("unmarshal field permissions: %w", err)
+				}
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -258,6 +282,11 @@ func (_m *Resources) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("created_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
 	builder.WriteString(", ")
@@ -271,16 +300,16 @@ func (_m *Resources) String() string {
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("i18n_name=")
-	builder.WriteString(_m.I18nName)
+	builder.WriteString(fmt.Sprintf("%v", _m.I18nName))
 	builder.WriteString(", ")
 	builder.WriteString("order_weight=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
 	builder.WriteString(", ")
-	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Type))
+	builder.WriteString("resource_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ResourceType))
 	builder.WriteString(", ")
-	builder.WriteString("scope=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Scope))
+	builder.WriteString("resource_scope=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ResourceScope))
 	builder.WriteString(", ")
 	builder.WriteString("enabled=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))
@@ -302,6 +331,9 @@ func (_m *Resources) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("permissions=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Permissions))
 	builder.WriteByte(')')
 	return builder.String()
 }

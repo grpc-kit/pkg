@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Groups 存储用户组信息，实现 RBAC 权限管理
@@ -21,14 +22,14 @@ func (Groups) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("用户组名"),
-		field.Int("type").
+		field.Int("group_type").
 			Default(0).
 			Comment("群组类型，对应 api/known/admin/v1/common.proto 中定义"),
-		field.Int("status").
+		field.Int("group_status").
 			Default(0).
 			Comment("群组状态，对应 api/known/admin/v1/common.proto 中定义"),
-		field.String("i18n_name").
-			Default("").
+		field.JSON("i18n_name", map[string]string{}).
+			Optional().
 			Comment("国际化名称，支持多语言显示"),
 		field.Int("order_weight").
 			Default(0).
@@ -39,9 +40,9 @@ func (Groups) Fields() []ent.Field {
 		field.Int("max_members").
 			Default(0).
 			Comment("群组最大成员数量限制，0表示不限制"),
-		field.String("metadata").
-			Default("").
-			Comment("元数据，用于存储自定义属性，JSON格式"),
+		field.JSON("metadata", map[string]string{}).
+			Default(map[string]string{}).
+			Comment("元数据，用于存储自定义属性，对应 proto 中的 map<string, string> metadata"),
 		field.String("external_id").
 			Default("").
 			Comment("外部系统ID，用于与外部系统集成"),
@@ -71,8 +72,20 @@ func (Groups) Edges() []ent.Edge {
 // Mixin of the table.
 func (Groups) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixin{},
+		TimeMixin{}, // 支持软删除，包含 deleted_at 字段
 		AuditMixin{},
+	}
+}
+
+// Indexes 定义索引
+func (Groups) Indexes() []ent.Index {
+	return []ent.Index{
+		// 群组名称唯一索引（已在字段定义中设置 Unique，这里作为补充）
+		index.Fields("name").Unique(),
+		// 群组类型索引，用于按类型过滤查询
+		index.Fields("group_type"),
+		// 群组状态索引，用于按状态过滤查询
+		index.Fields("group_status"),
 	}
 }
 

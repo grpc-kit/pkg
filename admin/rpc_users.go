@@ -167,12 +167,12 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	basicViewFields := []string{
 		users.FieldID,
 		users.FieldUsername,
-		users.FieldStatus,
+		users.FieldUserStatus,
 		users.FieldNickname,
 		users.FieldProfile,
 		users.FieldPicture,
 		users.FieldWebsite,
-		users.FieldZoneinfo,
+		users.FieldTimezone,
 		users.FieldLocale,
 		users.FieldCreatedAt,
 		users.FieldUpdatedAt,
@@ -241,7 +241,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		if err != nil {
 			return nil, fmt.Errorf("invalid filter_status: %w", err)
 		}
-		userQuery = userQuery.Where(users.StatusEQ(status))
+		userQuery = userQuery.Where(users.UserStatusEQ(status))
 	}
 	if !req.GetShowDeleted() {
 		userQuery = userQuery.Where(users.DeletedAtIsNil())
@@ -313,7 +313,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		result.Users = append(result.Users, &adminv1.User{
 			Id:                  int64(user.ID),
 			Username:            user.Username,
-			Status:              adminv1.User_Status(user.Status),
+			Status:              adminv1.User_Status(user.UserStatus),
 			Realname:            string(realname),
 			NationalId:          string(idcard),
 			Nickname:            user.Nickname,
@@ -324,7 +324,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 			EmailVerified:       user.EmailVerified,
 			Gender:              adminv1.User_Gender(user.Gender),
 			Birthday:            timestamppb.New(user.Birthdate),
-			Zoneinfo:            user.Zoneinfo,
+			Timezone:            user.Timezone,
 			Locale:              user.Locale,
 			PhoneNumber:         &phoneNumber,
 			PhoneNumberVerified: user.PhoneNumberVerified,
@@ -582,14 +582,14 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 				x.SetPicture(req.User.Picture)
 			case users.FieldWebsite:
 				x.SetWebsite(req.User.Website)
-			case users.FieldZoneinfo:
-				x.SetZoneinfo(req.User.Zoneinfo)
+			case users.FieldTimezone:
+				x.SetTimezone(req.User.Timezone)
 			case users.FieldLocale:
 				x.SetLocale(req.User.Locale)
-			case users.FieldType:
-				x.SetType(int(req.User.Type))
-			case users.FieldStatus:
-				x.SetStatus(int(req.User.Status))
+			case users.FieldUserType:
+				x.SetUserType(int(req.User.Type))
+			case users.FieldUserStatus:
+				x.SetUserStatus(int(req.User.Status))
 
 				// 身份信息
 			case users.FieldGender:
@@ -656,12 +656,12 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 	basicViewFields := []string{
 		users.FieldID,
 		users.FieldUsername,
-		users.FieldStatus,
+		users.FieldUserStatus,
 		users.FieldNickname,
 		users.FieldProfile,
 		users.FieldPicture,
 		users.FieldWebsite,
-		users.FieldZoneinfo,
+		users.FieldTimezone,
 		users.FieldLocale,
 	}
 
@@ -700,7 +700,7 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 	result := &adminv1.User{
 		Id:                  int64(row.ID),
 		Username:            row.Username,
-		Status:              adminv1.User_Status(row.Status),
+		Status:              adminv1.User_Status(row.UserStatus),
 		Realname:            string(crypto.DecryptAESMust(a.config.aesKey, row.RealnameEncrypted)),
 		NationalId:          string(crypto.DecryptAESMust(a.config.aesKey, row.NationalIDEncrypted)),
 		Nickname:            row.Nickname,
@@ -711,7 +711,7 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 		EmailVerified:       row.EmailVerified,
 		Gender:              adminv1.User_Gender(row.Gender),
 		Birthday:            timestamppb.New(row.Birthdate),
-		Zoneinfo:            row.Zoneinfo,
+		Timezone:            row.Timezone,
 		Locale:              row.Locale,
 		PhoneNumber:         &phoneNumber,
 		PhoneNumberVerified: row.PhoneNumberVerified,
@@ -737,7 +737,7 @@ func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.Upd
 		Select(
 			authproviders.FieldName,
 		).
-		Where(authproviders.TypeEQ(int(adminv1.AuthProvider_TYPE_LOCAL.Number()))).
+		Where(authproviders.ProviderTypeEQ(int(adminv1.AuthProvider_TYPE_LOCAL.Number()))).
 		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
 			q.Select(
 				useridentities.FieldID,

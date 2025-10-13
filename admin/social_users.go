@@ -42,7 +42,7 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 		Select(
 			authproviders.FieldID,
 			authproviders.FieldName,
-			authproviders.FieldType,
+			authproviders.FieldProviderType,
 			authproviders.FieldEnabled,
 			authproviders.FieldClientID,
 			authproviders.FieldClientSecretEncrypted,
@@ -94,7 +94,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 
 	idToken := &auth.IDTokenClaims{}
 
-	switch adminv1.AuthProvider_Type(s.AuthProvider.Type) {
+	switch adminv1.AuthProvider_Type(s.AuthProvider.ProviderType) {
 	case adminv1.AuthProvider_TYPE_LOCAL:
 
 	case adminv1.AuthProvider_TYPE_WECHAT:
@@ -172,7 +172,7 @@ func (s *socialUsers) PasswordCheck(ctx context.Context, username, password stri
 		).
 		Where(
 			users.UsernameEQ(username),
-			users.StatusEQ(int(adminv1.User_STATUS_ACTIVE.Number())),
+			users.UserStatusEQ(int(adminv1.User_STATUS_ACTIVE.Number())),
 		).
 		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
 			q.Select(

@@ -65,11 +65,6 @@ func UpdatedAt(v time.Time) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
-func DeletedAt(v time.Time) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldDeletedAt, v))
-}
-
 // CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
 func CreatedBy(v int64) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldEQ(FieldCreatedBy, v))
@@ -108,11 +103,6 @@ func JoinedAt(v time.Time) predicate.UserGroups {
 // ExpiredAt applies equality check predicate on the "expired_at" field. It's identical to ExpiredAtEQ.
 func ExpiredAt(v time.Time) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldEQ(FieldExpiredAt, v))
-}
-
-// Metadata applies equality check predicate on the "metadata" field. It's identical to MetadataEQ.
-func Metadata(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldMetadata, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
@@ -198,56 +188,6 @@ func UpdatedAtLT(v time.Time) predicate.UserGroups {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldLTE(FieldUpdatedAt, v))
-}
-
-// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
-func DeletedAtEQ(v time.Time) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldDeletedAt, v))
-}
-
-// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
-func DeletedAtNEQ(v time.Time) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNEQ(FieldDeletedAt, v))
-}
-
-// DeletedAtIn applies the In predicate on the "deleted_at" field.
-func DeletedAtIn(vs ...time.Time) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldIn(FieldDeletedAt, vs...))
-}
-
-// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
-func DeletedAtNotIn(vs ...time.Time) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNotIn(FieldDeletedAt, vs...))
-}
-
-// DeletedAtGT applies the GT predicate on the "deleted_at" field.
-func DeletedAtGT(v time.Time) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGT(FieldDeletedAt, v))
-}
-
-// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
-func DeletedAtGTE(v time.Time) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGTE(FieldDeletedAt, v))
-}
-
-// DeletedAtLT applies the LT predicate on the "deleted_at" field.
-func DeletedAtLT(v time.Time) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLT(FieldDeletedAt, v))
-}
-
-// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
-func DeletedAtLTE(v time.Time) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLTE(FieldDeletedAt, v))
-}
-
-// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
-func DeletedAtIsNil() predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldIsNull(FieldDeletedAt))
-}
-
-// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
-func DeletedAtNotNil() predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // CreatedByEQ applies the EQ predicate on the "created_by" field.
@@ -550,61 +490,6 @@ func ExpiredAtNotNil() predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldNotNull(FieldExpiredAt))
 }
 
-// MetadataEQ applies the EQ predicate on the "metadata" field.
-func MetadataEQ(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEQ(FieldMetadata, v))
-}
-
-// MetadataNEQ applies the NEQ predicate on the "metadata" field.
-func MetadataNEQ(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNEQ(FieldMetadata, v))
-}
-
-// MetadataIn applies the In predicate on the "metadata" field.
-func MetadataIn(vs ...string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldIn(FieldMetadata, vs...))
-}
-
-// MetadataNotIn applies the NotIn predicate on the "metadata" field.
-func MetadataNotIn(vs ...string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldNotIn(FieldMetadata, vs...))
-}
-
-// MetadataGT applies the GT predicate on the "metadata" field.
-func MetadataGT(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGT(FieldMetadata, v))
-}
-
-// MetadataGTE applies the GTE predicate on the "metadata" field.
-func MetadataGTE(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldGTE(FieldMetadata, v))
-}
-
-// MetadataLT applies the LT predicate on the "metadata" field.
-func MetadataLT(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLT(FieldMetadata, v))
-}
-
-// MetadataLTE applies the LTE predicate on the "metadata" field.
-func MetadataLTE(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldLTE(FieldMetadata, v))
-}
-
-// MetadataContains applies the Contains predicate on the "metadata" field.
-func MetadataContains(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldContains(FieldMetadata, v))
-}
-
-// MetadataHasPrefix applies the HasPrefix predicate on the "metadata" field.
-func MetadataHasPrefix(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldHasPrefix(FieldMetadata, v))
-}
-
-// MetadataHasSuffix applies the HasSuffix predicate on the "metadata" field.
-func MetadataHasSuffix(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldHasSuffix(FieldMetadata, v))
-}
-
 // MetadataIsNil applies the IsNil predicate on the "metadata" field.
 func MetadataIsNil() predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldIsNull(FieldMetadata))
@@ -613,16 +498,6 @@ func MetadataIsNil() predicate.UserGroups {
 // MetadataNotNil applies the NotNil predicate on the "metadata" field.
 func MetadataNotNil() predicate.UserGroups {
 	return predicate.UserGroups(sql.FieldNotNull(FieldMetadata))
-}
-
-// MetadataEqualFold applies the EqualFold predicate on the "metadata" field.
-func MetadataEqualFold(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldEqualFold(FieldMetadata, v))
-}
-
-// MetadataContainsFold applies the ContainsFold predicate on the "metadata" field.
-func MetadataContainsFold(v string) predicate.UserGroups {
-	return predicate.UserGroups(sql.FieldContainsFold(FieldMetadata, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.

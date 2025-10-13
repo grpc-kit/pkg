@@ -36,14 +36,14 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	tx.Roles.CreateBulk(
 		tx.Roles.Create().
 			SetName("superadmin").
-			SetProtected(true).
+			SetRoleType(int(adminv1.Role_TYPE_SYSTEM.Number())).
 			SetDescription("超级管理员"),
 	).SaveX(ctx)
 
 	tx.AuthProviders.CreateBulk(
 		tx.AuthProviders.Create().
 			SetName("local").
-			SetType(int(adminv1.AuthProvider_TYPE_LOCAL.Number())).
+			SetProviderType(int(adminv1.AuthProvider_TYPE_LOCAL.Number())).
 			SetEnabled(true),
 	).SaveX(ctx)
 

@@ -3,6 +3,7 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -24,8 +25,6 @@ type UserGroups struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
@@ -42,8 +41,8 @@ type UserGroups struct {
 	JoinedAt time.Time `json:"joined_at,omitempty"`
 	// 关系有效期，用于临时成员管理，0表示永久有效
 	ExpiredAt time.Time `json:"expired_at,omitempty"`
-	// 元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储
-	Metadata string `json:"metadata,omitempty"`
+	// 元数据，用于存储自定义属性，支持业务扩展
+	Metadata map[string]string `json:"metadata,omitempty"`
 	// 用户组描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -90,11 +89,13 @@ func (*UserGroups) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case usergroups.FieldMetadata:
+			values[i] = new([]byte)
 		case usergroups.FieldID, usergroups.FieldCreatedBy, usergroups.FieldUpdatedBy, usergroups.FieldUserID, usergroups.FieldGroupID, usergroups.FieldMemberRole, usergroups.FieldMemberStatus:
 			values[i] = new(sql.NullInt64)
-		case usergroups.FieldMetadata, usergroups.FieldDescription:
+		case usergroups.FieldDescription:
 			values[i] = new(sql.NullString)
-		case usergroups.FieldCreatedAt, usergroups.FieldUpdatedAt, usergroups.FieldDeletedAt, usergroups.FieldJoinedAt, usergroups.FieldExpiredAt:
+		case usergroups.FieldCreatedAt, usergroups.FieldUpdatedAt, usergroups.FieldJoinedAt, usergroups.FieldExpiredAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -128,13 +129,6 @@ func (_m *UserGroups) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
-			}
-		case usergroups.FieldDeletedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
-			} else if value.Valid {
-				_m.DeletedAt = new(time.Time)
-				*_m.DeletedAt = value.Time
 			}
 		case usergroups.FieldCreatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -185,10 +179,12 @@ func (_m *UserGroups) assignValues(columns []string, values []any) error {
 				_m.ExpiredAt = value.Time
 			}
 		case usergroups.FieldMetadata:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field metadata", values[i])
-			} else if value.Valid {
-				_m.Metadata = value.String
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
 			}
 		case usergroups.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -248,11 +244,6 @@ func (_m *UserGroups) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := _m.DeletedAt; v != nil {
-		builder.WriteString("deleted_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
-	builder.WriteString(", ")
 	builder.WriteString("created_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
 	builder.WriteString(", ")
@@ -278,7 +269,7 @@ func (_m *UserGroups) String() string {
 	builder.WriteString(_m.ExpiredAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
-	builder.WriteString(_m.Metadata)
+	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

@@ -70,12 +70,12 @@ func (a *KnownAdminAPI) ListRoleUsers(ctx context.Context, req *adminv1.ListRole
 	userObjs, err := db.Users.Query().Select(
 		users.FieldID,
 		users.FieldUsername,
-		users.FieldStatus,
+		users.FieldUserStatus,
 		users.FieldNickname,
 		users.FieldProfile,
 		users.FieldPicture,
 		users.FieldWebsite,
-		users.FieldZoneinfo,
+		users.FieldTimezone,
 		users.FieldLocale,
 	).Where(
 		users.IDIn(uidInts...),
@@ -88,12 +88,12 @@ func (a *KnownAdminAPI) ListRoleUsers(ctx context.Context, req *adminv1.ListRole
 		result.Users = append(result.Users, &adminv1.User{
 			Id:       int64(user.ID),
 			Username: user.Username,
-			Status:   adminv1.User_Status(user.Status),
+			Status:   adminv1.User_Status(user.UserStatus),
 			Nickname: user.Nickname,
 			Profile:  user.Profile,
 			Picture:  user.Picture,
 			Website:  user.Website,
-			Zoneinfo: user.Zoneinfo,
+			Timezone: user.Timezone,
 			Locale:   user.Locale,
 		})
 	}
@@ -142,7 +142,7 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 
 	role, err := db.Roles.Create().
 		SetName(req.Role.Name).
-		SetI18nName(I18NNameJSON(req.Role.I18NName)).
+		SetI18nName(req.Role.I18NName).
 		SetDescription(req.Role.Description).
 		SetOrderWeight(int(req.Role.OrderWeight)).
 		Save(ctx)
@@ -153,7 +153,7 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 	result = &adminv1.Role{
 		Id:          int32(role.ID),
 		Name:        role.Name,
-		I18NName:    I18NNameParse(role.I18nName),
+		I18NName:    role.I18nName,
 		Description: role.Description,
 		OrderWeight: int32(role.OrderWeight),
 	}
@@ -240,7 +240,8 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 			roles.FieldID,
 			roles.FieldName,
 			roles.FieldI18nName,
-			roles.FieldProtected,
+			roles.FieldRoleType,
+			roles.FieldRoleStatus,
 			roles.FieldOrderWeight,
 			roles.FieldDescription,
 		).Where(
@@ -253,7 +254,7 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 		result = &adminv1.Role{
 			Id:          int32(q.ID),
 			Name:        q.Name,
-			I18NName:    I18NNameParse(q.I18nName),
+			I18NName:    q.I18nName,
 			Description: q.Description,
 			OrderWeight: int32(q.OrderWeight),
 		}

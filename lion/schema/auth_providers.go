@@ -19,12 +19,12 @@ func (AuthProviders) Fields() []ent.Field {
 		field.String("name").
 			Unique().
 			Comment("认证提供方名称"),
-		field.Int("type").
+		field.Int("provider_type").
 			Comment("支持的认证提供方"),
 		field.String("client_id").
 			Default(""),
 		field.Bool("enabled").
-			Default(false),
+			Default(true),
 		field.Bytes("client_secret_encrypted").
 			Sensitive().
 			Default([]byte("")),

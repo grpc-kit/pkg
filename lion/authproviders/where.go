@@ -80,9 +80,9 @@ func Name(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldName, v))
 }
 
-// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
-func Type(v int) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldType, v))
+// ProviderType applies equality check predicate on the "provider_type" field. It's identical to ProviderTypeEQ.
+func ProviderType(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldProviderType, v))
 }
 
 // ClientID applies equality check predicate on the "client_id" field. It's identical to ClientIDEQ.
@@ -355,44 +355,44 @@ func NameContainsFold(v string) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldContainsFold(FieldName, v))
 }
 
-// TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v int) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldEQ(FieldType, v))
+// ProviderTypeEQ applies the EQ predicate on the "provider_type" field.
+func ProviderTypeEQ(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldProviderType, v))
 }
 
-// TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v int) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNEQ(FieldType, v))
+// ProviderTypeNEQ applies the NEQ predicate on the "provider_type" field.
+func ProviderTypeNEQ(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNEQ(FieldProviderType, v))
 }
 
-// TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...int) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldIn(FieldType, vs...))
+// ProviderTypeIn applies the In predicate on the "provider_type" field.
+func ProviderTypeIn(vs ...int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldIn(FieldProviderType, vs...))
 }
 
-// TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...int) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldNotIn(FieldType, vs...))
+// ProviderTypeNotIn applies the NotIn predicate on the "provider_type" field.
+func ProviderTypeNotIn(vs ...int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNotIn(FieldProviderType, vs...))
 }
 
-// TypeGT applies the GT predicate on the "type" field.
-func TypeGT(v int) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGT(FieldType, v))
+// ProviderTypeGT applies the GT predicate on the "provider_type" field.
+func ProviderTypeGT(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGT(FieldProviderType, v))
 }
 
-// TypeGTE applies the GTE predicate on the "type" field.
-func TypeGTE(v int) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldGTE(FieldType, v))
+// ProviderTypeGTE applies the GTE predicate on the "provider_type" field.
+func ProviderTypeGTE(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldGTE(FieldProviderType, v))
 }
 
-// TypeLT applies the LT predicate on the "type" field.
-func TypeLT(v int) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLT(FieldType, v))
+// ProviderTypeLT applies the LT predicate on the "provider_type" field.
+func ProviderTypeLT(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLT(FieldProviderType, v))
 }
 
-// TypeLTE applies the LTE predicate on the "type" field.
-func TypeLTE(v int) predicate.AuthProviders {
-	return predicate.AuthProviders(sql.FieldLTE(FieldType, v))
+// ProviderTypeLTE applies the LTE predicate on the "provider_type" field.
+func ProviderTypeLTE(v int) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldLTE(FieldProviderType, v))
 }
 
 // ClientIDEQ applies the EQ predicate on the "client_id" field.

@@ -52,6 +52,20 @@ func (_c *RolesCreate) SetNillableUpdatedAt(v *time.Time) *RolesCreate {
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *RolesCreate) SetDeletedAt(v time.Time) *RolesCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *RolesCreate) SetNillableDeletedAt(v *time.Time) *RolesCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetCreatedBy sets the "created_by" field.
 func (_c *RolesCreate) SetCreatedBy(v int64) *RolesCreate {
 	_c.mutation.SetCreatedBy(v)
@@ -87,29 +101,35 @@ func (_c *RolesCreate) SetName(v string) *RolesCreate {
 }
 
 // SetI18nName sets the "i18n_name" field.
-func (_c *RolesCreate) SetI18nName(v string) *RolesCreate {
+func (_c *RolesCreate) SetI18nName(v map[string]string) *RolesCreate {
 	_c.mutation.SetI18nName(v)
 	return _c
 }
 
-// SetNillableI18nName sets the "i18n_name" field if the given value is not nil.
-func (_c *RolesCreate) SetNillableI18nName(v *string) *RolesCreate {
+// SetRoleType sets the "role_type" field.
+func (_c *RolesCreate) SetRoleType(v int) *RolesCreate {
+	_c.mutation.SetRoleType(v)
+	return _c
+}
+
+// SetNillableRoleType sets the "role_type" field if the given value is not nil.
+func (_c *RolesCreate) SetNillableRoleType(v *int) *RolesCreate {
 	if v != nil {
-		_c.SetI18nName(*v)
+		_c.SetRoleType(*v)
 	}
 	return _c
 }
 
-// SetProtected sets the "protected" field.
-func (_c *RolesCreate) SetProtected(v bool) *RolesCreate {
-	_c.mutation.SetProtected(v)
+// SetRoleStatus sets the "role_status" field.
+func (_c *RolesCreate) SetRoleStatus(v int) *RolesCreate {
+	_c.mutation.SetRoleStatus(v)
 	return _c
 }
 
-// SetNillableProtected sets the "protected" field if the given value is not nil.
-func (_c *RolesCreate) SetNillableProtected(v *bool) *RolesCreate {
+// SetNillableRoleStatus sets the "role_status" field if the given value is not nil.
+func (_c *RolesCreate) SetNillableRoleStatus(v *int) *RolesCreate {
 	if v != nil {
-		_c.SetProtected(*v)
+		_c.SetRoleStatus(*v)
 	}
 	return _c
 }
@@ -253,13 +273,13 @@ func (_c *RolesCreate) defaults() {
 		v := roles.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
-	if _, ok := _c.mutation.I18nName(); !ok {
-		v := roles.DefaultI18nName
-		_c.mutation.SetI18nName(v)
+	if _, ok := _c.mutation.RoleType(); !ok {
+		v := roles.DefaultRoleType
+		_c.mutation.SetRoleType(v)
 	}
-	if _, ok := _c.mutation.Protected(); !ok {
-		v := roles.DefaultProtected
-		_c.mutation.SetProtected(v)
+	if _, ok := _c.mutation.RoleStatus(); !ok {
+		v := roles.DefaultRoleStatus
+		_c.mutation.SetRoleStatus(v)
 	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		v := roles.DefaultOrderWeight
@@ -293,11 +313,11 @@ func (_c *RolesCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Roles.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.I18nName(); !ok {
-		return &ValidationError{Name: "i18n_name", err: errors.New(`lion: missing required field "Roles.i18n_name"`)}
+	if _, ok := _c.mutation.RoleType(); !ok {
+		return &ValidationError{Name: "role_type", err: errors.New(`lion: missing required field "Roles.role_type"`)}
 	}
-	if _, ok := _c.mutation.Protected(); !ok {
-		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Roles.protected"`)}
+	if _, ok := _c.mutation.RoleStatus(); !ok {
+		return &ValidationError{Name: "role_status", err: errors.New(`lion: missing required field "Roles.role_status"`)}
 	}
 	if _, ok := _c.mutation.OrderWeight(); !ok {
 		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Roles.order_weight"`)}
@@ -339,6 +359,10 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 		_spec.SetField(roles.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(roles.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
 		_spec.SetField(roles.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = value
@@ -352,12 +376,16 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 		_node.Name = value
 	}
 	if value, ok := _c.mutation.I18nName(); ok {
-		_spec.SetField(roles.FieldI18nName, field.TypeString, value)
+		_spec.SetField(roles.FieldI18nName, field.TypeJSON, value)
 		_node.I18nName = value
 	}
-	if value, ok := _c.mutation.Protected(); ok {
-		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
-		_node.Protected = value
+	if value, ok := _c.mutation.RoleType(); ok {
+		_spec.SetField(roles.FieldRoleType, field.TypeInt, value)
+		_node.RoleType = value
+	}
+	if value, ok := _c.mutation.RoleStatus(); ok {
+		_spec.SetField(roles.FieldRoleStatus, field.TypeInt, value)
+		_node.RoleStatus = value
 	}
 	if value, ok := _c.mutation.OrderWeight(); ok {
 		_spec.SetField(roles.FieldOrderWeight, field.TypeInt, value)

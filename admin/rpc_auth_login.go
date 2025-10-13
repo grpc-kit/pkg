@@ -129,7 +129,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 	selectFields := []string{
 		authproviders.FieldID,
 		authproviders.FieldName,
-		authproviders.FieldType,
+		authproviders.FieldProviderType,
 		authproviders.FieldClientID,
 		authproviders.FieldEnabled,
 		authproviders.FieldScopes,
@@ -153,7 +153,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 			UserinfoEndpoint:      row.UserinfoEndpoint,
 			Scopes:                row.Scopes,
 			RedirectUri:           row.RedirectURI,
-			Type:                  adminv1.AuthProvider_Type(row.Type),
+			Type:                  adminv1.AuthProvider_Type(row.ProviderType),
 		}
 
 		result.Providers = append(result.Providers, p)
@@ -187,7 +187,7 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 		if existID == 0 {
 			_, err = db.AuthProviders.Create().
 				SetName(name).
-				SetType(int(p.GetType())).
+				SetProviderType(int(p.GetType())).
 				SetEnabled(p.Enabled).
 				SetClientID(p.ClientId).
 				SetClientSecretEncrypted(clientSecretEnc).
@@ -243,7 +243,7 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 	// TODO; 权限验证
 	x, err := a.config.db.AuthProviders.Create().
 		SetName(req.Provider.Name).
-		SetType(int(req.Provider.Type)).
+		SetProviderType(int(req.Provider.Type)).
 		SetEnabled(req.Provider.Enabled).
 		SetClientID(req.Provider.ClientId).
 		SetClientSecretEncrypted(crypto.EncryptAESMust(a.config.aesKey, []byte(req.Provider.ClientSecret))).
@@ -260,7 +260,7 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 
 	result.Id = int32(x.ID)
 	result.Name = x.Name
-	result.Type = adminv1.AuthProvider_Type(x.Type)
+	result.Type = adminv1.AuthProvider_Type(x.ProviderType)
 	result.ClientId = x.ClientID
 	result.Enabled = x.Enabled
 	result.RedirectUri = x.RedirectURI

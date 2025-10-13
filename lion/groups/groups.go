@@ -26,10 +26,10 @@ const (
 	FieldUpdatedBy = "updated_by"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
-	// FieldStatus holds the string denoting the status field in the database.
-	FieldStatus = "status"
+	// FieldGroupType holds the string denoting the group_type field in the database.
+	FieldGroupType = "group_type"
+	// FieldGroupStatus holds the string denoting the group_status field in the database.
+	FieldGroupStatus = "group_status"
 	// FieldI18nName holds the string denoting the i18n_name field in the database.
 	FieldI18nName = "i18n_name"
 	// FieldOrderWeight holds the string denoting the order_weight field in the database.
@@ -86,8 +86,8 @@ var Columns = []string{
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldName,
-	FieldType,
-	FieldStatus,
+	FieldGroupType,
+	FieldGroupStatus,
 	FieldI18nName,
 	FieldOrderWeight,
 	FieldParentID,
@@ -121,12 +121,10 @@ var (
 	DefaultUpdatedBy int64
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultType holds the default value on creation for the "type" field.
-	DefaultType int
-	// DefaultStatus holds the default value on creation for the "status" field.
-	DefaultStatus int
-	// DefaultI18nName holds the default value on creation for the "i18n_name" field.
-	DefaultI18nName string
+	// DefaultGroupType holds the default value on creation for the "group_type" field.
+	DefaultGroupType int
+	// DefaultGroupStatus holds the default value on creation for the "group_status" field.
+	DefaultGroupStatus int
 	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
 	DefaultOrderWeight int
 	// DefaultParentID holds the default value on creation for the "parent_id" field.
@@ -134,7 +132,7 @@ var (
 	// DefaultMaxMembers holds the default value on creation for the "max_members" field.
 	DefaultMaxMembers int
 	// DefaultMetadata holds the default value on creation for the "metadata" field.
-	DefaultMetadata string
+	DefaultMetadata map[string]string
 	// DefaultExternalID holds the default value on creation for the "external_id" field.
 	DefaultExternalID string
 	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
@@ -181,19 +179,14 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByType orders the results by the type field.
-func ByType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldType, opts...).ToFunc()
+// ByGroupType orders the results by the group_type field.
+func ByGroupType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGroupType, opts...).ToFunc()
 }
 
-// ByStatus orders the results by the status field.
-func ByStatus(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldStatus, opts...).ToFunc()
-}
-
-// ByI18nName orders the results by the i18n_name field.
-func ByI18nName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldI18nName, opts...).ToFunc()
+// ByGroupStatus orders the results by the group_status field.
+func ByGroupStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGroupStatus, opts...).ToFunc()
 }
 
 // ByOrderWeight orders the results by the order_weight field.
@@ -209,11 +202,6 @@ func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 // ByMaxMembers orders the results by the max_members field.
 func ByMaxMembers(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMaxMembers, opts...).ToFunc()
-}
-
-// ByMetadata orders the results by the metadata field.
-func ByMetadata(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldMetadata, opts...).ToFunc()
 }
 
 // ByExternalID orders the results by the external_id field.

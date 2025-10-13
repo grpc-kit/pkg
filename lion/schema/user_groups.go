@@ -39,9 +39,9 @@ func (UserGroups) Fields() []ent.Field {
 		field.Time("expired_at").
 			Optional().
 			Comment("关系有效期，用于临时成员管理，0表示永久有效"),
-		field.String("metadata").
+		field.JSON("metadata", map[string]string{}).
 			Optional().
-			Comment("元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储"),
+			Comment("元数据，用于存储自定义属性，支持业务扩展"),
 		field.String("description").
 			Default("").
 			Comment("用户组描述"),
@@ -67,7 +67,7 @@ func (UserGroups) Edges() []ent.Edge {
 // Mixin of the table.
 func (UserGroups) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixin{}, // 使用包含 deleted_at 的 TimeMixin 支持软删除
+		TimeMixinWithoutDeleted{}, // 使用包含 deleted_at 的 TimeMixin 支持软删除
 		AuditMixin{},
 	}
 }
@@ -75,6 +75,7 @@ func (UserGroups) Mixin() []ent.Mixin {
 // Indexes of the table.
 func (UserGroups) Indexes() []ent.Index {
 	return []ent.Index{
+		// 唯一索引：确保用户在同一群组中只有一个关系记录
 		index.Fields("user_id", "group_id").Unique(),
 	}
 }

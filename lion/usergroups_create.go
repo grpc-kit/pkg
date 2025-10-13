@@ -50,20 +50,6 @@ func (_c *UserGroupsCreate) SetNillableUpdatedAt(v *time.Time) *UserGroupsCreate
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *UserGroupsCreate) SetDeletedAt(v time.Time) *UserGroupsCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableDeletedAt(v *time.Time) *UserGroupsCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetCreatedBy sets the "created_by" field.
 func (_c *UserGroupsCreate) SetCreatedBy(v int64) *UserGroupsCreate {
 	_c.mutation.SetCreatedBy(v)
@@ -161,16 +147,8 @@ func (_c *UserGroupsCreate) SetNillableExpiredAt(v *time.Time) *UserGroupsCreate
 }
 
 // SetMetadata sets the "metadata" field.
-func (_c *UserGroupsCreate) SetMetadata(v string) *UserGroupsCreate {
+func (_c *UserGroupsCreate) SetMetadata(v map[string]string) *UserGroupsCreate {
 	_c.mutation.SetMetadata(v)
-	return _c
-}
-
-// SetNillableMetadata sets the "metadata" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableMetadata(v *string) *UserGroupsCreate {
-	if v != nil {
-		_c.SetMetadata(*v)
-	}
 	return _c
 }
 
@@ -371,10 +349,6 @@ func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
 		_spec.SetField(usergroups.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(usergroups.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
-	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
 		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = value
@@ -400,7 +374,7 @@ func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
 		_node.ExpiredAt = value
 	}
 	if value, ok := _c.mutation.Metadata(); ok {
-		_spec.SetField(usergroups.FieldMetadata, field.TypeString, value)
+		_spec.SetField(usergroups.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
 	}
 	if value, ok := _c.mutation.Description(); ok {

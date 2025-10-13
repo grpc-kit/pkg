@@ -36,13 +36,13 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 
 	group, err := db.Groups.Create().
 		SetName(req.Group.Name).
-		SetType(int(req.Group.Type.Number())).
-		SetStatus(int(req.Group.Status.Number())).
-		SetI18nName(I18NNameJSON(req.Group.I18NName)).
+		SetGroupType(int(req.Group.Type.Number())).
+		SetGroupStatus(int(req.Group.Status.Number())).
+		SetI18nName(req.Group.I18NName).
 		SetOrderWeight(int(req.Group.OrderWeight)).
 		SetParentID(int(req.Group.ParentId)).
 		SetMaxMembers(int(req.Group.MaxMembers)).
-		SetMetadata(MetadataJSON(req.Group.Metadata)).
+		SetMetadata(req.Group.Metadata).
 		SetExternalID(req.Group.ExternalId).
 		SetDepartmentID(departmentID).
 		SetDescription(req.Group.Description).
@@ -56,18 +56,18 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 	result = &adminv1.Group{
 		Id:           int32(group.ID),
 		Name:         group.Name,
-		Type:         adminv1.Group_Type(group.Type),
-		Status:       adminv1.Group_Status(group.Status),
-		I18NName:     I18NNameParse(group.I18nName),
+		Type:         adminv1.Group_Type(group.GroupType),
+		Status:       adminv1.Group_Status(group.GroupStatus),
+		I18NName:     group.I18nName,
 		OrderWeight:  int32(group.OrderWeight),
 		ParentId:     int32(group.ParentID),
 		MaxMembers:   int32(group.MaxMembers),
-		Metadata:     MetadataParse(group.Metadata),
+		Metadata:     group.Metadata,
 		ExternalId:   group.ExternalID,
 		DepartmentId: int32(departmentID),
 		Description:  group.Description,
-		CreatedBy:    int32(group.CreatedBy),
-		UpdatedBy:    int32(group.UpdatedBy),
+		CreatedBy:    group.CreatedBy,
+		UpdatedBy:    group.UpdatedBy,
 	}
 
 	return result, nil
@@ -100,18 +100,18 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 		result.Groups = append(result.Groups, &adminv1.Group{
 			Id:           int32(group.ID),
 			Name:         group.Name,
-			Type:         adminv1.Group_Type(group.Type),
-			Status:       adminv1.Group_Status(group.Status),
-			I18NName:     I18NNameParse(group.I18nName),
+			Type:         adminv1.Group_Type(group.GroupType),
+			Status:       adminv1.Group_Status(group.GroupStatus),
+			I18NName:     group.I18nName,
 			OrderWeight:  int32(group.OrderWeight),
 			ParentId:     int32(group.ParentID),
 			MaxMembers:   int32(group.MaxMembers),
-			Metadata:     MetadataParse(group.Metadata),
+			Metadata:     group.Metadata,
 			ExternalId:   group.ExternalID,
 			DepartmentId: int32(group.DepartmentID),
 			Description:  group.Description,
-			CreatedBy:    int32(group.CreatedBy),
-			UpdatedBy:    int32(group.UpdatedBy),
+			CreatedBy:    group.CreatedBy,
+			UpdatedBy:    group.UpdatedBy,
 		})
 	}
 
@@ -147,11 +147,11 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			case "name":
 				update.SetName(req.Group.Name)
 			case "type":
-				update.SetType(int(req.Group.Type.Number()))
+				update.SetGroupType(int(req.Group.Type.Number()))
 			case "status":
-				update.SetStatus(int(req.Group.Status.Number()))
+				update.SetGroupStatus(int(req.Group.Status.Number()))
 			case "i18n_name":
-				update.SetI18nName(I18NNameJSON(req.Group.I18NName))
+				update.SetI18nName(req.Group.I18NName)
 			case "order_weight":
 				update.SetOrderWeight(int(req.Group.OrderWeight))
 			case "parent_id":
@@ -159,7 +159,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			case "max_members":
 				update.SetMaxMembers(int(req.Group.MaxMembers))
 			case "metadata":
-				update.SetMetadata(MetadataJSON(req.Group.Metadata))
+				update.SetMetadata(req.Group.Metadata)
 			case "external_id":
 				update.SetExternalID(req.Group.ExternalId)
 			case "department_id":
@@ -174,13 +174,13 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 		// 如果没有指定更新字段，则更新所有非零字段
 		update.
 			SetName(req.Group.Name).
-			SetType(int(req.Group.Type.Number())).
-			SetStatus(int(req.Group.Status.Number())).
-			SetI18nName(I18NNameJSON(req.Group.I18NName)).
+			SetGroupType(int(req.Group.Type.Number())).
+			SetGroupStatus(int(req.Group.Status.Number())).
+			SetI18nName(req.Group.I18NName).
 			SetOrderWeight(int(req.Group.OrderWeight)).
 			SetParentID(int(req.Group.ParentId)).
 			SetMaxMembers(int(req.Group.MaxMembers)).
-			SetMetadata(MetadataJSON(req.Group.Metadata)).
+			SetMetadata(req.Group.Metadata).
 			SetExternalID(req.Group.ExternalId).
 			SetDepartmentID(int(req.Group.DepartmentId)).
 			SetDescription(req.Group.Description).
@@ -197,18 +197,18 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 	result = &adminv1.Group{
 		Id:           int32(updatedGroup.ID),
 		Name:         updatedGroup.Name,
-		Type:         adminv1.Group_Type(updatedGroup.Type),
-		Status:       adminv1.Group_Status(updatedGroup.Status),
-		I18NName:     I18NNameParse(updatedGroup.I18nName),
+		Type:         adminv1.Group_Type(updatedGroup.GroupType),
+		Status:       adminv1.Group_Status(updatedGroup.GroupStatus),
+		I18NName:     updatedGroup.I18nName,
 		OrderWeight:  int32(updatedGroup.OrderWeight),
 		ParentId:     int32(updatedGroup.ParentID),
 		MaxMembers:   int32(updatedGroup.MaxMembers),
-		Metadata:     MetadataParse(updatedGroup.Metadata),
+		Metadata:     updatedGroup.Metadata,
 		ExternalId:   updatedGroup.ExternalID,
 		DepartmentId: int32(updatedGroup.DepartmentID),
 		Description:  updatedGroup.Description,
-		CreatedBy:    int32(updatedGroup.CreatedBy),
-		UpdatedBy:    int32(updatedGroup.UpdatedBy),
+		CreatedBy:    updatedGroup.CreatedBy,
+		UpdatedBy:    updatedGroup.UpdatedBy,
 	}
 
 	return result, nil
@@ -281,7 +281,7 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 
 		result.GroupMembers = append(result.GroupMembers, &adminv1.GroupMember{
 			Id:           int32(member.ID),
-			UserId:       int32(member.UserID),
+			UserId:       int64(member.UserID),
 			Username:     member.Edges.LionUsers.Username,
 			Nickname:     member.Edges.LionUsers.Nickname,
 			GroupId:      int32(member.GroupID),
@@ -289,8 +289,8 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 			MemberStatus: adminv1.GroupMember_Status(member.MemberStatus),
 			JoinedAt:     timestamppb.New(member.JoinedAt),
 			ExpiredAt:    timestamppb.New(member.ExpiredAt),
-			CreatedBy:    int32(member.CreatedBy),
-			UpdatedBy:    int32(member.UpdatedBy),
+			CreatedBy:    member.CreatedBy,
+			UpdatedBy:    member.UpdatedBy,
 			CreatedAt:    timestamppb.New(member.CreatedAt),
 			UpdatedAt:    timestamppb.New(member.UpdatedAt),
 			Description:  member.Description,

@@ -18,6 +18,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
 	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
@@ -30,10 +32,10 @@ const (
 	FieldI18nName = "i18n_name"
 	// FieldOrderWeight holds the string denoting the order_weight field in the database.
 	FieldOrderWeight = "order_weight"
-	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
-	// FieldScope holds the string denoting the scope field in the database.
-	FieldScope = "scope"
+	// FieldResourceType holds the string denoting the resource_type field in the database.
+	FieldResourceType = "resource_type"
+	// FieldResourceScope holds the string denoting the resource_scope field in the database.
+	FieldResourceScope = "resource_scope"
 	// FieldEnabled holds the string denoting the enabled field in the database.
 	FieldEnabled = "enabled"
 	// FieldHidden holds the string denoting the hidden field in the database.
@@ -48,6 +50,8 @@ const (
 	FieldComponent = "component"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldPermissions holds the string denoting the permissions field in the database.
+	FieldPermissions = "permissions"
 	// EdgeLionRoleResources holds the string denoting the lion_role_resources edge name in mutations.
 	EdgeLionRoleResources = "lion_role_resources"
 	// Table holds the table name of the resources in the database.
@@ -66,14 +70,15 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldParentID,
 	FieldName,
 	FieldI18nName,
 	FieldOrderWeight,
-	FieldType,
-	FieldScope,
+	FieldResourceType,
+	FieldResourceScope,
 	FieldEnabled,
 	FieldHidden,
 	FieldHideChildren,
@@ -81,6 +86,7 @@ var Columns = []string{
 	FieldIcon,
 	FieldComponent,
 	FieldDescription,
+	FieldPermissions,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -108,14 +114,12 @@ var (
 	DefaultParentID int
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultI18nName holds the default value on creation for the "i18n_name" field.
-	DefaultI18nName string
 	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
 	DefaultOrderWeight int
-	// DefaultType holds the default value on creation for the "type" field.
-	DefaultType int
-	// DefaultScope holds the default value on creation for the "scope" field.
-	DefaultScope int
+	// DefaultResourceType holds the default value on creation for the "resource_type" field.
+	DefaultResourceType int
+	// DefaultResourceScope holds the default value on creation for the "resource_scope" field.
+	DefaultResourceScope int
 	// DefaultEnabled holds the default value on creation for the "enabled" field.
 	DefaultEnabled bool
 	// DefaultHidden holds the default value on creation for the "hidden" field.
@@ -156,6 +160,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
 // ByCreatedBy orders the results by the created_by field.
 func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
@@ -176,24 +185,19 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByI18nName orders the results by the i18n_name field.
-func ByI18nName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldI18nName, opts...).ToFunc()
-}
-
 // ByOrderWeight orders the results by the order_weight field.
 func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
 }
 
-// ByType orders the results by the type field.
-func ByType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldType, opts...).ToFunc()
+// ByResourceType orders the results by the resource_type field.
+func ByResourceType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceType, opts...).ToFunc()
 }
 
-// ByScope orders the results by the scope field.
-func ByScope(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldScope, opts...).ToFunc()
+// ByResourceScope orders the results by the resource_scope field.
+func ByResourceScope(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceScope, opts...).ToFunc()
 }
 
 // ByEnabled orders the results by the enabled field.

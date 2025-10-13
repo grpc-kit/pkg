@@ -3,6 +3,7 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -32,9 +33,9 @@ type Users struct {
 	// 用户的真实姓名
 	RealnameEncrypted []byte `json:"-"`
 	// 用户类型
-	Type int `json:"type,omitempty"`
+	UserType int `json:"user_type,omitempty"`
 	// 用户状态
-	Status int `json:"status,omitempty"`
+	UserStatus int `json:"user_status,omitempty"`
 	// 用户身份证号码
 	NationalIDEncrypted []byte `json:"-"`
 	// 用户的身份证号码哈希，用于唯一值判断
@@ -58,7 +59,7 @@ type Users struct {
 	// 用户的出生日期，格式为 YYYY-MM-DD，如 1990-12-31
 	Birthdate time.Time `json:"birthdate,omitempty"`
 	// 用户的时区信息，如：Asia/Shanghai
-	Zoneinfo string `json:"zoneinfo,omitempty"`
+	Timezone string `json:"timezone,omitempty"`
 	// 用户的语言/地区偏好，如：zh-CN
 	Locale string `json:"locale,omitempty"`
 	// 用户的手机号码，加密存储
@@ -71,6 +72,8 @@ type Users struct {
 	AddressEncrypted []byte `json:"-"`
 	// 用户详细描述
 	Description string `json:"description,omitempty"`
+	// 自定义元数据，用于存储额外的用户信息，对应 proto 中的 map<string, string> metadata
+	Metadata map[string]string `json:"metadata,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UsersQuery when eager-loading is set.
 	Edges        UsersEdges `json:"edges"`
@@ -133,13 +136,13 @@ func (*Users) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case users.FieldRealnameEncrypted, users.FieldNationalIDEncrypted, users.FieldEmailEncrypted, users.FieldPhoneNumberEncrypted, users.FieldAddressEncrypted:
+		case users.FieldRealnameEncrypted, users.FieldNationalIDEncrypted, users.FieldEmailEncrypted, users.FieldPhoneNumberEncrypted, users.FieldAddressEncrypted, users.FieldMetadata:
 			values[i] = new([]byte)
 		case users.FieldEmailVerified, users.FieldPhoneNumberVerified:
 			values[i] = new(sql.NullBool)
-		case users.FieldID, users.FieldCreatedBy, users.FieldUpdatedBy, users.FieldType, users.FieldStatus, users.FieldGender:
+		case users.FieldID, users.FieldCreatedBy, users.FieldUpdatedBy, users.FieldUserType, users.FieldUserStatus, users.FieldGender:
 			values[i] = new(sql.NullInt64)
-		case users.FieldUsername, users.FieldNationalIDHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldZoneinfo, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
+		case users.FieldUsername, users.FieldNationalIDHash, users.FieldNickname, users.FieldProfile, users.FieldPicture, users.FieldWebsite, users.FieldEmailHash, users.FieldTimezone, users.FieldLocale, users.FieldPhoneNumberHash, users.FieldDescription:
 			values[i] = new(sql.NullString)
 		case users.FieldCreatedAt, users.FieldUpdatedAt, users.FieldDeletedAt, users.FieldBirthdate:
 			values[i] = new(sql.NullTime)
@@ -207,17 +210,17 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.RealnameEncrypted = *value
 			}
-		case users.FieldType:
+		case users.FieldUserType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field type", values[i])
+				return fmt.Errorf("unexpected type %T for field user_type", values[i])
 			} else if value.Valid {
-				_m.Type = int(value.Int64)
+				_m.UserType = int(value.Int64)
 			}
-		case users.FieldStatus:
+		case users.FieldUserStatus:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field status", values[i])
+				return fmt.Errorf("unexpected type %T for field user_status", values[i])
 			} else if value.Valid {
-				_m.Status = int(value.Int64)
+				_m.UserStatus = int(value.Int64)
 			}
 		case users.FieldNationalIDEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -285,11 +288,11 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Birthdate = value.Time
 			}
-		case users.FieldZoneinfo:
+		case users.FieldTimezone:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field zoneinfo", values[i])
+				return fmt.Errorf("unexpected type %T for field timezone", values[i])
 			} else if value.Valid {
-				_m.Zoneinfo = value.String
+				_m.Timezone = value.String
 			}
 		case users.FieldLocale:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -326,6 +329,14 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
 				_m.Description = value.String
+			}
+		case users.FieldMetadata:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -405,11 +416,11 @@ func (_m *Users) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("realname_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Type))
+	builder.WriteString("user_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UserType))
 	builder.WriteString(", ")
-	builder.WriteString("status=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Status))
+	builder.WriteString("user_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.UserStatus))
 	builder.WriteString(", ")
 	builder.WriteString("national_id_encrypted=<sensitive>")
 	builder.WriteString(", ")
@@ -442,8 +453,8 @@ func (_m *Users) String() string {
 	builder.WriteString("birthdate=")
 	builder.WriteString(_m.Birthdate.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("zoneinfo=")
-	builder.WriteString(_m.Zoneinfo)
+	builder.WriteString("timezone=")
+	builder.WriteString(_m.Timezone)
 	builder.WriteString(", ")
 	builder.WriteString("locale=")
 	builder.WriteString(_m.Locale)
@@ -460,6 +471,9 @@ func (_m *Users) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("metadata=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteByte(')')
 	return builder.String()
 }

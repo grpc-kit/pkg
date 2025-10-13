@@ -3,6 +3,7 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -21,16 +22,20 @@ type Roles struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 角色名称，仅支持字母、数字
 	Name string `json:"name,omitempty"`
-	// 国际化标识
-	I18nName string `json:"i18n_name,omitempty"`
-	// 是否保护字段，不允许 UI 修改
-	Protected bool `json:"protected,omitempty"`
+	// 角色国际化名称，支持多语言，对应 proto 中的 map<string, string> i18n_name
+	I18nName map[string]string `json:"i18n_name,omitempty"`
+	// 角色类型：TYPE_SYSTEM=系统内置角色，TYPE_CUSTOM=自定义角色，TYPE_TEMPLATE=模板角色
+	RoleType int `json:"role_type,omitempty"`
+	// 角色状态：STATUS_ACTIVE=正常启用，STATUS_DISABLED=禁用状态
+	RoleStatus int `json:"role_status,omitempty"`
 	// 排序权重，越小越靠前
 	OrderWeight int `json:"order_weight,omitempty"`
 	// 用途详细描述
@@ -97,13 +102,13 @@ func (*Roles) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case roles.FieldProtected:
-			values[i] = new(sql.NullBool)
-		case roles.FieldID, roles.FieldCreatedBy, roles.FieldUpdatedBy, roles.FieldOrderWeight:
+		case roles.FieldI18nName:
+			values[i] = new([]byte)
+		case roles.FieldID, roles.FieldCreatedBy, roles.FieldUpdatedBy, roles.FieldRoleType, roles.FieldRoleStatus, roles.FieldOrderWeight:
 			values[i] = new(sql.NullInt64)
-		case roles.FieldName, roles.FieldI18nName, roles.FieldDescription:
+		case roles.FieldName, roles.FieldDescription:
 			values[i] = new(sql.NullString)
-		case roles.FieldCreatedAt, roles.FieldUpdatedAt:
+		case roles.FieldCreatedAt, roles.FieldUpdatedAt, roles.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -138,6 +143,13 @@ func (_m *Roles) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case roles.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
+			}
 		case roles.FieldCreatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_by", values[i])
@@ -157,16 +169,24 @@ func (_m *Roles) assignValues(columns []string, values []any) error {
 				_m.Name = value.String
 			}
 		case roles.FieldI18nName:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
-			} else if value.Valid {
-				_m.I18nName = value.String
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.I18nName); err != nil {
+					return fmt.Errorf("unmarshal field i18n_name: %w", err)
+				}
 			}
-		case roles.FieldProtected:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field protected", values[i])
+		case roles.FieldRoleType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field role_type", values[i])
 			} else if value.Valid {
-				_m.Protected = value.Bool
+				_m.RoleType = int(value.Int64)
+			}
+		case roles.FieldRoleStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field role_status", values[i])
+			} else if value.Valid {
+				_m.RoleStatus = int(value.Int64)
 			}
 		case roles.FieldOrderWeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -242,6 +262,11 @@ func (_m *Roles) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("created_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
 	builder.WriteString(", ")
@@ -252,10 +277,13 @@ func (_m *Roles) String() string {
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("i18n_name=")
-	builder.WriteString(_m.I18nName)
+	builder.WriteString(fmt.Sprintf("%v", _m.I18nName))
 	builder.WriteString(", ")
-	builder.WriteString("protected=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
+	builder.WriteString("role_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RoleType))
+	builder.WriteString(", ")
+	builder.WriteString("role_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RoleStatus))
 	builder.WriteString(", ")
 	builder.WriteString("order_weight=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))

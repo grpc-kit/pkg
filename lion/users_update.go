@@ -126,45 +126,45 @@ func (_u *UsersUpdate) ClearRealnameEncrypted() *UsersUpdate {
 	return _u
 }
 
-// SetType sets the "type" field.
-func (_u *UsersUpdate) SetType(v int) *UsersUpdate {
-	_u.mutation.ResetType()
-	_u.mutation.SetType(v)
+// SetUserType sets the "user_type" field.
+func (_u *UsersUpdate) SetUserType(v int) *UsersUpdate {
+	_u.mutation.ResetUserType()
+	_u.mutation.SetUserType(v)
 	return _u
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *UsersUpdate) SetNillableType(v *int) *UsersUpdate {
+// SetNillableUserType sets the "user_type" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableUserType(v *int) *UsersUpdate {
 	if v != nil {
-		_u.SetType(*v)
+		_u.SetUserType(*v)
 	}
 	return _u
 }
 
-// AddType adds value to the "type" field.
-func (_u *UsersUpdate) AddType(v int) *UsersUpdate {
-	_u.mutation.AddType(v)
+// AddUserType adds value to the "user_type" field.
+func (_u *UsersUpdate) AddUserType(v int) *UsersUpdate {
+	_u.mutation.AddUserType(v)
 	return _u
 }
 
-// SetStatus sets the "status" field.
-func (_u *UsersUpdate) SetStatus(v int) *UsersUpdate {
-	_u.mutation.ResetStatus()
-	_u.mutation.SetStatus(v)
+// SetUserStatus sets the "user_status" field.
+func (_u *UsersUpdate) SetUserStatus(v int) *UsersUpdate {
+	_u.mutation.ResetUserStatus()
+	_u.mutation.SetUserStatus(v)
 	return _u
 }
 
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *UsersUpdate) SetNillableStatus(v *int) *UsersUpdate {
+// SetNillableUserStatus sets the "user_status" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableUserStatus(v *int) *UsersUpdate {
 	if v != nil {
-		_u.SetStatus(*v)
+		_u.SetUserStatus(*v)
 	}
 	return _u
 }
 
-// AddStatus adds value to the "status" field.
-func (_u *UsersUpdate) AddStatus(v int) *UsersUpdate {
-	_u.mutation.AddStatus(v)
+// AddUserStatus adds value to the "user_status" field.
+func (_u *UsersUpdate) AddUserStatus(v int) *UsersUpdate {
+	_u.mutation.AddUserStatus(v)
 	return _u
 }
 
@@ -343,16 +343,16 @@ func (_u *UsersUpdate) ClearBirthdate() *UsersUpdate {
 	return _u
 }
 
-// SetZoneinfo sets the "zoneinfo" field.
-func (_u *UsersUpdate) SetZoneinfo(v string) *UsersUpdate {
-	_u.mutation.SetZoneinfo(v)
+// SetTimezone sets the "timezone" field.
+func (_u *UsersUpdate) SetTimezone(v string) *UsersUpdate {
+	_u.mutation.SetTimezone(v)
 	return _u
 }
 
-// SetNillableZoneinfo sets the "zoneinfo" field if the given value is not nil.
-func (_u *UsersUpdate) SetNillableZoneinfo(v *string) *UsersUpdate {
+// SetNillableTimezone sets the "timezone" field if the given value is not nil.
+func (_u *UsersUpdate) SetNillableTimezone(v *string) *UsersUpdate {
 	if v != nil {
-		_u.SetZoneinfo(*v)
+		_u.SetTimezone(*v)
 	}
 	return _u
 }
@@ -440,6 +440,12 @@ func (_u *UsersUpdate) SetNillableDescription(v *string) *UsersUpdate {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *UsersUpdate) SetMetadata(v map[string]string) *UsersUpdate {
+	_u.mutation.SetMetadata(v)
 	return _u
 }
 
@@ -690,17 +696,17 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.RealnameEncryptedCleared() {
 		_spec.ClearField(users.FieldRealnameEncrypted, field.TypeBytes)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(users.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.UserType(); ok {
+		_spec.SetField(users.FieldUserType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedType(); ok {
-		_spec.AddField(users.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedUserType(); ok {
+		_spec.AddField(users.FieldUserType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(users.FieldStatus, field.TypeInt, value)
+	if value, ok := _u.mutation.UserStatus(); ok {
+		_spec.SetField(users.FieldUserStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedStatus(); ok {
-		_spec.AddField(users.FieldStatus, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedUserStatus(); ok {
+		_spec.AddField(users.FieldUserStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.NationalIDEncrypted(); ok {
 		_spec.SetField(users.FieldNationalIDEncrypted, field.TypeBytes, value)
@@ -753,8 +759,8 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.BirthdateCleared() {
 		_spec.ClearField(users.FieldBirthdate, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Zoneinfo(); ok {
-		_spec.SetField(users.FieldZoneinfo, field.TypeString, value)
+	if value, ok := _u.mutation.Timezone(); ok {
+		_spec.SetField(users.FieldTimezone, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Locale(); ok {
 		_spec.SetField(users.FieldLocale, field.TypeString, value)
@@ -782,6 +788,9 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(users.FieldMetadata, field.TypeJSON, value)
 	}
 	if _u.mutation.LionUserRolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1077,45 +1086,45 @@ func (_u *UsersUpdateOne) ClearRealnameEncrypted() *UsersUpdateOne {
 	return _u
 }
 
-// SetType sets the "type" field.
-func (_u *UsersUpdateOne) SetType(v int) *UsersUpdateOne {
-	_u.mutation.ResetType()
-	_u.mutation.SetType(v)
+// SetUserType sets the "user_type" field.
+func (_u *UsersUpdateOne) SetUserType(v int) *UsersUpdateOne {
+	_u.mutation.ResetUserType()
+	_u.mutation.SetUserType(v)
 	return _u
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *UsersUpdateOne) SetNillableType(v *int) *UsersUpdateOne {
+// SetNillableUserType sets the "user_type" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableUserType(v *int) *UsersUpdateOne {
 	if v != nil {
-		_u.SetType(*v)
+		_u.SetUserType(*v)
 	}
 	return _u
 }
 
-// AddType adds value to the "type" field.
-func (_u *UsersUpdateOne) AddType(v int) *UsersUpdateOne {
-	_u.mutation.AddType(v)
+// AddUserType adds value to the "user_type" field.
+func (_u *UsersUpdateOne) AddUserType(v int) *UsersUpdateOne {
+	_u.mutation.AddUserType(v)
 	return _u
 }
 
-// SetStatus sets the "status" field.
-func (_u *UsersUpdateOne) SetStatus(v int) *UsersUpdateOne {
-	_u.mutation.ResetStatus()
-	_u.mutation.SetStatus(v)
+// SetUserStatus sets the "user_status" field.
+func (_u *UsersUpdateOne) SetUserStatus(v int) *UsersUpdateOne {
+	_u.mutation.ResetUserStatus()
+	_u.mutation.SetUserStatus(v)
 	return _u
 }
 
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *UsersUpdateOne) SetNillableStatus(v *int) *UsersUpdateOne {
+// SetNillableUserStatus sets the "user_status" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableUserStatus(v *int) *UsersUpdateOne {
 	if v != nil {
-		_u.SetStatus(*v)
+		_u.SetUserStatus(*v)
 	}
 	return _u
 }
 
-// AddStatus adds value to the "status" field.
-func (_u *UsersUpdateOne) AddStatus(v int) *UsersUpdateOne {
-	_u.mutation.AddStatus(v)
+// AddUserStatus adds value to the "user_status" field.
+func (_u *UsersUpdateOne) AddUserStatus(v int) *UsersUpdateOne {
+	_u.mutation.AddUserStatus(v)
 	return _u
 }
 
@@ -1294,16 +1303,16 @@ func (_u *UsersUpdateOne) ClearBirthdate() *UsersUpdateOne {
 	return _u
 }
 
-// SetZoneinfo sets the "zoneinfo" field.
-func (_u *UsersUpdateOne) SetZoneinfo(v string) *UsersUpdateOne {
-	_u.mutation.SetZoneinfo(v)
+// SetTimezone sets the "timezone" field.
+func (_u *UsersUpdateOne) SetTimezone(v string) *UsersUpdateOne {
+	_u.mutation.SetTimezone(v)
 	return _u
 }
 
-// SetNillableZoneinfo sets the "zoneinfo" field if the given value is not nil.
-func (_u *UsersUpdateOne) SetNillableZoneinfo(v *string) *UsersUpdateOne {
+// SetNillableTimezone sets the "timezone" field if the given value is not nil.
+func (_u *UsersUpdateOne) SetNillableTimezone(v *string) *UsersUpdateOne {
 	if v != nil {
-		_u.SetZoneinfo(*v)
+		_u.SetTimezone(*v)
 	}
 	return _u
 }
@@ -1391,6 +1400,12 @@ func (_u *UsersUpdateOne) SetNillableDescription(v *string) *UsersUpdateOne {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *UsersUpdateOne) SetMetadata(v map[string]string) *UsersUpdateOne {
+	_u.mutation.SetMetadata(v)
 	return _u
 }
 
@@ -1671,17 +1686,17 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if _u.mutation.RealnameEncryptedCleared() {
 		_spec.ClearField(users.FieldRealnameEncrypted, field.TypeBytes)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(users.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.UserType(); ok {
+		_spec.SetField(users.FieldUserType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedType(); ok {
-		_spec.AddField(users.FieldType, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedUserType(); ok {
+		_spec.AddField(users.FieldUserType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(users.FieldStatus, field.TypeInt, value)
+	if value, ok := _u.mutation.UserStatus(); ok {
+		_spec.SetField(users.FieldUserStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedStatus(); ok {
-		_spec.AddField(users.FieldStatus, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedUserStatus(); ok {
+		_spec.AddField(users.FieldUserStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.NationalIDEncrypted(); ok {
 		_spec.SetField(users.FieldNationalIDEncrypted, field.TypeBytes, value)
@@ -1734,8 +1749,8 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if _u.mutation.BirthdateCleared() {
 		_spec.ClearField(users.FieldBirthdate, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Zoneinfo(); ok {
-		_spec.SetField(users.FieldZoneinfo, field.TypeString, value)
+	if value, ok := _u.mutation.Timezone(); ok {
+		_spec.SetField(users.FieldTimezone, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Locale(); ok {
 		_spec.SetField(users.FieldLocale, field.TypeString, value)
@@ -1763,6 +1778,9 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(users.FieldMetadata, field.TypeJSON, value)
 	}
 	if _u.mutation.LionUserRolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
