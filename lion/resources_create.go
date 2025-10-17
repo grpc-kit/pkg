@@ -383,12 +383,6 @@ func (_c *ResourcesCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Resources.updated_at"`)}
 	}
-	if _, ok := _c.mutation.CreatedBy(); !ok {
-		return &ValidationError{Name: "created_by", err: errors.New(`lion: missing required field "Resources.created_by"`)}
-	}
-	if _, ok := _c.mutation.UpdatedBy(); !ok {
-		return &ValidationError{Name: "updated_by", err: errors.New(`lion: missing required field "Resources.updated_by"`)}
-	}
 	if _, ok := _c.mutation.ParentID(); !ok {
 		return &ValidationError{Name: "parent_id", err: errors.New(`lion: missing required field "Resources.parent_id"`)}
 	}

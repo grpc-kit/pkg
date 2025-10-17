@@ -2,17 +2,14 @@ package admin
 
 import (
 	"context"
-	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"math/big"
 
-	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
-	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -23,53 +20,55 @@ func (a *KnownAdminAPI) CreateCredential(ctx context.Context, req *adminv1.Creat
 
 	// 仅允许存在一条记录，如已存在多次创建返回已存在内容
 
-	tx, err := a.config.db.Tx(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	key, err := tx.Credentials.Query().Select(credentials.FieldPublicKey).Only(ctx)
-	if err != nil && !lion.IsNotFound(err) {
-		return nil, err
-	}
-
-	// 不存在记录则新建
-	if lion.IsNotFound(err) {
-		privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	/*
+		tx, err := a.config.db.Tx(ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
-		publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
-		if err != nil {
+		key, err := tx.Credentials.Query().Select(credentials.FieldPublicKey).Only(ctx)
+		if err != nil && !lion.IsNotFound(err) {
 			return nil, err
 		}
 
-		privateKeyEnc, err := crypto.EncryptAES(a.config.aesKey, privateKeyBytes)
-		if err != nil {
-			return nil, err
+		// 不存在记录则新建
+		if lion.IsNotFound(err) {
+			privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+			if err != nil {
+				return nil, err
+			}
+
+			privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
+			publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
+			if err != nil {
+				return nil, err
+			}
+
+			privateKeyEnc, err := crypto.EncryptAES(a.config.aesKey, privateKeyBytes)
+			if err != nil {
+				return nil, err
+			}
+
+			appid := uuid.New().String()
+			if req.Credential.Appid != "" {
+				appid = req.Credential.Appid
+			}
+
+			tx.Credentials.Create().
+				SetName(req.Credential.Name).
+				SetType(int(req.Credential.Type)).
+				SetAppid(appid).
+				SetUsage(req.Credential.Usage).
+				SetPublicKey(crypto.Base64Encode(publicKeyBytes)).
+				SetPrivateKeyEncrypted(privateKeyEnc).SaveX(ctx)
+
+			result.PublicKey = crypto.Base64Encode(publicKeyBytes)
+		} else {
+			result.PublicKey = key.PublicKey
 		}
 
-		appid := uuid.New().String()
-		if req.Credential.Appid != "" {
-			appid = req.Credential.Appid
-		}
-
-		tx.Credentials.Create().
-			SetName(req.Credential.Name).
-			SetType(int(req.Credential.Type)).
-			SetAppid(appid).
-			SetUsage(req.Credential.Usage).
-			SetPublicKey(crypto.Base64Encode(publicKeyBytes)).
-			SetPrivateKeyEncrypted(privateKeyEnc).SaveX(ctx)
-
-		result.PublicKey = crypto.Base64Encode(publicKeyBytes)
-	} else {
-		result.PublicKey = key.PublicKey
-	}
-
-	_ = tx.Commit()
+		_ = tx.Commit()
+	*/
 
 	return result, nil
 }
@@ -104,8 +103,16 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 
 	sk, err := a.config.db.Credentials.Query().
 		Select(
-			credentials.FieldAppid,
+			credentials.FieldKeyID,
 			credentials.FieldPublicKey,
+		).
+		Where(
+			credentials.CredentialTypeEQ(int(adminv1.Credential_TYPE_JWKS.Number())),
+			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_ALGORITHM_RSA.Number())),
+			credentials.CredentialUsageEQ(int(adminv1.Credential_USAGE_SIGNING.Number())),
+			credentials.CredentialVisibilityEQ(int(adminv1.Credential_VISIBILITY_PRIVATE.Number())),
+			credentials.CredentialStatusEQ(int(adminv1.Credential_STATUS_ACTIVE.Number())),
+			credentials.CredentialSourceEQ(int(adminv1.Credential_SOURCE_SYSTEM.Number())),
 		).
 		Order(credentials.ByID()).
 		Only(ctx)
@@ -134,7 +141,7 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 		Alg: "RS256",
 		E:   e,
 		N:   n,
-		Kid: sk.Appid,
+		Kid: sk.KeyID,
 	}
 
 	result.Keys = append(result.Keys, tmp)

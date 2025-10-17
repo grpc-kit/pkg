@@ -68,8 +68,10 @@ type AuditMixin struct {
 func (AuditMixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int64("created_by").
+			Optional().
 			Default(0),
 		field.Int64("updated_by").
+			Optional().
 			Default(0),
 	}
 }

@@ -57,6 +57,12 @@ func (_u *GroupRolesUpdate) AddCreatedBy(v int64) *GroupRolesUpdate {
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *GroupRolesUpdate) ClearCreatedBy() *GroupRolesUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *GroupRolesUpdate) SetUpdatedBy(v int64) *GroupRolesUpdate {
 	_u.mutation.ResetUpdatedBy()
@@ -75,6 +81,12 @@ func (_u *GroupRolesUpdate) SetNillableUpdatedBy(v *int64) *GroupRolesUpdate {
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *GroupRolesUpdate) AddUpdatedBy(v int64) *GroupRolesUpdate {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *GroupRolesUpdate) ClearUpdatedBy() *GroupRolesUpdate {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -223,11 +235,17 @@ func (_u *GroupRolesUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(grouproles.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(grouproles.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(grouproles.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(grouproles.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(grouproles.FieldUpdatedBy, field.TypeInt64)
 	}
 	if _u.mutation.LionGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -334,6 +352,12 @@ func (_u *GroupRolesUpdateOne) AddCreatedBy(v int64) *GroupRolesUpdateOne {
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *GroupRolesUpdateOne) ClearCreatedBy() *GroupRolesUpdateOne {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *GroupRolesUpdateOne) SetUpdatedBy(v int64) *GroupRolesUpdateOne {
 	_u.mutation.ResetUpdatedBy()
@@ -352,6 +376,12 @@ func (_u *GroupRolesUpdateOne) SetNillableUpdatedBy(v *int64) *GroupRolesUpdateO
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *GroupRolesUpdateOne) AddUpdatedBy(v int64) *GroupRolesUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *GroupRolesUpdateOne) ClearUpdatedBy() *GroupRolesUpdateOne {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -530,11 +560,17 @@ func (_u *GroupRolesUpdateOne) sqlSave(ctx context.Context) (_node *GroupRoles, 
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(grouproles.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(grouproles.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(grouproles.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(grouproles.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(grouproles.FieldUpdatedBy, field.TypeInt64)
 	}
 	if _u.mutation.LionGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{

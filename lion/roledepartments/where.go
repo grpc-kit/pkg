@@ -205,6 +205,16 @@ func CreatedByLTE(v int64) predicate.RoleDepartments {
 	return predicate.RoleDepartments(sql.FieldLTE(FieldCreatedBy, v))
 }
 
+// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
+func CreatedByIsNil() predicate.RoleDepartments {
+	return predicate.RoleDepartments(sql.FieldIsNull(FieldCreatedBy))
+}
+
+// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
+func CreatedByNotNil() predicate.RoleDepartments {
+	return predicate.RoleDepartments(sql.FieldNotNull(FieldCreatedBy))
+}
+
 // UpdatedByEQ applies the EQ predicate on the "updated_by" field.
 func UpdatedByEQ(v int64) predicate.RoleDepartments {
 	return predicate.RoleDepartments(sql.FieldEQ(FieldUpdatedBy, v))
@@ -243,6 +253,16 @@ func UpdatedByLT(v int64) predicate.RoleDepartments {
 // UpdatedByLTE applies the LTE predicate on the "updated_by" field.
 func UpdatedByLTE(v int64) predicate.RoleDepartments {
 	return predicate.RoleDepartments(sql.FieldLTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
+func UpdatedByIsNil() predicate.RoleDepartments {
+	return predicate.RoleDepartments(sql.FieldIsNull(FieldUpdatedBy))
+}
+
+// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
+func UpdatedByNotNil() predicate.RoleDepartments {
+	return predicate.RoleDepartments(sql.FieldNotNull(FieldUpdatedBy))
 }
 
 // RoleIDEQ applies the EQ predicate on the "role_id" field.

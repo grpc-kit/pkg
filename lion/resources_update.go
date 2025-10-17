@@ -77,6 +77,12 @@ func (_u *ResourcesUpdate) AddCreatedBy(v int64) *ResourcesUpdate {
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *ResourcesUpdate) ClearCreatedBy() *ResourcesUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *ResourcesUpdate) SetUpdatedBy(v int64) *ResourcesUpdate {
 	_u.mutation.ResetUpdatedBy()
@@ -95,6 +101,12 @@ func (_u *ResourcesUpdate) SetNillableUpdatedBy(v *int64) *ResourcesUpdate {
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *ResourcesUpdate) AddUpdatedBy(v int64) *ResourcesUpdate {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *ResourcesUpdate) ClearUpdatedBy() *ResourcesUpdate {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -453,11 +465,17 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(resources.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(resources.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(resources.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(resources.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(resources.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.ParentID(); ok {
 		_spec.SetField(resources.FieldParentID, field.TypeInt, value)
@@ -636,6 +654,12 @@ func (_u *ResourcesUpdateOne) AddCreatedBy(v int64) *ResourcesUpdateOne {
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *ResourcesUpdateOne) ClearCreatedBy() *ResourcesUpdateOne {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *ResourcesUpdateOne) SetUpdatedBy(v int64) *ResourcesUpdateOne {
 	_u.mutation.ResetUpdatedBy()
@@ -654,6 +678,12 @@ func (_u *ResourcesUpdateOne) SetNillableUpdatedBy(v *int64) *ResourcesUpdateOne
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *ResourcesUpdateOne) AddUpdatedBy(v int64) *ResourcesUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *ResourcesUpdateOne) ClearUpdatedBy() *ResourcesUpdateOne {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -1042,11 +1072,17 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(resources.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(resources.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(resources.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(resources.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(resources.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.ParentID(); ok {
 		_spec.SetField(resources.FieldParentID, field.TypeInt, value)

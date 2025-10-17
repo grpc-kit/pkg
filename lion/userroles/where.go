@@ -205,6 +205,16 @@ func CreatedByLTE(v int64) predicate.UserRoles {
 	return predicate.UserRoles(sql.FieldLTE(FieldCreatedBy, v))
 }
 
+// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
+func CreatedByIsNil() predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldIsNull(FieldCreatedBy))
+}
+
+// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
+func CreatedByNotNil() predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNotNull(FieldCreatedBy))
+}
+
 // UpdatedByEQ applies the EQ predicate on the "updated_by" field.
 func UpdatedByEQ(v int64) predicate.UserRoles {
 	return predicate.UserRoles(sql.FieldEQ(FieldUpdatedBy, v))
@@ -243,6 +253,16 @@ func UpdatedByLT(v int64) predicate.UserRoles {
 // UpdatedByLTE applies the LTE predicate on the "updated_by" field.
 func UpdatedByLTE(v int64) predicate.UserRoles {
 	return predicate.UserRoles(sql.FieldLTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
+func UpdatedByIsNil() predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldIsNull(FieldUpdatedBy))
+}
+
+// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
+func UpdatedByNotNil() predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNotNull(FieldUpdatedBy))
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.

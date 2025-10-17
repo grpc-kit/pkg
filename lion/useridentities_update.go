@@ -57,6 +57,12 @@ func (_u *UserIdentitiesUpdate) AddCreatedBy(v int64) *UserIdentitiesUpdate {
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *UserIdentitiesUpdate) ClearCreatedBy() *UserIdentitiesUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *UserIdentitiesUpdate) SetUpdatedBy(v int64) *UserIdentitiesUpdate {
 	_u.mutation.ResetUpdatedBy()
@@ -75,6 +81,12 @@ func (_u *UserIdentitiesUpdate) SetNillableUpdatedBy(v *int64) *UserIdentitiesUp
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *UserIdentitiesUpdate) AddUpdatedBy(v int64) *UserIdentitiesUpdate {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *UserIdentitiesUpdate) ClearUpdatedBy() *UserIdentitiesUpdate {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -395,11 +407,17 @@ func (_u *UserIdentitiesUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(useridentities.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(useridentities.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(useridentities.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(useridentities.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(useridentities.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.ProviderUserID(); ok {
 		_spec.SetField(useridentities.FieldProviderUserID, field.TypeString, value)
@@ -560,6 +578,12 @@ func (_u *UserIdentitiesUpdateOne) AddCreatedBy(v int64) *UserIdentitiesUpdateOn
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *UserIdentitiesUpdateOne) ClearCreatedBy() *UserIdentitiesUpdateOne {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *UserIdentitiesUpdateOne) SetUpdatedBy(v int64) *UserIdentitiesUpdateOne {
 	_u.mutation.ResetUpdatedBy()
@@ -578,6 +602,12 @@ func (_u *UserIdentitiesUpdateOne) SetNillableUpdatedBy(v *int64) *UserIdentitie
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *UserIdentitiesUpdateOne) AddUpdatedBy(v int64) *UserIdentitiesUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *UserIdentitiesUpdateOne) ClearUpdatedBy() *UserIdentitiesUpdateOne {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -928,11 +958,17 @@ func (_u *UserIdentitiesUpdateOne) sqlSave(ctx context.Context) (_node *UserIden
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(useridentities.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(useridentities.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(useridentities.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(useridentities.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(useridentities.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.ProviderUserID(); ok {
 		_spec.SetField(useridentities.FieldProviderUserID, field.TypeString, value)

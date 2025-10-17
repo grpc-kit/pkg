@@ -360,6 +360,16 @@ func CreatedByLTE(v int64) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldCreatedBy, v))
 }
 
+// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
+func CreatedByIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldCreatedBy))
+}
+
+// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
+func CreatedByNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldCreatedBy))
+}
+
 // UpdatedByEQ applies the EQ predicate on the "updated_by" field.
 func UpdatedByEQ(v int64) predicate.Users {
 	return predicate.Users(sql.FieldEQ(FieldUpdatedBy, v))
@@ -398,6 +408,16 @@ func UpdatedByLT(v int64) predicate.Users {
 // UpdatedByLTE applies the LTE predicate on the "updated_by" field.
 func UpdatedByLTE(v int64) predicate.Users {
 	return predicate.Users(sql.FieldLTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
+func UpdatedByIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldUpdatedBy))
+}
+
+// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
+func UpdatedByNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldUpdatedBy))
 }
 
 // UsernameEQ applies the EQ predicate on the "username" field.

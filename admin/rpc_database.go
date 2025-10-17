@@ -88,11 +88,16 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 	tx.Credentials.Create().
 		SetName("key1").
-		SetType(int(adminv1.Credential_TYPE_JWKS.Number())).
-		SetAppid(uuid.New().String()).
-		SetUsage("sig").
+		SetCredentialType(int(adminv1.Credential_TYPE_JWKS.Number())).
+		SetCredentialAlgorithm(int(adminv1.Credential_ALGORITHM_RSA.Number())).
+		SetCredentialUsage(int(adminv1.Credential_USAGE_SIGNING.Number())).
+		SetCredentialVisibility(int(adminv1.Credential_VISIBILITY_PRIVATE.Number())).
+		SetCredentialStatus(int(adminv1.Credential_STATUS_ACTIVE.Number())).
+		SetCredentialSource(int(adminv1.Credential_SOURCE_SYSTEM.Number())).
+		SetKeyID(uuid.New().String()).
 		SetPublicKey(crypto.Base64Encode(publicKeyBytes)).
-		SetPrivateKeyEncrypted(privateKeyEnc).SaveX(ctx)
+		SetPrivateKeyEncrypted(privateKeyEnc).
+		SaveX(ctx)
 
 	tx.Commit()
 

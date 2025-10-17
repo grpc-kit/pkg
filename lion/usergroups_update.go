@@ -57,6 +57,12 @@ func (_u *UserGroupsUpdate) AddCreatedBy(v int64) *UserGroupsUpdate {
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *UserGroupsUpdate) ClearCreatedBy() *UserGroupsUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *UserGroupsUpdate) SetUpdatedBy(v int64) *UserGroupsUpdate {
 	_u.mutation.ResetUpdatedBy()
@@ -75,6 +81,12 @@ func (_u *UserGroupsUpdate) SetNillableUpdatedBy(v *int64) *UserGroupsUpdate {
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *UserGroupsUpdate) AddUpdatedBy(v int64) *UserGroupsUpdate {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *UserGroupsUpdate) ClearUpdatedBy() *UserGroupsUpdate {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -331,11 +343,17 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(usergroups.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(usergroups.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(usergroups.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.MemberRole(); ok {
 		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)
@@ -475,6 +493,12 @@ func (_u *UserGroupsUpdateOne) AddCreatedBy(v int64) *UserGroupsUpdateOne {
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *UserGroupsUpdateOne) ClearCreatedBy() *UserGroupsUpdateOne {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *UserGroupsUpdateOne) SetUpdatedBy(v int64) *UserGroupsUpdateOne {
 	_u.mutation.ResetUpdatedBy()
@@ -493,6 +517,12 @@ func (_u *UserGroupsUpdateOne) SetNillableUpdatedBy(v *int64) *UserGroupsUpdateO
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *UserGroupsUpdateOne) AddUpdatedBy(v int64) *UserGroupsUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *UserGroupsUpdateOne) ClearUpdatedBy() *UserGroupsUpdateOne {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -779,11 +809,17 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(usergroups.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(usergroups.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(usergroups.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.MemberRole(); ok {
 		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)

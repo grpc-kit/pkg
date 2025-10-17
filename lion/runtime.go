@@ -117,18 +117,30 @@ func init() {
 	credentialsDescUpdatedBy := credentialsMixinFields1[1].Descriptor()
 	// credentials.DefaultUpdatedBy holds the default value on creation for the updated_by field.
 	credentials.DefaultUpdatedBy = credentialsDescUpdatedBy.Default.(int64)
-	// credentialsDescAppkeyEncrypted is the schema descriptor for appkey_encrypted field.
-	credentialsDescAppkeyEncrypted := credentialsFields[3].Descriptor()
-	// credentials.DefaultAppkeyEncrypted holds the default value on creation for the appkey_encrypted field.
-	credentials.DefaultAppkeyEncrypted = credentialsDescAppkeyEncrypted.Default.([]byte)
-	// credentialsDescPublicKey is the schema descriptor for public_key field.
-	credentialsDescPublicKey := credentialsFields[4].Descriptor()
-	// credentials.DefaultPublicKey holds the default value on creation for the public_key field.
-	credentials.DefaultPublicKey = credentialsDescPublicKey.Default.(string)
-	// credentialsDescPrivateKeyEncrypted is the schema descriptor for private_key_encrypted field.
-	credentialsDescPrivateKeyEncrypted := credentialsFields[5].Descriptor()
-	// credentials.DefaultPrivateKeyEncrypted holds the default value on creation for the private_key_encrypted field.
-	credentials.DefaultPrivateKeyEncrypted = credentialsDescPrivateKeyEncrypted.Default.([]byte)
+	// credentialsDescCredentialType is the schema descriptor for credential_type field.
+	credentialsDescCredentialType := credentialsFields[1].Descriptor()
+	// credentials.DefaultCredentialType holds the default value on creation for the credential_type field.
+	credentials.DefaultCredentialType = credentialsDescCredentialType.Default.(int)
+	// credentialsDescCredentialAlgorithm is the schema descriptor for credential_algorithm field.
+	credentialsDescCredentialAlgorithm := credentialsFields[2].Descriptor()
+	// credentials.DefaultCredentialAlgorithm holds the default value on creation for the credential_algorithm field.
+	credentials.DefaultCredentialAlgorithm = credentialsDescCredentialAlgorithm.Default.(int)
+	// credentialsDescCredentialUsage is the schema descriptor for credential_usage field.
+	credentialsDescCredentialUsage := credentialsFields[3].Descriptor()
+	// credentials.DefaultCredentialUsage holds the default value on creation for the credential_usage field.
+	credentials.DefaultCredentialUsage = credentialsDescCredentialUsage.Default.(int)
+	// credentialsDescCredentialVisibility is the schema descriptor for credential_visibility field.
+	credentialsDescCredentialVisibility := credentialsFields[4].Descriptor()
+	// credentials.DefaultCredentialVisibility holds the default value on creation for the credential_visibility field.
+	credentials.DefaultCredentialVisibility = credentialsDescCredentialVisibility.Default.(int)
+	// credentialsDescCredentialStatus is the schema descriptor for credential_status field.
+	credentialsDescCredentialStatus := credentialsFields[5].Descriptor()
+	// credentials.DefaultCredentialStatus holds the default value on creation for the credential_status field.
+	credentials.DefaultCredentialStatus = credentialsDescCredentialStatus.Default.(int)
+	// credentialsDescCredentialSource is the schema descriptor for credential_source field.
+	credentialsDescCredentialSource := credentialsFields[6].Descriptor()
+	// credentials.DefaultCredentialSource holds the default value on creation for the credential_source field.
+	credentials.DefaultCredentialSource = credentialsDescCredentialSource.Default.(int)
 	demoMixin := schema.Demo{}.Mixin()
 	demoMixinFields0 := demoMixin[0].Fields()
 	_ = demoMixinFields0

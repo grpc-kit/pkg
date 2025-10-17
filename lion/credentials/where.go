@@ -79,19 +79,49 @@ func Name(v string) predicate.Credentials {
 	return predicate.Credentials(sql.FieldEQ(FieldName, v))
 }
 
-// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
-func Type(v int) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldType, v))
+// CredentialType applies equality check predicate on the "credential_type" field. It's identical to CredentialTypeEQ.
+func CredentialType(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialType, v))
 }
 
-// Appid applies equality check predicate on the "appid" field. It's identical to AppidEQ.
-func Appid(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldAppid, v))
+// CredentialAlgorithm applies equality check predicate on the "credential_algorithm" field. It's identical to CredentialAlgorithmEQ.
+func CredentialAlgorithm(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialAlgorithm, v))
 }
 
-// AppkeyEncrypted applies equality check predicate on the "appkey_encrypted" field. It's identical to AppkeyEncryptedEQ.
-func AppkeyEncrypted(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldAppkeyEncrypted, v))
+// CredentialUsage applies equality check predicate on the "credential_usage" field. It's identical to CredentialUsageEQ.
+func CredentialUsage(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialUsage, v))
+}
+
+// CredentialVisibility applies equality check predicate on the "credential_visibility" field. It's identical to CredentialVisibilityEQ.
+func CredentialVisibility(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialVisibility, v))
+}
+
+// CredentialStatus applies equality check predicate on the "credential_status" field. It's identical to CredentialStatusEQ.
+func CredentialStatus(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialStatus, v))
+}
+
+// CredentialSource applies equality check predicate on the "credential_source" field. It's identical to CredentialSourceEQ.
+func CredentialSource(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialSource, v))
+}
+
+// KeyID applies equality check predicate on the "key_id" field. It's identical to KeyIDEQ.
+func KeyID(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldKeyID, v))
+}
+
+// APIKey applies equality check predicate on the "api_key" field. It's identical to APIKeyEQ.
+func APIKey(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldAPIKey, v))
+}
+
+// APISecretEncrypted applies equality check predicate on the "api_secret_encrypted" field. It's identical to APISecretEncryptedEQ.
+func APISecretEncrypted(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldAPISecretEncrypted, v))
 }
 
 // PublicKey applies equality check predicate on the "public_key" field. It's identical to PublicKeyEQ.
@@ -104,14 +134,49 @@ func PrivateKeyEncrypted(v []byte) predicate.Credentials {
 	return predicate.Credentials(sql.FieldEQ(FieldPrivateKeyEncrypted, v))
 }
 
-// Usage applies equality check predicate on the "usage" field. It's identical to UsageEQ.
-func Usage(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldUsage, v))
+// PassphraseEncrypted applies equality check predicate on the "passphrase_encrypted" field. It's identical to PassphraseEncryptedEQ.
+func PassphraseEncrypted(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldPassphraseEncrypted, v))
+}
+
+// Certificate applies equality check predicate on the "certificate" field. It's identical to CertificateEQ.
+func Certificate(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCertificate, v))
+}
+
+// LicenseKeyEncrypted applies equality check predicate on the "license_key_encrypted" field. It's identical to LicenseKeyEncryptedEQ.
+func LicenseKeyEncrypted(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldLicenseKeyEncrypted, v))
+}
+
+// Signature applies equality check predicate on the "signature" field. It's identical to SignatureEQ.
+func Signature(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldSignature, v))
+}
+
+// SymmetricKey applies equality check predicate on the "symmetric_key" field. It's identical to SymmetricKeyEQ.
+func SymmetricKey(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldSymmetricKey, v))
+}
+
+// JwksURI applies equality check predicate on the "jwks_uri" field. It's identical to JwksURIEQ.
+func JwksURI(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldJwksURI, v))
+}
+
+// NotBefore applies equality check predicate on the "not_before" field. It's identical to NotBeforeEQ.
+func NotBefore(v time.Time) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldNotBefore, v))
 }
 
 // ExpiresAt applies equality check predicate on the "expires_at" field. It's identical to ExpiresAtEQ.
 func ExpiresAt(v time.Time) predicate.Credentials {
 	return predicate.Credentials(sql.FieldEQ(FieldExpiresAt, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldDescription, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -234,6 +299,16 @@ func CreatedByLTE(v int64) predicate.Credentials {
 	return predicate.Credentials(sql.FieldLTE(FieldCreatedBy, v))
 }
 
+// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
+func CreatedByIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldCreatedBy))
+}
+
+// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
+func CreatedByNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldCreatedBy))
+}
+
 // UpdatedByEQ applies the EQ predicate on the "updated_by" field.
 func UpdatedByEQ(v int64) predicate.Credentials {
 	return predicate.Credentials(sql.FieldEQ(FieldUpdatedBy, v))
@@ -272,6 +347,16 @@ func UpdatedByLT(v int64) predicate.Credentials {
 // UpdatedByLTE applies the LTE predicate on the "updated_by" field.
 func UpdatedByLTE(v int64) predicate.Credentials {
 	return predicate.Credentials(sql.FieldLTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
+func UpdatedByIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldUpdatedBy))
+}
+
+// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
+func UpdatedByNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldUpdatedBy))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -339,149 +424,444 @@ func NameContainsFold(v string) predicate.Credentials {
 	return predicate.Credentials(sql.FieldContainsFold(FieldName, v))
 }
 
-// TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v int) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldType, v))
+// CredentialTypeEQ applies the EQ predicate on the "credential_type" field.
+func CredentialTypeEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialType, v))
 }
 
-// TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v int) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNEQ(FieldType, v))
+// CredentialTypeNEQ applies the NEQ predicate on the "credential_type" field.
+func CredentialTypeNEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldCredentialType, v))
 }
 
-// TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...int) predicate.Credentials {
-	return predicate.Credentials(sql.FieldIn(FieldType, vs...))
+// CredentialTypeIn applies the In predicate on the "credential_type" field.
+func CredentialTypeIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldCredentialType, vs...))
 }
 
-// TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...int) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotIn(FieldType, vs...))
+// CredentialTypeNotIn applies the NotIn predicate on the "credential_type" field.
+func CredentialTypeNotIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldCredentialType, vs...))
 }
 
-// TypeGT applies the GT predicate on the "type" field.
-func TypeGT(v int) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGT(FieldType, v))
+// CredentialTypeGT applies the GT predicate on the "credential_type" field.
+func CredentialTypeGT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldCredentialType, v))
 }
 
-// TypeGTE applies the GTE predicate on the "type" field.
-func TypeGTE(v int) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGTE(FieldType, v))
+// CredentialTypeGTE applies the GTE predicate on the "credential_type" field.
+func CredentialTypeGTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldCredentialType, v))
 }
 
-// TypeLT applies the LT predicate on the "type" field.
-func TypeLT(v int) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLT(FieldType, v))
+// CredentialTypeLT applies the LT predicate on the "credential_type" field.
+func CredentialTypeLT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldCredentialType, v))
 }
 
-// TypeLTE applies the LTE predicate on the "type" field.
-func TypeLTE(v int) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLTE(FieldType, v))
+// CredentialTypeLTE applies the LTE predicate on the "credential_type" field.
+func CredentialTypeLTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldCredentialType, v))
 }
 
-// AppidEQ applies the EQ predicate on the "appid" field.
-func AppidEQ(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldAppid, v))
+// CredentialAlgorithmEQ applies the EQ predicate on the "credential_algorithm" field.
+func CredentialAlgorithmEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialAlgorithm, v))
 }
 
-// AppidNEQ applies the NEQ predicate on the "appid" field.
-func AppidNEQ(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNEQ(FieldAppid, v))
+// CredentialAlgorithmNEQ applies the NEQ predicate on the "credential_algorithm" field.
+func CredentialAlgorithmNEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldCredentialAlgorithm, v))
 }
 
-// AppidIn applies the In predicate on the "appid" field.
-func AppidIn(vs ...string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldIn(FieldAppid, vs...))
+// CredentialAlgorithmIn applies the In predicate on the "credential_algorithm" field.
+func CredentialAlgorithmIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldCredentialAlgorithm, vs...))
 }
 
-// AppidNotIn applies the NotIn predicate on the "appid" field.
-func AppidNotIn(vs ...string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotIn(FieldAppid, vs...))
+// CredentialAlgorithmNotIn applies the NotIn predicate on the "credential_algorithm" field.
+func CredentialAlgorithmNotIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldCredentialAlgorithm, vs...))
 }
 
-// AppidGT applies the GT predicate on the "appid" field.
-func AppidGT(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGT(FieldAppid, v))
+// CredentialAlgorithmGT applies the GT predicate on the "credential_algorithm" field.
+func CredentialAlgorithmGT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldCredentialAlgorithm, v))
 }
 
-// AppidGTE applies the GTE predicate on the "appid" field.
-func AppidGTE(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGTE(FieldAppid, v))
+// CredentialAlgorithmGTE applies the GTE predicate on the "credential_algorithm" field.
+func CredentialAlgorithmGTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldCredentialAlgorithm, v))
 }
 
-// AppidLT applies the LT predicate on the "appid" field.
-func AppidLT(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLT(FieldAppid, v))
+// CredentialAlgorithmLT applies the LT predicate on the "credential_algorithm" field.
+func CredentialAlgorithmLT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldCredentialAlgorithm, v))
 }
 
-// AppidLTE applies the LTE predicate on the "appid" field.
-func AppidLTE(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLTE(FieldAppid, v))
+// CredentialAlgorithmLTE applies the LTE predicate on the "credential_algorithm" field.
+func CredentialAlgorithmLTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldCredentialAlgorithm, v))
 }
 
-// AppidContains applies the Contains predicate on the "appid" field.
-func AppidContains(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldContains(FieldAppid, v))
+// CredentialUsageEQ applies the EQ predicate on the "credential_usage" field.
+func CredentialUsageEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialUsage, v))
 }
 
-// AppidHasPrefix applies the HasPrefix predicate on the "appid" field.
-func AppidHasPrefix(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldHasPrefix(FieldAppid, v))
+// CredentialUsageNEQ applies the NEQ predicate on the "credential_usage" field.
+func CredentialUsageNEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldCredentialUsage, v))
 }
 
-// AppidHasSuffix applies the HasSuffix predicate on the "appid" field.
-func AppidHasSuffix(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldHasSuffix(FieldAppid, v))
+// CredentialUsageIn applies the In predicate on the "credential_usage" field.
+func CredentialUsageIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldCredentialUsage, vs...))
 }
 
-// AppidEqualFold applies the EqualFold predicate on the "appid" field.
-func AppidEqualFold(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEqualFold(FieldAppid, v))
+// CredentialUsageNotIn applies the NotIn predicate on the "credential_usage" field.
+func CredentialUsageNotIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldCredentialUsage, vs...))
 }
 
-// AppidContainsFold applies the ContainsFold predicate on the "appid" field.
-func AppidContainsFold(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldContainsFold(FieldAppid, v))
+// CredentialUsageGT applies the GT predicate on the "credential_usage" field.
+func CredentialUsageGT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldCredentialUsage, v))
 }
 
-// AppkeyEncryptedEQ applies the EQ predicate on the "appkey_encrypted" field.
-func AppkeyEncryptedEQ(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldAppkeyEncrypted, v))
+// CredentialUsageGTE applies the GTE predicate on the "credential_usage" field.
+func CredentialUsageGTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldCredentialUsage, v))
 }
 
-// AppkeyEncryptedNEQ applies the NEQ predicate on the "appkey_encrypted" field.
-func AppkeyEncryptedNEQ(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNEQ(FieldAppkeyEncrypted, v))
+// CredentialUsageLT applies the LT predicate on the "credential_usage" field.
+func CredentialUsageLT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldCredentialUsage, v))
 }
 
-// AppkeyEncryptedIn applies the In predicate on the "appkey_encrypted" field.
-func AppkeyEncryptedIn(vs ...[]byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldIn(FieldAppkeyEncrypted, vs...))
+// CredentialUsageLTE applies the LTE predicate on the "credential_usage" field.
+func CredentialUsageLTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldCredentialUsage, v))
 }
 
-// AppkeyEncryptedNotIn applies the NotIn predicate on the "appkey_encrypted" field.
-func AppkeyEncryptedNotIn(vs ...[]byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotIn(FieldAppkeyEncrypted, vs...))
+// CredentialVisibilityEQ applies the EQ predicate on the "credential_visibility" field.
+func CredentialVisibilityEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialVisibility, v))
 }
 
-// AppkeyEncryptedGT applies the GT predicate on the "appkey_encrypted" field.
-func AppkeyEncryptedGT(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGT(FieldAppkeyEncrypted, v))
+// CredentialVisibilityNEQ applies the NEQ predicate on the "credential_visibility" field.
+func CredentialVisibilityNEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldCredentialVisibility, v))
 }
 
-// AppkeyEncryptedGTE applies the GTE predicate on the "appkey_encrypted" field.
-func AppkeyEncryptedGTE(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGTE(FieldAppkeyEncrypted, v))
+// CredentialVisibilityIn applies the In predicate on the "credential_visibility" field.
+func CredentialVisibilityIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldCredentialVisibility, vs...))
 }
 
-// AppkeyEncryptedLT applies the LT predicate on the "appkey_encrypted" field.
-func AppkeyEncryptedLT(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLT(FieldAppkeyEncrypted, v))
+// CredentialVisibilityNotIn applies the NotIn predicate on the "credential_visibility" field.
+func CredentialVisibilityNotIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldCredentialVisibility, vs...))
 }
 
-// AppkeyEncryptedLTE applies the LTE predicate on the "appkey_encrypted" field.
-func AppkeyEncryptedLTE(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLTE(FieldAppkeyEncrypted, v))
+// CredentialVisibilityGT applies the GT predicate on the "credential_visibility" field.
+func CredentialVisibilityGT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldCredentialVisibility, v))
+}
+
+// CredentialVisibilityGTE applies the GTE predicate on the "credential_visibility" field.
+func CredentialVisibilityGTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldCredentialVisibility, v))
+}
+
+// CredentialVisibilityLT applies the LT predicate on the "credential_visibility" field.
+func CredentialVisibilityLT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldCredentialVisibility, v))
+}
+
+// CredentialVisibilityLTE applies the LTE predicate on the "credential_visibility" field.
+func CredentialVisibilityLTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldCredentialVisibility, v))
+}
+
+// CredentialStatusEQ applies the EQ predicate on the "credential_status" field.
+func CredentialStatusEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialStatus, v))
+}
+
+// CredentialStatusNEQ applies the NEQ predicate on the "credential_status" field.
+func CredentialStatusNEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldCredentialStatus, v))
+}
+
+// CredentialStatusIn applies the In predicate on the "credential_status" field.
+func CredentialStatusIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldCredentialStatus, vs...))
+}
+
+// CredentialStatusNotIn applies the NotIn predicate on the "credential_status" field.
+func CredentialStatusNotIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldCredentialStatus, vs...))
+}
+
+// CredentialStatusGT applies the GT predicate on the "credential_status" field.
+func CredentialStatusGT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldCredentialStatus, v))
+}
+
+// CredentialStatusGTE applies the GTE predicate on the "credential_status" field.
+func CredentialStatusGTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldCredentialStatus, v))
+}
+
+// CredentialStatusLT applies the LT predicate on the "credential_status" field.
+func CredentialStatusLT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldCredentialStatus, v))
+}
+
+// CredentialStatusLTE applies the LTE predicate on the "credential_status" field.
+func CredentialStatusLTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldCredentialStatus, v))
+}
+
+// CredentialSourceEQ applies the EQ predicate on the "credential_source" field.
+func CredentialSourceEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCredentialSource, v))
+}
+
+// CredentialSourceNEQ applies the NEQ predicate on the "credential_source" field.
+func CredentialSourceNEQ(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldCredentialSource, v))
+}
+
+// CredentialSourceIn applies the In predicate on the "credential_source" field.
+func CredentialSourceIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldCredentialSource, vs...))
+}
+
+// CredentialSourceNotIn applies the NotIn predicate on the "credential_source" field.
+func CredentialSourceNotIn(vs ...int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldCredentialSource, vs...))
+}
+
+// CredentialSourceGT applies the GT predicate on the "credential_source" field.
+func CredentialSourceGT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldCredentialSource, v))
+}
+
+// CredentialSourceGTE applies the GTE predicate on the "credential_source" field.
+func CredentialSourceGTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldCredentialSource, v))
+}
+
+// CredentialSourceLT applies the LT predicate on the "credential_source" field.
+func CredentialSourceLT(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldCredentialSource, v))
+}
+
+// CredentialSourceLTE applies the LTE predicate on the "credential_source" field.
+func CredentialSourceLTE(v int) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldCredentialSource, v))
+}
+
+// KeyIDEQ applies the EQ predicate on the "key_id" field.
+func KeyIDEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldKeyID, v))
+}
+
+// KeyIDNEQ applies the NEQ predicate on the "key_id" field.
+func KeyIDNEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldKeyID, v))
+}
+
+// KeyIDIn applies the In predicate on the "key_id" field.
+func KeyIDIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldKeyID, vs...))
+}
+
+// KeyIDNotIn applies the NotIn predicate on the "key_id" field.
+func KeyIDNotIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldKeyID, vs...))
+}
+
+// KeyIDGT applies the GT predicate on the "key_id" field.
+func KeyIDGT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldKeyID, v))
+}
+
+// KeyIDGTE applies the GTE predicate on the "key_id" field.
+func KeyIDGTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldKeyID, v))
+}
+
+// KeyIDLT applies the LT predicate on the "key_id" field.
+func KeyIDLT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldKeyID, v))
+}
+
+// KeyIDLTE applies the LTE predicate on the "key_id" field.
+func KeyIDLTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldKeyID, v))
+}
+
+// KeyIDContains applies the Contains predicate on the "key_id" field.
+func KeyIDContains(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContains(FieldKeyID, v))
+}
+
+// KeyIDHasPrefix applies the HasPrefix predicate on the "key_id" field.
+func KeyIDHasPrefix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasPrefix(FieldKeyID, v))
+}
+
+// KeyIDHasSuffix applies the HasSuffix predicate on the "key_id" field.
+func KeyIDHasSuffix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasSuffix(FieldKeyID, v))
+}
+
+// KeyIDIsNil applies the IsNil predicate on the "key_id" field.
+func KeyIDIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldKeyID))
+}
+
+// KeyIDNotNil applies the NotNil predicate on the "key_id" field.
+func KeyIDNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldKeyID))
+}
+
+// KeyIDEqualFold applies the EqualFold predicate on the "key_id" field.
+func KeyIDEqualFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEqualFold(FieldKeyID, v))
+}
+
+// KeyIDContainsFold applies the ContainsFold predicate on the "key_id" field.
+func KeyIDContainsFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContainsFold(FieldKeyID, v))
+}
+
+// APIKeyEQ applies the EQ predicate on the "api_key" field.
+func APIKeyEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldAPIKey, v))
+}
+
+// APIKeyNEQ applies the NEQ predicate on the "api_key" field.
+func APIKeyNEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldAPIKey, v))
+}
+
+// APIKeyIn applies the In predicate on the "api_key" field.
+func APIKeyIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldAPIKey, vs...))
+}
+
+// APIKeyNotIn applies the NotIn predicate on the "api_key" field.
+func APIKeyNotIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldAPIKey, vs...))
+}
+
+// APIKeyGT applies the GT predicate on the "api_key" field.
+func APIKeyGT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldAPIKey, v))
+}
+
+// APIKeyGTE applies the GTE predicate on the "api_key" field.
+func APIKeyGTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldAPIKey, v))
+}
+
+// APIKeyLT applies the LT predicate on the "api_key" field.
+func APIKeyLT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldAPIKey, v))
+}
+
+// APIKeyLTE applies the LTE predicate on the "api_key" field.
+func APIKeyLTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldAPIKey, v))
+}
+
+// APIKeyContains applies the Contains predicate on the "api_key" field.
+func APIKeyContains(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContains(FieldAPIKey, v))
+}
+
+// APIKeyHasPrefix applies the HasPrefix predicate on the "api_key" field.
+func APIKeyHasPrefix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasPrefix(FieldAPIKey, v))
+}
+
+// APIKeyHasSuffix applies the HasSuffix predicate on the "api_key" field.
+func APIKeyHasSuffix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasSuffix(FieldAPIKey, v))
+}
+
+// APIKeyIsNil applies the IsNil predicate on the "api_key" field.
+func APIKeyIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldAPIKey))
+}
+
+// APIKeyNotNil applies the NotNil predicate on the "api_key" field.
+func APIKeyNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldAPIKey))
+}
+
+// APIKeyEqualFold applies the EqualFold predicate on the "api_key" field.
+func APIKeyEqualFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEqualFold(FieldAPIKey, v))
+}
+
+// APIKeyContainsFold applies the ContainsFold predicate on the "api_key" field.
+func APIKeyContainsFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContainsFold(FieldAPIKey, v))
+}
+
+// APISecretEncryptedEQ applies the EQ predicate on the "api_secret_encrypted" field.
+func APISecretEncryptedEQ(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldAPISecretEncrypted, v))
+}
+
+// APISecretEncryptedNEQ applies the NEQ predicate on the "api_secret_encrypted" field.
+func APISecretEncryptedNEQ(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldAPISecretEncrypted, v))
+}
+
+// APISecretEncryptedIn applies the In predicate on the "api_secret_encrypted" field.
+func APISecretEncryptedIn(vs ...[]byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldAPISecretEncrypted, vs...))
+}
+
+// APISecretEncryptedNotIn applies the NotIn predicate on the "api_secret_encrypted" field.
+func APISecretEncryptedNotIn(vs ...[]byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldAPISecretEncrypted, vs...))
+}
+
+// APISecretEncryptedGT applies the GT predicate on the "api_secret_encrypted" field.
+func APISecretEncryptedGT(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldAPISecretEncrypted, v))
+}
+
+// APISecretEncryptedGTE applies the GTE predicate on the "api_secret_encrypted" field.
+func APISecretEncryptedGTE(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldAPISecretEncrypted, v))
+}
+
+// APISecretEncryptedLT applies the LT predicate on the "api_secret_encrypted" field.
+func APISecretEncryptedLT(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldAPISecretEncrypted, v))
+}
+
+// APISecretEncryptedLTE applies the LTE predicate on the "api_secret_encrypted" field.
+func APISecretEncryptedLTE(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldAPISecretEncrypted, v))
+}
+
+// APISecretEncryptedIsNil applies the IsNil predicate on the "api_secret_encrypted" field.
+func APISecretEncryptedIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldAPISecretEncrypted))
+}
+
+// APISecretEncryptedNotNil applies the NotNil predicate on the "api_secret_encrypted" field.
+func APISecretEncryptedNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldAPISecretEncrypted))
 }
 
 // PublicKeyEQ applies the EQ predicate on the "public_key" field.
@@ -539,6 +919,16 @@ func PublicKeyHasSuffix(v string) predicate.Credentials {
 	return predicate.Credentials(sql.FieldHasSuffix(FieldPublicKey, v))
 }
 
+// PublicKeyIsNil applies the IsNil predicate on the "public_key" field.
+func PublicKeyIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldPublicKey))
+}
+
+// PublicKeyNotNil applies the NotNil predicate on the "public_key" field.
+func PublicKeyNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldPublicKey))
+}
+
 // PublicKeyEqualFold applies the EqualFold predicate on the "public_key" field.
 func PublicKeyEqualFold(v string) predicate.Credentials {
 	return predicate.Credentials(sql.FieldEqualFold(FieldPublicKey, v))
@@ -589,69 +979,449 @@ func PrivateKeyEncryptedLTE(v []byte) predicate.Credentials {
 	return predicate.Credentials(sql.FieldLTE(FieldPrivateKeyEncrypted, v))
 }
 
-// UsageEQ applies the EQ predicate on the "usage" field.
-func UsageEQ(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldUsage, v))
+// PrivateKeyEncryptedIsNil applies the IsNil predicate on the "private_key_encrypted" field.
+func PrivateKeyEncryptedIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldPrivateKeyEncrypted))
 }
 
-// UsageNEQ applies the NEQ predicate on the "usage" field.
-func UsageNEQ(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNEQ(FieldUsage, v))
+// PrivateKeyEncryptedNotNil applies the NotNil predicate on the "private_key_encrypted" field.
+func PrivateKeyEncryptedNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldPrivateKeyEncrypted))
 }
 
-// UsageIn applies the In predicate on the "usage" field.
-func UsageIn(vs ...string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldIn(FieldUsage, vs...))
+// PassphraseEncryptedEQ applies the EQ predicate on the "passphrase_encrypted" field.
+func PassphraseEncryptedEQ(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldPassphraseEncrypted, v))
 }
 
-// UsageNotIn applies the NotIn predicate on the "usage" field.
-func UsageNotIn(vs ...string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotIn(FieldUsage, vs...))
+// PassphraseEncryptedNEQ applies the NEQ predicate on the "passphrase_encrypted" field.
+func PassphraseEncryptedNEQ(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldPassphraseEncrypted, v))
 }
 
-// UsageGT applies the GT predicate on the "usage" field.
-func UsageGT(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGT(FieldUsage, v))
+// PassphraseEncryptedIn applies the In predicate on the "passphrase_encrypted" field.
+func PassphraseEncryptedIn(vs ...[]byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldPassphraseEncrypted, vs...))
 }
 
-// UsageGTE applies the GTE predicate on the "usage" field.
-func UsageGTE(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGTE(FieldUsage, v))
+// PassphraseEncryptedNotIn applies the NotIn predicate on the "passphrase_encrypted" field.
+func PassphraseEncryptedNotIn(vs ...[]byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldPassphraseEncrypted, vs...))
 }
 
-// UsageLT applies the LT predicate on the "usage" field.
-func UsageLT(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLT(FieldUsage, v))
+// PassphraseEncryptedGT applies the GT predicate on the "passphrase_encrypted" field.
+func PassphraseEncryptedGT(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldPassphraseEncrypted, v))
 }
 
-// UsageLTE applies the LTE predicate on the "usage" field.
-func UsageLTE(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLTE(FieldUsage, v))
+// PassphraseEncryptedGTE applies the GTE predicate on the "passphrase_encrypted" field.
+func PassphraseEncryptedGTE(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldPassphraseEncrypted, v))
 }
 
-// UsageContains applies the Contains predicate on the "usage" field.
-func UsageContains(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldContains(FieldUsage, v))
+// PassphraseEncryptedLT applies the LT predicate on the "passphrase_encrypted" field.
+func PassphraseEncryptedLT(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldPassphraseEncrypted, v))
 }
 
-// UsageHasPrefix applies the HasPrefix predicate on the "usage" field.
-func UsageHasPrefix(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldHasPrefix(FieldUsage, v))
+// PassphraseEncryptedLTE applies the LTE predicate on the "passphrase_encrypted" field.
+func PassphraseEncryptedLTE(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldPassphraseEncrypted, v))
 }
 
-// UsageHasSuffix applies the HasSuffix predicate on the "usage" field.
-func UsageHasSuffix(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldHasSuffix(FieldUsage, v))
+// PassphraseEncryptedIsNil applies the IsNil predicate on the "passphrase_encrypted" field.
+func PassphraseEncryptedIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldPassphraseEncrypted))
 }
 
-// UsageEqualFold applies the EqualFold predicate on the "usage" field.
-func UsageEqualFold(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEqualFold(FieldUsage, v))
+// PassphraseEncryptedNotNil applies the NotNil predicate on the "passphrase_encrypted" field.
+func PassphraseEncryptedNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldPassphraseEncrypted))
 }
 
-// UsageContainsFold applies the ContainsFold predicate on the "usage" field.
-func UsageContainsFold(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldContainsFold(FieldUsage, v))
+// CertificateEQ applies the EQ predicate on the "certificate" field.
+func CertificateEQ(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldCertificate, v))
+}
+
+// CertificateNEQ applies the NEQ predicate on the "certificate" field.
+func CertificateNEQ(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldCertificate, v))
+}
+
+// CertificateIn applies the In predicate on the "certificate" field.
+func CertificateIn(vs ...[]byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldCertificate, vs...))
+}
+
+// CertificateNotIn applies the NotIn predicate on the "certificate" field.
+func CertificateNotIn(vs ...[]byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldCertificate, vs...))
+}
+
+// CertificateGT applies the GT predicate on the "certificate" field.
+func CertificateGT(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldCertificate, v))
+}
+
+// CertificateGTE applies the GTE predicate on the "certificate" field.
+func CertificateGTE(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldCertificate, v))
+}
+
+// CertificateLT applies the LT predicate on the "certificate" field.
+func CertificateLT(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldCertificate, v))
+}
+
+// CertificateLTE applies the LTE predicate on the "certificate" field.
+func CertificateLTE(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldCertificate, v))
+}
+
+// CertificateIsNil applies the IsNil predicate on the "certificate" field.
+func CertificateIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldCertificate))
+}
+
+// CertificateNotNil applies the NotNil predicate on the "certificate" field.
+func CertificateNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldCertificate))
+}
+
+// CaChainIsNil applies the IsNil predicate on the "ca_chain" field.
+func CaChainIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldCaChain))
+}
+
+// CaChainNotNil applies the NotNil predicate on the "ca_chain" field.
+func CaChainNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldCaChain))
+}
+
+// LicenseKeyEncryptedEQ applies the EQ predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldLicenseKeyEncrypted, v))
+}
+
+// LicenseKeyEncryptedNEQ applies the NEQ predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedNEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldLicenseKeyEncrypted, v))
+}
+
+// LicenseKeyEncryptedIn applies the In predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldLicenseKeyEncrypted, vs...))
+}
+
+// LicenseKeyEncryptedNotIn applies the NotIn predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedNotIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldLicenseKeyEncrypted, vs...))
+}
+
+// LicenseKeyEncryptedGT applies the GT predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedGT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldLicenseKeyEncrypted, v))
+}
+
+// LicenseKeyEncryptedGTE applies the GTE predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedGTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldLicenseKeyEncrypted, v))
+}
+
+// LicenseKeyEncryptedLT applies the LT predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedLT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldLicenseKeyEncrypted, v))
+}
+
+// LicenseKeyEncryptedLTE applies the LTE predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedLTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldLicenseKeyEncrypted, v))
+}
+
+// LicenseKeyEncryptedContains applies the Contains predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedContains(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContains(FieldLicenseKeyEncrypted, v))
+}
+
+// LicenseKeyEncryptedHasPrefix applies the HasPrefix predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedHasPrefix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasPrefix(FieldLicenseKeyEncrypted, v))
+}
+
+// LicenseKeyEncryptedHasSuffix applies the HasSuffix predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedHasSuffix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasSuffix(FieldLicenseKeyEncrypted, v))
+}
+
+// LicenseKeyEncryptedIsNil applies the IsNil predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldLicenseKeyEncrypted))
+}
+
+// LicenseKeyEncryptedNotNil applies the NotNil predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldLicenseKeyEncrypted))
+}
+
+// LicenseKeyEncryptedEqualFold applies the EqualFold predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedEqualFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEqualFold(FieldLicenseKeyEncrypted, v))
+}
+
+// LicenseKeyEncryptedContainsFold applies the ContainsFold predicate on the "license_key_encrypted" field.
+func LicenseKeyEncryptedContainsFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContainsFold(FieldLicenseKeyEncrypted, v))
+}
+
+// SignatureEQ applies the EQ predicate on the "signature" field.
+func SignatureEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldSignature, v))
+}
+
+// SignatureNEQ applies the NEQ predicate on the "signature" field.
+func SignatureNEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldSignature, v))
+}
+
+// SignatureIn applies the In predicate on the "signature" field.
+func SignatureIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldSignature, vs...))
+}
+
+// SignatureNotIn applies the NotIn predicate on the "signature" field.
+func SignatureNotIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldSignature, vs...))
+}
+
+// SignatureGT applies the GT predicate on the "signature" field.
+func SignatureGT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldSignature, v))
+}
+
+// SignatureGTE applies the GTE predicate on the "signature" field.
+func SignatureGTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldSignature, v))
+}
+
+// SignatureLT applies the LT predicate on the "signature" field.
+func SignatureLT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldSignature, v))
+}
+
+// SignatureLTE applies the LTE predicate on the "signature" field.
+func SignatureLTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldSignature, v))
+}
+
+// SignatureContains applies the Contains predicate on the "signature" field.
+func SignatureContains(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContains(FieldSignature, v))
+}
+
+// SignatureHasPrefix applies the HasPrefix predicate on the "signature" field.
+func SignatureHasPrefix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasPrefix(FieldSignature, v))
+}
+
+// SignatureHasSuffix applies the HasSuffix predicate on the "signature" field.
+func SignatureHasSuffix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasSuffix(FieldSignature, v))
+}
+
+// SignatureIsNil applies the IsNil predicate on the "signature" field.
+func SignatureIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldSignature))
+}
+
+// SignatureNotNil applies the NotNil predicate on the "signature" field.
+func SignatureNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldSignature))
+}
+
+// SignatureEqualFold applies the EqualFold predicate on the "signature" field.
+func SignatureEqualFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEqualFold(FieldSignature, v))
+}
+
+// SignatureContainsFold applies the ContainsFold predicate on the "signature" field.
+func SignatureContainsFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContainsFold(FieldSignature, v))
+}
+
+// SymmetricKeyEQ applies the EQ predicate on the "symmetric_key" field.
+func SymmetricKeyEQ(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldSymmetricKey, v))
+}
+
+// SymmetricKeyNEQ applies the NEQ predicate on the "symmetric_key" field.
+func SymmetricKeyNEQ(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldSymmetricKey, v))
+}
+
+// SymmetricKeyIn applies the In predicate on the "symmetric_key" field.
+func SymmetricKeyIn(vs ...[]byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldSymmetricKey, vs...))
+}
+
+// SymmetricKeyNotIn applies the NotIn predicate on the "symmetric_key" field.
+func SymmetricKeyNotIn(vs ...[]byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldSymmetricKey, vs...))
+}
+
+// SymmetricKeyGT applies the GT predicate on the "symmetric_key" field.
+func SymmetricKeyGT(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldSymmetricKey, v))
+}
+
+// SymmetricKeyGTE applies the GTE predicate on the "symmetric_key" field.
+func SymmetricKeyGTE(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldSymmetricKey, v))
+}
+
+// SymmetricKeyLT applies the LT predicate on the "symmetric_key" field.
+func SymmetricKeyLT(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldSymmetricKey, v))
+}
+
+// SymmetricKeyLTE applies the LTE predicate on the "symmetric_key" field.
+func SymmetricKeyLTE(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldSymmetricKey, v))
+}
+
+// SymmetricKeyIsNil applies the IsNil predicate on the "symmetric_key" field.
+func SymmetricKeyIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldSymmetricKey))
+}
+
+// SymmetricKeyNotNil applies the NotNil predicate on the "symmetric_key" field.
+func SymmetricKeyNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldSymmetricKey))
+}
+
+// JwksURIEQ applies the EQ predicate on the "jwks_uri" field.
+func JwksURIEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldJwksURI, v))
+}
+
+// JwksURINEQ applies the NEQ predicate on the "jwks_uri" field.
+func JwksURINEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldJwksURI, v))
+}
+
+// JwksURIIn applies the In predicate on the "jwks_uri" field.
+func JwksURIIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldJwksURI, vs...))
+}
+
+// JwksURINotIn applies the NotIn predicate on the "jwks_uri" field.
+func JwksURINotIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldJwksURI, vs...))
+}
+
+// JwksURIGT applies the GT predicate on the "jwks_uri" field.
+func JwksURIGT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldJwksURI, v))
+}
+
+// JwksURIGTE applies the GTE predicate on the "jwks_uri" field.
+func JwksURIGTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldJwksURI, v))
+}
+
+// JwksURILT applies the LT predicate on the "jwks_uri" field.
+func JwksURILT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldJwksURI, v))
+}
+
+// JwksURILTE applies the LTE predicate on the "jwks_uri" field.
+func JwksURILTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldJwksURI, v))
+}
+
+// JwksURIContains applies the Contains predicate on the "jwks_uri" field.
+func JwksURIContains(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContains(FieldJwksURI, v))
+}
+
+// JwksURIHasPrefix applies the HasPrefix predicate on the "jwks_uri" field.
+func JwksURIHasPrefix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasPrefix(FieldJwksURI, v))
+}
+
+// JwksURIHasSuffix applies the HasSuffix predicate on the "jwks_uri" field.
+func JwksURIHasSuffix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasSuffix(FieldJwksURI, v))
+}
+
+// JwksURIIsNil applies the IsNil predicate on the "jwks_uri" field.
+func JwksURIIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldJwksURI))
+}
+
+// JwksURINotNil applies the NotNil predicate on the "jwks_uri" field.
+func JwksURINotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldJwksURI))
+}
+
+// JwksURIEqualFold applies the EqualFold predicate on the "jwks_uri" field.
+func JwksURIEqualFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEqualFold(FieldJwksURI, v))
+}
+
+// JwksURIContainsFold applies the ContainsFold predicate on the "jwks_uri" field.
+func JwksURIContainsFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContainsFold(FieldJwksURI, v))
+}
+
+// NotBeforeEQ applies the EQ predicate on the "not_before" field.
+func NotBeforeEQ(v time.Time) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldNotBefore, v))
+}
+
+// NotBeforeNEQ applies the NEQ predicate on the "not_before" field.
+func NotBeforeNEQ(v time.Time) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldNotBefore, v))
+}
+
+// NotBeforeIn applies the In predicate on the "not_before" field.
+func NotBeforeIn(vs ...time.Time) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldNotBefore, vs...))
+}
+
+// NotBeforeNotIn applies the NotIn predicate on the "not_before" field.
+func NotBeforeNotIn(vs ...time.Time) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldNotBefore, vs...))
+}
+
+// NotBeforeGT applies the GT predicate on the "not_before" field.
+func NotBeforeGT(v time.Time) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldNotBefore, v))
+}
+
+// NotBeforeGTE applies the GTE predicate on the "not_before" field.
+func NotBeforeGTE(v time.Time) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldNotBefore, v))
+}
+
+// NotBeforeLT applies the LT predicate on the "not_before" field.
+func NotBeforeLT(v time.Time) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldNotBefore, v))
+}
+
+// NotBeforeLTE applies the LTE predicate on the "not_before" field.
+func NotBeforeLTE(v time.Time) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldNotBefore, v))
+}
+
+// NotBeforeIsNil applies the IsNil predicate on the "not_before" field.
+func NotBeforeIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldNotBefore))
+}
+
+// NotBeforeNotNil applies the NotNil predicate on the "not_before" field.
+func NotBeforeNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldNotBefore))
 }
 
 // ExpiresAtEQ applies the EQ predicate on the "expires_at" field.
@@ -702,6 +1472,91 @@ func ExpiresAtIsNil() predicate.Credentials {
 // ExpiresAtNotNil applies the NotNil predicate on the "expires_at" field.
 func ExpiresAtNotNil() predicate.Credentials {
 	return predicate.Credentials(sql.FieldNotNull(FieldExpiresAt))
+}
+
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldMetadata))
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionIsNil applies the IsNil predicate on the "description" field.
+func DescriptionIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldDescription))
+}
+
+// DescriptionNotNil applies the NotNil predicate on the "description" field.
+func DescriptionNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldDescription))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // And groups predicates with the AND operator between them.

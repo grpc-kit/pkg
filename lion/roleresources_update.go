@@ -57,6 +57,12 @@ func (_u *RoleResourcesUpdate) AddCreatedBy(v int64) *RoleResourcesUpdate {
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *RoleResourcesUpdate) ClearCreatedBy() *RoleResourcesUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *RoleResourcesUpdate) SetUpdatedBy(v int64) *RoleResourcesUpdate {
 	_u.mutation.ResetUpdatedBy()
@@ -75,6 +81,12 @@ func (_u *RoleResourcesUpdate) SetNillableUpdatedBy(v *int64) *RoleResourcesUpda
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *RoleResourcesUpdate) AddUpdatedBy(v int64) *RoleResourcesUpdate {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *RoleResourcesUpdate) ClearUpdatedBy() *RoleResourcesUpdate {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -223,11 +235,17 @@ func (_u *RoleResourcesUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(roleresources.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(roleresources.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(roleresources.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(roleresources.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(roleresources.FieldUpdatedBy, field.TypeInt64)
 	}
 	if _u.mutation.LionRolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -334,6 +352,12 @@ func (_u *RoleResourcesUpdateOne) AddCreatedBy(v int64) *RoleResourcesUpdateOne 
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *RoleResourcesUpdateOne) ClearCreatedBy() *RoleResourcesUpdateOne {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *RoleResourcesUpdateOne) SetUpdatedBy(v int64) *RoleResourcesUpdateOne {
 	_u.mutation.ResetUpdatedBy()
@@ -352,6 +376,12 @@ func (_u *RoleResourcesUpdateOne) SetNillableUpdatedBy(v *int64) *RoleResourcesU
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *RoleResourcesUpdateOne) AddUpdatedBy(v int64) *RoleResourcesUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *RoleResourcesUpdateOne) ClearUpdatedBy() *RoleResourcesUpdateOne {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -530,11 +560,17 @@ func (_u *RoleResourcesUpdateOne) sqlSave(ctx context.Context) (_node *RoleResou
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(roleresources.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(roleresources.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(roleresources.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(roleresources.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(roleresources.FieldUpdatedBy, field.TypeInt64)
 	}
 	if _u.mutation.LionRolesCleared() {
 		edge := &sqlgraph.EdgeSpec{

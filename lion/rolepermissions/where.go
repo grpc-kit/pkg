@@ -204,6 +204,16 @@ func CreatedByLTE(v int64) predicate.RolePermissions {
 	return predicate.RolePermissions(sql.FieldLTE(FieldCreatedBy, v))
 }
 
+// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
+func CreatedByIsNil() predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldIsNull(FieldCreatedBy))
+}
+
+// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
+func CreatedByNotNil() predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldNotNull(FieldCreatedBy))
+}
+
 // UpdatedByEQ applies the EQ predicate on the "updated_by" field.
 func UpdatedByEQ(v int64) predicate.RolePermissions {
 	return predicate.RolePermissions(sql.FieldEQ(FieldUpdatedBy, v))
@@ -242,6 +252,16 @@ func UpdatedByLT(v int64) predicate.RolePermissions {
 // UpdatedByLTE applies the LTE predicate on the "updated_by" field.
 func UpdatedByLTE(v int64) predicate.RolePermissions {
 	return predicate.RolePermissions(sql.FieldLTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
+func UpdatedByIsNil() predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldIsNull(FieldUpdatedBy))
+}
+
+// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
+func UpdatedByNotNil() predicate.RolePermissions {
+	return predicate.RolePermissions(sql.FieldNotNull(FieldUpdatedBy))
 }
 
 // RoleIDEQ applies the EQ predicate on the "role_id" field.

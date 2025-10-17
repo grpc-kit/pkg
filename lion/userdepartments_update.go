@@ -57,6 +57,12 @@ func (_u *UserDepartmentsUpdate) AddCreatedBy(v int64) *UserDepartmentsUpdate {
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *UserDepartmentsUpdate) ClearCreatedBy() *UserDepartmentsUpdate {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *UserDepartmentsUpdate) SetUpdatedBy(v int64) *UserDepartmentsUpdate {
 	_u.mutation.ResetUpdatedBy()
@@ -75,6 +81,12 @@ func (_u *UserDepartmentsUpdate) SetNillableUpdatedBy(v *int64) *UserDepartments
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *UserDepartmentsUpdate) AddUpdatedBy(v int64) *UserDepartmentsUpdate {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *UserDepartmentsUpdate) ClearUpdatedBy() *UserDepartmentsUpdate {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -309,11 +321,17 @@ func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(userdepartments.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(userdepartments.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.MemberRole(); ok {
 		_spec.SetField(userdepartments.FieldMemberRole, field.TypeInt, value)
@@ -447,6 +465,12 @@ func (_u *UserDepartmentsUpdateOne) AddCreatedBy(v int64) *UserDepartmentsUpdate
 	return _u
 }
 
+// ClearCreatedBy clears the value of the "created_by" field.
+func (_u *UserDepartmentsUpdateOne) ClearCreatedBy() *UserDepartmentsUpdateOne {
+	_u.mutation.ClearCreatedBy()
+	return _u
+}
+
 // SetUpdatedBy sets the "updated_by" field.
 func (_u *UserDepartmentsUpdateOne) SetUpdatedBy(v int64) *UserDepartmentsUpdateOne {
 	_u.mutation.ResetUpdatedBy()
@@ -465,6 +489,12 @@ func (_u *UserDepartmentsUpdateOne) SetNillableUpdatedBy(v *int64) *UserDepartme
 // AddUpdatedBy adds value to the "updated_by" field.
 func (_u *UserDepartmentsUpdateOne) AddUpdatedBy(v int64) *UserDepartmentsUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
+	return _u
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (_u *UserDepartmentsUpdateOne) ClearUpdatedBy() *UserDepartmentsUpdateOne {
+	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
@@ -729,11 +759,17 @@ func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDep
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
 		_spec.AddField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
 	}
+	if _u.mutation.CreatedByCleared() {
+		_spec.ClearField(userdepartments.FieldCreatedBy, field.TypeInt64)
+	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
 		_spec.SetField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
 		_spec.AddField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+	}
+	if _u.mutation.UpdatedByCleared() {
+		_spec.ClearField(userdepartments.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.MemberRole(); ok {
 		_spec.SetField(userdepartments.FieldMemberRole, field.TypeInt, value)

@@ -199,6 +199,16 @@ func CreatedByLTE(v int64) predicate.Permissions {
 	return predicate.Permissions(sql.FieldLTE(FieldCreatedBy, v))
 }
 
+// CreatedByIsNil applies the IsNil predicate on the "created_by" field.
+func CreatedByIsNil() predicate.Permissions {
+	return predicate.Permissions(sql.FieldIsNull(FieldCreatedBy))
+}
+
+// CreatedByNotNil applies the NotNil predicate on the "created_by" field.
+func CreatedByNotNil() predicate.Permissions {
+	return predicate.Permissions(sql.FieldNotNull(FieldCreatedBy))
+}
+
 // UpdatedByEQ applies the EQ predicate on the "updated_by" field.
 func UpdatedByEQ(v int64) predicate.Permissions {
 	return predicate.Permissions(sql.FieldEQ(FieldUpdatedBy, v))
@@ -237,6 +247,16 @@ func UpdatedByLT(v int64) predicate.Permissions {
 // UpdatedByLTE applies the LTE predicate on the "updated_by" field.
 func UpdatedByLTE(v int64) predicate.Permissions {
 	return predicate.Permissions(sql.FieldLTE(FieldUpdatedBy, v))
+}
+
+// UpdatedByIsNil applies the IsNil predicate on the "updated_by" field.
+func UpdatedByIsNil() predicate.Permissions {
+	return predicate.Permissions(sql.FieldIsNull(FieldUpdatedBy))
+}
+
+// UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
+func UpdatedByNotNil() predicate.Permissions {
+	return predicate.Permissions(sql.FieldNotNull(FieldUpdatedBy))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.

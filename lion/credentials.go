@@ -3,6 +3,7 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -25,22 +26,52 @@ type Credentials struct {
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
-	// 凭据名称
+	// 凭证显示名称
 	Name string `json:"name,omitempty"`
-	// 类型: api_key, jwt, jwks, license, ssh_key
-	Type int `json:"type,omitempty"`
-	// 应用 ID
-	Appid string `json:"appid,omitempty"`
-	// 应用 Key 或 Client Secret
-	AppkeyEncrypted []byte `json:"appkey_encrypted,omitempty"`
-	// 公钥 base64 编码存储
+	// 凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=JWKS, 7=HSM_REF, 8=FIDO, 99=OTHER
+	CredentialType int `json:"credential_type,omitempty"`
+	// 算法类型: 0=未指定, 1=RSA, 2=ECDSA, 3=ED25519, 4=HMAC, 5=AES, 6=CHACHA20_POLY1305, 99=OTHER
+	CredentialAlgorithm int `json:"credential_algorithm,omitempty"`
+	// 凭证用途: 0=未指定, 1=SIGNING, 2=ENCRYPTION, 10=AUTH, 11=LICENSE, 12=OTP
+	CredentialUsage int `json:"credential_usage,omitempty"`
+	// 可见性: 0=未指定, 1=PRIVATE, 2=INTERNAL, 3=PUBLIC, 4=GROUP
+	CredentialVisibility int `json:"credential_visibility,omitempty"`
+	// 状态: 0=未指定, 1=ACTIVE, 2=PENDING, 3=DISABLED, 4=EXPIRED, 5=REVOKED
+	CredentialStatus int `json:"credential_status,omitempty"`
+	// 来源: 0=未指定, 1=SYSTEM, 2=USER, 3=KMS, 4=EXTERNAL
+	CredentialSource int `json:"credential_source,omitempty"`
+	// 外部系统 Key ID / JWKS ID / HSM ID
+	KeyID string `json:"key_id,omitempty"`
+	// API Key 的公有标识
+	APIKey string `json:"api_key,omitempty"`
+	// API Secret / 私密部分，敏感数据
+	APISecretEncrypted []byte `json:"-"`
+	// 公钥内容（PEM/DER 格式）
 	PublicKey string `json:"public_key,omitempty"`
-	// 私钥对称加密存储
+	// 私钥内容（PEM/DER 格式），敏感数据
 	PrivateKeyEncrypted []byte `json:"-"`
-	// 用途: oidc, license, api_gateway ...
-	Usage string `json:"usage,omitempty"`
-	// 密码过期时间
-	ExpiresAt    *time.Time `json:"expires_at,omitempty"`
+	// 私钥加密口令，可选
+	PassphraseEncrypted []byte `json:"-"`
+	// 主证书（PEM/DER 格式）
+	Certificate []byte `json:"certificate,omitempty"`
+	// 可选 CA 证书链（顺序从根到中间证书）
+	CaChain [][]uint8 `json:"ca_chain,omitempty"`
+	// 许可证密钥或主体内容
+	LicenseKeyEncrypted string `json:"license_key_encrypted,omitempty"`
+	// 许可证数字签名，用于验证完整性
+	Signature string `json:"signature,omitempty"`
+	// 对称密钥 / HMAC / JWT
+	SymmetricKey []byte `json:"-"`
+	// JWKS URI
+	JwksURI string `json:"jwks_uri,omitempty"`
+	// 生效时间（Not Before）
+	NotBefore *time.Time `json:"not_before,omitempty"`
+	// 过期时间
+	ExpiresAt *time.Time `json:"expires_at,omitempty"`
+	// 自定义业务属性，许可证附加信息，如授权范围、用户数、有效期等
+	Metadata map[string]string `json:"metadata,omitempty"`
+	// 凭证说明或备注
+	Description  string `json:"description,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -49,13 +80,13 @@ func (*Credentials) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case credentials.FieldAppkeyEncrypted, credentials.FieldPrivateKeyEncrypted:
+		case credentials.FieldAPISecretEncrypted, credentials.FieldPrivateKeyEncrypted, credentials.FieldPassphraseEncrypted, credentials.FieldCertificate, credentials.FieldCaChain, credentials.FieldSymmetricKey, credentials.FieldMetadata:
 			values[i] = new([]byte)
-		case credentials.FieldID, credentials.FieldCreatedBy, credentials.FieldUpdatedBy, credentials.FieldType:
+		case credentials.FieldID, credentials.FieldCreatedBy, credentials.FieldUpdatedBy, credentials.FieldCredentialType, credentials.FieldCredentialAlgorithm, credentials.FieldCredentialUsage, credentials.FieldCredentialVisibility, credentials.FieldCredentialStatus, credentials.FieldCredentialSource:
 			values[i] = new(sql.NullInt64)
-		case credentials.FieldName, credentials.FieldAppid, credentials.FieldPublicKey, credentials.FieldUsage:
+		case credentials.FieldName, credentials.FieldKeyID, credentials.FieldAPIKey, credentials.FieldPublicKey, credentials.FieldLicenseKeyEncrypted, credentials.FieldSignature, credentials.FieldJwksURI, credentials.FieldDescription:
 			values[i] = new(sql.NullString)
-		case credentials.FieldCreatedAt, credentials.FieldUpdatedAt, credentials.FieldExpiresAt:
+		case credentials.FieldCreatedAt, credentials.FieldUpdatedAt, credentials.FieldNotBefore, credentials.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -108,23 +139,59 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case credentials.FieldType:
+		case credentials.FieldCredentialType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field type", values[i])
+				return fmt.Errorf("unexpected type %T for field credential_type", values[i])
 			} else if value.Valid {
-				_m.Type = int(value.Int64)
+				_m.CredentialType = int(value.Int64)
 			}
-		case credentials.FieldAppid:
+		case credentials.FieldCredentialAlgorithm:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field credential_algorithm", values[i])
+			} else if value.Valid {
+				_m.CredentialAlgorithm = int(value.Int64)
+			}
+		case credentials.FieldCredentialUsage:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field credential_usage", values[i])
+			} else if value.Valid {
+				_m.CredentialUsage = int(value.Int64)
+			}
+		case credentials.FieldCredentialVisibility:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field credential_visibility", values[i])
+			} else if value.Valid {
+				_m.CredentialVisibility = int(value.Int64)
+			}
+		case credentials.FieldCredentialStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field credential_status", values[i])
+			} else if value.Valid {
+				_m.CredentialStatus = int(value.Int64)
+			}
+		case credentials.FieldCredentialSource:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field credential_source", values[i])
+			} else if value.Valid {
+				_m.CredentialSource = int(value.Int64)
+			}
+		case credentials.FieldKeyID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field appid", values[i])
+				return fmt.Errorf("unexpected type %T for field key_id", values[i])
 			} else if value.Valid {
-				_m.Appid = value.String
+				_m.KeyID = value.String
 			}
-		case credentials.FieldAppkeyEncrypted:
+		case credentials.FieldAPIKey:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field api_key", values[i])
+			} else if value.Valid {
+				_m.APIKey = value.String
+			}
+		case credentials.FieldAPISecretEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field appkey_encrypted", values[i])
+				return fmt.Errorf("unexpected type %T for field api_secret_encrypted", values[i])
 			} else if value != nil {
-				_m.AppkeyEncrypted = *value
+				_m.APISecretEncrypted = *value
 			}
 		case credentials.FieldPublicKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -138,11 +205,56 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.PrivateKeyEncrypted = *value
 			}
-		case credentials.FieldUsage:
+		case credentials.FieldPassphraseEncrypted:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field passphrase_encrypted", values[i])
+			} else if value != nil {
+				_m.PassphraseEncrypted = *value
+			}
+		case credentials.FieldCertificate:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field certificate", values[i])
+			} else if value != nil {
+				_m.Certificate = *value
+			}
+		case credentials.FieldCaChain:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field ca_chain", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.CaChain); err != nil {
+					return fmt.Errorf("unmarshal field ca_chain: %w", err)
+				}
+			}
+		case credentials.FieldLicenseKeyEncrypted:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field usage", values[i])
+				return fmt.Errorf("unexpected type %T for field license_key_encrypted", values[i])
 			} else if value.Valid {
-				_m.Usage = value.String
+				_m.LicenseKeyEncrypted = value.String
+			}
+		case credentials.FieldSignature:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field signature", values[i])
+			} else if value.Valid {
+				_m.Signature = value.String
+			}
+		case credentials.FieldSymmetricKey:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field symmetric_key", values[i])
+			} else if value != nil {
+				_m.SymmetricKey = *value
+			}
+		case credentials.FieldJwksURI:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field jwks_uri", values[i])
+			} else if value.Valid {
+				_m.JwksURI = value.String
+			}
+		case credentials.FieldNotBefore:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field not_before", values[i])
+			} else if value.Valid {
+				_m.NotBefore = new(time.Time)
+				*_m.NotBefore = value.Time
 			}
 		case credentials.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -150,6 +262,20 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ExpiresAt = new(time.Time)
 				*_m.ExpiresAt = value.Time
+			}
+		case credentials.FieldMetadata:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
+			}
+		case credentials.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -202,27 +328,71 @@ func (_m *Credentials) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Type))
+	builder.WriteString("credential_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CredentialType))
 	builder.WriteString(", ")
-	builder.WriteString("appid=")
-	builder.WriteString(_m.Appid)
+	builder.WriteString("credential_algorithm=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CredentialAlgorithm))
 	builder.WriteString(", ")
-	builder.WriteString("appkey_encrypted=")
-	builder.WriteString(fmt.Sprintf("%v", _m.AppkeyEncrypted))
+	builder.WriteString("credential_usage=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CredentialUsage))
+	builder.WriteString(", ")
+	builder.WriteString("credential_visibility=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CredentialVisibility))
+	builder.WriteString(", ")
+	builder.WriteString("credential_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CredentialStatus))
+	builder.WriteString(", ")
+	builder.WriteString("credential_source=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CredentialSource))
+	builder.WriteString(", ")
+	builder.WriteString("key_id=")
+	builder.WriteString(_m.KeyID)
+	builder.WriteString(", ")
+	builder.WriteString("api_key=")
+	builder.WriteString(_m.APIKey)
+	builder.WriteString(", ")
+	builder.WriteString("api_secret_encrypted=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("public_key=")
 	builder.WriteString(_m.PublicKey)
 	builder.WriteString(", ")
 	builder.WriteString("private_key_encrypted=<sensitive>")
 	builder.WriteString(", ")
-	builder.WriteString("usage=")
-	builder.WriteString(_m.Usage)
+	builder.WriteString("passphrase_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("certificate=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Certificate))
+	builder.WriteString(", ")
+	builder.WriteString("ca_chain=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CaChain))
+	builder.WriteString(", ")
+	builder.WriteString("license_key_encrypted=")
+	builder.WriteString(_m.LicenseKeyEncrypted)
+	builder.WriteString(", ")
+	builder.WriteString("signature=")
+	builder.WriteString(_m.Signature)
+	builder.WriteString(", ")
+	builder.WriteString("symmetric_key=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("jwks_uri=")
+	builder.WriteString(_m.JwksURI)
+	builder.WriteString(", ")
+	if v := _m.NotBefore; v != nil {
+		builder.WriteString("not_before=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	if v := _m.ExpiresAt; v != nil {
 		builder.WriteString("expires_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("metadata=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

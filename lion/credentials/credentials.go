@@ -23,20 +23,50 @@ const (
 	FieldUpdatedBy = "updated_by"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
-	// FieldAppid holds the string denoting the appid field in the database.
-	FieldAppid = "appid"
-	// FieldAppkeyEncrypted holds the string denoting the appkey_encrypted field in the database.
-	FieldAppkeyEncrypted = "appkey_encrypted"
+	// FieldCredentialType holds the string denoting the credential_type field in the database.
+	FieldCredentialType = "credential_type"
+	// FieldCredentialAlgorithm holds the string denoting the credential_algorithm field in the database.
+	FieldCredentialAlgorithm = "credential_algorithm"
+	// FieldCredentialUsage holds the string denoting the credential_usage field in the database.
+	FieldCredentialUsage = "credential_usage"
+	// FieldCredentialVisibility holds the string denoting the credential_visibility field in the database.
+	FieldCredentialVisibility = "credential_visibility"
+	// FieldCredentialStatus holds the string denoting the credential_status field in the database.
+	FieldCredentialStatus = "credential_status"
+	// FieldCredentialSource holds the string denoting the credential_source field in the database.
+	FieldCredentialSource = "credential_source"
+	// FieldKeyID holds the string denoting the key_id field in the database.
+	FieldKeyID = "key_id"
+	// FieldAPIKey holds the string denoting the api_key field in the database.
+	FieldAPIKey = "api_key"
+	// FieldAPISecretEncrypted holds the string denoting the api_secret_encrypted field in the database.
+	FieldAPISecretEncrypted = "api_secret_encrypted"
 	// FieldPublicKey holds the string denoting the public_key field in the database.
 	FieldPublicKey = "public_key"
 	// FieldPrivateKeyEncrypted holds the string denoting the private_key_encrypted field in the database.
 	FieldPrivateKeyEncrypted = "private_key_encrypted"
-	// FieldUsage holds the string denoting the usage field in the database.
-	FieldUsage = "usage"
+	// FieldPassphraseEncrypted holds the string denoting the passphrase_encrypted field in the database.
+	FieldPassphraseEncrypted = "passphrase_encrypted"
+	// FieldCertificate holds the string denoting the certificate field in the database.
+	FieldCertificate = "certificate"
+	// FieldCaChain holds the string denoting the ca_chain field in the database.
+	FieldCaChain = "ca_chain"
+	// FieldLicenseKeyEncrypted holds the string denoting the license_key_encrypted field in the database.
+	FieldLicenseKeyEncrypted = "license_key_encrypted"
+	// FieldSignature holds the string denoting the signature field in the database.
+	FieldSignature = "signature"
+	// FieldSymmetricKey holds the string denoting the symmetric_key field in the database.
+	FieldSymmetricKey = "symmetric_key"
+	// FieldJwksURI holds the string denoting the jwks_uri field in the database.
+	FieldJwksURI = "jwks_uri"
+	// FieldNotBefore holds the string denoting the not_before field in the database.
+	FieldNotBefore = "not_before"
 	// FieldExpiresAt holds the string denoting the expires_at field in the database.
 	FieldExpiresAt = "expires_at"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// Table holds the table name of the credentials in the database.
 	Table = "lion_credentials"
 )
@@ -49,13 +79,28 @@ var Columns = []string{
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldName,
-	FieldType,
-	FieldAppid,
-	FieldAppkeyEncrypted,
+	FieldCredentialType,
+	FieldCredentialAlgorithm,
+	FieldCredentialUsage,
+	FieldCredentialVisibility,
+	FieldCredentialStatus,
+	FieldCredentialSource,
+	FieldKeyID,
+	FieldAPIKey,
+	FieldAPISecretEncrypted,
 	FieldPublicKey,
 	FieldPrivateKeyEncrypted,
-	FieldUsage,
+	FieldPassphraseEncrypted,
+	FieldCertificate,
+	FieldCaChain,
+	FieldLicenseKeyEncrypted,
+	FieldSignature,
+	FieldSymmetricKey,
+	FieldJwksURI,
+	FieldNotBefore,
 	FieldExpiresAt,
+	FieldMetadata,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -79,12 +124,18 @@ var (
 	DefaultCreatedBy int64
 	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
 	DefaultUpdatedBy int64
-	// DefaultAppkeyEncrypted holds the default value on creation for the "appkey_encrypted" field.
-	DefaultAppkeyEncrypted []byte
-	// DefaultPublicKey holds the default value on creation for the "public_key" field.
-	DefaultPublicKey string
-	// DefaultPrivateKeyEncrypted holds the default value on creation for the "private_key_encrypted" field.
-	DefaultPrivateKeyEncrypted []byte
+	// DefaultCredentialType holds the default value on creation for the "credential_type" field.
+	DefaultCredentialType int
+	// DefaultCredentialAlgorithm holds the default value on creation for the "credential_algorithm" field.
+	DefaultCredentialAlgorithm int
+	// DefaultCredentialUsage holds the default value on creation for the "credential_usage" field.
+	DefaultCredentialUsage int
+	// DefaultCredentialVisibility holds the default value on creation for the "credential_visibility" field.
+	DefaultCredentialVisibility int
+	// DefaultCredentialStatus holds the default value on creation for the "credential_status" field.
+	DefaultCredentialStatus int
+	// DefaultCredentialSource holds the default value on creation for the "credential_source" field.
+	DefaultCredentialSource int
 )
 
 // OrderOption defines the ordering options for the Credentials queries.
@@ -120,14 +171,44 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByType orders the results by the type field.
-func ByType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldType, opts...).ToFunc()
+// ByCredentialType orders the results by the credential_type field.
+func ByCredentialType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCredentialType, opts...).ToFunc()
 }
 
-// ByAppid orders the results by the appid field.
-func ByAppid(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAppid, opts...).ToFunc()
+// ByCredentialAlgorithm orders the results by the credential_algorithm field.
+func ByCredentialAlgorithm(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCredentialAlgorithm, opts...).ToFunc()
+}
+
+// ByCredentialUsage orders the results by the credential_usage field.
+func ByCredentialUsage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCredentialUsage, opts...).ToFunc()
+}
+
+// ByCredentialVisibility orders the results by the credential_visibility field.
+func ByCredentialVisibility(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCredentialVisibility, opts...).ToFunc()
+}
+
+// ByCredentialStatus orders the results by the credential_status field.
+func ByCredentialStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCredentialStatus, opts...).ToFunc()
+}
+
+// ByCredentialSource orders the results by the credential_source field.
+func ByCredentialSource(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCredentialSource, opts...).ToFunc()
+}
+
+// ByKeyID orders the results by the key_id field.
+func ByKeyID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldKeyID, opts...).ToFunc()
+}
+
+// ByAPIKey orders the results by the api_key field.
+func ByAPIKey(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAPIKey, opts...).ToFunc()
 }
 
 // ByPublicKey orders the results by the public_key field.
@@ -135,12 +216,32 @@ func ByPublicKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPublicKey, opts...).ToFunc()
 }
 
-// ByUsage orders the results by the usage field.
-func ByUsage(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUsage, opts...).ToFunc()
+// ByLicenseKeyEncrypted orders the results by the license_key_encrypted field.
+func ByLicenseKeyEncrypted(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLicenseKeyEncrypted, opts...).ToFunc()
+}
+
+// BySignature orders the results by the signature field.
+func BySignature(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSignature, opts...).ToFunc()
+}
+
+// ByJwksURI orders the results by the jwks_uri field.
+func ByJwksURI(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldJwksURI, opts...).ToFunc()
+}
+
+// ByNotBefore orders the results by the not_before field.
+func ByNotBefore(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNotBefore, opts...).ToFunc()
 }
 
 // ByExpiresAt orders the results by the expires_at field.
 func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
