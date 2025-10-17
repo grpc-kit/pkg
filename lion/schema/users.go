@@ -106,7 +106,7 @@ func (Users) Fields() []ent.Field {
 			MaxLen(4096).
 			Comment("用户详细描述"),
 		field.JSON("metadata", map[string]string{}).
-			Default(map[string]string{}).
+			Optional().
 			Comment("自定义元数据，用于存储额外的用户信息，对应 proto 中的 map<string, string> metadata"),
 	}
 }
@@ -147,11 +147,11 @@ func (Users) Indexes() []ent.Index {
 		// 用户状态索引，用于过滤不同状态的用户
 		index.Fields("user_status"),
 		// 邮箱哈希索引，用于邮箱唯一性检查
-		index.Fields("email_hash").Unique(),
+		index.Fields("email_hash"),
 		// 手机号哈希索引，用于手机号唯一性检查
-		index.Fields("phone_number_hash").Unique(),
+		index.Fields("phone_number_hash"),
 		// 身份证号哈希索引，用于身份证号唯一性检查
-		index.Fields("national_id_hash").Unique(),
+		index.Fields("national_id_hash"),
 		// 邮箱验证状态索引
 		index.Fields("email_verified"),
 		// 手机号验证状态索引

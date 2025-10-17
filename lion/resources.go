@@ -54,8 +54,6 @@ type Resources struct {
 	Component string `json:"component,omitempty"`
 	// 详细描述
 	Description string `json:"description,omitempty"`
-	// 权限列表，对应 proto 中的 repeated string permissions
-	Permissions []string `json:"permissions,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ResourcesQuery when eager-loading is set.
 	Edges        ResourcesEdges `json:"edges"`
@@ -64,20 +62,20 @@ type Resources struct {
 
 // ResourcesEdges holds the relations/edges for other nodes in the graph.
 type ResourcesEdges struct {
-	// LionRoleResources holds the value of the lion_role_resources edge.
-	LionRoleResources []*RoleResources `json:"lion_role_resources,omitempty"`
+	// LionPermissions holds the value of the lion_permissions edge.
+	LionPermissions []*Permissions `json:"lion_permissions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// LionRoleResourcesOrErr returns the LionRoleResources value or an error if the edge
+// LionPermissionsOrErr returns the LionPermissions value or an error if the edge
 // was not loaded in eager-loading.
-func (e ResourcesEdges) LionRoleResourcesOrErr() ([]*RoleResources, error) {
+func (e ResourcesEdges) LionPermissionsOrErr() ([]*Permissions, error) {
 	if e.loadedTypes[0] {
-		return e.LionRoleResources, nil
+		return e.LionPermissions, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_role_resources"}
+	return nil, &NotLoadedError{edge: "lion_permissions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -85,7 +83,7 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case resources.FieldI18nName, resources.FieldPermissions:
+		case resources.FieldI18nName:
 			values[i] = new([]byte)
 		case resources.FieldEnabled, resources.FieldHidden, resources.FieldHideChildren:
 			values[i] = new(sql.NullBool)
@@ -227,14 +225,6 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
-		case resources.FieldPermissions:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field permissions", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Permissions); err != nil {
-					return fmt.Errorf("unmarshal field permissions: %w", err)
-				}
-			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -248,9 +238,9 @@ func (_m *Resources) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionRoleResources queries the "lion_role_resources" edge of the Resources entity.
-func (_m *Resources) QueryLionRoleResources() *RoleResourcesQuery {
-	return NewResourcesClient(_m.config).QueryLionRoleResources(_m)
+// QueryLionPermissions queries the "lion_permissions" edge of the Resources entity.
+func (_m *Resources) QueryLionPermissions() *PermissionsQuery {
+	return NewResourcesClient(_m.config).QueryLionPermissions(_m)
 }
 
 // Update returns a builder for updating this Resources.
@@ -331,9 +321,6 @@ func (_m *Resources) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
-	builder.WriteString(", ")
-	builder.WriteString("permissions=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Permissions))
 	builder.WriteByte(')')
 	return builder.String()
 }

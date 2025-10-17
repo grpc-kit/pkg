@@ -895,31 +895,21 @@ func DescriptionContainsFold(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// PermissionsIsNil applies the IsNil predicate on the "permissions" field.
-func PermissionsIsNil() predicate.Resources {
-	return predicate.Resources(sql.FieldIsNull(FieldPermissions))
-}
-
-// PermissionsNotNil applies the NotNil predicate on the "permissions" field.
-func PermissionsNotNil() predicate.Resources {
-	return predicate.Resources(sql.FieldNotNull(FieldPermissions))
-}
-
-// HasLionRoleResources applies the HasEdge predicate on the "lion_role_resources" edge.
-func HasLionRoleResources() predicate.Resources {
+// HasLionPermissions applies the HasEdge predicate on the "lion_permissions" edge.
+func HasLionPermissions() predicate.Resources {
 	return predicate.Resources(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionRoleResourcesTable, LionRoleResourcesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLionRoleResourcesWith applies the HasEdge predicate on the "lion_role_resources" edge with a given conditions (other predicates).
-func HasLionRoleResourcesWith(preds ...predicate.RoleResources) predicate.Resources {
+// HasLionPermissionsWith applies the HasEdge predicate on the "lion_permissions" edge with a given conditions (other predicates).
+func HasLionPermissionsWith(preds ...predicate.Permissions) predicate.Resources {
 	return predicate.Resources(func(s *sql.Selector) {
-		step := newLionRoleResourcesStep()
+		step := newLionPermissionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

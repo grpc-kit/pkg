@@ -210,13 +210,21 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "name", Type: field.TypeString, Size: 256},
+		{Name: "resource_id", Type: field.TypeInt},
 	}
 	// LionPermissionsTable holds the schema information for the "lion_permissions" table.
 	LionPermissionsTable = &schema.Table{
 		Name:       "lion_permissions",
 		Columns:    LionPermissionsColumns,
 		PrimaryKey: []*schema.Column{LionPermissionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_permissions_lion_resources_lion_permissions",
+				Columns:    []*schema.Column{LionPermissionsColumns[5]},
+				RefColumns: []*schema.Column{LionResourcesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
 	}
 	// LionPoliciesColumns holds the columns for the "lion_policies" table.
 	LionPoliciesColumns = []*schema.Column{
@@ -255,7 +263,6 @@ var (
 		{Name: "icon", Type: field.TypeString, Size: 256, Default: ""},
 		{Name: "component", Type: field.TypeString, Size: 256, Default: ""},
 		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "permissions", Type: field.TypeJSON, Nullable: true},
 	}
 	// LionResourcesTable holds the schema information for the "lion_resources" table.
 	LionResourcesTable = &schema.Table{
@@ -339,49 +346,33 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "role_id", Type: field.TypeInt},
 		{Name: "permission_id", Type: field.TypeInt},
+		{Name: "role_id", Type: field.TypeInt},
 	}
 	// LionRolePermissionsTable holds the schema information for the "lion_role_permissions" table.
 	LionRolePermissionsTable = &schema.Table{
 		Name:       "lion_role_permissions",
 		Columns:    LionRolePermissionsColumns,
 		PrimaryKey: []*schema.Column{LionRolePermissionsColumns[0]},
-	}
-	// LionRoleResourcesColumns holds the columns for the "lion_role_resources" table.
-	LionRoleResourcesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "resource_id", Type: field.TypeInt},
-		{Name: "role_id", Type: field.TypeInt},
-	}
-	// LionRoleResourcesTable holds the schema information for the "lion_role_resources" table.
-	LionRoleResourcesTable = &schema.Table{
-		Name:       "lion_role_resources",
-		Columns:    LionRoleResourcesColumns,
-		PrimaryKey: []*schema.Column{LionRoleResourcesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "lion_role_resources_lion_resources_lion_role_resources",
-				Columns:    []*schema.Column{LionRoleResourcesColumns[5]},
-				RefColumns: []*schema.Column{LionResourcesColumns[0]},
-				OnDelete:   schema.Cascade,
+				Symbol:     "lion_role_permissions_lion_permissions_lion_role_permissions",
+				Columns:    []*schema.Column{LionRolePermissionsColumns[5]},
+				RefColumns: []*schema.Column{LionPermissionsColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "lion_role_resources_lion_roles_lion_role_resources",
-				Columns:    []*schema.Column{LionRoleResourcesColumns[6]},
+				Symbol:     "lion_role_permissions_lion_roles_lion_role_permissions",
+				Columns:    []*schema.Column{LionRolePermissionsColumns[6]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "roleresources_role_id_resource_id",
+				Name:    "rolepermissions_role_id_permission_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionRoleResourcesColumns[6], LionRoleResourcesColumns[5]},
+				Columns: []*schema.Column{LionRolePermissionsColumns[6], LionRolePermissionsColumns[5]},
 			},
 		},
 	}
@@ -636,7 +627,7 @@ var (
 		{Name: "phone_number_verified", Type: field.TypeBool, Default: false},
 		{Name: "address_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "description", Type: field.TypeString, Size: 4096, Default: ""},
-		{Name: "metadata", Type: field.TypeJSON},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 	}
 	// LionUsersTable holds the schema information for the "lion_users" table.
 	LionUsersTable = &schema.Table{
@@ -661,17 +652,17 @@ var (
 			},
 			{
 				Name:    "users_email_hash",
-				Unique:  true,
+				Unique:  false,
 				Columns: []*schema.Column{LionUsersColumns[17]},
 			},
 			{
 				Name:    "users_phone_number_hash",
-				Unique:  true,
+				Unique:  false,
 				Columns: []*schema.Column{LionUsersColumns[24]},
 			},
 			{
 				Name:    "users_national_id_hash",
-				Unique:  true,
+				Unique:  false,
 				Columns: []*schema.Column{LionUsersColumns[11]},
 			},
 			{
@@ -724,7 +715,6 @@ var (
 		LionResourcesTable,
 		LionRoleDepartmentsTable,
 		LionRolePermissionsTable,
-		LionRoleResourcesTable,
 		LionRolesTable,
 		LionUserDepartmentsTable,
 		LionUserGroupsTable,
@@ -757,6 +747,7 @@ func init() {
 	LionGroupsTable.Annotation = &entsql.Annotation{
 		Table: "lion_groups",
 	}
+	LionPermissionsTable.ForeignKeys[0].RefTable = LionResourcesTable
 	LionPermissionsTable.Annotation = &entsql.Annotation{
 		Table: "lion_permissions",
 	}
@@ -771,13 +762,10 @@ func init() {
 	LionRoleDepartmentsTable.Annotation = &entsql.Annotation{
 		Table: "lion_role_departments",
 	}
+	LionRolePermissionsTable.ForeignKeys[0].RefTable = LionPermissionsTable
+	LionRolePermissionsTable.ForeignKeys[1].RefTable = LionRolesTable
 	LionRolePermissionsTable.Annotation = &entsql.Annotation{
 		Table: "lion_role_permissions",
-	}
-	LionRoleResourcesTable.ForeignKeys[0].RefTable = LionResourcesTable
-	LionRoleResourcesTable.ForeignKeys[1].RefTable = LionRolesTable
-	LionRoleResourcesTable.Annotation = &entsql.Annotation{
-		Table: "lion_role_resources",
 	}
 	LionRolesTable.Annotation = &entsql.Annotation{
 		Table: "lion_roles",

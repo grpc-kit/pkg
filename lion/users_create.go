@@ -535,10 +535,6 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultDescription
 		_c.mutation.SetDescription(v)
 	}
-	if _, ok := _c.mutation.Metadata(); !ok {
-		v := users.DefaultMetadata
-		_c.mutation.SetMetadata(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -602,9 +598,6 @@ func (_c *UsersCreate) check() error {
 		if err := users.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
 		}
-	}
-	if _, ok := _c.mutation.Metadata(); !ok {
-		return &ValidationError{Name: "metadata", err: errors.New(`lion: missing required field "Users.metadata"`)}
 	}
 	return nil
 }

@@ -6,8 +6,9 @@ import (
 	"sort"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/roleresources"
+	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -90,13 +91,14 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	}
 
 	// 根据用户组 ID 列表获取菜单
-	mins, err := a.config.db.RoleResources.Query().
+	mins, err := a.config.db.RolePermissions.Query().
 		Select(
-			roleresources.FieldResourceID,
+			rolepermissions.FieldPermissionID,
 		).
 		Where(
-			roleresources.RoleIDIn(gids...),
-		).
+			rolepermissions.RoleIDIn(gids...),
+		).WithLionPermissions(func(query *lion.PermissionsQuery) {
+	}).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -104,7 +106,9 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 
 	mids := make([]int, 0)
 	for _, x := range mins {
-		mids = append(mids, x.ResourceID)
+		if x.Edges.LionPermissions != nil {
+			mids = append(mids, x.Edges.LionPermissions.ResourceID)
+		}
 	}
 
 	// 根据菜单 ID 获取菜单详情

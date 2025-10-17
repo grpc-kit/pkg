@@ -16,7 +16,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
-	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
@@ -364,24 +363,10 @@ func init() {
 	permissionsDescUpdatedBy := permissionsMixinFields1[1].Descriptor()
 	// permissions.DefaultUpdatedBy holds the default value on creation for the updated_by field.
 	permissions.DefaultUpdatedBy = permissionsDescUpdatedBy.Default.(int64)
-	// permissionsDescName is the schema descriptor for name field.
-	permissionsDescName := permissionsFields[0].Descriptor()
-	// permissions.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	permissions.NameValidator = func() func(string) error {
-		validators := permissionsDescName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(name string) error {
-			for _, fn := range fns {
-				if err := fn(name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
+	// permissionsDescResourceID is the schema descriptor for resource_id field.
+	permissionsDescResourceID := permissionsFields[0].Descriptor()
+	// permissions.ResourceIDValidator is a validator for the "resource_id" field. It is called by the builders before save.
+	permissions.ResourceIDValidator = permissionsDescResourceID.Validators[0].(func(int) error)
 	policiesMixin := schema.Policies{}.Mixin()
 	policiesMixinFields0 := policiesMixin[0].Fields()
 	_ = policiesMixinFields0
@@ -570,39 +555,6 @@ func init() {
 	rolepermissionsDescPermissionID := rolepermissionsFields[1].Descriptor()
 	// rolepermissions.PermissionIDValidator is a validator for the "permission_id" field. It is called by the builders before save.
 	rolepermissions.PermissionIDValidator = rolepermissionsDescPermissionID.Validators[0].(func(int) error)
-	roleresourcesMixin := schema.RoleResources{}.Mixin()
-	roleresourcesMixinFields0 := roleresourcesMixin[0].Fields()
-	_ = roleresourcesMixinFields0
-	roleresourcesMixinFields1 := roleresourcesMixin[1].Fields()
-	_ = roleresourcesMixinFields1
-	roleresourcesFields := schema.RoleResources{}.Fields()
-	_ = roleresourcesFields
-	// roleresourcesDescCreatedAt is the schema descriptor for created_at field.
-	roleresourcesDescCreatedAt := roleresourcesMixinFields0[0].Descriptor()
-	// roleresources.DefaultCreatedAt holds the default value on creation for the created_at field.
-	roleresources.DefaultCreatedAt = roleresourcesDescCreatedAt.Default.(func() time.Time)
-	// roleresourcesDescUpdatedAt is the schema descriptor for updated_at field.
-	roleresourcesDescUpdatedAt := roleresourcesMixinFields0[1].Descriptor()
-	// roleresources.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	roleresources.DefaultUpdatedAt = roleresourcesDescUpdatedAt.Default.(func() time.Time)
-	// roleresources.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	roleresources.UpdateDefaultUpdatedAt = roleresourcesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// roleresourcesDescCreatedBy is the schema descriptor for created_by field.
-	roleresourcesDescCreatedBy := roleresourcesMixinFields1[0].Descriptor()
-	// roleresources.DefaultCreatedBy holds the default value on creation for the created_by field.
-	roleresources.DefaultCreatedBy = roleresourcesDescCreatedBy.Default.(int64)
-	// roleresourcesDescUpdatedBy is the schema descriptor for updated_by field.
-	roleresourcesDescUpdatedBy := roleresourcesMixinFields1[1].Descriptor()
-	// roleresources.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	roleresources.DefaultUpdatedBy = roleresourcesDescUpdatedBy.Default.(int64)
-	// roleresourcesDescRoleID is the schema descriptor for role_id field.
-	roleresourcesDescRoleID := roleresourcesFields[0].Descriptor()
-	// roleresources.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
-	roleresources.RoleIDValidator = roleresourcesDescRoleID.Validators[0].(func(int) error)
-	// roleresourcesDescResourceID is the schema descriptor for resource_id field.
-	roleresourcesDescResourceID := roleresourcesFields[1].Descriptor()
-	// roleresources.ResourceIDValidator is a validator for the "resource_id" field. It is called by the builders before save.
-	roleresources.ResourceIDValidator = roleresourcesDescResourceID.Validators[0].(func(int) error)
 	rolesMixin := schema.Roles{}.Mixin()
 	rolesMixinFields0 := rolesMixin[0].Fields()
 	_ = rolesMixinFields0
@@ -966,8 +918,4 @@ func init() {
 	users.DefaultDescription = usersDescDescription.Default.(string)
 	// users.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	users.DescriptionValidator = usersDescDescription.Validators[0].(func(string) error)
-	// usersDescMetadata is the schema descriptor for metadata field.
-	usersDescMetadata := usersFields[22].Descriptor()
-	// users.DefaultMetadata holds the default value on creation for the metadata field.
-	users.DefaultMetadata = usersDescMetadata.Default.(map[string]string)
 }

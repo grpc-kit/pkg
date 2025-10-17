@@ -11,17 +11,21 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
+	"github.com/grpc-kit/pkg/lion/roles"
 )
 
 // RolePermissionsQuery is the builder for querying RolePermissions entities.
 type RolePermissionsQuery struct {
 	config
-	ctx        *QueryContext
-	order      []rolepermissions.OrderOption
-	inters     []Interceptor
-	predicates []predicate.RolePermissions
+	ctx                 *QueryContext
+	order               []rolepermissions.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.RolePermissions
+	withLionRoles       *RolesQuery
+	withLionPermissions *PermissionsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +60,50 @@ func (_q *RolePermissionsQuery) Unique(unique bool) *RolePermissionsQuery {
 func (_q *RolePermissionsQuery) Order(o ...rolepermissions.OrderOption) *RolePermissionsQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryLionRoles chains the current query on the "lion_roles" edge.
+func (_q *RolePermissionsQuery) QueryLionRoles() *RolesQuery {
+	query := (&RolesClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rolepermissions.Table, rolepermissions.FieldID, selector),
+			sqlgraph.To(roles.Table, roles.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolepermissions.LionRolesTable, rolepermissions.LionRolesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLionPermissions chains the current query on the "lion_permissions" edge.
+func (_q *RolePermissionsQuery) QueryLionPermissions() *PermissionsQuery {
+	query := (&PermissionsClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rolepermissions.Table, rolepermissions.FieldID, selector),
+			sqlgraph.To(permissions.Table, permissions.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolepermissions.LionPermissionsTable, rolepermissions.LionPermissionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first RolePermissions entity from the query.
@@ -245,15 +293,39 @@ func (_q *RolePermissionsQuery) Clone() *RolePermissionsQuery {
 		return nil
 	}
 	return &RolePermissionsQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]rolepermissions.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.RolePermissions{}, _q.predicates...),
+		config:              _q.config,
+		ctx:                 _q.ctx.Clone(),
+		order:               append([]rolepermissions.OrderOption{}, _q.order...),
+		inters:              append([]Interceptor{}, _q.inters...),
+		predicates:          append([]predicate.RolePermissions{}, _q.predicates...),
+		withLionRoles:       _q.withLionRoles.Clone(),
+		withLionPermissions: _q.withLionPermissions.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithLionRoles tells the query-builder to eager-load the nodes that are connected to
+// the "lion_roles" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *RolePermissionsQuery) WithLionRoles(opts ...func(*RolesQuery)) *RolePermissionsQuery {
+	query := (&RolesClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionRoles = query
+	return _q
+}
+
+// WithLionPermissions tells the query-builder to eager-load the nodes that are connected to
+// the "lion_permissions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *RolePermissionsQuery) WithLionPermissions(opts ...func(*PermissionsQuery)) *RolePermissionsQuery {
+	query := (&PermissionsClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionPermissions = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +404,12 @@ func (_q *RolePermissionsQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *RolePermissionsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RolePermissions, error) {
 	var (
-		nodes = []*RolePermissions{}
-		_spec = _q.querySpec()
+		nodes       = []*RolePermissions{}
+		_spec       = _q.querySpec()
+		loadedTypes = [2]bool{
+			_q.withLionRoles != nil,
+			_q.withLionPermissions != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RolePermissions).scanValues(nil, columns)
@@ -341,6 +417,7 @@ func (_q *RolePermissionsQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &RolePermissions{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +429,78 @@ func (_q *RolePermissionsQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withLionRoles; query != nil {
+		if err := _q.loadLionRoles(ctx, query, nodes, nil,
+			func(n *RolePermissions, e *Roles) { n.Edges.LionRoles = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLionPermissions; query != nil {
+		if err := _q.loadLionPermissions(ctx, query, nodes, nil,
+			func(n *RolePermissions, e *Permissions) { n.Edges.LionPermissions = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *RolePermissionsQuery) loadLionRoles(ctx context.Context, query *RolesQuery, nodes []*RolePermissions, init func(*RolePermissions), assign func(*RolePermissions, *Roles)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*RolePermissions)
+	for i := range nodes {
+		fk := nodes[i].RoleID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(roles.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "role_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *RolePermissionsQuery) loadLionPermissions(ctx context.Context, query *PermissionsQuery, nodes []*RolePermissions, init func(*RolePermissions), assign func(*RolePermissions, *Permissions)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*RolePermissions)
+	for i := range nodes {
+		fk := nodes[i].PermissionID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(permissions.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "permission_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (_q *RolePermissionsQuery) sqlCount(ctx context.Context) (int, error) {
@@ -379,6 +527,12 @@ func (_q *RolePermissionsQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != rolepermissions.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withLionRoles != nil {
+			_spec.Node.AddColumnOnce(rolepermissions.FieldRoleID)
+		}
+		if _q.withLionPermissions != nil {
+			_spec.Node.AddColumnOnce(rolepermissions.FieldPermissionID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

@@ -60,9 +60,6 @@ func (Resources) Fields() []ent.Field {
 		field.String("description").
 			Default("").
 			Comment("详细描述"),
-		field.JSON("permissions", []string{}).
-			Optional().
-			Comment("权限列表，对应 proto 中的 repeated string permissions"),
 	}
 }
 
@@ -70,7 +67,7 @@ func (Resources) Fields() []ent.Field {
 func (Resources) Edges() []ent.Edge {
 	return []ent.Edge{
 		// 一个 Resource 可以对应多个 RoleResources (中间实体)
-		edge.To("lion_role_resources", RoleResources.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		edge.To("lion_permissions", Permissions.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 

@@ -26,7 +26,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
-	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/usergroups"
@@ -63,8 +62,6 @@ type Client struct {
 	RoleDepartments *RoleDepartmentsClient
 	// RolePermissions is the client for interacting with the RolePermissions builders.
 	RolePermissions *RolePermissionsClient
-	// RoleResources is the client for interacting with the RoleResources builders.
-	RoleResources *RoleResourcesClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
 	// UserDepartments is the client for interacting with the UserDepartments builders.
@@ -101,7 +98,6 @@ func (c *Client) init() {
 	c.Resources = NewResourcesClient(c.config)
 	c.RoleDepartments = NewRoleDepartmentsClient(c.config)
 	c.RolePermissions = NewRolePermissionsClient(c.config)
-	c.RoleResources = NewRoleResourcesClient(c.config)
 	c.Roles = NewRolesClient(c.config)
 	c.UserDepartments = NewUserDepartmentsClient(c.config)
 	c.UserGroups = NewUserGroupsClient(c.config)
@@ -212,7 +208,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Resources:       NewResourcesClient(cfg),
 		RoleDepartments: NewRoleDepartmentsClient(cfg),
 		RolePermissions: NewRolePermissionsClient(cfg),
-		RoleResources:   NewRoleResourcesClient(cfg),
 		Roles:           NewRolesClient(cfg),
 		UserDepartments: NewUserDepartmentsClient(cfg),
 		UserGroups:      NewUserGroupsClient(cfg),
@@ -250,7 +245,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Resources:       NewResourcesClient(cfg),
 		RoleDepartments: NewRoleDepartmentsClient(cfg),
 		RolePermissions: NewRolePermissionsClient(cfg),
-		RoleResources:   NewRoleResourcesClient(cfg),
 		Roles:           NewRolesClient(cfg),
 		UserDepartments: NewUserDepartmentsClient(cfg),
 		UserGroups:      NewUserGroupsClient(cfg),
@@ -289,8 +283,8 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuthProviders, c.Credentials, c.Demo, c.Departments, c.GroupRoles, c.Groups,
 		c.Permissions, c.Policies, c.Resources, c.RoleDepartments, c.RolePermissions,
-		c.RoleResources, c.Roles, c.UserDepartments, c.UserGroups, c.UserIdentities,
-		c.UserProfiles, c.UserRoles, c.Users,
+		c.Roles, c.UserDepartments, c.UserGroups, c.UserIdentities, c.UserProfiles,
+		c.UserRoles, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -302,8 +296,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuthProviders, c.Credentials, c.Demo, c.Departments, c.GroupRoles, c.Groups,
 		c.Permissions, c.Policies, c.Resources, c.RoleDepartments, c.RolePermissions,
-		c.RoleResources, c.Roles, c.UserDepartments, c.UserGroups, c.UserIdentities,
-		c.UserProfiles, c.UserRoles, c.Users,
+		c.Roles, c.UserDepartments, c.UserGroups, c.UserIdentities, c.UserProfiles,
+		c.UserRoles, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -334,8 +328,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RoleDepartments.mutate(ctx, m)
 	case *RolePermissionsMutation:
 		return c.RolePermissions.mutate(ctx, m)
-	case *RoleResourcesMutation:
-		return c.RoleResources.mutate(ctx, m)
 	case *RolesMutation:
 		return c.Roles.mutate(ctx, m)
 	case *UserDepartmentsMutation:
@@ -1405,6 +1397,38 @@ func (c *PermissionsClient) GetX(ctx context.Context, id int) *Permissions {
 	return obj
 }
 
+// QueryLionRolePermissions queries the lion_role_permissions edge of a Permissions.
+func (c *PermissionsClient) QueryLionRolePermissions(_m *Permissions) *RolePermissionsQuery {
+	query := (&RolePermissionsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permissions.Table, permissions.FieldID, id),
+			sqlgraph.To(rolepermissions.Table, rolepermissions.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, permissions.LionRolePermissionsTable, permissions.LionRolePermissionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionResources queries the lion_resources edge of a Permissions.
+func (c *PermissionsClient) QueryLionResources(_m *Permissions) *ResourcesQuery {
+	query := (&ResourcesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permissions.Table, permissions.FieldID, id),
+			sqlgraph.To(resources.Table, resources.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, permissions.LionResourcesTable, permissions.LionResourcesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PermissionsClient) Hooks() []Hook {
 	return c.hooks.Permissions
@@ -1671,15 +1695,15 @@ func (c *ResourcesClient) GetX(ctx context.Context, id int) *Resources {
 	return obj
 }
 
-// QueryLionRoleResources queries the lion_role_resources edge of a Resources.
-func (c *ResourcesClient) QueryLionRoleResources(_m *Resources) *RoleResourcesQuery {
-	query := (&RoleResourcesClient{config: c.config}).Query()
+// QueryLionPermissions queries the lion_permissions edge of a Resources.
+func (c *ResourcesClient) QueryLionPermissions(_m *Resources) *PermissionsQuery {
+	query := (&PermissionsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(resources.Table, resources.FieldID, id),
-			sqlgraph.To(roleresources.Table, roleresources.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, resources.LionRoleResourcesTable, resources.LionRoleResourcesColumn),
+			sqlgraph.To(permissions.Table, permissions.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resources.LionPermissionsTable, resources.LionPermissionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1985,6 +2009,38 @@ func (c *RolePermissionsClient) GetX(ctx context.Context, id int) *RolePermissio
 	return obj
 }
 
+// QueryLionRoles queries the lion_roles edge of a RolePermissions.
+func (c *RolePermissionsClient) QueryLionRoles(_m *RolePermissions) *RolesQuery {
+	query := (&RolesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rolepermissions.Table, rolepermissions.FieldID, id),
+			sqlgraph.To(roles.Table, roles.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolepermissions.LionRolesTable, rolepermissions.LionRolesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionPermissions queries the lion_permissions edge of a RolePermissions.
+func (c *RolePermissionsClient) QueryLionPermissions(_m *RolePermissions) *PermissionsQuery {
+	query := (&PermissionsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rolepermissions.Table, rolepermissions.FieldID, id),
+			sqlgraph.To(permissions.Table, permissions.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolepermissions.LionPermissionsTable, rolepermissions.LionPermissionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *RolePermissionsClient) Hooks() []Hook {
 	return c.hooks.RolePermissions
@@ -2007,171 +2063,6 @@ func (c *RolePermissionsClient) mutate(ctx context.Context, m *RolePermissionsMu
 		return (&RolePermissionsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown RolePermissions mutation op: %q", m.Op())
-	}
-}
-
-// RoleResourcesClient is a client for the RoleResources schema.
-type RoleResourcesClient struct {
-	config
-}
-
-// NewRoleResourcesClient returns a client for the RoleResources from the given config.
-func NewRoleResourcesClient(c config) *RoleResourcesClient {
-	return &RoleResourcesClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `roleresources.Hooks(f(g(h())))`.
-func (c *RoleResourcesClient) Use(hooks ...Hook) {
-	c.hooks.RoleResources = append(c.hooks.RoleResources, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `roleresources.Intercept(f(g(h())))`.
-func (c *RoleResourcesClient) Intercept(interceptors ...Interceptor) {
-	c.inters.RoleResources = append(c.inters.RoleResources, interceptors...)
-}
-
-// Create returns a builder for creating a RoleResources entity.
-func (c *RoleResourcesClient) Create() *RoleResourcesCreate {
-	mutation := newRoleResourcesMutation(c.config, OpCreate)
-	return &RoleResourcesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of RoleResources entities.
-func (c *RoleResourcesClient) CreateBulk(builders ...*RoleResourcesCreate) *RoleResourcesCreateBulk {
-	return &RoleResourcesCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *RoleResourcesClient) MapCreateBulk(slice any, setFunc func(*RoleResourcesCreate, int)) *RoleResourcesCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &RoleResourcesCreateBulk{err: fmt.Errorf("calling to RoleResourcesClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*RoleResourcesCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &RoleResourcesCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for RoleResources.
-func (c *RoleResourcesClient) Update() *RoleResourcesUpdate {
-	mutation := newRoleResourcesMutation(c.config, OpUpdate)
-	return &RoleResourcesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *RoleResourcesClient) UpdateOne(_m *RoleResources) *RoleResourcesUpdateOne {
-	mutation := newRoleResourcesMutation(c.config, OpUpdateOne, withRoleResources(_m))
-	return &RoleResourcesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *RoleResourcesClient) UpdateOneID(id int) *RoleResourcesUpdateOne {
-	mutation := newRoleResourcesMutation(c.config, OpUpdateOne, withRoleResourcesID(id))
-	return &RoleResourcesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for RoleResources.
-func (c *RoleResourcesClient) Delete() *RoleResourcesDelete {
-	mutation := newRoleResourcesMutation(c.config, OpDelete)
-	return &RoleResourcesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *RoleResourcesClient) DeleteOne(_m *RoleResources) *RoleResourcesDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *RoleResourcesClient) DeleteOneID(id int) *RoleResourcesDeleteOne {
-	builder := c.Delete().Where(roleresources.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &RoleResourcesDeleteOne{builder}
-}
-
-// Query returns a query builder for RoleResources.
-func (c *RoleResourcesClient) Query() *RoleResourcesQuery {
-	return &RoleResourcesQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeRoleResources},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a RoleResources entity by its id.
-func (c *RoleResourcesClient) Get(ctx context.Context, id int) (*RoleResources, error) {
-	return c.Query().Where(roleresources.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *RoleResourcesClient) GetX(ctx context.Context, id int) *RoleResources {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryLionRoles queries the lion_roles edge of a RoleResources.
-func (c *RoleResourcesClient) QueryLionRoles(_m *RoleResources) *RolesQuery {
-	query := (&RolesClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(roleresources.Table, roleresources.FieldID, id),
-			sqlgraph.To(roles.Table, roles.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, roleresources.LionRolesTable, roleresources.LionRolesColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryLionResources queries the lion_resources edge of a RoleResources.
-func (c *RoleResourcesClient) QueryLionResources(_m *RoleResources) *ResourcesQuery {
-	query := (&ResourcesClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(roleresources.Table, roleresources.FieldID, id),
-			sqlgraph.To(resources.Table, resources.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, roleresources.LionResourcesTable, roleresources.LionResourcesColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *RoleResourcesClient) Hooks() []Hook {
-	return c.hooks.RoleResources
-}
-
-// Interceptors returns the client interceptors.
-func (c *RoleResourcesClient) Interceptors() []Interceptor {
-	return c.inters.RoleResources
-}
-
-func (c *RoleResourcesClient) mutate(ctx context.Context, m *RoleResourcesMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&RoleResourcesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&RoleResourcesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&RoleResourcesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&RoleResourcesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("lion: unknown RoleResources mutation op: %q", m.Op())
 	}
 }
 
@@ -2283,15 +2174,15 @@ func (c *RolesClient) GetX(ctx context.Context, id int) *Roles {
 	return obj
 }
 
-// QueryLionRoleResources queries the lion_role_resources edge of a Roles.
-func (c *RolesClient) QueryLionRoleResources(_m *Roles) *RoleResourcesQuery {
-	query := (&RoleResourcesClient{config: c.config}).Query()
+// QueryLionRolePermissions queries the lion_role_permissions edge of a Roles.
+func (c *RolesClient) QueryLionRolePermissions(_m *Roles) *RolePermissionsQuery {
+	query := (&RolePermissionsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(roles.Table, roles.FieldID, id),
-			sqlgraph.To(roleresources.Table, roleresources.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleResourcesTable, roles.LionRoleResourcesColumn),
+			sqlgraph.To(rolepermissions.Table, rolepermissions.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRolePermissionsTable, roles.LionRolePermissionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -3366,14 +3257,12 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 type (
 	hooks struct {
 		AuthProviders, Credentials, Demo, Departments, GroupRoles, Groups, Permissions,
-		Policies, Resources, RoleDepartments, RolePermissions, RoleResources, Roles,
-		UserDepartments, UserGroups, UserIdentities, UserProfiles, UserRoles,
-		Users []ent.Hook
+		Policies, Resources, RoleDepartments, RolePermissions, Roles, UserDepartments,
+		UserGroups, UserIdentities, UserProfiles, UserRoles, Users []ent.Hook
 	}
 	inters struct {
 		AuthProviders, Credentials, Demo, Departments, GroupRoles, Groups, Permissions,
-		Policies, Resources, RoleDepartments, RolePermissions, RoleResources, Roles,
-		UserDepartments, UserGroups, UserIdentities, UserProfiles, UserRoles,
-		Users []ent.Interceptor
+		Policies, Resources, RoleDepartments, RolePermissions, Roles, UserDepartments,
+		UserGroups, UserIdentities, UserProfiles, UserRoles, Users []ent.Interceptor
 	}
 )

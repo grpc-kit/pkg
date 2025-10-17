@@ -9,7 +9,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
+	"github.com/grpc-kit/pkg/lion/roles"
 )
 
 // RolePermissions is the model entity for the RolePermissions schema.
@@ -29,7 +31,43 @@ type RolePermissions struct {
 	RoleID int `json:"role_id,omitempty"`
 	// 关联 lion_permissions 表的菜单 ID
 	PermissionID int `json:"permission_id,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the RolePermissionsQuery when eager-loading is set.
+	Edges        RolePermissionsEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// RolePermissionsEdges holds the relations/edges for other nodes in the graph.
+type RolePermissionsEdges struct {
+	// LionRoles holds the value of the lion_roles edge.
+	LionRoles *Roles `json:"lion_roles,omitempty"`
+	// LionPermissions holds the value of the lion_permissions edge.
+	LionPermissions *Permissions `json:"lion_permissions,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// LionRolesOrErr returns the LionRoles value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RolePermissionsEdges) LionRolesOrErr() (*Roles, error) {
+	if e.LionRoles != nil {
+		return e.LionRoles, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: roles.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_roles"}
+}
+
+// LionPermissionsOrErr returns the LionPermissions value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e RolePermissionsEdges) LionPermissionsOrErr() (*Permissions, error) {
+	if e.LionPermissions != nil {
+		return e.LionPermissions, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: permissions.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_permissions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -109,6 +147,16 @@ func (_m *RolePermissions) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *RolePermissions) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionRoles queries the "lion_roles" edge of the RolePermissions entity.
+func (_m *RolePermissions) QueryLionRoles() *RolesQuery {
+	return NewRolePermissionsClient(_m.config).QueryLionRoles(_m)
+}
+
+// QueryLionPermissions queries the "lion_permissions" edge of the RolePermissions entity.
+func (_m *RolePermissions) QueryLionPermissions() *PermissionsQuery {
+	return NewRolePermissionsClient(_m.config).QueryLionPermissions(_m)
 }
 
 // Update returns a builder for updating this RolePermissions.

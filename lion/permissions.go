@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/grpc-kit/pkg/lion/permissions"
+	"github.com/grpc-kit/pkg/lion/resources"
 )
 
 // Permissions is the model entity for the Permissions schema.
@@ -25,9 +26,43 @@ type Permissions struct {
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
-	// 权限名称
-	Name         string `json:"name,omitempty"`
+	// 关联 lion_resources 表的资源 ID
+	ResourceID int `json:"resource_id,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the PermissionsQuery when eager-loading is set.
+	Edges        PermissionsEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// PermissionsEdges holds the relations/edges for other nodes in the graph.
+type PermissionsEdges struct {
+	// LionRolePermissions holds the value of the lion_role_permissions edge.
+	LionRolePermissions []*RolePermissions `json:"lion_role_permissions,omitempty"`
+	// LionResources holds the value of the lion_resources edge.
+	LionResources *Resources `json:"lion_resources,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// LionRolePermissionsOrErr returns the LionRolePermissions value or an error if the edge
+// was not loaded in eager-loading.
+func (e PermissionsEdges) LionRolePermissionsOrErr() ([]*RolePermissions, error) {
+	if e.loadedTypes[0] {
+		return e.LionRolePermissions, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_role_permissions"}
+}
+
+// LionResourcesOrErr returns the LionResources value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PermissionsEdges) LionResourcesOrErr() (*Resources, error) {
+	if e.LionResources != nil {
+		return e.LionResources, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: resources.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_resources"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -35,10 +70,8 @@ func (*Permissions) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case permissions.FieldID, permissions.FieldCreatedBy, permissions.FieldUpdatedBy:
+		case permissions.FieldID, permissions.FieldCreatedBy, permissions.FieldUpdatedBy, permissions.FieldResourceID:
 			values[i] = new(sql.NullInt64)
-		case permissions.FieldName:
-			values[i] = new(sql.NullString)
 		case permissions.FieldCreatedAt, permissions.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -86,11 +119,11 @@ func (_m *Permissions) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case permissions.FieldName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+		case permissions.FieldResourceID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_id", values[i])
 			} else if value.Valid {
-				_m.Name = value.String
+				_m.ResourceID = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -103,6 +136,16 @@ func (_m *Permissions) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Permissions) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionRolePermissions queries the "lion_role_permissions" edge of the Permissions entity.
+func (_m *Permissions) QueryLionRolePermissions() *RolePermissionsQuery {
+	return NewPermissionsClient(_m.config).QueryLionRolePermissions(_m)
+}
+
+// QueryLionResources queries the "lion_resources" edge of the Permissions entity.
+func (_m *Permissions) QueryLionResources() *ResourcesQuery {
+	return NewPermissionsClient(_m.config).QueryLionResources(_m)
 }
 
 // Update returns a builder for updating this Permissions.
@@ -140,8 +183,8 @@ func (_m *Permissions) String() string {
 	builder.WriteString("updated_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
+	builder.WriteString("resource_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ResourceID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -10,7 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
+	"github.com/grpc-kit/pkg/lion/roles"
 )
 
 // RolePermissionsCreate is the builder for creating a RolePermissions entity.
@@ -86,6 +88,28 @@ func (_c *RolePermissionsCreate) SetRoleID(v int) *RolePermissionsCreate {
 func (_c *RolePermissionsCreate) SetPermissionID(v int) *RolePermissionsCreate {
 	_c.mutation.SetPermissionID(v)
 	return _c
+}
+
+// SetLionRolesID sets the "lion_roles" edge to the Roles entity by ID.
+func (_c *RolePermissionsCreate) SetLionRolesID(id int) *RolePermissionsCreate {
+	_c.mutation.SetLionRolesID(id)
+	return _c
+}
+
+// SetLionRoles sets the "lion_roles" edge to the Roles entity.
+func (_c *RolePermissionsCreate) SetLionRoles(v *Roles) *RolePermissionsCreate {
+	return _c.SetLionRolesID(v.ID)
+}
+
+// SetLionPermissionsID sets the "lion_permissions" edge to the Permissions entity by ID.
+func (_c *RolePermissionsCreate) SetLionPermissionsID(id int) *RolePermissionsCreate {
+	_c.mutation.SetLionPermissionsID(id)
+	return _c
+}
+
+// SetLionPermissions sets the "lion_permissions" edge to the Permissions entity.
+func (_c *RolePermissionsCreate) SetLionPermissions(v *Permissions) *RolePermissionsCreate {
+	return _c.SetLionPermissionsID(v.ID)
 }
 
 // Mutation returns the RolePermissionsMutation object of the builder.
@@ -165,6 +189,12 @@ func (_c *RolePermissionsCreate) check() error {
 			return &ValidationError{Name: "permission_id", err: fmt.Errorf(`lion: validator failed for field "RolePermissions.permission_id": %w`, err)}
 		}
 	}
+	if len(_c.mutation.LionRolesIDs()) == 0 {
+		return &ValidationError{Name: "lion_roles", err: errors.New(`lion: missing required edge "RolePermissions.lion_roles"`)}
+	}
+	if len(_c.mutation.LionPermissionsIDs()) == 0 {
+		return &ValidationError{Name: "lion_permissions", err: errors.New(`lion: missing required edge "RolePermissions.lion_permissions"`)}
+	}
 	return nil
 }
 
@@ -207,13 +237,39 @@ func (_c *RolePermissionsCreate) createSpec() (*RolePermissions, *sqlgraph.Creat
 		_spec.SetField(rolepermissions.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
 	}
-	if value, ok := _c.mutation.RoleID(); ok {
-		_spec.SetField(rolepermissions.FieldRoleID, field.TypeInt, value)
-		_node.RoleID = value
+	if nodes := _c.mutation.LionRolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   rolepermissions.LionRolesTable,
+			Columns: []string{rolepermissions.LionRolesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.RoleID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if value, ok := _c.mutation.PermissionID(); ok {
-		_spec.SetField(rolepermissions.FieldPermissionID, field.TypeInt, value)
-		_node.PermissionID = value
+	if nodes := _c.mutation.LionPermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   rolepermissions.LionPermissionsTable,
+			Columns: []string{rolepermissions.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.PermissionID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

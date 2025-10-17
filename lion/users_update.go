@@ -461,6 +461,12 @@ func (_u *UsersUpdate) SetMetadata(v map[string]string) *UsersUpdate {
 	return _u
 }
 
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *UsersUpdate) ClearMetadata() *UsersUpdate {
+	_u.mutation.ClearMetadata()
+	return _u
+}
+
 // AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by IDs.
 func (_u *UsersUpdate) AddLionUserRoleIDs(ids ...int) *UsersUpdate {
 	_u.mutation.AddLionUserRoleIDs(ids...)
@@ -809,6 +815,9 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(users.FieldMetadata, field.TypeJSON, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(users.FieldMetadata, field.TypeJSON)
 	}
 	if _u.mutation.LionUserRolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1439,6 +1448,12 @@ func (_u *UsersUpdateOne) SetMetadata(v map[string]string) *UsersUpdateOne {
 	return _u
 }
 
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *UsersUpdateOne) ClearMetadata() *UsersUpdateOne {
+	_u.mutation.ClearMetadata()
+	return _u
+}
+
 // AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by IDs.
 func (_u *UsersUpdateOne) AddLionUserRoleIDs(ids ...int) *UsersUpdateOne {
 	_u.mutation.AddLionUserRoleIDs(ids...)
@@ -1817,6 +1832,9 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(users.FieldMetadata, field.TypeJSON, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(users.FieldMetadata, field.TypeJSON)
 	}
 	if _u.mutation.LionUserRolesCleared() {
 		edge := &sqlgraph.EdgeSpec{

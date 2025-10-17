@@ -11,6 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/permissions"
+	"github.com/grpc-kit/pkg/lion/resources"
+	"github.com/grpc-kit/pkg/lion/rolepermissions"
 )
 
 // PermissionsCreate is the builder for creating a Permissions entity.
@@ -76,10 +78,36 @@ func (_c *PermissionsCreate) SetNillableUpdatedBy(v *int64) *PermissionsCreate {
 	return _c
 }
 
-// SetName sets the "name" field.
-func (_c *PermissionsCreate) SetName(v string) *PermissionsCreate {
-	_c.mutation.SetName(v)
+// SetResourceID sets the "resource_id" field.
+func (_c *PermissionsCreate) SetResourceID(v int) *PermissionsCreate {
+	_c.mutation.SetResourceID(v)
 	return _c
+}
+
+// AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by IDs.
+func (_c *PermissionsCreate) AddLionRolePermissionIDs(ids ...int) *PermissionsCreate {
+	_c.mutation.AddLionRolePermissionIDs(ids...)
+	return _c
+}
+
+// AddLionRolePermissions adds the "lion_role_permissions" edges to the RolePermissions entity.
+func (_c *PermissionsCreate) AddLionRolePermissions(v ...*RolePermissions) *PermissionsCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionRolePermissionIDs(ids...)
+}
+
+// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
+func (_c *PermissionsCreate) SetLionResourcesID(id int) *PermissionsCreate {
+	_c.mutation.SetLionResourcesID(id)
+	return _c
+}
+
+// SetLionResources sets the "lion_resources" edge to the Resources entity.
+func (_c *PermissionsCreate) SetLionResources(v *Resources) *PermissionsCreate {
+	return _c.SetLionResourcesID(v.ID)
 }
 
 // Mutation returns the PermissionsMutation object of the builder.
@@ -143,13 +171,16 @@ func (_c *PermissionsCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Permissions.updated_at"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Permissions.name"`)}
+	if _, ok := _c.mutation.ResourceID(); !ok {
+		return &ValidationError{Name: "resource_id", err: errors.New(`lion: missing required field "Permissions.resource_id"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := permissions.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Permissions.name": %w`, err)}
+	if v, ok := _c.mutation.ResourceID(); ok {
+		if err := permissions.ResourceIDValidator(v); err != nil {
+			return &ValidationError{Name: "resource_id", err: fmt.Errorf(`lion: validator failed for field "Permissions.resource_id": %w`, err)}
 		}
+	}
+	if len(_c.mutation.LionResourcesIDs()) == 0 {
+		return &ValidationError{Name: "lion_resources", err: errors.New(`lion: missing required edge "Permissions.lion_resources"`)}
 	}
 	return nil
 }
@@ -193,9 +224,38 @@ func (_c *PermissionsCreate) createSpec() (*Permissions, *sqlgraph.CreateSpec) {
 		_spec.SetField(permissions.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(permissions.FieldName, field.TypeString, value)
-		_node.Name = value
+	if nodes := _c.mutation.LionRolePermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   permissions.LionRolePermissionsTable,
+			Columns: []string{permissions.LionRolePermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolepermissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionResourcesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissions.LionResourcesTable,
+			Columns: []string{permissions.LionResourcesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ResourceID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

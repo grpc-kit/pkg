@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -25,8 +26,26 @@ const (
 	FieldRoleID = "role_id"
 	// FieldPermissionID holds the string denoting the permission_id field in the database.
 	FieldPermissionID = "permission_id"
+	// EdgeLionRoles holds the string denoting the lion_roles edge name in mutations.
+	EdgeLionRoles = "lion_roles"
+	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
+	EdgeLionPermissions = "lion_permissions"
 	// Table holds the table name of the rolepermissions in the database.
 	Table = "lion_role_permissions"
+	// LionRolesTable is the table that holds the lion_roles relation/edge.
+	LionRolesTable = "lion_role_permissions"
+	// LionRolesInverseTable is the table name for the Roles entity.
+	// It exists in this package in order to avoid circular dependency with the "roles" package.
+	LionRolesInverseTable = "lion_roles"
+	// LionRolesColumn is the table column denoting the lion_roles relation/edge.
+	LionRolesColumn = "role_id"
+	// LionPermissionsTable is the table that holds the lion_permissions relation/edge.
+	LionPermissionsTable = "lion_role_permissions"
+	// LionPermissionsInverseTable is the table name for the Permissions entity.
+	// It exists in this package in order to avoid circular dependency with the "permissions" package.
+	LionPermissionsInverseTable = "lion_permissions"
+	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
+	LionPermissionsColumn = "permission_id"
 )
 
 // Columns holds all SQL columns for rolepermissions fields.
@@ -103,4 +122,32 @@ func ByRoleID(opts ...sql.OrderTermOption) OrderOption {
 // ByPermissionID orders the results by the permission_id field.
 func ByPermissionID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPermissionID, opts...).ToFunc()
+}
+
+// ByLionRolesField orders the results by lion_roles field.
+func ByLionRolesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionRolesStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLionPermissionsField orders the results by lion_permissions field.
+func ByLionPermissionsField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionPermissionsStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newLionRolesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionRolesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionRolesTable, LionRolesColumn),
+	)
+}
+func newLionPermissionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionPermissionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionPermissionsTable, LionPermissionsColumn),
+	)
 }

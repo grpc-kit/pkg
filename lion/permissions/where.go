@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -74,9 +75,9 @@ func UpdatedBy(v int64) predicate.Permissions {
 	return predicate.Permissions(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEQ(FieldName, v))
+// ResourceID applies equality check predicate on the "resource_id" field. It's identical to ResourceIDEQ.
+func ResourceID(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldEQ(FieldResourceID, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -259,69 +260,70 @@ func UpdatedByNotNil() predicate.Permissions {
 	return predicate.Permissions(sql.FieldNotNull(FieldUpdatedBy))
 }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEQ(FieldName, v))
+// ResourceIDEQ applies the EQ predicate on the "resource_id" field.
+func ResourceIDEQ(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldEQ(FieldResourceID, v))
 }
 
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldNEQ(FieldName, v))
+// ResourceIDNEQ applies the NEQ predicate on the "resource_id" field.
+func ResourceIDNEQ(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldNEQ(FieldResourceID, v))
 }
 
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldIn(FieldName, vs...))
+// ResourceIDIn applies the In predicate on the "resource_id" field.
+func ResourceIDIn(vs ...int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldIn(FieldResourceID, vs...))
 }
 
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldNotIn(FieldName, vs...))
+// ResourceIDNotIn applies the NotIn predicate on the "resource_id" field.
+func ResourceIDNotIn(vs ...int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldNotIn(FieldResourceID, vs...))
 }
 
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldGT(FieldName, v))
+// HasLionRolePermissions applies the HasEdge predicate on the "lion_role_permissions" edge.
+func HasLionRolePermissions() predicate.Permissions {
+	return predicate.Permissions(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionRolePermissionsTable, LionRolePermissionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
 }
 
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldGTE(FieldName, v))
+// HasLionRolePermissionsWith applies the HasEdge predicate on the "lion_role_permissions" edge with a given conditions (other predicates).
+func HasLionRolePermissionsWith(preds ...predicate.RolePermissions) predicate.Permissions {
+	return predicate.Permissions(func(s *sql.Selector) {
+		step := newLionRolePermissionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldLT(FieldName, v))
+// HasLionResources applies the HasEdge predicate on the "lion_resources" edge.
+func HasLionResources() predicate.Permissions {
+	return predicate.Permissions(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionResourcesTable, LionResourcesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
 }
 
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldLTE(FieldName, v))
-}
-
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldContains(FieldName, v))
-}
-
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldHasPrefix(FieldName, v))
-}
-
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Permissions {
-	return predicate.Permissions(sql.FieldContainsFold(FieldName, v))
+// HasLionResourcesWith applies the HasEdge predicate on the "lion_resources" edge with a given conditions (other predicates).
+func HasLionResourcesWith(preds ...predicate.Resources) predicate.Permissions {
+	return predicate.Permissions(func(s *sql.Selector) {
+		step := newLionResourcesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

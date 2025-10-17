@@ -50,19 +50,17 @@ const (
 	FieldComponent = "component"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// FieldPermissions holds the string denoting the permissions field in the database.
-	FieldPermissions = "permissions"
-	// EdgeLionRoleResources holds the string denoting the lion_role_resources edge name in mutations.
-	EdgeLionRoleResources = "lion_role_resources"
+	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
+	EdgeLionPermissions = "lion_permissions"
 	// Table holds the table name of the resources in the database.
 	Table = "lion_resources"
-	// LionRoleResourcesTable is the table that holds the lion_role_resources relation/edge.
-	LionRoleResourcesTable = "lion_role_resources"
-	// LionRoleResourcesInverseTable is the table name for the RoleResources entity.
-	// It exists in this package in order to avoid circular dependency with the "roleresources" package.
-	LionRoleResourcesInverseTable = "lion_role_resources"
-	// LionRoleResourcesColumn is the table column denoting the lion_role_resources relation/edge.
-	LionRoleResourcesColumn = "resource_id"
+	// LionPermissionsTable is the table that holds the lion_permissions relation/edge.
+	LionPermissionsTable = "lion_permissions"
+	// LionPermissionsInverseTable is the table name for the Permissions entity.
+	// It exists in this package in order to avoid circular dependency with the "permissions" package.
+	LionPermissionsInverseTable = "lion_permissions"
+	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
+	LionPermissionsColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for resources fields.
@@ -86,7 +84,6 @@ var Columns = []string{
 	FieldIcon,
 	FieldComponent,
 	FieldDescription,
-	FieldPermissions,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -235,23 +232,23 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLionRoleResourcesCount orders the results by lion_role_resources count.
-func ByLionRoleResourcesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionPermissionsCount orders the results by lion_permissions count.
+func ByLionPermissionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionRoleResourcesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionPermissionsStep(), opts...)
 	}
 }
 
-// ByLionRoleResources orders the results by lion_role_resources terms.
-func ByLionRoleResources(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionPermissions orders the results by lion_permissions terms.
+func ByLionPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionRoleResourcesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionPermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newLionRoleResourcesStep() *sqlgraph.Step {
+func newLionPermissionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionRoleResourcesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleResourcesTable, LionRoleResourcesColumn),
+		sqlgraph.To(LionPermissionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
 	)
 }

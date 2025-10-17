@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/roleresources"
 )
 
 // ResourcesCreate is the builder for creating a Resources entity.
@@ -257,25 +257,19 @@ func (_c *ResourcesCreate) SetNillableDescription(v *string) *ResourcesCreate {
 	return _c
 }
 
-// SetPermissions sets the "permissions" field.
-func (_c *ResourcesCreate) SetPermissions(v []string) *ResourcesCreate {
-	_c.mutation.SetPermissions(v)
+// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
+func (_c *ResourcesCreate) AddLionPermissionIDs(ids ...int) *ResourcesCreate {
+	_c.mutation.AddLionPermissionIDs(ids...)
 	return _c
 }
 
-// AddLionRoleResourceIDs adds the "lion_role_resources" edge to the RoleResources entity by IDs.
-func (_c *ResourcesCreate) AddLionRoleResourceIDs(ids ...int) *ResourcesCreate {
-	_c.mutation.AddLionRoleResourceIDs(ids...)
-	return _c
-}
-
-// AddLionRoleResources adds the "lion_role_resources" edges to the RoleResources entity.
-func (_c *ResourcesCreate) AddLionRoleResources(v ...*RoleResources) *ResourcesCreate {
+// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
+func (_c *ResourcesCreate) AddLionPermissions(v ...*Permissions) *ResourcesCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddLionRoleResourceIDs(ids...)
+	return _c.AddLionPermissionIDs(ids...)
 }
 
 // Mutation returns the ResourcesMutation object of the builder.
@@ -537,19 +531,15 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := _c.mutation.Permissions(); ok {
-		_spec.SetField(resources.FieldPermissions, field.TypeJSON, value)
-		_node.Permissions = value
-	}
-	if nodes := _c.mutation.LionRoleResourcesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionPermissionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   resources.LionRoleResourcesTable,
-			Columns: []string{resources.LionRoleResourcesColumn},
+			Table:   resources.LionPermissionsTable,
+			Columns: []string{resources.LionPermissionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roleresources.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

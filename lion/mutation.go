@@ -23,7 +23,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
-	"github.com/grpc-kit/pkg/lion/roleresources"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/usergroups"
@@ -53,7 +52,6 @@ const (
 	TypeResources       = "Resources"
 	TypeRoleDepartments = "RoleDepartments"
 	TypeRolePermissions = "RolePermissions"
-	TypeRoleResources   = "RoleResources"
 	TypeRoles           = "Roles"
 	TypeUserDepartments = "UserDepartments"
 	TypeUserGroups      = "UserGroups"
@@ -8836,20 +8834,24 @@ func (m *GroupsMutation) ResetEdge(name string) error {
 // PermissionsMutation represents an operation that mutates the Permissions nodes in the graph.
 type PermissionsMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	created_by    *int64
-	addcreated_by *int64
-	updated_by    *int64
-	addupdated_by *int64
-	name          *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Permissions, error)
-	predicates    []predicate.Permissions
+	op                           Op
+	typ                          string
+	id                           *int
+	created_at                   *time.Time
+	updated_at                   *time.Time
+	created_by                   *int64
+	addcreated_by                *int64
+	updated_by                   *int64
+	addupdated_by                *int64
+	clearedFields                map[string]struct{}
+	lion_role_permissions        map[int]struct{}
+	removedlion_role_permissions map[int]struct{}
+	clearedlion_role_permissions bool
+	lion_resources               *int
+	clearedlion_resources        bool
+	done                         bool
+	oldValue                     func(context.Context) (*Permissions, error)
+	predicates                   []predicate.Permissions
 }
 
 var _ ent.Mutation = (*PermissionsMutation)(nil)
@@ -9162,40 +9164,134 @@ func (m *PermissionsMutation) ResetUpdatedBy() {
 	delete(m.clearedFields, permissions.FieldUpdatedBy)
 }
 
-// SetName sets the "name" field.
-func (m *PermissionsMutation) SetName(s string) {
-	m.name = &s
+// SetResourceID sets the "resource_id" field.
+func (m *PermissionsMutation) SetResourceID(i int) {
+	m.lion_resources = &i
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *PermissionsMutation) Name() (r string, exists bool) {
-	v := m.name
+// ResourceID returns the value of the "resource_id" field in the mutation.
+func (m *PermissionsMutation) ResourceID() (r int, exists bool) {
+	v := m.lion_resources
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Permissions entity.
+// OldResourceID returns the old "resource_id" field's value of the Permissions entity.
 // If the Permissions object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PermissionsMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *PermissionsMutation) OldResourceID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldResourceID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.ResourceID, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *PermissionsMutation) ResetName() {
-	m.name = nil
+// ResetResourceID resets all changes to the "resource_id" field.
+func (m *PermissionsMutation) ResetResourceID() {
+	m.lion_resources = nil
+}
+
+// AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by ids.
+func (m *PermissionsMutation) AddLionRolePermissionIDs(ids ...int) {
+	if m.lion_role_permissions == nil {
+		m.lion_role_permissions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lion_role_permissions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLionRolePermissions clears the "lion_role_permissions" edge to the RolePermissions entity.
+func (m *PermissionsMutation) ClearLionRolePermissions() {
+	m.clearedlion_role_permissions = true
+}
+
+// LionRolePermissionsCleared reports if the "lion_role_permissions" edge to the RolePermissions entity was cleared.
+func (m *PermissionsMutation) LionRolePermissionsCleared() bool {
+	return m.clearedlion_role_permissions
+}
+
+// RemoveLionRolePermissionIDs removes the "lion_role_permissions" edge to the RolePermissions entity by IDs.
+func (m *PermissionsMutation) RemoveLionRolePermissionIDs(ids ...int) {
+	if m.removedlion_role_permissions == nil {
+		m.removedlion_role_permissions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lion_role_permissions, ids[i])
+		m.removedlion_role_permissions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLionRolePermissions returns the removed IDs of the "lion_role_permissions" edge to the RolePermissions entity.
+func (m *PermissionsMutation) RemovedLionRolePermissionsIDs() (ids []int) {
+	for id := range m.removedlion_role_permissions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LionRolePermissionsIDs returns the "lion_role_permissions" edge IDs in the mutation.
+func (m *PermissionsMutation) LionRolePermissionsIDs() (ids []int) {
+	for id := range m.lion_role_permissions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLionRolePermissions resets all changes to the "lion_role_permissions" edge.
+func (m *PermissionsMutation) ResetLionRolePermissions() {
+	m.lion_role_permissions = nil
+	m.clearedlion_role_permissions = false
+	m.removedlion_role_permissions = nil
+}
+
+// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by id.
+func (m *PermissionsMutation) SetLionResourcesID(id int) {
+	m.lion_resources = &id
+}
+
+// ClearLionResources clears the "lion_resources" edge to the Resources entity.
+func (m *PermissionsMutation) ClearLionResources() {
+	m.clearedlion_resources = true
+	m.clearedFields[permissions.FieldResourceID] = struct{}{}
+}
+
+// LionResourcesCleared reports if the "lion_resources" edge to the Resources entity was cleared.
+func (m *PermissionsMutation) LionResourcesCleared() bool {
+	return m.clearedlion_resources
+}
+
+// LionResourcesID returns the "lion_resources" edge ID in the mutation.
+func (m *PermissionsMutation) LionResourcesID() (id int, exists bool) {
+	if m.lion_resources != nil {
+		return *m.lion_resources, true
+	}
+	return
+}
+
+// LionResourcesIDs returns the "lion_resources" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionResourcesID instead. It exists only for internal usage by the builders.
+func (m *PermissionsMutation) LionResourcesIDs() (ids []int) {
+	if id := m.lion_resources; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionResources resets all changes to the "lion_resources" edge.
+func (m *PermissionsMutation) ResetLionResources() {
+	m.lion_resources = nil
+	m.clearedlion_resources = false
 }
 
 // Where appends a list predicates to the PermissionsMutation builder.
@@ -9245,8 +9341,8 @@ func (m *PermissionsMutation) Fields() []string {
 	if m.updated_by != nil {
 		fields = append(fields, permissions.FieldUpdatedBy)
 	}
-	if m.name != nil {
-		fields = append(fields, permissions.FieldName)
+	if m.lion_resources != nil {
+		fields = append(fields, permissions.FieldResourceID)
 	}
 	return fields
 }
@@ -9264,8 +9360,8 @@ func (m *PermissionsMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedBy()
 	case permissions.FieldUpdatedBy:
 		return m.UpdatedBy()
-	case permissions.FieldName:
-		return m.Name()
+	case permissions.FieldResourceID:
+		return m.ResourceID()
 	}
 	return nil, false
 }
@@ -9283,8 +9379,8 @@ func (m *PermissionsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldCreatedBy(ctx)
 	case permissions.FieldUpdatedBy:
 		return m.OldUpdatedBy(ctx)
-	case permissions.FieldName:
-		return m.OldName(ctx)
+	case permissions.FieldResourceID:
+		return m.OldResourceID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Permissions field %s", name)
 }
@@ -9322,12 +9418,12 @@ func (m *PermissionsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedBy(v)
 		return nil
-	case permissions.FieldName:
-		v, ok := value.(string)
+	case permissions.FieldResourceID:
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetResourceID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Permissions field %s", name)
@@ -9432,8 +9528,8 @@ func (m *PermissionsMutation) ResetField(name string) error {
 	case permissions.FieldUpdatedBy:
 		m.ResetUpdatedBy()
 		return nil
-	case permissions.FieldName:
-		m.ResetName()
+	case permissions.FieldResourceID:
+		m.ResetResourceID()
 		return nil
 	}
 	return fmt.Errorf("unknown Permissions field %s", name)
@@ -9441,49 +9537,103 @@ func (m *PermissionsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PermissionsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.lion_role_permissions != nil {
+		edges = append(edges, permissions.EdgeLionRolePermissions)
+	}
+	if m.lion_resources != nil {
+		edges = append(edges, permissions.EdgeLionResources)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *PermissionsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case permissions.EdgeLionRolePermissions:
+		ids := make([]ent.Value, 0, len(m.lion_role_permissions))
+		for id := range m.lion_role_permissions {
+			ids = append(ids, id)
+		}
+		return ids
+	case permissions.EdgeLionResources:
+		if id := m.lion_resources; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PermissionsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.removedlion_role_permissions != nil {
+		edges = append(edges, permissions.EdgeLionRolePermissions)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PermissionsMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case permissions.EdgeLionRolePermissions:
+		ids := make([]ent.Value, 0, len(m.removedlion_role_permissions))
+		for id := range m.removedlion_role_permissions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PermissionsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.clearedlion_role_permissions {
+		edges = append(edges, permissions.EdgeLionRolePermissions)
+	}
+	if m.clearedlion_resources {
+		edges = append(edges, permissions.EdgeLionResources)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *PermissionsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case permissions.EdgeLionRolePermissions:
+		return m.clearedlion_role_permissions
+	case permissions.EdgeLionResources:
+		return m.clearedlion_resources
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *PermissionsMutation) ClearEdge(name string) error {
+	switch name {
+	case permissions.EdgeLionResources:
+		m.ClearLionResources()
+		return nil
+	}
 	return fmt.Errorf("unknown Permissions unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *PermissionsMutation) ResetEdge(name string) error {
+	switch name {
+	case permissions.EdgeLionRolePermissions:
+		m.ResetLionRolePermissions()
+		return nil
+	case permissions.EdgeLionResources:
+		m.ResetLionResources()
+		return nil
+	}
 	return fmt.Errorf("unknown Permissions edge %s", name)
 }
 
@@ -10217,42 +10367,40 @@ func (m *PoliciesMutation) ResetEdge(name string) error {
 // ResourcesMutation represents an operation that mutates the Resources nodes in the graph.
 type ResourcesMutation struct {
 	config
-	op                         Op
-	typ                        string
-	id                         *int
-	created_at                 *time.Time
-	updated_at                 *time.Time
-	deleted_at                 *time.Time
-	created_by                 *int64
-	addcreated_by              *int64
-	updated_by                 *int64
-	addupdated_by              *int64
-	parent_id                  *int
-	addparent_id               *int
-	name                       *string
-	i18n_name                  *map[string]string
-	order_weight               *int
-	addorder_weight            *int
-	resource_type              *int
-	addresource_type           *int
-	resource_scope             *int
-	addresource_scope          *int
-	enabled                    *bool
-	hidden                     *bool
-	hide_children              *bool
-	_path                      *string
-	icon                       *string
-	component                  *string
-	description                *string
-	permissions                *[]string
-	appendpermissions          []string
-	clearedFields              map[string]struct{}
-	lion_role_resources        map[int]struct{}
-	removedlion_role_resources map[int]struct{}
-	clearedlion_role_resources bool
-	done                       bool
-	oldValue                   func(context.Context) (*Resources, error)
-	predicates                 []predicate.Resources
+	op                      Op
+	typ                     string
+	id                      *int
+	created_at              *time.Time
+	updated_at              *time.Time
+	deleted_at              *time.Time
+	created_by              *int64
+	addcreated_by           *int64
+	updated_by              *int64
+	addupdated_by           *int64
+	parent_id               *int
+	addparent_id            *int
+	name                    *string
+	i18n_name               *map[string]string
+	order_weight            *int
+	addorder_weight         *int
+	resource_type           *int
+	addresource_type        *int
+	resource_scope          *int
+	addresource_scope       *int
+	enabled                 *bool
+	hidden                  *bool
+	hide_children           *bool
+	_path                   *string
+	icon                    *string
+	component               *string
+	description             *string
+	clearedFields           map[string]struct{}
+	lion_permissions        map[int]struct{}
+	removedlion_permissions map[int]struct{}
+	clearedlion_permissions bool
+	done                    bool
+	oldValue                func(context.Context) (*Resources, error)
+	predicates              []predicate.Resources
 }
 
 var _ ent.Mutation = (*ResourcesMutation)(nil)
@@ -11175,123 +11323,58 @@ func (m *ResourcesMutation) ResetDescription() {
 	m.description = nil
 }
 
-// SetPermissions sets the "permissions" field.
-func (m *ResourcesMutation) SetPermissions(s []string) {
-	m.permissions = &s
-	m.appendpermissions = nil
-}
-
-// Permissions returns the value of the "permissions" field in the mutation.
-func (m *ResourcesMutation) Permissions() (r []string, exists bool) {
-	v := m.permissions
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPermissions returns the old "permissions" field's value of the Resources entity.
-// If the Resources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldPermissions(ctx context.Context) (v []string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPermissions is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPermissions requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPermissions: %w", err)
-	}
-	return oldValue.Permissions, nil
-}
-
-// AppendPermissions adds s to the "permissions" field.
-func (m *ResourcesMutation) AppendPermissions(s []string) {
-	m.appendpermissions = append(m.appendpermissions, s...)
-}
-
-// AppendedPermissions returns the list of values that were appended to the "permissions" field in this mutation.
-func (m *ResourcesMutation) AppendedPermissions() ([]string, bool) {
-	if len(m.appendpermissions) == 0 {
-		return nil, false
-	}
-	return m.appendpermissions, true
-}
-
-// ClearPermissions clears the value of the "permissions" field.
-func (m *ResourcesMutation) ClearPermissions() {
-	m.permissions = nil
-	m.appendpermissions = nil
-	m.clearedFields[resources.FieldPermissions] = struct{}{}
-}
-
-// PermissionsCleared returns if the "permissions" field was cleared in this mutation.
-func (m *ResourcesMutation) PermissionsCleared() bool {
-	_, ok := m.clearedFields[resources.FieldPermissions]
-	return ok
-}
-
-// ResetPermissions resets all changes to the "permissions" field.
-func (m *ResourcesMutation) ResetPermissions() {
-	m.permissions = nil
-	m.appendpermissions = nil
-	delete(m.clearedFields, resources.FieldPermissions)
-}
-
-// AddLionRoleResourceIDs adds the "lion_role_resources" edge to the RoleResources entity by ids.
-func (m *ResourcesMutation) AddLionRoleResourceIDs(ids ...int) {
-	if m.lion_role_resources == nil {
-		m.lion_role_resources = make(map[int]struct{})
+// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by ids.
+func (m *ResourcesMutation) AddLionPermissionIDs(ids ...int) {
+	if m.lion_permissions == nil {
+		m.lion_permissions = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.lion_role_resources[ids[i]] = struct{}{}
+		m.lion_permissions[ids[i]] = struct{}{}
 	}
 }
 
-// ClearLionRoleResources clears the "lion_role_resources" edge to the RoleResources entity.
-func (m *ResourcesMutation) ClearLionRoleResources() {
-	m.clearedlion_role_resources = true
+// ClearLionPermissions clears the "lion_permissions" edge to the Permissions entity.
+func (m *ResourcesMutation) ClearLionPermissions() {
+	m.clearedlion_permissions = true
 }
 
-// LionRoleResourcesCleared reports if the "lion_role_resources" edge to the RoleResources entity was cleared.
-func (m *ResourcesMutation) LionRoleResourcesCleared() bool {
-	return m.clearedlion_role_resources
+// LionPermissionsCleared reports if the "lion_permissions" edge to the Permissions entity was cleared.
+func (m *ResourcesMutation) LionPermissionsCleared() bool {
+	return m.clearedlion_permissions
 }
 
-// RemoveLionRoleResourceIDs removes the "lion_role_resources" edge to the RoleResources entity by IDs.
-func (m *ResourcesMutation) RemoveLionRoleResourceIDs(ids ...int) {
-	if m.removedlion_role_resources == nil {
-		m.removedlion_role_resources = make(map[int]struct{})
+// RemoveLionPermissionIDs removes the "lion_permissions" edge to the Permissions entity by IDs.
+func (m *ResourcesMutation) RemoveLionPermissionIDs(ids ...int) {
+	if m.removedlion_permissions == nil {
+		m.removedlion_permissions = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.lion_role_resources, ids[i])
-		m.removedlion_role_resources[ids[i]] = struct{}{}
+		delete(m.lion_permissions, ids[i])
+		m.removedlion_permissions[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedLionRoleResources returns the removed IDs of the "lion_role_resources" edge to the RoleResources entity.
-func (m *ResourcesMutation) RemovedLionRoleResourcesIDs() (ids []int) {
-	for id := range m.removedlion_role_resources {
+// RemovedLionPermissions returns the removed IDs of the "lion_permissions" edge to the Permissions entity.
+func (m *ResourcesMutation) RemovedLionPermissionsIDs() (ids []int) {
+	for id := range m.removedlion_permissions {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// LionRoleResourcesIDs returns the "lion_role_resources" edge IDs in the mutation.
-func (m *ResourcesMutation) LionRoleResourcesIDs() (ids []int) {
-	for id := range m.lion_role_resources {
+// LionPermissionsIDs returns the "lion_permissions" edge IDs in the mutation.
+func (m *ResourcesMutation) LionPermissionsIDs() (ids []int) {
+	for id := range m.lion_permissions {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetLionRoleResources resets all changes to the "lion_role_resources" edge.
-func (m *ResourcesMutation) ResetLionRoleResources() {
-	m.lion_role_resources = nil
-	m.clearedlion_role_resources = false
-	m.removedlion_role_resources = nil
+// ResetLionPermissions resets all changes to the "lion_permissions" edge.
+func (m *ResourcesMutation) ResetLionPermissions() {
+	m.lion_permissions = nil
+	m.clearedlion_permissions = false
+	m.removedlion_permissions = nil
 }
 
 // Where appends a list predicates to the ResourcesMutation builder.
@@ -11328,7 +11411,7 @@ func (m *ResourcesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResourcesMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 18)
 	if m.created_at != nil {
 		fields = append(fields, resources.FieldCreatedAt)
 	}
@@ -11383,9 +11466,6 @@ func (m *ResourcesMutation) Fields() []string {
 	if m.description != nil {
 		fields = append(fields, resources.FieldDescription)
 	}
-	if m.permissions != nil {
-		fields = append(fields, resources.FieldPermissions)
-	}
 	return fields
 }
 
@@ -11430,8 +11510,6 @@ func (m *ResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.Component()
 	case resources.FieldDescription:
 		return m.Description()
-	case resources.FieldPermissions:
-		return m.Permissions()
 	}
 	return nil, false
 }
@@ -11477,8 +11555,6 @@ func (m *ResourcesMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldComponent(ctx)
 	case resources.FieldDescription:
 		return m.OldDescription(ctx)
-	case resources.FieldPermissions:
-		return m.OldPermissions(ctx)
 	}
 	return nil, fmt.Errorf("unknown Resources field %s", name)
 }
@@ -11614,13 +11690,6 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDescription(v)
 		return nil
-	case resources.FieldPermissions:
-		v, ok := value.([]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPermissions(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Resources field %s", name)
 }
@@ -11738,9 +11807,6 @@ func (m *ResourcesMutation) ClearedFields() []string {
 	if m.FieldCleared(resources.FieldI18nName) {
 		fields = append(fields, resources.FieldI18nName)
 	}
-	if m.FieldCleared(resources.FieldPermissions) {
-		fields = append(fields, resources.FieldPermissions)
-	}
 	return fields
 }
 
@@ -11766,9 +11832,6 @@ func (m *ResourcesMutation) ClearField(name string) error {
 		return nil
 	case resources.FieldI18nName:
 		m.ClearI18nName()
-		return nil
-	case resources.FieldPermissions:
-		m.ClearPermissions()
 		return nil
 	}
 	return fmt.Errorf("unknown Resources nullable field %s", name)
@@ -11832,9 +11895,6 @@ func (m *ResourcesMutation) ResetField(name string) error {
 	case resources.FieldDescription:
 		m.ResetDescription()
 		return nil
-	case resources.FieldPermissions:
-		m.ResetPermissions()
-		return nil
 	}
 	return fmt.Errorf("unknown Resources field %s", name)
 }
@@ -11842,8 +11902,8 @@ func (m *ResourcesMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ResourcesMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.lion_role_resources != nil {
-		edges = append(edges, resources.EdgeLionRoleResources)
+	if m.lion_permissions != nil {
+		edges = append(edges, resources.EdgeLionPermissions)
 	}
 	return edges
 }
@@ -11852,9 +11912,9 @@ func (m *ResourcesMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ResourcesMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case resources.EdgeLionRoleResources:
-		ids := make([]ent.Value, 0, len(m.lion_role_resources))
-		for id := range m.lion_role_resources {
+	case resources.EdgeLionPermissions:
+		ids := make([]ent.Value, 0, len(m.lion_permissions))
+		for id := range m.lion_permissions {
 			ids = append(ids, id)
 		}
 		return ids
@@ -11865,8 +11925,8 @@ func (m *ResourcesMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ResourcesMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedlion_role_resources != nil {
-		edges = append(edges, resources.EdgeLionRoleResources)
+	if m.removedlion_permissions != nil {
+		edges = append(edges, resources.EdgeLionPermissions)
 	}
 	return edges
 }
@@ -11875,9 +11935,9 @@ func (m *ResourcesMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *ResourcesMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case resources.EdgeLionRoleResources:
-		ids := make([]ent.Value, 0, len(m.removedlion_role_resources))
-		for id := range m.removedlion_role_resources {
+	case resources.EdgeLionPermissions:
+		ids := make([]ent.Value, 0, len(m.removedlion_permissions))
+		for id := range m.removedlion_permissions {
 			ids = append(ids, id)
 		}
 		return ids
@@ -11888,8 +11948,8 @@ func (m *ResourcesMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ResourcesMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedlion_role_resources {
-		edges = append(edges, resources.EdgeLionRoleResources)
+	if m.clearedlion_permissions {
+		edges = append(edges, resources.EdgeLionPermissions)
 	}
 	return edges
 }
@@ -11898,8 +11958,8 @@ func (m *ResourcesMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ResourcesMutation) EdgeCleared(name string) bool {
 	switch name {
-	case resources.EdgeLionRoleResources:
-		return m.clearedlion_role_resources
+	case resources.EdgeLionPermissions:
+		return m.clearedlion_permissions
 	}
 	return false
 }
@@ -11916,8 +11976,8 @@ func (m *ResourcesMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ResourcesMutation) ResetEdge(name string) error {
 	switch name {
-	case resources.EdgeLionRoleResources:
-		m.ResetLionRoleResources()
+	case resources.EdgeLionPermissions:
+		m.ResetLionPermissions()
 		return nil
 	}
 	return fmt.Errorf("unknown Resources edge %s", name)
@@ -12760,23 +12820,23 @@ func (m *RoleDepartmentsMutation) ResetEdge(name string) error {
 // RolePermissionsMutation represents an operation that mutates the RolePermissions nodes in the graph.
 type RolePermissionsMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	created_at       *time.Time
-	updated_at       *time.Time
-	created_by       *int64
-	addcreated_by    *int64
-	updated_by       *int64
-	addupdated_by    *int64
-	role_id          *int
-	addrole_id       *int
-	permission_id    *int
-	addpermission_id *int
-	clearedFields    map[string]struct{}
-	done             bool
-	oldValue         func(context.Context) (*RolePermissions, error)
-	predicates       []predicate.RolePermissions
+	op                      Op
+	typ                     string
+	id                      *int
+	created_at              *time.Time
+	updated_at              *time.Time
+	created_by              *int64
+	addcreated_by           *int64
+	updated_by              *int64
+	addupdated_by           *int64
+	clearedFields           map[string]struct{}
+	lion_roles              *int
+	clearedlion_roles       bool
+	lion_permissions        *int
+	clearedlion_permissions bool
+	done                    bool
+	oldValue                func(context.Context) (*RolePermissions, error)
+	predicates              []predicate.RolePermissions
 }
 
 var _ ent.Mutation = (*RolePermissionsMutation)(nil)
@@ -13091,13 +13151,12 @@ func (m *RolePermissionsMutation) ResetUpdatedBy() {
 
 // SetRoleID sets the "role_id" field.
 func (m *RolePermissionsMutation) SetRoleID(i int) {
-	m.role_id = &i
-	m.addrole_id = nil
+	m.lion_roles = &i
 }
 
 // RoleID returns the value of the "role_id" field in the mutation.
 func (m *RolePermissionsMutation) RoleID() (r int, exists bool) {
-	v := m.role_id
+	v := m.lion_roles
 	if v == nil {
 		return
 	}
@@ -13121,39 +13180,19 @@ func (m *RolePermissionsMutation) OldRoleID(ctx context.Context) (v int, err err
 	return oldValue.RoleID, nil
 }
 
-// AddRoleID adds i to the "role_id" field.
-func (m *RolePermissionsMutation) AddRoleID(i int) {
-	if m.addrole_id != nil {
-		*m.addrole_id += i
-	} else {
-		m.addrole_id = &i
-	}
-}
-
-// AddedRoleID returns the value that was added to the "role_id" field in this mutation.
-func (m *RolePermissionsMutation) AddedRoleID() (r int, exists bool) {
-	v := m.addrole_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetRoleID resets all changes to the "role_id" field.
 func (m *RolePermissionsMutation) ResetRoleID() {
-	m.role_id = nil
-	m.addrole_id = nil
+	m.lion_roles = nil
 }
 
 // SetPermissionID sets the "permission_id" field.
 func (m *RolePermissionsMutation) SetPermissionID(i int) {
-	m.permission_id = &i
-	m.addpermission_id = nil
+	m.lion_permissions = &i
 }
 
 // PermissionID returns the value of the "permission_id" field in the mutation.
 func (m *RolePermissionsMutation) PermissionID() (r int, exists bool) {
-	v := m.permission_id
+	v := m.lion_permissions
 	if v == nil {
 		return
 	}
@@ -13177,28 +13216,89 @@ func (m *RolePermissionsMutation) OldPermissionID(ctx context.Context) (v int, e
 	return oldValue.PermissionID, nil
 }
 
-// AddPermissionID adds i to the "permission_id" field.
-func (m *RolePermissionsMutation) AddPermissionID(i int) {
-	if m.addpermission_id != nil {
-		*m.addpermission_id += i
-	} else {
-		m.addpermission_id = &i
-	}
-}
-
-// AddedPermissionID returns the value that was added to the "permission_id" field in this mutation.
-func (m *RolePermissionsMutation) AddedPermissionID() (r int, exists bool) {
-	v := m.addpermission_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetPermissionID resets all changes to the "permission_id" field.
 func (m *RolePermissionsMutation) ResetPermissionID() {
-	m.permission_id = nil
-	m.addpermission_id = nil
+	m.lion_permissions = nil
+}
+
+// SetLionRolesID sets the "lion_roles" edge to the Roles entity by id.
+func (m *RolePermissionsMutation) SetLionRolesID(id int) {
+	m.lion_roles = &id
+}
+
+// ClearLionRoles clears the "lion_roles" edge to the Roles entity.
+func (m *RolePermissionsMutation) ClearLionRoles() {
+	m.clearedlion_roles = true
+	m.clearedFields[rolepermissions.FieldRoleID] = struct{}{}
+}
+
+// LionRolesCleared reports if the "lion_roles" edge to the Roles entity was cleared.
+func (m *RolePermissionsMutation) LionRolesCleared() bool {
+	return m.clearedlion_roles
+}
+
+// LionRolesID returns the "lion_roles" edge ID in the mutation.
+func (m *RolePermissionsMutation) LionRolesID() (id int, exists bool) {
+	if m.lion_roles != nil {
+		return *m.lion_roles, true
+	}
+	return
+}
+
+// LionRolesIDs returns the "lion_roles" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionRolesID instead. It exists only for internal usage by the builders.
+func (m *RolePermissionsMutation) LionRolesIDs() (ids []int) {
+	if id := m.lion_roles; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionRoles resets all changes to the "lion_roles" edge.
+func (m *RolePermissionsMutation) ResetLionRoles() {
+	m.lion_roles = nil
+	m.clearedlion_roles = false
+}
+
+// SetLionPermissionsID sets the "lion_permissions" edge to the Permissions entity by id.
+func (m *RolePermissionsMutation) SetLionPermissionsID(id int) {
+	m.lion_permissions = &id
+}
+
+// ClearLionPermissions clears the "lion_permissions" edge to the Permissions entity.
+func (m *RolePermissionsMutation) ClearLionPermissions() {
+	m.clearedlion_permissions = true
+	m.clearedFields[rolepermissions.FieldPermissionID] = struct{}{}
+}
+
+// LionPermissionsCleared reports if the "lion_permissions" edge to the Permissions entity was cleared.
+func (m *RolePermissionsMutation) LionPermissionsCleared() bool {
+	return m.clearedlion_permissions
+}
+
+// LionPermissionsID returns the "lion_permissions" edge ID in the mutation.
+func (m *RolePermissionsMutation) LionPermissionsID() (id int, exists bool) {
+	if m.lion_permissions != nil {
+		return *m.lion_permissions, true
+	}
+	return
+}
+
+// LionPermissionsIDs returns the "lion_permissions" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionPermissionsID instead. It exists only for internal usage by the builders.
+func (m *RolePermissionsMutation) LionPermissionsIDs() (ids []int) {
+	if id := m.lion_permissions; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionPermissions resets all changes to the "lion_permissions" edge.
+func (m *RolePermissionsMutation) ResetLionPermissions() {
+	m.lion_permissions = nil
+	m.clearedlion_permissions = false
 }
 
 // Where appends a list predicates to the RolePermissionsMutation builder.
@@ -13248,10 +13348,10 @@ func (m *RolePermissionsMutation) Fields() []string {
 	if m.updated_by != nil {
 		fields = append(fields, rolepermissions.FieldUpdatedBy)
 	}
-	if m.role_id != nil {
+	if m.lion_roles != nil {
 		fields = append(fields, rolepermissions.FieldRoleID)
 	}
-	if m.permission_id != nil {
+	if m.lion_permissions != nil {
 		fields = append(fields, rolepermissions.FieldPermissionID)
 	}
 	return fields
@@ -13360,12 +13460,6 @@ func (m *RolePermissionsMutation) AddedFields() []string {
 	if m.addupdated_by != nil {
 		fields = append(fields, rolepermissions.FieldUpdatedBy)
 	}
-	if m.addrole_id != nil {
-		fields = append(fields, rolepermissions.FieldRoleID)
-	}
-	if m.addpermission_id != nil {
-		fields = append(fields, rolepermissions.FieldPermissionID)
-	}
 	return fields
 }
 
@@ -13378,10 +13472,6 @@ func (m *RolePermissionsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCreatedBy()
 	case rolepermissions.FieldUpdatedBy:
 		return m.AddedUpdatedBy()
-	case rolepermissions.FieldRoleID:
-		return m.AddedRoleID()
-	case rolepermissions.FieldPermissionID:
-		return m.AddedPermissionID()
 	}
 	return nil, false
 }
@@ -13404,20 +13494,6 @@ func (m *RolePermissionsMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUpdatedBy(v)
-		return nil
-	case rolepermissions.FieldRoleID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddRoleID(v)
-		return nil
-	case rolepermissions.FieldPermissionID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPermissionID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown RolePermissions numeric field %s", name)
@@ -13485,19 +13561,35 @@ func (m *RolePermissionsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RolePermissionsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.lion_roles != nil {
+		edges = append(edges, rolepermissions.EdgeLionRoles)
+	}
+	if m.lion_permissions != nil {
+		edges = append(edges, rolepermissions.EdgeLionPermissions)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *RolePermissionsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case rolepermissions.EdgeLionRoles:
+		if id := m.lion_roles; id != nil {
+			return []ent.Value{*id}
+		}
+	case rolepermissions.EdgeLionPermissions:
+		if id := m.lion_permissions; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RolePermissionsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -13509,860 +13601,54 @@ func (m *RolePermissionsMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RolePermissionsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.clearedlion_roles {
+		edges = append(edges, rolepermissions.EdgeLionRoles)
+	}
+	if m.clearedlion_permissions {
+		edges = append(edges, rolepermissions.EdgeLionPermissions)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *RolePermissionsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case rolepermissions.EdgeLionRoles:
+		return m.clearedlion_roles
+	case rolepermissions.EdgeLionPermissions:
+		return m.clearedlion_permissions
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *RolePermissionsMutation) ClearEdge(name string) error {
+	switch name {
+	case rolepermissions.EdgeLionRoles:
+		m.ClearLionRoles()
+		return nil
+	case rolepermissions.EdgeLionPermissions:
+		m.ClearLionPermissions()
+		return nil
+	}
 	return fmt.Errorf("unknown RolePermissions unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *RolePermissionsMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown RolePermissions edge %s", name)
-}
-
-// RoleResourcesMutation represents an operation that mutates the RoleResources nodes in the graph.
-type RoleResourcesMutation struct {
-	config
-	op                    Op
-	typ                   string
-	id                    *int
-	created_at            *time.Time
-	updated_at            *time.Time
-	created_by            *int64
-	addcreated_by         *int64
-	updated_by            *int64
-	addupdated_by         *int64
-	clearedFields         map[string]struct{}
-	lion_roles            *int
-	clearedlion_roles     bool
-	lion_resources        *int
-	clearedlion_resources bool
-	done                  bool
-	oldValue              func(context.Context) (*RoleResources, error)
-	predicates            []predicate.RoleResources
-}
-
-var _ ent.Mutation = (*RoleResourcesMutation)(nil)
-
-// roleresourcesOption allows management of the mutation configuration using functional options.
-type roleresourcesOption func(*RoleResourcesMutation)
-
-// newRoleResourcesMutation creates new mutation for the RoleResources entity.
-func newRoleResourcesMutation(c config, op Op, opts ...roleresourcesOption) *RoleResourcesMutation {
-	m := &RoleResourcesMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeRoleResources,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withRoleResourcesID sets the ID field of the mutation.
-func withRoleResourcesID(id int) roleresourcesOption {
-	return func(m *RoleResourcesMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *RoleResources
-		)
-		m.oldValue = func(ctx context.Context) (*RoleResources, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().RoleResources.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withRoleResources sets the old RoleResources of the mutation.
-func withRoleResources(node *RoleResources) roleresourcesOption {
-	return func(m *RoleResourcesMutation) {
-		m.oldValue = func(context.Context) (*RoleResources, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m RoleResourcesMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m RoleResourcesMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("lion: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *RoleResourcesMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *RoleResourcesMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().RoleResources.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *RoleResourcesMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *RoleResourcesMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the RoleResources entity.
-// If the RoleResources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RoleResourcesMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *RoleResourcesMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *RoleResourcesMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *RoleResourcesMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the RoleResources entity.
-// If the RoleResources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RoleResourcesMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *RoleResourcesMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetCreatedBy sets the "created_by" field.
-func (m *RoleResourcesMutation) SetCreatedBy(i int64) {
-	m.created_by = &i
-	m.addcreated_by = nil
-}
-
-// CreatedBy returns the value of the "created_by" field in the mutation.
-func (m *RoleResourcesMutation) CreatedBy() (r int64, exists bool) {
-	v := m.created_by
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedBy returns the old "created_by" field's value of the RoleResources entity.
-// If the RoleResources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RoleResourcesMutation) OldCreatedBy(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
-	}
-	return oldValue.CreatedBy, nil
-}
-
-// AddCreatedBy adds i to the "created_by" field.
-func (m *RoleResourcesMutation) AddCreatedBy(i int64) {
-	if m.addcreated_by != nil {
-		*m.addcreated_by += i
-	} else {
-		m.addcreated_by = &i
-	}
-}
-
-// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
-func (m *RoleResourcesMutation) AddedCreatedBy() (r int64, exists bool) {
-	v := m.addcreated_by
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearCreatedBy clears the value of the "created_by" field.
-func (m *RoleResourcesMutation) ClearCreatedBy() {
-	m.created_by = nil
-	m.addcreated_by = nil
-	m.clearedFields[roleresources.FieldCreatedBy] = struct{}{}
-}
-
-// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
-func (m *RoleResourcesMutation) CreatedByCleared() bool {
-	_, ok := m.clearedFields[roleresources.FieldCreatedBy]
-	return ok
-}
-
-// ResetCreatedBy resets all changes to the "created_by" field.
-func (m *RoleResourcesMutation) ResetCreatedBy() {
-	m.created_by = nil
-	m.addcreated_by = nil
-	delete(m.clearedFields, roleresources.FieldCreatedBy)
-}
-
-// SetUpdatedBy sets the "updated_by" field.
-func (m *RoleResourcesMutation) SetUpdatedBy(i int64) {
-	m.updated_by = &i
-	m.addupdated_by = nil
-}
-
-// UpdatedBy returns the value of the "updated_by" field in the mutation.
-func (m *RoleResourcesMutation) UpdatedBy() (r int64, exists bool) {
-	v := m.updated_by
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedBy returns the old "updated_by" field's value of the RoleResources entity.
-// If the RoleResources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RoleResourcesMutation) OldUpdatedBy(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedBy is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedBy requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedBy: %w", err)
-	}
-	return oldValue.UpdatedBy, nil
-}
-
-// AddUpdatedBy adds i to the "updated_by" field.
-func (m *RoleResourcesMutation) AddUpdatedBy(i int64) {
-	if m.addupdated_by != nil {
-		*m.addupdated_by += i
-	} else {
-		m.addupdated_by = &i
-	}
-}
-
-// AddedUpdatedBy returns the value that was added to the "updated_by" field in this mutation.
-func (m *RoleResourcesMutation) AddedUpdatedBy() (r int64, exists bool) {
-	v := m.addupdated_by
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearUpdatedBy clears the value of the "updated_by" field.
-func (m *RoleResourcesMutation) ClearUpdatedBy() {
-	m.updated_by = nil
-	m.addupdated_by = nil
-	m.clearedFields[roleresources.FieldUpdatedBy] = struct{}{}
-}
-
-// UpdatedByCleared returns if the "updated_by" field was cleared in this mutation.
-func (m *RoleResourcesMutation) UpdatedByCleared() bool {
-	_, ok := m.clearedFields[roleresources.FieldUpdatedBy]
-	return ok
-}
-
-// ResetUpdatedBy resets all changes to the "updated_by" field.
-func (m *RoleResourcesMutation) ResetUpdatedBy() {
-	m.updated_by = nil
-	m.addupdated_by = nil
-	delete(m.clearedFields, roleresources.FieldUpdatedBy)
-}
-
-// SetRoleID sets the "role_id" field.
-func (m *RoleResourcesMutation) SetRoleID(i int) {
-	m.lion_roles = &i
-}
-
-// RoleID returns the value of the "role_id" field in the mutation.
-func (m *RoleResourcesMutation) RoleID() (r int, exists bool) {
-	v := m.lion_roles
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRoleID returns the old "role_id" field's value of the RoleResources entity.
-// If the RoleResources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RoleResourcesMutation) OldRoleID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRoleID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRoleID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRoleID: %w", err)
-	}
-	return oldValue.RoleID, nil
-}
-
-// ResetRoleID resets all changes to the "role_id" field.
-func (m *RoleResourcesMutation) ResetRoleID() {
-	m.lion_roles = nil
-}
-
-// SetResourceID sets the "resource_id" field.
-func (m *RoleResourcesMutation) SetResourceID(i int) {
-	m.lion_resources = &i
-}
-
-// ResourceID returns the value of the "resource_id" field in the mutation.
-func (m *RoleResourcesMutation) ResourceID() (r int, exists bool) {
-	v := m.lion_resources
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldResourceID returns the old "resource_id" field's value of the RoleResources entity.
-// If the RoleResources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RoleResourcesMutation) OldResourceID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldResourceID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
-	}
-	return oldValue.ResourceID, nil
-}
-
-// ResetResourceID resets all changes to the "resource_id" field.
-func (m *RoleResourcesMutation) ResetResourceID() {
-	m.lion_resources = nil
-}
-
-// SetLionRolesID sets the "lion_roles" edge to the Roles entity by id.
-func (m *RoleResourcesMutation) SetLionRolesID(id int) {
-	m.lion_roles = &id
-}
-
-// ClearLionRoles clears the "lion_roles" edge to the Roles entity.
-func (m *RoleResourcesMutation) ClearLionRoles() {
-	m.clearedlion_roles = true
-	m.clearedFields[roleresources.FieldRoleID] = struct{}{}
-}
-
-// LionRolesCleared reports if the "lion_roles" edge to the Roles entity was cleared.
-func (m *RoleResourcesMutation) LionRolesCleared() bool {
-	return m.clearedlion_roles
-}
-
-// LionRolesID returns the "lion_roles" edge ID in the mutation.
-func (m *RoleResourcesMutation) LionRolesID() (id int, exists bool) {
-	if m.lion_roles != nil {
-		return *m.lion_roles, true
-	}
-	return
-}
-
-// LionRolesIDs returns the "lion_roles" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// LionRolesID instead. It exists only for internal usage by the builders.
-func (m *RoleResourcesMutation) LionRolesIDs() (ids []int) {
-	if id := m.lion_roles; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetLionRoles resets all changes to the "lion_roles" edge.
-func (m *RoleResourcesMutation) ResetLionRoles() {
-	m.lion_roles = nil
-	m.clearedlion_roles = false
-}
-
-// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by id.
-func (m *RoleResourcesMutation) SetLionResourcesID(id int) {
-	m.lion_resources = &id
-}
-
-// ClearLionResources clears the "lion_resources" edge to the Resources entity.
-func (m *RoleResourcesMutation) ClearLionResources() {
-	m.clearedlion_resources = true
-	m.clearedFields[roleresources.FieldResourceID] = struct{}{}
-}
-
-// LionResourcesCleared reports if the "lion_resources" edge to the Resources entity was cleared.
-func (m *RoleResourcesMutation) LionResourcesCleared() bool {
-	return m.clearedlion_resources
-}
-
-// LionResourcesID returns the "lion_resources" edge ID in the mutation.
-func (m *RoleResourcesMutation) LionResourcesID() (id int, exists bool) {
-	if m.lion_resources != nil {
-		return *m.lion_resources, true
-	}
-	return
-}
-
-// LionResourcesIDs returns the "lion_resources" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// LionResourcesID instead. It exists only for internal usage by the builders.
-func (m *RoleResourcesMutation) LionResourcesIDs() (ids []int) {
-	if id := m.lion_resources; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetLionResources resets all changes to the "lion_resources" edge.
-func (m *RoleResourcesMutation) ResetLionResources() {
-	m.lion_resources = nil
-	m.clearedlion_resources = false
-}
-
-// Where appends a list predicates to the RoleResourcesMutation builder.
-func (m *RoleResourcesMutation) Where(ps ...predicate.RoleResources) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the RoleResourcesMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *RoleResourcesMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.RoleResources, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *RoleResourcesMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *RoleResourcesMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (RoleResources).
-func (m *RoleResourcesMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *RoleResourcesMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m.created_at != nil {
-		fields = append(fields, roleresources.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, roleresources.FieldUpdatedAt)
-	}
-	if m.created_by != nil {
-		fields = append(fields, roleresources.FieldCreatedBy)
-	}
-	if m.updated_by != nil {
-		fields = append(fields, roleresources.FieldUpdatedBy)
-	}
-	if m.lion_roles != nil {
-		fields = append(fields, roleresources.FieldRoleID)
-	}
-	if m.lion_resources != nil {
-		fields = append(fields, roleresources.FieldResourceID)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *RoleResourcesMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case roleresources.FieldCreatedAt:
-		return m.CreatedAt()
-	case roleresources.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case roleresources.FieldCreatedBy:
-		return m.CreatedBy()
-	case roleresources.FieldUpdatedBy:
-		return m.UpdatedBy()
-	case roleresources.FieldRoleID:
-		return m.RoleID()
-	case roleresources.FieldResourceID:
-		return m.ResourceID()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *RoleResourcesMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case roleresources.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case roleresources.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case roleresources.FieldCreatedBy:
-		return m.OldCreatedBy(ctx)
-	case roleresources.FieldUpdatedBy:
-		return m.OldUpdatedBy(ctx)
-	case roleresources.FieldRoleID:
-		return m.OldRoleID(ctx)
-	case roleresources.FieldResourceID:
-		return m.OldResourceID(ctx)
-	}
-	return nil, fmt.Errorf("unknown RoleResources field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *RoleResourcesMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case roleresources.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case roleresources.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case roleresources.FieldCreatedBy:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedBy(v)
-		return nil
-	case roleresources.FieldUpdatedBy:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedBy(v)
-		return nil
-	case roleresources.FieldRoleID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRoleID(v)
-		return nil
-	case roleresources.FieldResourceID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetResourceID(v)
-		return nil
-	}
-	return fmt.Errorf("unknown RoleResources field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *RoleResourcesMutation) AddedFields() []string {
-	var fields []string
-	if m.addcreated_by != nil {
-		fields = append(fields, roleresources.FieldCreatedBy)
-	}
-	if m.addupdated_by != nil {
-		fields = append(fields, roleresources.FieldUpdatedBy)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *RoleResourcesMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case roleresources.FieldCreatedBy:
-		return m.AddedCreatedBy()
-	case roleresources.FieldUpdatedBy:
-		return m.AddedUpdatedBy()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *RoleResourcesMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case roleresources.FieldCreatedBy:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddCreatedBy(v)
-		return nil
-	case roleresources.FieldUpdatedBy:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUpdatedBy(v)
-		return nil
-	}
-	return fmt.Errorf("unknown RoleResources numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *RoleResourcesMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(roleresources.FieldCreatedBy) {
-		fields = append(fields, roleresources.FieldCreatedBy)
-	}
-	if m.FieldCleared(roleresources.FieldUpdatedBy) {
-		fields = append(fields, roleresources.FieldUpdatedBy)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *RoleResourcesMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *RoleResourcesMutation) ClearField(name string) error {
-	switch name {
-	case roleresources.FieldCreatedBy:
-		m.ClearCreatedBy()
-		return nil
-	case roleresources.FieldUpdatedBy:
-		m.ClearUpdatedBy()
-		return nil
-	}
-	return fmt.Errorf("unknown RoleResources nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *RoleResourcesMutation) ResetField(name string) error {
-	switch name {
-	case roleresources.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case roleresources.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case roleresources.FieldCreatedBy:
-		m.ResetCreatedBy()
-		return nil
-	case roleresources.FieldUpdatedBy:
-		m.ResetUpdatedBy()
-		return nil
-	case roleresources.FieldRoleID:
-		m.ResetRoleID()
-		return nil
-	case roleresources.FieldResourceID:
-		m.ResetResourceID()
-		return nil
-	}
-	return fmt.Errorf("unknown RoleResources field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *RoleResourcesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.lion_roles != nil {
-		edges = append(edges, roleresources.EdgeLionRoles)
-	}
-	if m.lion_resources != nil {
-		edges = append(edges, roleresources.EdgeLionResources)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *RoleResourcesMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case roleresources.EdgeLionRoles:
-		if id := m.lion_roles; id != nil {
-			return []ent.Value{*id}
-		}
-	case roleresources.EdgeLionResources:
-		if id := m.lion_resources; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *RoleResourcesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *RoleResourcesMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *RoleResourcesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedlion_roles {
-		edges = append(edges, roleresources.EdgeLionRoles)
-	}
-	if m.clearedlion_resources {
-		edges = append(edges, roleresources.EdgeLionResources)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *RoleResourcesMutation) EdgeCleared(name string) bool {
-	switch name {
-	case roleresources.EdgeLionRoles:
-		return m.clearedlion_roles
-	case roleresources.EdgeLionResources:
-		return m.clearedlion_resources
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *RoleResourcesMutation) ClearEdge(name string) error {
-	switch name {
-	case roleresources.EdgeLionRoles:
-		m.ClearLionRoles()
-		return nil
-	case roleresources.EdgeLionResources:
-		m.ClearLionResources()
-		return nil
-	}
-	return fmt.Errorf("unknown RoleResources unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *RoleResourcesMutation) ResetEdge(name string) error {
-	switch name {
-	case roleresources.EdgeLionRoles:
+	case rolepermissions.EdgeLionRoles:
 		m.ResetLionRoles()
 		return nil
-	case roleresources.EdgeLionResources:
-		m.ResetLionResources()
+	case rolepermissions.EdgeLionPermissions:
+		m.ResetLionPermissions()
 		return nil
 	}
-	return fmt.Errorf("unknown RoleResources edge %s", name)
+	return fmt.Errorf("unknown RolePermissions edge %s", name)
 }
 
 // RolesMutation represents an operation that mutates the Roles nodes in the graph.
@@ -14388,9 +13674,9 @@ type RolesMutation struct {
 	addorder_weight              *int
 	description                  *string
 	clearedFields                map[string]struct{}
-	lion_role_resources          map[int]struct{}
-	removedlion_role_resources   map[int]struct{}
-	clearedlion_role_resources   bool
+	lion_role_permissions        map[int]struct{}
+	removedlion_role_permissions map[int]struct{}
+	clearedlion_role_permissions bool
 	lion_user_roles              map[int]struct{}
 	removedlion_user_roles       map[int]struct{}
 	clearedlion_user_roles       bool
@@ -15053,58 +14339,58 @@ func (m *RolesMutation) ResetDescription() {
 	m.description = nil
 }
 
-// AddLionRoleResourceIDs adds the "lion_role_resources" edge to the RoleResources entity by ids.
-func (m *RolesMutation) AddLionRoleResourceIDs(ids ...int) {
-	if m.lion_role_resources == nil {
-		m.lion_role_resources = make(map[int]struct{})
+// AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by ids.
+func (m *RolesMutation) AddLionRolePermissionIDs(ids ...int) {
+	if m.lion_role_permissions == nil {
+		m.lion_role_permissions = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.lion_role_resources[ids[i]] = struct{}{}
+		m.lion_role_permissions[ids[i]] = struct{}{}
 	}
 }
 
-// ClearLionRoleResources clears the "lion_role_resources" edge to the RoleResources entity.
-func (m *RolesMutation) ClearLionRoleResources() {
-	m.clearedlion_role_resources = true
+// ClearLionRolePermissions clears the "lion_role_permissions" edge to the RolePermissions entity.
+func (m *RolesMutation) ClearLionRolePermissions() {
+	m.clearedlion_role_permissions = true
 }
 
-// LionRoleResourcesCleared reports if the "lion_role_resources" edge to the RoleResources entity was cleared.
-func (m *RolesMutation) LionRoleResourcesCleared() bool {
-	return m.clearedlion_role_resources
+// LionRolePermissionsCleared reports if the "lion_role_permissions" edge to the RolePermissions entity was cleared.
+func (m *RolesMutation) LionRolePermissionsCleared() bool {
+	return m.clearedlion_role_permissions
 }
 
-// RemoveLionRoleResourceIDs removes the "lion_role_resources" edge to the RoleResources entity by IDs.
-func (m *RolesMutation) RemoveLionRoleResourceIDs(ids ...int) {
-	if m.removedlion_role_resources == nil {
-		m.removedlion_role_resources = make(map[int]struct{})
+// RemoveLionRolePermissionIDs removes the "lion_role_permissions" edge to the RolePermissions entity by IDs.
+func (m *RolesMutation) RemoveLionRolePermissionIDs(ids ...int) {
+	if m.removedlion_role_permissions == nil {
+		m.removedlion_role_permissions = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.lion_role_resources, ids[i])
-		m.removedlion_role_resources[ids[i]] = struct{}{}
+		delete(m.lion_role_permissions, ids[i])
+		m.removedlion_role_permissions[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedLionRoleResources returns the removed IDs of the "lion_role_resources" edge to the RoleResources entity.
-func (m *RolesMutation) RemovedLionRoleResourcesIDs() (ids []int) {
-	for id := range m.removedlion_role_resources {
+// RemovedLionRolePermissions returns the removed IDs of the "lion_role_permissions" edge to the RolePermissions entity.
+func (m *RolesMutation) RemovedLionRolePermissionsIDs() (ids []int) {
+	for id := range m.removedlion_role_permissions {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// LionRoleResourcesIDs returns the "lion_role_resources" edge IDs in the mutation.
-func (m *RolesMutation) LionRoleResourcesIDs() (ids []int) {
-	for id := range m.lion_role_resources {
+// LionRolePermissionsIDs returns the "lion_role_permissions" edge IDs in the mutation.
+func (m *RolesMutation) LionRolePermissionsIDs() (ids []int) {
+	for id := range m.lion_role_permissions {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetLionRoleResources resets all changes to the "lion_role_resources" edge.
-func (m *RolesMutation) ResetLionRoleResources() {
-	m.lion_role_resources = nil
-	m.clearedlion_role_resources = false
-	m.removedlion_role_resources = nil
+// ResetLionRolePermissions resets all changes to the "lion_role_permissions" edge.
+func (m *RolesMutation) ResetLionRolePermissions() {
+	m.lion_role_permissions = nil
+	m.clearedlion_role_permissions = false
+	m.removedlion_role_permissions = nil
 }
 
 // AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by ids.
@@ -15663,8 +14949,8 @@ func (m *RolesMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *RolesMutation) AddedEdges() []string {
 	edges := make([]string, 0, 4)
-	if m.lion_role_resources != nil {
-		edges = append(edges, roles.EdgeLionRoleResources)
+	if m.lion_role_permissions != nil {
+		edges = append(edges, roles.EdgeLionRolePermissions)
 	}
 	if m.lion_user_roles != nil {
 		edges = append(edges, roles.EdgeLionUserRoles)
@@ -15682,9 +14968,9 @@ func (m *RolesMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *RolesMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case roles.EdgeLionRoleResources:
-		ids := make([]ent.Value, 0, len(m.lion_role_resources))
-		for id := range m.lion_role_resources {
+	case roles.EdgeLionRolePermissions:
+		ids := make([]ent.Value, 0, len(m.lion_role_permissions))
+		for id := range m.lion_role_permissions {
 			ids = append(ids, id)
 		}
 		return ids
@@ -15713,8 +14999,8 @@ func (m *RolesMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *RolesMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 4)
-	if m.removedlion_role_resources != nil {
-		edges = append(edges, roles.EdgeLionRoleResources)
+	if m.removedlion_role_permissions != nil {
+		edges = append(edges, roles.EdgeLionRolePermissions)
 	}
 	if m.removedlion_user_roles != nil {
 		edges = append(edges, roles.EdgeLionUserRoles)
@@ -15732,9 +15018,9 @@ func (m *RolesMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *RolesMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case roles.EdgeLionRoleResources:
-		ids := make([]ent.Value, 0, len(m.removedlion_role_resources))
-		for id := range m.removedlion_role_resources {
+	case roles.EdgeLionRolePermissions:
+		ids := make([]ent.Value, 0, len(m.removedlion_role_permissions))
+		for id := range m.removedlion_role_permissions {
 			ids = append(ids, id)
 		}
 		return ids
@@ -15763,8 +15049,8 @@ func (m *RolesMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *RolesMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 4)
-	if m.clearedlion_role_resources {
-		edges = append(edges, roles.EdgeLionRoleResources)
+	if m.clearedlion_role_permissions {
+		edges = append(edges, roles.EdgeLionRolePermissions)
 	}
 	if m.clearedlion_user_roles {
 		edges = append(edges, roles.EdgeLionUserRoles)
@@ -15782,8 +15068,8 @@ func (m *RolesMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *RolesMutation) EdgeCleared(name string) bool {
 	switch name {
-	case roles.EdgeLionRoleResources:
-		return m.clearedlion_role_resources
+	case roles.EdgeLionRolePermissions:
+		return m.clearedlion_role_permissions
 	case roles.EdgeLionUserRoles:
 		return m.clearedlion_user_roles
 	case roles.EdgeLionRoleGroups:
@@ -15806,8 +15092,8 @@ func (m *RolesMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *RolesMutation) ResetEdge(name string) error {
 	switch name {
-	case roles.EdgeLionRoleResources:
-		m.ResetLionRoleResources()
+	case roles.EdgeLionRolePermissions:
+		m.ResetLionRolePermissions()
 		return nil
 	case roles.EdgeLionUserRoles:
 		m.ResetLionUserRoles()
@@ -22782,9 +22068,22 @@ func (m *UsersMutation) OldMetadata(ctx context.Context) (v map[string]string, e
 	return oldValue.Metadata, nil
 }
 
+// ClearMetadata clears the value of the "metadata" field.
+func (m *UsersMutation) ClearMetadata() {
+	m.metadata = nil
+	m.clearedFields[users.FieldMetadata] = struct{}{}
+}
+
+// MetadataCleared returns if the "metadata" field was cleared in this mutation.
+func (m *UsersMutation) MetadataCleared() bool {
+	_, ok := m.clearedFields[users.FieldMetadata]
+	return ok
+}
+
 // ResetMetadata resets all changes to the "metadata" field.
 func (m *UsersMutation) ResetMetadata() {
 	m.metadata = nil
+	delete(m.clearedFields, users.FieldMetadata)
 }
 
 // AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by ids.
@@ -23585,6 +22884,9 @@ func (m *UsersMutation) ClearedFields() []string {
 	if m.FieldCleared(users.FieldAddressEncrypted) {
 		fields = append(fields, users.FieldAddressEncrypted)
 	}
+	if m.FieldCleared(users.FieldMetadata) {
+		fields = append(fields, users.FieldMetadata)
+	}
 	return fields
 }
 
@@ -23634,6 +22936,9 @@ func (m *UsersMutation) ClearField(name string) error {
 		return nil
 	case users.FieldAddressEncrypted:
 		m.ClearAddressEncrypted()
+		return nil
+	case users.FieldMetadata:
+		m.ClearMetadata()
 		return nil
 	}
 	return fmt.Errorf("unknown Users nullable field %s", name)

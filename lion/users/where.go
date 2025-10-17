@@ -1605,6 +1605,16 @@ func DescriptionContainsFold(v string) predicate.Users {
 	return predicate.Users(sql.FieldContainsFold(FieldDescription, v))
 }
 
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldMetadata))
+}
+
 // HasLionUserRoles applies the HasEdge predicate on the "lion_user_roles" edge.
 func HasLionUserRoles() predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {

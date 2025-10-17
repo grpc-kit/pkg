@@ -28,6 +28,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return result, nil
 	}
 
+	// 为 users 表 id 默认从 654321 开始
+
 	tx, err := db.Tx(ctx)
 	if err != nil {
 		return nil, err

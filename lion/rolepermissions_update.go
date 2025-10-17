@@ -11,8 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
+	"github.com/grpc-kit/pkg/lion/roles"
 )
 
 // RolePermissionsUpdate is the builder for updating RolePermissions entities.
@@ -90,7 +92,6 @@ func (_u *RolePermissionsUpdate) ClearUpdatedBy() *RolePermissionsUpdate {
 
 // SetRoleID sets the "role_id" field.
 func (_u *RolePermissionsUpdate) SetRoleID(v int) *RolePermissionsUpdate {
-	_u.mutation.ResetRoleID()
 	_u.mutation.SetRoleID(v)
 	return _u
 }
@@ -103,15 +104,8 @@ func (_u *RolePermissionsUpdate) SetNillableRoleID(v *int) *RolePermissionsUpdat
 	return _u
 }
 
-// AddRoleID adds value to the "role_id" field.
-func (_u *RolePermissionsUpdate) AddRoleID(v int) *RolePermissionsUpdate {
-	_u.mutation.AddRoleID(v)
-	return _u
-}
-
 // SetPermissionID sets the "permission_id" field.
 func (_u *RolePermissionsUpdate) SetPermissionID(v int) *RolePermissionsUpdate {
-	_u.mutation.ResetPermissionID()
 	_u.mutation.SetPermissionID(v)
 	return _u
 }
@@ -124,15 +118,43 @@ func (_u *RolePermissionsUpdate) SetNillablePermissionID(v *int) *RolePermission
 	return _u
 }
 
-// AddPermissionID adds value to the "permission_id" field.
-func (_u *RolePermissionsUpdate) AddPermissionID(v int) *RolePermissionsUpdate {
-	_u.mutation.AddPermissionID(v)
+// SetLionRolesID sets the "lion_roles" edge to the Roles entity by ID.
+func (_u *RolePermissionsUpdate) SetLionRolesID(id int) *RolePermissionsUpdate {
+	_u.mutation.SetLionRolesID(id)
 	return _u
+}
+
+// SetLionRoles sets the "lion_roles" edge to the Roles entity.
+func (_u *RolePermissionsUpdate) SetLionRoles(v *Roles) *RolePermissionsUpdate {
+	return _u.SetLionRolesID(v.ID)
+}
+
+// SetLionPermissionsID sets the "lion_permissions" edge to the Permissions entity by ID.
+func (_u *RolePermissionsUpdate) SetLionPermissionsID(id int) *RolePermissionsUpdate {
+	_u.mutation.SetLionPermissionsID(id)
+	return _u
+}
+
+// SetLionPermissions sets the "lion_permissions" edge to the Permissions entity.
+func (_u *RolePermissionsUpdate) SetLionPermissions(v *Permissions) *RolePermissionsUpdate {
+	return _u.SetLionPermissionsID(v.ID)
 }
 
 // Mutation returns the RolePermissionsMutation object of the builder.
 func (_u *RolePermissionsUpdate) Mutation() *RolePermissionsMutation {
 	return _u.mutation
+}
+
+// ClearLionRoles clears the "lion_roles" edge to the Roles entity.
+func (_u *RolePermissionsUpdate) ClearLionRoles() *RolePermissionsUpdate {
+	_u.mutation.ClearLionRoles()
+	return _u
+}
+
+// ClearLionPermissions clears the "lion_permissions" edge to the Permissions entity.
+func (_u *RolePermissionsUpdate) ClearLionPermissions() *RolePermissionsUpdate {
+	_u.mutation.ClearLionPermissions()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -183,6 +205,12 @@ func (_u *RolePermissionsUpdate) check() error {
 			return &ValidationError{Name: "permission_id", err: fmt.Errorf(`lion: validator failed for field "RolePermissions.permission_id": %w`, err)}
 		}
 	}
+	if _u.mutation.LionRolesCleared() && len(_u.mutation.LionRolesIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "RolePermissions.lion_roles"`)
+	}
+	if _u.mutation.LionPermissionsCleared() && len(_u.mutation.LionPermissionsIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "RolePermissions.lion_permissions"`)
+	}
 	return nil
 }
 
@@ -219,17 +247,63 @@ func (_u *RolePermissionsUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(rolepermissions.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.RoleID(); ok {
-		_spec.SetField(rolepermissions.FieldRoleID, field.TypeInt, value)
+	if _u.mutation.LionRolesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   rolepermissions.LionRolesTable,
+			Columns: []string{rolepermissions.LionRolesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if value, ok := _u.mutation.AddedRoleID(); ok {
-		_spec.AddField(rolepermissions.FieldRoleID, field.TypeInt, value)
+	if nodes := _u.mutation.LionRolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   rolepermissions.LionRolesTable,
+			Columns: []string{rolepermissions.LionRolesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if value, ok := _u.mutation.PermissionID(); ok {
-		_spec.SetField(rolepermissions.FieldPermissionID, field.TypeInt, value)
+	if _u.mutation.LionPermissionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   rolepermissions.LionPermissionsTable,
+			Columns: []string{rolepermissions.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if value, ok := _u.mutation.AddedPermissionID(); ok {
-		_spec.AddField(rolepermissions.FieldPermissionID, field.TypeInt, value)
+	if nodes := _u.mutation.LionPermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   rolepermissions.LionPermissionsTable,
+			Columns: []string{rolepermissions.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -313,7 +387,6 @@ func (_u *RolePermissionsUpdateOne) ClearUpdatedBy() *RolePermissionsUpdateOne {
 
 // SetRoleID sets the "role_id" field.
 func (_u *RolePermissionsUpdateOne) SetRoleID(v int) *RolePermissionsUpdateOne {
-	_u.mutation.ResetRoleID()
 	_u.mutation.SetRoleID(v)
 	return _u
 }
@@ -326,15 +399,8 @@ func (_u *RolePermissionsUpdateOne) SetNillableRoleID(v *int) *RolePermissionsUp
 	return _u
 }
 
-// AddRoleID adds value to the "role_id" field.
-func (_u *RolePermissionsUpdateOne) AddRoleID(v int) *RolePermissionsUpdateOne {
-	_u.mutation.AddRoleID(v)
-	return _u
-}
-
 // SetPermissionID sets the "permission_id" field.
 func (_u *RolePermissionsUpdateOne) SetPermissionID(v int) *RolePermissionsUpdateOne {
-	_u.mutation.ResetPermissionID()
 	_u.mutation.SetPermissionID(v)
 	return _u
 }
@@ -347,15 +413,43 @@ func (_u *RolePermissionsUpdateOne) SetNillablePermissionID(v *int) *RolePermiss
 	return _u
 }
 
-// AddPermissionID adds value to the "permission_id" field.
-func (_u *RolePermissionsUpdateOne) AddPermissionID(v int) *RolePermissionsUpdateOne {
-	_u.mutation.AddPermissionID(v)
+// SetLionRolesID sets the "lion_roles" edge to the Roles entity by ID.
+func (_u *RolePermissionsUpdateOne) SetLionRolesID(id int) *RolePermissionsUpdateOne {
+	_u.mutation.SetLionRolesID(id)
 	return _u
+}
+
+// SetLionRoles sets the "lion_roles" edge to the Roles entity.
+func (_u *RolePermissionsUpdateOne) SetLionRoles(v *Roles) *RolePermissionsUpdateOne {
+	return _u.SetLionRolesID(v.ID)
+}
+
+// SetLionPermissionsID sets the "lion_permissions" edge to the Permissions entity by ID.
+func (_u *RolePermissionsUpdateOne) SetLionPermissionsID(id int) *RolePermissionsUpdateOne {
+	_u.mutation.SetLionPermissionsID(id)
+	return _u
+}
+
+// SetLionPermissions sets the "lion_permissions" edge to the Permissions entity.
+func (_u *RolePermissionsUpdateOne) SetLionPermissions(v *Permissions) *RolePermissionsUpdateOne {
+	return _u.SetLionPermissionsID(v.ID)
 }
 
 // Mutation returns the RolePermissionsMutation object of the builder.
 func (_u *RolePermissionsUpdateOne) Mutation() *RolePermissionsMutation {
 	return _u.mutation
+}
+
+// ClearLionRoles clears the "lion_roles" edge to the Roles entity.
+func (_u *RolePermissionsUpdateOne) ClearLionRoles() *RolePermissionsUpdateOne {
+	_u.mutation.ClearLionRoles()
+	return _u
+}
+
+// ClearLionPermissions clears the "lion_permissions" edge to the Permissions entity.
+func (_u *RolePermissionsUpdateOne) ClearLionPermissions() *RolePermissionsUpdateOne {
+	_u.mutation.ClearLionPermissions()
+	return _u
 }
 
 // Where appends a list predicates to the RolePermissionsUpdate builder.
@@ -419,6 +513,12 @@ func (_u *RolePermissionsUpdateOne) check() error {
 			return &ValidationError{Name: "permission_id", err: fmt.Errorf(`lion: validator failed for field "RolePermissions.permission_id": %w`, err)}
 		}
 	}
+	if _u.mutation.LionRolesCleared() && len(_u.mutation.LionRolesIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "RolePermissions.lion_roles"`)
+	}
+	if _u.mutation.LionPermissionsCleared() && len(_u.mutation.LionPermissionsIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "RolePermissions.lion_permissions"`)
+	}
 	return nil
 }
 
@@ -472,17 +572,63 @@ func (_u *RolePermissionsUpdateOne) sqlSave(ctx context.Context) (_node *RolePer
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(rolepermissions.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.RoleID(); ok {
-		_spec.SetField(rolepermissions.FieldRoleID, field.TypeInt, value)
+	if _u.mutation.LionRolesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   rolepermissions.LionRolesTable,
+			Columns: []string{rolepermissions.LionRolesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if value, ok := _u.mutation.AddedRoleID(); ok {
-		_spec.AddField(rolepermissions.FieldRoleID, field.TypeInt, value)
+	if nodes := _u.mutation.LionRolesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   rolepermissions.LionRolesTable,
+			Columns: []string{rolepermissions.LionRolesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if value, ok := _u.mutation.PermissionID(); ok {
-		_spec.SetField(rolepermissions.FieldPermissionID, field.TypeInt, value)
+	if _u.mutation.LionPermissionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   rolepermissions.LionPermissionsTable,
+			Columns: []string{rolepermissions.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if value, ok := _u.mutation.AddedPermissionID(); ok {
-		_spec.AddField(rolepermissions.FieldPermissionID, field.TypeInt, value)
+	if nodes := _u.mutation.LionPermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   rolepermissions.LionPermissionsTable,
+			Columns: []string{rolepermissions.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &RolePermissions{config: _u.config}
 	_spec.Assign = _node.assignValues

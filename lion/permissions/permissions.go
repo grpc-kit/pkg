@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -21,10 +22,28 @@ const (
 	FieldCreatedBy = "created_by"
 	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
 	FieldUpdatedBy = "updated_by"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
+	// FieldResourceID holds the string denoting the resource_id field in the database.
+	FieldResourceID = "resource_id"
+	// EdgeLionRolePermissions holds the string denoting the lion_role_permissions edge name in mutations.
+	EdgeLionRolePermissions = "lion_role_permissions"
+	// EdgeLionResources holds the string denoting the lion_resources edge name in mutations.
+	EdgeLionResources = "lion_resources"
 	// Table holds the table name of the permissions in the database.
 	Table = "lion_permissions"
+	// LionRolePermissionsTable is the table that holds the lion_role_permissions relation/edge.
+	LionRolePermissionsTable = "lion_role_permissions"
+	// LionRolePermissionsInverseTable is the table name for the RolePermissions entity.
+	// It exists in this package in order to avoid circular dependency with the "rolepermissions" package.
+	LionRolePermissionsInverseTable = "lion_role_permissions"
+	// LionRolePermissionsColumn is the table column denoting the lion_role_permissions relation/edge.
+	LionRolePermissionsColumn = "permission_id"
+	// LionResourcesTable is the table that holds the lion_resources relation/edge.
+	LionResourcesTable = "lion_permissions"
+	// LionResourcesInverseTable is the table name for the Resources entity.
+	// It exists in this package in order to avoid circular dependency with the "resources" package.
+	LionResourcesInverseTable = "lion_resources"
+	// LionResourcesColumn is the table column denoting the lion_resources relation/edge.
+	LionResourcesColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for permissions fields.
@@ -34,7 +53,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldCreatedBy,
 	FieldUpdatedBy,
-	FieldName,
+	FieldResourceID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -58,8 +77,8 @@ var (
 	DefaultCreatedBy int64
 	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
 	DefaultUpdatedBy int64
-	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator func(string) error
+	// ResourceIDValidator is a validator for the "resource_id" field. It is called by the builders before save.
+	ResourceIDValidator func(int) error
 )
 
 // OrderOption defines the ordering options for the Permissions queries.
@@ -90,7 +109,42 @@ func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
+// ByResourceID orders the results by the resource_id field.
+func ByResourceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceID, opts...).ToFunc()
+}
+
+// ByLionRolePermissionsCount orders the results by lion_role_permissions count.
+func ByLionRolePermissionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionRolePermissionsStep(), opts...)
+	}
+}
+
+// ByLionRolePermissions orders the results by lion_role_permissions terms.
+func ByLionRolePermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionRolePermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByLionResourcesField orders the results by lion_resources field.
+func ByLionResourcesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionResourcesStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newLionRolePermissionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionRolePermissionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRolePermissionsTable, LionRolePermissionsColumn),
+	)
+}
+func newLionResourcesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionResourcesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionResourcesTable, LionResourcesColumn),
+	)
 }

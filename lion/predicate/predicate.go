@@ -39,9 +39,6 @@ type RoleDepartments func(*sql.Selector)
 // RolePermissions is the predicate function for rolepermissions builders.
 type RolePermissions func(*sql.Selector)
 
-// RoleResources is the predicate function for roleresources builders.
-type RoleResources func(*sql.Selector)
-
 // Roles is the predicate function for roles builders.
 type Roles func(*sql.Selector)
 

@@ -36,8 +36,8 @@ const (
 	FieldOrderWeight = "order_weight"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLionRoleResources holds the string denoting the lion_role_resources edge name in mutations.
-	EdgeLionRoleResources = "lion_role_resources"
+	// EdgeLionRolePermissions holds the string denoting the lion_role_permissions edge name in mutations.
+	EdgeLionRolePermissions = "lion_role_permissions"
 	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
 	EdgeLionUserRoles = "lion_user_roles"
 	// EdgeLionRoleGroups holds the string denoting the lion_role_groups edge name in mutations.
@@ -46,13 +46,13 @@ const (
 	EdgeLionRoleDepartments = "lion_role_departments"
 	// Table holds the table name of the roles in the database.
 	Table = "lion_roles"
-	// LionRoleResourcesTable is the table that holds the lion_role_resources relation/edge.
-	LionRoleResourcesTable = "lion_role_resources"
-	// LionRoleResourcesInverseTable is the table name for the RoleResources entity.
-	// It exists in this package in order to avoid circular dependency with the "roleresources" package.
-	LionRoleResourcesInverseTable = "lion_role_resources"
-	// LionRoleResourcesColumn is the table column denoting the lion_role_resources relation/edge.
-	LionRoleResourcesColumn = "role_id"
+	// LionRolePermissionsTable is the table that holds the lion_role_permissions relation/edge.
+	LionRolePermissionsTable = "lion_role_permissions"
+	// LionRolePermissionsInverseTable is the table name for the RolePermissions entity.
+	// It exists in this package in order to avoid circular dependency with the "rolepermissions" package.
+	LionRolePermissionsInverseTable = "lion_role_permissions"
+	// LionRolePermissionsColumn is the table column denoting the lion_role_permissions relation/edge.
+	LionRolePermissionsColumn = "role_id"
 	// LionUserRolesTable is the table that holds the lion_user_roles relation/edge.
 	LionUserRolesTable = "lion_user_roles"
 	// LionUserRolesInverseTable is the table name for the UserRoles entity.
@@ -183,17 +183,17 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLionRoleResourcesCount orders the results by lion_role_resources count.
-func ByLionRoleResourcesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionRolePermissionsCount orders the results by lion_role_permissions count.
+func ByLionRolePermissionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionRoleResourcesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionRolePermissionsStep(), opts...)
 	}
 }
 
-// ByLionRoleResources orders the results by lion_role_resources terms.
-func ByLionRoleResources(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionRolePermissions orders the results by lion_role_permissions terms.
+func ByLionRolePermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionRoleResourcesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionRolePermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -238,11 +238,11 @@ func ByLionRoleDepartments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOpti
 		sqlgraph.OrderByNeighborTerms(s, newLionRoleDepartmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newLionRoleResourcesStep() *sqlgraph.Step {
+func newLionRolePermissionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionRoleResourcesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleResourcesTable, LionRoleResourcesColumn),
+		sqlgraph.To(LionRolePermissionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRolePermissionsTable, LionRolePermissionsColumn),
 	)
 }
 func newLionUserRolesStep() *sqlgraph.Step {

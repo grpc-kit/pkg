@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -284,26 +285,6 @@ func RoleIDNotIn(vs ...int) predicate.RolePermissions {
 	return predicate.RolePermissions(sql.FieldNotIn(FieldRoleID, vs...))
 }
 
-// RoleIDGT applies the GT predicate on the "role_id" field.
-func RoleIDGT(v int) predicate.RolePermissions {
-	return predicate.RolePermissions(sql.FieldGT(FieldRoleID, v))
-}
-
-// RoleIDGTE applies the GTE predicate on the "role_id" field.
-func RoleIDGTE(v int) predicate.RolePermissions {
-	return predicate.RolePermissions(sql.FieldGTE(FieldRoleID, v))
-}
-
-// RoleIDLT applies the LT predicate on the "role_id" field.
-func RoleIDLT(v int) predicate.RolePermissions {
-	return predicate.RolePermissions(sql.FieldLT(FieldRoleID, v))
-}
-
-// RoleIDLTE applies the LTE predicate on the "role_id" field.
-func RoleIDLTE(v int) predicate.RolePermissions {
-	return predicate.RolePermissions(sql.FieldLTE(FieldRoleID, v))
-}
-
 // PermissionIDEQ applies the EQ predicate on the "permission_id" field.
 func PermissionIDEQ(v int) predicate.RolePermissions {
 	return predicate.RolePermissions(sql.FieldEQ(FieldPermissionID, v))
@@ -324,24 +305,50 @@ func PermissionIDNotIn(vs ...int) predicate.RolePermissions {
 	return predicate.RolePermissions(sql.FieldNotIn(FieldPermissionID, vs...))
 }
 
-// PermissionIDGT applies the GT predicate on the "permission_id" field.
-func PermissionIDGT(v int) predicate.RolePermissions {
-	return predicate.RolePermissions(sql.FieldGT(FieldPermissionID, v))
+// HasLionRoles applies the HasEdge predicate on the "lion_roles" edge.
+func HasLionRoles() predicate.RolePermissions {
+	return predicate.RolePermissions(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionRolesTable, LionRolesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
 }
 
-// PermissionIDGTE applies the GTE predicate on the "permission_id" field.
-func PermissionIDGTE(v int) predicate.RolePermissions {
-	return predicate.RolePermissions(sql.FieldGTE(FieldPermissionID, v))
+// HasLionRolesWith applies the HasEdge predicate on the "lion_roles" edge with a given conditions (other predicates).
+func HasLionRolesWith(preds ...predicate.Roles) predicate.RolePermissions {
+	return predicate.RolePermissions(func(s *sql.Selector) {
+		step := newLionRolesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
-// PermissionIDLT applies the LT predicate on the "permission_id" field.
-func PermissionIDLT(v int) predicate.RolePermissions {
-	return predicate.RolePermissions(sql.FieldLT(FieldPermissionID, v))
+// HasLionPermissions applies the HasEdge predicate on the "lion_permissions" edge.
+func HasLionPermissions() predicate.RolePermissions {
+	return predicate.RolePermissions(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionPermissionsTable, LionPermissionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
 }
 
-// PermissionIDLTE applies the LTE predicate on the "permission_id" field.
-func PermissionIDLTE(v int) predicate.RolePermissions {
-	return predicate.RolePermissions(sql.FieldLTE(FieldPermissionID, v))
+// HasLionPermissionsWith applies the HasEdge predicate on the "lion_permissions" edge with a given conditions (other predicates).
+func HasLionPermissionsWith(preds ...predicate.Permissions) predicate.RolePermissions {
+	return predicate.RolePermissions(func(s *sql.Selector) {
+		step := newLionPermissionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.
