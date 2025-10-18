@@ -38,7 +38,7 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		SetName(req.Group.Name).
 		SetGroupType(int(req.Group.Type.Number())).
 		SetGroupStatus(int(req.Group.Status.Number())).
-		SetI18nName(req.Group.I18NName).
+		// SetI18nName(req.Group.I18NName).
 		SetOrderWeight(int(req.Group.OrderWeight)).
 		SetParentID(int(req.Group.ParentId)).
 		SetMaxMembers(int(req.Group.MaxMembers)).
@@ -54,11 +54,12 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 	}
 
 	result = &adminv1.Group{
-		Id:           int32(group.ID),
-		Name:         group.Name,
-		Type:         adminv1.Group_Type(group.GroupType),
-		Status:       adminv1.Group_Status(group.GroupStatus),
-		I18NName:     group.I18nName,
+		Id:     int32(group.ID),
+		Name:   group.Name,
+		Type:   adminv1.Group_Type(group.GroupType),
+		Status: adminv1.Group_Status(group.GroupStatus),
+		// I18NName:     group.I18nName,
+		DisplayName:  I18NName(group.Name),
 		OrderWeight:  int32(group.OrderWeight),
 		ParentId:     int32(group.ParentID),
 		MaxMembers:   int32(group.MaxMembers),
@@ -98,11 +99,11 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 	result.Groups = make([]*adminv1.Group, 0, len(groupList))
 	for _, group := range groupList {
 		result.Groups = append(result.Groups, &adminv1.Group{
-			Id:           int32(group.ID),
-			Name:         group.Name,
-			Type:         adminv1.Group_Type(group.GroupType),
-			Status:       adminv1.Group_Status(group.GroupStatus),
-			I18NName:     group.I18nName,
+			Id:     int32(group.ID),
+			Name:   group.Name,
+			Type:   adminv1.Group_Type(group.GroupType),
+			Status: adminv1.Group_Status(group.GroupStatus),
+			// I18NName:     group.I18nName,
 			OrderWeight:  int32(group.OrderWeight),
 			ParentId:     int32(group.ParentID),
 			MaxMembers:   int32(group.MaxMembers),
@@ -150,8 +151,10 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 				update.SetGroupType(int(req.Group.Type.Number()))
 			case "status":
 				update.SetGroupStatus(int(req.Group.Status.Number()))
-			case "i18n_name":
-				update.SetI18nName(req.Group.I18NName)
+				/*
+					case "i18n_name":
+						update.SetI18nName(req.Group.I18NName)
+				*/
 			case "order_weight":
 				update.SetOrderWeight(int(req.Group.OrderWeight))
 			case "parent_id":
@@ -176,7 +179,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			SetName(req.Group.Name).
 			SetGroupType(int(req.Group.Type.Number())).
 			SetGroupStatus(int(req.Group.Status.Number())).
-			SetI18nName(req.Group.I18NName).
+			// SetI18nName(req.Group.I18NName).
 			SetOrderWeight(int(req.Group.OrderWeight)).
 			SetParentID(int(req.Group.ParentId)).
 			SetMaxMembers(int(req.Group.MaxMembers)).
@@ -195,11 +198,11 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 
 	// 转换结果
 	result = &adminv1.Group{
-		Id:           int32(updatedGroup.ID),
-		Name:         updatedGroup.Name,
-		Type:         adminv1.Group_Type(updatedGroup.GroupType),
-		Status:       adminv1.Group_Status(updatedGroup.GroupStatus),
-		I18NName:     updatedGroup.I18nName,
+		Id:     int32(updatedGroup.ID),
+		Name:   updatedGroup.Name,
+		Type:   adminv1.Group_Type(updatedGroup.GroupType),
+		Status: adminv1.Group_Status(updatedGroup.GroupStatus),
+		// I18NName:     updatedGroup.I18nName,
 		OrderWeight:  int32(updatedGroup.OrderWeight),
 		ParentId:     int32(updatedGroup.ParentID),
 		MaxMembers:   int32(updatedGroup.MaxMembers),

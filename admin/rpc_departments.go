@@ -44,7 +44,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	dp, err := tx.Departments.Create().
 		SetParentID(int(req.Department.ParentId)).
 		SetName(req.Department.Name).
-		SetI18nName(req.Department.I18NName).
+		// SetI18nName(req.Department.I18NName).
 		SetOrderWeight(int(req.Department.OrderWeight)).
 		Save(ctx)
 	if err != nil {
@@ -61,9 +61,9 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	_, err = tx.RoleDepartments.Create().SetRoleID(ros.ID).SetDepartmentID(dp.ID).Save(ctx)
 
 	result = &adminv1.Department{
-		Id:          int32(dp.ID),
-		Name:        dp.Name,
-		I18NName:    dp.I18nName,
+		Id:   int32(dp.ID),
+		Name: dp.Name,
+		// I18NName:    dp.I18nName,
 		OrderWeight: int32(dp.OrderWeight),
 		Managers:    make([]*adminv1.DepartmentMember, 0),
 	}
@@ -124,7 +124,8 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Id:          int32(m.ID),
 			ParentId:    int32(m.ParentID),
 			Name:        m.Name,
-			I18NName:    m.I18nName,
+			DisplayName: I18NName(m.Name),
+			// I18NName:    m.I18nName,
 			OrderWeight: int32(m.OrderWeight),
 			Managers:    make([]*adminv1.DepartmentMember, 0),
 		}
@@ -273,8 +274,6 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 			switch path {
 			case departments.FieldName:
 				x.SetName(req.Department.Name)
-			case "i18n_name.en_us":
-			// TODO;
 			case departments.FieldOrderWeight:
 				x.SetOrderWeight(int(req.Department.OrderWeight))
 			case departments.FieldParentID:
@@ -486,10 +485,10 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 	}
 
 	pbDep := &adminv1.Department{
-		Id:          int32(dep.ID),
-		ParentId:    int32(dep.ParentID),
-		Name:        dep.Name,
-		I18NName:    dep.I18nName,
+		Id:       int32(dep.ID),
+		ParentId: int32(dep.ParentID),
+		Name:     dep.Name,
+		// I18NName:    dep.I18nName,
 		OrderWeight: int32(dep.OrderWeight),
 		Managers:    make([]*adminv1.DepartmentMember, 0),
 	}

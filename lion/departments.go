@@ -32,8 +32,6 @@ type Departments struct {
 	ParentID int `json:"parent_id,omitempty"`
 	// 部门名称，用于系统内部显示和业务逻辑
 	Name string `json:"name,omitempty"`
-	// 国际化名称配置，支持多语言环境
-	I18nName map[string]string `json:"i18n_name,omitempty"`
 	// 部门类型分类：0-未指定，1-业务部门，2-支持部门，3-管理部门，4-虚拟部门
 	DepartmentType int `json:"department_type,omitempty"`
 	// 部门运营状态：0-未指定，1-正常运营，2-暂停运营，3-已解散，4-合并中
@@ -109,7 +107,7 @@ func (*Departments) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case departments.FieldI18nName, departments.FieldEmailEncrypted, departments.FieldPhoneNumberEncrypted, departments.FieldAddressEncrypted, departments.FieldMetadata:
+		case departments.FieldEmailEncrypted, departments.FieldPhoneNumberEncrypted, departments.FieldAddressEncrypted, departments.FieldMetadata:
 			values[i] = new([]byte)
 		case departments.FieldID, departments.FieldCreatedBy, departments.FieldUpdatedBy, departments.FieldParentID, departments.FieldDepartmentType, departments.FieldDepartmentStatus, departments.FieldOrderWeight, departments.FieldMaxMembers:
 			values[i] = new(sql.NullInt64)
@@ -180,14 +178,6 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
-			}
-		case departments.FieldI18nName:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.I18nName); err != nil {
-					return fmt.Errorf("unmarshal field i18n_name: %w", err)
-				}
 			}
 		case departments.FieldDepartmentType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -336,9 +326,6 @@ func (_m *Departments) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
-	builder.WriteString("i18n_name=")
-	builder.WriteString(fmt.Sprintf("%v", _m.I18nName))
 	builder.WriteString(", ")
 	builder.WriteString("department_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentType))

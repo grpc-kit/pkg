@@ -400,16 +400,6 @@ func NameContainsFold(v string) predicate.Roles {
 	return predicate.Roles(sql.FieldContainsFold(FieldName, v))
 }
 
-// I18nNameIsNil applies the IsNil predicate on the "i18n_name" field.
-func I18nNameIsNil() predicate.Roles {
-	return predicate.Roles(sql.FieldIsNull(FieldI18nName))
-}
-
-// I18nNameNotNil applies the NotNil predicate on the "i18n_name" field.
-func I18nNameNotNil() predicate.Roles {
-	return predicate.Roles(sql.FieldNotNull(FieldI18nName))
-}
-
 // RoleTypeEQ applies the EQ predicate on the "role_type" field.
 func RoleTypeEQ(v int) predicate.Roles {
 	return predicate.Roles(sql.FieldEQ(FieldRoleType, v))

@@ -35,8 +35,6 @@ type Groups struct {
 	GroupType int `json:"group_type,omitempty"`
 	// 群组状态，对应 api/known/admin/v1/common.proto 中定义
 	GroupStatus int `json:"group_status,omitempty"`
-	// 国际化名称，支持多语言显示
-	I18nName map[string]string `json:"i18n_name,omitempty"`
 	// 排序权重，数字越小越靠前
 	OrderWeight int `json:"order_weight,omitempty"`
 	// 父群组ID，为0表示顶级群组
@@ -104,7 +102,7 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case groups.FieldI18nName, groups.FieldMetadata:
+		case groups.FieldMetadata:
 			values[i] = new([]byte)
 		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldOrderWeight, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
@@ -181,14 +179,6 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field group_status", values[i])
 			} else if value.Valid {
 				_m.GroupStatus = int(value.Int64)
-			}
-		case groups.FieldI18nName:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field i18n_name", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.I18nName); err != nil {
-					return fmt.Errorf("unmarshal field i18n_name: %w", err)
-				}
 			}
 		case groups.FieldOrderWeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -310,9 +300,6 @@ func (_m *Groups) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("group_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GroupStatus))
-	builder.WriteString(", ")
-	builder.WriteString("i18n_name=")
-	builder.WriteString(fmt.Sprintf("%v", _m.I18nName))
 	builder.WriteString(", ")
 	builder.WriteString("order_weight=")
 	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))

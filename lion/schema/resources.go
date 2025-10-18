@@ -24,9 +24,10 @@ func (Resources) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("资源名称"),
-		field.JSON("i18n_name", map[string]string{}).
-			Optional().
-			Comment("国际化名称，支持多语言，如 {\"en\": \"User\", \"zh\": \"用户\"}"),
+		// field.String("i18n_key").
+		//	Optional().
+		//	Comment("国际化键值，用于前端多语言显示的标识符"),
+
 		field.Int("order_weight").
 			Default(0).
 			Comment("排序权重，越小越靠前"),

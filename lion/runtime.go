@@ -207,23 +207,23 @@ func init() {
 		}
 	}()
 	// departmentsDescDepartmentType is the schema descriptor for department_type field.
-	departmentsDescDepartmentType := departmentsFields[3].Descriptor()
+	departmentsDescDepartmentType := departmentsFields[2].Descriptor()
 	// departments.DefaultDepartmentType holds the default value on creation for the department_type field.
 	departments.DefaultDepartmentType = departmentsDescDepartmentType.Default.(int)
 	// departmentsDescDepartmentStatus is the schema descriptor for department_status field.
-	departmentsDescDepartmentStatus := departmentsFields[4].Descriptor()
+	departmentsDescDepartmentStatus := departmentsFields[3].Descriptor()
 	// departments.DefaultDepartmentStatus holds the default value on creation for the department_status field.
 	departments.DefaultDepartmentStatus = departmentsDescDepartmentStatus.Default.(int)
 	// departmentsDescOrderWeight is the schema descriptor for order_weight field.
-	departmentsDescOrderWeight := departmentsFields[5].Descriptor()
+	departmentsDescOrderWeight := departmentsFields[4].Descriptor()
 	// departments.DefaultOrderWeight holds the default value on creation for the order_weight field.
 	departments.DefaultOrderWeight = departmentsDescOrderWeight.Default.(int)
 	// departmentsDescMaxMembers is the schema descriptor for max_members field.
-	departmentsDescMaxMembers := departmentsFields[11].Descriptor()
+	departmentsDescMaxMembers := departmentsFields[10].Descriptor()
 	// departments.DefaultMaxMembers holds the default value on creation for the max_members field.
 	departments.DefaultMaxMembers = departmentsDescMaxMembers.Default.(int)
 	// departmentsDescDescription is the schema descriptor for description field.
-	departmentsDescDescription := departmentsFields[14].Descriptor()
+	departmentsDescDescription := departmentsFields[13].Descriptor()
 	// departments.DefaultDescription holds the default value on creation for the description field.
 	departments.DefaultDescription = departmentsDescDescription.Default.(string)
 	grouprolesMixin := schema.GroupRoles{}.Mixin()
@@ -311,31 +311,31 @@ func init() {
 	// groups.DefaultGroupStatus holds the default value on creation for the group_status field.
 	groups.DefaultGroupStatus = groupsDescGroupStatus.Default.(int)
 	// groupsDescOrderWeight is the schema descriptor for order_weight field.
-	groupsDescOrderWeight := groupsFields[4].Descriptor()
+	groupsDescOrderWeight := groupsFields[3].Descriptor()
 	// groups.DefaultOrderWeight holds the default value on creation for the order_weight field.
 	groups.DefaultOrderWeight = groupsDescOrderWeight.Default.(int)
 	// groupsDescParentID is the schema descriptor for parent_id field.
-	groupsDescParentID := groupsFields[5].Descriptor()
+	groupsDescParentID := groupsFields[4].Descriptor()
 	// groups.DefaultParentID holds the default value on creation for the parent_id field.
 	groups.DefaultParentID = groupsDescParentID.Default.(int)
 	// groupsDescMaxMembers is the schema descriptor for max_members field.
-	groupsDescMaxMembers := groupsFields[6].Descriptor()
+	groupsDescMaxMembers := groupsFields[5].Descriptor()
 	// groups.DefaultMaxMembers holds the default value on creation for the max_members field.
 	groups.DefaultMaxMembers = groupsDescMaxMembers.Default.(int)
 	// groupsDescMetadata is the schema descriptor for metadata field.
-	groupsDescMetadata := groupsFields[7].Descriptor()
+	groupsDescMetadata := groupsFields[6].Descriptor()
 	// groups.DefaultMetadata holds the default value on creation for the metadata field.
 	groups.DefaultMetadata = groupsDescMetadata.Default.(map[string]string)
 	// groupsDescExternalID is the schema descriptor for external_id field.
-	groupsDescExternalID := groupsFields[8].Descriptor()
+	groupsDescExternalID := groupsFields[7].Descriptor()
 	// groups.DefaultExternalID holds the default value on creation for the external_id field.
 	groups.DefaultExternalID = groupsDescExternalID.Default.(string)
 	// groupsDescDepartmentID is the schema descriptor for department_id field.
-	groupsDescDepartmentID := groupsFields[9].Descriptor()
+	groupsDescDepartmentID := groupsFields[8].Descriptor()
 	// groups.DefaultDepartmentID holds the default value on creation for the department_id field.
 	groups.DefaultDepartmentID = groupsDescDepartmentID.Default.(int)
 	// groupsDescDescription is the schema descriptor for description field.
-	groupsDescDescription := groupsFields[10].Descriptor()
+	groupsDescDescription := groupsFields[9].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
 	permissionsMixin := schema.Permissions{}.Mixin()
@@ -444,49 +444,49 @@ func init() {
 		}
 	}()
 	// resourcesDescOrderWeight is the schema descriptor for order_weight field.
-	resourcesDescOrderWeight := resourcesFields[3].Descriptor()
+	resourcesDescOrderWeight := resourcesFields[2].Descriptor()
 	// resources.DefaultOrderWeight holds the default value on creation for the order_weight field.
 	resources.DefaultOrderWeight = resourcesDescOrderWeight.Default.(int)
 	// resourcesDescResourceType is the schema descriptor for resource_type field.
-	resourcesDescResourceType := resourcesFields[4].Descriptor()
+	resourcesDescResourceType := resourcesFields[3].Descriptor()
 	// resources.DefaultResourceType holds the default value on creation for the resource_type field.
 	resources.DefaultResourceType = resourcesDescResourceType.Default.(int)
 	// resourcesDescResourceScope is the schema descriptor for resource_scope field.
-	resourcesDescResourceScope := resourcesFields[5].Descriptor()
+	resourcesDescResourceScope := resourcesFields[4].Descriptor()
 	// resources.DefaultResourceScope holds the default value on creation for the resource_scope field.
 	resources.DefaultResourceScope = resourcesDescResourceScope.Default.(int)
 	// resourcesDescEnabled is the schema descriptor for enabled field.
-	resourcesDescEnabled := resourcesFields[6].Descriptor()
+	resourcesDescEnabled := resourcesFields[5].Descriptor()
 	// resources.DefaultEnabled holds the default value on creation for the enabled field.
 	resources.DefaultEnabled = resourcesDescEnabled.Default.(bool)
 	// resourcesDescHidden is the schema descriptor for hidden field.
-	resourcesDescHidden := resourcesFields[7].Descriptor()
+	resourcesDescHidden := resourcesFields[6].Descriptor()
 	// resources.DefaultHidden holds the default value on creation for the hidden field.
 	resources.DefaultHidden = resourcesDescHidden.Default.(bool)
 	// resourcesDescHideChildren is the schema descriptor for hide_children field.
-	resourcesDescHideChildren := resourcesFields[8].Descriptor()
+	resourcesDescHideChildren := resourcesFields[7].Descriptor()
 	// resources.DefaultHideChildren holds the default value on creation for the hide_children field.
 	resources.DefaultHideChildren = resourcesDescHideChildren.Default.(bool)
 	// resourcesDescPath is the schema descriptor for path field.
-	resourcesDescPath := resourcesFields[9].Descriptor()
+	resourcesDescPath := resourcesFields[8].Descriptor()
 	// resources.DefaultPath holds the default value on creation for the path field.
 	resources.DefaultPath = resourcesDescPath.Default.(string)
 	// resources.PathValidator is a validator for the "path" field. It is called by the builders before save.
 	resources.PathValidator = resourcesDescPath.Validators[0].(func(string) error)
 	// resourcesDescIcon is the schema descriptor for icon field.
-	resourcesDescIcon := resourcesFields[10].Descriptor()
+	resourcesDescIcon := resourcesFields[9].Descriptor()
 	// resources.DefaultIcon holds the default value on creation for the icon field.
 	resources.DefaultIcon = resourcesDescIcon.Default.(string)
 	// resources.IconValidator is a validator for the "icon" field. It is called by the builders before save.
 	resources.IconValidator = resourcesDescIcon.Validators[0].(func(string) error)
 	// resourcesDescComponent is the schema descriptor for component field.
-	resourcesDescComponent := resourcesFields[11].Descriptor()
+	resourcesDescComponent := resourcesFields[10].Descriptor()
 	// resources.DefaultComponent holds the default value on creation for the component field.
 	resources.DefaultComponent = resourcesDescComponent.Default.(string)
 	// resources.ComponentValidator is a validator for the "component" field. It is called by the builders before save.
 	resources.ComponentValidator = resourcesDescComponent.Validators[0].(func(string) error)
 	// resourcesDescDescription is the schema descriptor for description field.
-	resourcesDescDescription := resourcesFields[12].Descriptor()
+	resourcesDescDescription := resourcesFields[11].Descriptor()
 	// resources.DefaultDescription holds the default value on creation for the description field.
 	resources.DefaultDescription = resourcesDescDescription.Default.(string)
 	roledepartmentsMixin := schema.RoleDepartments{}.Mixin()
@@ -588,7 +588,6 @@ func init() {
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
-			validators[2].(func(string) error),
 		}
 		return func(name string) error {
 			for _, fn := range fns {
@@ -600,19 +599,19 @@ func init() {
 		}
 	}()
 	// rolesDescRoleType is the schema descriptor for role_type field.
-	rolesDescRoleType := rolesFields[2].Descriptor()
+	rolesDescRoleType := rolesFields[1].Descriptor()
 	// roles.DefaultRoleType holds the default value on creation for the role_type field.
 	roles.DefaultRoleType = rolesDescRoleType.Default.(int)
 	// rolesDescRoleStatus is the schema descriptor for role_status field.
-	rolesDescRoleStatus := rolesFields[3].Descriptor()
+	rolesDescRoleStatus := rolesFields[2].Descriptor()
 	// roles.DefaultRoleStatus holds the default value on creation for the role_status field.
 	roles.DefaultRoleStatus = rolesDescRoleStatus.Default.(int)
 	// rolesDescOrderWeight is the schema descriptor for order_weight field.
-	rolesDescOrderWeight := rolesFields[4].Descriptor()
+	rolesDescOrderWeight := rolesFields[3].Descriptor()
 	// roles.DefaultOrderWeight holds the default value on creation for the order_weight field.
 	roles.DefaultOrderWeight = rolesDescOrderWeight.Default.(int)
 	// rolesDescDescription is the schema descriptor for description field.
-	rolesDescDescription := rolesFields[5].Descriptor()
+	rolesDescDescription := rolesFields[4].Descriptor()
 	// roles.DefaultDescription holds the default value on creation for the description field.
 	roles.DefaultDescription = rolesDescDescription.Default.(string)
 	userdepartmentsMixin := schema.UserDepartments{}.Mixin()

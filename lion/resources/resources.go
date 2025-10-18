@@ -28,8 +28,6 @@ const (
 	FieldParentID = "parent_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldI18nName holds the string denoting the i18n_name field in the database.
-	FieldI18nName = "i18n_name"
 	// FieldOrderWeight holds the string denoting the order_weight field in the database.
 	FieldOrderWeight = "order_weight"
 	// FieldResourceType holds the string denoting the resource_type field in the database.
@@ -73,7 +71,6 @@ var Columns = []string{
 	FieldUpdatedBy,
 	FieldParentID,
 	FieldName,
-	FieldI18nName,
 	FieldOrderWeight,
 	FieldResourceType,
 	FieldResourceScope,

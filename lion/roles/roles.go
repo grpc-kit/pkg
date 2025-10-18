@@ -26,8 +26,6 @@ const (
 	FieldUpdatedBy = "updated_by"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldI18nName holds the string denoting the i18n_name field in the database.
-	FieldI18nName = "i18n_name"
 	// FieldRoleType holds the string denoting the role_type field in the database.
 	FieldRoleType = "role_type"
 	// FieldRoleStatus holds the string denoting the role_status field in the database.
@@ -85,7 +83,6 @@ var Columns = []string{
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldName,
-	FieldI18nName,
 	FieldRoleType,
 	FieldRoleStatus,
 	FieldOrderWeight,

@@ -475,16 +475,6 @@ func NameContainsFold(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldContainsFold(FieldName, v))
 }
 
-// I18nNameIsNil applies the IsNil predicate on the "i18n_name" field.
-func I18nNameIsNil() predicate.Resources {
-	return predicate.Resources(sql.FieldIsNull(FieldI18nName))
-}
-
-// I18nNameNotNil applies the NotNil predicate on the "i18n_name" field.
-func I18nNameNotNil() predicate.Resources {
-	return predicate.Resources(sql.FieldNotNull(FieldI18nName))
-}
-
 // OrderWeightEQ applies the EQ predicate on the "order_weight" field.
 func OrderWeightEQ(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldOrderWeight, v))

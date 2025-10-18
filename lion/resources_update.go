@@ -144,18 +144,6 @@ func (_u *ResourcesUpdate) SetNillableName(v *string) *ResourcesUpdate {
 	return _u
 }
 
-// SetI18nName sets the "i18n_name" field.
-func (_u *ResourcesUpdate) SetI18nName(v map[string]string) *ResourcesUpdate {
-	_u.mutation.SetI18nName(v)
-	return _u
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (_u *ResourcesUpdate) ClearI18nName() *ResourcesUpdate {
-	_u.mutation.ClearI18nName()
-	return _u
-}
-
 // SetOrderWeight sets the "order_weight" field.
 func (_u *ResourcesUpdate) SetOrderWeight(v int) *ResourcesUpdate {
 	_u.mutation.ResetOrderWeight()
@@ -467,12 +455,6 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(resources.FieldI18nName, field.TypeJSON, value)
-	}
-	if _u.mutation.I18nNameCleared() {
-		_spec.ClearField(resources.FieldI18nName, field.TypeJSON)
-	}
 	if value, ok := _u.mutation.OrderWeight(); ok {
 		_spec.SetField(resources.FieldOrderWeight, field.TypeInt, value)
 	}
@@ -689,18 +671,6 @@ func (_u *ResourcesUpdateOne) SetNillableName(v *string) *ResourcesUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
 	}
-	return _u
-}
-
-// SetI18nName sets the "i18n_name" field.
-func (_u *ResourcesUpdateOne) SetI18nName(v map[string]string) *ResourcesUpdateOne {
-	_u.mutation.SetI18nName(v)
-	return _u
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (_u *ResourcesUpdateOne) ClearI18nName() *ResourcesUpdateOne {
-	_u.mutation.ClearI18nName()
 	return _u
 }
 
@@ -1044,12 +1014,6 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(resources.FieldI18nName, field.TypeJSON, value)
-	}
-	if _u.mutation.I18nNameCleared() {
-		_spec.ClearField(resources.FieldI18nName, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.OrderWeight(); ok {
 		_spec.SetField(resources.FieldOrderWeight, field.TypeInt, value)

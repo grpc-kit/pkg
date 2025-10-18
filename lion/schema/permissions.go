@@ -24,9 +24,9 @@ func (Permissions) Fields() []ent.Field {
 				MaxLen(256).
 				NotEmpty().
 				Comment("对我展示的权限名称，如：管理用户列表"),
-			field.JSON("i18n_name", map[string]string{}).
+			field.String("i18n_key").
 				Optional().
-				Comment("国际化名称，支持多语言，如 {\"en\": \"User\", \"zh\": \"用户\"}"),
+				Comment("国际化键值，用于前端多语言显示的标识符"),
 			field.String("domain").
 				MaxLen(128).
 				NotEmpty().

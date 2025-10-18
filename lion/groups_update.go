@@ -167,18 +167,6 @@ func (_u *GroupsUpdate) AddGroupStatus(v int) *GroupsUpdate {
 	return _u
 }
 
-// SetI18nName sets the "i18n_name" field.
-func (_u *GroupsUpdate) SetI18nName(v map[string]string) *GroupsUpdate {
-	_u.mutation.SetI18nName(v)
-	return _u
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (_u *GroupsUpdate) ClearI18nName() *GroupsUpdate {
-	_u.mutation.ClearI18nName()
-	return _u
-}
-
 // SetOrderWeight sets the "order_weight" field.
 func (_u *GroupsUpdate) SetOrderWeight(v int) *GroupsUpdate {
 	_u.mutation.ResetOrderWeight()
@@ -487,12 +475,6 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedGroupStatus(); ok {
 		_spec.AddField(groups.FieldGroupStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(groups.FieldI18nName, field.TypeJSON, value)
-	}
-	if _u.mutation.I18nNameCleared() {
-		_spec.ClearField(groups.FieldI18nName, field.TypeJSON)
-	}
 	if value, ok := _u.mutation.OrderWeight(); ok {
 		_spec.SetField(groups.FieldOrderWeight, field.TypeInt, value)
 	}
@@ -792,18 +774,6 @@ func (_u *GroupsUpdateOne) SetNillableGroupStatus(v *int) *GroupsUpdateOne {
 // AddGroupStatus adds value to the "group_status" field.
 func (_u *GroupsUpdateOne) AddGroupStatus(v int) *GroupsUpdateOne {
 	_u.mutation.AddGroupStatus(v)
-	return _u
-}
-
-// SetI18nName sets the "i18n_name" field.
-func (_u *GroupsUpdateOne) SetI18nName(v map[string]string) *GroupsUpdateOne {
-	_u.mutation.SetI18nName(v)
-	return _u
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (_u *GroupsUpdateOne) ClearI18nName() *GroupsUpdateOne {
-	_u.mutation.ClearI18nName()
 	return _u
 }
 
@@ -1144,12 +1114,6 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	}
 	if value, ok := _u.mutation.AddedGroupStatus(); ok {
 		_spec.AddField(groups.FieldGroupStatus, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(groups.FieldI18nName, field.TypeJSON, value)
-	}
-	if _u.mutation.I18nNameCleared() {
-		_spec.ClearField(groups.FieldI18nName, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.OrderWeight(); ok {
 		_spec.SetField(groups.FieldOrderWeight, field.TypeInt, value)

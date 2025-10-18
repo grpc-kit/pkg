@@ -127,12 +127,6 @@ func (_c *GroupsCreate) SetNillableGroupStatus(v *int) *GroupsCreate {
 	return _c
 }
 
-// SetI18nName sets the "i18n_name" field.
-func (_c *GroupsCreate) SetI18nName(v map[string]string) *GroupsCreate {
-	_c.mutation.SetI18nName(v)
-	return _c
-}
-
 // SetOrderWeight sets the "order_weight" field.
 func (_c *GroupsCreate) SetOrderWeight(v int) *GroupsCreate {
 	_c.mutation.SetOrderWeight(v)
@@ -456,10 +450,6 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.GroupStatus(); ok {
 		_spec.SetField(groups.FieldGroupStatus, field.TypeInt, value)
 		_node.GroupStatus = value
-	}
-	if value, ok := _c.mutation.I18nName(); ok {
-		_spec.SetField(groups.FieldI18nName, field.TypeJSON, value)
-		_node.I18nName = value
 	}
 	if value, ok := _c.mutation.OrderWeight(); ok {
 		_spec.SetField(groups.FieldOrderWeight, field.TypeInt, value)

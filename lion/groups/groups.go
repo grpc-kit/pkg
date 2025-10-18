@@ -30,8 +30,6 @@ const (
 	FieldGroupType = "group_type"
 	// FieldGroupStatus holds the string denoting the group_status field in the database.
 	FieldGroupStatus = "group_status"
-	// FieldI18nName holds the string denoting the i18n_name field in the database.
-	FieldI18nName = "i18n_name"
 	// FieldOrderWeight holds the string denoting the order_weight field in the database.
 	FieldOrderWeight = "order_weight"
 	// FieldParentID holds the string denoting the parent_id field in the database.
@@ -88,7 +86,6 @@ var Columns = []string{
 	FieldName,
 	FieldGroupType,
 	FieldGroupStatus,
-	FieldI18nName,
 	FieldOrderWeight,
 	FieldParentID,
 	FieldMaxMembers,

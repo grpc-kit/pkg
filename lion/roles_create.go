@@ -100,12 +100,6 @@ func (_c *RolesCreate) SetName(v string) *RolesCreate {
 	return _c
 }
 
-// SetI18nName sets the "i18n_name" field.
-func (_c *RolesCreate) SetI18nName(v map[string]string) *RolesCreate {
-	_c.mutation.SetI18nName(v)
-	return _c
-}
-
 // SetRoleType sets the "role_type" field.
 func (_c *RolesCreate) SetRoleType(v int) *RolesCreate {
 	_c.mutation.SetRoleType(v)
@@ -368,10 +362,6 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(roles.FieldName, field.TypeString, value)
 		_node.Name = value
-	}
-	if value, ok := _c.mutation.I18nName(); ok {
-		_spec.SetField(roles.FieldI18nName, field.TypeJSON, value)
-		_node.I18nName = value
 	}
 	if value, ok := _c.mutation.RoleType(); ok {
 		_spec.SetField(roles.FieldRoleType, field.TypeInt, value)

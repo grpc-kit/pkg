@@ -480,16 +480,6 @@ func NameContainsFold(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldContainsFold(FieldName, v))
 }
 
-// I18nNameIsNil applies the IsNil predicate on the "i18n_name" field.
-func I18nNameIsNil() predicate.Departments {
-	return predicate.Departments(sql.FieldIsNull(FieldI18nName))
-}
-
-// I18nNameNotNil applies the NotNil predicate on the "i18n_name" field.
-func I18nNameNotNil() predicate.Departments {
-	return predicate.Departments(sql.FieldNotNull(FieldI18nName))
-}
-
 // DepartmentTypeEQ applies the EQ predicate on the "department_type" field.
 func DepartmentTypeEQ(v int) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldDepartmentType, v))

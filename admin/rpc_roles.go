@@ -141,7 +141,7 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 
 	role, err := db.Roles.Create().
 		SetName(req.Role.Name).
-		SetI18nName(req.Role.I18NName).
+		// SetI18nName(req.Role.I18NName).
 		SetDescription(req.Role.Description).
 		SetOrderWeight(int(req.Role.OrderWeight)).
 		Save(ctx)
@@ -152,7 +152,8 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 	result = &adminv1.Role{
 		Id:          int32(role.ID),
 		Name:        role.Name,
-		I18NName:    role.I18nName,
+		DisplayName: role.Name,
+		// I18NName:    role.I18nName,
 		Description: role.Description,
 		OrderWeight: int32(role.OrderWeight),
 	}
@@ -238,7 +239,7 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 		q, err := db.Roles.Query().Select(
 			roles.FieldID,
 			roles.FieldName,
-			roles.FieldI18nName,
+			// roles.FieldI18nName,
 			roles.FieldRoleType,
 			roles.FieldRoleStatus,
 			roles.FieldOrderWeight,
@@ -253,7 +254,8 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 		result = &adminv1.Role{
 			Id:          int32(q.ID),
 			Name:        q.Name,
-			I18NName:    q.I18nName,
+			DisplayName: q.Name,
+			// I18NName:    q.I18nName,
 			Description: q.Description,
 			OrderWeight: int32(q.OrderWeight),
 		}

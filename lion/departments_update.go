@@ -146,18 +146,6 @@ func (_u *DepartmentsUpdate) SetNillableName(v *string) *DepartmentsUpdate {
 	return _u
 }
 
-// SetI18nName sets the "i18n_name" field.
-func (_u *DepartmentsUpdate) SetI18nName(v map[string]string) *DepartmentsUpdate {
-	_u.mutation.SetI18nName(v)
-	return _u
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (_u *DepartmentsUpdate) ClearI18nName() *DepartmentsUpdate {
-	_u.mutation.ClearI18nName()
-	return _u
-}
-
 // SetDepartmentType sets the "department_type" field.
 func (_u *DepartmentsUpdate) SetDepartmentType(v int) *DepartmentsUpdate {
 	_u.mutation.ResetDepartmentType()
@@ -571,12 +559,6 @@ func (_u *DepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(departments.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(departments.FieldI18nName, field.TypeJSON, value)
-	}
-	if _u.mutation.I18nNameCleared() {
-		_spec.ClearField(departments.FieldI18nName, field.TypeJSON)
-	}
 	if value, ok := _u.mutation.DepartmentType(); ok {
 		_spec.SetField(departments.FieldDepartmentType, field.TypeInt, value)
 	}
@@ -913,18 +895,6 @@ func (_u *DepartmentsUpdateOne) SetNillableName(v *string) *DepartmentsUpdateOne
 	if v != nil {
 		_u.SetName(*v)
 	}
-	return _u
-}
-
-// SetI18nName sets the "i18n_name" field.
-func (_u *DepartmentsUpdateOne) SetI18nName(v map[string]string) *DepartmentsUpdateOne {
-	_u.mutation.SetI18nName(v)
-	return _u
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (_u *DepartmentsUpdateOne) ClearI18nName() *DepartmentsUpdateOne {
-	_u.mutation.ClearI18nName()
 	return _u
 }
 
@@ -1370,12 +1340,6 @@ func (_u *DepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *Departments
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(departments.FieldName, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(departments.FieldI18nName, field.TypeJSON, value)
-	}
-	if _u.mutation.I18nNameCleared() {
-		_spec.ClearField(departments.FieldI18nName, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.DepartmentType(); ok {
 		_spec.SetField(departments.FieldDepartmentType, field.TypeInt, value)

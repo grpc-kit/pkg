@@ -113,12 +113,6 @@ func (_c *DepartmentsCreate) SetName(v string) *DepartmentsCreate {
 	return _c
 }
 
-// SetI18nName sets the "i18n_name" field.
-func (_c *DepartmentsCreate) SetI18nName(v map[string]string) *DepartmentsCreate {
-	_c.mutation.SetI18nName(v)
-	return _c
-}
-
 // SetDepartmentType sets the "department_type" field.
 func (_c *DepartmentsCreate) SetDepartmentType(v int) *DepartmentsCreate {
 	_c.mutation.SetDepartmentType(v)
@@ -464,10 +458,6 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(departments.FieldName, field.TypeString, value)
 		_node.Name = value
-	}
-	if value, ok := _c.mutation.I18nName(); ok {
-		_spec.SetField(departments.FieldI18nName, field.TypeJSON, value)
-		_node.I18nName = value
 	}
 	if value, ok := _c.mutation.DepartmentType(); ok {
 		_spec.SetField(departments.FieldDepartmentType, field.TypeInt, value)

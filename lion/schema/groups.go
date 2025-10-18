@@ -22,15 +22,16 @@ func (Groups) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("用户组名"),
+		// field.String("i18n_key").
+		//	Optional().
+		//	Comment("国际化键值，用于前端多语言显示的标识符"),
 		field.Int("group_type").
 			Default(0).
 			Comment("群组类型，对应 api/known/admin/v1/common.proto 中定义"),
 		field.Int("group_status").
 			Default(0).
 			Comment("群组状态，对应 api/known/admin/v1/common.proto 中定义"),
-		field.JSON("i18n_name", map[string]string{}).
-			Optional().
-			Comment("国际化名称，支持多语言显示"),
+
 		field.Int("order_weight").
 			Default(0).
 			Comment("排序权重，数字越小越靠前"),

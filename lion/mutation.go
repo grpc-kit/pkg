@@ -4268,7 +4268,6 @@ type DepartmentsMutation struct {
 	parent_id                    *int
 	addparent_id                 *int
 	name                         *string
-	i18n_name                    *map[string]string
 	department_type              *int
 	adddepartment_type           *int
 	department_status            *int
@@ -4749,55 +4748,6 @@ func (m *DepartmentsMutation) OldName(ctx context.Context) (v string, err error)
 // ResetName resets all changes to the "name" field.
 func (m *DepartmentsMutation) ResetName() {
 	m.name = nil
-}
-
-// SetI18nName sets the "i18n_name" field.
-func (m *DepartmentsMutation) SetI18nName(value map[string]string) {
-	m.i18n_name = &value
-}
-
-// I18nName returns the value of the "i18n_name" field in the mutation.
-func (m *DepartmentsMutation) I18nName() (r map[string]string, exists bool) {
-	v := m.i18n_name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldI18nName returns the old "i18n_name" field's value of the Departments entity.
-// If the Departments object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DepartmentsMutation) OldI18nName(ctx context.Context) (v map[string]string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldI18nName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldI18nName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldI18nName: %w", err)
-	}
-	return oldValue.I18nName, nil
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (m *DepartmentsMutation) ClearI18nName() {
-	m.i18n_name = nil
-	m.clearedFields[departments.FieldI18nName] = struct{}{}
-}
-
-// I18nNameCleared returns if the "i18n_name" field was cleared in this mutation.
-func (m *DepartmentsMutation) I18nNameCleared() bool {
-	_, ok := m.clearedFields[departments.FieldI18nName]
-	return ok
-}
-
-// ResetI18nName resets all changes to the "i18n_name" field.
-func (m *DepartmentsMutation) ResetI18nName() {
-	m.i18n_name = nil
-	delete(m.clearedFields, departments.FieldI18nName)
 }
 
 // SetDepartmentType sets the "department_type" field.
@@ -5599,7 +5549,7 @@ func (m *DepartmentsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DepartmentsMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 19)
 	if m.created_at != nil {
 		fields = append(fields, departments.FieldCreatedAt)
 	}
@@ -5620,9 +5570,6 @@ func (m *DepartmentsMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, departments.FieldName)
-	}
-	if m.i18n_name != nil {
-		fields = append(fields, departments.FieldI18nName)
 	}
 	if m.department_type != nil {
 		fields = append(fields, departments.FieldDepartmentType)
@@ -5682,8 +5629,6 @@ func (m *DepartmentsMutation) Field(name string) (ent.Value, bool) {
 		return m.ParentID()
 	case departments.FieldName:
 		return m.Name()
-	case departments.FieldI18nName:
-		return m.I18nName()
 	case departments.FieldDepartmentType:
 		return m.DepartmentType()
 	case departments.FieldDepartmentStatus:
@@ -5731,8 +5676,6 @@ func (m *DepartmentsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldParentID(ctx)
 	case departments.FieldName:
 		return m.OldName(ctx)
-	case departments.FieldI18nName:
-		return m.OldI18nName(ctx)
 	case departments.FieldDepartmentType:
 		return m.OldDepartmentType(ctx)
 	case departments.FieldDepartmentStatus:
@@ -5814,13 +5757,6 @@ func (m *DepartmentsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
-		return nil
-	case departments.FieldI18nName:
-		v, ok := value.(map[string]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetI18nName(v)
 		return nil
 	case departments.FieldDepartmentType:
 		v, ok := value.(int)
@@ -6032,9 +5968,6 @@ func (m *DepartmentsMutation) ClearedFields() []string {
 	if m.FieldCleared(departments.FieldUpdatedBy) {
 		fields = append(fields, departments.FieldUpdatedBy)
 	}
-	if m.FieldCleared(departments.FieldI18nName) {
-		fields = append(fields, departments.FieldI18nName)
-	}
 	if m.FieldCleared(departments.FieldEmailEncrypted) {
 		fields = append(fields, departments.FieldEmailEncrypted)
 	}
@@ -6078,9 +6011,6 @@ func (m *DepartmentsMutation) ClearField(name string) error {
 		return nil
 	case departments.FieldUpdatedBy:
 		m.ClearUpdatedBy()
-		return nil
-	case departments.FieldI18nName:
-		m.ClearI18nName()
 		return nil
 	case departments.FieldEmailEncrypted:
 		m.ClearEmailEncrypted()
@@ -6131,9 +6061,6 @@ func (m *DepartmentsMutation) ResetField(name string) error {
 		return nil
 	case departments.FieldName:
 		m.ResetName()
-		return nil
-	case departments.FieldI18nName:
-		m.ResetI18nName()
 		return nil
 	case departments.FieldDepartmentType:
 		m.ResetDepartmentType()
@@ -7163,7 +7090,6 @@ type GroupsMutation struct {
 	addgroup_type           *int
 	group_status            *int
 	addgroup_status         *int
-	i18n_name               *map[string]string
 	order_weight            *int
 	addorder_weight         *int
 	parent_id               *int
@@ -7694,55 +7620,6 @@ func (m *GroupsMutation) ResetGroupStatus() {
 	m.addgroup_status = nil
 }
 
-// SetI18nName sets the "i18n_name" field.
-func (m *GroupsMutation) SetI18nName(value map[string]string) {
-	m.i18n_name = &value
-}
-
-// I18nName returns the value of the "i18n_name" field in the mutation.
-func (m *GroupsMutation) I18nName() (r map[string]string, exists bool) {
-	v := m.i18n_name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldI18nName returns the old "i18n_name" field's value of the Groups entity.
-// If the Groups object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GroupsMutation) OldI18nName(ctx context.Context) (v map[string]string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldI18nName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldI18nName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldI18nName: %w", err)
-	}
-	return oldValue.I18nName, nil
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (m *GroupsMutation) ClearI18nName() {
-	m.i18n_name = nil
-	m.clearedFields[groups.FieldI18nName] = struct{}{}
-}
-
-// I18nNameCleared returns if the "i18n_name" field was cleared in this mutation.
-func (m *GroupsMutation) I18nNameCleared() bool {
-	_, ok := m.clearedFields[groups.FieldI18nName]
-	return ok
-}
-
-// ResetI18nName resets all changes to the "i18n_name" field.
-func (m *GroupsMutation) ResetI18nName() {
-	m.i18n_name = nil
-	delete(m.clearedFields, groups.FieldI18nName)
-}
-
 // SetOrderWeight sets the "order_weight" field.
 func (m *GroupsMutation) SetOrderWeight(i int) {
 	m.order_weight = &i
@@ -8237,7 +8114,7 @@ func (m *GroupsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupsMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 15)
 	if m.created_at != nil {
 		fields = append(fields, groups.FieldCreatedAt)
 	}
@@ -8261,9 +8138,6 @@ func (m *GroupsMutation) Fields() []string {
 	}
 	if m.group_status != nil {
 		fields = append(fields, groups.FieldGroupStatus)
-	}
-	if m.i18n_name != nil {
-		fields = append(fields, groups.FieldI18nName)
 	}
 	if m.order_weight != nil {
 		fields = append(fields, groups.FieldOrderWeight)
@@ -8310,8 +8184,6 @@ func (m *GroupsMutation) Field(name string) (ent.Value, bool) {
 		return m.GroupType()
 	case groups.FieldGroupStatus:
 		return m.GroupStatus()
-	case groups.FieldI18nName:
-		return m.I18nName()
 	case groups.FieldOrderWeight:
 		return m.OrderWeight()
 	case groups.FieldParentID:
@@ -8351,8 +8223,6 @@ func (m *GroupsMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldGroupType(ctx)
 	case groups.FieldGroupStatus:
 		return m.OldGroupStatus(ctx)
-	case groups.FieldI18nName:
-		return m.OldI18nName(ctx)
 	case groups.FieldOrderWeight:
 		return m.OldOrderWeight(ctx)
 	case groups.FieldParentID:
@@ -8431,13 +8301,6 @@ func (m *GroupsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetGroupStatus(v)
-		return nil
-	case groups.FieldI18nName:
-		v, ok := value.(map[string]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetI18nName(v)
 		return nil
 	case groups.FieldOrderWeight:
 		v, ok := value.(int)
@@ -8614,9 +8477,6 @@ func (m *GroupsMutation) ClearedFields() []string {
 	if m.FieldCleared(groups.FieldUpdatedBy) {
 		fields = append(fields, groups.FieldUpdatedBy)
 	}
-	if m.FieldCleared(groups.FieldI18nName) {
-		fields = append(fields, groups.FieldI18nName)
-	}
 	return fields
 }
 
@@ -8639,9 +8499,6 @@ func (m *GroupsMutation) ClearField(name string) error {
 		return nil
 	case groups.FieldUpdatedBy:
 		m.ClearUpdatedBy()
-		return nil
-	case groups.FieldI18nName:
-		m.ClearI18nName()
 		return nil
 	}
 	return fmt.Errorf("unknown Groups nullable field %s", name)
@@ -8674,9 +8531,6 @@ func (m *GroupsMutation) ResetField(name string) error {
 		return nil
 	case groups.FieldGroupStatus:
 		m.ResetGroupStatus()
-		return nil
-	case groups.FieldI18nName:
-		m.ResetI18nName()
 		return nil
 	case groups.FieldOrderWeight:
 		m.ResetOrderWeight()
@@ -10380,7 +10234,6 @@ type ResourcesMutation struct {
 	parent_id               *int
 	addparent_id            *int
 	name                    *string
-	i18n_name               *map[string]string
 	order_weight            *int
 	addorder_weight         *int
 	resource_type           *int
@@ -10852,55 +10705,6 @@ func (m *ResourcesMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *ResourcesMutation) ResetName() {
 	m.name = nil
-}
-
-// SetI18nName sets the "i18n_name" field.
-func (m *ResourcesMutation) SetI18nName(value map[string]string) {
-	m.i18n_name = &value
-}
-
-// I18nName returns the value of the "i18n_name" field in the mutation.
-func (m *ResourcesMutation) I18nName() (r map[string]string, exists bool) {
-	v := m.i18n_name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldI18nName returns the old "i18n_name" field's value of the Resources entity.
-// If the Resources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldI18nName(ctx context.Context) (v map[string]string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldI18nName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldI18nName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldI18nName: %w", err)
-	}
-	return oldValue.I18nName, nil
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (m *ResourcesMutation) ClearI18nName() {
-	m.i18n_name = nil
-	m.clearedFields[resources.FieldI18nName] = struct{}{}
-}
-
-// I18nNameCleared returns if the "i18n_name" field was cleared in this mutation.
-func (m *ResourcesMutation) I18nNameCleared() bool {
-	_, ok := m.clearedFields[resources.FieldI18nName]
-	return ok
-}
-
-// ResetI18nName resets all changes to the "i18n_name" field.
-func (m *ResourcesMutation) ResetI18nName() {
-	m.i18n_name = nil
-	delete(m.clearedFields, resources.FieldI18nName)
 }
 
 // SetOrderWeight sets the "order_weight" field.
@@ -11411,7 +11215,7 @@ func (m *ResourcesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResourcesMutation) Fields() []string {
-	fields := make([]string, 0, 18)
+	fields := make([]string, 0, 17)
 	if m.created_at != nil {
 		fields = append(fields, resources.FieldCreatedAt)
 	}
@@ -11432,9 +11236,6 @@ func (m *ResourcesMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, resources.FieldName)
-	}
-	if m.i18n_name != nil {
-		fields = append(fields, resources.FieldI18nName)
 	}
 	if m.order_weight != nil {
 		fields = append(fields, resources.FieldOrderWeight)
@@ -11488,8 +11289,6 @@ func (m *ResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.ParentID()
 	case resources.FieldName:
 		return m.Name()
-	case resources.FieldI18nName:
-		return m.I18nName()
 	case resources.FieldOrderWeight:
 		return m.OrderWeight()
 	case resources.FieldResourceType:
@@ -11533,8 +11332,6 @@ func (m *ResourcesMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldParentID(ctx)
 	case resources.FieldName:
 		return m.OldName(ctx)
-	case resources.FieldI18nName:
-		return m.OldI18nName(ctx)
 	case resources.FieldOrderWeight:
 		return m.OldOrderWeight(ctx)
 	case resources.FieldResourceType:
@@ -11612,13 +11409,6 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
-		return nil
-	case resources.FieldI18nName:
-		v, ok := value.(map[string]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetI18nName(v)
 		return nil
 	case resources.FieldOrderWeight:
 		v, ok := value.(int)
@@ -11804,9 +11594,6 @@ func (m *ResourcesMutation) ClearedFields() []string {
 	if m.FieldCleared(resources.FieldUpdatedBy) {
 		fields = append(fields, resources.FieldUpdatedBy)
 	}
-	if m.FieldCleared(resources.FieldI18nName) {
-		fields = append(fields, resources.FieldI18nName)
-	}
 	return fields
 }
 
@@ -11829,9 +11616,6 @@ func (m *ResourcesMutation) ClearField(name string) error {
 		return nil
 	case resources.FieldUpdatedBy:
 		m.ClearUpdatedBy()
-		return nil
-	case resources.FieldI18nName:
-		m.ClearI18nName()
 		return nil
 	}
 	return fmt.Errorf("unknown Resources nullable field %s", name)
@@ -11861,9 +11645,6 @@ func (m *ResourcesMutation) ResetField(name string) error {
 		return nil
 	case resources.FieldName:
 		m.ResetName()
-		return nil
-	case resources.FieldI18nName:
-		m.ResetI18nName()
 		return nil
 	case resources.FieldOrderWeight:
 		m.ResetOrderWeight()
@@ -13665,7 +13446,6 @@ type RolesMutation struct {
 	updated_by                   *int64
 	addupdated_by                *int64
 	name                         *string
-	i18n_name                    *map[string]string
 	role_type                    *int
 	addrole_type                 *int
 	role_status                  *int
@@ -14084,55 +13864,6 @@ func (m *RolesMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *RolesMutation) ResetName() {
 	m.name = nil
-}
-
-// SetI18nName sets the "i18n_name" field.
-func (m *RolesMutation) SetI18nName(value map[string]string) {
-	m.i18n_name = &value
-}
-
-// I18nName returns the value of the "i18n_name" field in the mutation.
-func (m *RolesMutation) I18nName() (r map[string]string, exists bool) {
-	v := m.i18n_name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldI18nName returns the old "i18n_name" field's value of the Roles entity.
-// If the Roles object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RolesMutation) OldI18nName(ctx context.Context) (v map[string]string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldI18nName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldI18nName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldI18nName: %w", err)
-	}
-	return oldValue.I18nName, nil
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (m *RolesMutation) ClearI18nName() {
-	m.i18n_name = nil
-	m.clearedFields[roles.FieldI18nName] = struct{}{}
-}
-
-// I18nNameCleared returns if the "i18n_name" field was cleared in this mutation.
-func (m *RolesMutation) I18nNameCleared() bool {
-	_, ok := m.clearedFields[roles.FieldI18nName]
-	return ok
-}
-
-// ResetI18nName resets all changes to the "i18n_name" field.
-func (m *RolesMutation) ResetI18nName() {
-	m.i18n_name = nil
-	delete(m.clearedFields, roles.FieldI18nName)
 }
 
 // SetRoleType sets the "role_type" field.
@@ -14589,7 +14320,7 @@ func (m *RolesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RolesMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, roles.FieldCreatedAt)
 	}
@@ -14607,9 +14338,6 @@ func (m *RolesMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, roles.FieldName)
-	}
-	if m.i18n_name != nil {
-		fields = append(fields, roles.FieldI18nName)
 	}
 	if m.role_type != nil {
 		fields = append(fields, roles.FieldRoleType)
@@ -14643,8 +14371,6 @@ func (m *RolesMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedBy()
 	case roles.FieldName:
 		return m.Name()
-	case roles.FieldI18nName:
-		return m.I18nName()
 	case roles.FieldRoleType:
 		return m.RoleType()
 	case roles.FieldRoleStatus:
@@ -14674,8 +14400,6 @@ func (m *RolesMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldUpdatedBy(ctx)
 	case roles.FieldName:
 		return m.OldName(ctx)
-	case roles.FieldI18nName:
-		return m.OldI18nName(ctx)
 	case roles.FieldRoleType:
 		return m.OldRoleType(ctx)
 	case roles.FieldRoleStatus:
@@ -14734,13 +14458,6 @@ func (m *RolesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
-		return nil
-	case roles.FieldI18nName:
-		v, ok := value.(map[string]string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetI18nName(v)
 		return nil
 	case roles.FieldRoleType:
 		v, ok := value.(int)
@@ -14872,9 +14589,6 @@ func (m *RolesMutation) ClearedFields() []string {
 	if m.FieldCleared(roles.FieldUpdatedBy) {
 		fields = append(fields, roles.FieldUpdatedBy)
 	}
-	if m.FieldCleared(roles.FieldI18nName) {
-		fields = append(fields, roles.FieldI18nName)
-	}
 	return fields
 }
 
@@ -14897,9 +14611,6 @@ func (m *RolesMutation) ClearField(name string) error {
 		return nil
 	case roles.FieldUpdatedBy:
 		m.ClearUpdatedBy()
-		return nil
-	case roles.FieldI18nName:
-		m.ClearI18nName()
 		return nil
 	}
 	return fmt.Errorf("unknown Roles nullable field %s", name)
@@ -14926,9 +14637,6 @@ func (m *RolesMutation) ResetField(name string) error {
 		return nil
 	case roles.FieldName:
 		m.ResetName()
-		return nil
-	case roles.FieldI18nName:
-		m.ResetI18nName()
 		return nil
 	case roles.FieldRoleType:
 		m.ResetRoleType()

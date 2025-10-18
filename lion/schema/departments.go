@@ -23,9 +23,9 @@ func (Departments) Fields() []ent.Field {
 			MaxLen(256).
 			NotEmpty().
 			Comment("部门名称，用于系统内部显示和业务逻辑"),
-		field.JSON("i18n_name", map[string]string{}).
-			Optional().
-			Comment("国际化名称配置，支持多语言环境"),
+		// field.String("i18n_key").
+		//	Optional().
+		//	Comment("国际化键值，用于前端多语言显示的标识符"),
 		field.Int("department_type").
 			Default(0).
 			Comment("部门类型分类：0-未指定，1-业务部门，2-支持部门，3-管理部门，4-虚拟部门"),

@@ -117,7 +117,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			resources.FieldID,
 			resources.FieldParentID,
 			resources.FieldName,
-			resources.FieldI18nName,
+			// resources.FieldI18nName,
 			resources.FieldOrderWeight,
 			resources.FieldResourceType,
 			resources.FieldResourceScope,
@@ -144,10 +144,11 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 
 	for _, m := range rids {
 		menu := &adminv1.Resource{
-			Id:           int32(m.ID),
-			ParentId:     int32(m.ParentID),
-			Name:         m.Name,
-			I18NName:     m.I18nName,
+			Id:       int32(m.ID),
+			ParentId: int32(m.ParentID),
+			Name:     m.Name,
+			// I18NName:     m.I18nName,
+			DisplayName:  I18NName(m.Name),
 			OrderWeight:  int32(m.OrderWeight),
 			Type:         adminv1.Resource_Type(m.ResourceType),
 			Scope:        adminv1.Resource_Scope(m.ResourceScope),

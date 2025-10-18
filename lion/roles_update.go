@@ -126,18 +126,6 @@ func (_u *RolesUpdate) SetNillableName(v *string) *RolesUpdate {
 	return _u
 }
 
-// SetI18nName sets the "i18n_name" field.
-func (_u *RolesUpdate) SetI18nName(v map[string]string) *RolesUpdate {
-	_u.mutation.SetI18nName(v)
-	return _u
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (_u *RolesUpdate) ClearI18nName() *RolesUpdate {
-	_u.mutation.ClearI18nName()
-	return _u
-}
-
 // SetRoleType sets the "role_type" field.
 func (_u *RolesUpdate) SetRoleType(v int) *RolesUpdate {
 	_u.mutation.ResetRoleType()
@@ -452,12 +440,6 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(roles.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(roles.FieldI18nName, field.TypeJSON, value)
-	}
-	if _u.mutation.I18nNameCleared() {
-		_spec.ClearField(roles.FieldI18nName, field.TypeJSON)
-	}
 	if value, ok := _u.mutation.RoleType(); ok {
 		_spec.SetField(roles.FieldRoleType, field.TypeInt, value)
 	}
@@ -770,18 +752,6 @@ func (_u *RolesUpdateOne) SetNillableName(v *string) *RolesUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
 	}
-	return _u
-}
-
-// SetI18nName sets the "i18n_name" field.
-func (_u *RolesUpdateOne) SetI18nName(v map[string]string) *RolesUpdateOne {
-	_u.mutation.SetI18nName(v)
-	return _u
-}
-
-// ClearI18nName clears the value of the "i18n_name" field.
-func (_u *RolesUpdateOne) ClearI18nName() *RolesUpdateOne {
-	_u.mutation.ClearI18nName()
 	return _u
 }
 
@@ -1128,12 +1098,6 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(roles.FieldName, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.I18nName(); ok {
-		_spec.SetField(roles.FieldI18nName, field.TypeJSON, value)
-	}
-	if _u.mutation.I18nNameCleared() {
-		_spec.ClearField(roles.FieldI18nName, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.RoleType(); ok {
 		_spec.SetField(roles.FieldRoleType, field.TypeInt, value)

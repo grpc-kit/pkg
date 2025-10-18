@@ -1,8 +1,6 @@
 package schema
 
 import (
-	"regexp"
-
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
@@ -20,14 +18,13 @@ type Roles struct {
 func (Roles) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
-			MaxLen(128).
+			MaxLen(256).
 			NotEmpty().
-			Unique().
-			Match(regexp.MustCompile(`^[a-zA-Z0-9]+$`)).
-			Comment("角色名称，仅支持字母、数字"),
-		field.JSON("i18n_name", map[string]string{}).
-			Optional().
-			Comment("角色国际化名称，支持多语言，对应 proto 中的 map<string, string> i18n_name"),
+			Comment("角色名称，用于系统内部显示和业务逻辑"),
+		// field.String("i18n_key").
+		//	Optional().
+		//	Comment("国际化键值，用于前端多语言显示的标识符"),
+
 		field.Int("role_type").
 			Default(0).
 			Comment("角色类型：TYPE_SYSTEM=系统内置角色，TYPE_CUSTOM=自定义角色，TYPE_TEMPLATE=模板角色"),

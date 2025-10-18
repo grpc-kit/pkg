@@ -111,12 +111,6 @@ func (_c *ResourcesCreate) SetName(v string) *ResourcesCreate {
 	return _c
 }
 
-// SetI18nName sets the "i18n_name" field.
-func (_c *ResourcesCreate) SetI18nName(v map[string]string) *ResourcesCreate {
-	_c.mutation.SetI18nName(v)
-	return _c
-}
-
 // SetOrderWeight sets the "order_weight" field.
 func (_c *ResourcesCreate) SetOrderWeight(v int) *ResourcesCreate {
 	_c.mutation.SetOrderWeight(v)
@@ -486,10 +480,6 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
 		_node.Name = value
-	}
-	if value, ok := _c.mutation.I18nName(); ok {
-		_spec.SetField(resources.FieldI18nName, field.TypeJSON, value)
-		_node.I18nName = value
 	}
 	if value, ok := _c.mutation.OrderWeight(); ok {
 		_spec.SetField(resources.FieldOrderWeight, field.TypeInt, value)
