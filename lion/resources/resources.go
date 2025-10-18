@@ -28,8 +28,8 @@ const (
 	FieldParentID = "parent_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldOrderWeight holds the string denoting the order_weight field in the database.
-	FieldOrderWeight = "order_weight"
+	// FieldSortOrder holds the string denoting the sort_order field in the database.
+	FieldSortOrder = "sort_order"
 	// FieldResourceType holds the string denoting the resource_type field in the database.
 	FieldResourceType = "resource_type"
 	// FieldResourceScope holds the string denoting the resource_scope field in the database.
@@ -71,7 +71,7 @@ var Columns = []string{
 	FieldUpdatedBy,
 	FieldParentID,
 	FieldName,
-	FieldOrderWeight,
+	FieldSortOrder,
 	FieldResourceType,
 	FieldResourceScope,
 	FieldEnabled,
@@ -108,8 +108,8 @@ var (
 	DefaultParentID int
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
-	DefaultOrderWeight int
+	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
+	DefaultSortOrder int
 	// DefaultResourceType holds the default value on creation for the "resource_type" field.
 	DefaultResourceType int
 	// DefaultResourceScope holds the default value on creation for the "resource_scope" field.
@@ -179,9 +179,9 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByOrderWeight orders the results by the order_weight field.
-func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
+// BySortOrder orders the results by the sort_order field.
+func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
 }
 
 // ByResourceType orders the results by the resource_type field.

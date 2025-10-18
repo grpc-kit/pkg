@@ -167,24 +167,24 @@ func (_u *GroupsUpdate) AddGroupStatus(v int) *GroupsUpdate {
 	return _u
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_u *GroupsUpdate) SetOrderWeight(v int) *GroupsUpdate {
-	_u.mutation.ResetOrderWeight()
-	_u.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_u *GroupsUpdate) SetSortOrder(v int) *GroupsUpdate {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
 	return _u
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableOrderWeight(v *int) *GroupsUpdate {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableSortOrder(v *int) *GroupsUpdate {
 	if v != nil {
-		_u.SetOrderWeight(*v)
+		_u.SetSortOrder(*v)
 	}
 	return _u
 }
 
-// AddOrderWeight adds value to the "order_weight" field.
-func (_u *GroupsUpdate) AddOrderWeight(v int) *GroupsUpdate {
-	_u.mutation.AddOrderWeight(v)
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *GroupsUpdate) AddSortOrder(v int) *GroupsUpdate {
+	_u.mutation.AddSortOrder(v)
 	return _u
 }
 
@@ -475,11 +475,11 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedGroupStatus(); ok {
 		_spec.AddField(groups.FieldGroupStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.OrderWeight(); ok {
-		_spec.SetField(groups.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(groups.FieldSortOrder, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrderWeight(); ok {
-		_spec.AddField(groups.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(groups.FieldSortOrder, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ParentID(); ok {
 		_spec.SetField(groups.FieldParentID, field.TypeInt, value)
@@ -777,24 +777,24 @@ func (_u *GroupsUpdateOne) AddGroupStatus(v int) *GroupsUpdateOne {
 	return _u
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_u *GroupsUpdateOne) SetOrderWeight(v int) *GroupsUpdateOne {
-	_u.mutation.ResetOrderWeight()
-	_u.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_u *GroupsUpdateOne) SetSortOrder(v int) *GroupsUpdateOne {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
 	return _u
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableOrderWeight(v *int) *GroupsUpdateOne {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableSortOrder(v *int) *GroupsUpdateOne {
 	if v != nil {
-		_u.SetOrderWeight(*v)
+		_u.SetSortOrder(*v)
 	}
 	return _u
 }
 
-// AddOrderWeight adds value to the "order_weight" field.
-func (_u *GroupsUpdateOne) AddOrderWeight(v int) *GroupsUpdateOne {
-	_u.mutation.AddOrderWeight(v)
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *GroupsUpdateOne) AddSortOrder(v int) *GroupsUpdateOne {
+	_u.mutation.AddSortOrder(v)
 	return _u
 }
 
@@ -1115,11 +1115,11 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	if value, ok := _u.mutation.AddedGroupStatus(); ok {
 		_spec.AddField(groups.FieldGroupStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.OrderWeight(); ok {
-		_spec.SetField(groups.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(groups.FieldSortOrder, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrderWeight(); ok {
-		_spec.AddField(groups.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(groups.FieldSortOrder, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ParentID(); ok {
 		_spec.SetField(groups.FieldParentID, field.TypeInt, value)

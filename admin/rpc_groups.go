@@ -39,7 +39,7 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		SetGroupType(int(req.Group.Type.Number())).
 		SetGroupStatus(int(req.Group.Status.Number())).
 		// SetI18nName(req.Group.I18NName).
-		SetOrderWeight(int(req.Group.OrderWeight)).
+		SetSortOrder(int(req.Group.SortOrder)).
 		SetParentID(int(req.Group.ParentId)).
 		SetMaxMembers(int(req.Group.MaxMembers)).
 		SetMetadata(req.Group.Metadata).
@@ -60,7 +60,7 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		Status: adminv1.Group_Status(group.GroupStatus),
 		// I18NName:     group.I18nName,
 		DisplayName:  I18NName(group.Name),
-		OrderWeight:  int32(group.OrderWeight),
+		SortOrder:    int32(group.SortOrder),
 		ParentId:     int32(group.ParentID),
 		MaxMembers:   int32(group.MaxMembers),
 		Metadata:     group.Metadata,
@@ -104,7 +104,7 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 			Type:   adminv1.Group_Type(group.GroupType),
 			Status: adminv1.Group_Status(group.GroupStatus),
 			// I18NName:     group.I18nName,
-			OrderWeight:  int32(group.OrderWeight),
+			SortOrder:    int32(group.SortOrder),
 			ParentId:     int32(group.ParentID),
 			MaxMembers:   int32(group.MaxMembers),
 			Metadata:     group.Metadata,
@@ -155,8 +155,8 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 					case "i18n_name":
 						update.SetI18nName(req.Group.I18NName)
 				*/
-			case "order_weight":
-				update.SetOrderWeight(int(req.Group.OrderWeight))
+			case groups.FieldSortOrder:
+				update.SetSortOrder(int(req.Group.SortOrder))
 			case "parent_id":
 				update.SetParentID(int(req.Group.ParentId))
 			case "max_members":
@@ -180,7 +180,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			SetGroupType(int(req.Group.Type.Number())).
 			SetGroupStatus(int(req.Group.Status.Number())).
 			// SetI18nName(req.Group.I18NName).
-			SetOrderWeight(int(req.Group.OrderWeight)).
+			SetSortOrder(int(req.Group.SortOrder)).
 			SetParentID(int(req.Group.ParentId)).
 			SetMaxMembers(int(req.Group.MaxMembers)).
 			SetMetadata(req.Group.Metadata).
@@ -203,7 +203,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 		Type:   adminv1.Group_Type(updatedGroup.GroupType),
 		Status: adminv1.Group_Status(updatedGroup.GroupStatus),
 		// I18NName:     updatedGroup.I18nName,
-		OrderWeight:  int32(updatedGroup.OrderWeight),
+		SortOrder:    int32(updatedGroup.SortOrder),
 		ParentId:     int32(updatedGroup.ParentID),
 		MaxMembers:   int32(updatedGroup.MaxMembers),
 		Metadata:     updatedGroup.Metadata,

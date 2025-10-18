@@ -32,8 +32,8 @@ const (
 	FieldDepartmentType = "department_type"
 	// FieldDepartmentStatus holds the string denoting the department_status field in the database.
 	FieldDepartmentStatus = "department_status"
-	// FieldOrderWeight holds the string denoting the order_weight field in the database.
-	FieldOrderWeight = "order_weight"
+	// FieldSortOrder holds the string denoting the sort_order field in the database.
+	FieldSortOrder = "sort_order"
 	// FieldEmailEncrypted holds the string denoting the email_encrypted field in the database.
 	FieldEmailEncrypted = "email_encrypted"
 	// FieldPhoneNumberEncrypted holds the string denoting the phone_number_encrypted field in the database.
@@ -95,7 +95,7 @@ var Columns = []string{
 	FieldName,
 	FieldDepartmentType,
 	FieldDepartmentStatus,
-	FieldOrderWeight,
+	FieldSortOrder,
 	FieldEmailEncrypted,
 	FieldPhoneNumberEncrypted,
 	FieldAddressEncrypted,
@@ -136,8 +136,8 @@ var (
 	DefaultDepartmentType int
 	// DefaultDepartmentStatus holds the default value on creation for the "department_status" field.
 	DefaultDepartmentStatus int
-	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
-	DefaultOrderWeight int
+	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
+	DefaultSortOrder int
 	// DefaultMaxMembers holds the default value on creation for the "max_members" field.
 	DefaultMaxMembers int
 	// DefaultDescription holds the default value on creation for the "description" field.
@@ -197,9 +197,9 @@ func ByDepartmentStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDepartmentStatus, opts...).ToFunc()
 }
 
-// ByOrderWeight orders the results by the order_weight field.
-func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
+// BySortOrder orders the results by the sort_order field.
+func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
 }
 
 // ByCostCenterCode orders the results by the cost_center_code field.

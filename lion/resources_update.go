@@ -144,24 +144,24 @@ func (_u *ResourcesUpdate) SetNillableName(v *string) *ResourcesUpdate {
 	return _u
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_u *ResourcesUpdate) SetOrderWeight(v int) *ResourcesUpdate {
-	_u.mutation.ResetOrderWeight()
-	_u.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_u *ResourcesUpdate) SetSortOrder(v int) *ResourcesUpdate {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
 	return _u
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_u *ResourcesUpdate) SetNillableOrderWeight(v *int) *ResourcesUpdate {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableSortOrder(v *int) *ResourcesUpdate {
 	if v != nil {
-		_u.SetOrderWeight(*v)
+		_u.SetSortOrder(*v)
 	}
 	return _u
 }
 
-// AddOrderWeight adds value to the "order_weight" field.
-func (_u *ResourcesUpdate) AddOrderWeight(v int) *ResourcesUpdate {
-	_u.mutation.AddOrderWeight(v)
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *ResourcesUpdate) AddSortOrder(v int) *ResourcesUpdate {
+	_u.mutation.AddSortOrder(v)
 	return _u
 }
 
@@ -455,11 +455,11 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.OrderWeight(); ok {
-		_spec.SetField(resources.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrderWeight(); ok {
-		_spec.AddField(resources.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(resources.FieldSortOrder, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ResourceType(); ok {
 		_spec.SetField(resources.FieldResourceType, field.TypeInt, value)
@@ -674,24 +674,24 @@ func (_u *ResourcesUpdateOne) SetNillableName(v *string) *ResourcesUpdateOne {
 	return _u
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_u *ResourcesUpdateOne) SetOrderWeight(v int) *ResourcesUpdateOne {
-	_u.mutation.ResetOrderWeight()
-	_u.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_u *ResourcesUpdateOne) SetSortOrder(v int) *ResourcesUpdateOne {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
 	return _u
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_u *ResourcesUpdateOne) SetNillableOrderWeight(v *int) *ResourcesUpdateOne {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableSortOrder(v *int) *ResourcesUpdateOne {
 	if v != nil {
-		_u.SetOrderWeight(*v)
+		_u.SetSortOrder(*v)
 	}
 	return _u
 }
 
-// AddOrderWeight adds value to the "order_weight" field.
-func (_u *ResourcesUpdateOne) AddOrderWeight(v int) *ResourcesUpdateOne {
-	_u.mutation.AddOrderWeight(v)
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *ResourcesUpdateOne) AddSortOrder(v int) *ResourcesUpdateOne {
+	_u.mutation.AddSortOrder(v)
 	return _u
 }
 
@@ -1015,11 +1015,11 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.OrderWeight(); ok {
-		_spec.SetField(resources.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrderWeight(); ok {
-		_spec.AddField(resources.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(resources.FieldSortOrder, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ResourceType(); ok {
 		_spec.SetField(resources.FieldResourceType, field.TypeInt, value)

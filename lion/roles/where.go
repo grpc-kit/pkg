@@ -95,9 +95,9 @@ func RoleStatus(v int) predicate.Roles {
 	return predicate.Roles(sql.FieldEQ(FieldRoleStatus, v))
 }
 
-// OrderWeight applies equality check predicate on the "order_weight" field. It's identical to OrderWeightEQ.
-func OrderWeight(v int) predicate.Roles {
-	return predicate.Roles(sql.FieldEQ(FieldOrderWeight, v))
+// SortOrder applies equality check predicate on the "sort_order" field. It's identical to SortOrderEQ.
+func SortOrder(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldSortOrder, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
@@ -480,44 +480,44 @@ func RoleStatusLTE(v int) predicate.Roles {
 	return predicate.Roles(sql.FieldLTE(FieldRoleStatus, v))
 }
 
-// OrderWeightEQ applies the EQ predicate on the "order_weight" field.
-func OrderWeightEQ(v int) predicate.Roles {
-	return predicate.Roles(sql.FieldEQ(FieldOrderWeight, v))
+// SortOrderEQ applies the EQ predicate on the "sort_order" field.
+func SortOrderEQ(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldSortOrder, v))
 }
 
-// OrderWeightNEQ applies the NEQ predicate on the "order_weight" field.
-func OrderWeightNEQ(v int) predicate.Roles {
-	return predicate.Roles(sql.FieldNEQ(FieldOrderWeight, v))
+// SortOrderNEQ applies the NEQ predicate on the "sort_order" field.
+func SortOrderNEQ(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldNEQ(FieldSortOrder, v))
 }
 
-// OrderWeightIn applies the In predicate on the "order_weight" field.
-func OrderWeightIn(vs ...int) predicate.Roles {
-	return predicate.Roles(sql.FieldIn(FieldOrderWeight, vs...))
+// SortOrderIn applies the In predicate on the "sort_order" field.
+func SortOrderIn(vs ...int) predicate.Roles {
+	return predicate.Roles(sql.FieldIn(FieldSortOrder, vs...))
 }
 
-// OrderWeightNotIn applies the NotIn predicate on the "order_weight" field.
-func OrderWeightNotIn(vs ...int) predicate.Roles {
-	return predicate.Roles(sql.FieldNotIn(FieldOrderWeight, vs...))
+// SortOrderNotIn applies the NotIn predicate on the "sort_order" field.
+func SortOrderNotIn(vs ...int) predicate.Roles {
+	return predicate.Roles(sql.FieldNotIn(FieldSortOrder, vs...))
 }
 
-// OrderWeightGT applies the GT predicate on the "order_weight" field.
-func OrderWeightGT(v int) predicate.Roles {
-	return predicate.Roles(sql.FieldGT(FieldOrderWeight, v))
+// SortOrderGT applies the GT predicate on the "sort_order" field.
+func SortOrderGT(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldGT(FieldSortOrder, v))
 }
 
-// OrderWeightGTE applies the GTE predicate on the "order_weight" field.
-func OrderWeightGTE(v int) predicate.Roles {
-	return predicate.Roles(sql.FieldGTE(FieldOrderWeight, v))
+// SortOrderGTE applies the GTE predicate on the "sort_order" field.
+func SortOrderGTE(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldGTE(FieldSortOrder, v))
 }
 
-// OrderWeightLT applies the LT predicate on the "order_weight" field.
-func OrderWeightLT(v int) predicate.Roles {
-	return predicate.Roles(sql.FieldLT(FieldOrderWeight, v))
+// SortOrderLT applies the LT predicate on the "sort_order" field.
+func SortOrderLT(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldLT(FieldSortOrder, v))
 }
 
-// OrderWeightLTE applies the LTE predicate on the "order_weight" field.
-func OrderWeightLTE(v int) predicate.Roles {
-	return predicate.Roles(sql.FieldLTE(FieldOrderWeight, v))
+// SortOrderLTE applies the LTE predicate on the "sort_order" field.
+func SortOrderLTE(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldLTE(FieldSortOrder, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.

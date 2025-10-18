@@ -28,9 +28,9 @@ func (Resources) Fields() []ent.Field {
 		//	Optional().
 		//	Comment("国际化键值，用于前端多语言显示的标识符"),
 
-		field.Int("order_weight").
-			Default(0).
-			Comment("排序权重，越小越靠前"),
+		field.Int("sort_order").
+			Default(100).
+			Comment("资源排序顺序，用于同级资源的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999"),
 		field.Int("resource_type").
 			Default(0).
 			Comment("用途类型，对应 api/known/admin/v1/common.proto 中定义"),
@@ -89,12 +89,12 @@ func (Resources) Indexes() []ent.Index {
 		index.Fields("resource_type", "resource_scope"),
 		// 启用状态索引，用于快速过滤启用的资源
 		index.Fields("enabled"),
-		// 排序权重索引，用于排序查询
-		index.Fields("order_weight"),
+		// 排序顺序索引，用于排序查询
+		index.Fields("sort_order"),
 		// 路径索引，用于路由匹配
 		index.Fields("path"),
-		// 父资源ID + 排序权重组合索引，用于同级资源排序
-		index.Fields("parent_id", "order_weight"),
+		// 父资源ID + 排序顺序组合索引，用于同级资源排序
+		index.Fields("parent_id", "sort_order"),
 	}
 }
 

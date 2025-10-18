@@ -127,16 +127,16 @@ func (_c *GroupsCreate) SetNillableGroupStatus(v *int) *GroupsCreate {
 	return _c
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_c *GroupsCreate) SetOrderWeight(v int) *GroupsCreate {
-	_c.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_c *GroupsCreate) SetSortOrder(v int) *GroupsCreate {
+	_c.mutation.SetSortOrder(v)
 	return _c
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableOrderWeight(v *int) *GroupsCreate {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableSortOrder(v *int) *GroupsCreate {
 	if v != nil {
-		_c.SetOrderWeight(*v)
+		_c.SetSortOrder(*v)
 	}
 	return _c
 }
@@ -317,9 +317,9 @@ func (_c *GroupsCreate) defaults() {
 		v := groups.DefaultGroupStatus
 		_c.mutation.SetGroupStatus(v)
 	}
-	if _, ok := _c.mutation.OrderWeight(); !ok {
-		v := groups.DefaultOrderWeight
-		_c.mutation.SetOrderWeight(v)
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		v := groups.DefaultSortOrder
+		_c.mutation.SetSortOrder(v)
 	}
 	if _, ok := _c.mutation.ParentID(); !ok {
 		v := groups.DefaultParentID
@@ -369,8 +369,8 @@ func (_c *GroupsCreate) check() error {
 	if _, ok := _c.mutation.GroupStatus(); !ok {
 		return &ValidationError{Name: "group_status", err: errors.New(`lion: missing required field "Groups.group_status"`)}
 	}
-	if _, ok := _c.mutation.OrderWeight(); !ok {
-		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Groups.order_weight"`)}
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		return &ValidationError{Name: "sort_order", err: errors.New(`lion: missing required field "Groups.sort_order"`)}
 	}
 	if _, ok := _c.mutation.ParentID(); !ok {
 		return &ValidationError{Name: "parent_id", err: errors.New(`lion: missing required field "Groups.parent_id"`)}
@@ -451,9 +451,9 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_spec.SetField(groups.FieldGroupStatus, field.TypeInt, value)
 		_node.GroupStatus = value
 	}
-	if value, ok := _c.mutation.OrderWeight(); ok {
-		_spec.SetField(groups.FieldOrderWeight, field.TypeInt, value)
-		_node.OrderWeight = value
+	if value, ok := _c.mutation.SortOrder(); ok {
+		_spec.SetField(groups.FieldSortOrder, field.TypeInt, value)
+		_node.SortOrder = value
 	}
 	if value, ok := _c.mutation.ParentID(); ok {
 		_spec.SetField(groups.FieldParentID, field.TypeInt, value)

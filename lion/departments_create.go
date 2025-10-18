@@ -141,16 +141,16 @@ func (_c *DepartmentsCreate) SetNillableDepartmentStatus(v *int) *DepartmentsCre
 	return _c
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_c *DepartmentsCreate) SetOrderWeight(v int) *DepartmentsCreate {
-	_c.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_c *DepartmentsCreate) SetSortOrder(v int) *DepartmentsCreate {
+	_c.mutation.SetSortOrder(v)
 	return _c
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_c *DepartmentsCreate) SetNillableOrderWeight(v *int) *DepartmentsCreate {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableSortOrder(v *int) *DepartmentsCreate {
 	if v != nil {
-		_c.SetOrderWeight(*v)
+		_c.SetSortOrder(*v)
 	}
 	return _c
 }
@@ -357,9 +357,9 @@ func (_c *DepartmentsCreate) defaults() {
 		v := departments.DefaultDepartmentStatus
 		_c.mutation.SetDepartmentStatus(v)
 	}
-	if _, ok := _c.mutation.OrderWeight(); !ok {
-		v := departments.DefaultOrderWeight
-		_c.mutation.SetOrderWeight(v)
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		v := departments.DefaultSortOrder
+		_c.mutation.SetSortOrder(v)
 	}
 	if _, ok := _c.mutation.MaxMembers(); !ok {
 		v := departments.DefaultMaxMembers
@@ -396,8 +396,8 @@ func (_c *DepartmentsCreate) check() error {
 	if _, ok := _c.mutation.DepartmentStatus(); !ok {
 		return &ValidationError{Name: "department_status", err: errors.New(`lion: missing required field "Departments.department_status"`)}
 	}
-	if _, ok := _c.mutation.OrderWeight(); !ok {
-		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Departments.order_weight"`)}
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		return &ValidationError{Name: "sort_order", err: errors.New(`lion: missing required field "Departments.sort_order"`)}
 	}
 	if _, ok := _c.mutation.MaxMembers(); !ok {
 		return &ValidationError{Name: "max_members", err: errors.New(`lion: missing required field "Departments.max_members"`)}
@@ -467,9 +467,9 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 		_spec.SetField(departments.FieldDepartmentStatus, field.TypeInt, value)
 		_node.DepartmentStatus = value
 	}
-	if value, ok := _c.mutation.OrderWeight(); ok {
-		_spec.SetField(departments.FieldOrderWeight, field.TypeInt, value)
-		_node.OrderWeight = value
+	if value, ok := _c.mutation.SortOrder(); ok {
+		_spec.SetField(departments.FieldSortOrder, field.TypeInt, value)
+		_node.SortOrder = value
 	}
 	if value, ok := _c.mutation.EmailEncrypted(); ok {
 		_spec.SetField(departments.FieldEmailEncrypted, field.TypeBytes, value)

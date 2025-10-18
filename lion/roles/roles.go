@@ -30,8 +30,8 @@ const (
 	FieldRoleType = "role_type"
 	// FieldRoleStatus holds the string denoting the role_status field in the database.
 	FieldRoleStatus = "role_status"
-	// FieldOrderWeight holds the string denoting the order_weight field in the database.
-	FieldOrderWeight = "order_weight"
+	// FieldSortOrder holds the string denoting the sort_order field in the database.
+	FieldSortOrder = "sort_order"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// EdgeLionRolePermissions holds the string denoting the lion_role_permissions edge name in mutations.
@@ -85,7 +85,7 @@ var Columns = []string{
 	FieldName,
 	FieldRoleType,
 	FieldRoleStatus,
-	FieldOrderWeight,
+	FieldSortOrder,
 	FieldDescription,
 }
 
@@ -116,8 +116,8 @@ var (
 	DefaultRoleType int
 	// DefaultRoleStatus holds the default value on creation for the "role_status" field.
 	DefaultRoleStatus int
-	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
-	DefaultOrderWeight int
+	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
+	DefaultSortOrder int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -170,9 +170,9 @@ func ByRoleStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRoleStatus, opts...).ToFunc()
 }
 
-// ByOrderWeight orders the results by the order_weight field.
-func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
+// BySortOrder orders the results by the sort_order field.
+func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

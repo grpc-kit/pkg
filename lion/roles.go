@@ -33,8 +33,8 @@ type Roles struct {
 	RoleType int `json:"role_type,omitempty"`
 	// 角色状态：STATUS_ACTIVE=正常启用，STATUS_DISABLED=禁用状态
 	RoleStatus int `json:"role_status,omitempty"`
-	// 排序权重，越小越靠前
-	OrderWeight int `json:"order_weight,omitempty"`
+	// 角色排序顺序，用于同级角色的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999
+	SortOrder int `json:"sort_order,omitempty"`
 	// 用途详细描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -99,7 +99,7 @@ func (*Roles) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case roles.FieldID, roles.FieldCreatedBy, roles.FieldUpdatedBy, roles.FieldRoleType, roles.FieldRoleStatus, roles.FieldOrderWeight:
+		case roles.FieldID, roles.FieldCreatedBy, roles.FieldUpdatedBy, roles.FieldRoleType, roles.FieldRoleStatus, roles.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
 		case roles.FieldName, roles.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -175,11 +175,11 @@ func (_m *Roles) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RoleStatus = int(value.Int64)
 			}
-		case roles.FieldOrderWeight:
+		case roles.FieldSortOrder:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field order_weight", values[i])
+				return fmt.Errorf("unexpected type %T for field sort_order", values[i])
 			} else if value.Valid {
-				_m.OrderWeight = int(value.Int64)
+				_m.SortOrder = int(value.Int64)
 			}
 		case roles.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -269,8 +269,8 @@ func (_m *Roles) String() string {
 	builder.WriteString("role_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RoleStatus))
 	builder.WriteString(", ")
-	builder.WriteString("order_weight=")
-	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
+	builder.WriteString("sort_order=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

@@ -128,16 +128,16 @@ func (_c *RolesCreate) SetNillableRoleStatus(v *int) *RolesCreate {
 	return _c
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_c *RolesCreate) SetOrderWeight(v int) *RolesCreate {
-	_c.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_c *RolesCreate) SetSortOrder(v int) *RolesCreate {
+	_c.mutation.SetSortOrder(v)
 	return _c
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_c *RolesCreate) SetNillableOrderWeight(v *int) *RolesCreate {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_c *RolesCreate) SetNillableSortOrder(v *int) *RolesCreate {
 	if v != nil {
-		_c.SetOrderWeight(*v)
+		_c.SetSortOrder(*v)
 	}
 	return _c
 }
@@ -275,9 +275,9 @@ func (_c *RolesCreate) defaults() {
 		v := roles.DefaultRoleStatus
 		_c.mutation.SetRoleStatus(v)
 	}
-	if _, ok := _c.mutation.OrderWeight(); !ok {
-		v := roles.DefaultOrderWeight
-		_c.mutation.SetOrderWeight(v)
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		v := roles.DefaultSortOrder
+		_c.mutation.SetSortOrder(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := roles.DefaultDescription
@@ -307,8 +307,8 @@ func (_c *RolesCreate) check() error {
 	if _, ok := _c.mutation.RoleStatus(); !ok {
 		return &ValidationError{Name: "role_status", err: errors.New(`lion: missing required field "Roles.role_status"`)}
 	}
-	if _, ok := _c.mutation.OrderWeight(); !ok {
-		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Roles.order_weight"`)}
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		return &ValidationError{Name: "sort_order", err: errors.New(`lion: missing required field "Roles.sort_order"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Roles.description"`)}
@@ -371,9 +371,9 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 		_spec.SetField(roles.FieldRoleStatus, field.TypeInt, value)
 		_node.RoleStatus = value
 	}
-	if value, ok := _c.mutation.OrderWeight(); ok {
-		_spec.SetField(roles.FieldOrderWeight, field.TypeInt, value)
-		_node.OrderWeight = value
+	if value, ok := _c.mutation.SortOrder(); ok {
+		_spec.SetField(roles.FieldSortOrder, field.TypeInt, value)
+		_node.SortOrder = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(roles.FieldDescription, field.TypeString, value)

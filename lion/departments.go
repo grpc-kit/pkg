@@ -36,8 +36,8 @@ type Departments struct {
 	DepartmentType int `json:"department_type,omitempty"`
 	// 部门运营状态：0-未指定，1-正常运营，2-暂停运营，3-已解散，4-合并中
 	DepartmentStatus int `json:"department_status,omitempty"`
-	// 部门排序权重，数值越小排序越靠前，建议使用 10 的倍数
-	OrderWeight int `json:"order_weight,omitempty"`
+	// 部门排序顺序，用于同级部门的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999
+	SortOrder int `json:"sort_order,omitempty"`
 	// 部门公共邮箱地址，加密存储
 	EmailEncrypted []byte `json:"-"`
 	// 部门联系电话，加密存储
@@ -109,7 +109,7 @@ func (*Departments) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case departments.FieldEmailEncrypted, departments.FieldPhoneNumberEncrypted, departments.FieldAddressEncrypted, departments.FieldMetadata:
 			values[i] = new([]byte)
-		case departments.FieldID, departments.FieldCreatedBy, departments.FieldUpdatedBy, departments.FieldParentID, departments.FieldDepartmentType, departments.FieldDepartmentStatus, departments.FieldOrderWeight, departments.FieldMaxMembers:
+		case departments.FieldID, departments.FieldCreatedBy, departments.FieldUpdatedBy, departments.FieldParentID, departments.FieldDepartmentType, departments.FieldDepartmentStatus, departments.FieldSortOrder, departments.FieldMaxMembers:
 			values[i] = new(sql.NullInt64)
 		case departments.FieldName, departments.FieldCostCenterCode, departments.FieldBudgetItemCode, departments.FieldExternalID, departments.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -191,11 +191,11 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DepartmentStatus = int(value.Int64)
 			}
-		case departments.FieldOrderWeight:
+		case departments.FieldSortOrder:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field order_weight", values[i])
+				return fmt.Errorf("unexpected type %T for field sort_order", values[i])
 			} else if value.Valid {
-				_m.OrderWeight = int(value.Int64)
+				_m.SortOrder = int(value.Int64)
 			}
 		case departments.FieldEmailEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -333,8 +333,8 @@ func (_m *Departments) String() string {
 	builder.WriteString("department_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentStatus))
 	builder.WriteString(", ")
-	builder.WriteString("order_weight=")
-	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
+	builder.WriteString("sort_order=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))
 	builder.WriteString(", ")
 	builder.WriteString("email_encrypted=<sensitive>")
 	builder.WriteString(", ")

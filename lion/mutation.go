@@ -4272,8 +4272,8 @@ type DepartmentsMutation struct {
 	adddepartment_type           *int
 	department_status            *int
 	adddepartment_status         *int
-	order_weight                 *int
-	addorder_weight              *int
+	sort_order                   *int
+	addsort_order                *int
 	email_encrypted              *[]byte
 	phone_number_encrypted       *[]byte
 	address_encrypted            *[]byte
@@ -4862,60 +4862,60 @@ func (m *DepartmentsMutation) ResetDepartmentStatus() {
 	m.adddepartment_status = nil
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (m *DepartmentsMutation) SetOrderWeight(i int) {
-	m.order_weight = &i
-	m.addorder_weight = nil
+// SetSortOrder sets the "sort_order" field.
+func (m *DepartmentsMutation) SetSortOrder(i int) {
+	m.sort_order = &i
+	m.addsort_order = nil
 }
 
-// OrderWeight returns the value of the "order_weight" field in the mutation.
-func (m *DepartmentsMutation) OrderWeight() (r int, exists bool) {
-	v := m.order_weight
+// SortOrder returns the value of the "sort_order" field in the mutation.
+func (m *DepartmentsMutation) SortOrder() (r int, exists bool) {
+	v := m.sort_order
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldOrderWeight returns the old "order_weight" field's value of the Departments entity.
+// OldSortOrder returns the old "sort_order" field's value of the Departments entity.
 // If the Departments object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DepartmentsMutation) OldOrderWeight(ctx context.Context) (v int, err error) {
+func (m *DepartmentsMutation) OldSortOrder(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOrderWeight is only allowed on UpdateOne operations")
+		return v, errors.New("OldSortOrder is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOrderWeight requires an ID field in the mutation")
+		return v, errors.New("OldSortOrder requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOrderWeight: %w", err)
+		return v, fmt.Errorf("querying old value for OldSortOrder: %w", err)
 	}
-	return oldValue.OrderWeight, nil
+	return oldValue.SortOrder, nil
 }
 
-// AddOrderWeight adds i to the "order_weight" field.
-func (m *DepartmentsMutation) AddOrderWeight(i int) {
-	if m.addorder_weight != nil {
-		*m.addorder_weight += i
+// AddSortOrder adds i to the "sort_order" field.
+func (m *DepartmentsMutation) AddSortOrder(i int) {
+	if m.addsort_order != nil {
+		*m.addsort_order += i
 	} else {
-		m.addorder_weight = &i
+		m.addsort_order = &i
 	}
 }
 
-// AddedOrderWeight returns the value that was added to the "order_weight" field in this mutation.
-func (m *DepartmentsMutation) AddedOrderWeight() (r int, exists bool) {
-	v := m.addorder_weight
+// AddedSortOrder returns the value that was added to the "sort_order" field in this mutation.
+func (m *DepartmentsMutation) AddedSortOrder() (r int, exists bool) {
+	v := m.addsort_order
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetOrderWeight resets all changes to the "order_weight" field.
-func (m *DepartmentsMutation) ResetOrderWeight() {
-	m.order_weight = nil
-	m.addorder_weight = nil
+// ResetSortOrder resets all changes to the "sort_order" field.
+func (m *DepartmentsMutation) ResetSortOrder() {
+	m.sort_order = nil
+	m.addsort_order = nil
 }
 
 // SetEmailEncrypted sets the "email_encrypted" field.
@@ -5577,8 +5577,8 @@ func (m *DepartmentsMutation) Fields() []string {
 	if m.department_status != nil {
 		fields = append(fields, departments.FieldDepartmentStatus)
 	}
-	if m.order_weight != nil {
-		fields = append(fields, departments.FieldOrderWeight)
+	if m.sort_order != nil {
+		fields = append(fields, departments.FieldSortOrder)
 	}
 	if m.email_encrypted != nil {
 		fields = append(fields, departments.FieldEmailEncrypted)
@@ -5633,8 +5633,8 @@ func (m *DepartmentsMutation) Field(name string) (ent.Value, bool) {
 		return m.DepartmentType()
 	case departments.FieldDepartmentStatus:
 		return m.DepartmentStatus()
-	case departments.FieldOrderWeight:
-		return m.OrderWeight()
+	case departments.FieldSortOrder:
+		return m.SortOrder()
 	case departments.FieldEmailEncrypted:
 		return m.EmailEncrypted()
 	case departments.FieldPhoneNumberEncrypted:
@@ -5680,8 +5680,8 @@ func (m *DepartmentsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldDepartmentType(ctx)
 	case departments.FieldDepartmentStatus:
 		return m.OldDepartmentStatus(ctx)
-	case departments.FieldOrderWeight:
-		return m.OldOrderWeight(ctx)
+	case departments.FieldSortOrder:
+		return m.OldSortOrder(ctx)
 	case departments.FieldEmailEncrypted:
 		return m.OldEmailEncrypted(ctx)
 	case departments.FieldPhoneNumberEncrypted:
@@ -5772,12 +5772,12 @@ func (m *DepartmentsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDepartmentStatus(v)
 		return nil
-	case departments.FieldOrderWeight:
+	case departments.FieldSortOrder:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOrderWeight(v)
+		m.SetSortOrder(v)
 		return nil
 	case departments.FieldEmailEncrypted:
 		v, ok := value.([]byte)
@@ -5865,8 +5865,8 @@ func (m *DepartmentsMutation) AddedFields() []string {
 	if m.adddepartment_status != nil {
 		fields = append(fields, departments.FieldDepartmentStatus)
 	}
-	if m.addorder_weight != nil {
-		fields = append(fields, departments.FieldOrderWeight)
+	if m.addsort_order != nil {
+		fields = append(fields, departments.FieldSortOrder)
 	}
 	if m.addmax_members != nil {
 		fields = append(fields, departments.FieldMaxMembers)
@@ -5889,8 +5889,8 @@ func (m *DepartmentsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedDepartmentType()
 	case departments.FieldDepartmentStatus:
 		return m.AddedDepartmentStatus()
-	case departments.FieldOrderWeight:
-		return m.AddedOrderWeight()
+	case departments.FieldSortOrder:
+		return m.AddedSortOrder()
 	case departments.FieldMaxMembers:
 		return m.AddedMaxMembers()
 	}
@@ -5937,12 +5937,12 @@ func (m *DepartmentsMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddDepartmentStatus(v)
 		return nil
-	case departments.FieldOrderWeight:
+	case departments.FieldSortOrder:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddOrderWeight(v)
+		m.AddSortOrder(v)
 		return nil
 	case departments.FieldMaxMembers:
 		v, ok := value.(int)
@@ -6068,8 +6068,8 @@ func (m *DepartmentsMutation) ResetField(name string) error {
 	case departments.FieldDepartmentStatus:
 		m.ResetDepartmentStatus()
 		return nil
-	case departments.FieldOrderWeight:
-		m.ResetOrderWeight()
+	case departments.FieldSortOrder:
+		m.ResetSortOrder()
 		return nil
 	case departments.FieldEmailEncrypted:
 		m.ResetEmailEncrypted()
@@ -7090,8 +7090,8 @@ type GroupsMutation struct {
 	addgroup_type           *int
 	group_status            *int
 	addgroup_status         *int
-	order_weight            *int
-	addorder_weight         *int
+	sort_order              *int
+	addsort_order           *int
 	parent_id               *int
 	addparent_id            *int
 	max_members             *int
@@ -7620,60 +7620,60 @@ func (m *GroupsMutation) ResetGroupStatus() {
 	m.addgroup_status = nil
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (m *GroupsMutation) SetOrderWeight(i int) {
-	m.order_weight = &i
-	m.addorder_weight = nil
+// SetSortOrder sets the "sort_order" field.
+func (m *GroupsMutation) SetSortOrder(i int) {
+	m.sort_order = &i
+	m.addsort_order = nil
 }
 
-// OrderWeight returns the value of the "order_weight" field in the mutation.
-func (m *GroupsMutation) OrderWeight() (r int, exists bool) {
-	v := m.order_weight
+// SortOrder returns the value of the "sort_order" field in the mutation.
+func (m *GroupsMutation) SortOrder() (r int, exists bool) {
+	v := m.sort_order
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldOrderWeight returns the old "order_weight" field's value of the Groups entity.
+// OldSortOrder returns the old "sort_order" field's value of the Groups entity.
 // If the Groups object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GroupsMutation) OldOrderWeight(ctx context.Context) (v int, err error) {
+func (m *GroupsMutation) OldSortOrder(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOrderWeight is only allowed on UpdateOne operations")
+		return v, errors.New("OldSortOrder is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOrderWeight requires an ID field in the mutation")
+		return v, errors.New("OldSortOrder requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOrderWeight: %w", err)
+		return v, fmt.Errorf("querying old value for OldSortOrder: %w", err)
 	}
-	return oldValue.OrderWeight, nil
+	return oldValue.SortOrder, nil
 }
 
-// AddOrderWeight adds i to the "order_weight" field.
-func (m *GroupsMutation) AddOrderWeight(i int) {
-	if m.addorder_weight != nil {
-		*m.addorder_weight += i
+// AddSortOrder adds i to the "sort_order" field.
+func (m *GroupsMutation) AddSortOrder(i int) {
+	if m.addsort_order != nil {
+		*m.addsort_order += i
 	} else {
-		m.addorder_weight = &i
+		m.addsort_order = &i
 	}
 }
 
-// AddedOrderWeight returns the value that was added to the "order_weight" field in this mutation.
-func (m *GroupsMutation) AddedOrderWeight() (r int, exists bool) {
-	v := m.addorder_weight
+// AddedSortOrder returns the value that was added to the "sort_order" field in this mutation.
+func (m *GroupsMutation) AddedSortOrder() (r int, exists bool) {
+	v := m.addsort_order
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetOrderWeight resets all changes to the "order_weight" field.
-func (m *GroupsMutation) ResetOrderWeight() {
-	m.order_weight = nil
-	m.addorder_weight = nil
+// ResetSortOrder resets all changes to the "sort_order" field.
+func (m *GroupsMutation) ResetSortOrder() {
+	m.sort_order = nil
+	m.addsort_order = nil
 }
 
 // SetParentID sets the "parent_id" field.
@@ -8139,8 +8139,8 @@ func (m *GroupsMutation) Fields() []string {
 	if m.group_status != nil {
 		fields = append(fields, groups.FieldGroupStatus)
 	}
-	if m.order_weight != nil {
-		fields = append(fields, groups.FieldOrderWeight)
+	if m.sort_order != nil {
+		fields = append(fields, groups.FieldSortOrder)
 	}
 	if m.parent_id != nil {
 		fields = append(fields, groups.FieldParentID)
@@ -8184,8 +8184,8 @@ func (m *GroupsMutation) Field(name string) (ent.Value, bool) {
 		return m.GroupType()
 	case groups.FieldGroupStatus:
 		return m.GroupStatus()
-	case groups.FieldOrderWeight:
-		return m.OrderWeight()
+	case groups.FieldSortOrder:
+		return m.SortOrder()
 	case groups.FieldParentID:
 		return m.ParentID()
 	case groups.FieldMaxMembers:
@@ -8223,8 +8223,8 @@ func (m *GroupsMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldGroupType(ctx)
 	case groups.FieldGroupStatus:
 		return m.OldGroupStatus(ctx)
-	case groups.FieldOrderWeight:
-		return m.OldOrderWeight(ctx)
+	case groups.FieldSortOrder:
+		return m.OldSortOrder(ctx)
 	case groups.FieldParentID:
 		return m.OldParentID(ctx)
 	case groups.FieldMaxMembers:
@@ -8302,12 +8302,12 @@ func (m *GroupsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetGroupStatus(v)
 		return nil
-	case groups.FieldOrderWeight:
+	case groups.FieldSortOrder:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOrderWeight(v)
+		m.SetSortOrder(v)
 		return nil
 	case groups.FieldParentID:
 		v, ok := value.(int)
@@ -8371,8 +8371,8 @@ func (m *GroupsMutation) AddedFields() []string {
 	if m.addgroup_status != nil {
 		fields = append(fields, groups.FieldGroupStatus)
 	}
-	if m.addorder_weight != nil {
-		fields = append(fields, groups.FieldOrderWeight)
+	if m.addsort_order != nil {
+		fields = append(fields, groups.FieldSortOrder)
 	}
 	if m.addparent_id != nil {
 		fields = append(fields, groups.FieldParentID)
@@ -8396,8 +8396,8 @@ func (m *GroupsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedGroupType()
 	case groups.FieldGroupStatus:
 		return m.AddedGroupStatus()
-	case groups.FieldOrderWeight:
-		return m.AddedOrderWeight()
+	case groups.FieldSortOrder:
+		return m.AddedSortOrder()
 	case groups.FieldParentID:
 		return m.AddedParentID()
 	case groups.FieldMaxMembers:
@@ -8439,12 +8439,12 @@ func (m *GroupsMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddGroupStatus(v)
 		return nil
-	case groups.FieldOrderWeight:
+	case groups.FieldSortOrder:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddOrderWeight(v)
+		m.AddSortOrder(v)
 		return nil
 	case groups.FieldParentID:
 		v, ok := value.(int)
@@ -8532,8 +8532,8 @@ func (m *GroupsMutation) ResetField(name string) error {
 	case groups.FieldGroupStatus:
 		m.ResetGroupStatus()
 		return nil
-	case groups.FieldOrderWeight:
-		m.ResetOrderWeight()
+	case groups.FieldSortOrder:
+		m.ResetSortOrder()
 		return nil
 	case groups.FieldParentID:
 		m.ResetParentID()
@@ -10234,8 +10234,8 @@ type ResourcesMutation struct {
 	parent_id               *int
 	addparent_id            *int
 	name                    *string
-	order_weight            *int
-	addorder_weight         *int
+	sort_order              *int
+	addsort_order           *int
 	resource_type           *int
 	addresource_type        *int
 	resource_scope          *int
@@ -10707,60 +10707,60 @@ func (m *ResourcesMutation) ResetName() {
 	m.name = nil
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (m *ResourcesMutation) SetOrderWeight(i int) {
-	m.order_weight = &i
-	m.addorder_weight = nil
+// SetSortOrder sets the "sort_order" field.
+func (m *ResourcesMutation) SetSortOrder(i int) {
+	m.sort_order = &i
+	m.addsort_order = nil
 }
 
-// OrderWeight returns the value of the "order_weight" field in the mutation.
-func (m *ResourcesMutation) OrderWeight() (r int, exists bool) {
-	v := m.order_weight
+// SortOrder returns the value of the "sort_order" field in the mutation.
+func (m *ResourcesMutation) SortOrder() (r int, exists bool) {
+	v := m.sort_order
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldOrderWeight returns the old "order_weight" field's value of the Resources entity.
+// OldSortOrder returns the old "sort_order" field's value of the Resources entity.
 // If the Resources object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldOrderWeight(ctx context.Context) (v int, err error) {
+func (m *ResourcesMutation) OldSortOrder(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOrderWeight is only allowed on UpdateOne operations")
+		return v, errors.New("OldSortOrder is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOrderWeight requires an ID field in the mutation")
+		return v, errors.New("OldSortOrder requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOrderWeight: %w", err)
+		return v, fmt.Errorf("querying old value for OldSortOrder: %w", err)
 	}
-	return oldValue.OrderWeight, nil
+	return oldValue.SortOrder, nil
 }
 
-// AddOrderWeight adds i to the "order_weight" field.
-func (m *ResourcesMutation) AddOrderWeight(i int) {
-	if m.addorder_weight != nil {
-		*m.addorder_weight += i
+// AddSortOrder adds i to the "sort_order" field.
+func (m *ResourcesMutation) AddSortOrder(i int) {
+	if m.addsort_order != nil {
+		*m.addsort_order += i
 	} else {
-		m.addorder_weight = &i
+		m.addsort_order = &i
 	}
 }
 
-// AddedOrderWeight returns the value that was added to the "order_weight" field in this mutation.
-func (m *ResourcesMutation) AddedOrderWeight() (r int, exists bool) {
-	v := m.addorder_weight
+// AddedSortOrder returns the value that was added to the "sort_order" field in this mutation.
+func (m *ResourcesMutation) AddedSortOrder() (r int, exists bool) {
+	v := m.addsort_order
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetOrderWeight resets all changes to the "order_weight" field.
-func (m *ResourcesMutation) ResetOrderWeight() {
-	m.order_weight = nil
-	m.addorder_weight = nil
+// ResetSortOrder resets all changes to the "sort_order" field.
+func (m *ResourcesMutation) ResetSortOrder() {
+	m.sort_order = nil
+	m.addsort_order = nil
 }
 
 // SetResourceType sets the "resource_type" field.
@@ -11237,8 +11237,8 @@ func (m *ResourcesMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, resources.FieldName)
 	}
-	if m.order_weight != nil {
-		fields = append(fields, resources.FieldOrderWeight)
+	if m.sort_order != nil {
+		fields = append(fields, resources.FieldSortOrder)
 	}
 	if m.resource_type != nil {
 		fields = append(fields, resources.FieldResourceType)
@@ -11289,8 +11289,8 @@ func (m *ResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.ParentID()
 	case resources.FieldName:
 		return m.Name()
-	case resources.FieldOrderWeight:
-		return m.OrderWeight()
+	case resources.FieldSortOrder:
+		return m.SortOrder()
 	case resources.FieldResourceType:
 		return m.ResourceType()
 	case resources.FieldResourceScope:
@@ -11332,8 +11332,8 @@ func (m *ResourcesMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldParentID(ctx)
 	case resources.FieldName:
 		return m.OldName(ctx)
-	case resources.FieldOrderWeight:
-		return m.OldOrderWeight(ctx)
+	case resources.FieldSortOrder:
+		return m.OldSortOrder(ctx)
 	case resources.FieldResourceType:
 		return m.OldResourceType(ctx)
 	case resources.FieldResourceScope:
@@ -11410,12 +11410,12 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
-	case resources.FieldOrderWeight:
+	case resources.FieldSortOrder:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOrderWeight(v)
+		m.SetSortOrder(v)
 		return nil
 	case resources.FieldResourceType:
 		v, ok := value.(int)
@@ -11497,8 +11497,8 @@ func (m *ResourcesMutation) AddedFields() []string {
 	if m.addparent_id != nil {
 		fields = append(fields, resources.FieldParentID)
 	}
-	if m.addorder_weight != nil {
-		fields = append(fields, resources.FieldOrderWeight)
+	if m.addsort_order != nil {
+		fields = append(fields, resources.FieldSortOrder)
 	}
 	if m.addresource_type != nil {
 		fields = append(fields, resources.FieldResourceType)
@@ -11520,8 +11520,8 @@ func (m *ResourcesMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedUpdatedBy()
 	case resources.FieldParentID:
 		return m.AddedParentID()
-	case resources.FieldOrderWeight:
-		return m.AddedOrderWeight()
+	case resources.FieldSortOrder:
+		return m.AddedSortOrder()
 	case resources.FieldResourceType:
 		return m.AddedResourceType()
 	case resources.FieldResourceScope:
@@ -11556,12 +11556,12 @@ func (m *ResourcesMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddParentID(v)
 		return nil
-	case resources.FieldOrderWeight:
+	case resources.FieldSortOrder:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddOrderWeight(v)
+		m.AddSortOrder(v)
 		return nil
 	case resources.FieldResourceType:
 		v, ok := value.(int)
@@ -11646,8 +11646,8 @@ func (m *ResourcesMutation) ResetField(name string) error {
 	case resources.FieldName:
 		m.ResetName()
 		return nil
-	case resources.FieldOrderWeight:
-		m.ResetOrderWeight()
+	case resources.FieldSortOrder:
+		m.ResetSortOrder()
 		return nil
 	case resources.FieldResourceType:
 		m.ResetResourceType()
@@ -13450,8 +13450,8 @@ type RolesMutation struct {
 	addrole_type                 *int
 	role_status                  *int
 	addrole_status               *int
-	order_weight                 *int
-	addorder_weight              *int
+	sort_order                   *int
+	addsort_order                *int
 	description                  *string
 	clearedFields                map[string]struct{}
 	lion_role_permissions        map[int]struct{}
@@ -13978,60 +13978,60 @@ func (m *RolesMutation) ResetRoleStatus() {
 	m.addrole_status = nil
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (m *RolesMutation) SetOrderWeight(i int) {
-	m.order_weight = &i
-	m.addorder_weight = nil
+// SetSortOrder sets the "sort_order" field.
+func (m *RolesMutation) SetSortOrder(i int) {
+	m.sort_order = &i
+	m.addsort_order = nil
 }
 
-// OrderWeight returns the value of the "order_weight" field in the mutation.
-func (m *RolesMutation) OrderWeight() (r int, exists bool) {
-	v := m.order_weight
+// SortOrder returns the value of the "sort_order" field in the mutation.
+func (m *RolesMutation) SortOrder() (r int, exists bool) {
+	v := m.sort_order
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldOrderWeight returns the old "order_weight" field's value of the Roles entity.
+// OldSortOrder returns the old "sort_order" field's value of the Roles entity.
 // If the Roles object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RolesMutation) OldOrderWeight(ctx context.Context) (v int, err error) {
+func (m *RolesMutation) OldSortOrder(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOrderWeight is only allowed on UpdateOne operations")
+		return v, errors.New("OldSortOrder is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOrderWeight requires an ID field in the mutation")
+		return v, errors.New("OldSortOrder requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOrderWeight: %w", err)
+		return v, fmt.Errorf("querying old value for OldSortOrder: %w", err)
 	}
-	return oldValue.OrderWeight, nil
+	return oldValue.SortOrder, nil
 }
 
-// AddOrderWeight adds i to the "order_weight" field.
-func (m *RolesMutation) AddOrderWeight(i int) {
-	if m.addorder_weight != nil {
-		*m.addorder_weight += i
+// AddSortOrder adds i to the "sort_order" field.
+func (m *RolesMutation) AddSortOrder(i int) {
+	if m.addsort_order != nil {
+		*m.addsort_order += i
 	} else {
-		m.addorder_weight = &i
+		m.addsort_order = &i
 	}
 }
 
-// AddedOrderWeight returns the value that was added to the "order_weight" field in this mutation.
-func (m *RolesMutation) AddedOrderWeight() (r int, exists bool) {
-	v := m.addorder_weight
+// AddedSortOrder returns the value that was added to the "sort_order" field in this mutation.
+func (m *RolesMutation) AddedSortOrder() (r int, exists bool) {
+	v := m.addsort_order
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetOrderWeight resets all changes to the "order_weight" field.
-func (m *RolesMutation) ResetOrderWeight() {
-	m.order_weight = nil
-	m.addorder_weight = nil
+// ResetSortOrder resets all changes to the "sort_order" field.
+func (m *RolesMutation) ResetSortOrder() {
+	m.sort_order = nil
+	m.addsort_order = nil
 }
 
 // SetDescription sets the "description" field.
@@ -14345,8 +14345,8 @@ func (m *RolesMutation) Fields() []string {
 	if m.role_status != nil {
 		fields = append(fields, roles.FieldRoleStatus)
 	}
-	if m.order_weight != nil {
-		fields = append(fields, roles.FieldOrderWeight)
+	if m.sort_order != nil {
+		fields = append(fields, roles.FieldSortOrder)
 	}
 	if m.description != nil {
 		fields = append(fields, roles.FieldDescription)
@@ -14375,8 +14375,8 @@ func (m *RolesMutation) Field(name string) (ent.Value, bool) {
 		return m.RoleType()
 	case roles.FieldRoleStatus:
 		return m.RoleStatus()
-	case roles.FieldOrderWeight:
-		return m.OrderWeight()
+	case roles.FieldSortOrder:
+		return m.SortOrder()
 	case roles.FieldDescription:
 		return m.Description()
 	}
@@ -14404,8 +14404,8 @@ func (m *RolesMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldRoleType(ctx)
 	case roles.FieldRoleStatus:
 		return m.OldRoleStatus(ctx)
-	case roles.FieldOrderWeight:
-		return m.OldOrderWeight(ctx)
+	case roles.FieldSortOrder:
+		return m.OldSortOrder(ctx)
 	case roles.FieldDescription:
 		return m.OldDescription(ctx)
 	}
@@ -14473,12 +14473,12 @@ func (m *RolesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRoleStatus(v)
 		return nil
-	case roles.FieldOrderWeight:
+	case roles.FieldSortOrder:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetOrderWeight(v)
+		m.SetSortOrder(v)
 		return nil
 	case roles.FieldDescription:
 		v, ok := value.(string)
@@ -14507,8 +14507,8 @@ func (m *RolesMutation) AddedFields() []string {
 	if m.addrole_status != nil {
 		fields = append(fields, roles.FieldRoleStatus)
 	}
-	if m.addorder_weight != nil {
-		fields = append(fields, roles.FieldOrderWeight)
+	if m.addsort_order != nil {
+		fields = append(fields, roles.FieldSortOrder)
 	}
 	return fields
 }
@@ -14526,8 +14526,8 @@ func (m *RolesMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedRoleType()
 	case roles.FieldRoleStatus:
 		return m.AddedRoleStatus()
-	case roles.FieldOrderWeight:
-		return m.AddedOrderWeight()
+	case roles.FieldSortOrder:
+		return m.AddedSortOrder()
 	}
 	return nil, false
 }
@@ -14565,12 +14565,12 @@ func (m *RolesMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddRoleStatus(v)
 		return nil
-	case roles.FieldOrderWeight:
+	case roles.FieldSortOrder:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddOrderWeight(v)
+		m.AddSortOrder(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Roles numeric field %s", name)
@@ -14644,8 +14644,8 @@ func (m *RolesMutation) ResetField(name string) error {
 	case roles.FieldRoleStatus:
 		m.ResetRoleStatus()
 		return nil
-	case roles.FieldOrderWeight:
-		m.ResetOrderWeight()
+	case roles.FieldSortOrder:
+		m.ResetSortOrder()
 		return nil
 	case roles.FieldDescription:
 		m.ResetDescription()

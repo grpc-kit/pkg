@@ -97,7 +97,7 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 256},
 		{Name: "department_type", Type: field.TypeInt, Default: 0},
 		{Name: "department_status", Type: field.TypeInt, Default: 1},
-		{Name: "order_weight", Type: field.TypeInt, Default: 100},
+		{Name: "sort_order", Type: field.TypeInt, Default: 100},
 		{Name: "email_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "phone_number_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "address_encrypted", Type: field.TypeBytes, Nullable: true},
@@ -162,7 +162,7 @@ var (
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
 		{Name: "group_type", Type: field.TypeInt, Default: 0},
 		{Name: "group_status", Type: field.TypeInt, Default: 0},
-		{Name: "order_weight", Type: field.TypeInt, Default: 0},
+		{Name: "sort_order", Type: field.TypeInt, Default: 100},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "max_members", Type: field.TypeInt, Default: 0},
 		{Name: "metadata", Type: field.TypeJSON},
@@ -250,7 +250,7 @@ var (
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "name", Type: field.TypeString, Size: 128},
-		{Name: "order_weight", Type: field.TypeInt, Default: 0},
+		{Name: "sort_order", Type: field.TypeInt, Default: 100},
 		{Name: "resource_type", Type: field.TypeInt, Default: 0},
 		{Name: "resource_scope", Type: field.TypeInt, Default: 0},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
@@ -283,7 +283,7 @@ var (
 				Columns: []*schema.Column{LionResourcesColumns[11]},
 			},
 			{
-				Name:    "resources_order_weight",
+				Name:    "resources_sort_order",
 				Unique:  false,
 				Columns: []*schema.Column{LionResourcesColumns[8]},
 			},
@@ -293,7 +293,7 @@ var (
 				Columns: []*schema.Column{LionResourcesColumns[14]},
 			},
 			{
-				Name:    "resources_parent_id_order_weight",
+				Name:    "resources_parent_id_sort_order",
 				Unique:  false,
 				Columns: []*schema.Column{LionResourcesColumns[6], LionResourcesColumns[8]},
 			},
@@ -384,7 +384,7 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 256},
 		{Name: "role_type", Type: field.TypeInt, Default: 0},
 		{Name: "role_status", Type: field.TypeInt, Default: 0},
-		{Name: "order_weight", Type: field.TypeInt, Default: 0},
+		{Name: "sort_order", Type: field.TypeInt, Default: 100},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}
 	// LionRolesTable holds the schema information for the "lion_roles" table.

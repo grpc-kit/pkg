@@ -35,8 +35,8 @@ type Groups struct {
 	GroupType int `json:"group_type,omitempty"`
 	// 群组状态，对应 api/known/admin/v1/common.proto 中定义
 	GroupStatus int `json:"group_status,omitempty"`
-	// 排序权重，数字越小越靠前
-	OrderWeight int `json:"order_weight,omitempty"`
+	// 群组排序顺序，用于同级群组的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999
+	SortOrder int `json:"sort_order,omitempty"`
 	// 父群组ID，为0表示顶级群组
 	ParentID int `json:"parent_id,omitempty"`
 	// 群组最大成员数量限制，0表示不限制
@@ -104,7 +104,7 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case groups.FieldMetadata:
 			values[i] = new([]byte)
-		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldOrderWeight, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID:
+		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
 		case groups.FieldName, groups.FieldExternalID, groups.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -180,11 +180,11 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.GroupStatus = int(value.Int64)
 			}
-		case groups.FieldOrderWeight:
+		case groups.FieldSortOrder:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field order_weight", values[i])
+				return fmt.Errorf("unexpected type %T for field sort_order", values[i])
 			} else if value.Valid {
-				_m.OrderWeight = int(value.Int64)
+				_m.SortOrder = int(value.Int64)
 			}
 		case groups.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -301,8 +301,8 @@ func (_m *Groups) String() string {
 	builder.WriteString("group_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GroupStatus))
 	builder.WriteString(", ")
-	builder.WriteString("order_weight=")
-	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
+	builder.WriteString("sort_order=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))
 	builder.WriteString(", ")
 	builder.WriteString("parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))

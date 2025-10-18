@@ -188,24 +188,24 @@ func (_u *DepartmentsUpdate) AddDepartmentStatus(v int) *DepartmentsUpdate {
 	return _u
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_u *DepartmentsUpdate) SetOrderWeight(v int) *DepartmentsUpdate {
-	_u.mutation.ResetOrderWeight()
-	_u.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_u *DepartmentsUpdate) SetSortOrder(v int) *DepartmentsUpdate {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
 	return _u
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_u *DepartmentsUpdate) SetNillableOrderWeight(v *int) *DepartmentsUpdate {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableSortOrder(v *int) *DepartmentsUpdate {
 	if v != nil {
-		_u.SetOrderWeight(*v)
+		_u.SetSortOrder(*v)
 	}
 	return _u
 }
 
-// AddOrderWeight adds value to the "order_weight" field.
-func (_u *DepartmentsUpdate) AddOrderWeight(v int) *DepartmentsUpdate {
-	_u.mutation.AddOrderWeight(v)
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *DepartmentsUpdate) AddSortOrder(v int) *DepartmentsUpdate {
+	_u.mutation.AddSortOrder(v)
 	return _u
 }
 
@@ -571,11 +571,11 @@ func (_u *DepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.AddedDepartmentStatus(); ok {
 		_spec.AddField(departments.FieldDepartmentStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.OrderWeight(); ok {
-		_spec.SetField(departments.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(departments.FieldSortOrder, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrderWeight(); ok {
-		_spec.AddField(departments.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(departments.FieldSortOrder, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.EmailEncrypted(); ok {
 		_spec.SetField(departments.FieldEmailEncrypted, field.TypeBytes, value)
@@ -940,24 +940,24 @@ func (_u *DepartmentsUpdateOne) AddDepartmentStatus(v int) *DepartmentsUpdateOne
 	return _u
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_u *DepartmentsUpdateOne) SetOrderWeight(v int) *DepartmentsUpdateOne {
-	_u.mutation.ResetOrderWeight()
-	_u.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_u *DepartmentsUpdateOne) SetSortOrder(v int) *DepartmentsUpdateOne {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
 	return _u
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_u *DepartmentsUpdateOne) SetNillableOrderWeight(v *int) *DepartmentsUpdateOne {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableSortOrder(v *int) *DepartmentsUpdateOne {
 	if v != nil {
-		_u.SetOrderWeight(*v)
+		_u.SetSortOrder(*v)
 	}
 	return _u
 }
 
-// AddOrderWeight adds value to the "order_weight" field.
-func (_u *DepartmentsUpdateOne) AddOrderWeight(v int) *DepartmentsUpdateOne {
-	_u.mutation.AddOrderWeight(v)
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *DepartmentsUpdateOne) AddSortOrder(v int) *DepartmentsUpdateOne {
+	_u.mutation.AddSortOrder(v)
 	return _u
 }
 
@@ -1353,11 +1353,11 @@ func (_u *DepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *Departments
 	if value, ok := _u.mutation.AddedDepartmentStatus(); ok {
 		_spec.AddField(departments.FieldDepartmentStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.OrderWeight(); ok {
-		_spec.SetField(departments.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(departments.FieldSortOrder, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrderWeight(); ok {
-		_spec.AddField(departments.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(departments.FieldSortOrder, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.EmailEncrypted(); ok {
 		_spec.SetField(departments.FieldEmailEncrypted, field.TypeBytes, value)

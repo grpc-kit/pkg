@@ -143,7 +143,7 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 		SetName(req.Role.Name).
 		// SetI18nName(req.Role.I18NName).
 		SetDescription(req.Role.Description).
-		SetOrderWeight(int(req.Role.OrderWeight)).
+		SetSortOrder(int(req.Role.SortOrder)).
 		Save(ctx)
 	if err != nil {
 		return result, err
@@ -155,7 +155,7 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 		DisplayName: role.Name,
 		// I18NName:    role.I18nName,
 		Description: role.Description,
-		OrderWeight: int32(role.OrderWeight),
+		SortOrder:   int32(role.SortOrder),
 	}
 
 	return result, nil
@@ -222,8 +222,8 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 							}
 						}
 				*/
-			case roles.FieldOrderWeight:
-				x.SetOrderWeight(int(req.Role.OrderWeight))
+			case roles.FieldSortOrder:
+				x.SetSortOrder(int(req.Role.SortOrder))
 			case roles.FieldDescription:
 				x.SetDescription(req.Role.Description)
 			}
@@ -242,7 +242,7 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 			// roles.FieldI18nName,
 			roles.FieldRoleType,
 			roles.FieldRoleStatus,
-			roles.FieldOrderWeight,
+			roles.FieldSortOrder,
 			roles.FieldDescription,
 		).Where(
 			roles.ID(int(req.Role.Id)),
@@ -257,7 +257,7 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 			DisplayName: q.Name,
 			// I18NName:    q.I18nName,
 			Description: q.Description,
-			OrderWeight: int32(q.OrderWeight),
+			SortOrder:   int32(q.SortOrder),
 		}
 	}
 

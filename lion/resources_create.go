@@ -111,16 +111,16 @@ func (_c *ResourcesCreate) SetName(v string) *ResourcesCreate {
 	return _c
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_c *ResourcesCreate) SetOrderWeight(v int) *ResourcesCreate {
-	_c.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_c *ResourcesCreate) SetSortOrder(v int) *ResourcesCreate {
+	_c.mutation.SetSortOrder(v)
 	return _c
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableOrderWeight(v *int) *ResourcesCreate {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableSortOrder(v *int) *ResourcesCreate {
 	if v != nil {
-		_c.SetOrderWeight(*v)
+		_c.SetSortOrder(*v)
 	}
 	return _c
 }
@@ -321,9 +321,9 @@ func (_c *ResourcesCreate) defaults() {
 		v := resources.DefaultParentID
 		_c.mutation.SetParentID(v)
 	}
-	if _, ok := _c.mutation.OrderWeight(); !ok {
-		v := resources.DefaultOrderWeight
-		_c.mutation.SetOrderWeight(v)
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		v := resources.DefaultSortOrder
+		_c.mutation.SetSortOrder(v)
 	}
 	if _, ok := _c.mutation.ResourceType(); !ok {
 		v := resources.DefaultResourceType
@@ -382,8 +382,8 @@ func (_c *ResourcesCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Resources.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.OrderWeight(); !ok {
-		return &ValidationError{Name: "order_weight", err: errors.New(`lion: missing required field "Resources.order_weight"`)}
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		return &ValidationError{Name: "sort_order", err: errors.New(`lion: missing required field "Resources.sort_order"`)}
 	}
 	if _, ok := _c.mutation.ResourceType(); !ok {
 		return &ValidationError{Name: "resource_type", err: errors.New(`lion: missing required field "Resources.resource_type"`)}
@@ -481,9 +481,9 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.OrderWeight(); ok {
-		_spec.SetField(resources.FieldOrderWeight, field.TypeInt, value)
-		_node.OrderWeight = value
+	if value, ok := _c.mutation.SortOrder(); ok {
+		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
+		_node.SortOrder = value
 	}
 	if value, ok := _c.mutation.ResourceType(); ok {
 		_spec.SetField(resources.FieldResourceType, field.TypeInt, value)

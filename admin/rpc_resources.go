@@ -118,7 +118,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			resources.FieldParentID,
 			resources.FieldName,
 			// resources.FieldI18nName,
-			resources.FieldOrderWeight,
+			resources.FieldSortOrder,
 			resources.FieldResourceType,
 			resources.FieldResourceScope,
 			resources.FieldEnabled,
@@ -149,7 +149,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			Name:     m.Name,
 			// I18NName:     m.I18nName,
 			DisplayName:  I18NName(m.Name),
-			OrderWeight:  int32(m.OrderWeight),
+			SortOrder:    int32(m.SortOrder),
 			Type:         adminv1.Resource_Type(m.ResourceType),
 			Scope:        adminv1.Resource_Scope(m.ResourceScope),
 			Enabled:      m.Enabled,
@@ -178,7 +178,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 
 	// 可选：对根菜单排序
 	sort.Slice(roots, func(i, j int) bool {
-		return roots[i].OrderWeight < roots[j].OrderWeight
+		return roots[i].SortOrder < roots[j].SortOrder
 	})
 
 	// TODO；写入该用户的缓存
@@ -206,7 +206,7 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		SetPath(req.Resource.Path).
 		SetComponent(req.Resource.Component).
 		SetIcon(req.Resource.Icon).
-		SetOrderWeight(int(req.Resource.OrderWeight)).
+		SetSortOrder(int(req.Resource.SortOrder)).
 		SetEnabled(req.Resource.Enabled).
 		SetHidden(req.Resource.Hidden).
 		SetHideChildren(req.Resource.HideChildren).

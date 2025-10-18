@@ -31,8 +31,8 @@ type Resources struct {
 	ParentID int `json:"parent_id,omitempty"`
 	// 资源名称
 	Name string `json:"name,omitempty"`
-	// 排序权重，越小越靠前
-	OrderWeight int `json:"order_weight,omitempty"`
+	// 资源排序顺序，用于同级资源的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999
+	SortOrder int `json:"sort_order,omitempty"`
 	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
 	ResourceType int `json:"resource_type,omitempty"`
 	// 作用范围，对应 api/known/admin/v1/common.proto 中定义
@@ -82,7 +82,7 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case resources.FieldEnabled, resources.FieldHidden, resources.FieldHideChildren:
 			values[i] = new(sql.NullBool)
-		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldOrderWeight, resources.FieldResourceType, resources.FieldResourceScope:
+		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldSortOrder, resources.FieldResourceType, resources.FieldResourceScope:
 			values[i] = new(sql.NullInt64)
 		case resources.FieldName, resources.FieldPath, resources.FieldIcon, resources.FieldComponent, resources.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -152,11 +152,11 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case resources.FieldOrderWeight:
+		case resources.FieldSortOrder:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field order_weight", values[i])
+				return fmt.Errorf("unexpected type %T for field sort_order", values[i])
 			} else if value.Valid {
-				_m.OrderWeight = int(value.Int64)
+				_m.SortOrder = int(value.Int64)
 			}
 		case resources.FieldResourceType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -276,8 +276,8 @@ func (_m *Resources) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("order_weight=")
-	builder.WriteString(fmt.Sprintf("%v", _m.OrderWeight))
+	builder.WriteString("sort_order=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))
 	builder.WriteString(", ")
 	builder.WriteString("resource_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ResourceType))

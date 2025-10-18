@@ -45,7 +45,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		SetParentID(int(req.Department.ParentId)).
 		SetName(req.Department.Name).
 		// SetI18nName(req.Department.I18NName).
-		SetOrderWeight(int(req.Department.OrderWeight)).
+		SetSortOrder(int(req.Department.SortOrder)).
 		Save(ctx)
 	if err != nil {
 		_ = tx.Rollback()
@@ -64,8 +64,8 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		Id:   int32(dp.ID),
 		Name: dp.Name,
 		// I18NName:    dp.I18nName,
-		OrderWeight: int32(dp.OrderWeight),
-		Managers:    make([]*adminv1.DepartmentMember, 0),
+		SortOrder: int32(dp.SortOrder),
+		Managers:  make([]*adminv1.DepartmentMember, 0),
 	}
 
 	_ = tx.Commit()
@@ -126,8 +126,8 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Name:        m.Name,
 			DisplayName: I18NName(m.Name),
 			// I18NName:    m.I18nName,
-			OrderWeight: int32(m.OrderWeight),
-			Managers:    make([]*adminv1.DepartmentMember, 0),
+			SortOrder: int32(m.SortOrder),
+			Managers:  make([]*adminv1.DepartmentMember, 0),
 		}
 
 		if m.Edges.LionUserDepartments != nil {
@@ -175,7 +175,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 
 	// 可选：对根菜单排序
 	sort.Slice(roots, func(i, j int) bool {
-		return roots[i].OrderWeight < roots[j].OrderWeight
+		return roots[i].SortOrder < roots[j].SortOrder
 	})
 
 	result.Departments = roots
@@ -274,8 +274,8 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 			switch path {
 			case departments.FieldName:
 				x.SetName(req.Department.Name)
-			case departments.FieldOrderWeight:
-				x.SetOrderWeight(int(req.Department.OrderWeight))
+			case departments.FieldSortOrder:
+				x.SetSortOrder(int(req.Department.SortOrder))
 			case departments.FieldParentID:
 				if req.Department.ParentId == 0 || req.Department.ParentId == req.Department.Id {
 					continue
@@ -489,8 +489,8 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 		ParentId: int32(dep.ParentID),
 		Name:     dep.Name,
 		// I18NName:    dep.I18nName,
-		OrderWeight: int32(dep.OrderWeight),
-		Managers:    make([]*adminv1.DepartmentMember, 0),
+		SortOrder: int32(dep.SortOrder),
+		Managers:  make([]*adminv1.DepartmentMember, 0),
 	}
 
 	// 递归子部门

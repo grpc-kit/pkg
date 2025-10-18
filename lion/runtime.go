@@ -214,10 +214,10 @@ func init() {
 	departmentsDescDepartmentStatus := departmentsFields[3].Descriptor()
 	// departments.DefaultDepartmentStatus holds the default value on creation for the department_status field.
 	departments.DefaultDepartmentStatus = departmentsDescDepartmentStatus.Default.(int)
-	// departmentsDescOrderWeight is the schema descriptor for order_weight field.
-	departmentsDescOrderWeight := departmentsFields[4].Descriptor()
-	// departments.DefaultOrderWeight holds the default value on creation for the order_weight field.
-	departments.DefaultOrderWeight = departmentsDescOrderWeight.Default.(int)
+	// departmentsDescSortOrder is the schema descriptor for sort_order field.
+	departmentsDescSortOrder := departmentsFields[4].Descriptor()
+	// departments.DefaultSortOrder holds the default value on creation for the sort_order field.
+	departments.DefaultSortOrder = departmentsDescSortOrder.Default.(int)
 	// departmentsDescMaxMembers is the schema descriptor for max_members field.
 	departmentsDescMaxMembers := departmentsFields[10].Descriptor()
 	// departments.DefaultMaxMembers holds the default value on creation for the max_members field.
@@ -310,10 +310,10 @@ func init() {
 	groupsDescGroupStatus := groupsFields[2].Descriptor()
 	// groups.DefaultGroupStatus holds the default value on creation for the group_status field.
 	groups.DefaultGroupStatus = groupsDescGroupStatus.Default.(int)
-	// groupsDescOrderWeight is the schema descriptor for order_weight field.
-	groupsDescOrderWeight := groupsFields[3].Descriptor()
-	// groups.DefaultOrderWeight holds the default value on creation for the order_weight field.
-	groups.DefaultOrderWeight = groupsDescOrderWeight.Default.(int)
+	// groupsDescSortOrder is the schema descriptor for sort_order field.
+	groupsDescSortOrder := groupsFields[3].Descriptor()
+	// groups.DefaultSortOrder holds the default value on creation for the sort_order field.
+	groups.DefaultSortOrder = groupsDescSortOrder.Default.(int)
 	// groupsDescParentID is the schema descriptor for parent_id field.
 	groupsDescParentID := groupsFields[4].Descriptor()
 	// groups.DefaultParentID holds the default value on creation for the parent_id field.
@@ -443,10 +443,10 @@ func init() {
 			return nil
 		}
 	}()
-	// resourcesDescOrderWeight is the schema descriptor for order_weight field.
-	resourcesDescOrderWeight := resourcesFields[2].Descriptor()
-	// resources.DefaultOrderWeight holds the default value on creation for the order_weight field.
-	resources.DefaultOrderWeight = resourcesDescOrderWeight.Default.(int)
+	// resourcesDescSortOrder is the schema descriptor for sort_order field.
+	resourcesDescSortOrder := resourcesFields[2].Descriptor()
+	// resources.DefaultSortOrder holds the default value on creation for the sort_order field.
+	resources.DefaultSortOrder = resourcesDescSortOrder.Default.(int)
 	// resourcesDescResourceType is the schema descriptor for resource_type field.
 	resourcesDescResourceType := resourcesFields[3].Descriptor()
 	// resources.DefaultResourceType holds the default value on creation for the resource_type field.
@@ -606,10 +606,10 @@ func init() {
 	rolesDescRoleStatus := rolesFields[2].Descriptor()
 	// roles.DefaultRoleStatus holds the default value on creation for the role_status field.
 	roles.DefaultRoleStatus = rolesDescRoleStatus.Default.(int)
-	// rolesDescOrderWeight is the schema descriptor for order_weight field.
-	rolesDescOrderWeight := rolesFields[3].Descriptor()
-	// roles.DefaultOrderWeight holds the default value on creation for the order_weight field.
-	roles.DefaultOrderWeight = rolesDescOrderWeight.Default.(int)
+	// rolesDescSortOrder is the schema descriptor for sort_order field.
+	rolesDescSortOrder := rolesFields[3].Descriptor()
+	// roles.DefaultSortOrder holds the default value on creation for the sort_order field.
+	roles.DefaultSortOrder = rolesDescSortOrder.Default.(int)
 	// rolesDescDescription is the schema descriptor for description field.
 	rolesDescDescription := rolesFields[4].Descriptor()
 	// roles.DefaultDescription holds the default value on creation for the description field.

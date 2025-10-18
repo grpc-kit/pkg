@@ -32,9 +32,9 @@ func (Departments) Fields() []ent.Field {
 		field.Int("department_status").
 			Default(1).
 			Comment("部门运营状态：0-未指定，1-正常运营，2-暂停运营，3-已解散，4-合并中"),
-		field.Int("order_weight").
+		field.Int("sort_order").
 			Default(100).
-			Comment("部门排序权重，数值越小排序越靠前，建议使用 10 的倍数"),
+			Comment("部门排序顺序，用于同级部门的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999"),
 		field.Bytes("email_encrypted").
 			Sensitive().
 			Optional().

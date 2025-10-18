@@ -52,7 +52,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	tx.Departments.CreateBulk(
 		tx.Departments.Create().
 			SetName("root").
-			SetOrderWeight(1).
+			SetSortOrder(1).
 			SetParentID(0),
 	).SaveX(ctx)
 

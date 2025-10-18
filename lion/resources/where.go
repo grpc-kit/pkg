@@ -90,9 +90,9 @@ func Name(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldName, v))
 }
 
-// OrderWeight applies equality check predicate on the "order_weight" field. It's identical to OrderWeightEQ.
-func OrderWeight(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldOrderWeight, v))
+// SortOrder applies equality check predicate on the "sort_order" field. It's identical to SortOrderEQ.
+func SortOrder(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldSortOrder, v))
 }
 
 // ResourceType applies equality check predicate on the "resource_type" field. It's identical to ResourceTypeEQ.
@@ -475,44 +475,44 @@ func NameContainsFold(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldContainsFold(FieldName, v))
 }
 
-// OrderWeightEQ applies the EQ predicate on the "order_weight" field.
-func OrderWeightEQ(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldOrderWeight, v))
+// SortOrderEQ applies the EQ predicate on the "sort_order" field.
+func SortOrderEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldSortOrder, v))
 }
 
-// OrderWeightNEQ applies the NEQ predicate on the "order_weight" field.
-func OrderWeightNEQ(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldOrderWeight, v))
+// SortOrderNEQ applies the NEQ predicate on the "sort_order" field.
+func SortOrderNEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldSortOrder, v))
 }
 
-// OrderWeightIn applies the In predicate on the "order_weight" field.
-func OrderWeightIn(vs ...int) predicate.Resources {
-	return predicate.Resources(sql.FieldIn(FieldOrderWeight, vs...))
+// SortOrderIn applies the In predicate on the "sort_order" field.
+func SortOrderIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldSortOrder, vs...))
 }
 
-// OrderWeightNotIn applies the NotIn predicate on the "order_weight" field.
-func OrderWeightNotIn(vs ...int) predicate.Resources {
-	return predicate.Resources(sql.FieldNotIn(FieldOrderWeight, vs...))
+// SortOrderNotIn applies the NotIn predicate on the "sort_order" field.
+func SortOrderNotIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldSortOrder, vs...))
 }
 
-// OrderWeightGT applies the GT predicate on the "order_weight" field.
-func OrderWeightGT(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldGT(FieldOrderWeight, v))
+// SortOrderGT applies the GT predicate on the "sort_order" field.
+func SortOrderGT(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldSortOrder, v))
 }
 
-// OrderWeightGTE applies the GTE predicate on the "order_weight" field.
-func OrderWeightGTE(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldGTE(FieldOrderWeight, v))
+// SortOrderGTE applies the GTE predicate on the "sort_order" field.
+func SortOrderGTE(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldSortOrder, v))
 }
 
-// OrderWeightLT applies the LT predicate on the "order_weight" field.
-func OrderWeightLT(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldLT(FieldOrderWeight, v))
+// SortOrderLT applies the LT predicate on the "sort_order" field.
+func SortOrderLT(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldSortOrder, v))
 }
 
-// OrderWeightLTE applies the LTE predicate on the "order_weight" field.
-func OrderWeightLTE(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldLTE(FieldOrderWeight, v))
+// SortOrderLTE applies the LTE predicate on the "sort_order" field.
+func SortOrderLTE(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldSortOrder, v))
 }
 
 // ResourceTypeEQ applies the EQ predicate on the "resource_type" field.

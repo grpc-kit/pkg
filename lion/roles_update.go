@@ -168,24 +168,24 @@ func (_u *RolesUpdate) AddRoleStatus(v int) *RolesUpdate {
 	return _u
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_u *RolesUpdate) SetOrderWeight(v int) *RolesUpdate {
-	_u.mutation.ResetOrderWeight()
-	_u.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_u *RolesUpdate) SetSortOrder(v int) *RolesUpdate {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
 	return _u
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_u *RolesUpdate) SetNillableOrderWeight(v *int) *RolesUpdate {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableSortOrder(v *int) *RolesUpdate {
 	if v != nil {
-		_u.SetOrderWeight(*v)
+		_u.SetSortOrder(*v)
 	}
 	return _u
 }
 
-// AddOrderWeight adds value to the "order_weight" field.
-func (_u *RolesUpdate) AddOrderWeight(v int) *RolesUpdate {
-	_u.mutation.AddOrderWeight(v)
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *RolesUpdate) AddSortOrder(v int) *RolesUpdate {
+	_u.mutation.AddSortOrder(v)
 	return _u
 }
 
@@ -452,11 +452,11 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedRoleStatus(); ok {
 		_spec.AddField(roles.FieldRoleStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.OrderWeight(); ok {
-		_spec.SetField(roles.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(roles.FieldSortOrder, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrderWeight(); ok {
-		_spec.AddField(roles.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(roles.FieldSortOrder, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(roles.FieldDescription, field.TypeString, value)
@@ -797,24 +797,24 @@ func (_u *RolesUpdateOne) AddRoleStatus(v int) *RolesUpdateOne {
 	return _u
 }
 
-// SetOrderWeight sets the "order_weight" field.
-func (_u *RolesUpdateOne) SetOrderWeight(v int) *RolesUpdateOne {
-	_u.mutation.ResetOrderWeight()
-	_u.mutation.SetOrderWeight(v)
+// SetSortOrder sets the "sort_order" field.
+func (_u *RolesUpdateOne) SetSortOrder(v int) *RolesUpdateOne {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
 	return _u
 }
 
-// SetNillableOrderWeight sets the "order_weight" field if the given value is not nil.
-func (_u *RolesUpdateOne) SetNillableOrderWeight(v *int) *RolesUpdateOne {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableSortOrder(v *int) *RolesUpdateOne {
 	if v != nil {
-		_u.SetOrderWeight(*v)
+		_u.SetSortOrder(*v)
 	}
 	return _u
 }
 
-// AddOrderWeight adds value to the "order_weight" field.
-func (_u *RolesUpdateOne) AddOrderWeight(v int) *RolesUpdateOne {
-	_u.mutation.AddOrderWeight(v)
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *RolesUpdateOne) AddSortOrder(v int) *RolesUpdateOne {
+	_u.mutation.AddSortOrder(v)
 	return _u
 }
 
@@ -1111,11 +1111,11 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 	if value, ok := _u.mutation.AddedRoleStatus(); ok {
 		_spec.AddField(roles.FieldRoleStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.OrderWeight(); ok {
-		_spec.SetField(roles.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(roles.FieldSortOrder, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrderWeight(); ok {
-		_spec.AddField(roles.FieldOrderWeight, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(roles.FieldSortOrder, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(roles.FieldDescription, field.TypeString, value)

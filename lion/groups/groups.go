@@ -30,8 +30,8 @@ const (
 	FieldGroupType = "group_type"
 	// FieldGroupStatus holds the string denoting the group_status field in the database.
 	FieldGroupStatus = "group_status"
-	// FieldOrderWeight holds the string denoting the order_weight field in the database.
-	FieldOrderWeight = "order_weight"
+	// FieldSortOrder holds the string denoting the sort_order field in the database.
+	FieldSortOrder = "sort_order"
 	// FieldParentID holds the string denoting the parent_id field in the database.
 	FieldParentID = "parent_id"
 	// FieldMaxMembers holds the string denoting the max_members field in the database.
@@ -86,7 +86,7 @@ var Columns = []string{
 	FieldName,
 	FieldGroupType,
 	FieldGroupStatus,
-	FieldOrderWeight,
+	FieldSortOrder,
 	FieldParentID,
 	FieldMaxMembers,
 	FieldMetadata,
@@ -122,8 +122,8 @@ var (
 	DefaultGroupType int
 	// DefaultGroupStatus holds the default value on creation for the "group_status" field.
 	DefaultGroupStatus int
-	// DefaultOrderWeight holds the default value on creation for the "order_weight" field.
-	DefaultOrderWeight int
+	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
+	DefaultSortOrder int
 	// DefaultParentID holds the default value on creation for the "parent_id" field.
 	DefaultParentID int
 	// DefaultMaxMembers holds the default value on creation for the "max_members" field.
@@ -186,9 +186,9 @@ func ByGroupStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldGroupStatus, opts...).ToFunc()
 }
 
-// ByOrderWeight orders the results by the order_weight field.
-func ByOrderWeight(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOrderWeight, opts...).ToFunc()
+// BySortOrder orders the results by the sort_order field.
+func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
 }
 
 // ByParentID orders the results by the parent_id field.

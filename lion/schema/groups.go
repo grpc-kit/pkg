@@ -32,9 +32,9 @@ func (Groups) Fields() []ent.Field {
 			Default(0).
 			Comment("群组状态，对应 api/known/admin/v1/common.proto 中定义"),
 
-		field.Int("order_weight").
-			Default(0).
-			Comment("排序权重，数字越小越靠前"),
+		field.Int("sort_order").
+			Default(100).
+			Comment("群组排序顺序，用于同级群组的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999"),
 		field.Int("parent_id").
 			Default(0).
 			Comment("父群组ID，为0表示顶级群组"),

@@ -31,9 +31,9 @@ func (Roles) Fields() []ent.Field {
 		field.Int("role_status").
 			Default(0).
 			Comment("角色状态：STATUS_ACTIVE=正常启用，STATUS_DISABLED=禁用状态"),
-		field.Int("order_weight").
-			Default(0).
-			Comment("排序权重，越小越靠前"),
+		field.Int("sort_order").
+			Default(100).
+			Comment("角色排序顺序，用于同级角色的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999"),
 		field.String("description").
 			Default("").
 			Comment("用途详细描述"),
