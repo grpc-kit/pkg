@@ -363,6 +363,7 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 		userdepartments.FieldDepartmentID,
 		userdepartments.FieldMemberRole,
 		userdepartments.FieldMemberStatus,
+		userdepartments.FieldMemberType,
 		userdepartments.FieldCreatedAt,
 		userdepartments.FieldUpdatedAt,
 	).WithLionUsers(func(query *lion.UsersQuery) {
@@ -387,6 +388,7 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 			DepartmentId: int32(member.DepartmentID),
 			MemberRole:   adminv1.DepartmentMember_Role(member.MemberRole),
 			MemberStatus: adminv1.DepartmentMember_Status(member.MemberStatus),
+			MemberType:   adminv1.DepartmentMember_MemberType(member.MemberType),
 			CreatedAt:    timestamppb.New(member.CreatedAt),
 			UpdatedAt:    timestamppb.New(member.UpdatedAt),
 			Description:  member.Description,
@@ -414,6 +416,7 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 	for _, member := range req.DepartmentMembers {
 		defaultRole := adminv1.DepartmentMember_ROLE_MEMBER
 		defaultStatus := adminv1.DepartmentMember_STATUS_ACTIVE
+		defaultType := adminv1.DepartmentMember_TYPE_PRIMARY
 
 		if member.MemberRole == adminv1.DepartmentMember_ROLE_UNSPECIFIED {
 			member.MemberRole = defaultRole
@@ -428,6 +431,7 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 				SetDepartmentID(int(departmentID)).
 				SetMemberRole(int(defaultRole)).
 				SetMemberStatus(int(defaultStatus)).
+				SetMemberType(int(defaultType)).
 				SetDescription(member.Description),
 		)
 	}

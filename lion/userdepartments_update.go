@@ -160,6 +160,27 @@ func (_u *UserDepartmentsUpdate) AddMemberStatus(v int) *UserDepartmentsUpdate {
 	return _u
 }
 
+// SetMemberType sets the "member_type" field.
+func (_u *UserDepartmentsUpdate) SetMemberType(v int) *UserDepartmentsUpdate {
+	_u.mutation.ResetMemberType()
+	_u.mutation.SetMemberType(v)
+	return _u
+}
+
+// SetNillableMemberType sets the "member_type" field if the given value is not nil.
+func (_u *UserDepartmentsUpdate) SetNillableMemberType(v *int) *UserDepartmentsUpdate {
+	if v != nil {
+		_u.SetMemberType(*v)
+	}
+	return _u
+}
+
+// AddMemberType adds value to the "member_type" field.
+func (_u *UserDepartmentsUpdate) AddMemberType(v int) *UserDepartmentsUpdate {
+	_u.mutation.AddMemberType(v)
+	return _u
+}
+
 // SetExpiredAt sets the "expired_at" field.
 func (_u *UserDepartmentsUpdate) SetExpiredAt(v time.Time) *UserDepartmentsUpdate {
 	_u.mutation.SetExpiredAt(v)
@@ -344,6 +365,12 @@ func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err er
 	}
 	if value, ok := _u.mutation.AddedMemberStatus(); ok {
 		_spec.AddField(userdepartments.FieldMemberStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MemberType(); ok {
+		_spec.SetField(userdepartments.FieldMemberType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMemberType(); ok {
+		_spec.AddField(userdepartments.FieldMemberType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ExpiredAt(); ok {
 		_spec.SetField(userdepartments.FieldExpiredAt, field.TypeTime, value)
@@ -568,6 +595,27 @@ func (_u *UserDepartmentsUpdateOne) AddMemberStatus(v int) *UserDepartmentsUpdat
 	return _u
 }
 
+// SetMemberType sets the "member_type" field.
+func (_u *UserDepartmentsUpdateOne) SetMemberType(v int) *UserDepartmentsUpdateOne {
+	_u.mutation.ResetMemberType()
+	_u.mutation.SetMemberType(v)
+	return _u
+}
+
+// SetNillableMemberType sets the "member_type" field if the given value is not nil.
+func (_u *UserDepartmentsUpdateOne) SetNillableMemberType(v *int) *UserDepartmentsUpdateOne {
+	if v != nil {
+		_u.SetMemberType(*v)
+	}
+	return _u
+}
+
+// AddMemberType adds value to the "member_type" field.
+func (_u *UserDepartmentsUpdateOne) AddMemberType(v int) *UserDepartmentsUpdateOne {
+	_u.mutation.AddMemberType(v)
+	return _u
+}
+
 // SetExpiredAt sets the "expired_at" field.
 func (_u *UserDepartmentsUpdateOne) SetExpiredAt(v time.Time) *UserDepartmentsUpdateOne {
 	_u.mutation.SetExpiredAt(v)
@@ -782,6 +830,12 @@ func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDep
 	}
 	if value, ok := _u.mutation.AddedMemberStatus(); ok {
 		_spec.AddField(userdepartments.FieldMemberStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MemberType(); ok {
+		_spec.SetField(userdepartments.FieldMemberType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMemberType(); ok {
+		_spec.AddField(userdepartments.FieldMemberType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ExpiredAt(); ok {
 		_spec.SetField(userdepartments.FieldExpiredAt, field.TypeTime, value)

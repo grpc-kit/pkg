@@ -118,6 +118,20 @@ func (_c *UserDepartmentsCreate) SetNillableMemberStatus(v *int) *UserDepartment
 	return _c
 }
 
+// SetMemberType sets the "member_type" field.
+func (_c *UserDepartmentsCreate) SetMemberType(v int) *UserDepartmentsCreate {
+	_c.mutation.SetMemberType(v)
+	return _c
+}
+
+// SetNillableMemberType sets the "member_type" field if the given value is not nil.
+func (_c *UserDepartmentsCreate) SetNillableMemberType(v *int) *UserDepartmentsCreate {
+	if v != nil {
+		_c.SetMemberType(*v)
+	}
+	return _c
+}
+
 // SetExpiredAt sets the "expired_at" field.
 func (_c *UserDepartmentsCreate) SetExpiredAt(v time.Time) *UserDepartmentsCreate {
 	_c.mutation.SetExpiredAt(v)
@@ -241,6 +255,10 @@ func (_c *UserDepartmentsCreate) defaults() {
 		v := userdepartments.DefaultMemberStatus
 		_c.mutation.SetMemberStatus(v)
 	}
+	if _, ok := _c.mutation.MemberType(); !ok {
+		v := userdepartments.DefaultMemberType
+		_c.mutation.SetMemberType(v)
+	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := userdepartments.DefaultDescription
 		_c.mutation.SetDescription(v)
@@ -266,6 +284,9 @@ func (_c *UserDepartmentsCreate) check() error {
 	}
 	if _, ok := _c.mutation.MemberStatus(); !ok {
 		return &ValidationError{Name: "member_status", err: errors.New(`lion: missing required field "UserDepartments.member_status"`)}
+	}
+	if _, ok := _c.mutation.MemberType(); !ok {
+		return &ValidationError{Name: "member_type", err: errors.New(`lion: missing required field "UserDepartments.member_type"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "UserDepartments.description"`)}
@@ -325,6 +346,10 @@ func (_c *UserDepartmentsCreate) createSpec() (*UserDepartments, *sqlgraph.Creat
 	if value, ok := _c.mutation.MemberStatus(); ok {
 		_spec.SetField(userdepartments.FieldMemberStatus, field.TypeInt, value)
 		_node.MemberStatus = value
+	}
+	if value, ok := _c.mutation.MemberType(); ok {
+		_spec.SetField(userdepartments.FieldMemberType, field.TypeInt, value)
+		_node.MemberType = value
 	}
 	if value, ok := _c.mutation.ExpiredAt(); ok {
 		_spec.SetField(userdepartments.FieldExpiredAt, field.TypeTime, value)

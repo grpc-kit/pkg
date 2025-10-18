@@ -409,6 +409,7 @@ var (
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "member_role", Type: field.TypeInt, Default: 0},
 		{Name: "member_status", Type: field.TypeInt, Default: 0},
+		{Name: "member_type", Type: field.TypeInt, Default: 0},
 		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
 		{Name: "metadata", Type: field.TypeString, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
@@ -423,13 +424,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_user_departments_lion_departments_lion_user_departments",
-				Columns:    []*schema.Column{LionUserDepartmentsColumns[10]},
+				Columns:    []*schema.Column{LionUserDepartmentsColumns[11]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_user_departments_lion_users_lion_user_departments",
-				Columns:    []*schema.Column{LionUserDepartmentsColumns[11]},
+				Columns:    []*schema.Column{LionUserDepartmentsColumns[12]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -438,7 +439,15 @@ var (
 			{
 				Name:    "userdepartments_user_id_department_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserDepartmentsColumns[11], LionUserDepartmentsColumns[10]},
+				Columns: []*schema.Column{LionUserDepartmentsColumns[12], LionUserDepartmentsColumns[11]},
+			},
+			{
+				Name:    "userdepartments_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionUserDepartmentsColumns[12]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "member_type = 1",
+				},
 			},
 		},
 	}

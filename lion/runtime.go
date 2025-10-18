@@ -647,8 +647,12 @@ func init() {
 	userdepartmentsDescMemberStatus := userdepartmentsFields[3].Descriptor()
 	// userdepartments.DefaultMemberStatus holds the default value on creation for the member_status field.
 	userdepartments.DefaultMemberStatus = userdepartmentsDescMemberStatus.Default.(int)
+	// userdepartmentsDescMemberType is the schema descriptor for member_type field.
+	userdepartmentsDescMemberType := userdepartmentsFields[4].Descriptor()
+	// userdepartments.DefaultMemberType holds the default value on creation for the member_type field.
+	userdepartments.DefaultMemberType = userdepartmentsDescMemberType.Default.(int)
 	// userdepartmentsDescDescription is the schema descriptor for description field.
-	userdepartmentsDescDescription := userdepartmentsFields[6].Descriptor()
+	userdepartmentsDescDescription := userdepartmentsFields[7].Descriptor()
 	// userdepartments.DefaultDescription holds the default value on creation for the description field.
 	userdepartments.DefaultDescription = userdepartmentsDescDescription.Default.(string)
 	usergroupsMixin := schema.UserGroups{}.Mixin()

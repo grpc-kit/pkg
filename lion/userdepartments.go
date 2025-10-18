@@ -35,6 +35,8 @@ type UserDepartments struct {
 	MemberRole int `json:"member_role,omitempty"`
 	// 用户群组关系状态：0-未知状态，1-待激活，2-正常启用，3-被邀请，4-禁用，5-被拒绝，6-已退出
 	MemberStatus int `json:"member_status,omitempty"`
+	// 成员关系类型，区分主部门和兼职部门
+	MemberType int `json:"member_type,omitempty"`
 	// 关系有效期，用于临时成员管理，0表示永久有效
 	ExpiredAt time.Time `json:"expired_at,omitempty"`
 	// 元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储
@@ -85,7 +87,7 @@ func (*UserDepartments) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case userdepartments.FieldID, userdepartments.FieldCreatedBy, userdepartments.FieldUpdatedBy, userdepartments.FieldDepartmentID, userdepartments.FieldUserID, userdepartments.FieldMemberRole, userdepartments.FieldMemberStatus:
+		case userdepartments.FieldID, userdepartments.FieldCreatedBy, userdepartments.FieldUpdatedBy, userdepartments.FieldDepartmentID, userdepartments.FieldUserID, userdepartments.FieldMemberRole, userdepartments.FieldMemberStatus, userdepartments.FieldMemberType:
 			values[i] = new(sql.NullInt64)
 		case userdepartments.FieldMetadata, userdepartments.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -159,6 +161,12 @@ func (_m *UserDepartments) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field member_status", values[i])
 			} else if value.Valid {
 				_m.MemberStatus = int(value.Int64)
+			}
+		case userdepartments.FieldMemberType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field member_type", values[i])
+			} else if value.Valid {
+				_m.MemberType = int(value.Int64)
 			}
 		case userdepartments.FieldExpiredAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -247,6 +255,9 @@ func (_m *UserDepartments) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("member_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MemberStatus))
+	builder.WriteString(", ")
+	builder.WriteString("member_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MemberType))
 	builder.WriteString(", ")
 	builder.WriteString("expired_at=")
 	builder.WriteString(_m.ExpiredAt.Format(time.ANSIC))

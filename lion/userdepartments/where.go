@@ -95,6 +95,11 @@ func MemberStatus(v int) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldEQ(FieldMemberStatus, v))
 }
 
+// MemberType applies equality check predicate on the "member_type" field. It's identical to MemberTypeEQ.
+func MemberType(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldMemberType, v))
+}
+
 // ExpiredAt applies equality check predicate on the "expired_at" field. It's identical to ExpiredAtEQ.
 func ExpiredAt(v time.Time) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldEQ(FieldExpiredAt, v))
@@ -408,6 +413,46 @@ func MemberStatusLT(v int) predicate.UserDepartments {
 // MemberStatusLTE applies the LTE predicate on the "member_status" field.
 func MemberStatusLTE(v int) predicate.UserDepartments {
 	return predicate.UserDepartments(sql.FieldLTE(FieldMemberStatus, v))
+}
+
+// MemberTypeEQ applies the EQ predicate on the "member_type" field.
+func MemberTypeEQ(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldEQ(FieldMemberType, v))
+}
+
+// MemberTypeNEQ applies the NEQ predicate on the "member_type" field.
+func MemberTypeNEQ(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNEQ(FieldMemberType, v))
+}
+
+// MemberTypeIn applies the In predicate on the "member_type" field.
+func MemberTypeIn(vs ...int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldIn(FieldMemberType, vs...))
+}
+
+// MemberTypeNotIn applies the NotIn predicate on the "member_type" field.
+func MemberTypeNotIn(vs ...int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldNotIn(FieldMemberType, vs...))
+}
+
+// MemberTypeGT applies the GT predicate on the "member_type" field.
+func MemberTypeGT(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGT(FieldMemberType, v))
+}
+
+// MemberTypeGTE applies the GTE predicate on the "member_type" field.
+func MemberTypeGTE(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldGTE(FieldMemberType, v))
+}
+
+// MemberTypeLT applies the LT predicate on the "member_type" field.
+func MemberTypeLT(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLT(FieldMemberType, v))
+}
+
+// MemberTypeLTE applies the LTE predicate on the "member_type" field.
+func MemberTypeLTE(v int) predicate.UserDepartments {
+	return predicate.UserDepartments(sql.FieldLTE(FieldMemberType, v))
 }
 
 // ExpiredAtEQ applies the EQ predicate on the "expired_at" field.

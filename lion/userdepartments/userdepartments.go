@@ -30,6 +30,8 @@ const (
 	FieldMemberRole = "member_role"
 	// FieldMemberStatus holds the string denoting the member_status field in the database.
 	FieldMemberStatus = "member_status"
+	// FieldMemberType holds the string denoting the member_type field in the database.
+	FieldMemberType = "member_type"
 	// FieldExpiredAt holds the string denoting the expired_at field in the database.
 	FieldExpiredAt = "expired_at"
 	// FieldMetadata holds the string denoting the metadata field in the database.
@@ -69,6 +71,7 @@ var Columns = []string{
 	FieldUserID,
 	FieldMemberRole,
 	FieldMemberStatus,
+	FieldMemberType,
 	FieldExpiredAt,
 	FieldMetadata,
 	FieldDescription,
@@ -99,6 +102,8 @@ var (
 	DefaultMemberRole int
 	// DefaultMemberStatus holds the default value on creation for the "member_status" field.
 	DefaultMemberStatus int
+	// DefaultMemberType holds the default value on creation for the "member_type" field.
+	DefaultMemberType int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -149,6 +154,11 @@ func ByMemberRole(opts ...sql.OrderTermOption) OrderOption {
 // ByMemberStatus orders the results by the member_status field.
 func ByMemberStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMemberStatus, opts...).ToFunc()
+}
+
+// ByMemberType orders the results by the member_type field.
+func ByMemberType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMemberType, opts...).ToFunc()
 }
 
 // ByExpiredAt orders the results by the expired_at field.

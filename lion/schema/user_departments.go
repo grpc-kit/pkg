@@ -27,6 +27,9 @@ func (UserDepartments) Fields() []ent.Field {
 		field.Int("member_status").
 			Default(0).
 			Comment("用户群组关系状态：0-未知状态，1-待激活，2-正常启用，3-被邀请，4-禁用，5-被拒绝，6-已退出"),
+		field.Int("member_type").
+			Default(0).
+			Comment("成员关系类型，区分主部门和兼职部门"),
 		field.Time("expired_at").
 			Optional().
 			Comment("关系有效期，用于临时成员管理，0表示永久有效"),
@@ -67,7 +70,13 @@ func (UserDepartments) Mixin() []ent.Mixin {
 // Indexes of the table.
 func (UserDepartments) Indexes() []ent.Index {
 	return []ent.Index{
+		// 确保用户和部门的组合是唯一的
 		index.Fields("user_id", "department_id").Unique(),
+		// 确保一个用户只能有一个主部门（TYPE_PRIMARY = 1）
+		// 这个索引只对 member_type = 1 的记录生效，实现条件唯一约束
+		index.Fields("user_id").
+			Unique().
+			Annotations(entsql.IndexWhere("member_type = 1")),
 	}
 }
 

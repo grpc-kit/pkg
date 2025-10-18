@@ -14832,6 +14832,8 @@ type UserDepartmentsMutation struct {
 	addmember_role          *int
 	member_status           *int
 	addmember_status        *int
+	member_type             *int
+	addmember_type          *int
 	expired_at              *time.Time
 	metadata                *string
 	description             *string
@@ -15339,6 +15341,62 @@ func (m *UserDepartmentsMutation) ResetMemberStatus() {
 	m.addmember_status = nil
 }
 
+// SetMemberType sets the "member_type" field.
+func (m *UserDepartmentsMutation) SetMemberType(i int) {
+	m.member_type = &i
+	m.addmember_type = nil
+}
+
+// MemberType returns the value of the "member_type" field in the mutation.
+func (m *UserDepartmentsMutation) MemberType() (r int, exists bool) {
+	v := m.member_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMemberType returns the old "member_type" field's value of the UserDepartments entity.
+// If the UserDepartments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserDepartmentsMutation) OldMemberType(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMemberType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMemberType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMemberType: %w", err)
+	}
+	return oldValue.MemberType, nil
+}
+
+// AddMemberType adds i to the "member_type" field.
+func (m *UserDepartmentsMutation) AddMemberType(i int) {
+	if m.addmember_type != nil {
+		*m.addmember_type += i
+	} else {
+		m.addmember_type = &i
+	}
+}
+
+// AddedMemberType returns the value that was added to the "member_type" field in this mutation.
+func (m *UserDepartmentsMutation) AddedMemberType() (r int, exists bool) {
+	v := m.addmember_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMemberType resets all changes to the "member_type" field.
+func (m *UserDepartmentsMutation) ResetMemberType() {
+	m.member_type = nil
+	m.addmember_type = nil
+}
+
 // SetExpiredAt sets the "expired_at" field.
 func (m *UserDepartmentsMutation) SetExpiredAt(t time.Time) {
 	m.expired_at = &t
@@ -15587,7 +15645,7 @@ func (m *UserDepartmentsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserDepartmentsMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, userdepartments.FieldCreatedAt)
 	}
@@ -15611,6 +15669,9 @@ func (m *UserDepartmentsMutation) Fields() []string {
 	}
 	if m.member_status != nil {
 		fields = append(fields, userdepartments.FieldMemberStatus)
+	}
+	if m.member_type != nil {
+		fields = append(fields, userdepartments.FieldMemberType)
 	}
 	if m.expired_at != nil {
 		fields = append(fields, userdepartments.FieldExpiredAt)
@@ -15645,6 +15706,8 @@ func (m *UserDepartmentsMutation) Field(name string) (ent.Value, bool) {
 		return m.MemberRole()
 	case userdepartments.FieldMemberStatus:
 		return m.MemberStatus()
+	case userdepartments.FieldMemberType:
+		return m.MemberType()
 	case userdepartments.FieldExpiredAt:
 		return m.ExpiredAt()
 	case userdepartments.FieldMetadata:
@@ -15676,6 +15739,8 @@ func (m *UserDepartmentsMutation) OldField(ctx context.Context, name string) (en
 		return m.OldMemberRole(ctx)
 	case userdepartments.FieldMemberStatus:
 		return m.OldMemberStatus(ctx)
+	case userdepartments.FieldMemberType:
+		return m.OldMemberType(ctx)
 	case userdepartments.FieldExpiredAt:
 		return m.OldExpiredAt(ctx)
 	case userdepartments.FieldMetadata:
@@ -15747,6 +15812,13 @@ func (m *UserDepartmentsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMemberStatus(v)
 		return nil
+	case userdepartments.FieldMemberType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMemberType(v)
+		return nil
 	case userdepartments.FieldExpiredAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -15788,6 +15860,9 @@ func (m *UserDepartmentsMutation) AddedFields() []string {
 	if m.addmember_status != nil {
 		fields = append(fields, userdepartments.FieldMemberStatus)
 	}
+	if m.addmember_type != nil {
+		fields = append(fields, userdepartments.FieldMemberType)
+	}
 	return fields
 }
 
@@ -15804,6 +15879,8 @@ func (m *UserDepartmentsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedMemberRole()
 	case userdepartments.FieldMemberStatus:
 		return m.AddedMemberStatus()
+	case userdepartments.FieldMemberType:
+		return m.AddedMemberType()
 	}
 	return nil, false
 }
@@ -15840,6 +15917,13 @@ func (m *UserDepartmentsMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddMemberStatus(v)
+		return nil
+	case userdepartments.FieldMemberType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMemberType(v)
 		return nil
 	}
 	return fmt.Errorf("unknown UserDepartments numeric field %s", name)
@@ -15918,6 +16002,9 @@ func (m *UserDepartmentsMutation) ResetField(name string) error {
 		return nil
 	case userdepartments.FieldMemberStatus:
 		m.ResetMemberStatus()
+		return nil
+	case userdepartments.FieldMemberType:
+		m.ResetMemberType()
 		return nil
 	case userdepartments.FieldExpiredAt:
 		m.ResetExpiredAt()
