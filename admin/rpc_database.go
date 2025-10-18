@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"strconv"
 
 	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -35,19 +36,46 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 
-	tx.Roles.CreateBulk(
-		tx.Roles.Create().
-			SetName("superadmin").
-			SetRoleType(int(adminv1.Role_TYPE_SYSTEM.Number())).
-			SetDescription("超级管理员"),
-	).SaveX(ctx)
+	adminUser, err := tx.Users.Create().
+		SetUsername("admin").
+		SetUserType(int(adminv1.User_TYPE_SYSTEM.Number())).
+		SetUserStatus(int(adminv1.User_STATUS_ACTIVE.Number())).
+		SetNickname("超级管理员").
+		SetDescription("初始超级管理员，系统配置成功后建议删除或者禁用！").
+		Save(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return result, err
+	}
 
-	tx.AuthProviders.CreateBulk(
-		tx.AuthProviders.Create().
-			SetName("local").
-			SetProviderType(int(adminv1.AuthProvider_TYPE_LOCAL.Number())).
-			SetEnabled(true),
-	).SaveX(ctx)
+	adminRole, err := tx.Roles.Create().
+		SetName("superadmin").
+		SetRoleType(int(adminv1.Role_TYPE_SYSTEM.Number())).
+		SetDescription("超级管理员").
+		Save(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return result, err
+	}
+
+	tx.UserRoles.Create().SetUserID(adminUser.ID).SetRoleID(adminRole.ID).SaveX(ctx)
+
+	localProvider, err := tx.AuthProviders.Create().
+		SetName("local").
+		SetProviderType(int(adminv1.AuthProvider_TYPE_LOCAL.Number())).
+		SetEnabled(true).
+		Save(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return result, err
+	}
+
+	tx.UserIdentities.Create().
+		SetProviderID(localProvider.ID).
+		SetProviderUserID(strconv.Itoa(adminUser.ID)).
+		SetUserID(adminUser.ID).
+		SetPasswordHash(crypto.BcryptHashMust(crypto.SHA256([]byte("grpc-kit-cli")))). // TODO; 由客户端参数获取
+		SaveX(ctx)
 
 	tx.Departments.CreateBulk(
 		tx.Departments.Create().
