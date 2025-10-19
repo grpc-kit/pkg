@@ -418,6 +418,10 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 		defaultStatus := adminv1.DepartmentMember_STATUS_ACTIVE
 		defaultType := adminv1.DepartmentMember_TYPE_PRIMARY
 
+		if member.MemberType != adminv1.DepartmentMember_TYPE_UNSPECIFIED {
+			defaultType = member.MemberType
+		}
+
 		if member.MemberRole == adminv1.DepartmentMember_ROLE_UNSPECIFIED {
 			member.MemberRole = defaultRole
 		}
