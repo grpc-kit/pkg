@@ -20,7 +20,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -722,7 +721,7 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 }
 
 // UpdateUserPassword 修改用户密码
-func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.UpdateUserPasswordRequest) (*emptypb.Empty, error) {
+func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.UpdateUserPasswordRequest) (*adminv1.UpdateUserPasswordResponse, error) {
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
@@ -774,7 +773,7 @@ func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.Upd
 
 	tx.Commit()
 
-	return &emptypb.Empty{}, nil
+	return &adminv1.UpdateUserPasswordResponse{}, nil
 }
 
 func (a *KnownAdminAPI) getDepartmentID(filter string) (int, bool) {
