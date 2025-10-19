@@ -53,3 +53,17 @@ func GetUserID(ctx context.Context) (int, error) {
 
 	return userIDInt, nil
 }
+
+// GetPageSize 实现分页参数获取
+func GetPageSize(ctx context.Context, pageSize int32) int32 {
+	currentPageSize := pageSize
+
+	if currentPageSize <= 0 {
+		currentPageSize = 20
+	}
+	if currentPageSize > 100 {
+		currentPageSize = 100
+	}
+
+	return currentPageSize
+}

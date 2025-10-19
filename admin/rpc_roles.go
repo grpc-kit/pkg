@@ -6,6 +6,7 @@ import (
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
@@ -13,15 +14,65 @@ import (
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // ListRoles 创建用户
 func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesRequest) (*adminv1.ListRolesResponse, error) {
 	result := &adminv1.ListRolesResponse{}
 
-	rl, err := a.config.db.Roles.Query().
-		Select(roles.FieldID, roles.FieldName, roles.FieldDescription).
-		All(ctx)
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	defaultSelect := []string{
+		roles.FieldID,
+		roles.FieldName,
+		roles.FieldRoleType,
+		roles.FieldRoleStatus,
+		roles.FieldSortOrder,
+		roles.FieldDescription,
+		roles.FieldCreatedAt,
+		roles.FieldUpdatedAt,
+	}
+
+	roleQuery := db.Roles.Query()
+
+	// 查找用户并实现分页
+	pageSize := GetPageSize(ctx, req.PageSize)
+
+	// OrderBy
+	if req.GetOrderBy() != "" {
+		switch req.GetOrderBy() {
+		case "create_time desc":
+			roleQuery = roleQuery.Order(lion.Desc(roles.FieldCreatedAt))
+		case "create_time asc":
+			roleQuery = roleQuery.Order(lion.Asc(roles.FieldCreatedAt))
+		default:
+			roleQuery = roleQuery.Order(lion.Desc(roles.FieldID))
+		}
+	} else {
+		roleQuery = roleQuery.Order(lion.Desc(roles.FieldID))
+	}
+
+	totalSize, err := roleQuery.Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result.TotalSize = int32(totalSize)
+
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListRolesRequest_Offset:
+		// Offset 分页
+		roleQuery = roleQuery.Offset(int(p.Offset))
+	case *adminv1.ListRolesRequest_PageToken:
+		// TODO; Cursor 分页
+	}
+
+	roleQuery = roleQuery.Limit(int(pageSize))
+
+	rl, err := roleQuery.Select(defaultSelect...).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +81,12 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 		result.Roles = append(result.Roles, &adminv1.Role{
 			Id:          int32(r.ID),
 			Name:        r.Name,
+			Type:        adminv1.Role_Type(r.RoleType),
+			Status:      adminv1.Role_Status(r.RoleStatus),
+			SortOrder:   int32(r.SortOrder),
 			Description: r.Description,
+			CreatedAt:   timestamppb.New(r.CreatedAt),
+			UpdatedAt:   timestamppb.New(r.UpdatedAt),
 		})
 	}
 
