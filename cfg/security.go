@@ -18,7 +18,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// IDTokenClaims 用于框架jwt的数据结构
+// IDTokenClaims 用于框架jwt的数据结构，使用 auth.IDTokenClaims 代替
+/*
 type IDTokenClaims struct {
 	jwt.RegisteredClaims
 	Email           string            `json:"email"`
@@ -27,6 +28,7 @@ type IDTokenClaims struct {
 	FederatedClaims map[string]string `json:"federated_claims"`
 	Tenant          string            `json:"tenant"`
 }
+*/
 
 // OPANative 内嵌的 opa 组件
 type OPANative struct {
@@ -153,7 +155,7 @@ func (c *LocalConfig) initSecurity() error {
 }
 
 // WithIDToken 用于设置当前会话的IDToken
-func (c *SecurityConfig) withIDToken(parent context.Context, token IDTokenClaims) context.Context {
+func (c *SecurityConfig) withIDToken(parent context.Context, token auth.IDTokenClaims) context.Context {
 	// return context.WithValue(parent, idTokenKey, token)
 	return rpc.ContextWithIDToken(parent, token)
 }
@@ -225,8 +227,8 @@ func (s *SecurityConfig) foundUserID(userID string) (bool, *BasicAuth) {
 
 // verifyBearerToken 用于验证 bearerToken
 // 需判断服务端是否允许 HS256 的签名算法，如果有在判断 token 是否使用 HS256
-func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString string) (IDTokenClaims, error) {
-	var idToken IDTokenClaims
+func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString string) (auth.IDTokenClaims, error) {
+	var idToken auth.IDTokenClaims
 
 	// 用户提交的 token 是否为 HS256 签名
 	hasHS256Alg := false
@@ -236,7 +238,7 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 		if token.Method.Alg() == "HS256" {
 			hasHS256Alg = true
 
-			claims, ok := token.Claims.(*IDTokenClaims)
+			claims, ok := token.Claims.(*auth.IDTokenClaims)
 			if ok {
 				// 根据 sub 获取作为 username 获取对应的 password 作为 token 的签名验证
 				f, b := s.foundUserID(claims.Subject)

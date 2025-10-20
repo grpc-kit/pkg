@@ -582,13 +582,13 @@ func (c *LocalConfig) HasCacheboxEnabled() bool {
 }
 
 // IDTokenFrom 用于获取当前会话的IDToken
-func (c *LocalConfig) IDTokenFrom(ctx context.Context) (IDTokenClaims, bool) {
+func (c *LocalConfig) IDTokenFrom(ctx context.Context) (auth.IDTokenClaims, bool) {
 	tmp := rpc.GetIDTokenFromContext(ctx)
 
 	// idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
 	// return idToken, ok
 
-	idToken, ok := tmp.(IDTokenClaims)
+	idToken, ok := tmp.(auth.IDTokenClaims)
 	return idToken, ok
 }
 
