@@ -3,6 +3,7 @@ package auth
 import (
 	"crypto/rsa"
 	"fmt"
+	"hash/fnv"
 	"strconv"
 	"time"
 
@@ -91,7 +92,20 @@ func (i *IDTokenClaims) GetAccessTokenRSA(signeKey *rsa.PrivateKey) (string, err
 func (i *IDTokenClaims) GetMustUserID() int64 {
 	userID, err := strconv.ParseInt(i.Subject, 10, 64)
 	if err != nil {
-		return 0
+		if i.Subject == "" {
+			return 0
+		}
+
+		// 如果为 lion_users 中用户登录的，则 "subject" 必须为 "user_id"
+		// 如果为本地配置文件用户登录的，则 "subject" 有可能为 "username"
+		var maxVal, minVal int64
+		maxVal = 109999
+		minVal = 100000
+
+		h := fnv.New64a()
+		h.Write([]byte(i.Username))
+		v := int64(h.Sum64() & 0x7fffffffffffffff)
+		return minVal + (v % (maxVal - minVal + 1))
 	}
 
 	return userID

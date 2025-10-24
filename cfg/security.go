@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash/fnv"
 	"net/http"
 	"time"
 
@@ -219,6 +220,22 @@ func (s *SecurityConfig) foundUserID(userID int64) (bool, *BasicAuth) {
 	for _, v := range s.Authentication.HTTPUsers {
 		if userID == v.UserID {
 			return true, v
+		} else if v.UserID == 0 {
+			// 兼容无 user_id 的用户
+
+			// TODO；同 auth/token.go
+			var maxVal, minVal int64
+			maxVal = 109999
+			minVal = 100000
+
+			h := fnv.New64a()
+			h.Write([]byte(v.Username))
+			calcV := int64(h.Sum64() & 0x7fffffffffffffff)
+			calcID := minVal + (calcV % (maxVal - minVal + 1))
+
+			if calcID == userID {
+				return true, v
+			}
 		}
 	}
 
