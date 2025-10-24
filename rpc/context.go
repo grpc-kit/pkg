@@ -27,7 +27,7 @@ func ContextWithIDToken(parent context.Context, token interface{}) context.Conte
 	return context.WithValue(parent, idTokenKey, token)
 }
 
-func ContextWithUserID(parent context.Context, userID string) context.Context {
+func ContextWithUserID(parent context.Context, userID int64) context.Context {
 	return context.WithValue(parent, userIDKey, userID)
 }
 
@@ -53,15 +53,15 @@ func GetAuthenticationTypeFromContext(ctx context.Context) (string, bool) {
 	return username, ok
 }
 
-func GetUserIDFromContext(ctx context.Context) (string, bool) {
-	defaultUser := "0"
+func GetUserIDFromContext(ctx context.Context) (int64, bool) {
+	defaultUser := 0
 
-	userID, ok := ctx.Value(userIDKey).(string)
-	if ok && userID != "" {
+	userID, ok := ctx.Value(userIDKey).(int64)
+	if ok && userID != 0 {
 		return userID, true
 	}
 
-	return defaultUser, false
+	return int64(defaultUser), false
 }
 
 func GetUsernameFromContext(ctx context.Context) (string, bool) {

@@ -22,6 +22,840 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type LocalConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Services    *ServicesConfig    `protobuf:"bytes,1,opt,name=Services,proto3" json:"Services,omitempty"`
+	Discover    *DiscoverConfig    `protobuf:"bytes,2,opt,name=Discover,proto3" json:"Discover,omitempty"`
+	Security    *SecurityConfig    `protobuf:"bytes,3,opt,name=Security,proto3" json:"Security,omitempty"`
+	Database    *DatabaseConfig    `protobuf:"bytes,4,opt,name=Database,proto3" json:"Database,omitempty"`
+	Cachebox    *CacheboxConfig    `protobuf:"bytes,5,opt,name=Cachebox,proto3" json:"Cachebox,omitempty"`
+	Debugger    *DebuggerConfig    `protobuf:"bytes,6,opt,name=Debugger,proto3" json:"Debugger,omitempty"`
+	Objstore    *ObjstoreConfig    `protobuf:"bytes,7,opt,name=Objstore,proto3" json:"Objstore,omitempty"`
+	Frontend    *FrontendConfig    `protobuf:"bytes,8,opt,name=Frontend,proto3" json:"Frontend,omitempty"`
+	Observables *ObservablesConfig `protobuf:"bytes,9,opt,name=Observables,proto3" json:"Observables,omitempty"`
+	CloudEvents *CloudEventsConfig `protobuf:"bytes,10,opt,name=CloudEvents,proto3" json:"CloudEvents,omitempty"`
+	Automations *AutomationsConfig `protobuf:"bytes,11,opt,name=Automations,proto3" json:"Automations,omitempty"`
+}
+
+func (x *LocalConfig) Reset() {
+	*x = LocalConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LocalConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LocalConfig) ProtoMessage() {}
+
+func (x *LocalConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LocalConfig.ProtoReflect.Descriptor instead.
+func (*LocalConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *LocalConfig) GetServices() *ServicesConfig {
+	if x != nil {
+		return x.Services
+	}
+	return nil
+}
+
+func (x *LocalConfig) GetDiscover() *DiscoverConfig {
+	if x != nil {
+		return x.Discover
+	}
+	return nil
+}
+
+func (x *LocalConfig) GetSecurity() *SecurityConfig {
+	if x != nil {
+		return x.Security
+	}
+	return nil
+}
+
+func (x *LocalConfig) GetDatabase() *DatabaseConfig {
+	if x != nil {
+		return x.Database
+	}
+	return nil
+}
+
+func (x *LocalConfig) GetCachebox() *CacheboxConfig {
+	if x != nil {
+		return x.Cachebox
+	}
+	return nil
+}
+
+func (x *LocalConfig) GetDebugger() *DebuggerConfig {
+	if x != nil {
+		return x.Debugger
+	}
+	return nil
+}
+
+func (x *LocalConfig) GetObjstore() *ObjstoreConfig {
+	if x != nil {
+		return x.Objstore
+	}
+	return nil
+}
+
+func (x *LocalConfig) GetFrontend() *FrontendConfig {
+	if x != nil {
+		return x.Frontend
+	}
+	return nil
+}
+
+func (x *LocalConfig) GetObservables() *ObservablesConfig {
+	if x != nil {
+		return x.Observables
+	}
+	return nil
+}
+
+func (x *LocalConfig) GetCloudEvents() *CloudEventsConfig {
+	if x != nil {
+		return x.CloudEvents
+	}
+	return nil
+}
+
+func (x *LocalConfig) GetAutomations() *AutomationsConfig {
+	if x != nil {
+		return x.Automations
+	}
+	return nil
+}
+
+type ServicesConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ServicesConfig) Reset() {
+	*x = ServicesConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ServicesConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServicesConfig) ProtoMessage() {}
+
+func (x *ServicesConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServicesConfig.ProtoReflect.Descriptor instead.
+func (*ServicesConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{1}
+}
+
+type DiscoverConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *DiscoverConfig) Reset() {
+	*x = DiscoverConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DiscoverConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DiscoverConfig) ProtoMessage() {}
+
+func (x *DiscoverConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DiscoverConfig.ProtoReflect.Descriptor instead.
+func (*DiscoverConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{2}
+}
+
+type SecurityConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Enable         bool            `protobuf:"varint,1,opt,name=enable,proto3" json:"enable,omitempty"`
+	Authentication *Authentication `protobuf:"bytes,2,opt,name=authentication,proto3" json:"authentication,omitempty"`
+	Authorization  *Authorization  `protobuf:"bytes,3,opt,name=authorization,proto3" json:"authorization,omitempty"`
+}
+
+func (x *SecurityConfig) Reset() {
+	*x = SecurityConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SecurityConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SecurityConfig) ProtoMessage() {}
+
+func (x *SecurityConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SecurityConfig.ProtoReflect.Descriptor instead.
+func (*SecurityConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *SecurityConfig) GetEnable() bool {
+	if x != nil {
+		return x.Enable
+	}
+	return false
+}
+
+func (x *SecurityConfig) GetAuthentication() *Authentication {
+	if x != nil {
+		return x.Authentication
+	}
+	return nil
+}
+
+func (x *SecurityConfig) GetAuthorization() *Authorization {
+	if x != nil {
+		return x.Authorization
+	}
+	return nil
+}
+
+type DatabaseConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *DatabaseConfig) Reset() {
+	*x = DatabaseConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DatabaseConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DatabaseConfig) ProtoMessage() {}
+
+func (x *DatabaseConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DatabaseConfig.ProtoReflect.Descriptor instead.
+func (*DatabaseConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{4}
+}
+
+type CacheboxConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CacheboxConfig) Reset() {
+	*x = CacheboxConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CacheboxConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CacheboxConfig) ProtoMessage() {}
+
+func (x *CacheboxConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CacheboxConfig.ProtoReflect.Descriptor instead.
+func (*CacheboxConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{5}
+}
+
+type DebuggerConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *DebuggerConfig) Reset() {
+	*x = DebuggerConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DebuggerConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DebuggerConfig) ProtoMessage() {}
+
+func (x *DebuggerConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DebuggerConfig.ProtoReflect.Descriptor instead.
+func (*DebuggerConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{6}
+}
+
+type ObjstoreConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ObjstoreConfig) Reset() {
+	*x = ObjstoreConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ObjstoreConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ObjstoreConfig) ProtoMessage() {}
+
+func (x *ObjstoreConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ObjstoreConfig.ProtoReflect.Descriptor instead.
+func (*ObjstoreConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{7}
+}
+
+type FrontendConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *FrontendConfig) Reset() {
+	*x = FrontendConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FrontendConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FrontendConfig) ProtoMessage() {}
+
+func (x *FrontendConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FrontendConfig.ProtoReflect.Descriptor instead.
+func (*FrontendConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{8}
+}
+
+type ObservablesConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ObservablesConfig) Reset() {
+	*x = ObservablesConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ObservablesConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ObservablesConfig) ProtoMessage() {}
+
+func (x *ObservablesConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ObservablesConfig.ProtoReflect.Descriptor instead.
+func (*ObservablesConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{9}
+}
+
+type CloudEventsConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CloudEventsConfig) Reset() {
+	*x = CloudEventsConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CloudEventsConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CloudEventsConfig) ProtoMessage() {}
+
+func (x *CloudEventsConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CloudEventsConfig.ProtoReflect.Descriptor instead.
+func (*CloudEventsConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{10}
+}
+
+type AutomationsConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *AutomationsConfig) Reset() {
+	*x = AutomationsConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AutomationsConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AutomationsConfig) ProtoMessage() {}
+
+func (x *AutomationsConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AutomationsConfig.ProtoReflect.Descriptor instead.
+func (*AutomationsConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{11}
+}
+
+type Authentication struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	InsecureRpcs []string      `protobuf:"bytes,1,rep,name=insecure_rpcs,json=insecureRpcs,proto3" json:"insecure_rpcs,omitempty"`
+	OidcProvider *OIDCProvider `protobuf:"bytes,2,opt,name=oidc_provider,json=oidcProvider,proto3" json:"oidc_provider,omitempty"`
+	HttpUsers    []*BasicAuth  `protobuf:"bytes,3,rep,name=http_users,json=httpUsers,proto3" json:"http_users,omitempty"`
+}
+
+func (x *Authentication) Reset() {
+	*x = Authentication{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Authentication) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Authentication) ProtoMessage() {}
+
+func (x *Authentication) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Authentication.ProtoReflect.Descriptor instead.
+func (*Authentication) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *Authentication) GetInsecureRpcs() []string {
+	if x != nil {
+		return x.InsecureRpcs
+	}
+	return nil
+}
+
+func (x *Authentication) GetOidcProvider() *OIDCProvider {
+	if x != nil {
+		return x.OidcProvider
+	}
+	return nil
+}
+
+func (x *Authentication) GetHttpUsers() []*BasicAuth {
+	if x != nil {
+		return x.HttpUsers
+	}
+	return nil
+}
+
+type Authorization struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *Authorization) Reset() {
+	*x = Authorization{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Authorization) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Authorization) ProtoMessage() {}
+
+func (x *Authorization) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Authorization.ProtoReflect.Descriptor instead.
+func (*Authorization) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{13}
+}
+
+type OIDCProvider struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *OIDCProvider) Reset() {
+	*x = OIDCProvider{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *OIDCProvider) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OIDCProvider) ProtoMessage() {}
+
+func (x *OIDCProvider) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OIDCProvider.ProtoReflect.Descriptor instead.
+func (*OIDCProvider) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{14}
+}
+
+type BasicAuth struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId       int64    `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Username     string   `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Password     string   `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	PasswordHash string   `protobuf:"bytes,4,opt,name=password_hash,json=passwordHash,proto3" json:"password_hash,omitempty"`
+	Groups       []string `protobuf:"bytes,5,rep,name=groups,proto3" json:"groups,omitempty"`
+	Tenant       string   `protobuf:"bytes,6,opt,name=tenant,proto3" json:"tenant,omitempty"`
+}
+
+func (x *BasicAuth) Reset() {
+	*x = BasicAuth{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BasicAuth) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BasicAuth) ProtoMessage() {}
+
+func (x *BasicAuth) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BasicAuth.ProtoReflect.Descriptor instead.
+func (*BasicAuth) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *BasicAuth) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *BasicAuth) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *BasicAuth) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *BasicAuth) GetPasswordHash() string {
+	if x != nil {
+		return x.PasswordHash
+	}
+	return ""
+}
+
+func (x *BasicAuth) GetGroups() []string {
+	if x != nil {
+		return x.Groups
+	}
+	return nil
+}
+
+func (x *BasicAuth) GetTenant() string {
+	if x != nil {
+		return x.Tenant
+	}
+	return ""
+}
+
+type AuthorizationConfig struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *AuthorizationConfig) Reset() {
+	*x = AuthorizationConfig{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AuthorizationConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthorizationConfig) ProtoMessage() {}
+
+func (x *AuthorizationConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthorizationConfig.ProtoReflect.Descriptor instead.
+func (*AuthorizationConfig) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{16}
+}
+
 type GetConfigRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -31,7 +865,7 @@ type GetConfigRequest struct {
 func (x *GetConfigRequest) Reset() {
 	*x = GetConfigRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_config_proto_msgTypes[0]
+		mi := &file_known_admin_v1_config_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -44,7 +878,7 @@ func (x *GetConfigRequest) String() string {
 func (*GetConfigRequest) ProtoMessage() {}
 
 func (x *GetConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_config_proto_msgTypes[0]
+	mi := &file_known_admin_v1_config_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +891,7 @@ func (x *GetConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetConfigRequest.ProtoReflect.Descriptor instead.
 func (*GetConfigRequest) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{0}
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{17}
 }
 
 type GetConfigResponse struct {
@@ -69,7 +903,7 @@ type GetConfigResponse struct {
 func (x *GetConfigResponse) Reset() {
 	*x = GetConfigResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_config_proto_msgTypes[1]
+		mi := &file_known_admin_v1_config_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -82,7 +916,7 @@ func (x *GetConfigResponse) String() string {
 func (*GetConfigResponse) ProtoMessage() {}
 
 func (x *GetConfigResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_config_proto_msgTypes[1]
+	mi := &file_known_admin_v1_config_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -95,7 +929,45 @@ func (x *GetConfigResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetConfigResponse.ProtoReflect.Descriptor instead.
 func (*GetConfigResponse) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{1}
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{18}
+}
+
+type GetLocalConfigSecurityRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *GetLocalConfigSecurityRequest) Reset() {
+	*x = GetLocalConfigSecurityRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_config_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetLocalConfigSecurityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetLocalConfigSecurityRequest) ProtoMessage() {}
+
+func (x *GetLocalConfigSecurityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_config_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetLocalConfigSecurityRequest.ProtoReflect.Descriptor instead.
+func (*GetLocalConfigSecurityRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_config_proto_rawDescGZIP(), []int{19}
 }
 
 var File_known_admin_v1_config_proto protoreflect.FileDescriptor
@@ -104,14 +976,121 @@ var file_known_admin_v1_config_proto_rawDesc = []byte{
 	0x0a, 0x1b, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31,
 	0x2f, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x1b, 0x67,
 	0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77,
-	0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x22, 0x12, 0x0a, 0x10, 0x47, 0x65,
-	0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x13,
-	0x0a, 0x11, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61,
-	0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76,
-	0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x22, 0xcb, 0x06, 0x0a, 0x0b, 0x4c,
+	0x6f, 0x63, 0x61, 0x6c, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x47, 0x0a, 0x08, 0x53, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x67,
+	0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77,
+	0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x73, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x08, 0x53, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x73, 0x12, 0x47, 0x0a, 0x08, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x76, 0x65, 0x72, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e,
+	0x2e, 0x76, 0x31, 0x2e, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x76, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66,
+	0x69, 0x67, 0x52, 0x08, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x76, 0x65, 0x72, 0x12, 0x47, 0x0a, 0x08,
+	0x53, 0x65, 0x63, 0x75, 0x72, 0x69, 0x74, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b,
+	0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e,
+	0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x63,
+	0x75, 0x72, 0x69, 0x74, 0x79, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x08, 0x53, 0x65, 0x63,
+	0x75, 0x72, 0x69, 0x74, 0x79, 0x12, 0x47, 0x0a, 0x08, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73,
+	0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b,
+	0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d,
+	0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x43, 0x6f,
+	0x6e, 0x66, 0x69, 0x67, 0x52, 0x08, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x12, 0x47,
+	0x0a, 0x08, 0x43, 0x61, 0x63, 0x68, 0x65, 0x62, 0x6f, 0x78, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x2b, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e,
+	0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x43,
+	0x61, 0x63, 0x68, 0x65, 0x62, 0x6f, 0x78, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x08, 0x43,
+	0x61, 0x63, 0x68, 0x65, 0x62, 0x6f, 0x78, 0x12, 0x47, 0x0a, 0x08, 0x44, 0x65, 0x62, 0x75, 0x67,
+	0x67, 0x65, 0x72, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x67, 0x72, 0x70, 0x63,
+	0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61,
+	0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x65, 0x62, 0x75, 0x67, 0x67, 0x65, 0x72,
+	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x08, 0x44, 0x65, 0x62, 0x75, 0x67, 0x67, 0x65, 0x72,
+	0x12, 0x47, 0x0a, 0x08, 0x4f, 0x62, 0x6a, 0x73, 0x74, 0x6f, 0x72, 0x65, 0x18, 0x07, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31,
+	0x2e, 0x4f, 0x62, 0x6a, 0x73, 0x74, 0x6f, 0x72, 0x65, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52,
+	0x08, 0x4f, 0x62, 0x6a, 0x73, 0x74, 0x6f, 0x72, 0x65, 0x12, 0x47, 0x0a, 0x08, 0x46, 0x72, 0x6f,
+	0x6e, 0x74, 0x65, 0x6e, 0x64, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x67, 0x72,
+	0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e,
+	0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x46, 0x72, 0x6f, 0x6e, 0x74, 0x65,
+	0x6e, 0x64, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x08, 0x46, 0x72, 0x6f, 0x6e, 0x74, 0x65,
+	0x6e, 0x64, 0x12, 0x50, 0x0a, 0x0b, 0x4f, 0x62, 0x73, 0x65, 0x72, 0x76, 0x61, 0x62, 0x6c, 0x65,
+	0x73, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b,
+	0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d,
+	0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x73, 0x65, 0x72, 0x76, 0x61, 0x62, 0x6c, 0x65,
+	0x73, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x0b, 0x4f, 0x62, 0x73, 0x65, 0x72, 0x76, 0x61,
+	0x62, 0x6c, 0x65, 0x73, 0x12, 0x50, 0x0a, 0x0b, 0x43, 0x6c, 0x6f, 0x75, 0x64, 0x45, 0x76, 0x65,
+	0x6e, 0x74, 0x73, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x67, 0x72, 0x70, 0x63,
+	0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61,
+	0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x6f, 0x75, 0x64, 0x45, 0x76, 0x65,
+	0x6e, 0x74, 0x73, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x0b, 0x43, 0x6c, 0x6f, 0x75, 0x64,
+	0x45, 0x76, 0x65, 0x6e, 0x74, 0x73, 0x12, 0x50, 0x0a, 0x0b, 0x41, 0x75, 0x74, 0x6f, 0x6d, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x67, 0x72,
+	0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e,
+	0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x75, 0x74, 0x6f, 0x6d, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x0b, 0x41, 0x75, 0x74,
+	0x6f, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x22, 0x10, 0x0a, 0x0e, 0x53, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x73, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0x10, 0x0a, 0x0e, 0x44, 0x69,
+	0x73, 0x63, 0x6f, 0x76, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0xcf, 0x01, 0x0a,
+	0x0e, 0x53, 0x65, 0x63, 0x75, 0x72, 0x69, 0x74, 0x79, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12,
+	0x16, 0x0a, 0x06, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52,
+	0x06, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x12, 0x53, 0x0a, 0x0e, 0x61, 0x75, 0x74, 0x68, 0x65,
+	0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x2b, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b,
+	0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x41, 0x75,
+	0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x0e, 0x61, 0x75,
+	0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x50, 0x0a, 0x0d,
+	0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76,
+	0x31, 0x2e, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52,
+	0x0d, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x10,
+	0x0a, 0x0e, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67,
+	0x22, 0x10, 0x0a, 0x0e, 0x43, 0x61, 0x63, 0x68, 0x65, 0x62, 0x6f, 0x78, 0x43, 0x6f, 0x6e, 0x66,
+	0x69, 0x67, 0x22, 0x10, 0x0a, 0x0e, 0x44, 0x65, 0x62, 0x75, 0x67, 0x67, 0x65, 0x72, 0x43, 0x6f,
+	0x6e, 0x66, 0x69, 0x67, 0x22, 0x10, 0x0a, 0x0e, 0x4f, 0x62, 0x6a, 0x73, 0x74, 0x6f, 0x72, 0x65,
+	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0x10, 0x0a, 0x0e, 0x46, 0x72, 0x6f, 0x6e, 0x74, 0x65,
+	0x6e, 0x64, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0x13, 0x0a, 0x11, 0x4f, 0x62, 0x73, 0x65,
+	0x72, 0x76, 0x61, 0x62, 0x6c, 0x65, 0x73, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0x13, 0x0a,
+	0x11, 0x43, 0x6c, 0x6f, 0x75, 0x64, 0x45, 0x76, 0x65, 0x6e, 0x74, 0x73, 0x43, 0x6f, 0x6e, 0x66,
+	0x69, 0x67, 0x22, 0x13, 0x0a, 0x11, 0x41, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x73, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0xcc, 0x01, 0x0a, 0x0e, 0x41, 0x75, 0x74, 0x68,
+	0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x23, 0x0a, 0x0d, 0x69, 0x6e,
+	0x73, 0x65, 0x63, 0x75, 0x72, 0x65, 0x5f, 0x72, 0x70, 0x63, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
+	0x09, 0x52, 0x0c, 0x69, 0x6e, 0x73, 0x65, 0x63, 0x75, 0x72, 0x65, 0x52, 0x70, 0x63, 0x73, 0x12,
+	0x4e, 0x0a, 0x0d, 0x6f, 0x69, 0x64, 0x63, 0x5f, 0x70, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x29, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69,
+	0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69,
+	0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x49, 0x44, 0x43, 0x50, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65,
+	0x72, 0x52, 0x0c, 0x6f, 0x69, 0x64, 0x63, 0x50, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x12,
+	0x45, 0x0a, 0x0a, 0x68, 0x74, 0x74, 0x70, 0x5f, 0x75, 0x73, 0x65, 0x72, 0x73, 0x18, 0x03, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x26, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76,
+	0x31, 0x2e, 0x42, 0x61, 0x73, 0x69, 0x63, 0x41, 0x75, 0x74, 0x68, 0x52, 0x09, 0x68, 0x74, 0x74,
+	0x70, 0x55, 0x73, 0x65, 0x72, 0x73, 0x22, 0x0f, 0x0a, 0x0d, 0x41, 0x75, 0x74, 0x68, 0x6f, 0x72,
+	0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x0e, 0x0a, 0x0c, 0x4f, 0x49, 0x44, 0x43, 0x50,
+	0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x22, 0xb1, 0x01, 0x0a, 0x09, 0x42, 0x61, 0x73, 0x69,
+	0x63, 0x41, 0x75, 0x74, 0x68, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x1a,
+	0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61,
+	0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61,
+	0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x12, 0x23, 0x0a, 0x0d, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f,
+	0x72, 0x64, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x70,
+	0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x48, 0x61, 0x73, 0x68, 0x12, 0x16, 0x0a, 0x06, 0x67,
+	0x72, 0x6f, 0x75, 0x70, 0x73, 0x18, 0x05, 0x20, 0x03, 0x28, 0x09, 0x52, 0x06, 0x67, 0x72, 0x6f,
+	0x75, 0x70, 0x73, 0x12, 0x16, 0x0a, 0x06, 0x74, 0x65, 0x6e, 0x61, 0x6e, 0x74, 0x18, 0x06, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x74, 0x65, 0x6e, 0x61, 0x6e, 0x74, 0x22, 0x15, 0x0a, 0x13, 0x41,
+	0x75, 0x74, 0x68, 0x6f, 0x72, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x43, 0x6f, 0x6e, 0x66,
+	0x69, 0x67, 0x22, 0x12, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x13, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x43, 0x6f, 0x6e,
+	0x66, 0x69, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1f, 0x0a, 0x1d, 0x47,
+	0x65, 0x74, 0x4c, 0x6f, 0x63, 0x61, 0x6c, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x53, 0x65, 0x63,
+	0x75, 0x72, 0x69, 0x74, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x42, 0x34, 0x5a, 0x32,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d,
+	0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77,
+	0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e,
+	0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -126,17 +1105,50 @@ func file_known_admin_v1_config_proto_rawDescGZIP() []byte {
 	return file_known_admin_v1_config_proto_rawDescData
 }
 
-var file_known_admin_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_known_admin_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_known_admin_v1_config_proto_goTypes = []interface{}{
-	(*GetConfigRequest)(nil),  // 0: grpc_kit.api.known.admin.v1.GetConfigRequest
-	(*GetConfigResponse)(nil), // 1: grpc_kit.api.known.admin.v1.GetConfigResponse
+	(*LocalConfig)(nil),                   // 0: grpc_kit.api.known.admin.v1.LocalConfig
+	(*ServicesConfig)(nil),                // 1: grpc_kit.api.known.admin.v1.ServicesConfig
+	(*DiscoverConfig)(nil),                // 2: grpc_kit.api.known.admin.v1.DiscoverConfig
+	(*SecurityConfig)(nil),                // 3: grpc_kit.api.known.admin.v1.SecurityConfig
+	(*DatabaseConfig)(nil),                // 4: grpc_kit.api.known.admin.v1.DatabaseConfig
+	(*CacheboxConfig)(nil),                // 5: grpc_kit.api.known.admin.v1.CacheboxConfig
+	(*DebuggerConfig)(nil),                // 6: grpc_kit.api.known.admin.v1.DebuggerConfig
+	(*ObjstoreConfig)(nil),                // 7: grpc_kit.api.known.admin.v1.ObjstoreConfig
+	(*FrontendConfig)(nil),                // 8: grpc_kit.api.known.admin.v1.FrontendConfig
+	(*ObservablesConfig)(nil),             // 9: grpc_kit.api.known.admin.v1.ObservablesConfig
+	(*CloudEventsConfig)(nil),             // 10: grpc_kit.api.known.admin.v1.CloudEventsConfig
+	(*AutomationsConfig)(nil),             // 11: grpc_kit.api.known.admin.v1.AutomationsConfig
+	(*Authentication)(nil),                // 12: grpc_kit.api.known.admin.v1.Authentication
+	(*Authorization)(nil),                 // 13: grpc_kit.api.known.admin.v1.Authorization
+	(*OIDCProvider)(nil),                  // 14: grpc_kit.api.known.admin.v1.OIDCProvider
+	(*BasicAuth)(nil),                     // 15: grpc_kit.api.known.admin.v1.BasicAuth
+	(*AuthorizationConfig)(nil),           // 16: grpc_kit.api.known.admin.v1.AuthorizationConfig
+	(*GetConfigRequest)(nil),              // 17: grpc_kit.api.known.admin.v1.GetConfigRequest
+	(*GetConfigResponse)(nil),             // 18: grpc_kit.api.known.admin.v1.GetConfigResponse
+	(*GetLocalConfigSecurityRequest)(nil), // 19: grpc_kit.api.known.admin.v1.GetLocalConfigSecurityRequest
 }
 var file_known_admin_v1_config_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	1,  // 0: grpc_kit.api.known.admin.v1.LocalConfig.Services:type_name -> grpc_kit.api.known.admin.v1.ServicesConfig
+	2,  // 1: grpc_kit.api.known.admin.v1.LocalConfig.Discover:type_name -> grpc_kit.api.known.admin.v1.DiscoverConfig
+	3,  // 2: grpc_kit.api.known.admin.v1.LocalConfig.Security:type_name -> grpc_kit.api.known.admin.v1.SecurityConfig
+	4,  // 3: grpc_kit.api.known.admin.v1.LocalConfig.Database:type_name -> grpc_kit.api.known.admin.v1.DatabaseConfig
+	5,  // 4: grpc_kit.api.known.admin.v1.LocalConfig.Cachebox:type_name -> grpc_kit.api.known.admin.v1.CacheboxConfig
+	6,  // 5: grpc_kit.api.known.admin.v1.LocalConfig.Debugger:type_name -> grpc_kit.api.known.admin.v1.DebuggerConfig
+	7,  // 6: grpc_kit.api.known.admin.v1.LocalConfig.Objstore:type_name -> grpc_kit.api.known.admin.v1.ObjstoreConfig
+	8,  // 7: grpc_kit.api.known.admin.v1.LocalConfig.Frontend:type_name -> grpc_kit.api.known.admin.v1.FrontendConfig
+	9,  // 8: grpc_kit.api.known.admin.v1.LocalConfig.Observables:type_name -> grpc_kit.api.known.admin.v1.ObservablesConfig
+	10, // 9: grpc_kit.api.known.admin.v1.LocalConfig.CloudEvents:type_name -> grpc_kit.api.known.admin.v1.CloudEventsConfig
+	11, // 10: grpc_kit.api.known.admin.v1.LocalConfig.Automations:type_name -> grpc_kit.api.known.admin.v1.AutomationsConfig
+	12, // 11: grpc_kit.api.known.admin.v1.SecurityConfig.authentication:type_name -> grpc_kit.api.known.admin.v1.Authentication
+	13, // 12: grpc_kit.api.known.admin.v1.SecurityConfig.authorization:type_name -> grpc_kit.api.known.admin.v1.Authorization
+	14, // 13: grpc_kit.api.known.admin.v1.Authentication.oidc_provider:type_name -> grpc_kit.api.known.admin.v1.OIDCProvider
+	15, // 14: grpc_kit.api.known.admin.v1.Authentication.http_users:type_name -> grpc_kit.api.known.admin.v1.BasicAuth
+	15, // [15:15] is the sub-list for method output_type
+	15, // [15:15] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_config_proto_init() }
@@ -146,7 +1158,7 @@ func file_known_admin_v1_config_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_known_admin_v1_config_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetConfigRequest); i {
+			switch v := v.(*LocalConfig); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -158,7 +1170,223 @@ func file_known_admin_v1_config_proto_init() {
 			}
 		}
 		file_known_admin_v1_config_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ServicesConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DiscoverConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SecurityConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DatabaseConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CacheboxConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DebuggerConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ObjstoreConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FrontendConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ObservablesConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CloudEventsConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AutomationsConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Authentication); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Authorization); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*OIDCProvider); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BasicAuth); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AuthorizationConfig); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetConfigRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetConfigResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_config_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetLocalConfigSecurityRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -176,7 +1404,7 @@ func file_known_admin_v1_config_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_config_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -3,6 +3,7 @@ package auth
 import (
 	"crypto/rsa"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -85,4 +86,13 @@ func (i *IDTokenClaims) GetAccessTokenRSA(signeKey *rsa.PrivateKey) (string, err
 	}
 
 	return ss, nil
+}
+
+func (i *IDTokenClaims) GetMustUserID() int64 {
+	userID, err := strconv.ParseInt(i.Subject, 10, 64)
+	if err != nil {
+		return 0
+	}
+
+	return userID
 }

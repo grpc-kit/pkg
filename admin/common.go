@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/grpc-kit/pkg/rpc"
 )
@@ -40,18 +39,13 @@ func MetadataParse(rawBody string) map[string]string {
 }
 
 // GetUserID 获取用户 ID
-func GetUserID(ctx context.Context) (int, error) {
-	userIDStr, ok := rpc.GetUserIDFromContext(ctx)
+func GetUserID(ctx context.Context) (int64, error) {
+	userID, ok := rpc.GetUserIDFromContext(ctx)
 	if !ok {
 		return 0, fmt.Errorf("not found user id")
 	}
 
-	userIDInt, err := strconv.Atoi(userIDStr)
-	if err != nil {
-		return 0, err
-	}
-
-	return userIDInt, nil
+	return userID, nil
 }
 
 // GetPageSize 实现分页参数获取

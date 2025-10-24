@@ -23,7 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KnownAdminClient interface {
+	// 本地配置
 	GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*GetConfigResponse, error)
+	GetLocalConfigSecurity(ctx context.Context, in *GetLocalConfigSecurityRequest, opts ...grpc.CallOption) (*SecurityConfig, error)
 	// 认证鉴权
 	CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*AuthToken, error)
 	CreateAuthToken(ctx context.Context, in *CreateAuthTokenRequest, opts ...grpc.CallOption) (*AuthToken, error)
@@ -88,6 +90,15 @@ func NewKnownAdminClient(cc grpc.ClientConnInterface) KnownAdminClient {
 func (c *knownAdminClient) GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*GetConfigResponse, error) {
 	out := new(GetConfigResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfig", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) GetLocalConfigSecurity(ctx context.Context, in *GetLocalConfigSecurityRequest, opts ...grpc.CallOption) (*SecurityConfig, error) {
+	out := new(SecurityConfig)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigSecurity", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -476,7 +487,9 @@ func (c *knownAdminClient) CreateDatabaseInitialize(ctx context.Context, in *Cre
 // All implementations should embed UnimplementedKnownAdminServer
 // for forward compatibility
 type KnownAdminServer interface {
+	// 本地配置
 	GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error)
+	GetLocalConfigSecurity(context.Context, *GetLocalConfigSecurityRequest) (*SecurityConfig, error)
 	// 认证鉴权
 	CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*AuthToken, error)
 	CreateAuthToken(context.Context, *CreateAuthTokenRequest) (*AuthToken, error)
@@ -536,6 +549,9 @@ type UnimplementedKnownAdminServer struct {
 
 func (UnimplementedKnownAdminServer) GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
+}
+func (UnimplementedKnownAdminServer) GetLocalConfigSecurity(context.Context, *GetLocalConfigSecurityRequest) (*SecurityConfig, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLocalConfigSecurity not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*AuthToken, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthLogin not implemented")
@@ -689,6 +705,24 @@ func _KnownAdmin_GetConfig_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).GetConfig(ctx, req.(*GetConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_GetLocalConfigSecurity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLocalConfigSecurityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetLocalConfigSecurity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigSecurity",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetLocalConfigSecurity(ctx, req.(*GetLocalConfigSecurityRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1459,6 +1493,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetConfig",
 			Handler:    _KnownAdmin_GetConfig_Handler,
+		},
+		{
+			MethodName: "GetLocalConfigSecurity",
+			Handler:    _KnownAdmin_GetLocalConfigSecurity_Handler,
 		},
 		{
 			MethodName: "CreateAuthLogin",

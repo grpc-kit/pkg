@@ -568,7 +568,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2JSONWebKeys":
-			ctx = c.Security.withUserID(ctx, "0")
+			ctx = c.Security.withUserID(ctx, 0)
 			ctx = c.Security.withUsername(ctx, UsernameAnonymous)
 			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeNone)
 			return ctx, nil
@@ -635,8 +635,8 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			}
 
 			ctx = c.Security.withIDToken(ctx, idToken)
-			ctx = c.Security.withUserID(ctx, idToken.Subject)
-			ctx = c.Security.withUsername(ctx, idToken.Email)
+			ctx = c.Security.withUserID(ctx, idToken.GetMustUserID())
+			ctx = c.Security.withUsername(ctx, idToken.Username)
 			ctx = c.Security.withGroups(ctx, idToken.Groups)
 			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBearer)
 

@@ -2,6 +2,7 @@ package admin
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -10,7 +11,7 @@ import (
 
 // StaticUser 本地配置的静态用户
 type StaticUser struct {
-	UserID       string   `json:"user_id"`
+	UserID       int64    `json:"user_id"`
 	Username     string   `json:"username"`
 	PasswordHash string   `json:"password_hash"`
 	Email        string   `json:"email"`
@@ -28,13 +29,13 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 	}
 
 	userID := s.UserID
-	if userID == "" {
-		userID = s.Username
+	if userID == 0 {
+		userID = 0
 	}
 
 	claims := auth.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   s.UserID,
+			Subject:   strconv.FormatInt(s.UserID, 10),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresIn) * time.Second)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),

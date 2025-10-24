@@ -161,7 +161,7 @@ func (c *SecurityConfig) withIDToken(parent context.Context, token auth.IDTokenC
 }
 
 // WithUserID 用于设置当前会话的用户 ID
-func (c *SecurityConfig) withUserID(parent context.Context, userID string) context.Context {
+func (c *SecurityConfig) withUserID(parent context.Context, userID int64) context.Context {
 	// return context.WithValue(parent, usernameKey, username)
 	return rpc.ContextWithUserID(parent, userID)
 }
@@ -211,7 +211,7 @@ func (s *SecurityConfig) supportedHS256Alg() bool {
 }
 
 // foundUserPassword 查找用户
-func (s *SecurityConfig) foundUserID(userID string) (bool, *BasicAuth) {
+func (s *SecurityConfig) foundUserID(userID int64) (bool, *BasicAuth) {
 	if s.Authentication.HTTPUsers == nil {
 		return false, nil
 	}
@@ -241,7 +241,7 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 			claims, ok := token.Claims.(*auth.IDTokenClaims)
 			if ok {
 				// 根据 sub 获取作为 username 获取对应的 password 作为 token 的签名验证
-				f, b := s.foundUserID(claims.Subject)
+				f, b := s.foundUserID(claims.GetMustUserID())
 				if f {
 					// TODO; 使用 password sha256 后作为密钥进行验证
 					jwtKey := []byte(b.PasswordHash)
