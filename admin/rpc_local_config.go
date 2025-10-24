@@ -4,6 +4,7 @@ import (
 	"context"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/crypto"
 )
 
 // GetConfig 获取配置内容
@@ -26,8 +27,13 @@ func (a *KnownAdminAPI) GetLocalConfigSecurity(ctx context.Context, req *adminv1
 	}
 
 	for _, user := range *a.config.staticUsers {
+		userID := user.UserID
+		if userID == 0 {
+			userID = crypto.Username2UserID(user.Username)
+		}
+
 		result.Authentication.HttpUsers = append(result.Authentication.HttpUsers, &adminv1.BasicAuth{
-			UserId:       user.UserID,
+			UserId:       userID,
 			Username:     user.Username,
 			Password:     user.PasswordHash,
 			PasswordHash: user.PasswordHash,

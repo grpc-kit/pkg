@@ -3,7 +3,6 @@ package auth
 import (
 	"crypto/rsa"
 	"fmt"
-	"hash/fnv"
 	"strconv"
 	"time"
 
@@ -98,14 +97,7 @@ func (i *IDTokenClaims) GetMustUserID() int64 {
 
 		// 如果为 lion_users 中用户登录的，则 "subject" 必须为 "user_id"
 		// 如果为本地配置文件用户登录的，则 "subject" 有可能为 "username"
-		var maxVal, minVal int64
-		maxVal = 109999
-		minVal = 100000
-
-		h := fnv.New64a()
-		h.Write([]byte(i.Username))
-		v := int64(h.Sum64() & 0x7fffffffffffffff)
-		return minVal + (v % (maxVal - minVal + 1))
+		return crypto.Username2UserID(i.Username)
 	}
 
 	return userID
