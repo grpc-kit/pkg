@@ -15,13 +15,13 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/demo"
+	"github.com/grpc-kit/pkg/lion/departmentroles"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
@@ -93,13 +93,13 @@ func checkColumn(t, c string) error {
 			authproviders.Table:   authproviders.ValidColumn,
 			credentials.Table:     credentials.ValidColumn,
 			demo.Table:            demo.ValidColumn,
+			departmentroles.Table: departmentroles.ValidColumn,
 			departments.Table:     departments.ValidColumn,
 			grouproles.Table:      grouproles.ValidColumn,
 			groups.Table:          groups.ValidColumn,
 			permissions.Table:     permissions.ValidColumn,
 			policies.Table:        policies.ValidColumn,
 			resources.Table:       resources.ValidColumn,
-			roledepartments.Table: roledepartments.ValidColumn,
 			rolepermissions.Table: rolepermissions.ValidColumn,
 			roles.Table:           roles.ValidColumn,
 			userdepartments.Table: userdepartments.ValidColumn,

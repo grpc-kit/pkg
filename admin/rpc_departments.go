@@ -12,8 +12,8 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/lion/departmentroles"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 )
@@ -58,7 +58,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		_ = tx.Rollback()
 		return result, err
 	}
-	_, err = tx.RoleDepartments.Create().SetRoleID(ros.ID).SetDepartmentID(dp.ID).Save(ctx)
+	_, err = tx.DepartmentRoles.Create().SetRoleID(ros.ID).SetDepartmentID(dp.ID).Save(ctx)
 
 	result = &adminv1.Department{
 		Id:   int32(dp.ID),
@@ -82,11 +82,11 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 		return result, err
 	}
 
-	res, err := a.config.db.RoleDepartments.Query().Select(
-		roledepartments.FieldRoleID,
-		roledepartments.FieldDepartmentID,
+	res, err := a.config.db.DepartmentRoles.Query().Select(
+		departmentroles.FieldRoleID,
+		departmentroles.FieldDepartmentID,
 	).Where(
-		roledepartments.RoleIDIn(rids...),
+		departmentroles.RoleIDIn(rids...),
 	).All(ctx)
 	if err != nil {
 		return result, err

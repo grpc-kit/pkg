@@ -64,8 +64,8 @@ type Departments struct {
 
 // DepartmentsEdges holds the relations/edges for other nodes in the graph.
 type DepartmentsEdges struct {
-	// LionRoleDepartments holds the value of the lion_role_departments edge.
-	LionRoleDepartments []*RoleDepartments `json:"lion_role_departments,omitempty"`
+	// LionDepartmentRoles holds the value of the lion_department_roles edge.
+	LionDepartmentRoles []*DepartmentRoles `json:"lion_department_roles,omitempty"`
 	// LionUserDepartments holds the value of the lion_user_departments edge.
 	LionUserDepartments []*UserDepartments `json:"lion_user_departments,omitempty"`
 	// LionGroups holds the value of the lion_groups edge.
@@ -75,13 +75,13 @@ type DepartmentsEdges struct {
 	loadedTypes [3]bool
 }
 
-// LionRoleDepartmentsOrErr returns the LionRoleDepartments value or an error if the edge
+// LionDepartmentRolesOrErr returns the LionDepartmentRoles value or an error if the edge
 // was not loaded in eager-loading.
-func (e DepartmentsEdges) LionRoleDepartmentsOrErr() ([]*RoleDepartments, error) {
+func (e DepartmentsEdges) LionDepartmentRolesOrErr() ([]*DepartmentRoles, error) {
 	if e.loadedTypes[0] {
-		return e.LionRoleDepartments, nil
+		return e.LionDepartmentRoles, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_role_departments"}
+	return nil, &NotLoadedError{edge: "lion_department_roles"}
 }
 
 // LionUserDepartmentsOrErr returns the LionUserDepartments value or an error if the edge
@@ -266,9 +266,9 @@ func (_m *Departments) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionRoleDepartments queries the "lion_role_departments" edge of the Departments entity.
-func (_m *Departments) QueryLionRoleDepartments() *RoleDepartmentsQuery {
-	return NewDepartmentsClient(_m.config).QueryLionRoleDepartments(_m)
+// QueryLionDepartmentRoles queries the "lion_department_roles" edge of the Departments entity.
+func (_m *Departments) QueryLionDepartmentRoles() *DepartmentRolesQuery {
+	return NewDepartmentsClient(_m.config).QueryLionDepartmentRoles(_m)
 }
 
 // QueryLionUserDepartments queries the "lion_user_departments" edge of the Departments entity.

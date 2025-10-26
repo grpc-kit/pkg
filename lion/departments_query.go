@@ -12,10 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/departmentroles"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 )
 
@@ -26,7 +26,7 @@ type DepartmentsQuery struct {
 	order                   []departments.OrderOption
 	inters                  []Interceptor
 	predicates              []predicate.Departments
-	withLionRoleDepartments *RoleDepartmentsQuery
+	withLionDepartmentRoles *DepartmentRolesQuery
 	withLionUserDepartments *UserDepartmentsQuery
 	withLionGroups          *GroupsQuery
 	// intermediate query (i.e. traversal path).
@@ -65,9 +65,9 @@ func (_q *DepartmentsQuery) Order(o ...departments.OrderOption) *DepartmentsQuer
 	return _q
 }
 
-// QueryLionRoleDepartments chains the current query on the "lion_role_departments" edge.
-func (_q *DepartmentsQuery) QueryLionRoleDepartments() *RoleDepartmentsQuery {
-	query := (&RoleDepartmentsClient{config: _q.config}).Query()
+// QueryLionDepartmentRoles chains the current query on the "lion_department_roles" edge.
+func (_q *DepartmentsQuery) QueryLionDepartmentRoles() *DepartmentRolesQuery {
+	query := (&DepartmentRolesClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -78,8 +78,8 @@ func (_q *DepartmentsQuery) QueryLionRoleDepartments() *RoleDepartmentsQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(departments.Table, departments.FieldID, selector),
-			sqlgraph.To(roledepartments.Table, roledepartments.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionRoleDepartmentsTable, departments.LionRoleDepartmentsColumn),
+			sqlgraph.To(departmentroles.Table, departmentroles.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionDepartmentRolesTable, departments.LionDepartmentRolesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -323,7 +323,7 @@ func (_q *DepartmentsQuery) Clone() *DepartmentsQuery {
 		order:                   append([]departments.OrderOption{}, _q.order...),
 		inters:                  append([]Interceptor{}, _q.inters...),
 		predicates:              append([]predicate.Departments{}, _q.predicates...),
-		withLionRoleDepartments: _q.withLionRoleDepartments.Clone(),
+		withLionDepartmentRoles: _q.withLionDepartmentRoles.Clone(),
 		withLionUserDepartments: _q.withLionUserDepartments.Clone(),
 		withLionGroups:          _q.withLionGroups.Clone(),
 		// clone intermediate query.
@@ -332,14 +332,14 @@ func (_q *DepartmentsQuery) Clone() *DepartmentsQuery {
 	}
 }
 
-// WithLionRoleDepartments tells the query-builder to eager-load the nodes that are connected to
-// the "lion_role_departments" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *DepartmentsQuery) WithLionRoleDepartments(opts ...func(*RoleDepartmentsQuery)) *DepartmentsQuery {
-	query := (&RoleDepartmentsClient{config: _q.config}).Query()
+// WithLionDepartmentRoles tells the query-builder to eager-load the nodes that are connected to
+// the "lion_department_roles" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *DepartmentsQuery) WithLionDepartmentRoles(opts ...func(*DepartmentRolesQuery)) *DepartmentsQuery {
+	query := (&DepartmentRolesClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withLionRoleDepartments = query
+	_q.withLionDepartmentRoles = query
 	return _q
 }
 
@@ -444,7 +444,7 @@ func (_q *DepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes       = []*Departments{}
 		_spec       = _q.querySpec()
 		loadedTypes = [3]bool{
-			_q.withLionRoleDepartments != nil,
+			_q.withLionDepartmentRoles != nil,
 			_q.withLionUserDepartments != nil,
 			_q.withLionGroups != nil,
 		}
@@ -467,11 +467,11 @@ func (_q *DepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withLionRoleDepartments; query != nil {
-		if err := _q.loadLionRoleDepartments(ctx, query, nodes,
-			func(n *Departments) { n.Edges.LionRoleDepartments = []*RoleDepartments{} },
-			func(n *Departments, e *RoleDepartments) {
-				n.Edges.LionRoleDepartments = append(n.Edges.LionRoleDepartments, e)
+	if query := _q.withLionDepartmentRoles; query != nil {
+		if err := _q.loadLionDepartmentRoles(ctx, query, nodes,
+			func(n *Departments) { n.Edges.LionDepartmentRoles = []*DepartmentRoles{} },
+			func(n *Departments, e *DepartmentRoles) {
+				n.Edges.LionDepartmentRoles = append(n.Edges.LionDepartmentRoles, e)
 			}); err != nil {
 			return nil, err
 		}
@@ -495,7 +495,7 @@ func (_q *DepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	return nodes, nil
 }
 
-func (_q *DepartmentsQuery) loadLionRoleDepartments(ctx context.Context, query *RoleDepartmentsQuery, nodes []*Departments, init func(*Departments), assign func(*Departments, *RoleDepartments)) error {
+func (_q *DepartmentsQuery) loadLionDepartmentRoles(ctx context.Context, query *DepartmentRolesQuery, nodes []*Departments, init func(*Departments), assign func(*Departments, *DepartmentRoles)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Departments)
 	for i := range nodes {
@@ -506,10 +506,10 @@ func (_q *DepartmentsQuery) loadLionRoleDepartments(ctx context.Context, query *
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(roledepartments.FieldDepartmentID)
+		query.ctx.AppendFieldOnce(departmentroles.FieldDepartmentID)
 	}
-	query.Where(predicate.RoleDepartments(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(departments.LionRoleDepartmentsColumn), fks...))
+	query.Where(predicate.DepartmentRoles(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(departments.LionDepartmentRolesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

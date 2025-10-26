@@ -40,8 +40,8 @@ const (
 	EdgeLionUserRoles = "lion_user_roles"
 	// EdgeLionRoleGroups holds the string denoting the lion_role_groups edge name in mutations.
 	EdgeLionRoleGroups = "lion_role_groups"
-	// EdgeLionRoleDepartments holds the string denoting the lion_role_departments edge name in mutations.
-	EdgeLionRoleDepartments = "lion_role_departments"
+	// EdgeLionDepartmentRoles holds the string denoting the lion_department_roles edge name in mutations.
+	EdgeLionDepartmentRoles = "lion_department_roles"
 	// Table holds the table name of the roles in the database.
 	Table = "lion_roles"
 	// LionRolePermissionsTable is the table that holds the lion_role_permissions relation/edge.
@@ -65,13 +65,13 @@ const (
 	LionRoleGroupsInverseTable = "lion_group_roles"
 	// LionRoleGroupsColumn is the table column denoting the lion_role_groups relation/edge.
 	LionRoleGroupsColumn = "role_id"
-	// LionRoleDepartmentsTable is the table that holds the lion_role_departments relation/edge.
-	LionRoleDepartmentsTable = "lion_role_departments"
-	// LionRoleDepartmentsInverseTable is the table name for the RoleDepartments entity.
-	// It exists in this package in order to avoid circular dependency with the "roledepartments" package.
-	LionRoleDepartmentsInverseTable = "lion_role_departments"
-	// LionRoleDepartmentsColumn is the table column denoting the lion_role_departments relation/edge.
-	LionRoleDepartmentsColumn = "role_id"
+	// LionDepartmentRolesTable is the table that holds the lion_department_roles relation/edge.
+	LionDepartmentRolesTable = "lion_department_roles"
+	// LionDepartmentRolesInverseTable is the table name for the DepartmentRoles entity.
+	// It exists in this package in order to avoid circular dependency with the "departmentroles" package.
+	LionDepartmentRolesInverseTable = "lion_department_roles"
+	// LionDepartmentRolesColumn is the table column denoting the lion_department_roles relation/edge.
+	LionDepartmentRolesColumn = "role_id"
 )
 
 // Columns holds all SQL columns for roles fields.
@@ -222,17 +222,17 @@ func ByLionRoleGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByLionRoleDepartmentsCount orders the results by lion_role_departments count.
-func ByLionRoleDepartmentsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionDepartmentRolesCount orders the results by lion_department_roles count.
+func ByLionDepartmentRolesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionRoleDepartmentsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionDepartmentRolesStep(), opts...)
 	}
 }
 
-// ByLionRoleDepartments orders the results by lion_role_departments terms.
-func ByLionRoleDepartments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionDepartmentRoles orders the results by lion_department_roles terms.
+func ByLionDepartmentRoles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionRoleDepartmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentRolesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newLionRolePermissionsStep() *sqlgraph.Step {
@@ -256,10 +256,10 @@ func newLionRoleGroupsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleGroupsTable, LionRoleGroupsColumn),
 	)
 }
-func newLionRoleDepartmentsStep() *sqlgraph.Step {
+func newLionDepartmentRolesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionRoleDepartmentsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleDepartmentsTable, LionRoleDepartmentsColumn),
+		sqlgraph.To(LionDepartmentRolesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentRolesTable, LionDepartmentRolesColumn),
 	)
 }

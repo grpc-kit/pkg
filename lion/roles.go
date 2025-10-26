@@ -51,8 +51,8 @@ type RolesEdges struct {
 	LionUserRoles []*UserRoles `json:"lion_user_roles,omitempty"`
 	// LionRoleGroups holds the value of the lion_role_groups edge.
 	LionRoleGroups []*GroupRoles `json:"lion_role_groups,omitempty"`
-	// LionRoleDepartments holds the value of the lion_role_departments edge.
-	LionRoleDepartments []*RoleDepartments `json:"lion_role_departments,omitempty"`
+	// LionDepartmentRoles holds the value of the lion_department_roles edge.
+	LionDepartmentRoles []*DepartmentRoles `json:"lion_department_roles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -85,13 +85,13 @@ func (e RolesEdges) LionRoleGroupsOrErr() ([]*GroupRoles, error) {
 	return nil, &NotLoadedError{edge: "lion_role_groups"}
 }
 
-// LionRoleDepartmentsOrErr returns the LionRoleDepartments value or an error if the edge
+// LionDepartmentRolesOrErr returns the LionDepartmentRoles value or an error if the edge
 // was not loaded in eager-loading.
-func (e RolesEdges) LionRoleDepartmentsOrErr() ([]*RoleDepartments, error) {
+func (e RolesEdges) LionDepartmentRolesOrErr() ([]*DepartmentRoles, error) {
 	if e.loadedTypes[3] {
-		return e.LionRoleDepartments, nil
+		return e.LionDepartmentRoles, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_role_departments"}
+	return nil, &NotLoadedError{edge: "lion_department_roles"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -215,9 +215,9 @@ func (_m *Roles) QueryLionRoleGroups() *GroupRolesQuery {
 	return NewRolesClient(_m.config).QueryLionRoleGroups(_m)
 }
 
-// QueryLionRoleDepartments queries the "lion_role_departments" edge of the Roles entity.
-func (_m *Roles) QueryLionRoleDepartments() *RoleDepartmentsQuery {
-	return NewRolesClient(_m.config).QueryLionRoleDepartments(_m)
+// QueryLionDepartmentRoles queries the "lion_department_roles" edge of the Roles entity.
+func (_m *Roles) QueryLionDepartmentRoles() *DepartmentRolesQuery {
+	return NewRolesClient(_m.config).QueryLionDepartmentRoles(_m)
 }
 
 // Update returns a builder for updating this Roles.
