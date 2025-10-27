@@ -3539,6 +3539,117 @@ func (x *OAuth2JSONWebKeys) GetKeys() []*OAuth2JSONWebKeys_Key {
 	return nil
 }
 
+type OAuth2Userinfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// ID 用户 ID，全局唯一标识，使用 int64 序列化为 json 为 string 类型
+	UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// 用户名，系统登录凭证，必须唯一
+	Username string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	// 昵称，用于社交或前端展示
+	Nickname string `protobuf:"bytes,3,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	// 个人简介或签名
+	Profile string `protobuf:"bytes,4,opt,name=profile,proto3" json:"profile,omitempty"`
+	// 用户头像 URL
+	Picture string `protobuf:"bytes,5,opt,name=picture,proto3" json:"picture,omitempty"`
+	// 个人网站地址
+	Website string `protobuf:"bytes,6,opt,name=website,proto3" json:"website,omitempty"`
+	// 时区信息（IANA 时区标识，例如 "Asia/Shanghai"）
+	Timezone string `protobuf:"bytes,7,opt,name=timezone,proto3" json:"timezone,omitempty"`
+	// 用户偏好的语言与地区（例如 "zh-CN"、"en-US"）
+	Locale string `protobuf:"bytes,8,opt,name=locale,proto3" json:"locale,omitempty"`
+}
+
+func (x *OAuth2Userinfo) Reset() {
+	*x = OAuth2Userinfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *OAuth2Userinfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OAuth2Userinfo) ProtoMessage() {}
+
+func (x *OAuth2Userinfo) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OAuth2Userinfo.ProtoReflect.Descriptor instead.
+func (*OAuth2Userinfo) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_admin_common_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *OAuth2Userinfo) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *OAuth2Userinfo) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *OAuth2Userinfo) GetNickname() string {
+	if x != nil {
+		return x.Nickname
+	}
+	return ""
+}
+
+func (x *OAuth2Userinfo) GetProfile() string {
+	if x != nil {
+		return x.Profile
+	}
+	return ""
+}
+
+func (x *OAuth2Userinfo) GetPicture() string {
+	if x != nil {
+		return x.Picture
+	}
+	return ""
+}
+
+func (x *OAuth2Userinfo) GetWebsite() string {
+	if x != nil {
+		return x.Website
+	}
+	return ""
+}
+
+func (x *OAuth2Userinfo) GetTimezone() string {
+	if x != nil {
+		return x.Timezone
+	}
+	return ""
+}
+
+func (x *OAuth2Userinfo) GetLocale() string {
+	if x != nil {
+		return x.Locale
+	}
+	return ""
+}
+
 // AuthToken 登录成功响应
 // 参考 rfc 规范：https://www.rfc-editor.org/rfc/rfc6749#section-5
 type AuthToken struct {
@@ -3554,7 +3665,7 @@ type AuthToken struct {
 func (x *AuthToken) Reset() {
 	*x = AuthToken{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[13]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3567,7 +3678,7 @@ func (x *AuthToken) String() string {
 func (*AuthToken) ProtoMessage() {}
 
 func (x *AuthToken) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[13]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3580,7 +3691,7 @@ func (x *AuthToken) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthToken.ProtoReflect.Descriptor instead.
 func (*AuthToken) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_admin_common_proto_rawDescGZIP(), []int{13}
+	return file_known_admin_v1_admin_common_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *AuthToken) GetAccessToken() string {
@@ -3617,7 +3728,7 @@ type Credential_ApiKeyData struct {
 func (x *Credential_ApiKeyData) Reset() {
 	*x = Credential_ApiKeyData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[19]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3630,7 +3741,7 @@ func (x *Credential_ApiKeyData) String() string {
 func (*Credential_ApiKeyData) ProtoMessage() {}
 
 func (x *Credential_ApiKeyData) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[19]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3674,7 +3785,7 @@ type Credential_KeyPairData struct {
 func (x *Credential_KeyPairData) Reset() {
 	*x = Credential_KeyPairData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[20]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3687,7 +3798,7 @@ func (x *Credential_KeyPairData) String() string {
 func (*Credential_KeyPairData) ProtoMessage() {}
 
 func (x *Credential_KeyPairData) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[20]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3738,7 +3849,7 @@ type Credential_X509Data struct {
 func (x *Credential_X509Data) Reset() {
 	*x = Credential_X509Data{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[21]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3751,7 +3862,7 @@ func (x *Credential_X509Data) String() string {
 func (*Credential_X509Data) ProtoMessage() {}
 
 func (x *Credential_X509Data) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[21]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3801,7 +3912,7 @@ type Credential_LicenseData struct {
 func (x *Credential_LicenseData) Reset() {
 	*x = Credential_LicenseData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[22]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3814,7 +3925,7 @@ func (x *Credential_LicenseData) String() string {
 func (*Credential_LicenseData) ProtoMessage() {}
 
 func (x *Credential_LicenseData) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[22]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3860,7 +3971,7 @@ type OAuth2JSONWebKeys_Key struct {
 func (x *OAuth2JSONWebKeys_Key) Reset() {
 	*x = OAuth2JSONWebKeys_Key{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[24]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3873,7 +3984,7 @@ func (x *OAuth2JSONWebKeys_Key) String() string {
 func (*OAuth2JSONWebKeys_Key) ProtoMessage() {}
 
 func (x *OAuth2JSONWebKeys_Key) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[24]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4658,17 +4769,32 @@ var file_known_admin_v1_admin_common_proto_rawDesc = []byte{
 	0x61, 0x6c, 0x67, 0x12, 0x0c, 0x0a, 0x01, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x01,
 	0x65, 0x12, 0x0c, 0x0a, 0x01, 0x6e, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x01, 0x6e, 0x12,
 	0x10, 0x0a, 0x03, 0x6b, 0x69, 0x64, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x69,
-	0x64, 0x22, 0x6c, 0x0a, 0x09, 0x41, 0x75, 0x74, 0x68, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x21,
-	0x0a, 0x0c, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65,
-	0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x54, 0x79, 0x70, 0x65,
-	0x12, 0x1d, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x73, 0x5f, 0x69, 0x6e, 0x18, 0x03,
-	0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x73, 0x49, 0x6e, 0x42,
-	0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72,
-	0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b,
-	0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64,
-	0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x64, 0x22, 0xe3, 0x01, 0x0a, 0x0e, 0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x55, 0x73, 0x65, 0x72,
+	0x69, 0x6e, 0x66, 0x6f, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x1a, 0x0a,
+	0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x6e, 0x69, 0x63,
+	0x6b, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6e, 0x69, 0x63,
+	0x6b, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x12,
+	0x18, 0x0a, 0x07, 0x70, 0x69, 0x63, 0x74, 0x75, 0x72, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x07, 0x70, 0x69, 0x63, 0x74, 0x75, 0x72, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x77, 0x65, 0x62,
+	0x73, 0x69, 0x74, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x77, 0x65, 0x62, 0x73,
+	0x69, 0x74, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x74, 0x69, 0x6d, 0x65, 0x7a, 0x6f, 0x6e, 0x65, 0x18,
+	0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x74, 0x69, 0x6d, 0x65, 0x7a, 0x6f, 0x6e, 0x65, 0x12,
+	0x16, 0x0a, 0x06, 0x6c, 0x6f, 0x63, 0x61, 0x6c, 0x65, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x06, 0x6c, 0x6f, 0x63, 0x61, 0x6c, 0x65, 0x22, 0x6c, 0x0a, 0x09, 0x41, 0x75, 0x74, 0x68, 0x54,
+	0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x21, 0x0a, 0x0c, 0x61, 0x63, 0x63, 0x65, 0x73, 0x73, 0x5f, 0x74,
+	0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x61, 0x63, 0x63, 0x65,
+	0x73, 0x73, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x6f, 0x6b, 0x65, 0x6e,
+	0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x74, 0x6f, 0x6b,
+	0x65, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1d, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65,
+	0x73, 0x5f, 0x69, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x65, 0x78, 0x70, 0x69,
+	0x72, 0x65, 0x73, 0x49, 0x6e, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
+	0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67,
+	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e,
+	0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -4684,7 +4810,7 @@ func file_known_admin_v1_admin_common_proto_rawDescGZIP() []byte {
 }
 
 var file_known_admin_v1_admin_common_proto_enumTypes = make([]protoimpl.EnumInfo, 23)
-var file_known_admin_v1_admin_common_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_known_admin_v1_admin_common_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_known_admin_v1_admin_common_proto_goTypes = []interface{}{
 	(Department_Type)(0),             // 0: grpc_kit.api.known.admin.v1.Department.Type
 	(Department_Status)(0),           // 1: grpc_kit.api.known.admin.v1.Department.Status
@@ -4722,19 +4848,20 @@ var file_known_admin_v1_admin_common_proto_goTypes = []interface{}{
 	(*AuthProvider)(nil),             // 33: grpc_kit.api.known.admin.v1.AuthProvider
 	(*Credential)(nil),               // 34: grpc_kit.api.known.admin.v1.Credential
 	(*OAuth2JSONWebKeys)(nil),        // 35: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys
-	(*AuthToken)(nil),                // 36: grpc_kit.api.known.admin.v1.AuthToken
-	nil,                              // 37: grpc_kit.api.known.admin.v1.Department.MetadataEntry
-	nil,                              // 38: grpc_kit.api.known.admin.v1.User.MetadataEntry
-	nil,                              // 39: grpc_kit.api.known.admin.v1.Group.MetadataEntry
-	nil,                              // 40: grpc_kit.api.known.admin.v1.GroupMember.MetadataEntry
-	nil,                              // 41: grpc_kit.api.known.admin.v1.DepartmentMember.MetadataEntry
-	(*Credential_ApiKeyData)(nil),    // 42: grpc_kit.api.known.admin.v1.Credential.ApiKeyData
-	(*Credential_KeyPairData)(nil),   // 43: grpc_kit.api.known.admin.v1.Credential.KeyPairData
-	(*Credential_X509Data)(nil),      // 44: grpc_kit.api.known.admin.v1.Credential.X509Data
-	(*Credential_LicenseData)(nil),   // 45: grpc_kit.api.known.admin.v1.Credential.LicenseData
-	nil,                              // 46: grpc_kit.api.known.admin.v1.Credential.MetadataEntry
-	(*OAuth2JSONWebKeys_Key)(nil),    // 47: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
-	(*timestamppb.Timestamp)(nil),    // 48: google.protobuf.Timestamp
+	(*OAuth2Userinfo)(nil),           // 36: grpc_kit.api.known.admin.v1.OAuth2Userinfo
+	(*AuthToken)(nil),                // 37: grpc_kit.api.known.admin.v1.AuthToken
+	nil,                              // 38: grpc_kit.api.known.admin.v1.Department.MetadataEntry
+	nil,                              // 39: grpc_kit.api.known.admin.v1.User.MetadataEntry
+	nil,                              // 40: grpc_kit.api.known.admin.v1.Group.MetadataEntry
+	nil,                              // 41: grpc_kit.api.known.admin.v1.GroupMember.MetadataEntry
+	nil,                              // 42: grpc_kit.api.known.admin.v1.DepartmentMember.MetadataEntry
+	(*Credential_ApiKeyData)(nil),    // 43: grpc_kit.api.known.admin.v1.Credential.ApiKeyData
+	(*Credential_KeyPairData)(nil),   // 44: grpc_kit.api.known.admin.v1.Credential.KeyPairData
+	(*Credential_X509Data)(nil),      // 45: grpc_kit.api.known.admin.v1.Credential.X509Data
+	(*Credential_LicenseData)(nil),   // 46: grpc_kit.api.known.admin.v1.Credential.LicenseData
+	nil,                              // 47: grpc_kit.api.known.admin.v1.Credential.MetadataEntry
+	(*OAuth2JSONWebKeys_Key)(nil),    // 48: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
+	(*timestamppb.Timestamp)(nil),    // 49: google.protobuf.Timestamp
 }
 var file_known_admin_v1_admin_common_proto_depIdxs = []int32{
 	0,  // 0: grpc_kit.api.known.admin.v1.Department.type:type_name -> grpc_kit.api.known.admin.v1.Department.Type
@@ -4743,47 +4870,47 @@ var file_known_admin_v1_admin_common_proto_depIdxs = []int32{
 	25, // 3: grpc_kit.api.known.admin.v1.Department.children:type_name -> grpc_kit.api.known.admin.v1.Department
 	24, // 4: grpc_kit.api.known.admin.v1.Department.phone_number:type_name -> grpc_kit.api.known.admin.v1.PhoneNumber
 	23, // 5: grpc_kit.api.known.admin.v1.Department.address:type_name -> grpc_kit.api.known.admin.v1.Address
-	37, // 6: grpc_kit.api.known.admin.v1.Department.metadata:type_name -> grpc_kit.api.known.admin.v1.Department.MetadataEntry
-	48, // 7: grpc_kit.api.known.admin.v1.Department.created_at:type_name -> google.protobuf.Timestamp
-	48, // 8: grpc_kit.api.known.admin.v1.Department.updated_at:type_name -> google.protobuf.Timestamp
-	48, // 9: grpc_kit.api.known.admin.v1.Department.deleted_at:type_name -> google.protobuf.Timestamp
+	38, // 6: grpc_kit.api.known.admin.v1.Department.metadata:type_name -> grpc_kit.api.known.admin.v1.Department.MetadataEntry
+	49, // 7: grpc_kit.api.known.admin.v1.Department.created_at:type_name -> google.protobuf.Timestamp
+	49, // 8: grpc_kit.api.known.admin.v1.Department.updated_at:type_name -> google.protobuf.Timestamp
+	49, // 9: grpc_kit.api.known.admin.v1.Department.deleted_at:type_name -> google.protobuf.Timestamp
 	2,  // 10: grpc_kit.api.known.admin.v1.Resource.type:type_name -> grpc_kit.api.known.admin.v1.Resource.Type
 	3,  // 11: grpc_kit.api.known.admin.v1.Resource.scope:type_name -> grpc_kit.api.known.admin.v1.Resource.Scope
 	26, // 12: grpc_kit.api.known.admin.v1.Resource.children:type_name -> grpc_kit.api.known.admin.v1.Resource
-	48, // 13: grpc_kit.api.known.admin.v1.Resource.created_at:type_name -> google.protobuf.Timestamp
-	48, // 14: grpc_kit.api.known.admin.v1.Resource.updated_at:type_name -> google.protobuf.Timestamp
+	49, // 13: grpc_kit.api.known.admin.v1.Resource.created_at:type_name -> google.protobuf.Timestamp
+	49, // 14: grpc_kit.api.known.admin.v1.Resource.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 15: grpc_kit.api.known.admin.v1.User.type:type_name -> grpc_kit.api.known.admin.v1.User.Type
 	5,  // 16: grpc_kit.api.known.admin.v1.User.status:type_name -> grpc_kit.api.known.admin.v1.User.Status
 	6,  // 17: grpc_kit.api.known.admin.v1.User.gender:type_name -> grpc_kit.api.known.admin.v1.User.Gender
-	48, // 18: grpc_kit.api.known.admin.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	48, // 19: grpc_kit.api.known.admin.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	48, // 20: grpc_kit.api.known.admin.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
-	48, // 21: grpc_kit.api.known.admin.v1.User.birthday:type_name -> google.protobuf.Timestamp
+	49, // 18: grpc_kit.api.known.admin.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	49, // 19: grpc_kit.api.known.admin.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	49, // 20: grpc_kit.api.known.admin.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
+	49, // 21: grpc_kit.api.known.admin.v1.User.birthday:type_name -> google.protobuf.Timestamp
 	24, // 22: grpc_kit.api.known.admin.v1.User.phone_number:type_name -> grpc_kit.api.known.admin.v1.PhoneNumber
 	23, // 23: grpc_kit.api.known.admin.v1.User.address:type_name -> grpc_kit.api.known.admin.v1.Address
-	38, // 24: grpc_kit.api.known.admin.v1.User.metadata:type_name -> grpc_kit.api.known.admin.v1.User.MetadataEntry
+	39, // 24: grpc_kit.api.known.admin.v1.User.metadata:type_name -> grpc_kit.api.known.admin.v1.User.MetadataEntry
 	7,  // 25: grpc_kit.api.known.admin.v1.Role.type:type_name -> grpc_kit.api.known.admin.v1.Role.Type
 	8,  // 26: grpc_kit.api.known.admin.v1.Role.status:type_name -> grpc_kit.api.known.admin.v1.Role.Status
-	48, // 27: grpc_kit.api.known.admin.v1.Role.created_at:type_name -> google.protobuf.Timestamp
-	48, // 28: grpc_kit.api.known.admin.v1.Role.updated_at:type_name -> google.protobuf.Timestamp
+	49, // 27: grpc_kit.api.known.admin.v1.Role.created_at:type_name -> google.protobuf.Timestamp
+	49, // 28: grpc_kit.api.known.admin.v1.Role.updated_at:type_name -> google.protobuf.Timestamp
 	9,  // 29: grpc_kit.api.known.admin.v1.Group.type:type_name -> grpc_kit.api.known.admin.v1.Group.Type
 	10, // 30: grpc_kit.api.known.admin.v1.Group.status:type_name -> grpc_kit.api.known.admin.v1.Group.Status
-	39, // 31: grpc_kit.api.known.admin.v1.Group.metadata:type_name -> grpc_kit.api.known.admin.v1.Group.MetadataEntry
-	48, // 32: grpc_kit.api.known.admin.v1.Group.created_at:type_name -> google.protobuf.Timestamp
-	48, // 33: grpc_kit.api.known.admin.v1.Group.updated_at:type_name -> google.protobuf.Timestamp
-	48, // 34: grpc_kit.api.known.admin.v1.Group.deleted_at:type_name -> google.protobuf.Timestamp
+	40, // 31: grpc_kit.api.known.admin.v1.Group.metadata:type_name -> grpc_kit.api.known.admin.v1.Group.MetadataEntry
+	49, // 32: grpc_kit.api.known.admin.v1.Group.created_at:type_name -> google.protobuf.Timestamp
+	49, // 33: grpc_kit.api.known.admin.v1.Group.updated_at:type_name -> google.protobuf.Timestamp
+	49, // 34: grpc_kit.api.known.admin.v1.Group.deleted_at:type_name -> google.protobuf.Timestamp
 	11, // 35: grpc_kit.api.known.admin.v1.GroupMember.member_role:type_name -> grpc_kit.api.known.admin.v1.GroupMember.Role
 	12, // 36: grpc_kit.api.known.admin.v1.GroupMember.member_status:type_name -> grpc_kit.api.known.admin.v1.GroupMember.Status
-	48, // 37: grpc_kit.api.known.admin.v1.GroupMember.joined_at:type_name -> google.protobuf.Timestamp
-	48, // 38: grpc_kit.api.known.admin.v1.GroupMember.expired_at:type_name -> google.protobuf.Timestamp
-	48, // 39: grpc_kit.api.known.admin.v1.GroupMember.created_at:type_name -> google.protobuf.Timestamp
-	48, // 40: grpc_kit.api.known.admin.v1.GroupMember.updated_at:type_name -> google.protobuf.Timestamp
-	40, // 41: grpc_kit.api.known.admin.v1.GroupMember.metadata:type_name -> grpc_kit.api.known.admin.v1.GroupMember.MetadataEntry
+	49, // 37: grpc_kit.api.known.admin.v1.GroupMember.joined_at:type_name -> google.protobuf.Timestamp
+	49, // 38: grpc_kit.api.known.admin.v1.GroupMember.expired_at:type_name -> google.protobuf.Timestamp
+	49, // 39: grpc_kit.api.known.admin.v1.GroupMember.created_at:type_name -> google.protobuf.Timestamp
+	49, // 40: grpc_kit.api.known.admin.v1.GroupMember.updated_at:type_name -> google.protobuf.Timestamp
+	41, // 41: grpc_kit.api.known.admin.v1.GroupMember.metadata:type_name -> grpc_kit.api.known.admin.v1.GroupMember.MetadataEntry
 	13, // 42: grpc_kit.api.known.admin.v1.DepartmentMember.member_role:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember.Role
 	14, // 43: grpc_kit.api.known.admin.v1.DepartmentMember.member_status:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember.Status
-	48, // 44: grpc_kit.api.known.admin.v1.DepartmentMember.created_at:type_name -> google.protobuf.Timestamp
-	48, // 45: grpc_kit.api.known.admin.v1.DepartmentMember.updated_at:type_name -> google.protobuf.Timestamp
-	41, // 46: grpc_kit.api.known.admin.v1.DepartmentMember.metadata:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember.MetadataEntry
+	49, // 44: grpc_kit.api.known.admin.v1.DepartmentMember.created_at:type_name -> google.protobuf.Timestamp
+	49, // 45: grpc_kit.api.known.admin.v1.DepartmentMember.updated_at:type_name -> google.protobuf.Timestamp
+	42, // 46: grpc_kit.api.known.admin.v1.DepartmentMember.metadata:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember.MetadataEntry
 	15, // 47: grpc_kit.api.known.admin.v1.DepartmentMember.member_type:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember.MemberType
 	16, // 48: grpc_kit.api.known.admin.v1.AuthProvider.type:type_name -> grpc_kit.api.known.admin.v1.AuthProvider.Type
 	17, // 49: grpc_kit.api.known.admin.v1.Credential.type:type_name -> grpc_kit.api.known.admin.v1.Credential.Type
@@ -4792,16 +4919,16 @@ var file_known_admin_v1_admin_common_proto_depIdxs = []int32{
 	20, // 52: grpc_kit.api.known.admin.v1.Credential.visibility:type_name -> grpc_kit.api.known.admin.v1.Credential.Visibility
 	21, // 53: grpc_kit.api.known.admin.v1.Credential.status:type_name -> grpc_kit.api.known.admin.v1.Credential.Status
 	22, // 54: grpc_kit.api.known.admin.v1.Credential.source:type_name -> grpc_kit.api.known.admin.v1.Credential.Source
-	42, // 55: grpc_kit.api.known.admin.v1.Credential.api_key:type_name -> grpc_kit.api.known.admin.v1.Credential.ApiKeyData
-	43, // 56: grpc_kit.api.known.admin.v1.Credential.key_pair:type_name -> grpc_kit.api.known.admin.v1.Credential.KeyPairData
-	44, // 57: grpc_kit.api.known.admin.v1.Credential.x509:type_name -> grpc_kit.api.known.admin.v1.Credential.X509Data
-	45, // 58: grpc_kit.api.known.admin.v1.Credential.license:type_name -> grpc_kit.api.known.admin.v1.Credential.LicenseData
-	48, // 59: grpc_kit.api.known.admin.v1.Credential.not_before:type_name -> google.protobuf.Timestamp
-	48, // 60: grpc_kit.api.known.admin.v1.Credential.expires_at:type_name -> google.protobuf.Timestamp
-	48, // 61: grpc_kit.api.known.admin.v1.Credential.created_at:type_name -> google.protobuf.Timestamp
-	48, // 62: grpc_kit.api.known.admin.v1.Credential.updated_at:type_name -> google.protobuf.Timestamp
-	46, // 63: grpc_kit.api.known.admin.v1.Credential.metadata:type_name -> grpc_kit.api.known.admin.v1.Credential.MetadataEntry
-	47, // 64: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.keys:type_name -> grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
+	43, // 55: grpc_kit.api.known.admin.v1.Credential.api_key:type_name -> grpc_kit.api.known.admin.v1.Credential.ApiKeyData
+	44, // 56: grpc_kit.api.known.admin.v1.Credential.key_pair:type_name -> grpc_kit.api.known.admin.v1.Credential.KeyPairData
+	45, // 57: grpc_kit.api.known.admin.v1.Credential.x509:type_name -> grpc_kit.api.known.admin.v1.Credential.X509Data
+	46, // 58: grpc_kit.api.known.admin.v1.Credential.license:type_name -> grpc_kit.api.known.admin.v1.Credential.LicenseData
+	49, // 59: grpc_kit.api.known.admin.v1.Credential.not_before:type_name -> google.protobuf.Timestamp
+	49, // 60: grpc_kit.api.known.admin.v1.Credential.expires_at:type_name -> google.protobuf.Timestamp
+	49, // 61: grpc_kit.api.known.admin.v1.Credential.created_at:type_name -> google.protobuf.Timestamp
+	49, // 62: grpc_kit.api.known.admin.v1.Credential.updated_at:type_name -> google.protobuf.Timestamp
+	47, // 63: grpc_kit.api.known.admin.v1.Credential.metadata:type_name -> grpc_kit.api.known.admin.v1.Credential.MetadataEntry
+	48, // 64: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.keys:type_name -> grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
 	65, // [65:65] is the sub-list for method output_type
 	65, // [65:65] is the sub-list for method input_type
 	65, // [65:65] is the sub-list for extension type_name
@@ -4972,6 +5099,18 @@ func file_known_admin_v1_admin_common_proto_init() {
 			}
 		}
 		file_known_admin_v1_admin_common_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*OAuth2Userinfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_admin_common_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*AuthToken); i {
 			case 0:
 				return &v.state
@@ -4983,7 +5122,7 @@ func file_known_admin_v1_admin_common_proto_init() {
 				return nil
 			}
 		}
-		file_known_admin_v1_admin_common_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+		file_known_admin_v1_admin_common_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Credential_ApiKeyData); i {
 			case 0:
 				return &v.state
@@ -4995,7 +5134,7 @@ func file_known_admin_v1_admin_common_proto_init() {
 				return nil
 			}
 		}
-		file_known_admin_v1_admin_common_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+		file_known_admin_v1_admin_common_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Credential_KeyPairData); i {
 			case 0:
 				return &v.state
@@ -5007,7 +5146,7 @@ func file_known_admin_v1_admin_common_proto_init() {
 				return nil
 			}
 		}
-		file_known_admin_v1_admin_common_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+		file_known_admin_v1_admin_common_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Credential_X509Data); i {
 			case 0:
 				return &v.state
@@ -5019,7 +5158,7 @@ func file_known_admin_v1_admin_common_proto_init() {
 				return nil
 			}
 		}
-		file_known_admin_v1_admin_common_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+		file_known_admin_v1_admin_common_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Credential_LicenseData); i {
 			case 0:
 				return &v.state
@@ -5031,7 +5170,7 @@ func file_known_admin_v1_admin_common_proto_init() {
 				return nil
 			}
 		}
-		file_known_admin_v1_admin_common_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+		file_known_admin_v1_admin_common_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OAuth2JSONWebKeys_Key); i {
 			case 0:
 				return &v.state
@@ -5058,7 +5197,7 @@ func file_known_admin_v1_admin_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_admin_common_proto_rawDesc,
 			NumEnums:      23,
-			NumMessages:   25,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

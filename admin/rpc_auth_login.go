@@ -117,7 +117,18 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 
 	db, err := a.GetLionClient()
 	if err != nil {
-		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+		if a.config.staticUsers == nil || a.config.staticUsers.Len() == 0 {
+			return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+		}
+
+		// 支持本地登录
+		result.Providers = append(result.Providers, &adminv1.AuthProvider{
+			Name:    "local",
+			Type:    adminv1.AuthProvider_TYPE_LOCAL,
+			Enabled: true,
+		})
+
+		return result, nil
 	}
 
 	selectFields := []string{

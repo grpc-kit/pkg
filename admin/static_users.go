@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/crypto"
 )
 
 // StaticUser 本地配置的静态用户
@@ -30,12 +31,12 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 
 	userID := s.UserID
 	if userID == 0 {
-		userID = 0
+		userID = crypto.Username2UserID(s.Username)
 	}
 
 	claims := auth.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   strconv.FormatInt(s.UserID, 10),
+			Subject:   strconv.FormatInt(userID, 10),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresIn) * time.Second)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
@@ -80,4 +81,9 @@ func (s *StaticUsers) Append(user *StaticUser) {
 	}
 
 	*s = append(*s, user)
+}
+
+// Len 返回用户数量
+func (s *StaticUsers) Len() int {
+	return len(*s)
 }

@@ -24,8 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KnownAdminClient interface {
 	// 本地配置
-	GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*GetConfigResponse, error)
-	GetLocalConfigSecurity(ctx context.Context, in *GetLocalConfigSecurityRequest, opts ...grpc.CallOption) (*SecurityConfig, error)
+	GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*LocalConfig, error)
+	GetConfigSecurity(ctx context.Context, in *GetConfigSecurityRequest, opts ...grpc.CallOption) (*SecurityConfig, error)
 	// 认证鉴权
 	CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*AuthToken, error)
 	CreateAuthToken(ctx context.Context, in *CreateAuthTokenRequest, opts ...grpc.CallOption) (*AuthToken, error)
@@ -75,6 +75,7 @@ type KnownAdminClient interface {
 	CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*Credential, error)
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2JSONWebKeys, error)
+	GetOAuth2Userinfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Userinfo, error)
 	// 数据库相关
 	CreateDatabaseInitialize(ctx context.Context, in *CreateDatabaseInitializeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -87,8 +88,8 @@ func NewKnownAdminClient(cc grpc.ClientConnInterface) KnownAdminClient {
 	return &knownAdminClient{cc}
 }
 
-func (c *knownAdminClient) GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*GetConfigResponse, error) {
-	out := new(GetConfigResponse)
+func (c *knownAdminClient) GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*LocalConfig, error) {
+	out := new(LocalConfig)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -96,9 +97,9 @@ func (c *knownAdminClient) GetConfig(ctx context.Context, in *GetConfigRequest, 
 	return out, nil
 }
 
-func (c *knownAdminClient) GetLocalConfigSecurity(ctx context.Context, in *GetLocalConfigSecurityRequest, opts ...grpc.CallOption) (*SecurityConfig, error) {
+func (c *knownAdminClient) GetConfigSecurity(ctx context.Context, in *GetConfigSecurityRequest, opts ...grpc.CallOption) (*SecurityConfig, error) {
 	out := new(SecurityConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigSecurity", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigSecurity", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -474,6 +475,15 @@ func (c *knownAdminClient) GetOAuth2JSONWebKeys(ctx context.Context, in *emptypb
 	return out, nil
 }
 
+func (c *knownAdminClient) GetOAuth2Userinfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Userinfo, error) {
+	out := new(OAuth2Userinfo)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) CreateDatabaseInitialize(ctx context.Context, in *CreateDatabaseInitializeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize", in, out, opts...)
@@ -488,8 +498,8 @@ func (c *knownAdminClient) CreateDatabaseInitialize(ctx context.Context, in *Cre
 // for forward compatibility
 type KnownAdminServer interface {
 	// 本地配置
-	GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error)
-	GetLocalConfigSecurity(context.Context, *GetLocalConfigSecurityRequest) (*SecurityConfig, error)
+	GetConfig(context.Context, *GetConfigRequest) (*LocalConfig, error)
+	GetConfigSecurity(context.Context, *GetConfigSecurityRequest) (*SecurityConfig, error)
 	// 认证鉴权
 	CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*AuthToken, error)
 	CreateAuthToken(context.Context, *CreateAuthTokenRequest) (*AuthToken, error)
@@ -539,6 +549,7 @@ type KnownAdminServer interface {
 	CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error)
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(context.Context, *emptypb.Empty) (*OAuth2JSONWebKeys, error)
+	GetOAuth2Userinfo(context.Context, *emptypb.Empty) (*OAuth2Userinfo, error)
 	// 数据库相关
 	CreateDatabaseInitialize(context.Context, *CreateDatabaseInitializeRequest) (*emptypb.Empty, error)
 }
@@ -547,11 +558,11 @@ type KnownAdminServer interface {
 type UnimplementedKnownAdminServer struct {
 }
 
-func (UnimplementedKnownAdminServer) GetConfig(context.Context, *GetConfigRequest) (*GetConfigResponse, error) {
+func (UnimplementedKnownAdminServer) GetConfig(context.Context, *GetConfigRequest) (*LocalConfig, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
 }
-func (UnimplementedKnownAdminServer) GetLocalConfigSecurity(context.Context, *GetLocalConfigSecurityRequest) (*SecurityConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetLocalConfigSecurity not implemented")
+func (UnimplementedKnownAdminServer) GetConfigSecurity(context.Context, *GetConfigSecurityRequest) (*SecurityConfig, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetConfigSecurity not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*AuthToken, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthLogin not implemented")
@@ -676,6 +687,9 @@ func (UnimplementedKnownAdminServer) GetOAuth2Discovery(context.Context, *emptyp
 func (UnimplementedKnownAdminServer) GetOAuth2JSONWebKeys(context.Context, *emptypb.Empty) (*OAuth2JSONWebKeys, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2JSONWebKeys not implemented")
 }
+func (UnimplementedKnownAdminServer) GetOAuth2Userinfo(context.Context, *emptypb.Empty) (*OAuth2Userinfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2Userinfo not implemented")
+}
 func (UnimplementedKnownAdminServer) CreateDatabaseInitialize(context.Context, *CreateDatabaseInitializeRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDatabaseInitialize not implemented")
 }
@@ -709,20 +723,20 @@ func _KnownAdmin_GetConfig_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_GetLocalConfigSecurity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetLocalConfigSecurityRequest)
+func _KnownAdmin_GetConfigSecurity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConfigSecurityRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetLocalConfigSecurity(ctx, in)
+		return srv.(KnownAdminServer).GetConfigSecurity(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigSecurity",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigSecurity",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetLocalConfigSecurity(ctx, req.(*GetLocalConfigSecurityRequest))
+		return srv.(KnownAdminServer).GetConfigSecurity(ctx, req.(*GetConfigSecurityRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1465,6 +1479,24 @@ func _KnownAdmin_GetOAuth2JSONWebKeys_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_GetOAuth2Userinfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetOAuth2Userinfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetOAuth2Userinfo(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_CreateDatabaseInitialize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDatabaseInitializeRequest)
 	if err := dec(in); err != nil {
@@ -1495,8 +1527,8 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_GetConfig_Handler,
 		},
 		{
-			MethodName: "GetLocalConfigSecurity",
-			Handler:    _KnownAdmin_GetLocalConfigSecurity_Handler,
+			MethodName: "GetConfigSecurity",
+			Handler:    _KnownAdmin_GetConfigSecurity_Handler,
 		},
 		{
 			MethodName: "CreateAuthLogin",
@@ -1661,6 +1693,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOAuth2JSONWebKeys",
 			Handler:    _KnownAdmin_GetOAuth2JSONWebKeys_Handler,
+		},
+		{
+			MethodName: "GetOAuth2Userinfo",
+			Handler:    _KnownAdmin_GetOAuth2Userinfo_Handler,
 		},
 		{
 			MethodName: "CreateDatabaseInitialize",

@@ -7,10 +7,14 @@ import (
 	"encoding/base64"
 	"fmt"
 	"math/big"
+	"reflect"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
+	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion/credentials"
+	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -145,6 +149,24 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 	}
 
 	result.Keys = append(result.Keys, tmp)
+
+	return result, nil
+}
+
+// GetOAuth2Userinfo 获取内置 OpenID 用户信息
+func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empty) (*adminv1.OAuth2Userinfo, error) {
+	result := &adminv1.OAuth2Userinfo{}
+
+	tmp := rpc.GetIDTokenFromContext(ctx)
+	a.logger.Infof("get id token type: %v", reflect.TypeOf(tmp))
+	idToken, ok := tmp.(auth.IDTokenClaims)
+	if !ok {
+		return result, errs.PermissionDenied(ctx)
+	}
+
+	result.UserId = idToken.GetMustUserID()
+	result.Username = idToken.Username
+	result.Nickname = idToken.Nickname
 
 	return result, nil
 }

@@ -8,15 +8,28 @@ import (
 )
 
 // GetConfig 获取配置内容
-func (a *KnownAdminAPI) GetConfig(ctx context.Context, req *adminv1.GetConfigRequest) (*adminv1.GetConfigResponse, error) {
-	result := &adminv1.GetConfigResponse{}
+func (a *KnownAdminAPI) GetConfig(ctx context.Context, req *adminv1.GetConfigRequest) (*adminv1.LocalConfig, error) {
+	result := &adminv1.LocalConfig{
+		Services:    &adminv1.ServicesConfig{Name: "基础服务", Enabled: false},
+		Discover:    &adminv1.DiscoverConfig{Name: "服务发现", Enabled: false},
+		Security:    &adminv1.SecurityConfig{Name: "认证鉴权", Enabled: true},
+		Database:    &adminv1.DatabaseConfig{Name: "关系存储", Enabled: false},
+		Cachebox:    &adminv1.CacheboxConfig{Name: "缓存服务", Enabled: false},
+		Debugger:    &adminv1.DebuggerConfig{Name: "日志调试", Enabled: false},
+		Objstore:    &adminv1.ObjstoreConfig{Name: "对象存储", Enabled: false},
+		Frontend:    &adminv1.FrontendConfig{Name: "前端托管", Enabled: false},
+		Observables: &adminv1.ObservablesConfig{Name: "可观测性", Enabled: false},
+		Cloudevents: &adminv1.CloudEventsConfig{Name: "消息事件", Enabled: false},
+		Automations: &adminv1.AutomationsConfig{Name: "流程编排", Enabled: false},
+	}
+
 	return result, nil
 }
 
-// GetLocalConfigSecurity xx
-func (a *KnownAdminAPI) GetLocalConfigSecurity(ctx context.Context, req *adminv1.GetLocalConfigSecurityRequest) (*adminv1.SecurityConfig, error) {
+// GetConfigSecurity xx
+func (a *KnownAdminAPI) GetConfigSecurity(ctx context.Context, req *adminv1.GetConfigSecurityRequest) (*adminv1.SecurityConfig, error) {
 	result := &adminv1.SecurityConfig{
-		Enable: true,
+		Enabled: true,
 		Authentication: &adminv1.Authentication{
 			HttpUsers: make([]*adminv1.BasicAuth, 0),
 		},
