@@ -95,9 +95,14 @@ func (i *IDTokenClaims) GetMustUserID() int64 {
 			return 0
 		}
 
+		username := i.Username
+		if username == "" {
+			username = i.Subject
+		}
+
 		// 如果为 lion_users 中用户登录的，则 "subject" 必须为 "user_id"
 		// 如果为本地配置文件用户登录的，则 "subject" 有可能为 "username"
-		return crypto.Username2UserID(i.Username)
+		return crypto.Username2UserID(username)
 	}
 
 	return userID
