@@ -248,7 +248,7 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 	// TODO; 权限验证
 	x, err := a.config.db.AuthProviders.Create().
 		SetName(req.Provider.Name).
-		SetProviderType(int(req.Provider.Type)).
+		SetProviderType(int(req.Provider.Type.Number())).
 		SetEnabled(req.Provider.Enabled).
 		SetClientID(req.Provider.ClientId).
 		SetClientSecretEncrypted(crypto.EncryptAESMust(a.config.aesKey, []byte(req.Provider.ClientSecret))).
