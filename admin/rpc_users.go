@@ -309,6 +309,10 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		var phoneNumber adminv1.PhoneNumber
 		_ = proto.Unmarshal(phoneNumberByte, &phoneNumber)
 
+		var birthday *timestamppb.Timestamp
+		if user.Birthdate != nil {
+			birthday = timestamppb.New(*user.Birthdate)
+		}
 		result.Users = append(result.Users, &adminv1.User{
 			Id:                  int64(user.ID),
 			Username:            user.Username,
@@ -322,7 +326,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 			Email:               string(email),
 			EmailVerified:       user.EmailVerified,
 			Gender:              adminv1.User_Gender(user.Gender),
-			Birthday:            timestamppb.New(user.Birthdate),
+			Birthday:            birthday,
 			Timezone:            user.Timezone,
 			Locale:              user.Locale,
 			PhoneNumber:         &phoneNumber,
@@ -529,6 +533,10 @@ func (a *KnownAdminAPI) ListUsersV1(ctx context.Context, req *adminv1.ListUsersR
 		var phoneNumber adminv1.PhoneNumber
 		_ = proto.Unmarshal(phoneNumberByte, &phoneNumber)
 
+		var birthday *timestamppb.Timestamp
+		if user.Birthdate != nil {
+			birthday = timestamppb.New(*user.Birthdate)
+		}
 		result.Users = append(result.Users, &adminv1.User{
 			Id:                  int64(user.ID),
 			Username:            user.Username,
@@ -542,7 +550,7 @@ func (a *KnownAdminAPI) ListUsersV1(ctx context.Context, req *adminv1.ListUsersR
 			Email:               string(email),
 			EmailVerified:       user.EmailVerified,
 			Gender:              adminv1.User_Gender(user.Gender),
-			Birthday:            timestamppb.New(user.Birthdate),
+			Birthday:            birthday,
 			Zoneinfo:            user.Zoneinfo,
 			Locale:              user.Locale,
 			PhoneNumber:         &phoneNumber,
@@ -696,6 +704,10 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 	addressByte := crypto.DecryptAESMust(a.config.aesKey, row.AddressEncrypted)
 	_ = proto.Unmarshal(addressByte, &address)
 
+	var birthday *timestamppb.Timestamp
+	if row.Birthdate != nil {
+		birthday = timestamppb.New(*row.Birthdate)
+	}
 	result := &adminv1.User{
 		Id:                  int64(row.ID),
 		Username:            row.Username,
@@ -709,7 +721,7 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 		Email:               string(crypto.DecryptAESMust(a.config.aesKey, row.EmailEncrypted)),
 		EmailVerified:       row.EmailVerified,
 		Gender:              adminv1.User_Gender(row.Gender),
-		Birthday:            timestamppb.New(row.Birthdate),
+		Birthday:            birthday,
 		Timezone:            row.Timezone,
 		Locale:              row.Locale,
 		PhoneNumber:         &phoneNumber,

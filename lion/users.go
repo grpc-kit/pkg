@@ -54,10 +54,10 @@ type Users struct {
 	EmailHash string `json:"email_hash,omitempty"`
 	// 邮箱是否验证过
 	EmailVerified bool `json:"email_verified,omitempty"`
-	// 用户的性别，如：0, 1=male、2=female
+	// 用户的性别：0-未知，1-男性，2-女性
 	Gender int `json:"gender,omitempty"`
 	// 用户的出生日期，格式为 YYYY-MM-DD，如 1990-12-31
-	Birthdate time.Time `json:"birthdate,omitempty"`
+	Birthdate *time.Time `json:"birthdate,omitempty"`
 	// 用户的时区信息，如：Asia/Shanghai
 	Timezone string `json:"timezone,omitempty"`
 	// 用户的语言/地区偏好，如：zh-CN
@@ -286,7 +286,8 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field birthdate", values[i])
 			} else if value.Valid {
-				_m.Birthdate = value.Time
+				_m.Birthdate = new(time.Time)
+				*_m.Birthdate = value.Time
 			}
 		case users.FieldTimezone:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -450,8 +451,10 @@ func (_m *Users) String() string {
 	builder.WriteString("gender=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Gender))
 	builder.WriteString(", ")
-	builder.WriteString("birthdate=")
-	builder.WriteString(_m.Birthdate.Format(time.ANSIC))
+	if v := _m.Birthdate; v != nil {
+		builder.WriteString("birthdate=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("timezone=")
 	builder.WriteString(_m.Timezone)

@@ -795,6 +795,16 @@ func NicknameHasSuffix(v string) predicate.Users {
 	return predicate.Users(sql.FieldHasSuffix(FieldNickname, v))
 }
 
+// NicknameIsNil applies the IsNil predicate on the "nickname" field.
+func NicknameIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldNickname))
+}
+
+// NicknameNotNil applies the NotNil predicate on the "nickname" field.
+func NicknameNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldNickname))
+}
+
 // NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
 func NicknameEqualFold(v string) predicate.Users {
 	return predicate.Users(sql.FieldEqualFold(FieldNickname, v))
@@ -858,6 +868,16 @@ func ProfileHasPrefix(v string) predicate.Users {
 // ProfileHasSuffix applies the HasSuffix predicate on the "profile" field.
 func ProfileHasSuffix(v string) predicate.Users {
 	return predicate.Users(sql.FieldHasSuffix(FieldProfile, v))
+}
+
+// ProfileIsNil applies the IsNil predicate on the "profile" field.
+func ProfileIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldProfile))
+}
+
+// ProfileNotNil applies the NotNil predicate on the "profile" field.
+func ProfileNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldProfile))
 }
 
 // ProfileEqualFold applies the EqualFold predicate on the "profile" field.
@@ -925,6 +945,16 @@ func PictureHasSuffix(v string) predicate.Users {
 	return predicate.Users(sql.FieldHasSuffix(FieldPicture, v))
 }
 
+// PictureIsNil applies the IsNil predicate on the "picture" field.
+func PictureIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldPicture))
+}
+
+// PictureNotNil applies the NotNil predicate on the "picture" field.
+func PictureNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldPicture))
+}
+
 // PictureEqualFold applies the EqualFold predicate on the "picture" field.
 func PictureEqualFold(v string) predicate.Users {
 	return predicate.Users(sql.FieldEqualFold(FieldPicture, v))
@@ -988,6 +1018,16 @@ func WebsiteHasPrefix(v string) predicate.Users {
 // WebsiteHasSuffix applies the HasSuffix predicate on the "website" field.
 func WebsiteHasSuffix(v string) predicate.Users {
 	return predicate.Users(sql.FieldHasSuffix(FieldWebsite, v))
+}
+
+// WebsiteIsNil applies the IsNil predicate on the "website" field.
+func WebsiteIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldWebsite))
+}
+
+// WebsiteNotNil applies the NotNil predicate on the "website" field.
+func WebsiteNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldWebsite))
 }
 
 // WebsiteEqualFold applies the EqualFold predicate on the "website" field.
@@ -1280,6 +1320,16 @@ func TimezoneHasSuffix(v string) predicate.Users {
 	return predicate.Users(sql.FieldHasSuffix(FieldTimezone, v))
 }
 
+// TimezoneIsNil applies the IsNil predicate on the "timezone" field.
+func TimezoneIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldTimezone))
+}
+
+// TimezoneNotNil applies the NotNil predicate on the "timezone" field.
+func TimezoneNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldTimezone))
+}
+
 // TimezoneEqualFold applies the EqualFold predicate on the "timezone" field.
 func TimezoneEqualFold(v string) predicate.Users {
 	return predicate.Users(sql.FieldEqualFold(FieldTimezone, v))
@@ -1343,6 +1393,16 @@ func LocaleHasPrefix(v string) predicate.Users {
 // LocaleHasSuffix applies the HasSuffix predicate on the "locale" field.
 func LocaleHasSuffix(v string) predicate.Users {
 	return predicate.Users(sql.FieldHasSuffix(FieldLocale, v))
+}
+
+// LocaleIsNil applies the IsNil predicate on the "locale" field.
+func LocaleIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldLocale))
+}
+
+// LocaleNotNil applies the NotNil predicate on the "locale" field.
+func LocaleNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldLocale))
 }
 
 // LocaleEqualFold applies the EqualFold predicate on the "locale" field.
@@ -1593,6 +1653,16 @@ func DescriptionHasPrefix(v string) predicate.Users {
 // DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
 func DescriptionHasSuffix(v string) predicate.Users {
 	return predicate.Users(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionIsNil applies the IsNil predicate on the "description" field.
+func DescriptionIsNil() predicate.Users {
+	return predicate.Users(sql.FieldIsNull(FieldDescription))
+}
+
+// DescriptionNotNil applies the NotNil predicate on the "description" field.
+func DescriptionNotNil() predicate.Users {
+	return predicate.Users(sql.FieldNotNull(FieldDescription))
 }
 
 // DescriptionEqualFold applies the EqualFold predicate on the "description" field.

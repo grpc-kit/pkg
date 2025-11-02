@@ -170,36 +170,20 @@ var (
 	DefaultUserType int
 	// DefaultUserStatus holds the default value on creation for the "user_status" field.
 	DefaultUserStatus int
-	// DefaultNationalIDHash holds the default value on creation for the "national_id_hash" field.
-	DefaultNationalIDHash string
-	// DefaultNickname holds the default value on creation for the "nickname" field.
-	DefaultNickname string
-	// DefaultProfile holds the default value on creation for the "profile" field.
-	DefaultProfile string
 	// ProfileValidator is a validator for the "profile" field. It is called by the builders before save.
 	ProfileValidator func(string) error
-	// DefaultPicture holds the default value on creation for the "picture" field.
-	DefaultPicture string
-	// DefaultWebsite holds the default value on creation for the "website" field.
-	DefaultWebsite string
-	// DefaultEmailHash holds the default value on creation for the "email_hash" field.
-	DefaultEmailHash string
+	// PictureValidator is a validator for the "picture" field. It is called by the builders before save.
+	PictureValidator func(string) error
+	// WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
+	WebsiteValidator func(string) error
 	// DefaultEmailVerified holds the default value on creation for the "email_verified" field.
 	DefaultEmailVerified bool
 	// DefaultGender holds the default value on creation for the "gender" field.
 	DefaultGender int
-	// DefaultBirthdate holds the default value on creation for the "birthdate" field.
-	DefaultBirthdate func() time.Time
-	// DefaultTimezone holds the default value on creation for the "timezone" field.
-	DefaultTimezone string
-	// DefaultLocale holds the default value on creation for the "locale" field.
-	DefaultLocale string
-	// DefaultPhoneNumberHash holds the default value on creation for the "phone_number_hash" field.
-	DefaultPhoneNumberHash string
+	// GenderValidator is a validator for the "gender" field. It is called by the builders before save.
+	GenderValidator func(int) error
 	// DefaultPhoneNumberVerified holds the default value on creation for the "phone_number_verified" field.
 	DefaultPhoneNumberVerified bool
-	// DefaultDescription holds the default value on creation for the "description" field.
-	DefaultDescription string
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	DescriptionValidator func(string) error
 )

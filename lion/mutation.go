@@ -21189,9 +21189,22 @@ func (m *UsersMutation) OldNickname(ctx context.Context) (v string, err error) {
 	return oldValue.Nickname, nil
 }
 
+// ClearNickname clears the value of the "nickname" field.
+func (m *UsersMutation) ClearNickname() {
+	m.nickname = nil
+	m.clearedFields[users.FieldNickname] = struct{}{}
+}
+
+// NicknameCleared returns if the "nickname" field was cleared in this mutation.
+func (m *UsersMutation) NicknameCleared() bool {
+	_, ok := m.clearedFields[users.FieldNickname]
+	return ok
+}
+
 // ResetNickname resets all changes to the "nickname" field.
 func (m *UsersMutation) ResetNickname() {
 	m.nickname = nil
+	delete(m.clearedFields, users.FieldNickname)
 }
 
 // SetProfile sets the "profile" field.
@@ -21225,9 +21238,22 @@ func (m *UsersMutation) OldProfile(ctx context.Context) (v string, err error) {
 	return oldValue.Profile, nil
 }
 
+// ClearProfile clears the value of the "profile" field.
+func (m *UsersMutation) ClearProfile() {
+	m.profile = nil
+	m.clearedFields[users.FieldProfile] = struct{}{}
+}
+
+// ProfileCleared returns if the "profile" field was cleared in this mutation.
+func (m *UsersMutation) ProfileCleared() bool {
+	_, ok := m.clearedFields[users.FieldProfile]
+	return ok
+}
+
 // ResetProfile resets all changes to the "profile" field.
 func (m *UsersMutation) ResetProfile() {
 	m.profile = nil
+	delete(m.clearedFields, users.FieldProfile)
 }
 
 // SetPicture sets the "picture" field.
@@ -21261,9 +21287,22 @@ func (m *UsersMutation) OldPicture(ctx context.Context) (v string, err error) {
 	return oldValue.Picture, nil
 }
 
+// ClearPicture clears the value of the "picture" field.
+func (m *UsersMutation) ClearPicture() {
+	m.picture = nil
+	m.clearedFields[users.FieldPicture] = struct{}{}
+}
+
+// PictureCleared returns if the "picture" field was cleared in this mutation.
+func (m *UsersMutation) PictureCleared() bool {
+	_, ok := m.clearedFields[users.FieldPicture]
+	return ok
+}
+
 // ResetPicture resets all changes to the "picture" field.
 func (m *UsersMutation) ResetPicture() {
 	m.picture = nil
+	delete(m.clearedFields, users.FieldPicture)
 }
 
 // SetWebsite sets the "website" field.
@@ -21297,9 +21336,22 @@ func (m *UsersMutation) OldWebsite(ctx context.Context) (v string, err error) {
 	return oldValue.Website, nil
 }
 
+// ClearWebsite clears the value of the "website" field.
+func (m *UsersMutation) ClearWebsite() {
+	m.website = nil
+	m.clearedFields[users.FieldWebsite] = struct{}{}
+}
+
+// WebsiteCleared returns if the "website" field was cleared in this mutation.
+func (m *UsersMutation) WebsiteCleared() bool {
+	_, ok := m.clearedFields[users.FieldWebsite]
+	return ok
+}
+
 // ResetWebsite resets all changes to the "website" field.
 func (m *UsersMutation) ResetWebsite() {
 	m.website = nil
+	delete(m.clearedFields, users.FieldWebsite)
 }
 
 // SetEmailEncrypted sets the "email_encrypted" field.
@@ -21509,7 +21561,7 @@ func (m *UsersMutation) Birthdate() (r time.Time, exists bool) {
 // OldBirthdate returns the old "birthdate" field's value of the Users entity.
 // If the Users object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UsersMutation) OldBirthdate(ctx context.Context) (v time.Time, err error) {
+func (m *UsersMutation) OldBirthdate(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldBirthdate is only allowed on UpdateOne operations")
 	}
@@ -21572,9 +21624,22 @@ func (m *UsersMutation) OldTimezone(ctx context.Context) (v string, err error) {
 	return oldValue.Timezone, nil
 }
 
+// ClearTimezone clears the value of the "timezone" field.
+func (m *UsersMutation) ClearTimezone() {
+	m.timezone = nil
+	m.clearedFields[users.FieldTimezone] = struct{}{}
+}
+
+// TimezoneCleared returns if the "timezone" field was cleared in this mutation.
+func (m *UsersMutation) TimezoneCleared() bool {
+	_, ok := m.clearedFields[users.FieldTimezone]
+	return ok
+}
+
 // ResetTimezone resets all changes to the "timezone" field.
 func (m *UsersMutation) ResetTimezone() {
 	m.timezone = nil
+	delete(m.clearedFields, users.FieldTimezone)
 }
 
 // SetLocale sets the "locale" field.
@@ -21608,9 +21673,22 @@ func (m *UsersMutation) OldLocale(ctx context.Context) (v string, err error) {
 	return oldValue.Locale, nil
 }
 
+// ClearLocale clears the value of the "locale" field.
+func (m *UsersMutation) ClearLocale() {
+	m.locale = nil
+	m.clearedFields[users.FieldLocale] = struct{}{}
+}
+
+// LocaleCleared returns if the "locale" field was cleared in this mutation.
+func (m *UsersMutation) LocaleCleared() bool {
+	_, ok := m.clearedFields[users.FieldLocale]
+	return ok
+}
+
 // ResetLocale resets all changes to the "locale" field.
 func (m *UsersMutation) ResetLocale() {
 	m.locale = nil
+	delete(m.clearedFields, users.FieldLocale)
 }
 
 // SetPhoneNumberEncrypted sets the "phone_number_encrypted" field.
@@ -21827,9 +21905,22 @@ func (m *UsersMutation) OldDescription(ctx context.Context) (v string, err error
 	return oldValue.Description, nil
 }
 
+// ClearDescription clears the value of the "description" field.
+func (m *UsersMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[users.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *UsersMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[users.FieldDescription]
+	return ok
+}
+
 // ResetDescription resets all changes to the "description" field.
 func (m *UsersMutation) ResetDescription() {
 	m.description = nil
+	delete(m.clearedFields, users.FieldDescription)
 }
 
 // SetMetadata sets the "metadata" field.
@@ -22661,6 +22752,18 @@ func (m *UsersMutation) ClearedFields() []string {
 	if m.FieldCleared(users.FieldNationalIDHash) {
 		fields = append(fields, users.FieldNationalIDHash)
 	}
+	if m.FieldCleared(users.FieldNickname) {
+		fields = append(fields, users.FieldNickname)
+	}
+	if m.FieldCleared(users.FieldProfile) {
+		fields = append(fields, users.FieldProfile)
+	}
+	if m.FieldCleared(users.FieldPicture) {
+		fields = append(fields, users.FieldPicture)
+	}
+	if m.FieldCleared(users.FieldWebsite) {
+		fields = append(fields, users.FieldWebsite)
+	}
 	if m.FieldCleared(users.FieldEmailEncrypted) {
 		fields = append(fields, users.FieldEmailEncrypted)
 	}
@@ -22670,6 +22773,12 @@ func (m *UsersMutation) ClearedFields() []string {
 	if m.FieldCleared(users.FieldBirthdate) {
 		fields = append(fields, users.FieldBirthdate)
 	}
+	if m.FieldCleared(users.FieldTimezone) {
+		fields = append(fields, users.FieldTimezone)
+	}
+	if m.FieldCleared(users.FieldLocale) {
+		fields = append(fields, users.FieldLocale)
+	}
 	if m.FieldCleared(users.FieldPhoneNumberEncrypted) {
 		fields = append(fields, users.FieldPhoneNumberEncrypted)
 	}
@@ -22678,6 +22787,9 @@ func (m *UsersMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(users.FieldAddressEncrypted) {
 		fields = append(fields, users.FieldAddressEncrypted)
+	}
+	if m.FieldCleared(users.FieldDescription) {
+		fields = append(fields, users.FieldDescription)
 	}
 	if m.FieldCleared(users.FieldMetadata) {
 		fields = append(fields, users.FieldMetadata)
@@ -22714,6 +22826,18 @@ func (m *UsersMutation) ClearField(name string) error {
 	case users.FieldNationalIDHash:
 		m.ClearNationalIDHash()
 		return nil
+	case users.FieldNickname:
+		m.ClearNickname()
+		return nil
+	case users.FieldProfile:
+		m.ClearProfile()
+		return nil
+	case users.FieldPicture:
+		m.ClearPicture()
+		return nil
+	case users.FieldWebsite:
+		m.ClearWebsite()
+		return nil
 	case users.FieldEmailEncrypted:
 		m.ClearEmailEncrypted()
 		return nil
@@ -22723,6 +22847,12 @@ func (m *UsersMutation) ClearField(name string) error {
 	case users.FieldBirthdate:
 		m.ClearBirthdate()
 		return nil
+	case users.FieldTimezone:
+		m.ClearTimezone()
+		return nil
+	case users.FieldLocale:
+		m.ClearLocale()
+		return nil
 	case users.FieldPhoneNumberEncrypted:
 		m.ClearPhoneNumberEncrypted()
 		return nil
@@ -22731,6 +22861,9 @@ func (m *UsersMutation) ClearField(name string) error {
 		return nil
 	case users.FieldAddressEncrypted:
 		m.ClearAddressEncrypted()
+		return nil
+	case users.FieldDescription:
+		m.ClearDescription()
 		return nil
 	case users.FieldMetadata:
 		m.ClearMetadata()

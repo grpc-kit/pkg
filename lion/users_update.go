@@ -226,6 +226,12 @@ func (_u *UsersUpdate) SetNillableNickname(v *string) *UsersUpdate {
 	return _u
 }
 
+// ClearNickname clears the value of the "nickname" field.
+func (_u *UsersUpdate) ClearNickname() *UsersUpdate {
+	_u.mutation.ClearNickname()
+	return _u
+}
+
 // SetProfile sets the "profile" field.
 func (_u *UsersUpdate) SetProfile(v string) *UsersUpdate {
 	_u.mutation.SetProfile(v)
@@ -237,6 +243,12 @@ func (_u *UsersUpdate) SetNillableProfile(v *string) *UsersUpdate {
 	if v != nil {
 		_u.SetProfile(*v)
 	}
+	return _u
+}
+
+// ClearProfile clears the value of the "profile" field.
+func (_u *UsersUpdate) ClearProfile() *UsersUpdate {
+	_u.mutation.ClearProfile()
 	return _u
 }
 
@@ -254,6 +266,12 @@ func (_u *UsersUpdate) SetNillablePicture(v *string) *UsersUpdate {
 	return _u
 }
 
+// ClearPicture clears the value of the "picture" field.
+func (_u *UsersUpdate) ClearPicture() *UsersUpdate {
+	_u.mutation.ClearPicture()
+	return _u
+}
+
 // SetWebsite sets the "website" field.
 func (_u *UsersUpdate) SetWebsite(v string) *UsersUpdate {
 	_u.mutation.SetWebsite(v)
@@ -265,6 +283,12 @@ func (_u *UsersUpdate) SetNillableWebsite(v *string) *UsersUpdate {
 	if v != nil {
 		_u.SetWebsite(*v)
 	}
+	return _u
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (_u *UsersUpdate) ClearWebsite() *UsersUpdate {
+	_u.mutation.ClearWebsite()
 	return _u
 }
 
@@ -369,6 +393,12 @@ func (_u *UsersUpdate) SetNillableTimezone(v *string) *UsersUpdate {
 	return _u
 }
 
+// ClearTimezone clears the value of the "timezone" field.
+func (_u *UsersUpdate) ClearTimezone() *UsersUpdate {
+	_u.mutation.ClearTimezone()
+	return _u
+}
+
 // SetLocale sets the "locale" field.
 func (_u *UsersUpdate) SetLocale(v string) *UsersUpdate {
 	_u.mutation.SetLocale(v)
@@ -380,6 +410,12 @@ func (_u *UsersUpdate) SetNillableLocale(v *string) *UsersUpdate {
 	if v != nil {
 		_u.SetLocale(*v)
 	}
+	return _u
+}
+
+// ClearLocale clears the value of the "locale" field.
+func (_u *UsersUpdate) ClearLocale() *UsersUpdate {
+	_u.mutation.ClearLocale()
 	return _u
 }
 
@@ -452,6 +488,12 @@ func (_u *UsersUpdate) SetNillableDescription(v *string) *UsersUpdate {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
+	return _u
+}
+
+// ClearDescription clears the value of the "description" field.
+func (_u *UsersUpdate) ClearDescription() *UsersUpdate {
+	_u.mutation.ClearDescription()
 	return _u
 }
 
@@ -664,6 +706,21 @@ func (_u *UsersUpdate) check() error {
 			return &ValidationError{Name: "profile", err: fmt.Errorf(`lion: validator failed for field "Users.profile": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Picture(); ok {
+		if err := users.PictureValidator(v); err != nil {
+			return &ValidationError{Name: "picture", err: fmt.Errorf(`lion: validator failed for field "Users.picture": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Website(); ok {
+		if err := users.WebsiteValidator(v); err != nil {
+			return &ValidationError{Name: "website", err: fmt.Errorf(`lion: validator failed for field "Users.website": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Gender(); ok {
+		if err := users.GenderValidator(v); err != nil {
+			return &ValidationError{Name: "gender", err: fmt.Errorf(`lion: validator failed for field "Users.gender": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Description(); ok {
 		if err := users.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
@@ -747,14 +804,26 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Nickname(); ok {
 		_spec.SetField(users.FieldNickname, field.TypeString, value)
 	}
+	if _u.mutation.NicknameCleared() {
+		_spec.ClearField(users.FieldNickname, field.TypeString)
+	}
 	if value, ok := _u.mutation.Profile(); ok {
 		_spec.SetField(users.FieldProfile, field.TypeString, value)
+	}
+	if _u.mutation.ProfileCleared() {
+		_spec.ClearField(users.FieldProfile, field.TypeString)
 	}
 	if value, ok := _u.mutation.Picture(); ok {
 		_spec.SetField(users.FieldPicture, field.TypeString, value)
 	}
+	if _u.mutation.PictureCleared() {
+		_spec.ClearField(users.FieldPicture, field.TypeString)
+	}
 	if value, ok := _u.mutation.Website(); ok {
 		_spec.SetField(users.FieldWebsite, field.TypeString, value)
+	}
+	if _u.mutation.WebsiteCleared() {
+		_spec.ClearField(users.FieldWebsite, field.TypeString)
 	}
 	if value, ok := _u.mutation.EmailEncrypted(); ok {
 		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
@@ -786,8 +855,14 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Timezone(); ok {
 		_spec.SetField(users.FieldTimezone, field.TypeString, value)
 	}
+	if _u.mutation.TimezoneCleared() {
+		_spec.ClearField(users.FieldTimezone, field.TypeString)
+	}
 	if value, ok := _u.mutation.Locale(); ok {
 		_spec.SetField(users.FieldLocale, field.TypeString, value)
+	}
+	if _u.mutation.LocaleCleared() {
+		_spec.ClearField(users.FieldLocale, field.TypeString)
 	}
 	if value, ok := _u.mutation.PhoneNumberEncrypted(); ok {
 		_spec.SetField(users.FieldPhoneNumberEncrypted, field.TypeBytes, value)
@@ -812,6 +887,9 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.DescriptionCleared() {
+		_spec.ClearField(users.FieldDescription, field.TypeString)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(users.FieldMetadata, field.TypeJSON, value)
@@ -1213,6 +1291,12 @@ func (_u *UsersUpdateOne) SetNillableNickname(v *string) *UsersUpdateOne {
 	return _u
 }
 
+// ClearNickname clears the value of the "nickname" field.
+func (_u *UsersUpdateOne) ClearNickname() *UsersUpdateOne {
+	_u.mutation.ClearNickname()
+	return _u
+}
+
 // SetProfile sets the "profile" field.
 func (_u *UsersUpdateOne) SetProfile(v string) *UsersUpdateOne {
 	_u.mutation.SetProfile(v)
@@ -1224,6 +1308,12 @@ func (_u *UsersUpdateOne) SetNillableProfile(v *string) *UsersUpdateOne {
 	if v != nil {
 		_u.SetProfile(*v)
 	}
+	return _u
+}
+
+// ClearProfile clears the value of the "profile" field.
+func (_u *UsersUpdateOne) ClearProfile() *UsersUpdateOne {
+	_u.mutation.ClearProfile()
 	return _u
 }
 
@@ -1241,6 +1331,12 @@ func (_u *UsersUpdateOne) SetNillablePicture(v *string) *UsersUpdateOne {
 	return _u
 }
 
+// ClearPicture clears the value of the "picture" field.
+func (_u *UsersUpdateOne) ClearPicture() *UsersUpdateOne {
+	_u.mutation.ClearPicture()
+	return _u
+}
+
 // SetWebsite sets the "website" field.
 func (_u *UsersUpdateOne) SetWebsite(v string) *UsersUpdateOne {
 	_u.mutation.SetWebsite(v)
@@ -1252,6 +1348,12 @@ func (_u *UsersUpdateOne) SetNillableWebsite(v *string) *UsersUpdateOne {
 	if v != nil {
 		_u.SetWebsite(*v)
 	}
+	return _u
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (_u *UsersUpdateOne) ClearWebsite() *UsersUpdateOne {
+	_u.mutation.ClearWebsite()
 	return _u
 }
 
@@ -1356,6 +1458,12 @@ func (_u *UsersUpdateOne) SetNillableTimezone(v *string) *UsersUpdateOne {
 	return _u
 }
 
+// ClearTimezone clears the value of the "timezone" field.
+func (_u *UsersUpdateOne) ClearTimezone() *UsersUpdateOne {
+	_u.mutation.ClearTimezone()
+	return _u
+}
+
 // SetLocale sets the "locale" field.
 func (_u *UsersUpdateOne) SetLocale(v string) *UsersUpdateOne {
 	_u.mutation.SetLocale(v)
@@ -1367,6 +1475,12 @@ func (_u *UsersUpdateOne) SetNillableLocale(v *string) *UsersUpdateOne {
 	if v != nil {
 		_u.SetLocale(*v)
 	}
+	return _u
+}
+
+// ClearLocale clears the value of the "locale" field.
+func (_u *UsersUpdateOne) ClearLocale() *UsersUpdateOne {
+	_u.mutation.ClearLocale()
 	return _u
 }
 
@@ -1439,6 +1553,12 @@ func (_u *UsersUpdateOne) SetNillableDescription(v *string) *UsersUpdateOne {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
+	return _u
+}
+
+// ClearDescription clears the value of the "description" field.
+func (_u *UsersUpdateOne) ClearDescription() *UsersUpdateOne {
+	_u.mutation.ClearDescription()
 	return _u
 }
 
@@ -1664,6 +1784,21 @@ func (_u *UsersUpdateOne) check() error {
 			return &ValidationError{Name: "profile", err: fmt.Errorf(`lion: validator failed for field "Users.profile": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Picture(); ok {
+		if err := users.PictureValidator(v); err != nil {
+			return &ValidationError{Name: "picture", err: fmt.Errorf(`lion: validator failed for field "Users.picture": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Website(); ok {
+		if err := users.WebsiteValidator(v); err != nil {
+			return &ValidationError{Name: "website", err: fmt.Errorf(`lion: validator failed for field "Users.website": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Gender(); ok {
+		if err := users.GenderValidator(v); err != nil {
+			return &ValidationError{Name: "gender", err: fmt.Errorf(`lion: validator failed for field "Users.gender": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Description(); ok {
 		if err := users.DescriptionValidator(v); err != nil {
 			return &ValidationError{Name: "description", err: fmt.Errorf(`lion: validator failed for field "Users.description": %w`, err)}
@@ -1764,14 +1899,26 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if value, ok := _u.mutation.Nickname(); ok {
 		_spec.SetField(users.FieldNickname, field.TypeString, value)
 	}
+	if _u.mutation.NicknameCleared() {
+		_spec.ClearField(users.FieldNickname, field.TypeString)
+	}
 	if value, ok := _u.mutation.Profile(); ok {
 		_spec.SetField(users.FieldProfile, field.TypeString, value)
+	}
+	if _u.mutation.ProfileCleared() {
+		_spec.ClearField(users.FieldProfile, field.TypeString)
 	}
 	if value, ok := _u.mutation.Picture(); ok {
 		_spec.SetField(users.FieldPicture, field.TypeString, value)
 	}
+	if _u.mutation.PictureCleared() {
+		_spec.ClearField(users.FieldPicture, field.TypeString)
+	}
 	if value, ok := _u.mutation.Website(); ok {
 		_spec.SetField(users.FieldWebsite, field.TypeString, value)
+	}
+	if _u.mutation.WebsiteCleared() {
+		_spec.ClearField(users.FieldWebsite, field.TypeString)
 	}
 	if value, ok := _u.mutation.EmailEncrypted(); ok {
 		_spec.SetField(users.FieldEmailEncrypted, field.TypeBytes, value)
@@ -1803,8 +1950,14 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	if value, ok := _u.mutation.Timezone(); ok {
 		_spec.SetField(users.FieldTimezone, field.TypeString, value)
 	}
+	if _u.mutation.TimezoneCleared() {
+		_spec.ClearField(users.FieldTimezone, field.TypeString)
+	}
 	if value, ok := _u.mutation.Locale(); ok {
 		_spec.SetField(users.FieldLocale, field.TypeString, value)
+	}
+	if _u.mutation.LocaleCleared() {
+		_spec.ClearField(users.FieldLocale, field.TypeString)
 	}
 	if value, ok := _u.mutation.PhoneNumberEncrypted(); ok {
 		_spec.SetField(users.FieldPhoneNumberEncrypted, field.TypeBytes, value)
@@ -1829,6 +1982,9 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(users.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.DescriptionCleared() {
+		_spec.ClearField(users.FieldDescription, field.TypeString)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(users.FieldMetadata, field.TypeJSON, value)

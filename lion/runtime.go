@@ -861,32 +861,18 @@ func init() {
 	usersDescUserStatus := usersFields[3].Descriptor()
 	// users.DefaultUserStatus holds the default value on creation for the user_status field.
 	users.DefaultUserStatus = usersDescUserStatus.Default.(int)
-	// usersDescNationalIDHash is the schema descriptor for national_id_hash field.
-	usersDescNationalIDHash := usersFields[5].Descriptor()
-	// users.DefaultNationalIDHash holds the default value on creation for the national_id_hash field.
-	users.DefaultNationalIDHash = usersDescNationalIDHash.Default.(string)
-	// usersDescNickname is the schema descriptor for nickname field.
-	usersDescNickname := usersFields[6].Descriptor()
-	// users.DefaultNickname holds the default value on creation for the nickname field.
-	users.DefaultNickname = usersDescNickname.Default.(string)
 	// usersDescProfile is the schema descriptor for profile field.
 	usersDescProfile := usersFields[7].Descriptor()
-	// users.DefaultProfile holds the default value on creation for the profile field.
-	users.DefaultProfile = usersDescProfile.Default.(string)
 	// users.ProfileValidator is a validator for the "profile" field. It is called by the builders before save.
 	users.ProfileValidator = usersDescProfile.Validators[0].(func(string) error)
 	// usersDescPicture is the schema descriptor for picture field.
 	usersDescPicture := usersFields[8].Descriptor()
-	// users.DefaultPicture holds the default value on creation for the picture field.
-	users.DefaultPicture = usersDescPicture.Default.(string)
+	// users.PictureValidator is a validator for the "picture" field. It is called by the builders before save.
+	users.PictureValidator = usersDescPicture.Validators[0].(func(string) error)
 	// usersDescWebsite is the schema descriptor for website field.
 	usersDescWebsite := usersFields[9].Descriptor()
-	// users.DefaultWebsite holds the default value on creation for the website field.
-	users.DefaultWebsite = usersDescWebsite.Default.(string)
-	// usersDescEmailHash is the schema descriptor for email_hash field.
-	usersDescEmailHash := usersFields[11].Descriptor()
-	// users.DefaultEmailHash holds the default value on creation for the email_hash field.
-	users.DefaultEmailHash = usersDescEmailHash.Default.(string)
+	// users.WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
+	users.WebsiteValidator = usersDescWebsite.Validators[0].(func(string) error)
 	// usersDescEmailVerified is the schema descriptor for email_verified field.
 	usersDescEmailVerified := usersFields[12].Descriptor()
 	// users.DefaultEmailVerified holds the default value on creation for the email_verified field.
@@ -895,30 +881,14 @@ func init() {
 	usersDescGender := usersFields[13].Descriptor()
 	// users.DefaultGender holds the default value on creation for the gender field.
 	users.DefaultGender = usersDescGender.Default.(int)
-	// usersDescBirthdate is the schema descriptor for birthdate field.
-	usersDescBirthdate := usersFields[14].Descriptor()
-	// users.DefaultBirthdate holds the default value on creation for the birthdate field.
-	users.DefaultBirthdate = usersDescBirthdate.Default.(func() time.Time)
-	// usersDescTimezone is the schema descriptor for timezone field.
-	usersDescTimezone := usersFields[15].Descriptor()
-	// users.DefaultTimezone holds the default value on creation for the timezone field.
-	users.DefaultTimezone = usersDescTimezone.Default.(string)
-	// usersDescLocale is the schema descriptor for locale field.
-	usersDescLocale := usersFields[16].Descriptor()
-	// users.DefaultLocale holds the default value on creation for the locale field.
-	users.DefaultLocale = usersDescLocale.Default.(string)
-	// usersDescPhoneNumberHash is the schema descriptor for phone_number_hash field.
-	usersDescPhoneNumberHash := usersFields[18].Descriptor()
-	// users.DefaultPhoneNumberHash holds the default value on creation for the phone_number_hash field.
-	users.DefaultPhoneNumberHash = usersDescPhoneNumberHash.Default.(string)
+	// users.GenderValidator is a validator for the "gender" field. It is called by the builders before save.
+	users.GenderValidator = usersDescGender.Validators[0].(func(int) error)
 	// usersDescPhoneNumberVerified is the schema descriptor for phone_number_verified field.
 	usersDescPhoneNumberVerified := usersFields[19].Descriptor()
 	// users.DefaultPhoneNumberVerified holds the default value on creation for the phone_number_verified field.
 	users.DefaultPhoneNumberVerified = usersDescPhoneNumberVerified.Default.(bool)
 	// usersDescDescription is the schema descriptor for description field.
 	usersDescDescription := usersFields[21].Descriptor()
-	// users.DefaultDescription holds the default value on creation for the description field.
-	users.DefaultDescription = usersDescDescription.Default.(string)
 	// users.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	users.DescriptionValidator = usersDescDescription.Validators[0].(func(string) error)
 }

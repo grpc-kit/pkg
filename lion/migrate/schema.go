@@ -615,23 +615,23 @@ var (
 		{Name: "user_type", Type: field.TypeInt, Default: 0},
 		{Name: "user_status", Type: field.TypeInt, Default: 0},
 		{Name: "national_id_encrypted", Type: field.TypeBytes, Nullable: true},
-		{Name: "national_id_hash", Type: field.TypeString, Nullable: true, Default: ""},
-		{Name: "nickname", Type: field.TypeString, Default: ""},
-		{Name: "profile", Type: field.TypeString, Size: 500, Default: ""},
-		{Name: "picture", Type: field.TypeString, Default: ""},
-		{Name: "website", Type: field.TypeString, Default: ""},
+		{Name: "national_id_hash", Type: field.TypeString, Nullable: true},
+		{Name: "nickname", Type: field.TypeString, Nullable: true},
+		{Name: "profile", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "picture", Type: field.TypeString, Nullable: true},
+		{Name: "website", Type: field.TypeString, Nullable: true},
 		{Name: "email_encrypted", Type: field.TypeBytes, Nullable: true},
-		{Name: "email_hash", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "email_hash", Type: field.TypeString, Nullable: true},
 		{Name: "email_verified", Type: field.TypeBool, Default: false},
 		{Name: "gender", Type: field.TypeInt, Default: 0},
 		{Name: "birthdate", Type: field.TypeTime, Nullable: true},
-		{Name: "timezone", Type: field.TypeString, Default: ""},
-		{Name: "locale", Type: field.TypeString, Default: ""},
+		{Name: "timezone", Type: field.TypeString, Nullable: true},
+		{Name: "locale", Type: field.TypeString, Nullable: true},
 		{Name: "phone_number_encrypted", Type: field.TypeBytes, Nullable: true},
-		{Name: "phone_number_hash", Type: field.TypeString, Nullable: true, Default: ""},
+		{Name: "phone_number_hash", Type: field.TypeString, Nullable: true},
 		{Name: "phone_number_verified", Type: field.TypeBool, Default: false},
 		{Name: "address_encrypted", Type: field.TypeBytes, Nullable: true},
-		{Name: "description", Type: field.TypeString, Size: 4096, Default: ""},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 4096},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 	}
 	// LionUsersTable holds the schema information for the "lion_users" table.
@@ -641,9 +641,53 @@ var (
 		PrimaryKey: []*schema.Column{LionUsersColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "users_username",
+				Name:    "users_email_hash",
 				Unique:  true,
-				Columns: []*schema.Column{LionUsersColumns[6]},
+				Columns: []*schema.Column{LionUsersColumns[17]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "email_hash != '' AND email_hash IS NOT NULL",
+				},
+			},
+			{
+				Name:    "users_phone_number_hash",
+				Unique:  true,
+				Columns: []*schema.Column{LionUsersColumns[24]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "phone_number_hash != '' AND phone_number_hash IS NOT NULL",
+				},
+			},
+			{
+				Name:    "users_national_id_hash",
+				Unique:  true,
+				Columns: []*schema.Column{LionUsersColumns[11]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "national_id_hash != '' AND national_id_hash IS NOT NULL",
+				},
+			},
+			{
+				Name:    "users_deleted_at_user_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[3], LionUsersColumns[9], LionUsersColumns[1]},
+			},
+			{
+				Name:    "users_deleted_at_user_type_user_status_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[3], LionUsersColumns[8], LionUsersColumns[9], LionUsersColumns[1]},
+			},
+			{
+				Name:    "users_deleted_at_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[3], LionUsersColumns[1]},
+			},
+			{
+				Name:    "users_user_type_user_status",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[8], LionUsersColumns[9]},
+			},
+			{
+				Name:    "users_user_type_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[8], LionUsersColumns[1]},
 			},
 			{
 				Name:    "users_user_type",
@@ -656,54 +700,35 @@ var (
 				Columns: []*schema.Column{LionUsersColumns[9]},
 			},
 			{
-				Name:    "users_email_hash",
+				Name:    "users_email_hash_email_verified",
 				Unique:  false,
-				Columns: []*schema.Column{LionUsersColumns[17]},
+				Columns: []*schema.Column{LionUsersColumns[17], LionUsersColumns[18]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "email_hash != '' AND email_hash IS NOT NULL",
+				},
 			},
 			{
-				Name:    "users_phone_number_hash",
+				Name:    "users_phone_number_hash_phone_number_verified",
 				Unique:  false,
-				Columns: []*schema.Column{LionUsersColumns[24]},
-			},
-			{
-				Name:    "users_national_id_hash",
-				Unique:  false,
-				Columns: []*schema.Column{LionUsersColumns[11]},
-			},
-			{
-				Name:    "users_email_verified",
-				Unique:  false,
-				Columns: []*schema.Column{LionUsersColumns[18]},
-			},
-			{
-				Name:    "users_phone_number_verified",
-				Unique:  false,
-				Columns: []*schema.Column{LionUsersColumns[25]},
-			},
-			{
-				Name:    "users_gender",
-				Unique:  false,
-				Columns: []*schema.Column{LionUsersColumns[19]},
-			},
-			{
-				Name:    "users_created_by",
-				Unique:  false,
-				Columns: []*schema.Column{LionUsersColumns[4]},
-			},
-			{
-				Name:    "users_updated_by",
-				Unique:  false,
-				Columns: []*schema.Column{LionUsersColumns[5]},
-			},
-			{
-				Name:    "users_user_type_user_status",
-				Unique:  false,
-				Columns: []*schema.Column{LionUsersColumns[8], LionUsersColumns[9]},
+				Columns: []*schema.Column{LionUsersColumns[24], LionUsersColumns[25]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "phone_number_hash != '' AND phone_number_hash IS NOT NULL",
+				},
 			},
 			{
 				Name:    "users_created_at",
 				Unique:  false,
 				Columns: []*schema.Column{LionUsersColumns[1]},
+			},
+			{
+				Name:    "users_created_by_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[4], LionUsersColumns[1]},
+			},
+			{
+				Name:    "users_updated_by_updated_at",
+				Unique:  false,
+				Columns: []*schema.Column{LionUsersColumns[5], LionUsersColumns[2]},
 			},
 		},
 	}

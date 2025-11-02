@@ -479,30 +479,6 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultUserStatus
 		_c.mutation.SetUserStatus(v)
 	}
-	if _, ok := _c.mutation.NationalIDHash(); !ok {
-		v := users.DefaultNationalIDHash
-		_c.mutation.SetNationalIDHash(v)
-	}
-	if _, ok := _c.mutation.Nickname(); !ok {
-		v := users.DefaultNickname
-		_c.mutation.SetNickname(v)
-	}
-	if _, ok := _c.mutation.Profile(); !ok {
-		v := users.DefaultProfile
-		_c.mutation.SetProfile(v)
-	}
-	if _, ok := _c.mutation.Picture(); !ok {
-		v := users.DefaultPicture
-		_c.mutation.SetPicture(v)
-	}
-	if _, ok := _c.mutation.Website(); !ok {
-		v := users.DefaultWebsite
-		_c.mutation.SetWebsite(v)
-	}
-	if _, ok := _c.mutation.EmailHash(); !ok {
-		v := users.DefaultEmailHash
-		_c.mutation.SetEmailHash(v)
-	}
 	if _, ok := _c.mutation.EmailVerified(); !ok {
 		v := users.DefaultEmailVerified
 		_c.mutation.SetEmailVerified(v)
@@ -511,29 +487,9 @@ func (_c *UsersCreate) defaults() {
 		v := users.DefaultGender
 		_c.mutation.SetGender(v)
 	}
-	if _, ok := _c.mutation.Birthdate(); !ok {
-		v := users.DefaultBirthdate()
-		_c.mutation.SetBirthdate(v)
-	}
-	if _, ok := _c.mutation.Timezone(); !ok {
-		v := users.DefaultTimezone
-		_c.mutation.SetTimezone(v)
-	}
-	if _, ok := _c.mutation.Locale(); !ok {
-		v := users.DefaultLocale
-		_c.mutation.SetLocale(v)
-	}
-	if _, ok := _c.mutation.PhoneNumberHash(); !ok {
-		v := users.DefaultPhoneNumberHash
-		_c.mutation.SetPhoneNumberHash(v)
-	}
 	if _, ok := _c.mutation.PhoneNumberVerified(); !ok {
 		v := users.DefaultPhoneNumberVerified
 		_c.mutation.SetPhoneNumberVerified(v)
-	}
-	if _, ok := _c.mutation.Description(); !ok {
-		v := users.DefaultDescription
-		_c.mutation.SetDescription(v)
 	}
 }
 
@@ -559,22 +515,20 @@ func (_c *UsersCreate) check() error {
 	if _, ok := _c.mutation.UserStatus(); !ok {
 		return &ValidationError{Name: "user_status", err: errors.New(`lion: missing required field "Users.user_status"`)}
 	}
-	if _, ok := _c.mutation.Nickname(); !ok {
-		return &ValidationError{Name: "nickname", err: errors.New(`lion: missing required field "Users.nickname"`)}
-	}
-	if _, ok := _c.mutation.Profile(); !ok {
-		return &ValidationError{Name: "profile", err: errors.New(`lion: missing required field "Users.profile"`)}
-	}
 	if v, ok := _c.mutation.Profile(); ok {
 		if err := users.ProfileValidator(v); err != nil {
 			return &ValidationError{Name: "profile", err: fmt.Errorf(`lion: validator failed for field "Users.profile": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Picture(); !ok {
-		return &ValidationError{Name: "picture", err: errors.New(`lion: missing required field "Users.picture"`)}
+	if v, ok := _c.mutation.Picture(); ok {
+		if err := users.PictureValidator(v); err != nil {
+			return &ValidationError{Name: "picture", err: fmt.Errorf(`lion: validator failed for field "Users.picture": %w`, err)}
+		}
 	}
-	if _, ok := _c.mutation.Website(); !ok {
-		return &ValidationError{Name: "website", err: errors.New(`lion: missing required field "Users.website"`)}
+	if v, ok := _c.mutation.Website(); ok {
+		if err := users.WebsiteValidator(v); err != nil {
+			return &ValidationError{Name: "website", err: fmt.Errorf(`lion: validator failed for field "Users.website": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.EmailVerified(); !ok {
 		return &ValidationError{Name: "email_verified", err: errors.New(`lion: missing required field "Users.email_verified"`)}
@@ -582,17 +536,13 @@ func (_c *UsersCreate) check() error {
 	if _, ok := _c.mutation.Gender(); !ok {
 		return &ValidationError{Name: "gender", err: errors.New(`lion: missing required field "Users.gender"`)}
 	}
-	if _, ok := _c.mutation.Timezone(); !ok {
-		return &ValidationError{Name: "timezone", err: errors.New(`lion: missing required field "Users.timezone"`)}
-	}
-	if _, ok := _c.mutation.Locale(); !ok {
-		return &ValidationError{Name: "locale", err: errors.New(`lion: missing required field "Users.locale"`)}
+	if v, ok := _c.mutation.Gender(); ok {
+		if err := users.GenderValidator(v); err != nil {
+			return &ValidationError{Name: "gender", err: fmt.Errorf(`lion: validator failed for field "Users.gender": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.PhoneNumberVerified(); !ok {
 		return &ValidationError{Name: "phone_number_verified", err: errors.New(`lion: missing required field "Users.phone_number_verified"`)}
-	}
-	if _, ok := _c.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Users.description"`)}
 	}
 	if v, ok := _c.mutation.Description(); ok {
 		if err := users.DescriptionValidator(v); err != nil {
@@ -703,7 +653,7 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.Birthdate(); ok {
 		_spec.SetField(users.FieldBirthdate, field.TypeTime, value)
-		_node.Birthdate = value
+		_node.Birthdate = &value
 	}
 	if value, ok := _c.mutation.Timezone(); ok {
 		_spec.SetField(users.FieldTimezone, field.TypeString, value)
