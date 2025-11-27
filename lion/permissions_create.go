@@ -84,6 +84,32 @@ func (_c *PermissionsCreate) SetResourceID(v int) *PermissionsCreate {
 	return _c
 }
 
+// SetName sets the "name" field.
+func (_c *PermissionsCreate) SetName(v string) *PermissionsCreate {
+	_c.mutation.SetName(v)
+	return _c
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_c *PermissionsCreate) SetDisplayName(v string) *PermissionsCreate {
+	_c.mutation.SetDisplayName(v)
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *PermissionsCreate) SetDescription(v string) *PermissionsCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *PermissionsCreate) SetNillableDescription(v *string) *PermissionsCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
 // AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by IDs.
 func (_c *PermissionsCreate) AddLionRolePermissionIDs(ids ...int) *PermissionsCreate {
 	_c.mutation.AddLionRolePermissionIDs(ids...)
@@ -161,6 +187,10 @@ func (_c *PermissionsCreate) defaults() {
 		v := permissions.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := permissions.DefaultDescription
+		_c.mutation.SetDescription(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -178,6 +208,25 @@ func (_c *PermissionsCreate) check() error {
 		if err := permissions.ResourceIDValidator(v); err != nil {
 			return &ValidationError{Name: "resource_id", err: fmt.Errorf(`lion: validator failed for field "Permissions.resource_id": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Permissions.name"`)}
+	}
+	if v, ok := _c.mutation.Name(); ok {
+		if err := permissions.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Permissions.name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "Permissions.display_name"`)}
+	}
+	if v, ok := _c.mutation.DisplayName(); ok {
+		if err := permissions.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Permissions.display_name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Permissions.description"`)}
 	}
 	if len(_c.mutation.LionResourcesIDs()) == 0 {
 		return &ValidationError{Name: "lion_resources", err: errors.New(`lion: missing required edge "Permissions.lion_resources"`)}
@@ -223,6 +272,18 @@ func (_c *PermissionsCreate) createSpec() (*Permissions, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedBy(); ok {
 		_spec.SetField(permissions.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
+	}
+	if value, ok := _c.mutation.Name(); ok {
+		_spec.SetField(permissions.FieldName, field.TypeString, value)
+		_node.Name = value
+	}
+	if value, ok := _c.mutation.DisplayName(); ok {
+		_spec.SetField(permissions.FieldDisplayName, field.TypeString, value)
+		_node.DisplayName = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(permissions.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if nodes := _c.mutation.LionRolePermissionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

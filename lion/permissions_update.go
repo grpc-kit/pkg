@@ -104,6 +104,48 @@ func (_u *PermissionsUpdate) SetNillableResourceID(v *int) *PermissionsUpdate {
 	return _u
 }
 
+// SetName sets the "name" field.
+func (_u *PermissionsUpdate) SetName(v string) *PermissionsUpdate {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *PermissionsUpdate) SetNillableName(v *string) *PermissionsUpdate {
+	if v != nil {
+		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_u *PermissionsUpdate) SetDisplayName(v string) *PermissionsUpdate {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *PermissionsUpdate) SetNillableDisplayName(v *string) *PermissionsUpdate {
+	if v != nil {
+		_u.SetDisplayName(*v)
+	}
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *PermissionsUpdate) SetDescription(v string) *PermissionsUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *PermissionsUpdate) SetNillableDescription(v *string) *PermissionsUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
 // AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by IDs.
 func (_u *PermissionsUpdate) AddLionRolePermissionIDs(ids ...int) *PermissionsUpdate {
 	_u.mutation.AddLionRolePermissionIDs(ids...)
@@ -205,6 +247,16 @@ func (_u *PermissionsUpdate) check() error {
 			return &ValidationError{Name: "resource_id", err: fmt.Errorf(`lion: validator failed for field "Permissions.resource_id": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Name(); ok {
+		if err := permissions.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Permissions.name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := permissions.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Permissions.display_name": %w`, err)}
+		}
+	}
 	if _u.mutation.LionResourcesCleared() && len(_u.mutation.LionResourcesIDs()) > 0 {
 		return errors.New(`lion: clearing a required unique edge "Permissions.lion_resources"`)
 	}
@@ -243,6 +295,15 @@ func (_u *PermissionsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(permissions.FieldUpdatedBy, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(permissions.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(permissions.FieldDisplayName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(permissions.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionRolePermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -412,6 +473,48 @@ func (_u *PermissionsUpdateOne) SetNillableResourceID(v *int) *PermissionsUpdate
 	return _u
 }
 
+// SetName sets the "name" field.
+func (_u *PermissionsUpdateOne) SetName(v string) *PermissionsUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *PermissionsUpdateOne) SetNillableName(v *string) *PermissionsUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_u *PermissionsUpdateOne) SetDisplayName(v string) *PermissionsUpdateOne {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *PermissionsUpdateOne) SetNillableDisplayName(v *string) *PermissionsUpdateOne {
+	if v != nil {
+		_u.SetDisplayName(*v)
+	}
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *PermissionsUpdateOne) SetDescription(v string) *PermissionsUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *PermissionsUpdateOne) SetNillableDescription(v *string) *PermissionsUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
 // AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by IDs.
 func (_u *PermissionsUpdateOne) AddLionRolePermissionIDs(ids ...int) *PermissionsUpdateOne {
 	_u.mutation.AddLionRolePermissionIDs(ids...)
@@ -526,6 +629,16 @@ func (_u *PermissionsUpdateOne) check() error {
 			return &ValidationError{Name: "resource_id", err: fmt.Errorf(`lion: validator failed for field "Permissions.resource_id": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Name(); ok {
+		if err := permissions.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Permissions.name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := permissions.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Permissions.display_name": %w`, err)}
+		}
+	}
 	if _u.mutation.LionResourcesCleared() && len(_u.mutation.LionResourcesIDs()) > 0 {
 		return errors.New(`lion: clearing a required unique edge "Permissions.lion_resources"`)
 	}
@@ -581,6 +694,15 @@ func (_u *PermissionsUpdateOne) sqlSave(ctx context.Context) (_node *Permissions
 	}
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(permissions.FieldUpdatedBy, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(permissions.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(permissions.FieldDisplayName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(permissions.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionRolePermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -111,6 +111,20 @@ func (_c *ResourcesCreate) SetName(v string) *ResourcesCreate {
 	return _c
 }
 
+// SetDisplayName sets the "display_name" field.
+func (_c *ResourcesCreate) SetDisplayName(v string) *ResourcesCreate {
+	_c.mutation.SetDisplayName(v)
+	return _c
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableDisplayName(v *string) *ResourcesCreate {
+	if v != nil {
+		_c.SetDisplayName(*v)
+	}
+	return _c
+}
+
 // SetSortOrder sets the "sort_order" field.
 func (_c *ResourcesCreate) SetSortOrder(v int) *ResourcesCreate {
 	_c.mutation.SetSortOrder(v)
@@ -321,6 +335,10 @@ func (_c *ResourcesCreate) defaults() {
 		v := resources.DefaultParentID
 		_c.mutation.SetParentID(v)
 	}
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		v := resources.DefaultDisplayName
+		_c.mutation.SetDisplayName(v)
+	}
 	if _, ok := _c.mutation.SortOrder(); !ok {
 		v := resources.DefaultSortOrder
 		_c.mutation.SetSortOrder(v)
@@ -381,6 +399,9 @@ func (_c *ResourcesCreate) check() error {
 		if err := resources.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Resources.name": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "Resources.display_name"`)}
 	}
 	if _, ok := _c.mutation.SortOrder(); !ok {
 		return &ValidationError{Name: "sort_order", err: errors.New(`lion: missing required field "Resources.sort_order"`)}
@@ -480,6 +501,10 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.DisplayName(); ok {
+		_spec.SetField(resources.FieldDisplayName, field.TypeString, value)
+		_node.DisplayName = value
 	}
 	if value, ok := _c.mutation.SortOrder(); ok {
 		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)

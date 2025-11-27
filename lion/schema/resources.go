@@ -24,6 +24,9 @@ func (Resources) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("资源名称"),
+		field.String("display_name").
+			Default("").
+			Comment("友好展示名称"),
 		// field.String("i18n_key").
 		//	Optional().
 		//	Comment("国际化键值，用于前端多语言显示的标识符"),
@@ -34,6 +37,7 @@ func (Resources) Fields() []ent.Field {
 		field.Int("resource_type").
 			Default(0).
 			Comment("用途类型，对应 api/known/admin/v1/common.proto 中定义"),
+
 		field.Int("resource_scope").
 			Default(0).
 			Comment("作用范围，对应 api/known/admin/v1/common.proto 中定义"),

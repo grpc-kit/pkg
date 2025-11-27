@@ -31,6 +31,8 @@ type Resources struct {
 	ParentID int `json:"parent_id,omitempty"`
 	// 资源名称
 	Name string `json:"name,omitempty"`
+	// 友好展示名称
+	DisplayName string `json:"display_name,omitempty"`
 	// 资源排序顺序，用于同级资源的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999
 	SortOrder int `json:"sort_order,omitempty"`
 	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
@@ -84,7 +86,7 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldSortOrder, resources.FieldResourceType, resources.FieldResourceScope:
 			values[i] = new(sql.NullInt64)
-		case resources.FieldName, resources.FieldPath, resources.FieldIcon, resources.FieldComponent, resources.FieldDescription:
+		case resources.FieldName, resources.FieldDisplayName, resources.FieldPath, resources.FieldIcon, resources.FieldComponent, resources.FieldDescription:
 			values[i] = new(sql.NullString)
 		case resources.FieldCreatedAt, resources.FieldUpdatedAt, resources.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -151,6 +153,12 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
+			}
+		case resources.FieldDisplayName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
+			} else if value.Valid {
+				_m.DisplayName = value.String
 			}
 		case resources.FieldSortOrder:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -275,6 +283,9 @@ func (_m *Resources) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("display_name=")
+	builder.WriteString(_m.DisplayName)
 	builder.WriteString(", ")
 	builder.WriteString("sort_order=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))

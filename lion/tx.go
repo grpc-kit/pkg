@@ -26,16 +26,24 @@ type Tx struct {
 	GroupRoles *GroupRolesClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
+	// PermissionResources is the client for interacting with the PermissionResources builders.
+	PermissionResources *PermissionResourcesClient
 	// Permissions is the client for interacting with the Permissions builders.
 	Permissions *PermissionsClient
 	// Policies is the client for interacting with the Policies builders.
 	Policies *PoliciesClient
+	// ResourceScopes is the client for interacting with the ResourceScopes builders.
+	ResourceScopes *ResourceScopesClient
+	// ResourceUris is the client for interacting with the ResourceUris builders.
+	ResourceUris *ResourceUrisClient
 	// Resources is the client for interacting with the Resources builders.
 	Resources *ResourcesClient
 	// RolePermissions is the client for interacting with the RolePermissions builders.
 	RolePermissions *RolePermissionsClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
+	// Scopes is the client for interacting with the Scopes builders.
+	Scopes *ScopesClient
 	// UserDepartments is the client for interacting with the UserDepartments builders.
 	UserDepartments *UserDepartmentsClient
 	// UserGroups is the client for interacting with the UserGroups builders.
@@ -186,11 +194,15 @@ func (tx *Tx) init() {
 	tx.Departments = NewDepartmentsClient(tx.config)
 	tx.GroupRoles = NewGroupRolesClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
+	tx.PermissionResources = NewPermissionResourcesClient(tx.config)
 	tx.Permissions = NewPermissionsClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
+	tx.ResourceScopes = NewResourceScopesClient(tx.config)
+	tx.ResourceUris = NewResourceUrisClient(tx.config)
 	tx.Resources = NewResourcesClient(tx.config)
 	tx.RolePermissions = NewRolePermissionsClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
+	tx.Scopes = NewScopesClient(tx.config)
 	tx.UserDepartments = NewUserDepartmentsClient(tx.config)
 	tx.UserGroups = NewUserGroupsClient(tx.config)
 	tx.UserIdentities = NewUserIdentitiesClient(tx.config)

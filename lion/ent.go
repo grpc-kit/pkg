@@ -19,11 +19,15 @@ import (
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
+	"github.com/grpc-kit/pkg/lion/permissionresources"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
+	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/resourceuris"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
+	"github.com/grpc-kit/pkg/lion/scopes"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/useridentities"
@@ -90,24 +94,28 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			authproviders.Table:   authproviders.ValidColumn,
-			credentials.Table:     credentials.ValidColumn,
-			demo.Table:            demo.ValidColumn,
-			departmentroles.Table: departmentroles.ValidColumn,
-			departments.Table:     departments.ValidColumn,
-			grouproles.Table:      grouproles.ValidColumn,
-			groups.Table:          groups.ValidColumn,
-			permissions.Table:     permissions.ValidColumn,
-			policies.Table:        policies.ValidColumn,
-			resources.Table:       resources.ValidColumn,
-			rolepermissions.Table: rolepermissions.ValidColumn,
-			roles.Table:           roles.ValidColumn,
-			userdepartments.Table: userdepartments.ValidColumn,
-			usergroups.Table:      usergroups.ValidColumn,
-			useridentities.Table:  useridentities.ValidColumn,
-			userprofiles.Table:    userprofiles.ValidColumn,
-			userroles.Table:       userroles.ValidColumn,
-			users.Table:           users.ValidColumn,
+			authproviders.Table:       authproviders.ValidColumn,
+			credentials.Table:         credentials.ValidColumn,
+			demo.Table:                demo.ValidColumn,
+			departmentroles.Table:     departmentroles.ValidColumn,
+			departments.Table:         departments.ValidColumn,
+			grouproles.Table:          grouproles.ValidColumn,
+			groups.Table:              groups.ValidColumn,
+			permissionresources.Table: permissionresources.ValidColumn,
+			permissions.Table:         permissions.ValidColumn,
+			policies.Table:            policies.ValidColumn,
+			resourcescopes.Table:      resourcescopes.ValidColumn,
+			resourceuris.Table:        resourceuris.ValidColumn,
+			resources.Table:           resources.ValidColumn,
+			rolepermissions.Table:     rolepermissions.ValidColumn,
+			roles.Table:               roles.ValidColumn,
+			scopes.Table:              scopes.ValidColumn,
+			userdepartments.Table:     userdepartments.ValidColumn,
+			usergroups.Table:          usergroups.ValidColumn,
+			useridentities.Table:      useridentities.ValidColumn,
+			userprofiles.Table:        userprofiles.ValidColumn,
+			userroles.Table:           userroles.ValidColumn,
+			users.Table:               users.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

@@ -238,6 +238,21 @@ var (
 			},
 		},
 	}
+	// LionPermissionResourcesColumns holds the columns for the "lion_permission_resources" table.
+	LionPermissionResourcesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "permission_id", Type: field.TypeInt},
+		{Name: "resource_id", Type: field.TypeInt},
+	}
+	// LionPermissionResourcesTable holds the schema information for the "lion_permission_resources" table.
+	LionPermissionResourcesTable = &schema.Table{
+		Name:       "lion_permission_resources",
+		Columns:    LionPermissionResourcesColumns,
+		PrimaryKey: []*schema.Column{LionPermissionResourcesColumns[0]},
+	}
 	// LionPermissionsColumns holds the columns for the "lion_permissions" table.
 	LionPermissionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -245,6 +260,9 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "name", Type: field.TypeString, Size: 256},
+		{Name: "display_name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "resource_id", Type: field.TypeInt},
 	}
 	// LionPermissionsTable holds the schema information for the "lion_permissions" table.
@@ -255,7 +273,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_permissions_lion_resources_lion_permissions",
-				Columns:    []*schema.Column{LionPermissionsColumns[5]},
+				Columns:    []*schema.Column{LionPermissionsColumns[8]},
 				RefColumns: []*schema.Column{LionResourcesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -277,6 +295,36 @@ var (
 		Columns:    LionPoliciesColumns,
 		PrimaryKey: []*schema.Column{LionPoliciesColumns[0]},
 	}
+	// LionResourceScopesColumns holds the columns for the "lion_resource_scopes" table.
+	LionResourceScopesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "resource_id", Type: field.TypeInt},
+		{Name: "scope_id", Type: field.TypeInt},
+	}
+	// LionResourceScopesTable holds the schema information for the "lion_resource_scopes" table.
+	LionResourceScopesTable = &schema.Table{
+		Name:       "lion_resource_scopes",
+		Columns:    LionResourceScopesColumns,
+		PrimaryKey: []*schema.Column{LionResourceScopesColumns[0]},
+	}
+	// LionResourceUrisColumns holds the columns for the "lion_resource_uris" table.
+	LionResourceUrisColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "resource_id", Type: field.TypeInt},
+		{Name: "uri", Type: field.TypeString},
+	}
+	// LionResourceUrisTable holds the schema information for the "lion_resource_uris" table.
+	LionResourceUrisTable = &schema.Table{
+		Name:       "lion_resource_uris",
+		Columns:    LionResourceUrisColumns,
+		PrimaryKey: []*schema.Column{LionResourceUrisColumns[0]},
+	}
 	// LionResourcesColumns holds the columns for the "lion_resources" table.
 	LionResourcesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -287,6 +335,7 @@ var (
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "display_name", Type: field.TypeString, Default: ""},
 		{Name: "sort_order", Type: field.TypeInt, Default: 100},
 		{Name: "resource_type", Type: field.TypeInt, Default: 0},
 		{Name: "resource_scope", Type: field.TypeInt, Default: 0},
@@ -312,27 +361,27 @@ var (
 			{
 				Name:    "resources_resource_type_resource_scope",
 				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[9], LionResourcesColumns[10]},
+				Columns: []*schema.Column{LionResourcesColumns[10], LionResourcesColumns[11]},
 			},
 			{
 				Name:    "resources_enabled",
 				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[11]},
+				Columns: []*schema.Column{LionResourcesColumns[12]},
 			},
 			{
 				Name:    "resources_sort_order",
 				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[8]},
+				Columns: []*schema.Column{LionResourcesColumns[9]},
 			},
 			{
 				Name:    "resources_path",
 				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[14]},
+				Columns: []*schema.Column{LionResourcesColumns[15]},
 			},
 			{
 				Name:    "resources_parent_id_sort_order",
 				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[6], LionResourcesColumns[8]},
+				Columns: []*schema.Column{LionResourcesColumns[6], LionResourcesColumns[9]},
 			},
 		},
 	}
@@ -399,6 +448,21 @@ var (
 				Columns: []*schema.Column{LionRolesColumns[6]},
 			},
 		},
+	}
+	// LionScopesColumns holds the columns for the "lion_scopes" table.
+	LionScopesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
+		{Name: "display_name", Type: field.TypeString, Default: ""},
+	}
+	// LionScopesTable holds the schema information for the "lion_scopes" table.
+	LionScopesTable = &schema.Table{
+		Name:       "lion_scopes",
+		Columns:    LionScopesColumns,
+		PrimaryKey: []*schema.Column{LionScopesColumns[0]},
 	}
 	// LionUserDepartmentsColumns holds the columns for the "lion_user_departments" table.
 	LionUserDepartmentsColumns = []*schema.Column{
@@ -741,11 +805,15 @@ var (
 		LionDepartmentsTable,
 		LionGroupRolesTable,
 		LionGroupsTable,
+		LionPermissionResourcesTable,
 		LionPermissionsTable,
 		LionPoliciesTable,
+		LionResourceScopesTable,
+		LionResourceUrisTable,
 		LionResourcesTable,
 		LionRolePermissionsTable,
 		LionRolesTable,
+		LionScopesTable,
 		LionUserDepartmentsTable,
 		LionUserGroupsTable,
 		LionUserIdentitiesTable,
@@ -782,12 +850,21 @@ func init() {
 	LionGroupsTable.Annotation = &entsql.Annotation{
 		Table: "lion_groups",
 	}
+	LionPermissionResourcesTable.Annotation = &entsql.Annotation{
+		Table: "lion_permission_resources",
+	}
 	LionPermissionsTable.ForeignKeys[0].RefTable = LionResourcesTable
 	LionPermissionsTable.Annotation = &entsql.Annotation{
 		Table: "lion_permissions",
 	}
 	LionPoliciesTable.Annotation = &entsql.Annotation{
 		Table: "lion_policies",
+	}
+	LionResourceScopesTable.Annotation = &entsql.Annotation{
+		Table: "lion_resource_scopes",
+	}
+	LionResourceUrisTable.Annotation = &entsql.Annotation{
+		Table: "lion_resource_uris",
 	}
 	LionResourcesTable.Annotation = &entsql.Annotation{
 		Table: "lion_resources",
@@ -799,6 +876,9 @@ func init() {
 	}
 	LionRolesTable.Annotation = &entsql.Annotation{
 		Table: "lion_roles",
+	}
+	LionScopesTable.Annotation = &entsql.Annotation{
+		Table: "lion_scopes",
 	}
 	LionUserDepartmentsTable.ForeignKeys[0].RefTable = LionDepartmentsTable
 	LionUserDepartmentsTable.ForeignKeys[1].RefTable = LionUsersTable

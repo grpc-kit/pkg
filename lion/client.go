@@ -22,11 +22,15 @@ import (
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
+	"github.com/grpc-kit/pkg/lion/permissionresources"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
+	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/resourceuris"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
+	"github.com/grpc-kit/pkg/lion/scopes"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/useridentities"
@@ -54,16 +58,24 @@ type Client struct {
 	GroupRoles *GroupRolesClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
+	// PermissionResources is the client for interacting with the PermissionResources builders.
+	PermissionResources *PermissionResourcesClient
 	// Permissions is the client for interacting with the Permissions builders.
 	Permissions *PermissionsClient
 	// Policies is the client for interacting with the Policies builders.
 	Policies *PoliciesClient
+	// ResourceScopes is the client for interacting with the ResourceScopes builders.
+	ResourceScopes *ResourceScopesClient
+	// ResourceUris is the client for interacting with the ResourceUris builders.
+	ResourceUris *ResourceUrisClient
 	// Resources is the client for interacting with the Resources builders.
 	Resources *ResourcesClient
 	// RolePermissions is the client for interacting with the RolePermissions builders.
 	RolePermissions *RolePermissionsClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
+	// Scopes is the client for interacting with the Scopes builders.
+	Scopes *ScopesClient
 	// UserDepartments is the client for interacting with the UserDepartments builders.
 	UserDepartments *UserDepartmentsClient
 	// UserGroups is the client for interacting with the UserGroups builders.
@@ -94,11 +106,15 @@ func (c *Client) init() {
 	c.Departments = NewDepartmentsClient(c.config)
 	c.GroupRoles = NewGroupRolesClient(c.config)
 	c.Groups = NewGroupsClient(c.config)
+	c.PermissionResources = NewPermissionResourcesClient(c.config)
 	c.Permissions = NewPermissionsClient(c.config)
 	c.Policies = NewPoliciesClient(c.config)
+	c.ResourceScopes = NewResourceScopesClient(c.config)
+	c.ResourceUris = NewResourceUrisClient(c.config)
 	c.Resources = NewResourcesClient(c.config)
 	c.RolePermissions = NewRolePermissionsClient(c.config)
 	c.Roles = NewRolesClient(c.config)
+	c.Scopes = NewScopesClient(c.config)
 	c.UserDepartments = NewUserDepartmentsClient(c.config)
 	c.UserGroups = NewUserGroupsClient(c.config)
 	c.UserIdentities = NewUserIdentitiesClient(c.config)
@@ -195,26 +211,30 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:             ctx,
-		config:          cfg,
-		AuthProviders:   NewAuthProvidersClient(cfg),
-		Credentials:     NewCredentialsClient(cfg),
-		Demo:            NewDemoClient(cfg),
-		DepartmentRoles: NewDepartmentRolesClient(cfg),
-		Departments:     NewDepartmentsClient(cfg),
-		GroupRoles:      NewGroupRolesClient(cfg),
-		Groups:          NewGroupsClient(cfg),
-		Permissions:     NewPermissionsClient(cfg),
-		Policies:        NewPoliciesClient(cfg),
-		Resources:       NewResourcesClient(cfg),
-		RolePermissions: NewRolePermissionsClient(cfg),
-		Roles:           NewRolesClient(cfg),
-		UserDepartments: NewUserDepartmentsClient(cfg),
-		UserGroups:      NewUserGroupsClient(cfg),
-		UserIdentities:  NewUserIdentitiesClient(cfg),
-		UserProfiles:    NewUserProfilesClient(cfg),
-		UserRoles:       NewUserRolesClient(cfg),
-		Users:           NewUsersClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		AuthProviders:       NewAuthProvidersClient(cfg),
+		Credentials:         NewCredentialsClient(cfg),
+		Demo:                NewDemoClient(cfg),
+		DepartmentRoles:     NewDepartmentRolesClient(cfg),
+		Departments:         NewDepartmentsClient(cfg),
+		GroupRoles:          NewGroupRolesClient(cfg),
+		Groups:              NewGroupsClient(cfg),
+		PermissionResources: NewPermissionResourcesClient(cfg),
+		Permissions:         NewPermissionsClient(cfg),
+		Policies:            NewPoliciesClient(cfg),
+		ResourceScopes:      NewResourceScopesClient(cfg),
+		ResourceUris:        NewResourceUrisClient(cfg),
+		Resources:           NewResourcesClient(cfg),
+		RolePermissions:     NewRolePermissionsClient(cfg),
+		Roles:               NewRolesClient(cfg),
+		Scopes:              NewScopesClient(cfg),
+		UserDepartments:     NewUserDepartmentsClient(cfg),
+		UserGroups:          NewUserGroupsClient(cfg),
+		UserIdentities:      NewUserIdentitiesClient(cfg),
+		UserProfiles:        NewUserProfilesClient(cfg),
+		UserRoles:           NewUserRolesClient(cfg),
+		Users:               NewUsersClient(cfg),
 	}, nil
 }
 
@@ -232,26 +252,30 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:             ctx,
-		config:          cfg,
-		AuthProviders:   NewAuthProvidersClient(cfg),
-		Credentials:     NewCredentialsClient(cfg),
-		Demo:            NewDemoClient(cfg),
-		DepartmentRoles: NewDepartmentRolesClient(cfg),
-		Departments:     NewDepartmentsClient(cfg),
-		GroupRoles:      NewGroupRolesClient(cfg),
-		Groups:          NewGroupsClient(cfg),
-		Permissions:     NewPermissionsClient(cfg),
-		Policies:        NewPoliciesClient(cfg),
-		Resources:       NewResourcesClient(cfg),
-		RolePermissions: NewRolePermissionsClient(cfg),
-		Roles:           NewRolesClient(cfg),
-		UserDepartments: NewUserDepartmentsClient(cfg),
-		UserGroups:      NewUserGroupsClient(cfg),
-		UserIdentities:  NewUserIdentitiesClient(cfg),
-		UserProfiles:    NewUserProfilesClient(cfg),
-		UserRoles:       NewUserRolesClient(cfg),
-		Users:           NewUsersClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		AuthProviders:       NewAuthProvidersClient(cfg),
+		Credentials:         NewCredentialsClient(cfg),
+		Demo:                NewDemoClient(cfg),
+		DepartmentRoles:     NewDepartmentRolesClient(cfg),
+		Departments:         NewDepartmentsClient(cfg),
+		GroupRoles:          NewGroupRolesClient(cfg),
+		Groups:              NewGroupsClient(cfg),
+		PermissionResources: NewPermissionResourcesClient(cfg),
+		Permissions:         NewPermissionsClient(cfg),
+		Policies:            NewPoliciesClient(cfg),
+		ResourceScopes:      NewResourceScopesClient(cfg),
+		ResourceUris:        NewResourceUrisClient(cfg),
+		Resources:           NewResourcesClient(cfg),
+		RolePermissions:     NewRolePermissionsClient(cfg),
+		Roles:               NewRolesClient(cfg),
+		Scopes:              NewScopesClient(cfg),
+		UserDepartments:     NewUserDepartmentsClient(cfg),
+		UserGroups:          NewUserGroupsClient(cfg),
+		UserIdentities:      NewUserIdentitiesClient(cfg),
+		UserProfiles:        NewUserProfilesClient(cfg),
+		UserRoles:           NewUserRolesClient(cfg),
+		Users:               NewUsersClient(cfg),
 	}, nil
 }
 
@@ -282,9 +306,10 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuthProviders, c.Credentials, c.Demo, c.DepartmentRoles, c.Departments,
-		c.GroupRoles, c.Groups, c.Permissions, c.Policies, c.Resources,
-		c.RolePermissions, c.Roles, c.UserDepartments, c.UserGroups, c.UserIdentities,
-		c.UserProfiles, c.UserRoles, c.Users,
+		c.GroupRoles, c.Groups, c.PermissionResources, c.Permissions, c.Policies,
+		c.ResourceScopes, c.ResourceUris, c.Resources, c.RolePermissions, c.Roles,
+		c.Scopes, c.UserDepartments, c.UserGroups, c.UserIdentities, c.UserProfiles,
+		c.UserRoles, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -295,9 +320,10 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuthProviders, c.Credentials, c.Demo, c.DepartmentRoles, c.Departments,
-		c.GroupRoles, c.Groups, c.Permissions, c.Policies, c.Resources,
-		c.RolePermissions, c.Roles, c.UserDepartments, c.UserGroups, c.UserIdentities,
-		c.UserProfiles, c.UserRoles, c.Users,
+		c.GroupRoles, c.Groups, c.PermissionResources, c.Permissions, c.Policies,
+		c.ResourceScopes, c.ResourceUris, c.Resources, c.RolePermissions, c.Roles,
+		c.Scopes, c.UserDepartments, c.UserGroups, c.UserIdentities, c.UserProfiles,
+		c.UserRoles, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -320,16 +346,24 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.GroupRoles.mutate(ctx, m)
 	case *GroupsMutation:
 		return c.Groups.mutate(ctx, m)
+	case *PermissionResourcesMutation:
+		return c.PermissionResources.mutate(ctx, m)
 	case *PermissionsMutation:
 		return c.Permissions.mutate(ctx, m)
 	case *PoliciesMutation:
 		return c.Policies.mutate(ctx, m)
+	case *ResourceScopesMutation:
+		return c.ResourceScopes.mutate(ctx, m)
+	case *ResourceUrisMutation:
+		return c.ResourceUris.mutate(ctx, m)
 	case *ResourcesMutation:
 		return c.Resources.mutate(ctx, m)
 	case *RolePermissionsMutation:
 		return c.RolePermissions.mutate(ctx, m)
 	case *RolesMutation:
 		return c.Roles.mutate(ctx, m)
+	case *ScopesMutation:
+		return c.Scopes.mutate(ctx, m)
 	case *UserDepartmentsMutation:
 		return c.UserDepartments.mutate(ctx, m)
 	case *UserGroupsMutation:
@@ -1454,6 +1488,139 @@ func (c *GroupsClient) mutate(ctx context.Context, m *GroupsMutation) (Value, er
 	}
 }
 
+// PermissionResourcesClient is a client for the PermissionResources schema.
+type PermissionResourcesClient struct {
+	config
+}
+
+// NewPermissionResourcesClient returns a client for the PermissionResources from the given config.
+func NewPermissionResourcesClient(c config) *PermissionResourcesClient {
+	return &PermissionResourcesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `permissionresources.Hooks(f(g(h())))`.
+func (c *PermissionResourcesClient) Use(hooks ...Hook) {
+	c.hooks.PermissionResources = append(c.hooks.PermissionResources, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `permissionresources.Intercept(f(g(h())))`.
+func (c *PermissionResourcesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PermissionResources = append(c.inters.PermissionResources, interceptors...)
+}
+
+// Create returns a builder for creating a PermissionResources entity.
+func (c *PermissionResourcesClient) Create() *PermissionResourcesCreate {
+	mutation := newPermissionResourcesMutation(c.config, OpCreate)
+	return &PermissionResourcesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PermissionResources entities.
+func (c *PermissionResourcesClient) CreateBulk(builders ...*PermissionResourcesCreate) *PermissionResourcesCreateBulk {
+	return &PermissionResourcesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PermissionResourcesClient) MapCreateBulk(slice any, setFunc func(*PermissionResourcesCreate, int)) *PermissionResourcesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PermissionResourcesCreateBulk{err: fmt.Errorf("calling to PermissionResourcesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PermissionResourcesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PermissionResourcesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PermissionResources.
+func (c *PermissionResourcesClient) Update() *PermissionResourcesUpdate {
+	mutation := newPermissionResourcesMutation(c.config, OpUpdate)
+	return &PermissionResourcesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PermissionResourcesClient) UpdateOne(_m *PermissionResources) *PermissionResourcesUpdateOne {
+	mutation := newPermissionResourcesMutation(c.config, OpUpdateOne, withPermissionResources(_m))
+	return &PermissionResourcesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PermissionResourcesClient) UpdateOneID(id int) *PermissionResourcesUpdateOne {
+	mutation := newPermissionResourcesMutation(c.config, OpUpdateOne, withPermissionResourcesID(id))
+	return &PermissionResourcesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PermissionResources.
+func (c *PermissionResourcesClient) Delete() *PermissionResourcesDelete {
+	mutation := newPermissionResourcesMutation(c.config, OpDelete)
+	return &PermissionResourcesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PermissionResourcesClient) DeleteOne(_m *PermissionResources) *PermissionResourcesDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PermissionResourcesClient) DeleteOneID(id int) *PermissionResourcesDeleteOne {
+	builder := c.Delete().Where(permissionresources.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PermissionResourcesDeleteOne{builder}
+}
+
+// Query returns a query builder for PermissionResources.
+func (c *PermissionResourcesClient) Query() *PermissionResourcesQuery {
+	return &PermissionResourcesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePermissionResources},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PermissionResources entity by its id.
+func (c *PermissionResourcesClient) Get(ctx context.Context, id int) (*PermissionResources, error) {
+	return c.Query().Where(permissionresources.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PermissionResourcesClient) GetX(ctx context.Context, id int) *PermissionResources {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *PermissionResourcesClient) Hooks() []Hook {
+	return c.hooks.PermissionResources
+}
+
+// Interceptors returns the client interceptors.
+func (c *PermissionResourcesClient) Interceptors() []Interceptor {
+	return c.inters.PermissionResources
+}
+
+func (c *PermissionResourcesClient) mutate(ctx context.Context, m *PermissionResourcesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PermissionResourcesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PermissionResourcesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PermissionResourcesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PermissionResourcesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown PermissionResources mutation op: %q", m.Op())
+	}
+}
+
 // PermissionsClient is a client for the Permissions schema.
 type PermissionsClient struct {
 	config
@@ -1749,6 +1916,272 @@ func (c *PoliciesClient) mutate(ctx context.Context, m *PoliciesMutation) (Value
 		return (&PoliciesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown Policies mutation op: %q", m.Op())
+	}
+}
+
+// ResourceScopesClient is a client for the ResourceScopes schema.
+type ResourceScopesClient struct {
+	config
+}
+
+// NewResourceScopesClient returns a client for the ResourceScopes from the given config.
+func NewResourceScopesClient(c config) *ResourceScopesClient {
+	return &ResourceScopesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `resourcescopes.Hooks(f(g(h())))`.
+func (c *ResourceScopesClient) Use(hooks ...Hook) {
+	c.hooks.ResourceScopes = append(c.hooks.ResourceScopes, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `resourcescopes.Intercept(f(g(h())))`.
+func (c *ResourceScopesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ResourceScopes = append(c.inters.ResourceScopes, interceptors...)
+}
+
+// Create returns a builder for creating a ResourceScopes entity.
+func (c *ResourceScopesClient) Create() *ResourceScopesCreate {
+	mutation := newResourceScopesMutation(c.config, OpCreate)
+	return &ResourceScopesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ResourceScopes entities.
+func (c *ResourceScopesClient) CreateBulk(builders ...*ResourceScopesCreate) *ResourceScopesCreateBulk {
+	return &ResourceScopesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ResourceScopesClient) MapCreateBulk(slice any, setFunc func(*ResourceScopesCreate, int)) *ResourceScopesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ResourceScopesCreateBulk{err: fmt.Errorf("calling to ResourceScopesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ResourceScopesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ResourceScopesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ResourceScopes.
+func (c *ResourceScopesClient) Update() *ResourceScopesUpdate {
+	mutation := newResourceScopesMutation(c.config, OpUpdate)
+	return &ResourceScopesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ResourceScopesClient) UpdateOne(_m *ResourceScopes) *ResourceScopesUpdateOne {
+	mutation := newResourceScopesMutation(c.config, OpUpdateOne, withResourceScopes(_m))
+	return &ResourceScopesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ResourceScopesClient) UpdateOneID(id int) *ResourceScopesUpdateOne {
+	mutation := newResourceScopesMutation(c.config, OpUpdateOne, withResourceScopesID(id))
+	return &ResourceScopesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ResourceScopes.
+func (c *ResourceScopesClient) Delete() *ResourceScopesDelete {
+	mutation := newResourceScopesMutation(c.config, OpDelete)
+	return &ResourceScopesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ResourceScopesClient) DeleteOne(_m *ResourceScopes) *ResourceScopesDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ResourceScopesClient) DeleteOneID(id int) *ResourceScopesDeleteOne {
+	builder := c.Delete().Where(resourcescopes.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ResourceScopesDeleteOne{builder}
+}
+
+// Query returns a query builder for ResourceScopes.
+func (c *ResourceScopesClient) Query() *ResourceScopesQuery {
+	return &ResourceScopesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeResourceScopes},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ResourceScopes entity by its id.
+func (c *ResourceScopesClient) Get(ctx context.Context, id int) (*ResourceScopes, error) {
+	return c.Query().Where(resourcescopes.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ResourceScopesClient) GetX(ctx context.Context, id int) *ResourceScopes {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ResourceScopesClient) Hooks() []Hook {
+	return c.hooks.ResourceScopes
+}
+
+// Interceptors returns the client interceptors.
+func (c *ResourceScopesClient) Interceptors() []Interceptor {
+	return c.inters.ResourceScopes
+}
+
+func (c *ResourceScopesClient) mutate(ctx context.Context, m *ResourceScopesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ResourceScopesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ResourceScopesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ResourceScopesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ResourceScopesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown ResourceScopes mutation op: %q", m.Op())
+	}
+}
+
+// ResourceUrisClient is a client for the ResourceUris schema.
+type ResourceUrisClient struct {
+	config
+}
+
+// NewResourceUrisClient returns a client for the ResourceUris from the given config.
+func NewResourceUrisClient(c config) *ResourceUrisClient {
+	return &ResourceUrisClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `resourceuris.Hooks(f(g(h())))`.
+func (c *ResourceUrisClient) Use(hooks ...Hook) {
+	c.hooks.ResourceUris = append(c.hooks.ResourceUris, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `resourceuris.Intercept(f(g(h())))`.
+func (c *ResourceUrisClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ResourceUris = append(c.inters.ResourceUris, interceptors...)
+}
+
+// Create returns a builder for creating a ResourceUris entity.
+func (c *ResourceUrisClient) Create() *ResourceUrisCreate {
+	mutation := newResourceUrisMutation(c.config, OpCreate)
+	return &ResourceUrisCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ResourceUris entities.
+func (c *ResourceUrisClient) CreateBulk(builders ...*ResourceUrisCreate) *ResourceUrisCreateBulk {
+	return &ResourceUrisCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ResourceUrisClient) MapCreateBulk(slice any, setFunc func(*ResourceUrisCreate, int)) *ResourceUrisCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ResourceUrisCreateBulk{err: fmt.Errorf("calling to ResourceUrisClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ResourceUrisCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ResourceUrisCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ResourceUris.
+func (c *ResourceUrisClient) Update() *ResourceUrisUpdate {
+	mutation := newResourceUrisMutation(c.config, OpUpdate)
+	return &ResourceUrisUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ResourceUrisClient) UpdateOne(_m *ResourceUris) *ResourceUrisUpdateOne {
+	mutation := newResourceUrisMutation(c.config, OpUpdateOne, withResourceUris(_m))
+	return &ResourceUrisUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ResourceUrisClient) UpdateOneID(id int) *ResourceUrisUpdateOne {
+	mutation := newResourceUrisMutation(c.config, OpUpdateOne, withResourceUrisID(id))
+	return &ResourceUrisUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ResourceUris.
+func (c *ResourceUrisClient) Delete() *ResourceUrisDelete {
+	mutation := newResourceUrisMutation(c.config, OpDelete)
+	return &ResourceUrisDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ResourceUrisClient) DeleteOne(_m *ResourceUris) *ResourceUrisDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ResourceUrisClient) DeleteOneID(id int) *ResourceUrisDeleteOne {
+	builder := c.Delete().Where(resourceuris.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ResourceUrisDeleteOne{builder}
+}
+
+// Query returns a query builder for ResourceUris.
+func (c *ResourceUrisClient) Query() *ResourceUrisQuery {
+	return &ResourceUrisQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeResourceUris},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ResourceUris entity by its id.
+func (c *ResourceUrisClient) Get(ctx context.Context, id int) (*ResourceUris, error) {
+	return c.Query().Where(resourceuris.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ResourceUrisClient) GetX(ctx context.Context, id int) *ResourceUris {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ResourceUrisClient) Hooks() []Hook {
+	return c.hooks.ResourceUris
+}
+
+// Interceptors returns the client interceptors.
+func (c *ResourceUrisClient) Interceptors() []Interceptor {
+	return c.inters.ResourceUris
+}
+
+func (c *ResourceUrisClient) mutate(ctx context.Context, m *ResourceUrisMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ResourceUrisCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ResourceUrisUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ResourceUrisUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ResourceUrisDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown ResourceUris mutation op: %q", m.Op())
 	}
 }
 
@@ -2260,6 +2693,139 @@ func (c *RolesClient) mutate(ctx context.Context, m *RolesMutation) (Value, erro
 		return (&RolesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown Roles mutation op: %q", m.Op())
+	}
+}
+
+// ScopesClient is a client for the Scopes schema.
+type ScopesClient struct {
+	config
+}
+
+// NewScopesClient returns a client for the Scopes from the given config.
+func NewScopesClient(c config) *ScopesClient {
+	return &ScopesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `scopes.Hooks(f(g(h())))`.
+func (c *ScopesClient) Use(hooks ...Hook) {
+	c.hooks.Scopes = append(c.hooks.Scopes, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `scopes.Intercept(f(g(h())))`.
+func (c *ScopesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Scopes = append(c.inters.Scopes, interceptors...)
+}
+
+// Create returns a builder for creating a Scopes entity.
+func (c *ScopesClient) Create() *ScopesCreate {
+	mutation := newScopesMutation(c.config, OpCreate)
+	return &ScopesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Scopes entities.
+func (c *ScopesClient) CreateBulk(builders ...*ScopesCreate) *ScopesCreateBulk {
+	return &ScopesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ScopesClient) MapCreateBulk(slice any, setFunc func(*ScopesCreate, int)) *ScopesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ScopesCreateBulk{err: fmt.Errorf("calling to ScopesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ScopesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ScopesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Scopes.
+func (c *ScopesClient) Update() *ScopesUpdate {
+	mutation := newScopesMutation(c.config, OpUpdate)
+	return &ScopesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ScopesClient) UpdateOne(_m *Scopes) *ScopesUpdateOne {
+	mutation := newScopesMutation(c.config, OpUpdateOne, withScopes(_m))
+	return &ScopesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ScopesClient) UpdateOneID(id int) *ScopesUpdateOne {
+	mutation := newScopesMutation(c.config, OpUpdateOne, withScopesID(id))
+	return &ScopesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Scopes.
+func (c *ScopesClient) Delete() *ScopesDelete {
+	mutation := newScopesMutation(c.config, OpDelete)
+	return &ScopesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ScopesClient) DeleteOne(_m *Scopes) *ScopesDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ScopesClient) DeleteOneID(id int) *ScopesDeleteOne {
+	builder := c.Delete().Where(scopes.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ScopesDeleteOne{builder}
+}
+
+// Query returns a query builder for Scopes.
+func (c *ScopesClient) Query() *ScopesQuery {
+	return &ScopesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeScopes},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Scopes entity by its id.
+func (c *ScopesClient) Get(ctx context.Context, id int) (*Scopes, error) {
+	return c.Query().Where(scopes.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ScopesClient) GetX(ctx context.Context, id int) *Scopes {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ScopesClient) Hooks() []Hook {
+	return c.hooks.Scopes
+}
+
+// Interceptors returns the client interceptors.
+func (c *ScopesClient) Interceptors() []Interceptor {
+	return c.inters.Scopes
+}
+
+func (c *ScopesClient) mutate(ctx context.Context, m *ScopesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ScopesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ScopesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ScopesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ScopesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown Scopes mutation op: %q", m.Op())
 	}
 }
 
@@ -3257,14 +3823,14 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 type (
 	hooks struct {
 		AuthProviders, Credentials, Demo, DepartmentRoles, Departments, GroupRoles,
-		Groups, Permissions, Policies, Resources, RolePermissions, Roles,
-		UserDepartments, UserGroups, UserIdentities, UserProfiles, UserRoles,
-		Users []ent.Hook
+		Groups, PermissionResources, Permissions, Policies, ResourceScopes,
+		ResourceUris, Resources, RolePermissions, Roles, Scopes, UserDepartments,
+		UserGroups, UserIdentities, UserProfiles, UserRoles, Users []ent.Hook
 	}
 	inters struct {
 		AuthProviders, Credentials, Demo, DepartmentRoles, Departments, GroupRoles,
-		Groups, Permissions, Policies, Resources, RolePermissions, Roles,
-		UserDepartments, UserGroups, UserIdentities, UserProfiles, UserRoles,
-		Users []ent.Interceptor
+		Groups, PermissionResources, Permissions, Policies, ResourceScopes,
+		ResourceUris, Resources, RolePermissions, Roles, Scopes, UserDepartments,
+		UserGroups, UserIdentities, UserProfiles, UserRoles, Users []ent.Interceptor
 	}
 )

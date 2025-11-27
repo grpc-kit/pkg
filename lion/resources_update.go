@@ -144,6 +144,20 @@ func (_u *ResourcesUpdate) SetNillableName(v *string) *ResourcesUpdate {
 	return _u
 }
 
+// SetDisplayName sets the "display_name" field.
+func (_u *ResourcesUpdate) SetDisplayName(v string) *ResourcesUpdate {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableDisplayName(v *string) *ResourcesUpdate {
+	if v != nil {
+		_u.SetDisplayName(*v)
+	}
+	return _u
+}
+
 // SetSortOrder sets the "sort_order" field.
 func (_u *ResourcesUpdate) SetSortOrder(v int) *ResourcesUpdate {
 	_u.mutation.ResetSortOrder()
@@ -455,6 +469,9 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(resources.FieldDisplayName, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.SortOrder(); ok {
 		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
 	}
@@ -670,6 +687,20 @@ func (_u *ResourcesUpdateOne) SetName(v string) *ResourcesUpdateOne {
 func (_u *ResourcesUpdateOne) SetNillableName(v *string) *ResourcesUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_u *ResourcesUpdateOne) SetDisplayName(v string) *ResourcesUpdateOne {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableDisplayName(v *string) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetDisplayName(*v)
 	}
 	return _u
 }
@@ -1014,6 +1045,9 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(resources.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(resources.FieldDisplayName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.SortOrder(); ok {
 		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)

@@ -28,6 +28,12 @@ type Permissions struct {
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 关联 lion_resources 表的资源 ID
 	ResourceID int `json:"resource_id,omitempty"`
+	// 对我展示的权限名称，如：管理用户列表
+	Name string `json:"name,omitempty"`
+	// 国际化键值，用于前端多语言显示的标识符
+	DisplayName string `json:"display_name,omitempty"`
+	// 详细描述
+	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PermissionsQuery when eager-loading is set.
 	Edges        PermissionsEdges `json:"edges"`
@@ -72,6 +78,8 @@ func (*Permissions) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case permissions.FieldID, permissions.FieldCreatedBy, permissions.FieldUpdatedBy, permissions.FieldResourceID:
 			values[i] = new(sql.NullInt64)
+		case permissions.FieldName, permissions.FieldDisplayName, permissions.FieldDescription:
+			values[i] = new(sql.NullString)
 		case permissions.FieldCreatedAt, permissions.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -124,6 +132,24 @@ func (_m *Permissions) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field resource_id", values[i])
 			} else if value.Valid {
 				_m.ResourceID = int(value.Int64)
+			}
+		case permissions.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				_m.Name = value.String
+			}
+		case permissions.FieldDisplayName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
+			} else if value.Valid {
+				_m.DisplayName = value.String
+			}
+		case permissions.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -185,6 +211,15 @@ func (_m *Permissions) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("resource_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ResourceID))
+	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("display_name=")
+	builder.WriteString(_m.DisplayName)
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

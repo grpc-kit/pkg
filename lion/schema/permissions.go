@@ -19,23 +19,16 @@ func (Permissions) Fields() []ent.Field {
 		field.Int("resource_id").
 			Positive().
 			Comment("关联 lion_resources 表的资源 ID"),
-		/*
-			field.String("name").
-				MaxLen(256).
-				NotEmpty().
-				Comment("对我展示的权限名称，如：管理用户列表"),
-			field.String("action").
-				MaxLen(256).
-				NotEmpty().
-				Comment("允许的操作行为，如：create, readonly, update, delete, list, execute, admin"),
-			field.String("effect").
-				MaxLen(128).
-				NotEmpty().
-				Comment("权限的行为，如 allow, deny"),
-			field.String("description").
-				Default("").
-				Comment("详细描述"),
-		*/
+		field.String("name").
+			MaxLen(256).
+			NotEmpty().
+			Comment("对我展示的权限名称，如：管理用户列表"),
+		field.String("display_name").
+			NotEmpty().
+			Comment("国际化键值，用于前端多语言显示的标识符"),
+		field.String("description").
+			Default("").
+			Comment("详细描述"),
 	}
 }
 
