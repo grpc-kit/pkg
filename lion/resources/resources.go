@@ -30,14 +30,14 @@ const (
 	FieldName = "name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
-	// FieldSortOrder holds the string denoting the sort_order field in the database.
-	FieldSortOrder = "sort_order"
 	// FieldResourceType holds the string denoting the resource_type field in the database.
 	FieldResourceType = "resource_type"
-	// FieldResourceScope holds the string denoting the resource_scope field in the database.
-	FieldResourceScope = "resource_scope"
 	// FieldEnabled holds the string denoting the enabled field in the database.
 	FieldEnabled = "enabled"
+	// FieldSortOrder holds the string denoting the sort_order field in the database.
+	FieldSortOrder = "sort_order"
+	// FieldResourceScope holds the string denoting the resource_scope field in the database.
+	FieldResourceScope = "resource_scope"
 	// FieldHidden holds the string denoting the hidden field in the database.
 	FieldHidden = "hidden"
 	// FieldHideChildren holds the string denoting the hide_children field in the database.
@@ -50,17 +50,17 @@ const (
 	FieldComponent = "component"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
-	EdgeLionPermissions = "lion_permissions"
+	// EdgeLionResourceUris holds the string denoting the lion_resource_uris edge name in mutations.
+	EdgeLionResourceUris = "lion_resource_uris"
 	// Table holds the table name of the resources in the database.
 	Table = "lion_resources"
-	// LionPermissionsTable is the table that holds the lion_permissions relation/edge.
-	LionPermissionsTable = "lion_permissions"
-	// LionPermissionsInverseTable is the table name for the Permissions entity.
-	// It exists in this package in order to avoid circular dependency with the "permissions" package.
-	LionPermissionsInverseTable = "lion_permissions"
-	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
-	LionPermissionsColumn = "resource_id"
+	// LionResourceUrisTable is the table that holds the lion_resource_uris relation/edge.
+	LionResourceUrisTable = "lion_resource_uris"
+	// LionResourceUrisInverseTable is the table name for the ResourceUris entity.
+	// It exists in this package in order to avoid circular dependency with the "resourceuris" package.
+	LionResourceUrisInverseTable = "lion_resource_uris"
+	// LionResourceUrisColumn is the table column denoting the lion_resource_uris relation/edge.
+	LionResourceUrisColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for resources fields.
@@ -74,10 +74,10 @@ var Columns = []string{
 	FieldParentID,
 	FieldName,
 	FieldDisplayName,
-	FieldSortOrder,
 	FieldResourceType,
-	FieldResourceScope,
 	FieldEnabled,
+	FieldSortOrder,
+	FieldResourceScope,
 	FieldHidden,
 	FieldHideChildren,
 	FieldPath,
@@ -113,14 +113,14 @@ var (
 	NameValidator func(string) error
 	// DefaultDisplayName holds the default value on creation for the "display_name" field.
 	DefaultDisplayName string
-	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
-	DefaultSortOrder int
 	// DefaultResourceType holds the default value on creation for the "resource_type" field.
 	DefaultResourceType int
-	// DefaultResourceScope holds the default value on creation for the "resource_scope" field.
-	DefaultResourceScope int
 	// DefaultEnabled holds the default value on creation for the "enabled" field.
 	DefaultEnabled bool
+	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
+	DefaultSortOrder int
+	// DefaultResourceScope holds the default value on creation for the "resource_scope" field.
+	DefaultResourceScope int
 	// DefaultHidden holds the default value on creation for the "hidden" field.
 	DefaultHidden bool
 	// DefaultHideChildren holds the default value on creation for the "hide_children" field.
@@ -189,24 +189,24 @@ func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
 }
 
-// BySortOrder orders the results by the sort_order field.
-func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
-}
-
 // ByResourceType orders the results by the resource_type field.
 func ByResourceType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResourceType, opts...).ToFunc()
 }
 
-// ByResourceScope orders the results by the resource_scope field.
-func ByResourceScope(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResourceScope, opts...).ToFunc()
-}
-
 // ByEnabled orders the results by the enabled field.
 func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
+}
+
+// BySortOrder orders the results by the sort_order field.
+func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
+}
+
+// ByResourceScope orders the results by the resource_scope field.
+func ByResourceScope(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceScope, opts...).ToFunc()
 }
 
 // ByHidden orders the results by the hidden field.
@@ -239,23 +239,23 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLionPermissionsCount orders the results by lion_permissions count.
-func ByLionPermissionsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionResourceUrisCount orders the results by lion_resource_uris count.
+func ByLionResourceUrisCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionPermissionsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionResourceUrisStep(), opts...)
 	}
 }
 
-// ByLionPermissions orders the results by lion_permissions terms.
-func ByLionPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionResourceUris orders the results by lion_resource_uris terms.
+func ByLionResourceUris(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionPermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionResourceUrisStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newLionPermissionsStep() *sqlgraph.Step {
+func newLionResourceUrisStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionPermissionsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
+		sqlgraph.To(LionResourceUrisInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionResourceUrisTable, LionResourceUrisColumn),
 	)
 }

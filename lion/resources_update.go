@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
+	"github.com/grpc-kit/pkg/lion/resourceuris"
 )
 
 // ResourcesUpdate is the builder for updating Resources entities.
@@ -158,27 +158,6 @@ func (_u *ResourcesUpdate) SetNillableDisplayName(v *string) *ResourcesUpdate {
 	return _u
 }
 
-// SetSortOrder sets the "sort_order" field.
-func (_u *ResourcesUpdate) SetSortOrder(v int) *ResourcesUpdate {
-	_u.mutation.ResetSortOrder()
-	_u.mutation.SetSortOrder(v)
-	return _u
-}
-
-// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
-func (_u *ResourcesUpdate) SetNillableSortOrder(v *int) *ResourcesUpdate {
-	if v != nil {
-		_u.SetSortOrder(*v)
-	}
-	return _u
-}
-
-// AddSortOrder adds value to the "sort_order" field.
-func (_u *ResourcesUpdate) AddSortOrder(v int) *ResourcesUpdate {
-	_u.mutation.AddSortOrder(v)
-	return _u
-}
-
 // SetResourceType sets the "resource_type" field.
 func (_u *ResourcesUpdate) SetResourceType(v int) *ResourcesUpdate {
 	_u.mutation.ResetResourceType()
@@ -200,6 +179,41 @@ func (_u *ResourcesUpdate) AddResourceType(v int) *ResourcesUpdate {
 	return _u
 }
 
+// SetEnabled sets the "enabled" field.
+func (_u *ResourcesUpdate) SetEnabled(v bool) *ResourcesUpdate {
+	_u.mutation.SetEnabled(v)
+	return _u
+}
+
+// SetNillableEnabled sets the "enabled" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableEnabled(v *bool) *ResourcesUpdate {
+	if v != nil {
+		_u.SetEnabled(*v)
+	}
+	return _u
+}
+
+// SetSortOrder sets the "sort_order" field.
+func (_u *ResourcesUpdate) SetSortOrder(v int) *ResourcesUpdate {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
+	return _u
+}
+
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableSortOrder(v *int) *ResourcesUpdate {
+	if v != nil {
+		_u.SetSortOrder(*v)
+	}
+	return _u
+}
+
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *ResourcesUpdate) AddSortOrder(v int) *ResourcesUpdate {
+	_u.mutation.AddSortOrder(v)
+	return _u
+}
+
 // SetResourceScope sets the "resource_scope" field.
 func (_u *ResourcesUpdate) SetResourceScope(v int) *ResourcesUpdate {
 	_u.mutation.ResetResourceScope()
@@ -218,20 +232,6 @@ func (_u *ResourcesUpdate) SetNillableResourceScope(v *int) *ResourcesUpdate {
 // AddResourceScope adds value to the "resource_scope" field.
 func (_u *ResourcesUpdate) AddResourceScope(v int) *ResourcesUpdate {
 	_u.mutation.AddResourceScope(v)
-	return _u
-}
-
-// SetEnabled sets the "enabled" field.
-func (_u *ResourcesUpdate) SetEnabled(v bool) *ResourcesUpdate {
-	_u.mutation.SetEnabled(v)
-	return _u
-}
-
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_u *ResourcesUpdate) SetNillableEnabled(v *bool) *ResourcesUpdate {
-	if v != nil {
-		_u.SetEnabled(*v)
-	}
 	return _u
 }
 
@@ -319,19 +319,19 @@ func (_u *ResourcesUpdate) SetNillableDescription(v *string) *ResourcesUpdate {
 	return _u
 }
 
-// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
-func (_u *ResourcesUpdate) AddLionPermissionIDs(ids ...int) *ResourcesUpdate {
-	_u.mutation.AddLionPermissionIDs(ids...)
+// AddLionResourceURIIDs adds the "lion_resource_uris" edge to the ResourceUris entity by IDs.
+func (_u *ResourcesUpdate) AddLionResourceURIIDs(ids ...int) *ResourcesUpdate {
+	_u.mutation.AddLionResourceURIIDs(ids...)
 	return _u
 }
 
-// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
-func (_u *ResourcesUpdate) AddLionPermissions(v ...*Permissions) *ResourcesUpdate {
+// AddLionResourceUris adds the "lion_resource_uris" edges to the ResourceUris entity.
+func (_u *ResourcesUpdate) AddLionResourceUris(v ...*ResourceUris) *ResourcesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddLionPermissionIDs(ids...)
+	return _u.AddLionResourceURIIDs(ids...)
 }
 
 // Mutation returns the ResourcesMutation object of the builder.
@@ -339,25 +339,25 @@ func (_u *ResourcesUpdate) Mutation() *ResourcesMutation {
 	return _u.mutation
 }
 
-// ClearLionPermissions clears all "lion_permissions" edges to the Permissions entity.
-func (_u *ResourcesUpdate) ClearLionPermissions() *ResourcesUpdate {
-	_u.mutation.ClearLionPermissions()
+// ClearLionResourceUris clears all "lion_resource_uris" edges to the ResourceUris entity.
+func (_u *ResourcesUpdate) ClearLionResourceUris() *ResourcesUpdate {
+	_u.mutation.ClearLionResourceUris()
 	return _u
 }
 
-// RemoveLionPermissionIDs removes the "lion_permissions" edge to Permissions entities by IDs.
-func (_u *ResourcesUpdate) RemoveLionPermissionIDs(ids ...int) *ResourcesUpdate {
-	_u.mutation.RemoveLionPermissionIDs(ids...)
+// RemoveLionResourceURIIDs removes the "lion_resource_uris" edge to ResourceUris entities by IDs.
+func (_u *ResourcesUpdate) RemoveLionResourceURIIDs(ids ...int) *ResourcesUpdate {
+	_u.mutation.RemoveLionResourceURIIDs(ids...)
 	return _u
 }
 
-// RemoveLionPermissions removes "lion_permissions" edges to Permissions entities.
-func (_u *ResourcesUpdate) RemoveLionPermissions(v ...*Permissions) *ResourcesUpdate {
+// RemoveLionResourceUris removes "lion_resource_uris" edges to ResourceUris entities.
+func (_u *ResourcesUpdate) RemoveLionResourceUris(v ...*ResourceUris) *ResourcesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveLionPermissionIDs(ids...)
+	return _u.RemoveLionResourceURIIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -472,26 +472,26 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(resources.FieldDisplayName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.SortOrder(); ok {
-		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedSortOrder(); ok {
-		_spec.AddField(resources.FieldSortOrder, field.TypeInt, value)
-	}
 	if value, ok := _u.mutation.ResourceType(); ok {
 		_spec.SetField(resources.FieldResourceType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedResourceType(); ok {
 		_spec.AddField(resources.FieldResourceType, field.TypeInt, value)
 	}
+	if value, ok := _u.mutation.Enabled(); ok {
+		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(resources.FieldSortOrder, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.ResourceScope(); ok {
 		_spec.SetField(resources.FieldResourceScope, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedResourceScope(); ok {
 		_spec.AddField(resources.FieldResourceScope, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.Enabled(); ok {
-		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Hidden(); ok {
 		_spec.SetField(resources.FieldHidden, field.TypeBool, value)
@@ -511,28 +511,28 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
 	}
-	if _u.mutation.LionPermissionsCleared() {
+	if _u.mutation.LionResourceUrisCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   resources.LionPermissionsTable,
-			Columns: []string{resources.LionPermissionsColumn},
+			Table:   resources.LionResourceUrisTable,
+			Columns: []string{resources.LionResourceUrisColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLionPermissionsIDs(); len(nodes) > 0 && !_u.mutation.LionPermissionsCleared() {
+	if nodes := _u.mutation.RemovedLionResourceUrisIDs(); len(nodes) > 0 && !_u.mutation.LionResourceUrisCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   resources.LionPermissionsTable,
-			Columns: []string{resources.LionPermissionsColumn},
+			Table:   resources.LionResourceUrisTable,
+			Columns: []string{resources.LionResourceUrisColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -540,15 +540,15 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionPermissionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionResourceUrisIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   resources.LionPermissionsTable,
-			Columns: []string{resources.LionPermissionsColumn},
+			Table:   resources.LionResourceUrisTable,
+			Columns: []string{resources.LionResourceUrisColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -705,27 +705,6 @@ func (_u *ResourcesUpdateOne) SetNillableDisplayName(v *string) *ResourcesUpdate
 	return _u
 }
 
-// SetSortOrder sets the "sort_order" field.
-func (_u *ResourcesUpdateOne) SetSortOrder(v int) *ResourcesUpdateOne {
-	_u.mutation.ResetSortOrder()
-	_u.mutation.SetSortOrder(v)
-	return _u
-}
-
-// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
-func (_u *ResourcesUpdateOne) SetNillableSortOrder(v *int) *ResourcesUpdateOne {
-	if v != nil {
-		_u.SetSortOrder(*v)
-	}
-	return _u
-}
-
-// AddSortOrder adds value to the "sort_order" field.
-func (_u *ResourcesUpdateOne) AddSortOrder(v int) *ResourcesUpdateOne {
-	_u.mutation.AddSortOrder(v)
-	return _u
-}
-
 // SetResourceType sets the "resource_type" field.
 func (_u *ResourcesUpdateOne) SetResourceType(v int) *ResourcesUpdateOne {
 	_u.mutation.ResetResourceType()
@@ -747,6 +726,41 @@ func (_u *ResourcesUpdateOne) AddResourceType(v int) *ResourcesUpdateOne {
 	return _u
 }
 
+// SetEnabled sets the "enabled" field.
+func (_u *ResourcesUpdateOne) SetEnabled(v bool) *ResourcesUpdateOne {
+	_u.mutation.SetEnabled(v)
+	return _u
+}
+
+// SetNillableEnabled sets the "enabled" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableEnabled(v *bool) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetEnabled(*v)
+	}
+	return _u
+}
+
+// SetSortOrder sets the "sort_order" field.
+func (_u *ResourcesUpdateOne) SetSortOrder(v int) *ResourcesUpdateOne {
+	_u.mutation.ResetSortOrder()
+	_u.mutation.SetSortOrder(v)
+	return _u
+}
+
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableSortOrder(v *int) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetSortOrder(*v)
+	}
+	return _u
+}
+
+// AddSortOrder adds value to the "sort_order" field.
+func (_u *ResourcesUpdateOne) AddSortOrder(v int) *ResourcesUpdateOne {
+	_u.mutation.AddSortOrder(v)
+	return _u
+}
+
 // SetResourceScope sets the "resource_scope" field.
 func (_u *ResourcesUpdateOne) SetResourceScope(v int) *ResourcesUpdateOne {
 	_u.mutation.ResetResourceScope()
@@ -765,20 +779,6 @@ func (_u *ResourcesUpdateOne) SetNillableResourceScope(v *int) *ResourcesUpdateO
 // AddResourceScope adds value to the "resource_scope" field.
 func (_u *ResourcesUpdateOne) AddResourceScope(v int) *ResourcesUpdateOne {
 	_u.mutation.AddResourceScope(v)
-	return _u
-}
-
-// SetEnabled sets the "enabled" field.
-func (_u *ResourcesUpdateOne) SetEnabled(v bool) *ResourcesUpdateOne {
-	_u.mutation.SetEnabled(v)
-	return _u
-}
-
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_u *ResourcesUpdateOne) SetNillableEnabled(v *bool) *ResourcesUpdateOne {
-	if v != nil {
-		_u.SetEnabled(*v)
-	}
 	return _u
 }
 
@@ -866,19 +866,19 @@ func (_u *ResourcesUpdateOne) SetNillableDescription(v *string) *ResourcesUpdate
 	return _u
 }
 
-// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
-func (_u *ResourcesUpdateOne) AddLionPermissionIDs(ids ...int) *ResourcesUpdateOne {
-	_u.mutation.AddLionPermissionIDs(ids...)
+// AddLionResourceURIIDs adds the "lion_resource_uris" edge to the ResourceUris entity by IDs.
+func (_u *ResourcesUpdateOne) AddLionResourceURIIDs(ids ...int) *ResourcesUpdateOne {
+	_u.mutation.AddLionResourceURIIDs(ids...)
 	return _u
 }
 
-// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
-func (_u *ResourcesUpdateOne) AddLionPermissions(v ...*Permissions) *ResourcesUpdateOne {
+// AddLionResourceUris adds the "lion_resource_uris" edges to the ResourceUris entity.
+func (_u *ResourcesUpdateOne) AddLionResourceUris(v ...*ResourceUris) *ResourcesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddLionPermissionIDs(ids...)
+	return _u.AddLionResourceURIIDs(ids...)
 }
 
 // Mutation returns the ResourcesMutation object of the builder.
@@ -886,25 +886,25 @@ func (_u *ResourcesUpdateOne) Mutation() *ResourcesMutation {
 	return _u.mutation
 }
 
-// ClearLionPermissions clears all "lion_permissions" edges to the Permissions entity.
-func (_u *ResourcesUpdateOne) ClearLionPermissions() *ResourcesUpdateOne {
-	_u.mutation.ClearLionPermissions()
+// ClearLionResourceUris clears all "lion_resource_uris" edges to the ResourceUris entity.
+func (_u *ResourcesUpdateOne) ClearLionResourceUris() *ResourcesUpdateOne {
+	_u.mutation.ClearLionResourceUris()
 	return _u
 }
 
-// RemoveLionPermissionIDs removes the "lion_permissions" edge to Permissions entities by IDs.
-func (_u *ResourcesUpdateOne) RemoveLionPermissionIDs(ids ...int) *ResourcesUpdateOne {
-	_u.mutation.RemoveLionPermissionIDs(ids...)
+// RemoveLionResourceURIIDs removes the "lion_resource_uris" edge to ResourceUris entities by IDs.
+func (_u *ResourcesUpdateOne) RemoveLionResourceURIIDs(ids ...int) *ResourcesUpdateOne {
+	_u.mutation.RemoveLionResourceURIIDs(ids...)
 	return _u
 }
 
-// RemoveLionPermissions removes "lion_permissions" edges to Permissions entities.
-func (_u *ResourcesUpdateOne) RemoveLionPermissions(v ...*Permissions) *ResourcesUpdateOne {
+// RemoveLionResourceUris removes "lion_resource_uris" edges to ResourceUris entities.
+func (_u *ResourcesUpdateOne) RemoveLionResourceUris(v ...*ResourceUris) *ResourcesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveLionPermissionIDs(ids...)
+	return _u.RemoveLionResourceURIIDs(ids...)
 }
 
 // Where appends a list predicates to the ResourcesUpdate builder.
@@ -1049,26 +1049,26 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(resources.FieldDisplayName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.SortOrder(); ok {
-		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedSortOrder(); ok {
-		_spec.AddField(resources.FieldSortOrder, field.TypeInt, value)
-	}
 	if value, ok := _u.mutation.ResourceType(); ok {
 		_spec.SetField(resources.FieldResourceType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedResourceType(); ok {
 		_spec.AddField(resources.FieldResourceType, field.TypeInt, value)
 	}
+	if value, ok := _u.mutation.Enabled(); ok {
+		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.SortOrder(); ok {
+		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedSortOrder(); ok {
+		_spec.AddField(resources.FieldSortOrder, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.ResourceScope(); ok {
 		_spec.SetField(resources.FieldResourceScope, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedResourceScope(); ok {
 		_spec.AddField(resources.FieldResourceScope, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.Enabled(); ok {
-		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Hidden(); ok {
 		_spec.SetField(resources.FieldHidden, field.TypeBool, value)
@@ -1088,28 +1088,28 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
 	}
-	if _u.mutation.LionPermissionsCleared() {
+	if _u.mutation.LionResourceUrisCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   resources.LionPermissionsTable,
-			Columns: []string{resources.LionPermissionsColumn},
+			Table:   resources.LionResourceUrisTable,
+			Columns: []string{resources.LionResourceUrisColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLionPermissionsIDs(); len(nodes) > 0 && !_u.mutation.LionPermissionsCleared() {
+	if nodes := _u.mutation.RemovedLionResourceUrisIDs(); len(nodes) > 0 && !_u.mutation.LionResourceUrisCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   resources.LionPermissionsTable,
-			Columns: []string{resources.LionPermissionsColumn},
+			Table:   resources.LionResourceUrisTable,
+			Columns: []string{resources.LionResourceUrisColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1117,15 +1117,15 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionPermissionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionResourceUrisIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   resources.LionPermissionsTable,
-			Columns: []string{resources.LionPermissionsColumn},
+			Table:   resources.LionResourceUrisTable,
+			Columns: []string{resources.LionResourceUrisColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

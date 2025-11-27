@@ -12,16 +12,18 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourceuris"
 )
 
 // ResourceUrisQuery is the builder for querying ResourceUris entities.
 type ResourceUrisQuery struct {
 	config
-	ctx        *QueryContext
-	order      []resourceuris.OrderOption
-	inters     []Interceptor
-	predicates []predicate.ResourceUris
+	ctx               *QueryContext
+	order             []resourceuris.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.ResourceUris
+	withLionResources *ResourcesQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +58,28 @@ func (_q *ResourceUrisQuery) Unique(unique bool) *ResourceUrisQuery {
 func (_q *ResourceUrisQuery) Order(o ...resourceuris.OrderOption) *ResourceUrisQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryLionResources chains the current query on the "lion_resources" edge.
+func (_q *ResourceUrisQuery) QueryLionResources() *ResourcesQuery {
+	query := (&ResourcesClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourceuris.Table, resourceuris.FieldID, selector),
+			sqlgraph.To(resources.Table, resources.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, resourceuris.LionResourcesTable, resourceuris.LionResourcesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first ResourceUris entity from the query.
@@ -245,15 +269,27 @@ func (_q *ResourceUrisQuery) Clone() *ResourceUrisQuery {
 		return nil
 	}
 	return &ResourceUrisQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]resourceuris.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.ResourceUris{}, _q.predicates...),
+		config:            _q.config,
+		ctx:               _q.ctx.Clone(),
+		order:             append([]resourceuris.OrderOption{}, _q.order...),
+		inters:            append([]Interceptor{}, _q.inters...),
+		predicates:        append([]predicate.ResourceUris{}, _q.predicates...),
+		withLionResources: _q.withLionResources.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithLionResources tells the query-builder to eager-load the nodes that are connected to
+// the "lion_resources" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ResourceUrisQuery) WithLionResources(opts ...func(*ResourcesQuery)) *ResourceUrisQuery {
+	query := (&ResourcesClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionResources = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +368,11 @@ func (_q *ResourceUrisQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *ResourceUrisQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ResourceUris, error) {
 	var (
-		nodes = []*ResourceUris{}
-		_spec = _q.querySpec()
+		nodes       = []*ResourceUris{}
+		_spec       = _q.querySpec()
+		loadedTypes = [1]bool{
+			_q.withLionResources != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*ResourceUris).scanValues(nil, columns)
@@ -341,6 +380,7 @@ func (_q *ResourceUrisQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &ResourceUris{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +392,43 @@ func (_q *ResourceUrisQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withLionResources; query != nil {
+		if err := _q.loadLionResources(ctx, query, nodes, nil,
+			func(n *ResourceUris, e *Resources) { n.Edges.LionResources = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *ResourceUrisQuery) loadLionResources(ctx context.Context, query *ResourcesQuery, nodes []*ResourceUris, init func(*ResourceUris), assign func(*ResourceUris, *Resources)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*ResourceUris)
+	for i := range nodes {
+		fk := nodes[i].ResourceID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(resources.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "resource_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (_q *ResourceUrisQuery) sqlCount(ctx context.Context) (int, error) {
@@ -379,6 +455,9 @@ func (_q *ResourceUrisQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != resourceuris.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withLionResources != nil {
+			_spec.Node.AddColumnOnce(resourceuris.FieldResourceID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

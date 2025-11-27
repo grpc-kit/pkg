@@ -36,11 +36,13 @@ func (Permissions) Fields() []ent.Field {
 func (Permissions) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("lion_role_permissions", RolePermissions.Type),
-		edge.From("lion_resources", Resources.Type).
-			Ref("lion_permissions").
-			Field("resource_id").
-			Unique().
-			Required(),
+		/*
+			edge.From("lion_resources", Resources.Type).
+				Ref("lion_permissions").
+				Field("resource_id").
+				Unique().
+				Required(),
+		*/
 	}
 }
 

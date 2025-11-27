@@ -95,24 +95,24 @@ func DisplayName(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldDisplayName, v))
 }
 
-// SortOrder applies equality check predicate on the "sort_order" field. It's identical to SortOrderEQ.
-func SortOrder(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldSortOrder, v))
-}
-
 // ResourceType applies equality check predicate on the "resource_type" field. It's identical to ResourceTypeEQ.
 func ResourceType(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldResourceType, v))
 }
 
-// ResourceScope applies equality check predicate on the "resource_scope" field. It's identical to ResourceScopeEQ.
-func ResourceScope(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldResourceScope, v))
-}
-
 // Enabled applies equality check predicate on the "enabled" field. It's identical to EnabledEQ.
 func Enabled(v bool) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldEnabled, v))
+}
+
+// SortOrder applies equality check predicate on the "sort_order" field. It's identical to SortOrderEQ.
+func SortOrder(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldSortOrder, v))
+}
+
+// ResourceScope applies equality check predicate on the "resource_scope" field. It's identical to ResourceScopeEQ.
+func ResourceScope(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceScope, v))
 }
 
 // Hidden applies equality check predicate on the "hidden" field. It's identical to HiddenEQ.
@@ -545,46 +545,6 @@ func DisplayNameContainsFold(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldContainsFold(FieldDisplayName, v))
 }
 
-// SortOrderEQ applies the EQ predicate on the "sort_order" field.
-func SortOrderEQ(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldSortOrder, v))
-}
-
-// SortOrderNEQ applies the NEQ predicate on the "sort_order" field.
-func SortOrderNEQ(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldSortOrder, v))
-}
-
-// SortOrderIn applies the In predicate on the "sort_order" field.
-func SortOrderIn(vs ...int) predicate.Resources {
-	return predicate.Resources(sql.FieldIn(FieldSortOrder, vs...))
-}
-
-// SortOrderNotIn applies the NotIn predicate on the "sort_order" field.
-func SortOrderNotIn(vs ...int) predicate.Resources {
-	return predicate.Resources(sql.FieldNotIn(FieldSortOrder, vs...))
-}
-
-// SortOrderGT applies the GT predicate on the "sort_order" field.
-func SortOrderGT(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldGT(FieldSortOrder, v))
-}
-
-// SortOrderGTE applies the GTE predicate on the "sort_order" field.
-func SortOrderGTE(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldGTE(FieldSortOrder, v))
-}
-
-// SortOrderLT applies the LT predicate on the "sort_order" field.
-func SortOrderLT(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldLT(FieldSortOrder, v))
-}
-
-// SortOrderLTE applies the LTE predicate on the "sort_order" field.
-func SortOrderLTE(v int) predicate.Resources {
-	return predicate.Resources(sql.FieldLTE(FieldSortOrder, v))
-}
-
 // ResourceTypeEQ applies the EQ predicate on the "resource_type" field.
 func ResourceTypeEQ(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldResourceType, v))
@@ -625,6 +585,56 @@ func ResourceTypeLTE(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldLTE(FieldResourceType, v))
 }
 
+// EnabledEQ applies the EQ predicate on the "enabled" field.
+func EnabledEQ(v bool) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldEnabled, v))
+}
+
+// EnabledNEQ applies the NEQ predicate on the "enabled" field.
+func EnabledNEQ(v bool) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldEnabled, v))
+}
+
+// SortOrderEQ applies the EQ predicate on the "sort_order" field.
+func SortOrderEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldSortOrder, v))
+}
+
+// SortOrderNEQ applies the NEQ predicate on the "sort_order" field.
+func SortOrderNEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldSortOrder, v))
+}
+
+// SortOrderIn applies the In predicate on the "sort_order" field.
+func SortOrderIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldSortOrder, vs...))
+}
+
+// SortOrderNotIn applies the NotIn predicate on the "sort_order" field.
+func SortOrderNotIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldSortOrder, vs...))
+}
+
+// SortOrderGT applies the GT predicate on the "sort_order" field.
+func SortOrderGT(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldSortOrder, v))
+}
+
+// SortOrderGTE applies the GTE predicate on the "sort_order" field.
+func SortOrderGTE(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldSortOrder, v))
+}
+
+// SortOrderLT applies the LT predicate on the "sort_order" field.
+func SortOrderLT(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldSortOrder, v))
+}
+
+// SortOrderLTE applies the LTE predicate on the "sort_order" field.
+func SortOrderLTE(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldSortOrder, v))
+}
+
 // ResourceScopeEQ applies the EQ predicate on the "resource_scope" field.
 func ResourceScopeEQ(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldResourceScope, v))
@@ -663,16 +673,6 @@ func ResourceScopeLT(v int) predicate.Resources {
 // ResourceScopeLTE applies the LTE predicate on the "resource_scope" field.
 func ResourceScopeLTE(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldLTE(FieldResourceScope, v))
-}
-
-// EnabledEQ applies the EQ predicate on the "enabled" field.
-func EnabledEQ(v bool) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldEnabled, v))
-}
-
-// EnabledNEQ applies the NEQ predicate on the "enabled" field.
-func EnabledNEQ(v bool) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldEnabled, v))
 }
 
 // HiddenEQ applies the EQ predicate on the "hidden" field.
@@ -955,21 +955,21 @@ func DescriptionContainsFold(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// HasLionPermissions applies the HasEdge predicate on the "lion_permissions" edge.
-func HasLionPermissions() predicate.Resources {
+// HasLionResourceUris applies the HasEdge predicate on the "lion_resource_uris" edge.
+func HasLionResourceUris() predicate.Resources {
 	return predicate.Resources(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionResourceUrisTable, LionResourceUrisColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLionPermissionsWith applies the HasEdge predicate on the "lion_permissions" edge with a given conditions (other predicates).
-func HasLionPermissionsWith(preds ...predicate.Permissions) predicate.Resources {
+// HasLionResourceUrisWith applies the HasEdge predicate on the "lion_resource_uris" edge with a given conditions (other predicates).
+func HasLionResourceUrisWith(preds ...predicate.ResourceUris) predicate.Resources {
 	return predicate.Resources(func(s *sql.Selector) {
-		step := newLionPermissionsStep()
+		step := newLionResourceUrisStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

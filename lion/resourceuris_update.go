@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourceuris"
 )
 
@@ -56,7 +57,6 @@ func (_u *ResourceUrisUpdate) ClearDeletedAt() *ResourceUrisUpdate {
 
 // SetResourceID sets the "resource_id" field.
 func (_u *ResourceUrisUpdate) SetResourceID(v int) *ResourceUrisUpdate {
-	_u.mutation.ResetResourceID()
 	_u.mutation.SetResourceID(v)
 	return _u
 }
@@ -69,29 +69,110 @@ func (_u *ResourceUrisUpdate) SetNillableResourceID(v *int) *ResourceUrisUpdate 
 	return _u
 }
 
-// AddResourceID adds value to the "resource_id" field.
-func (_u *ResourceUrisUpdate) AddResourceID(v int) *ResourceUrisUpdate {
-	_u.mutation.AddResourceID(v)
+// SetPath sets the "path" field.
+func (_u *ResourceUrisUpdate) SetPath(v string) *ResourceUrisUpdate {
+	_u.mutation.SetPath(v)
 	return _u
 }
 
-// SetURI sets the "uri" field.
-func (_u *ResourceUrisUpdate) SetURI(v string) *ResourceUrisUpdate {
-	_u.mutation.SetURI(v)
-	return _u
-}
-
-// SetNillableURI sets the "uri" field if the given value is not nil.
-func (_u *ResourceUrisUpdate) SetNillableURI(v *string) *ResourceUrisUpdate {
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (_u *ResourceUrisUpdate) SetNillablePath(v *string) *ResourceUrisUpdate {
 	if v != nil {
-		_u.SetURI(*v)
+		_u.SetPath(*v)
 	}
 	return _u
+}
+
+// SetHidden sets the "hidden" field.
+func (_u *ResourceUrisUpdate) SetHidden(v bool) *ResourceUrisUpdate {
+	_u.mutation.SetHidden(v)
+	return _u
+}
+
+// SetNillableHidden sets the "hidden" field if the given value is not nil.
+func (_u *ResourceUrisUpdate) SetNillableHidden(v *bool) *ResourceUrisUpdate {
+	if v != nil {
+		_u.SetHidden(*v)
+	}
+	return _u
+}
+
+// SetHideChildren sets the "hide_children" field.
+func (_u *ResourceUrisUpdate) SetHideChildren(v bool) *ResourceUrisUpdate {
+	_u.mutation.SetHideChildren(v)
+	return _u
+}
+
+// SetNillableHideChildren sets the "hide_children" field if the given value is not nil.
+func (_u *ResourceUrisUpdate) SetNillableHideChildren(v *bool) *ResourceUrisUpdate {
+	if v != nil {
+		_u.SetHideChildren(*v)
+	}
+	return _u
+}
+
+// SetIcon sets the "icon" field.
+func (_u *ResourceUrisUpdate) SetIcon(v string) *ResourceUrisUpdate {
+	_u.mutation.SetIcon(v)
+	return _u
+}
+
+// SetNillableIcon sets the "icon" field if the given value is not nil.
+func (_u *ResourceUrisUpdate) SetNillableIcon(v *string) *ResourceUrisUpdate {
+	if v != nil {
+		_u.SetIcon(*v)
+	}
+	return _u
+}
+
+// SetComponent sets the "component" field.
+func (_u *ResourceUrisUpdate) SetComponent(v string) *ResourceUrisUpdate {
+	_u.mutation.SetComponent(v)
+	return _u
+}
+
+// SetNillableComponent sets the "component" field if the given value is not nil.
+func (_u *ResourceUrisUpdate) SetNillableComponent(v *string) *ResourceUrisUpdate {
+	if v != nil {
+		_u.SetComponent(*v)
+	}
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *ResourceUrisUpdate) SetDescription(v string) *ResourceUrisUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *ResourceUrisUpdate) SetNillableDescription(v *string) *ResourceUrisUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
+// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
+func (_u *ResourceUrisUpdate) SetLionResourcesID(id int) *ResourceUrisUpdate {
+	_u.mutation.SetLionResourcesID(id)
+	return _u
+}
+
+// SetLionResources sets the "lion_resources" edge to the Resources entity.
+func (_u *ResourceUrisUpdate) SetLionResources(v *Resources) *ResourceUrisUpdate {
+	return _u.SetLionResourcesID(v.ID)
 }
 
 // Mutation returns the ResourceUrisMutation object of the builder.
 func (_u *ResourceUrisUpdate) Mutation() *ResourceUrisMutation {
 	return _u.mutation
+}
+
+// ClearLionResources clears the "lion_resources" edge to the Resources entity.
+func (_u *ResourceUrisUpdate) ClearLionResources() *ResourceUrisUpdate {
+	_u.mutation.ClearLionResources()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -137,10 +218,23 @@ func (_u *ResourceUrisUpdate) check() error {
 			return &ValidationError{Name: "resource_id", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.resource_id": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.URI(); ok {
-		if err := resourceuris.URIValidator(v); err != nil {
-			return &ValidationError{Name: "uri", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.uri": %w`, err)}
+	if v, ok := _u.mutation.Path(); ok {
+		if err := resourceuris.PathValidator(v); err != nil {
+			return &ValidationError{Name: "path", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.path": %w`, err)}
 		}
+	}
+	if v, ok := _u.mutation.Icon(); ok {
+		if err := resourceuris.IconValidator(v); err != nil {
+			return &ValidationError{Name: "icon", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.icon": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Component(); ok {
+		if err := resourceuris.ComponentValidator(v); err != nil {
+			return &ValidationError{Name: "component", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.component": %w`, err)}
+		}
+	}
+	if _u.mutation.LionResourcesCleared() && len(_u.mutation.LionResourcesIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "ResourceUris.lion_resources"`)
 	}
 	return nil
 }
@@ -166,14 +260,52 @@ func (_u *ResourceUrisUpdate) sqlSave(ctx context.Context) (_node int, err error
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(resourceuris.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.ResourceID(); ok {
-		_spec.SetField(resourceuris.FieldResourceID, field.TypeInt, value)
+	if value, ok := _u.mutation.Path(); ok {
+		_spec.SetField(resourceuris.FieldPath, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.AddedResourceID(); ok {
-		_spec.AddField(resourceuris.FieldResourceID, field.TypeInt, value)
+	if value, ok := _u.mutation.Hidden(); ok {
+		_spec.SetField(resourceuris.FieldHidden, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.URI(); ok {
-		_spec.SetField(resourceuris.FieldURI, field.TypeString, value)
+	if value, ok := _u.mutation.HideChildren(); ok {
+		_spec.SetField(resourceuris.FieldHideChildren, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Icon(); ok {
+		_spec.SetField(resourceuris.FieldIcon, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Component(); ok {
+		_spec.SetField(resourceuris.FieldComponent, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(resourceuris.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.LionResourcesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resourceuris.LionResourcesTable,
+			Columns: []string{resourceuris.LionResourcesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionResourcesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resourceuris.LionResourcesTable,
+			Columns: []string{resourceuris.LionResourcesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -223,7 +355,6 @@ func (_u *ResourceUrisUpdateOne) ClearDeletedAt() *ResourceUrisUpdateOne {
 
 // SetResourceID sets the "resource_id" field.
 func (_u *ResourceUrisUpdateOne) SetResourceID(v int) *ResourceUrisUpdateOne {
-	_u.mutation.ResetResourceID()
 	_u.mutation.SetResourceID(v)
 	return _u
 }
@@ -236,29 +367,110 @@ func (_u *ResourceUrisUpdateOne) SetNillableResourceID(v *int) *ResourceUrisUpda
 	return _u
 }
 
-// AddResourceID adds value to the "resource_id" field.
-func (_u *ResourceUrisUpdateOne) AddResourceID(v int) *ResourceUrisUpdateOne {
-	_u.mutation.AddResourceID(v)
+// SetPath sets the "path" field.
+func (_u *ResourceUrisUpdateOne) SetPath(v string) *ResourceUrisUpdateOne {
+	_u.mutation.SetPath(v)
 	return _u
 }
 
-// SetURI sets the "uri" field.
-func (_u *ResourceUrisUpdateOne) SetURI(v string) *ResourceUrisUpdateOne {
-	_u.mutation.SetURI(v)
-	return _u
-}
-
-// SetNillableURI sets the "uri" field if the given value is not nil.
-func (_u *ResourceUrisUpdateOne) SetNillableURI(v *string) *ResourceUrisUpdateOne {
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (_u *ResourceUrisUpdateOne) SetNillablePath(v *string) *ResourceUrisUpdateOne {
 	if v != nil {
-		_u.SetURI(*v)
+		_u.SetPath(*v)
 	}
 	return _u
+}
+
+// SetHidden sets the "hidden" field.
+func (_u *ResourceUrisUpdateOne) SetHidden(v bool) *ResourceUrisUpdateOne {
+	_u.mutation.SetHidden(v)
+	return _u
+}
+
+// SetNillableHidden sets the "hidden" field if the given value is not nil.
+func (_u *ResourceUrisUpdateOne) SetNillableHidden(v *bool) *ResourceUrisUpdateOne {
+	if v != nil {
+		_u.SetHidden(*v)
+	}
+	return _u
+}
+
+// SetHideChildren sets the "hide_children" field.
+func (_u *ResourceUrisUpdateOne) SetHideChildren(v bool) *ResourceUrisUpdateOne {
+	_u.mutation.SetHideChildren(v)
+	return _u
+}
+
+// SetNillableHideChildren sets the "hide_children" field if the given value is not nil.
+func (_u *ResourceUrisUpdateOne) SetNillableHideChildren(v *bool) *ResourceUrisUpdateOne {
+	if v != nil {
+		_u.SetHideChildren(*v)
+	}
+	return _u
+}
+
+// SetIcon sets the "icon" field.
+func (_u *ResourceUrisUpdateOne) SetIcon(v string) *ResourceUrisUpdateOne {
+	_u.mutation.SetIcon(v)
+	return _u
+}
+
+// SetNillableIcon sets the "icon" field if the given value is not nil.
+func (_u *ResourceUrisUpdateOne) SetNillableIcon(v *string) *ResourceUrisUpdateOne {
+	if v != nil {
+		_u.SetIcon(*v)
+	}
+	return _u
+}
+
+// SetComponent sets the "component" field.
+func (_u *ResourceUrisUpdateOne) SetComponent(v string) *ResourceUrisUpdateOne {
+	_u.mutation.SetComponent(v)
+	return _u
+}
+
+// SetNillableComponent sets the "component" field if the given value is not nil.
+func (_u *ResourceUrisUpdateOne) SetNillableComponent(v *string) *ResourceUrisUpdateOne {
+	if v != nil {
+		_u.SetComponent(*v)
+	}
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *ResourceUrisUpdateOne) SetDescription(v string) *ResourceUrisUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *ResourceUrisUpdateOne) SetNillableDescription(v *string) *ResourceUrisUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
+// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
+func (_u *ResourceUrisUpdateOne) SetLionResourcesID(id int) *ResourceUrisUpdateOne {
+	_u.mutation.SetLionResourcesID(id)
+	return _u
+}
+
+// SetLionResources sets the "lion_resources" edge to the Resources entity.
+func (_u *ResourceUrisUpdateOne) SetLionResources(v *Resources) *ResourceUrisUpdateOne {
+	return _u.SetLionResourcesID(v.ID)
 }
 
 // Mutation returns the ResourceUrisMutation object of the builder.
 func (_u *ResourceUrisUpdateOne) Mutation() *ResourceUrisMutation {
 	return _u.mutation
+}
+
+// ClearLionResources clears the "lion_resources" edge to the Resources entity.
+func (_u *ResourceUrisUpdateOne) ClearLionResources() *ResourceUrisUpdateOne {
+	_u.mutation.ClearLionResources()
+	return _u
 }
 
 // Where appends a list predicates to the ResourceUrisUpdate builder.
@@ -317,10 +529,23 @@ func (_u *ResourceUrisUpdateOne) check() error {
 			return &ValidationError{Name: "resource_id", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.resource_id": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.URI(); ok {
-		if err := resourceuris.URIValidator(v); err != nil {
-			return &ValidationError{Name: "uri", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.uri": %w`, err)}
+	if v, ok := _u.mutation.Path(); ok {
+		if err := resourceuris.PathValidator(v); err != nil {
+			return &ValidationError{Name: "path", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.path": %w`, err)}
 		}
+	}
+	if v, ok := _u.mutation.Icon(); ok {
+		if err := resourceuris.IconValidator(v); err != nil {
+			return &ValidationError{Name: "icon", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.icon": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Component(); ok {
+		if err := resourceuris.ComponentValidator(v); err != nil {
+			return &ValidationError{Name: "component", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.component": %w`, err)}
+		}
+	}
+	if _u.mutation.LionResourcesCleared() && len(_u.mutation.LionResourcesIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "ResourceUris.lion_resources"`)
 	}
 	return nil
 }
@@ -363,14 +588,52 @@ func (_u *ResourceUrisUpdateOne) sqlSave(ctx context.Context) (_node *ResourceUr
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(resourceuris.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.ResourceID(); ok {
-		_spec.SetField(resourceuris.FieldResourceID, field.TypeInt, value)
+	if value, ok := _u.mutation.Path(); ok {
+		_spec.SetField(resourceuris.FieldPath, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.AddedResourceID(); ok {
-		_spec.AddField(resourceuris.FieldResourceID, field.TypeInt, value)
+	if value, ok := _u.mutation.Hidden(); ok {
+		_spec.SetField(resourceuris.FieldHidden, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.URI(); ok {
-		_spec.SetField(resourceuris.FieldURI, field.TypeString, value)
+	if value, ok := _u.mutation.HideChildren(); ok {
+		_spec.SetField(resourceuris.FieldHideChildren, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Icon(); ok {
+		_spec.SetField(resourceuris.FieldIcon, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Component(); ok {
+		_spec.SetField(resourceuris.FieldComponent, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(resourceuris.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.LionResourcesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resourceuris.LionResourcesTable,
+			Columns: []string{resourceuris.LionResourcesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionResourcesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resourceuris.LionResourcesTable,
+			Columns: []string{resourceuris.LionResourcesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &ResourceUris{config: _u.config}
 	_spec.Assign = _node.assignValues

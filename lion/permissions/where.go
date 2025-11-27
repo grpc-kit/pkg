@@ -295,6 +295,26 @@ func ResourceIDNotIn(vs ...int) predicate.Permissions {
 	return predicate.Permissions(sql.FieldNotIn(FieldResourceID, vs...))
 }
 
+// ResourceIDGT applies the GT predicate on the "resource_id" field.
+func ResourceIDGT(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldGT(FieldResourceID, v))
+}
+
+// ResourceIDGTE applies the GTE predicate on the "resource_id" field.
+func ResourceIDGTE(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldGTE(FieldResourceID, v))
+}
+
+// ResourceIDLT applies the LT predicate on the "resource_id" field.
+func ResourceIDLT(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldLT(FieldResourceID, v))
+}
+
+// ResourceIDLTE applies the LTE predicate on the "resource_id" field.
+func ResourceIDLTE(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldLTE(FieldResourceID, v))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Permissions {
 	return predicate.Permissions(sql.FieldEQ(FieldName, v))
@@ -505,29 +525,6 @@ func HasLionRolePermissions() predicate.Permissions {
 func HasLionRolePermissionsWith(preds ...predicate.RolePermissions) predicate.Permissions {
 	return predicate.Permissions(func(s *sql.Selector) {
 		step := newLionRolePermissionsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasLionResources applies the HasEdge predicate on the "lion_resources" edge.
-func HasLionResources() predicate.Permissions {
-	return predicate.Permissions(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, LionResourcesTable, LionResourcesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionResourcesWith applies the HasEdge predicate on the "lion_resources" edge with a given conditions (other predicates).
-func HasLionResourcesWith(preds ...predicate.Resources) predicate.Permissions {
-	return predicate.Permissions(func(s *sql.Selector) {
-		step := newLionResourcesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

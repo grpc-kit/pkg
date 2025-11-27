@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourceuris"
 )
 
@@ -68,10 +69,99 @@ func (_c *ResourceUrisCreate) SetResourceID(v int) *ResourceUrisCreate {
 	return _c
 }
 
-// SetURI sets the "uri" field.
-func (_c *ResourceUrisCreate) SetURI(v string) *ResourceUrisCreate {
-	_c.mutation.SetURI(v)
+// SetPath sets the "path" field.
+func (_c *ResourceUrisCreate) SetPath(v string) *ResourceUrisCreate {
+	_c.mutation.SetPath(v)
 	return _c
+}
+
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (_c *ResourceUrisCreate) SetNillablePath(v *string) *ResourceUrisCreate {
+	if v != nil {
+		_c.SetPath(*v)
+	}
+	return _c
+}
+
+// SetHidden sets the "hidden" field.
+func (_c *ResourceUrisCreate) SetHidden(v bool) *ResourceUrisCreate {
+	_c.mutation.SetHidden(v)
+	return _c
+}
+
+// SetNillableHidden sets the "hidden" field if the given value is not nil.
+func (_c *ResourceUrisCreate) SetNillableHidden(v *bool) *ResourceUrisCreate {
+	if v != nil {
+		_c.SetHidden(*v)
+	}
+	return _c
+}
+
+// SetHideChildren sets the "hide_children" field.
+func (_c *ResourceUrisCreate) SetHideChildren(v bool) *ResourceUrisCreate {
+	_c.mutation.SetHideChildren(v)
+	return _c
+}
+
+// SetNillableHideChildren sets the "hide_children" field if the given value is not nil.
+func (_c *ResourceUrisCreate) SetNillableHideChildren(v *bool) *ResourceUrisCreate {
+	if v != nil {
+		_c.SetHideChildren(*v)
+	}
+	return _c
+}
+
+// SetIcon sets the "icon" field.
+func (_c *ResourceUrisCreate) SetIcon(v string) *ResourceUrisCreate {
+	_c.mutation.SetIcon(v)
+	return _c
+}
+
+// SetNillableIcon sets the "icon" field if the given value is not nil.
+func (_c *ResourceUrisCreate) SetNillableIcon(v *string) *ResourceUrisCreate {
+	if v != nil {
+		_c.SetIcon(*v)
+	}
+	return _c
+}
+
+// SetComponent sets the "component" field.
+func (_c *ResourceUrisCreate) SetComponent(v string) *ResourceUrisCreate {
+	_c.mutation.SetComponent(v)
+	return _c
+}
+
+// SetNillableComponent sets the "component" field if the given value is not nil.
+func (_c *ResourceUrisCreate) SetNillableComponent(v *string) *ResourceUrisCreate {
+	if v != nil {
+		_c.SetComponent(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *ResourceUrisCreate) SetDescription(v string) *ResourceUrisCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *ResourceUrisCreate) SetNillableDescription(v *string) *ResourceUrisCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
+// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
+func (_c *ResourceUrisCreate) SetLionResourcesID(id int) *ResourceUrisCreate {
+	_c.mutation.SetLionResourcesID(id)
+	return _c
+}
+
+// SetLionResources sets the "lion_resources" edge to the Resources entity.
+func (_c *ResourceUrisCreate) SetLionResources(v *Resources) *ResourceUrisCreate {
+	return _c.SetLionResourcesID(v.ID)
 }
 
 // Mutation returns the ResourceUrisMutation object of the builder.
@@ -117,6 +207,30 @@ func (_c *ResourceUrisCreate) defaults() {
 		v := resourceuris.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.Path(); !ok {
+		v := resourceuris.DefaultPath
+		_c.mutation.SetPath(v)
+	}
+	if _, ok := _c.mutation.Hidden(); !ok {
+		v := resourceuris.DefaultHidden
+		_c.mutation.SetHidden(v)
+	}
+	if _, ok := _c.mutation.HideChildren(); !ok {
+		v := resourceuris.DefaultHideChildren
+		_c.mutation.SetHideChildren(v)
+	}
+	if _, ok := _c.mutation.Icon(); !ok {
+		v := resourceuris.DefaultIcon
+		_c.mutation.SetIcon(v)
+	}
+	if _, ok := _c.mutation.Component(); !ok {
+		v := resourceuris.DefaultComponent
+		_c.mutation.SetComponent(v)
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := resourceuris.DefaultDescription
+		_c.mutation.SetDescription(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -135,13 +249,41 @@ func (_c *ResourceUrisCreate) check() error {
 			return &ValidationError{Name: "resource_id", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.resource_id": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.URI(); !ok {
-		return &ValidationError{Name: "uri", err: errors.New(`lion: missing required field "ResourceUris.uri"`)}
+	if _, ok := _c.mutation.Path(); !ok {
+		return &ValidationError{Name: "path", err: errors.New(`lion: missing required field "ResourceUris.path"`)}
 	}
-	if v, ok := _c.mutation.URI(); ok {
-		if err := resourceuris.URIValidator(v); err != nil {
-			return &ValidationError{Name: "uri", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.uri": %w`, err)}
+	if v, ok := _c.mutation.Path(); ok {
+		if err := resourceuris.PathValidator(v); err != nil {
+			return &ValidationError{Name: "path", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.path": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Hidden(); !ok {
+		return &ValidationError{Name: "hidden", err: errors.New(`lion: missing required field "ResourceUris.hidden"`)}
+	}
+	if _, ok := _c.mutation.HideChildren(); !ok {
+		return &ValidationError{Name: "hide_children", err: errors.New(`lion: missing required field "ResourceUris.hide_children"`)}
+	}
+	if _, ok := _c.mutation.Icon(); !ok {
+		return &ValidationError{Name: "icon", err: errors.New(`lion: missing required field "ResourceUris.icon"`)}
+	}
+	if v, ok := _c.mutation.Icon(); ok {
+		if err := resourceuris.IconValidator(v); err != nil {
+			return &ValidationError{Name: "icon", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.icon": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Component(); !ok {
+		return &ValidationError{Name: "component", err: errors.New(`lion: missing required field "ResourceUris.component"`)}
+	}
+	if v, ok := _c.mutation.Component(); ok {
+		if err := resourceuris.ComponentValidator(v); err != nil {
+			return &ValidationError{Name: "component", err: fmt.Errorf(`lion: validator failed for field "ResourceUris.component": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "ResourceUris.description"`)}
+	}
+	if len(_c.mutation.LionResourcesIDs()) == 0 {
+		return &ValidationError{Name: "lion_resources", err: errors.New(`lion: missing required edge "ResourceUris.lion_resources"`)}
 	}
 	return nil
 }
@@ -181,13 +323,46 @@ func (_c *ResourceUrisCreate) createSpec() (*ResourceUris, *sqlgraph.CreateSpec)
 		_spec.SetField(resourceuris.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := _c.mutation.ResourceID(); ok {
-		_spec.SetField(resourceuris.FieldResourceID, field.TypeInt, value)
-		_node.ResourceID = value
+	if value, ok := _c.mutation.Path(); ok {
+		_spec.SetField(resourceuris.FieldPath, field.TypeString, value)
+		_node.Path = value
 	}
-	if value, ok := _c.mutation.URI(); ok {
-		_spec.SetField(resourceuris.FieldURI, field.TypeString, value)
-		_node.URI = value
+	if value, ok := _c.mutation.Hidden(); ok {
+		_spec.SetField(resourceuris.FieldHidden, field.TypeBool, value)
+		_node.Hidden = value
+	}
+	if value, ok := _c.mutation.HideChildren(); ok {
+		_spec.SetField(resourceuris.FieldHideChildren, field.TypeBool, value)
+		_node.HideChildren = value
+	}
+	if value, ok := _c.mutation.Icon(); ok {
+		_spec.SetField(resourceuris.FieldIcon, field.TypeString, value)
+		_node.Icon = value
+	}
+	if value, ok := _c.mutation.Component(); ok {
+		_spec.SetField(resourceuris.FieldComponent, field.TypeString, value)
+		_node.Component = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(resourceuris.FieldDescription, field.TypeString, value)
+		_node.Description = value
+	}
+	if nodes := _c.mutation.LionResourcesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resourceuris.LionResourcesTable,
+			Columns: []string{resourceuris.LionResourcesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ResourceID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

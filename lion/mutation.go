@@ -10172,6 +10172,8 @@ type PermissionsMutation struct {
 	addcreated_by                *int64
 	updated_by                   *int64
 	addupdated_by                *int64
+	resource_id                  *int
+	addresource_id               *int
 	name                         *string
 	display_name                 *string
 	description                  *string
@@ -10179,8 +10181,6 @@ type PermissionsMutation struct {
 	lion_role_permissions        map[int]struct{}
 	removedlion_role_permissions map[int]struct{}
 	clearedlion_role_permissions bool
-	lion_resources               *int
-	clearedlion_resources        bool
 	done                         bool
 	oldValue                     func(context.Context) (*Permissions, error)
 	predicates                   []predicate.Permissions
@@ -10498,12 +10498,13 @@ func (m *PermissionsMutation) ResetUpdatedBy() {
 
 // SetResourceID sets the "resource_id" field.
 func (m *PermissionsMutation) SetResourceID(i int) {
-	m.lion_resources = &i
+	m.resource_id = &i
+	m.addresource_id = nil
 }
 
 // ResourceID returns the value of the "resource_id" field in the mutation.
 func (m *PermissionsMutation) ResourceID() (r int, exists bool) {
-	v := m.lion_resources
+	v := m.resource_id
 	if v == nil {
 		return
 	}
@@ -10527,9 +10528,28 @@ func (m *PermissionsMutation) OldResourceID(ctx context.Context) (v int, err err
 	return oldValue.ResourceID, nil
 }
 
+// AddResourceID adds i to the "resource_id" field.
+func (m *PermissionsMutation) AddResourceID(i int) {
+	if m.addresource_id != nil {
+		*m.addresource_id += i
+	} else {
+		m.addresource_id = &i
+	}
+}
+
+// AddedResourceID returns the value that was added to the "resource_id" field in this mutation.
+func (m *PermissionsMutation) AddedResourceID() (r int, exists bool) {
+	v := m.addresource_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetResourceID resets all changes to the "resource_id" field.
 func (m *PermissionsMutation) ResetResourceID() {
-	m.lion_resources = nil
+	m.resource_id = nil
+	m.addresource_id = nil
 }
 
 // SetName sets the "name" field.
@@ -10694,46 +10714,6 @@ func (m *PermissionsMutation) ResetLionRolePermissions() {
 	m.removedlion_role_permissions = nil
 }
 
-// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by id.
-func (m *PermissionsMutation) SetLionResourcesID(id int) {
-	m.lion_resources = &id
-}
-
-// ClearLionResources clears the "lion_resources" edge to the Resources entity.
-func (m *PermissionsMutation) ClearLionResources() {
-	m.clearedlion_resources = true
-	m.clearedFields[permissions.FieldResourceID] = struct{}{}
-}
-
-// LionResourcesCleared reports if the "lion_resources" edge to the Resources entity was cleared.
-func (m *PermissionsMutation) LionResourcesCleared() bool {
-	return m.clearedlion_resources
-}
-
-// LionResourcesID returns the "lion_resources" edge ID in the mutation.
-func (m *PermissionsMutation) LionResourcesID() (id int, exists bool) {
-	if m.lion_resources != nil {
-		return *m.lion_resources, true
-	}
-	return
-}
-
-// LionResourcesIDs returns the "lion_resources" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// LionResourcesID instead. It exists only for internal usage by the builders.
-func (m *PermissionsMutation) LionResourcesIDs() (ids []int) {
-	if id := m.lion_resources; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetLionResources resets all changes to the "lion_resources" edge.
-func (m *PermissionsMutation) ResetLionResources() {
-	m.lion_resources = nil
-	m.clearedlion_resources = false
-}
-
 // Where appends a list predicates to the PermissionsMutation builder.
 func (m *PermissionsMutation) Where(ps ...predicate.Permissions) {
 	m.predicates = append(m.predicates, ps...)
@@ -10781,7 +10761,7 @@ func (m *PermissionsMutation) Fields() []string {
 	if m.updated_by != nil {
 		fields = append(fields, permissions.FieldUpdatedBy)
 	}
-	if m.lion_resources != nil {
+	if m.resource_id != nil {
 		fields = append(fields, permissions.FieldResourceID)
 	}
 	if m.name != nil {
@@ -10921,6 +10901,9 @@ func (m *PermissionsMutation) AddedFields() []string {
 	if m.addupdated_by != nil {
 		fields = append(fields, permissions.FieldUpdatedBy)
 	}
+	if m.addresource_id != nil {
+		fields = append(fields, permissions.FieldResourceID)
+	}
 	return fields
 }
 
@@ -10933,6 +10916,8 @@ func (m *PermissionsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCreatedBy()
 	case permissions.FieldUpdatedBy:
 		return m.AddedUpdatedBy()
+	case permissions.FieldResourceID:
+		return m.AddedResourceID()
 	}
 	return nil, false
 }
@@ -10955,6 +10940,13 @@ func (m *PermissionsMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUpdatedBy(v)
+		return nil
+	case permissions.FieldResourceID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddResourceID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Permissions numeric field %s", name)
@@ -11028,12 +11020,9 @@ func (m *PermissionsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PermissionsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.lion_role_permissions != nil {
 		edges = append(edges, permissions.EdgeLionRolePermissions)
-	}
-	if m.lion_resources != nil {
-		edges = append(edges, permissions.EdgeLionResources)
 	}
 	return edges
 }
@@ -11048,17 +11037,13 @@ func (m *PermissionsMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case permissions.EdgeLionResources:
-		if id := m.lion_resources; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PermissionsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.removedlion_role_permissions != nil {
 		edges = append(edges, permissions.EdgeLionRolePermissions)
 	}
@@ -11081,12 +11066,9 @@ func (m *PermissionsMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PermissionsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 1)
 	if m.clearedlion_role_permissions {
 		edges = append(edges, permissions.EdgeLionRolePermissions)
-	}
-	if m.clearedlion_resources {
-		edges = append(edges, permissions.EdgeLionResources)
 	}
 	return edges
 }
@@ -11097,8 +11079,6 @@ func (m *PermissionsMutation) EdgeCleared(name string) bool {
 	switch name {
 	case permissions.EdgeLionRolePermissions:
 		return m.clearedlion_role_permissions
-	case permissions.EdgeLionResources:
-		return m.clearedlion_resources
 	}
 	return false
 }
@@ -11107,9 +11087,6 @@ func (m *PermissionsMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PermissionsMutation) ClearEdge(name string) error {
 	switch name {
-	case permissions.EdgeLionResources:
-		m.ClearLionResources()
-		return nil
 	}
 	return fmt.Errorf("unknown Permissions unique edge %s", name)
 }
@@ -11120,9 +11097,6 @@ func (m *PermissionsMutation) ResetEdge(name string) error {
 	switch name {
 	case permissions.EdgeLionRolePermissions:
 		m.ResetLionRolePermissions()
-		return nil
-	case permissions.EdgeLionResources:
-		m.ResetLionResources()
 		return nil
 	}
 	return fmt.Errorf("unknown Permissions edge %s", name)
@@ -12491,19 +12465,24 @@ func (m *ResourceScopesMutation) ResetEdge(name string) error {
 // ResourceUrisMutation represents an operation that mutates the ResourceUris nodes in the graph.
 type ResourceUrisMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	created_at     *time.Time
-	updated_at     *time.Time
-	deleted_at     *time.Time
-	resource_id    *int
-	addresource_id *int
-	uri            *string
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*ResourceUris, error)
-	predicates     []predicate.ResourceUris
+	op                    Op
+	typ                   string
+	id                    *int
+	created_at            *time.Time
+	updated_at            *time.Time
+	deleted_at            *time.Time
+	_path                 *string
+	hidden                *bool
+	hide_children         *bool
+	icon                  *string
+	component             *string
+	description           *string
+	clearedFields         map[string]struct{}
+	lion_resources        *int
+	clearedlion_resources bool
+	done                  bool
+	oldValue              func(context.Context) (*ResourceUris, error)
+	predicates            []predicate.ResourceUris
 }
 
 var _ ent.Mutation = (*ResourceUrisMutation)(nil)
@@ -12727,13 +12706,12 @@ func (m *ResourceUrisMutation) ResetDeletedAt() {
 
 // SetResourceID sets the "resource_id" field.
 func (m *ResourceUrisMutation) SetResourceID(i int) {
-	m.resource_id = &i
-	m.addresource_id = nil
+	m.lion_resources = &i
 }
 
 // ResourceID returns the value of the "resource_id" field in the mutation.
 func (m *ResourceUrisMutation) ResourceID() (r int, exists bool) {
-	v := m.resource_id
+	v := m.lion_resources
 	if v == nil {
 		return
 	}
@@ -12757,64 +12735,265 @@ func (m *ResourceUrisMutation) OldResourceID(ctx context.Context) (v int, err er
 	return oldValue.ResourceID, nil
 }
 
-// AddResourceID adds i to the "resource_id" field.
-func (m *ResourceUrisMutation) AddResourceID(i int) {
-	if m.addresource_id != nil {
-		*m.addresource_id += i
-	} else {
-		m.addresource_id = &i
-	}
-}
-
-// AddedResourceID returns the value that was added to the "resource_id" field in this mutation.
-func (m *ResourceUrisMutation) AddedResourceID() (r int, exists bool) {
-	v := m.addresource_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetResourceID resets all changes to the "resource_id" field.
 func (m *ResourceUrisMutation) ResetResourceID() {
-	m.resource_id = nil
-	m.addresource_id = nil
+	m.lion_resources = nil
 }
 
-// SetURI sets the "uri" field.
-func (m *ResourceUrisMutation) SetURI(s string) {
-	m.uri = &s
+// SetPath sets the "path" field.
+func (m *ResourceUrisMutation) SetPath(s string) {
+	m._path = &s
 }
 
-// URI returns the value of the "uri" field in the mutation.
-func (m *ResourceUrisMutation) URI() (r string, exists bool) {
-	v := m.uri
+// Path returns the value of the "path" field in the mutation.
+func (m *ResourceUrisMutation) Path() (r string, exists bool) {
+	v := m._path
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldURI returns the old "uri" field's value of the ResourceUris entity.
+// OldPath returns the old "path" field's value of the ResourceUris entity.
 // If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldURI(ctx context.Context) (v string, err error) {
+func (m *ResourceUrisMutation) OldPath(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldURI is only allowed on UpdateOne operations")
+		return v, errors.New("OldPath is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldURI requires an ID field in the mutation")
+		return v, errors.New("OldPath requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldURI: %w", err)
+		return v, fmt.Errorf("querying old value for OldPath: %w", err)
 	}
-	return oldValue.URI, nil
+	return oldValue.Path, nil
 }
 
-// ResetURI resets all changes to the "uri" field.
-func (m *ResourceUrisMutation) ResetURI() {
-	m.uri = nil
+// ResetPath resets all changes to the "path" field.
+func (m *ResourceUrisMutation) ResetPath() {
+	m._path = nil
+}
+
+// SetHidden sets the "hidden" field.
+func (m *ResourceUrisMutation) SetHidden(b bool) {
+	m.hidden = &b
+}
+
+// Hidden returns the value of the "hidden" field in the mutation.
+func (m *ResourceUrisMutation) Hidden() (r bool, exists bool) {
+	v := m.hidden
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHidden returns the old "hidden" field's value of the ResourceUris entity.
+// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourceUrisMutation) OldHidden(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHidden is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHidden requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHidden: %w", err)
+	}
+	return oldValue.Hidden, nil
+}
+
+// ResetHidden resets all changes to the "hidden" field.
+func (m *ResourceUrisMutation) ResetHidden() {
+	m.hidden = nil
+}
+
+// SetHideChildren sets the "hide_children" field.
+func (m *ResourceUrisMutation) SetHideChildren(b bool) {
+	m.hide_children = &b
+}
+
+// HideChildren returns the value of the "hide_children" field in the mutation.
+func (m *ResourceUrisMutation) HideChildren() (r bool, exists bool) {
+	v := m.hide_children
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHideChildren returns the old "hide_children" field's value of the ResourceUris entity.
+// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourceUrisMutation) OldHideChildren(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHideChildren is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHideChildren requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHideChildren: %w", err)
+	}
+	return oldValue.HideChildren, nil
+}
+
+// ResetHideChildren resets all changes to the "hide_children" field.
+func (m *ResourceUrisMutation) ResetHideChildren() {
+	m.hide_children = nil
+}
+
+// SetIcon sets the "icon" field.
+func (m *ResourceUrisMutation) SetIcon(s string) {
+	m.icon = &s
+}
+
+// Icon returns the value of the "icon" field in the mutation.
+func (m *ResourceUrisMutation) Icon() (r string, exists bool) {
+	v := m.icon
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIcon returns the old "icon" field's value of the ResourceUris entity.
+// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourceUrisMutation) OldIcon(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIcon is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIcon requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIcon: %w", err)
+	}
+	return oldValue.Icon, nil
+}
+
+// ResetIcon resets all changes to the "icon" field.
+func (m *ResourceUrisMutation) ResetIcon() {
+	m.icon = nil
+}
+
+// SetComponent sets the "component" field.
+func (m *ResourceUrisMutation) SetComponent(s string) {
+	m.component = &s
+}
+
+// Component returns the value of the "component" field in the mutation.
+func (m *ResourceUrisMutation) Component() (r string, exists bool) {
+	v := m.component
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldComponent returns the old "component" field's value of the ResourceUris entity.
+// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourceUrisMutation) OldComponent(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldComponent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldComponent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldComponent: %w", err)
+	}
+	return oldValue.Component, nil
+}
+
+// ResetComponent resets all changes to the "component" field.
+func (m *ResourceUrisMutation) ResetComponent() {
+	m.component = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *ResourceUrisMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *ResourceUrisMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the ResourceUris entity.
+// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourceUrisMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *ResourceUrisMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by id.
+func (m *ResourceUrisMutation) SetLionResourcesID(id int) {
+	m.lion_resources = &id
+}
+
+// ClearLionResources clears the "lion_resources" edge to the Resources entity.
+func (m *ResourceUrisMutation) ClearLionResources() {
+	m.clearedlion_resources = true
+	m.clearedFields[resourceuris.FieldResourceID] = struct{}{}
+}
+
+// LionResourcesCleared reports if the "lion_resources" edge to the Resources entity was cleared.
+func (m *ResourceUrisMutation) LionResourcesCleared() bool {
+	return m.clearedlion_resources
+}
+
+// LionResourcesID returns the "lion_resources" edge ID in the mutation.
+func (m *ResourceUrisMutation) LionResourcesID() (id int, exists bool) {
+	if m.lion_resources != nil {
+		return *m.lion_resources, true
+	}
+	return
+}
+
+// LionResourcesIDs returns the "lion_resources" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionResourcesID instead. It exists only for internal usage by the builders.
+func (m *ResourceUrisMutation) LionResourcesIDs() (ids []int) {
+	if id := m.lion_resources; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionResources resets all changes to the "lion_resources" edge.
+func (m *ResourceUrisMutation) ResetLionResources() {
+	m.lion_resources = nil
+	m.clearedlion_resources = false
 }
 
 // Where appends a list predicates to the ResourceUrisMutation builder.
@@ -12851,7 +13030,7 @@ func (m *ResourceUrisMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResourceUrisMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 10)
 	if m.created_at != nil {
 		fields = append(fields, resourceuris.FieldCreatedAt)
 	}
@@ -12861,11 +13040,26 @@ func (m *ResourceUrisMutation) Fields() []string {
 	if m.deleted_at != nil {
 		fields = append(fields, resourceuris.FieldDeletedAt)
 	}
-	if m.resource_id != nil {
+	if m.lion_resources != nil {
 		fields = append(fields, resourceuris.FieldResourceID)
 	}
-	if m.uri != nil {
-		fields = append(fields, resourceuris.FieldURI)
+	if m._path != nil {
+		fields = append(fields, resourceuris.FieldPath)
+	}
+	if m.hidden != nil {
+		fields = append(fields, resourceuris.FieldHidden)
+	}
+	if m.hide_children != nil {
+		fields = append(fields, resourceuris.FieldHideChildren)
+	}
+	if m.icon != nil {
+		fields = append(fields, resourceuris.FieldIcon)
+	}
+	if m.component != nil {
+		fields = append(fields, resourceuris.FieldComponent)
+	}
+	if m.description != nil {
+		fields = append(fields, resourceuris.FieldDescription)
 	}
 	return fields
 }
@@ -12883,8 +13077,18 @@ func (m *ResourceUrisMutation) Field(name string) (ent.Value, bool) {
 		return m.DeletedAt()
 	case resourceuris.FieldResourceID:
 		return m.ResourceID()
-	case resourceuris.FieldURI:
-		return m.URI()
+	case resourceuris.FieldPath:
+		return m.Path()
+	case resourceuris.FieldHidden:
+		return m.Hidden()
+	case resourceuris.FieldHideChildren:
+		return m.HideChildren()
+	case resourceuris.FieldIcon:
+		return m.Icon()
+	case resourceuris.FieldComponent:
+		return m.Component()
+	case resourceuris.FieldDescription:
+		return m.Description()
 	}
 	return nil, false
 }
@@ -12902,8 +13106,18 @@ func (m *ResourceUrisMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldDeletedAt(ctx)
 	case resourceuris.FieldResourceID:
 		return m.OldResourceID(ctx)
-	case resourceuris.FieldURI:
-		return m.OldURI(ctx)
+	case resourceuris.FieldPath:
+		return m.OldPath(ctx)
+	case resourceuris.FieldHidden:
+		return m.OldHidden(ctx)
+	case resourceuris.FieldHideChildren:
+		return m.OldHideChildren(ctx)
+	case resourceuris.FieldIcon:
+		return m.OldIcon(ctx)
+	case resourceuris.FieldComponent:
+		return m.OldComponent(ctx)
+	case resourceuris.FieldDescription:
+		return m.OldDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown ResourceUris field %s", name)
 }
@@ -12941,12 +13155,47 @@ func (m *ResourceUrisMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetResourceID(v)
 		return nil
-	case resourceuris.FieldURI:
+	case resourceuris.FieldPath:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetURI(v)
+		m.SetPath(v)
+		return nil
+	case resourceuris.FieldHidden:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHidden(v)
+		return nil
+	case resourceuris.FieldHideChildren:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHideChildren(v)
+		return nil
+	case resourceuris.FieldIcon:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIcon(v)
+		return nil
+	case resourceuris.FieldComponent:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetComponent(v)
+		return nil
+	case resourceuris.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
 		return nil
 	}
 	return fmt.Errorf("unknown ResourceUris field %s", name)
@@ -12956,9 +13205,6 @@ func (m *ResourceUrisMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *ResourceUrisMutation) AddedFields() []string {
 	var fields []string
-	if m.addresource_id != nil {
-		fields = append(fields, resourceuris.FieldResourceID)
-	}
 	return fields
 }
 
@@ -12967,8 +13213,6 @@ func (m *ResourceUrisMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *ResourceUrisMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case resourceuris.FieldResourceID:
-		return m.AddedResourceID()
 	}
 	return nil, false
 }
@@ -12978,13 +13222,6 @@ func (m *ResourceUrisMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *ResourceUrisMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case resourceuris.FieldResourceID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddResourceID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown ResourceUris numeric field %s", name)
 }
@@ -13033,8 +13270,23 @@ func (m *ResourceUrisMutation) ResetField(name string) error {
 	case resourceuris.FieldResourceID:
 		m.ResetResourceID()
 		return nil
-	case resourceuris.FieldURI:
-		m.ResetURI()
+	case resourceuris.FieldPath:
+		m.ResetPath()
+		return nil
+	case resourceuris.FieldHidden:
+		m.ResetHidden()
+		return nil
+	case resourceuris.FieldHideChildren:
+		m.ResetHideChildren()
+		return nil
+	case resourceuris.FieldIcon:
+		m.ResetIcon()
+		return nil
+	case resourceuris.FieldComponent:
+		m.ResetComponent()
+		return nil
+	case resourceuris.FieldDescription:
+		m.ResetDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown ResourceUris field %s", name)
@@ -13042,19 +13294,28 @@ func (m *ResourceUrisMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ResourceUrisMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.lion_resources != nil {
+		edges = append(edges, resourceuris.EdgeLionResources)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *ResourceUrisMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case resourceuris.EdgeLionResources:
+		if id := m.lion_resources; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ResourceUrisMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -13066,65 +13327,82 @@ func (m *ResourceUrisMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ResourceUrisMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedlion_resources {
+		edges = append(edges, resourceuris.EdgeLionResources)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *ResourceUrisMutation) EdgeCleared(name string) bool {
+	switch name {
+	case resourceuris.EdgeLionResources:
+		return m.clearedlion_resources
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *ResourceUrisMutation) ClearEdge(name string) error {
+	switch name {
+	case resourceuris.EdgeLionResources:
+		m.ClearLionResources()
+		return nil
+	}
 	return fmt.Errorf("unknown ResourceUris unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *ResourceUrisMutation) ResetEdge(name string) error {
+	switch name {
+	case resourceuris.EdgeLionResources:
+		m.ResetLionResources()
+		return nil
+	}
 	return fmt.Errorf("unknown ResourceUris edge %s", name)
 }
 
 // ResourcesMutation represents an operation that mutates the Resources nodes in the graph.
 type ResourcesMutation struct {
 	config
-	op                      Op
-	typ                     string
-	id                      *int
-	created_at              *time.Time
-	updated_at              *time.Time
-	deleted_at              *time.Time
-	created_by              *int64
-	addcreated_by           *int64
-	updated_by              *int64
-	addupdated_by           *int64
-	parent_id               *int
-	addparent_id            *int
-	name                    *string
-	display_name            *string
-	sort_order              *int
-	addsort_order           *int
-	resource_type           *int
-	addresource_type        *int
-	resource_scope          *int
-	addresource_scope       *int
-	enabled                 *bool
-	hidden                  *bool
-	hide_children           *bool
-	_path                   *string
-	icon                    *string
-	component               *string
-	description             *string
-	clearedFields           map[string]struct{}
-	lion_permissions        map[int]struct{}
-	removedlion_permissions map[int]struct{}
-	clearedlion_permissions bool
-	done                    bool
-	oldValue                func(context.Context) (*Resources, error)
-	predicates              []predicate.Resources
+	op                        Op
+	typ                       string
+	id                        *int
+	created_at                *time.Time
+	updated_at                *time.Time
+	deleted_at                *time.Time
+	created_by                *int64
+	addcreated_by             *int64
+	updated_by                *int64
+	addupdated_by             *int64
+	parent_id                 *int
+	addparent_id              *int
+	name                      *string
+	display_name              *string
+	resource_type             *int
+	addresource_type          *int
+	enabled                   *bool
+	sort_order                *int
+	addsort_order             *int
+	resource_scope            *int
+	addresource_scope         *int
+	hidden                    *bool
+	hide_children             *bool
+	_path                     *string
+	icon                      *string
+	component                 *string
+	description               *string
+	clearedFields             map[string]struct{}
+	lion_resource_uris        map[int]struct{}
+	removedlion_resource_uris map[int]struct{}
+	clearedlion_resource_uris bool
+	done                      bool
+	oldValue                  func(context.Context) (*Resources, error)
+	predicates                []predicate.Resources
 }
 
 var _ ent.Mutation = (*ResourcesMutation)(nil)
@@ -13614,62 +13892,6 @@ func (m *ResourcesMutation) ResetDisplayName() {
 	m.display_name = nil
 }
 
-// SetSortOrder sets the "sort_order" field.
-func (m *ResourcesMutation) SetSortOrder(i int) {
-	m.sort_order = &i
-	m.addsort_order = nil
-}
-
-// SortOrder returns the value of the "sort_order" field in the mutation.
-func (m *ResourcesMutation) SortOrder() (r int, exists bool) {
-	v := m.sort_order
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSortOrder returns the old "sort_order" field's value of the Resources entity.
-// If the Resources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldSortOrder(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSortOrder is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSortOrder requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSortOrder: %w", err)
-	}
-	return oldValue.SortOrder, nil
-}
-
-// AddSortOrder adds i to the "sort_order" field.
-func (m *ResourcesMutation) AddSortOrder(i int) {
-	if m.addsort_order != nil {
-		*m.addsort_order += i
-	} else {
-		m.addsort_order = &i
-	}
-}
-
-// AddedSortOrder returns the value that was added to the "sort_order" field in this mutation.
-func (m *ResourcesMutation) AddedSortOrder() (r int, exists bool) {
-	v := m.addsort_order
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSortOrder resets all changes to the "sort_order" field.
-func (m *ResourcesMutation) ResetSortOrder() {
-	m.sort_order = nil
-	m.addsort_order = nil
-}
-
 // SetResourceType sets the "resource_type" field.
 func (m *ResourcesMutation) SetResourceType(i int) {
 	m.resource_type = &i
@@ -13726,6 +13948,98 @@ func (m *ResourcesMutation) ResetResourceType() {
 	m.addresource_type = nil
 }
 
+// SetEnabled sets the "enabled" field.
+func (m *ResourcesMutation) SetEnabled(b bool) {
+	m.enabled = &b
+}
+
+// Enabled returns the value of the "enabled" field in the mutation.
+func (m *ResourcesMutation) Enabled() (r bool, exists bool) {
+	v := m.enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnabled returns the old "enabled" field's value of the Resources entity.
+// If the Resources object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourcesMutation) OldEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnabled: %w", err)
+	}
+	return oldValue.Enabled, nil
+}
+
+// ResetEnabled resets all changes to the "enabled" field.
+func (m *ResourcesMutation) ResetEnabled() {
+	m.enabled = nil
+}
+
+// SetSortOrder sets the "sort_order" field.
+func (m *ResourcesMutation) SetSortOrder(i int) {
+	m.sort_order = &i
+	m.addsort_order = nil
+}
+
+// SortOrder returns the value of the "sort_order" field in the mutation.
+func (m *ResourcesMutation) SortOrder() (r int, exists bool) {
+	v := m.sort_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSortOrder returns the old "sort_order" field's value of the Resources entity.
+// If the Resources object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourcesMutation) OldSortOrder(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSortOrder is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSortOrder requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSortOrder: %w", err)
+	}
+	return oldValue.SortOrder, nil
+}
+
+// AddSortOrder adds i to the "sort_order" field.
+func (m *ResourcesMutation) AddSortOrder(i int) {
+	if m.addsort_order != nil {
+		*m.addsort_order += i
+	} else {
+		m.addsort_order = &i
+	}
+}
+
+// AddedSortOrder returns the value that was added to the "sort_order" field in this mutation.
+func (m *ResourcesMutation) AddedSortOrder() (r int, exists bool) {
+	v := m.addsort_order
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSortOrder resets all changes to the "sort_order" field.
+func (m *ResourcesMutation) ResetSortOrder() {
+	m.sort_order = nil
+	m.addsort_order = nil
+}
+
 // SetResourceScope sets the "resource_scope" field.
 func (m *ResourcesMutation) SetResourceScope(i int) {
 	m.resource_scope = &i
@@ -13780,42 +14094,6 @@ func (m *ResourcesMutation) AddedResourceScope() (r int, exists bool) {
 func (m *ResourcesMutation) ResetResourceScope() {
 	m.resource_scope = nil
 	m.addresource_scope = nil
-}
-
-// SetEnabled sets the "enabled" field.
-func (m *ResourcesMutation) SetEnabled(b bool) {
-	m.enabled = &b
-}
-
-// Enabled returns the value of the "enabled" field in the mutation.
-func (m *ResourcesMutation) Enabled() (r bool, exists bool) {
-	v := m.enabled
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldEnabled returns the old "enabled" field's value of the Resources entity.
-// If the Resources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldEnabled(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEnabled is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEnabled requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEnabled: %w", err)
-	}
-	return oldValue.Enabled, nil
-}
-
-// ResetEnabled resets all changes to the "enabled" field.
-func (m *ResourcesMutation) ResetEnabled() {
-	m.enabled = nil
 }
 
 // SetHidden sets the "hidden" field.
@@ -14034,58 +14312,58 @@ func (m *ResourcesMutation) ResetDescription() {
 	m.description = nil
 }
 
-// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by ids.
-func (m *ResourcesMutation) AddLionPermissionIDs(ids ...int) {
-	if m.lion_permissions == nil {
-		m.lion_permissions = make(map[int]struct{})
+// AddLionResourceURIIDs adds the "lion_resource_uris" edge to the ResourceUris entity by ids.
+func (m *ResourcesMutation) AddLionResourceURIIDs(ids ...int) {
+	if m.lion_resource_uris == nil {
+		m.lion_resource_uris = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.lion_permissions[ids[i]] = struct{}{}
+		m.lion_resource_uris[ids[i]] = struct{}{}
 	}
 }
 
-// ClearLionPermissions clears the "lion_permissions" edge to the Permissions entity.
-func (m *ResourcesMutation) ClearLionPermissions() {
-	m.clearedlion_permissions = true
+// ClearLionResourceUris clears the "lion_resource_uris" edge to the ResourceUris entity.
+func (m *ResourcesMutation) ClearLionResourceUris() {
+	m.clearedlion_resource_uris = true
 }
 
-// LionPermissionsCleared reports if the "lion_permissions" edge to the Permissions entity was cleared.
-func (m *ResourcesMutation) LionPermissionsCleared() bool {
-	return m.clearedlion_permissions
+// LionResourceUrisCleared reports if the "lion_resource_uris" edge to the ResourceUris entity was cleared.
+func (m *ResourcesMutation) LionResourceUrisCleared() bool {
+	return m.clearedlion_resource_uris
 }
 
-// RemoveLionPermissionIDs removes the "lion_permissions" edge to the Permissions entity by IDs.
-func (m *ResourcesMutation) RemoveLionPermissionIDs(ids ...int) {
-	if m.removedlion_permissions == nil {
-		m.removedlion_permissions = make(map[int]struct{})
+// RemoveLionResourceURIIDs removes the "lion_resource_uris" edge to the ResourceUris entity by IDs.
+func (m *ResourcesMutation) RemoveLionResourceURIIDs(ids ...int) {
+	if m.removedlion_resource_uris == nil {
+		m.removedlion_resource_uris = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.lion_permissions, ids[i])
-		m.removedlion_permissions[ids[i]] = struct{}{}
+		delete(m.lion_resource_uris, ids[i])
+		m.removedlion_resource_uris[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedLionPermissions returns the removed IDs of the "lion_permissions" edge to the Permissions entity.
-func (m *ResourcesMutation) RemovedLionPermissionsIDs() (ids []int) {
-	for id := range m.removedlion_permissions {
+// RemovedLionResourceUris returns the removed IDs of the "lion_resource_uris" edge to the ResourceUris entity.
+func (m *ResourcesMutation) RemovedLionResourceUrisIDs() (ids []int) {
+	for id := range m.removedlion_resource_uris {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// LionPermissionsIDs returns the "lion_permissions" edge IDs in the mutation.
-func (m *ResourcesMutation) LionPermissionsIDs() (ids []int) {
-	for id := range m.lion_permissions {
+// LionResourceUrisIDs returns the "lion_resource_uris" edge IDs in the mutation.
+func (m *ResourcesMutation) LionResourceUrisIDs() (ids []int) {
+	for id := range m.lion_resource_uris {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetLionPermissions resets all changes to the "lion_permissions" edge.
-func (m *ResourcesMutation) ResetLionPermissions() {
-	m.lion_permissions = nil
-	m.clearedlion_permissions = false
-	m.removedlion_permissions = nil
+// ResetLionResourceUris resets all changes to the "lion_resource_uris" edge.
+func (m *ResourcesMutation) ResetLionResourceUris() {
+	m.lion_resource_uris = nil
+	m.clearedlion_resource_uris = false
+	m.removedlion_resource_uris = nil
 }
 
 // Where appends a list predicates to the ResourcesMutation builder.
@@ -14147,17 +14425,17 @@ func (m *ResourcesMutation) Fields() []string {
 	if m.display_name != nil {
 		fields = append(fields, resources.FieldDisplayName)
 	}
-	if m.sort_order != nil {
-		fields = append(fields, resources.FieldSortOrder)
-	}
 	if m.resource_type != nil {
 		fields = append(fields, resources.FieldResourceType)
 	}
-	if m.resource_scope != nil {
-		fields = append(fields, resources.FieldResourceScope)
-	}
 	if m.enabled != nil {
 		fields = append(fields, resources.FieldEnabled)
+	}
+	if m.sort_order != nil {
+		fields = append(fields, resources.FieldSortOrder)
+	}
+	if m.resource_scope != nil {
+		fields = append(fields, resources.FieldResourceScope)
 	}
 	if m.hidden != nil {
 		fields = append(fields, resources.FieldHidden)
@@ -14201,14 +14479,14 @@ func (m *ResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case resources.FieldDisplayName:
 		return m.DisplayName()
-	case resources.FieldSortOrder:
-		return m.SortOrder()
 	case resources.FieldResourceType:
 		return m.ResourceType()
-	case resources.FieldResourceScope:
-		return m.ResourceScope()
 	case resources.FieldEnabled:
 		return m.Enabled()
+	case resources.FieldSortOrder:
+		return m.SortOrder()
+	case resources.FieldResourceScope:
+		return m.ResourceScope()
 	case resources.FieldHidden:
 		return m.Hidden()
 	case resources.FieldHideChildren:
@@ -14246,14 +14524,14 @@ func (m *ResourcesMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldName(ctx)
 	case resources.FieldDisplayName:
 		return m.OldDisplayName(ctx)
-	case resources.FieldSortOrder:
-		return m.OldSortOrder(ctx)
 	case resources.FieldResourceType:
 		return m.OldResourceType(ctx)
-	case resources.FieldResourceScope:
-		return m.OldResourceScope(ctx)
 	case resources.FieldEnabled:
 		return m.OldEnabled(ctx)
+	case resources.FieldSortOrder:
+		return m.OldSortOrder(ctx)
+	case resources.FieldResourceScope:
+		return m.OldResourceScope(ctx)
 	case resources.FieldHidden:
 		return m.OldHidden(ctx)
 	case resources.FieldHideChildren:
@@ -14331,13 +14609,6 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDisplayName(v)
 		return nil
-	case resources.FieldSortOrder:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSortOrder(v)
-		return nil
 	case resources.FieldResourceType:
 		v, ok := value.(int)
 		if !ok {
@@ -14345,19 +14616,26 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetResourceType(v)
 		return nil
-	case resources.FieldResourceScope:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetResourceScope(v)
-		return nil
 	case resources.FieldEnabled:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetEnabled(v)
+		return nil
+	case resources.FieldSortOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSortOrder(v)
+		return nil
+	case resources.FieldResourceScope:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceScope(v)
 		return nil
 	case resources.FieldHidden:
 		v, ok := value.(bool)
@@ -14418,11 +14696,11 @@ func (m *ResourcesMutation) AddedFields() []string {
 	if m.addparent_id != nil {
 		fields = append(fields, resources.FieldParentID)
 	}
-	if m.addsort_order != nil {
-		fields = append(fields, resources.FieldSortOrder)
-	}
 	if m.addresource_type != nil {
 		fields = append(fields, resources.FieldResourceType)
+	}
+	if m.addsort_order != nil {
+		fields = append(fields, resources.FieldSortOrder)
 	}
 	if m.addresource_scope != nil {
 		fields = append(fields, resources.FieldResourceScope)
@@ -14441,10 +14719,10 @@ func (m *ResourcesMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedUpdatedBy()
 	case resources.FieldParentID:
 		return m.AddedParentID()
-	case resources.FieldSortOrder:
-		return m.AddedSortOrder()
 	case resources.FieldResourceType:
 		return m.AddedResourceType()
+	case resources.FieldSortOrder:
+		return m.AddedSortOrder()
 	case resources.FieldResourceScope:
 		return m.AddedResourceScope()
 	}
@@ -14477,19 +14755,19 @@ func (m *ResourcesMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddParentID(v)
 		return nil
-	case resources.FieldSortOrder:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSortOrder(v)
-		return nil
 	case resources.FieldResourceType:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddResourceType(v)
+		return nil
+	case resources.FieldSortOrder:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSortOrder(v)
 		return nil
 	case resources.FieldResourceScope:
 		v, ok := value.(int)
@@ -14570,17 +14848,17 @@ func (m *ResourcesMutation) ResetField(name string) error {
 	case resources.FieldDisplayName:
 		m.ResetDisplayName()
 		return nil
-	case resources.FieldSortOrder:
-		m.ResetSortOrder()
-		return nil
 	case resources.FieldResourceType:
 		m.ResetResourceType()
 		return nil
-	case resources.FieldResourceScope:
-		m.ResetResourceScope()
-		return nil
 	case resources.FieldEnabled:
 		m.ResetEnabled()
+		return nil
+	case resources.FieldSortOrder:
+		m.ResetSortOrder()
+		return nil
+	case resources.FieldResourceScope:
+		m.ResetResourceScope()
 		return nil
 	case resources.FieldHidden:
 		m.ResetHidden()
@@ -14607,8 +14885,8 @@ func (m *ResourcesMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ResourcesMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.lion_permissions != nil {
-		edges = append(edges, resources.EdgeLionPermissions)
+	if m.lion_resource_uris != nil {
+		edges = append(edges, resources.EdgeLionResourceUris)
 	}
 	return edges
 }
@@ -14617,9 +14895,9 @@ func (m *ResourcesMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ResourcesMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case resources.EdgeLionPermissions:
-		ids := make([]ent.Value, 0, len(m.lion_permissions))
-		for id := range m.lion_permissions {
+	case resources.EdgeLionResourceUris:
+		ids := make([]ent.Value, 0, len(m.lion_resource_uris))
+		for id := range m.lion_resource_uris {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14630,8 +14908,8 @@ func (m *ResourcesMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ResourcesMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedlion_permissions != nil {
-		edges = append(edges, resources.EdgeLionPermissions)
+	if m.removedlion_resource_uris != nil {
+		edges = append(edges, resources.EdgeLionResourceUris)
 	}
 	return edges
 }
@@ -14640,9 +14918,9 @@ func (m *ResourcesMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *ResourcesMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case resources.EdgeLionPermissions:
-		ids := make([]ent.Value, 0, len(m.removedlion_permissions))
-		for id := range m.removedlion_permissions {
+	case resources.EdgeLionResourceUris:
+		ids := make([]ent.Value, 0, len(m.removedlion_resource_uris))
+		for id := range m.removedlion_resource_uris {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14653,8 +14931,8 @@ func (m *ResourcesMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ResourcesMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedlion_permissions {
-		edges = append(edges, resources.EdgeLionPermissions)
+	if m.clearedlion_resource_uris {
+		edges = append(edges, resources.EdgeLionResourceUris)
 	}
 	return edges
 }
@@ -14663,8 +14941,8 @@ func (m *ResourcesMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ResourcesMutation) EdgeCleared(name string) bool {
 	switch name {
-	case resources.EdgeLionPermissions:
-		return m.clearedlion_permissions
+	case resources.EdgeLionResourceUris:
+		return m.clearedlion_resource_uris
 	}
 	return false
 }
@@ -14681,8 +14959,8 @@ func (m *ResourcesMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ResourcesMutation) ResetEdge(name string) error {
 	switch name {
-	case resources.EdgeLionPermissions:
-		m.ResetLionPermissions()
+	case resources.EdgeLionResourceUris:
+		m.ResetLionResourceUris()
 		return nil
 	}
 	return fmt.Errorf("unknown Resources edge %s", name)

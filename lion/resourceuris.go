@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourceuris"
 )
 
@@ -25,9 +26,42 @@ type ResourceUris struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 关联 lion_resources 表 ID
 	ResourceID int `json:"resource_id,omitempty"`
-	// 资源地址
-	URI          string `json:"uri,omitempty"`
+	// 资源路径
+	Path string `json:"path,omitempty"`
+	// 是否在资源列表中隐藏该节点
+	Hidden bool `json:"hidden,omitempty"`
+	// 是否隐藏该资源节点的子项
+	HideChildren bool `json:"hide_children,omitempty"`
+	// 图标名称，如 UserOutlined
+	Icon string `json:"icon,omitempty"`
+	// 组件名称，如 UserOutlined
+	Component string `json:"component,omitempty"`
+	// 详细描述
+	Description string `json:"description,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ResourceUrisQuery when eager-loading is set.
+	Edges        ResourceUrisEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// ResourceUrisEdges holds the relations/edges for other nodes in the graph.
+type ResourceUrisEdges struct {
+	// LionResources holds the value of the lion_resources edge.
+	LionResources *Resources `json:"lion_resources,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// LionResourcesOrErr returns the LionResources value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ResourceUrisEdges) LionResourcesOrErr() (*Resources, error) {
+	if e.LionResources != nil {
+		return e.LionResources, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: resources.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_resources"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -35,9 +69,11 @@ func (*ResourceUris) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case resourceuris.FieldHidden, resourceuris.FieldHideChildren:
+			values[i] = new(sql.NullBool)
 		case resourceuris.FieldID, resourceuris.FieldResourceID:
 			values[i] = new(sql.NullInt64)
-		case resourceuris.FieldURI:
+		case resourceuris.FieldPath, resourceuris.FieldIcon, resourceuris.FieldComponent, resourceuris.FieldDescription:
 			values[i] = new(sql.NullString)
 		case resourceuris.FieldCreatedAt, resourceuris.FieldUpdatedAt, resourceuris.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -87,11 +123,41 @@ func (_m *ResourceUris) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ResourceID = int(value.Int64)
 			}
-		case resourceuris.FieldURI:
+		case resourceuris.FieldPath:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field uri", values[i])
+				return fmt.Errorf("unexpected type %T for field path", values[i])
 			} else if value.Valid {
-				_m.URI = value.String
+				_m.Path = value.String
+			}
+		case resourceuris.FieldHidden:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field hidden", values[i])
+			} else if value.Valid {
+				_m.Hidden = value.Bool
+			}
+		case resourceuris.FieldHideChildren:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field hide_children", values[i])
+			} else if value.Valid {
+				_m.HideChildren = value.Bool
+			}
+		case resourceuris.FieldIcon:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field icon", values[i])
+			} else if value.Valid {
+				_m.Icon = value.String
+			}
+		case resourceuris.FieldComponent:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field component", values[i])
+			} else if value.Valid {
+				_m.Component = value.String
+			}
+		case resourceuris.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -104,6 +170,11 @@ func (_m *ResourceUris) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *ResourceUris) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionResources queries the "lion_resources" edge of the ResourceUris entity.
+func (_m *ResourceUris) QueryLionResources() *ResourcesQuery {
+	return NewResourceUrisClient(_m.config).QueryLionResources(_m)
 }
 
 // Update returns a builder for updating this ResourceUris.
@@ -143,8 +214,23 @@ func (_m *ResourceUris) String() string {
 	builder.WriteString("resource_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ResourceID))
 	builder.WriteString(", ")
-	builder.WriteString("uri=")
-	builder.WriteString(_m.URI)
+	builder.WriteString("path=")
+	builder.WriteString(_m.Path)
+	builder.WriteString(", ")
+	builder.WriteString("hidden=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Hidden))
+	builder.WriteString(", ")
+	builder.WriteString("hide_children=")
+	builder.WriteString(fmt.Sprintf("%v", _m.HideChildren))
+	builder.WriteString(", ")
+	builder.WriteString("icon=")
+	builder.WriteString(_m.Icon)
+	builder.WriteString(", ")
+	builder.WriteString("component=")
+	builder.WriteString(_m.Component)
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

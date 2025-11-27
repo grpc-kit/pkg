@@ -1745,22 +1745,6 @@ func (c *PermissionsClient) QueryLionRolePermissions(_m *Permissions) *RolePermi
 	return query
 }
 
-// QueryLionResources queries the lion_resources edge of a Permissions.
-func (c *PermissionsClient) QueryLionResources(_m *Permissions) *ResourcesQuery {
-	query := (&ResourcesClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(permissions.Table, permissions.FieldID, id),
-			sqlgraph.To(resources.Table, resources.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, permissions.LionResourcesTable, permissions.LionResourcesColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *PermissionsClient) Hooks() []Hook {
 	return c.hooks.Permissions
@@ -2160,6 +2144,22 @@ func (c *ResourceUrisClient) GetX(ctx context.Context, id int) *ResourceUris {
 	return obj
 }
 
+// QueryLionResources queries the lion_resources edge of a ResourceUris.
+func (c *ResourceUrisClient) QueryLionResources(_m *ResourceUris) *ResourcesQuery {
+	query := (&ResourcesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourceuris.Table, resourceuris.FieldID, id),
+			sqlgraph.To(resources.Table, resources.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, resourceuris.LionResourcesTable, resourceuris.LionResourcesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ResourceUrisClient) Hooks() []Hook {
 	return c.hooks.ResourceUris
@@ -2293,15 +2293,15 @@ func (c *ResourcesClient) GetX(ctx context.Context, id int) *Resources {
 	return obj
 }
 
-// QueryLionPermissions queries the lion_permissions edge of a Resources.
-func (c *ResourcesClient) QueryLionPermissions(_m *Resources) *PermissionsQuery {
-	query := (&PermissionsClient{config: c.config}).Query()
+// QueryLionResourceUris queries the lion_resource_uris edge of a Resources.
+func (c *ResourcesClient) QueryLionResourceUris(_m *Resources) *ResourceUrisQuery {
+	query := (&ResourceUrisClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(resources.Table, resources.FieldID, id),
-			sqlgraph.To(permissions.Table, permissions.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, resources.LionPermissionsTable, resources.LionPermissionsColumn),
+			sqlgraph.To(resourceuris.Table, resourceuris.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resources.LionResourceUrisTable, resources.LionResourceUrisColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

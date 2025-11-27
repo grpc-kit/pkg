@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -19,15 +20,39 @@ func (ResourceUris) Fields() []ent.Field {
 			Positive().
 			// Immutable().
 			Comment("关联 lion_resources 表 ID"),
-		field.String("uri").
-			NotEmpty().
-			Comment("资源地址"),
+		field.String("path").
+			MaxLen(512).
+			Default("").
+			Comment("资源路径"),
+		field.Bool("hidden").
+			Default(false).
+			Comment("是否在资源列表中隐藏该节点"),
+		field.Bool("hide_children").
+			Default(false).
+			Comment("是否隐藏该资源节点的子项"),
+		field.String("icon").
+			MaxLen(256).
+			Default("").
+			Comment("图标名称，如 UserOutlined"),
+		field.String("component").
+			MaxLen(256).
+			Default("").
+			Comment("组件名称，如 UserOutlined"),
+		field.String("description").
+			Default("").
+			Comment("详细描述"),
 	}
 }
 
 // Edges of the table.
 func (ResourceUris) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("lion_resources", Resources.Type).
+			Ref("lion_resource_uris").
+			Field("resource_id").
+			Unique().
+			Required(),
+	}
 }
 
 // Mixin of the table.

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -74,9 +75,34 @@ func ResourceID(v int) predicate.ResourceUris {
 	return predicate.ResourceUris(sql.FieldEQ(FieldResourceID, v))
 }
 
-// URI applies equality check predicate on the "uri" field. It's identical to URIEQ.
-func URI(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldEQ(FieldURI, v))
+// Path applies equality check predicate on the "path" field. It's identical to PathEQ.
+func Path(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldPath, v))
+}
+
+// Hidden applies equality check predicate on the "hidden" field. It's identical to HiddenEQ.
+func Hidden(v bool) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldHidden, v))
+}
+
+// HideChildren applies equality check predicate on the "hide_children" field. It's identical to HideChildrenEQ.
+func HideChildren(v bool) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldHideChildren, v))
+}
+
+// Icon applies equality check predicate on the "icon" field. It's identical to IconEQ.
+func Icon(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldIcon, v))
+}
+
+// Component applies equality check predicate on the "component" field. It's identical to ComponentEQ.
+func Component(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldComponent, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldDescription, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -229,89 +255,307 @@ func ResourceIDNotIn(vs ...int) predicate.ResourceUris {
 	return predicate.ResourceUris(sql.FieldNotIn(FieldResourceID, vs...))
 }
 
-// ResourceIDGT applies the GT predicate on the "resource_id" field.
-func ResourceIDGT(v int) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldGT(FieldResourceID, v))
+// PathEQ applies the EQ predicate on the "path" field.
+func PathEQ(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldPath, v))
 }
 
-// ResourceIDGTE applies the GTE predicate on the "resource_id" field.
-func ResourceIDGTE(v int) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldGTE(FieldResourceID, v))
+// PathNEQ applies the NEQ predicate on the "path" field.
+func PathNEQ(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldNEQ(FieldPath, v))
 }
 
-// ResourceIDLT applies the LT predicate on the "resource_id" field.
-func ResourceIDLT(v int) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldLT(FieldResourceID, v))
+// PathIn applies the In predicate on the "path" field.
+func PathIn(vs ...string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldIn(FieldPath, vs...))
 }
 
-// ResourceIDLTE applies the LTE predicate on the "resource_id" field.
-func ResourceIDLTE(v int) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldLTE(FieldResourceID, v))
+// PathNotIn applies the NotIn predicate on the "path" field.
+func PathNotIn(vs ...string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldNotIn(FieldPath, vs...))
 }
 
-// URIEQ applies the EQ predicate on the "uri" field.
-func URIEQ(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldEQ(FieldURI, v))
+// PathGT applies the GT predicate on the "path" field.
+func PathGT(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldGT(FieldPath, v))
 }
 
-// URINEQ applies the NEQ predicate on the "uri" field.
-func URINEQ(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldNEQ(FieldURI, v))
+// PathGTE applies the GTE predicate on the "path" field.
+func PathGTE(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldGTE(FieldPath, v))
 }
 
-// URIIn applies the In predicate on the "uri" field.
-func URIIn(vs ...string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldIn(FieldURI, vs...))
+// PathLT applies the LT predicate on the "path" field.
+func PathLT(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldLT(FieldPath, v))
 }
 
-// URINotIn applies the NotIn predicate on the "uri" field.
-func URINotIn(vs ...string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldNotIn(FieldURI, vs...))
+// PathLTE applies the LTE predicate on the "path" field.
+func PathLTE(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldLTE(FieldPath, v))
 }
 
-// URIGT applies the GT predicate on the "uri" field.
-func URIGT(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldGT(FieldURI, v))
+// PathContains applies the Contains predicate on the "path" field.
+func PathContains(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldContains(FieldPath, v))
 }
 
-// URIGTE applies the GTE predicate on the "uri" field.
-func URIGTE(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldGTE(FieldURI, v))
+// PathHasPrefix applies the HasPrefix predicate on the "path" field.
+func PathHasPrefix(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldHasPrefix(FieldPath, v))
 }
 
-// URILT applies the LT predicate on the "uri" field.
-func URILT(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldLT(FieldURI, v))
+// PathHasSuffix applies the HasSuffix predicate on the "path" field.
+func PathHasSuffix(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldHasSuffix(FieldPath, v))
 }
 
-// URILTE applies the LTE predicate on the "uri" field.
-func URILTE(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldLTE(FieldURI, v))
+// PathEqualFold applies the EqualFold predicate on the "path" field.
+func PathEqualFold(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEqualFold(FieldPath, v))
 }
 
-// URIContains applies the Contains predicate on the "uri" field.
-func URIContains(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldContains(FieldURI, v))
+// PathContainsFold applies the ContainsFold predicate on the "path" field.
+func PathContainsFold(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldContainsFold(FieldPath, v))
 }
 
-// URIHasPrefix applies the HasPrefix predicate on the "uri" field.
-func URIHasPrefix(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldHasPrefix(FieldURI, v))
+// HiddenEQ applies the EQ predicate on the "hidden" field.
+func HiddenEQ(v bool) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldHidden, v))
 }
 
-// URIHasSuffix applies the HasSuffix predicate on the "uri" field.
-func URIHasSuffix(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldHasSuffix(FieldURI, v))
+// HiddenNEQ applies the NEQ predicate on the "hidden" field.
+func HiddenNEQ(v bool) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldNEQ(FieldHidden, v))
 }
 
-// URIEqualFold applies the EqualFold predicate on the "uri" field.
-func URIEqualFold(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldEqualFold(FieldURI, v))
+// HideChildrenEQ applies the EQ predicate on the "hide_children" field.
+func HideChildrenEQ(v bool) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldHideChildren, v))
 }
 
-// URIContainsFold applies the ContainsFold predicate on the "uri" field.
-func URIContainsFold(v string) predicate.ResourceUris {
-	return predicate.ResourceUris(sql.FieldContainsFold(FieldURI, v))
+// HideChildrenNEQ applies the NEQ predicate on the "hide_children" field.
+func HideChildrenNEQ(v bool) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldNEQ(FieldHideChildren, v))
+}
+
+// IconEQ applies the EQ predicate on the "icon" field.
+func IconEQ(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldIcon, v))
+}
+
+// IconNEQ applies the NEQ predicate on the "icon" field.
+func IconNEQ(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldNEQ(FieldIcon, v))
+}
+
+// IconIn applies the In predicate on the "icon" field.
+func IconIn(vs ...string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldIn(FieldIcon, vs...))
+}
+
+// IconNotIn applies the NotIn predicate on the "icon" field.
+func IconNotIn(vs ...string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldNotIn(FieldIcon, vs...))
+}
+
+// IconGT applies the GT predicate on the "icon" field.
+func IconGT(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldGT(FieldIcon, v))
+}
+
+// IconGTE applies the GTE predicate on the "icon" field.
+func IconGTE(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldGTE(FieldIcon, v))
+}
+
+// IconLT applies the LT predicate on the "icon" field.
+func IconLT(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldLT(FieldIcon, v))
+}
+
+// IconLTE applies the LTE predicate on the "icon" field.
+func IconLTE(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldLTE(FieldIcon, v))
+}
+
+// IconContains applies the Contains predicate on the "icon" field.
+func IconContains(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldContains(FieldIcon, v))
+}
+
+// IconHasPrefix applies the HasPrefix predicate on the "icon" field.
+func IconHasPrefix(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldHasPrefix(FieldIcon, v))
+}
+
+// IconHasSuffix applies the HasSuffix predicate on the "icon" field.
+func IconHasSuffix(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldHasSuffix(FieldIcon, v))
+}
+
+// IconEqualFold applies the EqualFold predicate on the "icon" field.
+func IconEqualFold(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEqualFold(FieldIcon, v))
+}
+
+// IconContainsFold applies the ContainsFold predicate on the "icon" field.
+func IconContainsFold(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldContainsFold(FieldIcon, v))
+}
+
+// ComponentEQ applies the EQ predicate on the "component" field.
+func ComponentEQ(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldComponent, v))
+}
+
+// ComponentNEQ applies the NEQ predicate on the "component" field.
+func ComponentNEQ(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldNEQ(FieldComponent, v))
+}
+
+// ComponentIn applies the In predicate on the "component" field.
+func ComponentIn(vs ...string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldIn(FieldComponent, vs...))
+}
+
+// ComponentNotIn applies the NotIn predicate on the "component" field.
+func ComponentNotIn(vs ...string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldNotIn(FieldComponent, vs...))
+}
+
+// ComponentGT applies the GT predicate on the "component" field.
+func ComponentGT(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldGT(FieldComponent, v))
+}
+
+// ComponentGTE applies the GTE predicate on the "component" field.
+func ComponentGTE(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldGTE(FieldComponent, v))
+}
+
+// ComponentLT applies the LT predicate on the "component" field.
+func ComponentLT(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldLT(FieldComponent, v))
+}
+
+// ComponentLTE applies the LTE predicate on the "component" field.
+func ComponentLTE(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldLTE(FieldComponent, v))
+}
+
+// ComponentContains applies the Contains predicate on the "component" field.
+func ComponentContains(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldContains(FieldComponent, v))
+}
+
+// ComponentHasPrefix applies the HasPrefix predicate on the "component" field.
+func ComponentHasPrefix(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldHasPrefix(FieldComponent, v))
+}
+
+// ComponentHasSuffix applies the HasSuffix predicate on the "component" field.
+func ComponentHasSuffix(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldHasSuffix(FieldComponent, v))
+}
+
+// ComponentEqualFold applies the EqualFold predicate on the "component" field.
+func ComponentEqualFold(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEqualFold(FieldComponent, v))
+}
+
+// ComponentContainsFold applies the ContainsFold predicate on the "component" field.
+func ComponentContainsFold(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldContainsFold(FieldComponent, v))
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.ResourceUris {
+	return predicate.ResourceUris(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// HasLionResources applies the HasEdge predicate on the "lion_resources" edge.
+func HasLionResources() predicate.ResourceUris {
+	return predicate.ResourceUris(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionResourcesTable, LionResourcesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionResourcesWith applies the HasEdge predicate on the "lion_resources" edge with a given conditions (other predicates).
+func HasLionResourcesWith(preds ...predicate.Resources) predicate.ResourceUris {
+	return predicate.ResourceUris(func(s *sql.Selector) {
+		step := newLionResourcesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

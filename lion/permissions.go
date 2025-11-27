@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/grpc-kit/pkg/lion/permissions"
-	"github.com/grpc-kit/pkg/lion/resources"
 )
 
 // Permissions is the model entity for the Permissions schema.
@@ -44,11 +43,9 @@ type Permissions struct {
 type PermissionsEdges struct {
 	// LionRolePermissions holds the value of the lion_role_permissions edge.
 	LionRolePermissions []*RolePermissions `json:"lion_role_permissions,omitempty"`
-	// LionResources holds the value of the lion_resources edge.
-	LionResources *Resources `json:"lion_resources,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 }
 
 // LionRolePermissionsOrErr returns the LionRolePermissions value or an error if the edge
@@ -58,17 +55,6 @@ func (e PermissionsEdges) LionRolePermissionsOrErr() ([]*RolePermissions, error)
 		return e.LionRolePermissions, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_role_permissions"}
-}
-
-// LionResourcesOrErr returns the LionResources value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PermissionsEdges) LionResourcesOrErr() (*Resources, error) {
-	if e.LionResources != nil {
-		return e.LionResources, nil
-	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: resources.Label}
-	}
-	return nil, &NotLoadedError{edge: "lion_resources"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -167,11 +153,6 @@ func (_m *Permissions) Value(name string) (ent.Value, error) {
 // QueryLionRolePermissions queries the "lion_role_permissions" edge of the Permissions entity.
 func (_m *Permissions) QueryLionRolePermissions() *RolePermissionsQuery {
 	return NewPermissionsClient(_m.config).QueryLionRolePermissions(_m)
-}
-
-// QueryLionResources queries the "lion_resources" edge of the Permissions entity.
-func (_m *Permissions) QueryLionResources() *ResourcesQuery {
-	return NewPermissionsClient(_m.config).QueryLionResources(_m)
 }
 
 // Update returns a builder for updating this Permissions.

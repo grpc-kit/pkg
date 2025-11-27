@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 )
 
@@ -92,6 +91,7 @@ func (_u *PermissionsUpdate) ClearUpdatedBy() *PermissionsUpdate {
 
 // SetResourceID sets the "resource_id" field.
 func (_u *PermissionsUpdate) SetResourceID(v int) *PermissionsUpdate {
+	_u.mutation.ResetResourceID()
 	_u.mutation.SetResourceID(v)
 	return _u
 }
@@ -101,6 +101,12 @@ func (_u *PermissionsUpdate) SetNillableResourceID(v *int) *PermissionsUpdate {
 	if v != nil {
 		_u.SetResourceID(*v)
 	}
+	return _u
+}
+
+// AddResourceID adds value to the "resource_id" field.
+func (_u *PermissionsUpdate) AddResourceID(v int) *PermissionsUpdate {
+	_u.mutation.AddResourceID(v)
 	return _u
 }
 
@@ -161,17 +167,6 @@ func (_u *PermissionsUpdate) AddLionRolePermissions(v ...*RolePermissions) *Perm
 	return _u.AddLionRolePermissionIDs(ids...)
 }
 
-// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
-func (_u *PermissionsUpdate) SetLionResourcesID(id int) *PermissionsUpdate {
-	_u.mutation.SetLionResourcesID(id)
-	return _u
-}
-
-// SetLionResources sets the "lion_resources" edge to the Resources entity.
-func (_u *PermissionsUpdate) SetLionResources(v *Resources) *PermissionsUpdate {
-	return _u.SetLionResourcesID(v.ID)
-}
-
 // Mutation returns the PermissionsMutation object of the builder.
 func (_u *PermissionsUpdate) Mutation() *PermissionsMutation {
 	return _u.mutation
@@ -196,12 +191,6 @@ func (_u *PermissionsUpdate) RemoveLionRolePermissions(v ...*RolePermissions) *P
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLionRolePermissionIDs(ids...)
-}
-
-// ClearLionResources clears the "lion_resources" edge to the Resources entity.
-func (_u *PermissionsUpdate) ClearLionResources() *PermissionsUpdate {
-	_u.mutation.ClearLionResources()
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -257,9 +246,6 @@ func (_u *PermissionsUpdate) check() error {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Permissions.display_name": %w`, err)}
 		}
 	}
-	if _u.mutation.LionResourcesCleared() && len(_u.mutation.LionResourcesIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "Permissions.lion_resources"`)
-	}
 	return nil
 }
 
@@ -295,6 +281,12 @@ func (_u *PermissionsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(permissions.FieldUpdatedBy, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.ResourceID(); ok {
+		_spec.SetField(permissions.FieldResourceID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedResourceID(); ok {
+		_spec.AddField(permissions.FieldResourceID, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(permissions.FieldName, field.TypeString, value)
@@ -343,35 +335,6 @@ func (_u *PermissionsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(rolepermissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.LionResourcesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   permissions.LionResourcesTable,
-			Columns: []string{permissions.LionResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionResourcesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   permissions.LionResourcesTable,
-			Columns: []string{permissions.LionResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -461,6 +424,7 @@ func (_u *PermissionsUpdateOne) ClearUpdatedBy() *PermissionsUpdateOne {
 
 // SetResourceID sets the "resource_id" field.
 func (_u *PermissionsUpdateOne) SetResourceID(v int) *PermissionsUpdateOne {
+	_u.mutation.ResetResourceID()
 	_u.mutation.SetResourceID(v)
 	return _u
 }
@@ -470,6 +434,12 @@ func (_u *PermissionsUpdateOne) SetNillableResourceID(v *int) *PermissionsUpdate
 	if v != nil {
 		_u.SetResourceID(*v)
 	}
+	return _u
+}
+
+// AddResourceID adds value to the "resource_id" field.
+func (_u *PermissionsUpdateOne) AddResourceID(v int) *PermissionsUpdateOne {
+	_u.mutation.AddResourceID(v)
 	return _u
 }
 
@@ -530,17 +500,6 @@ func (_u *PermissionsUpdateOne) AddLionRolePermissions(v ...*RolePermissions) *P
 	return _u.AddLionRolePermissionIDs(ids...)
 }
 
-// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
-func (_u *PermissionsUpdateOne) SetLionResourcesID(id int) *PermissionsUpdateOne {
-	_u.mutation.SetLionResourcesID(id)
-	return _u
-}
-
-// SetLionResources sets the "lion_resources" edge to the Resources entity.
-func (_u *PermissionsUpdateOne) SetLionResources(v *Resources) *PermissionsUpdateOne {
-	return _u.SetLionResourcesID(v.ID)
-}
-
 // Mutation returns the PermissionsMutation object of the builder.
 func (_u *PermissionsUpdateOne) Mutation() *PermissionsMutation {
 	return _u.mutation
@@ -565,12 +524,6 @@ func (_u *PermissionsUpdateOne) RemoveLionRolePermissions(v ...*RolePermissions)
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLionRolePermissionIDs(ids...)
-}
-
-// ClearLionResources clears the "lion_resources" edge to the Resources entity.
-func (_u *PermissionsUpdateOne) ClearLionResources() *PermissionsUpdateOne {
-	_u.mutation.ClearLionResources()
-	return _u
 }
 
 // Where appends a list predicates to the PermissionsUpdate builder.
@@ -639,9 +592,6 @@ func (_u *PermissionsUpdateOne) check() error {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Permissions.display_name": %w`, err)}
 		}
 	}
-	if _u.mutation.LionResourcesCleared() && len(_u.mutation.LionResourcesIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "Permissions.lion_resources"`)
-	}
 	return nil
 }
 
@@ -695,6 +645,12 @@ func (_u *PermissionsUpdateOne) sqlSave(ctx context.Context) (_node *Permissions
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(permissions.FieldUpdatedBy, field.TypeInt64)
 	}
+	if value, ok := _u.mutation.ResourceID(); ok {
+		_spec.SetField(permissions.FieldResourceID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedResourceID(); ok {
+		_spec.AddField(permissions.FieldResourceID, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(permissions.FieldName, field.TypeString, value)
 	}
@@ -742,35 +698,6 @@ func (_u *PermissionsUpdateOne) sqlSave(ctx context.Context) (_node *Permissions
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(rolepermissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.LionResourcesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   permissions.LionResourcesTable,
-			Columns: []string{permissions.LionResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionResourcesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   permissions.LionResourcesTable,
-			Columns: []string{permissions.LionResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

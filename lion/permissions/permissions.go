@@ -32,8 +32,6 @@ const (
 	FieldDescription = "description"
 	// EdgeLionRolePermissions holds the string denoting the lion_role_permissions edge name in mutations.
 	EdgeLionRolePermissions = "lion_role_permissions"
-	// EdgeLionResources holds the string denoting the lion_resources edge name in mutations.
-	EdgeLionResources = "lion_resources"
 	// Table holds the table name of the permissions in the database.
 	Table = "lion_permissions"
 	// LionRolePermissionsTable is the table that holds the lion_role_permissions relation/edge.
@@ -43,13 +41,6 @@ const (
 	LionRolePermissionsInverseTable = "lion_role_permissions"
 	// LionRolePermissionsColumn is the table column denoting the lion_role_permissions relation/edge.
 	LionRolePermissionsColumn = "permission_id"
-	// LionResourcesTable is the table that holds the lion_resources relation/edge.
-	LionResourcesTable = "lion_permissions"
-	// LionResourcesInverseTable is the table name for the Resources entity.
-	// It exists in this package in order to avoid circular dependency with the "resources" package.
-	LionResourcesInverseTable = "lion_resources"
-	// LionResourcesColumn is the table column denoting the lion_resources relation/edge.
-	LionResourcesColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for permissions fields.
@@ -157,24 +148,10 @@ func ByLionRolePermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOpti
 		sqlgraph.OrderByNeighborTerms(s, newLionRolePermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByLionResourcesField orders the results by lion_resources field.
-func ByLionResourcesField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionResourcesStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newLionRolePermissionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionRolePermissionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionRolePermissionsTable, LionRolePermissionsColumn),
-	)
-}
-func newLionResourcesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionResourcesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, LionResourcesTable, LionResourcesColumn),
 	)
 }

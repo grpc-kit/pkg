@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -21,10 +22,29 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// FieldResourceID holds the string denoting the resource_id field in the database.
 	FieldResourceID = "resource_id"
-	// FieldURI holds the string denoting the uri field in the database.
-	FieldURI = "uri"
+	// FieldPath holds the string denoting the path field in the database.
+	FieldPath = "path"
+	// FieldHidden holds the string denoting the hidden field in the database.
+	FieldHidden = "hidden"
+	// FieldHideChildren holds the string denoting the hide_children field in the database.
+	FieldHideChildren = "hide_children"
+	// FieldIcon holds the string denoting the icon field in the database.
+	FieldIcon = "icon"
+	// FieldComponent holds the string denoting the component field in the database.
+	FieldComponent = "component"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
+	// EdgeLionResources holds the string denoting the lion_resources edge name in mutations.
+	EdgeLionResources = "lion_resources"
 	// Table holds the table name of the resourceuris in the database.
 	Table = "lion_resource_uris"
+	// LionResourcesTable is the table that holds the lion_resources relation/edge.
+	LionResourcesTable = "lion_resource_uris"
+	// LionResourcesInverseTable is the table name for the Resources entity.
+	// It exists in this package in order to avoid circular dependency with the "resources" package.
+	LionResourcesInverseTable = "lion_resources"
+	// LionResourcesColumn is the table column denoting the lion_resources relation/edge.
+	LionResourcesColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for resourceuris fields.
@@ -34,7 +54,12 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldDeletedAt,
 	FieldResourceID,
-	FieldURI,
+	FieldPath,
+	FieldHidden,
+	FieldHideChildren,
+	FieldIcon,
+	FieldComponent,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -56,8 +81,24 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// ResourceIDValidator is a validator for the "resource_id" field. It is called by the builders before save.
 	ResourceIDValidator func(int) error
-	// URIValidator is a validator for the "uri" field. It is called by the builders before save.
-	URIValidator func(string) error
+	// DefaultPath holds the default value on creation for the "path" field.
+	DefaultPath string
+	// PathValidator is a validator for the "path" field. It is called by the builders before save.
+	PathValidator func(string) error
+	// DefaultHidden holds the default value on creation for the "hidden" field.
+	DefaultHidden bool
+	// DefaultHideChildren holds the default value on creation for the "hide_children" field.
+	DefaultHideChildren bool
+	// DefaultIcon holds the default value on creation for the "icon" field.
+	DefaultIcon string
+	// IconValidator is a validator for the "icon" field. It is called by the builders before save.
+	IconValidator func(string) error
+	// DefaultComponent holds the default value on creation for the "component" field.
+	DefaultComponent string
+	// ComponentValidator is a validator for the "component" field. It is called by the builders before save.
+	ComponentValidator func(string) error
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
 )
 
 // OrderOption defines the ordering options for the ResourceUris queries.
@@ -88,7 +129,46 @@ func ByResourceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResourceID, opts...).ToFunc()
 }
 
-// ByURI orders the results by the uri field.
-func ByURI(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldURI, opts...).ToFunc()
+// ByPath orders the results by the path field.
+func ByPath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPath, opts...).ToFunc()
+}
+
+// ByHidden orders the results by the hidden field.
+func ByHidden(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHidden, opts...).ToFunc()
+}
+
+// ByHideChildren orders the results by the hide_children field.
+func ByHideChildren(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHideChildren, opts...).ToFunc()
+}
+
+// ByIcon orders the results by the icon field.
+func ByIcon(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIcon, opts...).ToFunc()
+}
+
+// ByComponent orders the results by the component field.
+func ByComponent(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldComponent, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByLionResourcesField orders the results by lion_resources field.
+func ByLionResourcesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionResourcesStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newLionResourcesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionResourcesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionResourcesTable, LionResourcesColumn),
+	)
 }

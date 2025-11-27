@@ -524,10 +524,36 @@ func init() {
 	resourceurisDescResourceID := resourceurisFields[0].Descriptor()
 	// resourceuris.ResourceIDValidator is a validator for the "resource_id" field. It is called by the builders before save.
 	resourceuris.ResourceIDValidator = resourceurisDescResourceID.Validators[0].(func(int) error)
-	// resourceurisDescURI is the schema descriptor for uri field.
-	resourceurisDescURI := resourceurisFields[1].Descriptor()
-	// resourceuris.URIValidator is a validator for the "uri" field. It is called by the builders before save.
-	resourceuris.URIValidator = resourceurisDescURI.Validators[0].(func(string) error)
+	// resourceurisDescPath is the schema descriptor for path field.
+	resourceurisDescPath := resourceurisFields[1].Descriptor()
+	// resourceuris.DefaultPath holds the default value on creation for the path field.
+	resourceuris.DefaultPath = resourceurisDescPath.Default.(string)
+	// resourceuris.PathValidator is a validator for the "path" field. It is called by the builders before save.
+	resourceuris.PathValidator = resourceurisDescPath.Validators[0].(func(string) error)
+	// resourceurisDescHidden is the schema descriptor for hidden field.
+	resourceurisDescHidden := resourceurisFields[2].Descriptor()
+	// resourceuris.DefaultHidden holds the default value on creation for the hidden field.
+	resourceuris.DefaultHidden = resourceurisDescHidden.Default.(bool)
+	// resourceurisDescHideChildren is the schema descriptor for hide_children field.
+	resourceurisDescHideChildren := resourceurisFields[3].Descriptor()
+	// resourceuris.DefaultHideChildren holds the default value on creation for the hide_children field.
+	resourceuris.DefaultHideChildren = resourceurisDescHideChildren.Default.(bool)
+	// resourceurisDescIcon is the schema descriptor for icon field.
+	resourceurisDescIcon := resourceurisFields[4].Descriptor()
+	// resourceuris.DefaultIcon holds the default value on creation for the icon field.
+	resourceuris.DefaultIcon = resourceurisDescIcon.Default.(string)
+	// resourceuris.IconValidator is a validator for the "icon" field. It is called by the builders before save.
+	resourceuris.IconValidator = resourceurisDescIcon.Validators[0].(func(string) error)
+	// resourceurisDescComponent is the schema descriptor for component field.
+	resourceurisDescComponent := resourceurisFields[5].Descriptor()
+	// resourceuris.DefaultComponent holds the default value on creation for the component field.
+	resourceuris.DefaultComponent = resourceurisDescComponent.Default.(string)
+	// resourceuris.ComponentValidator is a validator for the "component" field. It is called by the builders before save.
+	resourceuris.ComponentValidator = resourceurisDescComponent.Validators[0].(func(string) error)
+	// resourceurisDescDescription is the schema descriptor for description field.
+	resourceurisDescDescription := resourceurisFields[6].Descriptor()
+	// resourceuris.DefaultDescription holds the default value on creation for the description field.
+	resourceuris.DefaultDescription = resourceurisDescDescription.Default.(string)
 	resourcesMixin := schema.Resources{}.Mixin()
 	resourcesMixinFields0 := resourcesMixin[0].Fields()
 	_ = resourcesMixinFields0
@@ -579,22 +605,22 @@ func init() {
 	resourcesDescDisplayName := resourcesFields[2].Descriptor()
 	// resources.DefaultDisplayName holds the default value on creation for the display_name field.
 	resources.DefaultDisplayName = resourcesDescDisplayName.Default.(string)
-	// resourcesDescSortOrder is the schema descriptor for sort_order field.
-	resourcesDescSortOrder := resourcesFields[3].Descriptor()
-	// resources.DefaultSortOrder holds the default value on creation for the sort_order field.
-	resources.DefaultSortOrder = resourcesDescSortOrder.Default.(int)
 	// resourcesDescResourceType is the schema descriptor for resource_type field.
-	resourcesDescResourceType := resourcesFields[4].Descriptor()
+	resourcesDescResourceType := resourcesFields[3].Descriptor()
 	// resources.DefaultResourceType holds the default value on creation for the resource_type field.
 	resources.DefaultResourceType = resourcesDescResourceType.Default.(int)
-	// resourcesDescResourceScope is the schema descriptor for resource_scope field.
-	resourcesDescResourceScope := resourcesFields[5].Descriptor()
-	// resources.DefaultResourceScope holds the default value on creation for the resource_scope field.
-	resources.DefaultResourceScope = resourcesDescResourceScope.Default.(int)
 	// resourcesDescEnabled is the schema descriptor for enabled field.
-	resourcesDescEnabled := resourcesFields[6].Descriptor()
+	resourcesDescEnabled := resourcesFields[4].Descriptor()
 	// resources.DefaultEnabled holds the default value on creation for the enabled field.
 	resources.DefaultEnabled = resourcesDescEnabled.Default.(bool)
+	// resourcesDescSortOrder is the schema descriptor for sort_order field.
+	resourcesDescSortOrder := resourcesFields[5].Descriptor()
+	// resources.DefaultSortOrder holds the default value on creation for the sort_order field.
+	resources.DefaultSortOrder = resourcesDescSortOrder.Default.(int)
+	// resourcesDescResourceScope is the schema descriptor for resource_scope field.
+	resourcesDescResourceScope := resourcesFields[6].Descriptor()
+	// resources.DefaultResourceScope holds the default value on creation for the resource_scope field.
+	resources.DefaultResourceScope = resourcesDescResourceScope.Default.(int)
 	// resourcesDescHidden is the schema descriptor for hidden field.
 	resourcesDescHidden := resourcesFields[7].Descriptor()
 	// resources.DefaultHidden holds the default value on creation for the hidden field.
