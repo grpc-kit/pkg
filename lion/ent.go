@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
-	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departmentroles"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
@@ -24,7 +23,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
-	"github.com/grpc-kit/pkg/lion/resourceuris"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/scopes"
@@ -96,7 +94,6 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			authproviders.Table:       authproviders.ValidColumn,
 			credentials.Table:         credentials.ValidColumn,
-			demo.Table:                demo.ValidColumn,
 			departmentroles.Table:     departmentroles.ValidColumn,
 			departments.Table:         departments.ValidColumn,
 			grouproles.Table:          grouproles.ValidColumn,
@@ -105,7 +102,6 @@ func checkColumn(t, c string) error {
 			permissions.Table:         permissions.ValidColumn,
 			policies.Table:            policies.ValidColumn,
 			resourcescopes.Table:      resourcescopes.ValidColumn,
-			resourceuris.Table:        resourceuris.ValidColumn,
 			resources.Table:           resources.ValidColumn,
 			rolepermissions.Table:     rolepermissions.ValidColumn,
 			roles.Table:               roles.ValidColumn,

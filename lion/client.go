@@ -17,7 +17,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
-	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departmentroles"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
@@ -27,7 +26,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
-	"github.com/grpc-kit/pkg/lion/resourceuris"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/scopes"
@@ -48,8 +46,6 @@ type Client struct {
 	AuthProviders *AuthProvidersClient
 	// Credentials is the client for interacting with the Credentials builders.
 	Credentials *CredentialsClient
-	// Demo is the client for interacting with the Demo builders.
-	Demo *DemoClient
 	// DepartmentRoles is the client for interacting with the DepartmentRoles builders.
 	DepartmentRoles *DepartmentRolesClient
 	// Departments is the client for interacting with the Departments builders.
@@ -66,8 +62,6 @@ type Client struct {
 	Policies *PoliciesClient
 	// ResourceScopes is the client for interacting with the ResourceScopes builders.
 	ResourceScopes *ResourceScopesClient
-	// ResourceUris is the client for interacting with the ResourceUris builders.
-	ResourceUris *ResourceUrisClient
 	// Resources is the client for interacting with the Resources builders.
 	Resources *ResourcesClient
 	// RolePermissions is the client for interacting with the RolePermissions builders.
@@ -101,7 +95,6 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.AuthProviders = NewAuthProvidersClient(c.config)
 	c.Credentials = NewCredentialsClient(c.config)
-	c.Demo = NewDemoClient(c.config)
 	c.DepartmentRoles = NewDepartmentRolesClient(c.config)
 	c.Departments = NewDepartmentsClient(c.config)
 	c.GroupRoles = NewGroupRolesClient(c.config)
@@ -110,7 +103,6 @@ func (c *Client) init() {
 	c.Permissions = NewPermissionsClient(c.config)
 	c.Policies = NewPoliciesClient(c.config)
 	c.ResourceScopes = NewResourceScopesClient(c.config)
-	c.ResourceUris = NewResourceUrisClient(c.config)
 	c.Resources = NewResourcesClient(c.config)
 	c.RolePermissions = NewRolePermissionsClient(c.config)
 	c.Roles = NewRolesClient(c.config)
@@ -215,7 +207,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:              cfg,
 		AuthProviders:       NewAuthProvidersClient(cfg),
 		Credentials:         NewCredentialsClient(cfg),
-		Demo:                NewDemoClient(cfg),
 		DepartmentRoles:     NewDepartmentRolesClient(cfg),
 		Departments:         NewDepartmentsClient(cfg),
 		GroupRoles:          NewGroupRolesClient(cfg),
@@ -224,7 +215,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Permissions:         NewPermissionsClient(cfg),
 		Policies:            NewPoliciesClient(cfg),
 		ResourceScopes:      NewResourceScopesClient(cfg),
-		ResourceUris:        NewResourceUrisClient(cfg),
 		Resources:           NewResourcesClient(cfg),
 		RolePermissions:     NewRolePermissionsClient(cfg),
 		Roles:               NewRolesClient(cfg),
@@ -256,7 +246,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:              cfg,
 		AuthProviders:       NewAuthProvidersClient(cfg),
 		Credentials:         NewCredentialsClient(cfg),
-		Demo:                NewDemoClient(cfg),
 		DepartmentRoles:     NewDepartmentRolesClient(cfg),
 		Departments:         NewDepartmentsClient(cfg),
 		GroupRoles:          NewGroupRolesClient(cfg),
@@ -265,7 +254,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Permissions:         NewPermissionsClient(cfg),
 		Policies:            NewPoliciesClient(cfg),
 		ResourceScopes:      NewResourceScopesClient(cfg),
-		ResourceUris:        NewResourceUrisClient(cfg),
 		Resources:           NewResourcesClient(cfg),
 		RolePermissions:     NewRolePermissionsClient(cfg),
 		Roles:               NewRolesClient(cfg),
@@ -305,11 +293,10 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AuthProviders, c.Credentials, c.Demo, c.DepartmentRoles, c.Departments,
-		c.GroupRoles, c.Groups, c.PermissionResources, c.Permissions, c.Policies,
-		c.ResourceScopes, c.ResourceUris, c.Resources, c.RolePermissions, c.Roles,
-		c.Scopes, c.UserDepartments, c.UserGroups, c.UserIdentities, c.UserProfiles,
-		c.UserRoles, c.Users,
+		c.AuthProviders, c.Credentials, c.DepartmentRoles, c.Departments, c.GroupRoles,
+		c.Groups, c.PermissionResources, c.Permissions, c.Policies, c.ResourceScopes,
+		c.Resources, c.RolePermissions, c.Roles, c.Scopes, c.UserDepartments,
+		c.UserGroups, c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -319,11 +306,10 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AuthProviders, c.Credentials, c.Demo, c.DepartmentRoles, c.Departments,
-		c.GroupRoles, c.Groups, c.PermissionResources, c.Permissions, c.Policies,
-		c.ResourceScopes, c.ResourceUris, c.Resources, c.RolePermissions, c.Roles,
-		c.Scopes, c.UserDepartments, c.UserGroups, c.UserIdentities, c.UserProfiles,
-		c.UserRoles, c.Users,
+		c.AuthProviders, c.Credentials, c.DepartmentRoles, c.Departments, c.GroupRoles,
+		c.Groups, c.PermissionResources, c.Permissions, c.Policies, c.ResourceScopes,
+		c.Resources, c.RolePermissions, c.Roles, c.Scopes, c.UserDepartments,
+		c.UserGroups, c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -336,8 +322,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.AuthProviders.mutate(ctx, m)
 	case *CredentialsMutation:
 		return c.Credentials.mutate(ctx, m)
-	case *DemoMutation:
-		return c.Demo.mutate(ctx, m)
 	case *DepartmentRolesMutation:
 		return c.DepartmentRoles.mutate(ctx, m)
 	case *DepartmentsMutation:
@@ -354,8 +338,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Policies.mutate(ctx, m)
 	case *ResourceScopesMutation:
 		return c.ResourceScopes.mutate(ctx, m)
-	case *ResourceUrisMutation:
-		return c.ResourceUris.mutate(ctx, m)
 	case *ResourcesMutation:
 		return c.Resources.mutate(ctx, m)
 	case *RolePermissionsMutation:
@@ -660,139 +642,6 @@ func (c *CredentialsClient) mutate(ctx context.Context, m *CredentialsMutation) 
 		return (&CredentialsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown Credentials mutation op: %q", m.Op())
-	}
-}
-
-// DemoClient is a client for the Demo schema.
-type DemoClient struct {
-	config
-}
-
-// NewDemoClient returns a client for the Demo from the given config.
-func NewDemoClient(c config) *DemoClient {
-	return &DemoClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `demo.Hooks(f(g(h())))`.
-func (c *DemoClient) Use(hooks ...Hook) {
-	c.hooks.Demo = append(c.hooks.Demo, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `demo.Intercept(f(g(h())))`.
-func (c *DemoClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Demo = append(c.inters.Demo, interceptors...)
-}
-
-// Create returns a builder for creating a Demo entity.
-func (c *DemoClient) Create() *DemoCreate {
-	mutation := newDemoMutation(c.config, OpCreate)
-	return &DemoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Demo entities.
-func (c *DemoClient) CreateBulk(builders ...*DemoCreate) *DemoCreateBulk {
-	return &DemoCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *DemoClient) MapCreateBulk(slice any, setFunc func(*DemoCreate, int)) *DemoCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &DemoCreateBulk{err: fmt.Errorf("calling to DemoClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*DemoCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &DemoCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Demo.
-func (c *DemoClient) Update() *DemoUpdate {
-	mutation := newDemoMutation(c.config, OpUpdate)
-	return &DemoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *DemoClient) UpdateOne(_m *Demo) *DemoUpdateOne {
-	mutation := newDemoMutation(c.config, OpUpdateOne, withDemo(_m))
-	return &DemoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *DemoClient) UpdateOneID(id int) *DemoUpdateOne {
-	mutation := newDemoMutation(c.config, OpUpdateOne, withDemoID(id))
-	return &DemoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Demo.
-func (c *DemoClient) Delete() *DemoDelete {
-	mutation := newDemoMutation(c.config, OpDelete)
-	return &DemoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *DemoClient) DeleteOne(_m *Demo) *DemoDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *DemoClient) DeleteOneID(id int) *DemoDeleteOne {
-	builder := c.Delete().Where(demo.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &DemoDeleteOne{builder}
-}
-
-// Query returns a query builder for Demo.
-func (c *DemoClient) Query() *DemoQuery {
-	return &DemoQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeDemo},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Demo entity by its id.
-func (c *DemoClient) Get(ctx context.Context, id int) (*Demo, error) {
-	return c.Query().Where(demo.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *DemoClient) GetX(ctx context.Context, id int) *Demo {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *DemoClient) Hooks() []Hook {
-	return c.hooks.Demo
-}
-
-// Interceptors returns the client interceptors.
-func (c *DemoClient) Interceptors() []Interceptor {
-	return c.inters.Demo
-}
-
-func (c *DemoClient) mutate(ctx context.Context, m *DemoMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&DemoCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&DemoUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&DemoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&DemoDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("lion: unknown Demo mutation op: %q", m.Op())
 	}
 }
 
@@ -2036,155 +1885,6 @@ func (c *ResourceScopesClient) mutate(ctx context.Context, m *ResourceScopesMuta
 	}
 }
 
-// ResourceUrisClient is a client for the ResourceUris schema.
-type ResourceUrisClient struct {
-	config
-}
-
-// NewResourceUrisClient returns a client for the ResourceUris from the given config.
-func NewResourceUrisClient(c config) *ResourceUrisClient {
-	return &ResourceUrisClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `resourceuris.Hooks(f(g(h())))`.
-func (c *ResourceUrisClient) Use(hooks ...Hook) {
-	c.hooks.ResourceUris = append(c.hooks.ResourceUris, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `resourceuris.Intercept(f(g(h())))`.
-func (c *ResourceUrisClient) Intercept(interceptors ...Interceptor) {
-	c.inters.ResourceUris = append(c.inters.ResourceUris, interceptors...)
-}
-
-// Create returns a builder for creating a ResourceUris entity.
-func (c *ResourceUrisClient) Create() *ResourceUrisCreate {
-	mutation := newResourceUrisMutation(c.config, OpCreate)
-	return &ResourceUrisCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of ResourceUris entities.
-func (c *ResourceUrisClient) CreateBulk(builders ...*ResourceUrisCreate) *ResourceUrisCreateBulk {
-	return &ResourceUrisCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *ResourceUrisClient) MapCreateBulk(slice any, setFunc func(*ResourceUrisCreate, int)) *ResourceUrisCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &ResourceUrisCreateBulk{err: fmt.Errorf("calling to ResourceUrisClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*ResourceUrisCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &ResourceUrisCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for ResourceUris.
-func (c *ResourceUrisClient) Update() *ResourceUrisUpdate {
-	mutation := newResourceUrisMutation(c.config, OpUpdate)
-	return &ResourceUrisUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *ResourceUrisClient) UpdateOne(_m *ResourceUris) *ResourceUrisUpdateOne {
-	mutation := newResourceUrisMutation(c.config, OpUpdateOne, withResourceUris(_m))
-	return &ResourceUrisUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *ResourceUrisClient) UpdateOneID(id int) *ResourceUrisUpdateOne {
-	mutation := newResourceUrisMutation(c.config, OpUpdateOne, withResourceUrisID(id))
-	return &ResourceUrisUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for ResourceUris.
-func (c *ResourceUrisClient) Delete() *ResourceUrisDelete {
-	mutation := newResourceUrisMutation(c.config, OpDelete)
-	return &ResourceUrisDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *ResourceUrisClient) DeleteOne(_m *ResourceUris) *ResourceUrisDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ResourceUrisClient) DeleteOneID(id int) *ResourceUrisDeleteOne {
-	builder := c.Delete().Where(resourceuris.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &ResourceUrisDeleteOne{builder}
-}
-
-// Query returns a query builder for ResourceUris.
-func (c *ResourceUrisClient) Query() *ResourceUrisQuery {
-	return &ResourceUrisQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeResourceUris},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a ResourceUris entity by its id.
-func (c *ResourceUrisClient) Get(ctx context.Context, id int) (*ResourceUris, error) {
-	return c.Query().Where(resourceuris.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *ResourceUrisClient) GetX(ctx context.Context, id int) *ResourceUris {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryLionResources queries the lion_resources edge of a ResourceUris.
-func (c *ResourceUrisClient) QueryLionResources(_m *ResourceUris) *ResourcesQuery {
-	query := (&ResourcesClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(resourceuris.Table, resourceuris.FieldID, id),
-			sqlgraph.To(resources.Table, resources.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, resourceuris.LionResourcesTable, resourceuris.LionResourcesColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *ResourceUrisClient) Hooks() []Hook {
-	return c.hooks.ResourceUris
-}
-
-// Interceptors returns the client interceptors.
-func (c *ResourceUrisClient) Interceptors() []Interceptor {
-	return c.inters.ResourceUris
-}
-
-func (c *ResourceUrisClient) mutate(ctx context.Context, m *ResourceUrisMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&ResourceUrisCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&ResourceUrisUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&ResourceUrisUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&ResourceUrisDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("lion: unknown ResourceUris mutation op: %q", m.Op())
-	}
-}
-
 // ResourcesClient is a client for the Resources schema.
 type ResourcesClient struct {
 	config
@@ -2291,22 +1991,6 @@ func (c *ResourcesClient) GetX(ctx context.Context, id int) *Resources {
 		panic(err)
 	}
 	return obj
-}
-
-// QueryLionResourceUris queries the lion_resource_uris edge of a Resources.
-func (c *ResourcesClient) QueryLionResourceUris(_m *Resources) *ResourceUrisQuery {
-	query := (&ResourceUrisClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(resources.Table, resources.FieldID, id),
-			sqlgraph.To(resourceuris.Table, resourceuris.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, resources.LionResourceUrisTable, resources.LionResourceUrisColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // Hooks returns the client hooks.
@@ -3822,15 +3506,15 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AuthProviders, Credentials, Demo, DepartmentRoles, Departments, GroupRoles,
-		Groups, PermissionResources, Permissions, Policies, ResourceScopes,
-		ResourceUris, Resources, RolePermissions, Roles, Scopes, UserDepartments,
-		UserGroups, UserIdentities, UserProfiles, UserRoles, Users []ent.Hook
+		AuthProviders, Credentials, DepartmentRoles, Departments, GroupRoles, Groups,
+		PermissionResources, Permissions, Policies, ResourceScopes, Resources,
+		RolePermissions, Roles, Scopes, UserDepartments, UserGroups, UserIdentities,
+		UserProfiles, UserRoles, Users []ent.Hook
 	}
 	inters struct {
-		AuthProviders, Credentials, Demo, DepartmentRoles, Departments, GroupRoles,
-		Groups, PermissionResources, Permissions, Policies, ResourceScopes,
-		ResourceUris, Resources, RolePermissions, Roles, Scopes, UserDepartments,
-		UserGroups, UserIdentities, UserProfiles, UserRoles, Users []ent.Interceptor
+		AuthProviders, Credentials, DepartmentRoles, Departments, GroupRoles, Groups,
+		PermissionResources, Permissions, Policies, ResourceScopes, Resources,
+		RolePermissions, Roles, Scopes, UserDepartments, UserGroups, UserIdentities,
+		UserProfiles, UserRoles, Users []ent.Interceptor
 	}
 )

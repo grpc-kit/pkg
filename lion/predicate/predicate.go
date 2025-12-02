@@ -12,9 +12,6 @@ type AuthProviders func(*sql.Selector)
 // Credentials is the predicate function for credentials builders.
 type Credentials func(*sql.Selector)
 
-// Demo is the predicate function for demo builders.
-type Demo func(*sql.Selector)
-
 // DepartmentRoles is the predicate function for departmentroles builders.
 type DepartmentRoles func(*sql.Selector)
 
@@ -38,9 +35,6 @@ type Policies func(*sql.Selector)
 
 // ResourceScopes is the predicate function for resourcescopes builders.
 type ResourceScopes func(*sql.Selector)
-
-// ResourceUris is the predicate function for resourceuris builders.
-type ResourceUris func(*sql.Selector)
 
 // Resources is the predicate function for resources builders.
 type Resources func(*sql.Selector)

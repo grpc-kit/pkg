@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -32,12 +31,10 @@ const (
 	FieldDisplayName = "display_name"
 	// FieldResourceType holds the string denoting the resource_type field in the database.
 	FieldResourceType = "resource_type"
-	// FieldEnabled holds the string denoting the enabled field in the database.
-	FieldEnabled = "enabled"
+	// FieldResourceStatus holds the string denoting the resource_status field in the database.
+	FieldResourceStatus = "resource_status"
 	// FieldSortOrder holds the string denoting the sort_order field in the database.
 	FieldSortOrder = "sort_order"
-	// FieldResourceScope holds the string denoting the resource_scope field in the database.
-	FieldResourceScope = "resource_scope"
 	// FieldHidden holds the string denoting the hidden field in the database.
 	FieldHidden = "hidden"
 	// FieldHideChildren holds the string denoting the hide_children field in the database.
@@ -50,17 +47,8 @@ const (
 	FieldComponent = "component"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLionResourceUris holds the string denoting the lion_resource_uris edge name in mutations.
-	EdgeLionResourceUris = "lion_resource_uris"
 	// Table holds the table name of the resources in the database.
 	Table = "lion_resources"
-	// LionResourceUrisTable is the table that holds the lion_resource_uris relation/edge.
-	LionResourceUrisTable = "lion_resource_uris"
-	// LionResourceUrisInverseTable is the table name for the ResourceUris entity.
-	// It exists in this package in order to avoid circular dependency with the "resourceuris" package.
-	LionResourceUrisInverseTable = "lion_resource_uris"
-	// LionResourceUrisColumn is the table column denoting the lion_resource_uris relation/edge.
-	LionResourceUrisColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for resources fields.
@@ -75,9 +63,8 @@ var Columns = []string{
 	FieldName,
 	FieldDisplayName,
 	FieldResourceType,
-	FieldEnabled,
+	FieldResourceStatus,
 	FieldSortOrder,
-	FieldResourceScope,
 	FieldHidden,
 	FieldHideChildren,
 	FieldPath,
@@ -115,12 +102,10 @@ var (
 	DefaultDisplayName string
 	// DefaultResourceType holds the default value on creation for the "resource_type" field.
 	DefaultResourceType int
-	// DefaultEnabled holds the default value on creation for the "enabled" field.
-	DefaultEnabled bool
+	// DefaultResourceStatus holds the default value on creation for the "resource_status" field.
+	DefaultResourceStatus int
 	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
 	DefaultSortOrder int
-	// DefaultResourceScope holds the default value on creation for the "resource_scope" field.
-	DefaultResourceScope int
 	// DefaultHidden holds the default value on creation for the "hidden" field.
 	DefaultHidden bool
 	// DefaultHideChildren holds the default value on creation for the "hide_children" field.
@@ -194,19 +179,14 @@ func ByResourceType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResourceType, opts...).ToFunc()
 }
 
-// ByEnabled orders the results by the enabled field.
-func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
+// ByResourceStatus orders the results by the resource_status field.
+func ByResourceStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceStatus, opts...).ToFunc()
 }
 
 // BySortOrder orders the results by the sort_order field.
 func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
-}
-
-// ByResourceScope orders the results by the resource_scope field.
-func ByResourceScope(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResourceScope, opts...).ToFunc()
 }
 
 // ByHidden orders the results by the hidden field.
@@ -237,25 +217,4 @@ func ByComponent(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
-}
-
-// ByLionResourceUrisCount orders the results by lion_resource_uris count.
-func ByLionResourceUrisCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionResourceUrisStep(), opts...)
-	}
-}
-
-// ByLionResourceUris orders the results by lion_resource_uris terms.
-func ByLionResourceUris(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionResourceUrisStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-func newLionResourceUrisStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionResourceUrisInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionResourceUrisTable, LionResourceUrisColumn),
-	)
 }

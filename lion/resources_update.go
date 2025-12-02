@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourceuris"
 )
 
 // ResourcesUpdate is the builder for updating Resources entities.
@@ -179,17 +178,24 @@ func (_u *ResourcesUpdate) AddResourceType(v int) *ResourcesUpdate {
 	return _u
 }
 
-// SetEnabled sets the "enabled" field.
-func (_u *ResourcesUpdate) SetEnabled(v bool) *ResourcesUpdate {
-	_u.mutation.SetEnabled(v)
+// SetResourceStatus sets the "resource_status" field.
+func (_u *ResourcesUpdate) SetResourceStatus(v int) *ResourcesUpdate {
+	_u.mutation.ResetResourceStatus()
+	_u.mutation.SetResourceStatus(v)
 	return _u
 }
 
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_u *ResourcesUpdate) SetNillableEnabled(v *bool) *ResourcesUpdate {
+// SetNillableResourceStatus sets the "resource_status" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableResourceStatus(v *int) *ResourcesUpdate {
 	if v != nil {
-		_u.SetEnabled(*v)
+		_u.SetResourceStatus(*v)
 	}
+	return _u
+}
+
+// AddResourceStatus adds value to the "resource_status" field.
+func (_u *ResourcesUpdate) AddResourceStatus(v int) *ResourcesUpdate {
+	_u.mutation.AddResourceStatus(v)
 	return _u
 }
 
@@ -211,27 +217,6 @@ func (_u *ResourcesUpdate) SetNillableSortOrder(v *int) *ResourcesUpdate {
 // AddSortOrder adds value to the "sort_order" field.
 func (_u *ResourcesUpdate) AddSortOrder(v int) *ResourcesUpdate {
 	_u.mutation.AddSortOrder(v)
-	return _u
-}
-
-// SetResourceScope sets the "resource_scope" field.
-func (_u *ResourcesUpdate) SetResourceScope(v int) *ResourcesUpdate {
-	_u.mutation.ResetResourceScope()
-	_u.mutation.SetResourceScope(v)
-	return _u
-}
-
-// SetNillableResourceScope sets the "resource_scope" field if the given value is not nil.
-func (_u *ResourcesUpdate) SetNillableResourceScope(v *int) *ResourcesUpdate {
-	if v != nil {
-		_u.SetResourceScope(*v)
-	}
-	return _u
-}
-
-// AddResourceScope adds value to the "resource_scope" field.
-func (_u *ResourcesUpdate) AddResourceScope(v int) *ResourcesUpdate {
-	_u.mutation.AddResourceScope(v)
 	return _u
 }
 
@@ -319,45 +304,9 @@ func (_u *ResourcesUpdate) SetNillableDescription(v *string) *ResourcesUpdate {
 	return _u
 }
 
-// AddLionResourceURIIDs adds the "lion_resource_uris" edge to the ResourceUris entity by IDs.
-func (_u *ResourcesUpdate) AddLionResourceURIIDs(ids ...int) *ResourcesUpdate {
-	_u.mutation.AddLionResourceURIIDs(ids...)
-	return _u
-}
-
-// AddLionResourceUris adds the "lion_resource_uris" edges to the ResourceUris entity.
-func (_u *ResourcesUpdate) AddLionResourceUris(v ...*ResourceUris) *ResourcesUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionResourceURIIDs(ids...)
-}
-
 // Mutation returns the ResourcesMutation object of the builder.
 func (_u *ResourcesUpdate) Mutation() *ResourcesMutation {
 	return _u.mutation
-}
-
-// ClearLionResourceUris clears all "lion_resource_uris" edges to the ResourceUris entity.
-func (_u *ResourcesUpdate) ClearLionResourceUris() *ResourcesUpdate {
-	_u.mutation.ClearLionResourceUris()
-	return _u
-}
-
-// RemoveLionResourceURIIDs removes the "lion_resource_uris" edge to ResourceUris entities by IDs.
-func (_u *ResourcesUpdate) RemoveLionResourceURIIDs(ids ...int) *ResourcesUpdate {
-	_u.mutation.RemoveLionResourceURIIDs(ids...)
-	return _u
-}
-
-// RemoveLionResourceUris removes "lion_resource_uris" edges to ResourceUris entities.
-func (_u *ResourcesUpdate) RemoveLionResourceUris(v ...*ResourceUris) *ResourcesUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveLionResourceURIIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -478,20 +427,17 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedResourceType(); ok {
 		_spec.AddField(resources.FieldResourceType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Enabled(); ok {
-		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
+	if value, ok := _u.mutation.ResourceStatus(); ok {
+		_spec.SetField(resources.FieldResourceStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedResourceStatus(); ok {
+		_spec.AddField(resources.FieldResourceStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.SortOrder(); ok {
 		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedSortOrder(); ok {
 		_spec.AddField(resources.FieldSortOrder, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.ResourceScope(); ok {
-		_spec.SetField(resources.FieldResourceScope, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedResourceScope(); ok {
-		_spec.AddField(resources.FieldResourceScope, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Hidden(); ok {
 		_spec.SetField(resources.FieldHidden, field.TypeBool, value)
@@ -510,51 +456,6 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
-	}
-	if _u.mutation.LionResourceUrisCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resources.LionResourceUrisTable,
-			Columns: []string{resources.LionResourceUrisColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionResourceUrisIDs(); len(nodes) > 0 && !_u.mutation.LionResourceUrisCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resources.LionResourceUrisTable,
-			Columns: []string{resources.LionResourceUrisColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionResourceUrisIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resources.LionResourceUrisTable,
-			Columns: []string{resources.LionResourceUrisColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -726,17 +627,24 @@ func (_u *ResourcesUpdateOne) AddResourceType(v int) *ResourcesUpdateOne {
 	return _u
 }
 
-// SetEnabled sets the "enabled" field.
-func (_u *ResourcesUpdateOne) SetEnabled(v bool) *ResourcesUpdateOne {
-	_u.mutation.SetEnabled(v)
+// SetResourceStatus sets the "resource_status" field.
+func (_u *ResourcesUpdateOne) SetResourceStatus(v int) *ResourcesUpdateOne {
+	_u.mutation.ResetResourceStatus()
+	_u.mutation.SetResourceStatus(v)
 	return _u
 }
 
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_u *ResourcesUpdateOne) SetNillableEnabled(v *bool) *ResourcesUpdateOne {
+// SetNillableResourceStatus sets the "resource_status" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableResourceStatus(v *int) *ResourcesUpdateOne {
 	if v != nil {
-		_u.SetEnabled(*v)
+		_u.SetResourceStatus(*v)
 	}
+	return _u
+}
+
+// AddResourceStatus adds value to the "resource_status" field.
+func (_u *ResourcesUpdateOne) AddResourceStatus(v int) *ResourcesUpdateOne {
+	_u.mutation.AddResourceStatus(v)
 	return _u
 }
 
@@ -758,27 +666,6 @@ func (_u *ResourcesUpdateOne) SetNillableSortOrder(v *int) *ResourcesUpdateOne {
 // AddSortOrder adds value to the "sort_order" field.
 func (_u *ResourcesUpdateOne) AddSortOrder(v int) *ResourcesUpdateOne {
 	_u.mutation.AddSortOrder(v)
-	return _u
-}
-
-// SetResourceScope sets the "resource_scope" field.
-func (_u *ResourcesUpdateOne) SetResourceScope(v int) *ResourcesUpdateOne {
-	_u.mutation.ResetResourceScope()
-	_u.mutation.SetResourceScope(v)
-	return _u
-}
-
-// SetNillableResourceScope sets the "resource_scope" field if the given value is not nil.
-func (_u *ResourcesUpdateOne) SetNillableResourceScope(v *int) *ResourcesUpdateOne {
-	if v != nil {
-		_u.SetResourceScope(*v)
-	}
-	return _u
-}
-
-// AddResourceScope adds value to the "resource_scope" field.
-func (_u *ResourcesUpdateOne) AddResourceScope(v int) *ResourcesUpdateOne {
-	_u.mutation.AddResourceScope(v)
 	return _u
 }
 
@@ -866,45 +753,9 @@ func (_u *ResourcesUpdateOne) SetNillableDescription(v *string) *ResourcesUpdate
 	return _u
 }
 
-// AddLionResourceURIIDs adds the "lion_resource_uris" edge to the ResourceUris entity by IDs.
-func (_u *ResourcesUpdateOne) AddLionResourceURIIDs(ids ...int) *ResourcesUpdateOne {
-	_u.mutation.AddLionResourceURIIDs(ids...)
-	return _u
-}
-
-// AddLionResourceUris adds the "lion_resource_uris" edges to the ResourceUris entity.
-func (_u *ResourcesUpdateOne) AddLionResourceUris(v ...*ResourceUris) *ResourcesUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionResourceURIIDs(ids...)
-}
-
 // Mutation returns the ResourcesMutation object of the builder.
 func (_u *ResourcesUpdateOne) Mutation() *ResourcesMutation {
 	return _u.mutation
-}
-
-// ClearLionResourceUris clears all "lion_resource_uris" edges to the ResourceUris entity.
-func (_u *ResourcesUpdateOne) ClearLionResourceUris() *ResourcesUpdateOne {
-	_u.mutation.ClearLionResourceUris()
-	return _u
-}
-
-// RemoveLionResourceURIIDs removes the "lion_resource_uris" edge to ResourceUris entities by IDs.
-func (_u *ResourcesUpdateOne) RemoveLionResourceURIIDs(ids ...int) *ResourcesUpdateOne {
-	_u.mutation.RemoveLionResourceURIIDs(ids...)
-	return _u
-}
-
-// RemoveLionResourceUris removes "lion_resource_uris" edges to ResourceUris entities.
-func (_u *ResourcesUpdateOne) RemoveLionResourceUris(v ...*ResourceUris) *ResourcesUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveLionResourceURIIDs(ids...)
 }
 
 // Where appends a list predicates to the ResourcesUpdate builder.
@@ -1055,20 +906,17 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	if value, ok := _u.mutation.AddedResourceType(); ok {
 		_spec.AddField(resources.FieldResourceType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Enabled(); ok {
-		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
+	if value, ok := _u.mutation.ResourceStatus(); ok {
+		_spec.SetField(resources.FieldResourceStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedResourceStatus(); ok {
+		_spec.AddField(resources.FieldResourceStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.SortOrder(); ok {
 		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedSortOrder(); ok {
 		_spec.AddField(resources.FieldSortOrder, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.ResourceScope(); ok {
-		_spec.SetField(resources.FieldResourceScope, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedResourceScope(); ok {
-		_spec.AddField(resources.FieldResourceScope, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Hidden(); ok {
 		_spec.SetField(resources.FieldHidden, field.TypeBool, value)
@@ -1087,51 +935,6 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
-	}
-	if _u.mutation.LionResourceUrisCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resources.LionResourceUrisTable,
-			Columns: []string{resources.LionResourceUrisColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionResourceUrisIDs(); len(nodes) > 0 && !_u.mutation.LionResourceUrisCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resources.LionResourceUrisTable,
-			Columns: []string{resources.LionResourceUrisColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionResourceUrisIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resources.LionResourceUrisTable,
-			Columns: []string{resources.LionResourceUrisColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Resources{config: _u.config}
 	_spec.Assign = _node.assignValues

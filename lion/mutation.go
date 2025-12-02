@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
-	"github.com/grpc-kit/pkg/lion/demo"
 	"github.com/grpc-kit/pkg/lion/departmentroles"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
@@ -24,7 +23,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
-	"github.com/grpc-kit/pkg/lion/resourceuris"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/scopes"
@@ -47,7 +45,6 @@ const (
 	// Node types.
 	TypeAuthProviders       = "AuthProviders"
 	TypeCredentials         = "Credentials"
-	TypeDemo                = "Demo"
 	TypeDepartmentRoles     = "DepartmentRoles"
 	TypeDepartments         = "Departments"
 	TypeGroupRoles          = "GroupRoles"
@@ -56,7 +53,6 @@ const (
 	TypePermissions         = "Permissions"
 	TypePolicies            = "Policies"
 	TypeResourceScopes      = "ResourceScopes"
-	TypeResourceUris        = "ResourceUris"
 	TypeResources           = "Resources"
 	TypeRolePermissions     = "RolePermissions"
 	TypeRoles               = "Roles"
@@ -3748,516 +3744,6 @@ func (m *CredentialsMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *CredentialsMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Credentials edge %s", name)
-}
-
-// DemoMutation represents an operation that mutates the Demo nodes in the graph.
-type DemoMutation struct {
-	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	deleted_at    *time.Time
-	name          *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Demo, error)
-	predicates    []predicate.Demo
-}
-
-var _ ent.Mutation = (*DemoMutation)(nil)
-
-// demoOption allows management of the mutation configuration using functional options.
-type demoOption func(*DemoMutation)
-
-// newDemoMutation creates new mutation for the Demo entity.
-func newDemoMutation(c config, op Op, opts ...demoOption) *DemoMutation {
-	m := &DemoMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeDemo,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withDemoID sets the ID field of the mutation.
-func withDemoID(id int) demoOption {
-	return func(m *DemoMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Demo
-		)
-		m.oldValue = func(ctx context.Context) (*Demo, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Demo.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withDemo sets the old Demo of the mutation.
-func withDemo(node *Demo) demoOption {
-	return func(m *DemoMutation) {
-		m.oldValue = func(context.Context) (*Demo, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m DemoMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m DemoMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("lion: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *DemoMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *DemoMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Demo.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *DemoMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *DemoMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Demo entity.
-// If the Demo object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DemoMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *DemoMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *DemoMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *DemoMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Demo entity.
-// If the Demo object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DemoMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *DemoMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (m *DemoMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *DemoMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the Demo entity.
-// If the Demo object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DemoMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *DemoMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[demo.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *DemoMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[demo.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *DemoMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, demo.FieldDeletedAt)
-}
-
-// SetName sets the "name" field.
-func (m *DemoMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the value of the "name" field in the mutation.
-func (m *DemoMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldName returns the old "name" field's value of the Demo entity.
-// If the Demo object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DemoMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
-	}
-	return oldValue.Name, nil
-}
-
-// ResetName resets all changes to the "name" field.
-func (m *DemoMutation) ResetName() {
-	m.name = nil
-}
-
-// Where appends a list predicates to the DemoMutation builder.
-func (m *DemoMutation) Where(ps ...predicate.Demo) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the DemoMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *DemoMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.Demo, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *DemoMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *DemoMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (Demo).
-func (m *DemoMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *DemoMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.created_at != nil {
-		fields = append(fields, demo.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, demo.FieldUpdatedAt)
-	}
-	if m.deleted_at != nil {
-		fields = append(fields, demo.FieldDeletedAt)
-	}
-	if m.name != nil {
-		fields = append(fields, demo.FieldName)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *DemoMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case demo.FieldCreatedAt:
-		return m.CreatedAt()
-	case demo.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case demo.FieldDeletedAt:
-		return m.DeletedAt()
-	case demo.FieldName:
-		return m.Name()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *DemoMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case demo.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case demo.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case demo.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
-	case demo.FieldName:
-		return m.OldName(ctx)
-	}
-	return nil, fmt.Errorf("unknown Demo field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *DemoMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case demo.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case demo.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case demo.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
-	case demo.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Demo field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *DemoMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *DemoMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *DemoMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Demo numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *DemoMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(demo.FieldDeletedAt) {
-		fields = append(fields, demo.FieldDeletedAt)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *DemoMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *DemoMutation) ClearField(name string) error {
-	switch name {
-	case demo.FieldDeletedAt:
-		m.ClearDeletedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown Demo nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *DemoMutation) ResetField(name string) error {
-	switch name {
-	case demo.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case demo.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case demo.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
-	case demo.FieldName:
-		m.ResetName()
-		return nil
-	}
-	return fmt.Errorf("unknown Demo field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *DemoMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *DemoMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *DemoMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *DemoMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *DemoMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *DemoMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *DemoMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown Demo unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *DemoMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown Demo edge %s", name)
 }
 
 // DepartmentRolesMutation represents an operation that mutates the DepartmentRoles nodes in the graph.
@@ -12462,947 +11948,39 @@ func (m *ResourceScopesMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown ResourceScopes edge %s", name)
 }
 
-// ResourceUrisMutation represents an operation that mutates the ResourceUris nodes in the graph.
-type ResourceUrisMutation struct {
-	config
-	op                    Op
-	typ                   string
-	id                    *int
-	created_at            *time.Time
-	updated_at            *time.Time
-	deleted_at            *time.Time
-	_path                 *string
-	hidden                *bool
-	hide_children         *bool
-	icon                  *string
-	component             *string
-	description           *string
-	clearedFields         map[string]struct{}
-	lion_resources        *int
-	clearedlion_resources bool
-	done                  bool
-	oldValue              func(context.Context) (*ResourceUris, error)
-	predicates            []predicate.ResourceUris
-}
-
-var _ ent.Mutation = (*ResourceUrisMutation)(nil)
-
-// resourceurisOption allows management of the mutation configuration using functional options.
-type resourceurisOption func(*ResourceUrisMutation)
-
-// newResourceUrisMutation creates new mutation for the ResourceUris entity.
-func newResourceUrisMutation(c config, op Op, opts ...resourceurisOption) *ResourceUrisMutation {
-	m := &ResourceUrisMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeResourceUris,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withResourceUrisID sets the ID field of the mutation.
-func withResourceUrisID(id int) resourceurisOption {
-	return func(m *ResourceUrisMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *ResourceUris
-		)
-		m.oldValue = func(ctx context.Context) (*ResourceUris, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().ResourceUris.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withResourceUris sets the old ResourceUris of the mutation.
-func withResourceUris(node *ResourceUris) resourceurisOption {
-	return func(m *ResourceUrisMutation) {
-		m.oldValue = func(context.Context) (*ResourceUris, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ResourceUrisMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m ResourceUrisMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("lion: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *ResourceUrisMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *ResourceUrisMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().ResourceUris.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ResourceUrisMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ResourceUrisMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the ResourceUris entity.
-// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ResourceUrisMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *ResourceUrisMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ResourceUrisMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the ResourceUris entity.
-// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ResourceUrisMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (m *ResourceUrisMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *ResourceUrisMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the ResourceUris entity.
-// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *ResourceUrisMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[resourceuris.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *ResourceUrisMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[resourceuris.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *ResourceUrisMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, resourceuris.FieldDeletedAt)
-}
-
-// SetResourceID sets the "resource_id" field.
-func (m *ResourceUrisMutation) SetResourceID(i int) {
-	m.lion_resources = &i
-}
-
-// ResourceID returns the value of the "resource_id" field in the mutation.
-func (m *ResourceUrisMutation) ResourceID() (r int, exists bool) {
-	v := m.lion_resources
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldResourceID returns the old "resource_id" field's value of the ResourceUris entity.
-// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldResourceID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldResourceID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
-	}
-	return oldValue.ResourceID, nil
-}
-
-// ResetResourceID resets all changes to the "resource_id" field.
-func (m *ResourceUrisMutation) ResetResourceID() {
-	m.lion_resources = nil
-}
-
-// SetPath sets the "path" field.
-func (m *ResourceUrisMutation) SetPath(s string) {
-	m._path = &s
-}
-
-// Path returns the value of the "path" field in the mutation.
-func (m *ResourceUrisMutation) Path() (r string, exists bool) {
-	v := m._path
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPath returns the old "path" field's value of the ResourceUris entity.
-// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldPath(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPath is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPath requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPath: %w", err)
-	}
-	return oldValue.Path, nil
-}
-
-// ResetPath resets all changes to the "path" field.
-func (m *ResourceUrisMutation) ResetPath() {
-	m._path = nil
-}
-
-// SetHidden sets the "hidden" field.
-func (m *ResourceUrisMutation) SetHidden(b bool) {
-	m.hidden = &b
-}
-
-// Hidden returns the value of the "hidden" field in the mutation.
-func (m *ResourceUrisMutation) Hidden() (r bool, exists bool) {
-	v := m.hidden
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldHidden returns the old "hidden" field's value of the ResourceUris entity.
-// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldHidden(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHidden is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHidden requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHidden: %w", err)
-	}
-	return oldValue.Hidden, nil
-}
-
-// ResetHidden resets all changes to the "hidden" field.
-func (m *ResourceUrisMutation) ResetHidden() {
-	m.hidden = nil
-}
-
-// SetHideChildren sets the "hide_children" field.
-func (m *ResourceUrisMutation) SetHideChildren(b bool) {
-	m.hide_children = &b
-}
-
-// HideChildren returns the value of the "hide_children" field in the mutation.
-func (m *ResourceUrisMutation) HideChildren() (r bool, exists bool) {
-	v := m.hide_children
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldHideChildren returns the old "hide_children" field's value of the ResourceUris entity.
-// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldHideChildren(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHideChildren is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHideChildren requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHideChildren: %w", err)
-	}
-	return oldValue.HideChildren, nil
-}
-
-// ResetHideChildren resets all changes to the "hide_children" field.
-func (m *ResourceUrisMutation) ResetHideChildren() {
-	m.hide_children = nil
-}
-
-// SetIcon sets the "icon" field.
-func (m *ResourceUrisMutation) SetIcon(s string) {
-	m.icon = &s
-}
-
-// Icon returns the value of the "icon" field in the mutation.
-func (m *ResourceUrisMutation) Icon() (r string, exists bool) {
-	v := m.icon
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIcon returns the old "icon" field's value of the ResourceUris entity.
-// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldIcon(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIcon is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIcon requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIcon: %w", err)
-	}
-	return oldValue.Icon, nil
-}
-
-// ResetIcon resets all changes to the "icon" field.
-func (m *ResourceUrisMutation) ResetIcon() {
-	m.icon = nil
-}
-
-// SetComponent sets the "component" field.
-func (m *ResourceUrisMutation) SetComponent(s string) {
-	m.component = &s
-}
-
-// Component returns the value of the "component" field in the mutation.
-func (m *ResourceUrisMutation) Component() (r string, exists bool) {
-	v := m.component
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldComponent returns the old "component" field's value of the ResourceUris entity.
-// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldComponent(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldComponent is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldComponent requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldComponent: %w", err)
-	}
-	return oldValue.Component, nil
-}
-
-// ResetComponent resets all changes to the "component" field.
-func (m *ResourceUrisMutation) ResetComponent() {
-	m.component = nil
-}
-
-// SetDescription sets the "description" field.
-func (m *ResourceUrisMutation) SetDescription(s string) {
-	m.description = &s
-}
-
-// Description returns the value of the "description" field in the mutation.
-func (m *ResourceUrisMutation) Description() (r string, exists bool) {
-	v := m.description
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDescription returns the old "description" field's value of the ResourceUris entity.
-// If the ResourceUris object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceUrisMutation) OldDescription(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDescription requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
-	}
-	return oldValue.Description, nil
-}
-
-// ResetDescription resets all changes to the "description" field.
-func (m *ResourceUrisMutation) ResetDescription() {
-	m.description = nil
-}
-
-// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by id.
-func (m *ResourceUrisMutation) SetLionResourcesID(id int) {
-	m.lion_resources = &id
-}
-
-// ClearLionResources clears the "lion_resources" edge to the Resources entity.
-func (m *ResourceUrisMutation) ClearLionResources() {
-	m.clearedlion_resources = true
-	m.clearedFields[resourceuris.FieldResourceID] = struct{}{}
-}
-
-// LionResourcesCleared reports if the "lion_resources" edge to the Resources entity was cleared.
-func (m *ResourceUrisMutation) LionResourcesCleared() bool {
-	return m.clearedlion_resources
-}
-
-// LionResourcesID returns the "lion_resources" edge ID in the mutation.
-func (m *ResourceUrisMutation) LionResourcesID() (id int, exists bool) {
-	if m.lion_resources != nil {
-		return *m.lion_resources, true
-	}
-	return
-}
-
-// LionResourcesIDs returns the "lion_resources" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// LionResourcesID instead. It exists only for internal usage by the builders.
-func (m *ResourceUrisMutation) LionResourcesIDs() (ids []int) {
-	if id := m.lion_resources; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetLionResources resets all changes to the "lion_resources" edge.
-func (m *ResourceUrisMutation) ResetLionResources() {
-	m.lion_resources = nil
-	m.clearedlion_resources = false
-}
-
-// Where appends a list predicates to the ResourceUrisMutation builder.
-func (m *ResourceUrisMutation) Where(ps ...predicate.ResourceUris) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the ResourceUrisMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *ResourceUrisMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.ResourceUris, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *ResourceUrisMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *ResourceUrisMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (ResourceUris).
-func (m *ResourceUrisMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *ResourceUrisMutation) Fields() []string {
-	fields := make([]string, 0, 10)
-	if m.created_at != nil {
-		fields = append(fields, resourceuris.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, resourceuris.FieldUpdatedAt)
-	}
-	if m.deleted_at != nil {
-		fields = append(fields, resourceuris.FieldDeletedAt)
-	}
-	if m.lion_resources != nil {
-		fields = append(fields, resourceuris.FieldResourceID)
-	}
-	if m._path != nil {
-		fields = append(fields, resourceuris.FieldPath)
-	}
-	if m.hidden != nil {
-		fields = append(fields, resourceuris.FieldHidden)
-	}
-	if m.hide_children != nil {
-		fields = append(fields, resourceuris.FieldHideChildren)
-	}
-	if m.icon != nil {
-		fields = append(fields, resourceuris.FieldIcon)
-	}
-	if m.component != nil {
-		fields = append(fields, resourceuris.FieldComponent)
-	}
-	if m.description != nil {
-		fields = append(fields, resourceuris.FieldDescription)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *ResourceUrisMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case resourceuris.FieldCreatedAt:
-		return m.CreatedAt()
-	case resourceuris.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case resourceuris.FieldDeletedAt:
-		return m.DeletedAt()
-	case resourceuris.FieldResourceID:
-		return m.ResourceID()
-	case resourceuris.FieldPath:
-		return m.Path()
-	case resourceuris.FieldHidden:
-		return m.Hidden()
-	case resourceuris.FieldHideChildren:
-		return m.HideChildren()
-	case resourceuris.FieldIcon:
-		return m.Icon()
-	case resourceuris.FieldComponent:
-		return m.Component()
-	case resourceuris.FieldDescription:
-		return m.Description()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *ResourceUrisMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case resourceuris.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case resourceuris.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case resourceuris.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
-	case resourceuris.FieldResourceID:
-		return m.OldResourceID(ctx)
-	case resourceuris.FieldPath:
-		return m.OldPath(ctx)
-	case resourceuris.FieldHidden:
-		return m.OldHidden(ctx)
-	case resourceuris.FieldHideChildren:
-		return m.OldHideChildren(ctx)
-	case resourceuris.FieldIcon:
-		return m.OldIcon(ctx)
-	case resourceuris.FieldComponent:
-		return m.OldComponent(ctx)
-	case resourceuris.FieldDescription:
-		return m.OldDescription(ctx)
-	}
-	return nil, fmt.Errorf("unknown ResourceUris field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ResourceUrisMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case resourceuris.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case resourceuris.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case resourceuris.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
-		return nil
-	case resourceuris.FieldResourceID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetResourceID(v)
-		return nil
-	case resourceuris.FieldPath:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPath(v)
-		return nil
-	case resourceuris.FieldHidden:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHidden(v)
-		return nil
-	case resourceuris.FieldHideChildren:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHideChildren(v)
-		return nil
-	case resourceuris.FieldIcon:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIcon(v)
-		return nil
-	case resourceuris.FieldComponent:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetComponent(v)
-		return nil
-	case resourceuris.FieldDescription:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDescription(v)
-		return nil
-	}
-	return fmt.Errorf("unknown ResourceUris field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *ResourceUrisMutation) AddedFields() []string {
-	var fields []string
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *ResourceUrisMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *ResourceUrisMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown ResourceUris numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *ResourceUrisMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(resourceuris.FieldDeletedAt) {
-		fields = append(fields, resourceuris.FieldDeletedAt)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *ResourceUrisMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *ResourceUrisMutation) ClearField(name string) error {
-	switch name {
-	case resourceuris.FieldDeletedAt:
-		m.ClearDeletedAt()
-		return nil
-	}
-	return fmt.Errorf("unknown ResourceUris nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *ResourceUrisMutation) ResetField(name string) error {
-	switch name {
-	case resourceuris.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case resourceuris.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case resourceuris.FieldDeletedAt:
-		m.ResetDeletedAt()
-		return nil
-	case resourceuris.FieldResourceID:
-		m.ResetResourceID()
-		return nil
-	case resourceuris.FieldPath:
-		m.ResetPath()
-		return nil
-	case resourceuris.FieldHidden:
-		m.ResetHidden()
-		return nil
-	case resourceuris.FieldHideChildren:
-		m.ResetHideChildren()
-		return nil
-	case resourceuris.FieldIcon:
-		m.ResetIcon()
-		return nil
-	case resourceuris.FieldComponent:
-		m.ResetComponent()
-		return nil
-	case resourceuris.FieldDescription:
-		m.ResetDescription()
-		return nil
-	}
-	return fmt.Errorf("unknown ResourceUris field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *ResourceUrisMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.lion_resources != nil {
-		edges = append(edges, resourceuris.EdgeLionResources)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *ResourceUrisMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case resourceuris.EdgeLionResources:
-		if id := m.lion_resources; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *ResourceUrisMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *ResourceUrisMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *ResourceUrisMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedlion_resources {
-		edges = append(edges, resourceuris.EdgeLionResources)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *ResourceUrisMutation) EdgeCleared(name string) bool {
-	switch name {
-	case resourceuris.EdgeLionResources:
-		return m.clearedlion_resources
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *ResourceUrisMutation) ClearEdge(name string) error {
-	switch name {
-	case resourceuris.EdgeLionResources:
-		m.ClearLionResources()
-		return nil
-	}
-	return fmt.Errorf("unknown ResourceUris unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *ResourceUrisMutation) ResetEdge(name string) error {
-	switch name {
-	case resourceuris.EdgeLionResources:
-		m.ResetLionResources()
-		return nil
-	}
-	return fmt.Errorf("unknown ResourceUris edge %s", name)
-}
-
 // ResourcesMutation represents an operation that mutates the Resources nodes in the graph.
 type ResourcesMutation struct {
 	config
-	op                        Op
-	typ                       string
-	id                        *int
-	created_at                *time.Time
-	updated_at                *time.Time
-	deleted_at                *time.Time
-	created_by                *int64
-	addcreated_by             *int64
-	updated_by                *int64
-	addupdated_by             *int64
-	parent_id                 *int
-	addparent_id              *int
-	name                      *string
-	display_name              *string
-	resource_type             *int
-	addresource_type          *int
-	enabled                   *bool
-	sort_order                *int
-	addsort_order             *int
-	resource_scope            *int
-	addresource_scope         *int
-	hidden                    *bool
-	hide_children             *bool
-	_path                     *string
-	icon                      *string
-	component                 *string
-	description               *string
-	clearedFields             map[string]struct{}
-	lion_resource_uris        map[int]struct{}
-	removedlion_resource_uris map[int]struct{}
-	clearedlion_resource_uris bool
-	done                      bool
-	oldValue                  func(context.Context) (*Resources, error)
-	predicates                []predicate.Resources
+	op                 Op
+	typ                string
+	id                 *int
+	created_at         *time.Time
+	updated_at         *time.Time
+	deleted_at         *time.Time
+	created_by         *int64
+	addcreated_by      *int64
+	updated_by         *int64
+	addupdated_by      *int64
+	parent_id          *int
+	addparent_id       *int
+	name               *string
+	display_name       *string
+	resource_type      *int
+	addresource_type   *int
+	resource_status    *int
+	addresource_status *int
+	sort_order         *int
+	addsort_order      *int
+	hidden             *bool
+	hide_children      *bool
+	_path              *string
+	icon               *string
+	component          *string
+	description        *string
+	clearedFields      map[string]struct{}
+	done               bool
+	oldValue           func(context.Context) (*Resources, error)
+	predicates         []predicate.Resources
 }
 
 var _ ent.Mutation = (*ResourcesMutation)(nil)
@@ -13948,40 +12526,60 @@ func (m *ResourcesMutation) ResetResourceType() {
 	m.addresource_type = nil
 }
 
-// SetEnabled sets the "enabled" field.
-func (m *ResourcesMutation) SetEnabled(b bool) {
-	m.enabled = &b
+// SetResourceStatus sets the "resource_status" field.
+func (m *ResourcesMutation) SetResourceStatus(i int) {
+	m.resource_status = &i
+	m.addresource_status = nil
 }
 
-// Enabled returns the value of the "enabled" field in the mutation.
-func (m *ResourcesMutation) Enabled() (r bool, exists bool) {
-	v := m.enabled
+// ResourceStatus returns the value of the "resource_status" field in the mutation.
+func (m *ResourcesMutation) ResourceStatus() (r int, exists bool) {
+	v := m.resource_status
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldEnabled returns the old "enabled" field's value of the Resources entity.
+// OldResourceStatus returns the old "resource_status" field's value of the Resources entity.
 // If the Resources object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldEnabled(ctx context.Context) (v bool, err error) {
+func (m *ResourcesMutation) OldResourceStatus(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEnabled is only allowed on UpdateOne operations")
+		return v, errors.New("OldResourceStatus is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEnabled requires an ID field in the mutation")
+		return v, errors.New("OldResourceStatus requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEnabled: %w", err)
+		return v, fmt.Errorf("querying old value for OldResourceStatus: %w", err)
 	}
-	return oldValue.Enabled, nil
+	return oldValue.ResourceStatus, nil
 }
 
-// ResetEnabled resets all changes to the "enabled" field.
-func (m *ResourcesMutation) ResetEnabled() {
-	m.enabled = nil
+// AddResourceStatus adds i to the "resource_status" field.
+func (m *ResourcesMutation) AddResourceStatus(i int) {
+	if m.addresource_status != nil {
+		*m.addresource_status += i
+	} else {
+		m.addresource_status = &i
+	}
+}
+
+// AddedResourceStatus returns the value that was added to the "resource_status" field in this mutation.
+func (m *ResourcesMutation) AddedResourceStatus() (r int, exists bool) {
+	v := m.addresource_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetResourceStatus resets all changes to the "resource_status" field.
+func (m *ResourcesMutation) ResetResourceStatus() {
+	m.resource_status = nil
+	m.addresource_status = nil
 }
 
 // SetSortOrder sets the "sort_order" field.
@@ -14038,62 +12636,6 @@ func (m *ResourcesMutation) AddedSortOrder() (r int, exists bool) {
 func (m *ResourcesMutation) ResetSortOrder() {
 	m.sort_order = nil
 	m.addsort_order = nil
-}
-
-// SetResourceScope sets the "resource_scope" field.
-func (m *ResourcesMutation) SetResourceScope(i int) {
-	m.resource_scope = &i
-	m.addresource_scope = nil
-}
-
-// ResourceScope returns the value of the "resource_scope" field in the mutation.
-func (m *ResourcesMutation) ResourceScope() (r int, exists bool) {
-	v := m.resource_scope
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldResourceScope returns the old "resource_scope" field's value of the Resources entity.
-// If the Resources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldResourceScope(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldResourceScope is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldResourceScope requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldResourceScope: %w", err)
-	}
-	return oldValue.ResourceScope, nil
-}
-
-// AddResourceScope adds i to the "resource_scope" field.
-func (m *ResourcesMutation) AddResourceScope(i int) {
-	if m.addresource_scope != nil {
-		*m.addresource_scope += i
-	} else {
-		m.addresource_scope = &i
-	}
-}
-
-// AddedResourceScope returns the value that was added to the "resource_scope" field in this mutation.
-func (m *ResourcesMutation) AddedResourceScope() (r int, exists bool) {
-	v := m.addresource_scope
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetResourceScope resets all changes to the "resource_scope" field.
-func (m *ResourcesMutation) ResetResourceScope() {
-	m.resource_scope = nil
-	m.addresource_scope = nil
 }
 
 // SetHidden sets the "hidden" field.
@@ -14312,60 +12854,6 @@ func (m *ResourcesMutation) ResetDescription() {
 	m.description = nil
 }
 
-// AddLionResourceURIIDs adds the "lion_resource_uris" edge to the ResourceUris entity by ids.
-func (m *ResourcesMutation) AddLionResourceURIIDs(ids ...int) {
-	if m.lion_resource_uris == nil {
-		m.lion_resource_uris = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.lion_resource_uris[ids[i]] = struct{}{}
-	}
-}
-
-// ClearLionResourceUris clears the "lion_resource_uris" edge to the ResourceUris entity.
-func (m *ResourcesMutation) ClearLionResourceUris() {
-	m.clearedlion_resource_uris = true
-}
-
-// LionResourceUrisCleared reports if the "lion_resource_uris" edge to the ResourceUris entity was cleared.
-func (m *ResourcesMutation) LionResourceUrisCleared() bool {
-	return m.clearedlion_resource_uris
-}
-
-// RemoveLionResourceURIIDs removes the "lion_resource_uris" edge to the ResourceUris entity by IDs.
-func (m *ResourcesMutation) RemoveLionResourceURIIDs(ids ...int) {
-	if m.removedlion_resource_uris == nil {
-		m.removedlion_resource_uris = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.lion_resource_uris, ids[i])
-		m.removedlion_resource_uris[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedLionResourceUris returns the removed IDs of the "lion_resource_uris" edge to the ResourceUris entity.
-func (m *ResourcesMutation) RemovedLionResourceUrisIDs() (ids []int) {
-	for id := range m.removedlion_resource_uris {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// LionResourceUrisIDs returns the "lion_resource_uris" edge IDs in the mutation.
-func (m *ResourcesMutation) LionResourceUrisIDs() (ids []int) {
-	for id := range m.lion_resource_uris {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetLionResourceUris resets all changes to the "lion_resource_uris" edge.
-func (m *ResourcesMutation) ResetLionResourceUris() {
-	m.lion_resource_uris = nil
-	m.clearedlion_resource_uris = false
-	m.removedlion_resource_uris = nil
-}
-
 // Where appends a list predicates to the ResourcesMutation builder.
 func (m *ResourcesMutation) Where(ps ...predicate.Resources) {
 	m.predicates = append(m.predicates, ps...)
@@ -14400,7 +12888,7 @@ func (m *ResourcesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResourcesMutation) Fields() []string {
-	fields := make([]string, 0, 18)
+	fields := make([]string, 0, 17)
 	if m.created_at != nil {
 		fields = append(fields, resources.FieldCreatedAt)
 	}
@@ -14428,14 +12916,11 @@ func (m *ResourcesMutation) Fields() []string {
 	if m.resource_type != nil {
 		fields = append(fields, resources.FieldResourceType)
 	}
-	if m.enabled != nil {
-		fields = append(fields, resources.FieldEnabled)
+	if m.resource_status != nil {
+		fields = append(fields, resources.FieldResourceStatus)
 	}
 	if m.sort_order != nil {
 		fields = append(fields, resources.FieldSortOrder)
-	}
-	if m.resource_scope != nil {
-		fields = append(fields, resources.FieldResourceScope)
 	}
 	if m.hidden != nil {
 		fields = append(fields, resources.FieldHidden)
@@ -14481,12 +12966,10 @@ func (m *ResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.DisplayName()
 	case resources.FieldResourceType:
 		return m.ResourceType()
-	case resources.FieldEnabled:
-		return m.Enabled()
+	case resources.FieldResourceStatus:
+		return m.ResourceStatus()
 	case resources.FieldSortOrder:
 		return m.SortOrder()
-	case resources.FieldResourceScope:
-		return m.ResourceScope()
 	case resources.FieldHidden:
 		return m.Hidden()
 	case resources.FieldHideChildren:
@@ -14526,12 +13009,10 @@ func (m *ResourcesMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldDisplayName(ctx)
 	case resources.FieldResourceType:
 		return m.OldResourceType(ctx)
-	case resources.FieldEnabled:
-		return m.OldEnabled(ctx)
+	case resources.FieldResourceStatus:
+		return m.OldResourceStatus(ctx)
 	case resources.FieldSortOrder:
 		return m.OldSortOrder(ctx)
-	case resources.FieldResourceScope:
-		return m.OldResourceScope(ctx)
 	case resources.FieldHidden:
 		return m.OldHidden(ctx)
 	case resources.FieldHideChildren:
@@ -14616,12 +13097,12 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetResourceType(v)
 		return nil
-	case resources.FieldEnabled:
-		v, ok := value.(bool)
+	case resources.FieldResourceStatus:
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetEnabled(v)
+		m.SetResourceStatus(v)
 		return nil
 	case resources.FieldSortOrder:
 		v, ok := value.(int)
@@ -14629,13 +13110,6 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSortOrder(v)
-		return nil
-	case resources.FieldResourceScope:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetResourceScope(v)
 		return nil
 	case resources.FieldHidden:
 		v, ok := value.(bool)
@@ -14699,11 +13173,11 @@ func (m *ResourcesMutation) AddedFields() []string {
 	if m.addresource_type != nil {
 		fields = append(fields, resources.FieldResourceType)
 	}
+	if m.addresource_status != nil {
+		fields = append(fields, resources.FieldResourceStatus)
+	}
 	if m.addsort_order != nil {
 		fields = append(fields, resources.FieldSortOrder)
-	}
-	if m.addresource_scope != nil {
-		fields = append(fields, resources.FieldResourceScope)
 	}
 	return fields
 }
@@ -14721,10 +13195,10 @@ func (m *ResourcesMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedParentID()
 	case resources.FieldResourceType:
 		return m.AddedResourceType()
+	case resources.FieldResourceStatus:
+		return m.AddedResourceStatus()
 	case resources.FieldSortOrder:
 		return m.AddedSortOrder()
-	case resources.FieldResourceScope:
-		return m.AddedResourceScope()
 	}
 	return nil, false
 }
@@ -14762,19 +13236,19 @@ func (m *ResourcesMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddResourceType(v)
 		return nil
+	case resources.FieldResourceStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddResourceStatus(v)
+		return nil
 	case resources.FieldSortOrder:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddSortOrder(v)
-		return nil
-	case resources.FieldResourceScope:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddResourceScope(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Resources numeric field %s", name)
@@ -14851,14 +13325,11 @@ func (m *ResourcesMutation) ResetField(name string) error {
 	case resources.FieldResourceType:
 		m.ResetResourceType()
 		return nil
-	case resources.FieldEnabled:
-		m.ResetEnabled()
+	case resources.FieldResourceStatus:
+		m.ResetResourceStatus()
 		return nil
 	case resources.FieldSortOrder:
 		m.ResetSortOrder()
-		return nil
-	case resources.FieldResourceScope:
-		m.ResetResourceScope()
 		return nil
 	case resources.FieldHidden:
 		m.ResetHidden()
@@ -14884,85 +13355,49 @@ func (m *ResourcesMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ResourcesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.lion_resource_uris != nil {
-		edges = append(edges, resources.EdgeLionResourceUris)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *ResourcesMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case resources.EdgeLionResourceUris:
-		ids := make([]ent.Value, 0, len(m.lion_resource_uris))
-		for id := range m.lion_resource_uris {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ResourcesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedlion_resource_uris != nil {
-		edges = append(edges, resources.EdgeLionResourceUris)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ResourcesMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case resources.EdgeLionResourceUris:
-		ids := make([]ent.Value, 0, len(m.removedlion_resource_uris))
-		for id := range m.removedlion_resource_uris {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ResourcesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedlion_resource_uris {
-		edges = append(edges, resources.EdgeLionResourceUris)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *ResourcesMutation) EdgeCleared(name string) bool {
-	switch name {
-	case resources.EdgeLionResourceUris:
-		return m.clearedlion_resource_uris
-	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *ResourcesMutation) ClearEdge(name string) error {
-	switch name {
-	}
 	return fmt.Errorf("unknown Resources unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *ResourcesMutation) ResetEdge(name string) error {
-	switch name {
-	case resources.EdgeLionResourceUris:
-		m.ResetLionResourceUris()
-		return nil
-	}
 	return fmt.Errorf("unknown Resources edge %s", name)
 }
 

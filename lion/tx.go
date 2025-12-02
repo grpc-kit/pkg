@@ -16,8 +16,6 @@ type Tx struct {
 	AuthProviders *AuthProvidersClient
 	// Credentials is the client for interacting with the Credentials builders.
 	Credentials *CredentialsClient
-	// Demo is the client for interacting with the Demo builders.
-	Demo *DemoClient
 	// DepartmentRoles is the client for interacting with the DepartmentRoles builders.
 	DepartmentRoles *DepartmentRolesClient
 	// Departments is the client for interacting with the Departments builders.
@@ -34,8 +32,6 @@ type Tx struct {
 	Policies *PoliciesClient
 	// ResourceScopes is the client for interacting with the ResourceScopes builders.
 	ResourceScopes *ResourceScopesClient
-	// ResourceUris is the client for interacting with the ResourceUris builders.
-	ResourceUris *ResourceUrisClient
 	// Resources is the client for interacting with the Resources builders.
 	Resources *ResourcesClient
 	// RolePermissions is the client for interacting with the RolePermissions builders.
@@ -189,7 +185,6 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
 	tx.Credentials = NewCredentialsClient(tx.config)
-	tx.Demo = NewDemoClient(tx.config)
 	tx.DepartmentRoles = NewDepartmentRolesClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
 	tx.GroupRoles = NewGroupRolesClient(tx.config)
@@ -198,7 +193,6 @@ func (tx *Tx) init() {
 	tx.Permissions = NewPermissionsClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
 	tx.ResourceScopes = NewResourceScopesClient(tx.config)
-	tx.ResourceUris = NewResourceUrisClient(tx.config)
 	tx.Resources = NewResourcesClient(tx.config)
 	tx.RolePermissions = NewRolePermissionsClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)

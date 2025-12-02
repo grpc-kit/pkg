@@ -36,11 +36,9 @@ type Resources struct {
 	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
 	ResourceType int `json:"resource_type,omitempty"`
 	// 是否启用该资源项，禁用后完全不可访问
-	Enabled bool `json:"enabled,omitempty"`
+	ResourceStatus int `json:"resource_status,omitempty"`
 	// 资源排序顺序，用于同级资源的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999
 	SortOrder int `json:"sort_order,omitempty"`
-	// 作用范围，对应 api/known/admin/v1/common.proto 中定义
-	ResourceScope int `json:"resource_scope,omitempty"`
 	// 是否在资源列表中隐藏该节点
 	Hidden bool `json:"hidden,omitempty"`
 	// 是否隐藏该资源节点的子项
@@ -52,29 +50,8 @@ type Resources struct {
 	// 组件名称，如 UserOutlined
 	Component string `json:"component,omitempty"`
 	// 详细描述
-	Description string `json:"description,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the ResourcesQuery when eager-loading is set.
-	Edges        ResourcesEdges `json:"edges"`
+	Description  string `json:"description,omitempty"`
 	selectValues sql.SelectValues
-}
-
-// ResourcesEdges holds the relations/edges for other nodes in the graph.
-type ResourcesEdges struct {
-	// LionResourceUris holds the value of the lion_resource_uris edge.
-	LionResourceUris []*ResourceUris `json:"lion_resource_uris,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// LionResourceUrisOrErr returns the LionResourceUris value or an error if the edge
-// was not loaded in eager-loading.
-func (e ResourcesEdges) LionResourceUrisOrErr() ([]*ResourceUris, error) {
-	if e.loadedTypes[0] {
-		return e.LionResourceUris, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_resource_uris"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -82,9 +59,9 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case resources.FieldEnabled, resources.FieldHidden, resources.FieldHideChildren:
+		case resources.FieldHidden, resources.FieldHideChildren:
 			values[i] = new(sql.NullBool)
-		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldResourceType, resources.FieldSortOrder, resources.FieldResourceScope:
+		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldResourceType, resources.FieldResourceStatus, resources.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
 		case resources.FieldName, resources.FieldDisplayName, resources.FieldPath, resources.FieldIcon, resources.FieldComponent, resources.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -166,23 +143,17 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ResourceType = int(value.Int64)
 			}
-		case resources.FieldEnabled:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field enabled", values[i])
+		case resources.FieldResourceStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_status", values[i])
 			} else if value.Valid {
-				_m.Enabled = value.Bool
+				_m.ResourceStatus = int(value.Int64)
 			}
 		case resources.FieldSortOrder:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field sort_order", values[i])
 			} else if value.Valid {
 				_m.SortOrder = int(value.Int64)
-			}
-		case resources.FieldResourceScope:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field resource_scope", values[i])
-			} else if value.Valid {
-				_m.ResourceScope = int(value.Int64)
 			}
 		case resources.FieldHidden:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -231,11 +202,6 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Resources) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryLionResourceUris queries the "lion_resource_uris" edge of the Resources entity.
-func (_m *Resources) QueryLionResourceUris() *ResourceUrisQuery {
-	return NewResourcesClient(_m.config).QueryLionResourceUris(_m)
 }
 
 // Update returns a builder for updating this Resources.
@@ -290,14 +256,11 @@ func (_m *Resources) String() string {
 	builder.WriteString("resource_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ResourceType))
 	builder.WriteString(", ")
-	builder.WriteString("enabled=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))
+	builder.WriteString("resource_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ResourceStatus))
 	builder.WriteString(", ")
 	builder.WriteString("sort_order=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))
-	builder.WriteString(", ")
-	builder.WriteString("resource_scope=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ResourceScope))
 	builder.WriteString(", ")
 	builder.WriteString("hidden=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Hidden))

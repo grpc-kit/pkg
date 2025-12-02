@@ -33,18 +33,6 @@ func (f CredentialsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.CredentialsMutation", m)
 }
 
-// The DemoFunc type is an adapter to allow the use of ordinary
-// function as Demo mutator.
-type DemoFunc func(context.Context, *lion.DemoMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f DemoFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.DemoMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DemoMutation", m)
-}
-
 // The DepartmentRolesFunc type is an adapter to allow the use of ordinary
 // function as DepartmentRoles mutator.
 type DepartmentRolesFunc func(context.Context, *lion.DepartmentRolesMutation) (lion.Value, error)
@@ -139,18 +127,6 @@ func (f ResourceScopesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.V
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.ResourceScopesMutation", m)
-}
-
-// The ResourceUrisFunc type is an adapter to allow the use of ordinary
-// function as ResourceUris mutator.
-type ResourceUrisFunc func(context.Context, *lion.ResourceUrisMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ResourceUrisFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.ResourceUrisMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.ResourceUrisMutation", m)
 }
 
 // The ResourcesFunc type is an adapter to allow the use of ordinary

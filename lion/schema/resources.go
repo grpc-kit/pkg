@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -30,16 +29,17 @@ func (Resources) Fields() []ent.Field {
 		field.Int("resource_type").
 			Default(0).
 			Comment("用途类型，对应 api/known/admin/v1/common.proto 中定义"),
-		field.Bool("enabled").
-			Default(true).
+		field.Int("resource_status").
+			Default(0).
 			Comment("是否启用该资源项，禁用后完全不可访问"),
 		field.Int("sort_order").
 			Default(100).
 			Comment("资源排序顺序，用于同级资源的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999"),
-
-		field.Int("resource_scope").
-			Default(0).
-			Comment("作用范围，对应 api/known/admin/v1/common.proto 中定义"),
+		/*
+			field.Int("resource_scope").
+				Default(0).
+				Comment("作用范围，对应 api/known/admin/v1/common.proto 中定义"),
+		*/
 		field.Bool("hidden").
 			Default(false).
 			Comment("是否在资源列表中隐藏该节点"),
@@ -66,9 +66,12 @@ func (Resources) Fields() []ent.Field {
 
 // Edges of the table.
 func (Resources) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.To("lion_resource_uris", ResourceUris.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
-	}
+	/*
+		return []ent.Edge{
+			edge.To("lion_resource_uris", ResourceUris.Type).Annotations(entsql.OnDelete(entsql.Cascade)),
+		}
+	*/
+	return nil
 }
 
 // Mixin of the table.
@@ -84,8 +87,6 @@ func (Resources) Indexes() []ent.Index {
 	return []ent.Index{
 		// 父资源ID索引，用于快速查找子资源
 		index.Fields("parent_id"),
-		// 启用状态索引，用于快速过滤启用的资源
-		index.Fields("enabled"),
 		// 排序顺序索引，用于排序查询
 		index.Fields("sort_order"),
 	}

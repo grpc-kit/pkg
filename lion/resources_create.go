@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourceuris"
 )
 
 // ResourcesCreate is the builder for creating a Resources entity.
@@ -139,16 +138,16 @@ func (_c *ResourcesCreate) SetNillableResourceType(v *int) *ResourcesCreate {
 	return _c
 }
 
-// SetEnabled sets the "enabled" field.
-func (_c *ResourcesCreate) SetEnabled(v bool) *ResourcesCreate {
-	_c.mutation.SetEnabled(v)
+// SetResourceStatus sets the "resource_status" field.
+func (_c *ResourcesCreate) SetResourceStatus(v int) *ResourcesCreate {
+	_c.mutation.SetResourceStatus(v)
 	return _c
 }
 
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableEnabled(v *bool) *ResourcesCreate {
+// SetNillableResourceStatus sets the "resource_status" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableResourceStatus(v *int) *ResourcesCreate {
 	if v != nil {
-		_c.SetEnabled(*v)
+		_c.SetResourceStatus(*v)
 	}
 	return _c
 }
@@ -163,20 +162,6 @@ func (_c *ResourcesCreate) SetSortOrder(v int) *ResourcesCreate {
 func (_c *ResourcesCreate) SetNillableSortOrder(v *int) *ResourcesCreate {
 	if v != nil {
 		_c.SetSortOrder(*v)
-	}
-	return _c
-}
-
-// SetResourceScope sets the "resource_scope" field.
-func (_c *ResourcesCreate) SetResourceScope(v int) *ResourcesCreate {
-	_c.mutation.SetResourceScope(v)
-	return _c
-}
-
-// SetNillableResourceScope sets the "resource_scope" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableResourceScope(v *int) *ResourcesCreate {
-	if v != nil {
-		_c.SetResourceScope(*v)
 	}
 	return _c
 }
@@ -265,21 +250,6 @@ func (_c *ResourcesCreate) SetNillableDescription(v *string) *ResourcesCreate {
 	return _c
 }
 
-// AddLionResourceURIIDs adds the "lion_resource_uris" edge to the ResourceUris entity by IDs.
-func (_c *ResourcesCreate) AddLionResourceURIIDs(ids ...int) *ResourcesCreate {
-	_c.mutation.AddLionResourceURIIDs(ids...)
-	return _c
-}
-
-// AddLionResourceUris adds the "lion_resource_uris" edges to the ResourceUris entity.
-func (_c *ResourcesCreate) AddLionResourceUris(v ...*ResourceUris) *ResourcesCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionResourceURIIDs(ids...)
-}
-
 // Mutation returns the ResourcesMutation object of the builder.
 func (_c *ResourcesCreate) Mutation() *ResourcesMutation {
 	return _c.mutation
@@ -343,17 +313,13 @@ func (_c *ResourcesCreate) defaults() {
 		v := resources.DefaultResourceType
 		_c.mutation.SetResourceType(v)
 	}
-	if _, ok := _c.mutation.Enabled(); !ok {
-		v := resources.DefaultEnabled
-		_c.mutation.SetEnabled(v)
+	if _, ok := _c.mutation.ResourceStatus(); !ok {
+		v := resources.DefaultResourceStatus
+		_c.mutation.SetResourceStatus(v)
 	}
 	if _, ok := _c.mutation.SortOrder(); !ok {
 		v := resources.DefaultSortOrder
 		_c.mutation.SetSortOrder(v)
-	}
-	if _, ok := _c.mutation.ResourceScope(); !ok {
-		v := resources.DefaultResourceScope
-		_c.mutation.SetResourceScope(v)
 	}
 	if _, ok := _c.mutation.Hidden(); !ok {
 		v := resources.DefaultHidden
@@ -406,14 +372,11 @@ func (_c *ResourcesCreate) check() error {
 	if _, ok := _c.mutation.ResourceType(); !ok {
 		return &ValidationError{Name: "resource_type", err: errors.New(`lion: missing required field "Resources.resource_type"`)}
 	}
-	if _, ok := _c.mutation.Enabled(); !ok {
-		return &ValidationError{Name: "enabled", err: errors.New(`lion: missing required field "Resources.enabled"`)}
+	if _, ok := _c.mutation.ResourceStatus(); !ok {
+		return &ValidationError{Name: "resource_status", err: errors.New(`lion: missing required field "Resources.resource_status"`)}
 	}
 	if _, ok := _c.mutation.SortOrder(); !ok {
 		return &ValidationError{Name: "sort_order", err: errors.New(`lion: missing required field "Resources.sort_order"`)}
-	}
-	if _, ok := _c.mutation.ResourceScope(); !ok {
-		return &ValidationError{Name: "resource_scope", err: errors.New(`lion: missing required field "Resources.resource_scope"`)}
 	}
 	if _, ok := _c.mutation.Hidden(); !ok {
 		return &ValidationError{Name: "hidden", err: errors.New(`lion: missing required field "Resources.hidden"`)}
@@ -510,17 +473,13 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 		_spec.SetField(resources.FieldResourceType, field.TypeInt, value)
 		_node.ResourceType = value
 	}
-	if value, ok := _c.mutation.Enabled(); ok {
-		_spec.SetField(resources.FieldEnabled, field.TypeBool, value)
-		_node.Enabled = value
+	if value, ok := _c.mutation.ResourceStatus(); ok {
+		_spec.SetField(resources.FieldResourceStatus, field.TypeInt, value)
+		_node.ResourceStatus = value
 	}
 	if value, ok := _c.mutation.SortOrder(); ok {
 		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
 		_node.SortOrder = value
-	}
-	if value, ok := _c.mutation.ResourceScope(); ok {
-		_spec.SetField(resources.FieldResourceScope, field.TypeInt, value)
-		_node.ResourceScope = value
 	}
 	if value, ok := _c.mutation.Hidden(); ok {
 		_spec.SetField(resources.FieldHidden, field.TypeBool, value)
@@ -545,22 +504,6 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
 		_node.Description = value
-	}
-	if nodes := _c.mutation.LionResourceUrisIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resources.LionResourceUrisTable,
-			Columns: []string{resources.LionResourceUrisColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resourceuris.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
