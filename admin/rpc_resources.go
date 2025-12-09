@@ -92,8 +92,8 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			// resources.FieldI18nName,
 			resources.FieldSortOrder,
 			resources.FieldResourceType,
-			resources.FieldResourceScope,
-			resources.FieldEnabled,
+			// resources.FieldResourceScope,
+			// resources.FieldEnabled,
 			resources.FieldHidden,
 			resources.FieldHideChildren,
 			resources.FieldPath,
@@ -120,11 +120,11 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			ParentId: int32(m.ParentID),
 			Name:     m.Name,
 			// I18NName:     m.I18nName,
-			DisplayName:  I18NName(m.Name),
-			SortOrder:    int32(m.SortOrder),
-			Type:         adminv1.Resource_Type(m.ResourceType),
-			Scope:        adminv1.Resource_Scope(m.ResourceScope),
-			Enabled:      m.Enabled,
+			DisplayName: I18NName(m.Name),
+			SortOrder:   int32(m.SortOrder),
+			Type:        adminv1.Resource_Type(m.ResourceType),
+			// Scope:        adminv1.Resource_Scope(m.ResourceScope),
+			// Enabled:      m.Enabled,
 			Hidden:       m.Hidden,
 			HideChildren: m.HideChildren,
 			Path:         m.Path,
@@ -173,15 +173,15 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 	_, err = db.Resources.Create().
 		SetName(req.Resource.Name).
 		SetResourceType(int(req.Resource.Type)).
-		SetResourceScope(int(req.Resource.Scope)).
+		// SetResourceScope(int(req.Resource.Scope)).
 		SetParentID(int(req.Resource.ParentId)).
 		SetPath(req.Resource.Path).
 		SetComponent(req.Resource.Component).
 		SetIcon(req.Resource.Icon).
 		SetSortOrder(int(req.Resource.SortOrder)).
-		SetEnabled(req.Resource.Enabled).
-		SetHidden(req.Resource.Hidden).
-		SetHideChildren(req.Resource.HideChildren).
+		// SetEnabled(req.Resource.Enabled).
+		// SetHidden(req.Resource.Hidden).
+		// SetHideChildren(req.Resource.HideChildren).
 		Save(ctx)
 
 	if err != nil {

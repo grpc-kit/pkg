@@ -24,9 +24,6 @@ type GroupRoles func(*sql.Selector)
 // Groups is the predicate function for groups builders.
 type Groups func(*sql.Selector)
 
-// PermissionResources is the predicate function for permissionresources builders.
-type PermissionResources func(*sql.Selector)
-
 // Permissions is the predicate function for permissions builders.
 type Permissions func(*sql.Selector)
 

@@ -11,7 +11,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/permissionresources"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
@@ -354,29 +353,6 @@ func init() {
 	groupsDescDescription := groupsFields[9].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
-	permissionresourcesMixin := schema.PermissionResources{}.Mixin()
-	permissionresourcesMixinFields0 := permissionresourcesMixin[0].Fields()
-	_ = permissionresourcesMixinFields0
-	permissionresourcesFields := schema.PermissionResources{}.Fields()
-	_ = permissionresourcesFields
-	// permissionresourcesDescCreatedAt is the schema descriptor for created_at field.
-	permissionresourcesDescCreatedAt := permissionresourcesMixinFields0[0].Descriptor()
-	// permissionresources.DefaultCreatedAt holds the default value on creation for the created_at field.
-	permissionresources.DefaultCreatedAt = permissionresourcesDescCreatedAt.Default.(func() time.Time)
-	// permissionresourcesDescUpdatedAt is the schema descriptor for updated_at field.
-	permissionresourcesDescUpdatedAt := permissionresourcesMixinFields0[1].Descriptor()
-	// permissionresources.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	permissionresources.DefaultUpdatedAt = permissionresourcesDescUpdatedAt.Default.(func() time.Time)
-	// permissionresources.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	permissionresources.UpdateDefaultUpdatedAt = permissionresourcesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// permissionresourcesDescPermissionID is the schema descriptor for permission_id field.
-	permissionresourcesDescPermissionID := permissionresourcesFields[0].Descriptor()
-	// permissionresources.PermissionIDValidator is a validator for the "permission_id" field. It is called by the builders before save.
-	permissionresources.PermissionIDValidator = permissionresourcesDescPermissionID.Validators[0].(func(int) error)
-	// permissionresourcesDescResourceID is the schema descriptor for resource_id field.
-	permissionresourcesDescResourceID := permissionresourcesFields[1].Descriptor()
-	// permissionresources.ResourceIDValidator is a validator for the "resource_id" field. It is called by the builders before save.
-	permissionresources.ResourceIDValidator = permissionresourcesDescResourceID.Validators[0].(func(int) error)
 	permissionsMixin := schema.Permissions{}.Mixin()
 	permissionsMixinFields0 := permissionsMixin[0].Fields()
 	_ = permissionsMixinFields0

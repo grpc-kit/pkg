@@ -18,7 +18,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/permissionresources"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
@@ -92,26 +91,25 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			authproviders.Table:       authproviders.ValidColumn,
-			credentials.Table:         credentials.ValidColumn,
-			departmentroles.Table:     departmentroles.ValidColumn,
-			departments.Table:         departments.ValidColumn,
-			grouproles.Table:          grouproles.ValidColumn,
-			groups.Table:              groups.ValidColumn,
-			permissionresources.Table: permissionresources.ValidColumn,
-			permissions.Table:         permissions.ValidColumn,
-			policies.Table:            policies.ValidColumn,
-			resourcescopes.Table:      resourcescopes.ValidColumn,
-			resources.Table:           resources.ValidColumn,
-			rolepermissions.Table:     rolepermissions.ValidColumn,
-			roles.Table:               roles.ValidColumn,
-			scopes.Table:              scopes.ValidColumn,
-			userdepartments.Table:     userdepartments.ValidColumn,
-			usergroups.Table:          usergroups.ValidColumn,
-			useridentities.Table:      useridentities.ValidColumn,
-			userprofiles.Table:        userprofiles.ValidColumn,
-			userroles.Table:           userroles.ValidColumn,
-			users.Table:               users.ValidColumn,
+			authproviders.Table:   authproviders.ValidColumn,
+			credentials.Table:     credentials.ValidColumn,
+			departmentroles.Table: departmentroles.ValidColumn,
+			departments.Table:     departments.ValidColumn,
+			grouproles.Table:      grouproles.ValidColumn,
+			groups.Table:          groups.ValidColumn,
+			permissions.Table:     permissions.ValidColumn,
+			policies.Table:        policies.ValidColumn,
+			resourcescopes.Table:  resourcescopes.ValidColumn,
+			resources.Table:       resources.ValidColumn,
+			rolepermissions.Table: rolepermissions.ValidColumn,
+			roles.Table:           roles.ValidColumn,
+			scopes.Table:          scopes.ValidColumn,
+			userdepartments.Table: userdepartments.ValidColumn,
+			usergroups.Table:      usergroups.ValidColumn,
+			useridentities.Table:  useridentities.ValidColumn,
+			userprofiles.Table:    userprofiles.ValidColumn,
+			userroles.Table:       userroles.ValidColumn,
+			users.Table:           users.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

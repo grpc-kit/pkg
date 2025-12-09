@@ -81,18 +81,6 @@ func (f GroupsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GroupsMutation", m)
 }
 
-// The PermissionResourcesFunc type is an adapter to allow the use of ordinary
-// function as PermissionResources mutator.
-type PermissionResourcesFunc func(context.Context, *lion.PermissionResourcesMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f PermissionResourcesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.PermissionResourcesMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.PermissionResourcesMutation", m)
-}
-
 // The PermissionsFunc type is an adapter to allow the use of ordinary
 // function as Permissions mutator.
 type PermissionsFunc func(context.Context, *lion.PermissionsMutation) (lion.Value, error)
