@@ -10,26 +10,26 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departmentroles"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/roles"
 )
 
-// DepartmentRolesCreate is the builder for creating a DepartmentRoles entity.
-type DepartmentRolesCreate struct {
+// RoleDepartmentsCreate is the builder for creating a RoleDepartments entity.
+type RoleDepartmentsCreate struct {
 	config
-	mutation *DepartmentRolesMutation
+	mutation *RoleDepartmentsMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *DepartmentRolesCreate) SetCreatedAt(v time.Time) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetCreatedAt(v time.Time) *RoleDepartmentsCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *DepartmentRolesCreate) SetNillableCreatedAt(v *time.Time) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetNillableCreatedAt(v *time.Time) *RoleDepartmentsCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -37,13 +37,13 @@ func (_c *DepartmentRolesCreate) SetNillableCreatedAt(v *time.Time) *DepartmentR
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *DepartmentRolesCreate) SetUpdatedAt(v time.Time) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetUpdatedAt(v time.Time) *RoleDepartmentsCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *DepartmentRolesCreate) SetNillableUpdatedAt(v *time.Time) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetNillableUpdatedAt(v *time.Time) *RoleDepartmentsCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -51,13 +51,13 @@ func (_c *DepartmentRolesCreate) SetNillableUpdatedAt(v *time.Time) *DepartmentR
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_c *DepartmentRolesCreate) SetCreatedBy(v int64) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetCreatedBy(v int64) *RoleDepartmentsCreate {
 	_c.mutation.SetCreatedBy(v)
 	return _c
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_c *DepartmentRolesCreate) SetNillableCreatedBy(v *int64) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetNillableCreatedBy(v *int64) *RoleDepartmentsCreate {
 	if v != nil {
 		_c.SetCreatedBy(*v)
 	}
@@ -65,13 +65,13 @@ func (_c *DepartmentRolesCreate) SetNillableCreatedBy(v *int64) *DepartmentRoles
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_c *DepartmentRolesCreate) SetUpdatedBy(v int64) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetUpdatedBy(v int64) *RoleDepartmentsCreate {
 	_c.mutation.SetUpdatedBy(v)
 	return _c
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_c *DepartmentRolesCreate) SetNillableUpdatedBy(v *int64) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetNillableUpdatedBy(v *int64) *RoleDepartmentsCreate {
 	if v != nil {
 		_c.SetUpdatedBy(*v)
 	}
@@ -79,52 +79,52 @@ func (_c *DepartmentRolesCreate) SetNillableUpdatedBy(v *int64) *DepartmentRoles
 }
 
 // SetRoleID sets the "role_id" field.
-func (_c *DepartmentRolesCreate) SetRoleID(v int) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetRoleID(v int) *RoleDepartmentsCreate {
 	_c.mutation.SetRoleID(v)
 	return _c
 }
 
 // SetDepartmentID sets the "department_id" field.
-func (_c *DepartmentRolesCreate) SetDepartmentID(v int) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetDepartmentID(v int) *RoleDepartmentsCreate {
 	_c.mutation.SetDepartmentID(v)
 	return _c
 }
 
 // SetLionRolesID sets the "lion_roles" edge to the Roles entity by ID.
-func (_c *DepartmentRolesCreate) SetLionRolesID(id int) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetLionRolesID(id int) *RoleDepartmentsCreate {
 	_c.mutation.SetLionRolesID(id)
 	return _c
 }
 
 // SetLionRoles sets the "lion_roles" edge to the Roles entity.
-func (_c *DepartmentRolesCreate) SetLionRoles(v *Roles) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetLionRoles(v *Roles) *RoleDepartmentsCreate {
 	return _c.SetLionRolesID(v.ID)
 }
 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_c *DepartmentRolesCreate) SetLionDepartmentsID(id int) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetLionDepartmentsID(id int) *RoleDepartmentsCreate {
 	_c.mutation.SetLionDepartmentsID(id)
 	return _c
 }
 
 // SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_c *DepartmentRolesCreate) SetLionDepartments(v *Departments) *DepartmentRolesCreate {
+func (_c *RoleDepartmentsCreate) SetLionDepartments(v *Departments) *RoleDepartmentsCreate {
 	return _c.SetLionDepartmentsID(v.ID)
 }
 
-// Mutation returns the DepartmentRolesMutation object of the builder.
-func (_c *DepartmentRolesCreate) Mutation() *DepartmentRolesMutation {
+// Mutation returns the RoleDepartmentsMutation object of the builder.
+func (_c *RoleDepartmentsCreate) Mutation() *RoleDepartmentsMutation {
 	return _c.mutation
 }
 
-// Save creates the DepartmentRoles in the database.
-func (_c *DepartmentRolesCreate) Save(ctx context.Context) (*DepartmentRoles, error) {
+// Save creates the RoleDepartments in the database.
+func (_c *RoleDepartmentsCreate) Save(ctx context.Context) (*RoleDepartments, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *DepartmentRolesCreate) SaveX(ctx context.Context) *DepartmentRoles {
+func (_c *RoleDepartmentsCreate) SaveX(ctx context.Context) *RoleDepartments {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -133,72 +133,72 @@ func (_c *DepartmentRolesCreate) SaveX(ctx context.Context) *DepartmentRoles {
 }
 
 // Exec executes the query.
-func (_c *DepartmentRolesCreate) Exec(ctx context.Context) error {
+func (_c *RoleDepartmentsCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *DepartmentRolesCreate) ExecX(ctx context.Context) {
+func (_c *RoleDepartmentsCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *DepartmentRolesCreate) defaults() {
+func (_c *RoleDepartmentsCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := departmentroles.DefaultCreatedAt()
+		v := roledepartments.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := departmentroles.DefaultUpdatedAt()
+		v := roledepartments.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := _c.mutation.CreatedBy(); !ok {
-		v := departmentroles.DefaultCreatedBy
+		v := roledepartments.DefaultCreatedBy
 		_c.mutation.SetCreatedBy(v)
 	}
 	if _, ok := _c.mutation.UpdatedBy(); !ok {
-		v := departmentroles.DefaultUpdatedBy
+		v := roledepartments.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *DepartmentRolesCreate) check() error {
+func (_c *RoleDepartmentsCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "DepartmentRoles.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "RoleDepartments.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "DepartmentRoles.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "RoleDepartments.updated_at"`)}
 	}
 	if _, ok := _c.mutation.RoleID(); !ok {
-		return &ValidationError{Name: "role_id", err: errors.New(`lion: missing required field "DepartmentRoles.role_id"`)}
+		return &ValidationError{Name: "role_id", err: errors.New(`lion: missing required field "RoleDepartments.role_id"`)}
 	}
 	if v, ok := _c.mutation.RoleID(); ok {
-		if err := departmentroles.RoleIDValidator(v); err != nil {
-			return &ValidationError{Name: "role_id", err: fmt.Errorf(`lion: validator failed for field "DepartmentRoles.role_id": %w`, err)}
+		if err := roledepartments.RoleIDValidator(v); err != nil {
+			return &ValidationError{Name: "role_id", err: fmt.Errorf(`lion: validator failed for field "RoleDepartments.role_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.DepartmentID(); !ok {
-		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "DepartmentRoles.department_id"`)}
+		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "RoleDepartments.department_id"`)}
 	}
 	if v, ok := _c.mutation.DepartmentID(); ok {
-		if err := departmentroles.DepartmentIDValidator(v); err != nil {
-			return &ValidationError{Name: "department_id", err: fmt.Errorf(`lion: validator failed for field "DepartmentRoles.department_id": %w`, err)}
+		if err := roledepartments.DepartmentIDValidator(v); err != nil {
+			return &ValidationError{Name: "department_id", err: fmt.Errorf(`lion: validator failed for field "RoleDepartments.department_id": %w`, err)}
 		}
 	}
 	if len(_c.mutation.LionRolesIDs()) == 0 {
-		return &ValidationError{Name: "lion_roles", err: errors.New(`lion: missing required edge "DepartmentRoles.lion_roles"`)}
+		return &ValidationError{Name: "lion_roles", err: errors.New(`lion: missing required edge "RoleDepartments.lion_roles"`)}
 	}
 	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
-		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "DepartmentRoles.lion_departments"`)}
+		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "RoleDepartments.lion_departments"`)}
 	}
 	return nil
 }
 
-func (_c *DepartmentRolesCreate) sqlSave(ctx context.Context) (*DepartmentRoles, error) {
+func (_c *RoleDepartmentsCreate) sqlSave(ctx context.Context) (*RoleDepartments, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -216,33 +216,33 @@ func (_c *DepartmentRolesCreate) sqlSave(ctx context.Context) (*DepartmentRoles,
 	return _node, nil
 }
 
-func (_c *DepartmentRolesCreate) createSpec() (*DepartmentRoles, *sqlgraph.CreateSpec) {
+func (_c *RoleDepartmentsCreate) createSpec() (*RoleDepartments, *sqlgraph.CreateSpec) {
 	var (
-		_node = &DepartmentRoles{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(departmentroles.Table, sqlgraph.NewFieldSpec(departmentroles.FieldID, field.TypeInt))
+		_node = &RoleDepartments{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(roledepartments.Table, sqlgraph.NewFieldSpec(roledepartments.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(departmentroles.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(roledepartments.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(departmentroles.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(roledepartments.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
-		_spec.SetField(departmentroles.FieldCreatedBy, field.TypeInt64, value)
+		_spec.SetField(roledepartments.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = value
 	}
 	if value, ok := _c.mutation.UpdatedBy(); ok {
-		_spec.SetField(departmentroles.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.SetField(roledepartments.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
 	}
 	if nodes := _c.mutation.LionRolesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentroles.LionRolesTable,
-			Columns: []string{departmentroles.LionRolesColumn},
+			Table:   roledepartments.LionRolesTable,
+			Columns: []string{roledepartments.LionRolesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
@@ -258,8 +258,8 @@ func (_c *DepartmentRolesCreate) createSpec() (*DepartmentRoles, *sqlgraph.Creat
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentroles.LionDepartmentsTable,
-			Columns: []string{departmentroles.LionDepartmentsColumn},
+			Table:   roledepartments.LionDepartmentsTable,
+			Columns: []string{roledepartments.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -274,27 +274,27 @@ func (_c *DepartmentRolesCreate) createSpec() (*DepartmentRoles, *sqlgraph.Creat
 	return _node, _spec
 }
 
-// DepartmentRolesCreateBulk is the builder for creating many DepartmentRoles entities in bulk.
-type DepartmentRolesCreateBulk struct {
+// RoleDepartmentsCreateBulk is the builder for creating many RoleDepartments entities in bulk.
+type RoleDepartmentsCreateBulk struct {
 	config
 	err      error
-	builders []*DepartmentRolesCreate
+	builders []*RoleDepartmentsCreate
 }
 
-// Save creates the DepartmentRoles entities in the database.
-func (_c *DepartmentRolesCreateBulk) Save(ctx context.Context) ([]*DepartmentRoles, error) {
+// Save creates the RoleDepartments entities in the database.
+func (_c *RoleDepartmentsCreateBulk) Save(ctx context.Context) ([]*RoleDepartments, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*DepartmentRoles, len(_c.builders))
+	nodes := make([]*RoleDepartments, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*DepartmentRolesMutation)
+				mutation, ok := m.(*RoleDepartmentsMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -341,7 +341,7 @@ func (_c *DepartmentRolesCreateBulk) Save(ctx context.Context) ([]*DepartmentRol
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *DepartmentRolesCreateBulk) SaveX(ctx context.Context) []*DepartmentRoles {
+func (_c *RoleDepartmentsCreateBulk) SaveX(ctx context.Context) []*RoleDepartments {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -350,13 +350,13 @@ func (_c *DepartmentRolesCreateBulk) SaveX(ctx context.Context) []*DepartmentRol
 }
 
 // Exec executes the query.
-func (_c *DepartmentRolesCreateBulk) Exec(ctx context.Context) error {
+func (_c *RoleDepartmentsCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *DepartmentRolesCreateBulk) ExecX(ctx context.Context) {
+func (_c *RoleDepartmentsCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

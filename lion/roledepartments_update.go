@@ -11,40 +11,40 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departmentroles"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/roles"
 )
 
-// DepartmentRolesUpdate is the builder for updating DepartmentRoles entities.
-type DepartmentRolesUpdate struct {
+// RoleDepartmentsUpdate is the builder for updating RoleDepartments entities.
+type RoleDepartmentsUpdate struct {
 	config
 	hooks    []Hook
-	mutation *DepartmentRolesMutation
+	mutation *RoleDepartmentsMutation
 }
 
-// Where appends a list predicates to the DepartmentRolesUpdate builder.
-func (_u *DepartmentRolesUpdate) Where(ps ...predicate.DepartmentRoles) *DepartmentRolesUpdate {
+// Where appends a list predicates to the RoleDepartmentsUpdate builder.
+func (_u *RoleDepartmentsUpdate) Where(ps ...predicate.RoleDepartments) *RoleDepartmentsUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *DepartmentRolesUpdate) SetUpdatedAt(v time.Time) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetUpdatedAt(v time.Time) *RoleDepartmentsUpdate {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *DepartmentRolesUpdate) SetCreatedBy(v int64) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetCreatedBy(v int64) *RoleDepartmentsUpdate {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *DepartmentRolesUpdate) SetNillableCreatedBy(v *int64) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetNillableCreatedBy(v *int64) *RoleDepartmentsUpdate {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -52,26 +52,26 @@ func (_u *DepartmentRolesUpdate) SetNillableCreatedBy(v *int64) *DepartmentRoles
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *DepartmentRolesUpdate) AddCreatedBy(v int64) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) AddCreatedBy(v int64) *RoleDepartmentsUpdate {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
 
 // ClearCreatedBy clears the value of the "created_by" field.
-func (_u *DepartmentRolesUpdate) ClearCreatedBy() *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) ClearCreatedBy() *RoleDepartmentsUpdate {
 	_u.mutation.ClearCreatedBy()
 	return _u
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *DepartmentRolesUpdate) SetUpdatedBy(v int64) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetUpdatedBy(v int64) *RoleDepartmentsUpdate {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *DepartmentRolesUpdate) SetNillableUpdatedBy(v *int64) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetNillableUpdatedBy(v *int64) *RoleDepartmentsUpdate {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -79,25 +79,25 @@ func (_u *DepartmentRolesUpdate) SetNillableUpdatedBy(v *int64) *DepartmentRoles
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *DepartmentRolesUpdate) AddUpdatedBy(v int64) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) AddUpdatedBy(v int64) *RoleDepartmentsUpdate {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
 // ClearUpdatedBy clears the value of the "updated_by" field.
-func (_u *DepartmentRolesUpdate) ClearUpdatedBy() *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) ClearUpdatedBy() *RoleDepartmentsUpdate {
 	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
 // SetRoleID sets the "role_id" field.
-func (_u *DepartmentRolesUpdate) SetRoleID(v int) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetRoleID(v int) *RoleDepartmentsUpdate {
 	_u.mutation.SetRoleID(v)
 	return _u
 }
 
 // SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (_u *DepartmentRolesUpdate) SetNillableRoleID(v *int) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetNillableRoleID(v *int) *RoleDepartmentsUpdate {
 	if v != nil {
 		_u.SetRoleID(*v)
 	}
@@ -105,13 +105,13 @@ func (_u *DepartmentRolesUpdate) SetNillableRoleID(v *int) *DepartmentRolesUpdat
 }
 
 // SetDepartmentID sets the "department_id" field.
-func (_u *DepartmentRolesUpdate) SetDepartmentID(v int) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetDepartmentID(v int) *RoleDepartmentsUpdate {
 	_u.mutation.SetDepartmentID(v)
 	return _u
 }
 
 // SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_u *DepartmentRolesUpdate) SetNillableDepartmentID(v *int) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetNillableDepartmentID(v *int) *RoleDepartmentsUpdate {
 	if v != nil {
 		_u.SetDepartmentID(*v)
 	}
@@ -119,52 +119,52 @@ func (_u *DepartmentRolesUpdate) SetNillableDepartmentID(v *int) *DepartmentRole
 }
 
 // SetLionRolesID sets the "lion_roles" edge to the Roles entity by ID.
-func (_u *DepartmentRolesUpdate) SetLionRolesID(id int) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetLionRolesID(id int) *RoleDepartmentsUpdate {
 	_u.mutation.SetLionRolesID(id)
 	return _u
 }
 
 // SetLionRoles sets the "lion_roles" edge to the Roles entity.
-func (_u *DepartmentRolesUpdate) SetLionRoles(v *Roles) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetLionRoles(v *Roles) *RoleDepartmentsUpdate {
 	return _u.SetLionRolesID(v.ID)
 }
 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_u *DepartmentRolesUpdate) SetLionDepartmentsID(id int) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetLionDepartmentsID(id int) *RoleDepartmentsUpdate {
 	_u.mutation.SetLionDepartmentsID(id)
 	return _u
 }
 
 // SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_u *DepartmentRolesUpdate) SetLionDepartments(v *Departments) *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) SetLionDepartments(v *Departments) *RoleDepartmentsUpdate {
 	return _u.SetLionDepartmentsID(v.ID)
 }
 
-// Mutation returns the DepartmentRolesMutation object of the builder.
-func (_u *DepartmentRolesUpdate) Mutation() *DepartmentRolesMutation {
+// Mutation returns the RoleDepartmentsMutation object of the builder.
+func (_u *RoleDepartmentsUpdate) Mutation() *RoleDepartmentsMutation {
 	return _u.mutation
 }
 
 // ClearLionRoles clears the "lion_roles" edge to the Roles entity.
-func (_u *DepartmentRolesUpdate) ClearLionRoles() *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) ClearLionRoles() *RoleDepartmentsUpdate {
 	_u.mutation.ClearLionRoles()
 	return _u
 }
 
 // ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
-func (_u *DepartmentRolesUpdate) ClearLionDepartments() *DepartmentRolesUpdate {
+func (_u *RoleDepartmentsUpdate) ClearLionDepartments() *RoleDepartmentsUpdate {
 	_u.mutation.ClearLionDepartments()
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *DepartmentRolesUpdate) Save(ctx context.Context) (int, error) {
+func (_u *RoleDepartmentsUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *DepartmentRolesUpdate) SaveX(ctx context.Context) int {
+func (_u *RoleDepartmentsUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -173,52 +173,52 @@ func (_u *DepartmentRolesUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *DepartmentRolesUpdate) Exec(ctx context.Context) error {
+func (_u *RoleDepartmentsUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *DepartmentRolesUpdate) ExecX(ctx context.Context) {
+func (_u *RoleDepartmentsUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *DepartmentRolesUpdate) defaults() {
+func (_u *RoleDepartmentsUpdate) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := departmentroles.UpdateDefaultUpdatedAt()
+		v := roledepartments.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *DepartmentRolesUpdate) check() error {
+func (_u *RoleDepartmentsUpdate) check() error {
 	if v, ok := _u.mutation.RoleID(); ok {
-		if err := departmentroles.RoleIDValidator(v); err != nil {
-			return &ValidationError{Name: "role_id", err: fmt.Errorf(`lion: validator failed for field "DepartmentRoles.role_id": %w`, err)}
+		if err := roledepartments.RoleIDValidator(v); err != nil {
+			return &ValidationError{Name: "role_id", err: fmt.Errorf(`lion: validator failed for field "RoleDepartments.role_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.DepartmentID(); ok {
-		if err := departmentroles.DepartmentIDValidator(v); err != nil {
-			return &ValidationError{Name: "department_id", err: fmt.Errorf(`lion: validator failed for field "DepartmentRoles.department_id": %w`, err)}
+		if err := roledepartments.DepartmentIDValidator(v); err != nil {
+			return &ValidationError{Name: "department_id", err: fmt.Errorf(`lion: validator failed for field "RoleDepartments.department_id": %w`, err)}
 		}
 	}
 	if _u.mutation.LionRolesCleared() && len(_u.mutation.LionRolesIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "DepartmentRoles.lion_roles"`)
+		return errors.New(`lion: clearing a required unique edge "RoleDepartments.lion_roles"`)
 	}
 	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "DepartmentRoles.lion_departments"`)
+		return errors.New(`lion: clearing a required unique edge "RoleDepartments.lion_departments"`)
 	}
 	return nil
 }
 
-func (_u *DepartmentRolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+func (_u *RoleDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(departmentroles.Table, departmentroles.Columns, sqlgraph.NewFieldSpec(departmentroles.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(roledepartments.Table, roledepartments.Columns, sqlgraph.NewFieldSpec(roledepartments.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -227,32 +227,32 @@ func (_u *DepartmentRolesUpdate) sqlSave(ctx context.Context) (_node int, err er
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(departmentroles.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(roledepartments.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(departmentroles.FieldCreatedBy, field.TypeInt64, value)
+		_spec.SetField(roledepartments.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(departmentroles.FieldCreatedBy, field.TypeInt64, value)
+		_spec.AddField(roledepartments.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(departmentroles.FieldCreatedBy, field.TypeInt64)
+		_spec.ClearField(roledepartments.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(departmentroles.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.SetField(roledepartments.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(departmentroles.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.AddField(roledepartments.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(departmentroles.FieldUpdatedBy, field.TypeInt64)
+		_spec.ClearField(roledepartments.FieldUpdatedBy, field.TypeInt64)
 	}
 	if _u.mutation.LionRolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentroles.LionRolesTable,
-			Columns: []string{departmentroles.LionRolesColumn},
+			Table:   roledepartments.LionRolesTable,
+			Columns: []string{roledepartments.LionRolesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
@@ -264,8 +264,8 @@ func (_u *DepartmentRolesUpdate) sqlSave(ctx context.Context) (_node int, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentroles.LionRolesTable,
-			Columns: []string{departmentroles.LionRolesColumn},
+			Table:   roledepartments.LionRolesTable,
+			Columns: []string{roledepartments.LionRolesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
@@ -280,8 +280,8 @@ func (_u *DepartmentRolesUpdate) sqlSave(ctx context.Context) (_node int, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentroles.LionDepartmentsTable,
-			Columns: []string{departmentroles.LionDepartmentsColumn},
+			Table:   roledepartments.LionDepartmentsTable,
+			Columns: []string{roledepartments.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -293,8 +293,8 @@ func (_u *DepartmentRolesUpdate) sqlSave(ctx context.Context) (_node int, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentroles.LionDepartmentsTable,
-			Columns: []string{departmentroles.LionDepartmentsColumn},
+			Table:   roledepartments.LionDepartmentsTable,
+			Columns: []string{roledepartments.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -307,7 +307,7 @@ func (_u *DepartmentRolesUpdate) sqlSave(ctx context.Context) (_node int, err er
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{departmentroles.Label}
+			err = &NotFoundError{roledepartments.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -317,29 +317,29 @@ func (_u *DepartmentRolesUpdate) sqlSave(ctx context.Context) (_node int, err er
 	return _node, nil
 }
 
-// DepartmentRolesUpdateOne is the builder for updating a single DepartmentRoles entity.
-type DepartmentRolesUpdateOne struct {
+// RoleDepartmentsUpdateOne is the builder for updating a single RoleDepartments entity.
+type RoleDepartmentsUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *DepartmentRolesMutation
+	mutation *RoleDepartmentsMutation
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *DepartmentRolesUpdateOne) SetUpdatedAt(v time.Time) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetUpdatedAt(v time.Time) *RoleDepartmentsUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *DepartmentRolesUpdateOne) SetCreatedBy(v int64) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetCreatedBy(v int64) *RoleDepartmentsUpdateOne {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *DepartmentRolesUpdateOne) SetNillableCreatedBy(v *int64) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetNillableCreatedBy(v *int64) *RoleDepartmentsUpdateOne {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -347,26 +347,26 @@ func (_u *DepartmentRolesUpdateOne) SetNillableCreatedBy(v *int64) *DepartmentRo
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *DepartmentRolesUpdateOne) AddCreatedBy(v int64) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) AddCreatedBy(v int64) *RoleDepartmentsUpdateOne {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
 
 // ClearCreatedBy clears the value of the "created_by" field.
-func (_u *DepartmentRolesUpdateOne) ClearCreatedBy() *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) ClearCreatedBy() *RoleDepartmentsUpdateOne {
 	_u.mutation.ClearCreatedBy()
 	return _u
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *DepartmentRolesUpdateOne) SetUpdatedBy(v int64) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetUpdatedBy(v int64) *RoleDepartmentsUpdateOne {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *DepartmentRolesUpdateOne) SetNillableUpdatedBy(v *int64) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetNillableUpdatedBy(v *int64) *RoleDepartmentsUpdateOne {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -374,25 +374,25 @@ func (_u *DepartmentRolesUpdateOne) SetNillableUpdatedBy(v *int64) *DepartmentRo
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *DepartmentRolesUpdateOne) AddUpdatedBy(v int64) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) AddUpdatedBy(v int64) *RoleDepartmentsUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
 // ClearUpdatedBy clears the value of the "updated_by" field.
-func (_u *DepartmentRolesUpdateOne) ClearUpdatedBy() *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) ClearUpdatedBy() *RoleDepartmentsUpdateOne {
 	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
 // SetRoleID sets the "role_id" field.
-func (_u *DepartmentRolesUpdateOne) SetRoleID(v int) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetRoleID(v int) *RoleDepartmentsUpdateOne {
 	_u.mutation.SetRoleID(v)
 	return _u
 }
 
 // SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (_u *DepartmentRolesUpdateOne) SetNillableRoleID(v *int) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetNillableRoleID(v *int) *RoleDepartmentsUpdateOne {
 	if v != nil {
 		_u.SetRoleID(*v)
 	}
@@ -400,13 +400,13 @@ func (_u *DepartmentRolesUpdateOne) SetNillableRoleID(v *int) *DepartmentRolesUp
 }
 
 // SetDepartmentID sets the "department_id" field.
-func (_u *DepartmentRolesUpdateOne) SetDepartmentID(v int) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetDepartmentID(v int) *RoleDepartmentsUpdateOne {
 	_u.mutation.SetDepartmentID(v)
 	return _u
 }
 
 // SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_u *DepartmentRolesUpdateOne) SetNillableDepartmentID(v *int) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetNillableDepartmentID(v *int) *RoleDepartmentsUpdateOne {
 	if v != nil {
 		_u.SetDepartmentID(*v)
 	}
@@ -414,65 +414,65 @@ func (_u *DepartmentRolesUpdateOne) SetNillableDepartmentID(v *int) *DepartmentR
 }
 
 // SetLionRolesID sets the "lion_roles" edge to the Roles entity by ID.
-func (_u *DepartmentRolesUpdateOne) SetLionRolesID(id int) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetLionRolesID(id int) *RoleDepartmentsUpdateOne {
 	_u.mutation.SetLionRolesID(id)
 	return _u
 }
 
 // SetLionRoles sets the "lion_roles" edge to the Roles entity.
-func (_u *DepartmentRolesUpdateOne) SetLionRoles(v *Roles) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetLionRoles(v *Roles) *RoleDepartmentsUpdateOne {
 	return _u.SetLionRolesID(v.ID)
 }
 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_u *DepartmentRolesUpdateOne) SetLionDepartmentsID(id int) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetLionDepartmentsID(id int) *RoleDepartmentsUpdateOne {
 	_u.mutation.SetLionDepartmentsID(id)
 	return _u
 }
 
 // SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_u *DepartmentRolesUpdateOne) SetLionDepartments(v *Departments) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) SetLionDepartments(v *Departments) *RoleDepartmentsUpdateOne {
 	return _u.SetLionDepartmentsID(v.ID)
 }
 
-// Mutation returns the DepartmentRolesMutation object of the builder.
-func (_u *DepartmentRolesUpdateOne) Mutation() *DepartmentRolesMutation {
+// Mutation returns the RoleDepartmentsMutation object of the builder.
+func (_u *RoleDepartmentsUpdateOne) Mutation() *RoleDepartmentsMutation {
 	return _u.mutation
 }
 
 // ClearLionRoles clears the "lion_roles" edge to the Roles entity.
-func (_u *DepartmentRolesUpdateOne) ClearLionRoles() *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) ClearLionRoles() *RoleDepartmentsUpdateOne {
 	_u.mutation.ClearLionRoles()
 	return _u
 }
 
 // ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
-func (_u *DepartmentRolesUpdateOne) ClearLionDepartments() *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) ClearLionDepartments() *RoleDepartmentsUpdateOne {
 	_u.mutation.ClearLionDepartments()
 	return _u
 }
 
-// Where appends a list predicates to the DepartmentRolesUpdate builder.
-func (_u *DepartmentRolesUpdateOne) Where(ps ...predicate.DepartmentRoles) *DepartmentRolesUpdateOne {
+// Where appends a list predicates to the RoleDepartmentsUpdate builder.
+func (_u *RoleDepartmentsUpdateOne) Where(ps ...predicate.RoleDepartments) *RoleDepartmentsUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *DepartmentRolesUpdateOne) Select(field string, fields ...string) *DepartmentRolesUpdateOne {
+func (_u *RoleDepartmentsUpdateOne) Select(field string, fields ...string) *RoleDepartmentsUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated DepartmentRoles entity.
-func (_u *DepartmentRolesUpdateOne) Save(ctx context.Context) (*DepartmentRoles, error) {
+// Save executes the query and returns the updated RoleDepartments entity.
+func (_u *RoleDepartmentsUpdateOne) Save(ctx context.Context) (*RoleDepartments, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *DepartmentRolesUpdateOne) SaveX(ctx context.Context) *DepartmentRoles {
+func (_u *RoleDepartmentsUpdateOne) SaveX(ctx context.Context) *RoleDepartments {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -481,65 +481,65 @@ func (_u *DepartmentRolesUpdateOne) SaveX(ctx context.Context) *DepartmentRoles 
 }
 
 // Exec executes the query on the entity.
-func (_u *DepartmentRolesUpdateOne) Exec(ctx context.Context) error {
+func (_u *RoleDepartmentsUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *DepartmentRolesUpdateOne) ExecX(ctx context.Context) {
+func (_u *RoleDepartmentsUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *DepartmentRolesUpdateOne) defaults() {
+func (_u *RoleDepartmentsUpdateOne) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := departmentroles.UpdateDefaultUpdatedAt()
+		v := roledepartments.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *DepartmentRolesUpdateOne) check() error {
+func (_u *RoleDepartmentsUpdateOne) check() error {
 	if v, ok := _u.mutation.RoleID(); ok {
-		if err := departmentroles.RoleIDValidator(v); err != nil {
-			return &ValidationError{Name: "role_id", err: fmt.Errorf(`lion: validator failed for field "DepartmentRoles.role_id": %w`, err)}
+		if err := roledepartments.RoleIDValidator(v); err != nil {
+			return &ValidationError{Name: "role_id", err: fmt.Errorf(`lion: validator failed for field "RoleDepartments.role_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.DepartmentID(); ok {
-		if err := departmentroles.DepartmentIDValidator(v); err != nil {
-			return &ValidationError{Name: "department_id", err: fmt.Errorf(`lion: validator failed for field "DepartmentRoles.department_id": %w`, err)}
+		if err := roledepartments.DepartmentIDValidator(v); err != nil {
+			return &ValidationError{Name: "department_id", err: fmt.Errorf(`lion: validator failed for field "RoleDepartments.department_id": %w`, err)}
 		}
 	}
 	if _u.mutation.LionRolesCleared() && len(_u.mutation.LionRolesIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "DepartmentRoles.lion_roles"`)
+		return errors.New(`lion: clearing a required unique edge "RoleDepartments.lion_roles"`)
 	}
 	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "DepartmentRoles.lion_departments"`)
+		return errors.New(`lion: clearing a required unique edge "RoleDepartments.lion_departments"`)
 	}
 	return nil
 }
 
-func (_u *DepartmentRolesUpdateOne) sqlSave(ctx context.Context) (_node *DepartmentRoles, err error) {
+func (_u *RoleDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *RoleDepartments, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(departmentroles.Table, departmentroles.Columns, sqlgraph.NewFieldSpec(departmentroles.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(roledepartments.Table, roledepartments.Columns, sqlgraph.NewFieldSpec(roledepartments.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "DepartmentRoles.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "RoleDepartments.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, departmentroles.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, roledepartments.FieldID)
 		for _, f := range fields {
-			if !departmentroles.ValidColumn(f) {
+			if !roledepartments.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 			}
-			if f != departmentroles.FieldID {
+			if f != roledepartments.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -552,32 +552,32 @@ func (_u *DepartmentRolesUpdateOne) sqlSave(ctx context.Context) (_node *Departm
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(departmentroles.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(roledepartments.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(departmentroles.FieldCreatedBy, field.TypeInt64, value)
+		_spec.SetField(roledepartments.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(departmentroles.FieldCreatedBy, field.TypeInt64, value)
+		_spec.AddField(roledepartments.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(departmentroles.FieldCreatedBy, field.TypeInt64)
+		_spec.ClearField(roledepartments.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(departmentroles.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.SetField(roledepartments.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(departmentroles.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.AddField(roledepartments.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(departmentroles.FieldUpdatedBy, field.TypeInt64)
+		_spec.ClearField(roledepartments.FieldUpdatedBy, field.TypeInt64)
 	}
 	if _u.mutation.LionRolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentroles.LionRolesTable,
-			Columns: []string{departmentroles.LionRolesColumn},
+			Table:   roledepartments.LionRolesTable,
+			Columns: []string{roledepartments.LionRolesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
@@ -589,8 +589,8 @@ func (_u *DepartmentRolesUpdateOne) sqlSave(ctx context.Context) (_node *Departm
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentroles.LionRolesTable,
-			Columns: []string{departmentroles.LionRolesColumn},
+			Table:   roledepartments.LionRolesTable,
+			Columns: []string{roledepartments.LionRolesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(roles.FieldID, field.TypeInt),
@@ -605,8 +605,8 @@ func (_u *DepartmentRolesUpdateOne) sqlSave(ctx context.Context) (_node *Departm
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentroles.LionDepartmentsTable,
-			Columns: []string{departmentroles.LionDepartmentsColumn},
+			Table:   roledepartments.LionDepartmentsTable,
+			Columns: []string{roledepartments.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -618,8 +618,8 @@ func (_u *DepartmentRolesUpdateOne) sqlSave(ctx context.Context) (_node *Departm
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   departmentroles.LionDepartmentsTable,
-			Columns: []string{departmentroles.LionDepartmentsColumn},
+			Table:   roledepartments.LionDepartmentsTable,
+			Columns: []string{roledepartments.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -630,12 +630,12 @@ func (_u *DepartmentRolesUpdateOne) sqlSave(ctx context.Context) (_node *Departm
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &DepartmentRoles{config: _u.config}
+	_node = &RoleDepartments{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{departmentroles.Label}
+			err = &NotFoundError{roledepartments.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

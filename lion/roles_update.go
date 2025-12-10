@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departmentroles"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -248,19 +248,19 @@ func (_u *RolesUpdate) AddLionRoleGroups(v ...*GroupRoles) *RolesUpdate {
 	return _u.AddLionRoleGroupIDs(ids...)
 }
 
-// AddLionDepartmentRoleIDs adds the "lion_department_roles" edge to the DepartmentRoles entity by IDs.
-func (_u *RolesUpdate) AddLionDepartmentRoleIDs(ids ...int) *RolesUpdate {
-	_u.mutation.AddLionDepartmentRoleIDs(ids...)
+// AddLionRoleDepartmentIDs adds the "lion_role_departments" edge to the RoleDepartments entity by IDs.
+func (_u *RolesUpdate) AddLionRoleDepartmentIDs(ids ...int) *RolesUpdate {
+	_u.mutation.AddLionRoleDepartmentIDs(ids...)
 	return _u
 }
 
-// AddLionDepartmentRoles adds the "lion_department_roles" edges to the DepartmentRoles entity.
-func (_u *RolesUpdate) AddLionDepartmentRoles(v ...*DepartmentRoles) *RolesUpdate {
+// AddLionRoleDepartments adds the "lion_role_departments" edges to the RoleDepartments entity.
+func (_u *RolesUpdate) AddLionRoleDepartments(v ...*RoleDepartments) *RolesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddLionDepartmentRoleIDs(ids...)
+	return _u.AddLionRoleDepartmentIDs(ids...)
 }
 
 // Mutation returns the RolesMutation object of the builder.
@@ -331,25 +331,25 @@ func (_u *RolesUpdate) RemoveLionRoleGroups(v ...*GroupRoles) *RolesUpdate {
 	return _u.RemoveLionRoleGroupIDs(ids...)
 }
 
-// ClearLionDepartmentRoles clears all "lion_department_roles" edges to the DepartmentRoles entity.
-func (_u *RolesUpdate) ClearLionDepartmentRoles() *RolesUpdate {
-	_u.mutation.ClearLionDepartmentRoles()
+// ClearLionRoleDepartments clears all "lion_role_departments" edges to the RoleDepartments entity.
+func (_u *RolesUpdate) ClearLionRoleDepartments() *RolesUpdate {
+	_u.mutation.ClearLionRoleDepartments()
 	return _u
 }
 
-// RemoveLionDepartmentRoleIDs removes the "lion_department_roles" edge to DepartmentRoles entities by IDs.
-func (_u *RolesUpdate) RemoveLionDepartmentRoleIDs(ids ...int) *RolesUpdate {
-	_u.mutation.RemoveLionDepartmentRoleIDs(ids...)
+// RemoveLionRoleDepartmentIDs removes the "lion_role_departments" edge to RoleDepartments entities by IDs.
+func (_u *RolesUpdate) RemoveLionRoleDepartmentIDs(ids ...int) *RolesUpdate {
+	_u.mutation.RemoveLionRoleDepartmentIDs(ids...)
 	return _u
 }
 
-// RemoveLionDepartmentRoles removes "lion_department_roles" edges to DepartmentRoles entities.
-func (_u *RolesUpdate) RemoveLionDepartmentRoles(v ...*DepartmentRoles) *RolesUpdate {
+// RemoveLionRoleDepartments removes "lion_role_departments" edges to RoleDepartments entities.
+func (_u *RolesUpdate) RemoveLionRoleDepartments(v ...*RoleDepartments) *RolesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveLionDepartmentRoleIDs(ids...)
+	return _u.RemoveLionRoleDepartmentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -596,28 +596,28 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionDepartmentRolesCleared() {
+	if _u.mutation.LionRoleDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionDepartmentRolesTable,
-			Columns: []string{roles.LionDepartmentRolesColumn},
+			Table:   roles.LionRoleDepartmentsTable,
+			Columns: []string{roles.LionRoleDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentroles.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledepartments.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLionDepartmentRolesIDs(); len(nodes) > 0 && !_u.mutation.LionDepartmentRolesCleared() {
+	if nodes := _u.mutation.RemovedLionRoleDepartmentsIDs(); len(nodes) > 0 && !_u.mutation.LionRoleDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionDepartmentRolesTable,
-			Columns: []string{roles.LionDepartmentRolesColumn},
+			Table:   roles.LionRoleDepartmentsTable,
+			Columns: []string{roles.LionRoleDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentroles.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledepartments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -625,15 +625,15 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionDepartmentRolesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionRoleDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionDepartmentRolesTable,
-			Columns: []string{roles.LionDepartmentRolesColumn},
+			Table:   roles.LionRoleDepartmentsTable,
+			Columns: []string{roles.LionRoleDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentroles.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledepartments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -877,19 +877,19 @@ func (_u *RolesUpdateOne) AddLionRoleGroups(v ...*GroupRoles) *RolesUpdateOne {
 	return _u.AddLionRoleGroupIDs(ids...)
 }
 
-// AddLionDepartmentRoleIDs adds the "lion_department_roles" edge to the DepartmentRoles entity by IDs.
-func (_u *RolesUpdateOne) AddLionDepartmentRoleIDs(ids ...int) *RolesUpdateOne {
-	_u.mutation.AddLionDepartmentRoleIDs(ids...)
+// AddLionRoleDepartmentIDs adds the "lion_role_departments" edge to the RoleDepartments entity by IDs.
+func (_u *RolesUpdateOne) AddLionRoleDepartmentIDs(ids ...int) *RolesUpdateOne {
+	_u.mutation.AddLionRoleDepartmentIDs(ids...)
 	return _u
 }
 
-// AddLionDepartmentRoles adds the "lion_department_roles" edges to the DepartmentRoles entity.
-func (_u *RolesUpdateOne) AddLionDepartmentRoles(v ...*DepartmentRoles) *RolesUpdateOne {
+// AddLionRoleDepartments adds the "lion_role_departments" edges to the RoleDepartments entity.
+func (_u *RolesUpdateOne) AddLionRoleDepartments(v ...*RoleDepartments) *RolesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddLionDepartmentRoleIDs(ids...)
+	return _u.AddLionRoleDepartmentIDs(ids...)
 }
 
 // Mutation returns the RolesMutation object of the builder.
@@ -960,25 +960,25 @@ func (_u *RolesUpdateOne) RemoveLionRoleGroups(v ...*GroupRoles) *RolesUpdateOne
 	return _u.RemoveLionRoleGroupIDs(ids...)
 }
 
-// ClearLionDepartmentRoles clears all "lion_department_roles" edges to the DepartmentRoles entity.
-func (_u *RolesUpdateOne) ClearLionDepartmentRoles() *RolesUpdateOne {
-	_u.mutation.ClearLionDepartmentRoles()
+// ClearLionRoleDepartments clears all "lion_role_departments" edges to the RoleDepartments entity.
+func (_u *RolesUpdateOne) ClearLionRoleDepartments() *RolesUpdateOne {
+	_u.mutation.ClearLionRoleDepartments()
 	return _u
 }
 
-// RemoveLionDepartmentRoleIDs removes the "lion_department_roles" edge to DepartmentRoles entities by IDs.
-func (_u *RolesUpdateOne) RemoveLionDepartmentRoleIDs(ids ...int) *RolesUpdateOne {
-	_u.mutation.RemoveLionDepartmentRoleIDs(ids...)
+// RemoveLionRoleDepartmentIDs removes the "lion_role_departments" edge to RoleDepartments entities by IDs.
+func (_u *RolesUpdateOne) RemoveLionRoleDepartmentIDs(ids ...int) *RolesUpdateOne {
+	_u.mutation.RemoveLionRoleDepartmentIDs(ids...)
 	return _u
 }
 
-// RemoveLionDepartmentRoles removes "lion_department_roles" edges to DepartmentRoles entities.
-func (_u *RolesUpdateOne) RemoveLionDepartmentRoles(v ...*DepartmentRoles) *RolesUpdateOne {
+// RemoveLionRoleDepartments removes "lion_role_departments" edges to RoleDepartments entities.
+func (_u *RolesUpdateOne) RemoveLionRoleDepartments(v ...*RoleDepartments) *RolesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveLionDepartmentRoleIDs(ids...)
+	return _u.RemoveLionRoleDepartmentIDs(ids...)
 }
 
 // Where appends a list predicates to the RolesUpdate builder.
@@ -1255,28 +1255,28 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionDepartmentRolesCleared() {
+	if _u.mutation.LionRoleDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionDepartmentRolesTable,
-			Columns: []string{roles.LionDepartmentRolesColumn},
+			Table:   roles.LionRoleDepartmentsTable,
+			Columns: []string{roles.LionRoleDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentroles.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledepartments.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLionDepartmentRolesIDs(); len(nodes) > 0 && !_u.mutation.LionDepartmentRolesCleared() {
+	if nodes := _u.mutation.RemovedLionRoleDepartmentsIDs(); len(nodes) > 0 && !_u.mutation.LionRoleDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionDepartmentRolesTable,
-			Columns: []string{roles.LionDepartmentRolesColumn},
+			Table:   roles.LionRoleDepartmentsTable,
+			Columns: []string{roles.LionRoleDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentroles.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledepartments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1284,15 +1284,15 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionDepartmentRolesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionRoleDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionDepartmentRolesTable,
-			Columns: []string{roles.LionDepartmentRolesColumn},
+			Table:   roles.LionRoleDepartmentsTable,
+			Columns: []string{roles.LionRoleDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentroles.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledepartments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

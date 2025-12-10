@@ -7,7 +7,6 @@ import (
 
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
-	"github.com/grpc-kit/pkg/lion/departmentroles"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
@@ -15,6 +14,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
@@ -141,39 +141,6 @@ func init() {
 	credentialsDescCredentialSource := credentialsFields[6].Descriptor()
 	// credentials.DefaultCredentialSource holds the default value on creation for the credential_source field.
 	credentials.DefaultCredentialSource = credentialsDescCredentialSource.Default.(int)
-	departmentrolesMixin := schema.DepartmentRoles{}.Mixin()
-	departmentrolesMixinFields0 := departmentrolesMixin[0].Fields()
-	_ = departmentrolesMixinFields0
-	departmentrolesMixinFields1 := departmentrolesMixin[1].Fields()
-	_ = departmentrolesMixinFields1
-	departmentrolesFields := schema.DepartmentRoles{}.Fields()
-	_ = departmentrolesFields
-	// departmentrolesDescCreatedAt is the schema descriptor for created_at field.
-	departmentrolesDescCreatedAt := departmentrolesMixinFields0[0].Descriptor()
-	// departmentroles.DefaultCreatedAt holds the default value on creation for the created_at field.
-	departmentroles.DefaultCreatedAt = departmentrolesDescCreatedAt.Default.(func() time.Time)
-	// departmentrolesDescUpdatedAt is the schema descriptor for updated_at field.
-	departmentrolesDescUpdatedAt := departmentrolesMixinFields0[1].Descriptor()
-	// departmentroles.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	departmentroles.DefaultUpdatedAt = departmentrolesDescUpdatedAt.Default.(func() time.Time)
-	// departmentroles.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	departmentroles.UpdateDefaultUpdatedAt = departmentrolesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// departmentrolesDescCreatedBy is the schema descriptor for created_by field.
-	departmentrolesDescCreatedBy := departmentrolesMixinFields1[0].Descriptor()
-	// departmentroles.DefaultCreatedBy holds the default value on creation for the created_by field.
-	departmentroles.DefaultCreatedBy = departmentrolesDescCreatedBy.Default.(int64)
-	// departmentrolesDescUpdatedBy is the schema descriptor for updated_by field.
-	departmentrolesDescUpdatedBy := departmentrolesMixinFields1[1].Descriptor()
-	// departmentroles.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	departmentroles.DefaultUpdatedBy = departmentrolesDescUpdatedBy.Default.(int64)
-	// departmentrolesDescRoleID is the schema descriptor for role_id field.
-	departmentrolesDescRoleID := departmentrolesFields[0].Descriptor()
-	// departmentroles.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
-	departmentroles.RoleIDValidator = departmentrolesDescRoleID.Validators[0].(func(int) error)
-	// departmentrolesDescDepartmentID is the schema descriptor for department_id field.
-	departmentrolesDescDepartmentID := departmentrolesFields[1].Descriptor()
-	// departmentroles.DepartmentIDValidator is a validator for the "department_id" field. It is called by the builders before save.
-	departmentroles.DepartmentIDValidator = departmentrolesDescDepartmentID.Validators[0].(func(int) error)
 	departmentsMixin := schema.Departments{}.Mixin()
 	departmentsMixinFields0 := departmentsMixin[0].Fields()
 	_ = departmentsMixinFields0
@@ -575,6 +542,39 @@ func init() {
 	resourcesDescDescription := resourcesFields[11].Descriptor()
 	// resources.DefaultDescription holds the default value on creation for the description field.
 	resources.DefaultDescription = resourcesDescDescription.Default.(string)
+	roledepartmentsMixin := schema.RoleDepartments{}.Mixin()
+	roledepartmentsMixinFields0 := roledepartmentsMixin[0].Fields()
+	_ = roledepartmentsMixinFields0
+	roledepartmentsMixinFields1 := roledepartmentsMixin[1].Fields()
+	_ = roledepartmentsMixinFields1
+	roledepartmentsFields := schema.RoleDepartments{}.Fields()
+	_ = roledepartmentsFields
+	// roledepartmentsDescCreatedAt is the schema descriptor for created_at field.
+	roledepartmentsDescCreatedAt := roledepartmentsMixinFields0[0].Descriptor()
+	// roledepartments.DefaultCreatedAt holds the default value on creation for the created_at field.
+	roledepartments.DefaultCreatedAt = roledepartmentsDescCreatedAt.Default.(func() time.Time)
+	// roledepartmentsDescUpdatedAt is the schema descriptor for updated_at field.
+	roledepartmentsDescUpdatedAt := roledepartmentsMixinFields0[1].Descriptor()
+	// roledepartments.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	roledepartments.DefaultUpdatedAt = roledepartmentsDescUpdatedAt.Default.(func() time.Time)
+	// roledepartments.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	roledepartments.UpdateDefaultUpdatedAt = roledepartmentsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// roledepartmentsDescCreatedBy is the schema descriptor for created_by field.
+	roledepartmentsDescCreatedBy := roledepartmentsMixinFields1[0].Descriptor()
+	// roledepartments.DefaultCreatedBy holds the default value on creation for the created_by field.
+	roledepartments.DefaultCreatedBy = roledepartmentsDescCreatedBy.Default.(int64)
+	// roledepartmentsDescUpdatedBy is the schema descriptor for updated_by field.
+	roledepartmentsDescUpdatedBy := roledepartmentsMixinFields1[1].Descriptor()
+	// roledepartments.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	roledepartments.DefaultUpdatedBy = roledepartmentsDescUpdatedBy.Default.(int64)
+	// roledepartmentsDescRoleID is the schema descriptor for role_id field.
+	roledepartmentsDescRoleID := roledepartmentsFields[0].Descriptor()
+	// roledepartments.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	roledepartments.RoleIDValidator = roledepartmentsDescRoleID.Validators[0].(func(int) error)
+	// roledepartmentsDescDepartmentID is the schema descriptor for department_id field.
+	roledepartmentsDescDepartmentID := roledepartmentsFields[1].Descriptor()
+	// roledepartments.DepartmentIDValidator is a validator for the "department_id" field. It is called by the builders before save.
+	roledepartments.DepartmentIDValidator = roledepartmentsDescDepartmentID.Validators[0].(func(int) error)
 	rolepermissionsMixin := schema.RolePermissions{}.Mixin()
 	rolepermissionsMixinFields0 := rolepermissionsMixin[0].Fields()
 	_ = rolepermissionsMixinFields0
