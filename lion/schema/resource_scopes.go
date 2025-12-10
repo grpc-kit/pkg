@@ -30,6 +30,8 @@ func (ResourceScopes) Fields() []ent.Field {
 // Edges of the table.
 func (ResourceScopes) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.To("lion_permissions", Permissions.Type),
+
 		edge.From("lion_resources", Resources.Type).
 			Ref("lion_resource_scopes").
 			Field("resource_id").
@@ -40,14 +42,13 @@ func (ResourceScopes) Edges() []ent.Edge {
 			Field("scope_id").
 			Unique().
 			Required(),
-		edge.To("lion_permissions", Permissions.Type),
 	}
 }
 
 // Mixin of the table.
 func (ResourceScopes) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixin{},
+		TimeMixinWithoutDeleted{},
 	}
 }
 
