@@ -26,8 +26,29 @@ type Scopes struct {
 	// 名称
 	Name string `json:"name,omitempty"`
 	// 友好展示名称
-	DisplayName  string `json:"display_name,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ScopesQuery when eager-loading is set.
+	Edges        ScopesEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// ScopesEdges holds the relations/edges for other nodes in the graph.
+type ScopesEdges struct {
+	// LionResourceScopes holds the value of the lion_resource_scopes edge.
+	LionResourceScopes []*ResourceScopes `json:"lion_resource_scopes,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// LionResourceScopesOrErr returns the LionResourceScopes value or an error if the edge
+// was not loaded in eager-loading.
+func (e ScopesEdges) LionResourceScopesOrErr() ([]*ResourceScopes, error) {
+	if e.loadedTypes[0] {
+		return e.LionResourceScopes, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_resource_scopes"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -104,6 +125,11 @@ func (_m *Scopes) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Scopes) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionResourceScopes queries the "lion_resource_scopes" edge of the Scopes entity.
+func (_m *Scopes) QueryLionResourceScopes() *ResourceScopesQuery {
+	return NewScopesClient(_m.config).QueryLionResourceScopes(_m)
 }
 
 // Update returns a builder for updating this Scopes.

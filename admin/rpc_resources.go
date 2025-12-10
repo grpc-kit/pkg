@@ -79,7 +79,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	mids := make([]int, 0)
 	for _, x := range mins {
 		if x.Edges.LionPermissions != nil {
-			mids = append(mids, x.Edges.LionPermissions.ResourceID)
+			mids = append(mids, x.Edges.LionPermissions.ResourceScopeID)
 		}
 	}
 

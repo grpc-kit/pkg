@@ -1453,6 +1453,38 @@ func (c *PermissionsClient) QueryLionRolePermissions(_m *Permissions) *RolePermi
 	return query
 }
 
+// QueryLionResourceScopes queries the lion_resource_scopes edge of a Permissions.
+func (c *PermissionsClient) QueryLionResourceScopes(_m *Permissions) *ResourceScopesQuery {
+	query := (&ResourceScopesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permissions.Table, permissions.FieldID, id),
+			sqlgraph.To(resourcescopes.Table, resourcescopes.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, permissions.LionResourceScopesTable, permissions.LionResourceScopesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionPolicies queries the lion_policies edge of a Permissions.
+func (c *PermissionsClient) QueryLionPolicies(_m *Permissions) *PoliciesQuery {
+	query := (&PoliciesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permissions.Table, permissions.FieldID, id),
+			sqlgraph.To(policies.Table, policies.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, permissions.LionPoliciesTable, permissions.LionPoliciesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PermissionsClient) Hooks() []Hook {
 	return c.hooks.Permissions
@@ -1584,6 +1616,22 @@ func (c *PoliciesClient) GetX(ctx context.Context, id int) *Policies {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryLionPermissions queries the lion_permissions edge of a Policies.
+func (c *PoliciesClient) QueryLionPermissions(_m *Policies) *PermissionsQuery {
+	query := (&PermissionsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(policies.Table, policies.FieldID, id),
+			sqlgraph.To(permissions.Table, permissions.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, policies.LionPermissionsTable, policies.LionPermissionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -1719,6 +1767,54 @@ func (c *ResourceScopesClient) GetX(ctx context.Context, id int) *ResourceScopes
 	return obj
 }
 
+// QueryLionResources queries the lion_resources edge of a ResourceScopes.
+func (c *ResourceScopesClient) QueryLionResources(_m *ResourceScopes) *ResourcesQuery {
+	query := (&ResourcesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourcescopes.Table, resourcescopes.FieldID, id),
+			sqlgraph.To(resources.Table, resources.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, resourcescopes.LionResourcesTable, resourcescopes.LionResourcesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionScopes queries the lion_scopes edge of a ResourceScopes.
+func (c *ResourceScopesClient) QueryLionScopes(_m *ResourceScopes) *ScopesQuery {
+	query := (&ScopesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourcescopes.Table, resourcescopes.FieldID, id),
+			sqlgraph.To(scopes.Table, scopes.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, resourcescopes.LionScopesTable, resourcescopes.LionScopesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionPermissions queries the lion_permissions edge of a ResourceScopes.
+func (c *ResourceScopesClient) QueryLionPermissions(_m *ResourceScopes) *PermissionsQuery {
+	query := (&PermissionsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourcescopes.Table, resourcescopes.FieldID, id),
+			sqlgraph.To(permissions.Table, permissions.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resourcescopes.LionPermissionsTable, resourcescopes.LionPermissionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ResourceScopesClient) Hooks() []Hook {
 	return c.hooks.ResourceScopes
@@ -1850,6 +1946,22 @@ func (c *ResourcesClient) GetX(ctx context.Context, id int) *Resources {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryLionResourceScopes queries the lion_resource_scopes edge of a Resources.
+func (c *ResourcesClient) QueryLionResourceScopes(_m *Resources) *ResourceScopesQuery {
+	query := (&ResourceScopesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resources.Table, resources.FieldID, id),
+			sqlgraph.To(resourcescopes.Table, resourcescopes.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resources.LionResourceScopesTable, resources.LionResourceScopesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -2345,6 +2457,22 @@ func (c *ScopesClient) GetX(ctx context.Context, id int) *Scopes {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryLionResourceScopes queries the lion_resource_scopes edge of a Scopes.
+func (c *ScopesClient) QueryLionResourceScopes(_m *Scopes) *ResourceScopesQuery {
+	query := (&ResourceScopesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(scopes.Table, scopes.FieldID, id),
+			sqlgraph.To(resourcescopes.Table, resourcescopes.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, scopes.LionResourceScopesTable, scopes.LionResourceScopesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

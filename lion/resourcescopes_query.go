@@ -4,6 +4,7 @@ package lion
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -11,17 +12,23 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/scopes"
 )
 
 // ResourceScopesQuery is the builder for querying ResourceScopes entities.
 type ResourceScopesQuery struct {
 	config
-	ctx        *QueryContext
-	order      []resourcescopes.OrderOption
-	inters     []Interceptor
-	predicates []predicate.ResourceScopes
+	ctx                 *QueryContext
+	order               []resourcescopes.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.ResourceScopes
+	withLionResources   *ResourcesQuery
+	withLionScopes      *ScopesQuery
+	withLionPermissions *PermissionsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +63,72 @@ func (_q *ResourceScopesQuery) Unique(unique bool) *ResourceScopesQuery {
 func (_q *ResourceScopesQuery) Order(o ...resourcescopes.OrderOption) *ResourceScopesQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryLionResources chains the current query on the "lion_resources" edge.
+func (_q *ResourceScopesQuery) QueryLionResources() *ResourcesQuery {
+	query := (&ResourcesClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourcescopes.Table, resourcescopes.FieldID, selector),
+			sqlgraph.To(resources.Table, resources.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, resourcescopes.LionResourcesTable, resourcescopes.LionResourcesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLionScopes chains the current query on the "lion_scopes" edge.
+func (_q *ResourceScopesQuery) QueryLionScopes() *ScopesQuery {
+	query := (&ScopesClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourcescopes.Table, resourcescopes.FieldID, selector),
+			sqlgraph.To(scopes.Table, scopes.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, resourcescopes.LionScopesTable, resourcescopes.LionScopesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLionPermissions chains the current query on the "lion_permissions" edge.
+func (_q *ResourceScopesQuery) QueryLionPermissions() *PermissionsQuery {
+	query := (&PermissionsClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourcescopes.Table, resourcescopes.FieldID, selector),
+			sqlgraph.To(permissions.Table, permissions.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resourcescopes.LionPermissionsTable, resourcescopes.LionPermissionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first ResourceScopes entity from the query.
@@ -245,15 +318,51 @@ func (_q *ResourceScopesQuery) Clone() *ResourceScopesQuery {
 		return nil
 	}
 	return &ResourceScopesQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]resourcescopes.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.ResourceScopes{}, _q.predicates...),
+		config:              _q.config,
+		ctx:                 _q.ctx.Clone(),
+		order:               append([]resourcescopes.OrderOption{}, _q.order...),
+		inters:              append([]Interceptor{}, _q.inters...),
+		predicates:          append([]predicate.ResourceScopes{}, _q.predicates...),
+		withLionResources:   _q.withLionResources.Clone(),
+		withLionScopes:      _q.withLionScopes.Clone(),
+		withLionPermissions: _q.withLionPermissions.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithLionResources tells the query-builder to eager-load the nodes that are connected to
+// the "lion_resources" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ResourceScopesQuery) WithLionResources(opts ...func(*ResourcesQuery)) *ResourceScopesQuery {
+	query := (&ResourcesClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionResources = query
+	return _q
+}
+
+// WithLionScopes tells the query-builder to eager-load the nodes that are connected to
+// the "lion_scopes" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ResourceScopesQuery) WithLionScopes(opts ...func(*ScopesQuery)) *ResourceScopesQuery {
+	query := (&ScopesClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionScopes = query
+	return _q
+}
+
+// WithLionPermissions tells the query-builder to eager-load the nodes that are connected to
+// the "lion_permissions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ResourceScopesQuery) WithLionPermissions(opts ...func(*PermissionsQuery)) *ResourceScopesQuery {
+	query := (&PermissionsClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionPermissions = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +441,13 @@ func (_q *ResourceScopesQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *ResourceScopesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*ResourceScopes, error) {
 	var (
-		nodes = []*ResourceScopes{}
-		_spec = _q.querySpec()
+		nodes       = []*ResourceScopes{}
+		_spec       = _q.querySpec()
+		loadedTypes = [3]bool{
+			_q.withLionResources != nil,
+			_q.withLionScopes != nil,
+			_q.withLionPermissions != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*ResourceScopes).scanValues(nil, columns)
@@ -341,6 +455,7 @@ func (_q *ResourceScopesQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &ResourceScopes{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +467,115 @@ func (_q *ResourceScopesQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withLionResources; query != nil {
+		if err := _q.loadLionResources(ctx, query, nodes, nil,
+			func(n *ResourceScopes, e *Resources) { n.Edges.LionResources = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLionScopes; query != nil {
+		if err := _q.loadLionScopes(ctx, query, nodes, nil,
+			func(n *ResourceScopes, e *Scopes) { n.Edges.LionScopes = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLionPermissions; query != nil {
+		if err := _q.loadLionPermissions(ctx, query, nodes,
+			func(n *ResourceScopes) { n.Edges.LionPermissions = []*Permissions{} },
+			func(n *ResourceScopes, e *Permissions) { n.Edges.LionPermissions = append(n.Edges.LionPermissions, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *ResourceScopesQuery) loadLionResources(ctx context.Context, query *ResourcesQuery, nodes []*ResourceScopes, init func(*ResourceScopes), assign func(*ResourceScopes, *Resources)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*ResourceScopes)
+	for i := range nodes {
+		fk := nodes[i].ResourceID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(resources.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "resource_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *ResourceScopesQuery) loadLionScopes(ctx context.Context, query *ScopesQuery, nodes []*ResourceScopes, init func(*ResourceScopes), assign func(*ResourceScopes, *Scopes)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*ResourceScopes)
+	for i := range nodes {
+		fk := nodes[i].ScopeID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(scopes.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "scope_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *ResourceScopesQuery) loadLionPermissions(ctx context.Context, query *PermissionsQuery, nodes []*ResourceScopes, init func(*ResourceScopes), assign func(*ResourceScopes, *Permissions)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*ResourceScopes)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(permissions.FieldResourceScopeID)
+	}
+	query.Where(predicate.Permissions(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(resourcescopes.LionPermissionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ResourceScopeID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "resource_scope_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (_q *ResourceScopesQuery) sqlCount(ctx context.Context) (int, error) {
@@ -379,6 +602,12 @@ func (_q *ResourceScopesQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != resourcescopes.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withLionResources != nil {
+			_spec.Node.AddColumnOnce(resourcescopes.FieldResourceID)
+		}
+		if _q.withLionScopes != nil {
+			_spec.Node.AddColumnOnce(resourcescopes.FieldScopeID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

@@ -22,8 +22,10 @@ const (
 	FieldCreatedBy = "created_by"
 	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
 	FieldUpdatedBy = "updated_by"
-	// FieldResourceID holds the string denoting the resource_id field in the database.
-	FieldResourceID = "resource_id"
+	// FieldResourceScopeID holds the string denoting the resource_scope_id field in the database.
+	FieldResourceScopeID = "resource_scope_id"
+	// FieldPolicyID holds the string denoting the policy_id field in the database.
+	FieldPolicyID = "policy_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
@@ -32,6 +34,10 @@ const (
 	FieldDescription = "description"
 	// EdgeLionRolePermissions holds the string denoting the lion_role_permissions edge name in mutations.
 	EdgeLionRolePermissions = "lion_role_permissions"
+	// EdgeLionResourceScopes holds the string denoting the lion_resource_scopes edge name in mutations.
+	EdgeLionResourceScopes = "lion_resource_scopes"
+	// EdgeLionPolicies holds the string denoting the lion_policies edge name in mutations.
+	EdgeLionPolicies = "lion_policies"
 	// Table holds the table name of the permissions in the database.
 	Table = "lion_permissions"
 	// LionRolePermissionsTable is the table that holds the lion_role_permissions relation/edge.
@@ -41,6 +47,20 @@ const (
 	LionRolePermissionsInverseTable = "lion_role_permissions"
 	// LionRolePermissionsColumn is the table column denoting the lion_role_permissions relation/edge.
 	LionRolePermissionsColumn = "permission_id"
+	// LionResourceScopesTable is the table that holds the lion_resource_scopes relation/edge.
+	LionResourceScopesTable = "lion_permissions"
+	// LionResourceScopesInverseTable is the table name for the ResourceScopes entity.
+	// It exists in this package in order to avoid circular dependency with the "resourcescopes" package.
+	LionResourceScopesInverseTable = "lion_resource_scopes"
+	// LionResourceScopesColumn is the table column denoting the lion_resource_scopes relation/edge.
+	LionResourceScopesColumn = "resource_scope_id"
+	// LionPoliciesTable is the table that holds the lion_policies relation/edge.
+	LionPoliciesTable = "lion_permissions"
+	// LionPoliciesInverseTable is the table name for the Policies entity.
+	// It exists in this package in order to avoid circular dependency with the "policies" package.
+	LionPoliciesInverseTable = "lion_policies"
+	// LionPoliciesColumn is the table column denoting the lion_policies relation/edge.
+	LionPoliciesColumn = "policy_id"
 )
 
 // Columns holds all SQL columns for permissions fields.
@@ -50,7 +70,8 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldCreatedBy,
 	FieldUpdatedBy,
-	FieldResourceID,
+	FieldResourceScopeID,
+	FieldPolicyID,
 	FieldName,
 	FieldDisplayName,
 	FieldDescription,
@@ -77,8 +98,10 @@ var (
 	DefaultCreatedBy int64
 	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
 	DefaultUpdatedBy int64
-	// ResourceIDValidator is a validator for the "resource_id" field. It is called by the builders before save.
-	ResourceIDValidator func(int) error
+	// ResourceScopeIDValidator is a validator for the "resource_scope_id" field. It is called by the builders before save.
+	ResourceScopeIDValidator func(int) error
+	// PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
+	PolicyIDValidator func(int) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
@@ -115,9 +138,14 @@ func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
 }
 
-// ByResourceID orders the results by the resource_id field.
-func ByResourceID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResourceID, opts...).ToFunc()
+// ByResourceScopeID orders the results by the resource_scope_id field.
+func ByResourceScopeID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceScopeID, opts...).ToFunc()
+}
+
+// ByPolicyID orders the results by the policy_id field.
+func ByPolicyID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPolicyID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
@@ -148,10 +176,38 @@ func ByLionRolePermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOpti
 		sqlgraph.OrderByNeighborTerms(s, newLionRolePermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByLionResourceScopesField orders the results by lion_resource_scopes field.
+func ByLionResourceScopesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionResourceScopesStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLionPoliciesField orders the results by lion_policies field.
+func ByLionPoliciesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionPoliciesStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newLionRolePermissionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionRolePermissionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionRolePermissionsTable, LionRolePermissionsColumn),
+	)
+}
+func newLionResourceScopesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionResourceScopesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionResourceScopesTable, LionResourceScopesColumn),
+	)
+}
+func newLionPoliciesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionPoliciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionPoliciesTable, LionPoliciesColumn),
 	)
 }

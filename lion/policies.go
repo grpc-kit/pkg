@@ -27,9 +27,32 @@ type Policies struct {
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
-	// Name holds the value of the "name" field.
-	Name         string `json:"name,omitempty"`
+	// 对我展示的权限名称，如：管理用户列表
+	Name string `json:"name,omitempty"`
+	// 国际化键值，用于前端多语言显示的标识符
+	DisplayName string `json:"display_name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the PoliciesQuery when eager-loading is set.
+	Edges        PoliciesEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// PoliciesEdges holds the relations/edges for other nodes in the graph.
+type PoliciesEdges struct {
+	// LionPermissions holds the value of the lion_permissions edge.
+	LionPermissions []*Permissions `json:"lion_permissions,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// LionPermissionsOrErr returns the LionPermissions value or an error if the edge
+// was not loaded in eager-loading.
+func (e PoliciesEdges) LionPermissionsOrErr() ([]*Permissions, error) {
+	if e.loadedTypes[0] {
+		return e.LionPermissions, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_permissions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -39,7 +62,7 @@ func (*Policies) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case policies.FieldID, policies.FieldCreatedBy, policies.FieldUpdatedBy:
 			values[i] = new(sql.NullInt64)
-		case policies.FieldName:
+		case policies.FieldName, policies.FieldDisplayName:
 			values[i] = new(sql.NullString)
 		case policies.FieldCreatedAt, policies.FieldUpdatedAt, policies.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -101,6 +124,12 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
+		case policies.FieldDisplayName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
+			} else if value.Valid {
+				_m.DisplayName = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -112,6 +141,11 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Policies) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionPermissions queries the "lion_permissions" edge of the Policies entity.
+func (_m *Policies) QueryLionPermissions() *PermissionsQuery {
+	return NewPoliciesClient(_m.config).QueryLionPermissions(_m)
 }
 
 // Update returns a builder for updating this Policies.
@@ -156,6 +190,9 @@ func (_m *Policies) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("display_name=")
+	builder.WriteString(_m.DisplayName)
 	builder.WriteByte(')')
 	return builder.String()
 }

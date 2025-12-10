@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -337,6 +338,29 @@ func DisplayNameEqualFold(v string) predicate.Scopes {
 // DisplayNameContainsFold applies the ContainsFold predicate on the "display_name" field.
 func DisplayNameContainsFold(v string) predicate.Scopes {
 	return predicate.Scopes(sql.FieldContainsFold(FieldDisplayName, v))
+}
+
+// HasLionResourceScopes applies the HasEdge predicate on the "lion_resource_scopes" edge.
+func HasLionResourceScopes() predicate.Scopes {
+	return predicate.Scopes(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionResourceScopesTable, LionResourceScopesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionResourceScopesWith applies the HasEdge predicate on the "lion_resource_scopes" edge with a given conditions (other predicates).
+func HasLionResourceScopesWith(preds ...predicate.ResourceScopes) predicate.Scopes {
+	return predicate.Scopes(func(s *sql.Selector) {
+		step := newLionResourceScopesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

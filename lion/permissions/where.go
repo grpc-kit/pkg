@@ -75,9 +75,14 @@ func UpdatedBy(v int64) predicate.Permissions {
 	return predicate.Permissions(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
-// ResourceID applies equality check predicate on the "resource_id" field. It's identical to ResourceIDEQ.
-func ResourceID(v int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEQ(FieldResourceID, v))
+// ResourceScopeID applies equality check predicate on the "resource_scope_id" field. It's identical to ResourceScopeIDEQ.
+func ResourceScopeID(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldEQ(FieldResourceScopeID, v))
+}
+
+// PolicyID applies equality check predicate on the "policy_id" field. It's identical to PolicyIDEQ.
+func PolicyID(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldEQ(FieldPolicyID, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
@@ -275,44 +280,44 @@ func UpdatedByNotNil() predicate.Permissions {
 	return predicate.Permissions(sql.FieldNotNull(FieldUpdatedBy))
 }
 
-// ResourceIDEQ applies the EQ predicate on the "resource_id" field.
-func ResourceIDEQ(v int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEQ(FieldResourceID, v))
+// ResourceScopeIDEQ applies the EQ predicate on the "resource_scope_id" field.
+func ResourceScopeIDEQ(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldEQ(FieldResourceScopeID, v))
 }
 
-// ResourceIDNEQ applies the NEQ predicate on the "resource_id" field.
-func ResourceIDNEQ(v int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldNEQ(FieldResourceID, v))
+// ResourceScopeIDNEQ applies the NEQ predicate on the "resource_scope_id" field.
+func ResourceScopeIDNEQ(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldNEQ(FieldResourceScopeID, v))
 }
 
-// ResourceIDIn applies the In predicate on the "resource_id" field.
-func ResourceIDIn(vs ...int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldIn(FieldResourceID, vs...))
+// ResourceScopeIDIn applies the In predicate on the "resource_scope_id" field.
+func ResourceScopeIDIn(vs ...int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldIn(FieldResourceScopeID, vs...))
 }
 
-// ResourceIDNotIn applies the NotIn predicate on the "resource_id" field.
-func ResourceIDNotIn(vs ...int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldNotIn(FieldResourceID, vs...))
+// ResourceScopeIDNotIn applies the NotIn predicate on the "resource_scope_id" field.
+func ResourceScopeIDNotIn(vs ...int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldNotIn(FieldResourceScopeID, vs...))
 }
 
-// ResourceIDGT applies the GT predicate on the "resource_id" field.
-func ResourceIDGT(v int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldGT(FieldResourceID, v))
+// PolicyIDEQ applies the EQ predicate on the "policy_id" field.
+func PolicyIDEQ(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldEQ(FieldPolicyID, v))
 }
 
-// ResourceIDGTE applies the GTE predicate on the "resource_id" field.
-func ResourceIDGTE(v int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldGTE(FieldResourceID, v))
+// PolicyIDNEQ applies the NEQ predicate on the "policy_id" field.
+func PolicyIDNEQ(v int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldNEQ(FieldPolicyID, v))
 }
 
-// ResourceIDLT applies the LT predicate on the "resource_id" field.
-func ResourceIDLT(v int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldLT(FieldResourceID, v))
+// PolicyIDIn applies the In predicate on the "policy_id" field.
+func PolicyIDIn(vs ...int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldIn(FieldPolicyID, vs...))
 }
 
-// ResourceIDLTE applies the LTE predicate on the "resource_id" field.
-func ResourceIDLTE(v int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldLTE(FieldResourceID, v))
+// PolicyIDNotIn applies the NotIn predicate on the "policy_id" field.
+func PolicyIDNotIn(vs ...int) predicate.Permissions {
+	return predicate.Permissions(sql.FieldNotIn(FieldPolicyID, vs...))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -525,6 +530,52 @@ func HasLionRolePermissions() predicate.Permissions {
 func HasLionRolePermissionsWith(preds ...predicate.RolePermissions) predicate.Permissions {
 	return predicate.Permissions(func(s *sql.Selector) {
 		step := newLionRolePermissionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLionResourceScopes applies the HasEdge predicate on the "lion_resource_scopes" edge.
+func HasLionResourceScopes() predicate.Permissions {
+	return predicate.Permissions(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionResourceScopesTable, LionResourceScopesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionResourceScopesWith applies the HasEdge predicate on the "lion_resource_scopes" edge with a given conditions (other predicates).
+func HasLionResourceScopesWith(preds ...predicate.ResourceScopes) predicate.Permissions {
+	return predicate.Permissions(func(s *sql.Selector) {
+		step := newLionResourceScopesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLionPolicies applies the HasEdge predicate on the "lion_policies" edge.
+func HasLionPolicies() predicate.Permissions {
+	return predicate.Permissions(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionPoliciesTable, LionPoliciesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionPoliciesWith applies the HasEdge predicate on the "lion_policies" edge with a given conditions (other predicates).
+func HasLionPoliciesWith(preds ...predicate.Policies) predicate.Permissions {
+	return predicate.Permissions(func(s *sql.Selector) {
+		step := newLionPoliciesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

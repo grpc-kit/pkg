@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -229,26 +230,6 @@ func ResourceIDNotIn(vs ...int) predicate.ResourceScopes {
 	return predicate.ResourceScopes(sql.FieldNotIn(FieldResourceID, vs...))
 }
 
-// ResourceIDGT applies the GT predicate on the "resource_id" field.
-func ResourceIDGT(v int) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldGT(FieldResourceID, v))
-}
-
-// ResourceIDGTE applies the GTE predicate on the "resource_id" field.
-func ResourceIDGTE(v int) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldGTE(FieldResourceID, v))
-}
-
-// ResourceIDLT applies the LT predicate on the "resource_id" field.
-func ResourceIDLT(v int) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldLT(FieldResourceID, v))
-}
-
-// ResourceIDLTE applies the LTE predicate on the "resource_id" field.
-func ResourceIDLTE(v int) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldLTE(FieldResourceID, v))
-}
-
 // ScopeIDEQ applies the EQ predicate on the "scope_id" field.
 func ScopeIDEQ(v int) predicate.ResourceScopes {
 	return predicate.ResourceScopes(sql.FieldEQ(FieldScopeID, v))
@@ -269,24 +250,73 @@ func ScopeIDNotIn(vs ...int) predicate.ResourceScopes {
 	return predicate.ResourceScopes(sql.FieldNotIn(FieldScopeID, vs...))
 }
 
-// ScopeIDGT applies the GT predicate on the "scope_id" field.
-func ScopeIDGT(v int) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldGT(FieldScopeID, v))
+// HasLionResources applies the HasEdge predicate on the "lion_resources" edge.
+func HasLionResources() predicate.ResourceScopes {
+	return predicate.ResourceScopes(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionResourcesTable, LionResourcesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
 }
 
-// ScopeIDGTE applies the GTE predicate on the "scope_id" field.
-func ScopeIDGTE(v int) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldGTE(FieldScopeID, v))
+// HasLionResourcesWith applies the HasEdge predicate on the "lion_resources" edge with a given conditions (other predicates).
+func HasLionResourcesWith(preds ...predicate.Resources) predicate.ResourceScopes {
+	return predicate.ResourceScopes(func(s *sql.Selector) {
+		step := newLionResourcesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
-// ScopeIDLT applies the LT predicate on the "scope_id" field.
-func ScopeIDLT(v int) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldLT(FieldScopeID, v))
+// HasLionScopes applies the HasEdge predicate on the "lion_scopes" edge.
+func HasLionScopes() predicate.ResourceScopes {
+	return predicate.ResourceScopes(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionScopesTable, LionScopesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
 }
 
-// ScopeIDLTE applies the LTE predicate on the "scope_id" field.
-func ScopeIDLTE(v int) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldLTE(FieldScopeID, v))
+// HasLionScopesWith applies the HasEdge predicate on the "lion_scopes" edge with a given conditions (other predicates).
+func HasLionScopesWith(preds ...predicate.Scopes) predicate.ResourceScopes {
+	return predicate.ResourceScopes(func(s *sql.Selector) {
+		step := newLionScopesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLionPermissions applies the HasEdge predicate on the "lion_permissions" edge.
+func HasLionPermissions() predicate.ResourceScopes {
+	return predicate.ResourceScopes(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionPermissionsWith applies the HasEdge predicate on the "lion_permissions" edge with a given conditions (other predicates).
+func HasLionPermissionsWith(preds ...predicate.Permissions) predicate.ResourceScopes {
+	return predicate.ResourceScopes(func(s *sql.Selector) {
+		step := newLionPermissionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

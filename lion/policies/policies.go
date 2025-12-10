@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -25,8 +26,19 @@ const (
 	FieldUpdatedBy = "updated_by"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldDisplayName holds the string denoting the display_name field in the database.
+	FieldDisplayName = "display_name"
+	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
+	EdgeLionPermissions = "lion_permissions"
 	// Table holds the table name of the policies in the database.
 	Table = "lion_policies"
+	// LionPermissionsTable is the table that holds the lion_permissions relation/edge.
+	LionPermissionsTable = "lion_permissions"
+	// LionPermissionsInverseTable is the table name for the Permissions entity.
+	// It exists in this package in order to avoid circular dependency with the "permissions" package.
+	LionPermissionsInverseTable = "lion_permissions"
+	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
+	LionPermissionsColumn = "policy_id"
 )
 
 // Columns holds all SQL columns for policies fields.
@@ -38,6 +50,7 @@ var Columns = []string{
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldName,
+	FieldDisplayName,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -61,8 +74,10 @@ var (
 	DefaultCreatedBy int64
 	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
 	DefaultUpdatedBy int64
-	// DefaultName holds the default value on creation for the "name" field.
-	DefaultName string
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
+	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	DisplayNameValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Policies queries.
@@ -101,4 +116,30 @@ func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByDisplayName orders the results by the display_name field.
+func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
+}
+
+// ByLionPermissionsCount orders the results by lion_permissions count.
+func ByLionPermissionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionPermissionsStep(), opts...)
+	}
+}
+
+// ByLionPermissions orders the results by lion_permissions terms.
+func ByLionPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionPermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newLionPermissionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionPermissionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
+	)
 }

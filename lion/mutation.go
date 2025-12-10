@@ -9023,8 +9023,6 @@ type PermissionsMutation struct {
 	addcreated_by                *int64
 	updated_by                   *int64
 	addupdated_by                *int64
-	resource_id                  *int
-	addresource_id               *int
 	name                         *string
 	display_name                 *string
 	description                  *string
@@ -9032,6 +9030,10 @@ type PermissionsMutation struct {
 	lion_role_permissions        map[int]struct{}
 	removedlion_role_permissions map[int]struct{}
 	clearedlion_role_permissions bool
+	lion_resource_scopes         *int
+	clearedlion_resource_scopes  bool
+	lion_policies                *int
+	clearedlion_policies         bool
 	done                         bool
 	oldValue                     func(context.Context) (*Permissions, error)
 	predicates                   []predicate.Permissions
@@ -9347,60 +9349,76 @@ func (m *PermissionsMutation) ResetUpdatedBy() {
 	delete(m.clearedFields, permissions.FieldUpdatedBy)
 }
 
-// SetResourceID sets the "resource_id" field.
-func (m *PermissionsMutation) SetResourceID(i int) {
-	m.resource_id = &i
-	m.addresource_id = nil
+// SetResourceScopeID sets the "resource_scope_id" field.
+func (m *PermissionsMutation) SetResourceScopeID(i int) {
+	m.lion_resource_scopes = &i
 }
 
-// ResourceID returns the value of the "resource_id" field in the mutation.
-func (m *PermissionsMutation) ResourceID() (r int, exists bool) {
-	v := m.resource_id
+// ResourceScopeID returns the value of the "resource_scope_id" field in the mutation.
+func (m *PermissionsMutation) ResourceScopeID() (r int, exists bool) {
+	v := m.lion_resource_scopes
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldResourceID returns the old "resource_id" field's value of the Permissions entity.
+// OldResourceScopeID returns the old "resource_scope_id" field's value of the Permissions entity.
 // If the Permissions object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PermissionsMutation) OldResourceID(ctx context.Context) (v int, err error) {
+func (m *PermissionsMutation) OldResourceScopeID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldResourceID is only allowed on UpdateOne operations")
+		return v, errors.New("OldResourceScopeID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldResourceID requires an ID field in the mutation")
+		return v, errors.New("OldResourceScopeID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldResourceID: %w", err)
+		return v, fmt.Errorf("querying old value for OldResourceScopeID: %w", err)
 	}
-	return oldValue.ResourceID, nil
+	return oldValue.ResourceScopeID, nil
 }
 
-// AddResourceID adds i to the "resource_id" field.
-func (m *PermissionsMutation) AddResourceID(i int) {
-	if m.addresource_id != nil {
-		*m.addresource_id += i
-	} else {
-		m.addresource_id = &i
-	}
+// ResetResourceScopeID resets all changes to the "resource_scope_id" field.
+func (m *PermissionsMutation) ResetResourceScopeID() {
+	m.lion_resource_scopes = nil
 }
 
-// AddedResourceID returns the value that was added to the "resource_id" field in this mutation.
-func (m *PermissionsMutation) AddedResourceID() (r int, exists bool) {
-	v := m.addresource_id
+// SetPolicyID sets the "policy_id" field.
+func (m *PermissionsMutation) SetPolicyID(i int) {
+	m.lion_policies = &i
+}
+
+// PolicyID returns the value of the "policy_id" field in the mutation.
+func (m *PermissionsMutation) PolicyID() (r int, exists bool) {
+	v := m.lion_policies
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetResourceID resets all changes to the "resource_id" field.
-func (m *PermissionsMutation) ResetResourceID() {
-	m.resource_id = nil
-	m.addresource_id = nil
+// OldPolicyID returns the old "policy_id" field's value of the Permissions entity.
+// If the Permissions object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PermissionsMutation) OldPolicyID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPolicyID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPolicyID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPolicyID: %w", err)
+	}
+	return oldValue.PolicyID, nil
+}
+
+// ResetPolicyID resets all changes to the "policy_id" field.
+func (m *PermissionsMutation) ResetPolicyID() {
+	m.lion_policies = nil
 }
 
 // SetName sets the "name" field.
@@ -9565,6 +9583,86 @@ func (m *PermissionsMutation) ResetLionRolePermissions() {
 	m.removedlion_role_permissions = nil
 }
 
+// SetLionResourceScopesID sets the "lion_resource_scopes" edge to the ResourceScopes entity by id.
+func (m *PermissionsMutation) SetLionResourceScopesID(id int) {
+	m.lion_resource_scopes = &id
+}
+
+// ClearLionResourceScopes clears the "lion_resource_scopes" edge to the ResourceScopes entity.
+func (m *PermissionsMutation) ClearLionResourceScopes() {
+	m.clearedlion_resource_scopes = true
+	m.clearedFields[permissions.FieldResourceScopeID] = struct{}{}
+}
+
+// LionResourceScopesCleared reports if the "lion_resource_scopes" edge to the ResourceScopes entity was cleared.
+func (m *PermissionsMutation) LionResourceScopesCleared() bool {
+	return m.clearedlion_resource_scopes
+}
+
+// LionResourceScopesID returns the "lion_resource_scopes" edge ID in the mutation.
+func (m *PermissionsMutation) LionResourceScopesID() (id int, exists bool) {
+	if m.lion_resource_scopes != nil {
+		return *m.lion_resource_scopes, true
+	}
+	return
+}
+
+// LionResourceScopesIDs returns the "lion_resource_scopes" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionResourceScopesID instead. It exists only for internal usage by the builders.
+func (m *PermissionsMutation) LionResourceScopesIDs() (ids []int) {
+	if id := m.lion_resource_scopes; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionResourceScopes resets all changes to the "lion_resource_scopes" edge.
+func (m *PermissionsMutation) ResetLionResourceScopes() {
+	m.lion_resource_scopes = nil
+	m.clearedlion_resource_scopes = false
+}
+
+// SetLionPoliciesID sets the "lion_policies" edge to the Policies entity by id.
+func (m *PermissionsMutation) SetLionPoliciesID(id int) {
+	m.lion_policies = &id
+}
+
+// ClearLionPolicies clears the "lion_policies" edge to the Policies entity.
+func (m *PermissionsMutation) ClearLionPolicies() {
+	m.clearedlion_policies = true
+	m.clearedFields[permissions.FieldPolicyID] = struct{}{}
+}
+
+// LionPoliciesCleared reports if the "lion_policies" edge to the Policies entity was cleared.
+func (m *PermissionsMutation) LionPoliciesCleared() bool {
+	return m.clearedlion_policies
+}
+
+// LionPoliciesID returns the "lion_policies" edge ID in the mutation.
+func (m *PermissionsMutation) LionPoliciesID() (id int, exists bool) {
+	if m.lion_policies != nil {
+		return *m.lion_policies, true
+	}
+	return
+}
+
+// LionPoliciesIDs returns the "lion_policies" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionPoliciesID instead. It exists only for internal usage by the builders.
+func (m *PermissionsMutation) LionPoliciesIDs() (ids []int) {
+	if id := m.lion_policies; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionPolicies resets all changes to the "lion_policies" edge.
+func (m *PermissionsMutation) ResetLionPolicies() {
+	m.lion_policies = nil
+	m.clearedlion_policies = false
+}
+
 // Where appends a list predicates to the PermissionsMutation builder.
 func (m *PermissionsMutation) Where(ps ...predicate.Permissions) {
 	m.predicates = append(m.predicates, ps...)
@@ -9599,7 +9697,7 @@ func (m *PermissionsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PermissionsMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, permissions.FieldCreatedAt)
 	}
@@ -9612,8 +9710,11 @@ func (m *PermissionsMutation) Fields() []string {
 	if m.updated_by != nil {
 		fields = append(fields, permissions.FieldUpdatedBy)
 	}
-	if m.resource_id != nil {
-		fields = append(fields, permissions.FieldResourceID)
+	if m.lion_resource_scopes != nil {
+		fields = append(fields, permissions.FieldResourceScopeID)
+	}
+	if m.lion_policies != nil {
+		fields = append(fields, permissions.FieldPolicyID)
 	}
 	if m.name != nil {
 		fields = append(fields, permissions.FieldName)
@@ -9640,8 +9741,10 @@ func (m *PermissionsMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedBy()
 	case permissions.FieldUpdatedBy:
 		return m.UpdatedBy()
-	case permissions.FieldResourceID:
-		return m.ResourceID()
+	case permissions.FieldResourceScopeID:
+		return m.ResourceScopeID()
+	case permissions.FieldPolicyID:
+		return m.PolicyID()
 	case permissions.FieldName:
 		return m.Name()
 	case permissions.FieldDisplayName:
@@ -9665,8 +9768,10 @@ func (m *PermissionsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldCreatedBy(ctx)
 	case permissions.FieldUpdatedBy:
 		return m.OldUpdatedBy(ctx)
-	case permissions.FieldResourceID:
-		return m.OldResourceID(ctx)
+	case permissions.FieldResourceScopeID:
+		return m.OldResourceScopeID(ctx)
+	case permissions.FieldPolicyID:
+		return m.OldPolicyID(ctx)
 	case permissions.FieldName:
 		return m.OldName(ctx)
 	case permissions.FieldDisplayName:
@@ -9710,12 +9815,19 @@ func (m *PermissionsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedBy(v)
 		return nil
-	case permissions.FieldResourceID:
+	case permissions.FieldResourceScopeID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetResourceID(v)
+		m.SetResourceScopeID(v)
+		return nil
+	case permissions.FieldPolicyID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPolicyID(v)
 		return nil
 	case permissions.FieldName:
 		v, ok := value.(string)
@@ -9752,9 +9864,6 @@ func (m *PermissionsMutation) AddedFields() []string {
 	if m.addupdated_by != nil {
 		fields = append(fields, permissions.FieldUpdatedBy)
 	}
-	if m.addresource_id != nil {
-		fields = append(fields, permissions.FieldResourceID)
-	}
 	return fields
 }
 
@@ -9767,8 +9876,6 @@ func (m *PermissionsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCreatedBy()
 	case permissions.FieldUpdatedBy:
 		return m.AddedUpdatedBy()
-	case permissions.FieldResourceID:
-		return m.AddedResourceID()
 	}
 	return nil, false
 }
@@ -9791,13 +9898,6 @@ func (m *PermissionsMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUpdatedBy(v)
-		return nil
-	case permissions.FieldResourceID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddResourceID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Permissions numeric field %s", name)
@@ -9853,8 +9953,11 @@ func (m *PermissionsMutation) ResetField(name string) error {
 	case permissions.FieldUpdatedBy:
 		m.ResetUpdatedBy()
 		return nil
-	case permissions.FieldResourceID:
-		m.ResetResourceID()
+	case permissions.FieldResourceScopeID:
+		m.ResetResourceScopeID()
+		return nil
+	case permissions.FieldPolicyID:
+		m.ResetPolicyID()
 		return nil
 	case permissions.FieldName:
 		m.ResetName()
@@ -9871,9 +9974,15 @@ func (m *PermissionsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PermissionsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.lion_role_permissions != nil {
 		edges = append(edges, permissions.EdgeLionRolePermissions)
+	}
+	if m.lion_resource_scopes != nil {
+		edges = append(edges, permissions.EdgeLionResourceScopes)
+	}
+	if m.lion_policies != nil {
+		edges = append(edges, permissions.EdgeLionPolicies)
 	}
 	return edges
 }
@@ -9888,13 +9997,21 @@ func (m *PermissionsMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case permissions.EdgeLionResourceScopes:
+		if id := m.lion_resource_scopes; id != nil {
+			return []ent.Value{*id}
+		}
+	case permissions.EdgeLionPolicies:
+		if id := m.lion_policies; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PermissionsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.removedlion_role_permissions != nil {
 		edges = append(edges, permissions.EdgeLionRolePermissions)
 	}
@@ -9917,9 +10034,15 @@ func (m *PermissionsMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PermissionsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.clearedlion_role_permissions {
 		edges = append(edges, permissions.EdgeLionRolePermissions)
+	}
+	if m.clearedlion_resource_scopes {
+		edges = append(edges, permissions.EdgeLionResourceScopes)
+	}
+	if m.clearedlion_policies {
+		edges = append(edges, permissions.EdgeLionPolicies)
 	}
 	return edges
 }
@@ -9930,6 +10053,10 @@ func (m *PermissionsMutation) EdgeCleared(name string) bool {
 	switch name {
 	case permissions.EdgeLionRolePermissions:
 		return m.clearedlion_role_permissions
+	case permissions.EdgeLionResourceScopes:
+		return m.clearedlion_resource_scopes
+	case permissions.EdgeLionPolicies:
+		return m.clearedlion_policies
 	}
 	return false
 }
@@ -9938,6 +10065,12 @@ func (m *PermissionsMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PermissionsMutation) ClearEdge(name string) error {
 	switch name {
+	case permissions.EdgeLionResourceScopes:
+		m.ClearLionResourceScopes()
+		return nil
+	case permissions.EdgeLionPolicies:
+		m.ClearLionPolicies()
+		return nil
 	}
 	return fmt.Errorf("unknown Permissions unique edge %s", name)
 }
@@ -9949,6 +10082,12 @@ func (m *PermissionsMutation) ResetEdge(name string) error {
 	case permissions.EdgeLionRolePermissions:
 		m.ResetLionRolePermissions()
 		return nil
+	case permissions.EdgeLionResourceScopes:
+		m.ResetLionResourceScopes()
+		return nil
+	case permissions.EdgeLionPolicies:
+		m.ResetLionPolicies()
+		return nil
 	}
 	return fmt.Errorf("unknown Permissions edge %s", name)
 }
@@ -9956,21 +10095,25 @@ func (m *PermissionsMutation) ResetEdge(name string) error {
 // PoliciesMutation represents an operation that mutates the Policies nodes in the graph.
 type PoliciesMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	deleted_at    *time.Time
-	created_by    *int64
-	addcreated_by *int64
-	updated_by    *int64
-	addupdated_by *int64
-	name          *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Policies, error)
-	predicates    []predicate.Policies
+	op                      Op
+	typ                     string
+	id                      *int
+	created_at              *time.Time
+	updated_at              *time.Time
+	deleted_at              *time.Time
+	created_by              *int64
+	addcreated_by           *int64
+	updated_by              *int64
+	addupdated_by           *int64
+	name                    *string
+	display_name            *string
+	clearedFields           map[string]struct{}
+	lion_permissions        map[int]struct{}
+	removedlion_permissions map[int]struct{}
+	clearedlion_permissions bool
+	done                    bool
+	oldValue                func(context.Context) (*Policies, error)
+	predicates              []predicate.Policies
 }
 
 var _ ent.Mutation = (*PoliciesMutation)(nil)
@@ -10368,6 +10511,96 @@ func (m *PoliciesMutation) ResetName() {
 	m.name = nil
 }
 
+// SetDisplayName sets the "display_name" field.
+func (m *PoliciesMutation) SetDisplayName(s string) {
+	m.display_name = &s
+}
+
+// DisplayName returns the value of the "display_name" field in the mutation.
+func (m *PoliciesMutation) DisplayName() (r string, exists bool) {
+	v := m.display_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisplayName returns the old "display_name" field's value of the Policies entity.
+// If the Policies object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PoliciesMutation) OldDisplayName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisplayName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisplayName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisplayName: %w", err)
+	}
+	return oldValue.DisplayName, nil
+}
+
+// ResetDisplayName resets all changes to the "display_name" field.
+func (m *PoliciesMutation) ResetDisplayName() {
+	m.display_name = nil
+}
+
+// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by ids.
+func (m *PoliciesMutation) AddLionPermissionIDs(ids ...int) {
+	if m.lion_permissions == nil {
+		m.lion_permissions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lion_permissions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLionPermissions clears the "lion_permissions" edge to the Permissions entity.
+func (m *PoliciesMutation) ClearLionPermissions() {
+	m.clearedlion_permissions = true
+}
+
+// LionPermissionsCleared reports if the "lion_permissions" edge to the Permissions entity was cleared.
+func (m *PoliciesMutation) LionPermissionsCleared() bool {
+	return m.clearedlion_permissions
+}
+
+// RemoveLionPermissionIDs removes the "lion_permissions" edge to the Permissions entity by IDs.
+func (m *PoliciesMutation) RemoveLionPermissionIDs(ids ...int) {
+	if m.removedlion_permissions == nil {
+		m.removedlion_permissions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lion_permissions, ids[i])
+		m.removedlion_permissions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLionPermissions returns the removed IDs of the "lion_permissions" edge to the Permissions entity.
+func (m *PoliciesMutation) RemovedLionPermissionsIDs() (ids []int) {
+	for id := range m.removedlion_permissions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LionPermissionsIDs returns the "lion_permissions" edge IDs in the mutation.
+func (m *PoliciesMutation) LionPermissionsIDs() (ids []int) {
+	for id := range m.lion_permissions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLionPermissions resets all changes to the "lion_permissions" edge.
+func (m *PoliciesMutation) ResetLionPermissions() {
+	m.lion_permissions = nil
+	m.clearedlion_permissions = false
+	m.removedlion_permissions = nil
+}
+
 // Where appends a list predicates to the PoliciesMutation builder.
 func (m *PoliciesMutation) Where(ps ...predicate.Policies) {
 	m.predicates = append(m.predicates, ps...)
@@ -10402,7 +10635,7 @@ func (m *PoliciesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PoliciesMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, policies.FieldCreatedAt)
 	}
@@ -10420,6 +10653,9 @@ func (m *PoliciesMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, policies.FieldName)
+	}
+	if m.display_name != nil {
+		fields = append(fields, policies.FieldDisplayName)
 	}
 	return fields
 }
@@ -10441,6 +10677,8 @@ func (m *PoliciesMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedBy()
 	case policies.FieldName:
 		return m.Name()
+	case policies.FieldDisplayName:
+		return m.DisplayName()
 	}
 	return nil, false
 }
@@ -10462,6 +10700,8 @@ func (m *PoliciesMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldUpdatedBy(ctx)
 	case policies.FieldName:
 		return m.OldName(ctx)
+	case policies.FieldDisplayName:
+		return m.OldDisplayName(ctx)
 	}
 	return nil, fmt.Errorf("unknown Policies field %s", name)
 }
@@ -10512,6 +10752,13 @@ func (m *PoliciesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case policies.FieldDisplayName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisplayName(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Policies field %s", name)
@@ -10628,75 +10875,117 @@ func (m *PoliciesMutation) ResetField(name string) error {
 	case policies.FieldName:
 		m.ResetName()
 		return nil
+	case policies.FieldDisplayName:
+		m.ResetDisplayName()
+		return nil
 	}
 	return fmt.Errorf("unknown Policies field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PoliciesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.lion_permissions != nil {
+		edges = append(edges, policies.EdgeLionPermissions)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *PoliciesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case policies.EdgeLionPermissions:
+		ids := make([]ent.Value, 0, len(m.lion_permissions))
+		for id := range m.lion_permissions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PoliciesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedlion_permissions != nil {
+		edges = append(edges, policies.EdgeLionPermissions)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PoliciesMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case policies.EdgeLionPermissions:
+		ids := make([]ent.Value, 0, len(m.removedlion_permissions))
+		for id := range m.removedlion_permissions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PoliciesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedlion_permissions {
+		edges = append(edges, policies.EdgeLionPermissions)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *PoliciesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case policies.EdgeLionPermissions:
+		return m.clearedlion_permissions
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *PoliciesMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Policies unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *PoliciesMutation) ResetEdge(name string) error {
+	switch name {
+	case policies.EdgeLionPermissions:
+		m.ResetLionPermissions()
+		return nil
+	}
 	return fmt.Errorf("unknown Policies edge %s", name)
 }
 
 // ResourceScopesMutation represents an operation that mutates the ResourceScopes nodes in the graph.
 type ResourceScopesMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	created_at     *time.Time
-	updated_at     *time.Time
-	deleted_at     *time.Time
-	resource_id    *int
-	addresource_id *int
-	scope_id       *int
-	addscope_id    *int
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*ResourceScopes, error)
-	predicates     []predicate.ResourceScopes
+	op                      Op
+	typ                     string
+	id                      *int
+	created_at              *time.Time
+	updated_at              *time.Time
+	deleted_at              *time.Time
+	clearedFields           map[string]struct{}
+	lion_resources          *int
+	clearedlion_resources   bool
+	lion_scopes             *int
+	clearedlion_scopes      bool
+	lion_permissions        map[int]struct{}
+	removedlion_permissions map[int]struct{}
+	clearedlion_permissions bool
+	done                    bool
+	oldValue                func(context.Context) (*ResourceScopes, error)
+	predicates              []predicate.ResourceScopes
 }
 
 var _ ent.Mutation = (*ResourceScopesMutation)(nil)
@@ -10920,13 +11209,12 @@ func (m *ResourceScopesMutation) ResetDeletedAt() {
 
 // SetResourceID sets the "resource_id" field.
 func (m *ResourceScopesMutation) SetResourceID(i int) {
-	m.resource_id = &i
-	m.addresource_id = nil
+	m.lion_resources = &i
 }
 
 // ResourceID returns the value of the "resource_id" field in the mutation.
 func (m *ResourceScopesMutation) ResourceID() (r int, exists bool) {
-	v := m.resource_id
+	v := m.lion_resources
 	if v == nil {
 		return
 	}
@@ -10950,39 +11238,19 @@ func (m *ResourceScopesMutation) OldResourceID(ctx context.Context) (v int, err 
 	return oldValue.ResourceID, nil
 }
 
-// AddResourceID adds i to the "resource_id" field.
-func (m *ResourceScopesMutation) AddResourceID(i int) {
-	if m.addresource_id != nil {
-		*m.addresource_id += i
-	} else {
-		m.addresource_id = &i
-	}
-}
-
-// AddedResourceID returns the value that was added to the "resource_id" field in this mutation.
-func (m *ResourceScopesMutation) AddedResourceID() (r int, exists bool) {
-	v := m.addresource_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetResourceID resets all changes to the "resource_id" field.
 func (m *ResourceScopesMutation) ResetResourceID() {
-	m.resource_id = nil
-	m.addresource_id = nil
+	m.lion_resources = nil
 }
 
 // SetScopeID sets the "scope_id" field.
 func (m *ResourceScopesMutation) SetScopeID(i int) {
-	m.scope_id = &i
-	m.addscope_id = nil
+	m.lion_scopes = &i
 }
 
 // ScopeID returns the value of the "scope_id" field in the mutation.
 func (m *ResourceScopesMutation) ScopeID() (r int, exists bool) {
-	v := m.scope_id
+	v := m.lion_scopes
 	if v == nil {
 		return
 	}
@@ -11006,28 +11274,143 @@ func (m *ResourceScopesMutation) OldScopeID(ctx context.Context) (v int, err err
 	return oldValue.ScopeID, nil
 }
 
-// AddScopeID adds i to the "scope_id" field.
-func (m *ResourceScopesMutation) AddScopeID(i int) {
-	if m.addscope_id != nil {
-		*m.addscope_id += i
-	} else {
-		m.addscope_id = &i
-	}
-}
-
-// AddedScopeID returns the value that was added to the "scope_id" field in this mutation.
-func (m *ResourceScopesMutation) AddedScopeID() (r int, exists bool) {
-	v := m.addscope_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetScopeID resets all changes to the "scope_id" field.
 func (m *ResourceScopesMutation) ResetScopeID() {
-	m.scope_id = nil
-	m.addscope_id = nil
+	m.lion_scopes = nil
+}
+
+// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by id.
+func (m *ResourceScopesMutation) SetLionResourcesID(id int) {
+	m.lion_resources = &id
+}
+
+// ClearLionResources clears the "lion_resources" edge to the Resources entity.
+func (m *ResourceScopesMutation) ClearLionResources() {
+	m.clearedlion_resources = true
+	m.clearedFields[resourcescopes.FieldResourceID] = struct{}{}
+}
+
+// LionResourcesCleared reports if the "lion_resources" edge to the Resources entity was cleared.
+func (m *ResourceScopesMutation) LionResourcesCleared() bool {
+	return m.clearedlion_resources
+}
+
+// LionResourcesID returns the "lion_resources" edge ID in the mutation.
+func (m *ResourceScopesMutation) LionResourcesID() (id int, exists bool) {
+	if m.lion_resources != nil {
+		return *m.lion_resources, true
+	}
+	return
+}
+
+// LionResourcesIDs returns the "lion_resources" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionResourcesID instead. It exists only for internal usage by the builders.
+func (m *ResourceScopesMutation) LionResourcesIDs() (ids []int) {
+	if id := m.lion_resources; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionResources resets all changes to the "lion_resources" edge.
+func (m *ResourceScopesMutation) ResetLionResources() {
+	m.lion_resources = nil
+	m.clearedlion_resources = false
+}
+
+// SetLionScopesID sets the "lion_scopes" edge to the Scopes entity by id.
+func (m *ResourceScopesMutation) SetLionScopesID(id int) {
+	m.lion_scopes = &id
+}
+
+// ClearLionScopes clears the "lion_scopes" edge to the Scopes entity.
+func (m *ResourceScopesMutation) ClearLionScopes() {
+	m.clearedlion_scopes = true
+	m.clearedFields[resourcescopes.FieldScopeID] = struct{}{}
+}
+
+// LionScopesCleared reports if the "lion_scopes" edge to the Scopes entity was cleared.
+func (m *ResourceScopesMutation) LionScopesCleared() bool {
+	return m.clearedlion_scopes
+}
+
+// LionScopesID returns the "lion_scopes" edge ID in the mutation.
+func (m *ResourceScopesMutation) LionScopesID() (id int, exists bool) {
+	if m.lion_scopes != nil {
+		return *m.lion_scopes, true
+	}
+	return
+}
+
+// LionScopesIDs returns the "lion_scopes" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LionScopesID instead. It exists only for internal usage by the builders.
+func (m *ResourceScopesMutation) LionScopesIDs() (ids []int) {
+	if id := m.lion_scopes; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLionScopes resets all changes to the "lion_scopes" edge.
+func (m *ResourceScopesMutation) ResetLionScopes() {
+	m.lion_scopes = nil
+	m.clearedlion_scopes = false
+}
+
+// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by ids.
+func (m *ResourceScopesMutation) AddLionPermissionIDs(ids ...int) {
+	if m.lion_permissions == nil {
+		m.lion_permissions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lion_permissions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLionPermissions clears the "lion_permissions" edge to the Permissions entity.
+func (m *ResourceScopesMutation) ClearLionPermissions() {
+	m.clearedlion_permissions = true
+}
+
+// LionPermissionsCleared reports if the "lion_permissions" edge to the Permissions entity was cleared.
+func (m *ResourceScopesMutation) LionPermissionsCleared() bool {
+	return m.clearedlion_permissions
+}
+
+// RemoveLionPermissionIDs removes the "lion_permissions" edge to the Permissions entity by IDs.
+func (m *ResourceScopesMutation) RemoveLionPermissionIDs(ids ...int) {
+	if m.removedlion_permissions == nil {
+		m.removedlion_permissions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lion_permissions, ids[i])
+		m.removedlion_permissions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLionPermissions returns the removed IDs of the "lion_permissions" edge to the Permissions entity.
+func (m *ResourceScopesMutation) RemovedLionPermissionsIDs() (ids []int) {
+	for id := range m.removedlion_permissions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LionPermissionsIDs returns the "lion_permissions" edge IDs in the mutation.
+func (m *ResourceScopesMutation) LionPermissionsIDs() (ids []int) {
+	for id := range m.lion_permissions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLionPermissions resets all changes to the "lion_permissions" edge.
+func (m *ResourceScopesMutation) ResetLionPermissions() {
+	m.lion_permissions = nil
+	m.clearedlion_permissions = false
+	m.removedlion_permissions = nil
 }
 
 // Where appends a list predicates to the ResourceScopesMutation builder.
@@ -11074,10 +11457,10 @@ func (m *ResourceScopesMutation) Fields() []string {
 	if m.deleted_at != nil {
 		fields = append(fields, resourcescopes.FieldDeletedAt)
 	}
-	if m.resource_id != nil {
+	if m.lion_resources != nil {
 		fields = append(fields, resourcescopes.FieldResourceID)
 	}
-	if m.scope_id != nil {
+	if m.lion_scopes != nil {
 		fields = append(fields, resourcescopes.FieldScopeID)
 	}
 	return fields
@@ -11169,12 +11552,6 @@ func (m *ResourceScopesMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *ResourceScopesMutation) AddedFields() []string {
 	var fields []string
-	if m.addresource_id != nil {
-		fields = append(fields, resourcescopes.FieldResourceID)
-	}
-	if m.addscope_id != nil {
-		fields = append(fields, resourcescopes.FieldScopeID)
-	}
 	return fields
 }
 
@@ -11183,10 +11560,6 @@ func (m *ResourceScopesMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *ResourceScopesMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case resourcescopes.FieldResourceID:
-		return m.AddedResourceID()
-	case resourcescopes.FieldScopeID:
-		return m.AddedScopeID()
 	}
 	return nil, false
 }
@@ -11196,20 +11569,6 @@ func (m *ResourceScopesMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *ResourceScopesMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case resourcescopes.FieldResourceID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddResourceID(v)
-		return nil
-	case resourcescopes.FieldScopeID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddScopeID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown ResourceScopes numeric field %s", name)
 }
@@ -11267,85 +11626,160 @@ func (m *ResourceScopesMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ResourceScopesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 3)
+	if m.lion_resources != nil {
+		edges = append(edges, resourcescopes.EdgeLionResources)
+	}
+	if m.lion_scopes != nil {
+		edges = append(edges, resourcescopes.EdgeLionScopes)
+	}
+	if m.lion_permissions != nil {
+		edges = append(edges, resourcescopes.EdgeLionPermissions)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *ResourceScopesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case resourcescopes.EdgeLionResources:
+		if id := m.lion_resources; id != nil {
+			return []ent.Value{*id}
+		}
+	case resourcescopes.EdgeLionScopes:
+		if id := m.lion_scopes; id != nil {
+			return []ent.Value{*id}
+		}
+	case resourcescopes.EdgeLionPermissions:
+		ids := make([]ent.Value, 0, len(m.lion_permissions))
+		for id := range m.lion_permissions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ResourceScopesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 3)
+	if m.removedlion_permissions != nil {
+		edges = append(edges, resourcescopes.EdgeLionPermissions)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ResourceScopesMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case resourcescopes.EdgeLionPermissions:
+		ids := make([]ent.Value, 0, len(m.removedlion_permissions))
+		for id := range m.removedlion_permissions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ResourceScopesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 3)
+	if m.clearedlion_resources {
+		edges = append(edges, resourcescopes.EdgeLionResources)
+	}
+	if m.clearedlion_scopes {
+		edges = append(edges, resourcescopes.EdgeLionScopes)
+	}
+	if m.clearedlion_permissions {
+		edges = append(edges, resourcescopes.EdgeLionPermissions)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *ResourceScopesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case resourcescopes.EdgeLionResources:
+		return m.clearedlion_resources
+	case resourcescopes.EdgeLionScopes:
+		return m.clearedlion_scopes
+	case resourcescopes.EdgeLionPermissions:
+		return m.clearedlion_permissions
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *ResourceScopesMutation) ClearEdge(name string) error {
+	switch name {
+	case resourcescopes.EdgeLionResources:
+		m.ClearLionResources()
+		return nil
+	case resourcescopes.EdgeLionScopes:
+		m.ClearLionScopes()
+		return nil
+	}
 	return fmt.Errorf("unknown ResourceScopes unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *ResourceScopesMutation) ResetEdge(name string) error {
+	switch name {
+	case resourcescopes.EdgeLionResources:
+		m.ResetLionResources()
+		return nil
+	case resourcescopes.EdgeLionScopes:
+		m.ResetLionScopes()
+		return nil
+	case resourcescopes.EdgeLionPermissions:
+		m.ResetLionPermissions()
+		return nil
+	}
 	return fmt.Errorf("unknown ResourceScopes edge %s", name)
 }
 
 // ResourcesMutation represents an operation that mutates the Resources nodes in the graph.
 type ResourcesMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	created_at         *time.Time
-	updated_at         *time.Time
-	deleted_at         *time.Time
-	created_by         *int64
-	addcreated_by      *int64
-	updated_by         *int64
-	addupdated_by      *int64
-	parent_id          *int
-	addparent_id       *int
-	name               *string
-	display_name       *string
-	resource_type      *int
-	addresource_type   *int
-	resource_status    *int
-	addresource_status *int
-	sort_order         *int
-	addsort_order      *int
-	hidden             *bool
-	hide_children      *bool
-	_path              *string
-	icon               *string
-	component          *string
-	description        *string
-	clearedFields      map[string]struct{}
-	done               bool
-	oldValue           func(context.Context) (*Resources, error)
-	predicates         []predicate.Resources
+	op                          Op
+	typ                         string
+	id                          *int
+	created_at                  *time.Time
+	updated_at                  *time.Time
+	deleted_at                  *time.Time
+	created_by                  *int64
+	addcreated_by               *int64
+	updated_by                  *int64
+	addupdated_by               *int64
+	parent_id                   *int
+	addparent_id                *int
+	name                        *string
+	display_name                *string
+	resource_type               *int
+	addresource_type            *int
+	resource_status             *int
+	addresource_status          *int
+	sort_order                  *int
+	addsort_order               *int
+	hidden                      *bool
+	hide_children               *bool
+	_path                       *string
+	icon                        *string
+	component                   *string
+	description                 *string
+	clearedFields               map[string]struct{}
+	lion_resource_scopes        map[int]struct{}
+	removedlion_resource_scopes map[int]struct{}
+	clearedlion_resource_scopes bool
+	done                        bool
+	oldValue                    func(context.Context) (*Resources, error)
+	predicates                  []predicate.Resources
 }
 
 var _ ent.Mutation = (*ResourcesMutation)(nil)
@@ -12219,6 +12653,60 @@ func (m *ResourcesMutation) ResetDescription() {
 	m.description = nil
 }
 
+// AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by ids.
+func (m *ResourcesMutation) AddLionResourceScopeIDs(ids ...int) {
+	if m.lion_resource_scopes == nil {
+		m.lion_resource_scopes = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lion_resource_scopes[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLionResourceScopes clears the "lion_resource_scopes" edge to the ResourceScopes entity.
+func (m *ResourcesMutation) ClearLionResourceScopes() {
+	m.clearedlion_resource_scopes = true
+}
+
+// LionResourceScopesCleared reports if the "lion_resource_scopes" edge to the ResourceScopes entity was cleared.
+func (m *ResourcesMutation) LionResourceScopesCleared() bool {
+	return m.clearedlion_resource_scopes
+}
+
+// RemoveLionResourceScopeIDs removes the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
+func (m *ResourcesMutation) RemoveLionResourceScopeIDs(ids ...int) {
+	if m.removedlion_resource_scopes == nil {
+		m.removedlion_resource_scopes = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lion_resource_scopes, ids[i])
+		m.removedlion_resource_scopes[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLionResourceScopes returns the removed IDs of the "lion_resource_scopes" edge to the ResourceScopes entity.
+func (m *ResourcesMutation) RemovedLionResourceScopesIDs() (ids []int) {
+	for id := range m.removedlion_resource_scopes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LionResourceScopesIDs returns the "lion_resource_scopes" edge IDs in the mutation.
+func (m *ResourcesMutation) LionResourceScopesIDs() (ids []int) {
+	for id := range m.lion_resource_scopes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLionResourceScopes resets all changes to the "lion_resource_scopes" edge.
+func (m *ResourcesMutation) ResetLionResourceScopes() {
+	m.lion_resource_scopes = nil
+	m.clearedlion_resource_scopes = false
+	m.removedlion_resource_scopes = nil
+}
+
 // Where appends a list predicates to the ResourcesMutation builder.
 func (m *ResourcesMutation) Where(ps ...predicate.Resources) {
 	m.predicates = append(m.predicates, ps...)
@@ -12720,49 +13208,85 @@ func (m *ResourcesMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ResourcesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.lion_resource_scopes != nil {
+		edges = append(edges, resources.EdgeLionResourceScopes)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *ResourcesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case resources.EdgeLionResourceScopes:
+		ids := make([]ent.Value, 0, len(m.lion_resource_scopes))
+		for id := range m.lion_resource_scopes {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ResourcesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedlion_resource_scopes != nil {
+		edges = append(edges, resources.EdgeLionResourceScopes)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ResourcesMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case resources.EdgeLionResourceScopes:
+		ids := make([]ent.Value, 0, len(m.removedlion_resource_scopes))
+		for id := range m.removedlion_resource_scopes {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ResourcesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedlion_resource_scopes {
+		edges = append(edges, resources.EdgeLionResourceScopes)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *ResourcesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case resources.EdgeLionResourceScopes:
+		return m.clearedlion_resource_scopes
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *ResourcesMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Resources unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *ResourcesMutation) ResetEdge(name string) error {
+	switch name {
+	case resources.EdgeLionResourceScopes:
+		m.ResetLionResourceScopes()
+		return nil
+	}
 	return fmt.Errorf("unknown Resources edge %s", name)
 }
 
@@ -14987,18 +15511,21 @@ func (m *RolesMutation) ResetEdge(name string) error {
 // ScopesMutation represents an operation that mutates the Scopes nodes in the graph.
 type ScopesMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	created_at    *time.Time
-	updated_at    *time.Time
-	deleted_at    *time.Time
-	name          *string
-	display_name  *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Scopes, error)
-	predicates    []predicate.Scopes
+	op                          Op
+	typ                         string
+	id                          *int
+	created_at                  *time.Time
+	updated_at                  *time.Time
+	deleted_at                  *time.Time
+	name                        *string
+	display_name                *string
+	clearedFields               map[string]struct{}
+	lion_resource_scopes        map[int]struct{}
+	removedlion_resource_scopes map[int]struct{}
+	clearedlion_resource_scopes bool
+	done                        bool
+	oldValue                    func(context.Context) (*Scopes, error)
+	predicates                  []predicate.Scopes
 }
 
 var _ ent.Mutation = (*ScopesMutation)(nil)
@@ -15292,6 +15819,60 @@ func (m *ScopesMutation) ResetDisplayName() {
 	m.display_name = nil
 }
 
+// AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by ids.
+func (m *ScopesMutation) AddLionResourceScopeIDs(ids ...int) {
+	if m.lion_resource_scopes == nil {
+		m.lion_resource_scopes = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lion_resource_scopes[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLionResourceScopes clears the "lion_resource_scopes" edge to the ResourceScopes entity.
+func (m *ScopesMutation) ClearLionResourceScopes() {
+	m.clearedlion_resource_scopes = true
+}
+
+// LionResourceScopesCleared reports if the "lion_resource_scopes" edge to the ResourceScopes entity was cleared.
+func (m *ScopesMutation) LionResourceScopesCleared() bool {
+	return m.clearedlion_resource_scopes
+}
+
+// RemoveLionResourceScopeIDs removes the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
+func (m *ScopesMutation) RemoveLionResourceScopeIDs(ids ...int) {
+	if m.removedlion_resource_scopes == nil {
+		m.removedlion_resource_scopes = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lion_resource_scopes, ids[i])
+		m.removedlion_resource_scopes[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLionResourceScopes returns the removed IDs of the "lion_resource_scopes" edge to the ResourceScopes entity.
+func (m *ScopesMutation) RemovedLionResourceScopesIDs() (ids []int) {
+	for id := range m.removedlion_resource_scopes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LionResourceScopesIDs returns the "lion_resource_scopes" edge IDs in the mutation.
+func (m *ScopesMutation) LionResourceScopesIDs() (ids []int) {
+	for id := range m.lion_resource_scopes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLionResourceScopes resets all changes to the "lion_resource_scopes" edge.
+func (m *ScopesMutation) ResetLionResourceScopes() {
+	m.lion_resource_scopes = nil
+	m.clearedlion_resource_scopes = false
+	m.removedlion_resource_scopes = nil
+}
+
 // Where appends a list predicates to the ScopesMutation builder.
 func (m *ScopesMutation) Where(ps ...predicate.Scopes) {
 	m.predicates = append(m.predicates, ps...)
@@ -15502,49 +16083,85 @@ func (m *ScopesMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ScopesMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.lion_resource_scopes != nil {
+		edges = append(edges, scopes.EdgeLionResourceScopes)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *ScopesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case scopes.EdgeLionResourceScopes:
+		ids := make([]ent.Value, 0, len(m.lion_resource_scopes))
+		for id := range m.lion_resource_scopes {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ScopesMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedlion_resource_scopes != nil {
+		edges = append(edges, scopes.EdgeLionResourceScopes)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ScopesMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case scopes.EdgeLionResourceScopes:
+		ids := make([]ent.Value, 0, len(m.removedlion_resource_scopes))
+		for id := range m.removedlion_resource_scopes {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ScopesMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedlion_resource_scopes {
+		edges = append(edges, scopes.EdgeLionResourceScopes)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *ScopesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case scopes.EdgeLionResourceScopes:
+		return m.clearedlion_resource_scopes
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *ScopesMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Scopes unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *ScopesMutation) ResetEdge(name string) error {
+	switch name {
+	case scopes.EdgeLionResourceScopes:
+		m.ResetLionResourceScopes()
+		return nil
+	}
 	return fmt.Errorf("unknown Scopes edge %s", name)
 }
 

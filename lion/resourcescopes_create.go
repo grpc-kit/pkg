@@ -10,7 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/permissions"
+	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/scopes"
 )
 
 // ResourceScopesCreate is the builder for creating a ResourceScopes entity.
@@ -72,6 +75,43 @@ func (_c *ResourceScopesCreate) SetResourceID(v int) *ResourceScopesCreate {
 func (_c *ResourceScopesCreate) SetScopeID(v int) *ResourceScopesCreate {
 	_c.mutation.SetScopeID(v)
 	return _c
+}
+
+// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
+func (_c *ResourceScopesCreate) SetLionResourcesID(id int) *ResourceScopesCreate {
+	_c.mutation.SetLionResourcesID(id)
+	return _c
+}
+
+// SetLionResources sets the "lion_resources" edge to the Resources entity.
+func (_c *ResourceScopesCreate) SetLionResources(v *Resources) *ResourceScopesCreate {
+	return _c.SetLionResourcesID(v.ID)
+}
+
+// SetLionScopesID sets the "lion_scopes" edge to the Scopes entity by ID.
+func (_c *ResourceScopesCreate) SetLionScopesID(id int) *ResourceScopesCreate {
+	_c.mutation.SetLionScopesID(id)
+	return _c
+}
+
+// SetLionScopes sets the "lion_scopes" edge to the Scopes entity.
+func (_c *ResourceScopesCreate) SetLionScopes(v *Scopes) *ResourceScopesCreate {
+	return _c.SetLionScopesID(v.ID)
+}
+
+// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
+func (_c *ResourceScopesCreate) AddLionPermissionIDs(ids ...int) *ResourceScopesCreate {
+	_c.mutation.AddLionPermissionIDs(ids...)
+	return _c
+}
+
+// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
+func (_c *ResourceScopesCreate) AddLionPermissions(v ...*Permissions) *ResourceScopesCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionPermissionIDs(ids...)
 }
 
 // Mutation returns the ResourceScopesMutation object of the builder.
@@ -143,6 +183,12 @@ func (_c *ResourceScopesCreate) check() error {
 			return &ValidationError{Name: "scope_id", err: fmt.Errorf(`lion: validator failed for field "ResourceScopes.scope_id": %w`, err)}
 		}
 	}
+	if len(_c.mutation.LionResourcesIDs()) == 0 {
+		return &ValidationError{Name: "lion_resources", err: errors.New(`lion: missing required edge "ResourceScopes.lion_resources"`)}
+	}
+	if len(_c.mutation.LionScopesIDs()) == 0 {
+		return &ValidationError{Name: "lion_scopes", err: errors.New(`lion: missing required edge "ResourceScopes.lion_scopes"`)}
+	}
 	return nil
 }
 
@@ -181,13 +227,55 @@ func (_c *ResourceScopesCreate) createSpec() (*ResourceScopes, *sqlgraph.CreateS
 		_spec.SetField(resourcescopes.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := _c.mutation.ResourceID(); ok {
-		_spec.SetField(resourcescopes.FieldResourceID, field.TypeInt, value)
-		_node.ResourceID = value
+	if nodes := _c.mutation.LionResourcesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resourcescopes.LionResourcesTable,
+			Columns: []string{resourcescopes.LionResourcesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ResourceID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if value, ok := _c.mutation.ScopeID(); ok {
-		_spec.SetField(resourcescopes.FieldScopeID, field.TypeInt, value)
-		_node.ScopeID = value
+	if nodes := _c.mutation.LionScopesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resourcescopes.LionScopesTable,
+			Columns: []string{resourcescopes.LionScopesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(scopes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ScopeID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionPermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionsTable,
+			Columns: []string{resourcescopes.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

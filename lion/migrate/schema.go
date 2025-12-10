@@ -231,16 +231,31 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "resource_id", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Size: 256},
 		{Name: "display_name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "policy_id", Type: field.TypeInt},
+		{Name: "resource_scope_id", Type: field.TypeInt},
 	}
 	// LionPermissionsTable holds the schema information for the "lion_permissions" table.
 	LionPermissionsTable = &schema.Table{
 		Name:       "lion_permissions",
 		Columns:    LionPermissionsColumns,
 		PrimaryKey: []*schema.Column{LionPermissionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_permissions_lion_policies_lion_permissions",
+				Columns:    []*schema.Column{LionPermissionsColumns[8]},
+				RefColumns: []*schema.Column{LionPoliciesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "lion_permissions_lion_resource_scopes_lion_permissions",
+				Columns:    []*schema.Column{LionPermissionsColumns[9]},
+				RefColumns: []*schema.Column{LionResourceScopesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// LionPoliciesColumns holds the columns for the "lion_policies" table.
 	LionPoliciesColumns = []*schema.Column{
@@ -250,7 +265,8 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "name", Type: field.TypeString, Default: "grpc-kit"},
+		{Name: "name", Type: field.TypeString, Size: 256},
+		{Name: "display_name", Type: field.TypeString},
 	}
 	// LionPoliciesTable holds the schema information for the "lion_policies" table.
 	LionPoliciesTable = &schema.Table{
@@ -272,6 +288,20 @@ var (
 		Name:       "lion_resource_scopes",
 		Columns:    LionResourceScopesColumns,
 		PrimaryKey: []*schema.Column{LionResourceScopesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_resource_scopes_lion_resources_lion_resource_scopes",
+				Columns:    []*schema.Column{LionResourceScopesColumns[4]},
+				RefColumns: []*schema.Column{LionResourcesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "lion_resource_scopes_lion_scopes_lion_resource_scopes",
+				Columns:    []*schema.Column{LionResourceScopesColumns[5]},
+				RefColumns: []*schema.Column{LionScopesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
 	}
 	// LionResourcesColumns holds the columns for the "lion_resources" table.
 	LionResourcesColumns = []*schema.Column{
@@ -771,12 +801,16 @@ func init() {
 	LionGroupsTable.Annotation = &entsql.Annotation{
 		Table: "lion_groups",
 	}
+	LionPermissionsTable.ForeignKeys[0].RefTable = LionPoliciesTable
+	LionPermissionsTable.ForeignKeys[1].RefTable = LionResourceScopesTable
 	LionPermissionsTable.Annotation = &entsql.Annotation{
 		Table: "lion_permissions",
 	}
 	LionPoliciesTable.Annotation = &entsql.Annotation{
 		Table: "lion_policies",
 	}
+	LionResourceScopesTable.ForeignKeys[0].RefTable = LionResourcesTable
+	LionResourceScopesTable.ForeignKeys[1].RefTable = LionScopesTable
 	LionResourceScopesTable.Annotation = &entsql.Annotation{
 		Table: "lion_resource_scopes",
 	}

@@ -11,6 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/permissions"
+	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 )
 
@@ -77,9 +79,15 @@ func (_c *PermissionsCreate) SetNillableUpdatedBy(v *int64) *PermissionsCreate {
 	return _c
 }
 
-// SetResourceID sets the "resource_id" field.
-func (_c *PermissionsCreate) SetResourceID(v int) *PermissionsCreate {
-	_c.mutation.SetResourceID(v)
+// SetResourceScopeID sets the "resource_scope_id" field.
+func (_c *PermissionsCreate) SetResourceScopeID(v int) *PermissionsCreate {
+	_c.mutation.SetResourceScopeID(v)
+	return _c
+}
+
+// SetPolicyID sets the "policy_id" field.
+func (_c *PermissionsCreate) SetPolicyID(v int) *PermissionsCreate {
+	_c.mutation.SetPolicyID(v)
 	return _c
 }
 
@@ -122,6 +130,28 @@ func (_c *PermissionsCreate) AddLionRolePermissions(v ...*RolePermissions) *Perm
 		ids[i] = v[i].ID
 	}
 	return _c.AddLionRolePermissionIDs(ids...)
+}
+
+// SetLionResourceScopesID sets the "lion_resource_scopes" edge to the ResourceScopes entity by ID.
+func (_c *PermissionsCreate) SetLionResourceScopesID(id int) *PermissionsCreate {
+	_c.mutation.SetLionResourceScopesID(id)
+	return _c
+}
+
+// SetLionResourceScopes sets the "lion_resource_scopes" edge to the ResourceScopes entity.
+func (_c *PermissionsCreate) SetLionResourceScopes(v *ResourceScopes) *PermissionsCreate {
+	return _c.SetLionResourceScopesID(v.ID)
+}
+
+// SetLionPoliciesID sets the "lion_policies" edge to the Policies entity by ID.
+func (_c *PermissionsCreate) SetLionPoliciesID(id int) *PermissionsCreate {
+	_c.mutation.SetLionPoliciesID(id)
+	return _c
+}
+
+// SetLionPolicies sets the "lion_policies" edge to the Policies entity.
+func (_c *PermissionsCreate) SetLionPolicies(v *Policies) *PermissionsCreate {
+	return _c.SetLionPoliciesID(v.ID)
 }
 
 // Mutation returns the PermissionsMutation object of the builder.
@@ -189,12 +219,20 @@ func (_c *PermissionsCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Permissions.updated_at"`)}
 	}
-	if _, ok := _c.mutation.ResourceID(); !ok {
-		return &ValidationError{Name: "resource_id", err: errors.New(`lion: missing required field "Permissions.resource_id"`)}
+	if _, ok := _c.mutation.ResourceScopeID(); !ok {
+		return &ValidationError{Name: "resource_scope_id", err: errors.New(`lion: missing required field "Permissions.resource_scope_id"`)}
 	}
-	if v, ok := _c.mutation.ResourceID(); ok {
-		if err := permissions.ResourceIDValidator(v); err != nil {
-			return &ValidationError{Name: "resource_id", err: fmt.Errorf(`lion: validator failed for field "Permissions.resource_id": %w`, err)}
+	if v, ok := _c.mutation.ResourceScopeID(); ok {
+		if err := permissions.ResourceScopeIDValidator(v); err != nil {
+			return &ValidationError{Name: "resource_scope_id", err: fmt.Errorf(`lion: validator failed for field "Permissions.resource_scope_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.PolicyID(); !ok {
+		return &ValidationError{Name: "policy_id", err: errors.New(`lion: missing required field "Permissions.policy_id"`)}
+	}
+	if v, ok := _c.mutation.PolicyID(); ok {
+		if err := permissions.PolicyIDValidator(v); err != nil {
+			return &ValidationError{Name: "policy_id", err: fmt.Errorf(`lion: validator failed for field "Permissions.policy_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Name(); !ok {
@@ -215,6 +253,12 @@ func (_c *PermissionsCreate) check() error {
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Permissions.description"`)}
+	}
+	if len(_c.mutation.LionResourceScopesIDs()) == 0 {
+		return &ValidationError{Name: "lion_resource_scopes", err: errors.New(`lion: missing required edge "Permissions.lion_resource_scopes"`)}
+	}
+	if len(_c.mutation.LionPoliciesIDs()) == 0 {
+		return &ValidationError{Name: "lion_policies", err: errors.New(`lion: missing required edge "Permissions.lion_policies"`)}
 	}
 	return nil
 }
@@ -258,10 +302,6 @@ func (_c *PermissionsCreate) createSpec() (*Permissions, *sqlgraph.CreateSpec) {
 		_spec.SetField(permissions.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
 	}
-	if value, ok := _c.mutation.ResourceID(); ok {
-		_spec.SetField(permissions.FieldResourceID, field.TypeInt, value)
-		_node.ResourceID = value
-	}
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(permissions.FieldName, field.TypeString, value)
 		_node.Name = value
@@ -288,6 +328,40 @@ func (_c *PermissionsCreate) createSpec() (*Permissions, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionResourceScopesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissions.LionResourceScopesTable,
+			Columns: []string{permissions.LionResourceScopesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcescopes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ResourceScopeID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionPoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   permissions.LionPoliciesTable,
+			Columns: []string{permissions.LionPoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(policies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.PolicyID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

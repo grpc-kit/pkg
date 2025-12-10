@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 )
 
@@ -96,12 +97,25 @@ func (_c *PoliciesCreate) SetName(v string) *PoliciesCreate {
 	return _c
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_c *PoliciesCreate) SetNillableName(v *string) *PoliciesCreate {
-	if v != nil {
-		_c.SetName(*v)
-	}
+// SetDisplayName sets the "display_name" field.
+func (_c *PoliciesCreate) SetDisplayName(v string) *PoliciesCreate {
+	_c.mutation.SetDisplayName(v)
 	return _c
+}
+
+// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
+func (_c *PoliciesCreate) AddLionPermissionIDs(ids ...int) *PoliciesCreate {
+	_c.mutation.AddLionPermissionIDs(ids...)
+	return _c
+}
+
+// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
+func (_c *PoliciesCreate) AddLionPermissions(v ...*Permissions) *PoliciesCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionPermissionIDs(ids...)
 }
 
 // Mutation returns the PoliciesMutation object of the builder.
@@ -155,10 +169,6 @@ func (_c *PoliciesCreate) defaults() {
 		v := policies.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
-	if _, ok := _c.mutation.Name(); !ok {
-		v := policies.DefaultName
-		_c.mutation.SetName(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -171,6 +181,19 @@ func (_c *PoliciesCreate) check() error {
 	}
 	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Policies.name"`)}
+	}
+	if v, ok := _c.mutation.Name(); ok {
+		if err := policies.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Policies.name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "Policies.display_name"`)}
+	}
+	if v, ok := _c.mutation.DisplayName(); ok {
+		if err := policies.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Policies.display_name": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -221,6 +244,26 @@ func (_c *PoliciesCreate) createSpec() (*Policies, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(policies.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.DisplayName(); ok {
+		_spec.SetField(policies.FieldDisplayName, field.TypeString, value)
+		_node.DisplayName = value
+	}
+	if nodes := _c.mutation.LionPermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   policies.LionPermissionsTable,
+			Columns: []string{policies.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

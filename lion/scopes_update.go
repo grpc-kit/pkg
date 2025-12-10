@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/scopes"
 )
 
@@ -82,9 +83,45 @@ func (_u *ScopesUpdate) SetNillableDisplayName(v *string) *ScopesUpdate {
 	return _u
 }
 
+// AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
+func (_u *ScopesUpdate) AddLionResourceScopeIDs(ids ...int) *ScopesUpdate {
+	_u.mutation.AddLionResourceScopeIDs(ids...)
+	return _u
+}
+
+// AddLionResourceScopes adds the "lion_resource_scopes" edges to the ResourceScopes entity.
+func (_u *ScopesUpdate) AddLionResourceScopes(v ...*ResourceScopes) *ScopesUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionResourceScopeIDs(ids...)
+}
+
 // Mutation returns the ScopesMutation object of the builder.
 func (_u *ScopesUpdate) Mutation() *ScopesMutation {
 	return _u.mutation
+}
+
+// ClearLionResourceScopes clears all "lion_resource_scopes" edges to the ResourceScopes entity.
+func (_u *ScopesUpdate) ClearLionResourceScopes() *ScopesUpdate {
+	_u.mutation.ClearLionResourceScopes()
+	return _u
+}
+
+// RemoveLionResourceScopeIDs removes the "lion_resource_scopes" edge to ResourceScopes entities by IDs.
+func (_u *ScopesUpdate) RemoveLionResourceScopeIDs(ids ...int) *ScopesUpdate {
+	_u.mutation.RemoveLionResourceScopeIDs(ids...)
+	return _u
+}
+
+// RemoveLionResourceScopes removes "lion_resource_scopes" edges to ResourceScopes entities.
+func (_u *ScopesUpdate) RemoveLionResourceScopes(v ...*ResourceScopes) *ScopesUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionResourceScopeIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -160,6 +197,51 @@ func (_u *ScopesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(scopes.FieldDisplayName, field.TypeString, value)
 	}
+	if _u.mutation.LionResourceScopesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   scopes.LionResourceScopesTable,
+			Columns: []string{scopes.LionResourceScopesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcescopes.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionResourceScopesIDs(); len(nodes) > 0 && !_u.mutation.LionResourceScopesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   scopes.LionResourceScopesTable,
+			Columns: []string{scopes.LionResourceScopesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcescopes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionResourceScopesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   scopes.LionResourceScopesTable,
+			Columns: []string{scopes.LionResourceScopesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcescopes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{scopes.Label}
@@ -234,9 +316,45 @@ func (_u *ScopesUpdateOne) SetNillableDisplayName(v *string) *ScopesUpdateOne {
 	return _u
 }
 
+// AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
+func (_u *ScopesUpdateOne) AddLionResourceScopeIDs(ids ...int) *ScopesUpdateOne {
+	_u.mutation.AddLionResourceScopeIDs(ids...)
+	return _u
+}
+
+// AddLionResourceScopes adds the "lion_resource_scopes" edges to the ResourceScopes entity.
+func (_u *ScopesUpdateOne) AddLionResourceScopes(v ...*ResourceScopes) *ScopesUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionResourceScopeIDs(ids...)
+}
+
 // Mutation returns the ScopesMutation object of the builder.
 func (_u *ScopesUpdateOne) Mutation() *ScopesMutation {
 	return _u.mutation
+}
+
+// ClearLionResourceScopes clears all "lion_resource_scopes" edges to the ResourceScopes entity.
+func (_u *ScopesUpdateOne) ClearLionResourceScopes() *ScopesUpdateOne {
+	_u.mutation.ClearLionResourceScopes()
+	return _u
+}
+
+// RemoveLionResourceScopeIDs removes the "lion_resource_scopes" edge to ResourceScopes entities by IDs.
+func (_u *ScopesUpdateOne) RemoveLionResourceScopeIDs(ids ...int) *ScopesUpdateOne {
+	_u.mutation.RemoveLionResourceScopeIDs(ids...)
+	return _u
+}
+
+// RemoveLionResourceScopes removes "lion_resource_scopes" edges to ResourceScopes entities.
+func (_u *ScopesUpdateOne) RemoveLionResourceScopes(v ...*ResourceScopes) *ScopesUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionResourceScopeIDs(ids...)
 }
 
 // Where appends a list predicates to the ScopesUpdate builder.
@@ -341,6 +459,51 @@ func (_u *ScopesUpdateOne) sqlSave(ctx context.Context) (_node *Scopes, err erro
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(scopes.FieldDisplayName, field.TypeString, value)
+	}
+	if _u.mutation.LionResourceScopesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   scopes.LionResourceScopesTable,
+			Columns: []string{scopes.LionResourceScopesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcescopes.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionResourceScopesIDs(); len(nodes) > 0 && !_u.mutation.LionResourceScopesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   scopes.LionResourceScopesTable,
+			Columns: []string{scopes.LionResourceScopesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcescopes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionResourceScopesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   scopes.LionResourceScopesTable,
+			Columns: []string{scopes.LionResourceScopesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcescopes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Scopes{config: _u.config}
 	_spec.Assign = _node.assignValues

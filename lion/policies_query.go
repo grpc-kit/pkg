@@ -4,6 +4,7 @@ package lion
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -11,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
@@ -18,10 +20,11 @@ import (
 // PoliciesQuery is the builder for querying Policies entities.
 type PoliciesQuery struct {
 	config
-	ctx        *QueryContext
-	order      []policies.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Policies
+	ctx                 *QueryContext
+	order               []policies.OrderOption
+	inters              []Interceptor
+	predicates          []predicate.Policies
+	withLionPermissions *PermissionsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +59,28 @@ func (_q *PoliciesQuery) Unique(unique bool) *PoliciesQuery {
 func (_q *PoliciesQuery) Order(o ...policies.OrderOption) *PoliciesQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryLionPermissions chains the current query on the "lion_permissions" edge.
+func (_q *PoliciesQuery) QueryLionPermissions() *PermissionsQuery {
+	query := (&PermissionsClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(policies.Table, policies.FieldID, selector),
+			sqlgraph.To(permissions.Table, permissions.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, policies.LionPermissionsTable, policies.LionPermissionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Policies entity from the query.
@@ -245,15 +270,27 @@ func (_q *PoliciesQuery) Clone() *PoliciesQuery {
 		return nil
 	}
 	return &PoliciesQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]policies.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Policies{}, _q.predicates...),
+		config:              _q.config,
+		ctx:                 _q.ctx.Clone(),
+		order:               append([]policies.OrderOption{}, _q.order...),
+		inters:              append([]Interceptor{}, _q.inters...),
+		predicates:          append([]predicate.Policies{}, _q.predicates...),
+		withLionPermissions: _q.withLionPermissions.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithLionPermissions tells the query-builder to eager-load the nodes that are connected to
+// the "lion_permissions" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *PoliciesQuery) WithLionPermissions(opts ...func(*PermissionsQuery)) *PoliciesQuery {
+	query := (&PermissionsClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionPermissions = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +369,11 @@ func (_q *PoliciesQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *PoliciesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Policies, error) {
 	var (
-		nodes = []*Policies{}
-		_spec = _q.querySpec()
+		nodes       = []*Policies{}
+		_spec       = _q.querySpec()
+		loadedTypes = [1]bool{
+			_q.withLionPermissions != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Policies).scanValues(nil, columns)
@@ -341,6 +381,7 @@ func (_q *PoliciesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pol
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Policies{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +393,45 @@ func (_q *PoliciesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pol
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withLionPermissions; query != nil {
+		if err := _q.loadLionPermissions(ctx, query, nodes,
+			func(n *Policies) { n.Edges.LionPermissions = []*Permissions{} },
+			func(n *Policies, e *Permissions) { n.Edges.LionPermissions = append(n.Edges.LionPermissions, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *PoliciesQuery) loadLionPermissions(ctx context.Context, query *PermissionsQuery, nodes []*Policies, init func(*Policies), assign func(*Policies, *Permissions)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Policies)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(permissions.FieldPolicyID)
+	}
+	query.Where(predicate.Permissions(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(policies.LionPermissionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PolicyID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "policy_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (_q *PoliciesQuery) sqlCount(ctx context.Context) (int, error) {

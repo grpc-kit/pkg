@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,7 +29,10 @@ func (Scopes) Fields() []ent.Field {
 
 // Edges of the table.
 func (Scopes) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("lion_resource_scopes", ResourceScopes.Type).
+			Annotations(entsql.OnDelete(entsql.Cascade)),
+	}
 }
 
 // Mixin of the table.

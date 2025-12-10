@@ -16,9 +16,12 @@ type Permissions struct {
 // Fields of the table.
 func (Permissions) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("resource_id").
+		field.Int("resource_scope_id").
 			Positive().
-			Comment("关联 lion_resources 表的资源 ID"),
+			Comment("关联 lion_resource_scopes 表的资源 ID"),
+		field.Int("policy_id").
+			Positive().
+			Comment("关联 lion_policies 表的资源 ID"),
 		field.String("name").
 			MaxLen(256).
 			NotEmpty().
@@ -36,13 +39,16 @@ func (Permissions) Fields() []ent.Field {
 func (Permissions) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("lion_role_permissions", RolePermissions.Type),
-		/*
-			edge.From("lion_resources", Resources.Type).
-				Ref("lion_permissions").
-				Field("resource_id").
-				Unique().
-				Required(),
-		*/
+		edge.From("lion_resource_scopes", ResourceScopes.Type).
+			Ref("lion_permissions").
+			Field("resource_scope_id").
+			Unique().
+			Required(),
+		edge.From("lion_policies", Policies.Type).
+			Ref("lion_permissions").
+			Field("policy_id").
+			Unique().
+			Required(),
 	}
 }
 

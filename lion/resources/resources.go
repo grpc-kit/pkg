@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -47,8 +48,17 @@ const (
 	FieldComponent = "component"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// EdgeLionResourceScopes holds the string denoting the lion_resource_scopes edge name in mutations.
+	EdgeLionResourceScopes = "lion_resource_scopes"
 	// Table holds the table name of the resources in the database.
 	Table = "lion_resources"
+	// LionResourceScopesTable is the table that holds the lion_resource_scopes relation/edge.
+	LionResourceScopesTable = "lion_resource_scopes"
+	// LionResourceScopesInverseTable is the table name for the ResourceScopes entity.
+	// It exists in this package in order to avoid circular dependency with the "resourcescopes" package.
+	LionResourceScopesInverseTable = "lion_resource_scopes"
+	// LionResourceScopesColumn is the table column denoting the lion_resource_scopes relation/edge.
+	LionResourceScopesColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for resources fields.
@@ -217,4 +227,25 @@ func ByComponent(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByLionResourceScopesCount orders the results by lion_resource_scopes count.
+func ByLionResourceScopesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionResourceScopesStep(), opts...)
+	}
+}
+
+// ByLionResourceScopes orders the results by lion_resource_scopes terms.
+func ByLionResourceScopes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionResourceScopesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newLionResourceScopesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionResourceScopesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionResourceScopesTable, LionResourceScopesColumn),
+	)
 }

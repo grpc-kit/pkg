@@ -9,7 +9,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/scopes"
 )
 
 // ResourceScopes is the model entity for the ResourceScopes schema.
@@ -26,8 +28,55 @@ type ResourceScopes struct {
 	// 关联 lion_resources 表 ID
 	ResourceID int `json:"resource_id,omitempty"`
 	// 关联 lion_scopes 表 ID
-	ScopeID      int `json:"scope_id,omitempty"`
+	ScopeID int `json:"scope_id,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ResourceScopesQuery when eager-loading is set.
+	Edges        ResourceScopesEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// ResourceScopesEdges holds the relations/edges for other nodes in the graph.
+type ResourceScopesEdges struct {
+	// LionResources holds the value of the lion_resources edge.
+	LionResources *Resources `json:"lion_resources,omitempty"`
+	// LionScopes holds the value of the lion_scopes edge.
+	LionScopes *Scopes `json:"lion_scopes,omitempty"`
+	// LionPermissions holds the value of the lion_permissions edge.
+	LionPermissions []*Permissions `json:"lion_permissions,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [3]bool
+}
+
+// LionResourcesOrErr returns the LionResources value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ResourceScopesEdges) LionResourcesOrErr() (*Resources, error) {
+	if e.LionResources != nil {
+		return e.LionResources, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: resources.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_resources"}
+}
+
+// LionScopesOrErr returns the LionScopes value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ResourceScopesEdges) LionScopesOrErr() (*Scopes, error) {
+	if e.LionScopes != nil {
+		return e.LionScopes, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: scopes.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_scopes"}
+}
+
+// LionPermissionsOrErr returns the LionPermissions value or an error if the edge
+// was not loaded in eager-loading.
+func (e ResourceScopesEdges) LionPermissionsOrErr() ([]*Permissions, error) {
+	if e.loadedTypes[2] {
+		return e.LionPermissions, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_permissions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -102,6 +151,21 @@ func (_m *ResourceScopes) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *ResourceScopes) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionResources queries the "lion_resources" edge of the ResourceScopes entity.
+func (_m *ResourceScopes) QueryLionResources() *ResourcesQuery {
+	return NewResourceScopesClient(_m.config).QueryLionResources(_m)
+}
+
+// QueryLionScopes queries the "lion_scopes" edge of the ResourceScopes entity.
+func (_m *ResourceScopes) QueryLionScopes() *ScopesQuery {
+	return NewResourceScopesClient(_m.config).QueryLionScopes(_m)
+}
+
+// QueryLionPermissions queries the "lion_permissions" edge of the ResourceScopes entity.
+func (_m *ResourceScopes) QueryLionPermissions() *PermissionsQuery {
+	return NewResourceScopesClient(_m.config).QueryLionPermissions(_m)
 }
 
 // Update returns a builder for updating this ResourceScopes.

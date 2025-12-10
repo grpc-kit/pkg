@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/scopes"
 )
 
@@ -80,6 +81,21 @@ func (_c *ScopesCreate) SetNillableDisplayName(v *string) *ScopesCreate {
 		_c.SetDisplayName(*v)
 	}
 	return _c
+}
+
+// AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
+func (_c *ScopesCreate) AddLionResourceScopeIDs(ids ...int) *ScopesCreate {
+	_c.mutation.AddLionResourceScopeIDs(ids...)
+	return _c
+}
+
+// AddLionResourceScopes adds the "lion_resource_scopes" edges to the ResourceScopes entity.
+func (_c *ScopesCreate) AddLionResourceScopes(v ...*ResourceScopes) *ScopesCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionResourceScopeIDs(ids...)
 }
 
 // Mutation returns the ScopesMutation object of the builder.
@@ -195,6 +211,22 @@ func (_c *ScopesCreate) createSpec() (*Scopes, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DisplayName(); ok {
 		_spec.SetField(scopes.FieldDisplayName, field.TypeString, value)
 		_node.DisplayName = value
+	}
+	if nodes := _c.mutation.LionResourceScopesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   scopes.LionResourceScopesTable,
+			Columns: []string{scopes.LionResourceScopesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcescopes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

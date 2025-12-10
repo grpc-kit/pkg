@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -23,8 +24,35 @@ const (
 	FieldResourceID = "resource_id"
 	// FieldScopeID holds the string denoting the scope_id field in the database.
 	FieldScopeID = "scope_id"
+	// EdgeLionResources holds the string denoting the lion_resources edge name in mutations.
+	EdgeLionResources = "lion_resources"
+	// EdgeLionScopes holds the string denoting the lion_scopes edge name in mutations.
+	EdgeLionScopes = "lion_scopes"
+	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
+	EdgeLionPermissions = "lion_permissions"
 	// Table holds the table name of the resourcescopes in the database.
 	Table = "lion_resource_scopes"
+	// LionResourcesTable is the table that holds the lion_resources relation/edge.
+	LionResourcesTable = "lion_resource_scopes"
+	// LionResourcesInverseTable is the table name for the Resources entity.
+	// It exists in this package in order to avoid circular dependency with the "resources" package.
+	LionResourcesInverseTable = "lion_resources"
+	// LionResourcesColumn is the table column denoting the lion_resources relation/edge.
+	LionResourcesColumn = "resource_id"
+	// LionScopesTable is the table that holds the lion_scopes relation/edge.
+	LionScopesTable = "lion_resource_scopes"
+	// LionScopesInverseTable is the table name for the Scopes entity.
+	// It exists in this package in order to avoid circular dependency with the "scopes" package.
+	LionScopesInverseTable = "lion_scopes"
+	// LionScopesColumn is the table column denoting the lion_scopes relation/edge.
+	LionScopesColumn = "scope_id"
+	// LionPermissionsTable is the table that holds the lion_permissions relation/edge.
+	LionPermissionsTable = "lion_permissions"
+	// LionPermissionsInverseTable is the table name for the Permissions entity.
+	// It exists in this package in order to avoid circular dependency with the "permissions" package.
+	LionPermissionsInverseTable = "lion_permissions"
+	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
+	LionPermissionsColumn = "resource_scope_id"
 )
 
 // Columns holds all SQL columns for resourcescopes fields.
@@ -91,4 +119,53 @@ func ByResourceID(opts ...sql.OrderTermOption) OrderOption {
 // ByScopeID orders the results by the scope_id field.
 func ByScopeID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldScopeID, opts...).ToFunc()
+}
+
+// ByLionResourcesField orders the results by lion_resources field.
+func ByLionResourcesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionResourcesStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLionScopesField orders the results by lion_scopes field.
+func ByLionScopesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionScopesStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLionPermissionsCount orders the results by lion_permissions count.
+func ByLionPermissionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionPermissionsStep(), opts...)
+	}
+}
+
+// ByLionPermissions orders the results by lion_permissions terms.
+func ByLionPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionPermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newLionResourcesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionResourcesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionResourcesTable, LionResourcesColumn),
+	)
+}
+func newLionScopesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionScopesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionScopesTable, LionScopesColumn),
+	)
+}
+func newLionPermissionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionPermissionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
+	)
 }

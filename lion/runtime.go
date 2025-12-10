@@ -378,12 +378,16 @@ func init() {
 	permissionsDescUpdatedBy := permissionsMixinFields1[1].Descriptor()
 	// permissions.DefaultUpdatedBy holds the default value on creation for the updated_by field.
 	permissions.DefaultUpdatedBy = permissionsDescUpdatedBy.Default.(int64)
-	// permissionsDescResourceID is the schema descriptor for resource_id field.
-	permissionsDescResourceID := permissionsFields[0].Descriptor()
-	// permissions.ResourceIDValidator is a validator for the "resource_id" field. It is called by the builders before save.
-	permissions.ResourceIDValidator = permissionsDescResourceID.Validators[0].(func(int) error)
+	// permissionsDescResourceScopeID is the schema descriptor for resource_scope_id field.
+	permissionsDescResourceScopeID := permissionsFields[0].Descriptor()
+	// permissions.ResourceScopeIDValidator is a validator for the "resource_scope_id" field. It is called by the builders before save.
+	permissions.ResourceScopeIDValidator = permissionsDescResourceScopeID.Validators[0].(func(int) error)
+	// permissionsDescPolicyID is the schema descriptor for policy_id field.
+	permissionsDescPolicyID := permissionsFields[1].Descriptor()
+	// permissions.PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
+	permissions.PolicyIDValidator = permissionsDescPolicyID.Validators[0].(func(int) error)
 	// permissionsDescName is the schema descriptor for name field.
-	permissionsDescName := permissionsFields[1].Descriptor()
+	permissionsDescName := permissionsFields[2].Descriptor()
 	// permissions.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	permissions.NameValidator = func() func(string) error {
 		validators := permissionsDescName.Validators
@@ -401,11 +405,11 @@ func init() {
 		}
 	}()
 	// permissionsDescDisplayName is the schema descriptor for display_name field.
-	permissionsDescDisplayName := permissionsFields[2].Descriptor()
+	permissionsDescDisplayName := permissionsFields[3].Descriptor()
 	// permissions.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	permissions.DisplayNameValidator = permissionsDescDisplayName.Validators[0].(func(string) error)
 	// permissionsDescDescription is the schema descriptor for description field.
-	permissionsDescDescription := permissionsFields[3].Descriptor()
+	permissionsDescDescription := permissionsFields[4].Descriptor()
 	// permissions.DefaultDescription holds the default value on creation for the description field.
 	permissions.DefaultDescription = permissionsDescDescription.Default.(string)
 	policiesMixin := schema.Policies{}.Mixin()
@@ -435,8 +439,26 @@ func init() {
 	policies.DefaultUpdatedBy = policiesDescUpdatedBy.Default.(int64)
 	// policiesDescName is the schema descriptor for name field.
 	policiesDescName := policiesFields[0].Descriptor()
-	// policies.DefaultName holds the default value on creation for the name field.
-	policies.DefaultName = policiesDescName.Default.(string)
+	// policies.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	policies.NameValidator = func() func(string) error {
+		validators := policiesDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// policiesDescDisplayName is the schema descriptor for display_name field.
+	policiesDescDisplayName := policiesFields[1].Descriptor()
+	// policies.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	policies.DisplayNameValidator = policiesDescDisplayName.Validators[0].(func(string) error)
 	resourcescopesMixin := schema.ResourceScopes{}.Mixin()
 	resourcescopesMixinFields0 := resourcescopesMixin[0].Fields()
 	_ = resourcescopesMixinFields0
