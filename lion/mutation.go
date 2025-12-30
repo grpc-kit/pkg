@@ -10140,15 +10140,14 @@ type ResourceScopesMutation struct {
 	id                      *int
 	created_at              *time.Time
 	updated_at              *time.Time
-	deleted_at              *time.Time
 	clearedFields           map[string]struct{}
+	lion_permissions        map[int]struct{}
+	removedlion_permissions map[int]struct{}
+	clearedlion_permissions bool
 	lion_resources          *int
 	clearedlion_resources   bool
 	lion_scopes             *int
 	clearedlion_scopes      bool
-	lion_permissions        map[int]struct{}
-	removedlion_permissions map[int]struct{}
-	clearedlion_permissions bool
 	done                    bool
 	oldValue                func(context.Context) (*ResourceScopes, error)
 	predicates              []predicate.ResourceScopes
@@ -10324,55 +10323,6 @@ func (m *ResourceScopesMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (m *ResourceScopesMutation) SetDeletedAt(t time.Time) {
-	m.deleted_at = &t
-}
-
-// DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *ResourceScopesMutation) DeletedAt() (r time.Time, exists bool) {
-	v := m.deleted_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeletedAt returns the old "deleted_at" field's value of the ResourceScopes entity.
-// If the ResourceScopes object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceScopesMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
-	}
-	return oldValue.DeletedAt, nil
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *ResourceScopesMutation) ClearDeletedAt() {
-	m.deleted_at = nil
-	m.clearedFields[resourcescopes.FieldDeletedAt] = struct{}{}
-}
-
-// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *ResourceScopesMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[resourcescopes.FieldDeletedAt]
-	return ok
-}
-
-// ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *ResourceScopesMutation) ResetDeletedAt() {
-	m.deleted_at = nil
-	delete(m.clearedFields, resourcescopes.FieldDeletedAt)
-}
-
 // SetResourceID sets the "resource_id" field.
 func (m *ResourceScopesMutation) SetResourceID(i int) {
 	m.lion_resources = &i
@@ -10443,6 +10393,60 @@ func (m *ResourceScopesMutation) OldScopeID(ctx context.Context) (v int, err err
 // ResetScopeID resets all changes to the "scope_id" field.
 func (m *ResourceScopesMutation) ResetScopeID() {
 	m.lion_scopes = nil
+}
+
+// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by ids.
+func (m *ResourceScopesMutation) AddLionPermissionIDs(ids ...int) {
+	if m.lion_permissions == nil {
+		m.lion_permissions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lion_permissions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLionPermissions clears the "lion_permissions" edge to the Permissions entity.
+func (m *ResourceScopesMutation) ClearLionPermissions() {
+	m.clearedlion_permissions = true
+}
+
+// LionPermissionsCleared reports if the "lion_permissions" edge to the Permissions entity was cleared.
+func (m *ResourceScopesMutation) LionPermissionsCleared() bool {
+	return m.clearedlion_permissions
+}
+
+// RemoveLionPermissionIDs removes the "lion_permissions" edge to the Permissions entity by IDs.
+func (m *ResourceScopesMutation) RemoveLionPermissionIDs(ids ...int) {
+	if m.removedlion_permissions == nil {
+		m.removedlion_permissions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lion_permissions, ids[i])
+		m.removedlion_permissions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLionPermissions returns the removed IDs of the "lion_permissions" edge to the Permissions entity.
+func (m *ResourceScopesMutation) RemovedLionPermissionsIDs() (ids []int) {
+	for id := range m.removedlion_permissions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LionPermissionsIDs returns the "lion_permissions" edge IDs in the mutation.
+func (m *ResourceScopesMutation) LionPermissionsIDs() (ids []int) {
+	for id := range m.lion_permissions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLionPermissions resets all changes to the "lion_permissions" edge.
+func (m *ResourceScopesMutation) ResetLionPermissions() {
+	m.lion_permissions = nil
+	m.clearedlion_permissions = false
+	m.removedlion_permissions = nil
 }
 
 // SetLionResourcesID sets the "lion_resources" edge to the Resources entity by id.
@@ -10525,60 +10529,6 @@ func (m *ResourceScopesMutation) ResetLionScopes() {
 	m.clearedlion_scopes = false
 }
 
-// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by ids.
-func (m *ResourceScopesMutation) AddLionPermissionIDs(ids ...int) {
-	if m.lion_permissions == nil {
-		m.lion_permissions = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.lion_permissions[ids[i]] = struct{}{}
-	}
-}
-
-// ClearLionPermissions clears the "lion_permissions" edge to the Permissions entity.
-func (m *ResourceScopesMutation) ClearLionPermissions() {
-	m.clearedlion_permissions = true
-}
-
-// LionPermissionsCleared reports if the "lion_permissions" edge to the Permissions entity was cleared.
-func (m *ResourceScopesMutation) LionPermissionsCleared() bool {
-	return m.clearedlion_permissions
-}
-
-// RemoveLionPermissionIDs removes the "lion_permissions" edge to the Permissions entity by IDs.
-func (m *ResourceScopesMutation) RemoveLionPermissionIDs(ids ...int) {
-	if m.removedlion_permissions == nil {
-		m.removedlion_permissions = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.lion_permissions, ids[i])
-		m.removedlion_permissions[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedLionPermissions returns the removed IDs of the "lion_permissions" edge to the Permissions entity.
-func (m *ResourceScopesMutation) RemovedLionPermissionsIDs() (ids []int) {
-	for id := range m.removedlion_permissions {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// LionPermissionsIDs returns the "lion_permissions" edge IDs in the mutation.
-func (m *ResourceScopesMutation) LionPermissionsIDs() (ids []int) {
-	for id := range m.lion_permissions {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetLionPermissions resets all changes to the "lion_permissions" edge.
-func (m *ResourceScopesMutation) ResetLionPermissions() {
-	m.lion_permissions = nil
-	m.clearedlion_permissions = false
-	m.removedlion_permissions = nil
-}
-
 // Where appends a list predicates to the ResourceScopesMutation builder.
 func (m *ResourceScopesMutation) Where(ps ...predicate.ResourceScopes) {
 	m.predicates = append(m.predicates, ps...)
@@ -10613,15 +10563,12 @@ func (m *ResourceScopesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResourceScopesMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 4)
 	if m.created_at != nil {
 		fields = append(fields, resourcescopes.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, resourcescopes.FieldUpdatedAt)
-	}
-	if m.deleted_at != nil {
-		fields = append(fields, resourcescopes.FieldDeletedAt)
 	}
 	if m.lion_resources != nil {
 		fields = append(fields, resourcescopes.FieldResourceID)
@@ -10641,8 +10588,6 @@ func (m *ResourceScopesMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case resourcescopes.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case resourcescopes.FieldDeletedAt:
-		return m.DeletedAt()
 	case resourcescopes.FieldResourceID:
 		return m.ResourceID()
 	case resourcescopes.FieldScopeID:
@@ -10660,8 +10605,6 @@ func (m *ResourceScopesMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldCreatedAt(ctx)
 	case resourcescopes.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case resourcescopes.FieldDeletedAt:
-		return m.OldDeletedAt(ctx)
 	case resourcescopes.FieldResourceID:
 		return m.OldResourceID(ctx)
 	case resourcescopes.FieldScopeID:
@@ -10688,13 +10631,6 @@ func (m *ResourceScopesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
-		return nil
-	case resourcescopes.FieldDeletedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeletedAt(v)
 		return nil
 	case resourcescopes.FieldResourceID:
 		v, ok := value.(int)
@@ -10742,11 +10678,7 @@ func (m *ResourceScopesMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ResourceScopesMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(resourcescopes.FieldDeletedAt) {
-		fields = append(fields, resourcescopes.FieldDeletedAt)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -10759,11 +10691,6 @@ func (m *ResourceScopesMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ResourceScopesMutation) ClearField(name string) error {
-	switch name {
-	case resourcescopes.FieldDeletedAt:
-		m.ClearDeletedAt()
-		return nil
-	}
 	return fmt.Errorf("unknown ResourceScopes nullable field %s", name)
 }
 
@@ -10776,9 +10703,6 @@ func (m *ResourceScopesMutation) ResetField(name string) error {
 		return nil
 	case resourcescopes.FieldUpdatedAt:
 		m.ResetUpdatedAt()
-		return nil
-	case resourcescopes.FieldDeletedAt:
-		m.ResetDeletedAt()
 		return nil
 	case resourcescopes.FieldResourceID:
 		m.ResetResourceID()
@@ -10793,14 +10717,14 @@ func (m *ResourceScopesMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ResourceScopesMutation) AddedEdges() []string {
 	edges := make([]string, 0, 3)
+	if m.lion_permissions != nil {
+		edges = append(edges, resourcescopes.EdgeLionPermissions)
+	}
 	if m.lion_resources != nil {
 		edges = append(edges, resourcescopes.EdgeLionResources)
 	}
 	if m.lion_scopes != nil {
 		edges = append(edges, resourcescopes.EdgeLionScopes)
-	}
-	if m.lion_permissions != nil {
-		edges = append(edges, resourcescopes.EdgeLionPermissions)
 	}
 	return edges
 }
@@ -10809,6 +10733,12 @@ func (m *ResourceScopesMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ResourceScopesMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case resourcescopes.EdgeLionPermissions:
+		ids := make([]ent.Value, 0, len(m.lion_permissions))
+		for id := range m.lion_permissions {
+			ids = append(ids, id)
+		}
+		return ids
 	case resourcescopes.EdgeLionResources:
 		if id := m.lion_resources; id != nil {
 			return []ent.Value{*id}
@@ -10817,12 +10747,6 @@ func (m *ResourceScopesMutation) AddedIDs(name string) []ent.Value {
 		if id := m.lion_scopes; id != nil {
 			return []ent.Value{*id}
 		}
-	case resourcescopes.EdgeLionPermissions:
-		ids := make([]ent.Value, 0, len(m.lion_permissions))
-		for id := range m.lion_permissions {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
@@ -10853,14 +10777,14 @@ func (m *ResourceScopesMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ResourceScopesMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 3)
+	if m.clearedlion_permissions {
+		edges = append(edges, resourcescopes.EdgeLionPermissions)
+	}
 	if m.clearedlion_resources {
 		edges = append(edges, resourcescopes.EdgeLionResources)
 	}
 	if m.clearedlion_scopes {
 		edges = append(edges, resourcescopes.EdgeLionScopes)
-	}
-	if m.clearedlion_permissions {
-		edges = append(edges, resourcescopes.EdgeLionPermissions)
 	}
 	return edges
 }
@@ -10869,12 +10793,12 @@ func (m *ResourceScopesMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ResourceScopesMutation) EdgeCleared(name string) bool {
 	switch name {
+	case resourcescopes.EdgeLionPermissions:
+		return m.clearedlion_permissions
 	case resourcescopes.EdgeLionResources:
 		return m.clearedlion_resources
 	case resourcescopes.EdgeLionScopes:
 		return m.clearedlion_scopes
-	case resourcescopes.EdgeLionPermissions:
-		return m.clearedlion_permissions
 	}
 	return false
 }
@@ -10897,14 +10821,14 @@ func (m *ResourceScopesMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ResourceScopesMutation) ResetEdge(name string) error {
 	switch name {
+	case resourcescopes.EdgeLionPermissions:
+		m.ResetLionPermissions()
+		return nil
 	case resourcescopes.EdgeLionResources:
 		m.ResetLionResources()
 		return nil
 	case resourcescopes.EdgeLionScopes:
 		m.ResetLionScopes()
-		return nil
-	case resourcescopes.EdgeLionPermissions:
-		m.ResetLionPermissions()
 		return nil
 	}
 	return fmt.Errorf("unknown ResourceScopes edge %s", name)
@@ -15518,6 +15442,8 @@ type ScopesMutation struct {
 	updated_at                  *time.Time
 	deleted_at                  *time.Time
 	name                        *string
+	scope_type                  *int
+	addscope_type               *int
 	display_name                *string
 	clearedFields               map[string]struct{}
 	lion_resource_scopes        map[int]struct{}
@@ -15783,6 +15709,62 @@ func (m *ScopesMutation) ResetName() {
 	m.name = nil
 }
 
+// SetScopeType sets the "scope_type" field.
+func (m *ScopesMutation) SetScopeType(i int) {
+	m.scope_type = &i
+	m.addscope_type = nil
+}
+
+// ScopeType returns the value of the "scope_type" field in the mutation.
+func (m *ScopesMutation) ScopeType() (r int, exists bool) {
+	v := m.scope_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScopeType returns the old "scope_type" field's value of the Scopes entity.
+// If the Scopes object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ScopesMutation) OldScopeType(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScopeType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScopeType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScopeType: %w", err)
+	}
+	return oldValue.ScopeType, nil
+}
+
+// AddScopeType adds i to the "scope_type" field.
+func (m *ScopesMutation) AddScopeType(i int) {
+	if m.addscope_type != nil {
+		*m.addscope_type += i
+	} else {
+		m.addscope_type = &i
+	}
+}
+
+// AddedScopeType returns the value that was added to the "scope_type" field in this mutation.
+func (m *ScopesMutation) AddedScopeType() (r int, exists bool) {
+	v := m.addscope_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetScopeType resets all changes to the "scope_type" field.
+func (m *ScopesMutation) ResetScopeType() {
+	m.scope_type = nil
+	m.addscope_type = nil
+}
+
 // SetDisplayName sets the "display_name" field.
 func (m *ScopesMutation) SetDisplayName(s string) {
 	m.display_name = &s
@@ -15907,7 +15889,7 @@ func (m *ScopesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ScopesMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, scopes.FieldCreatedAt)
 	}
@@ -15919,6 +15901,9 @@ func (m *ScopesMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, scopes.FieldName)
+	}
+	if m.scope_type != nil {
+		fields = append(fields, scopes.FieldScopeType)
 	}
 	if m.display_name != nil {
 		fields = append(fields, scopes.FieldDisplayName)
@@ -15939,6 +15924,8 @@ func (m *ScopesMutation) Field(name string) (ent.Value, bool) {
 		return m.DeletedAt()
 	case scopes.FieldName:
 		return m.Name()
+	case scopes.FieldScopeType:
+		return m.ScopeType()
 	case scopes.FieldDisplayName:
 		return m.DisplayName()
 	}
@@ -15958,6 +15945,8 @@ func (m *ScopesMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldDeletedAt(ctx)
 	case scopes.FieldName:
 		return m.OldName(ctx)
+	case scopes.FieldScopeType:
+		return m.OldScopeType(ctx)
 	case scopes.FieldDisplayName:
 		return m.OldDisplayName(ctx)
 	}
@@ -15997,6 +15986,13 @@ func (m *ScopesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case scopes.FieldScopeType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScopeType(v)
+		return nil
 	case scopes.FieldDisplayName:
 		v, ok := value.(string)
 		if !ok {
@@ -16011,13 +16007,21 @@ func (m *ScopesMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *ScopesMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addscope_type != nil {
+		fields = append(fields, scopes.FieldScopeType)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *ScopesMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case scopes.FieldScopeType:
+		return m.AddedScopeType()
+	}
 	return nil, false
 }
 
@@ -16026,6 +16030,13 @@ func (m *ScopesMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *ScopesMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case scopes.FieldScopeType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScopeType(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Scopes numeric field %s", name)
 }
@@ -16073,6 +16084,9 @@ func (m *ScopesMutation) ResetField(name string) error {
 		return nil
 	case scopes.FieldName:
 		m.ResetName()
+		return nil
+	case scopes.FieldScopeType:
+		m.ResetScopeType()
 		return nil
 	case scopes.FieldDisplayName:
 		m.ResetDisplayName()

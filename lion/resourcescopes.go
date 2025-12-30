@@ -23,8 +23,6 @@ type ResourceScopes struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 关联 lion_resources 表 ID
 	ResourceID int `json:"resource_id,omitempty"`
 	// 关联 lion_scopes 表 ID
@@ -37,15 +35,24 @@ type ResourceScopes struct {
 
 // ResourceScopesEdges holds the relations/edges for other nodes in the graph.
 type ResourceScopesEdges struct {
+	// LionPermissions holds the value of the lion_permissions edge.
+	LionPermissions []*Permissions `json:"lion_permissions,omitempty"`
 	// LionResources holds the value of the lion_resources edge.
 	LionResources *Resources `json:"lion_resources,omitempty"`
 	// LionScopes holds the value of the lion_scopes edge.
 	LionScopes *Scopes `json:"lion_scopes,omitempty"`
-	// LionPermissions holds the value of the lion_permissions edge.
-	LionPermissions []*Permissions `json:"lion_permissions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
+}
+
+// LionPermissionsOrErr returns the LionPermissions value or an error if the edge
+// was not loaded in eager-loading.
+func (e ResourceScopesEdges) LionPermissionsOrErr() ([]*Permissions, error) {
+	if e.loadedTypes[0] {
+		return e.LionPermissions, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_permissions"}
 }
 
 // LionResourcesOrErr returns the LionResources value or an error if the edge
@@ -53,7 +60,7 @@ type ResourceScopesEdges struct {
 func (e ResourceScopesEdges) LionResourcesOrErr() (*Resources, error) {
 	if e.LionResources != nil {
 		return e.LionResources, nil
-	} else if e.loadedTypes[0] {
+	} else if e.loadedTypes[1] {
 		return nil, &NotFoundError{label: resources.Label}
 	}
 	return nil, &NotLoadedError{edge: "lion_resources"}
@@ -64,19 +71,10 @@ func (e ResourceScopesEdges) LionResourcesOrErr() (*Resources, error) {
 func (e ResourceScopesEdges) LionScopesOrErr() (*Scopes, error) {
 	if e.LionScopes != nil {
 		return e.LionScopes, nil
-	} else if e.loadedTypes[1] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: scopes.Label}
 	}
 	return nil, &NotLoadedError{edge: "lion_scopes"}
-}
-
-// LionPermissionsOrErr returns the LionPermissions value or an error if the edge
-// was not loaded in eager-loading.
-func (e ResourceScopesEdges) LionPermissionsOrErr() ([]*Permissions, error) {
-	if e.loadedTypes[2] {
-		return e.LionPermissions, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_permissions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -86,7 +84,7 @@ func (*ResourceScopes) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case resourcescopes.FieldID, resourcescopes.FieldResourceID, resourcescopes.FieldScopeID:
 			values[i] = new(sql.NullInt64)
-		case resourcescopes.FieldCreatedAt, resourcescopes.FieldUpdatedAt, resourcescopes.FieldDeletedAt:
+		case resourcescopes.FieldCreatedAt, resourcescopes.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -121,13 +119,6 @@ func (_m *ResourceScopes) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case resourcescopes.FieldDeletedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
-			} else if value.Valid {
-				_m.DeletedAt = new(time.Time)
-				*_m.DeletedAt = value.Time
-			}
 		case resourcescopes.FieldResourceID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field resource_id", values[i])
@@ -153,6 +144,11 @@ func (_m *ResourceScopes) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
+// QueryLionPermissions queries the "lion_permissions" edge of the ResourceScopes entity.
+func (_m *ResourceScopes) QueryLionPermissions() *PermissionsQuery {
+	return NewResourceScopesClient(_m.config).QueryLionPermissions(_m)
+}
+
 // QueryLionResources queries the "lion_resources" edge of the ResourceScopes entity.
 func (_m *ResourceScopes) QueryLionResources() *ResourcesQuery {
 	return NewResourceScopesClient(_m.config).QueryLionResources(_m)
@@ -161,11 +157,6 @@ func (_m *ResourceScopes) QueryLionResources() *ResourcesQuery {
 // QueryLionScopes queries the "lion_scopes" edge of the ResourceScopes entity.
 func (_m *ResourceScopes) QueryLionScopes() *ScopesQuery {
 	return NewResourceScopesClient(_m.config).QueryLionScopes(_m)
-}
-
-// QueryLionPermissions queries the "lion_permissions" edge of the ResourceScopes entity.
-func (_m *ResourceScopes) QueryLionPermissions() *PermissionsQuery {
-	return NewResourceScopesClient(_m.config).QueryLionPermissions(_m)
 }
 
 // Update returns a builder for updating this ResourceScopes.
@@ -196,11 +187,6 @@ func (_m *ResourceScopes) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	if v := _m.DeletedAt; v != nil {
-		builder.WriteString("deleted_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
 	builder.WriteString(", ")
 	builder.WriteString("resource_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ResourceID))

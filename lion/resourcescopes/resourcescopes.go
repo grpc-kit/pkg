@@ -18,20 +18,25 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
-	FieldDeletedAt = "deleted_at"
 	// FieldResourceID holds the string denoting the resource_id field in the database.
 	FieldResourceID = "resource_id"
 	// FieldScopeID holds the string denoting the scope_id field in the database.
 	FieldScopeID = "scope_id"
+	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
+	EdgeLionPermissions = "lion_permissions"
 	// EdgeLionResources holds the string denoting the lion_resources edge name in mutations.
 	EdgeLionResources = "lion_resources"
 	// EdgeLionScopes holds the string denoting the lion_scopes edge name in mutations.
 	EdgeLionScopes = "lion_scopes"
-	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
-	EdgeLionPermissions = "lion_permissions"
 	// Table holds the table name of the resourcescopes in the database.
 	Table = "lion_resource_scopes"
+	// LionPermissionsTable is the table that holds the lion_permissions relation/edge.
+	LionPermissionsTable = "lion_permissions"
+	// LionPermissionsInverseTable is the table name for the Permissions entity.
+	// It exists in this package in order to avoid circular dependency with the "permissions" package.
+	LionPermissionsInverseTable = "lion_permissions"
+	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
+	LionPermissionsColumn = "resource_scope_id"
 	// LionResourcesTable is the table that holds the lion_resources relation/edge.
 	LionResourcesTable = "lion_resource_scopes"
 	// LionResourcesInverseTable is the table name for the Resources entity.
@@ -46,13 +51,6 @@ const (
 	LionScopesInverseTable = "lion_scopes"
 	// LionScopesColumn is the table column denoting the lion_scopes relation/edge.
 	LionScopesColumn = "scope_id"
-	// LionPermissionsTable is the table that holds the lion_permissions relation/edge.
-	LionPermissionsTable = "lion_permissions"
-	// LionPermissionsInverseTable is the table name for the Permissions entity.
-	// It exists in this package in order to avoid circular dependency with the "permissions" package.
-	LionPermissionsInverseTable = "lion_permissions"
-	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
-	LionPermissionsColumn = "resource_scope_id"
 )
 
 // Columns holds all SQL columns for resourcescopes fields.
@@ -60,7 +58,6 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-	FieldDeletedAt,
 	FieldResourceID,
 	FieldScopeID,
 }
@@ -106,11 +103,6 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByDeletedAt orders the results by the deleted_at field.
-func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
-}
-
 // ByResourceID orders the results by the resource_id field.
 func ByResourceID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResourceID, opts...).ToFunc()
@@ -119,20 +111,6 @@ func ByResourceID(opts ...sql.OrderTermOption) OrderOption {
 // ByScopeID orders the results by the scope_id field.
 func ByScopeID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldScopeID, opts...).ToFunc()
-}
-
-// ByLionResourcesField orders the results by lion_resources field.
-func ByLionResourcesField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionResourcesStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByLionScopesField orders the results by lion_scopes field.
-func ByLionScopesField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionScopesStep(), sql.OrderByField(field, opts...))
-	}
 }
 
 // ByLionPermissionsCount orders the results by lion_permissions count.
@@ -148,6 +126,27 @@ func ByLionPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionPermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByLionResourcesField orders the results by lion_resources field.
+func ByLionResourcesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionResourcesStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLionScopesField orders the results by lion_scopes field.
+func ByLionScopesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionScopesStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newLionPermissionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionPermissionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
+	)
+}
 func newLionResourcesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -160,12 +159,5 @@ func newLionScopesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionScopesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, LionScopesTable, LionScopesColumn),
-	)
-}
-func newLionPermissionsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionPermissionsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
 	)
 }

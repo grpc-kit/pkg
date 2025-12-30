@@ -21,6 +21,9 @@ func (Scopes) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("名称"),
+		field.Int("scope_type").
+			Default(0).
+			Comment("用途类型，对应 api/known/admin/v1/common.proto 中定义"),
 		field.String("display_name").
 			Default("").
 			Comment("友好展示名称"),

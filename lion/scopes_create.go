@@ -69,6 +69,20 @@ func (_c *ScopesCreate) SetName(v string) *ScopesCreate {
 	return _c
 }
 
+// SetScopeType sets the "scope_type" field.
+func (_c *ScopesCreate) SetScopeType(v int) *ScopesCreate {
+	_c.mutation.SetScopeType(v)
+	return _c
+}
+
+// SetNillableScopeType sets the "scope_type" field if the given value is not nil.
+func (_c *ScopesCreate) SetNillableScopeType(v *int) *ScopesCreate {
+	if v != nil {
+		_c.SetScopeType(*v)
+	}
+	return _c
+}
+
 // SetDisplayName sets the "display_name" field.
 func (_c *ScopesCreate) SetDisplayName(v string) *ScopesCreate {
 	_c.mutation.SetDisplayName(v)
@@ -141,6 +155,10 @@ func (_c *ScopesCreate) defaults() {
 		v := scopes.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.ScopeType(); !ok {
+		v := scopes.DefaultScopeType
+		_c.mutation.SetScopeType(v)
+	}
 	if _, ok := _c.mutation.DisplayName(); !ok {
 		v := scopes.DefaultDisplayName
 		_c.mutation.SetDisplayName(v)
@@ -162,6 +180,9 @@ func (_c *ScopesCreate) check() error {
 		if err := scopes.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Scopes.name": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.ScopeType(); !ok {
+		return &ValidationError{Name: "scope_type", err: errors.New(`lion: missing required field "Scopes.scope_type"`)}
 	}
 	if _, ok := _c.mutation.DisplayName(); !ok {
 		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "Scopes.display_name"`)}
@@ -207,6 +228,10 @@ func (_c *ScopesCreate) createSpec() (*Scopes, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(scopes.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.ScopeType(); ok {
+		_spec.SetField(scopes.FieldScopeType, field.TypeInt, value)
+		_node.ScopeType = value
 	}
 	if value, ok := _c.mutation.DisplayName(); ok {
 		_spec.SetField(scopes.FieldDisplayName, field.TypeString, value)

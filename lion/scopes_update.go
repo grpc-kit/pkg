@@ -69,6 +69,27 @@ func (_u *ScopesUpdate) SetNillableName(v *string) *ScopesUpdate {
 	return _u
 }
 
+// SetScopeType sets the "scope_type" field.
+func (_u *ScopesUpdate) SetScopeType(v int) *ScopesUpdate {
+	_u.mutation.ResetScopeType()
+	_u.mutation.SetScopeType(v)
+	return _u
+}
+
+// SetNillableScopeType sets the "scope_type" field if the given value is not nil.
+func (_u *ScopesUpdate) SetNillableScopeType(v *int) *ScopesUpdate {
+	if v != nil {
+		_u.SetScopeType(*v)
+	}
+	return _u
+}
+
+// AddScopeType adds value to the "scope_type" field.
+func (_u *ScopesUpdate) AddScopeType(v int) *ScopesUpdate {
+	_u.mutation.AddScopeType(v)
+	return _u
+}
+
 // SetDisplayName sets the "display_name" field.
 func (_u *ScopesUpdate) SetDisplayName(v string) *ScopesUpdate {
 	_u.mutation.SetDisplayName(v)
@@ -194,6 +215,12 @@ func (_u *ScopesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(scopes.FieldName, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.ScopeType(); ok {
+		_spec.SetField(scopes.FieldScopeType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedScopeType(); ok {
+		_spec.AddField(scopes.FieldScopeType, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(scopes.FieldDisplayName, field.TypeString, value)
 	}
@@ -299,6 +326,27 @@ func (_u *ScopesUpdateOne) SetNillableName(v *string) *ScopesUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
 	}
+	return _u
+}
+
+// SetScopeType sets the "scope_type" field.
+func (_u *ScopesUpdateOne) SetScopeType(v int) *ScopesUpdateOne {
+	_u.mutation.ResetScopeType()
+	_u.mutation.SetScopeType(v)
+	return _u
+}
+
+// SetNillableScopeType sets the "scope_type" field if the given value is not nil.
+func (_u *ScopesUpdateOne) SetNillableScopeType(v *int) *ScopesUpdateOne {
+	if v != nil {
+		_u.SetScopeType(*v)
+	}
+	return _u
+}
+
+// AddScopeType adds value to the "scope_type" field.
+func (_u *ScopesUpdateOne) AddScopeType(v int) *ScopesUpdateOne {
+	_u.mutation.AddScopeType(v)
 	return _u
 }
 
@@ -456,6 +504,12 @@ func (_u *ScopesUpdateOne) sqlSave(ctx context.Context) (_node *Scopes, err erro
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(scopes.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ScopeType(); ok {
+		_spec.SetField(scopes.FieldScopeType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedScopeType(); ok {
+		_spec.AddField(scopes.FieldScopeType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(scopes.FieldDisplayName, field.TypeString, value)

@@ -242,7 +242,6 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "resource_id", Type: field.TypeInt},
 		{Name: "scope_id", Type: field.TypeInt},
 	}
@@ -254,13 +253,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_resource_scopes_lion_resources_lion_resource_scopes",
-				Columns:    []*schema.Column{LionResourceScopesColumns[4]},
+				Columns:    []*schema.Column{LionResourceScopesColumns[3]},
 				RefColumns: []*schema.Column{LionResourcesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "lion_resource_scopes_lion_scopes_lion_resource_scopes",
-				Columns:    []*schema.Column{LionResourceScopesColumns[5]},
+				Columns:    []*schema.Column{LionResourceScopesColumns[4]},
 				RefColumns: []*schema.Column{LionScopesColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -413,6 +412,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Unique: true, Size: 128},
+		{Name: "scope_type", Type: field.TypeInt, Default: 0},
 		{Name: "display_name", Type: field.TypeString, Default: ""},
 	}
 	// LionScopesTable holds the schema information for the "lion_scopes" table.

@@ -51,20 +51,6 @@ func (_c *ResourceScopesCreate) SetNillableUpdatedAt(v *time.Time) *ResourceScop
 	return _c
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_c *ResourceScopesCreate) SetDeletedAt(v time.Time) *ResourceScopesCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *ResourceScopesCreate) SetNillableDeletedAt(v *time.Time) *ResourceScopesCreate {
-	if v != nil {
-		_c.SetDeletedAt(*v)
-	}
-	return _c
-}
-
 // SetResourceID sets the "resource_id" field.
 func (_c *ResourceScopesCreate) SetResourceID(v int) *ResourceScopesCreate {
 	_c.mutation.SetResourceID(v)
@@ -75,6 +61,21 @@ func (_c *ResourceScopesCreate) SetResourceID(v int) *ResourceScopesCreate {
 func (_c *ResourceScopesCreate) SetScopeID(v int) *ResourceScopesCreate {
 	_c.mutation.SetScopeID(v)
 	return _c
+}
+
+// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
+func (_c *ResourceScopesCreate) AddLionPermissionIDs(ids ...int) *ResourceScopesCreate {
+	_c.mutation.AddLionPermissionIDs(ids...)
+	return _c
+}
+
+// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
+func (_c *ResourceScopesCreate) AddLionPermissions(v ...*Permissions) *ResourceScopesCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionPermissionIDs(ids...)
 }
 
 // SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
@@ -97,21 +98,6 @@ func (_c *ResourceScopesCreate) SetLionScopesID(id int) *ResourceScopesCreate {
 // SetLionScopes sets the "lion_scopes" edge to the Scopes entity.
 func (_c *ResourceScopesCreate) SetLionScopes(v *Scopes) *ResourceScopesCreate {
 	return _c.SetLionScopesID(v.ID)
-}
-
-// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
-func (_c *ResourceScopesCreate) AddLionPermissionIDs(ids ...int) *ResourceScopesCreate {
-	_c.mutation.AddLionPermissionIDs(ids...)
-	return _c
-}
-
-// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
-func (_c *ResourceScopesCreate) AddLionPermissions(v ...*Permissions) *ResourceScopesCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionPermissionIDs(ids...)
 }
 
 // Mutation returns the ResourceScopesMutation object of the builder.
@@ -223,9 +209,21 @@ func (_c *ResourceScopesCreate) createSpec() (*ResourceScopes, *sqlgraph.CreateS
 		_spec.SetField(resourcescopes.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(resourcescopes.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
+	if nodes := _c.mutation.LionPermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionsTable,
+			Columns: []string{resourcescopes.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.LionResourcesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -259,22 +257,6 @@ func (_c *ResourceScopesCreate) createSpec() (*ResourceScopes, *sqlgraph.CreateS
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ScopeID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.LionPermissionsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resourcescopes.LionPermissionsTable,
-			Columns: []string{resourcescopes.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

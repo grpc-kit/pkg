@@ -1602,6 +1602,22 @@ func (c *ResourceScopesClient) GetX(ctx context.Context, id int) *ResourceScopes
 	return obj
 }
 
+// QueryLionPermissions queries the lion_permissions edge of a ResourceScopes.
+func (c *ResourceScopesClient) QueryLionPermissions(_m *ResourceScopes) *PermissionsQuery {
+	query := (&PermissionsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourcescopes.Table, resourcescopes.FieldID, id),
+			sqlgraph.To(permissions.Table, permissions.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resourcescopes.LionPermissionsTable, resourcescopes.LionPermissionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryLionResources queries the lion_resources edge of a ResourceScopes.
 func (c *ResourceScopesClient) QueryLionResources(_m *ResourceScopes) *ResourcesQuery {
 	query := (&ResourcesClient{config: c.config}).Query()
@@ -1627,22 +1643,6 @@ func (c *ResourceScopesClient) QueryLionScopes(_m *ResourceScopes) *ScopesQuery 
 			sqlgraph.From(resourcescopes.Table, resourcescopes.FieldID, id),
 			sqlgraph.To(scopes.Table, scopes.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, resourcescopes.LionScopesTable, resourcescopes.LionScopesColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryLionPermissions queries the lion_permissions edge of a ResourceScopes.
-func (c *ResourceScopesClient) QueryLionPermissions(_m *ResourceScopes) *PermissionsQuery {
-	query := (&PermissionsClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(resourcescopes.Table, resourcescopes.FieldID, id),
-			sqlgraph.To(permissions.Table, permissions.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, resourcescopes.LionPermissionsTable, resourcescopes.LionPermissionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

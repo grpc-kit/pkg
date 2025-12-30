@@ -75,6 +75,11 @@ func Name(v string) predicate.Scopes {
 	return predicate.Scopes(sql.FieldEQ(FieldName, v))
 }
 
+// ScopeType applies equality check predicate on the "scope_type" field. It's identical to ScopeTypeEQ.
+func ScopeType(v int) predicate.Scopes {
+	return predicate.Scopes(sql.FieldEQ(FieldScopeType, v))
+}
+
 // DisplayName applies equality check predicate on the "display_name" field. It's identical to DisplayNameEQ.
 func DisplayName(v string) predicate.Scopes {
 	return predicate.Scopes(sql.FieldEQ(FieldDisplayName, v))
@@ -273,6 +278,46 @@ func NameEqualFold(v string) predicate.Scopes {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Scopes {
 	return predicate.Scopes(sql.FieldContainsFold(FieldName, v))
+}
+
+// ScopeTypeEQ applies the EQ predicate on the "scope_type" field.
+func ScopeTypeEQ(v int) predicate.Scopes {
+	return predicate.Scopes(sql.FieldEQ(FieldScopeType, v))
+}
+
+// ScopeTypeNEQ applies the NEQ predicate on the "scope_type" field.
+func ScopeTypeNEQ(v int) predicate.Scopes {
+	return predicate.Scopes(sql.FieldNEQ(FieldScopeType, v))
+}
+
+// ScopeTypeIn applies the In predicate on the "scope_type" field.
+func ScopeTypeIn(vs ...int) predicate.Scopes {
+	return predicate.Scopes(sql.FieldIn(FieldScopeType, vs...))
+}
+
+// ScopeTypeNotIn applies the NotIn predicate on the "scope_type" field.
+func ScopeTypeNotIn(vs ...int) predicate.Scopes {
+	return predicate.Scopes(sql.FieldNotIn(FieldScopeType, vs...))
+}
+
+// ScopeTypeGT applies the GT predicate on the "scope_type" field.
+func ScopeTypeGT(v int) predicate.Scopes {
+	return predicate.Scopes(sql.FieldGT(FieldScopeType, v))
+}
+
+// ScopeTypeGTE applies the GTE predicate on the "scope_type" field.
+func ScopeTypeGTE(v int) predicate.Scopes {
+	return predicate.Scopes(sql.FieldGTE(FieldScopeType, v))
+}
+
+// ScopeTypeLT applies the LT predicate on the "scope_type" field.
+func ScopeTypeLT(v int) predicate.Scopes {
+	return predicate.Scopes(sql.FieldLT(FieldScopeType, v))
+}
+
+// ScopeTypeLTE applies the LTE predicate on the "scope_type" field.
+func ScopeTypeLTE(v int) predicate.Scopes {
+	return predicate.Scopes(sql.FieldLTE(FieldScopeType, v))
 }
 
 // DisplayNameEQ applies the EQ predicate on the "display_name" field.

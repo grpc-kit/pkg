@@ -700,8 +700,12 @@ func init() {
 			return nil
 		}
 	}()
+	// scopesDescScopeType is the schema descriptor for scope_type field.
+	scopesDescScopeType := scopesFields[1].Descriptor()
+	// scopes.DefaultScopeType holds the default value on creation for the scope_type field.
+	scopes.DefaultScopeType = scopesDescScopeType.Default.(int)
 	// scopesDescDisplayName is the schema descriptor for display_name field.
-	scopesDescDisplayName := scopesFields[1].Descriptor()
+	scopesDescDisplayName := scopesFields[2].Descriptor()
 	// scopes.DefaultDisplayName holds the default value on creation for the display_name field.
 	scopes.DefaultDisplayName = scopesDescDisplayName.Default.(string)
 	userdepartmentsMixin := schema.UserDepartments{}.Mixin()

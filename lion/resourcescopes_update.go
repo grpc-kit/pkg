@@ -37,26 +37,6 @@ func (_u *ResourceScopesUpdate) SetUpdatedAt(v time.Time) *ResourceScopesUpdate 
 	return _u
 }
 
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *ResourceScopesUpdate) SetDeletedAt(v time.Time) *ResourceScopesUpdate {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *ResourceScopesUpdate) SetNillableDeletedAt(v *time.Time) *ResourceScopesUpdate {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *ResourceScopesUpdate) ClearDeletedAt() *ResourceScopesUpdate {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
-
 // SetResourceID sets the "resource_id" field.
 func (_u *ResourceScopesUpdate) SetResourceID(v int) *ResourceScopesUpdate {
 	_u.mutation.SetResourceID(v)
@@ -85,6 +65,21 @@ func (_u *ResourceScopesUpdate) SetNillableScopeID(v *int) *ResourceScopesUpdate
 	return _u
 }
 
+// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
+func (_u *ResourceScopesUpdate) AddLionPermissionIDs(ids ...int) *ResourceScopesUpdate {
+	_u.mutation.AddLionPermissionIDs(ids...)
+	return _u
+}
+
+// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
+func (_u *ResourceScopesUpdate) AddLionPermissions(v ...*Permissions) *ResourceScopesUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionPermissionIDs(ids...)
+}
+
 // SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
 func (_u *ResourceScopesUpdate) SetLionResourcesID(id int) *ResourceScopesUpdate {
 	_u.mutation.SetLionResourcesID(id)
@@ -107,36 +102,9 @@ func (_u *ResourceScopesUpdate) SetLionScopes(v *Scopes) *ResourceScopesUpdate {
 	return _u.SetLionScopesID(v.ID)
 }
 
-// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
-func (_u *ResourceScopesUpdate) AddLionPermissionIDs(ids ...int) *ResourceScopesUpdate {
-	_u.mutation.AddLionPermissionIDs(ids...)
-	return _u
-}
-
-// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
-func (_u *ResourceScopesUpdate) AddLionPermissions(v ...*Permissions) *ResourceScopesUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionPermissionIDs(ids...)
-}
-
 // Mutation returns the ResourceScopesMutation object of the builder.
 func (_u *ResourceScopesUpdate) Mutation() *ResourceScopesMutation {
 	return _u.mutation
-}
-
-// ClearLionResources clears the "lion_resources" edge to the Resources entity.
-func (_u *ResourceScopesUpdate) ClearLionResources() *ResourceScopesUpdate {
-	_u.mutation.ClearLionResources()
-	return _u
-}
-
-// ClearLionScopes clears the "lion_scopes" edge to the Scopes entity.
-func (_u *ResourceScopesUpdate) ClearLionScopes() *ResourceScopesUpdate {
-	_u.mutation.ClearLionScopes()
-	return _u
 }
 
 // ClearLionPermissions clears all "lion_permissions" edges to the Permissions entity.
@@ -158,6 +126,18 @@ func (_u *ResourceScopesUpdate) RemoveLionPermissions(v ...*Permissions) *Resour
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLionPermissionIDs(ids...)
+}
+
+// ClearLionResources clears the "lion_resources" edge to the Resources entity.
+func (_u *ResourceScopesUpdate) ClearLionResources() *ResourceScopesUpdate {
+	_u.mutation.ClearLionResources()
+	return _u
+}
+
+// ClearLionScopes clears the "lion_scopes" edge to the Scopes entity.
+func (_u *ResourceScopesUpdate) ClearLionScopes() *ResourceScopesUpdate {
+	_u.mutation.ClearLionScopes()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -232,11 +212,50 @@ func (_u *ResourceScopesUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(resourcescopes.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(resourcescopes.FieldDeletedAt, field.TypeTime, value)
+	if _u.mutation.LionPermissionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionsTable,
+			Columns: []string{resourcescopes.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(resourcescopes.FieldDeletedAt, field.TypeTime)
+	if nodes := _u.mutation.RemovedLionPermissionsIDs(); len(nodes) > 0 && !_u.mutation.LionPermissionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionsTable,
+			Columns: []string{resourcescopes.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionPermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionsTable,
+			Columns: []string{resourcescopes.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.LionResourcesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -296,51 +315,6 @@ func (_u *ResourceScopesUpdate) sqlSave(ctx context.Context) (_node int, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionPermissionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resourcescopes.LionPermissionsTable,
-			Columns: []string{resourcescopes.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionPermissionsIDs(); len(nodes) > 0 && !_u.mutation.LionPermissionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resourcescopes.LionPermissionsTable,
-			Columns: []string{resourcescopes.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionPermissionsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resourcescopes.LionPermissionsTable,
-			Columns: []string{resourcescopes.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{resourcescopes.Label}
@@ -364,26 +338,6 @@ type ResourceScopesUpdateOne struct {
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *ResourceScopesUpdateOne) SetUpdatedAt(v time.Time) *ResourceScopesUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
-	return _u
-}
-
-// SetDeletedAt sets the "deleted_at" field.
-func (_u *ResourceScopesUpdateOne) SetDeletedAt(v time.Time) *ResourceScopesUpdateOne {
-	_u.mutation.SetDeletedAt(v)
-	return _u
-}
-
-// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *ResourceScopesUpdateOne) SetNillableDeletedAt(v *time.Time) *ResourceScopesUpdateOne {
-	if v != nil {
-		_u.SetDeletedAt(*v)
-	}
-	return _u
-}
-
-// ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *ResourceScopesUpdateOne) ClearDeletedAt() *ResourceScopesUpdateOne {
-	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -415,6 +369,21 @@ func (_u *ResourceScopesUpdateOne) SetNillableScopeID(v *int) *ResourceScopesUpd
 	return _u
 }
 
+// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
+func (_u *ResourceScopesUpdateOne) AddLionPermissionIDs(ids ...int) *ResourceScopesUpdateOne {
+	_u.mutation.AddLionPermissionIDs(ids...)
+	return _u
+}
+
+// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
+func (_u *ResourceScopesUpdateOne) AddLionPermissions(v ...*Permissions) *ResourceScopesUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionPermissionIDs(ids...)
+}
+
 // SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
 func (_u *ResourceScopesUpdateOne) SetLionResourcesID(id int) *ResourceScopesUpdateOne {
 	_u.mutation.SetLionResourcesID(id)
@@ -437,36 +406,9 @@ func (_u *ResourceScopesUpdateOne) SetLionScopes(v *Scopes) *ResourceScopesUpdat
 	return _u.SetLionScopesID(v.ID)
 }
 
-// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
-func (_u *ResourceScopesUpdateOne) AddLionPermissionIDs(ids ...int) *ResourceScopesUpdateOne {
-	_u.mutation.AddLionPermissionIDs(ids...)
-	return _u
-}
-
-// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
-func (_u *ResourceScopesUpdateOne) AddLionPermissions(v ...*Permissions) *ResourceScopesUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionPermissionIDs(ids...)
-}
-
 // Mutation returns the ResourceScopesMutation object of the builder.
 func (_u *ResourceScopesUpdateOne) Mutation() *ResourceScopesMutation {
 	return _u.mutation
-}
-
-// ClearLionResources clears the "lion_resources" edge to the Resources entity.
-func (_u *ResourceScopesUpdateOne) ClearLionResources() *ResourceScopesUpdateOne {
-	_u.mutation.ClearLionResources()
-	return _u
-}
-
-// ClearLionScopes clears the "lion_scopes" edge to the Scopes entity.
-func (_u *ResourceScopesUpdateOne) ClearLionScopes() *ResourceScopesUpdateOne {
-	_u.mutation.ClearLionScopes()
-	return _u
 }
 
 // ClearLionPermissions clears all "lion_permissions" edges to the Permissions entity.
@@ -488,6 +430,18 @@ func (_u *ResourceScopesUpdateOne) RemoveLionPermissions(v ...*Permissions) *Res
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLionPermissionIDs(ids...)
+}
+
+// ClearLionResources clears the "lion_resources" edge to the Resources entity.
+func (_u *ResourceScopesUpdateOne) ClearLionResources() *ResourceScopesUpdateOne {
+	_u.mutation.ClearLionResources()
+	return _u
+}
+
+// ClearLionScopes clears the "lion_scopes" edge to the Scopes entity.
+func (_u *ResourceScopesUpdateOne) ClearLionScopes() *ResourceScopesUpdateOne {
+	_u.mutation.ClearLionScopes()
+	return _u
 }
 
 // Where appends a list predicates to the ResourceScopesUpdate builder.
@@ -592,11 +546,50 @@ func (_u *ResourceScopesUpdateOne) sqlSave(ctx context.Context) (_node *Resource
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(resourcescopes.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(resourcescopes.FieldDeletedAt, field.TypeTime, value)
+	if _u.mutation.LionPermissionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionsTable,
+			Columns: []string{resourcescopes.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(resourcescopes.FieldDeletedAt, field.TypeTime)
+	if nodes := _u.mutation.RemovedLionPermissionsIDs(); len(nodes) > 0 && !_u.mutation.LionPermissionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionsTable,
+			Columns: []string{resourcescopes.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionPermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionsTable,
+			Columns: []string{resourcescopes.LionPermissionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.LionResourcesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -649,51 +642,6 @@ func (_u *ResourceScopesUpdateOne) sqlSave(ctx context.Context) (_node *Resource
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(scopes.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.LionPermissionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resourcescopes.LionPermissionsTable,
-			Columns: []string{resourcescopes.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionPermissionsIDs(); len(nodes) > 0 && !_u.mutation.LionPermissionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resourcescopes.LionPermissionsTable,
-			Columns: []string{resourcescopes.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionPermissionsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resourcescopes.LionPermissionsTable,
-			Columns: []string{resourcescopes.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

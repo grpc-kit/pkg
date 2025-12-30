@@ -25,6 +25,8 @@ type Scopes struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 名称
 	Name string `json:"name,omitempty"`
+	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
+	ScopeType int `json:"scope_type,omitempty"`
 	// 友好展示名称
 	DisplayName string `json:"display_name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -56,7 +58,7 @@ func (*Scopes) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case scopes.FieldID:
+		case scopes.FieldID, scopes.FieldScopeType:
 			values[i] = new(sql.NullInt64)
 		case scopes.FieldName, scopes.FieldDisplayName:
 			values[i] = new(sql.NullString)
@@ -107,6 +109,12 @@ func (_m *Scopes) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
+			}
+		case scopes.FieldScopeType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field scope_type", values[i])
+			} else if value.Valid {
+				_m.ScopeType = int(value.Int64)
 			}
 		case scopes.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -168,6 +176,9 @@ func (_m *Scopes) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("scope_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ScopeType))
 	builder.WriteString(", ")
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)

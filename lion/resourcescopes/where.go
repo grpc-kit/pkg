@@ -65,11 +65,6 @@ func UpdatedAt(v time.Time) predicate.ResourceScopes {
 	return predicate.ResourceScopes(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
-func DeletedAt(v time.Time) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldEQ(FieldDeletedAt, v))
-}
-
 // ResourceID applies equality check predicate on the "resource_id" field. It's identical to ResourceIDEQ.
 func ResourceID(v int) predicate.ResourceScopes {
 	return predicate.ResourceScopes(sql.FieldEQ(FieldResourceID, v))
@@ -160,56 +155,6 @@ func UpdatedAtLTE(v time.Time) predicate.ResourceScopes {
 	return predicate.ResourceScopes(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
-// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
-func DeletedAtEQ(v time.Time) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldEQ(FieldDeletedAt, v))
-}
-
-// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
-func DeletedAtNEQ(v time.Time) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldNEQ(FieldDeletedAt, v))
-}
-
-// DeletedAtIn applies the In predicate on the "deleted_at" field.
-func DeletedAtIn(vs ...time.Time) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldIn(FieldDeletedAt, vs...))
-}
-
-// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
-func DeletedAtNotIn(vs ...time.Time) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldNotIn(FieldDeletedAt, vs...))
-}
-
-// DeletedAtGT applies the GT predicate on the "deleted_at" field.
-func DeletedAtGT(v time.Time) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldGT(FieldDeletedAt, v))
-}
-
-// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
-func DeletedAtGTE(v time.Time) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldGTE(FieldDeletedAt, v))
-}
-
-// DeletedAtLT applies the LT predicate on the "deleted_at" field.
-func DeletedAtLT(v time.Time) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldLT(FieldDeletedAt, v))
-}
-
-// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
-func DeletedAtLTE(v time.Time) predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldLTE(FieldDeletedAt, v))
-}
-
-// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
-func DeletedAtIsNil() predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldIsNull(FieldDeletedAt))
-}
-
-// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
-func DeletedAtNotNil() predicate.ResourceScopes {
-	return predicate.ResourceScopes(sql.FieldNotNull(FieldDeletedAt))
-}
-
 // ResourceIDEQ applies the EQ predicate on the "resource_id" field.
 func ResourceIDEQ(v int) predicate.ResourceScopes {
 	return predicate.ResourceScopes(sql.FieldEQ(FieldResourceID, v))
@@ -250,6 +195,29 @@ func ScopeIDNotIn(vs ...int) predicate.ResourceScopes {
 	return predicate.ResourceScopes(sql.FieldNotIn(FieldScopeID, vs...))
 }
 
+// HasLionPermissions applies the HasEdge predicate on the "lion_permissions" edge.
+func HasLionPermissions() predicate.ResourceScopes {
+	return predicate.ResourceScopes(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionPermissionsWith applies the HasEdge predicate on the "lion_permissions" edge with a given conditions (other predicates).
+func HasLionPermissionsWith(preds ...predicate.Permissions) predicate.ResourceScopes {
+	return predicate.ResourceScopes(func(s *sql.Selector) {
+		step := newLionPermissionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasLionResources applies the HasEdge predicate on the "lion_resources" edge.
 func HasLionResources() predicate.ResourceScopes {
 	return predicate.ResourceScopes(func(s *sql.Selector) {
@@ -288,29 +256,6 @@ func HasLionScopes() predicate.ResourceScopes {
 func HasLionScopesWith(preds ...predicate.Scopes) predicate.ResourceScopes {
 	return predicate.ResourceScopes(func(s *sql.Selector) {
 		step := newLionScopesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasLionPermissions applies the HasEdge predicate on the "lion_permissions" edge.
-func HasLionPermissions() predicate.ResourceScopes {
-	return predicate.ResourceScopes(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionPermissionsWith applies the HasEdge predicate on the "lion_permissions" edge with a given conditions (other predicates).
-func HasLionPermissionsWith(preds ...predicate.Permissions) predicate.ResourceScopes {
-	return predicate.ResourceScopes(func(s *sql.Selector) {
-		step := newLionPermissionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
