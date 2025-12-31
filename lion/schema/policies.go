@@ -23,6 +23,18 @@ func (Policies) Fields() []ent.Field {
 		field.String("display_name").
 			NotEmpty().
 			Comment("国际化键值，用于前端多语言显示的标识符"),
+		field.Int("policy_type").
+			Default(0).
+			Comment("用途类型，对应 api/known/admin/v1/common.proto 中定义"),
+		field.Int("policy_status").
+			Default(0).
+			Comment("是否启用该资源项，禁用后完全不可访问"),
+		field.String("value").
+			Default("").
+			Comment("策略内容"),
+		field.String("description").
+			Default("").
+			Comment("详细描述"),
 	}
 }
 

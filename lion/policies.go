@@ -31,6 +31,14 @@ type Policies struct {
 	Name string `json:"name,omitempty"`
 	// 国际化键值，用于前端多语言显示的标识符
 	DisplayName string `json:"display_name,omitempty"`
+	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
+	PolicyType int `json:"policy_type,omitempty"`
+	// 是否启用该资源项，禁用后完全不可访问
+	PolicyStatus int `json:"policy_status,omitempty"`
+	// 策略内容
+	Value string `json:"value,omitempty"`
+	// 详细描述
+	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PoliciesQuery when eager-loading is set.
 	Edges        PoliciesEdges `json:"edges"`
@@ -60,9 +68,9 @@ func (*Policies) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case policies.FieldID, policies.FieldCreatedBy, policies.FieldUpdatedBy:
+		case policies.FieldID, policies.FieldCreatedBy, policies.FieldUpdatedBy, policies.FieldPolicyType, policies.FieldPolicyStatus:
 			values[i] = new(sql.NullInt64)
-		case policies.FieldName, policies.FieldDisplayName:
+		case policies.FieldName, policies.FieldDisplayName, policies.FieldValue, policies.FieldDescription:
 			values[i] = new(sql.NullString)
 		case policies.FieldCreatedAt, policies.FieldUpdatedAt, policies.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -130,6 +138,30 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DisplayName = value.String
 			}
+		case policies.FieldPolicyType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field policy_type", values[i])
+			} else if value.Valid {
+				_m.PolicyType = int(value.Int64)
+			}
+		case policies.FieldPolicyStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field policy_status", values[i])
+			} else if value.Valid {
+				_m.PolicyStatus = int(value.Int64)
+			}
+		case policies.FieldValue:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field value", values[i])
+			} else if value.Valid {
+				_m.Value = value.String
+			}
+		case policies.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -137,9 +169,9 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the Policies.
+// GetValue returns the ent.Value that was dynamically selected and assigned to the Policies.
 // This includes values selected through modifiers, order, etc.
-func (_m *Policies) Value(name string) (ent.Value, error) {
+func (_m *Policies) GetValue(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
@@ -193,6 +225,18 @@ func (_m *Policies) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)
+	builder.WriteString(", ")
+	builder.WriteString("policy_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PolicyType))
+	builder.WriteString(", ")
+	builder.WriteString("policy_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PolicyStatus))
+	builder.WriteString(", ")
+	builder.WriteString("value=")
+	builder.WriteString(_m.Value)
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

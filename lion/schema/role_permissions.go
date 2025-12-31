@@ -31,6 +31,8 @@ func (RolePermissions) Fields() []ent.Field {
 // Edges of the table.
 func (RolePermissions) Edges() []ent.Edge {
 	return []ent.Edge{
+		// edge.To("lion_permissions_2", Permissions.Type),
+
 		// 每条 RoleMenu 记录必须属于一个 Role
 		edge.From("lion_roles", Roles.Type).
 			Ref("lion_role_permissions"). // 与 Role 实体中的 edge.To("role_resources", ...) 的 Ref 名称对应

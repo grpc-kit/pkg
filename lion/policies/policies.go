@@ -28,6 +28,14 @@ const (
 	FieldName = "name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
+	// FieldPolicyType holds the string denoting the policy_type field in the database.
+	FieldPolicyType = "policy_type"
+	// FieldPolicyStatus holds the string denoting the policy_status field in the database.
+	FieldPolicyStatus = "policy_status"
+	// FieldValue holds the string denoting the value field in the database.
+	FieldValue = "value"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
 	EdgeLionPermissions = "lion_permissions"
 	// Table holds the table name of the policies in the database.
@@ -51,6 +59,10 @@ var Columns = []string{
 	FieldUpdatedBy,
 	FieldName,
 	FieldDisplayName,
+	FieldPolicyType,
+	FieldPolicyStatus,
+	FieldValue,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -78,6 +90,14 @@ var (
 	NameValidator func(string) error
 	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	DisplayNameValidator func(string) error
+	// DefaultPolicyType holds the default value on creation for the "policy_type" field.
+	DefaultPolicyType int
+	// DefaultPolicyStatus holds the default value on creation for the "policy_status" field.
+	DefaultPolicyStatus int
+	// DefaultValue holds the default value on creation for the "value" field.
+	DefaultValue string
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
 )
 
 // OrderOption defines the ordering options for the Policies queries.
@@ -121,6 +141,26 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByDisplayName orders the results by the display_name field.
 func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
+}
+
+// ByPolicyType orders the results by the policy_type field.
+func ByPolicyType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPolicyType, opts...).ToFunc()
+}
+
+// ByPolicyStatus orders the results by the policy_status field.
+func ByPolicyStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPolicyStatus, opts...).ToFunc()
+}
+
+// ByValue orders the results by the value field.
+func ByValue(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldValue, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByLionPermissionsCount orders the results by lion_permissions count.

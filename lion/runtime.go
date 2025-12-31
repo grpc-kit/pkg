@@ -426,6 +426,22 @@ func init() {
 	policiesDescDisplayName := policiesFields[1].Descriptor()
 	// policies.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	policies.DisplayNameValidator = policiesDescDisplayName.Validators[0].(func(string) error)
+	// policiesDescPolicyType is the schema descriptor for policy_type field.
+	policiesDescPolicyType := policiesFields[2].Descriptor()
+	// policies.DefaultPolicyType holds the default value on creation for the policy_type field.
+	policies.DefaultPolicyType = policiesDescPolicyType.Default.(int)
+	// policiesDescPolicyStatus is the schema descriptor for policy_status field.
+	policiesDescPolicyStatus := policiesFields[3].Descriptor()
+	// policies.DefaultPolicyStatus holds the default value on creation for the policy_status field.
+	policies.DefaultPolicyStatus = policiesDescPolicyStatus.Default.(int)
+	// policiesDescValue is the schema descriptor for value field.
+	policiesDescValue := policiesFields[4].Descriptor()
+	// policies.DefaultValue holds the default value on creation for the value field.
+	policies.DefaultValue = policiesDescValue.Default.(string)
+	// policiesDescDescription is the schema descriptor for description field.
+	policiesDescDescription := policiesFields[5].Descriptor()
+	// policies.DefaultDescription holds the default value on creation for the description field.
+	policies.DefaultDescription = policiesDescDescription.Default.(string)
 	resourcescopesMixin := schema.ResourceScopes{}.Mixin()
 	resourcescopesMixinFields0 := resourcescopesMixin[0].Fields()
 	_ = resourcescopesMixinFields0

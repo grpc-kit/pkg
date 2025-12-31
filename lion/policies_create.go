@@ -103,6 +103,62 @@ func (_c *PoliciesCreate) SetDisplayName(v string) *PoliciesCreate {
 	return _c
 }
 
+// SetPolicyType sets the "policy_type" field.
+func (_c *PoliciesCreate) SetPolicyType(v int) *PoliciesCreate {
+	_c.mutation.SetPolicyType(v)
+	return _c
+}
+
+// SetNillablePolicyType sets the "policy_type" field if the given value is not nil.
+func (_c *PoliciesCreate) SetNillablePolicyType(v *int) *PoliciesCreate {
+	if v != nil {
+		_c.SetPolicyType(*v)
+	}
+	return _c
+}
+
+// SetPolicyStatus sets the "policy_status" field.
+func (_c *PoliciesCreate) SetPolicyStatus(v int) *PoliciesCreate {
+	_c.mutation.SetPolicyStatus(v)
+	return _c
+}
+
+// SetNillablePolicyStatus sets the "policy_status" field if the given value is not nil.
+func (_c *PoliciesCreate) SetNillablePolicyStatus(v *int) *PoliciesCreate {
+	if v != nil {
+		_c.SetPolicyStatus(*v)
+	}
+	return _c
+}
+
+// SetValue sets the "value" field.
+func (_c *PoliciesCreate) SetValue(v string) *PoliciesCreate {
+	_c.mutation.SetValue(v)
+	return _c
+}
+
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (_c *PoliciesCreate) SetNillableValue(v *string) *PoliciesCreate {
+	if v != nil {
+		_c.SetValue(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *PoliciesCreate) SetDescription(v string) *PoliciesCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *PoliciesCreate) SetNillableDescription(v *string) *PoliciesCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
 // AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
 func (_c *PoliciesCreate) AddLionPermissionIDs(ids ...int) *PoliciesCreate {
 	_c.mutation.AddLionPermissionIDs(ids...)
@@ -169,6 +225,22 @@ func (_c *PoliciesCreate) defaults() {
 		v := policies.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
+	if _, ok := _c.mutation.PolicyType(); !ok {
+		v := policies.DefaultPolicyType
+		_c.mutation.SetPolicyType(v)
+	}
+	if _, ok := _c.mutation.PolicyStatus(); !ok {
+		v := policies.DefaultPolicyStatus
+		_c.mutation.SetPolicyStatus(v)
+	}
+	if _, ok := _c.mutation.Value(); !ok {
+		v := policies.DefaultValue
+		_c.mutation.SetValue(v)
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := policies.DefaultDescription
+		_c.mutation.SetDescription(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -194,6 +266,18 @@ func (_c *PoliciesCreate) check() error {
 		if err := policies.DisplayNameValidator(v); err != nil {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Policies.display_name": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.PolicyType(); !ok {
+		return &ValidationError{Name: "policy_type", err: errors.New(`lion: missing required field "Policies.policy_type"`)}
+	}
+	if _, ok := _c.mutation.PolicyStatus(); !ok {
+		return &ValidationError{Name: "policy_status", err: errors.New(`lion: missing required field "Policies.policy_status"`)}
+	}
+	if _, ok := _c.mutation.Value(); !ok {
+		return &ValidationError{Name: "value", err: errors.New(`lion: missing required field "Policies.value"`)}
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Policies.description"`)}
 	}
 	return nil
 }
@@ -248,6 +332,22 @@ func (_c *PoliciesCreate) createSpec() (*Policies, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DisplayName(); ok {
 		_spec.SetField(policies.FieldDisplayName, field.TypeString, value)
 		_node.DisplayName = value
+	}
+	if value, ok := _c.mutation.PolicyType(); ok {
+		_spec.SetField(policies.FieldPolicyType, field.TypeInt, value)
+		_node.PolicyType = value
+	}
+	if value, ok := _c.mutation.PolicyStatus(); ok {
+		_spec.SetField(policies.FieldPolicyStatus, field.TypeInt, value)
+		_node.PolicyStatus = value
+	}
+	if value, ok := _c.mutation.Value(); ok {
+		_spec.SetField(policies.FieldValue, field.TypeString, value)
+		_node.Value = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(policies.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if nodes := _c.mutation.LionPermissionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

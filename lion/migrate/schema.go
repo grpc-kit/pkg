@@ -230,6 +230,10 @@ var (
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "name", Type: field.TypeString, Size: 256},
 		{Name: "display_name", Type: field.TypeString},
+		{Name: "policy_type", Type: field.TypeInt, Default: 0},
+		{Name: "policy_status", Type: field.TypeInt, Default: 0},
+		{Name: "value", Type: field.TypeString, Default: ""},
+		{Name: "description", Type: field.TypeString, Default: ""},
 	}
 	// LionPoliciesTable holds the schema information for the "lion_policies" table.
 	LionPoliciesTable = &schema.Table{

@@ -9273,6 +9273,12 @@ type PoliciesMutation struct {
 	addupdated_by           *int64
 	name                    *string
 	display_name            *string
+	policy_type             *int
+	addpolicy_type          *int
+	policy_status           *int
+	addpolicy_status        *int
+	value                   *string
+	description             *string
 	clearedFields           map[string]struct{}
 	lion_permissions        map[int]struct{}
 	removedlion_permissions map[int]struct{}
@@ -9713,6 +9719,190 @@ func (m *PoliciesMutation) ResetDisplayName() {
 	m.display_name = nil
 }
 
+// SetPolicyType sets the "policy_type" field.
+func (m *PoliciesMutation) SetPolicyType(i int) {
+	m.policy_type = &i
+	m.addpolicy_type = nil
+}
+
+// PolicyType returns the value of the "policy_type" field in the mutation.
+func (m *PoliciesMutation) PolicyType() (r int, exists bool) {
+	v := m.policy_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPolicyType returns the old "policy_type" field's value of the Policies entity.
+// If the Policies object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PoliciesMutation) OldPolicyType(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPolicyType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPolicyType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPolicyType: %w", err)
+	}
+	return oldValue.PolicyType, nil
+}
+
+// AddPolicyType adds i to the "policy_type" field.
+func (m *PoliciesMutation) AddPolicyType(i int) {
+	if m.addpolicy_type != nil {
+		*m.addpolicy_type += i
+	} else {
+		m.addpolicy_type = &i
+	}
+}
+
+// AddedPolicyType returns the value that was added to the "policy_type" field in this mutation.
+func (m *PoliciesMutation) AddedPolicyType() (r int, exists bool) {
+	v := m.addpolicy_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPolicyType resets all changes to the "policy_type" field.
+func (m *PoliciesMutation) ResetPolicyType() {
+	m.policy_type = nil
+	m.addpolicy_type = nil
+}
+
+// SetPolicyStatus sets the "policy_status" field.
+func (m *PoliciesMutation) SetPolicyStatus(i int) {
+	m.policy_status = &i
+	m.addpolicy_status = nil
+}
+
+// PolicyStatus returns the value of the "policy_status" field in the mutation.
+func (m *PoliciesMutation) PolicyStatus() (r int, exists bool) {
+	v := m.policy_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPolicyStatus returns the old "policy_status" field's value of the Policies entity.
+// If the Policies object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PoliciesMutation) OldPolicyStatus(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPolicyStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPolicyStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPolicyStatus: %w", err)
+	}
+	return oldValue.PolicyStatus, nil
+}
+
+// AddPolicyStatus adds i to the "policy_status" field.
+func (m *PoliciesMutation) AddPolicyStatus(i int) {
+	if m.addpolicy_status != nil {
+		*m.addpolicy_status += i
+	} else {
+		m.addpolicy_status = &i
+	}
+}
+
+// AddedPolicyStatus returns the value that was added to the "policy_status" field in this mutation.
+func (m *PoliciesMutation) AddedPolicyStatus() (r int, exists bool) {
+	v := m.addpolicy_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPolicyStatus resets all changes to the "policy_status" field.
+func (m *PoliciesMutation) ResetPolicyStatus() {
+	m.policy_status = nil
+	m.addpolicy_status = nil
+}
+
+// SetValue sets the "value" field.
+func (m *PoliciesMutation) SetValue(s string) {
+	m.value = &s
+}
+
+// Value returns the value of the "value" field in the mutation.
+func (m *PoliciesMutation) Value() (r string, exists bool) {
+	v := m.value
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValue returns the old "value" field's value of the Policies entity.
+// If the Policies object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PoliciesMutation) OldValue(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValue is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+	}
+	return oldValue.Value, nil
+}
+
+// ResetValue resets all changes to the "value" field.
+func (m *PoliciesMutation) ResetValue() {
+	m.value = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *PoliciesMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *PoliciesMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Policies entity.
+// If the Policies object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PoliciesMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *PoliciesMutation) ResetDescription() {
+	m.description = nil
+}
+
 // AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by ids.
 func (m *PoliciesMutation) AddLionPermissionIDs(ids ...int) {
 	if m.lion_permissions == nil {
@@ -9801,7 +9991,7 @@ func (m *PoliciesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PoliciesMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, policies.FieldCreatedAt)
 	}
@@ -9822,6 +10012,18 @@ func (m *PoliciesMutation) Fields() []string {
 	}
 	if m.display_name != nil {
 		fields = append(fields, policies.FieldDisplayName)
+	}
+	if m.policy_type != nil {
+		fields = append(fields, policies.FieldPolicyType)
+	}
+	if m.policy_status != nil {
+		fields = append(fields, policies.FieldPolicyStatus)
+	}
+	if m.value != nil {
+		fields = append(fields, policies.FieldValue)
+	}
+	if m.description != nil {
+		fields = append(fields, policies.FieldDescription)
 	}
 	return fields
 }
@@ -9845,6 +10047,14 @@ func (m *PoliciesMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case policies.FieldDisplayName:
 		return m.DisplayName()
+	case policies.FieldPolicyType:
+		return m.PolicyType()
+	case policies.FieldPolicyStatus:
+		return m.PolicyStatus()
+	case policies.FieldValue:
+		return m.Value()
+	case policies.FieldDescription:
+		return m.Description()
 	}
 	return nil, false
 }
@@ -9868,6 +10078,14 @@ func (m *PoliciesMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldName(ctx)
 	case policies.FieldDisplayName:
 		return m.OldDisplayName(ctx)
+	case policies.FieldPolicyType:
+		return m.OldPolicyType(ctx)
+	case policies.FieldPolicyStatus:
+		return m.OldPolicyStatus(ctx)
+	case policies.FieldValue:
+		return m.OldValue(ctx)
+	case policies.FieldDescription:
+		return m.OldDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown Policies field %s", name)
 }
@@ -9926,6 +10144,34 @@ func (m *PoliciesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDisplayName(v)
 		return nil
+	case policies.FieldPolicyType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPolicyType(v)
+		return nil
+	case policies.FieldPolicyStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPolicyStatus(v)
+		return nil
+	case policies.FieldValue:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValue(v)
+		return nil
+	case policies.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Policies field %s", name)
 }
@@ -9940,6 +10186,12 @@ func (m *PoliciesMutation) AddedFields() []string {
 	if m.addupdated_by != nil {
 		fields = append(fields, policies.FieldUpdatedBy)
 	}
+	if m.addpolicy_type != nil {
+		fields = append(fields, policies.FieldPolicyType)
+	}
+	if m.addpolicy_status != nil {
+		fields = append(fields, policies.FieldPolicyStatus)
+	}
 	return fields
 }
 
@@ -9952,6 +10204,10 @@ func (m *PoliciesMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCreatedBy()
 	case policies.FieldUpdatedBy:
 		return m.AddedUpdatedBy()
+	case policies.FieldPolicyType:
+		return m.AddedPolicyType()
+	case policies.FieldPolicyStatus:
+		return m.AddedPolicyStatus()
 	}
 	return nil, false
 }
@@ -9974,6 +10230,20 @@ func (m *PoliciesMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUpdatedBy(v)
+		return nil
+	case policies.FieldPolicyType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPolicyType(v)
+		return nil
+	case policies.FieldPolicyStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPolicyStatus(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Policies numeric field %s", name)
@@ -10043,6 +10313,18 @@ func (m *PoliciesMutation) ResetField(name string) error {
 		return nil
 	case policies.FieldDisplayName:
 		m.ResetDisplayName()
+		return nil
+	case policies.FieldPolicyType:
+		m.ResetPolicyType()
+		return nil
+	case policies.FieldPolicyStatus:
+		m.ResetPolicyStatus()
+		return nil
+	case policies.FieldValue:
+		m.ResetValue()
+		return nil
+	case policies.FieldDescription:
+		m.ResetDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown Policies field %s", name)

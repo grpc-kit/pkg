@@ -137,6 +137,76 @@ func (_u *PoliciesUpdate) SetNillableDisplayName(v *string) *PoliciesUpdate {
 	return _u
 }
 
+// SetPolicyType sets the "policy_type" field.
+func (_u *PoliciesUpdate) SetPolicyType(v int) *PoliciesUpdate {
+	_u.mutation.ResetPolicyType()
+	_u.mutation.SetPolicyType(v)
+	return _u
+}
+
+// SetNillablePolicyType sets the "policy_type" field if the given value is not nil.
+func (_u *PoliciesUpdate) SetNillablePolicyType(v *int) *PoliciesUpdate {
+	if v != nil {
+		_u.SetPolicyType(*v)
+	}
+	return _u
+}
+
+// AddPolicyType adds value to the "policy_type" field.
+func (_u *PoliciesUpdate) AddPolicyType(v int) *PoliciesUpdate {
+	_u.mutation.AddPolicyType(v)
+	return _u
+}
+
+// SetPolicyStatus sets the "policy_status" field.
+func (_u *PoliciesUpdate) SetPolicyStatus(v int) *PoliciesUpdate {
+	_u.mutation.ResetPolicyStatus()
+	_u.mutation.SetPolicyStatus(v)
+	return _u
+}
+
+// SetNillablePolicyStatus sets the "policy_status" field if the given value is not nil.
+func (_u *PoliciesUpdate) SetNillablePolicyStatus(v *int) *PoliciesUpdate {
+	if v != nil {
+		_u.SetPolicyStatus(*v)
+	}
+	return _u
+}
+
+// AddPolicyStatus adds value to the "policy_status" field.
+func (_u *PoliciesUpdate) AddPolicyStatus(v int) *PoliciesUpdate {
+	_u.mutation.AddPolicyStatus(v)
+	return _u
+}
+
+// SetValue sets the "value" field.
+func (_u *PoliciesUpdate) SetValue(v string) *PoliciesUpdate {
+	_u.mutation.SetValue(v)
+	return _u
+}
+
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (_u *PoliciesUpdate) SetNillableValue(v *string) *PoliciesUpdate {
+	if v != nil {
+		_u.SetValue(*v)
+	}
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *PoliciesUpdate) SetDescription(v string) *PoliciesUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *PoliciesUpdate) SetNillableDescription(v *string) *PoliciesUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
 // AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
 func (_u *PoliciesUpdate) AddLionPermissionIDs(ids ...int) *PoliciesUpdate {
 	_u.mutation.AddLionPermissionIDs(ids...)
@@ -273,6 +343,24 @@ func (_u *PoliciesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(policies.FieldDisplayName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PolicyType(); ok {
+		_spec.SetField(policies.FieldPolicyType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPolicyType(); ok {
+		_spec.AddField(policies.FieldPolicyType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.PolicyStatus(); ok {
+		_spec.SetField(policies.FieldPolicyStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPolicyStatus(); ok {
+		_spec.AddField(policies.FieldPolicyStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Value(); ok {
+		_spec.SetField(policies.FieldValue, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(policies.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionPermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -447,6 +535,76 @@ func (_u *PoliciesUpdateOne) SetNillableDisplayName(v *string) *PoliciesUpdateOn
 	return _u
 }
 
+// SetPolicyType sets the "policy_type" field.
+func (_u *PoliciesUpdateOne) SetPolicyType(v int) *PoliciesUpdateOne {
+	_u.mutation.ResetPolicyType()
+	_u.mutation.SetPolicyType(v)
+	return _u
+}
+
+// SetNillablePolicyType sets the "policy_type" field if the given value is not nil.
+func (_u *PoliciesUpdateOne) SetNillablePolicyType(v *int) *PoliciesUpdateOne {
+	if v != nil {
+		_u.SetPolicyType(*v)
+	}
+	return _u
+}
+
+// AddPolicyType adds value to the "policy_type" field.
+func (_u *PoliciesUpdateOne) AddPolicyType(v int) *PoliciesUpdateOne {
+	_u.mutation.AddPolicyType(v)
+	return _u
+}
+
+// SetPolicyStatus sets the "policy_status" field.
+func (_u *PoliciesUpdateOne) SetPolicyStatus(v int) *PoliciesUpdateOne {
+	_u.mutation.ResetPolicyStatus()
+	_u.mutation.SetPolicyStatus(v)
+	return _u
+}
+
+// SetNillablePolicyStatus sets the "policy_status" field if the given value is not nil.
+func (_u *PoliciesUpdateOne) SetNillablePolicyStatus(v *int) *PoliciesUpdateOne {
+	if v != nil {
+		_u.SetPolicyStatus(*v)
+	}
+	return _u
+}
+
+// AddPolicyStatus adds value to the "policy_status" field.
+func (_u *PoliciesUpdateOne) AddPolicyStatus(v int) *PoliciesUpdateOne {
+	_u.mutation.AddPolicyStatus(v)
+	return _u
+}
+
+// SetValue sets the "value" field.
+func (_u *PoliciesUpdateOne) SetValue(v string) *PoliciesUpdateOne {
+	_u.mutation.SetValue(v)
+	return _u
+}
+
+// SetNillableValue sets the "value" field if the given value is not nil.
+func (_u *PoliciesUpdateOne) SetNillableValue(v *string) *PoliciesUpdateOne {
+	if v != nil {
+		_u.SetValue(*v)
+	}
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *PoliciesUpdateOne) SetDescription(v string) *PoliciesUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *PoliciesUpdateOne) SetNillableDescription(v *string) *PoliciesUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
 // AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
 func (_u *PoliciesUpdateOne) AddLionPermissionIDs(ids ...int) *PoliciesUpdateOne {
 	_u.mutation.AddLionPermissionIDs(ids...)
@@ -613,6 +771,24 @@ func (_u *PoliciesUpdateOne) sqlSave(ctx context.Context) (_node *Policies, err 
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(policies.FieldDisplayName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.PolicyType(); ok {
+		_spec.SetField(policies.FieldPolicyType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPolicyType(); ok {
+		_spec.AddField(policies.FieldPolicyType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.PolicyStatus(); ok {
+		_spec.SetField(policies.FieldPolicyStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedPolicyStatus(); ok {
+		_spec.AddField(policies.FieldPolicyStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.Value(); ok {
+		_spec.SetField(policies.FieldValue, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(policies.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionPermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{

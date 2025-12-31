@@ -90,6 +90,26 @@ func DisplayName(v string) predicate.Policies {
 	return predicate.Policies(sql.FieldEQ(FieldDisplayName, v))
 }
 
+// PolicyType applies equality check predicate on the "policy_type" field. It's identical to PolicyTypeEQ.
+func PolicyType(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldPolicyType, v))
+}
+
+// PolicyStatus applies equality check predicate on the "policy_status" field. It's identical to PolicyStatusEQ.
+func PolicyStatus(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldPolicyStatus, v))
+}
+
+// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
+func Value(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldValue, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldDescription, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Policies {
 	return predicate.Policies(sql.FieldEQ(FieldCreatedAt, v))
@@ -448,6 +468,216 @@ func DisplayNameEqualFold(v string) predicate.Policies {
 // DisplayNameContainsFold applies the ContainsFold predicate on the "display_name" field.
 func DisplayNameContainsFold(v string) predicate.Policies {
 	return predicate.Policies(sql.FieldContainsFold(FieldDisplayName, v))
+}
+
+// PolicyTypeEQ applies the EQ predicate on the "policy_type" field.
+func PolicyTypeEQ(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldPolicyType, v))
+}
+
+// PolicyTypeNEQ applies the NEQ predicate on the "policy_type" field.
+func PolicyTypeNEQ(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldNEQ(FieldPolicyType, v))
+}
+
+// PolicyTypeIn applies the In predicate on the "policy_type" field.
+func PolicyTypeIn(vs ...int) predicate.Policies {
+	return predicate.Policies(sql.FieldIn(FieldPolicyType, vs...))
+}
+
+// PolicyTypeNotIn applies the NotIn predicate on the "policy_type" field.
+func PolicyTypeNotIn(vs ...int) predicate.Policies {
+	return predicate.Policies(sql.FieldNotIn(FieldPolicyType, vs...))
+}
+
+// PolicyTypeGT applies the GT predicate on the "policy_type" field.
+func PolicyTypeGT(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldGT(FieldPolicyType, v))
+}
+
+// PolicyTypeGTE applies the GTE predicate on the "policy_type" field.
+func PolicyTypeGTE(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldGTE(FieldPolicyType, v))
+}
+
+// PolicyTypeLT applies the LT predicate on the "policy_type" field.
+func PolicyTypeLT(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldLT(FieldPolicyType, v))
+}
+
+// PolicyTypeLTE applies the LTE predicate on the "policy_type" field.
+func PolicyTypeLTE(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldLTE(FieldPolicyType, v))
+}
+
+// PolicyStatusEQ applies the EQ predicate on the "policy_status" field.
+func PolicyStatusEQ(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldPolicyStatus, v))
+}
+
+// PolicyStatusNEQ applies the NEQ predicate on the "policy_status" field.
+func PolicyStatusNEQ(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldNEQ(FieldPolicyStatus, v))
+}
+
+// PolicyStatusIn applies the In predicate on the "policy_status" field.
+func PolicyStatusIn(vs ...int) predicate.Policies {
+	return predicate.Policies(sql.FieldIn(FieldPolicyStatus, vs...))
+}
+
+// PolicyStatusNotIn applies the NotIn predicate on the "policy_status" field.
+func PolicyStatusNotIn(vs ...int) predicate.Policies {
+	return predicate.Policies(sql.FieldNotIn(FieldPolicyStatus, vs...))
+}
+
+// PolicyStatusGT applies the GT predicate on the "policy_status" field.
+func PolicyStatusGT(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldGT(FieldPolicyStatus, v))
+}
+
+// PolicyStatusGTE applies the GTE predicate on the "policy_status" field.
+func PolicyStatusGTE(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldGTE(FieldPolicyStatus, v))
+}
+
+// PolicyStatusLT applies the LT predicate on the "policy_status" field.
+func PolicyStatusLT(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldLT(FieldPolicyStatus, v))
+}
+
+// PolicyStatusLTE applies the LTE predicate on the "policy_status" field.
+func PolicyStatusLTE(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldLTE(FieldPolicyStatus, v))
+}
+
+// ValueEQ applies the EQ predicate on the "value" field.
+func ValueEQ(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldValue, v))
+}
+
+// ValueNEQ applies the NEQ predicate on the "value" field.
+func ValueNEQ(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldNEQ(FieldValue, v))
+}
+
+// ValueIn applies the In predicate on the "value" field.
+func ValueIn(vs ...string) predicate.Policies {
+	return predicate.Policies(sql.FieldIn(FieldValue, vs...))
+}
+
+// ValueNotIn applies the NotIn predicate on the "value" field.
+func ValueNotIn(vs ...string) predicate.Policies {
+	return predicate.Policies(sql.FieldNotIn(FieldValue, vs...))
+}
+
+// ValueGT applies the GT predicate on the "value" field.
+func ValueGT(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldGT(FieldValue, v))
+}
+
+// ValueGTE applies the GTE predicate on the "value" field.
+func ValueGTE(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldGTE(FieldValue, v))
+}
+
+// ValueLT applies the LT predicate on the "value" field.
+func ValueLT(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldLT(FieldValue, v))
+}
+
+// ValueLTE applies the LTE predicate on the "value" field.
+func ValueLTE(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldLTE(FieldValue, v))
+}
+
+// ValueContains applies the Contains predicate on the "value" field.
+func ValueContains(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldContains(FieldValue, v))
+}
+
+// ValueHasPrefix applies the HasPrefix predicate on the "value" field.
+func ValueHasPrefix(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldHasPrefix(FieldValue, v))
+}
+
+// ValueHasSuffix applies the HasSuffix predicate on the "value" field.
+func ValueHasSuffix(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldHasSuffix(FieldValue, v))
+}
+
+// ValueEqualFold applies the EqualFold predicate on the "value" field.
+func ValueEqualFold(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldEqualFold(FieldValue, v))
+}
+
+// ValueContainsFold applies the ContainsFold predicate on the "value" field.
+func ValueContainsFold(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldContainsFold(FieldValue, v))
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.Policies {
+	return predicate.Policies(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.Policies {
+	return predicate.Policies(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.Policies {
+	return predicate.Policies(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // HasLionPermissions applies the HasEdge predicate on the "lion_permissions" edge.
