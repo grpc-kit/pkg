@@ -8,10 +8,12 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
+	"github.com/grpc-kit/pkg/lion/scopes"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -35,22 +37,36 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 		return result, fmt.Errorf("not found groups")
 	}
 
+	if len(gs) == 0 {
+		return result, nil
+	}
+
+	permissionsWhere := make([]predicate.Permissions, 0)
+	permissionsWhere = append(permissionsWhere, permissions.HasLionRolePermissionsWith(
+		rolepermissions.HasLionRolesWith(
+			roles.NameIn(gs...),
+		),
+	))
+
+	policiesWhere := make([]predicate.Policies, 0)
+	if req.PolicyType != 0 {
+		policiesWhere = append(policiesWhere, policies.PolicyTypeEQ(int(req.PolicyType)))
+	}
+	if req.PolicyStatus != 0 {
+		policiesWhere = append(policiesWhere, policies.PolicyStatusEQ(int(req.PolicyStatus)))
+	}
+	if len(policiesWhere) > 0 {
+		permissionsWhere = append(permissionsWhere, permissions.HasLionPoliciesWith(policiesWhere...))
+	}
+
 	// 1 查询对应角色所有的资源归属
-	scopeList, err := db.Permissions.
+	resourceScopeList, err := db.Permissions.
 		Query().
 		Select(
 			permissions.FieldResourceScopeID,
 		).
 		Where(
-			permissions.HasLionRolePermissionsWith(
-				rolepermissions.HasLionRolesWith(
-					roles.NameIn(gs...),
-				),
-			),
-			permissions.HasLionPoliciesWith(
-				policies.PolicyTypeEQ(1),
-				policies.PolicyStatusEQ(2),
-			),
+			permissionsWhere...,
 		).
 		Unique(true).
 		All(ctx)
@@ -58,20 +74,51 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 		return nil, err
 	}
 
-	scopeIDS := make([]int, 0)
-	for _, scope := range scopeList {
-		scopeIDS = append(scopeIDS, scope.ResourceScopeID)
+	if len(resourceScopeList) == 0 {
+		return result, nil
 	}
 
-	// 2 获取资源列表
+	resourceScopeAllID := make([]int, 0)
+	for _, scope := range resourceScopeList {
+		resourceScopeAllID = append(resourceScopeAllID, scope.ResourceScopeID)
+	}
+
+	// 2 判断是否过滤资源作用域
+	scopeID := 0
+	if req.ScopeType != 0 && req.ScopeName != "" {
+		scopeID, err = db.Scopes.Query().Where(scopes.ScopeTypeEQ(int(req.ScopeType)), scopes.NameEQ(req.ScopeName)).OnlyID(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// 3 获取资源列表
+	resourcesWhere := make([]predicate.Resources, 0)
+
+	resourceScopesWhere := make([]predicate.ResourceScopes, 0)
+	if scopeID != 0 {
+		resourceScopesWhere = append(resourceScopesWhere, resourcescopes.ScopeIDEQ(scopeID))
+	}
+	resourceScopesWhere = append(resourceScopesWhere, resourcescopes.IDIn(resourceScopeAllID...))
+
+	resourcesWhere = append(resourcesWhere, resources.HasLionResourceScopesWith(resourceScopesWhere...))
+
+	if req.ResourceType != 0 {
+		resourcesWhere = append(resourcesWhere, resources.ResourceTypeEQ(int(req.ResourceType)))
+	}
+	if req.ResourceStatus != 0 {
+		resourcesWhere = append(resourcesWhere, resources.ResourceStatusEQ(int(req.ResourceStatus)))
+	}
+
 	resList, err := db.Resources.
 		Query().
 		Where(
-			resources.HasLionResourceScopesWith(
-				resourcescopes.IDIn(scopeIDS...),
-			),
+			resourcesWhere...,
 		).
 		All(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	switch req.Structure.String() {
 	case adminv1.Structure_TREE.String():
@@ -88,7 +135,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 				SortOrder:   int32(m.SortOrder),
 				Type:        adminv1.Resource_Type(m.ResourceType),
 				// Scope:        adminv1.Resource_Scope(m.ResourceScope),
-				// Enabled:      m.Enabled,
+				Status:       adminv1.Resource_Status(m.ResourceStatus),
 				Hidden:       m.Hidden,
 				HideChildren: m.HideChildren,
 				Path:         m.Path,
@@ -128,7 +175,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 				SortOrder:   int32(m.SortOrder),
 				Type:        adminv1.Resource_Type(m.ResourceType),
 				// Scope:        adminv1.Resource_Scope(m.ResourceScope),
-				// Enabled:      m.Enabled,
+				Status:       adminv1.Resource_Status(m.ResourceStatus),
 				Hidden:       m.Hidden,
 				HideChildren: m.HideChildren,
 				Path:         m.Path,
