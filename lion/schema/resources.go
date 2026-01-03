@@ -17,7 +17,7 @@ type Resources struct {
 // Fields of the table.
 func (Resources) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("parent_id").
+		field.Int64("parent_id").
 			Default(0).
 			Comment("父资源 ID，为 0 表示顶级资源"),
 		field.String("name").
@@ -33,6 +33,9 @@ func (Resources) Fields() []ent.Field {
 		field.Int("resource_status").
 			Default(0).
 			Comment("是否启用该资源项，禁用后完全不可访问"),
+		field.Int("visibility").
+			Default(0).
+			Comment("是否启用该资源项，禁用后完全不可访问"),
 		field.Int("sort_order").
 			Default(100).
 			Comment("资源排序顺序，用于同级资源的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999"),
@@ -41,22 +44,23 @@ func (Resources) Fields() []ent.Field {
 				Default(0).
 				Comment("作用范围，对应 api/known/admin/v1/common.proto 中定义"),
 		*/
-		field.Bool("hidden").
-			Default(false).
-			Comment("是否在资源列表中隐藏该节点"),
-		field.Bool("hide_children").
-			Default(false).
-			Comment("是否隐藏该资源节点的子项"),
-		field.String("path").
+		/*
+			field.Bool("hidden").
+				Default(false).
+				Comment("是否在资源列表中隐藏该节点"),
+			field.Bool("hide_children").
+				Default(false).
+				Comment("是否隐藏该资源节点的子项"),
+		*/
+		field.String("locator").
 			MaxLen(512).
 			Default("").
 			Comment("资源路径"),
-		field.String("icon").
+		field.String("visual").
 			MaxLen(256).
 			Default("").
 			Comment("图标名称，如 UserOutlined"),
-		field.String("component").
-			MaxLen(256).
+		field.String("manifest").
 			Default("").
 			Comment("组件名称，如 UserOutlined"),
 		field.String("description").

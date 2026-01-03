@@ -28,7 +28,7 @@ type Resources struct {
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 父资源 ID，为 0 表示顶级资源
-	ParentID int `json:"parent_id,omitempty"`
+	ParentID int64 `json:"parent_id,omitempty"`
 	// 资源名称
 	Name string `json:"name,omitempty"`
 	// 友好展示名称
@@ -37,18 +37,16 @@ type Resources struct {
 	ResourceType int `json:"resource_type,omitempty"`
 	// 是否启用该资源项，禁用后完全不可访问
 	ResourceStatus int `json:"resource_status,omitempty"`
+	// 是否启用该资源项，禁用后完全不可访问
+	Visibility int `json:"visibility,omitempty"`
 	// 资源排序顺序，用于同级资源的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999
 	SortOrder int `json:"sort_order,omitempty"`
-	// 是否在资源列表中隐藏该节点
-	Hidden bool `json:"hidden,omitempty"`
-	// 是否隐藏该资源节点的子项
-	HideChildren bool `json:"hide_children,omitempty"`
 	// 资源路径
-	Path string `json:"path,omitempty"`
+	Locator string `json:"locator,omitempty"`
 	// 图标名称，如 UserOutlined
-	Icon string `json:"icon,omitempty"`
+	Visual string `json:"visual,omitempty"`
 	// 组件名称，如 UserOutlined
-	Component string `json:"component,omitempty"`
+	Manifest string `json:"manifest,omitempty"`
 	// 详细描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -80,11 +78,9 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case resources.FieldHidden, resources.FieldHideChildren:
-			values[i] = new(sql.NullBool)
-		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldResourceType, resources.FieldResourceStatus, resources.FieldSortOrder:
+		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldResourceType, resources.FieldResourceStatus, resources.FieldVisibility, resources.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case resources.FieldName, resources.FieldDisplayName, resources.FieldPath, resources.FieldIcon, resources.FieldComponent, resources.FieldDescription:
+		case resources.FieldName, resources.FieldDisplayName, resources.FieldLocator, resources.FieldVisual, resources.FieldManifest, resources.FieldDescription:
 			values[i] = new(sql.NullString)
 		case resources.FieldCreatedAt, resources.FieldUpdatedAt, resources.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -144,7 +140,7 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
-				_m.ParentID = int(value.Int64)
+				_m.ParentID = value.Int64
 			}
 		case resources.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -170,41 +166,35 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ResourceStatus = int(value.Int64)
 			}
+		case resources.FieldVisibility:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field visibility", values[i])
+			} else if value.Valid {
+				_m.Visibility = int(value.Int64)
+			}
 		case resources.FieldSortOrder:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field sort_order", values[i])
 			} else if value.Valid {
 				_m.SortOrder = int(value.Int64)
 			}
-		case resources.FieldHidden:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field hidden", values[i])
-			} else if value.Valid {
-				_m.Hidden = value.Bool
-			}
-		case resources.FieldHideChildren:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field hide_children", values[i])
-			} else if value.Valid {
-				_m.HideChildren = value.Bool
-			}
-		case resources.FieldPath:
+		case resources.FieldLocator:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field path", values[i])
+				return fmt.Errorf("unexpected type %T for field locator", values[i])
 			} else if value.Valid {
-				_m.Path = value.String
+				_m.Locator = value.String
 			}
-		case resources.FieldIcon:
+		case resources.FieldVisual:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field icon", values[i])
+				return fmt.Errorf("unexpected type %T for field visual", values[i])
 			} else if value.Valid {
-				_m.Icon = value.String
+				_m.Visual = value.String
 			}
-		case resources.FieldComponent:
+		case resources.FieldManifest:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field component", values[i])
+				return fmt.Errorf("unexpected type %T for field manifest", values[i])
 			} else if value.Valid {
-				_m.Component = value.String
+				_m.Manifest = value.String
 			}
 		case resources.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -285,23 +275,20 @@ func (_m *Resources) String() string {
 	builder.WriteString("resource_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ResourceStatus))
 	builder.WriteString(", ")
+	builder.WriteString("visibility=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Visibility))
+	builder.WriteString(", ")
 	builder.WriteString("sort_order=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))
 	builder.WriteString(", ")
-	builder.WriteString("hidden=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Hidden))
+	builder.WriteString("locator=")
+	builder.WriteString(_m.Locator)
 	builder.WriteString(", ")
-	builder.WriteString("hide_children=")
-	builder.WriteString(fmt.Sprintf("%v", _m.HideChildren))
+	builder.WriteString("visual=")
+	builder.WriteString(_m.Visual)
 	builder.WriteString(", ")
-	builder.WriteString("path=")
-	builder.WriteString(_m.Path)
-	builder.WriteString(", ")
-	builder.WriteString("icon=")
-	builder.WriteString(_m.Icon)
-	builder.WriteString(", ")
-	builder.WriteString("component=")
-	builder.WriteString(_m.Component)
+	builder.WriteString("manifest=")
+	builder.WriteString(_m.Manifest)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

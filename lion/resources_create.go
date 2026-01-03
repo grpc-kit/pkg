@@ -92,13 +92,13 @@ func (_c *ResourcesCreate) SetNillableUpdatedBy(v *int64) *ResourcesCreate {
 }
 
 // SetParentID sets the "parent_id" field.
-func (_c *ResourcesCreate) SetParentID(v int) *ResourcesCreate {
+func (_c *ResourcesCreate) SetParentID(v int64) *ResourcesCreate {
 	_c.mutation.SetParentID(v)
 	return _c
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableParentID(v *int) *ResourcesCreate {
+func (_c *ResourcesCreate) SetNillableParentID(v *int64) *ResourcesCreate {
 	if v != nil {
 		_c.SetParentID(*v)
 	}
@@ -153,6 +153,20 @@ func (_c *ResourcesCreate) SetNillableResourceStatus(v *int) *ResourcesCreate {
 	return _c
 }
 
+// SetVisibility sets the "visibility" field.
+func (_c *ResourcesCreate) SetVisibility(v int) *ResourcesCreate {
+	_c.mutation.SetVisibility(v)
+	return _c
+}
+
+// SetNillableVisibility sets the "visibility" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableVisibility(v *int) *ResourcesCreate {
+	if v != nil {
+		_c.SetVisibility(*v)
+	}
+	return _c
+}
+
 // SetSortOrder sets the "sort_order" field.
 func (_c *ResourcesCreate) SetSortOrder(v int) *ResourcesCreate {
 	_c.mutation.SetSortOrder(v)
@@ -167,72 +181,44 @@ func (_c *ResourcesCreate) SetNillableSortOrder(v *int) *ResourcesCreate {
 	return _c
 }
 
-// SetHidden sets the "hidden" field.
-func (_c *ResourcesCreate) SetHidden(v bool) *ResourcesCreate {
-	_c.mutation.SetHidden(v)
+// SetLocator sets the "locator" field.
+func (_c *ResourcesCreate) SetLocator(v string) *ResourcesCreate {
+	_c.mutation.SetLocator(v)
 	return _c
 }
 
-// SetNillableHidden sets the "hidden" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableHidden(v *bool) *ResourcesCreate {
+// SetNillableLocator sets the "locator" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableLocator(v *string) *ResourcesCreate {
 	if v != nil {
-		_c.SetHidden(*v)
+		_c.SetLocator(*v)
 	}
 	return _c
 }
 
-// SetHideChildren sets the "hide_children" field.
-func (_c *ResourcesCreate) SetHideChildren(v bool) *ResourcesCreate {
-	_c.mutation.SetHideChildren(v)
+// SetVisual sets the "visual" field.
+func (_c *ResourcesCreate) SetVisual(v string) *ResourcesCreate {
+	_c.mutation.SetVisual(v)
 	return _c
 }
 
-// SetNillableHideChildren sets the "hide_children" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableHideChildren(v *bool) *ResourcesCreate {
+// SetNillableVisual sets the "visual" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableVisual(v *string) *ResourcesCreate {
 	if v != nil {
-		_c.SetHideChildren(*v)
+		_c.SetVisual(*v)
 	}
 	return _c
 }
 
-// SetPath sets the "path" field.
-func (_c *ResourcesCreate) SetPath(v string) *ResourcesCreate {
-	_c.mutation.SetPath(v)
+// SetManifest sets the "manifest" field.
+func (_c *ResourcesCreate) SetManifest(v string) *ResourcesCreate {
+	_c.mutation.SetManifest(v)
 	return _c
 }
 
-// SetNillablePath sets the "path" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillablePath(v *string) *ResourcesCreate {
+// SetNillableManifest sets the "manifest" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableManifest(v *string) *ResourcesCreate {
 	if v != nil {
-		_c.SetPath(*v)
-	}
-	return _c
-}
-
-// SetIcon sets the "icon" field.
-func (_c *ResourcesCreate) SetIcon(v string) *ResourcesCreate {
-	_c.mutation.SetIcon(v)
-	return _c
-}
-
-// SetNillableIcon sets the "icon" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableIcon(v *string) *ResourcesCreate {
-	if v != nil {
-		_c.SetIcon(*v)
-	}
-	return _c
-}
-
-// SetComponent sets the "component" field.
-func (_c *ResourcesCreate) SetComponent(v string) *ResourcesCreate {
-	_c.mutation.SetComponent(v)
-	return _c
-}
-
-// SetNillableComponent sets the "component" field if the given value is not nil.
-func (_c *ResourcesCreate) SetNillableComponent(v *string) *ResourcesCreate {
-	if v != nil {
-		_c.SetComponent(*v)
+		_c.SetManifest(*v)
 	}
 	return _c
 }
@@ -333,29 +319,25 @@ func (_c *ResourcesCreate) defaults() {
 		v := resources.DefaultResourceStatus
 		_c.mutation.SetResourceStatus(v)
 	}
+	if _, ok := _c.mutation.Visibility(); !ok {
+		v := resources.DefaultVisibility
+		_c.mutation.SetVisibility(v)
+	}
 	if _, ok := _c.mutation.SortOrder(); !ok {
 		v := resources.DefaultSortOrder
 		_c.mutation.SetSortOrder(v)
 	}
-	if _, ok := _c.mutation.Hidden(); !ok {
-		v := resources.DefaultHidden
-		_c.mutation.SetHidden(v)
+	if _, ok := _c.mutation.Locator(); !ok {
+		v := resources.DefaultLocator
+		_c.mutation.SetLocator(v)
 	}
-	if _, ok := _c.mutation.HideChildren(); !ok {
-		v := resources.DefaultHideChildren
-		_c.mutation.SetHideChildren(v)
+	if _, ok := _c.mutation.Visual(); !ok {
+		v := resources.DefaultVisual
+		_c.mutation.SetVisual(v)
 	}
-	if _, ok := _c.mutation.Path(); !ok {
-		v := resources.DefaultPath
-		_c.mutation.SetPath(v)
-	}
-	if _, ok := _c.mutation.Icon(); !ok {
-		v := resources.DefaultIcon
-		_c.mutation.SetIcon(v)
-	}
-	if _, ok := _c.mutation.Component(); !ok {
-		v := resources.DefaultComponent
-		_c.mutation.SetComponent(v)
+	if _, ok := _c.mutation.Manifest(); !ok {
+		v := resources.DefaultManifest
+		_c.mutation.SetManifest(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := resources.DefaultDescription
@@ -391,38 +373,30 @@ func (_c *ResourcesCreate) check() error {
 	if _, ok := _c.mutation.ResourceStatus(); !ok {
 		return &ValidationError{Name: "resource_status", err: errors.New(`lion: missing required field "Resources.resource_status"`)}
 	}
+	if _, ok := _c.mutation.Visibility(); !ok {
+		return &ValidationError{Name: "visibility", err: errors.New(`lion: missing required field "Resources.visibility"`)}
+	}
 	if _, ok := _c.mutation.SortOrder(); !ok {
 		return &ValidationError{Name: "sort_order", err: errors.New(`lion: missing required field "Resources.sort_order"`)}
 	}
-	if _, ok := _c.mutation.Hidden(); !ok {
-		return &ValidationError{Name: "hidden", err: errors.New(`lion: missing required field "Resources.hidden"`)}
+	if _, ok := _c.mutation.Locator(); !ok {
+		return &ValidationError{Name: "locator", err: errors.New(`lion: missing required field "Resources.locator"`)}
 	}
-	if _, ok := _c.mutation.HideChildren(); !ok {
-		return &ValidationError{Name: "hide_children", err: errors.New(`lion: missing required field "Resources.hide_children"`)}
-	}
-	if _, ok := _c.mutation.Path(); !ok {
-		return &ValidationError{Name: "path", err: errors.New(`lion: missing required field "Resources.path"`)}
-	}
-	if v, ok := _c.mutation.Path(); ok {
-		if err := resources.PathValidator(v); err != nil {
-			return &ValidationError{Name: "path", err: fmt.Errorf(`lion: validator failed for field "Resources.path": %w`, err)}
+	if v, ok := _c.mutation.Locator(); ok {
+		if err := resources.LocatorValidator(v); err != nil {
+			return &ValidationError{Name: "locator", err: fmt.Errorf(`lion: validator failed for field "Resources.locator": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Icon(); !ok {
-		return &ValidationError{Name: "icon", err: errors.New(`lion: missing required field "Resources.icon"`)}
+	if _, ok := _c.mutation.Visual(); !ok {
+		return &ValidationError{Name: "visual", err: errors.New(`lion: missing required field "Resources.visual"`)}
 	}
-	if v, ok := _c.mutation.Icon(); ok {
-		if err := resources.IconValidator(v); err != nil {
-			return &ValidationError{Name: "icon", err: fmt.Errorf(`lion: validator failed for field "Resources.icon": %w`, err)}
+	if v, ok := _c.mutation.Visual(); ok {
+		if err := resources.VisualValidator(v); err != nil {
+			return &ValidationError{Name: "visual", err: fmt.Errorf(`lion: validator failed for field "Resources.visual": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Component(); !ok {
-		return &ValidationError{Name: "component", err: errors.New(`lion: missing required field "Resources.component"`)}
-	}
-	if v, ok := _c.mutation.Component(); ok {
-		if err := resources.ComponentValidator(v); err != nil {
-			return &ValidationError{Name: "component", err: fmt.Errorf(`lion: validator failed for field "Resources.component": %w`, err)}
-		}
+	if _, ok := _c.mutation.Manifest(); !ok {
+		return &ValidationError{Name: "manifest", err: errors.New(`lion: missing required field "Resources.manifest"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Resources.description"`)}
@@ -474,7 +448,7 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 		_node.UpdatedBy = value
 	}
 	if value, ok := _c.mutation.ParentID(); ok {
-		_spec.SetField(resources.FieldParentID, field.TypeInt, value)
+		_spec.SetField(resources.FieldParentID, field.TypeInt64, value)
 		_node.ParentID = value
 	}
 	if value, ok := _c.mutation.Name(); ok {
@@ -493,29 +467,25 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 		_spec.SetField(resources.FieldResourceStatus, field.TypeInt, value)
 		_node.ResourceStatus = value
 	}
+	if value, ok := _c.mutation.Visibility(); ok {
+		_spec.SetField(resources.FieldVisibility, field.TypeInt, value)
+		_node.Visibility = value
+	}
 	if value, ok := _c.mutation.SortOrder(); ok {
 		_spec.SetField(resources.FieldSortOrder, field.TypeInt, value)
 		_node.SortOrder = value
 	}
-	if value, ok := _c.mutation.Hidden(); ok {
-		_spec.SetField(resources.FieldHidden, field.TypeBool, value)
-		_node.Hidden = value
+	if value, ok := _c.mutation.Locator(); ok {
+		_spec.SetField(resources.FieldLocator, field.TypeString, value)
+		_node.Locator = value
 	}
-	if value, ok := _c.mutation.HideChildren(); ok {
-		_spec.SetField(resources.FieldHideChildren, field.TypeBool, value)
-		_node.HideChildren = value
+	if value, ok := _c.mutation.Visual(); ok {
+		_spec.SetField(resources.FieldVisual, field.TypeString, value)
+		_node.Visual = value
 	}
-	if value, ok := _c.mutation.Path(); ok {
-		_spec.SetField(resources.FieldPath, field.TypeString, value)
-		_node.Path = value
-	}
-	if value, ok := _c.mutation.Icon(); ok {
-		_spec.SetField(resources.FieldIcon, field.TypeString, value)
-		_node.Icon = value
-	}
-	if value, ok := _c.mutation.Component(); ok {
-		_spec.SetField(resources.FieldComponent, field.TypeString, value)
-		_node.Component = value
+	if value, ok := _c.mutation.Manifest(); ok {
+		_spec.SetField(resources.FieldManifest, field.TypeString, value)
+		_node.Manifest = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)

@@ -34,18 +34,16 @@ const (
 	FieldResourceType = "resource_type"
 	// FieldResourceStatus holds the string denoting the resource_status field in the database.
 	FieldResourceStatus = "resource_status"
+	// FieldVisibility holds the string denoting the visibility field in the database.
+	FieldVisibility = "visibility"
 	// FieldSortOrder holds the string denoting the sort_order field in the database.
 	FieldSortOrder = "sort_order"
-	// FieldHidden holds the string denoting the hidden field in the database.
-	FieldHidden = "hidden"
-	// FieldHideChildren holds the string denoting the hide_children field in the database.
-	FieldHideChildren = "hide_children"
-	// FieldPath holds the string denoting the path field in the database.
-	FieldPath = "path"
-	// FieldIcon holds the string denoting the icon field in the database.
-	FieldIcon = "icon"
-	// FieldComponent holds the string denoting the component field in the database.
-	FieldComponent = "component"
+	// FieldLocator holds the string denoting the locator field in the database.
+	FieldLocator = "locator"
+	// FieldVisual holds the string denoting the visual field in the database.
+	FieldVisual = "visual"
+	// FieldManifest holds the string denoting the manifest field in the database.
+	FieldManifest = "manifest"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// EdgeLionResourceScopes holds the string denoting the lion_resource_scopes edge name in mutations.
@@ -74,12 +72,11 @@ var Columns = []string{
 	FieldDisplayName,
 	FieldResourceType,
 	FieldResourceStatus,
+	FieldVisibility,
 	FieldSortOrder,
-	FieldHidden,
-	FieldHideChildren,
-	FieldPath,
-	FieldIcon,
-	FieldComponent,
+	FieldLocator,
+	FieldVisual,
+	FieldManifest,
 	FieldDescription,
 }
 
@@ -105,7 +102,7 @@ var (
 	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
 	DefaultUpdatedBy int64
 	// DefaultParentID holds the default value on creation for the "parent_id" field.
-	DefaultParentID int
+	DefaultParentID int64
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 	// DefaultDisplayName holds the default value on creation for the "display_name" field.
@@ -114,24 +111,20 @@ var (
 	DefaultResourceType int
 	// DefaultResourceStatus holds the default value on creation for the "resource_status" field.
 	DefaultResourceStatus int
+	// DefaultVisibility holds the default value on creation for the "visibility" field.
+	DefaultVisibility int
 	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
 	DefaultSortOrder int
-	// DefaultHidden holds the default value on creation for the "hidden" field.
-	DefaultHidden bool
-	// DefaultHideChildren holds the default value on creation for the "hide_children" field.
-	DefaultHideChildren bool
-	// DefaultPath holds the default value on creation for the "path" field.
-	DefaultPath string
-	// PathValidator is a validator for the "path" field. It is called by the builders before save.
-	PathValidator func(string) error
-	// DefaultIcon holds the default value on creation for the "icon" field.
-	DefaultIcon string
-	// IconValidator is a validator for the "icon" field. It is called by the builders before save.
-	IconValidator func(string) error
-	// DefaultComponent holds the default value on creation for the "component" field.
-	DefaultComponent string
-	// ComponentValidator is a validator for the "component" field. It is called by the builders before save.
-	ComponentValidator func(string) error
+	// DefaultLocator holds the default value on creation for the "locator" field.
+	DefaultLocator string
+	// LocatorValidator is a validator for the "locator" field. It is called by the builders before save.
+	LocatorValidator func(string) error
+	// DefaultVisual holds the default value on creation for the "visual" field.
+	DefaultVisual string
+	// VisualValidator is a validator for the "visual" field. It is called by the builders before save.
+	VisualValidator func(string) error
+	// DefaultManifest holds the default value on creation for the "manifest" field.
+	DefaultManifest string
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -194,34 +187,29 @@ func ByResourceStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResourceStatus, opts...).ToFunc()
 }
 
+// ByVisibility orders the results by the visibility field.
+func ByVisibility(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVisibility, opts...).ToFunc()
+}
+
 // BySortOrder orders the results by the sort_order field.
 func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
 }
 
-// ByHidden orders the results by the hidden field.
-func ByHidden(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHidden, opts...).ToFunc()
+// ByLocator orders the results by the locator field.
+func ByLocator(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLocator, opts...).ToFunc()
 }
 
-// ByHideChildren orders the results by the hide_children field.
-func ByHideChildren(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHideChildren, opts...).ToFunc()
+// ByVisual orders the results by the visual field.
+func ByVisual(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVisual, opts...).ToFunc()
 }
 
-// ByPath orders the results by the path field.
-func ByPath(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPath, opts...).ToFunc()
-}
-
-// ByIcon orders the results by the icon field.
-func ByIcon(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIcon, opts...).ToFunc()
-}
-
-// ByComponent orders the results by the component field.
-func ByComponent(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldComponent, opts...).ToFunc()
+// ByManifest orders the results by the manifest field.
+func ByManifest(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldManifest, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

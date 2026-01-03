@@ -277,17 +277,16 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "parent_id", Type: field.TypeInt, Default: 0},
+		{Name: "parent_id", Type: field.TypeInt64, Default: 0},
 		{Name: "name", Type: field.TypeString, Size: 128},
 		{Name: "display_name", Type: field.TypeString, Default: ""},
 		{Name: "resource_type", Type: field.TypeInt, Default: 0},
 		{Name: "resource_status", Type: field.TypeInt, Default: 0},
+		{Name: "visibility", Type: field.TypeInt, Default: 0},
 		{Name: "sort_order", Type: field.TypeInt, Default: 100},
-		{Name: "hidden", Type: field.TypeBool, Default: false},
-		{Name: "hide_children", Type: field.TypeBool, Default: false},
-		{Name: "path", Type: field.TypeString, Size: 512, Default: ""},
-		{Name: "icon", Type: field.TypeString, Size: 256, Default: ""},
-		{Name: "component", Type: field.TypeString, Size: 256, Default: ""},
+		{Name: "locator", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "visual", Type: field.TypeString, Size: 256, Default: ""},
+		{Name: "manifest", Type: field.TypeString, Default: ""},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}
 	// LionResourcesTable holds the schema information for the "lion_resources" table.
@@ -304,7 +303,7 @@ var (
 			{
 				Name:    "resources_sort_order",
 				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[11]},
+				Columns: []*schema.Column{LionResourcesColumns[12]},
 			},
 		},
 	}

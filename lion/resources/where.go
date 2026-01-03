@@ -81,7 +81,7 @@ func UpdatedBy(v int64) predicate.Resources {
 }
 
 // ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
-func ParentID(v int) predicate.Resources {
+func ParentID(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldParentID, v))
 }
 
@@ -105,34 +105,29 @@ func ResourceStatus(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldResourceStatus, v))
 }
 
+// Visibility applies equality check predicate on the "visibility" field. It's identical to VisibilityEQ.
+func Visibility(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldVisibility, v))
+}
+
 // SortOrder applies equality check predicate on the "sort_order" field. It's identical to SortOrderEQ.
 func SortOrder(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldSortOrder, v))
 }
 
-// Hidden applies equality check predicate on the "hidden" field. It's identical to HiddenEQ.
-func Hidden(v bool) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldHidden, v))
+// Locator applies equality check predicate on the "locator" field. It's identical to LocatorEQ.
+func Locator(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldLocator, v))
 }
 
-// HideChildren applies equality check predicate on the "hide_children" field. It's identical to HideChildrenEQ.
-func HideChildren(v bool) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldHideChildren, v))
+// Visual applies equality check predicate on the "visual" field. It's identical to VisualEQ.
+func Visual(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldVisual, v))
 }
 
-// Path applies equality check predicate on the "path" field. It's identical to PathEQ.
-func Path(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldPath, v))
-}
-
-// Icon applies equality check predicate on the "icon" field. It's identical to IconEQ.
-func Icon(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldIcon, v))
-}
-
-// Component applies equality check predicate on the "component" field. It's identical to ComponentEQ.
-func Component(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldComponent, v))
+// Manifest applies equality check predicate on the "manifest" field. It's identical to ManifestEQ.
+func Manifest(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldManifest, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
@@ -371,42 +366,42 @@ func UpdatedByNotNil() predicate.Resources {
 }
 
 // ParentIDEQ applies the EQ predicate on the "parent_id" field.
-func ParentIDEQ(v int) predicate.Resources {
+func ParentIDEQ(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldParentID, v))
 }
 
 // ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
-func ParentIDNEQ(v int) predicate.Resources {
+func ParentIDNEQ(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldNEQ(FieldParentID, v))
 }
 
 // ParentIDIn applies the In predicate on the "parent_id" field.
-func ParentIDIn(vs ...int) predicate.Resources {
+func ParentIDIn(vs ...int64) predicate.Resources {
 	return predicate.Resources(sql.FieldIn(FieldParentID, vs...))
 }
 
 // ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
-func ParentIDNotIn(vs ...int) predicate.Resources {
+func ParentIDNotIn(vs ...int64) predicate.Resources {
 	return predicate.Resources(sql.FieldNotIn(FieldParentID, vs...))
 }
 
 // ParentIDGT applies the GT predicate on the "parent_id" field.
-func ParentIDGT(v int) predicate.Resources {
+func ParentIDGT(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldGT(FieldParentID, v))
 }
 
 // ParentIDGTE applies the GTE predicate on the "parent_id" field.
-func ParentIDGTE(v int) predicate.Resources {
+func ParentIDGTE(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldGTE(FieldParentID, v))
 }
 
 // ParentIDLT applies the LT predicate on the "parent_id" field.
-func ParentIDLT(v int) predicate.Resources {
+func ParentIDLT(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldLT(FieldParentID, v))
 }
 
 // ParentIDLTE applies the LTE predicate on the "parent_id" field.
-func ParentIDLTE(v int) predicate.Resources {
+func ParentIDLTE(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldLTE(FieldParentID, v))
 }
 
@@ -620,6 +615,46 @@ func ResourceStatusLTE(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldLTE(FieldResourceStatus, v))
 }
 
+// VisibilityEQ applies the EQ predicate on the "visibility" field.
+func VisibilityEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldVisibility, v))
+}
+
+// VisibilityNEQ applies the NEQ predicate on the "visibility" field.
+func VisibilityNEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldVisibility, v))
+}
+
+// VisibilityIn applies the In predicate on the "visibility" field.
+func VisibilityIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldVisibility, vs...))
+}
+
+// VisibilityNotIn applies the NotIn predicate on the "visibility" field.
+func VisibilityNotIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldVisibility, vs...))
+}
+
+// VisibilityGT applies the GT predicate on the "visibility" field.
+func VisibilityGT(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldVisibility, v))
+}
+
+// VisibilityGTE applies the GTE predicate on the "visibility" field.
+func VisibilityGTE(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldVisibility, v))
+}
+
+// VisibilityLT applies the LT predicate on the "visibility" field.
+func VisibilityLT(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldVisibility, v))
+}
+
+// VisibilityLTE applies the LTE predicate on the "visibility" field.
+func VisibilityLTE(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldVisibility, v))
+}
+
 // SortOrderEQ applies the EQ predicate on the "sort_order" field.
 func SortOrderEQ(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldSortOrder, v))
@@ -660,219 +695,199 @@ func SortOrderLTE(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldLTE(FieldSortOrder, v))
 }
 
-// HiddenEQ applies the EQ predicate on the "hidden" field.
-func HiddenEQ(v bool) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldHidden, v))
+// LocatorEQ applies the EQ predicate on the "locator" field.
+func LocatorEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldLocator, v))
 }
 
-// HiddenNEQ applies the NEQ predicate on the "hidden" field.
-func HiddenNEQ(v bool) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldHidden, v))
+// LocatorNEQ applies the NEQ predicate on the "locator" field.
+func LocatorNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldLocator, v))
 }
 
-// HideChildrenEQ applies the EQ predicate on the "hide_children" field.
-func HideChildrenEQ(v bool) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldHideChildren, v))
+// LocatorIn applies the In predicate on the "locator" field.
+func LocatorIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldLocator, vs...))
 }
 
-// HideChildrenNEQ applies the NEQ predicate on the "hide_children" field.
-func HideChildrenNEQ(v bool) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldHideChildren, v))
+// LocatorNotIn applies the NotIn predicate on the "locator" field.
+func LocatorNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldLocator, vs...))
 }
 
-// PathEQ applies the EQ predicate on the "path" field.
-func PathEQ(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldPath, v))
+// LocatorGT applies the GT predicate on the "locator" field.
+func LocatorGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldLocator, v))
 }
 
-// PathNEQ applies the NEQ predicate on the "path" field.
-func PathNEQ(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldPath, v))
+// LocatorGTE applies the GTE predicate on the "locator" field.
+func LocatorGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldLocator, v))
 }
 
-// PathIn applies the In predicate on the "path" field.
-func PathIn(vs ...string) predicate.Resources {
-	return predicate.Resources(sql.FieldIn(FieldPath, vs...))
+// LocatorLT applies the LT predicate on the "locator" field.
+func LocatorLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldLocator, v))
 }
 
-// PathNotIn applies the NotIn predicate on the "path" field.
-func PathNotIn(vs ...string) predicate.Resources {
-	return predicate.Resources(sql.FieldNotIn(FieldPath, vs...))
+// LocatorLTE applies the LTE predicate on the "locator" field.
+func LocatorLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldLocator, v))
 }
 
-// PathGT applies the GT predicate on the "path" field.
-func PathGT(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldGT(FieldPath, v))
+// LocatorContains applies the Contains predicate on the "locator" field.
+func LocatorContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldLocator, v))
 }
 
-// PathGTE applies the GTE predicate on the "path" field.
-func PathGTE(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldGTE(FieldPath, v))
+// LocatorHasPrefix applies the HasPrefix predicate on the "locator" field.
+func LocatorHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldLocator, v))
 }
 
-// PathLT applies the LT predicate on the "path" field.
-func PathLT(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldLT(FieldPath, v))
+// LocatorHasSuffix applies the HasSuffix predicate on the "locator" field.
+func LocatorHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldLocator, v))
 }
 
-// PathLTE applies the LTE predicate on the "path" field.
-func PathLTE(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldLTE(FieldPath, v))
+// LocatorEqualFold applies the EqualFold predicate on the "locator" field.
+func LocatorEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldLocator, v))
 }
 
-// PathContains applies the Contains predicate on the "path" field.
-func PathContains(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldContains(FieldPath, v))
+// LocatorContainsFold applies the ContainsFold predicate on the "locator" field.
+func LocatorContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldLocator, v))
 }
 
-// PathHasPrefix applies the HasPrefix predicate on the "path" field.
-func PathHasPrefix(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldHasPrefix(FieldPath, v))
+// VisualEQ applies the EQ predicate on the "visual" field.
+func VisualEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldVisual, v))
 }
 
-// PathHasSuffix applies the HasSuffix predicate on the "path" field.
-func PathHasSuffix(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldHasSuffix(FieldPath, v))
+// VisualNEQ applies the NEQ predicate on the "visual" field.
+func VisualNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldVisual, v))
 }
 
-// PathEqualFold applies the EqualFold predicate on the "path" field.
-func PathEqualFold(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEqualFold(FieldPath, v))
+// VisualIn applies the In predicate on the "visual" field.
+func VisualIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldVisual, vs...))
 }
 
-// PathContainsFold applies the ContainsFold predicate on the "path" field.
-func PathContainsFold(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldContainsFold(FieldPath, v))
+// VisualNotIn applies the NotIn predicate on the "visual" field.
+func VisualNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldVisual, vs...))
 }
 
-// IconEQ applies the EQ predicate on the "icon" field.
-func IconEQ(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldIcon, v))
+// VisualGT applies the GT predicate on the "visual" field.
+func VisualGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldVisual, v))
 }
 
-// IconNEQ applies the NEQ predicate on the "icon" field.
-func IconNEQ(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldIcon, v))
+// VisualGTE applies the GTE predicate on the "visual" field.
+func VisualGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldVisual, v))
 }
 
-// IconIn applies the In predicate on the "icon" field.
-func IconIn(vs ...string) predicate.Resources {
-	return predicate.Resources(sql.FieldIn(FieldIcon, vs...))
+// VisualLT applies the LT predicate on the "visual" field.
+func VisualLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldVisual, v))
 }
 
-// IconNotIn applies the NotIn predicate on the "icon" field.
-func IconNotIn(vs ...string) predicate.Resources {
-	return predicate.Resources(sql.FieldNotIn(FieldIcon, vs...))
+// VisualLTE applies the LTE predicate on the "visual" field.
+func VisualLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldVisual, v))
 }
 
-// IconGT applies the GT predicate on the "icon" field.
-func IconGT(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldGT(FieldIcon, v))
+// VisualContains applies the Contains predicate on the "visual" field.
+func VisualContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldVisual, v))
 }
 
-// IconGTE applies the GTE predicate on the "icon" field.
-func IconGTE(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldGTE(FieldIcon, v))
+// VisualHasPrefix applies the HasPrefix predicate on the "visual" field.
+func VisualHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldVisual, v))
 }
 
-// IconLT applies the LT predicate on the "icon" field.
-func IconLT(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldLT(FieldIcon, v))
+// VisualHasSuffix applies the HasSuffix predicate on the "visual" field.
+func VisualHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldVisual, v))
 }
 
-// IconLTE applies the LTE predicate on the "icon" field.
-func IconLTE(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldLTE(FieldIcon, v))
+// VisualEqualFold applies the EqualFold predicate on the "visual" field.
+func VisualEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldVisual, v))
 }
 
-// IconContains applies the Contains predicate on the "icon" field.
-func IconContains(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldContains(FieldIcon, v))
+// VisualContainsFold applies the ContainsFold predicate on the "visual" field.
+func VisualContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldVisual, v))
 }
 
-// IconHasPrefix applies the HasPrefix predicate on the "icon" field.
-func IconHasPrefix(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldHasPrefix(FieldIcon, v))
+// ManifestEQ applies the EQ predicate on the "manifest" field.
+func ManifestEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldManifest, v))
 }
 
-// IconHasSuffix applies the HasSuffix predicate on the "icon" field.
-func IconHasSuffix(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldHasSuffix(FieldIcon, v))
+// ManifestNEQ applies the NEQ predicate on the "manifest" field.
+func ManifestNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldManifest, v))
 }
 
-// IconEqualFold applies the EqualFold predicate on the "icon" field.
-func IconEqualFold(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEqualFold(FieldIcon, v))
+// ManifestIn applies the In predicate on the "manifest" field.
+func ManifestIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldManifest, vs...))
 }
 
-// IconContainsFold applies the ContainsFold predicate on the "icon" field.
-func IconContainsFold(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldContainsFold(FieldIcon, v))
+// ManifestNotIn applies the NotIn predicate on the "manifest" field.
+func ManifestNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldManifest, vs...))
 }
 
-// ComponentEQ applies the EQ predicate on the "component" field.
-func ComponentEQ(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldComponent, v))
+// ManifestGT applies the GT predicate on the "manifest" field.
+func ManifestGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldManifest, v))
 }
 
-// ComponentNEQ applies the NEQ predicate on the "component" field.
-func ComponentNEQ(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldComponent, v))
+// ManifestGTE applies the GTE predicate on the "manifest" field.
+func ManifestGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldManifest, v))
 }
 
-// ComponentIn applies the In predicate on the "component" field.
-func ComponentIn(vs ...string) predicate.Resources {
-	return predicate.Resources(sql.FieldIn(FieldComponent, vs...))
+// ManifestLT applies the LT predicate on the "manifest" field.
+func ManifestLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldManifest, v))
 }
 
-// ComponentNotIn applies the NotIn predicate on the "component" field.
-func ComponentNotIn(vs ...string) predicate.Resources {
-	return predicate.Resources(sql.FieldNotIn(FieldComponent, vs...))
+// ManifestLTE applies the LTE predicate on the "manifest" field.
+func ManifestLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldManifest, v))
 }
 
-// ComponentGT applies the GT predicate on the "component" field.
-func ComponentGT(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldGT(FieldComponent, v))
+// ManifestContains applies the Contains predicate on the "manifest" field.
+func ManifestContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldManifest, v))
 }
 
-// ComponentGTE applies the GTE predicate on the "component" field.
-func ComponentGTE(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldGTE(FieldComponent, v))
+// ManifestHasPrefix applies the HasPrefix predicate on the "manifest" field.
+func ManifestHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldManifest, v))
 }
 
-// ComponentLT applies the LT predicate on the "component" field.
-func ComponentLT(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldLT(FieldComponent, v))
+// ManifestHasSuffix applies the HasSuffix predicate on the "manifest" field.
+func ManifestHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldManifest, v))
 }
 
-// ComponentLTE applies the LTE predicate on the "component" field.
-func ComponentLTE(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldLTE(FieldComponent, v))
+// ManifestEqualFold applies the EqualFold predicate on the "manifest" field.
+func ManifestEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldManifest, v))
 }
 
-// ComponentContains applies the Contains predicate on the "component" field.
-func ComponentContains(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldContains(FieldComponent, v))
-}
-
-// ComponentHasPrefix applies the HasPrefix predicate on the "component" field.
-func ComponentHasPrefix(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldHasPrefix(FieldComponent, v))
-}
-
-// ComponentHasSuffix applies the HasSuffix predicate on the "component" field.
-func ComponentHasSuffix(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldHasSuffix(FieldComponent, v))
-}
-
-// ComponentEqualFold applies the EqualFold predicate on the "component" field.
-func ComponentEqualFold(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEqualFold(FieldComponent, v))
-}
-
-// ComponentContainsFold applies the ContainsFold predicate on the "component" field.
-func ComponentContainsFold(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldContainsFold(FieldComponent, v))
+// ManifestContainsFold applies the ContainsFold predicate on the "manifest" field.
+func ManifestContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldManifest, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.

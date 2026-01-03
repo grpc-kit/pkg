@@ -493,7 +493,7 @@ func init() {
 	// resourcesDescParentID is the schema descriptor for parent_id field.
 	resourcesDescParentID := resourcesFields[0].Descriptor()
 	// resources.DefaultParentID holds the default value on creation for the parent_id field.
-	resources.DefaultParentID = resourcesDescParentID.Default.(int)
+	resources.DefaultParentID = resourcesDescParentID.Default.(int64)
 	// resourcesDescName is the schema descriptor for name field.
 	resourcesDescName := resourcesFields[1].Descriptor()
 	// resources.NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -524,38 +524,32 @@ func init() {
 	resourcesDescResourceStatus := resourcesFields[4].Descriptor()
 	// resources.DefaultResourceStatus holds the default value on creation for the resource_status field.
 	resources.DefaultResourceStatus = resourcesDescResourceStatus.Default.(int)
+	// resourcesDescVisibility is the schema descriptor for visibility field.
+	resourcesDescVisibility := resourcesFields[5].Descriptor()
+	// resources.DefaultVisibility holds the default value on creation for the visibility field.
+	resources.DefaultVisibility = resourcesDescVisibility.Default.(int)
 	// resourcesDescSortOrder is the schema descriptor for sort_order field.
-	resourcesDescSortOrder := resourcesFields[5].Descriptor()
+	resourcesDescSortOrder := resourcesFields[6].Descriptor()
 	// resources.DefaultSortOrder holds the default value on creation for the sort_order field.
 	resources.DefaultSortOrder = resourcesDescSortOrder.Default.(int)
-	// resourcesDescHidden is the schema descriptor for hidden field.
-	resourcesDescHidden := resourcesFields[6].Descriptor()
-	// resources.DefaultHidden holds the default value on creation for the hidden field.
-	resources.DefaultHidden = resourcesDescHidden.Default.(bool)
-	// resourcesDescHideChildren is the schema descriptor for hide_children field.
-	resourcesDescHideChildren := resourcesFields[7].Descriptor()
-	// resources.DefaultHideChildren holds the default value on creation for the hide_children field.
-	resources.DefaultHideChildren = resourcesDescHideChildren.Default.(bool)
-	// resourcesDescPath is the schema descriptor for path field.
-	resourcesDescPath := resourcesFields[8].Descriptor()
-	// resources.DefaultPath holds the default value on creation for the path field.
-	resources.DefaultPath = resourcesDescPath.Default.(string)
-	// resources.PathValidator is a validator for the "path" field. It is called by the builders before save.
-	resources.PathValidator = resourcesDescPath.Validators[0].(func(string) error)
-	// resourcesDescIcon is the schema descriptor for icon field.
-	resourcesDescIcon := resourcesFields[9].Descriptor()
-	// resources.DefaultIcon holds the default value on creation for the icon field.
-	resources.DefaultIcon = resourcesDescIcon.Default.(string)
-	// resources.IconValidator is a validator for the "icon" field. It is called by the builders before save.
-	resources.IconValidator = resourcesDescIcon.Validators[0].(func(string) error)
-	// resourcesDescComponent is the schema descriptor for component field.
-	resourcesDescComponent := resourcesFields[10].Descriptor()
-	// resources.DefaultComponent holds the default value on creation for the component field.
-	resources.DefaultComponent = resourcesDescComponent.Default.(string)
-	// resources.ComponentValidator is a validator for the "component" field. It is called by the builders before save.
-	resources.ComponentValidator = resourcesDescComponent.Validators[0].(func(string) error)
+	// resourcesDescLocator is the schema descriptor for locator field.
+	resourcesDescLocator := resourcesFields[7].Descriptor()
+	// resources.DefaultLocator holds the default value on creation for the locator field.
+	resources.DefaultLocator = resourcesDescLocator.Default.(string)
+	// resources.LocatorValidator is a validator for the "locator" field. It is called by the builders before save.
+	resources.LocatorValidator = resourcesDescLocator.Validators[0].(func(string) error)
+	// resourcesDescVisual is the schema descriptor for visual field.
+	resourcesDescVisual := resourcesFields[8].Descriptor()
+	// resources.DefaultVisual holds the default value on creation for the visual field.
+	resources.DefaultVisual = resourcesDescVisual.Default.(string)
+	// resources.VisualValidator is a validator for the "visual" field. It is called by the builders before save.
+	resources.VisualValidator = resourcesDescVisual.Validators[0].(func(string) error)
+	// resourcesDescManifest is the schema descriptor for manifest field.
+	resourcesDescManifest := resourcesFields[9].Descriptor()
+	// resources.DefaultManifest holds the default value on creation for the manifest field.
+	resources.DefaultManifest = resourcesDescManifest.Default.(string)
 	// resourcesDescDescription is the schema descriptor for description field.
-	resourcesDescDescription := resourcesFields[11].Descriptor()
+	resourcesDescDescription := resourcesFields[10].Descriptor()
 	// resources.DefaultDescription holds the default value on creation for the description field.
 	resources.DefaultDescription = resourcesDescDescription.Default.(string)
 	roledepartmentsMixin := schema.RoleDepartments{}.Mixin()

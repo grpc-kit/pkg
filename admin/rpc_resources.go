@@ -123,29 +123,32 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	switch req.Structure.String() {
 	case adminv1.Structure_TREE.String():
 		// 构建树状菜单
-		menuMap := make(map[int32]*adminv1.Resource)
+		menuMap := make(map[int64]*adminv1.Resource)
 		var roots []*adminv1.Resource
 
 		for _, m := range resList {
 			menu := &adminv1.Resource{
-				Id:          int32(m.ID),
-				ParentId:    int32(m.ParentID),
+				Id:          int64(m.ID),
+				ParentId:    m.ParentID,
 				Name:        m.Name,
-				DisplayName: I18NName(m.Name),
+				DisplayName: m.DisplayName,
 				SortOrder:   int32(m.SortOrder),
 				Type:        adminv1.Resource_Type(m.ResourceType),
 				// Scope:        adminv1.Resource_Scope(m.ResourceScope),
-				Status:       adminv1.Resource_Status(m.ResourceStatus),
-				Hidden:       m.Hidden,
-				HideChildren: m.HideChildren,
-				Path:         m.Path,
-				Icon:         m.Icon,
-				Component:    m.Component,
-				CreatedAt:    timestamppb.New(m.CreatedAt),
-				UpdatedAt:    timestamppb.New(m.UpdatedAt),
+				Status:     adminv1.Resource_Status(m.ResourceStatus),
+				Visibility: adminv1.Resource_Visibility(m.Visibility),
+				/*
+					Hidden:       m.Hidden,
+					HideChildren: m.HideChildren,
+				*/
+				Locator:   m.Locator,
+				Visual:    m.Visual,
+				Manifest:  m.Manifest,
+				CreatedAt: timestamppb.New(m.CreatedAt),
+				UpdatedAt: timestamppb.New(m.UpdatedAt),
 			}
 
-			menuMap[int32(m.ID)] = menu
+			menuMap[int64(m.ID)] = menu
 		}
 
 		for _, menu := range menuMap {
@@ -168,21 +171,24 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	default:
 		for _, m := range resList {
 			result.Resources = append(result.Resources, &adminv1.Resource{
-				Id:          int32(m.ID),
-				ParentId:    int32(m.ParentID),
+				Id:          int64(m.ID),
+				ParentId:    m.ParentID,
 				Name:        m.Name,
-				DisplayName: I18NName(m.Name),
+				DisplayName: m.DisplayName,
 				SortOrder:   int32(m.SortOrder),
 				Type:        adminv1.Resource_Type(m.ResourceType),
 				// Scope:        adminv1.Resource_Scope(m.ResourceScope),
-				Status:       adminv1.Resource_Status(m.ResourceStatus),
-				Hidden:       m.Hidden,
-				HideChildren: m.HideChildren,
-				Path:         m.Path,
-				Icon:         m.Icon,
-				Component:    m.Component,
-				CreatedAt:    timestamppb.New(m.CreatedAt),
-				UpdatedAt:    timestamppb.New(m.UpdatedAt),
+				Status:     adminv1.Resource_Status(m.ResourceStatus),
+				Visibility: adminv1.Resource_Visibility(m.Visibility),
+				/*
+					Hidden:       m.Hidden,
+					HideChildren: m.HideChildren,
+				*/
+				Locator:   m.Locator,
+				Visual:    m.Visual,
+				Manifest:  m.Manifest,
+				CreatedAt: timestamppb.New(m.CreatedAt),
+				UpdatedAt: timestamppb.New(m.UpdatedAt),
 			})
 		}
 	}
@@ -204,10 +210,10 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		SetName(req.Resource.Name).
 		SetResourceType(int(req.Resource.Type)).
 		// SetResourceScope(int(req.Resource.Scope)).
-		SetParentID(int(req.Resource.ParentId)).
-		SetPath(req.Resource.Path).
-		SetComponent(req.Resource.Component).
-		SetIcon(req.Resource.Icon).
+		SetParentID(req.Resource.ParentId).
+		SetLocator(req.Resource.Locator).
+		SetManifest(req.Resource.Manifest).
+		SetVisual(req.Resource.Visual).
 		SetSortOrder(int(req.Resource.SortOrder)).
 		// SetEnabled(req.Resource.Enabled).
 		// SetHidden(req.Resource.Hidden).

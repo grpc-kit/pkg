@@ -11129,21 +11129,21 @@ type ResourcesMutation struct {
 	addcreated_by               *int64
 	updated_by                  *int64
 	addupdated_by               *int64
-	parent_id                   *int
-	addparent_id                *int
+	parent_id                   *int64
+	addparent_id                *int64
 	name                        *string
 	display_name                *string
 	resource_type               *int
 	addresource_type            *int
 	resource_status             *int
 	addresource_status          *int
+	visibility                  *int
+	addvisibility               *int
 	sort_order                  *int
 	addsort_order               *int
-	hidden                      *bool
-	hide_children               *bool
-	_path                       *string
-	icon                        *string
-	component                   *string
+	locator                     *string
+	visual                      *string
+	manifest                    *string
 	description                 *string
 	clearedFields               map[string]struct{}
 	lion_resource_scopes        map[int]struct{}
@@ -11514,13 +11514,13 @@ func (m *ResourcesMutation) ResetUpdatedBy() {
 }
 
 // SetParentID sets the "parent_id" field.
-func (m *ResourcesMutation) SetParentID(i int) {
+func (m *ResourcesMutation) SetParentID(i int64) {
 	m.parent_id = &i
 	m.addparent_id = nil
 }
 
 // ParentID returns the value of the "parent_id" field in the mutation.
-func (m *ResourcesMutation) ParentID() (r int, exists bool) {
+func (m *ResourcesMutation) ParentID() (r int64, exists bool) {
 	v := m.parent_id
 	if v == nil {
 		return
@@ -11531,7 +11531,7 @@ func (m *ResourcesMutation) ParentID() (r int, exists bool) {
 // OldParentID returns the old "parent_id" field's value of the Resources entity.
 // If the Resources object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldParentID(ctx context.Context) (v int, err error) {
+func (m *ResourcesMutation) OldParentID(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
 	}
@@ -11546,7 +11546,7 @@ func (m *ResourcesMutation) OldParentID(ctx context.Context) (v int, err error) 
 }
 
 // AddParentID adds i to the "parent_id" field.
-func (m *ResourcesMutation) AddParentID(i int) {
+func (m *ResourcesMutation) AddParentID(i int64) {
 	if m.addparent_id != nil {
 		*m.addparent_id += i
 	} else {
@@ -11555,7 +11555,7 @@ func (m *ResourcesMutation) AddParentID(i int) {
 }
 
 // AddedParentID returns the value that was added to the "parent_id" field in this mutation.
-func (m *ResourcesMutation) AddedParentID() (r int, exists bool) {
+func (m *ResourcesMutation) AddedParentID() (r int64, exists bool) {
 	v := m.addparent_id
 	if v == nil {
 		return
@@ -11753,6 +11753,62 @@ func (m *ResourcesMutation) ResetResourceStatus() {
 	m.addresource_status = nil
 }
 
+// SetVisibility sets the "visibility" field.
+func (m *ResourcesMutation) SetVisibility(i int) {
+	m.visibility = &i
+	m.addvisibility = nil
+}
+
+// Visibility returns the value of the "visibility" field in the mutation.
+func (m *ResourcesMutation) Visibility() (r int, exists bool) {
+	v := m.visibility
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisibility returns the old "visibility" field's value of the Resources entity.
+// If the Resources object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourcesMutation) OldVisibility(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisibility is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisibility requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisibility: %w", err)
+	}
+	return oldValue.Visibility, nil
+}
+
+// AddVisibility adds i to the "visibility" field.
+func (m *ResourcesMutation) AddVisibility(i int) {
+	if m.addvisibility != nil {
+		*m.addvisibility += i
+	} else {
+		m.addvisibility = &i
+	}
+}
+
+// AddedVisibility returns the value that was added to the "visibility" field in this mutation.
+func (m *ResourcesMutation) AddedVisibility() (r int, exists bool) {
+	v := m.addvisibility
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVisibility resets all changes to the "visibility" field.
+func (m *ResourcesMutation) ResetVisibility() {
+	m.visibility = nil
+	m.addvisibility = nil
+}
+
 // SetSortOrder sets the "sort_order" field.
 func (m *ResourcesMutation) SetSortOrder(i int) {
 	m.sort_order = &i
@@ -11809,184 +11865,112 @@ func (m *ResourcesMutation) ResetSortOrder() {
 	m.addsort_order = nil
 }
 
-// SetHidden sets the "hidden" field.
-func (m *ResourcesMutation) SetHidden(b bool) {
-	m.hidden = &b
+// SetLocator sets the "locator" field.
+func (m *ResourcesMutation) SetLocator(s string) {
+	m.locator = &s
 }
 
-// Hidden returns the value of the "hidden" field in the mutation.
-func (m *ResourcesMutation) Hidden() (r bool, exists bool) {
-	v := m.hidden
+// Locator returns the value of the "locator" field in the mutation.
+func (m *ResourcesMutation) Locator() (r string, exists bool) {
+	v := m.locator
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHidden returns the old "hidden" field's value of the Resources entity.
+// OldLocator returns the old "locator" field's value of the Resources entity.
 // If the Resources object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldHidden(ctx context.Context) (v bool, err error) {
+func (m *ResourcesMutation) OldLocator(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHidden is only allowed on UpdateOne operations")
+		return v, errors.New("OldLocator is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHidden requires an ID field in the mutation")
+		return v, errors.New("OldLocator requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHidden: %w", err)
+		return v, fmt.Errorf("querying old value for OldLocator: %w", err)
 	}
-	return oldValue.Hidden, nil
+	return oldValue.Locator, nil
 }
 
-// ResetHidden resets all changes to the "hidden" field.
-func (m *ResourcesMutation) ResetHidden() {
-	m.hidden = nil
+// ResetLocator resets all changes to the "locator" field.
+func (m *ResourcesMutation) ResetLocator() {
+	m.locator = nil
 }
 
-// SetHideChildren sets the "hide_children" field.
-func (m *ResourcesMutation) SetHideChildren(b bool) {
-	m.hide_children = &b
+// SetVisual sets the "visual" field.
+func (m *ResourcesMutation) SetVisual(s string) {
+	m.visual = &s
 }
 
-// HideChildren returns the value of the "hide_children" field in the mutation.
-func (m *ResourcesMutation) HideChildren() (r bool, exists bool) {
-	v := m.hide_children
+// Visual returns the value of the "visual" field in the mutation.
+func (m *ResourcesMutation) Visual() (r string, exists bool) {
+	v := m.visual
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHideChildren returns the old "hide_children" field's value of the Resources entity.
+// OldVisual returns the old "visual" field's value of the Resources entity.
 // If the Resources object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldHideChildren(ctx context.Context) (v bool, err error) {
+func (m *ResourcesMutation) OldVisual(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHideChildren is only allowed on UpdateOne operations")
+		return v, errors.New("OldVisual is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHideChildren requires an ID field in the mutation")
+		return v, errors.New("OldVisual requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHideChildren: %w", err)
+		return v, fmt.Errorf("querying old value for OldVisual: %w", err)
 	}
-	return oldValue.HideChildren, nil
+	return oldValue.Visual, nil
 }
 
-// ResetHideChildren resets all changes to the "hide_children" field.
-func (m *ResourcesMutation) ResetHideChildren() {
-	m.hide_children = nil
+// ResetVisual resets all changes to the "visual" field.
+func (m *ResourcesMutation) ResetVisual() {
+	m.visual = nil
 }
 
-// SetPath sets the "path" field.
-func (m *ResourcesMutation) SetPath(s string) {
-	m._path = &s
+// SetManifest sets the "manifest" field.
+func (m *ResourcesMutation) SetManifest(s string) {
+	m.manifest = &s
 }
 
-// Path returns the value of the "path" field in the mutation.
-func (m *ResourcesMutation) Path() (r string, exists bool) {
-	v := m._path
+// Manifest returns the value of the "manifest" field in the mutation.
+func (m *ResourcesMutation) Manifest() (r string, exists bool) {
+	v := m.manifest
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPath returns the old "path" field's value of the Resources entity.
+// OldManifest returns the old "manifest" field's value of the Resources entity.
 // If the Resources object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldPath(ctx context.Context) (v string, err error) {
+func (m *ResourcesMutation) OldManifest(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPath is only allowed on UpdateOne operations")
+		return v, errors.New("OldManifest is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPath requires an ID field in the mutation")
+		return v, errors.New("OldManifest requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPath: %w", err)
+		return v, fmt.Errorf("querying old value for OldManifest: %w", err)
 	}
-	return oldValue.Path, nil
+	return oldValue.Manifest, nil
 }
 
-// ResetPath resets all changes to the "path" field.
-func (m *ResourcesMutation) ResetPath() {
-	m._path = nil
-}
-
-// SetIcon sets the "icon" field.
-func (m *ResourcesMutation) SetIcon(s string) {
-	m.icon = &s
-}
-
-// Icon returns the value of the "icon" field in the mutation.
-func (m *ResourcesMutation) Icon() (r string, exists bool) {
-	v := m.icon
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIcon returns the old "icon" field's value of the Resources entity.
-// If the Resources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldIcon(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIcon is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIcon requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIcon: %w", err)
-	}
-	return oldValue.Icon, nil
-}
-
-// ResetIcon resets all changes to the "icon" field.
-func (m *ResourcesMutation) ResetIcon() {
-	m.icon = nil
-}
-
-// SetComponent sets the "component" field.
-func (m *ResourcesMutation) SetComponent(s string) {
-	m.component = &s
-}
-
-// Component returns the value of the "component" field in the mutation.
-func (m *ResourcesMutation) Component() (r string, exists bool) {
-	v := m.component
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldComponent returns the old "component" field's value of the Resources entity.
-// If the Resources object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldComponent(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldComponent is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldComponent requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldComponent: %w", err)
-	}
-	return oldValue.Component, nil
-}
-
-// ResetComponent resets all changes to the "component" field.
-func (m *ResourcesMutation) ResetComponent() {
-	m.component = nil
+// ResetManifest resets all changes to the "manifest" field.
+func (m *ResourcesMutation) ResetManifest() {
+	m.manifest = nil
 }
 
 // SetDescription sets the "description" field.
@@ -12113,7 +12097,7 @@ func (m *ResourcesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResourcesMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 16)
 	if m.created_at != nil {
 		fields = append(fields, resources.FieldCreatedAt)
 	}
@@ -12144,23 +12128,20 @@ func (m *ResourcesMutation) Fields() []string {
 	if m.resource_status != nil {
 		fields = append(fields, resources.FieldResourceStatus)
 	}
+	if m.visibility != nil {
+		fields = append(fields, resources.FieldVisibility)
+	}
 	if m.sort_order != nil {
 		fields = append(fields, resources.FieldSortOrder)
 	}
-	if m.hidden != nil {
-		fields = append(fields, resources.FieldHidden)
+	if m.locator != nil {
+		fields = append(fields, resources.FieldLocator)
 	}
-	if m.hide_children != nil {
-		fields = append(fields, resources.FieldHideChildren)
+	if m.visual != nil {
+		fields = append(fields, resources.FieldVisual)
 	}
-	if m._path != nil {
-		fields = append(fields, resources.FieldPath)
-	}
-	if m.icon != nil {
-		fields = append(fields, resources.FieldIcon)
-	}
-	if m.component != nil {
-		fields = append(fields, resources.FieldComponent)
+	if m.manifest != nil {
+		fields = append(fields, resources.FieldManifest)
 	}
 	if m.description != nil {
 		fields = append(fields, resources.FieldDescription)
@@ -12193,18 +12174,16 @@ func (m *ResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.ResourceType()
 	case resources.FieldResourceStatus:
 		return m.ResourceStatus()
+	case resources.FieldVisibility:
+		return m.Visibility()
 	case resources.FieldSortOrder:
 		return m.SortOrder()
-	case resources.FieldHidden:
-		return m.Hidden()
-	case resources.FieldHideChildren:
-		return m.HideChildren()
-	case resources.FieldPath:
-		return m.Path()
-	case resources.FieldIcon:
-		return m.Icon()
-	case resources.FieldComponent:
-		return m.Component()
+	case resources.FieldLocator:
+		return m.Locator()
+	case resources.FieldVisual:
+		return m.Visual()
+	case resources.FieldManifest:
+		return m.Manifest()
 	case resources.FieldDescription:
 		return m.Description()
 	}
@@ -12236,18 +12215,16 @@ func (m *ResourcesMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldResourceType(ctx)
 	case resources.FieldResourceStatus:
 		return m.OldResourceStatus(ctx)
+	case resources.FieldVisibility:
+		return m.OldVisibility(ctx)
 	case resources.FieldSortOrder:
 		return m.OldSortOrder(ctx)
-	case resources.FieldHidden:
-		return m.OldHidden(ctx)
-	case resources.FieldHideChildren:
-		return m.OldHideChildren(ctx)
-	case resources.FieldPath:
-		return m.OldPath(ctx)
-	case resources.FieldIcon:
-		return m.OldIcon(ctx)
-	case resources.FieldComponent:
-		return m.OldComponent(ctx)
+	case resources.FieldLocator:
+		return m.OldLocator(ctx)
+	case resources.FieldVisual:
+		return m.OldVisual(ctx)
+	case resources.FieldManifest:
+		return m.OldManifest(ctx)
 	case resources.FieldDescription:
 		return m.OldDescription(ctx)
 	}
@@ -12295,7 +12272,7 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 		m.SetUpdatedBy(v)
 		return nil
 	case resources.FieldParentID:
-		v, ok := value.(int)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -12329,6 +12306,13 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetResourceStatus(v)
 		return nil
+	case resources.FieldVisibility:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisibility(v)
+		return nil
 	case resources.FieldSortOrder:
 		v, ok := value.(int)
 		if !ok {
@@ -12336,40 +12320,26 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSortOrder(v)
 		return nil
-	case resources.FieldHidden:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHidden(v)
-		return nil
-	case resources.FieldHideChildren:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHideChildren(v)
-		return nil
-	case resources.FieldPath:
+	case resources.FieldLocator:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetPath(v)
+		m.SetLocator(v)
 		return nil
-	case resources.FieldIcon:
+	case resources.FieldVisual:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetIcon(v)
+		m.SetVisual(v)
 		return nil
-	case resources.FieldComponent:
+	case resources.FieldManifest:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetComponent(v)
+		m.SetManifest(v)
 		return nil
 	case resources.FieldDescription:
 		v, ok := value.(string)
@@ -12401,6 +12371,9 @@ func (m *ResourcesMutation) AddedFields() []string {
 	if m.addresource_status != nil {
 		fields = append(fields, resources.FieldResourceStatus)
 	}
+	if m.addvisibility != nil {
+		fields = append(fields, resources.FieldVisibility)
+	}
 	if m.addsort_order != nil {
 		fields = append(fields, resources.FieldSortOrder)
 	}
@@ -12422,6 +12395,8 @@ func (m *ResourcesMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedResourceType()
 	case resources.FieldResourceStatus:
 		return m.AddedResourceStatus()
+	case resources.FieldVisibility:
+		return m.AddedVisibility()
 	case resources.FieldSortOrder:
 		return m.AddedSortOrder()
 	}
@@ -12448,7 +12423,7 @@ func (m *ResourcesMutation) AddField(name string, value ent.Value) error {
 		m.AddUpdatedBy(v)
 		return nil
 	case resources.FieldParentID:
-		v, ok := value.(int)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -12467,6 +12442,13 @@ func (m *ResourcesMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddResourceStatus(v)
+		return nil
+	case resources.FieldVisibility:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVisibility(v)
 		return nil
 	case resources.FieldSortOrder:
 		v, ok := value.(int)
@@ -12553,23 +12535,20 @@ func (m *ResourcesMutation) ResetField(name string) error {
 	case resources.FieldResourceStatus:
 		m.ResetResourceStatus()
 		return nil
+	case resources.FieldVisibility:
+		m.ResetVisibility()
+		return nil
 	case resources.FieldSortOrder:
 		m.ResetSortOrder()
 		return nil
-	case resources.FieldHidden:
-		m.ResetHidden()
+	case resources.FieldLocator:
+		m.ResetLocator()
 		return nil
-	case resources.FieldHideChildren:
-		m.ResetHideChildren()
+	case resources.FieldVisual:
+		m.ResetVisual()
 		return nil
-	case resources.FieldPath:
-		m.ResetPath()
-		return nil
-	case resources.FieldIcon:
-		m.ResetIcon()
-		return nil
-	case resources.FieldComponent:
-		m.ResetComponent()
+	case resources.FieldManifest:
+		m.ResetManifest()
 		return nil
 	case resources.FieldDescription:
 		m.ResetDescription()
