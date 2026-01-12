@@ -59,7 +59,7 @@ func (a *KnownAdminAPI) getUserRoleID(ctx context.Context) ([]int, error) {
 			roles.FieldID,
 		).
 		Where(
-			roles.NameIn(gs...),
+			roles.CodeIn(gs...),
 		).
 		All(ctx)
 	if err != nil {

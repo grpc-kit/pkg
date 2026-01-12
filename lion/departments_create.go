@@ -107,9 +107,15 @@ func (_c *DepartmentsCreate) SetNillableParentID(v *int) *DepartmentsCreate {
 	return _c
 }
 
-// SetName sets the "name" field.
-func (_c *DepartmentsCreate) SetName(v string) *DepartmentsCreate {
-	_c.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_c *DepartmentsCreate) SetCode(v string) *DepartmentsCreate {
+	_c.mutation.SetCode(v)
+	return _c
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_c *DepartmentsCreate) SetDisplayName(v string) *DepartmentsCreate {
+	_c.mutation.SetDisplayName(v)
 	return _c
 }
 
@@ -382,12 +388,20 @@ func (_c *DepartmentsCreate) check() error {
 	if _, ok := _c.mutation.ParentID(); !ok {
 		return &ValidationError{Name: "parent_id", err: errors.New(`lion: missing required field "Departments.parent_id"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Departments.name"`)}
+	if _, ok := _c.mutation.Code(); !ok {
+		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "Departments.code"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := departments.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Departments.name": %w`, err)}
+	if v, ok := _c.mutation.Code(); ok {
+		if err := departments.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Departments.code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "Departments.display_name"`)}
+	}
+	if v, ok := _c.mutation.DisplayName(); ok {
+		if err := departments.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Departments.display_name": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.DepartmentType(); !ok {
@@ -455,9 +469,13 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 		_spec.SetField(departments.FieldParentID, field.TypeInt, value)
 		_node.ParentID = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(departments.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := _c.mutation.Code(); ok {
+		_spec.SetField(departments.FieldCode, field.TypeString, value)
+		_node.Code = value
+	}
+	if value, ok := _c.mutation.DisplayName(); ok {
+		_spec.SetField(departments.FieldDisplayName, field.TypeString, value)
+		_node.DisplayName = value
 	}
 	if value, ok := _c.mutation.DepartmentType(); ok {
 		_spec.SetField(departments.FieldDepartmentType, field.TypeInt, value)

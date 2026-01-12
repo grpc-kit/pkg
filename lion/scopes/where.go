@@ -70,9 +70,9 @@ func DeletedAt(v time.Time) predicate.Scopes {
 	return predicate.Scopes(sql.FieldEQ(FieldDeletedAt, v))
 }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldEQ(FieldName, v))
+// Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
+func Code(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldEQ(FieldCode, v))
 }
 
 // ScopeType applies equality check predicate on the "scope_type" field. It's identical to ScopeTypeEQ.
@@ -215,69 +215,69 @@ func DeletedAtNotNil() predicate.Scopes {
 	return predicate.Scopes(sql.FieldNotNull(FieldDeletedAt))
 }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldEQ(FieldName, v))
+// CodeEQ applies the EQ predicate on the "code" field.
+func CodeEQ(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldEQ(FieldCode, v))
 }
 
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldNEQ(FieldName, v))
+// CodeNEQ applies the NEQ predicate on the "code" field.
+func CodeNEQ(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldNEQ(FieldCode, v))
 }
 
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldIn(FieldName, vs...))
+// CodeIn applies the In predicate on the "code" field.
+func CodeIn(vs ...string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldIn(FieldCode, vs...))
 }
 
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldNotIn(FieldName, vs...))
+// CodeNotIn applies the NotIn predicate on the "code" field.
+func CodeNotIn(vs ...string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldNotIn(FieldCode, vs...))
 }
 
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldGT(FieldName, v))
+// CodeGT applies the GT predicate on the "code" field.
+func CodeGT(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldGT(FieldCode, v))
 }
 
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldGTE(FieldName, v))
+// CodeGTE applies the GTE predicate on the "code" field.
+func CodeGTE(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldGTE(FieldCode, v))
 }
 
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldLT(FieldName, v))
+// CodeLT applies the LT predicate on the "code" field.
+func CodeLT(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldLT(FieldCode, v))
 }
 
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldLTE(FieldName, v))
+// CodeLTE applies the LTE predicate on the "code" field.
+func CodeLTE(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldLTE(FieldCode, v))
 }
 
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldContains(FieldName, v))
+// CodeContains applies the Contains predicate on the "code" field.
+func CodeContains(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldContains(FieldCode, v))
 }
 
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldHasPrefix(FieldName, v))
+// CodeHasPrefix applies the HasPrefix predicate on the "code" field.
+func CodeHasPrefix(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldHasPrefix(FieldCode, v))
 }
 
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldHasSuffix(FieldName, v))
+// CodeHasSuffix applies the HasSuffix predicate on the "code" field.
+func CodeHasSuffix(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldHasSuffix(FieldCode, v))
 }
 
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldEqualFold(FieldName, v))
+// CodeEqualFold applies the EqualFold predicate on the "code" field.
+func CodeEqualFold(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldEqualFold(FieldCode, v))
 }
 
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Scopes {
-	return predicate.Scopes(sql.FieldContainsFold(FieldName, v))
+// CodeContainsFold applies the ContainsFold predicate on the "code" field.
+func CodeContainsFold(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldContainsFold(FieldCode, v))
 }
 
 // ScopeTypeEQ applies the EQ predicate on the "scope_type" field.

@@ -30,7 +30,7 @@ type Resources struct {
 	// 父资源 ID，为 0 表示顶级资源
 	ParentID int64 `json:"parent_id,omitempty"`
 	// 资源名称
-	Name string `json:"name,omitempty"`
+	Code string `json:"code,omitempty"`
 	// 友好展示名称
 	DisplayName string `json:"display_name,omitempty"`
 	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
@@ -80,7 +80,7 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldResourceType, resources.FieldResourceStatus, resources.FieldVisibility, resources.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case resources.FieldName, resources.FieldDisplayName, resources.FieldLocator, resources.FieldVisual, resources.FieldManifest, resources.FieldDescription:
+		case resources.FieldCode, resources.FieldDisplayName, resources.FieldLocator, resources.FieldVisual, resources.FieldManifest, resources.FieldDescription:
 			values[i] = new(sql.NullString)
 		case resources.FieldCreatedAt, resources.FieldUpdatedAt, resources.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -142,11 +142,11 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ParentID = value.Int64
 			}
-		case resources.FieldName:
+		case resources.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
-				_m.Name = value.String
+				_m.Code = value.String
 			}
 		case resources.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -263,8 +263,8 @@ func (_m *Resources) String() string {
 	builder.WriteString("parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
+	builder.WriteString("code=")
+	builder.WriteString(_m.Code)
 	builder.WriteString(", ")
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)

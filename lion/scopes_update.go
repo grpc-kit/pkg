@@ -55,16 +55,16 @@ func (_u *ScopesUpdate) ClearDeletedAt() *ScopesUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *ScopesUpdate) SetName(v string) *ScopesUpdate {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *ScopesUpdate) SetCode(v string) *ScopesUpdate {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *ScopesUpdate) SetNillableName(v *string) *ScopesUpdate {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *ScopesUpdate) SetNillableCode(v *string) *ScopesUpdate {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
 	}
 	return _u
 }
@@ -183,9 +183,9 @@ func (_u *ScopesUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ScopesUpdate) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := scopes.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Scopes.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := scopes.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Scopes.code": %w`, err)}
 		}
 	}
 	return nil
@@ -212,8 +212,8 @@ func (_u *ScopesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(scopes.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(scopes.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(scopes.FieldCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ScopeType(); ok {
 		_spec.SetField(scopes.FieldScopeType, field.TypeInt, value)
@@ -315,16 +315,16 @@ func (_u *ScopesUpdateOne) ClearDeletedAt() *ScopesUpdateOne {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *ScopesUpdateOne) SetName(v string) *ScopesUpdateOne {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *ScopesUpdateOne) SetCode(v string) *ScopesUpdateOne {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *ScopesUpdateOne) SetNillableName(v *string) *ScopesUpdateOne {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *ScopesUpdateOne) SetNillableCode(v *string) *ScopesUpdateOne {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
 	}
 	return _u
 }
@@ -456,9 +456,9 @@ func (_u *ScopesUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ScopesUpdateOne) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := scopes.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Scopes.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := scopes.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Scopes.code": %w`, err)}
 		}
 	}
 	return nil
@@ -502,8 +502,8 @@ func (_u *ScopesUpdateOne) sqlSave(ctx context.Context) (_node *Scopes, err erro
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(scopes.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(scopes.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(scopes.FieldCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ScopeType(); ok {
 		_spec.SetField(scopes.FieldScopeType, field.TypeInt, value)

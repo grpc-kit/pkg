@@ -22,7 +22,7 @@ func (Permissions) Fields() []ent.Field {
 		field.Int("policy_id").
 			Positive().
 			Comment("关联 lion_policies 表的资源 ID"),
-		field.String("name").
+		field.String("code").
 			MaxLen(256).
 			NotEmpty().
 			Comment("对我展示的权限名称，如：管理用户列表"),

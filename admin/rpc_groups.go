@@ -35,7 +35,7 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 	}
 
 	group, err := db.Groups.Create().
-		SetName(req.Group.Name).
+		SetCode(req.Group.Code).
 		SetGroupType(int(req.Group.Type.Number())).
 		SetGroupStatus(int(req.Group.Status.Number())).
 		// SetI18nName(req.Group.I18NName).
@@ -55,11 +55,11 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 
 	result = &adminv1.Group{
 		Id:     int32(group.ID),
-		Name:   group.Name,
+		Code:   group.Code,
 		Type:   adminv1.Group_Type(group.GroupType),
 		Status: adminv1.Group_Status(group.GroupStatus),
 		// I18NName:     group.I18nName,
-		DisplayName:  I18NName(group.Name),
+		DisplayName:  group.DisplayName,
 		SortOrder:    int32(group.SortOrder),
 		ParentId:     int32(group.ParentID),
 		MaxMembers:   int32(group.MaxMembers),
@@ -99,11 +99,11 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 	result.Groups = make([]*adminv1.Group, 0, len(groupList))
 	for _, group := range groupList {
 		result.Groups = append(result.Groups, &adminv1.Group{
-			Id:     int32(group.ID),
-			Name:   group.Name,
-			Type:   adminv1.Group_Type(group.GroupType),
-			Status: adminv1.Group_Status(group.GroupStatus),
-			// I18NName:     group.I18nName,
+			Id:           int32(group.ID),
+			Code:         group.Code,
+			Type:         adminv1.Group_Type(group.GroupType),
+			Status:       adminv1.Group_Status(group.GroupStatus),
+			DisplayName:  group.DisplayName,
 			SortOrder:    int32(group.SortOrder),
 			ParentId:     int32(group.ParentID),
 			MaxMembers:   int32(group.MaxMembers),
@@ -145,8 +145,8 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 	if req.UpdateMask != nil {
 		for _, field := range req.UpdateMask.Paths {
 			switch field {
-			case "name":
-				update.SetName(req.Group.Name)
+			case "code":
+				update.SetCode(req.Group.Code)
 			case "type":
 				update.SetGroupType(int(req.Group.Type.Number()))
 			case "status":
@@ -176,7 +176,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 	} else {
 		// 如果没有指定更新字段，则更新所有非零字段
 		update.
-			SetName(req.Group.Name).
+			SetCode(req.Group.Code).
 			SetGroupType(int(req.Group.Type.Number())).
 			SetGroupStatus(int(req.Group.Status.Number())).
 			// SetI18nName(req.Group.I18NName).
@@ -199,7 +199,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 	// 转换结果
 	result = &adminv1.Group{
 		Id:     int32(updatedGroup.ID),
-		Name:   updatedGroup.Name,
+		Code:   updatedGroup.Code,
 		Type:   adminv1.Group_Type(updatedGroup.GroupType),
 		Status: adminv1.Group_Status(updatedGroup.GroupStatus),
 		// I18NName:     updatedGroup.I18nName,

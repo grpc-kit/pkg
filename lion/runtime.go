@@ -170,18 +170,36 @@ func init() {
 	departmentsDescParentID := departmentsFields[0].Descriptor()
 	// departments.DefaultParentID holds the default value on creation for the parent_id field.
 	departments.DefaultParentID = departmentsDescParentID.Default.(int)
-	// departmentsDescName is the schema descriptor for name field.
-	departmentsDescName := departmentsFields[1].Descriptor()
-	// departments.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	departments.NameValidator = func() func(string) error {
-		validators := departmentsDescName.Validators
+	// departmentsDescCode is the schema descriptor for code field.
+	departmentsDescCode := departmentsFields[1].Descriptor()
+	// departments.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	departments.CodeValidator = func() func(string) error {
+		validators := departmentsDescCode.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(name string) error {
+		return func(code string) error {
 			for _, fn := range fns {
-				if err := fn(name); err != nil {
+				if err := fn(code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// departmentsDescDisplayName is the schema descriptor for display_name field.
+	departmentsDescDisplayName := departmentsFields[2].Descriptor()
+	// departments.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	departments.DisplayNameValidator = func() func(string) error {
+		validators := departmentsDescDisplayName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(display_name string) error {
+			for _, fn := range fns {
+				if err := fn(display_name); err != nil {
 					return err
 				}
 			}
@@ -189,23 +207,23 @@ func init() {
 		}
 	}()
 	// departmentsDescDepartmentType is the schema descriptor for department_type field.
-	departmentsDescDepartmentType := departmentsFields[2].Descriptor()
+	departmentsDescDepartmentType := departmentsFields[3].Descriptor()
 	// departments.DefaultDepartmentType holds the default value on creation for the department_type field.
 	departments.DefaultDepartmentType = departmentsDescDepartmentType.Default.(int)
 	// departmentsDescDepartmentStatus is the schema descriptor for department_status field.
-	departmentsDescDepartmentStatus := departmentsFields[3].Descriptor()
+	departmentsDescDepartmentStatus := departmentsFields[4].Descriptor()
 	// departments.DefaultDepartmentStatus holds the default value on creation for the department_status field.
 	departments.DefaultDepartmentStatus = departmentsDescDepartmentStatus.Default.(int)
 	// departmentsDescSortOrder is the schema descriptor for sort_order field.
-	departmentsDescSortOrder := departmentsFields[4].Descriptor()
+	departmentsDescSortOrder := departmentsFields[5].Descriptor()
 	// departments.DefaultSortOrder holds the default value on creation for the sort_order field.
 	departments.DefaultSortOrder = departmentsDescSortOrder.Default.(int)
 	// departmentsDescMaxMembers is the schema descriptor for max_members field.
-	departmentsDescMaxMembers := departmentsFields[10].Descriptor()
+	departmentsDescMaxMembers := departmentsFields[11].Descriptor()
 	// departments.DefaultMaxMembers holds the default value on creation for the max_members field.
 	departments.DefaultMaxMembers = departmentsDescMaxMembers.Default.(int)
 	// departmentsDescDescription is the schema descriptor for description field.
-	departmentsDescDescription := departmentsFields[13].Descriptor()
+	departmentsDescDescription := departmentsFields[14].Descriptor()
 	// departments.DefaultDescription holds the default value on creation for the description field.
 	departments.DefaultDescription = departmentsDescDescription.Default.(string)
 	grouprolesMixin := schema.GroupRoles{}.Mixin()
@@ -266,18 +284,36 @@ func init() {
 	groupsDescUpdatedBy := groupsMixinFields1[1].Descriptor()
 	// groups.DefaultUpdatedBy holds the default value on creation for the updated_by field.
 	groups.DefaultUpdatedBy = groupsDescUpdatedBy.Default.(int64)
-	// groupsDescName is the schema descriptor for name field.
-	groupsDescName := groupsFields[0].Descriptor()
-	// groups.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	groups.NameValidator = func() func(string) error {
-		validators := groupsDescName.Validators
+	// groupsDescCode is the schema descriptor for code field.
+	groupsDescCode := groupsFields[0].Descriptor()
+	// groups.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	groups.CodeValidator = func() func(string) error {
+		validators := groupsDescCode.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(name string) error {
+		return func(code string) error {
 			for _, fn := range fns {
-				if err := fn(name); err != nil {
+				if err := fn(code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// groupsDescDisplayName is the schema descriptor for display_name field.
+	groupsDescDisplayName := groupsFields[1].Descriptor()
+	// groups.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	groups.DisplayNameValidator = func() func(string) error {
+		validators := groupsDescDisplayName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(display_name string) error {
+			for _, fn := range fns {
+				if err := fn(display_name); err != nil {
 					return err
 				}
 			}
@@ -285,39 +321,39 @@ func init() {
 		}
 	}()
 	// groupsDescGroupType is the schema descriptor for group_type field.
-	groupsDescGroupType := groupsFields[1].Descriptor()
+	groupsDescGroupType := groupsFields[2].Descriptor()
 	// groups.DefaultGroupType holds the default value on creation for the group_type field.
 	groups.DefaultGroupType = groupsDescGroupType.Default.(int)
 	// groupsDescGroupStatus is the schema descriptor for group_status field.
-	groupsDescGroupStatus := groupsFields[2].Descriptor()
+	groupsDescGroupStatus := groupsFields[3].Descriptor()
 	// groups.DefaultGroupStatus holds the default value on creation for the group_status field.
 	groups.DefaultGroupStatus = groupsDescGroupStatus.Default.(int)
 	// groupsDescSortOrder is the schema descriptor for sort_order field.
-	groupsDescSortOrder := groupsFields[3].Descriptor()
+	groupsDescSortOrder := groupsFields[4].Descriptor()
 	// groups.DefaultSortOrder holds the default value on creation for the sort_order field.
 	groups.DefaultSortOrder = groupsDescSortOrder.Default.(int)
 	// groupsDescParentID is the schema descriptor for parent_id field.
-	groupsDescParentID := groupsFields[4].Descriptor()
+	groupsDescParentID := groupsFields[5].Descriptor()
 	// groups.DefaultParentID holds the default value on creation for the parent_id field.
 	groups.DefaultParentID = groupsDescParentID.Default.(int)
 	// groupsDescMaxMembers is the schema descriptor for max_members field.
-	groupsDescMaxMembers := groupsFields[5].Descriptor()
+	groupsDescMaxMembers := groupsFields[6].Descriptor()
 	// groups.DefaultMaxMembers holds the default value on creation for the max_members field.
 	groups.DefaultMaxMembers = groupsDescMaxMembers.Default.(int)
 	// groupsDescMetadata is the schema descriptor for metadata field.
-	groupsDescMetadata := groupsFields[6].Descriptor()
+	groupsDescMetadata := groupsFields[7].Descriptor()
 	// groups.DefaultMetadata holds the default value on creation for the metadata field.
 	groups.DefaultMetadata = groupsDescMetadata.Default.(map[string]string)
 	// groupsDescExternalID is the schema descriptor for external_id field.
-	groupsDescExternalID := groupsFields[7].Descriptor()
+	groupsDescExternalID := groupsFields[8].Descriptor()
 	// groups.DefaultExternalID holds the default value on creation for the external_id field.
 	groups.DefaultExternalID = groupsDescExternalID.Default.(string)
 	// groupsDescDepartmentID is the schema descriptor for department_id field.
-	groupsDescDepartmentID := groupsFields[8].Descriptor()
+	groupsDescDepartmentID := groupsFields[9].Descriptor()
 	// groups.DefaultDepartmentID holds the default value on creation for the department_id field.
 	groups.DefaultDepartmentID = groupsDescDepartmentID.Default.(int)
 	// groupsDescDescription is the schema descriptor for description field.
-	groupsDescDescription := groupsFields[9].Descriptor()
+	groupsDescDescription := groupsFields[10].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
 	permissionsMixin := schema.Permissions{}.Mixin()
@@ -353,18 +389,18 @@ func init() {
 	permissionsDescPolicyID := permissionsFields[1].Descriptor()
 	// permissions.PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
 	permissions.PolicyIDValidator = permissionsDescPolicyID.Validators[0].(func(int) error)
-	// permissionsDescName is the schema descriptor for name field.
-	permissionsDescName := permissionsFields[2].Descriptor()
-	// permissions.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	permissions.NameValidator = func() func(string) error {
-		validators := permissionsDescName.Validators
+	// permissionsDescCode is the schema descriptor for code field.
+	permissionsDescCode := permissionsFields[2].Descriptor()
+	// permissions.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	permissions.CodeValidator = func() func(string) error {
+		validators := permissionsDescCode.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(name string) error {
+		return func(code string) error {
 			for _, fn := range fns {
-				if err := fn(name); err != nil {
+				if err := fn(code); err != nil {
 					return err
 				}
 			}
@@ -404,18 +440,18 @@ func init() {
 	policiesDescUpdatedBy := policiesMixinFields1[1].Descriptor()
 	// policies.DefaultUpdatedBy holds the default value on creation for the updated_by field.
 	policies.DefaultUpdatedBy = policiesDescUpdatedBy.Default.(int64)
-	// policiesDescName is the schema descriptor for name field.
-	policiesDescName := policiesFields[0].Descriptor()
-	// policies.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	policies.NameValidator = func() func(string) error {
-		validators := policiesDescName.Validators
+	// policiesDescCode is the schema descriptor for code field.
+	policiesDescCode := policiesFields[0].Descriptor()
+	// policies.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	policies.CodeValidator = func() func(string) error {
+		validators := policiesDescCode.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(name string) error {
+		return func(code string) error {
 			for _, fn := range fns {
-				if err := fn(name); err != nil {
+				if err := fn(code); err != nil {
 					return err
 				}
 			}
@@ -494,18 +530,18 @@ func init() {
 	resourcesDescParentID := resourcesFields[0].Descriptor()
 	// resources.DefaultParentID holds the default value on creation for the parent_id field.
 	resources.DefaultParentID = resourcesDescParentID.Default.(int64)
-	// resourcesDescName is the schema descriptor for name field.
-	resourcesDescName := resourcesFields[1].Descriptor()
-	// resources.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	resources.NameValidator = func() func(string) error {
-		validators := resourcesDescName.Validators
+	// resourcesDescCode is the schema descriptor for code field.
+	resourcesDescCode := resourcesFields[1].Descriptor()
+	// resources.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	resources.CodeValidator = func() func(string) error {
+		validators := resourcesDescCode.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(name string) error {
+		return func(code string) error {
 			for _, fn := range fns {
-				if err := fn(name); err != nil {
+				if err := fn(code); err != nil {
 					return err
 				}
 			}
@@ -643,18 +679,36 @@ func init() {
 	rolesDescUpdatedBy := rolesMixinFields1[1].Descriptor()
 	// roles.DefaultUpdatedBy holds the default value on creation for the updated_by field.
 	roles.DefaultUpdatedBy = rolesDescUpdatedBy.Default.(int64)
-	// rolesDescName is the schema descriptor for name field.
-	rolesDescName := rolesFields[0].Descriptor()
-	// roles.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	roles.NameValidator = func() func(string) error {
-		validators := rolesDescName.Validators
+	// rolesDescCode is the schema descriptor for code field.
+	rolesDescCode := rolesFields[0].Descriptor()
+	// roles.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	roles.CodeValidator = func() func(string) error {
+		validators := rolesDescCode.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(name string) error {
+		return func(code string) error {
 			for _, fn := range fns {
-				if err := fn(name); err != nil {
+				if err := fn(code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// rolesDescDisplayName is the schema descriptor for display_name field.
+	rolesDescDisplayName := rolesFields[1].Descriptor()
+	// roles.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	roles.DisplayNameValidator = func() func(string) error {
+		validators := rolesDescDisplayName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(display_name string) error {
+			for _, fn := range fns {
+				if err := fn(display_name); err != nil {
 					return err
 				}
 			}
@@ -662,19 +716,19 @@ func init() {
 		}
 	}()
 	// rolesDescRoleType is the schema descriptor for role_type field.
-	rolesDescRoleType := rolesFields[1].Descriptor()
+	rolesDescRoleType := rolesFields[2].Descriptor()
 	// roles.DefaultRoleType holds the default value on creation for the role_type field.
 	roles.DefaultRoleType = rolesDescRoleType.Default.(int)
 	// rolesDescRoleStatus is the schema descriptor for role_status field.
-	rolesDescRoleStatus := rolesFields[2].Descriptor()
+	rolesDescRoleStatus := rolesFields[3].Descriptor()
 	// roles.DefaultRoleStatus holds the default value on creation for the role_status field.
 	roles.DefaultRoleStatus = rolesDescRoleStatus.Default.(int)
 	// rolesDescSortOrder is the schema descriptor for sort_order field.
-	rolesDescSortOrder := rolesFields[3].Descriptor()
+	rolesDescSortOrder := rolesFields[4].Descriptor()
 	// roles.DefaultSortOrder holds the default value on creation for the sort_order field.
 	roles.DefaultSortOrder = rolesDescSortOrder.Default.(int)
 	// rolesDescDescription is the schema descriptor for description field.
-	rolesDescDescription := rolesFields[4].Descriptor()
+	rolesDescDescription := rolesFields[5].Descriptor()
 	// roles.DefaultDescription holds the default value on creation for the description field.
 	roles.DefaultDescription = rolesDescDescription.Default.(string)
 	scopesMixin := schema.Scopes{}.Mixin()
@@ -692,18 +746,18 @@ func init() {
 	scopes.DefaultUpdatedAt = scopesDescUpdatedAt.Default.(func() time.Time)
 	// scopes.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	scopes.UpdateDefaultUpdatedAt = scopesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// scopesDescName is the schema descriptor for name field.
-	scopesDescName := scopesFields[0].Descriptor()
-	// scopes.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	scopes.NameValidator = func() func(string) error {
-		validators := scopesDescName.Validators
+	// scopesDescCode is the schema descriptor for code field.
+	scopesDescCode := scopesFields[0].Descriptor()
+	// scopes.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	scopes.CodeValidator = func() func(string) error {
+		validators := scopesDescCode.Validators
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
 		}
-		return func(name string) error {
+		return func(code string) error {
 			for _, fn := range fns {
-				if err := fn(name); err != nil {
+				if err := fn(code); err != nil {
 					return err
 				}
 			}

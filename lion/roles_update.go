@@ -112,16 +112,30 @@ func (_u *RolesUpdate) ClearUpdatedBy() *RolesUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *RolesUpdate) SetName(v string) *RolesUpdate {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *RolesUpdate) SetCode(v string) *RolesUpdate {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *RolesUpdate) SetNillableName(v *string) *RolesUpdate {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableCode(v *string) *RolesUpdate {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
+	}
+	return _u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_u *RolesUpdate) SetDisplayName(v string) *RolesUpdate {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableDisplayName(v *string) *RolesUpdate {
+	if v != nil {
+		_u.SetDisplayName(*v)
 	}
 	return _u
 }
@@ -390,9 +404,14 @@ func (_u *RolesUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *RolesUpdate) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := roles.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Roles.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := roles.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Roles.code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := roles.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Roles.display_name": %w`, err)}
 		}
 	}
 	return nil
@@ -437,8 +456,11 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(roles.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(roles.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(roles.FieldCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(roles.FieldDisplayName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.RoleType(); ok {
 		_spec.SetField(roles.FieldRoleType, field.TypeInt, value)
@@ -741,16 +763,30 @@ func (_u *RolesUpdateOne) ClearUpdatedBy() *RolesUpdateOne {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *RolesUpdateOne) SetName(v string) *RolesUpdateOne {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *RolesUpdateOne) SetCode(v string) *RolesUpdateOne {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *RolesUpdateOne) SetNillableName(v *string) *RolesUpdateOne {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableCode(v *string) *RolesUpdateOne {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
+	}
+	return _u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_u *RolesUpdateOne) SetDisplayName(v string) *RolesUpdateOne {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableDisplayName(v *string) *RolesUpdateOne {
+	if v != nil {
+		_u.SetDisplayName(*v)
 	}
 	return _u
 }
@@ -1032,9 +1068,14 @@ func (_u *RolesUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *RolesUpdateOne) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := roles.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Roles.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := roles.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Roles.code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := roles.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Roles.display_name": %w`, err)}
 		}
 	}
 	return nil
@@ -1096,8 +1137,11 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(roles.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(roles.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(roles.FieldCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(roles.FieldDisplayName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.RoleType(); ok {
 		_spec.SetField(roles.FieldRoleType, field.TypeInt, value)

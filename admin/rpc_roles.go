@@ -28,7 +28,7 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 
 	defaultSelect := []string{
 		roles.FieldID,
-		roles.FieldName,
+		roles.FieldCode,
 		roles.FieldRoleType,
 		roles.FieldRoleStatus,
 		roles.FieldSortOrder,
@@ -80,7 +80,7 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 	for _, r := range rl {
 		result.Roles = append(result.Roles, &adminv1.Role{
 			Id:          int32(r.ID),
-			Name:        r.Name,
+			Code:        r.Code,
 			Type:        adminv1.Role_Type(r.RoleType),
 			Status:      adminv1.Role_Status(r.RoleStatus),
 			SortOrder:   int32(r.SortOrder),
@@ -196,8 +196,8 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 	}
 
 	role, err := db.Roles.Create().
-		SetName(req.Role.Name).
-		// SetI18nName(req.Role.I18NName).
+		SetCode(req.Role.Code).
+		SetDisplayName(req.Role.DisplayName).
 		SetDescription(req.Role.Description).
 		SetSortOrder(int(req.Role.SortOrder)).
 		Save(ctx)
@@ -207,9 +207,8 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 
 	result = &adminv1.Role{
 		Id:          int32(role.ID),
-		Name:        role.Name,
-		DisplayName: role.Name,
-		// I18NName:    role.I18nName,
+		Code:        role.Code,
+		DisplayName: role.DisplayName,
 		Description: role.Description,
 		SortOrder:   int32(role.SortOrder),
 	}
@@ -268,8 +267,8 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 
 		for _, path := range req.UpdateMask.Paths {
 			switch path {
-			case roles.FieldName:
-				x.SetName(req.Role.Name)
+			case roles.FieldCode:
+				x.SetCode(req.Role.Code)
 				/*
 					case roles.FieldI18nName + ".zh_cn":
 						if req.Role.I18NName != nil {
@@ -294,8 +293,8 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 
 		q, err := db.Roles.Query().Select(
 			roles.FieldID,
-			roles.FieldName,
-			// roles.FieldI18nName,
+			roles.FieldCode,
+			roles.FieldDisplayName,
 			roles.FieldRoleType,
 			roles.FieldRoleStatus,
 			roles.FieldSortOrder,
@@ -309,9 +308,8 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 
 		result = &adminv1.Role{
 			Id:          int32(q.ID),
-			Name:        q.Name,
-			DisplayName: q.Name,
-			// I18NName:    q.I18nName,
+			Code:        q.Code,
+			DisplayName: q.DisplayName,
 			Description: q.Description,
 			SortOrder:   int32(q.SortOrder),
 		}

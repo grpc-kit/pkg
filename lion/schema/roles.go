@@ -17,13 +17,14 @@ type Roles struct {
 // Fields of the table.
 func (Roles) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").
+		field.String("code").
 			MaxLen(256).
 			NotEmpty().
 			Comment("角色名称，用于系统内部显示和业务逻辑"),
-		// field.String("i18n_key").
-		//	Optional().
-		//	Comment("国际化键值，用于前端多语言显示的标识符"),
+		field.String("display_name").
+			MaxLen(256).
+			NotEmpty().
+			Comment("角色名称，用于系统内部显示和业务逻辑"),
 
 		field.Int("role_type").
 			Default(0).
@@ -63,7 +64,7 @@ func (Roles) Mixin() []ent.Mixin {
 func (Roles) Indexes() []ent.Index {
 	return []ent.Index{
 		// 角色名称唯一索引（已在字段定义中设置 Unique，这里作为补充）
-		index.Fields("name").Unique(),
+		index.Fields("code").Unique(),
 	}
 }
 

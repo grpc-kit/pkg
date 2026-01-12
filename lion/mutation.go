@@ -75,7 +75,7 @@ type AuthProvidersMutation struct {
 	addcreated_by               *int64
 	updated_by                  *int64
 	addupdated_by               *int64
-	name                        *string
+	code                        *string
 	provider_type               *int
 	addprovider_type            *int
 	client_id                   *string
@@ -406,40 +406,40 @@ func (m *AuthProvidersMutation) ResetUpdatedBy() {
 	delete(m.clearedFields, authproviders.FieldUpdatedBy)
 }
 
-// SetName sets the "name" field.
-func (m *AuthProvidersMutation) SetName(s string) {
-	m.name = &s
+// SetCode sets the "code" field.
+func (m *AuthProvidersMutation) SetCode(s string) {
+	m.code = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *AuthProvidersMutation) Name() (r string, exists bool) {
-	v := m.name
+// Code returns the value of the "code" field in the mutation.
+func (m *AuthProvidersMutation) Code() (r string, exists bool) {
+	v := m.code
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the AuthProviders entity.
+// OldCode returns the old "code" field's value of the AuthProviders entity.
 // If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthProvidersMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *AuthProvidersMutation) OldCode(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Code, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *AuthProvidersMutation) ResetName() {
-	m.name = nil
+// ResetCode resets all changes to the "code" field.
+func (m *AuthProvidersMutation) ResetCode() {
+	m.code = nil
 }
 
 // SetProviderType sets the "provider_type" field.
@@ -923,8 +923,8 @@ func (m *AuthProvidersMutation) Fields() []string {
 	if m.updated_by != nil {
 		fields = append(fields, authproviders.FieldUpdatedBy)
 	}
-	if m.name != nil {
-		fields = append(fields, authproviders.FieldName)
+	if m.code != nil {
+		fields = append(fields, authproviders.FieldCode)
 	}
 	if m.provider_type != nil {
 		fields = append(fields, authproviders.FieldProviderType)
@@ -972,8 +972,8 @@ func (m *AuthProvidersMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedBy()
 	case authproviders.FieldUpdatedBy:
 		return m.UpdatedBy()
-	case authproviders.FieldName:
-		return m.Name()
+	case authproviders.FieldCode:
+		return m.Code()
 	case authproviders.FieldProviderType:
 		return m.ProviderType()
 	case authproviders.FieldClientID:
@@ -1011,8 +1011,8 @@ func (m *AuthProvidersMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldCreatedBy(ctx)
 	case authproviders.FieldUpdatedBy:
 		return m.OldUpdatedBy(ctx)
-	case authproviders.FieldName:
-		return m.OldName(ctx)
+	case authproviders.FieldCode:
+		return m.OldCode(ctx)
 	case authproviders.FieldProviderType:
 		return m.OldProviderType(ctx)
 	case authproviders.FieldClientID:
@@ -1070,12 +1070,12 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedBy(v)
 		return nil
-	case authproviders.FieldName:
+	case authproviders.FieldCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetCode(v)
 		return nil
 	case authproviders.FieldProviderType:
 		v, ok := value.(int)
@@ -1262,8 +1262,8 @@ func (m *AuthProvidersMutation) ResetField(name string) error {
 	case authproviders.FieldUpdatedBy:
 		m.ResetUpdatedBy()
 		return nil
-	case authproviders.FieldName:
-		m.ResetName()
+	case authproviders.FieldCode:
+		m.ResetCode()
 		return nil
 	case authproviders.FieldProviderType:
 		m.ResetProviderType()
@@ -1395,7 +1395,7 @@ type CredentialsMutation struct {
 	addcreated_by            *int64
 	updated_by               *int64
 	addupdated_by            *int64
-	name                     *string
+	code                     *string
 	credential_type          *int
 	addcredential_type       *int
 	credential_algorithm     *int
@@ -1741,40 +1741,40 @@ func (m *CredentialsMutation) ResetUpdatedBy() {
 	delete(m.clearedFields, credentials.FieldUpdatedBy)
 }
 
-// SetName sets the "name" field.
-func (m *CredentialsMutation) SetName(s string) {
-	m.name = &s
+// SetCode sets the "code" field.
+func (m *CredentialsMutation) SetCode(s string) {
+	m.code = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *CredentialsMutation) Name() (r string, exists bool) {
-	v := m.name
+// Code returns the value of the "code" field in the mutation.
+func (m *CredentialsMutation) Code() (r string, exists bool) {
+	v := m.code
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Credentials entity.
+// OldCode returns the old "code" field's value of the Credentials entity.
 // If the Credentials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *CredentialsMutation) OldCode(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Code, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *CredentialsMutation) ResetName() {
-	m.name = nil
+// ResetCode resets all changes to the "code" field.
+func (m *CredentialsMutation) ResetCode() {
+	m.code = nil
 }
 
 // SetCredentialType sets the "credential_type" field.
@@ -2960,8 +2960,8 @@ func (m *CredentialsMutation) Fields() []string {
 	if m.updated_by != nil {
 		fields = append(fields, credentials.FieldUpdatedBy)
 	}
-	if m.name != nil {
-		fields = append(fields, credentials.FieldName)
+	if m.code != nil {
+		fields = append(fields, credentials.FieldCode)
 	}
 	if m.credential_type != nil {
 		fields = append(fields, credentials.FieldCredentialType)
@@ -3045,8 +3045,8 @@ func (m *CredentialsMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedBy()
 	case credentials.FieldUpdatedBy:
 		return m.UpdatedBy()
-	case credentials.FieldName:
-		return m.Name()
+	case credentials.FieldCode:
+		return m.Code()
 	case credentials.FieldCredentialType:
 		return m.CredentialType()
 	case credentials.FieldCredentialAlgorithm:
@@ -3108,8 +3108,8 @@ func (m *CredentialsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldCreatedBy(ctx)
 	case credentials.FieldUpdatedBy:
 		return m.OldUpdatedBy(ctx)
-	case credentials.FieldName:
-		return m.OldName(ctx)
+	case credentials.FieldCode:
+		return m.OldCode(ctx)
 	case credentials.FieldCredentialType:
 		return m.OldCredentialType(ctx)
 	case credentials.FieldCredentialAlgorithm:
@@ -3191,12 +3191,12 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedBy(v)
 		return nil
-	case credentials.FieldName:
+	case credentials.FieldCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetCode(v)
 		return nil
 	case credentials.FieldCredentialType:
 		v, ok := value.(int)
@@ -3623,8 +3623,8 @@ func (m *CredentialsMutation) ResetField(name string) error {
 	case credentials.FieldUpdatedBy:
 		m.ResetUpdatedBy()
 		return nil
-	case credentials.FieldName:
-		m.ResetName()
+	case credentials.FieldCode:
+		m.ResetCode()
 		return nil
 	case credentials.FieldCredentialType:
 		m.ResetCredentialType()
@@ -3759,7 +3759,8 @@ type DepartmentsMutation struct {
 	addupdated_by                *int64
 	parent_id                    *int
 	addparent_id                 *int
-	name                         *string
+	code                         *string
+	display_name                 *string
 	department_type              *int
 	adddepartment_type           *int
 	department_status            *int
@@ -4206,40 +4207,76 @@ func (m *DepartmentsMutation) ResetParentID() {
 	m.addparent_id = nil
 }
 
-// SetName sets the "name" field.
-func (m *DepartmentsMutation) SetName(s string) {
-	m.name = &s
+// SetCode sets the "code" field.
+func (m *DepartmentsMutation) SetCode(s string) {
+	m.code = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *DepartmentsMutation) Name() (r string, exists bool) {
-	v := m.name
+// Code returns the value of the "code" field in the mutation.
+func (m *DepartmentsMutation) Code() (r string, exists bool) {
+	v := m.code
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Departments entity.
+// OldCode returns the old "code" field's value of the Departments entity.
 // If the Departments object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DepartmentsMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *DepartmentsMutation) OldCode(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Code, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *DepartmentsMutation) ResetName() {
-	m.name = nil
+// ResetCode resets all changes to the "code" field.
+func (m *DepartmentsMutation) ResetCode() {
+	m.code = nil
+}
+
+// SetDisplayName sets the "display_name" field.
+func (m *DepartmentsMutation) SetDisplayName(s string) {
+	m.display_name = &s
+}
+
+// DisplayName returns the value of the "display_name" field in the mutation.
+func (m *DepartmentsMutation) DisplayName() (r string, exists bool) {
+	v := m.display_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisplayName returns the old "display_name" field's value of the Departments entity.
+// If the Departments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DepartmentsMutation) OldDisplayName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisplayName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisplayName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisplayName: %w", err)
+	}
+	return oldValue.DisplayName, nil
+}
+
+// ResetDisplayName resets all changes to the "display_name" field.
+func (m *DepartmentsMutation) ResetDisplayName() {
+	m.display_name = nil
 }
 
 // SetDepartmentType sets the "department_type" field.
@@ -5041,7 +5078,7 @@ func (m *DepartmentsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DepartmentsMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 20)
 	if m.created_at != nil {
 		fields = append(fields, departments.FieldCreatedAt)
 	}
@@ -5060,8 +5097,11 @@ func (m *DepartmentsMutation) Fields() []string {
 	if m.parent_id != nil {
 		fields = append(fields, departments.FieldParentID)
 	}
-	if m.name != nil {
-		fields = append(fields, departments.FieldName)
+	if m.code != nil {
+		fields = append(fields, departments.FieldCode)
+	}
+	if m.display_name != nil {
+		fields = append(fields, departments.FieldDisplayName)
 	}
 	if m.department_type != nil {
 		fields = append(fields, departments.FieldDepartmentType)
@@ -5119,8 +5159,10 @@ func (m *DepartmentsMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedBy()
 	case departments.FieldParentID:
 		return m.ParentID()
-	case departments.FieldName:
-		return m.Name()
+	case departments.FieldCode:
+		return m.Code()
+	case departments.FieldDisplayName:
+		return m.DisplayName()
 	case departments.FieldDepartmentType:
 		return m.DepartmentType()
 	case departments.FieldDepartmentStatus:
@@ -5166,8 +5208,10 @@ func (m *DepartmentsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldUpdatedBy(ctx)
 	case departments.FieldParentID:
 		return m.OldParentID(ctx)
-	case departments.FieldName:
-		return m.OldName(ctx)
+	case departments.FieldCode:
+		return m.OldCode(ctx)
+	case departments.FieldDisplayName:
+		return m.OldDisplayName(ctx)
 	case departments.FieldDepartmentType:
 		return m.OldDepartmentType(ctx)
 	case departments.FieldDepartmentStatus:
@@ -5243,12 +5287,19 @@ func (m *DepartmentsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetParentID(v)
 		return nil
-	case departments.FieldName:
+	case departments.FieldCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetCode(v)
+		return nil
+	case departments.FieldDisplayName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisplayName(v)
 		return nil
 	case departments.FieldDepartmentType:
 		v, ok := value.(int)
@@ -5551,8 +5602,11 @@ func (m *DepartmentsMutation) ResetField(name string) error {
 	case departments.FieldParentID:
 		m.ResetParentID()
 		return nil
-	case departments.FieldName:
-		m.ResetName()
+	case departments.FieldCode:
+		m.ResetCode()
+		return nil
+	case departments.FieldDisplayName:
+		m.ResetDisplayName()
 		return nil
 	case departments.FieldDepartmentType:
 		m.ResetDepartmentType()
@@ -6577,7 +6631,8 @@ type GroupsMutation struct {
 	addcreated_by           *int64
 	updated_by              *int64
 	addupdated_by           *int64
-	name                    *string
+	code                    *string
+	display_name            *string
 	group_type              *int
 	addgroup_type           *int
 	group_status            *int
@@ -6964,40 +7019,76 @@ func (m *GroupsMutation) ResetUpdatedBy() {
 	delete(m.clearedFields, groups.FieldUpdatedBy)
 }
 
-// SetName sets the "name" field.
-func (m *GroupsMutation) SetName(s string) {
-	m.name = &s
+// SetCode sets the "code" field.
+func (m *GroupsMutation) SetCode(s string) {
+	m.code = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *GroupsMutation) Name() (r string, exists bool) {
-	v := m.name
+// Code returns the value of the "code" field in the mutation.
+func (m *GroupsMutation) Code() (r string, exists bool) {
+	v := m.code
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Groups entity.
+// OldCode returns the old "code" field's value of the Groups entity.
 // If the Groups object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *GroupsMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *GroupsMutation) OldCode(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Code, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *GroupsMutation) ResetName() {
-	m.name = nil
+// ResetCode resets all changes to the "code" field.
+func (m *GroupsMutation) ResetCode() {
+	m.code = nil
+}
+
+// SetDisplayName sets the "display_name" field.
+func (m *GroupsMutation) SetDisplayName(s string) {
+	m.display_name = &s
+}
+
+// DisplayName returns the value of the "display_name" field in the mutation.
+func (m *GroupsMutation) DisplayName() (r string, exists bool) {
+	v := m.display_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisplayName returns the old "display_name" field's value of the Groups entity.
+// If the Groups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupsMutation) OldDisplayName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisplayName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisplayName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisplayName: %w", err)
+	}
+	return oldValue.DisplayName, nil
+}
+
+// ResetDisplayName resets all changes to the "display_name" field.
+func (m *GroupsMutation) ResetDisplayName() {
+	m.display_name = nil
 }
 
 // SetGroupType sets the "group_type" field.
@@ -7606,7 +7697,7 @@ func (m *GroupsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupsMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 16)
 	if m.created_at != nil {
 		fields = append(fields, groups.FieldCreatedAt)
 	}
@@ -7622,8 +7713,11 @@ func (m *GroupsMutation) Fields() []string {
 	if m.updated_by != nil {
 		fields = append(fields, groups.FieldUpdatedBy)
 	}
-	if m.name != nil {
-		fields = append(fields, groups.FieldName)
+	if m.code != nil {
+		fields = append(fields, groups.FieldCode)
+	}
+	if m.display_name != nil {
+		fields = append(fields, groups.FieldDisplayName)
 	}
 	if m.group_type != nil {
 		fields = append(fields, groups.FieldGroupType)
@@ -7670,8 +7764,10 @@ func (m *GroupsMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedBy()
 	case groups.FieldUpdatedBy:
 		return m.UpdatedBy()
-	case groups.FieldName:
-		return m.Name()
+	case groups.FieldCode:
+		return m.Code()
+	case groups.FieldDisplayName:
+		return m.DisplayName()
 	case groups.FieldGroupType:
 		return m.GroupType()
 	case groups.FieldGroupStatus:
@@ -7709,8 +7805,10 @@ func (m *GroupsMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldCreatedBy(ctx)
 	case groups.FieldUpdatedBy:
 		return m.OldUpdatedBy(ctx)
-	case groups.FieldName:
-		return m.OldName(ctx)
+	case groups.FieldCode:
+		return m.OldCode(ctx)
+	case groups.FieldDisplayName:
+		return m.OldDisplayName(ctx)
 	case groups.FieldGroupType:
 		return m.OldGroupType(ctx)
 	case groups.FieldGroupStatus:
@@ -7773,12 +7871,19 @@ func (m *GroupsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedBy(v)
 		return nil
-	case groups.FieldName:
+	case groups.FieldCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetCode(v)
+		return nil
+	case groups.FieldDisplayName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisplayName(v)
 		return nil
 	case groups.FieldGroupType:
 		v, ok := value.(int)
@@ -8015,8 +8120,11 @@ func (m *GroupsMutation) ResetField(name string) error {
 	case groups.FieldUpdatedBy:
 		m.ResetUpdatedBy()
 		return nil
-	case groups.FieldName:
-		m.ResetName()
+	case groups.FieldCode:
+		m.ResetCode()
+		return nil
+	case groups.FieldDisplayName:
+		m.ResetDisplayName()
 		return nil
 	case groups.FieldGroupType:
 		m.ResetGroupType()
@@ -8189,7 +8297,7 @@ type PermissionsMutation struct {
 	addcreated_by                *int64
 	updated_by                   *int64
 	addupdated_by                *int64
-	name                         *string
+	code                         *string
 	display_name                 *string
 	description                  *string
 	clearedFields                map[string]struct{}
@@ -8587,40 +8695,40 @@ func (m *PermissionsMutation) ResetPolicyID() {
 	m.lion_policies = nil
 }
 
-// SetName sets the "name" field.
-func (m *PermissionsMutation) SetName(s string) {
-	m.name = &s
+// SetCode sets the "code" field.
+func (m *PermissionsMutation) SetCode(s string) {
+	m.code = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *PermissionsMutation) Name() (r string, exists bool) {
-	v := m.name
+// Code returns the value of the "code" field in the mutation.
+func (m *PermissionsMutation) Code() (r string, exists bool) {
+	v := m.code
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Permissions entity.
+// OldCode returns the old "code" field's value of the Permissions entity.
 // If the Permissions object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PermissionsMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *PermissionsMutation) OldCode(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Code, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *PermissionsMutation) ResetName() {
-	m.name = nil
+// ResetCode resets all changes to the "code" field.
+func (m *PermissionsMutation) ResetCode() {
+	m.code = nil
 }
 
 // SetDisplayName sets the "display_name" field.
@@ -8882,8 +8990,8 @@ func (m *PermissionsMutation) Fields() []string {
 	if m.lion_policies != nil {
 		fields = append(fields, permissions.FieldPolicyID)
 	}
-	if m.name != nil {
-		fields = append(fields, permissions.FieldName)
+	if m.code != nil {
+		fields = append(fields, permissions.FieldCode)
 	}
 	if m.display_name != nil {
 		fields = append(fields, permissions.FieldDisplayName)
@@ -8911,8 +9019,8 @@ func (m *PermissionsMutation) Field(name string) (ent.Value, bool) {
 		return m.ResourceScopeID()
 	case permissions.FieldPolicyID:
 		return m.PolicyID()
-	case permissions.FieldName:
-		return m.Name()
+	case permissions.FieldCode:
+		return m.Code()
 	case permissions.FieldDisplayName:
 		return m.DisplayName()
 	case permissions.FieldDescription:
@@ -8938,8 +9046,8 @@ func (m *PermissionsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldResourceScopeID(ctx)
 	case permissions.FieldPolicyID:
 		return m.OldPolicyID(ctx)
-	case permissions.FieldName:
-		return m.OldName(ctx)
+	case permissions.FieldCode:
+		return m.OldCode(ctx)
 	case permissions.FieldDisplayName:
 		return m.OldDisplayName(ctx)
 	case permissions.FieldDescription:
@@ -8995,12 +9103,12 @@ func (m *PermissionsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPolicyID(v)
 		return nil
-	case permissions.FieldName:
+	case permissions.FieldCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetCode(v)
 		return nil
 	case permissions.FieldDisplayName:
 		v, ok := value.(string)
@@ -9125,8 +9233,8 @@ func (m *PermissionsMutation) ResetField(name string) error {
 	case permissions.FieldPolicyID:
 		m.ResetPolicyID()
 		return nil
-	case permissions.FieldName:
-		m.ResetName()
+	case permissions.FieldCode:
+		m.ResetCode()
 		return nil
 	case permissions.FieldDisplayName:
 		m.ResetDisplayName()
@@ -9271,7 +9379,7 @@ type PoliciesMutation struct {
 	addcreated_by           *int64
 	updated_by              *int64
 	addupdated_by           *int64
-	name                    *string
+	code                    *string
 	display_name            *string
 	policy_type             *int
 	addpolicy_type          *int
@@ -9647,40 +9755,40 @@ func (m *PoliciesMutation) ResetUpdatedBy() {
 	delete(m.clearedFields, policies.FieldUpdatedBy)
 }
 
-// SetName sets the "name" field.
-func (m *PoliciesMutation) SetName(s string) {
-	m.name = &s
+// SetCode sets the "code" field.
+func (m *PoliciesMutation) SetCode(s string) {
+	m.code = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *PoliciesMutation) Name() (r string, exists bool) {
-	v := m.name
+// Code returns the value of the "code" field in the mutation.
+func (m *PoliciesMutation) Code() (r string, exists bool) {
+	v := m.code
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Policies entity.
+// OldCode returns the old "code" field's value of the Policies entity.
 // If the Policies object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PoliciesMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *PoliciesMutation) OldCode(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Code, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *PoliciesMutation) ResetName() {
-	m.name = nil
+// ResetCode resets all changes to the "code" field.
+func (m *PoliciesMutation) ResetCode() {
+	m.code = nil
 }
 
 // SetDisplayName sets the "display_name" field.
@@ -10007,8 +10115,8 @@ func (m *PoliciesMutation) Fields() []string {
 	if m.updated_by != nil {
 		fields = append(fields, policies.FieldUpdatedBy)
 	}
-	if m.name != nil {
-		fields = append(fields, policies.FieldName)
+	if m.code != nil {
+		fields = append(fields, policies.FieldCode)
 	}
 	if m.display_name != nil {
 		fields = append(fields, policies.FieldDisplayName)
@@ -10043,8 +10151,8 @@ func (m *PoliciesMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedBy()
 	case policies.FieldUpdatedBy:
 		return m.UpdatedBy()
-	case policies.FieldName:
-		return m.Name()
+	case policies.FieldCode:
+		return m.Code()
 	case policies.FieldDisplayName:
 		return m.DisplayName()
 	case policies.FieldPolicyType:
@@ -10074,8 +10182,8 @@ func (m *PoliciesMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldCreatedBy(ctx)
 	case policies.FieldUpdatedBy:
 		return m.OldUpdatedBy(ctx)
-	case policies.FieldName:
-		return m.OldName(ctx)
+	case policies.FieldCode:
+		return m.OldCode(ctx)
 	case policies.FieldDisplayName:
 		return m.OldDisplayName(ctx)
 	case policies.FieldPolicyType:
@@ -10130,12 +10238,12 @@ func (m *PoliciesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedBy(v)
 		return nil
-	case policies.FieldName:
+	case policies.FieldCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetCode(v)
 		return nil
 	case policies.FieldDisplayName:
 		v, ok := value.(string)
@@ -10308,8 +10416,8 @@ func (m *PoliciesMutation) ResetField(name string) error {
 	case policies.FieldUpdatedBy:
 		m.ResetUpdatedBy()
 		return nil
-	case policies.FieldName:
-		m.ResetName()
+	case policies.FieldCode:
+		m.ResetCode()
 		return nil
 	case policies.FieldDisplayName:
 		m.ResetDisplayName()
@@ -11131,7 +11239,7 @@ type ResourcesMutation struct {
 	addupdated_by               *int64
 	parent_id                   *int64
 	addparent_id                *int64
-	name                        *string
+	code                        *string
 	display_name                *string
 	resource_type               *int
 	addresource_type            *int
@@ -11569,40 +11677,40 @@ func (m *ResourcesMutation) ResetParentID() {
 	m.addparent_id = nil
 }
 
-// SetName sets the "name" field.
-func (m *ResourcesMutation) SetName(s string) {
-	m.name = &s
+// SetCode sets the "code" field.
+func (m *ResourcesMutation) SetCode(s string) {
+	m.code = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *ResourcesMutation) Name() (r string, exists bool) {
-	v := m.name
+// Code returns the value of the "code" field in the mutation.
+func (m *ResourcesMutation) Code() (r string, exists bool) {
+	v := m.code
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Resources entity.
+// OldCode returns the old "code" field's value of the Resources entity.
 // If the Resources object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourcesMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *ResourcesMutation) OldCode(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Code, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *ResourcesMutation) ResetName() {
-	m.name = nil
+// ResetCode resets all changes to the "code" field.
+func (m *ResourcesMutation) ResetCode() {
+	m.code = nil
 }
 
 // SetDisplayName sets the "display_name" field.
@@ -12116,8 +12224,8 @@ func (m *ResourcesMutation) Fields() []string {
 	if m.parent_id != nil {
 		fields = append(fields, resources.FieldParentID)
 	}
-	if m.name != nil {
-		fields = append(fields, resources.FieldName)
+	if m.code != nil {
+		fields = append(fields, resources.FieldCode)
 	}
 	if m.display_name != nil {
 		fields = append(fields, resources.FieldDisplayName)
@@ -12166,8 +12274,8 @@ func (m *ResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedBy()
 	case resources.FieldParentID:
 		return m.ParentID()
-	case resources.FieldName:
-		return m.Name()
+	case resources.FieldCode:
+		return m.Code()
 	case resources.FieldDisplayName:
 		return m.DisplayName()
 	case resources.FieldResourceType:
@@ -12207,8 +12315,8 @@ func (m *ResourcesMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldUpdatedBy(ctx)
 	case resources.FieldParentID:
 		return m.OldParentID(ctx)
-	case resources.FieldName:
-		return m.OldName(ctx)
+	case resources.FieldCode:
+		return m.OldCode(ctx)
 	case resources.FieldDisplayName:
 		return m.OldDisplayName(ctx)
 	case resources.FieldResourceType:
@@ -12278,12 +12386,12 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetParentID(v)
 		return nil
-	case resources.FieldName:
+	case resources.FieldCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetCode(v)
 		return nil
 	case resources.FieldDisplayName:
 		v, ok := value.(string)
@@ -12523,8 +12631,8 @@ func (m *ResourcesMutation) ResetField(name string) error {
 	case resources.FieldParentID:
 		m.ResetParentID()
 		return nil
-	case resources.FieldName:
-		m.ResetName()
+	case resources.FieldCode:
+		m.ResetCode()
 		return nil
 	case resources.FieldDisplayName:
 		m.ResetDisplayName()
@@ -14322,7 +14430,8 @@ type RolesMutation struct {
 	addcreated_by                *int64
 	updated_by                   *int64
 	addupdated_by                *int64
-	name                         *string
+	code                         *string
+	display_name                 *string
 	role_type                    *int
 	addrole_type                 *int
 	role_status                  *int
@@ -14707,40 +14816,76 @@ func (m *RolesMutation) ResetUpdatedBy() {
 	delete(m.clearedFields, roles.FieldUpdatedBy)
 }
 
-// SetName sets the "name" field.
-func (m *RolesMutation) SetName(s string) {
-	m.name = &s
+// SetCode sets the "code" field.
+func (m *RolesMutation) SetCode(s string) {
+	m.code = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *RolesMutation) Name() (r string, exists bool) {
-	v := m.name
+// Code returns the value of the "code" field in the mutation.
+func (m *RolesMutation) Code() (r string, exists bool) {
+	v := m.code
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Roles entity.
+// OldCode returns the old "code" field's value of the Roles entity.
 // If the Roles object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RolesMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *RolesMutation) OldCode(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Code, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *RolesMutation) ResetName() {
-	m.name = nil
+// ResetCode resets all changes to the "code" field.
+func (m *RolesMutation) ResetCode() {
+	m.code = nil
+}
+
+// SetDisplayName sets the "display_name" field.
+func (m *RolesMutation) SetDisplayName(s string) {
+	m.display_name = &s
+}
+
+// DisplayName returns the value of the "display_name" field in the mutation.
+func (m *RolesMutation) DisplayName() (r string, exists bool) {
+	v := m.display_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisplayName returns the old "display_name" field's value of the Roles entity.
+// If the Roles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RolesMutation) OldDisplayName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisplayName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisplayName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisplayName: %w", err)
+	}
+	return oldValue.DisplayName, nil
+}
+
+// ResetDisplayName resets all changes to the "display_name" field.
+func (m *RolesMutation) ResetDisplayName() {
+	m.display_name = nil
 }
 
 // SetRoleType sets the "role_type" field.
@@ -15197,7 +15342,7 @@ func (m *RolesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RolesMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, roles.FieldCreatedAt)
 	}
@@ -15213,8 +15358,11 @@ func (m *RolesMutation) Fields() []string {
 	if m.updated_by != nil {
 		fields = append(fields, roles.FieldUpdatedBy)
 	}
-	if m.name != nil {
-		fields = append(fields, roles.FieldName)
+	if m.code != nil {
+		fields = append(fields, roles.FieldCode)
+	}
+	if m.display_name != nil {
+		fields = append(fields, roles.FieldDisplayName)
 	}
 	if m.role_type != nil {
 		fields = append(fields, roles.FieldRoleType)
@@ -15246,8 +15394,10 @@ func (m *RolesMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedBy()
 	case roles.FieldUpdatedBy:
 		return m.UpdatedBy()
-	case roles.FieldName:
-		return m.Name()
+	case roles.FieldCode:
+		return m.Code()
+	case roles.FieldDisplayName:
+		return m.DisplayName()
 	case roles.FieldRoleType:
 		return m.RoleType()
 	case roles.FieldRoleStatus:
@@ -15275,8 +15425,10 @@ func (m *RolesMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldCreatedBy(ctx)
 	case roles.FieldUpdatedBy:
 		return m.OldUpdatedBy(ctx)
-	case roles.FieldName:
-		return m.OldName(ctx)
+	case roles.FieldCode:
+		return m.OldCode(ctx)
+	case roles.FieldDisplayName:
+		return m.OldDisplayName(ctx)
 	case roles.FieldRoleType:
 		return m.OldRoleType(ctx)
 	case roles.FieldRoleStatus:
@@ -15329,12 +15481,19 @@ func (m *RolesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedBy(v)
 		return nil
-	case roles.FieldName:
+	case roles.FieldCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetCode(v)
+		return nil
+	case roles.FieldDisplayName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisplayName(v)
 		return nil
 	case roles.FieldRoleType:
 		v, ok := value.(int)
@@ -15512,8 +15671,11 @@ func (m *RolesMutation) ResetField(name string) error {
 	case roles.FieldUpdatedBy:
 		m.ResetUpdatedBy()
 		return nil
-	case roles.FieldName:
-		m.ResetName()
+	case roles.FieldCode:
+		m.ResetCode()
+		return nil
+	case roles.FieldDisplayName:
+		m.ResetDisplayName()
 		return nil
 	case roles.FieldRoleType:
 		m.ResetRoleType()
@@ -15702,7 +15864,7 @@ type ScopesMutation struct {
 	created_at                  *time.Time
 	updated_at                  *time.Time
 	deleted_at                  *time.Time
-	name                        *string
+	code                        *string
 	scope_type                  *int
 	addscope_type               *int
 	display_name                *string
@@ -15934,40 +16096,40 @@ func (m *ScopesMutation) ResetDeletedAt() {
 	delete(m.clearedFields, scopes.FieldDeletedAt)
 }
 
-// SetName sets the "name" field.
-func (m *ScopesMutation) SetName(s string) {
-	m.name = &s
+// SetCode sets the "code" field.
+func (m *ScopesMutation) SetCode(s string) {
+	m.code = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *ScopesMutation) Name() (r string, exists bool) {
-	v := m.name
+// Code returns the value of the "code" field in the mutation.
+func (m *ScopesMutation) Code() (r string, exists bool) {
+	v := m.code
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Scopes entity.
+// OldCode returns the old "code" field's value of the Scopes entity.
 // If the Scopes object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ScopesMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *ScopesMutation) OldCode(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldCode requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Code, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *ScopesMutation) ResetName() {
-	m.name = nil
+// ResetCode resets all changes to the "code" field.
+func (m *ScopesMutation) ResetCode() {
+	m.code = nil
 }
 
 // SetScopeType sets the "scope_type" field.
@@ -16160,8 +16322,8 @@ func (m *ScopesMutation) Fields() []string {
 	if m.deleted_at != nil {
 		fields = append(fields, scopes.FieldDeletedAt)
 	}
-	if m.name != nil {
-		fields = append(fields, scopes.FieldName)
+	if m.code != nil {
+		fields = append(fields, scopes.FieldCode)
 	}
 	if m.scope_type != nil {
 		fields = append(fields, scopes.FieldScopeType)
@@ -16183,8 +16345,8 @@ func (m *ScopesMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case scopes.FieldDeletedAt:
 		return m.DeletedAt()
-	case scopes.FieldName:
-		return m.Name()
+	case scopes.FieldCode:
+		return m.Code()
 	case scopes.FieldScopeType:
 		return m.ScopeType()
 	case scopes.FieldDisplayName:
@@ -16204,8 +16366,8 @@ func (m *ScopesMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldUpdatedAt(ctx)
 	case scopes.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
-	case scopes.FieldName:
-		return m.OldName(ctx)
+	case scopes.FieldCode:
+		return m.OldCode(ctx)
 	case scopes.FieldScopeType:
 		return m.OldScopeType(ctx)
 	case scopes.FieldDisplayName:
@@ -16240,12 +16402,12 @@ func (m *ScopesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeletedAt(v)
 		return nil
-	case scopes.FieldName:
+	case scopes.FieldCode:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetCode(v)
 		return nil
 	case scopes.FieldScopeType:
 		v, ok := value.(int)
@@ -16343,8 +16505,8 @@ func (m *ScopesMutation) ResetField(name string) error {
 	case scopes.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
-	case scopes.FieldName:
-		m.ResetName()
+	case scopes.FieldCode:
+		m.ResetCode()
 		return nil
 	case scopes.FieldScopeType:
 		m.ResetScopeType()

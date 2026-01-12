@@ -30,7 +30,9 @@ type Groups struct {
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 用户组名
-	Name string `json:"name,omitempty"`
+	Code string `json:"code,omitempty"`
+	// 部门名称，用于系统内部显示和业务逻辑
+	DisplayName string `json:"display_name,omitempty"`
 	// 群组类型，对应 api/known/admin/v1/common.proto 中定义
 	GroupType int `json:"group_type,omitempty"`
 	// 群组状态，对应 api/known/admin/v1/common.proto 中定义
@@ -106,7 +108,7 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
-		case groups.FieldName, groups.FieldExternalID, groups.FieldDescription:
+		case groups.FieldCode, groups.FieldDisplayName, groups.FieldExternalID, groups.FieldDescription:
 			values[i] = new(sql.NullString)
 		case groups.FieldCreatedAt, groups.FieldUpdatedAt, groups.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -162,11 +164,17 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case groups.FieldName:
+		case groups.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
-				_m.Name = value.String
+				_m.Code = value.String
+			}
+		case groups.FieldDisplayName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
+			} else if value.Valid {
+				_m.DisplayName = value.String
 			}
 		case groups.FieldGroupType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -292,8 +300,11 @@ func (_m *Groups) String() string {
 	builder.WriteString("updated_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
+	builder.WriteString("code=")
+	builder.WriteString(_m.Code)
+	builder.WriteString(", ")
+	builder.WriteString("display_name=")
+	builder.WriteString(_m.DisplayName)
 	builder.WriteString(", ")
 	builder.WriteString("group_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.GroupType))

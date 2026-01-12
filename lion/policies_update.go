@@ -109,16 +109,16 @@ func (_u *PoliciesUpdate) ClearUpdatedBy() *PoliciesUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *PoliciesUpdate) SetName(v string) *PoliciesUpdate {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *PoliciesUpdate) SetCode(v string) *PoliciesUpdate {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *PoliciesUpdate) SetNillableName(v *string) *PoliciesUpdate {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *PoliciesUpdate) SetNillableCode(v *string) *PoliciesUpdate {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
 	}
 	return _u
 }
@@ -286,9 +286,9 @@ func (_u *PoliciesUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PoliciesUpdate) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := policies.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Policies.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := policies.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Policies.code": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.DisplayName(); ok {
@@ -338,8 +338,8 @@ func (_u *PoliciesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(policies.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(policies.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(policies.FieldCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(policies.FieldDisplayName, field.TypeString, value)
@@ -507,16 +507,16 @@ func (_u *PoliciesUpdateOne) ClearUpdatedBy() *PoliciesUpdateOne {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *PoliciesUpdateOne) SetName(v string) *PoliciesUpdateOne {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *PoliciesUpdateOne) SetCode(v string) *PoliciesUpdateOne {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *PoliciesUpdateOne) SetNillableName(v *string) *PoliciesUpdateOne {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *PoliciesUpdateOne) SetNillableCode(v *string) *PoliciesUpdateOne {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
 	}
 	return _u
 }
@@ -697,9 +697,9 @@ func (_u *PoliciesUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *PoliciesUpdateOne) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := policies.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Policies.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := policies.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Policies.code": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.DisplayName(); ok {
@@ -766,8 +766,8 @@ func (_u *PoliciesUpdateOne) sqlSave(ctx context.Context) (_node *Policies, err 
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(policies.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(policies.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(policies.FieldCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(policies.FieldDisplayName, field.TypeString, value)

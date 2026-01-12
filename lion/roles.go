@@ -28,7 +28,9 @@ type Roles struct {
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 角色名称，用于系统内部显示和业务逻辑
-	Name string `json:"name,omitempty"`
+	Code string `json:"code,omitempty"`
+	// 角色名称，用于系统内部显示和业务逻辑
+	DisplayName string `json:"display_name,omitempty"`
 	// 角色类型：TYPE_SYSTEM=系统内置角色，TYPE_CUSTOM=自定义角色，TYPE_TEMPLATE=模板角色
 	RoleType int `json:"role_type,omitempty"`
 	// 角色状态：STATUS_ACTIVE=正常启用，STATUS_DISABLED=禁用状态
@@ -101,7 +103,7 @@ func (*Roles) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case roles.FieldID, roles.FieldCreatedBy, roles.FieldUpdatedBy, roles.FieldRoleType, roles.FieldRoleStatus, roles.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case roles.FieldName, roles.FieldDescription:
+		case roles.FieldCode, roles.FieldDisplayName, roles.FieldDescription:
 			values[i] = new(sql.NullString)
 		case roles.FieldCreatedAt, roles.FieldUpdatedAt, roles.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -157,11 +159,17 @@ func (_m *Roles) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case roles.FieldName:
+		case roles.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
-				_m.Name = value.String
+				_m.Code = value.String
+			}
+		case roles.FieldDisplayName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
+			} else if value.Valid {
+				_m.DisplayName = value.String
 			}
 		case roles.FieldRoleType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -260,8 +268,11 @@ func (_m *Roles) String() string {
 	builder.WriteString("updated_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
+	builder.WriteString("code=")
+	builder.WriteString(_m.Code)
+	builder.WriteString(", ")
+	builder.WriteString("display_name=")
+	builder.WriteString(_m.DisplayName)
 	builder.WriteString(", ")
 	builder.WriteString("role_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RoleType))

@@ -91,9 +91,9 @@ func (_c *PermissionsCreate) SetPolicyID(v int) *PermissionsCreate {
 	return _c
 }
 
-// SetName sets the "name" field.
-func (_c *PermissionsCreate) SetName(v string) *PermissionsCreate {
-	_c.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_c *PermissionsCreate) SetCode(v string) *PermissionsCreate {
+	_c.mutation.SetCode(v)
 	return _c
 }
 
@@ -235,12 +235,12 @@ func (_c *PermissionsCreate) check() error {
 			return &ValidationError{Name: "policy_id", err: fmt.Errorf(`lion: validator failed for field "Permissions.policy_id": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Permissions.name"`)}
+	if _, ok := _c.mutation.Code(); !ok {
+		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "Permissions.code"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := permissions.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Permissions.name": %w`, err)}
+	if v, ok := _c.mutation.Code(); ok {
+		if err := permissions.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Permissions.code": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.DisplayName(); !ok {
@@ -302,9 +302,9 @@ func (_c *PermissionsCreate) createSpec() (*Permissions, *sqlgraph.CreateSpec) {
 		_spec.SetField(permissions.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(permissions.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := _c.mutation.Code(); ok {
+		_spec.SetField(permissions.FieldCode, field.TypeString, value)
+		_node.Code = value
 	}
 	if value, ok := _c.mutation.DisplayName(); ok {
 		_spec.SetField(permissions.FieldDisplayName, field.TypeString, value)

@@ -32,7 +32,7 @@ type Permissions struct {
 	// 关联 lion_policies 表的资源 ID
 	PolicyID int `json:"policy_id,omitempty"`
 	// 对我展示的权限名称，如：管理用户列表
-	Name string `json:"name,omitempty"`
+	Code string `json:"code,omitempty"`
 	// 国际化键值，用于前端多语言显示的标识符
 	DisplayName string `json:"display_name,omitempty"`
 	// 详细描述
@@ -94,7 +94,7 @@ func (*Permissions) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case permissions.FieldID, permissions.FieldCreatedBy, permissions.FieldUpdatedBy, permissions.FieldResourceScopeID, permissions.FieldPolicyID:
 			values[i] = new(sql.NullInt64)
-		case permissions.FieldName, permissions.FieldDisplayName, permissions.FieldDescription:
+		case permissions.FieldCode, permissions.FieldDisplayName, permissions.FieldDescription:
 			values[i] = new(sql.NullString)
 		case permissions.FieldCreatedAt, permissions.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -155,11 +155,11 @@ func (_m *Permissions) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.PolicyID = int(value.Int64)
 			}
-		case permissions.FieldName:
+		case permissions.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
-				_m.Name = value.String
+				_m.Code = value.String
 			}
 		case permissions.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -242,8 +242,8 @@ func (_m *Permissions) String() string {
 	builder.WriteString("policy_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PolicyID))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
+	builder.WriteString("code=")
+	builder.WriteString(_m.Code)
 	builder.WriteString(", ")
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)

@@ -16,7 +16,7 @@ type Policies struct {
 // Fields of the table.
 func (Policies) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").
+		field.String("code").
 			MaxLen(256).
 			NotEmpty().
 			Comment("对我展示的权限名称，如：管理用户列表"),

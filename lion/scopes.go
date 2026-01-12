@@ -24,7 +24,7 @@ type Scopes struct {
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// 名称
-	Name string `json:"name,omitempty"`
+	Code string `json:"code,omitempty"`
 	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
 	ScopeType int `json:"scope_type,omitempty"`
 	// 友好展示名称
@@ -60,7 +60,7 @@ func (*Scopes) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case scopes.FieldID, scopes.FieldScopeType:
 			values[i] = new(sql.NullInt64)
-		case scopes.FieldName, scopes.FieldDisplayName:
+		case scopes.FieldCode, scopes.FieldDisplayName:
 			values[i] = new(sql.NullString)
 		case scopes.FieldCreatedAt, scopes.FieldUpdatedAt, scopes.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -104,11 +104,11 @@ func (_m *Scopes) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case scopes.FieldName:
+		case scopes.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
-				_m.Name = value.String
+				_m.Code = value.String
 			}
 		case scopes.FieldScopeType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -174,8 +174,8 @@ func (_m *Scopes) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
+	builder.WriteString("code=")
+	builder.WriteString(_m.Code)
 	builder.WriteString(", ")
 	builder.WriteString("scope_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ScopeType))

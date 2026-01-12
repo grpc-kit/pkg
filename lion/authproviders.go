@@ -26,7 +26,7 @@ type AuthProviders struct {
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 认证提供方名称
-	Name string `json:"name,omitempty"`
+	Code string `json:"code,omitempty"`
 	// 支持的认证提供方
 	ProviderType int `json:"provider_type,omitempty"`
 	// ClientID holds the value of the "client_id" field.
@@ -82,7 +82,7 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case authproviders.FieldID, authproviders.FieldCreatedBy, authproviders.FieldUpdatedBy, authproviders.FieldProviderType:
 			values[i] = new(sql.NullInt64)
-		case authproviders.FieldName, authproviders.FieldClientID, authproviders.FieldScopes, authproviders.FieldRedirectURI, authproviders.FieldIssuer, authproviders.FieldAuthorizationEndpoint, authproviders.FieldTokenEndpoint, authproviders.FieldUserinfoEndpoint:
+		case authproviders.FieldCode, authproviders.FieldClientID, authproviders.FieldScopes, authproviders.FieldRedirectURI, authproviders.FieldIssuer, authproviders.FieldAuthorizationEndpoint, authproviders.FieldTokenEndpoint, authproviders.FieldUserinfoEndpoint:
 			values[i] = new(sql.NullString)
 		case authproviders.FieldCreatedAt, authproviders.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -131,11 +131,11 @@ func (_m *AuthProviders) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case authproviders.FieldName:
+		case authproviders.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
-				_m.Name = value.String
+				_m.Code = value.String
 			}
 		case authproviders.FieldProviderType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -250,8 +250,8 @@ func (_m *AuthProviders) String() string {
 	builder.WriteString("updated_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
+	builder.WriteString("code=")
+	builder.WriteString(_m.Code)
 	builder.WriteString(", ")
 	builder.WriteString("provider_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ProviderType))

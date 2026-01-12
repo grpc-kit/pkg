@@ -44,7 +44,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	permissionsWhere := make([]predicate.Permissions, 0)
 	permissionsWhere = append(permissionsWhere, permissions.HasLionRolePermissionsWith(
 		rolepermissions.HasLionRolesWith(
-			roles.NameIn(gs...),
+			roles.CodeIn(gs...),
 		),
 	))
 
@@ -86,7 +86,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	// 2 判断是否过滤资源作用域
 	scopeID := 0
 	if req.ScopeType != 0 && req.ScopeName != "" {
-		scopeID, err = db.Scopes.Query().Where(scopes.ScopeTypeEQ(int(req.ScopeType)), scopes.NameEQ(req.ScopeName)).OnlyID(ctx)
+		scopeID, err = db.Scopes.Query().Where(scopes.ScopeTypeEQ(int(req.ScopeType)), scopes.CodeEQ(req.ScopeName)).OnlyID(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -130,7 +130,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			menu := &adminv1.Resource{
 				Id:          int64(m.ID),
 				ParentId:    m.ParentID,
-				Name:        m.Name,
+				Code:        m.Code,
 				DisplayName: m.DisplayName,
 				SortOrder:   int32(m.SortOrder),
 				Type:        adminv1.Resource_Type(m.ResourceType),
@@ -173,7 +173,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			result.Resources = append(result.Resources, &adminv1.Resource{
 				Id:          int64(m.ID),
 				ParentId:    m.ParentID,
-				Name:        m.Name,
+				Code:        m.Code,
 				DisplayName: m.DisplayName,
 				SortOrder:   int32(m.SortOrder),
 				Type:        adminv1.Resource_Type(m.ResourceType),
@@ -207,7 +207,7 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 	}
 
 	_, err = db.Resources.Create().
-		SetName(req.Resource.Name).
+		SetCode(req.Resource.Code).
 		SetResourceType(int(req.Resource.Type)).
 		// SetResourceScope(int(req.Resource.Scope)).
 		SetParentID(req.Resource.ParentId).

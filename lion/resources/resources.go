@@ -26,8 +26,8 @@ const (
 	FieldUpdatedBy = "updated_by"
 	// FieldParentID holds the string denoting the parent_id field in the database.
 	FieldParentID = "parent_id"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
+	// FieldCode holds the string denoting the code field in the database.
+	FieldCode = "code"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
 	// FieldResourceType holds the string denoting the resource_type field in the database.
@@ -68,7 +68,7 @@ var Columns = []string{
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldParentID,
-	FieldName,
+	FieldCode,
 	FieldDisplayName,
 	FieldResourceType,
 	FieldResourceStatus,
@@ -103,8 +103,8 @@ var (
 	DefaultUpdatedBy int64
 	// DefaultParentID holds the default value on creation for the "parent_id" field.
 	DefaultParentID int64
-	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator func(string) error
+	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	CodeValidator func(string) error
 	// DefaultDisplayName holds the default value on creation for the "display_name" field.
 	DefaultDisplayName string
 	// DefaultResourceType holds the default value on creation for the "resource_type" field.
@@ -167,9 +167,9 @@ func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentID, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
+// ByCode orders the results by the code field.
+func ByCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCode, opts...).ToFunc()
 }
 
 // ByDisplayName orders the results by the display_name field.

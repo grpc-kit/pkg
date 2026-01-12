@@ -85,9 +85,9 @@ func ParentID(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldParentID, v))
 }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldName, v))
+// Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
+func Code(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldCode, v))
 }
 
 // DisplayName applies equality check predicate on the "display_name" field. It's identical to DisplayNameEQ.
@@ -405,69 +405,69 @@ func ParentIDLTE(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldLTE(FieldParentID, v))
 }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEQ(FieldName, v))
+// CodeEQ applies the EQ predicate on the "code" field.
+func CodeEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldCode, v))
 }
 
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldNEQ(FieldName, v))
+// CodeNEQ applies the NEQ predicate on the "code" field.
+func CodeNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldCode, v))
 }
 
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Resources {
-	return predicate.Resources(sql.FieldIn(FieldName, vs...))
+// CodeIn applies the In predicate on the "code" field.
+func CodeIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldCode, vs...))
 }
 
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Resources {
-	return predicate.Resources(sql.FieldNotIn(FieldName, vs...))
+// CodeNotIn applies the NotIn predicate on the "code" field.
+func CodeNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldCode, vs...))
 }
 
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldGT(FieldName, v))
+// CodeGT applies the GT predicate on the "code" field.
+func CodeGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldCode, v))
 }
 
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldGTE(FieldName, v))
+// CodeGTE applies the GTE predicate on the "code" field.
+func CodeGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldCode, v))
 }
 
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldLT(FieldName, v))
+// CodeLT applies the LT predicate on the "code" field.
+func CodeLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldCode, v))
 }
 
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldLTE(FieldName, v))
+// CodeLTE applies the LTE predicate on the "code" field.
+func CodeLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldCode, v))
 }
 
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldContains(FieldName, v))
+// CodeContains applies the Contains predicate on the "code" field.
+func CodeContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldCode, v))
 }
 
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldHasPrefix(FieldName, v))
+// CodeHasPrefix applies the HasPrefix predicate on the "code" field.
+func CodeHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldCode, v))
 }
 
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldHasSuffix(FieldName, v))
+// CodeHasSuffix applies the HasSuffix predicate on the "code" field.
+func CodeHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldCode, v))
 }
 
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldEqualFold(FieldName, v))
+// CodeEqualFold applies the EqualFold predicate on the "code" field.
+func CodeEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldCode, v))
 }
 
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Resources {
-	return predicate.Resources(sql.FieldContainsFold(FieldName, v))
+// CodeContainsFold applies the ContainsFold predicate on the "code" field.
+func CodeContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldCode, v))
 }
 
 // DisplayNameEQ applies the EQ predicate on the "display_name" field.

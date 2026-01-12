@@ -27,7 +27,7 @@ type Credentials struct {
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 凭证显示名称
-	Name string `json:"name,omitempty"`
+	Code string `json:"code,omitempty"`
 	// 凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=JWKS, 7=HSM_REF, 8=FIDO, 99=OTHER
 	CredentialType int `json:"credential_type,omitempty"`
 	// 算法类型: 0=未指定, 1=RSA, 2=ECDSA, 3=ED25519, 4=HMAC, 5=AES, 6=CHACHA20_POLY1305, 99=OTHER
@@ -84,7 +84,7 @@ func (*Credentials) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case credentials.FieldID, credentials.FieldCreatedBy, credentials.FieldUpdatedBy, credentials.FieldCredentialType, credentials.FieldCredentialAlgorithm, credentials.FieldCredentialUsage, credentials.FieldCredentialVisibility, credentials.FieldCredentialStatus, credentials.FieldCredentialSource:
 			values[i] = new(sql.NullInt64)
-		case credentials.FieldName, credentials.FieldKeyID, credentials.FieldAPIKey, credentials.FieldPublicKey, credentials.FieldLicenseKeyEncrypted, credentials.FieldSignature, credentials.FieldJwksURI, credentials.FieldDescription:
+		case credentials.FieldCode, credentials.FieldKeyID, credentials.FieldAPIKey, credentials.FieldPublicKey, credentials.FieldLicenseKeyEncrypted, credentials.FieldSignature, credentials.FieldJwksURI, credentials.FieldDescription:
 			values[i] = new(sql.NullString)
 		case credentials.FieldCreatedAt, credentials.FieldUpdatedAt, credentials.FieldNotBefore, credentials.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -133,11 +133,11 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case credentials.FieldName:
+		case credentials.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
-				_m.Name = value.String
+				_m.Code = value.String
 			}
 		case credentials.FieldCredentialType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -325,8 +325,8 @@ func (_m *Credentials) String() string {
 	builder.WriteString("updated_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
+	builder.WriteString("code=")
+	builder.WriteString(_m.Code)
 	builder.WriteString(", ")
 	builder.WriteString("credential_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CredentialType))

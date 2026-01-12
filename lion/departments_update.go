@@ -132,16 +132,30 @@ func (_u *DepartmentsUpdate) AddParentID(v int) *DepartmentsUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *DepartmentsUpdate) SetName(v string) *DepartmentsUpdate {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *DepartmentsUpdate) SetCode(v string) *DepartmentsUpdate {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *DepartmentsUpdate) SetNillableName(v *string) *DepartmentsUpdate {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableCode(v *string) *DepartmentsUpdate {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
+	}
+	return _u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_u *DepartmentsUpdate) SetDisplayName(v string) *DepartmentsUpdate {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableDisplayName(v *string) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetDisplayName(*v)
 	}
 	return _u
 }
@@ -503,9 +517,14 @@ func (_u *DepartmentsUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *DepartmentsUpdate) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := departments.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Departments.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := departments.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Departments.code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := departments.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Departments.display_name": %w`, err)}
 		}
 	}
 	return nil
@@ -556,8 +575,11 @@ func (_u *DepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.AddedParentID(); ok {
 		_spec.AddField(departments.FieldParentID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(departments.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(departments.FieldCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(departments.FieldDisplayName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DepartmentType(); ok {
 		_spec.SetField(departments.FieldDepartmentType, field.TypeInt, value)
@@ -884,16 +906,30 @@ func (_u *DepartmentsUpdateOne) AddParentID(v int) *DepartmentsUpdateOne {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *DepartmentsUpdateOne) SetName(v string) *DepartmentsUpdateOne {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *DepartmentsUpdateOne) SetCode(v string) *DepartmentsUpdateOne {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *DepartmentsUpdateOne) SetNillableName(v *string) *DepartmentsUpdateOne {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableCode(v *string) *DepartmentsUpdateOne {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
+	}
+	return _u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_u *DepartmentsUpdateOne) SetDisplayName(v string) *DepartmentsUpdateOne {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableDisplayName(v *string) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetDisplayName(*v)
 	}
 	return _u
 }
@@ -1268,9 +1304,14 @@ func (_u *DepartmentsUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *DepartmentsUpdateOne) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := departments.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Departments.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := departments.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Departments.code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := departments.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Departments.display_name": %w`, err)}
 		}
 	}
 	return nil
@@ -1338,8 +1379,11 @@ func (_u *DepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *Departments
 	if value, ok := _u.mutation.AddedParentID(); ok {
 		_spec.AddField(departments.FieldParentID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(departments.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(departments.FieldCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(departments.FieldDisplayName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DepartmentType(); ok {
 		_spec.SetField(departments.FieldDepartmentType, field.TypeInt, value)

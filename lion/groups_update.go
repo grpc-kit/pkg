@@ -111,16 +111,30 @@ func (_u *GroupsUpdate) ClearUpdatedBy() *GroupsUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *GroupsUpdate) SetName(v string) *GroupsUpdate {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *GroupsUpdate) SetCode(v string) *GroupsUpdate {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableName(v *string) *GroupsUpdate {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableCode(v *string) *GroupsUpdate {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
+	}
+	return _u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_u *GroupsUpdate) SetDisplayName(v string) *GroupsUpdate {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableDisplayName(v *string) *GroupsUpdate {
+	if v != nil {
+		_u.SetDisplayName(*v)
 	}
 	return _u
 }
@@ -410,9 +424,14 @@ func (_u *GroupsUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *GroupsUpdate) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := groups.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Groups.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := groups.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Groups.code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := groups.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Groups.display_name": %w`, err)}
 		}
 	}
 	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
@@ -460,8 +479,11 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(groups.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(groups.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(groups.FieldCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(groups.FieldDisplayName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.GroupType(); ok {
 		_spec.SetField(groups.FieldGroupType, field.TypeInt, value)
@@ -721,16 +743,30 @@ func (_u *GroupsUpdateOne) ClearUpdatedBy() *GroupsUpdateOne {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *GroupsUpdateOne) SetName(v string) *GroupsUpdateOne {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *GroupsUpdateOne) SetCode(v string) *GroupsUpdateOne {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableName(v *string) *GroupsUpdateOne {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableCode(v *string) *GroupsUpdateOne {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
+	}
+	return _u
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_u *GroupsUpdateOne) SetDisplayName(v string) *GroupsUpdateOne {
+	_u.mutation.SetDisplayName(v)
+	return _u
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableDisplayName(v *string) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetDisplayName(*v)
 	}
 	return _u
 }
@@ -1033,9 +1069,14 @@ func (_u *GroupsUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *GroupsUpdateOne) check() error {
-	if v, ok := _u.mutation.Name(); ok {
-		if err := groups.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Groups.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := groups.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Groups.code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := groups.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Groups.display_name": %w`, err)}
 		}
 	}
 	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
@@ -1100,8 +1141,11 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(groups.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(groups.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(groups.FieldCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.DisplayName(); ok {
+		_spec.SetField(groups.FieldDisplayName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.GroupType(); ok {
 		_spec.SetField(groups.FieldGroupType, field.TypeInt, value)

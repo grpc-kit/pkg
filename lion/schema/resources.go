@@ -20,7 +20,7 @@ func (Resources) Fields() []ent.Field {
 		field.Int64("parent_id").
 			Default(0).
 			Comment("父资源 ID，为 0 表示顶级资源"),
-		field.String("name").
+		field.String("code").
 			MaxLen(128).
 			NotEmpty().
 			Comment("资源名称"),

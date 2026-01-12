@@ -26,8 +26,10 @@ const (
 	FieldUpdatedBy = "updated_by"
 	// FieldParentID holds the string denoting the parent_id field in the database.
 	FieldParentID = "parent_id"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
+	// FieldCode holds the string denoting the code field in the database.
+	FieldCode = "code"
+	// FieldDisplayName holds the string denoting the display_name field in the database.
+	FieldDisplayName = "display_name"
 	// FieldDepartmentType holds the string denoting the department_type field in the database.
 	FieldDepartmentType = "department_type"
 	// FieldDepartmentStatus holds the string denoting the department_status field in the database.
@@ -92,7 +94,8 @@ var Columns = []string{
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldParentID,
-	FieldName,
+	FieldCode,
+	FieldDisplayName,
 	FieldDepartmentType,
 	FieldDepartmentStatus,
 	FieldSortOrder,
@@ -130,8 +133,10 @@ var (
 	DefaultUpdatedBy int64
 	// DefaultParentID holds the default value on creation for the "parent_id" field.
 	DefaultParentID int
-	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator func(string) error
+	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	CodeValidator func(string) error
+	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	DisplayNameValidator func(string) error
 	// DefaultDepartmentType holds the default value on creation for the "department_type" field.
 	DefaultDepartmentType int
 	// DefaultDepartmentStatus holds the default value on creation for the "department_status" field.
@@ -182,9 +187,14 @@ func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentID, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
+// ByCode orders the results by the code field.
+func ByCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCode, opts...).ToFunc()
+}
+
+// ByDisplayName orders the results by the display_name field.
+func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
 }
 
 // ByDepartmentType orders the results by the department_type field.

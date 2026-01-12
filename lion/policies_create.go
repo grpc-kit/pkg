@@ -91,9 +91,9 @@ func (_c *PoliciesCreate) SetNillableUpdatedBy(v *int64) *PoliciesCreate {
 	return _c
 }
 
-// SetName sets the "name" field.
-func (_c *PoliciesCreate) SetName(v string) *PoliciesCreate {
-	_c.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_c *PoliciesCreate) SetCode(v string) *PoliciesCreate {
+	_c.mutation.SetCode(v)
 	return _c
 }
 
@@ -251,12 +251,12 @@ func (_c *PoliciesCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Policies.updated_at"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Policies.name"`)}
+	if _, ok := _c.mutation.Code(); !ok {
+		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "Policies.code"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := policies.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Policies.name": %w`, err)}
+	if v, ok := _c.mutation.Code(); ok {
+		if err := policies.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Policies.code": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.DisplayName(); !ok {
@@ -325,9 +325,9 @@ func (_c *PoliciesCreate) createSpec() (*Policies, *sqlgraph.CreateSpec) {
 		_spec.SetField(policies.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(policies.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := _c.mutation.Code(); ok {
+		_spec.SetField(policies.FieldCode, field.TypeString, value)
+		_node.Code = value
 	}
 	if value, ok := _c.mutation.DisplayName(); ok {
 		_spec.SetField(policies.FieldDisplayName, field.TypeString, value)

@@ -63,9 +63,9 @@ func (_c *ScopesCreate) SetNillableDeletedAt(v *time.Time) *ScopesCreate {
 	return _c
 }
 
-// SetName sets the "name" field.
-func (_c *ScopesCreate) SetName(v string) *ScopesCreate {
-	_c.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_c *ScopesCreate) SetCode(v string) *ScopesCreate {
+	_c.mutation.SetCode(v)
 	return _c
 }
 
@@ -173,12 +173,12 @@ func (_c *ScopesCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Scopes.updated_at"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Scopes.name"`)}
+	if _, ok := _c.mutation.Code(); !ok {
+		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "Scopes.code"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := scopes.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Scopes.name": %w`, err)}
+	if v, ok := _c.mutation.Code(); ok {
+		if err := scopes.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Scopes.code": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.ScopeType(); !ok {
@@ -225,9 +225,9 @@ func (_c *ScopesCreate) createSpec() (*Scopes, *sqlgraph.CreateSpec) {
 		_spec.SetField(scopes.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(scopes.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := _c.mutation.Code(); ok {
+		_spec.SetField(scopes.FieldCode, field.TypeString, value)
+		_node.Code = value
 	}
 	if value, ok := _c.mutation.ScopeType(); ok {
 		_spec.SetField(scopes.FieldScopeType, field.TypeInt, value)

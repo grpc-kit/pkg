@@ -49,7 +49,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 
 	adminRole, err := tx.Roles.Create().
-		SetName("superadmin").
+		SetCode("superadmin").
+		SetDisplayName("superadmin").
 		SetRoleType(int(adminv1.Role_TYPE_SYSTEM.Number())).
 		SetDescription("超级管理员").
 		Save(ctx)
@@ -61,7 +62,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	tx.UserRoles.Create().SetUserID(adminUser.ID).SetRoleID(adminRole.ID).SaveX(ctx)
 
 	localProvider, err := tx.AuthProviders.Create().
-		SetName("local").
+		SetCode("local").
 		SetProviderType(int(adminv1.AuthProvider_TYPE_LOCAL.Number())).
 		SetEnabled(true).
 		Save(ctx)
@@ -79,7 +80,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 
 	tx.Departments.CreateBulk(
 		tx.Departments.Create().
-			SetName("root").
+			SetCode("root").
+			SetDisplayName("root").
 			SetSortOrder(1).
 			SetParentID(0),
 	).SaveX(ctx)
@@ -98,7 +100,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 	tx.Credentials.Create().
-		SetName("key1").
+		SetCode("key1").
 		SetCredentialType(int(adminv1.Credential_TYPE_JWKS.Number())).
 		SetCredentialAlgorithm(int(adminv1.Credential_ALGORITHM_RSA.Number())).
 		SetCredentialUsage(int(adminv1.Credential_USAGE_SIGNING.Number())).

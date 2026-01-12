@@ -123,7 +123,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 
 		// 支持本地登录
 		result.Providers = append(result.Providers, &adminv1.AuthProvider{
-			Name:    "local",
+			Code:    "local",
 			Type:    adminv1.AuthProvider_TYPE_LOCAL,
 			Enabled: true,
 		})
@@ -133,7 +133,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 
 	selectFields := []string{
 		authproviders.FieldID,
-		authproviders.FieldName,
+		authproviders.FieldCode,
 		authproviders.FieldProviderType,
 		authproviders.FieldClientID,
 		authproviders.FieldEnabled,
@@ -149,7 +149,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 	for _, row := range rows {
 		p := &adminv1.AuthProvider{
 			Id:                    int32(row.ID),
-			Name:                  row.Name,
+			Code:                  row.Code,
 			ClientId:              row.ClientID,
 			Enabled:               row.Enabled,
 			Issuer:                row.Issuer,
@@ -177,8 +177,8 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 	}
 
 	for _, p := range req.Providers {
-		name := p.Name
-		existID, err := db.AuthProviders.Query().Where(authproviders.NameEQ(name)).OnlyID(ctx)
+		name := p.Code
+		existID, err := db.AuthProviders.Query().Where(authproviders.CodeEQ(name)).OnlyID(ctx)
 		if err != nil && !lion.IsNotFound(err) {
 			return nil, err
 		}
@@ -191,7 +191,7 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 
 		if existID == 0 {
 			_, err = db.AuthProviders.Create().
-				SetName(name).
+				SetCode(name).
 				SetProviderType(int(p.GetType())).
 				SetEnabled(p.Enabled).
 				SetClientID(p.ClientId).
@@ -204,7 +204,7 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 				SetRedirectURI(p.RedirectUri).
 				Save(ctx)
 		} else {
-			x := db.AuthProviders.Update().Where(authproviders.NameEQ(name))
+			x := db.AuthProviders.Update().Where(authproviders.CodeEQ(name))
 
 			if p.ClientId != "" {
 				x.SetClientID(p.ClientId)
@@ -247,7 +247,7 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 
 	// TODO; 权限验证
 	x, err := a.config.db.AuthProviders.Create().
-		SetName(req.Provider.Name).
+		SetCode(req.Provider.Code).
 		SetProviderType(int(req.Provider.Type.Number())).
 		SetEnabled(req.Provider.Enabled).
 		SetClientID(req.Provider.ClientId).
@@ -264,7 +264,7 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 	}
 
 	result.Id = int32(x.ID)
-	result.Name = x.Name
+	result.Code = x.Code
 	result.Type = adminv1.AuthProvider_Type(x.ProviderType)
 	result.ClientId = x.ClientID
 	result.Enabled = x.Enabled

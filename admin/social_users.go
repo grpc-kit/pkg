@@ -41,7 +41,7 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 	ap, err := db.AuthProviders.Query().
 		Select(
 			authproviders.FieldID,
-			authproviders.FieldName,
+			authproviders.FieldCode,
 			authproviders.FieldProviderType,
 			authproviders.FieldEnabled,
 			authproviders.FieldClientID,
@@ -52,7 +52,7 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 			authproviders.FieldRedirectURI,
 		).
 		Where(
-			authproviders.NameEQ(providerName),
+			authproviders.CodeEQ(providerName),
 		).Only(ctx)
 	if err != nil {
 		return nil, err
@@ -448,7 +448,7 @@ func (s *socialUsers) setUserRoles(ctx context.Context, userID int) error {
 		if r.Edges.LionRoles == nil {
 			continue
 		}
-		s.Groups = append(s.Groups, r.Edges.LionRoles.Name)
+		s.Groups = append(s.Groups, r.Edges.LionRoles.Code)
 	}
 
 	return nil

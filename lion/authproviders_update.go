@@ -89,16 +89,16 @@ func (_u *AuthProvidersUpdate) ClearUpdatedBy() *AuthProvidersUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *AuthProvidersUpdate) SetName(v string) *AuthProvidersUpdate {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *AuthProvidersUpdate) SetCode(v string) *AuthProvidersUpdate {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *AuthProvidersUpdate) SetNillableName(v *string) *AuthProvidersUpdate {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *AuthProvidersUpdate) SetNillableCode(v *string) *AuthProvidersUpdate {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
 	}
 	return _u
 }
@@ -349,8 +349,8 @@ func (_u *AuthProvidersUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(authproviders.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(authproviders.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(authproviders.FieldCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ProviderType(); ok {
 		_spec.SetField(authproviders.FieldProviderType, field.TypeInt, value)
@@ -510,16 +510,16 @@ func (_u *AuthProvidersUpdateOne) ClearUpdatedBy() *AuthProvidersUpdateOne {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *AuthProvidersUpdateOne) SetName(v string) *AuthProvidersUpdateOne {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *AuthProvidersUpdateOne) SetCode(v string) *AuthProvidersUpdateOne {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *AuthProvidersUpdateOne) SetNillableName(v *string) *AuthProvidersUpdateOne {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *AuthProvidersUpdateOne) SetNillableCode(v *string) *AuthProvidersUpdateOne {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
 	}
 	return _u
 }
@@ -800,8 +800,8 @@ func (_u *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthProvi
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(authproviders.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(authproviders.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(authproviders.FieldCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ProviderType(); ok {
 		_spec.SetField(authproviders.FieldProviderType, field.TypeInt, value)

@@ -119,16 +119,16 @@ func (_u *PermissionsUpdate) SetNillablePolicyID(v *int) *PermissionsUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *PermissionsUpdate) SetName(v string) *PermissionsUpdate {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *PermissionsUpdate) SetCode(v string) *PermissionsUpdate {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *PermissionsUpdate) SetNillableName(v *string) *PermissionsUpdate {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *PermissionsUpdate) SetNillableCode(v *string) *PermissionsUpdate {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
 	}
 	return _u
 }
@@ -284,9 +284,9 @@ func (_u *PermissionsUpdate) check() error {
 			return &ValidationError{Name: "policy_id", err: fmt.Errorf(`lion: validator failed for field "Permissions.policy_id": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Name(); ok {
-		if err := permissions.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Permissions.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := permissions.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Permissions.code": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.DisplayName(); ok {
@@ -336,8 +336,8 @@ func (_u *PermissionsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(permissions.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(permissions.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(permissions.FieldCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(permissions.FieldDisplayName, field.TypeString, value)
@@ -556,16 +556,16 @@ func (_u *PermissionsUpdateOne) SetNillablePolicyID(v *int) *PermissionsUpdateOn
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *PermissionsUpdateOne) SetName(v string) *PermissionsUpdateOne {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *PermissionsUpdateOne) SetCode(v string) *PermissionsUpdateOne {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *PermissionsUpdateOne) SetNillableName(v *string) *PermissionsUpdateOne {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *PermissionsUpdateOne) SetNillableCode(v *string) *PermissionsUpdateOne {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
 	}
 	return _u
 }
@@ -734,9 +734,9 @@ func (_u *PermissionsUpdateOne) check() error {
 			return &ValidationError{Name: "policy_id", err: fmt.Errorf(`lion: validator failed for field "Permissions.policy_id": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Name(); ok {
-		if err := permissions.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Permissions.name": %w`, err)}
+	if v, ok := _u.mutation.Code(); ok {
+		if err := permissions.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Permissions.code": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.DisplayName(); ok {
@@ -803,8 +803,8 @@ func (_u *PermissionsUpdateOne) sqlSave(ctx context.Context) (_node *Permissions
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(permissions.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(permissions.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(permissions.FieldCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(permissions.FieldDisplayName, field.TypeString, value)

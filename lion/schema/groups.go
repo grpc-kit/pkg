@@ -17,11 +17,15 @@ type Groups struct {
 // Fields of the table.
 func (Groups) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").
+		field.String("code").
 			Unique().
 			MaxLen(128).
 			NotEmpty().
 			Comment("用户组名"),
+		field.String("display_name").
+			MaxLen(256).
+			NotEmpty().
+			Comment("部门名称，用于系统内部显示和业务逻辑"),
 		// field.String("i18n_key").
 		//	Optional().
 		//	Comment("国际化键值，用于前端多语言显示的标识符"),
@@ -82,7 +86,7 @@ func (Groups) Mixin() []ent.Mixin {
 func (Groups) Indexes() []ent.Index {
 	return []ent.Index{
 		// 群组名称唯一索引（已在字段定义中设置 Unique，这里作为补充）
-		index.Fields("name").Unique(),
+		index.Fields("code").Unique(),
 		// 群组类型索引，用于按类型过滤查询
 		index.Fields("group_type"),
 		// 群组状态索引，用于按状态过滤查询

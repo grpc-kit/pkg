@@ -16,9 +16,9 @@ type Credentials struct {
 func (Credentials) Fields() []ent.Field {
 	return []ent.Field{
 		// 基本信息
-		field.String("name").
+		field.String("code").
 			Comment("凭证显示名称"),
-		
+
 		// 凭证分类字段 (原 proto enum 转为 int)
 		field.Int("credential_type").
 			Default(0).
@@ -38,12 +38,12 @@ func (Credentials) Fields() []ent.Field {
 		field.Int("credential_source").
 			Default(0).
 			Comment("来源: 0=未指定, 1=SYSTEM, 2=USER, 3=KMS, 4=EXTERNAL"),
-		
+
 		// 外部引用
 		field.String("key_id").
 			Optional().
 			Comment("外部系统 Key ID / JWKS ID / HSM ID"),
-		
+
 		// API Key 相关字段
 		field.String("api_key").
 			Optional().
@@ -52,7 +52,7 @@ func (Credentials) Fields() []ent.Field {
 			Optional().
 			Sensitive().
 			Comment("API Secret / 私密部分，敏感数据"),
-		
+
 		// 密钥对相关字段
 		field.String("public_key").
 			Optional().
@@ -65,7 +65,7 @@ func (Credentials) Fields() []ent.Field {
 			Optional().
 			Sensitive().
 			Comment("私钥加密口令，可选"),
-		
+
 		// X.509 证书相关字段
 		field.Bytes("certificate").
 			Optional().
@@ -73,7 +73,7 @@ func (Credentials) Fields() []ent.Field {
 		field.JSON("ca_chain", [][]byte{}).
 			Optional().
 			Comment("可选 CA 证书链（顺序从根到中间证书）"),
-		
+
 		// 许可证相关字段
 		field.String("license_key_encrypted").
 			Optional().
@@ -90,7 +90,7 @@ func (Credentials) Fields() []ent.Field {
 		field.String("jwks_uri").
 			Optional().
 			Comment("JWKS URI"),
-		
+
 		// 时间相关字段
 		field.Time("not_before").
 			Optional().
@@ -100,7 +100,7 @@ func (Credentials) Fields() []ent.Field {
 			Optional().
 			Nillable().
 			Comment("过期时间"),
-		
+
 		// 附加元数据
 		field.JSON("metadata", map[string]string{}).
 			Optional().

@@ -105,9 +105,9 @@ func (_c *ResourcesCreate) SetNillableParentID(v *int64) *ResourcesCreate {
 	return _c
 }
 
-// SetName sets the "name" field.
-func (_c *ResourcesCreate) SetName(v string) *ResourcesCreate {
-	_c.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_c *ResourcesCreate) SetCode(v string) *ResourcesCreate {
+	_c.mutation.SetCode(v)
 	return _c
 }
 
@@ -356,12 +356,12 @@ func (_c *ResourcesCreate) check() error {
 	if _, ok := _c.mutation.ParentID(); !ok {
 		return &ValidationError{Name: "parent_id", err: errors.New(`lion: missing required field "Resources.parent_id"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Resources.name"`)}
+	if _, ok := _c.mutation.Code(); !ok {
+		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "Resources.code"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := resources.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Resources.name": %w`, err)}
+	if v, ok := _c.mutation.Code(); ok {
+		if err := resources.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Resources.code": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.DisplayName(); !ok {
@@ -451,9 +451,9 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 		_spec.SetField(resources.FieldParentID, field.TypeInt64, value)
 		_node.ParentID = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(resources.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := _c.mutation.Code(); ok {
+		_spec.SetField(resources.FieldCode, field.TypeString, value)
+		_node.Code = value
 	}
 	if value, ok := _c.mutation.DisplayName(); ok {
 		_spec.SetField(resources.FieldDisplayName, field.TypeString, value)

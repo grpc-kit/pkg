@@ -19,7 +19,11 @@ func (Departments) Fields() []ent.Field {
 		field.Int("parent_id").
 			Default(0).
 			Comment("父部门ID，构建树形组织结构，值为 0 表示顶级部门"),
-		field.String("name").
+		field.String("code").
+			MaxLen(256).
+			NotEmpty().
+			Comment("部门代号，用于系统内部显示和业务逻辑"),
+		field.String("display_name").
 			MaxLen(256).
 			NotEmpty().
 			Comment("部门名称，用于系统内部显示和业务逻辑"),

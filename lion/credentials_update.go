@@ -89,16 +89,16 @@ func (_u *CredentialsUpdate) ClearUpdatedBy() *CredentialsUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *CredentialsUpdate) SetName(v string) *CredentialsUpdate {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *CredentialsUpdate) SetCode(v string) *CredentialsUpdate {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CredentialsUpdate) SetNillableName(v *string) *CredentialsUpdate {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *CredentialsUpdate) SetNillableCode(v *string) *CredentialsUpdate {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
 	}
 	return _u
 }
@@ -570,8 +570,8 @@ func (_u *CredentialsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(credentials.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(credentials.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(credentials.FieldCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CredentialType(); ok {
 		_spec.SetField(credentials.FieldCredentialType, field.TypeInt, value)
@@ -790,16 +790,16 @@ func (_u *CredentialsUpdateOne) ClearUpdatedBy() *CredentialsUpdateOne {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *CredentialsUpdateOne) SetName(v string) *CredentialsUpdateOne {
-	_u.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_u *CredentialsUpdateOne) SetCode(v string) *CredentialsUpdateOne {
+	_u.mutation.SetCode(v)
 	return _u
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CredentialsUpdateOne) SetNillableName(v *string) *CredentialsUpdateOne {
+// SetNillableCode sets the "code" field if the given value is not nil.
+func (_u *CredentialsUpdateOne) SetNillableCode(v *string) *CredentialsUpdateOne {
 	if v != nil {
-		_u.SetName(*v)
+		_u.SetCode(*v)
 	}
 	return _u
 }
@@ -1301,8 +1301,8 @@ func (_u *CredentialsUpdateOne) sqlSave(ctx context.Context) (_node *Credentials
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(credentials.FieldUpdatedBy, field.TypeInt64)
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(credentials.FieldName, field.TypeString, value)
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(credentials.FieldCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.CredentialType(); ok {
 		_spec.SetField(credentials.FieldCredentialType, field.TypeInt, value)

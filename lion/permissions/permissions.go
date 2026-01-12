@@ -26,8 +26,8 @@ const (
 	FieldResourceScopeID = "resource_scope_id"
 	// FieldPolicyID holds the string denoting the policy_id field in the database.
 	FieldPolicyID = "policy_id"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
+	// FieldCode holds the string denoting the code field in the database.
+	FieldCode = "code"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
 	// FieldDescription holds the string denoting the description field in the database.
@@ -72,7 +72,7 @@ var Columns = []string{
 	FieldUpdatedBy,
 	FieldResourceScopeID,
 	FieldPolicyID,
-	FieldName,
+	FieldCode,
 	FieldDisplayName,
 	FieldDescription,
 }
@@ -102,8 +102,8 @@ var (
 	ResourceScopeIDValidator func(int) error
 	// PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
 	PolicyIDValidator func(int) error
-	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator func(string) error
+	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	CodeValidator func(string) error
 	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	DisplayNameValidator func(string) error
 	// DefaultDescription holds the default value on creation for the "description" field.
@@ -148,9 +148,9 @@ func ByPolicyID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPolicyID, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
+// ByCode orders the results by the code field.
+func ByCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCode, opts...).ToFunc()
 }
 
 // ByDisplayName orders the results by the display_name field.

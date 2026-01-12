@@ -43,7 +43,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	// 创建部门
 	dp, err := tx.Departments.Create().
 		SetParentID(int(req.Department.ParentId)).
-		SetName(req.Department.Name).
+		SetCode(req.Department.Code).
 		// SetI18nName(req.Department.I18NName).
 		SetSortOrder(int(req.Department.SortOrder)).
 		Save(ctx)
@@ -53,7 +53,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	}
 
 	// 自动插入对超级管理员插入权限
-	ros, err := tx.Roles.Query().Select(roles.FieldID).Where(roles.NameEQ("superadmin")).Only(ctx)
+	ros, err := tx.Roles.Query().Select(roles.FieldID).Where(roles.CodeEQ("superadmin")).Only(ctx)
 	if err != nil {
 		_ = tx.Rollback()
 		return result, err
@@ -62,7 +62,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 
 	result = &adminv1.Department{
 		Id:   int32(dp.ID),
-		Name: dp.Name,
+		Code: dp.Code,
 		// I18NName:    dp.I18nName,
 		SortOrder: int32(dp.SortOrder),
 		Managers:  make([]*adminv1.DepartmentMember, 0),
@@ -123,8 +123,8 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 		menu := &adminv1.Department{
 			Id:          int32(m.ID),
 			ParentId:    int32(m.ParentID),
-			Name:        m.Name,
-			DisplayName: I18NName(m.Name),
+			Code:        m.Code,
+			DisplayName: I18NName(m.Code),
 			// I18NName:    m.I18nName,
 			SortOrder: int32(m.SortOrder),
 			Managers:  make([]*adminv1.DepartmentMember, 0),
@@ -272,8 +272,8 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 
 		for _, path := range req.UpdateMask.Paths {
 			switch path {
-			case departments.FieldName:
-				x.SetName(req.Department.Name)
+			case departments.FieldCode:
+				x.SetCode(req.Department.Code)
 			case departments.FieldSortOrder:
 				x.SetSortOrder(int(req.Department.SortOrder))
 			case departments.FieldParentID:
@@ -495,7 +495,7 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 	pbDep := &adminv1.Department{
 		Id:       int32(dep.ID),
 		ParentId: int32(dep.ParentID),
-		Name:     dep.Name,
+		Code:     dep.Code,
 		// I18NName:    dep.I18nName,
 		SortOrder: int32(dep.SortOrder),
 		Managers:  make([]*adminv1.DepartmentMember, 0),

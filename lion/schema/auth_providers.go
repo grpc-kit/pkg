@@ -16,7 +16,7 @@ type AuthProviders struct {
 // Fields of the table.
 func (AuthProviders) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").
+		field.String("code").
 			Unique().
 			Comment("认证提供方名称"),
 		field.Int("provider_type").

@@ -28,7 +28,7 @@ type Policies struct {
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 对我展示的权限名称，如：管理用户列表
-	Name string `json:"name,omitempty"`
+	Code string `json:"code,omitempty"`
 	// 国际化键值，用于前端多语言显示的标识符
 	DisplayName string `json:"display_name,omitempty"`
 	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
@@ -70,7 +70,7 @@ func (*Policies) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case policies.FieldID, policies.FieldCreatedBy, policies.FieldUpdatedBy, policies.FieldPolicyType, policies.FieldPolicyStatus:
 			values[i] = new(sql.NullInt64)
-		case policies.FieldName, policies.FieldDisplayName, policies.FieldValue, policies.FieldDescription:
+		case policies.FieldCode, policies.FieldDisplayName, policies.FieldValue, policies.FieldDescription:
 			values[i] = new(sql.NullString)
 		case policies.FieldCreatedAt, policies.FieldUpdatedAt, policies.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -126,11 +126,11 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case policies.FieldName:
+		case policies.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
-				_m.Name = value.String
+				_m.Code = value.String
 			}
 		case policies.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -220,8 +220,8 @@ func (_m *Policies) String() string {
 	builder.WriteString("updated_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
+	builder.WriteString("code=")
+	builder.WriteString(_m.Code)
 	builder.WriteString(", ")
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)

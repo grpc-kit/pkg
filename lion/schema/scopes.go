@@ -16,7 +16,7 @@ type Scopes struct {
 // Fields of the table.
 func (Scopes) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").
+		field.String("code").
 			Unique().
 			MaxLen(128).
 			NotEmpty().

@@ -94,9 +94,15 @@ func (_c *RolesCreate) SetNillableUpdatedBy(v *int64) *RolesCreate {
 	return _c
 }
 
-// SetName sets the "name" field.
-func (_c *RolesCreate) SetName(v string) *RolesCreate {
-	_c.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_c *RolesCreate) SetCode(v string) *RolesCreate {
+	_c.mutation.SetCode(v)
+	return _c
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_c *RolesCreate) SetDisplayName(v string) *RolesCreate {
+	_c.mutation.SetDisplayName(v)
 	return _c
 }
 
@@ -293,12 +299,20 @@ func (_c *RolesCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Roles.updated_at"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Roles.name"`)}
+	if _, ok := _c.mutation.Code(); !ok {
+		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "Roles.code"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := roles.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Roles.name": %w`, err)}
+	if v, ok := _c.mutation.Code(); ok {
+		if err := roles.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Roles.code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "Roles.display_name"`)}
+	}
+	if v, ok := _c.mutation.DisplayName(); ok {
+		if err := roles.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Roles.display_name": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.RoleType(); !ok {
@@ -359,9 +373,13 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 		_spec.SetField(roles.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(roles.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := _c.mutation.Code(); ok {
+		_spec.SetField(roles.FieldCode, field.TypeString, value)
+		_node.Code = value
+	}
+	if value, ok := _c.mutation.DisplayName(); ok {
+		_spec.SetField(roles.FieldDisplayName, field.TypeString, value)
+		_node.DisplayName = value
 	}
 	if value, ok := _c.mutation.RoleType(); ok {
 		_spec.SetField(roles.FieldRoleType, field.TypeInt, value)

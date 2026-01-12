@@ -93,9 +93,15 @@ func (_c *GroupsCreate) SetNillableUpdatedBy(v *int64) *GroupsCreate {
 	return _c
 }
 
-// SetName sets the "name" field.
-func (_c *GroupsCreate) SetName(v string) *GroupsCreate {
-	_c.mutation.SetName(v)
+// SetCode sets the "code" field.
+func (_c *GroupsCreate) SetCode(v string) *GroupsCreate {
+	_c.mutation.SetCode(v)
+	return _c
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_c *GroupsCreate) SetDisplayName(v string) *GroupsCreate {
+	_c.mutation.SetDisplayName(v)
 	return _c
 }
 
@@ -355,12 +361,20 @@ func (_c *GroupsCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Groups.updated_at"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Groups.name"`)}
+	if _, ok := _c.mutation.Code(); !ok {
+		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "Groups.code"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := groups.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Groups.name": %w`, err)}
+	if v, ok := _c.mutation.Code(); ok {
+		if err := groups.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Groups.code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "Groups.display_name"`)}
+	}
+	if v, ok := _c.mutation.DisplayName(); ok {
+		if err := groups.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Groups.display_name": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.GroupType(); !ok {
@@ -439,9 +453,13 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_spec.SetField(groups.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(groups.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := _c.mutation.Code(); ok {
+		_spec.SetField(groups.FieldCode, field.TypeString, value)
+		_node.Code = value
+	}
+	if value, ok := _c.mutation.DisplayName(); ok {
+		_spec.SetField(groups.FieldDisplayName, field.TypeString, value)
+		_node.DisplayName = value
 	}
 	if value, ok := _c.mutation.GroupType(); ok {
 		_spec.SetField(groups.FieldGroupType, field.TypeInt, value)

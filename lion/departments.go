@@ -30,8 +30,10 @@ type Departments struct {
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 父部门ID，构建树形组织结构，值为 0 表示顶级部门
 	ParentID int `json:"parent_id,omitempty"`
+	// 部门代号，用于系统内部显示和业务逻辑
+	Code string `json:"code,omitempty"`
 	// 部门名称，用于系统内部显示和业务逻辑
-	Name string `json:"name,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
 	// 部门类型分类：0-未指定，1-业务部门，2-支持部门，3-管理部门，4-虚拟部门
 	DepartmentType int `json:"department_type,omitempty"`
 	// 部门运营状态：0-未指定，1-正常运营，2-暂停运营，3-已解散，4-合并中
@@ -111,7 +113,7 @@ func (*Departments) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case departments.FieldID, departments.FieldCreatedBy, departments.FieldUpdatedBy, departments.FieldParentID, departments.FieldDepartmentType, departments.FieldDepartmentStatus, departments.FieldSortOrder, departments.FieldMaxMembers:
 			values[i] = new(sql.NullInt64)
-		case departments.FieldName, departments.FieldCostCenterCode, departments.FieldBudgetItemCode, departments.FieldExternalID, departments.FieldDescription:
+		case departments.FieldCode, departments.FieldDisplayName, departments.FieldCostCenterCode, departments.FieldBudgetItemCode, departments.FieldExternalID, departments.FieldDescription:
 			values[i] = new(sql.NullString)
 		case departments.FieldCreatedAt, departments.FieldUpdatedAt, departments.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -173,11 +175,17 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ParentID = int(value.Int64)
 			}
-		case departments.FieldName:
+		case departments.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
-				_m.Name = value.String
+				_m.Code = value.String
+			}
+		case departments.FieldDisplayName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
+			} else if value.Valid {
+				_m.DisplayName = value.String
 			}
 		case departments.FieldDepartmentType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -324,8 +332,11 @@ func (_m *Departments) String() string {
 	builder.WriteString("parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
+	builder.WriteString("code=")
+	builder.WriteString(_m.Code)
+	builder.WriteString(", ")
+	builder.WriteString("display_name=")
+	builder.WriteString(_m.DisplayName)
 	builder.WriteString(", ")
 	builder.WriteString("department_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentType))
