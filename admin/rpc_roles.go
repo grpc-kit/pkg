@@ -29,6 +29,7 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 	defaultSelect := []string{
 		roles.FieldID,
 		roles.FieldCode,
+		roles.FieldDisplayName,
 		roles.FieldRoleType,
 		roles.FieldRoleStatus,
 		roles.FieldSortOrder,
@@ -81,6 +82,7 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 		result.Roles = append(result.Roles, &adminv1.Role{
 			Id:          int32(r.ID),
 			Code:        r.Code,
+			DisplayName: r.DisplayName,
 			Type:        adminv1.Role_Type(r.RoleType),
 			Status:      adminv1.Role_Status(r.RoleStatus),
 			SortOrder:   int32(r.SortOrder),
