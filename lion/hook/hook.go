@@ -81,6 +81,18 @@ func (f PermissionsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.PermissionsMutation", m)
 }
 
+// The PermissionsBindingsFunc type is an adapter to allow the use of ordinary
+// function as PermissionsBindings mutator.
+type PermissionsBindingsFunc func(context.Context, *lion.PermissionsBindingsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PermissionsBindingsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.PermissionsBindingsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.PermissionsBindingsMutation", m)
+}
+
 // The PoliciesFunc type is an adapter to allow the use of ordinary
 // function as Policies mutator.
 type PoliciesFunc func(context.Context, *lion.PoliciesMutation) (lion.Value, error)

@@ -24,6 +24,8 @@ type Tx struct {
 	Groups *GroupsClient
 	// Permissions is the client for interacting with the Permissions builders.
 	Permissions *PermissionsClient
+	// PermissionsBindings is the client for interacting with the PermissionsBindings builders.
+	PermissionsBindings *PermissionsBindingsClient
 	// Policies is the client for interacting with the Policies builders.
 	Policies *PoliciesClient
 	// ResourceScopes is the client for interacting with the ResourceScopes builders.
@@ -187,6 +189,7 @@ func (tx *Tx) init() {
 	tx.GroupRoles = NewGroupRolesClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Permissions = NewPermissionsClient(tx.config)
+	tx.PermissionsBindings = NewPermissionsBindingsClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
 	tx.ResourceScopes = NewResourceScopesClient(tx.config)
 	tx.Resources = NewResourcesClient(tx.config)

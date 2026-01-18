@@ -17,6 +17,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/permissions"
+	"github.com/grpc-kit/pkg/lion/permissionsbindings"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
@@ -42,25 +43,26 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAuthProviders   = "AuthProviders"
-	TypeCredentials     = "Credentials"
-	TypeDepartments     = "Departments"
-	TypeGroupRoles      = "GroupRoles"
-	TypeGroups          = "Groups"
-	TypePermissions     = "Permissions"
-	TypePolicies        = "Policies"
-	TypeResourceScopes  = "ResourceScopes"
-	TypeResources       = "Resources"
-	TypeRoleDepartments = "RoleDepartments"
-	TypeRolePermissions = "RolePermissions"
-	TypeRoles           = "Roles"
-	TypeScopes          = "Scopes"
-	TypeUserDepartments = "UserDepartments"
-	TypeUserGroups      = "UserGroups"
-	TypeUserIdentities  = "UserIdentities"
-	TypeUserProfiles    = "UserProfiles"
-	TypeUserRoles       = "UserRoles"
-	TypeUsers           = "Users"
+	TypeAuthProviders       = "AuthProviders"
+	TypeCredentials         = "Credentials"
+	TypeDepartments         = "Departments"
+	TypeGroupRoles          = "GroupRoles"
+	TypeGroups              = "Groups"
+	TypePermissions         = "Permissions"
+	TypePermissionsBindings = "PermissionsBindings"
+	TypePolicies            = "Policies"
+	TypeResourceScopes      = "ResourceScopes"
+	TypeResources           = "Resources"
+	TypeRoleDepartments     = "RoleDepartments"
+	TypeRolePermissions     = "RolePermissions"
+	TypeRoles               = "Roles"
+	TypeScopes              = "Scopes"
+	TypeUserDepartments     = "UserDepartments"
+	TypeUserGroups          = "UserGroups"
+	TypeUserIdentities      = "UserIdentities"
+	TypeUserProfiles        = "UserProfiles"
+	TypeUserRoles           = "UserRoles"
+	TypeUsers               = "Users"
 )
 
 // AuthProvidersMutation represents an operation that mutates the AuthProviders nodes in the graph.
@@ -9364,6 +9366,639 @@ func (m *PermissionsMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Permissions edge %s", name)
+}
+
+// PermissionsBindingsMutation represents an operation that mutates the PermissionsBindings nodes in the graph.
+type PermissionsBindingsMutation struct {
+	config
+	op                   Op
+	typ                  string
+	id                   *int
+	created_at           *time.Time
+	updated_at           *time.Time
+	deleted_at           *time.Time
+	permission_id        *int
+	addpermission_id     *int
+	resource_scope_id    *int
+	addresource_scope_id *int
+	clearedFields        map[string]struct{}
+	done                 bool
+	oldValue             func(context.Context) (*PermissionsBindings, error)
+	predicates           []predicate.PermissionsBindings
+}
+
+var _ ent.Mutation = (*PermissionsBindingsMutation)(nil)
+
+// permissionsbindingsOption allows management of the mutation configuration using functional options.
+type permissionsbindingsOption func(*PermissionsBindingsMutation)
+
+// newPermissionsBindingsMutation creates new mutation for the PermissionsBindings entity.
+func newPermissionsBindingsMutation(c config, op Op, opts ...permissionsbindingsOption) *PermissionsBindingsMutation {
+	m := &PermissionsBindingsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePermissionsBindings,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPermissionsBindingsID sets the ID field of the mutation.
+func withPermissionsBindingsID(id int) permissionsbindingsOption {
+	return func(m *PermissionsBindingsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PermissionsBindings
+		)
+		m.oldValue = func(ctx context.Context) (*PermissionsBindings, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PermissionsBindings.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPermissionsBindings sets the old PermissionsBindings of the mutation.
+func withPermissionsBindings(node *PermissionsBindings) permissionsbindingsOption {
+	return func(m *PermissionsBindingsMutation) {
+		m.oldValue = func(context.Context) (*PermissionsBindings, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PermissionsBindingsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PermissionsBindingsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("lion: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PermissionsBindingsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PermissionsBindingsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PermissionsBindings.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *PermissionsBindingsMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *PermissionsBindingsMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the PermissionsBindings entity.
+// If the PermissionsBindings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PermissionsBindingsMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *PermissionsBindingsMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *PermissionsBindingsMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *PermissionsBindingsMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the PermissionsBindings entity.
+// If the PermissionsBindings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PermissionsBindingsMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *PermissionsBindingsMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *PermissionsBindingsMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *PermissionsBindingsMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the PermissionsBindings entity.
+// If the PermissionsBindings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PermissionsBindingsMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *PermissionsBindingsMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[permissionsbindings.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *PermissionsBindingsMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[permissionsbindings.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *PermissionsBindingsMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, permissionsbindings.FieldDeletedAt)
+}
+
+// SetPermissionID sets the "permission_id" field.
+func (m *PermissionsBindingsMutation) SetPermissionID(i int) {
+	m.permission_id = &i
+	m.addpermission_id = nil
+}
+
+// PermissionID returns the value of the "permission_id" field in the mutation.
+func (m *PermissionsBindingsMutation) PermissionID() (r int, exists bool) {
+	v := m.permission_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPermissionID returns the old "permission_id" field's value of the PermissionsBindings entity.
+// If the PermissionsBindings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PermissionsBindingsMutation) OldPermissionID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPermissionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPermissionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPermissionID: %w", err)
+	}
+	return oldValue.PermissionID, nil
+}
+
+// AddPermissionID adds i to the "permission_id" field.
+func (m *PermissionsBindingsMutation) AddPermissionID(i int) {
+	if m.addpermission_id != nil {
+		*m.addpermission_id += i
+	} else {
+		m.addpermission_id = &i
+	}
+}
+
+// AddedPermissionID returns the value that was added to the "permission_id" field in this mutation.
+func (m *PermissionsBindingsMutation) AddedPermissionID() (r int, exists bool) {
+	v := m.addpermission_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPermissionID resets all changes to the "permission_id" field.
+func (m *PermissionsBindingsMutation) ResetPermissionID() {
+	m.permission_id = nil
+	m.addpermission_id = nil
+}
+
+// SetResourceScopeID sets the "resource_scope_id" field.
+func (m *PermissionsBindingsMutation) SetResourceScopeID(i int) {
+	m.resource_scope_id = &i
+	m.addresource_scope_id = nil
+}
+
+// ResourceScopeID returns the value of the "resource_scope_id" field in the mutation.
+func (m *PermissionsBindingsMutation) ResourceScopeID() (r int, exists bool) {
+	v := m.resource_scope_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldResourceScopeID returns the old "resource_scope_id" field's value of the PermissionsBindings entity.
+// If the PermissionsBindings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PermissionsBindingsMutation) OldResourceScopeID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldResourceScopeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldResourceScopeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldResourceScopeID: %w", err)
+	}
+	return oldValue.ResourceScopeID, nil
+}
+
+// AddResourceScopeID adds i to the "resource_scope_id" field.
+func (m *PermissionsBindingsMutation) AddResourceScopeID(i int) {
+	if m.addresource_scope_id != nil {
+		*m.addresource_scope_id += i
+	} else {
+		m.addresource_scope_id = &i
+	}
+}
+
+// AddedResourceScopeID returns the value that was added to the "resource_scope_id" field in this mutation.
+func (m *PermissionsBindingsMutation) AddedResourceScopeID() (r int, exists bool) {
+	v := m.addresource_scope_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetResourceScopeID resets all changes to the "resource_scope_id" field.
+func (m *PermissionsBindingsMutation) ResetResourceScopeID() {
+	m.resource_scope_id = nil
+	m.addresource_scope_id = nil
+}
+
+// Where appends a list predicates to the PermissionsBindingsMutation builder.
+func (m *PermissionsBindingsMutation) Where(ps ...predicate.PermissionsBindings) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PermissionsBindingsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PermissionsBindingsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PermissionsBindings, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PermissionsBindingsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PermissionsBindingsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PermissionsBindings).
+func (m *PermissionsBindingsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PermissionsBindingsMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.created_at != nil {
+		fields = append(fields, permissionsbindings.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, permissionsbindings.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, permissionsbindings.FieldDeletedAt)
+	}
+	if m.permission_id != nil {
+		fields = append(fields, permissionsbindings.FieldPermissionID)
+	}
+	if m.resource_scope_id != nil {
+		fields = append(fields, permissionsbindings.FieldResourceScopeID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PermissionsBindingsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case permissionsbindings.FieldCreatedAt:
+		return m.CreatedAt()
+	case permissionsbindings.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case permissionsbindings.FieldDeletedAt:
+		return m.DeletedAt()
+	case permissionsbindings.FieldPermissionID:
+		return m.PermissionID()
+	case permissionsbindings.FieldResourceScopeID:
+		return m.ResourceScopeID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PermissionsBindingsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case permissionsbindings.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case permissionsbindings.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case permissionsbindings.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case permissionsbindings.FieldPermissionID:
+		return m.OldPermissionID(ctx)
+	case permissionsbindings.FieldResourceScopeID:
+		return m.OldResourceScopeID(ctx)
+	}
+	return nil, fmt.Errorf("unknown PermissionsBindings field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PermissionsBindingsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case permissionsbindings.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case permissionsbindings.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case permissionsbindings.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case permissionsbindings.FieldPermissionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPermissionID(v)
+		return nil
+	case permissionsbindings.FieldResourceScopeID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetResourceScopeID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PermissionsBindings field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PermissionsBindingsMutation) AddedFields() []string {
+	var fields []string
+	if m.addpermission_id != nil {
+		fields = append(fields, permissionsbindings.FieldPermissionID)
+	}
+	if m.addresource_scope_id != nil {
+		fields = append(fields, permissionsbindings.FieldResourceScopeID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PermissionsBindingsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case permissionsbindings.FieldPermissionID:
+		return m.AddedPermissionID()
+	case permissionsbindings.FieldResourceScopeID:
+		return m.AddedResourceScopeID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PermissionsBindingsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case permissionsbindings.FieldPermissionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPermissionID(v)
+		return nil
+	case permissionsbindings.FieldResourceScopeID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddResourceScopeID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PermissionsBindings numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PermissionsBindingsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(permissionsbindings.FieldDeletedAt) {
+		fields = append(fields, permissionsbindings.FieldDeletedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PermissionsBindingsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PermissionsBindingsMutation) ClearField(name string) error {
+	switch name {
+	case permissionsbindings.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown PermissionsBindings nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PermissionsBindingsMutation) ResetField(name string) error {
+	switch name {
+	case permissionsbindings.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case permissionsbindings.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case permissionsbindings.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case permissionsbindings.FieldPermissionID:
+		m.ResetPermissionID()
+		return nil
+	case permissionsbindings.FieldResourceScopeID:
+		m.ResetResourceScopeID()
+		return nil
+	}
+	return fmt.Errorf("unknown PermissionsBindings field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PermissionsBindingsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PermissionsBindingsMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PermissionsBindingsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PermissionsBindingsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PermissionsBindingsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PermissionsBindingsMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PermissionsBindingsMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown PermissionsBindings unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PermissionsBindingsMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown PermissionsBindings edge %s", name)
 }
 
 // PoliciesMutation represents an operation that mutates the Policies nodes in the graph.

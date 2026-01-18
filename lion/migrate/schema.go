@@ -222,6 +222,21 @@ var (
 			},
 		},
 	}
+	// LionPermissionBindingsColumns holds the columns for the "lion_permission_bindings" table.
+	LionPermissionBindingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "permission_id", Type: field.TypeInt},
+		{Name: "resource_scope_id", Type: field.TypeInt},
+	}
+	// LionPermissionBindingsTable holds the schema information for the "lion_permission_bindings" table.
+	LionPermissionBindingsTable = &schema.Table{
+		Name:       "lion_permission_bindings",
+		Columns:    LionPermissionBindingsColumns,
+		PrimaryKey: []*schema.Column{LionPermissionBindingsColumns[0]},
+	}
 	// LionPoliciesColumns holds the columns for the "lion_policies" table.
 	LionPoliciesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -767,6 +782,7 @@ var (
 		LionGroupRolesTable,
 		LionGroupsTable,
 		LionPermissionsTable,
+		LionPermissionBindingsTable,
 		LionPoliciesTable,
 		LionResourceScopesTable,
 		LionResourcesTable,
@@ -806,6 +822,9 @@ func init() {
 	LionPermissionsTable.ForeignKeys[1].RefTable = LionResourceScopesTable
 	LionPermissionsTable.Annotation = &entsql.Annotation{
 		Table: "lion_permissions",
+	}
+	LionPermissionBindingsTable.Annotation = &entsql.Annotation{
+		Table: "lion_permission_bindings",
 	}
 	LionPoliciesTable.Annotation = &entsql.Annotation{
 		Table: "lion_policies",

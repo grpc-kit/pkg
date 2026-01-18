@@ -11,6 +11,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/permissions"
+	"github.com/grpc-kit/pkg/lion/permissionsbindings"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
@@ -415,6 +416,29 @@ func init() {
 	permissionsDescDescription := permissionsFields[4].Descriptor()
 	// permissions.DefaultDescription holds the default value on creation for the description field.
 	permissions.DefaultDescription = permissionsDescDescription.Default.(string)
+	permissionsbindingsMixin := schema.PermissionsBindings{}.Mixin()
+	permissionsbindingsMixinFields0 := permissionsbindingsMixin[0].Fields()
+	_ = permissionsbindingsMixinFields0
+	permissionsbindingsFields := schema.PermissionsBindings{}.Fields()
+	_ = permissionsbindingsFields
+	// permissionsbindingsDescCreatedAt is the schema descriptor for created_at field.
+	permissionsbindingsDescCreatedAt := permissionsbindingsMixinFields0[0].Descriptor()
+	// permissionsbindings.DefaultCreatedAt holds the default value on creation for the created_at field.
+	permissionsbindings.DefaultCreatedAt = permissionsbindingsDescCreatedAt.Default.(func() time.Time)
+	// permissionsbindingsDescUpdatedAt is the schema descriptor for updated_at field.
+	permissionsbindingsDescUpdatedAt := permissionsbindingsMixinFields0[1].Descriptor()
+	// permissionsbindings.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	permissionsbindings.DefaultUpdatedAt = permissionsbindingsDescUpdatedAt.Default.(func() time.Time)
+	// permissionsbindings.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	permissionsbindings.UpdateDefaultUpdatedAt = permissionsbindingsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// permissionsbindingsDescPermissionID is the schema descriptor for permission_id field.
+	permissionsbindingsDescPermissionID := permissionsbindingsFields[0].Descriptor()
+	// permissionsbindings.PermissionIDValidator is a validator for the "permission_id" field. It is called by the builders before save.
+	permissionsbindings.PermissionIDValidator = permissionsbindingsDescPermissionID.Validators[0].(func(int) error)
+	// permissionsbindingsDescResourceScopeID is the schema descriptor for resource_scope_id field.
+	permissionsbindingsDescResourceScopeID := permissionsbindingsFields[1].Descriptor()
+	// permissionsbindings.ResourceScopeIDValidator is a validator for the "resource_scope_id" field. It is called by the builders before save.
+	permissionsbindings.ResourceScopeIDValidator = permissionsbindingsDescResourceScopeID.Validators[0].(func(int) error)
 	policiesMixin := schema.Policies{}.Mixin()
 	policiesMixinFields0 := policiesMixin[0].Fields()
 	_ = policiesMixinFields0
