@@ -34,10 +34,20 @@ type KnownAdminClient interface {
 	GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error)
 	CreateAuthProvider(ctx context.Context, in *CreateAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error)
 	// 资源管理
+	GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*Resource, error)
 	ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error)
 	CreateResource(ctx context.Context, in *CreateResourceRequest, opts ...grpc.CallOption) (*Resource, error)
 	UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*Resource, error)
 	DeleteResource(ctx context.Context, in *DeleteResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	CreateResourceScopes(ctx context.Context, in *CreateResourceScopesRequest, opts ...grpc.CallOption) (*CreateResourceScopesResponse, error)
+	// 作用域管理
+	ListScopes(ctx context.Context, in *ListScopesRequest, opts ...grpc.CallOption) (*ListScopesResponse, error)
+	CreateScope(ctx context.Context, in *CreateScopeRequest, opts ...grpc.CallOption) (*Scope, error)
+	UpdateScope(ctx context.Context, in *UpdateScopeRequest, opts ...grpc.CallOption) (*Scope, error)
+	DeleteScope(ctx context.Context, in *DeleteScopeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ListScopeResources(ctx context.Context, in *ListScopeResourcesRequest, opts ...grpc.CallOption) (*ListScopeResourcesResponse, error)
+	DeleteScopeResource(ctx context.Context, in *DeleteScopeResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	CreateScopeResources(ctx context.Context, in *CreateScopeResourcesRequest, opts ...grpc.CallOption) (*CreateScopeResourcesResponse, error)
 	// 角色相关
 	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error)
 	UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*Role, error)
@@ -160,6 +170,15 @@ func (c *knownAdminClient) CreateAuthProvider(ctx context.Context, in *CreateAut
 	return out, nil
 }
 
+func (c *knownAdminClient) GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*Resource, error) {
+	out := new(Resource)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error) {
 	out := new(ListResourcesResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResources", in, out, opts...)
@@ -190,6 +209,78 @@ func (c *knownAdminClient) UpdateResource(ctx context.Context, in *UpdateResourc
 func (c *knownAdminClient) DeleteResource(ctx context.Context, in *DeleteResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateResourceScopes(ctx context.Context, in *CreateResourceScopesRequest, opts ...grpc.CallOption) (*CreateResourceScopesResponse, error) {
+	out := new(CreateResourceScopesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceScopes", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ListScopes(ctx context.Context, in *ListScopesRequest, opts ...grpc.CallOption) (*ListScopesResponse, error) {
+	out := new(ListScopesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopes", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateScope(ctx context.Context, in *CreateScopeRequest, opts ...grpc.CallOption) (*Scope, error) {
+	out := new(Scope)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScope", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateScope(ctx context.Context, in *UpdateScopeRequest, opts ...grpc.CallOption) (*Scope, error) {
+	out := new(Scope)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateScope", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteScope(ctx context.Context, in *DeleteScopeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScope", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ListScopeResources(ctx context.Context, in *ListScopeResourcesRequest, opts ...grpc.CallOption) (*ListScopeResourcesResponse, error) {
+	out := new(ListScopeResourcesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopeResources", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteScopeResource(ctx context.Context, in *DeleteScopeResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScopeResource", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateScopeResources(ctx context.Context, in *CreateScopeResourcesRequest, opts ...grpc.CallOption) (*CreateScopeResourcesResponse, error) {
+	out := new(CreateScopeResourcesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScopeResources", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -508,10 +599,20 @@ type KnownAdminServer interface {
 	GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error)
 	CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error)
 	// 资源管理
+	GetResource(context.Context, *GetResourceRequest) (*Resource, error)
 	ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error)
 	CreateResource(context.Context, *CreateResourceRequest) (*Resource, error)
 	UpdateResource(context.Context, *UpdateResourceRequest) (*Resource, error)
 	DeleteResource(context.Context, *DeleteResourceRequest) (*emptypb.Empty, error)
+	CreateResourceScopes(context.Context, *CreateResourceScopesRequest) (*CreateResourceScopesResponse, error)
+	// 作用域管理
+	ListScopes(context.Context, *ListScopesRequest) (*ListScopesResponse, error)
+	CreateScope(context.Context, *CreateScopeRequest) (*Scope, error)
+	UpdateScope(context.Context, *UpdateScopeRequest) (*Scope, error)
+	DeleteScope(context.Context, *DeleteScopeRequest) (*emptypb.Empty, error)
+	ListScopeResources(context.Context, *ListScopeResourcesRequest) (*ListScopeResourcesResponse, error)
+	DeleteScopeResource(context.Context, *DeleteScopeResourceRequest) (*emptypb.Empty, error)
+	CreateScopeResources(context.Context, *CreateScopeResourcesRequest) (*CreateScopeResourcesResponse, error)
 	// 角色相关
 	CreateRole(context.Context, *CreateRoleRequest) (*Role, error)
 	UpdateRole(context.Context, *UpdateRoleRequest) (*Role, error)
@@ -582,6 +683,9 @@ func (UnimplementedKnownAdminServer) GetAuthCallback(context.Context, *GetAuthCa
 func (UnimplementedKnownAdminServer) CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthProvider not implemented")
 }
+func (UnimplementedKnownAdminServer) GetResource(context.Context, *GetResourceRequest) (*Resource, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetResource not implemented")
+}
 func (UnimplementedKnownAdminServer) ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListResources not implemented")
 }
@@ -593,6 +697,30 @@ func (UnimplementedKnownAdminServer) UpdateResource(context.Context, *UpdateReso
 }
 func (UnimplementedKnownAdminServer) DeleteResource(context.Context, *DeleteResourceRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteResource not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateResourceScopes(context.Context, *CreateResourceScopesRequest) (*CreateResourceScopesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateResourceScopes not implemented")
+}
+func (UnimplementedKnownAdminServer) ListScopes(context.Context, *ListScopesRequest) (*ListScopesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListScopes not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateScope(context.Context, *CreateScopeRequest) (*Scope, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateScope not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateScope(context.Context, *UpdateScopeRequest) (*Scope, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateScope not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteScope(context.Context, *DeleteScopeRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteScope not implemented")
+}
+func (UnimplementedKnownAdminServer) ListScopeResources(context.Context, *ListScopeResourcesRequest) (*ListScopeResourcesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListScopeResources not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteScopeResource(context.Context, *DeleteScopeResourceRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteScopeResource not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateScopeResources(context.Context, *CreateScopeResourcesRequest) (*CreateScopeResourcesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateScopeResources not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateRole(context.Context, *CreateRoleRequest) (*Role, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRole not implemented")
@@ -849,6 +977,24 @@ func _KnownAdmin_CreateAuthProvider_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_GetResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetResource(ctx, req.(*GetResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_ListResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListResourcesRequest)
 	if err := dec(in); err != nil {
@@ -917,6 +1063,150 @@ func _KnownAdmin_DeleteResource_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).DeleteResource(ctx, req.(*DeleteResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateResourceScopes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateResourceScopesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateResourceScopes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceScopes",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateResourceScopes(ctx, req.(*CreateResourceScopesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListScopes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListScopesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListScopes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopes",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListScopes(ctx, req.(*ListScopesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateScopeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateScope(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScope",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateScope(ctx, req.(*CreateScopeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateScopeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateScope(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateScope",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateScope(ctx, req.(*UpdateScopeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteScopeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteScope(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScope",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteScope(ctx, req.(*DeleteScopeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListScopeResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListScopeResourcesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListScopeResources(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopeResources",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListScopeResources(ctx, req.(*ListScopeResourcesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteScopeResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteScopeResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteScopeResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScopeResource",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteScopeResource(ctx, req.(*DeleteScopeResourceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateScopeResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateScopeResourcesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateScopeResources(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScopeResources",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateScopeResources(ctx, req.(*CreateScopeResourcesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1555,6 +1845,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_CreateAuthProvider_Handler,
 		},
 		{
+			MethodName: "GetResource",
+			Handler:    _KnownAdmin_GetResource_Handler,
+		},
+		{
 			MethodName: "ListResources",
 			Handler:    _KnownAdmin_ListResources_Handler,
 		},
@@ -1569,6 +1863,38 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteResource",
 			Handler:    _KnownAdmin_DeleteResource_Handler,
+		},
+		{
+			MethodName: "CreateResourceScopes",
+			Handler:    _KnownAdmin_CreateResourceScopes_Handler,
+		},
+		{
+			MethodName: "ListScopes",
+			Handler:    _KnownAdmin_ListScopes_Handler,
+		},
+		{
+			MethodName: "CreateScope",
+			Handler:    _KnownAdmin_CreateScope_Handler,
+		},
+		{
+			MethodName: "UpdateScope",
+			Handler:    _KnownAdmin_UpdateScope_Handler,
+		},
+		{
+			MethodName: "DeleteScope",
+			Handler:    _KnownAdmin_DeleteScope_Handler,
+		},
+		{
+			MethodName: "ListScopeResources",
+			Handler:    _KnownAdmin_ListScopeResources_Handler,
+		},
+		{
+			MethodName: "DeleteScopeResource",
+			Handler:    _KnownAdmin_DeleteScopeResource_Handler,
+		},
+		{
+			MethodName: "CreateScopeResources",
+			Handler:    _KnownAdmin_CreateScopeResources_Handler,
 		},
 		{
 			MethodName: "CreateRole",

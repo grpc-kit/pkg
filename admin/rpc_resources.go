@@ -198,9 +198,41 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	resourceQuery = resourceQuery.Limit(int(pageSize))
 
 	// 执行查询
+	// 如果 View 为 FULL，需要预加载作用域信息
+	if req.View == adminv1.View_FULL {
+		resourceQuery = resourceQuery.WithLionResourceScopes(
+			func(query *lion.ResourceScopesQuery) {
+				query.WithLionScopes()
+			},
+		)
+	}
+
 	resList, err := resourceQuery.All(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	// 如果 View 为 FULL，收集作用域信息
+	var resourceScopesMap map[int][]*adminv1.Scope
+	if req.View == adminv1.View_FULL {
+		resourceScopesMap = make(map[int][]*adminv1.Scope)
+		for _, res := range resList {
+			if res.Edges.LionResourceScopes != nil {
+				scopes := make([]*adminv1.Scope, 0)
+				for _, rs := range res.Edges.LionResourceScopes {
+					if rs.Edges.LionScopes != nil {
+						s := rs.Edges.LionScopes
+						scopes = append(scopes, &adminv1.Scope{
+							Id:          int64(s.ID),
+							Code:        s.Code,
+							DisplayName: s.DisplayName,
+							Type:        adminv1.Scope_Type(s.ScopeType),
+						})
+					}
+				}
+				resourceScopesMap[res.ID] = scopes
+			}
+		}
 	}
 
 	switch req.Structure.String() {
@@ -232,6 +264,13 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 				UpdatedAt: timestamppb.New(m.UpdatedAt),
 			}
 
+			// 如果 View 为 FULL，填充作用域列表
+			if req.View == adminv1.View_FULL {
+				if scopes, ok := resourceScopesMap[m.ID]; ok {
+					menu.Scopes = scopes
+				}
+			}
+
 			menuMap[int64(m.ID)] = menu
 		}
 
@@ -254,7 +293,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 		result.Resources = roots
 	default:
 		for _, m := range resList {
-			result.Resources = append(result.Resources, &adminv1.Resource{
+			resource := &adminv1.Resource{
 				Id:          int64(m.ID),
 				ParentId:    m.ParentID,
 				Code:        m.Code,
@@ -273,7 +312,16 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 				Manifest:  m.Manifest,
 				CreatedAt: timestamppb.New(m.CreatedAt),
 				UpdatedAt: timestamppb.New(m.UpdatedAt),
-			})
+			}
+
+			// 如果 View 为 FULL，填充作用域列表
+			if req.View == adminv1.View_FULL {
+				if scopes, ok := resourceScopesMap[m.ID]; ok {
+					resource.Scopes = scopes
+				}
+			}
+
+			result.Resources = append(result.Resources, resource)
 		}
 	}
 
@@ -506,4 +554,177 @@ func (a *KnownAdminAPI) DeleteResource(ctx context.Context, req *adminv1.DeleteR
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+// CreateResourceScopes 创建资源与多个作用域的关联
+func (a *KnownAdminAPI) CreateResourceScopes(ctx context.Context, req *adminv1.CreateResourceScopesRequest) (*adminv1.CreateResourceScopesResponse, error) {
+	result := &adminv1.CreateResourceScopesResponse{}
+
+	if req.ResourceId == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("resource_id is required")
+	}
+
+	if len(req.Scopes) == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("scopes list is empty")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	// 检查资源是否存在
+	_, err = db.Resources.Get(ctx, int(req.ResourceId))
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("resource not found")
+	}
+
+	// 收集有效的 scope IDs 并验证每个 scope 是否存在
+	scopeIDs := make([]int, 0, len(req.Scopes))
+	scopeIDMap := make(map[int64]*adminv1.Scope)
+
+	for _, scope := range req.Scopes {
+		if scope.Id == 0 {
+			continue
+		}
+
+		// 检查作用域是否存在
+		dbScope, err := db.Scopes.Get(ctx, int(scope.Id))
+		if err != nil {
+			// 如果某个 scope 不存在，可以选择跳过或返回错误
+			// 这里选择跳过不存在的 scope
+			continue
+		}
+
+		scopeIDs = append(scopeIDs, dbScope.ID)
+		// 保存 scope 信息以便后续返回
+		scopeIDMap[scope.Id] = &adminv1.Scope{
+			Id:          int64(dbScope.ID),
+			Code:        dbScope.Code,
+			DisplayName: dbScope.DisplayName,
+			Type:        adminv1.Scope_Type(dbScope.ScopeType),
+		}
+	}
+
+	if len(scopeIDs) == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("no valid scopes found")
+	}
+
+	// 检查是否已存在关联关系，如果存在则跳过
+	existingResourceScopes, err := db.ResourceScopes.Query().
+		Where(
+			resourcescopes.ResourceIDEQ(int(req.ResourceId)),
+			resourcescopes.ScopeIDIn(scopeIDs...),
+		).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 构建已存在的 scope ID 集合
+	existingScopeIDSet := make(map[int]bool)
+	for _, rs := range existingResourceScopes {
+		existingScopeIDSet[rs.ScopeID] = true
+	}
+
+	// 过滤出需要创建的 scope IDs（排除已存在的）
+	scopesToCreate := make([]int, 0)
+	for _, scopeID := range scopeIDs {
+		if !existingScopeIDSet[scopeID] {
+			scopesToCreate = append(scopesToCreate, scopeID)
+		}
+	}
+
+	// 批量创建关联关系
+	if len(scopesToCreate) > 0 {
+		allResourceScopes := make([]*lion.ResourceScopesCreate, 0, len(scopesToCreate))
+
+		for _, scopeID := range scopesToCreate {
+			rs := db.ResourceScopes.Create().
+				SetResourceID(int(req.ResourceId)).
+				SetScopeID(scopeID)
+
+			allResourceScopes = append(allResourceScopes, rs)
+		}
+
+		_, err = db.ResourceScopes.CreateBulk(allResourceScopes...).Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// 返回所有关联的作用域（包括已存在的和新创建的）
+	for _, scope := range req.Scopes {
+		if scope.Id != 0 {
+			if s, ok := scopeIDMap[scope.Id]; ok {
+				result.Scopes = append(result.Scopes, s)
+			}
+		}
+	}
+
+	return result, nil
+}
+
+// GetResource 获取单个资源的详细信息
+func (a *KnownAdminAPI) GetResource(ctx context.Context, req *adminv1.GetResourceRequest) (*adminv1.Resource, error) {
+	if req.Id == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("resource id is required")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	// 查询资源，并预加载作用域信息
+	resource, err := db.Resources.Query().
+		Where(resources.IDEQ(int(req.Id))).
+		WithLionResourceScopes(
+			func(query *lion.ResourceScopesQuery) {
+				query.WithLionScopes()
+			},
+		).
+		Only(ctx)
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("resource not found")
+	}
+
+	// 构建返回的资源对象
+	result := &adminv1.Resource{
+		Id:          int64(resource.ID),
+		ParentId:    resource.ParentID,
+		Code:        resource.Code,
+		DisplayName: resource.DisplayName,
+		SortOrder:   int32(resource.SortOrder),
+		Type:        adminv1.Resource_Type(resource.ResourceType),
+		Status:      adminv1.Resource_Status(resource.ResourceStatus),
+		Visibility:  adminv1.Resource_Visibility(resource.Visibility),
+		Locator:     resource.Locator,
+		Visual:      resource.Visual,
+		Manifest:    resource.Manifest,
+		Description: resource.Description,
+		CreatedBy:   resource.CreatedBy,
+		UpdatedBy:   resource.UpdatedBy,
+		CreatedAt:   timestamppb.New(resource.CreatedAt),
+		UpdatedAt:   timestamppb.New(resource.UpdatedAt),
+	}
+
+	// 加载关联的作用域列表
+	if resource.Edges.LionResourceScopes != nil {
+		scopes := make([]*adminv1.Scope, 0)
+		for _, rs := range resource.Edges.LionResourceScopes {
+			if rs.Edges.LionScopes != nil {
+				s := rs.Edges.LionScopes
+				scopes = append(scopes, &adminv1.Scope{
+					Id:          int64(s.ID),
+					Code:        s.Code,
+					DisplayName: s.DisplayName,
+					Type:        adminv1.Scope_Type(s.ScopeType),
+				})
+			}
+		}
+		result.Scopes = scopes
+	}
+
+	return result, nil
 }
