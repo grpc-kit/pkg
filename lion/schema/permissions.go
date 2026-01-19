@@ -39,6 +39,7 @@ func (Permissions) Fields() []ent.Field {
 func (Permissions) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("lion_role_permissions", RolePermissions.Type),
+		edge.To("lion_permission_bindings", PermissionBindings.Type),
 
 		edge.From("lion_resource_scopes", ResourceScopes.Type).
 			Ref("lion_permissions").

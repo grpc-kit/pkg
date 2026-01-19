@@ -218,6 +218,29 @@ func HasLionPermissionsWith(preds ...predicate.Permissions) predicate.ResourceSc
 	})
 }
 
+// HasLionPermissionBindings applies the HasEdge predicate on the "lion_permission_bindings" edge.
+func HasLionPermissionBindings() predicate.ResourceScopes {
+	return predicate.ResourceScopes(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionBindingsTable, LionPermissionBindingsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionPermissionBindingsWith applies the HasEdge predicate on the "lion_permission_bindings" edge with a given conditions (other predicates).
+func HasLionPermissionBindingsWith(preds ...predicate.PermissionBindings) predicate.ResourceScopes {
+	return predicate.ResourceScopes(func(s *sql.Selector) {
+		step := newLionPermissionBindingsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasLionResources applies the HasEdge predicate on the "lion_resources" edge.
 func HasLionResources() predicate.ResourceScopes {
 	return predicate.ResourceScopes(func(s *sql.Selector) {

@@ -47,13 +47,15 @@ type Permissions struct {
 type PermissionsEdges struct {
 	// LionRolePermissions holds the value of the lion_role_permissions edge.
 	LionRolePermissions []*RolePermissions `json:"lion_role_permissions,omitempty"`
+	// LionPermissionBindings holds the value of the lion_permission_bindings edge.
+	LionPermissionBindings []*PermissionBindings `json:"lion_permission_bindings,omitempty"`
 	// LionResourceScopes holds the value of the lion_resource_scopes edge.
 	LionResourceScopes *ResourceScopes `json:"lion_resource_scopes,omitempty"`
 	// LionPolicies holds the value of the lion_policies edge.
 	LionPolicies *Policies `json:"lion_policies,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // LionRolePermissionsOrErr returns the LionRolePermissions value or an error if the edge
@@ -65,12 +67,21 @@ func (e PermissionsEdges) LionRolePermissionsOrErr() ([]*RolePermissions, error)
 	return nil, &NotLoadedError{edge: "lion_role_permissions"}
 }
 
+// LionPermissionBindingsOrErr returns the LionPermissionBindings value or an error if the edge
+// was not loaded in eager-loading.
+func (e PermissionsEdges) LionPermissionBindingsOrErr() ([]*PermissionBindings, error) {
+	if e.loadedTypes[1] {
+		return e.LionPermissionBindings, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_permission_bindings"}
+}
+
 // LionResourceScopesOrErr returns the LionResourceScopes value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e PermissionsEdges) LionResourceScopesOrErr() (*ResourceScopes, error) {
 	if e.LionResourceScopes != nil {
 		return e.LionResourceScopes, nil
-	} else if e.loadedTypes[1] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: resourcescopes.Label}
 	}
 	return nil, &NotLoadedError{edge: "lion_resource_scopes"}
@@ -81,7 +92,7 @@ func (e PermissionsEdges) LionResourceScopesOrErr() (*ResourceScopes, error) {
 func (e PermissionsEdges) LionPoliciesOrErr() (*Policies, error) {
 	if e.LionPolicies != nil {
 		return e.LionPolicies, nil
-	} else if e.loadedTypes[2] {
+	} else if e.loadedTypes[3] {
 		return nil, &NotFoundError{label: policies.Label}
 	}
 	return nil, &NotLoadedError{edge: "lion_policies"}
@@ -189,6 +200,11 @@ func (_m *Permissions) Value(name string) (ent.Value, error) {
 // QueryLionRolePermissions queries the "lion_role_permissions" edge of the Permissions entity.
 func (_m *Permissions) QueryLionRolePermissions() *RolePermissionsQuery {
 	return NewPermissionsClient(_m.config).QueryLionRolePermissions(_m)
+}
+
+// QueryLionPermissionBindings queries the "lion_permission_bindings" edge of the Permissions entity.
+func (_m *Permissions) QueryLionPermissionBindings() *PermissionBindingsQuery {
+	return NewPermissionsClient(_m.config).QueryLionPermissionBindings(_m)
 }
 
 // QueryLionResourceScopes queries the "lion_resource_scopes" edge of the Permissions entity.

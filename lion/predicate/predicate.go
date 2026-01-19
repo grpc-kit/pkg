@@ -21,11 +21,11 @@ type GroupRoles func(*sql.Selector)
 // Groups is the predicate function for groups builders.
 type Groups func(*sql.Selector)
 
+// PermissionBindings is the predicate function for permissionbindings builders.
+type PermissionBindings func(*sql.Selector)
+
 // Permissions is the predicate function for permissions builders.
 type Permissions func(*sql.Selector)
-
-// PermissionsBindings is the predicate function for permissionsbindings builders.
-type PermissionsBindings func(*sql.Selector)
 
 // Policies is the predicate function for policies builders.
 type Policies func(*sql.Selector)

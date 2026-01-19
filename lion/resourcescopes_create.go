@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/permissionbindings"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
@@ -76,6 +77,21 @@ func (_c *ResourceScopesCreate) AddLionPermissions(v ...*Permissions) *ResourceS
 		ids[i] = v[i].ID
 	}
 	return _c.AddLionPermissionIDs(ids...)
+}
+
+// AddLionPermissionBindingIDs adds the "lion_permission_bindings" edge to the PermissionBindings entity by IDs.
+func (_c *ResourceScopesCreate) AddLionPermissionBindingIDs(ids ...int) *ResourceScopesCreate {
+	_c.mutation.AddLionPermissionBindingIDs(ids...)
+	return _c
+}
+
+// AddLionPermissionBindings adds the "lion_permission_bindings" edges to the PermissionBindings entity.
+func (_c *ResourceScopesCreate) AddLionPermissionBindings(v ...*PermissionBindings) *ResourceScopesCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionPermissionBindingIDs(ids...)
 }
 
 // SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
@@ -218,6 +234,22 @@ func (_c *ResourceScopesCreate) createSpec() (*ResourceScopes, *sqlgraph.CreateS
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionPermissionBindingsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionBindingsTable,
+			Columns: []string{resourcescopes.LionPermissionBindingsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissionbindings.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

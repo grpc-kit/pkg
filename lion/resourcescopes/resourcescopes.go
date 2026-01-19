@@ -24,6 +24,8 @@ const (
 	FieldScopeID = "scope_id"
 	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
 	EdgeLionPermissions = "lion_permissions"
+	// EdgeLionPermissionBindings holds the string denoting the lion_permission_bindings edge name in mutations.
+	EdgeLionPermissionBindings = "lion_permission_bindings"
 	// EdgeLionResources holds the string denoting the lion_resources edge name in mutations.
 	EdgeLionResources = "lion_resources"
 	// EdgeLionScopes holds the string denoting the lion_scopes edge name in mutations.
@@ -37,6 +39,13 @@ const (
 	LionPermissionsInverseTable = "lion_permissions"
 	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
 	LionPermissionsColumn = "resource_scope_id"
+	// LionPermissionBindingsTable is the table that holds the lion_permission_bindings relation/edge.
+	LionPermissionBindingsTable = "lion_permission_bindings"
+	// LionPermissionBindingsInverseTable is the table name for the PermissionBindings entity.
+	// It exists in this package in order to avoid circular dependency with the "permissionbindings" package.
+	LionPermissionBindingsInverseTable = "lion_permission_bindings"
+	// LionPermissionBindingsColumn is the table column denoting the lion_permission_bindings relation/edge.
+	LionPermissionBindingsColumn = "resource_scope_id"
 	// LionResourcesTable is the table that holds the lion_resources relation/edge.
 	LionResourcesTable = "lion_resource_scopes"
 	// LionResourcesInverseTable is the table name for the Resources entity.
@@ -127,6 +136,20 @@ func ByLionPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByLionPermissionBindingsCount orders the results by lion_permission_bindings count.
+func ByLionPermissionBindingsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionPermissionBindingsStep(), opts...)
+	}
+}
+
+// ByLionPermissionBindings orders the results by lion_permission_bindings terms.
+func ByLionPermissionBindings(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionPermissionBindingsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByLionResourcesField orders the results by lion_resources field.
 func ByLionResourcesField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -145,6 +168,13 @@ func newLionPermissionsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionPermissionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
+	)
+}
+func newLionPermissionBindingsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionPermissionBindingsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionBindingsTable, LionPermissionBindingsColumn),
 	)
 }
 func newLionResourcesStep() *sqlgraph.Step {

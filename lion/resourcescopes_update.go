@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/permissionbindings"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
@@ -80,6 +81,21 @@ func (_u *ResourceScopesUpdate) AddLionPermissions(v ...*Permissions) *ResourceS
 	return _u.AddLionPermissionIDs(ids...)
 }
 
+// AddLionPermissionBindingIDs adds the "lion_permission_bindings" edge to the PermissionBindings entity by IDs.
+func (_u *ResourceScopesUpdate) AddLionPermissionBindingIDs(ids ...int) *ResourceScopesUpdate {
+	_u.mutation.AddLionPermissionBindingIDs(ids...)
+	return _u
+}
+
+// AddLionPermissionBindings adds the "lion_permission_bindings" edges to the PermissionBindings entity.
+func (_u *ResourceScopesUpdate) AddLionPermissionBindings(v ...*PermissionBindings) *ResourceScopesUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionPermissionBindingIDs(ids...)
+}
+
 // SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
 func (_u *ResourceScopesUpdate) SetLionResourcesID(id int) *ResourceScopesUpdate {
 	_u.mutation.SetLionResourcesID(id)
@@ -126,6 +142,27 @@ func (_u *ResourceScopesUpdate) RemoveLionPermissions(v ...*Permissions) *Resour
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLionPermissionIDs(ids...)
+}
+
+// ClearLionPermissionBindings clears all "lion_permission_bindings" edges to the PermissionBindings entity.
+func (_u *ResourceScopesUpdate) ClearLionPermissionBindings() *ResourceScopesUpdate {
+	_u.mutation.ClearLionPermissionBindings()
+	return _u
+}
+
+// RemoveLionPermissionBindingIDs removes the "lion_permission_bindings" edge to PermissionBindings entities by IDs.
+func (_u *ResourceScopesUpdate) RemoveLionPermissionBindingIDs(ids ...int) *ResourceScopesUpdate {
+	_u.mutation.RemoveLionPermissionBindingIDs(ids...)
+	return _u
+}
+
+// RemoveLionPermissionBindings removes "lion_permission_bindings" edges to PermissionBindings entities.
+func (_u *ResourceScopesUpdate) RemoveLionPermissionBindings(v ...*PermissionBindings) *ResourceScopesUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionPermissionBindingIDs(ids...)
 }
 
 // ClearLionResources clears the "lion_resources" edge to the Resources entity.
@@ -250,6 +287,51 @@ func (_u *ResourceScopesUpdate) sqlSave(ctx context.Context) (_node int, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LionPermissionBindingsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionBindingsTable,
+			Columns: []string{resourcescopes.LionPermissionBindingsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissionbindings.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionPermissionBindingsIDs(); len(nodes) > 0 && !_u.mutation.LionPermissionBindingsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionBindingsTable,
+			Columns: []string{resourcescopes.LionPermissionBindingsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissionbindings.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionPermissionBindingsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionBindingsTable,
+			Columns: []string{resourcescopes.LionPermissionBindingsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissionbindings.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -384,6 +466,21 @@ func (_u *ResourceScopesUpdateOne) AddLionPermissions(v ...*Permissions) *Resour
 	return _u.AddLionPermissionIDs(ids...)
 }
 
+// AddLionPermissionBindingIDs adds the "lion_permission_bindings" edge to the PermissionBindings entity by IDs.
+func (_u *ResourceScopesUpdateOne) AddLionPermissionBindingIDs(ids ...int) *ResourceScopesUpdateOne {
+	_u.mutation.AddLionPermissionBindingIDs(ids...)
+	return _u
+}
+
+// AddLionPermissionBindings adds the "lion_permission_bindings" edges to the PermissionBindings entity.
+func (_u *ResourceScopesUpdateOne) AddLionPermissionBindings(v ...*PermissionBindings) *ResourceScopesUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionPermissionBindingIDs(ids...)
+}
+
 // SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
 func (_u *ResourceScopesUpdateOne) SetLionResourcesID(id int) *ResourceScopesUpdateOne {
 	_u.mutation.SetLionResourcesID(id)
@@ -430,6 +527,27 @@ func (_u *ResourceScopesUpdateOne) RemoveLionPermissions(v ...*Permissions) *Res
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLionPermissionIDs(ids...)
+}
+
+// ClearLionPermissionBindings clears all "lion_permission_bindings" edges to the PermissionBindings entity.
+func (_u *ResourceScopesUpdateOne) ClearLionPermissionBindings() *ResourceScopesUpdateOne {
+	_u.mutation.ClearLionPermissionBindings()
+	return _u
+}
+
+// RemoveLionPermissionBindingIDs removes the "lion_permission_bindings" edge to PermissionBindings entities by IDs.
+func (_u *ResourceScopesUpdateOne) RemoveLionPermissionBindingIDs(ids ...int) *ResourceScopesUpdateOne {
+	_u.mutation.RemoveLionPermissionBindingIDs(ids...)
+	return _u
+}
+
+// RemoveLionPermissionBindings removes "lion_permission_bindings" edges to PermissionBindings entities.
+func (_u *ResourceScopesUpdateOne) RemoveLionPermissionBindings(v ...*PermissionBindings) *ResourceScopesUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionPermissionBindingIDs(ids...)
 }
 
 // ClearLionResources clears the "lion_resources" edge to the Resources entity.
@@ -584,6 +702,51 @@ func (_u *ResourceScopesUpdateOne) sqlSave(ctx context.Context) (_node *Resource
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LionPermissionBindingsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionBindingsTable,
+			Columns: []string{resourcescopes.LionPermissionBindingsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissionbindings.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionPermissionBindingsIDs(); len(nodes) > 0 && !_u.mutation.LionPermissionBindingsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionBindingsTable,
+			Columns: []string{resourcescopes.LionPermissionBindingsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissionbindings.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionPermissionBindingsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resourcescopes.LionPermissionBindingsTable,
+			Columns: []string{resourcescopes.LionPermissionBindingsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permissionbindings.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
