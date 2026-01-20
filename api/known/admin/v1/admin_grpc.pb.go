@@ -48,6 +48,11 @@ type KnownAdminClient interface {
 	ListScopeResources(ctx context.Context, in *ListScopeResourcesRequest, opts ...grpc.CallOption) (*ListScopeResourcesResponse, error)
 	DeleteScopeResource(ctx context.Context, in *DeleteScopeResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CreateScopeResources(ctx context.Context, in *CreateScopeResourcesRequest, opts ...grpc.CallOption) (*CreateScopeResourcesResponse, error)
+	// 策略管理
+	ListPolicies(ctx context.Context, in *ListPoliciesRequest, opts ...grpc.CallOption) (*ListPoliciesResponse, error)
+	CreatePolicy(ctx context.Context, in *CreatePolicyRequest, opts ...grpc.CallOption) (*Policy, error)
+	UpdatePolicy(ctx context.Context, in *UpdatePolicyRequest, opts ...grpc.CallOption) (*Policy, error)
+	DeletePolicy(ctx context.Context, in *DeletePolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 角色相关
 	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error)
 	UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*Role, error)
@@ -281,6 +286,42 @@ func (c *knownAdminClient) DeleteScopeResource(ctx context.Context, in *DeleteSc
 func (c *knownAdminClient) CreateScopeResources(ctx context.Context, in *CreateScopeResourcesRequest, opts ...grpc.CallOption) (*CreateScopeResourcesResponse, error) {
 	out := new(CreateScopeResourcesResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScopeResources", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ListPolicies(ctx context.Context, in *ListPoliciesRequest, opts ...grpc.CallOption) (*ListPoliciesResponse, error) {
+	out := new(ListPoliciesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicies", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreatePolicy(ctx context.Context, in *CreatePolicyRequest, opts ...grpc.CallOption) (*Policy, error) {
+	out := new(Policy)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdatePolicy(ctx context.Context, in *UpdatePolicyRequest, opts ...grpc.CallOption) (*Policy, error) {
+	out := new(Policy)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeletePolicy(ctx context.Context, in *DeletePolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicy", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -613,6 +654,11 @@ type KnownAdminServer interface {
 	ListScopeResources(context.Context, *ListScopeResourcesRequest) (*ListScopeResourcesResponse, error)
 	DeleteScopeResource(context.Context, *DeleteScopeResourceRequest) (*emptypb.Empty, error)
 	CreateScopeResources(context.Context, *CreateScopeResourcesRequest) (*CreateScopeResourcesResponse, error)
+	// 策略管理
+	ListPolicies(context.Context, *ListPoliciesRequest) (*ListPoliciesResponse, error)
+	CreatePolicy(context.Context, *CreatePolicyRequest) (*Policy, error)
+	UpdatePolicy(context.Context, *UpdatePolicyRequest) (*Policy, error)
+	DeletePolicy(context.Context, *DeletePolicyRequest) (*emptypb.Empty, error)
 	// 角色相关
 	CreateRole(context.Context, *CreateRoleRequest) (*Role, error)
 	UpdateRole(context.Context, *UpdateRoleRequest) (*Role, error)
@@ -721,6 +767,18 @@ func (UnimplementedKnownAdminServer) DeleteScopeResource(context.Context, *Delet
 }
 func (UnimplementedKnownAdminServer) CreateScopeResources(context.Context, *CreateScopeResourcesRequest) (*CreateScopeResourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateScopeResources not implemented")
+}
+func (UnimplementedKnownAdminServer) ListPolicies(context.Context, *ListPoliciesRequest) (*ListPoliciesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPolicies not implemented")
+}
+func (UnimplementedKnownAdminServer) CreatePolicy(context.Context, *CreatePolicyRequest) (*Policy, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePolicy not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdatePolicy(context.Context, *UpdatePolicyRequest) (*Policy, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePolicy not implemented")
+}
+func (UnimplementedKnownAdminServer) DeletePolicy(context.Context, *DeletePolicyRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletePolicy not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateRole(context.Context, *CreateRoleRequest) (*Role, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRole not implemented")
@@ -1207,6 +1265,78 @@ func _KnownAdmin_CreateScopeResources_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).CreateScopeResources(ctx, req.(*CreateScopeResourcesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListPolicies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPoliciesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListPolicies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicies",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListPolicies(ctx, req.(*ListPoliciesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreatePolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreatePolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreatePolicy(ctx, req.(*CreatePolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdatePolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdatePolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdatePolicy(ctx, req.(*UpdatePolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeletePolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeletePolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeletePolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeletePolicy(ctx, req.(*DeletePolicyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1895,6 +2025,22 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateScopeResources",
 			Handler:    _KnownAdmin_CreateScopeResources_Handler,
+		},
+		{
+			MethodName: "ListPolicies",
+			Handler:    _KnownAdmin_ListPolicies_Handler,
+		},
+		{
+			MethodName: "CreatePolicy",
+			Handler:    _KnownAdmin_CreatePolicy_Handler,
+		},
+		{
+			MethodName: "UpdatePolicy",
+			Handler:    _KnownAdmin_UpdatePolicy_Handler,
+		},
+		{
+			MethodName: "DeletePolicy",
+			Handler:    _KnownAdmin_DeletePolicy_Handler,
 		},
 		{
 			MethodName: "CreateRole",
