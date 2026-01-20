@@ -22,8 +22,6 @@ const (
 	FieldCreatedBy = "created_by"
 	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
 	FieldUpdatedBy = "updated_by"
-	// FieldResourceScopeID holds the string denoting the resource_scope_id field in the database.
-	FieldResourceScopeID = "resource_scope_id"
 	// FieldPolicyID holds the string denoting the policy_id field in the database.
 	FieldPolicyID = "policy_id"
 	// FieldCode holds the string denoting the code field in the database.
@@ -36,8 +34,6 @@ const (
 	EdgeLionRolePermissions = "lion_role_permissions"
 	// EdgeLionPermissionBindings holds the string denoting the lion_permission_bindings edge name in mutations.
 	EdgeLionPermissionBindings = "lion_permission_bindings"
-	// EdgeLionResourceScopes holds the string denoting the lion_resource_scopes edge name in mutations.
-	EdgeLionResourceScopes = "lion_resource_scopes"
 	// EdgeLionPolicies holds the string denoting the lion_policies edge name in mutations.
 	EdgeLionPolicies = "lion_policies"
 	// Table holds the table name of the permissions in the database.
@@ -56,13 +52,6 @@ const (
 	LionPermissionBindingsInverseTable = "lion_permission_bindings"
 	// LionPermissionBindingsColumn is the table column denoting the lion_permission_bindings relation/edge.
 	LionPermissionBindingsColumn = "permission_id"
-	// LionResourceScopesTable is the table that holds the lion_resource_scopes relation/edge.
-	LionResourceScopesTable = "lion_permissions"
-	// LionResourceScopesInverseTable is the table name for the ResourceScopes entity.
-	// It exists in this package in order to avoid circular dependency with the "resourcescopes" package.
-	LionResourceScopesInverseTable = "lion_resource_scopes"
-	// LionResourceScopesColumn is the table column denoting the lion_resource_scopes relation/edge.
-	LionResourceScopesColumn = "resource_scope_id"
 	// LionPoliciesTable is the table that holds the lion_policies relation/edge.
 	LionPoliciesTable = "lion_permissions"
 	// LionPoliciesInverseTable is the table name for the Policies entity.
@@ -79,7 +68,6 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldCreatedBy,
 	FieldUpdatedBy,
-	FieldResourceScopeID,
 	FieldPolicyID,
 	FieldCode,
 	FieldDisplayName,
@@ -107,8 +95,6 @@ var (
 	DefaultCreatedBy int64
 	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
 	DefaultUpdatedBy int64
-	// ResourceScopeIDValidator is a validator for the "resource_scope_id" field. It is called by the builders before save.
-	ResourceScopeIDValidator func(int) error
 	// PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
 	PolicyIDValidator func(int) error
 	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
@@ -145,11 +131,6 @@ func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedBy orders the results by the updated_by field.
 func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
-}
-
-// ByResourceScopeID orders the results by the resource_scope_id field.
-func ByResourceScopeID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResourceScopeID, opts...).ToFunc()
 }
 
 // ByPolicyID orders the results by the policy_id field.
@@ -200,13 +181,6 @@ func ByLionPermissionBindings(term sql.OrderTerm, terms ...sql.OrderTerm) OrderO
 	}
 }
 
-// ByLionResourceScopesField orders the results by lion_resource_scopes field.
-func ByLionResourceScopesField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionResourceScopesStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByLionPoliciesField orders the results by lion_policies field.
 func ByLionPoliciesField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -225,13 +199,6 @@ func newLionPermissionBindingsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionPermissionBindingsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionBindingsTable, LionPermissionBindingsColumn),
-	)
-}
-func newLionResourceScopesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionResourceScopesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, LionResourceScopesTable, LionResourceScopesColumn),
 	)
 }
 func newLionPoliciesStep() *sqlgraph.Step {

@@ -10,6 +10,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/lion/permissionbindings"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/predicate"
@@ -77,14 +78,14 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			permissionsWhere = append(permissionsWhere, permissions.HasLionPoliciesWith(policiesWhere...))
 		}
 
-		// 1 查询对应角色所有的资源归属
-		resourceScopeList, err := db.Permissions.
+		// 1 查询对应角色所有的资源归属（通过 permission_bindings 关联 permissions 和 resource_scopes）
+		resourceScopeList, err := db.PermissionBindings.
 			Query().
 			Select(
-				permissions.FieldResourceScopeID,
+				permissionbindings.FieldResourceScopeID,
 			).
 			Where(
-				permissionsWhere...,
+				permissionbindings.HasLionPermissionsWith(permissionsWhere...),
 			).
 			Unique(true).
 			All(ctx)

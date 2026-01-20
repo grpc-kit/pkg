@@ -35,8 +35,6 @@ type ResourceScopes struct {
 
 // ResourceScopesEdges holds the relations/edges for other nodes in the graph.
 type ResourceScopesEdges struct {
-	// LionPermissions holds the value of the lion_permissions edge.
-	LionPermissions []*Permissions `json:"lion_permissions,omitempty"`
 	// LionPermissionBindings holds the value of the lion_permission_bindings edge.
 	LionPermissionBindings []*PermissionBindings `json:"lion_permission_bindings,omitempty"`
 	// LionResources holds the value of the lion_resources edge.
@@ -45,22 +43,13 @@ type ResourceScopesEdges struct {
 	LionScopes *Scopes `json:"lion_scopes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
-}
-
-// LionPermissionsOrErr returns the LionPermissions value or an error if the edge
-// was not loaded in eager-loading.
-func (e ResourceScopesEdges) LionPermissionsOrErr() ([]*Permissions, error) {
-	if e.loadedTypes[0] {
-		return e.LionPermissions, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_permissions"}
+	loadedTypes [3]bool
 }
 
 // LionPermissionBindingsOrErr returns the LionPermissionBindings value or an error if the edge
 // was not loaded in eager-loading.
 func (e ResourceScopesEdges) LionPermissionBindingsOrErr() ([]*PermissionBindings, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.LionPermissionBindings, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_permission_bindings"}
@@ -71,7 +60,7 @@ func (e ResourceScopesEdges) LionPermissionBindingsOrErr() ([]*PermissionBinding
 func (e ResourceScopesEdges) LionResourcesOrErr() (*Resources, error) {
 	if e.LionResources != nil {
 		return e.LionResources, nil
-	} else if e.loadedTypes[2] {
+	} else if e.loadedTypes[1] {
 		return nil, &NotFoundError{label: resources.Label}
 	}
 	return nil, &NotLoadedError{edge: "lion_resources"}
@@ -82,7 +71,7 @@ func (e ResourceScopesEdges) LionResourcesOrErr() (*Resources, error) {
 func (e ResourceScopesEdges) LionScopesOrErr() (*Scopes, error) {
 	if e.LionScopes != nil {
 		return e.LionScopes, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: scopes.Label}
 	}
 	return nil, &NotLoadedError{edge: "lion_scopes"}
@@ -153,11 +142,6 @@ func (_m *ResourceScopes) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *ResourceScopes) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryLionPermissions queries the "lion_permissions" edge of the ResourceScopes entity.
-func (_m *ResourceScopes) QueryLionPermissions() *PermissionsQuery {
-	return NewResourceScopesClient(_m.config).QueryLionPermissions(_m)
 }
 
 // QueryLionPermissionBindings queries the "lion_permission_bindings" edge of the ResourceScopes entity.

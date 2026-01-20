@@ -229,7 +229,6 @@ var (
 		{Name: "display_name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "policy_id", Type: field.TypeInt},
-		{Name: "resource_scope_id", Type: field.TypeInt},
 	}
 	// LionPermissionsTable holds the schema information for the "lion_permissions" table.
 	LionPermissionsTable = &schema.Table{
@@ -241,12 +240,6 @@ var (
 				Symbol:     "lion_permissions_lion_policies_lion_permissions",
 				Columns:    []*schema.Column{LionPermissionsColumns[8]},
 				RefColumns: []*schema.Column{LionPoliciesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "lion_permissions_lion_resource_scopes_lion_permissions",
-				Columns:    []*schema.Column{LionPermissionsColumns[9]},
-				RefColumns: []*schema.Column{LionResourceScopesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -838,7 +831,6 @@ func init() {
 		Table: "lion_permission_bindings",
 	}
 	LionPermissionsTable.ForeignKeys[0].RefTable = LionPoliciesTable
-	LionPermissionsTable.ForeignKeys[1].RefTable = LionResourceScopesTable
 	LionPermissionsTable.Annotation = &entsql.Annotation{
 		Table: "lion_permissions",
 	}

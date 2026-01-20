@@ -1477,22 +1477,6 @@ func (c *PermissionsClient) QueryLionPermissionBindings(_m *Permissions) *Permis
 	return query
 }
 
-// QueryLionResourceScopes queries the lion_resource_scopes edge of a Permissions.
-func (c *PermissionsClient) QueryLionResourceScopes(_m *Permissions) *ResourceScopesQuery {
-	query := (&ResourceScopesClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(permissions.Table, permissions.FieldID, id),
-			sqlgraph.To(resourcescopes.Table, resourcescopes.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, permissions.LionResourceScopesTable, permissions.LionResourceScopesColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryLionPolicies queries the lion_policies edge of a Permissions.
 func (c *PermissionsClient) QueryLionPolicies(_m *Permissions) *PoliciesQuery {
 	query := (&PoliciesClient{config: c.config}).Query()
@@ -1789,22 +1773,6 @@ func (c *ResourceScopesClient) GetX(ctx context.Context, id int) *ResourceScopes
 		panic(err)
 	}
 	return obj
-}
-
-// QueryLionPermissions queries the lion_permissions edge of a ResourceScopes.
-func (c *ResourceScopesClient) QueryLionPermissions(_m *ResourceScopes) *PermissionsQuery {
-	query := (&PermissionsClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(resourcescopes.Table, resourcescopes.FieldID, id),
-			sqlgraph.To(permissions.Table, permissions.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, resourcescopes.LionPermissionsTable, resourcescopes.LionPermissionsColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
 }
 
 // QueryLionPermissionBindings queries the lion_permission_bindings edge of a ResourceScopes.

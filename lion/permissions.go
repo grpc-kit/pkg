@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
-	"github.com/grpc-kit/pkg/lion/resourcescopes"
 )
 
 // Permissions is the model entity for the Permissions schema.
@@ -27,8 +26,6 @@ type Permissions struct {
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
-	// 关联 lion_resource_scopes 表的资源 ID
-	ResourceScopeID int `json:"resource_scope_id,omitempty"`
 	// 关联 lion_policies 表的资源 ID
 	PolicyID int `json:"policy_id,omitempty"`
 	// 对我展示的权限名称，如：管理用户列表
@@ -49,13 +46,11 @@ type PermissionsEdges struct {
 	LionRolePermissions []*RolePermissions `json:"lion_role_permissions,omitempty"`
 	// LionPermissionBindings holds the value of the lion_permission_bindings edge.
 	LionPermissionBindings []*PermissionBindings `json:"lion_permission_bindings,omitempty"`
-	// LionResourceScopes holds the value of the lion_resource_scopes edge.
-	LionResourceScopes *ResourceScopes `json:"lion_resource_scopes,omitempty"`
 	// LionPolicies holds the value of the lion_policies edge.
 	LionPolicies *Policies `json:"lion_policies,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [3]bool
 }
 
 // LionRolePermissionsOrErr returns the LionRolePermissions value or an error if the edge
@@ -76,23 +71,12 @@ func (e PermissionsEdges) LionPermissionBindingsOrErr() ([]*PermissionBindings, 
 	return nil, &NotLoadedError{edge: "lion_permission_bindings"}
 }
 
-// LionResourceScopesOrErr returns the LionResourceScopes value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PermissionsEdges) LionResourceScopesOrErr() (*ResourceScopes, error) {
-	if e.LionResourceScopes != nil {
-		return e.LionResourceScopes, nil
-	} else if e.loadedTypes[2] {
-		return nil, &NotFoundError{label: resourcescopes.Label}
-	}
-	return nil, &NotLoadedError{edge: "lion_resource_scopes"}
-}
-
 // LionPoliciesOrErr returns the LionPolicies value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e PermissionsEdges) LionPoliciesOrErr() (*Policies, error) {
 	if e.LionPolicies != nil {
 		return e.LionPolicies, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: policies.Label}
 	}
 	return nil, &NotLoadedError{edge: "lion_policies"}
@@ -103,7 +87,7 @@ func (*Permissions) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case permissions.FieldID, permissions.FieldCreatedBy, permissions.FieldUpdatedBy, permissions.FieldResourceScopeID, permissions.FieldPolicyID:
+		case permissions.FieldID, permissions.FieldCreatedBy, permissions.FieldUpdatedBy, permissions.FieldPolicyID:
 			values[i] = new(sql.NullInt64)
 		case permissions.FieldCode, permissions.FieldDisplayName, permissions.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -154,12 +138,6 @@ func (_m *Permissions) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case permissions.FieldResourceScopeID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field resource_scope_id", values[i])
-			} else if value.Valid {
-				_m.ResourceScopeID = int(value.Int64)
-			}
 		case permissions.FieldPolicyID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field policy_id", values[i])
@@ -207,11 +185,6 @@ func (_m *Permissions) QueryLionPermissionBindings() *PermissionBindingsQuery {
 	return NewPermissionsClient(_m.config).QueryLionPermissionBindings(_m)
 }
 
-// QueryLionResourceScopes queries the "lion_resource_scopes" edge of the Permissions entity.
-func (_m *Permissions) QueryLionResourceScopes() *ResourceScopesQuery {
-	return NewPermissionsClient(_m.config).QueryLionResourceScopes(_m)
-}
-
 // QueryLionPolicies queries the "lion_policies" edge of the Permissions entity.
 func (_m *Permissions) QueryLionPolicies() *PoliciesQuery {
 	return NewPermissionsClient(_m.config).QueryLionPolicies(_m)
@@ -251,9 +224,6 @@ func (_m *Permissions) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
-	builder.WriteString(", ")
-	builder.WriteString("resource_scope_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ResourceScopeID))
 	builder.WriteString(", ")
 	builder.WriteString("policy_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PolicyID))

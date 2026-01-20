@@ -22,8 +22,6 @@ const (
 	FieldResourceID = "resource_id"
 	// FieldScopeID holds the string denoting the scope_id field in the database.
 	FieldScopeID = "scope_id"
-	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
-	EdgeLionPermissions = "lion_permissions"
 	// EdgeLionPermissionBindings holds the string denoting the lion_permission_bindings edge name in mutations.
 	EdgeLionPermissionBindings = "lion_permission_bindings"
 	// EdgeLionResources holds the string denoting the lion_resources edge name in mutations.
@@ -32,13 +30,6 @@ const (
 	EdgeLionScopes = "lion_scopes"
 	// Table holds the table name of the resourcescopes in the database.
 	Table = "lion_resource_scopes"
-	// LionPermissionsTable is the table that holds the lion_permissions relation/edge.
-	LionPermissionsTable = "lion_permissions"
-	// LionPermissionsInverseTable is the table name for the Permissions entity.
-	// It exists in this package in order to avoid circular dependency with the "permissions" package.
-	LionPermissionsInverseTable = "lion_permissions"
-	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
-	LionPermissionsColumn = "resource_scope_id"
 	// LionPermissionBindingsTable is the table that holds the lion_permission_bindings relation/edge.
 	LionPermissionBindingsTable = "lion_permission_bindings"
 	// LionPermissionBindingsInverseTable is the table name for the PermissionBindings entity.
@@ -122,20 +113,6 @@ func ByScopeID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldScopeID, opts...).ToFunc()
 }
 
-// ByLionPermissionsCount orders the results by lion_permissions count.
-func ByLionPermissionsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionPermissionsStep(), opts...)
-	}
-}
-
-// ByLionPermissions orders the results by lion_permissions terms.
-func ByLionPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionPermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByLionPermissionBindingsCount orders the results by lion_permission_bindings count.
 func ByLionPermissionBindingsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -162,13 +139,6 @@ func ByLionScopesField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newLionScopesStep(), sql.OrderByField(field, opts...))
 	}
-}
-func newLionPermissionsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionPermissionsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
-	)
 }
 func newLionPermissionBindingsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

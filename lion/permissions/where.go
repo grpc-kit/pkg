@@ -75,11 +75,6 @@ func UpdatedBy(v int64) predicate.Permissions {
 	return predicate.Permissions(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
-// ResourceScopeID applies equality check predicate on the "resource_scope_id" field. It's identical to ResourceScopeIDEQ.
-func ResourceScopeID(v int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEQ(FieldResourceScopeID, v))
-}
-
 // PolicyID applies equality check predicate on the "policy_id" field. It's identical to PolicyIDEQ.
 func PolicyID(v int) predicate.Permissions {
 	return predicate.Permissions(sql.FieldEQ(FieldPolicyID, v))
@@ -278,26 +273,6 @@ func UpdatedByIsNil() predicate.Permissions {
 // UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
 func UpdatedByNotNil() predicate.Permissions {
 	return predicate.Permissions(sql.FieldNotNull(FieldUpdatedBy))
-}
-
-// ResourceScopeIDEQ applies the EQ predicate on the "resource_scope_id" field.
-func ResourceScopeIDEQ(v int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldEQ(FieldResourceScopeID, v))
-}
-
-// ResourceScopeIDNEQ applies the NEQ predicate on the "resource_scope_id" field.
-func ResourceScopeIDNEQ(v int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldNEQ(FieldResourceScopeID, v))
-}
-
-// ResourceScopeIDIn applies the In predicate on the "resource_scope_id" field.
-func ResourceScopeIDIn(vs ...int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldIn(FieldResourceScopeID, vs...))
-}
-
-// ResourceScopeIDNotIn applies the NotIn predicate on the "resource_scope_id" field.
-func ResourceScopeIDNotIn(vs ...int) predicate.Permissions {
-	return predicate.Permissions(sql.FieldNotIn(FieldResourceScopeID, vs...))
 }
 
 // PolicyIDEQ applies the EQ predicate on the "policy_id" field.
@@ -553,29 +528,6 @@ func HasLionPermissionBindings() predicate.Permissions {
 func HasLionPermissionBindingsWith(preds ...predicate.PermissionBindings) predicate.Permissions {
 	return predicate.Permissions(func(s *sql.Selector) {
 		step := newLionPermissionBindingsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasLionResourceScopes applies the HasEdge predicate on the "lion_resource_scopes" edge.
-func HasLionResourceScopes() predicate.Permissions {
-	return predicate.Permissions(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, LionResourceScopesTable, LionResourceScopesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionResourceScopesWith applies the HasEdge predicate on the "lion_resource_scopes" edge with a given conditions (other predicates).
-func HasLionResourceScopesWith(preds ...predicate.ResourceScopes) predicate.Permissions {
-	return predicate.Permissions(func(s *sql.Selector) {
-		step := newLionResourceScopesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

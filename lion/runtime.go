@@ -405,16 +405,12 @@ func init() {
 	permissionsDescUpdatedBy := permissionsMixinFields1[1].Descriptor()
 	// permissions.DefaultUpdatedBy holds the default value on creation for the updated_by field.
 	permissions.DefaultUpdatedBy = permissionsDescUpdatedBy.Default.(int64)
-	// permissionsDescResourceScopeID is the schema descriptor for resource_scope_id field.
-	permissionsDescResourceScopeID := permissionsFields[0].Descriptor()
-	// permissions.ResourceScopeIDValidator is a validator for the "resource_scope_id" field. It is called by the builders before save.
-	permissions.ResourceScopeIDValidator = permissionsDescResourceScopeID.Validators[0].(func(int) error)
 	// permissionsDescPolicyID is the schema descriptor for policy_id field.
-	permissionsDescPolicyID := permissionsFields[1].Descriptor()
+	permissionsDescPolicyID := permissionsFields[0].Descriptor()
 	// permissions.PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
 	permissions.PolicyIDValidator = permissionsDescPolicyID.Validators[0].(func(int) error)
 	// permissionsDescCode is the schema descriptor for code field.
-	permissionsDescCode := permissionsFields[2].Descriptor()
+	permissionsDescCode := permissionsFields[1].Descriptor()
 	// permissions.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	permissions.CodeValidator = func() func(string) error {
 		validators := permissionsDescCode.Validators
@@ -432,11 +428,11 @@ func init() {
 		}
 	}()
 	// permissionsDescDisplayName is the schema descriptor for display_name field.
-	permissionsDescDisplayName := permissionsFields[3].Descriptor()
+	permissionsDescDisplayName := permissionsFields[2].Descriptor()
 	// permissions.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	permissions.DisplayNameValidator = permissionsDescDisplayName.Validators[0].(func(string) error)
 	// permissionsDescDescription is the schema descriptor for description field.
-	permissionsDescDescription := permissionsFields[4].Descriptor()
+	permissionsDescDescription := permissionsFields[3].Descriptor()
 	// permissions.DefaultDescription holds the default value on creation for the description field.
 	permissions.DefaultDescription = permissionsDescDescription.Default.(string)
 	policiesMixin := schema.Policies{}.Mixin()

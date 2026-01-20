@@ -30,7 +30,7 @@ func (ResourceScopes) Fields() []ent.Field {
 // Edges of the table.
 func (ResourceScopes) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("lion_permissions", Permissions.Type),
+		// edge.To("lion_permissions", Permissions.Type),
 		edge.To("lion_permission_bindings", PermissionBindings.Type),
 
 		edge.From("lion_resources", Resources.Type).
