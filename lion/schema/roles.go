@@ -17,6 +17,9 @@ type Roles struct {
 // Fields of the table.
 func (Roles) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("parent_id").
+			Default(0).
+			Comment("父角色ID，构建树形组织结构，值为 0 表示顶级角色"),
 		field.String("code").
 			MaxLen(256).
 			NotEmpty().

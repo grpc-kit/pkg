@@ -94,6 +94,20 @@ func (_c *RolesCreate) SetNillableUpdatedBy(v *int64) *RolesCreate {
 	return _c
 }
 
+// SetParentID sets the "parent_id" field.
+func (_c *RolesCreate) SetParentID(v int) *RolesCreate {
+	_c.mutation.SetParentID(v)
+	return _c
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_c *RolesCreate) SetNillableParentID(v *int) *RolesCreate {
+	if v != nil {
+		_c.SetParentID(*v)
+	}
+	return _c
+}
+
 // SetCode sets the "code" field.
 func (_c *RolesCreate) SetCode(v string) *RolesCreate {
 	_c.mutation.SetCode(v)
@@ -273,6 +287,10 @@ func (_c *RolesCreate) defaults() {
 		v := roles.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
+	if _, ok := _c.mutation.ParentID(); !ok {
+		v := roles.DefaultParentID
+		_c.mutation.SetParentID(v)
+	}
 	if _, ok := _c.mutation.RoleType(); !ok {
 		v := roles.DefaultRoleType
 		_c.mutation.SetRoleType(v)
@@ -298,6 +316,9 @@ func (_c *RolesCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "Roles.updated_at"`)}
+	}
+	if _, ok := _c.mutation.ParentID(); !ok {
+		return &ValidationError{Name: "parent_id", err: errors.New(`lion: missing required field "Roles.parent_id"`)}
 	}
 	if _, ok := _c.mutation.Code(); !ok {
 		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "Roles.code"`)}
@@ -372,6 +393,10 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedBy(); ok {
 		_spec.SetField(roles.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
+	}
+	if value, ok := _c.mutation.ParentID(); ok {
+		_spec.SetField(roles.FieldParentID, field.TypeInt, value)
+		_node.ParentID = value
 	}
 	if value, ok := _c.mutation.Code(); ok {
 		_spec.SetField(roles.FieldCode, field.TypeString, value)

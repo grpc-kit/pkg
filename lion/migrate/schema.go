@@ -413,6 +413,7 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "code", Type: field.TypeString, Size: 256},
 		{Name: "display_name", Type: field.TypeString, Size: 256},
 		{Name: "role_type", Type: field.TypeInt, Default: 0},
@@ -429,7 +430,7 @@ var (
 			{
 				Name:    "roles_code",
 				Unique:  true,
-				Columns: []*schema.Column{LionRolesColumns[6]},
+				Columns: []*schema.Column{LionRolesColumns[7]},
 			},
 		},
 	}

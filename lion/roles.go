@@ -27,6 +27,8 @@ type Roles struct {
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
+	// 父角色ID，构建树形组织结构，值为 0 表示顶级角色
+	ParentID int `json:"parent_id,omitempty"`
 	// 角色名称，用于系统内部显示和业务逻辑
 	Code string `json:"code,omitempty"`
 	// 角色名称，用于系统内部显示和业务逻辑
@@ -101,7 +103,7 @@ func (*Roles) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case roles.FieldID, roles.FieldCreatedBy, roles.FieldUpdatedBy, roles.FieldRoleType, roles.FieldRoleStatus, roles.FieldSortOrder:
+		case roles.FieldID, roles.FieldCreatedBy, roles.FieldUpdatedBy, roles.FieldParentID, roles.FieldRoleType, roles.FieldRoleStatus, roles.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
 		case roles.FieldCode, roles.FieldDisplayName, roles.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -158,6 +160,12 @@ func (_m *Roles) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
+			}
+		case roles.FieldParentID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
+			} else if value.Valid {
+				_m.ParentID = int(value.Int64)
 			}
 		case roles.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -267,6 +275,9 @@ func (_m *Roles) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("parent_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
 	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(_m.Code)

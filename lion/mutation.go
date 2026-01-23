@@ -15095,6 +15095,8 @@ type RolesMutation struct {
 	addcreated_by                *int64
 	updated_by                   *int64
 	addupdated_by                *int64
+	parent_id                    *int
+	addparent_id                 *int
 	code                         *string
 	display_name                 *string
 	role_type                    *int
@@ -15479,6 +15481,62 @@ func (m *RolesMutation) ResetUpdatedBy() {
 	m.updated_by = nil
 	m.addupdated_by = nil
 	delete(m.clearedFields, roles.FieldUpdatedBy)
+}
+
+// SetParentID sets the "parent_id" field.
+func (m *RolesMutation) SetParentID(i int) {
+	m.parent_id = &i
+	m.addparent_id = nil
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *RolesMutation) ParentID() (r int, exists bool) {
+	v := m.parent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the Roles entity.
+// If the Roles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RolesMutation) OldParentID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// AddParentID adds i to the "parent_id" field.
+func (m *RolesMutation) AddParentID(i int) {
+	if m.addparent_id != nil {
+		*m.addparent_id += i
+	} else {
+		m.addparent_id = &i
+	}
+}
+
+// AddedParentID returns the value that was added to the "parent_id" field in this mutation.
+func (m *RolesMutation) AddedParentID() (r int, exists bool) {
+	v := m.addparent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *RolesMutation) ResetParentID() {
+	m.parent_id = nil
+	m.addparent_id = nil
 }
 
 // SetCode sets the "code" field.
@@ -16007,7 +16065,7 @@ func (m *RolesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RolesMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, roles.FieldCreatedAt)
 	}
@@ -16022,6 +16080,9 @@ func (m *RolesMutation) Fields() []string {
 	}
 	if m.updated_by != nil {
 		fields = append(fields, roles.FieldUpdatedBy)
+	}
+	if m.parent_id != nil {
+		fields = append(fields, roles.FieldParentID)
 	}
 	if m.code != nil {
 		fields = append(fields, roles.FieldCode)
@@ -16059,6 +16120,8 @@ func (m *RolesMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedBy()
 	case roles.FieldUpdatedBy:
 		return m.UpdatedBy()
+	case roles.FieldParentID:
+		return m.ParentID()
 	case roles.FieldCode:
 		return m.Code()
 	case roles.FieldDisplayName:
@@ -16090,6 +16153,8 @@ func (m *RolesMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldCreatedBy(ctx)
 	case roles.FieldUpdatedBy:
 		return m.OldUpdatedBy(ctx)
+	case roles.FieldParentID:
+		return m.OldParentID(ctx)
 	case roles.FieldCode:
 		return m.OldCode(ctx)
 	case roles.FieldDisplayName:
@@ -16145,6 +16210,13 @@ func (m *RolesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedBy(v)
+		return nil
+	case roles.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
 		return nil
 	case roles.FieldCode:
 		v, ok := value.(string)
@@ -16202,6 +16274,9 @@ func (m *RolesMutation) AddedFields() []string {
 	if m.addupdated_by != nil {
 		fields = append(fields, roles.FieldUpdatedBy)
 	}
+	if m.addparent_id != nil {
+		fields = append(fields, roles.FieldParentID)
+	}
 	if m.addrole_type != nil {
 		fields = append(fields, roles.FieldRoleType)
 	}
@@ -16223,6 +16298,8 @@ func (m *RolesMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCreatedBy()
 	case roles.FieldUpdatedBy:
 		return m.AddedUpdatedBy()
+	case roles.FieldParentID:
+		return m.AddedParentID()
 	case roles.FieldRoleType:
 		return m.AddedRoleType()
 	case roles.FieldRoleStatus:
@@ -16251,6 +16328,13 @@ func (m *RolesMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddUpdatedBy(v)
+		return nil
+	case roles.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddParentID(v)
 		return nil
 	case roles.FieldRoleType:
 		v, ok := value.(int)
@@ -16335,6 +16419,9 @@ func (m *RolesMutation) ResetField(name string) error {
 		return nil
 	case roles.FieldUpdatedBy:
 		m.ResetUpdatedBy()
+		return nil
+	case roles.FieldParentID:
+		m.ResetParentID()
 		return nil
 	case roles.FieldCode:
 		m.ResetCode()

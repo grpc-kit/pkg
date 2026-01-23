@@ -699,8 +699,12 @@ func init() {
 	rolesDescUpdatedBy := rolesMixinFields1[1].Descriptor()
 	// roles.DefaultUpdatedBy holds the default value on creation for the updated_by field.
 	roles.DefaultUpdatedBy = rolesDescUpdatedBy.Default.(int64)
+	// rolesDescParentID is the schema descriptor for parent_id field.
+	rolesDescParentID := rolesFields[0].Descriptor()
+	// roles.DefaultParentID holds the default value on creation for the parent_id field.
+	roles.DefaultParentID = rolesDescParentID.Default.(int)
 	// rolesDescCode is the schema descriptor for code field.
-	rolesDescCode := rolesFields[0].Descriptor()
+	rolesDescCode := rolesFields[1].Descriptor()
 	// roles.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	roles.CodeValidator = func() func(string) error {
 		validators := rolesDescCode.Validators
@@ -718,7 +722,7 @@ func init() {
 		}
 	}()
 	// rolesDescDisplayName is the schema descriptor for display_name field.
-	rolesDescDisplayName := rolesFields[1].Descriptor()
+	rolesDescDisplayName := rolesFields[2].Descriptor()
 	// roles.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	roles.DisplayNameValidator = func() func(string) error {
 		validators := rolesDescDisplayName.Validators
@@ -736,19 +740,19 @@ func init() {
 		}
 	}()
 	// rolesDescRoleType is the schema descriptor for role_type field.
-	rolesDescRoleType := rolesFields[2].Descriptor()
+	rolesDescRoleType := rolesFields[3].Descriptor()
 	// roles.DefaultRoleType holds the default value on creation for the role_type field.
 	roles.DefaultRoleType = rolesDescRoleType.Default.(int)
 	// rolesDescRoleStatus is the schema descriptor for role_status field.
-	rolesDescRoleStatus := rolesFields[3].Descriptor()
+	rolesDescRoleStatus := rolesFields[4].Descriptor()
 	// roles.DefaultRoleStatus holds the default value on creation for the role_status field.
 	roles.DefaultRoleStatus = rolesDescRoleStatus.Default.(int)
 	// rolesDescSortOrder is the schema descriptor for sort_order field.
-	rolesDescSortOrder := rolesFields[4].Descriptor()
+	rolesDescSortOrder := rolesFields[5].Descriptor()
 	// roles.DefaultSortOrder holds the default value on creation for the sort_order field.
 	roles.DefaultSortOrder = rolesDescSortOrder.Default.(int)
 	// rolesDescDescription is the schema descriptor for description field.
-	rolesDescDescription := rolesFields[5].Descriptor()
+	rolesDescDescription := rolesFields[6].Descriptor()
 	// roles.DefaultDescription holds the default value on creation for the description field.
 	roles.DefaultDescription = rolesDescDescription.Default.(string)
 	scopesMixin := schema.Scopes{}.Mixin()

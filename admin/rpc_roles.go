@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -20,7 +21,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// ListRoles 创建用户
+// ListRoles 获取角色列表，默认返回树状结构
 func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesRequest) (*adminv1.ListRolesResponse, error) {
 	result := &adminv1.ListRolesResponse{}
 
@@ -29,8 +30,10 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 		return nil, err
 	}
 
+	// 添加 parent_id 字段到查询字段列表
 	defaultSelect := []string{
 		roles.FieldID,
+		roles.FieldParentID,
 		roles.FieldCode,
 		roles.FieldDisplayName,
 		roles.FieldRoleType,
@@ -57,7 +60,8 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 			roleQuery = roleQuery.Order(lion.Desc(roles.FieldID))
 		}
 	} else {
-		roleQuery = roleQuery.Order(lion.Desc(roles.FieldID))
+		// 默认按 sort_order 升序，然后按 ID 升序
+		roleQuery = roleQuery.Order(lion.Asc(roles.FieldSortOrder), lion.Asc(roles.FieldID))
 	}
 
 	totalSize, err := roleQuery.Count(ctx)
@@ -81,9 +85,15 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 		return nil, err
 	}
 
+	// 构建角色映射和树状结构
+	roleMap := make(map[int32]*adminv1.Role)
+	var roots []*adminv1.Role
+
+	// 首先将所有角色转换为 protobuf 格式并存入 map
 	for _, r := range rl {
-		result.Roles = append(result.Roles, &adminv1.Role{
+		role := &adminv1.Role{
 			Id:          int32(r.ID),
+			ParentId:    int32(r.ParentID),
 			Code:        r.Code,
 			DisplayName: r.DisplayName,
 			Type:        adminv1.Role_Type(r.RoleType),
@@ -92,10 +102,58 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 			Description: r.Description,
 			CreatedAt:   timestamppb.New(r.CreatedAt),
 			UpdatedAt:   timestamppb.New(r.UpdatedAt),
-		})
+			Children:    make([]*adminv1.Role, 0),
+		}
+
+		roleMap[int32(r.ID)] = role
 	}
 
+	// 构建父子关系
+	for _, role := range roleMap {
+		if role.ParentId != 0 {
+			if parent, ok := roleMap[role.ParentId]; ok {
+				parent.Children = append(parent.Children, role)
+			} else {
+				// 父节点不在当前查询结果中，作为根节点处理
+				roots = append(roots, role)
+			}
+		} else {
+			// parent_id 为 0，是根节点
+			roots = append(roots, role)
+		}
+	}
+
+	// 对根节点排序
+	sort.Slice(roots, func(i, j int) bool {
+		if roots[i].SortOrder != roots[j].SortOrder {
+			return roots[i].SortOrder < roots[j].SortOrder
+		}
+		return roots[i].Id < roots[j].Id
+	})
+
+	// 递归排序子节点
+	a.sortRoleChildren(roots)
+
+	result.Roles = roots
+
 	return result, nil
+}
+
+
+// sortRoleChildren 递归排序角色的子节点
+func (a *KnownAdminAPI) sortRoleChildren(roles []*adminv1.Role) {
+	for _, role := range roles {
+		if len(role.Children) > 0 {
+			sort.Slice(role.Children, func(i, j int) bool {
+				if role.Children[i].SortOrder != role.Children[j].SortOrder {
+					return role.Children[i].SortOrder < role.Children[j].SortOrder
+				}
+				return role.Children[i].Id < role.Children[j].Id
+			})
+			// 递归排序子节点的子节点
+			a.sortRoleChildren(role.Children)
+		}
+	}
 }
 
 // ListRoleUsers 获取角色用户列表
@@ -200,22 +258,93 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 		return nil, err
 	}
 
-	role, err := db.Roles.Create().
+	createBuilder := db.Roles.Create().
 		SetCode(req.Role.Code).
 		SetDisplayName(req.Role.DisplayName).
 		SetDescription(req.Role.Description).
-		SetSortOrder(int(req.Role.SortOrder)).
-		Save(ctx)
+		SetSortOrder(int(req.Role.SortOrder))
+
+	// 设置 parent_id（如果提供）
+	if req.Role.ParentId > 0 {
+		createBuilder.SetParentID(int(req.Role.ParentId))
+	}
+
+	// 获取创建者用户 ID
+	userID, _ := GetUserID(ctx)
+	if userID > 0 {
+		createBuilder.SetCreatedBy(userID).SetUpdatedBy(userID)
+	}
+
+	role, err := createBuilder.Save(ctx)
 	if err != nil {
 		return result, err
 	}
 
 	result = &adminv1.Role{
 		Id:          int32(role.ID),
+		ParentId:    int32(role.ParentID),
 		Code:        role.Code,
 		DisplayName: role.DisplayName,
 		Description: role.Description,
 		SortOrder:   int32(role.SortOrder),
+		Type:        adminv1.Role_Type(role.RoleType),
+		Status:      adminv1.Role_Status(role.RoleStatus),
+		CreatedBy:   role.CreatedBy,
+		UpdatedBy:   role.UpdatedBy,
+		CreatedAt:   timestamppb.New(role.CreatedAt),
+		UpdatedAt:   timestamppb.New(role.UpdatedAt),
+		Children:   make([]*adminv1.Role, 0),
+	}
+
+	return result, nil
+}
+
+// GetRole 获取角色详情
+func (a *KnownAdminAPI) GetRole(ctx context.Context, req *adminv1.GetRoleRequest) (*adminv1.Role, error) {
+	if req.Id == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("role id is required")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	// 查询角色信息
+	role, err := db.Roles.Query().Select(
+		roles.FieldID,
+		roles.FieldParentID,
+		roles.FieldCode,
+		roles.FieldDisplayName,
+		roles.FieldRoleType,
+		roles.FieldRoleStatus,
+		roles.FieldSortOrder,
+		roles.FieldDescription,
+		roles.FieldCreatedBy,
+		roles.FieldUpdatedBy,
+		roles.FieldCreatedAt,
+		roles.FieldUpdatedAt,
+	).Where(
+		roles.ID(int(req.Id)),
+	).Only(ctx)
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("role not found")
+	}
+
+	result := &adminv1.Role{
+		Id:          int32(role.ID),
+		ParentId:    int32(role.ParentID),
+		Code:        role.Code,
+		DisplayName: role.DisplayName,
+		Description: role.Description,
+		SortOrder:   int32(role.SortOrder),
+		Type:        adminv1.Role_Type(role.RoleType),
+		Status:      adminv1.Role_Status(role.RoleStatus),
+		CreatedBy:   role.CreatedBy,
+		UpdatedBy:   role.UpdatedBy,
+		CreatedAt:   timestamppb.New(role.CreatedAt),
+		UpdatedAt:   timestamppb.New(role.UpdatedAt),
+		Children:    make([]*adminv1.Role, 0),
 	}
 
 	return result, nil
@@ -270,23 +399,28 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 	if req.UpdateMask != nil && len(req.UpdateMask.Paths) != 0 {
 		x := db.Roles.Update()
 
+		// 获取更新者用户 ID
+		userID, _ := GetUserID(ctx)
+
 		for _, path := range req.UpdateMask.Paths {
 			switch path {
 			case roles.FieldCode:
 				x.SetCode(req.Role.Code)
-				/*
-					case roles.FieldI18nName + ".zh_cn":
-						if req.Role.I18NName != nil {
-							if req.Role.I18NName.ZhCn != "" {
-								x.SetI18nName(I18NNameJSON(req.Role.I18NName))
-							}
-						}
-				*/
+			case roles.FieldParentID:
+				// 更新 parent_id
+				x.SetParentID(int(req.Role.ParentId))
 			case roles.FieldSortOrder:
 				x.SetSortOrder(int(req.Role.SortOrder))
 			case roles.FieldDescription:
 				x.SetDescription(req.Role.Description)
+			case roles.FieldDisplayName:
+				x.SetDisplayName(req.Role.DisplayName)
 			}
+		}
+
+		// 更新 updated_by
+		if userID > 0 {
+			x.SetUpdatedBy(userID)
 		}
 
 		save, err := x.Where(roles.ID(int(req.Role.Id))).Save(ctx)
@@ -296,14 +430,20 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 
 		a.logger.Infof("update role save: %v, req id: %v", save, req.Role.Id)
 
+		// 查询更新后的角色信息，包含 parent_id
 		q, err := db.Roles.Query().Select(
 			roles.FieldID,
+			roles.FieldParentID,
 			roles.FieldCode,
 			roles.FieldDisplayName,
 			roles.FieldRoleType,
 			roles.FieldRoleStatus,
 			roles.FieldSortOrder,
 			roles.FieldDescription,
+			roles.FieldCreatedBy,
+			roles.FieldUpdatedBy,
+			roles.FieldCreatedAt,
+			roles.FieldUpdatedAt,
 		).Where(
 			roles.ID(int(req.Role.Id)),
 		).Only(ctx)
@@ -313,10 +453,18 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 
 		result = &adminv1.Role{
 			Id:          int32(q.ID),
+			ParentId:    int32(q.ParentID),
 			Code:        q.Code,
 			DisplayName: q.DisplayName,
 			Description: q.Description,
 			SortOrder:   int32(q.SortOrder),
+			Type:        adminv1.Role_Type(q.RoleType),
+			Status:      adminv1.Role_Status(q.RoleStatus),
+			CreatedBy:   q.CreatedBy,
+			UpdatedBy:   q.UpdatedBy,
+			CreatedAt:   timestamppb.New(q.CreatedAt),
+			UpdatedAt:   timestamppb.New(q.UpdatedAt),
+			Children:   make([]*adminv1.Role, 0),
 		}
 	}
 

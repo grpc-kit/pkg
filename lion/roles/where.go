@@ -80,6 +80,11 @@ func UpdatedBy(v int64) predicate.Roles {
 	return predicate.Roles(sql.FieldEQ(FieldUpdatedBy, v))
 }
 
+// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
+func ParentID(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldParentID, v))
+}
+
 // Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
 func Code(v string) predicate.Roles {
 	return predicate.Roles(sql.FieldEQ(FieldCode, v))
@@ -338,6 +343,46 @@ func UpdatedByIsNil() predicate.Roles {
 // UpdatedByNotNil applies the NotNil predicate on the "updated_by" field.
 func UpdatedByNotNil() predicate.Roles {
 	return predicate.Roles(sql.FieldNotNull(FieldUpdatedBy))
+}
+
+// ParentIDEQ applies the EQ predicate on the "parent_id" field.
+func ParentIDEQ(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldParentID, v))
+}
+
+// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
+func ParentIDNEQ(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldNEQ(FieldParentID, v))
+}
+
+// ParentIDIn applies the In predicate on the "parent_id" field.
+func ParentIDIn(vs ...int) predicate.Roles {
+	return predicate.Roles(sql.FieldIn(FieldParentID, vs...))
+}
+
+// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
+func ParentIDNotIn(vs ...int) predicate.Roles {
+	return predicate.Roles(sql.FieldNotIn(FieldParentID, vs...))
+}
+
+// ParentIDGT applies the GT predicate on the "parent_id" field.
+func ParentIDGT(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldGT(FieldParentID, v))
+}
+
+// ParentIDGTE applies the GTE predicate on the "parent_id" field.
+func ParentIDGTE(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldGTE(FieldParentID, v))
+}
+
+// ParentIDLT applies the LT predicate on the "parent_id" field.
+func ParentIDLT(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldLT(FieldParentID, v))
+}
+
+// ParentIDLTE applies the LTE predicate on the "parent_id" field.
+func ParentIDLTE(v int) predicate.Roles {
+	return predicate.Roles(sql.FieldLTE(FieldParentID, v))
 }
 
 // CodeEQ applies the EQ predicate on the "code" field.

@@ -112,6 +112,27 @@ func (_u *RolesUpdate) ClearUpdatedBy() *RolesUpdate {
 	return _u
 }
 
+// SetParentID sets the "parent_id" field.
+func (_u *RolesUpdate) SetParentID(v int) *RolesUpdate {
+	_u.mutation.ResetParentID()
+	_u.mutation.SetParentID(v)
+	return _u
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableParentID(v *int) *RolesUpdate {
+	if v != nil {
+		_u.SetParentID(*v)
+	}
+	return _u
+}
+
+// AddParentID adds value to the "parent_id" field.
+func (_u *RolesUpdate) AddParentID(v int) *RolesUpdate {
+	_u.mutation.AddParentID(v)
+	return _u
+}
+
 // SetCode sets the "code" field.
 func (_u *RolesUpdate) SetCode(v string) *RolesUpdate {
 	_u.mutation.SetCode(v)
@@ -456,6 +477,12 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(roles.FieldUpdatedBy, field.TypeInt64)
 	}
+	if value, ok := _u.mutation.ParentID(); ok {
+		_spec.SetField(roles.FieldParentID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedParentID(); ok {
+		_spec.AddField(roles.FieldParentID, field.TypeInt, value)
+	}
 	if value, ok := _u.mutation.Code(); ok {
 		_spec.SetField(roles.FieldCode, field.TypeString, value)
 	}
@@ -760,6 +787,27 @@ func (_u *RolesUpdateOne) AddUpdatedBy(v int64) *RolesUpdateOne {
 // ClearUpdatedBy clears the value of the "updated_by" field.
 func (_u *RolesUpdateOne) ClearUpdatedBy() *RolesUpdateOne {
 	_u.mutation.ClearUpdatedBy()
+	return _u
+}
+
+// SetParentID sets the "parent_id" field.
+func (_u *RolesUpdateOne) SetParentID(v int) *RolesUpdateOne {
+	_u.mutation.ResetParentID()
+	_u.mutation.SetParentID(v)
+	return _u
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableParentID(v *int) *RolesUpdateOne {
+	if v != nil {
+		_u.SetParentID(*v)
+	}
+	return _u
+}
+
+// AddParentID adds value to the "parent_id" field.
+func (_u *RolesUpdateOne) AddParentID(v int) *RolesUpdateOne {
+	_u.mutation.AddParentID(v)
 	return _u
 }
 
@@ -1136,6 +1184,12 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 	}
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(roles.FieldUpdatedBy, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.ParentID(); ok {
+		_spec.SetField(roles.FieldParentID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedParentID(); ok {
+		_spec.AddField(roles.FieldParentID, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Code(); ok {
 		_spec.SetField(roles.FieldCode, field.TypeString, value)
