@@ -11,59 +11,58 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/roledepartments"
+	"github.com/grpc-kit/pkg/lion/roledatascopes"
 	"github.com/grpc-kit/pkg/lion/roles"
 )
 
-// RoleDepartmentsQuery is the builder for querying RoleDepartments entities.
-type RoleDepartmentsQuery struct {
+// RoleDataScopesQuery is the builder for querying RoleDataScopes entities.
+type RoleDataScopesQuery struct {
 	config
-	ctx                 *QueryContext
-	order               []roledepartments.OrderOption
-	inters              []Interceptor
-	predicates          []predicate.RoleDepartments
-	withLionRoles       *RolesQuery
-	withLionDepartments *DepartmentsQuery
+	ctx           *QueryContext
+	order         []roledatascopes.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.RoleDataScopes
+	withLionRoles *RolesQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the RoleDepartmentsQuery builder.
-func (_q *RoleDepartmentsQuery) Where(ps ...predicate.RoleDepartments) *RoleDepartmentsQuery {
+// Where adds a new predicate for the RoleDataScopesQuery builder.
+func (_q *RoleDataScopesQuery) Where(ps ...predicate.RoleDataScopes) *RoleDataScopesQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *RoleDepartmentsQuery) Limit(limit int) *RoleDepartmentsQuery {
+func (_q *RoleDataScopesQuery) Limit(limit int) *RoleDataScopesQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *RoleDepartmentsQuery) Offset(offset int) *RoleDepartmentsQuery {
+func (_q *RoleDataScopesQuery) Offset(offset int) *RoleDataScopesQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *RoleDepartmentsQuery) Unique(unique bool) *RoleDepartmentsQuery {
+func (_q *RoleDataScopesQuery) Unique(unique bool) *RoleDataScopesQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *RoleDepartmentsQuery) Order(o ...roledepartments.OrderOption) *RoleDepartmentsQuery {
+func (_q *RoleDataScopesQuery) Order(o ...roledatascopes.OrderOption) *RoleDataScopesQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
 // QueryLionRoles chains the current query on the "lion_roles" edge.
-func (_q *RoleDepartmentsQuery) QueryLionRoles() *RolesQuery {
+func (_q *RoleDataScopesQuery) QueryLionRoles() *RolesQuery {
 	query := (&RolesClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -74,9 +73,9 @@ func (_q *RoleDepartmentsQuery) QueryLionRoles() *RolesQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(roledepartments.Table, roledepartments.FieldID, selector),
+			sqlgraph.From(roledatascopes.Table, roledatascopes.FieldID, selector),
 			sqlgraph.To(roles.Table, roles.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, roledepartments.LionRolesTable, roledepartments.LionRolesColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, roledatascopes.LionRolesTable, roledatascopes.LionRolesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -84,43 +83,21 @@ func (_q *RoleDepartmentsQuery) QueryLionRoles() *RolesQuery {
 	return query
 }
 
-// QueryLionDepartments chains the current query on the "lion_departments" edge.
-func (_q *RoleDepartmentsQuery) QueryLionDepartments() *DepartmentsQuery {
-	query := (&DepartmentsClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(roledepartments.Table, roledepartments.FieldID, selector),
-			sqlgraph.To(departments.Table, departments.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, roledepartments.LionDepartmentsTable, roledepartments.LionDepartmentsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// First returns the first RoleDepartments entity from the query.
-// Returns a *NotFoundError when no RoleDepartments was found.
-func (_q *RoleDepartmentsQuery) First(ctx context.Context) (*RoleDepartments, error) {
+// First returns the first RoleDataScopes entity from the query.
+// Returns a *NotFoundError when no RoleDataScopes was found.
+func (_q *RoleDataScopesQuery) First(ctx context.Context) (*RoleDataScopes, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{roledepartments.Label}
+		return nil, &NotFoundError{roledatascopes.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *RoleDepartmentsQuery) FirstX(ctx context.Context) *RoleDepartments {
+func (_q *RoleDataScopesQuery) FirstX(ctx context.Context) *RoleDataScopes {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -128,22 +105,22 @@ func (_q *RoleDepartmentsQuery) FirstX(ctx context.Context) *RoleDepartments {
 	return node
 }
 
-// FirstID returns the first RoleDepartments ID from the query.
-// Returns a *NotFoundError when no RoleDepartments ID was found.
-func (_q *RoleDepartmentsQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first RoleDataScopes ID from the query.
+// Returns a *NotFoundError when no RoleDataScopes ID was found.
+func (_q *RoleDataScopesQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{roledepartments.Label}
+		err = &NotFoundError{roledatascopes.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *RoleDepartmentsQuery) FirstIDX(ctx context.Context) int {
+func (_q *RoleDataScopesQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -151,10 +128,10 @@ func (_q *RoleDepartmentsQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single RoleDepartments entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one RoleDepartments entity is found.
-// Returns a *NotFoundError when no RoleDepartments entities are found.
-func (_q *RoleDepartmentsQuery) Only(ctx context.Context) (*RoleDepartments, error) {
+// Only returns a single RoleDataScopes entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one RoleDataScopes entity is found.
+// Returns a *NotFoundError when no RoleDataScopes entities are found.
+func (_q *RoleDataScopesQuery) Only(ctx context.Context) (*RoleDataScopes, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -163,14 +140,14 @@ func (_q *RoleDepartmentsQuery) Only(ctx context.Context) (*RoleDepartments, err
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{roledepartments.Label}
+		return nil, &NotFoundError{roledatascopes.Label}
 	default:
-		return nil, &NotSingularError{roledepartments.Label}
+		return nil, &NotSingularError{roledatascopes.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *RoleDepartmentsQuery) OnlyX(ctx context.Context) *RoleDepartments {
+func (_q *RoleDataScopesQuery) OnlyX(ctx context.Context) *RoleDataScopes {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -178,10 +155,10 @@ func (_q *RoleDepartmentsQuery) OnlyX(ctx context.Context) *RoleDepartments {
 	return node
 }
 
-// OnlyID is like Only, but returns the only RoleDepartments ID in the query.
-// Returns a *NotSingularError when more than one RoleDepartments ID is found.
+// OnlyID is like Only, but returns the only RoleDataScopes ID in the query.
+// Returns a *NotSingularError when more than one RoleDataScopes ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *RoleDepartmentsQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *RoleDataScopesQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -190,15 +167,15 @@ func (_q *RoleDepartmentsQuery) OnlyID(ctx context.Context) (id int, err error) 
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{roledepartments.Label}
+		err = &NotFoundError{roledatascopes.Label}
 	default:
-		err = &NotSingularError{roledepartments.Label}
+		err = &NotSingularError{roledatascopes.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *RoleDepartmentsQuery) OnlyIDX(ctx context.Context) int {
+func (_q *RoleDataScopesQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -206,18 +183,18 @@ func (_q *RoleDepartmentsQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of RoleDepartmentsSlice.
-func (_q *RoleDepartmentsQuery) All(ctx context.Context) ([]*RoleDepartments, error) {
+// All executes the query and returns a list of RoleDataScopesSlice.
+func (_q *RoleDataScopesQuery) All(ctx context.Context) ([]*RoleDataScopes, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*RoleDepartments, *RoleDepartmentsQuery]()
-	return withInterceptors[[]*RoleDepartments](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*RoleDataScopes, *RoleDataScopesQuery]()
+	return withInterceptors[[]*RoleDataScopes](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *RoleDepartmentsQuery) AllX(ctx context.Context) []*RoleDepartments {
+func (_q *RoleDataScopesQuery) AllX(ctx context.Context) []*RoleDataScopes {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -225,20 +202,20 @@ func (_q *RoleDepartmentsQuery) AllX(ctx context.Context) []*RoleDepartments {
 	return nodes
 }
 
-// IDs executes the query and returns a list of RoleDepartments IDs.
-func (_q *RoleDepartmentsQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of RoleDataScopes IDs.
+func (_q *RoleDataScopesQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(roledepartments.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(roledatascopes.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *RoleDepartmentsQuery) IDsX(ctx context.Context) []int {
+func (_q *RoleDataScopesQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -247,16 +224,16 @@ func (_q *RoleDepartmentsQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *RoleDepartmentsQuery) Count(ctx context.Context) (int, error) {
+func (_q *RoleDataScopesQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*RoleDepartmentsQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*RoleDataScopesQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *RoleDepartmentsQuery) CountX(ctx context.Context) int {
+func (_q *RoleDataScopesQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -265,7 +242,7 @@ func (_q *RoleDepartmentsQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *RoleDepartmentsQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *RoleDataScopesQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -278,7 +255,7 @@ func (_q *RoleDepartmentsQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *RoleDepartmentsQuery) ExistX(ctx context.Context) bool {
+func (_q *RoleDataScopesQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -286,20 +263,19 @@ func (_q *RoleDepartmentsQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the RoleDepartmentsQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the RoleDataScopesQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *RoleDepartmentsQuery) Clone() *RoleDepartmentsQuery {
+func (_q *RoleDataScopesQuery) Clone() *RoleDataScopesQuery {
 	if _q == nil {
 		return nil
 	}
-	return &RoleDepartmentsQuery{
-		config:              _q.config,
-		ctx:                 _q.ctx.Clone(),
-		order:               append([]roledepartments.OrderOption{}, _q.order...),
-		inters:              append([]Interceptor{}, _q.inters...),
-		predicates:          append([]predicate.RoleDepartments{}, _q.predicates...),
-		withLionRoles:       _q.withLionRoles.Clone(),
-		withLionDepartments: _q.withLionDepartments.Clone(),
+	return &RoleDataScopesQuery{
+		config:        _q.config,
+		ctx:           _q.ctx.Clone(),
+		order:         append([]roledatascopes.OrderOption{}, _q.order...),
+		inters:        append([]Interceptor{}, _q.inters...),
+		predicates:    append([]predicate.RoleDataScopes{}, _q.predicates...),
+		withLionRoles: _q.withLionRoles.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -308,23 +284,12 @@ func (_q *RoleDepartmentsQuery) Clone() *RoleDepartmentsQuery {
 
 // WithLionRoles tells the query-builder to eager-load the nodes that are connected to
 // the "lion_roles" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *RoleDepartmentsQuery) WithLionRoles(opts ...func(*RolesQuery)) *RoleDepartmentsQuery {
+func (_q *RoleDataScopesQuery) WithLionRoles(opts ...func(*RolesQuery)) *RoleDataScopesQuery {
 	query := (&RolesClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
 	_q.withLionRoles = query
-	return _q
-}
-
-// WithLionDepartments tells the query-builder to eager-load the nodes that are connected to
-// the "lion_departments" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *RoleDepartmentsQuery) WithLionDepartments(opts ...func(*DepartmentsQuery)) *RoleDepartmentsQuery {
-	query := (&DepartmentsClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withLionDepartments = query
 	return _q
 }
 
@@ -338,15 +303,15 @@ func (_q *RoleDepartmentsQuery) WithLionDepartments(opts ...func(*DepartmentsQue
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.RoleDepartments.Query().
-//		GroupBy(roledepartments.FieldCreatedAt).
+//	client.RoleDataScopes.Query().
+//		GroupBy(roledatascopes.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (_q *RoleDepartmentsQuery) GroupBy(field string, fields ...string) *RoleDepartmentsGroupBy {
+func (_q *RoleDataScopesQuery) GroupBy(field string, fields ...string) *RoleDataScopesGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &RoleDepartmentsGroupBy{build: _q}
+	grbuild := &RoleDataScopesGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = roledepartments.Label
+	grbuild.label = roledatascopes.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -360,23 +325,23 @@ func (_q *RoleDepartmentsQuery) GroupBy(field string, fields ...string) *RoleDep
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.RoleDepartments.Query().
-//		Select(roledepartments.FieldCreatedAt).
+//	client.RoleDataScopes.Query().
+//		Select(roledatascopes.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *RoleDepartmentsQuery) Select(fields ...string) *RoleDepartmentsSelect {
+func (_q *RoleDataScopesQuery) Select(fields ...string) *RoleDataScopesSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &RoleDepartmentsSelect{RoleDepartmentsQuery: _q}
-	sbuild.label = roledepartments.Label
+	sbuild := &RoleDataScopesSelect{RoleDataScopesQuery: _q}
+	sbuild.label = roledatascopes.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a RoleDepartmentsSelect configured with the given aggregations.
-func (_q *RoleDepartmentsQuery) Aggregate(fns ...AggregateFunc) *RoleDepartmentsSelect {
+// Aggregate returns a RoleDataScopesSelect configured with the given aggregations.
+func (_q *RoleDataScopesQuery) Aggregate(fns ...AggregateFunc) *RoleDataScopesSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *RoleDepartmentsQuery) prepareQuery(ctx context.Context) error {
+func (_q *RoleDataScopesQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
@@ -388,7 +353,7 @@ func (_q *RoleDepartmentsQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !roledepartments.ValidColumn(f) {
+		if !roledatascopes.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
@@ -402,20 +367,23 @@ func (_q *RoleDepartmentsQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *RoleDepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RoleDepartments, error) {
+func (_q *RoleDataScopesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RoleDataScopes, error) {
 	var (
-		nodes       = []*RoleDepartments{}
+		nodes       = []*RoleDataScopes{}
+		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [1]bool{
 			_q.withLionRoles != nil,
-			_q.withLionDepartments != nil,
 		}
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, roledatascopes.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*RoleDepartments).scanValues(nil, columns)
+		return (*RoleDataScopes).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &RoleDepartments{config: _q.config}
+		node := &RoleDataScopes{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -431,22 +399,16 @@ func (_q *RoleDepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	}
 	if query := _q.withLionRoles; query != nil {
 		if err := _q.loadLionRoles(ctx, query, nodes, nil,
-			func(n *RoleDepartments, e *Roles) { n.Edges.LionRoles = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withLionDepartments; query != nil {
-		if err := _q.loadLionDepartments(ctx, query, nodes, nil,
-			func(n *RoleDepartments, e *Departments) { n.Edges.LionDepartments = e }); err != nil {
+			func(n *RoleDataScopes, e *Roles) { n.Edges.LionRoles = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *RoleDepartmentsQuery) loadLionRoles(ctx context.Context, query *RolesQuery, nodes []*RoleDepartments, init func(*RoleDepartments), assign func(*RoleDepartments, *Roles)) error {
+func (_q *RoleDataScopesQuery) loadLionRoles(ctx context.Context, query *RolesQuery, nodes []*RoleDataScopes, init func(*RoleDataScopes), assign func(*RoleDataScopes, *Roles)) error {
 	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*RoleDepartments)
+	nodeids := make(map[int][]*RoleDataScopes)
 	for i := range nodes {
 		fk := nodes[i].RoleID
 		if _, ok := nodeids[fk]; !ok {
@@ -473,37 +435,8 @@ func (_q *RoleDepartmentsQuery) loadLionRoles(ctx context.Context, query *RolesQ
 	}
 	return nil
 }
-func (_q *RoleDepartmentsQuery) loadLionDepartments(ctx context.Context, query *DepartmentsQuery, nodes []*RoleDepartments, init func(*RoleDepartments), assign func(*RoleDepartments, *Departments)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*RoleDepartments)
-	for i := range nodes {
-		fk := nodes[i].DepartmentID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(departments.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "department_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 
-func (_q *RoleDepartmentsQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *RoleDataScopesQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -512,8 +445,8 @@ func (_q *RoleDepartmentsQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *RoleDepartmentsQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(roledepartments.Table, roledepartments.Columns, sqlgraph.NewFieldSpec(roledepartments.FieldID, field.TypeInt))
+func (_q *RoleDataScopesQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(roledatascopes.Table, roledatascopes.Columns, sqlgraph.NewFieldSpec(roledatascopes.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -522,17 +455,14 @@ func (_q *RoleDepartmentsQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, roledepartments.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, roledatascopes.FieldID)
 		for i := range fields {
-			if fields[i] != roledepartments.FieldID {
+			if fields[i] != roledatascopes.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
 		if _q.withLionRoles != nil {
-			_spec.Node.AddColumnOnce(roledepartments.FieldRoleID)
-		}
-		if _q.withLionDepartments != nil {
-			_spec.Node.AddColumnOnce(roledepartments.FieldDepartmentID)
+			_spec.Node.AddColumnOnce(roledatascopes.FieldRoleID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -558,12 +488,12 @@ func (_q *RoleDepartmentsQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *RoleDepartmentsQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *RoleDataScopesQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(roledepartments.Table)
+	t1 := builder.Table(roledatascopes.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = roledepartments.Columns
+		columns = roledatascopes.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -590,28 +520,28 @@ func (_q *RoleDepartmentsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// RoleDepartmentsGroupBy is the group-by builder for RoleDepartments entities.
-type RoleDepartmentsGroupBy struct {
+// RoleDataScopesGroupBy is the group-by builder for RoleDataScopes entities.
+type RoleDataScopesGroupBy struct {
 	selector
-	build *RoleDepartmentsQuery
+	build *RoleDataScopesQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *RoleDepartmentsGroupBy) Aggregate(fns ...AggregateFunc) *RoleDepartmentsGroupBy {
+func (_g *RoleDataScopesGroupBy) Aggregate(fns ...AggregateFunc) *RoleDataScopesGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *RoleDepartmentsGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *RoleDataScopesGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RoleDepartmentsQuery, *RoleDepartmentsGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*RoleDataScopesQuery, *RoleDataScopesGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *RoleDepartmentsGroupBy) sqlScan(ctx context.Context, root *RoleDepartmentsQuery, v any) error {
+func (_g *RoleDataScopesGroupBy) sqlScan(ctx context.Context, root *RoleDataScopesQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -638,28 +568,28 @@ func (_g *RoleDepartmentsGroupBy) sqlScan(ctx context.Context, root *RoleDepartm
 	return sql.ScanSlice(rows, v)
 }
 
-// RoleDepartmentsSelect is the builder for selecting fields of RoleDepartments entities.
-type RoleDepartmentsSelect struct {
-	*RoleDepartmentsQuery
+// RoleDataScopesSelect is the builder for selecting fields of RoleDataScopes entities.
+type RoleDataScopesSelect struct {
+	*RoleDataScopesQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *RoleDepartmentsSelect) Aggregate(fns ...AggregateFunc) *RoleDepartmentsSelect {
+func (_s *RoleDataScopesSelect) Aggregate(fns ...AggregateFunc) *RoleDataScopesSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *RoleDepartmentsSelect) Scan(ctx context.Context, v any) error {
+func (_s *RoleDataScopesSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RoleDepartmentsQuery, *RoleDepartmentsSelect](ctx, _s.RoleDepartmentsQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*RoleDataScopesQuery, *RoleDataScopesSelect](ctx, _s.RoleDataScopesQuery, _s, _s.inters, v)
 }
 
-func (_s *RoleDepartmentsSelect) sqlScan(ctx context.Context, root *RoleDepartmentsQuery, v any) error {
+func (_s *RoleDataScopesSelect) sqlScan(ctx context.Context, root *RoleDataScopesQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

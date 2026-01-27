@@ -331,40 +331,43 @@ var (
 			},
 		},
 	}
-	// LionRoleDepartmentsColumns holds the columns for the "lion_role_departments" table.
-	LionRoleDepartmentsColumns = []*schema.Column{
+	// LionRoleDataScopesColumns holds the columns for the "lion_role_data_scopes" table.
+	LionRoleDataScopesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "scope_type", Type: field.TypeInt, Default: 0},
 		{Name: "department_id", Type: field.TypeInt},
+		{Name: "scope_inherit", Type: field.TypeBool, Default: false},
+		{Name: "departments_lion_role_data_scopes", Type: field.TypeInt, Nullable: true},
 		{Name: "role_id", Type: field.TypeInt},
 	}
-	// LionRoleDepartmentsTable holds the schema information for the "lion_role_departments" table.
-	LionRoleDepartmentsTable = &schema.Table{
-		Name:       "lion_role_departments",
-		Columns:    LionRoleDepartmentsColumns,
-		PrimaryKey: []*schema.Column{LionRoleDepartmentsColumns[0]},
+	// LionRoleDataScopesTable holds the schema information for the "lion_role_data_scopes" table.
+	LionRoleDataScopesTable = &schema.Table{
+		Name:       "lion_role_data_scopes",
+		Columns:    LionRoleDataScopesColumns,
+		PrimaryKey: []*schema.Column{LionRoleDataScopesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "lion_role_departments_lion_departments_lion_role_departments",
-				Columns:    []*schema.Column{LionRoleDepartmentsColumns[5]},
+				Symbol:     "lion_role_data_scopes_lion_departments_lion_role_data_scopes",
+				Columns:    []*schema.Column{LionRoleDataScopesColumns[8]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "lion_role_departments_lion_roles_lion_role_departments",
-				Columns:    []*schema.Column{LionRoleDepartmentsColumns[6]},
+				Symbol:     "lion_role_data_scopes_lion_roles_lion_role_data_scopes",
+				Columns:    []*schema.Column{LionRoleDataScopesColumns[9]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "roledepartments_role_id_department_id",
+				Name:    "roledatascopes_role_id_department_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionRoleDepartmentsColumns[6], LionRoleDepartmentsColumns[5]},
+				Columns: []*schema.Column{LionRoleDataScopesColumns[9], LionRoleDataScopesColumns[6]},
 			},
 		},
 	}
@@ -794,7 +797,7 @@ var (
 		LionPoliciesTable,
 		LionResourceScopesTable,
 		LionResourcesTable,
-		LionRoleDepartmentsTable,
+		LionRoleDataScopesTable,
 		LionRolePermissionsTable,
 		LionRolesTable,
 		LionScopesTable,
@@ -846,10 +849,10 @@ func init() {
 	LionResourcesTable.Annotation = &entsql.Annotation{
 		Table: "lion_resources",
 	}
-	LionRoleDepartmentsTable.ForeignKeys[0].RefTable = LionDepartmentsTable
-	LionRoleDepartmentsTable.ForeignKeys[1].RefTable = LionRolesTable
-	LionRoleDepartmentsTable.Annotation = &entsql.Annotation{
-		Table: "lion_role_departments",
+	LionRoleDataScopesTable.ForeignKeys[0].RefTable = LionDepartmentsTable
+	LionRoleDataScopesTable.ForeignKeys[1].RefTable = LionRolesTable
+	LionRoleDataScopesTable.Annotation = &entsql.Annotation{
+		Table: "lion_role_data_scopes",
 	}
 	LionRolePermissionsTable.ForeignKeys[0].RefTable = LionPermissionsTable
 	LionRolePermissionsTable.ForeignKeys[1].RefTable = LionRolesTable

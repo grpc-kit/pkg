@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/roledepartments"
+	"github.com/grpc-kit/pkg/lion/roledatascopes"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -30,7 +30,7 @@ type RolesQuery struct {
 	withLionRolePermissions *RolePermissionsQuery
 	withLionUserRoles       *UserRolesQuery
 	withLionRoleGroups      *GroupRolesQuery
-	withLionRoleDepartments *RoleDepartmentsQuery
+	withLionRoleDataScopes  *RoleDataScopesQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -133,9 +133,9 @@ func (_q *RolesQuery) QueryLionRoleGroups() *GroupRolesQuery {
 	return query
 }
 
-// QueryLionRoleDepartments chains the current query on the "lion_role_departments" edge.
-func (_q *RolesQuery) QueryLionRoleDepartments() *RoleDepartmentsQuery {
-	query := (&RoleDepartmentsClient{config: _q.config}).Query()
+// QueryLionRoleDataScopes chains the current query on the "lion_role_data_scopes" edge.
+func (_q *RolesQuery) QueryLionRoleDataScopes() *RoleDataScopesQuery {
+	query := (&RoleDataScopesClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -146,8 +146,8 @@ func (_q *RolesQuery) QueryLionRoleDepartments() *RoleDepartmentsQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(roles.Table, roles.FieldID, selector),
-			sqlgraph.To(roledepartments.Table, roledepartments.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleDepartmentsTable, roles.LionRoleDepartmentsColumn),
+			sqlgraph.To(roledatascopes.Table, roledatascopes.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleDataScopesTable, roles.LionRoleDataScopesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -350,7 +350,7 @@ func (_q *RolesQuery) Clone() *RolesQuery {
 		withLionRolePermissions: _q.withLionRolePermissions.Clone(),
 		withLionUserRoles:       _q.withLionUserRoles.Clone(),
 		withLionRoleGroups:      _q.withLionRoleGroups.Clone(),
-		withLionRoleDepartments: _q.withLionRoleDepartments.Clone(),
+		withLionRoleDataScopes:  _q.withLionRoleDataScopes.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -390,14 +390,14 @@ func (_q *RolesQuery) WithLionRoleGroups(opts ...func(*GroupRolesQuery)) *RolesQ
 	return _q
 }
 
-// WithLionRoleDepartments tells the query-builder to eager-load the nodes that are connected to
-// the "lion_role_departments" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *RolesQuery) WithLionRoleDepartments(opts ...func(*RoleDepartmentsQuery)) *RolesQuery {
-	query := (&RoleDepartmentsClient{config: _q.config}).Query()
+// WithLionRoleDataScopes tells the query-builder to eager-load the nodes that are connected to
+// the "lion_role_data_scopes" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *RolesQuery) WithLionRoleDataScopes(opts ...func(*RoleDataScopesQuery)) *RolesQuery {
+	query := (&RoleDataScopesClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withLionRoleDepartments = query
+	_q.withLionRoleDataScopes = query
 	return _q
 }
 
@@ -483,7 +483,7 @@ func (_q *RolesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Roles,
 			_q.withLionRolePermissions != nil,
 			_q.withLionUserRoles != nil,
 			_q.withLionRoleGroups != nil,
-			_q.withLionRoleDepartments != nil,
+			_q.withLionRoleDataScopes != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -527,12 +527,10 @@ func (_q *RolesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Roles,
 			return nil, err
 		}
 	}
-	if query := _q.withLionRoleDepartments; query != nil {
-		if err := _q.loadLionRoleDepartments(ctx, query, nodes,
-			func(n *Roles) { n.Edges.LionRoleDepartments = []*RoleDepartments{} },
-			func(n *Roles, e *RoleDepartments) {
-				n.Edges.LionRoleDepartments = append(n.Edges.LionRoleDepartments, e)
-			}); err != nil {
+	if query := _q.withLionRoleDataScopes; query != nil {
+		if err := _q.loadLionRoleDataScopes(ctx, query, nodes,
+			func(n *Roles) { n.Edges.LionRoleDataScopes = []*RoleDataScopes{} },
+			func(n *Roles, e *RoleDataScopes) { n.Edges.LionRoleDataScopes = append(n.Edges.LionRoleDataScopes, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -629,7 +627,7 @@ func (_q *RolesQuery) loadLionRoleGroups(ctx context.Context, query *GroupRolesQ
 	}
 	return nil
 }
-func (_q *RolesQuery) loadLionRoleDepartments(ctx context.Context, query *RoleDepartmentsQuery, nodes []*Roles, init func(*Roles), assign func(*Roles, *RoleDepartments)) error {
+func (_q *RolesQuery) loadLionRoleDataScopes(ctx context.Context, query *RoleDataScopesQuery, nodes []*Roles, init func(*Roles), assign func(*Roles, *RoleDataScopes)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Roles)
 	for i := range nodes {
@@ -639,11 +637,12 @@ func (_q *RolesQuery) loadLionRoleDepartments(ctx context.Context, query *RoleDe
 			init(nodes[i])
 		}
 	}
+	query.withFKs = true
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(roledepartments.FieldRoleID)
+		query.ctx.AppendFieldOnce(roledatascopes.FieldRoleID)
 	}
-	query.Where(predicate.RoleDepartments(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(roles.LionRoleDepartmentsColumn), fks...))
+	query.Where(predicate.RoleDataScopes(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(roles.LionRoleDataScopesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

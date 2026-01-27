@@ -129,16 +129,16 @@ func (f ResourcesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.ResourcesMutation", m)
 }
 
-// The RoleDepartmentsFunc type is an adapter to allow the use of ordinary
-// function as RoleDepartments mutator.
-type RoleDepartmentsFunc func(context.Context, *lion.RoleDepartmentsMutation) (lion.Value, error)
+// The RoleDataScopesFunc type is an adapter to allow the use of ordinary
+// function as RoleDataScopes mutator.
+type RoleDataScopesFunc func(context.Context, *lion.RoleDataScopesMutation) (lion.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f RoleDepartmentsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.RoleDepartmentsMutation); ok {
+func (f RoleDataScopesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.RoleDataScopesMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RoleDepartmentsMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RoleDataScopesMutation", m)
 }
 
 // The RolePermissionsFunc type is an adapter to allow the use of ordinary

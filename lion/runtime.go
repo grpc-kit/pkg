@@ -15,7 +15,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
-	"github.com/grpc-kit/pkg/lion/roledepartments"
+	"github.com/grpc-kit/pkg/lion/roledatascopes"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
@@ -608,39 +608,47 @@ func init() {
 	resourcesDescDescription := resourcesFields[10].Descriptor()
 	// resources.DefaultDescription holds the default value on creation for the description field.
 	resources.DefaultDescription = resourcesDescDescription.Default.(string)
-	roledepartmentsMixin := schema.RoleDepartments{}.Mixin()
-	roledepartmentsMixinFields0 := roledepartmentsMixin[0].Fields()
-	_ = roledepartmentsMixinFields0
-	roledepartmentsMixinFields1 := roledepartmentsMixin[1].Fields()
-	_ = roledepartmentsMixinFields1
-	roledepartmentsFields := schema.RoleDepartments{}.Fields()
-	_ = roledepartmentsFields
-	// roledepartmentsDescCreatedAt is the schema descriptor for created_at field.
-	roledepartmentsDescCreatedAt := roledepartmentsMixinFields0[0].Descriptor()
-	// roledepartments.DefaultCreatedAt holds the default value on creation for the created_at field.
-	roledepartments.DefaultCreatedAt = roledepartmentsDescCreatedAt.Default.(func() time.Time)
-	// roledepartmentsDescUpdatedAt is the schema descriptor for updated_at field.
-	roledepartmentsDescUpdatedAt := roledepartmentsMixinFields0[1].Descriptor()
-	// roledepartments.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	roledepartments.DefaultUpdatedAt = roledepartmentsDescUpdatedAt.Default.(func() time.Time)
-	// roledepartments.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	roledepartments.UpdateDefaultUpdatedAt = roledepartmentsDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// roledepartmentsDescCreatedBy is the schema descriptor for created_by field.
-	roledepartmentsDescCreatedBy := roledepartmentsMixinFields1[0].Descriptor()
-	// roledepartments.DefaultCreatedBy holds the default value on creation for the created_by field.
-	roledepartments.DefaultCreatedBy = roledepartmentsDescCreatedBy.Default.(int64)
-	// roledepartmentsDescUpdatedBy is the schema descriptor for updated_by field.
-	roledepartmentsDescUpdatedBy := roledepartmentsMixinFields1[1].Descriptor()
-	// roledepartments.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	roledepartments.DefaultUpdatedBy = roledepartmentsDescUpdatedBy.Default.(int64)
-	// roledepartmentsDescRoleID is the schema descriptor for role_id field.
-	roledepartmentsDescRoleID := roledepartmentsFields[0].Descriptor()
-	// roledepartments.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
-	roledepartments.RoleIDValidator = roledepartmentsDescRoleID.Validators[0].(func(int) error)
-	// roledepartmentsDescDepartmentID is the schema descriptor for department_id field.
-	roledepartmentsDescDepartmentID := roledepartmentsFields[1].Descriptor()
-	// roledepartments.DepartmentIDValidator is a validator for the "department_id" field. It is called by the builders before save.
-	roledepartments.DepartmentIDValidator = roledepartmentsDescDepartmentID.Validators[0].(func(int) error)
+	roledatascopesMixin := schema.RoleDataScopes{}.Mixin()
+	roledatascopesMixinFields0 := roledatascopesMixin[0].Fields()
+	_ = roledatascopesMixinFields0
+	roledatascopesMixinFields1 := roledatascopesMixin[1].Fields()
+	_ = roledatascopesMixinFields1
+	roledatascopesFields := schema.RoleDataScopes{}.Fields()
+	_ = roledatascopesFields
+	// roledatascopesDescCreatedAt is the schema descriptor for created_at field.
+	roledatascopesDescCreatedAt := roledatascopesMixinFields0[0].Descriptor()
+	// roledatascopes.DefaultCreatedAt holds the default value on creation for the created_at field.
+	roledatascopes.DefaultCreatedAt = roledatascopesDescCreatedAt.Default.(func() time.Time)
+	// roledatascopesDescUpdatedAt is the schema descriptor for updated_at field.
+	roledatascopesDescUpdatedAt := roledatascopesMixinFields0[1].Descriptor()
+	// roledatascopes.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	roledatascopes.DefaultUpdatedAt = roledatascopesDescUpdatedAt.Default.(func() time.Time)
+	// roledatascopes.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	roledatascopes.UpdateDefaultUpdatedAt = roledatascopesDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// roledatascopesDescCreatedBy is the schema descriptor for created_by field.
+	roledatascopesDescCreatedBy := roledatascopesMixinFields1[0].Descriptor()
+	// roledatascopes.DefaultCreatedBy holds the default value on creation for the created_by field.
+	roledatascopes.DefaultCreatedBy = roledatascopesDescCreatedBy.Default.(int64)
+	// roledatascopesDescUpdatedBy is the schema descriptor for updated_by field.
+	roledatascopesDescUpdatedBy := roledatascopesMixinFields1[1].Descriptor()
+	// roledatascopes.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	roledatascopes.DefaultUpdatedBy = roledatascopesDescUpdatedBy.Default.(int64)
+	// roledatascopesDescRoleID is the schema descriptor for role_id field.
+	roledatascopesDescRoleID := roledatascopesFields[0].Descriptor()
+	// roledatascopes.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	roledatascopes.RoleIDValidator = roledatascopesDescRoleID.Validators[0].(func(int) error)
+	// roledatascopesDescScopeType is the schema descriptor for scope_type field.
+	roledatascopesDescScopeType := roledatascopesFields[1].Descriptor()
+	// roledatascopes.DefaultScopeType holds the default value on creation for the scope_type field.
+	roledatascopes.DefaultScopeType = roledatascopesDescScopeType.Default.(int)
+	// roledatascopesDescDepartmentID is the schema descriptor for department_id field.
+	roledatascopesDescDepartmentID := roledatascopesFields[2].Descriptor()
+	// roledatascopes.DepartmentIDValidator is a validator for the "department_id" field. It is called by the builders before save.
+	roledatascopes.DepartmentIDValidator = roledatascopesDescDepartmentID.Validators[0].(func(int) error)
+	// roledatascopesDescScopeInherit is the schema descriptor for scope_inherit field.
+	roledatascopesDescScopeInherit := roledatascopesFields[3].Descriptor()
+	// roledatascopes.DefaultScopeInherit holds the default value on creation for the scope_inherit field.
+	roledatascopes.DefaultScopeInherit = roledatascopesDescScopeInherit.Default.(bool)
 	rolepermissionsMixin := schema.RolePermissions{}.Mixin()
 	rolepermissionsMixinFields0 := rolepermissionsMixin[0].Fields()
 	_ = rolepermissionsMixinFields0

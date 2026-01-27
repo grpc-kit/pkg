@@ -11,8 +11,9 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
-	"github.com/grpc-kit/pkg/lion/roledepartments"
+	"github.com/grpc-kit/pkg/lion/roledatascopes"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -534,7 +535,7 @@ func (a *KnownAdminAPI) DeleteRole(ctx context.Context, req *adminv1.DeleteRoleR
 		return nil, errs.InvalidArgument(ctx).WithMessage("role has group")
 	}
 
-	if db.RoleDepartments.Query().Where(roledepartments.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
+	if db.RoleDataScopes.Query().Where(roledatascopes.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("role has department")
 	}
 
@@ -1068,9 +1069,9 @@ func (a *KnownAdminAPI) ListRolePermissions(ctx context.Context, req *adminv1.Li
 	return result, nil
 }
 
-// CreateRoleDepartments 为角色关联部门
-func (a *KnownAdminAPI) CreateRoleDepartments(ctx context.Context, req *adminv1.CreateRoleDepartmentsRequest) (*adminv1.CreateRoleDepartmentsResponse, error) {
-	result := &adminv1.CreateRoleDepartmentsResponse{}
+// CreateRoleDataScopes 为角色关联部门
+func (a *KnownAdminAPI) CreateRoleDataScopes(ctx context.Context, req *adminv1.CreateRoleDataScopesRequest) (*adminv1.CreateRoleDataScopesResponse, error) {
+	result := &adminv1.CreateRoleDataScopesResponse{}
 
 	if req.RoleId == 0 {
 		return result, errs.InvalidArgument(ctx).WithMessage("role_id is required")
@@ -1137,10 +1138,10 @@ func (a *KnownAdminAPI) CreateRoleDepartments(ctx context.Context, req *adminv1.
 	}
 
 	// 检查是否已存在关联关系，如果存在则跳过
-	existingRoleDepartments, err := db.RoleDepartments.Query().
+	existingRoleDataScopes, err := db.RoleDataScopes.Query().
 		Where(
-			roledepartments.RoleIDEQ(int(req.RoleId)),
-			roledepartments.DepartmentIDIn(departmentIDs...),
+			roledatascopes.RoleIDEQ(int(req.RoleId)),
+			roledatascopes.DepartmentIDIn(departmentIDs...),
 		).
 		All(ctx)
 	if err != nil {
@@ -1149,7 +1150,7 @@ func (a *KnownAdminAPI) CreateRoleDepartments(ctx context.Context, req *adminv1.
 
 	// 构建已存在的 department ID 集合
 	existingDepartmentIDSet := make(map[int]bool)
-	for _, rd := range existingRoleDepartments {
+	for _, rd := range existingRoleDataScopes {
 		existingDepartmentIDSet[rd.DepartmentID] = true
 	}
 
@@ -1163,19 +1164,19 @@ func (a *KnownAdminAPI) CreateRoleDepartments(ctx context.Context, req *adminv1.
 
 	// 批量创建关联关系
 	if len(departmentsToCreate) > 0 {
-		allRoleDepartments := make([]*lion.RoleDepartmentsCreate, 0, len(departmentsToCreate))
+		allRoleDataScopes := make([]*lion.RoleDataScopesCreate, 0, len(departmentsToCreate))
 
 		for _, departmentID := range departmentsToCreate {
-			rd := db.RoleDepartments.Create().
+			rd := db.RoleDataScopes.Create().
 				SetRoleID(int(req.RoleId)).
 				SetDepartmentID(departmentID).
 				SetCreatedBy(userID).
 				SetUpdatedBy(userID)
 
-			allRoleDepartments = append(allRoleDepartments, rd)
+			allRoleDataScopes = append(allRoleDataScopes, rd)
 		}
 
-		_, err = db.RoleDepartments.CreateBulk(allRoleDepartments...).Save(ctx)
+		_, err = db.RoleDataScopes.CreateBulk(allRoleDataScopes...).Save(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -1193,8 +1194,8 @@ func (a *KnownAdminAPI) CreateRoleDepartments(ctx context.Context, req *adminv1.
 	return result, nil
 }
 
-// DeleteRoleDepartment 删除角色下的部门关联
-func (a *KnownAdminAPI) DeleteRoleDepartment(ctx context.Context, req *adminv1.DeleteRoleDepartmentRequest) (*emptypb.Empty, error) {
+// DeleteRoleDataScopes 删除角色下的数据范围关联
+func (a *KnownAdminAPI) DeleteRoleDataScopes(ctx context.Context, req *adminv1.DeleteRoleDataScopesRequest) (*emptypb.Empty, error) {
 	if req.RoleId == 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("role_id is required")
 	}
@@ -1226,10 +1227,10 @@ func (a *KnownAdminAPI) DeleteRoleDepartment(ctx context.Context, req *adminv1.D
 	}
 
 	// 检查关联关系是否存在
-	_, err = db.RoleDepartments.Query().
+	_, err = db.RoleDataScopes.Query().
 		Where(
-			roledepartments.RoleIDEQ(int(req.RoleId)),
-			roledepartments.DepartmentIDEQ(int(req.DepartmentId)),
+			roledatascopes.RoleIDEQ(int(req.RoleId)),
+			roledatascopes.DepartmentIDEQ(int(req.DepartmentId)),
 		).
 		Only(ctx)
 	if err != nil {
@@ -1237,10 +1238,10 @@ func (a *KnownAdminAPI) DeleteRoleDepartment(ctx context.Context, req *adminv1.D
 	}
 
 	// 删除关联关系
-	_, err = db.RoleDepartments.Delete().
+	_, err = db.RoleDataScopes.Delete().
 		Where(
-			roledepartments.RoleIDEQ(int(req.RoleId)),
-			roledepartments.DepartmentIDEQ(int(req.DepartmentId)),
+			roledatascopes.RoleIDEQ(int(req.RoleId)),
+			roledatascopes.DepartmentIDEQ(int(req.DepartmentId)),
 		).
 		Exec(ctx)
 	if err != nil {
@@ -1250,9 +1251,9 @@ func (a *KnownAdminAPI) DeleteRoleDepartment(ctx context.Context, req *adminv1.D
 	return &emptypb.Empty{}, nil
 }
 
-// ListRoleDepartments 列出角色下的所有部门
-func (a *KnownAdminAPI) ListRoleDepartments(ctx context.Context, req *adminv1.ListRoleDepartmentsRequest) (*adminv1.ListRoleDepartmentsResponse, error) {
-	result := &adminv1.ListRoleDepartmentsResponse{}
+// ListRoleDataScopes 列出角色下的所有部门
+func (a *KnownAdminAPI) ListRoleDataScopes(ctx context.Context, req *adminv1.ListRoleDataScopesRequest) (*adminv1.ListRoleDataScopesResponse, error) {
+	result := &adminv1.ListRoleDataScopesResponse{}
 
 	if req.RoleId == 0 {
 		return result, errs.InvalidArgument(ctx).WithMessage("role_id is required")
@@ -1275,16 +1276,8 @@ func (a *KnownAdminAPI) ListRoleDepartments(ctx context.Context, req *adminv1.Li
 	}
 
 	// 查询角色部门关联
-	roleDepartmentQuery := db.RoleDepartments.Query().
-		Where(roledepartments.RoleIDEQ(int(req.RoleId)))
-
-	// 如果 View 为 FULL，需要预加载部门的详细信息
-	if req.View == adminv1.View_FULL {
-		roleDepartmentQuery = roleDepartmentQuery.WithLionDepartments()
-	} else {
-		// BASIC 或 STANDARD 视图，只加载基本信息
-		roleDepartmentQuery = roleDepartmentQuery.WithLionDepartments()
-	}
+	roleDepartmentQuery := db.RoleDataScopes.Query().
+		Where(roledatascopes.RoleIDEQ(int(req.RoleId)))
 
 	// 计算总数（在应用分页前）
 	totalSize, err := roleDepartmentQuery.Clone().Count(ctx)
@@ -1300,15 +1293,15 @@ func (a *KnownAdminAPI) ListRoleDepartments(ctx context.Context, req *adminv1.Li
 	if req.OrderBy != "" {
 		switch req.OrderBy {
 		case "create_time desc":
-			roleDepartmentQuery = roleDepartmentQuery.Order(lion.Desc(roledepartments.FieldCreatedAt))
+			roleDepartmentQuery = roleDepartmentQuery.Order(lion.Desc(roledatascopes.FieldCreatedAt))
 		case "create_time asc":
-			roleDepartmentQuery = roleDepartmentQuery.Order(lion.Asc(roledepartments.FieldCreatedAt))
+			roleDepartmentQuery = roleDepartmentQuery.Order(lion.Asc(roledatascopes.FieldCreatedAt))
 		default:
-			roleDepartmentQuery = roleDepartmentQuery.Order(lion.Desc(roledepartments.FieldCreatedAt))
+			roleDepartmentQuery = roleDepartmentQuery.Order(lion.Desc(roledatascopes.FieldCreatedAt))
 		}
 	} else {
 		// 默认排序
-		roleDepartmentQuery = roleDepartmentQuery.Order(lion.Desc(roledepartments.FieldCreatedAt))
+		roleDepartmentQuery = roleDepartmentQuery.Order(lion.Desc(roledatascopes.FieldCreatedAt))
 	}
 
 	var lastID int
@@ -1322,15 +1315,15 @@ func (a *KnownAdminAPI) ListRoleDepartments(ctx context.Context, req *adminv1.Li
 			return nil, fmt.Errorf("invalid page_token format: %w", err)
 		}
 		if lastID > 0 {
-			roleDepartmentQuery = roleDepartmentQuery.Where(roledepartments.IDGT(lastID))
+			roleDepartmentQuery = roleDepartmentQuery.Where(roledatascopes.IDGT(lastID))
 		}
 	}
 
 	switch p := req.GetPagination().(type) {
-	case *adminv1.ListRoleDepartmentsRequest_Offset:
+	case *adminv1.ListRoleDataScopesRequest_Offset:
 		// Offset-based 分页
 		roleDepartmentQuery = roleDepartmentQuery.Offset(int(p.Offset))
-	case *adminv1.ListRoleDepartmentsRequest_PageToken:
+	case *adminv1.ListRoleDataScopesRequest_PageToken:
 		// Cursor-based 分页已在上面处理
 	}
 
@@ -1343,13 +1336,64 @@ func (a *KnownAdminAPI) ListRoleDepartments(ctx context.Context, req *adminv1.Li
 		return nil, err
 	}
 
+	// 收集所有 department_id
+	departmentIDs := make([]int, 0, len(roleDepartmentList))
+	for _, rd := range roleDepartmentList {
+		if rd.DepartmentID > 0 {
+			departmentIDs = append(departmentIDs, rd.DepartmentID)
+		}
+	}
+
+	// 批量查询部门信息
+	departmentMap := make(map[int]*lion.Departments)
+	if len(departmentIDs) > 0 {
+		// 确定需要查询的字段
+		selectFields := []string{
+			departments.FieldID,
+			departments.FieldParentID,
+			departments.FieldCode,
+			departments.FieldDisplayName,
+			departments.FieldDepartmentType,
+			departments.FieldDepartmentStatus,
+			departments.FieldSortOrder,
+		}
+
+		// 如果 View 为 FULL，添加更多字段
+		if req.View == adminv1.View_FULL {
+			selectFields = append(selectFields,
+				departments.FieldCreatedBy,
+				departments.FieldUpdatedBy,
+				departments.FieldCreatedAt,
+				departments.FieldUpdatedAt,
+				departments.FieldDescription,
+			)
+		}
+
+		departmentList, err := db.Departments.Query().
+			Select(selectFields...).
+			Where(departments.IDIn(departmentIDs...)).
+			All(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, dept := range departmentList {
+			departmentMap[dept.ID] = dept
+		}
+	}
+
 	// 转换为响应格式
 	for _, rd := range roleDepartmentList {
-		if rd.Edges.LionDepartments == nil {
+		if rd.DepartmentID == 0 {
 			continue
 		}
 
-		dept := rd.Edges.LionDepartments
+		dept, ok := departmentMap[rd.DepartmentID]
+		if !ok {
+			// 部门不存在，跳过
+			continue
+		}
+
 		department := &adminv1.Department{
 			Id:          int32(dept.ID),
 			ParentId:    int32(dept.ParentID),
@@ -1376,7 +1420,7 @@ func (a *KnownAdminAPI) ListRoleDepartments(ctx context.Context, req *adminv1.Li
 
 	// 构造 next_page_token（仅用于 cursor-based 分页）
 	switch req.GetPagination().(type) {
-	case *adminv1.ListRoleDepartmentsRequest_PageToken:
+	case *adminv1.ListRoleDataScopesRequest_PageToken:
 		// 只有在使用 cursor-based 分页时才生成 next_page_token
 		if len(roleDepartmentList) == int(pageSize) && len(roleDepartmentList) > 0 {
 			last := roleDepartmentList[len(roleDepartmentList)-1].ID

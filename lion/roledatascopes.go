@@ -9,13 +9,12 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/roledepartments"
+	"github.com/grpc-kit/pkg/lion/roledatascopes"
 	"github.com/grpc-kit/pkg/lion/roles"
 )
 
-// RoleDepartments is the model entity for the RoleDepartments schema.
-type RoleDepartments struct {
+// RoleDataScopes is the model entity for the RoleDataScopes schema.
+type RoleDataScopes struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -29,28 +28,31 @@ type RoleDepartments struct {
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 关联 lion_role 表的用户组 ID
 	RoleID int `json:"role_id,omitempty"`
+	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
+	ScopeType int `json:"scope_type,omitempty"`
 	// 关联 lion_departments 表的资源 ID
 	DepartmentID int `json:"department_id,omitempty"`
+	// 是否继承父级数据范围
+	ScopeInherit bool `json:"scope_inherit,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the RoleDepartmentsQuery when eager-loading is set.
-	Edges        RoleDepartmentsEdges `json:"edges"`
-	selectValues sql.SelectValues
+	// The values are being populated by the RoleDataScopesQuery when eager-loading is set.
+	Edges                             RoleDataScopesEdges `json:"edges"`
+	departments_lion_role_data_scopes *int
+	selectValues                      sql.SelectValues
 }
 
-// RoleDepartmentsEdges holds the relations/edges for other nodes in the graph.
-type RoleDepartmentsEdges struct {
+// RoleDataScopesEdges holds the relations/edges for other nodes in the graph.
+type RoleDataScopesEdges struct {
 	// LionRoles holds the value of the lion_roles edge.
 	LionRoles *Roles `json:"lion_roles,omitempty"`
-	// LionDepartments holds the value of the lion_departments edge.
-	LionDepartments *Departments `json:"lion_departments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 }
 
 // LionRolesOrErr returns the LionRoles value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e RoleDepartmentsEdges) LionRolesOrErr() (*Roles, error) {
+func (e RoleDataScopesEdges) LionRolesOrErr() (*Roles, error) {
 	if e.LionRoles != nil {
 		return e.LionRoles, nil
 	} else if e.loadedTypes[0] {
@@ -59,26 +61,19 @@ func (e RoleDepartmentsEdges) LionRolesOrErr() (*Roles, error) {
 	return nil, &NotLoadedError{edge: "lion_roles"}
 }
 
-// LionDepartmentsOrErr returns the LionDepartments value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e RoleDepartmentsEdges) LionDepartmentsOrErr() (*Departments, error) {
-	if e.LionDepartments != nil {
-		return e.LionDepartments, nil
-	} else if e.loadedTypes[1] {
-		return nil, &NotFoundError{label: departments.Label}
-	}
-	return nil, &NotLoadedError{edge: "lion_departments"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
-func (*RoleDepartments) scanValues(columns []string) ([]any, error) {
+func (*RoleDataScopes) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case roledepartments.FieldID, roledepartments.FieldCreatedBy, roledepartments.FieldUpdatedBy, roledepartments.FieldRoleID, roledepartments.FieldDepartmentID:
+		case roledatascopes.FieldScopeInherit:
+			values[i] = new(sql.NullBool)
+		case roledatascopes.FieldID, roledatascopes.FieldCreatedBy, roledatascopes.FieldUpdatedBy, roledatascopes.FieldRoleID, roledatascopes.FieldScopeType, roledatascopes.FieldDepartmentID:
 			values[i] = new(sql.NullInt64)
-		case roledepartments.FieldCreatedAt, roledepartments.FieldUpdatedAt:
+		case roledatascopes.FieldCreatedAt, roledatascopes.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case roledatascopes.ForeignKeys[0]: // departments_lion_role_data_scopes
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -87,54 +82,73 @@ func (*RoleDepartments) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the RoleDepartments fields.
-func (_m *RoleDepartments) assignValues(columns []string, values []any) error {
+// to the RoleDataScopes fields.
+func (_m *RoleDataScopes) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case roledepartments.FieldID:
+		case roledatascopes.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case roledepartments.FieldCreatedAt:
+		case roledatascopes.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case roledepartments.FieldUpdatedAt:
+		case roledatascopes.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case roledepartments.FieldCreatedBy:
+		case roledatascopes.FieldCreatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_by", values[i])
 			} else if value.Valid {
 				_m.CreatedBy = value.Int64
 			}
-		case roledepartments.FieldUpdatedBy:
+		case roledatascopes.FieldUpdatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case roledepartments.FieldRoleID:
+		case roledatascopes.FieldRoleID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field role_id", values[i])
 			} else if value.Valid {
 				_m.RoleID = int(value.Int64)
 			}
-		case roledepartments.FieldDepartmentID:
+		case roledatascopes.FieldScopeType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field scope_type", values[i])
+			} else if value.Valid {
+				_m.ScopeType = int(value.Int64)
+			}
+		case roledatascopes.FieldDepartmentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field department_id", values[i])
 			} else if value.Valid {
 				_m.DepartmentID = int(value.Int64)
+			}
+		case roledatascopes.FieldScopeInherit:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field scope_inherit", values[i])
+			} else if value.Valid {
+				_m.ScopeInherit = value.Bool
+			}
+		case roledatascopes.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field departments_lion_role_data_scopes", value)
+			} else if value.Valid {
+				_m.departments_lion_role_data_scopes = new(int)
+				*_m.departments_lion_role_data_scopes = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -143,44 +157,39 @@ func (_m *RoleDepartments) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the RoleDepartments.
+// Value returns the ent.Value that was dynamically selected and assigned to the RoleDataScopes.
 // This includes values selected through modifiers, order, etc.
-func (_m *RoleDepartments) Value(name string) (ent.Value, error) {
+func (_m *RoleDataScopes) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionRoles queries the "lion_roles" edge of the RoleDepartments entity.
-func (_m *RoleDepartments) QueryLionRoles() *RolesQuery {
-	return NewRoleDepartmentsClient(_m.config).QueryLionRoles(_m)
+// QueryLionRoles queries the "lion_roles" edge of the RoleDataScopes entity.
+func (_m *RoleDataScopes) QueryLionRoles() *RolesQuery {
+	return NewRoleDataScopesClient(_m.config).QueryLionRoles(_m)
 }
 
-// QueryLionDepartments queries the "lion_departments" edge of the RoleDepartments entity.
-func (_m *RoleDepartments) QueryLionDepartments() *DepartmentsQuery {
-	return NewRoleDepartmentsClient(_m.config).QueryLionDepartments(_m)
-}
-
-// Update returns a builder for updating this RoleDepartments.
-// Note that you need to call RoleDepartments.Unwrap() before calling this method if this RoleDepartments
+// Update returns a builder for updating this RoleDataScopes.
+// Note that you need to call RoleDataScopes.Unwrap() before calling this method if this RoleDataScopes
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *RoleDepartments) Update() *RoleDepartmentsUpdateOne {
-	return NewRoleDepartmentsClient(_m.config).UpdateOne(_m)
+func (_m *RoleDataScopes) Update() *RoleDataScopesUpdateOne {
+	return NewRoleDataScopesClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the RoleDepartments entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the RoleDataScopes entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *RoleDepartments) Unwrap() *RoleDepartments {
+func (_m *RoleDataScopes) Unwrap() *RoleDataScopes {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: RoleDepartments is not a transactional entity")
+		panic("lion: RoleDataScopes is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *RoleDepartments) String() string {
+func (_m *RoleDataScopes) String() string {
 	var builder strings.Builder
-	builder.WriteString("RoleDepartments(")
+	builder.WriteString("RoleDataScopes(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -197,11 +206,17 @@ func (_m *RoleDepartments) String() string {
 	builder.WriteString("role_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RoleID))
 	builder.WriteString(", ")
+	builder.WriteString("scope_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ScopeType))
+	builder.WriteString(", ")
 	builder.WriteString("department_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentID))
+	builder.WriteString(", ")
+	builder.WriteString("scope_inherit=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ScopeInherit))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// RoleDepartmentsSlice is a parsable slice of RoleDepartments.
-type RoleDepartmentsSlice []*RoleDepartments
+// RoleDataScopesSlice is a parsable slice of RoleDataScopes.
+type RoleDataScopesSlice []*RoleDataScopes

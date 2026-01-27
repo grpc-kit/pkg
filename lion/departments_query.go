@@ -15,7 +15,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/roledepartments"
+	"github.com/grpc-kit/pkg/lion/roledatascopes"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 )
 
@@ -26,7 +26,7 @@ type DepartmentsQuery struct {
 	order                   []departments.OrderOption
 	inters                  []Interceptor
 	predicates              []predicate.Departments
-	withLionRoleDepartments *RoleDepartmentsQuery
+	withLionRoleDataScopes  *RoleDataScopesQuery
 	withLionUserDepartments *UserDepartmentsQuery
 	withLionGroups          *GroupsQuery
 	// intermediate query (i.e. traversal path).
@@ -65,9 +65,9 @@ func (_q *DepartmentsQuery) Order(o ...departments.OrderOption) *DepartmentsQuer
 	return _q
 }
 
-// QueryLionRoleDepartments chains the current query on the "lion_role_departments" edge.
-func (_q *DepartmentsQuery) QueryLionRoleDepartments() *RoleDepartmentsQuery {
-	query := (&RoleDepartmentsClient{config: _q.config}).Query()
+// QueryLionRoleDataScopes chains the current query on the "lion_role_data_scopes" edge.
+func (_q *DepartmentsQuery) QueryLionRoleDataScopes() *RoleDataScopesQuery {
+	query := (&RoleDataScopesClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -78,8 +78,8 @@ func (_q *DepartmentsQuery) QueryLionRoleDepartments() *RoleDepartmentsQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(departments.Table, departments.FieldID, selector),
-			sqlgraph.To(roledepartments.Table, roledepartments.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionRoleDepartmentsTable, departments.LionRoleDepartmentsColumn),
+			sqlgraph.To(roledatascopes.Table, roledatascopes.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionRoleDataScopesTable, departments.LionRoleDataScopesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -323,7 +323,7 @@ func (_q *DepartmentsQuery) Clone() *DepartmentsQuery {
 		order:                   append([]departments.OrderOption{}, _q.order...),
 		inters:                  append([]Interceptor{}, _q.inters...),
 		predicates:              append([]predicate.Departments{}, _q.predicates...),
-		withLionRoleDepartments: _q.withLionRoleDepartments.Clone(),
+		withLionRoleDataScopes:  _q.withLionRoleDataScopes.Clone(),
 		withLionUserDepartments: _q.withLionUserDepartments.Clone(),
 		withLionGroups:          _q.withLionGroups.Clone(),
 		// clone intermediate query.
@@ -332,14 +332,14 @@ func (_q *DepartmentsQuery) Clone() *DepartmentsQuery {
 	}
 }
 
-// WithLionRoleDepartments tells the query-builder to eager-load the nodes that are connected to
-// the "lion_role_departments" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *DepartmentsQuery) WithLionRoleDepartments(opts ...func(*RoleDepartmentsQuery)) *DepartmentsQuery {
-	query := (&RoleDepartmentsClient{config: _q.config}).Query()
+// WithLionRoleDataScopes tells the query-builder to eager-load the nodes that are connected to
+// the "lion_role_data_scopes" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *DepartmentsQuery) WithLionRoleDataScopes(opts ...func(*RoleDataScopesQuery)) *DepartmentsQuery {
+	query := (&RoleDataScopesClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withLionRoleDepartments = query
+	_q.withLionRoleDataScopes = query
 	return _q
 }
 
@@ -444,7 +444,7 @@ func (_q *DepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes       = []*Departments{}
 		_spec       = _q.querySpec()
 		loadedTypes = [3]bool{
-			_q.withLionRoleDepartments != nil,
+			_q.withLionRoleDataScopes != nil,
 			_q.withLionUserDepartments != nil,
 			_q.withLionGroups != nil,
 		}
@@ -467,11 +467,11 @@ func (_q *DepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withLionRoleDepartments; query != nil {
-		if err := _q.loadLionRoleDepartments(ctx, query, nodes,
-			func(n *Departments) { n.Edges.LionRoleDepartments = []*RoleDepartments{} },
-			func(n *Departments, e *RoleDepartments) {
-				n.Edges.LionRoleDepartments = append(n.Edges.LionRoleDepartments, e)
+	if query := _q.withLionRoleDataScopes; query != nil {
+		if err := _q.loadLionRoleDataScopes(ctx, query, nodes,
+			func(n *Departments) { n.Edges.LionRoleDataScopes = []*RoleDataScopes{} },
+			func(n *Departments, e *RoleDataScopes) {
+				n.Edges.LionRoleDataScopes = append(n.Edges.LionRoleDataScopes, e)
 			}); err != nil {
 			return nil, err
 		}
@@ -495,7 +495,7 @@ func (_q *DepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	return nodes, nil
 }
 
-func (_q *DepartmentsQuery) loadLionRoleDepartments(ctx context.Context, query *RoleDepartmentsQuery, nodes []*Departments, init func(*Departments), assign func(*Departments, *RoleDepartments)) error {
+func (_q *DepartmentsQuery) loadLionRoleDataScopes(ctx context.Context, query *RoleDataScopesQuery, nodes []*Departments, init func(*Departments), assign func(*Departments, *RoleDataScopes)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Departments)
 	for i := range nodes {
@@ -505,21 +505,22 @@ func (_q *DepartmentsQuery) loadLionRoleDepartments(ctx context.Context, query *
 			init(nodes[i])
 		}
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(roledepartments.FieldDepartmentID)
-	}
-	query.Where(predicate.RoleDepartments(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(departments.LionRoleDepartmentsColumn), fks...))
+	query.withFKs = true
+	query.Where(predicate.RoleDataScopes(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(departments.LionRoleDataScopesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.DepartmentID
-		node, ok := nodeids[fk]
+		fk := n.departments_lion_role_data_scopes
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "departments_lion_role_data_scopes" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "department_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "departments_lion_role_data_scopes" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
