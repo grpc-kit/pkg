@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strconv"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/roledepartments"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
+	"github.com/grpc-kit/pkg/rpc"
 )
 
 // CreateDepartment 创建部门
@@ -41,9 +43,15 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	}
 
 	// 创建部门
+	// 设置 display_name：如果请求中提供了则使用，否则使用 code 作为默认值
+	displayName := req.Department.DisplayName
+	if displayName == "" {
+		displayName = req.Department.Code
+	}
 	dp, err := tx.Departments.Create().
 		SetParentID(int(req.Department.ParentId)).
 		SetCode(req.Department.Code).
+		SetDisplayName(displayName).
 		// SetI18nName(req.Department.I18NName).
 		SetSortOrder(int(req.Department.SortOrder)).
 		Save(ctx)
@@ -61,8 +69,9 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	_, err = tx.RoleDepartments.Create().SetRoleID(ros.ID).SetDepartmentID(dp.ID).Save(ctx)
 
 	result = &adminv1.Department{
-		Id:   int32(dp.ID),
-		Code: dp.Code,
+		Id:          int32(dp.ID),
+		Code:        dp.Code,
+		DisplayName: dp.DisplayName,
 		// I18NName:    dp.I18nName,
 		SortOrder: int32(dp.SortOrder),
 		Managers:  make([]*adminv1.DepartmentMember, 0),
@@ -77,42 +86,84 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDepartmentsRequest) (*adminv1.ListDepartmentsResponse, error) {
 	result := &adminv1.ListDepartmentsResponse{}
 
-	rids, err := a.getUserRoleID(ctx)
-	if err != nil {
-		return result, err
+	// 从 jwt 中获取用户组
+	gs, ok := rpc.GetGroupsFromContext(ctx)
+	if !ok {
+		return result, fmt.Errorf("not found groups")
 	}
 
-	res, err := a.config.db.RoleDepartments.Query().Select(
-		roledepartments.FieldRoleID,
-		roledepartments.FieldDepartmentID,
-	).Where(
-		roledepartments.RoleIDIn(rids...),
-	).All(ctx)
-	if err != nil {
-		return result, err
+	if len(gs) == 0 {
+		return result, nil
 	}
 
-	depIDs := make([]int, 0)
-	for _, v := range res {
-		depIDs = append(depIDs, v.DepartmentID)
+	// 检查是否包含 superadmin 角色
+	hasSuperAdmin := false
+	for _, g := range gs {
+		if g == "superadmin" {
+			hasSuperAdmin = true
+			break
+		}
 	}
 
-	depObj, err := a.config.db.Departments.Query().
-		Select().
-		Where(
-			departments.IDIn(depIDs...),
-		).
-		WithLionUserDepartments(
-			func(query *lion.UserDepartmentsQuery) {
-				query.Where(
-					userdepartments.DepartmentIDIn(depIDs...),
-					userdepartments.MemberRoleIn(int(adminv1.DepartmentMember_ROLE_OWNER.Number()), int(adminv1.DepartmentMember_ROLE_MANAGER.Number())),
-				)
-				query.WithLionUsers()
-			}).
-		All(ctx)
-	if err != nil {
-		return result, err
+	var depObj []*lion.Departments
+	var err error
+
+	// 如果不是 superadmin，则需要权限验证
+	if !hasSuperAdmin {
+		rids, err := a.getUserRoleID(ctx)
+		if err != nil {
+			return result, err
+		}
+
+		res, err := a.config.db.RoleDepartments.Query().Select(
+			roledepartments.FieldRoleID,
+			roledepartments.FieldDepartmentID,
+		).Where(
+			roledepartments.RoleIDIn(rids...),
+		).All(ctx)
+		if err != nil {
+			return result, err
+		}
+
+		depIDs := make([]int, 0)
+		for _, v := range res {
+			depIDs = append(depIDs, v.DepartmentID)
+		}
+
+		depObj, err = a.config.db.Departments.Query().
+			Select().
+			Where(
+				departments.IDIn(depIDs...),
+			).
+			WithLionUserDepartments(
+				func(query *lion.UserDepartmentsQuery) {
+					query.Where(
+						userdepartments.DepartmentIDIn(depIDs...),
+						userdepartments.MemberRoleIn(int(adminv1.DepartmentMember_ROLE_OWNER.Number()), int(adminv1.DepartmentMember_ROLE_MANAGER.Number())),
+					)
+					query.WithLionUsers()
+				}).
+			All(ctx)
+		if err != nil {
+			return result, err
+		}
+	} else {
+		// superadmin 可以查看所有部门
+		depObj, err = a.config.db.Departments.Query().
+			Select().
+			/*
+			WithLionUserDepartments(
+				func(query *lion.UserDepartmentsQuery) {
+					query.Where(
+						userdepartments.MemberRoleIn(int(adminv1.DepartmentMember_ROLE_OWNER.Number()), int(adminv1.DepartmentMember_ROLE_MANAGER.Number())),
+					)
+					query.WithLionUsers()
+				}).
+			*/
+			All(ctx)
+		if err != nil {
+			return result, err
+		}
 	}
 
 	// 构建树状菜单

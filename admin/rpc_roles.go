@@ -21,13 +21,158 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// getAllChildRoleIDs 递归获取所有子角色ID
+func (a *KnownAdminAPI) getAllChildRoleIDs(ctx context.Context, db *lion.Client, parentIDs []int) ([]int, error) {
+	if len(parentIDs) == 0 {
+		return []int{}, nil
+	}
+
+	// 查询所有子角色
+	childRoles, err := db.Roles.Query().
+		Select(roles.FieldID, roles.FieldParentID).
+		Where(roles.ParentIDIn(parentIDs...)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(childRoles) == 0 {
+		return []int{}, nil
+	}
+
+	// 收集子角色ID
+	childIDs := make([]int, 0, len(childRoles))
+	for _, child := range childRoles {
+		childIDs = append(childIDs, child.ID)
+	}
+
+	// 递归获取子角色的子角色
+	grandChildIDs, err := a.getAllChildRoleIDs(ctx, db, childIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// 合并所有子角色ID
+	allChildIDs := append(childIDs, grandChildIDs...)
+	return allChildIDs, nil
+}
+
+// checkRolePermission 检查用户是否有权限操作指定角色
+// 返回 true 表示用户拥有该角色或其子角色，可以操作
+func (a *KnownAdminAPI) checkRolePermission(ctx context.Context, db *lion.Client, roleID int) error {
+	// 获取当前用户的角色ID列表
+	userRoleIDs, err := a.getUserRoleID(ctx)
+	if err != nil {
+		return err
+	}
+
+	if len(userRoleIDs) == 0 {
+		return errs.PermissionDenied(ctx).WithMessage("user has no roles")
+	}
+
+	// 检查目标角色是否就是用户拥有的角色之一
+	for _, userRoleID := range userRoleIDs {
+		if userRoleID == roleID {
+			return nil
+		}
+	}
+
+	// 递归获取所有子角色ID
+	allChildRoleIDs, err := a.getAllChildRoleIDs(ctx, db, userRoleIDs)
+	if err != nil {
+		return err
+	}
+
+	// 检查目标角色是否是用户角色的子角色
+	for _, childRoleID := range allChildRoleIDs {
+		if childRoleID == roleID {
+			return nil
+		}
+	}
+
+	// 没有权限
+	return errs.PermissionDenied(ctx).WithMessage("user does not have permission to access this role")
+}
+
+// checkParentRolePermission 检查用户是否有权限将新角色创建为指定父角色的子角色
+// 如果 parentID 为 0，表示创建根角色，需要检查用户是否有根角色权限
+func (a *KnownAdminAPI) checkParentRolePermission(ctx context.Context, db *lion.Client, parentID int32) error {
+	if parentID == 0 {
+		// 创建根角色，需要检查用户是否有根角色
+		userRoleIDs, err := a.getUserRoleID(ctx)
+		if err != nil {
+			return err
+		}
+
+		if len(userRoleIDs) == 0 {
+			return errs.PermissionDenied(ctx).WithMessage("user has no roles")
+		}
+
+		// 检查用户是否有根角色（parent_id = 0）
+		userRootRoles, err := db.Roles.Query().
+			Select(roles.FieldID, roles.FieldParentID).
+			Where(
+				roles.IDIn(userRoleIDs...),
+				roles.ParentIDEQ(0),
+			).
+			All(ctx)
+		if err != nil {
+			return err
+		}
+
+		if len(userRootRoles) == 0 {
+			return errs.PermissionDenied(ctx).WithMessage("user does not have root role permission to create root role")
+		}
+
+		return nil
+	}
+
+	// 检查用户是否有权限操作父角色
+	return a.checkRolePermission(ctx, db, int(parentID))
+}
+
 // ListRoles 获取角色列表，默认返回树状结构
+// 仅返回当前用户拥有的角色及其所有子角色
 func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesRequest) (*adminv1.ListRolesResponse, error) {
 	result := &adminv1.ListRolesResponse{}
 
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
+	}
+
+	// 获取当前用户的角色ID列表
+	userRoleIDs, err := a.getUserRoleID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(userRoleIDs) == 0 {
+		// 用户没有任何角色，返回空列表
+		result.Roles = []*adminv1.Role{}
+		result.TotalSize = 0
+		return result, nil
+	}
+
+	// 递归获取所有子角色ID
+	allChildRoleIDs, err := a.getAllChildRoleIDs(ctx, db, userRoleIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// 合并用户角色ID和所有子角色ID
+	allowedRoleIDs := make(map[int]bool)
+	for _, id := range userRoleIDs {
+		allowedRoleIDs[id] = true
+	}
+	for _, id := range allChildRoleIDs {
+		allowedRoleIDs[id] = true
+	}
+
+	// 转换为切片用于查询
+	allowedRoleIDsSlice := make([]int, 0, len(allowedRoleIDs))
+	for id := range allowedRoleIDs {
+		allowedRoleIDsSlice = append(allowedRoleIDsSlice, id)
 	}
 
 	// 添加 parent_id 字段到查询字段列表
@@ -44,7 +189,8 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 		roles.FieldUpdatedAt,
 	}
 
-	roleQuery := db.Roles.Query()
+	roleQuery := db.Roles.Query().
+		Where(roles.IDIn(allowedRoleIDsSlice...))
 
 	// 查找用户并实现分页
 	pageSize := GetPageSize(ctx, req.PageSize)
@@ -170,6 +316,11 @@ func (a *KnownAdminAPI) ListRoleUsers(ctx context.Context, req *adminv1.ListRole
 		return nil, err
 	}
 
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
 	uidObjs, err := db.UserRoles.Query().Select(
 		userroles.FieldUserID,
 	).Where(
@@ -233,6 +384,11 @@ func (a *KnownAdminAPI) DeleteRoleUser(ctx context.Context, req *adminv1.DeleteR
 		return empty, err
 	}
 
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
 	_, err = db.UserRoles.Delete().
 		Where(
 			userroles.RoleID(roleID),
@@ -255,6 +411,11 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 
 	db, err := a.GetLionClient()
 	if err != nil {
+		return nil, err
+	}
+
+	// 检查用户是否有权限创建该父角色的子角色
+	if err := a.checkParentRolePermission(ctx, db, req.Role.ParentId); err != nil {
 		return nil, err
 	}
 
@@ -331,6 +492,11 @@ func (a *KnownAdminAPI) GetRole(ctx context.Context, req *adminv1.GetRoleRequest
 		return nil, errs.NotFound(ctx).WithMessage("role not found")
 	}
 
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, role.ID); err != nil {
+		return nil, err
+	}
+
 	result := &adminv1.Role{
 		Id:          int32(role.ID),
 		ParentId:    int32(role.ParentID),
@@ -356,6 +522,11 @@ func (a *KnownAdminAPI) DeleteRole(ctx context.Context, req *adminv1.DeleteRoleR
 
 	db, err := a.GetLionClient()
 	if err != nil {
+		return nil, err
+	}
+
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, int(req.Id)); err != nil {
 		return nil, err
 	}
 
@@ -396,6 +567,11 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 		return nil, err
 	}
 
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, int(req.Role.Id)); err != nil {
+		return nil, err
+	}
+
 	if req.UpdateMask != nil && len(req.UpdateMask.Paths) != 0 {
 		x := db.Roles.Update()
 
@@ -407,7 +583,10 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 			case roles.FieldCode:
 				x.SetCode(req.Role.Code)
 			case roles.FieldParentID:
-				// 更新 parent_id
+				// 更新 parent_id，需要检查新父角色的权限
+				if err := a.checkParentRolePermission(ctx, db, req.Role.ParentId); err != nil {
+					return nil, err
+				}
 				x.SetParentID(int(req.Role.ParentId))
 			case roles.FieldSortOrder:
 				x.SetSortOrder(int(req.Role.SortOrder))
@@ -478,6 +657,11 @@ func (a *KnownAdminAPI) AssignRoleToUser(ctx context.Context, req *adminv1.Assig
 		return nil, err
 	}
 
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
+		return nil, err
+	}
+
 	if len(req.Users) == 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("users is empty")
 	}
@@ -503,6 +687,11 @@ func (a *KnownAdminAPI) CreateRolePermissions(ctx context.Context, req *adminv1.
 
 	db, err := a.GetLionClient()
 	if err != nil {
+		return nil, err
+	}
+
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
 		return nil, err
 	}
 
@@ -621,6 +810,11 @@ func (a *KnownAdminAPI) DeleteRolePermission(ctx context.Context, req *adminv1.D
 		return nil, err
 	}
 
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
+		return nil, err
+	}
+
 	// 检查角色是否存在
 	_, err = db.Roles.Get(ctx, int(req.RoleId))
 	if err != nil {
@@ -668,6 +862,11 @@ func (a *KnownAdminAPI) ListRolePermissions(ctx context.Context, req *adminv1.Li
 
 	db, err := a.GetLionClient()
 	if err != nil {
+		return nil, err
+	}
+
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
 		return nil, err
 	}
 
@@ -861,6 +1060,326 @@ func (a *KnownAdminAPI) ListRolePermissions(ctx context.Context, req *adminv1.Li
 		// 只有在使用 cursor-based 分页时才生成 next_page_token
 		if len(rolePermissionList) == int(pageSize) && len(rolePermissionList) > 0 {
 			last := rolePermissionList[len(rolePermissionList)-1].ID
+			tokenData, _ := json.Marshal(last)
+			result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+		}
+	}
+
+	return result, nil
+}
+
+// CreateRoleDepartments 为角色关联部门
+func (a *KnownAdminAPI) CreateRoleDepartments(ctx context.Context, req *adminv1.CreateRoleDepartmentsRequest) (*adminv1.CreateRoleDepartmentsResponse, error) {
+	result := &adminv1.CreateRoleDepartmentsResponse{}
+
+	if req.RoleId == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("role_id is required")
+	}
+
+	if len(req.Departments) == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("departments list is empty")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
+		return nil, err
+	}
+
+	// 获取创建者用户 ID
+	userID, err := GetUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 检查角色是否存在
+	_, err = db.Roles.Get(ctx, int(req.RoleId))
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("role not found")
+	}
+
+	// 收集有效的部门 IDs 并验证每个部门是否存在
+	departmentIDs := make([]int, 0, len(req.Departments))
+	departmentMap := make(map[int32]*adminv1.Department)
+
+	for _, dept := range req.Departments {
+		if dept.Id == 0 {
+			continue
+		}
+
+		// 检查部门是否存在
+		dbDepartment, err := db.Departments.Get(ctx, int(dept.Id))
+		if err != nil {
+			// 如果某个部门不存在，可以选择跳过或返回错误
+			// 这里选择跳过不存在的部门
+			continue
+		}
+
+		departmentIDs = append(departmentIDs, dbDepartment.ID)
+		// 保存部门信息以便后续返回
+		departmentMap[dept.Id] = &adminv1.Department{
+			Id:          int32(dbDepartment.ID),
+			ParentId:    int32(dbDepartment.ParentID),
+			Code:        dbDepartment.Code,
+			DisplayName: dbDepartment.DisplayName,
+			Type:        adminv1.Department_Type(dbDepartment.DepartmentType),
+			Status:      adminv1.Department_Status(dbDepartment.DepartmentStatus),
+			SortOrder:   int32(dbDepartment.SortOrder),
+		}
+	}
+
+	if len(departmentIDs) == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("no valid departments found")
+	}
+
+	// 检查是否已存在关联关系，如果存在则跳过
+	existingRoleDepartments, err := db.RoleDepartments.Query().
+		Where(
+			roledepartments.RoleIDEQ(int(req.RoleId)),
+			roledepartments.DepartmentIDIn(departmentIDs...),
+		).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 构建已存在的 department ID 集合
+	existingDepartmentIDSet := make(map[int]bool)
+	for _, rd := range existingRoleDepartments {
+		existingDepartmentIDSet[rd.DepartmentID] = true
+	}
+
+	// 过滤出需要创建的 department IDs（排除已存在的）
+	departmentsToCreate := make([]int, 0)
+	for _, departmentID := range departmentIDs {
+		if !existingDepartmentIDSet[departmentID] {
+			departmentsToCreate = append(departmentsToCreate, departmentID)
+		}
+	}
+
+	// 批量创建关联关系
+	if len(departmentsToCreate) > 0 {
+		allRoleDepartments := make([]*lion.RoleDepartmentsCreate, 0, len(departmentsToCreate))
+
+		for _, departmentID := range departmentsToCreate {
+			rd := db.RoleDepartments.Create().
+				SetRoleID(int(req.RoleId)).
+				SetDepartmentID(departmentID).
+				SetCreatedBy(userID).
+				SetUpdatedBy(userID)
+
+			allRoleDepartments = append(allRoleDepartments, rd)
+		}
+
+		_, err = db.RoleDepartments.CreateBulk(allRoleDepartments...).Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// 返回所有关联的部门（包括已存在的和新创建的）
+	for _, dept := range req.Departments {
+		if dept.Id != 0 {
+			if d, ok := departmentMap[dept.Id]; ok {
+				result.Departments = append(result.Departments, d)
+			}
+		}
+	}
+
+	return result, nil
+}
+
+// DeleteRoleDepartment 删除角色下的部门关联
+func (a *KnownAdminAPI) DeleteRoleDepartment(ctx context.Context, req *adminv1.DeleteRoleDepartmentRequest) (*emptypb.Empty, error) {
+	if req.RoleId == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("role_id is required")
+	}
+
+	if req.DepartmentId == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("department_id is required")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
+		return nil, err
+	}
+
+	// 检查角色是否存在
+	_, err = db.Roles.Get(ctx, int(req.RoleId))
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("role not found")
+	}
+
+	// 检查部门是否存在
+	_, err = db.Departments.Get(ctx, int(req.DepartmentId))
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("department not found")
+	}
+
+	// 检查关联关系是否存在
+	_, err = db.RoleDepartments.Query().
+		Where(
+			roledepartments.RoleIDEQ(int(req.RoleId)),
+			roledepartments.DepartmentIDEQ(int(req.DepartmentId)),
+		).
+		Only(ctx)
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("role department relationship not found")
+	}
+
+	// 删除关联关系
+	_, err = db.RoleDepartments.Delete().
+		Where(
+			roledepartments.RoleIDEQ(int(req.RoleId)),
+			roledepartments.DepartmentIDEQ(int(req.DepartmentId)),
+		).
+		Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
+}
+
+// ListRoleDepartments 列出角色下的所有部门
+func (a *KnownAdminAPI) ListRoleDepartments(ctx context.Context, req *adminv1.ListRoleDepartmentsRequest) (*adminv1.ListRoleDepartmentsResponse, error) {
+	result := &adminv1.ListRoleDepartmentsResponse{}
+
+	if req.RoleId == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("role_id is required")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	// 检查用户是否有权限操作该角色
+	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
+		return nil, err
+	}
+
+	// 检查角色是否存在
+	_, err = db.Roles.Get(ctx, int(req.RoleId))
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("role not found")
+	}
+
+	// 查询角色部门关联
+	roleDepartmentQuery := db.RoleDepartments.Query().
+		Where(roledepartments.RoleIDEQ(int(req.RoleId)))
+
+	// 如果 View 为 FULL，需要预加载部门的详细信息
+	if req.View == adminv1.View_FULL {
+		roleDepartmentQuery = roleDepartmentQuery.WithLionDepartments()
+	} else {
+		// BASIC 或 STANDARD 视图，只加载基本信息
+		roleDepartmentQuery = roleDepartmentQuery.WithLionDepartments()
+	}
+
+	// 计算总数（在应用分页前）
+	totalSize, err := roleDepartmentQuery.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result.TotalSize = int32(totalSize)
+
+	// 处理分页
+	pageSize := GetPageSize(ctx, req.PageSize)
+
+	// 处理排序
+	if req.OrderBy != "" {
+		switch req.OrderBy {
+		case "create_time desc":
+			roleDepartmentQuery = roleDepartmentQuery.Order(lion.Desc(roledepartments.FieldCreatedAt))
+		case "create_time asc":
+			roleDepartmentQuery = roleDepartmentQuery.Order(lion.Asc(roledepartments.FieldCreatedAt))
+		default:
+			roleDepartmentQuery = roleDepartmentQuery.Order(lion.Desc(roledepartments.FieldCreatedAt))
+		}
+	} else {
+		// 默认排序
+		roleDepartmentQuery = roleDepartmentQuery.Order(lion.Desc(roledepartments.FieldCreatedAt))
+	}
+
+	var lastID int
+	if req.GetPageToken() != "" {
+		// Cursor-based 分页
+		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
+		if err != nil {
+			return nil, fmt.Errorf("invalid page_token: %w", err)
+		}
+		if err := json.Unmarshal(data, &lastID); err != nil {
+			return nil, fmt.Errorf("invalid page_token format: %w", err)
+		}
+		if lastID > 0 {
+			roleDepartmentQuery = roleDepartmentQuery.Where(roledepartments.IDGT(lastID))
+		}
+	}
+
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListRoleDepartmentsRequest_Offset:
+		// Offset-based 分页
+		roleDepartmentQuery = roleDepartmentQuery.Offset(int(p.Offset))
+	case *adminv1.ListRoleDepartmentsRequest_PageToken:
+		// Cursor-based 分页已在上面处理
+	}
+
+	// 应用 Limit
+	roleDepartmentQuery = roleDepartmentQuery.Limit(int(pageSize))
+
+	// 执行查询
+	roleDepartmentList, err := roleDepartmentQuery.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换为响应格式
+	for _, rd := range roleDepartmentList {
+		if rd.Edges.LionDepartments == nil {
+			continue
+		}
+
+		dept := rd.Edges.LionDepartments
+		department := &adminv1.Department{
+			Id:          int32(dept.ID),
+			ParentId:    int32(dept.ParentID),
+			Code:        dept.Code,
+			DisplayName: dept.DisplayName,
+			Type:        adminv1.Department_Type(dept.DepartmentType),
+			Status:      adminv1.Department_Status(dept.DepartmentStatus),
+			SortOrder:   int32(dept.SortOrder),
+		}
+
+		// 如果 View 为 FULL，加载更多详细信息
+		if req.View == adminv1.View_FULL {
+			department.CreatedBy = dept.CreatedBy
+			department.UpdatedBy = dept.UpdatedBy
+			department.CreatedAt = timestamppb.New(dept.CreatedAt)
+			department.UpdatedAt = timestamppb.New(dept.UpdatedAt)
+			if dept.Description != "" {
+				department.Description = dept.Description
+			}
+		}
+
+		result.Departments = append(result.Departments, department)
+	}
+
+	// 构造 next_page_token（仅用于 cursor-based 分页）
+	switch req.GetPagination().(type) {
+	case *adminv1.ListRoleDepartmentsRequest_PageToken:
+		// 只有在使用 cursor-based 分页时才生成 next_page_token
+		if len(roleDepartmentList) == int(pageSize) && len(roleDepartmentList) > 0 {
+			last := roleDepartmentList[len(roleDepartmentList)-1].ID
 			tokenData, _ := json.Marshal(last)
 			result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
 		}
