@@ -36,8 +36,8 @@ type ResourceScopes func(*sql.Selector)
 // Resources is the predicate function for resources builders.
 type Resources func(*sql.Selector)
 
-// RoleDataScopes is the predicate function for roledatascopes builders.
-type RoleDataScopes func(*sql.Selector)
+// RoleDataRanges is the predicate function for roledataranges builders.
+type RoleDataRanges func(*sql.Selector)
 
 // RolePermissions is the predicate function for rolepermissions builders.
 type RolePermissions func(*sql.Selector)

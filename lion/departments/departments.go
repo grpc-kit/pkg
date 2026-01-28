@@ -54,21 +54,21 @@ const (
 	FieldMetadata = "metadata"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLionRoleDataScopes holds the string denoting the lion_role_data_scopes edge name in mutations.
-	EdgeLionRoleDataScopes = "lion_role_data_scopes"
+	// EdgeLionRoleDataRanges holds the string denoting the lion_role_data_ranges edge name in mutations.
+	EdgeLionRoleDataRanges = "lion_role_data_ranges"
 	// EdgeLionUserDepartments holds the string denoting the lion_user_departments edge name in mutations.
 	EdgeLionUserDepartments = "lion_user_departments"
 	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
 	EdgeLionGroups = "lion_groups"
 	// Table holds the table name of the departments in the database.
 	Table = "lion_departments"
-	// LionRoleDataScopesTable is the table that holds the lion_role_data_scopes relation/edge.
-	LionRoleDataScopesTable = "lion_role_data_scopes"
-	// LionRoleDataScopesInverseTable is the table name for the RoleDataScopes entity.
-	// It exists in this package in order to avoid circular dependency with the "roledatascopes" package.
-	LionRoleDataScopesInverseTable = "lion_role_data_scopes"
-	// LionRoleDataScopesColumn is the table column denoting the lion_role_data_scopes relation/edge.
-	LionRoleDataScopesColumn = "departments_lion_role_data_scopes"
+	// LionRoleDataRangesTable is the table that holds the lion_role_data_ranges relation/edge.
+	LionRoleDataRangesTable = "lion_role_data_ranges"
+	// LionRoleDataRangesInverseTable is the table name for the RoleDataRanges entity.
+	// It exists in this package in order to avoid circular dependency with the "roledataranges" package.
+	LionRoleDataRangesInverseTable = "lion_role_data_ranges"
+	// LionRoleDataRangesColumn is the table column denoting the lion_role_data_ranges relation/edge.
+	LionRoleDataRangesColumn = "departments_lion_role_data_ranges"
 	// LionUserDepartmentsTable is the table that holds the lion_user_departments relation/edge.
 	LionUserDepartmentsTable = "lion_user_departments"
 	// LionUserDepartmentsInverseTable is the table name for the UserDepartments entity.
@@ -237,17 +237,17 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLionRoleDataScopesCount orders the results by lion_role_data_scopes count.
-func ByLionRoleDataScopesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionRoleDataRangesCount orders the results by lion_role_data_ranges count.
+func ByLionRoleDataRangesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionRoleDataScopesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionRoleDataRangesStep(), opts...)
 	}
 }
 
-// ByLionRoleDataScopes orders the results by lion_role_data_scopes terms.
-func ByLionRoleDataScopes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionRoleDataRanges orders the results by lion_role_data_ranges terms.
+func ByLionRoleDataRanges(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionRoleDataScopesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionRoleDataRangesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -278,11 +278,11 @@ func ByLionGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newLionRoleDataScopesStep() *sqlgraph.Step {
+func newLionRoleDataRangesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionRoleDataScopesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleDataScopesTable, LionRoleDataScopesColumn),
+		sqlgraph.To(LionRoleDataRangesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleDataRangesTable, LionRoleDataRangesColumn),
 	)
 }
 func newLionUserDepartmentsStep() *sqlgraph.Step {

@@ -25,7 +25,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
-	"github.com/grpc-kit/pkg/lion/roledatascopes"
+	"github.com/grpc-kit/pkg/lion/roledataranges"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/scopes"
@@ -62,8 +62,8 @@ type Client struct {
 	ResourceScopes *ResourceScopesClient
 	// Resources is the client for interacting with the Resources builders.
 	Resources *ResourcesClient
-	// RoleDataScopes is the client for interacting with the RoleDataScopes builders.
-	RoleDataScopes *RoleDataScopesClient
+	// RoleDataRanges is the client for interacting with the RoleDataRanges builders.
+	RoleDataRanges *RoleDataRangesClient
 	// RolePermissions is the client for interacting with the RolePermissions builders.
 	RolePermissions *RolePermissionsClient
 	// Roles is the client for interacting with the Roles builders.
@@ -103,7 +103,7 @@ func (c *Client) init() {
 	c.Policies = NewPoliciesClient(c.config)
 	c.ResourceScopes = NewResourceScopesClient(c.config)
 	c.Resources = NewResourcesClient(c.config)
-	c.RoleDataScopes = NewRoleDataScopesClient(c.config)
+	c.RoleDataRanges = NewRoleDataRangesClient(c.config)
 	c.RolePermissions = NewRolePermissionsClient(c.config)
 	c.Roles = NewRolesClient(c.config)
 	c.Scopes = NewScopesClient(c.config)
@@ -215,7 +215,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Policies:           NewPoliciesClient(cfg),
 		ResourceScopes:     NewResourceScopesClient(cfg),
 		Resources:          NewResourcesClient(cfg),
-		RoleDataScopes:     NewRoleDataScopesClient(cfg),
+		RoleDataRanges:     NewRoleDataRangesClient(cfg),
 		RolePermissions:    NewRolePermissionsClient(cfg),
 		Roles:              NewRolesClient(cfg),
 		Scopes:             NewScopesClient(cfg),
@@ -254,7 +254,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Policies:           NewPoliciesClient(cfg),
 		ResourceScopes:     NewResourceScopesClient(cfg),
 		Resources:          NewResourcesClient(cfg),
-		RoleDataScopes:     NewRoleDataScopesClient(cfg),
+		RoleDataRanges:     NewRoleDataRangesClient(cfg),
 		RolePermissions:    NewRolePermissionsClient(cfg),
 		Roles:              NewRolesClient(cfg),
 		Scopes:             NewScopesClient(cfg),
@@ -295,7 +295,7 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuthProviders, c.Credentials, c.Departments, c.GroupRoles, c.Groups,
 		c.PermissionBindings, c.Permissions, c.Policies, c.ResourceScopes, c.Resources,
-		c.RoleDataScopes, c.RolePermissions, c.Roles, c.Scopes, c.UserDepartments,
+		c.RoleDataRanges, c.RolePermissions, c.Roles, c.Scopes, c.UserDepartments,
 		c.UserGroups, c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
 	} {
 		n.Use(hooks...)
@@ -308,7 +308,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuthProviders, c.Credentials, c.Departments, c.GroupRoles, c.Groups,
 		c.PermissionBindings, c.Permissions, c.Policies, c.ResourceScopes, c.Resources,
-		c.RoleDataScopes, c.RolePermissions, c.Roles, c.Scopes, c.UserDepartments,
+		c.RoleDataRanges, c.RolePermissions, c.Roles, c.Scopes, c.UserDepartments,
 		c.UserGroups, c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
 	} {
 		n.Intercept(interceptors...)
@@ -338,8 +338,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ResourceScopes.mutate(ctx, m)
 	case *ResourcesMutation:
 		return c.Resources.mutate(ctx, m)
-	case *RoleDataScopesMutation:
-		return c.RoleDataScopes.mutate(ctx, m)
+	case *RoleDataRangesMutation:
+		return c.RoleDataRanges.mutate(ctx, m)
 	case *RolePermissionsMutation:
 		return c.RolePermissions.mutate(ctx, m)
 	case *RolesMutation:
@@ -753,15 +753,15 @@ func (c *DepartmentsClient) GetX(ctx context.Context, id int) *Departments {
 	return obj
 }
 
-// QueryLionRoleDataScopes queries the lion_role_data_scopes edge of a Departments.
-func (c *DepartmentsClient) QueryLionRoleDataScopes(_m *Departments) *RoleDataScopesQuery {
-	query := (&RoleDataScopesClient{config: c.config}).Query()
+// QueryLionRoleDataRanges queries the lion_role_data_ranges edge of a Departments.
+func (c *DepartmentsClient) QueryLionRoleDataRanges(_m *Departments) *RoleDataRangesQuery {
+	query := (&RoleDataRangesClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(departments.Table, departments.FieldID, id),
-			sqlgraph.To(roledatascopes.Table, roledatascopes.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionRoleDataScopesTable, departments.LionRoleDataScopesColumn),
+			sqlgraph.To(roledataranges.Table, roledataranges.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionRoleDataRangesTable, departments.LionRoleDataRangesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -1997,107 +1997,107 @@ func (c *ResourcesClient) mutate(ctx context.Context, m *ResourcesMutation) (Val
 	}
 }
 
-// RoleDataScopesClient is a client for the RoleDataScopes schema.
-type RoleDataScopesClient struct {
+// RoleDataRangesClient is a client for the RoleDataRanges schema.
+type RoleDataRangesClient struct {
 	config
 }
 
-// NewRoleDataScopesClient returns a client for the RoleDataScopes from the given config.
-func NewRoleDataScopesClient(c config) *RoleDataScopesClient {
-	return &RoleDataScopesClient{config: c}
+// NewRoleDataRangesClient returns a client for the RoleDataRanges from the given config.
+func NewRoleDataRangesClient(c config) *RoleDataRangesClient {
+	return &RoleDataRangesClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `roledatascopes.Hooks(f(g(h())))`.
-func (c *RoleDataScopesClient) Use(hooks ...Hook) {
-	c.hooks.RoleDataScopes = append(c.hooks.RoleDataScopes, hooks...)
+// A call to `Use(f, g, h)` equals to `roledataranges.Hooks(f(g(h())))`.
+func (c *RoleDataRangesClient) Use(hooks ...Hook) {
+	c.hooks.RoleDataRanges = append(c.hooks.RoleDataRanges, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `roledatascopes.Intercept(f(g(h())))`.
-func (c *RoleDataScopesClient) Intercept(interceptors ...Interceptor) {
-	c.inters.RoleDataScopes = append(c.inters.RoleDataScopes, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `roledataranges.Intercept(f(g(h())))`.
+func (c *RoleDataRangesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RoleDataRanges = append(c.inters.RoleDataRanges, interceptors...)
 }
 
-// Create returns a builder for creating a RoleDataScopes entity.
-func (c *RoleDataScopesClient) Create() *RoleDataScopesCreate {
-	mutation := newRoleDataScopesMutation(c.config, OpCreate)
-	return &RoleDataScopesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a RoleDataRanges entity.
+func (c *RoleDataRangesClient) Create() *RoleDataRangesCreate {
+	mutation := newRoleDataRangesMutation(c.config, OpCreate)
+	return &RoleDataRangesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of RoleDataScopes entities.
-func (c *RoleDataScopesClient) CreateBulk(builders ...*RoleDataScopesCreate) *RoleDataScopesCreateBulk {
-	return &RoleDataScopesCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of RoleDataRanges entities.
+func (c *RoleDataRangesClient) CreateBulk(builders ...*RoleDataRangesCreate) *RoleDataRangesCreateBulk {
+	return &RoleDataRangesCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *RoleDataScopesClient) MapCreateBulk(slice any, setFunc func(*RoleDataScopesCreate, int)) *RoleDataScopesCreateBulk {
+func (c *RoleDataRangesClient) MapCreateBulk(slice any, setFunc func(*RoleDataRangesCreate, int)) *RoleDataRangesCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &RoleDataScopesCreateBulk{err: fmt.Errorf("calling to RoleDataScopesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &RoleDataRangesCreateBulk{err: fmt.Errorf("calling to RoleDataRangesClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*RoleDataScopesCreate, rv.Len())
+	builders := make([]*RoleDataRangesCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &RoleDataScopesCreateBulk{config: c.config, builders: builders}
+	return &RoleDataRangesCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for RoleDataScopes.
-func (c *RoleDataScopesClient) Update() *RoleDataScopesUpdate {
-	mutation := newRoleDataScopesMutation(c.config, OpUpdate)
-	return &RoleDataScopesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for RoleDataRanges.
+func (c *RoleDataRangesClient) Update() *RoleDataRangesUpdate {
+	mutation := newRoleDataRangesMutation(c.config, OpUpdate)
+	return &RoleDataRangesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *RoleDataScopesClient) UpdateOne(_m *RoleDataScopes) *RoleDataScopesUpdateOne {
-	mutation := newRoleDataScopesMutation(c.config, OpUpdateOne, withRoleDataScopes(_m))
-	return &RoleDataScopesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *RoleDataRangesClient) UpdateOne(_m *RoleDataRanges) *RoleDataRangesUpdateOne {
+	mutation := newRoleDataRangesMutation(c.config, OpUpdateOne, withRoleDataRanges(_m))
+	return &RoleDataRangesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RoleDataScopesClient) UpdateOneID(id int) *RoleDataScopesUpdateOne {
-	mutation := newRoleDataScopesMutation(c.config, OpUpdateOne, withRoleDataScopesID(id))
-	return &RoleDataScopesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *RoleDataRangesClient) UpdateOneID(id int) *RoleDataRangesUpdateOne {
+	mutation := newRoleDataRangesMutation(c.config, OpUpdateOne, withRoleDataRangesID(id))
+	return &RoleDataRangesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for RoleDataScopes.
-func (c *RoleDataScopesClient) Delete() *RoleDataScopesDelete {
-	mutation := newRoleDataScopesMutation(c.config, OpDelete)
-	return &RoleDataScopesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for RoleDataRanges.
+func (c *RoleDataRangesClient) Delete() *RoleDataRangesDelete {
+	mutation := newRoleDataRangesMutation(c.config, OpDelete)
+	return &RoleDataRangesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *RoleDataScopesClient) DeleteOne(_m *RoleDataScopes) *RoleDataScopesDeleteOne {
+func (c *RoleDataRangesClient) DeleteOne(_m *RoleDataRanges) *RoleDataRangesDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *RoleDataScopesClient) DeleteOneID(id int) *RoleDataScopesDeleteOne {
-	builder := c.Delete().Where(roledatascopes.ID(id))
+func (c *RoleDataRangesClient) DeleteOneID(id int) *RoleDataRangesDeleteOne {
+	builder := c.Delete().Where(roledataranges.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &RoleDataScopesDeleteOne{builder}
+	return &RoleDataRangesDeleteOne{builder}
 }
 
-// Query returns a query builder for RoleDataScopes.
-func (c *RoleDataScopesClient) Query() *RoleDataScopesQuery {
-	return &RoleDataScopesQuery{
+// Query returns a query builder for RoleDataRanges.
+func (c *RoleDataRangesClient) Query() *RoleDataRangesQuery {
+	return &RoleDataRangesQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeRoleDataScopes},
+		ctx:    &QueryContext{Type: TypeRoleDataRanges},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a RoleDataScopes entity by its id.
-func (c *RoleDataScopesClient) Get(ctx context.Context, id int) (*RoleDataScopes, error) {
-	return c.Query().Where(roledatascopes.ID(id)).Only(ctx)
+// Get returns a RoleDataRanges entity by its id.
+func (c *RoleDataRangesClient) Get(ctx context.Context, id int) (*RoleDataRanges, error) {
+	return c.Query().Where(roledataranges.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RoleDataScopesClient) GetX(ctx context.Context, id int) *RoleDataScopes {
+func (c *RoleDataRangesClient) GetX(ctx context.Context, id int) *RoleDataRanges {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -2105,15 +2105,15 @@ func (c *RoleDataScopesClient) GetX(ctx context.Context, id int) *RoleDataScopes
 	return obj
 }
 
-// QueryLionRoles queries the lion_roles edge of a RoleDataScopes.
-func (c *RoleDataScopesClient) QueryLionRoles(_m *RoleDataScopes) *RolesQuery {
+// QueryLionRoles queries the lion_roles edge of a RoleDataRanges.
+func (c *RoleDataRangesClient) QueryLionRoles(_m *RoleDataRanges) *RolesQuery {
 	query := (&RolesClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(roledatascopes.Table, roledatascopes.FieldID, id),
+			sqlgraph.From(roledataranges.Table, roledataranges.FieldID, id),
 			sqlgraph.To(roles.Table, roles.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, roledatascopes.LionRolesTable, roledatascopes.LionRolesColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, roledataranges.LionRolesTable, roledataranges.LionRolesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2122,27 +2122,27 @@ func (c *RoleDataScopesClient) QueryLionRoles(_m *RoleDataScopes) *RolesQuery {
 }
 
 // Hooks returns the client hooks.
-func (c *RoleDataScopesClient) Hooks() []Hook {
-	return c.hooks.RoleDataScopes
+func (c *RoleDataRangesClient) Hooks() []Hook {
+	return c.hooks.RoleDataRanges
 }
 
 // Interceptors returns the client interceptors.
-func (c *RoleDataScopesClient) Interceptors() []Interceptor {
-	return c.inters.RoleDataScopes
+func (c *RoleDataRangesClient) Interceptors() []Interceptor {
+	return c.inters.RoleDataRanges
 }
 
-func (c *RoleDataScopesClient) mutate(ctx context.Context, m *RoleDataScopesMutation) (Value, error) {
+func (c *RoleDataRangesClient) mutate(ctx context.Context, m *RoleDataRangesMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&RoleDataScopesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleDataRangesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&RoleDataScopesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleDataRangesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&RoleDataScopesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&RoleDataRangesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&RoleDataScopesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&RoleDataRangesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("lion: unknown RoleDataScopes mutation op: %q", m.Op())
+		return nil, fmt.Errorf("lion: unknown RoleDataRanges mutation op: %q", m.Op())
 	}
 }
 
@@ -2467,15 +2467,15 @@ func (c *RolesClient) QueryLionRoleGroups(_m *Roles) *GroupRolesQuery {
 	return query
 }
 
-// QueryLionRoleDataScopes queries the lion_role_data_scopes edge of a Roles.
-func (c *RolesClient) QueryLionRoleDataScopes(_m *Roles) *RoleDataScopesQuery {
-	query := (&RoleDataScopesClient{config: c.config}).Query()
+// QueryLionRoleDataRanges queries the lion_role_data_ranges edge of a Roles.
+func (c *RolesClient) QueryLionRoleDataRanges(_m *Roles) *RoleDataRangesQuery {
+	query := (&RoleDataRangesClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(roles.Table, roles.FieldID, id),
-			sqlgraph.To(roledatascopes.Table, roledatascopes.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleDataScopesTable, roles.LionRoleDataScopesColumn),
+			sqlgraph.To(roledataranges.Table, roledataranges.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRoleDataRangesTable, roles.LionRoleDataRangesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -3651,13 +3651,13 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 type (
 	hooks struct {
 		AuthProviders, Credentials, Departments, GroupRoles, Groups, PermissionBindings,
-		Permissions, Policies, ResourceScopes, Resources, RoleDataScopes,
+		Permissions, Policies, ResourceScopes, Resources, RoleDataRanges,
 		RolePermissions, Roles, Scopes, UserDepartments, UserGroups, UserIdentities,
 		UserProfiles, UserRoles, Users []ent.Hook
 	}
 	inters struct {
 		AuthProviders, Credentials, Departments, GroupRoles, Groups, PermissionBindings,
-		Permissions, Policies, ResourceScopes, Resources, RoleDataScopes,
+		Permissions, Policies, ResourceScopes, Resources, RoleDataRanges,
 		RolePermissions, Roles, Scopes, UserDepartments, UserGroups, UserIdentities,
 		UserProfiles, UserRoles, Users []ent.Interceptor
 	}

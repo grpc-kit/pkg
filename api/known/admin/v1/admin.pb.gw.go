@@ -2344,15 +2344,15 @@ func local_request_KnownAdmin_ListRolePermissions_0(ctx context.Context, marshal
 
 }
 
-func request_KnownAdmin_CreateRoleDataScopes_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CreateRoleDataScopesRequest
+func request_KnownAdmin_CreateRoleDataRanges_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq CreateRoleDataRangesRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Departments); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.DataRanges); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -2373,20 +2373,20 @@ func request_KnownAdmin_CreateRoleDataScopes_0(ctx context.Context, marshaler ru
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "role_id", err)
 	}
 
-	msg, err := client.CreateRoleDataScopes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.CreateRoleDataRanges(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_KnownAdmin_CreateRoleDataScopes_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CreateRoleDataScopesRequest
+func local_request_KnownAdmin_CreateRoleDataRanges_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq CreateRoleDataRangesRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Departments); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.DataRanges); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -2407,13 +2407,13 @@ func local_request_KnownAdmin_CreateRoleDataScopes_0(ctx context.Context, marsha
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "role_id", err)
 	}
 
-	msg, err := server.CreateRoleDataScopes(ctx, &protoReq)
+	msg, err := server.CreateRoleDataRanges(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
-func request_KnownAdmin_DeleteRoleDataScopes_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq DeleteRoleDataScopesRequest
+func request_KnownAdmin_DeleteRoleDataRanges_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq DeleteRoleDataRangesRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -2433,23 +2433,23 @@ func request_KnownAdmin_DeleteRoleDataScopes_0(ctx context.Context, marshaler ru
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "role_id", err)
 	}
 
-	val, ok = pathParams["department_id"]
+	val, ok = pathParams["data_range_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "department_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "data_range_id")
 	}
 
-	protoReq.DepartmentId, err = runtime.Int32(val)
+	protoReq.DataRangeId, err = runtime.Int32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "department_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "data_range_id", err)
 	}
 
-	msg, err := client.DeleteRoleDataScopes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.DeleteRoleDataRanges(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_KnownAdmin_DeleteRoleDataScopes_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq DeleteRoleDataScopesRequest
+func local_request_KnownAdmin_DeleteRoleDataRanges_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq DeleteRoleDataRangesRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -2469,27 +2469,27 @@ func local_request_KnownAdmin_DeleteRoleDataScopes_0(ctx context.Context, marsha
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "role_id", err)
 	}
 
-	val, ok = pathParams["department_id"]
+	val, ok = pathParams["data_range_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "department_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "data_range_id")
 	}
 
-	protoReq.DepartmentId, err = runtime.Int32(val)
+	protoReq.DataRangeId, err = runtime.Int32(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "department_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "data_range_id", err)
 	}
 
-	msg, err := server.DeleteRoleDataScopes(ctx, &protoReq)
+	msg, err := server.DeleteRoleDataRanges(ctx, &protoReq)
 	return msg, metadata, err
 
 }
 
 var (
-	filter_KnownAdmin_ListRoleDataScopes_0 = &utilities.DoubleArray{Encoding: map[string]int{"role_id": 0, "roleId": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
+	filter_KnownAdmin_ListRoleDataRanges_0 = &utilities.DoubleArray{Encoding: map[string]int{"role_id": 0, "roleId": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
 )
 
-func request_KnownAdmin_ListRoleDataScopes_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListRoleDataScopesRequest
+func request_KnownAdmin_ListRoleDataRanges_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListRoleDataRangesRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -2512,17 +2512,17 @@ func request_KnownAdmin_ListRoleDataScopes_0(ctx context.Context, marshaler runt
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_KnownAdmin_ListRoleDataScopes_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_KnownAdmin_ListRoleDataRanges_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := client.ListRoleDataScopes(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ListRoleDataRanges(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_KnownAdmin_ListRoleDataScopes_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq ListRoleDataScopesRequest
+func local_request_KnownAdmin_ListRoleDataRanges_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq ListRoleDataRangesRequest
 	var metadata runtime.ServerMetadata
 
 	var (
@@ -2545,11 +2545,11 @@ func local_request_KnownAdmin_ListRoleDataScopes_0(ctx context.Context, marshale
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_KnownAdmin_ListRoleDataScopes_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_KnownAdmin_ListRoleDataRanges_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.ListRoleDataScopes(ctx, &protoReq)
+	msg, err := server.ListRoleDataRanges(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -5056,7 +5056,7 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 
 	})
 
-	mux.Handle("POST", pattern_KnownAdmin_CreateRoleDataScopes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_KnownAdmin_CreateRoleDataRanges_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -5064,12 +5064,12 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleDataScopes", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/departments"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleDataRanges", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/data/ranges"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_KnownAdmin_CreateRoleDataScopes_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_KnownAdmin_CreateRoleDataRanges_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -5077,11 +5077,11 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 			return
 		}
 
-		forward_KnownAdmin_CreateRoleDataScopes_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_KnownAdmin_CreateRoleDataRanges_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_KnownAdmin_DeleteRoleDataScopes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_KnownAdmin_DeleteRoleDataRanges_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -5089,12 +5089,12 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleDataScopes", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/departments/{department_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleDataRanges", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/data/ranges/{data_range_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_KnownAdmin_DeleteRoleDataScopes_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_KnownAdmin_DeleteRoleDataRanges_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -5102,11 +5102,11 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 			return
 		}
 
-		forward_KnownAdmin_DeleteRoleDataScopes_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_KnownAdmin_DeleteRoleDataRanges_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_KnownAdmin_ListRoleDataScopes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_KnownAdmin_ListRoleDataRanges_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -5114,12 +5114,12 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleDataScopes", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/departments"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleDataRanges", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/data/ranges"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_KnownAdmin_ListRoleDataScopes_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_KnownAdmin_ListRoleDataRanges_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -5127,7 +5127,7 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 			return
 		}
 
-		forward_KnownAdmin_ListRoleDataScopes_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_KnownAdmin_ListRoleDataRanges_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -6746,69 +6746,69 @@ func RegisterKnownAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 
 	})
 
-	mux.Handle("POST", pattern_KnownAdmin_CreateRoleDataScopes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_KnownAdmin_CreateRoleDataRanges_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleDataScopes", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/departments"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleDataRanges", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/data/ranges"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_KnownAdmin_CreateRoleDataScopes_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_KnownAdmin_CreateRoleDataRanges_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_KnownAdmin_CreateRoleDataScopes_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_KnownAdmin_CreateRoleDataRanges_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("DELETE", pattern_KnownAdmin_DeleteRoleDataScopes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("DELETE", pattern_KnownAdmin_DeleteRoleDataRanges_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleDataScopes", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/departments/{department_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleDataRanges", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/data/ranges/{data_range_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_KnownAdmin_DeleteRoleDataScopes_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_KnownAdmin_DeleteRoleDataRanges_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_KnownAdmin_DeleteRoleDataScopes_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_KnownAdmin_DeleteRoleDataRanges_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_KnownAdmin_ListRoleDataScopes_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_KnownAdmin_ListRoleDataRanges_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleDataScopes", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/departments"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleDataRanges", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{role_id}/data/ranges"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_KnownAdmin_ListRoleDataScopes_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_KnownAdmin_ListRoleDataRanges_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_KnownAdmin_ListRoleDataScopes_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_KnownAdmin_ListRoleDataRanges_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -7472,11 +7472,11 @@ var (
 
 	pattern_KnownAdmin_ListRolePermissions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"builtin", "admin", "api", "v1", "roles", "role_id", "permissions"}, ""))
 
-	pattern_KnownAdmin_CreateRoleDataScopes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"builtin", "admin", "api", "v1", "roles", "role_id", "departments"}, ""))
+	pattern_KnownAdmin_CreateRoleDataRanges_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"builtin", "admin", "api", "v1", "roles", "role_id", "data", "ranges"}, ""))
 
-	pattern_KnownAdmin_DeleteRoleDataScopes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 1, 0, 4, 1, 5, 7}, []string{"builtin", "admin", "api", "v1", "roles", "role_id", "departments", "department_id"}, ""))
+	pattern_KnownAdmin_DeleteRoleDataRanges_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7, 1, 0, 4, 1, 5, 8}, []string{"builtin", "admin", "api", "v1", "roles", "role_id", "data", "ranges", "data_range_id"}, ""))
 
-	pattern_KnownAdmin_ListRoleDataScopes_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"builtin", "admin", "api", "v1", "roles", "role_id", "departments"}, ""))
+	pattern_KnownAdmin_ListRoleDataRanges_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"builtin", "admin", "api", "v1", "roles", "role_id", "data", "ranges"}, ""))
 
 	pattern_KnownAdmin_CreateDepartment_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"builtin", "admin", "api", "v1", "departments"}, ""))
 
@@ -7616,11 +7616,11 @@ var (
 
 	forward_KnownAdmin_ListRolePermissions_0 = runtime.ForwardResponseMessage
 
-	forward_KnownAdmin_CreateRoleDataScopes_0 = runtime.ForwardResponseMessage
+	forward_KnownAdmin_CreateRoleDataRanges_0 = runtime.ForwardResponseMessage
 
-	forward_KnownAdmin_DeleteRoleDataScopes_0 = runtime.ForwardResponseMessage
+	forward_KnownAdmin_DeleteRoleDataRanges_0 = runtime.ForwardResponseMessage
 
-	forward_KnownAdmin_ListRoleDataScopes_0 = runtime.ForwardResponseMessage
+	forward_KnownAdmin_ListRoleDataRanges_0 = runtime.ForwardResponseMessage
 
 	forward_KnownAdmin_CreateDepartment_0 = runtime.ForwardResponseMessage
 

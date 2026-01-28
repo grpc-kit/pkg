@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/roledatascopes"
+	"github.com/grpc-kit/pkg/lion/roledataranges"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -283,19 +283,19 @@ func (_u *RolesUpdate) AddLionRoleGroups(v ...*GroupRoles) *RolesUpdate {
 	return _u.AddLionRoleGroupIDs(ids...)
 }
 
-// AddLionRoleDataScopeIDs adds the "lion_role_data_scopes" edge to the RoleDataScopes entity by IDs.
-func (_u *RolesUpdate) AddLionRoleDataScopeIDs(ids ...int) *RolesUpdate {
-	_u.mutation.AddLionRoleDataScopeIDs(ids...)
+// AddLionRoleDataRangeIDs adds the "lion_role_data_ranges" edge to the RoleDataRanges entity by IDs.
+func (_u *RolesUpdate) AddLionRoleDataRangeIDs(ids ...int) *RolesUpdate {
+	_u.mutation.AddLionRoleDataRangeIDs(ids...)
 	return _u
 }
 
-// AddLionRoleDataScopes adds the "lion_role_data_scopes" edges to the RoleDataScopes entity.
-func (_u *RolesUpdate) AddLionRoleDataScopes(v ...*RoleDataScopes) *RolesUpdate {
+// AddLionRoleDataRanges adds the "lion_role_data_ranges" edges to the RoleDataRanges entity.
+func (_u *RolesUpdate) AddLionRoleDataRanges(v ...*RoleDataRanges) *RolesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddLionRoleDataScopeIDs(ids...)
+	return _u.AddLionRoleDataRangeIDs(ids...)
 }
 
 // Mutation returns the RolesMutation object of the builder.
@@ -366,25 +366,25 @@ func (_u *RolesUpdate) RemoveLionRoleGroups(v ...*GroupRoles) *RolesUpdate {
 	return _u.RemoveLionRoleGroupIDs(ids...)
 }
 
-// ClearLionRoleDataScopes clears all "lion_role_data_scopes" edges to the RoleDataScopes entity.
-func (_u *RolesUpdate) ClearLionRoleDataScopes() *RolesUpdate {
-	_u.mutation.ClearLionRoleDataScopes()
+// ClearLionRoleDataRanges clears all "lion_role_data_ranges" edges to the RoleDataRanges entity.
+func (_u *RolesUpdate) ClearLionRoleDataRanges() *RolesUpdate {
+	_u.mutation.ClearLionRoleDataRanges()
 	return _u
 }
 
-// RemoveLionRoleDataScopeIDs removes the "lion_role_data_scopes" edge to RoleDataScopes entities by IDs.
-func (_u *RolesUpdate) RemoveLionRoleDataScopeIDs(ids ...int) *RolesUpdate {
-	_u.mutation.RemoveLionRoleDataScopeIDs(ids...)
+// RemoveLionRoleDataRangeIDs removes the "lion_role_data_ranges" edge to RoleDataRanges entities by IDs.
+func (_u *RolesUpdate) RemoveLionRoleDataRangeIDs(ids ...int) *RolesUpdate {
+	_u.mutation.RemoveLionRoleDataRangeIDs(ids...)
 	return _u
 }
 
-// RemoveLionRoleDataScopes removes "lion_role_data_scopes" edges to RoleDataScopes entities.
-func (_u *RolesUpdate) RemoveLionRoleDataScopes(v ...*RoleDataScopes) *RolesUpdate {
+// RemoveLionRoleDataRanges removes "lion_role_data_ranges" edges to RoleDataRanges entities.
+func (_u *RolesUpdate) RemoveLionRoleDataRanges(v ...*RoleDataRanges) *RolesUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveLionRoleDataScopeIDs(ids...)
+	return _u.RemoveLionRoleDataRangeIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -645,28 +645,28 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionRoleDataScopesCleared() {
+	if _u.mutation.LionRoleDataRangesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionRoleDataScopesTable,
-			Columns: []string{roles.LionRoleDataScopesColumn},
+			Table:   roles.LionRoleDataRangesTable,
+			Columns: []string{roles.LionRoleDataRangesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roledatascopes.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledataranges.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLionRoleDataScopesIDs(); len(nodes) > 0 && !_u.mutation.LionRoleDataScopesCleared() {
+	if nodes := _u.mutation.RemovedLionRoleDataRangesIDs(); len(nodes) > 0 && !_u.mutation.LionRoleDataRangesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionRoleDataScopesTable,
-			Columns: []string{roles.LionRoleDataScopesColumn},
+			Table:   roles.LionRoleDataRangesTable,
+			Columns: []string{roles.LionRoleDataRangesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roledatascopes.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledataranges.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -674,15 +674,15 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionRoleDataScopesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionRoleDataRangesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionRoleDataScopesTable,
-			Columns: []string{roles.LionRoleDataScopesColumn},
+			Table:   roles.LionRoleDataRangesTable,
+			Columns: []string{roles.LionRoleDataRangesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roledatascopes.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledataranges.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -961,19 +961,19 @@ func (_u *RolesUpdateOne) AddLionRoleGroups(v ...*GroupRoles) *RolesUpdateOne {
 	return _u.AddLionRoleGroupIDs(ids...)
 }
 
-// AddLionRoleDataScopeIDs adds the "lion_role_data_scopes" edge to the RoleDataScopes entity by IDs.
-func (_u *RolesUpdateOne) AddLionRoleDataScopeIDs(ids ...int) *RolesUpdateOne {
-	_u.mutation.AddLionRoleDataScopeIDs(ids...)
+// AddLionRoleDataRangeIDs adds the "lion_role_data_ranges" edge to the RoleDataRanges entity by IDs.
+func (_u *RolesUpdateOne) AddLionRoleDataRangeIDs(ids ...int) *RolesUpdateOne {
+	_u.mutation.AddLionRoleDataRangeIDs(ids...)
 	return _u
 }
 
-// AddLionRoleDataScopes adds the "lion_role_data_scopes" edges to the RoleDataScopes entity.
-func (_u *RolesUpdateOne) AddLionRoleDataScopes(v ...*RoleDataScopes) *RolesUpdateOne {
+// AddLionRoleDataRanges adds the "lion_role_data_ranges" edges to the RoleDataRanges entity.
+func (_u *RolesUpdateOne) AddLionRoleDataRanges(v ...*RoleDataRanges) *RolesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddLionRoleDataScopeIDs(ids...)
+	return _u.AddLionRoleDataRangeIDs(ids...)
 }
 
 // Mutation returns the RolesMutation object of the builder.
@@ -1044,25 +1044,25 @@ func (_u *RolesUpdateOne) RemoveLionRoleGroups(v ...*GroupRoles) *RolesUpdateOne
 	return _u.RemoveLionRoleGroupIDs(ids...)
 }
 
-// ClearLionRoleDataScopes clears all "lion_role_data_scopes" edges to the RoleDataScopes entity.
-func (_u *RolesUpdateOne) ClearLionRoleDataScopes() *RolesUpdateOne {
-	_u.mutation.ClearLionRoleDataScopes()
+// ClearLionRoleDataRanges clears all "lion_role_data_ranges" edges to the RoleDataRanges entity.
+func (_u *RolesUpdateOne) ClearLionRoleDataRanges() *RolesUpdateOne {
+	_u.mutation.ClearLionRoleDataRanges()
 	return _u
 }
 
-// RemoveLionRoleDataScopeIDs removes the "lion_role_data_scopes" edge to RoleDataScopes entities by IDs.
-func (_u *RolesUpdateOne) RemoveLionRoleDataScopeIDs(ids ...int) *RolesUpdateOne {
-	_u.mutation.RemoveLionRoleDataScopeIDs(ids...)
+// RemoveLionRoleDataRangeIDs removes the "lion_role_data_ranges" edge to RoleDataRanges entities by IDs.
+func (_u *RolesUpdateOne) RemoveLionRoleDataRangeIDs(ids ...int) *RolesUpdateOne {
+	_u.mutation.RemoveLionRoleDataRangeIDs(ids...)
 	return _u
 }
 
-// RemoveLionRoleDataScopes removes "lion_role_data_scopes" edges to RoleDataScopes entities.
-func (_u *RolesUpdateOne) RemoveLionRoleDataScopes(v ...*RoleDataScopes) *RolesUpdateOne {
+// RemoveLionRoleDataRanges removes "lion_role_data_ranges" edges to RoleDataRanges entities.
+func (_u *RolesUpdateOne) RemoveLionRoleDataRanges(v ...*RoleDataRanges) *RolesUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveLionRoleDataScopeIDs(ids...)
+	return _u.RemoveLionRoleDataRangeIDs(ids...)
 }
 
 // Where appends a list predicates to the RolesUpdate builder.
@@ -1353,28 +1353,28 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionRoleDataScopesCleared() {
+	if _u.mutation.LionRoleDataRangesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionRoleDataScopesTable,
-			Columns: []string{roles.LionRoleDataScopesColumn},
+			Table:   roles.LionRoleDataRangesTable,
+			Columns: []string{roles.LionRoleDataRangesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roledatascopes.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledataranges.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLionRoleDataScopesIDs(); len(nodes) > 0 && !_u.mutation.LionRoleDataScopesCleared() {
+	if nodes := _u.mutation.RemovedLionRoleDataRangesIDs(); len(nodes) > 0 && !_u.mutation.LionRoleDataRangesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionRoleDataScopesTable,
-			Columns: []string{roles.LionRoleDataScopesColumn},
+			Table:   roles.LionRoleDataRangesTable,
+			Columns: []string{roles.LionRoleDataRangesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roledatascopes.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledataranges.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1382,15 +1382,15 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionRoleDataScopesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionRoleDataRangesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionRoleDataScopesTable,
-			Columns: []string{roles.LionRoleDataScopesColumn},
+			Table:   roles.LionRoleDataRangesTable,
+			Columns: []string{roles.LionRoleDataRangesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roledatascopes.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledataranges.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

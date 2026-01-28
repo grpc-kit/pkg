@@ -1752,6 +1752,56 @@ func (Credential_Source) EnumDescriptor() ([]byte, []int) {
 	return file_known_admin_v1_admin_common_proto_rawDescGZIP(), []int{13, 5}
 }
 
+// 数据类型：表示数据维度
+type RoleDataRange_DataType int32
+
+const (
+	RoleDataRange_DATA_TYPE_UNSPECIFIED RoleDataRange_DataType = 0
+	RoleDataRange_RESOURCE              RoleDataRange_DataType = 1
+	RoleDataRange_DEPARTMENT            RoleDataRange_DataType = 2
+)
+
+// Enum value maps for RoleDataRange_DataType.
+var (
+	RoleDataRange_DataType_name = map[int32]string{
+		0: "DATA_TYPE_UNSPECIFIED",
+		1: "RESOURCE",
+		2: "DEPARTMENT",
+	}
+	RoleDataRange_DataType_value = map[string]int32{
+		"DATA_TYPE_UNSPECIFIED": 0,
+		"RESOURCE":              1,
+		"DEPARTMENT":            2,
+	}
+)
+
+func (x RoleDataRange_DataType) Enum() *RoleDataRange_DataType {
+	p := new(RoleDataRange_DataType)
+	*p = x
+	return p
+}
+
+func (x RoleDataRange_DataType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RoleDataRange_DataType) Descriptor() protoreflect.EnumDescriptor {
+	return file_known_admin_v1_admin_common_proto_enumTypes[29].Descriptor()
+}
+
+func (RoleDataRange_DataType) Type() protoreflect.EnumType {
+	return &file_known_admin_v1_admin_common_proto_enumTypes[29]
+}
+
+func (x RoleDataRange_DataType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RoleDataRange_DataType.Descriptor instead.
+func (RoleDataRange_DataType) EnumDescriptor() ([]byte, []int) {
+	return file_known_admin_v1_admin_common_proto_rawDescGZIP(), []int{17, 0}
+}
+
 // Address 用户地址
 // https://openid.net/specs/openid-connect-core-1_0.html#AddressClaim
 type Address struct {
@@ -4295,6 +4345,148 @@ func (x *AuthToken) GetExpiresIn() int32 {
 	return 0
 }
 
+type RoleDataRange struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// 关联的角色 ID
+	RoleId   int64                  `protobuf:"varint,12,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	DataType RoleDataRange_DataType `protobuf:"varint,2,opt,name=data_type,json=dataType,proto3,enum=grpc_kit.api.known.admin.v1.RoleDataRange_DataType" json:"data_type,omitempty"`
+	// 数据对象 ID：对应具体的部门、项目或资源 ID
+	// 当 strategy 为 SPECIFIED 时，此字段必须有值
+	DataId int64 `protobuf:"varint,3,opt,name=data_id,json=dataId,proto3" json:"data_id,omitempty"`
+	// 是否递归包含子节点（仅在 data_type 为树状结构如部门时有效）
+	IsRecursive bool `protobuf:"varint,4,opt,name=is_recursive,json=isRecursive,proto3" json:"is_recursive,omitempty"`
+	// 系统内部唯一标识符（如：DEPT_S01）
+	Code string `protobuf:"bytes,5,opt,name=code,proto3" json:"code,omitempty"`
+	// 可展示名称（如：华南区研发部范围）
+	DisplayName string `protobuf:"bytes,6,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Description string `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	// 审计信息
+	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedBy int64                  `protobuf:"varint,10,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	UpdatedBy int64                  `protobuf:"varint,11,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+}
+
+func (x *RoleDataRange) Reset() {
+	*x = RoleDataRange{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RoleDataRange) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoleDataRange) ProtoMessage() {}
+
+func (x *RoleDataRange) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoleDataRange.ProtoReflect.Descriptor instead.
+func (*RoleDataRange) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_admin_common_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *RoleDataRange) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *RoleDataRange) GetRoleId() int64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *RoleDataRange) GetDataType() RoleDataRange_DataType {
+	if x != nil {
+		return x.DataType
+	}
+	return RoleDataRange_DATA_TYPE_UNSPECIFIED
+}
+
+func (x *RoleDataRange) GetDataId() int64 {
+	if x != nil {
+		return x.DataId
+	}
+	return 0
+}
+
+func (x *RoleDataRange) GetIsRecursive() bool {
+	if x != nil {
+		return x.IsRecursive
+	}
+	return false
+}
+
+func (x *RoleDataRange) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *RoleDataRange) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *RoleDataRange) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *RoleDataRange) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *RoleDataRange) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+func (x *RoleDataRange) GetCreatedBy() int64 {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return 0
+}
+
+func (x *RoleDataRange) GetUpdatedBy() int64 {
+	if x != nil {
+		return x.UpdatedBy
+	}
+	return 0
+}
+
 // API 密钥结构
 type Credential_ApiKeyData struct {
 	state         protoimpl.MessageState
@@ -4308,7 +4500,7 @@ type Credential_ApiKeyData struct {
 func (x *Credential_ApiKeyData) Reset() {
 	*x = Credential_ApiKeyData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[23]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4321,7 +4513,7 @@ func (x *Credential_ApiKeyData) String() string {
 func (*Credential_ApiKeyData) ProtoMessage() {}
 
 func (x *Credential_ApiKeyData) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[23]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4365,7 +4557,7 @@ type Credential_KeyPairData struct {
 func (x *Credential_KeyPairData) Reset() {
 	*x = Credential_KeyPairData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[24]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4378,7 +4570,7 @@ func (x *Credential_KeyPairData) String() string {
 func (*Credential_KeyPairData) ProtoMessage() {}
 
 func (x *Credential_KeyPairData) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[24]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4429,7 +4621,7 @@ type Credential_X509Data struct {
 func (x *Credential_X509Data) Reset() {
 	*x = Credential_X509Data{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[25]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4442,7 +4634,7 @@ func (x *Credential_X509Data) String() string {
 func (*Credential_X509Data) ProtoMessage() {}
 
 func (x *Credential_X509Data) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[25]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4492,7 +4684,7 @@ type Credential_LicenseData struct {
 func (x *Credential_LicenseData) Reset() {
 	*x = Credential_LicenseData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[26]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4505,7 +4697,7 @@ func (x *Credential_LicenseData) String() string {
 func (*Credential_LicenseData) ProtoMessage() {}
 
 func (x *Credential_LicenseData) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[26]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4551,7 +4743,7 @@ type OAuth2JSONWebKeys_Key struct {
 func (x *OAuth2JSONWebKeys_Key) Reset() {
 	*x = OAuth2JSONWebKeys_Key{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_admin_common_proto_msgTypes[28]
+		mi := &file_known_admin_v1_admin_common_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4564,7 +4756,7 @@ func (x *OAuth2JSONWebKeys_Key) String() string {
 func (*OAuth2JSONWebKeys_Key) ProtoMessage() {}
 
 func (x *OAuth2JSONWebKeys_Key) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_admin_common_proto_msgTypes[28]
+	mi := &file_known_admin_v1_admin_common_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5448,20 +5640,54 @@ var file_known_admin_v1_admin_common_proto_rawDesc = []byte{
 	0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18,
 	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x54, 0x79, 0x70, 0x65,
 	0x12, 0x1d, 0x0a, 0x0a, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x73, 0x5f, 0x69, 0x6e, 0x18, 0x03,
-	0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x73, 0x49, 0x6e, 0x2a,
-	0x3f, 0x0a, 0x04, 0x56, 0x69, 0x65, 0x77, 0x12, 0x14, 0x0a, 0x10, 0x56, 0x49, 0x45, 0x57, 0x5f,
-	0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x09, 0x0a,
-	0x05, 0x42, 0x41, 0x53, 0x49, 0x43, 0x10, 0x01, 0x12, 0x0c, 0x0a, 0x08, 0x53, 0x54, 0x41, 0x4e,
-	0x44, 0x41, 0x52, 0x44, 0x10, 0x02, 0x12, 0x08, 0x0a, 0x04, 0x46, 0x55, 0x4c, 0x4c, 0x10, 0x03,
-	0x2a, 0x4d, 0x0a, 0x09, 0x53, 0x74, 0x72, 0x75, 0x63, 0x74, 0x75, 0x72, 0x65, 0x12, 0x19, 0x0a,
-	0x15, 0x53, 0x54, 0x52, 0x55, 0x43, 0x54, 0x55, 0x52, 0x45, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45,
-	0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x46, 0x4c, 0x41, 0x54,
-	0x10, 0x01, 0x12, 0x08, 0x0a, 0x04, 0x54, 0x52, 0x45, 0x45, 0x10, 0x02, 0x12, 0x11, 0x0a, 0x0d,
-	0x54, 0x52, 0x45, 0x45, 0x5f, 0x45, 0x58, 0x50, 0x41, 0x4e, 0x44, 0x45, 0x44, 0x10, 0x03, 0x42,
-	0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72,
-	0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b,
-	0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64,
-	0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x65, 0x78, 0x70, 0x69, 0x72, 0x65, 0x73, 0x49, 0x6e, 0x22,
+	0x98, 0x04, 0x0a, 0x0d, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x61, 0x74, 0x61, 0x52, 0x61, 0x6e, 0x67,
+	0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69,
+	0x64, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x0c, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x50, 0x0a, 0x09, 0x64, 0x61,
+	0x74, 0x61, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x33, 0x2e,
+	0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f,
+	0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65,
+	0x44, 0x61, 0x74, 0x61, 0x52, 0x61, 0x6e, 0x67, 0x65, 0x2e, 0x44, 0x61, 0x74, 0x61, 0x54, 0x79,
+	0x70, 0x65, 0x52, 0x08, 0x64, 0x61, 0x74, 0x61, 0x54, 0x79, 0x70, 0x65, 0x12, 0x17, 0x0a, 0x07,
+	0x64, 0x61, 0x74, 0x61, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x64,
+	0x61, 0x74, 0x61, 0x49, 0x64, 0x12, 0x21, 0x0a, 0x0c, 0x69, 0x73, 0x5f, 0x72, 0x65, 0x63, 0x75,
+	0x72, 0x73, 0x69, 0x76, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0b, 0x69, 0x73, 0x52,
+	0x65, 0x63, 0x75, 0x72, 0x73, 0x69, 0x76, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65,
+	0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x12, 0x21, 0x0a, 0x0c,
+	0x64, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x06, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x0b, 0x64, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x12,
+	0x20, 0x0a, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x07,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f,
+	0x6e, 0x12, 0x39, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18,
+	0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d,
+	0x70, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x39, 0x0a, 0x0a,
+	0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x09, 0x75, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74,
+	0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x64, 0x42, 0x79, 0x12, 0x1d, 0x0a, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x64, 0x5f, 0x62, 0x79, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61,
+	0x74, 0x65, 0x64, 0x42, 0x79, 0x22, 0x43, 0x0a, 0x08, 0x44, 0x61, 0x74, 0x61, 0x54, 0x79, 0x70,
+	0x65, 0x12, 0x19, 0x0a, 0x15, 0x44, 0x41, 0x54, 0x41, 0x5f, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x55,
+	0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x0c, 0x0a, 0x08,
+	0x52, 0x45, 0x53, 0x4f, 0x55, 0x52, 0x43, 0x45, 0x10, 0x01, 0x12, 0x0e, 0x0a, 0x0a, 0x44, 0x45,
+	0x50, 0x41, 0x52, 0x54, 0x4d, 0x45, 0x4e, 0x54, 0x10, 0x02, 0x2a, 0x3f, 0x0a, 0x04, 0x56, 0x69,
+	0x65, 0x77, 0x12, 0x14, 0x0a, 0x10, 0x56, 0x49, 0x45, 0x57, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45,
+	0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x09, 0x0a, 0x05, 0x42, 0x41, 0x53, 0x49,
+	0x43, 0x10, 0x01, 0x12, 0x0c, 0x0a, 0x08, 0x53, 0x54, 0x41, 0x4e, 0x44, 0x41, 0x52, 0x44, 0x10,
+	0x02, 0x12, 0x08, 0x0a, 0x04, 0x46, 0x55, 0x4c, 0x4c, 0x10, 0x03, 0x2a, 0x4d, 0x0a, 0x09, 0x53,
+	0x74, 0x72, 0x75, 0x63, 0x74, 0x75, 0x72, 0x65, 0x12, 0x19, 0x0a, 0x15, 0x53, 0x54, 0x52, 0x55,
+	0x43, 0x54, 0x55, 0x52, 0x45, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45,
+	0x44, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x46, 0x4c, 0x41, 0x54, 0x10, 0x01, 0x12, 0x08, 0x0a,
+	0x04, 0x54, 0x52, 0x45, 0x45, 0x10, 0x02, 0x12, 0x11, 0x0a, 0x0d, 0x54, 0x52, 0x45, 0x45, 0x5f,
+	0x45, 0x58, 0x50, 0x41, 0x4e, 0x44, 0x45, 0x44, 0x10, 0x03, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69,
+	0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f,
+	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -5476,8 +5702,8 @@ func file_known_admin_v1_admin_common_proto_rawDescGZIP() []byte {
 	return file_known_admin_v1_admin_common_proto_rawDescData
 }
 
-var file_known_admin_v1_admin_common_proto_enumTypes = make([]protoimpl.EnumInfo, 29)
-var file_known_admin_v1_admin_common_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_known_admin_v1_admin_common_proto_enumTypes = make([]protoimpl.EnumInfo, 30)
+var file_known_admin_v1_admin_common_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
 var file_known_admin_v1_admin_common_proto_goTypes = []interface{}{
 	(View)(0),                        // 0: grpc_kit.api.known.admin.v1.View
 	(Structure)(0),                   // 1: grpc_kit.api.known.admin.v1.Structure
@@ -5508,94 +5734,96 @@ var file_known_admin_v1_admin_common_proto_goTypes = []interface{}{
 	(Credential_Visibility)(0),       // 26: grpc_kit.api.known.admin.v1.Credential.Visibility
 	(Credential_Status)(0),           // 27: grpc_kit.api.known.admin.v1.Credential.Status
 	(Credential_Source)(0),           // 28: grpc_kit.api.known.admin.v1.Credential.Source
-	(*Address)(nil),                  // 29: grpc_kit.api.known.admin.v1.Address
-	(*PhoneNumber)(nil),              // 30: grpc_kit.api.known.admin.v1.PhoneNumber
-	(*Department)(nil),               // 31: grpc_kit.api.known.admin.v1.Department
-	(*Scope)(nil),                    // 32: grpc_kit.api.known.admin.v1.Scope
-	(*Resource)(nil),                 // 33: grpc_kit.api.known.admin.v1.Resource
-	(*Policy)(nil),                   // 34: grpc_kit.api.known.admin.v1.Policy
-	(*Permission)(nil),               // 35: grpc_kit.api.known.admin.v1.Permission
-	(*User)(nil),                     // 36: grpc_kit.api.known.admin.v1.User
-	(*Role)(nil),                     // 37: grpc_kit.api.known.admin.v1.Role
-	(*Group)(nil),                    // 38: grpc_kit.api.known.admin.v1.Group
-	(*GroupMember)(nil),              // 39: grpc_kit.api.known.admin.v1.GroupMember
-	(*DepartmentMember)(nil),         // 40: grpc_kit.api.known.admin.v1.DepartmentMember
-	(*AuthProvider)(nil),             // 41: grpc_kit.api.known.admin.v1.AuthProvider
-	(*Credential)(nil),               // 42: grpc_kit.api.known.admin.v1.Credential
-	(*OAuth2JSONWebKeys)(nil),        // 43: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys
-	(*OAuth2Userinfo)(nil),           // 44: grpc_kit.api.known.admin.v1.OAuth2Userinfo
-	(*AuthToken)(nil),                // 45: grpc_kit.api.known.admin.v1.AuthToken
-	nil,                              // 46: grpc_kit.api.known.admin.v1.Department.MetadataEntry
-	nil,                              // 47: grpc_kit.api.known.admin.v1.Resource.MetadataEntry
-	nil,                              // 48: grpc_kit.api.known.admin.v1.User.MetadataEntry
-	nil,                              // 49: grpc_kit.api.known.admin.v1.Group.MetadataEntry
-	nil,                              // 50: grpc_kit.api.known.admin.v1.GroupMember.MetadataEntry
-	nil,                              // 51: grpc_kit.api.known.admin.v1.DepartmentMember.MetadataEntry
-	(*Credential_ApiKeyData)(nil),    // 52: grpc_kit.api.known.admin.v1.Credential.ApiKeyData
-	(*Credential_KeyPairData)(nil),   // 53: grpc_kit.api.known.admin.v1.Credential.KeyPairData
-	(*Credential_X509Data)(nil),      // 54: grpc_kit.api.known.admin.v1.Credential.X509Data
-	(*Credential_LicenseData)(nil),   // 55: grpc_kit.api.known.admin.v1.Credential.LicenseData
-	nil,                              // 56: grpc_kit.api.known.admin.v1.Credential.MetadataEntry
-	(*OAuth2JSONWebKeys_Key)(nil),    // 57: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
-	(*timestamppb.Timestamp)(nil),    // 58: google.protobuf.Timestamp
+	(RoleDataRange_DataType)(0),      // 29: grpc_kit.api.known.admin.v1.RoleDataRange.DataType
+	(*Address)(nil),                  // 30: grpc_kit.api.known.admin.v1.Address
+	(*PhoneNumber)(nil),              // 31: grpc_kit.api.known.admin.v1.PhoneNumber
+	(*Department)(nil),               // 32: grpc_kit.api.known.admin.v1.Department
+	(*Scope)(nil),                    // 33: grpc_kit.api.known.admin.v1.Scope
+	(*Resource)(nil),                 // 34: grpc_kit.api.known.admin.v1.Resource
+	(*Policy)(nil),                   // 35: grpc_kit.api.known.admin.v1.Policy
+	(*Permission)(nil),               // 36: grpc_kit.api.known.admin.v1.Permission
+	(*User)(nil),                     // 37: grpc_kit.api.known.admin.v1.User
+	(*Role)(nil),                     // 38: grpc_kit.api.known.admin.v1.Role
+	(*Group)(nil),                    // 39: grpc_kit.api.known.admin.v1.Group
+	(*GroupMember)(nil),              // 40: grpc_kit.api.known.admin.v1.GroupMember
+	(*DepartmentMember)(nil),         // 41: grpc_kit.api.known.admin.v1.DepartmentMember
+	(*AuthProvider)(nil),             // 42: grpc_kit.api.known.admin.v1.AuthProvider
+	(*Credential)(nil),               // 43: grpc_kit.api.known.admin.v1.Credential
+	(*OAuth2JSONWebKeys)(nil),        // 44: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys
+	(*OAuth2Userinfo)(nil),           // 45: grpc_kit.api.known.admin.v1.OAuth2Userinfo
+	(*AuthToken)(nil),                // 46: grpc_kit.api.known.admin.v1.AuthToken
+	(*RoleDataRange)(nil),            // 47: grpc_kit.api.known.admin.v1.RoleDataRange
+	nil,                              // 48: grpc_kit.api.known.admin.v1.Department.MetadataEntry
+	nil,                              // 49: grpc_kit.api.known.admin.v1.Resource.MetadataEntry
+	nil,                              // 50: grpc_kit.api.known.admin.v1.User.MetadataEntry
+	nil,                              // 51: grpc_kit.api.known.admin.v1.Group.MetadataEntry
+	nil,                              // 52: grpc_kit.api.known.admin.v1.GroupMember.MetadataEntry
+	nil,                              // 53: grpc_kit.api.known.admin.v1.DepartmentMember.MetadataEntry
+	(*Credential_ApiKeyData)(nil),    // 54: grpc_kit.api.known.admin.v1.Credential.ApiKeyData
+	(*Credential_KeyPairData)(nil),   // 55: grpc_kit.api.known.admin.v1.Credential.KeyPairData
+	(*Credential_X509Data)(nil),      // 56: grpc_kit.api.known.admin.v1.Credential.X509Data
+	(*Credential_LicenseData)(nil),   // 57: grpc_kit.api.known.admin.v1.Credential.LicenseData
+	nil,                              // 58: grpc_kit.api.known.admin.v1.Credential.MetadataEntry
+	(*OAuth2JSONWebKeys_Key)(nil),    // 59: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
+	(*timestamppb.Timestamp)(nil),    // 60: google.protobuf.Timestamp
 }
 var file_known_admin_v1_admin_common_proto_depIdxs = []int32{
 	2,  // 0: grpc_kit.api.known.admin.v1.Department.type:type_name -> grpc_kit.api.known.admin.v1.Department.Type
 	3,  // 1: grpc_kit.api.known.admin.v1.Department.status:type_name -> grpc_kit.api.known.admin.v1.Department.Status
-	40, // 2: grpc_kit.api.known.admin.v1.Department.managers:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember
-	31, // 3: grpc_kit.api.known.admin.v1.Department.children:type_name -> grpc_kit.api.known.admin.v1.Department
-	30, // 4: grpc_kit.api.known.admin.v1.Department.phone_number:type_name -> grpc_kit.api.known.admin.v1.PhoneNumber
-	29, // 5: grpc_kit.api.known.admin.v1.Department.address:type_name -> grpc_kit.api.known.admin.v1.Address
-	46, // 6: grpc_kit.api.known.admin.v1.Department.metadata:type_name -> grpc_kit.api.known.admin.v1.Department.MetadataEntry
-	58, // 7: grpc_kit.api.known.admin.v1.Department.created_at:type_name -> google.protobuf.Timestamp
-	58, // 8: grpc_kit.api.known.admin.v1.Department.updated_at:type_name -> google.protobuf.Timestamp
-	58, // 9: grpc_kit.api.known.admin.v1.Department.deleted_at:type_name -> google.protobuf.Timestamp
+	41, // 2: grpc_kit.api.known.admin.v1.Department.managers:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember
+	32, // 3: grpc_kit.api.known.admin.v1.Department.children:type_name -> grpc_kit.api.known.admin.v1.Department
+	31, // 4: grpc_kit.api.known.admin.v1.Department.phone_number:type_name -> grpc_kit.api.known.admin.v1.PhoneNumber
+	30, // 5: grpc_kit.api.known.admin.v1.Department.address:type_name -> grpc_kit.api.known.admin.v1.Address
+	48, // 6: grpc_kit.api.known.admin.v1.Department.metadata:type_name -> grpc_kit.api.known.admin.v1.Department.MetadataEntry
+	60, // 7: grpc_kit.api.known.admin.v1.Department.created_at:type_name -> google.protobuf.Timestamp
+	60, // 8: grpc_kit.api.known.admin.v1.Department.updated_at:type_name -> google.protobuf.Timestamp
+	60, // 9: grpc_kit.api.known.admin.v1.Department.deleted_at:type_name -> google.protobuf.Timestamp
 	4,  // 10: grpc_kit.api.known.admin.v1.Scope.type:type_name -> grpc_kit.api.known.admin.v1.Scope.Type
 	5,  // 11: grpc_kit.api.known.admin.v1.Resource.type:type_name -> grpc_kit.api.known.admin.v1.Resource.Type
 	6,  // 12: grpc_kit.api.known.admin.v1.Resource.status:type_name -> grpc_kit.api.known.admin.v1.Resource.Status
 	7,  // 13: grpc_kit.api.known.admin.v1.Resource.visibility:type_name -> grpc_kit.api.known.admin.v1.Resource.Visibility
-	47, // 14: grpc_kit.api.known.admin.v1.Resource.metadata:type_name -> grpc_kit.api.known.admin.v1.Resource.MetadataEntry
-	33, // 15: grpc_kit.api.known.admin.v1.Resource.children:type_name -> grpc_kit.api.known.admin.v1.Resource
-	32, // 16: grpc_kit.api.known.admin.v1.Resource.scopes:type_name -> grpc_kit.api.known.admin.v1.Scope
-	58, // 17: grpc_kit.api.known.admin.v1.Resource.created_at:type_name -> google.protobuf.Timestamp
-	58, // 18: grpc_kit.api.known.admin.v1.Resource.updated_at:type_name -> google.protobuf.Timestamp
+	49, // 14: grpc_kit.api.known.admin.v1.Resource.metadata:type_name -> grpc_kit.api.known.admin.v1.Resource.MetadataEntry
+	34, // 15: grpc_kit.api.known.admin.v1.Resource.children:type_name -> grpc_kit.api.known.admin.v1.Resource
+	33, // 16: grpc_kit.api.known.admin.v1.Resource.scopes:type_name -> grpc_kit.api.known.admin.v1.Scope
+	60, // 17: grpc_kit.api.known.admin.v1.Resource.created_at:type_name -> google.protobuf.Timestamp
+	60, // 18: grpc_kit.api.known.admin.v1.Resource.updated_at:type_name -> google.protobuf.Timestamp
 	8,  // 19: grpc_kit.api.known.admin.v1.Policy.type:type_name -> grpc_kit.api.known.admin.v1.Policy.Type
 	9,  // 20: grpc_kit.api.known.admin.v1.Policy.status:type_name -> grpc_kit.api.known.admin.v1.Policy.Status
-	34, // 21: grpc_kit.api.known.admin.v1.Permission.policy:type_name -> grpc_kit.api.known.admin.v1.Policy
-	33, // 22: grpc_kit.api.known.admin.v1.Permission.resources:type_name -> grpc_kit.api.known.admin.v1.Resource
+	35, // 21: grpc_kit.api.known.admin.v1.Permission.policy:type_name -> grpc_kit.api.known.admin.v1.Policy
+	34, // 22: grpc_kit.api.known.admin.v1.Permission.resources:type_name -> grpc_kit.api.known.admin.v1.Resource
 	10, // 23: grpc_kit.api.known.admin.v1.User.type:type_name -> grpc_kit.api.known.admin.v1.User.Type
 	11, // 24: grpc_kit.api.known.admin.v1.User.status:type_name -> grpc_kit.api.known.admin.v1.User.Status
 	12, // 25: grpc_kit.api.known.admin.v1.User.gender:type_name -> grpc_kit.api.known.admin.v1.User.Gender
-	58, // 26: grpc_kit.api.known.admin.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	58, // 27: grpc_kit.api.known.admin.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	58, // 28: grpc_kit.api.known.admin.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
-	58, // 29: grpc_kit.api.known.admin.v1.User.birthday:type_name -> google.protobuf.Timestamp
-	30, // 30: grpc_kit.api.known.admin.v1.User.phone_number:type_name -> grpc_kit.api.known.admin.v1.PhoneNumber
-	29, // 31: grpc_kit.api.known.admin.v1.User.address:type_name -> grpc_kit.api.known.admin.v1.Address
-	48, // 32: grpc_kit.api.known.admin.v1.User.metadata:type_name -> grpc_kit.api.known.admin.v1.User.MetadataEntry
+	60, // 26: grpc_kit.api.known.admin.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	60, // 27: grpc_kit.api.known.admin.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	60, // 28: grpc_kit.api.known.admin.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
+	60, // 29: grpc_kit.api.known.admin.v1.User.birthday:type_name -> google.protobuf.Timestamp
+	31, // 30: grpc_kit.api.known.admin.v1.User.phone_number:type_name -> grpc_kit.api.known.admin.v1.PhoneNumber
+	30, // 31: grpc_kit.api.known.admin.v1.User.address:type_name -> grpc_kit.api.known.admin.v1.Address
+	50, // 32: grpc_kit.api.known.admin.v1.User.metadata:type_name -> grpc_kit.api.known.admin.v1.User.MetadataEntry
 	13, // 33: grpc_kit.api.known.admin.v1.Role.type:type_name -> grpc_kit.api.known.admin.v1.Role.Type
 	14, // 34: grpc_kit.api.known.admin.v1.Role.status:type_name -> grpc_kit.api.known.admin.v1.Role.Status
-	58, // 35: grpc_kit.api.known.admin.v1.Role.created_at:type_name -> google.protobuf.Timestamp
-	58, // 36: grpc_kit.api.known.admin.v1.Role.updated_at:type_name -> google.protobuf.Timestamp
-	37, // 37: grpc_kit.api.known.admin.v1.Role.children:type_name -> grpc_kit.api.known.admin.v1.Role
+	60, // 35: grpc_kit.api.known.admin.v1.Role.created_at:type_name -> google.protobuf.Timestamp
+	60, // 36: grpc_kit.api.known.admin.v1.Role.updated_at:type_name -> google.protobuf.Timestamp
+	38, // 37: grpc_kit.api.known.admin.v1.Role.children:type_name -> grpc_kit.api.known.admin.v1.Role
 	15, // 38: grpc_kit.api.known.admin.v1.Group.type:type_name -> grpc_kit.api.known.admin.v1.Group.Type
 	16, // 39: grpc_kit.api.known.admin.v1.Group.status:type_name -> grpc_kit.api.known.admin.v1.Group.Status
-	49, // 40: grpc_kit.api.known.admin.v1.Group.metadata:type_name -> grpc_kit.api.known.admin.v1.Group.MetadataEntry
-	58, // 41: grpc_kit.api.known.admin.v1.Group.created_at:type_name -> google.protobuf.Timestamp
-	58, // 42: grpc_kit.api.known.admin.v1.Group.updated_at:type_name -> google.protobuf.Timestamp
-	58, // 43: grpc_kit.api.known.admin.v1.Group.deleted_at:type_name -> google.protobuf.Timestamp
+	51, // 40: grpc_kit.api.known.admin.v1.Group.metadata:type_name -> grpc_kit.api.known.admin.v1.Group.MetadataEntry
+	60, // 41: grpc_kit.api.known.admin.v1.Group.created_at:type_name -> google.protobuf.Timestamp
+	60, // 42: grpc_kit.api.known.admin.v1.Group.updated_at:type_name -> google.protobuf.Timestamp
+	60, // 43: grpc_kit.api.known.admin.v1.Group.deleted_at:type_name -> google.protobuf.Timestamp
 	17, // 44: grpc_kit.api.known.admin.v1.GroupMember.member_role:type_name -> grpc_kit.api.known.admin.v1.GroupMember.Role
 	18, // 45: grpc_kit.api.known.admin.v1.GroupMember.member_status:type_name -> grpc_kit.api.known.admin.v1.GroupMember.Status
-	58, // 46: grpc_kit.api.known.admin.v1.GroupMember.joined_at:type_name -> google.protobuf.Timestamp
-	58, // 47: grpc_kit.api.known.admin.v1.GroupMember.expired_at:type_name -> google.protobuf.Timestamp
-	58, // 48: grpc_kit.api.known.admin.v1.GroupMember.created_at:type_name -> google.protobuf.Timestamp
-	58, // 49: grpc_kit.api.known.admin.v1.GroupMember.updated_at:type_name -> google.protobuf.Timestamp
-	50, // 50: grpc_kit.api.known.admin.v1.GroupMember.metadata:type_name -> grpc_kit.api.known.admin.v1.GroupMember.MetadataEntry
+	60, // 46: grpc_kit.api.known.admin.v1.GroupMember.joined_at:type_name -> google.protobuf.Timestamp
+	60, // 47: grpc_kit.api.known.admin.v1.GroupMember.expired_at:type_name -> google.protobuf.Timestamp
+	60, // 48: grpc_kit.api.known.admin.v1.GroupMember.created_at:type_name -> google.protobuf.Timestamp
+	60, // 49: grpc_kit.api.known.admin.v1.GroupMember.updated_at:type_name -> google.protobuf.Timestamp
+	52, // 50: grpc_kit.api.known.admin.v1.GroupMember.metadata:type_name -> grpc_kit.api.known.admin.v1.GroupMember.MetadataEntry
 	19, // 51: grpc_kit.api.known.admin.v1.DepartmentMember.member_role:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember.Role
 	20, // 52: grpc_kit.api.known.admin.v1.DepartmentMember.member_status:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember.Status
-	58, // 53: grpc_kit.api.known.admin.v1.DepartmentMember.created_at:type_name -> google.protobuf.Timestamp
-	58, // 54: grpc_kit.api.known.admin.v1.DepartmentMember.updated_at:type_name -> google.protobuf.Timestamp
-	51, // 55: grpc_kit.api.known.admin.v1.DepartmentMember.metadata:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember.MetadataEntry
+	60, // 53: grpc_kit.api.known.admin.v1.DepartmentMember.created_at:type_name -> google.protobuf.Timestamp
+	60, // 54: grpc_kit.api.known.admin.v1.DepartmentMember.updated_at:type_name -> google.protobuf.Timestamp
+	53, // 55: grpc_kit.api.known.admin.v1.DepartmentMember.metadata:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember.MetadataEntry
 	21, // 56: grpc_kit.api.known.admin.v1.DepartmentMember.member_type:type_name -> grpc_kit.api.known.admin.v1.DepartmentMember.MemberType
 	22, // 57: grpc_kit.api.known.admin.v1.AuthProvider.type:type_name -> grpc_kit.api.known.admin.v1.AuthProvider.Type
 	23, // 58: grpc_kit.api.known.admin.v1.Credential.type:type_name -> grpc_kit.api.known.admin.v1.Credential.Type
@@ -5604,21 +5832,24 @@ var file_known_admin_v1_admin_common_proto_depIdxs = []int32{
 	26, // 61: grpc_kit.api.known.admin.v1.Credential.visibility:type_name -> grpc_kit.api.known.admin.v1.Credential.Visibility
 	27, // 62: grpc_kit.api.known.admin.v1.Credential.status:type_name -> grpc_kit.api.known.admin.v1.Credential.Status
 	28, // 63: grpc_kit.api.known.admin.v1.Credential.source:type_name -> grpc_kit.api.known.admin.v1.Credential.Source
-	52, // 64: grpc_kit.api.known.admin.v1.Credential.api_key:type_name -> grpc_kit.api.known.admin.v1.Credential.ApiKeyData
-	53, // 65: grpc_kit.api.known.admin.v1.Credential.key_pair:type_name -> grpc_kit.api.known.admin.v1.Credential.KeyPairData
-	54, // 66: grpc_kit.api.known.admin.v1.Credential.x509:type_name -> grpc_kit.api.known.admin.v1.Credential.X509Data
-	55, // 67: grpc_kit.api.known.admin.v1.Credential.license:type_name -> grpc_kit.api.known.admin.v1.Credential.LicenseData
-	58, // 68: grpc_kit.api.known.admin.v1.Credential.not_before:type_name -> google.protobuf.Timestamp
-	58, // 69: grpc_kit.api.known.admin.v1.Credential.expires_at:type_name -> google.protobuf.Timestamp
-	58, // 70: grpc_kit.api.known.admin.v1.Credential.created_at:type_name -> google.protobuf.Timestamp
-	58, // 71: grpc_kit.api.known.admin.v1.Credential.updated_at:type_name -> google.protobuf.Timestamp
-	56, // 72: grpc_kit.api.known.admin.v1.Credential.metadata:type_name -> grpc_kit.api.known.admin.v1.Credential.MetadataEntry
-	57, // 73: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.keys:type_name -> grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
-	74, // [74:74] is the sub-list for method output_type
-	74, // [74:74] is the sub-list for method input_type
-	74, // [74:74] is the sub-list for extension type_name
-	74, // [74:74] is the sub-list for extension extendee
-	0,  // [0:74] is the sub-list for field type_name
+	54, // 64: grpc_kit.api.known.admin.v1.Credential.api_key:type_name -> grpc_kit.api.known.admin.v1.Credential.ApiKeyData
+	55, // 65: grpc_kit.api.known.admin.v1.Credential.key_pair:type_name -> grpc_kit.api.known.admin.v1.Credential.KeyPairData
+	56, // 66: grpc_kit.api.known.admin.v1.Credential.x509:type_name -> grpc_kit.api.known.admin.v1.Credential.X509Data
+	57, // 67: grpc_kit.api.known.admin.v1.Credential.license:type_name -> grpc_kit.api.known.admin.v1.Credential.LicenseData
+	60, // 68: grpc_kit.api.known.admin.v1.Credential.not_before:type_name -> google.protobuf.Timestamp
+	60, // 69: grpc_kit.api.known.admin.v1.Credential.expires_at:type_name -> google.protobuf.Timestamp
+	60, // 70: grpc_kit.api.known.admin.v1.Credential.created_at:type_name -> google.protobuf.Timestamp
+	60, // 71: grpc_kit.api.known.admin.v1.Credential.updated_at:type_name -> google.protobuf.Timestamp
+	58, // 72: grpc_kit.api.known.admin.v1.Credential.metadata:type_name -> grpc_kit.api.known.admin.v1.Credential.MetadataEntry
+	59, // 73: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.keys:type_name -> grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys.Key
+	29, // 74: grpc_kit.api.known.admin.v1.RoleDataRange.data_type:type_name -> grpc_kit.api.known.admin.v1.RoleDataRange.DataType
+	60, // 75: grpc_kit.api.known.admin.v1.RoleDataRange.created_at:type_name -> google.protobuf.Timestamp
+	60, // 76: grpc_kit.api.known.admin.v1.RoleDataRange.updated_at:type_name -> google.protobuf.Timestamp
+	77, // [77:77] is the sub-list for method output_type
+	77, // [77:77] is the sub-list for method input_type
+	77, // [77:77] is the sub-list for extension type_name
+	77, // [77:77] is the sub-list for extension extendee
+	0,  // [0:77] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_admin_common_proto_init() }
@@ -5831,8 +6062,8 @@ func file_known_admin_v1_admin_common_proto_init() {
 				return nil
 			}
 		}
-		file_known_admin_v1_admin_common_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Credential_ApiKeyData); i {
+		file_known_admin_v1_admin_common_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RoleDataRange); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5844,7 +6075,7 @@ func file_known_admin_v1_admin_common_proto_init() {
 			}
 		}
 		file_known_admin_v1_admin_common_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Credential_KeyPairData); i {
+			switch v := v.(*Credential_ApiKeyData); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5856,7 +6087,7 @@ func file_known_admin_v1_admin_common_proto_init() {
 			}
 		}
 		file_known_admin_v1_admin_common_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Credential_X509Data); i {
+			switch v := v.(*Credential_KeyPairData); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -5868,6 +6099,18 @@ func file_known_admin_v1_admin_common_proto_init() {
 			}
 		}
 		file_known_admin_v1_admin_common_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Credential_X509Data); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_admin_common_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Credential_LicenseData); i {
 			case 0:
 				return &v.state
@@ -5879,7 +6122,7 @@ func file_known_admin_v1_admin_common_proto_init() {
 				return nil
 			}
 		}
-		file_known_admin_v1_admin_common_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
+		file_known_admin_v1_admin_common_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OAuth2JSONWebKeys_Key); i {
 			case 0:
 				return &v.state
@@ -5905,8 +6148,8 @@ func file_known_admin_v1_admin_common_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_admin_common_proto_rawDesc,
-			NumEnums:      29,
-			NumMessages:   29,
+			NumEnums:      30,
+			NumMessages:   30,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

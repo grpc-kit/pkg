@@ -51,7 +51,7 @@ func (Roles) Edges() []ent.Edge {
 		edge.To("lion_role_permissions", RolePermissions.Type),
 		edge.To("lion_user_roles", UserRoles.Type),
 		edge.To("lion_role_groups", GroupRoles.Type),
-		edge.To("lion_role_data_scopes", RoleDataScopes.Type),
+		edge.To("lion_role_data_ranges", RoleDataRanges.Type),
 	}
 }
 

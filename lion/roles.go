@@ -55,8 +55,8 @@ type RolesEdges struct {
 	LionUserRoles []*UserRoles `json:"lion_user_roles,omitempty"`
 	// LionRoleGroups holds the value of the lion_role_groups edge.
 	LionRoleGroups []*GroupRoles `json:"lion_role_groups,omitempty"`
-	// LionRoleDataScopes holds the value of the lion_role_data_scopes edge.
-	LionRoleDataScopes []*RoleDataScopes `json:"lion_role_data_scopes,omitempty"`
+	// LionRoleDataRanges holds the value of the lion_role_data_ranges edge.
+	LionRoleDataRanges []*RoleDataRanges `json:"lion_role_data_ranges,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -89,13 +89,13 @@ func (e RolesEdges) LionRoleGroupsOrErr() ([]*GroupRoles, error) {
 	return nil, &NotLoadedError{edge: "lion_role_groups"}
 }
 
-// LionRoleDataScopesOrErr returns the LionRoleDataScopes value or an error if the edge
+// LionRoleDataRangesOrErr returns the LionRoleDataRanges value or an error if the edge
 // was not loaded in eager-loading.
-func (e RolesEdges) LionRoleDataScopesOrErr() ([]*RoleDataScopes, error) {
+func (e RolesEdges) LionRoleDataRangesOrErr() ([]*RoleDataRanges, error) {
 	if e.loadedTypes[3] {
-		return e.LionRoleDataScopes, nil
+		return e.LionRoleDataRanges, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_role_data_scopes"}
+	return nil, &NotLoadedError{edge: "lion_role_data_ranges"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -231,9 +231,9 @@ func (_m *Roles) QueryLionRoleGroups() *GroupRolesQuery {
 	return NewRolesClient(_m.config).QueryLionRoleGroups(_m)
 }
 
-// QueryLionRoleDataScopes queries the "lion_role_data_scopes" edge of the Roles entity.
-func (_m *Roles) QueryLionRoleDataScopes() *RoleDataScopesQuery {
-	return NewRolesClient(_m.config).QueryLionRoleDataScopes(_m)
+// QueryLionRoleDataRanges queries the "lion_role_data_ranges" edge of the Roles entity.
+func (_m *Roles) QueryLionRoleDataRanges() *RoleDataRangesQuery {
+	return NewRolesClient(_m.config).QueryLionRoleDataRanges(_m)
 }
 
 // Update returns a builder for updating this Roles.

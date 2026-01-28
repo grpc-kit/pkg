@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/roledatascopes"
+	"github.com/grpc-kit/pkg/lion/roledataranges"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 )
 
@@ -255,19 +255,19 @@ func (_c *DepartmentsCreate) SetNillableDescription(v *string) *DepartmentsCreat
 	return _c
 }
 
-// AddLionRoleDataScopeIDs adds the "lion_role_data_scopes" edge to the RoleDataScopes entity by IDs.
-func (_c *DepartmentsCreate) AddLionRoleDataScopeIDs(ids ...int) *DepartmentsCreate {
-	_c.mutation.AddLionRoleDataScopeIDs(ids...)
+// AddLionRoleDataRangeIDs adds the "lion_role_data_ranges" edge to the RoleDataRanges entity by IDs.
+func (_c *DepartmentsCreate) AddLionRoleDataRangeIDs(ids ...int) *DepartmentsCreate {
+	_c.mutation.AddLionRoleDataRangeIDs(ids...)
 	return _c
 }
 
-// AddLionRoleDataScopes adds the "lion_role_data_scopes" edges to the RoleDataScopes entity.
-func (_c *DepartmentsCreate) AddLionRoleDataScopes(v ...*RoleDataScopes) *DepartmentsCreate {
+// AddLionRoleDataRanges adds the "lion_role_data_ranges" edges to the RoleDataRanges entity.
+func (_c *DepartmentsCreate) AddLionRoleDataRanges(v ...*RoleDataRanges) *DepartmentsCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddLionRoleDataScopeIDs(ids...)
+	return _c.AddLionRoleDataRangeIDs(ids...)
 }
 
 // AddLionUserDepartmentIDs adds the "lion_user_departments" edge to the UserDepartments entity by IDs.
@@ -525,15 +525,15 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 		_spec.SetField(departments.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if nodes := _c.mutation.LionRoleDataScopesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionRoleDataRangesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   departments.LionRoleDataScopesTable,
-			Columns: []string{departments.LionRoleDataScopesColumn},
+			Table:   departments.LionRoleDataRangesTable,
+			Columns: []string{departments.LionRoleDataRangesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roledatascopes.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(roledataranges.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
