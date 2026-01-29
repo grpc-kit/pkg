@@ -78,28 +78,35 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			permissionsWhere = append(permissionsWhere, permissions.HasLionPoliciesWith(policiesWhere...))
 		}
 
-		// 1 查询对应角色所有的资源归属（通过 permission_bindings 关联 permissions 和 resource_scopes）
-		resourceScopeList, err := db.PermissionBindings.
+		// 1 查询对应角色在 lion_permission_bindings 中的资源范围及是否递归（resource_scope_id + is_recursive）
+		bindingList, err := db.PermissionBindings.
 			Query().
 			Select(
 				permissionbindings.FieldResourceScopeID,
+				permissionbindings.FieldIsRecursive,
 			).
 			Where(
 				permissionbindings.HasLionPermissionsWith(permissionsWhere...),
 			).
-			Unique(true).
 			All(ctx)
 		if err != nil {
 			return nil, err
 		}
 
-		if len(resourceScopeList) == 0 {
+		if len(bindingList) == 0 {
 			return result, nil
 		}
 
+		// resource_scope_id -> is_recursive（同一 scope 若既有 true 又有 false 则按 true 处理，允许递归）
+		scopeRecursive := make(map[int]bool)
 		resourceScopeAllID := make([]int, 0)
-		for _, scope := range resourceScopeList {
-			resourceScopeAllID = append(resourceScopeAllID, scope.ResourceScopeID)
+		for _, b := range bindingList {
+			resourceScopeAllID = append(resourceScopeAllID, b.ResourceScopeID)
+			if b.IsRecursive {
+				scopeRecursive[b.ResourceScopeID] = true
+			} else if _, set := scopeRecursive[b.ResourceScopeID]; !set {
+				scopeRecursive[b.ResourceScopeID] = false
+			}
 		}
 
 		// 2 判断是否过滤资源作用域
@@ -111,13 +118,46 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			}
 		}
 
-		resourceScopesWhere := make([]predicate.ResourceScopes, 0)
+		// 3 通过 resource_scopes 解析出 resource_id，并按 is_recursive 计算允许访问的资源 ID 集合
+		rsWhere := []predicate.ResourceScopes{resourcescopes.IDIn(resourceScopeAllID...)}
 		if scopeID != 0 {
-			resourceScopesWhere = append(resourceScopesWhere, resourcescopes.ScopeIDEQ(scopeID))
+			rsWhere = append(rsWhere, resourcescopes.ScopeIDEQ(scopeID))
 		}
-		resourceScopesWhere = append(resourceScopesWhere, resourcescopes.IDIn(resourceScopeAllID...))
+		rsList, err := db.ResourceScopes.Query().Where(rsWhere...).Select(resourcescopes.FieldID, resourcescopes.FieldResourceID).All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if len(rsList) == 0 {
+			return result, nil
+		}
 
-		resourcesWhere = append(resourcesWhere, resources.HasLionResourceScopesWith(resourceScopesWhere...))
+		// 收集需递归的根 resource_id 与仅自身的 resource_id
+		recursiveRootIDs := make(map[int]struct{})
+		allowedIDs := make(map[int]struct{})
+		for _, rs := range rsList {
+			allowedIDs[rs.ResourceID] = struct{}{}
+			if scopeRecursive[rs.ID] {
+				recursiveRootIDs[rs.ResourceID] = struct{}{}
+			}
+		}
+
+		// 4 is_recursive 为 true 时，将子孙资源 ID 加入允许集合
+		if len(recursiveRootIDs) > 0 {
+			allRes, err := db.Resources.Query().Select(resources.FieldID, resources.FieldParentID).All(ctx)
+			if err != nil {
+				return nil, err
+			}
+			children := make(map[int64][]int)
+			for _, r := range allRes {
+				pid := r.ParentID
+				children[pid] = append(children[pid], r.ID)
+			}
+			for rootID := range recursiveRootIDs {
+				collectDescendantIDs(int64(rootID), children, allowedIDs)
+			}
+		}
+
+		resourcesWhere = append(resourcesWhere, resources.IDIn(mapKeys(allowedIDs)...))
 	} else {
 		// superadmin 可以查看所有资源，但仍需要支持资源作用域过滤
 		if req.ScopeType != 0 && req.ScopeName != "" {
@@ -728,4 +768,26 @@ func (a *KnownAdminAPI) GetResource(ctx context.Context, req *adminv1.GetResourc
 	}
 
 	return result, nil
+}
+
+// collectDescendantIDs 从根节点起 BFS 收集所有子孙资源 ID 并加入 allowedIDs。
+func collectDescendantIDs(rootID int64, children map[int64][]int, allowedIDs map[int]struct{}) {
+	queue := []int{int(rootID)}
+	for len(queue) > 0 {
+		pid := queue[0]
+		queue = queue[1:]
+		for _, cid := range children[int64(pid)] {
+			allowedIDs[cid] = struct{}{}
+			queue = append(queue, cid)
+		}
+	}
+}
+
+// mapKeys 返回 map[int]struct{} 的所有 key，用于 resources.IDIn。
+func mapKeys(m map[int]struct{}) []int {
+	keys := make([]int, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }

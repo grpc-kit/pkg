@@ -370,6 +370,53 @@ func (a *KnownAdminAPI) ListScopeResources(ctx context.Context, req *adminv1.Lis
 		return nil, err
 	}
 
+	// 查询 resource_scope_id 映射（用于 scope_resource_items，供权限绑定等使用）
+	if len(resList) > 0 {
+		resourceIDs := make([]int, 0, len(resList))
+		for _, r := range resList {
+			resourceIDs = append(resourceIDs, r.ID)
+		}
+		rsList, rsErr := db.ResourceScopes.Query().
+			Where(
+				resourcescopes.ScopeIDEQ(int(req.ScopeId)),
+				resourcescopes.ResourceIDIn(resourceIDs...),
+			).
+			WithLionResources().
+			All(ctx)
+		if rsErr == nil {
+			resourceToProto := func(m *lion.Resources) *adminv1.Resource {
+				if m == nil {
+					return nil
+				}
+				return &adminv1.Resource{
+					Id:          int64(m.ID),
+					ParentId:    m.ParentID,
+					Code:        m.Code,
+					DisplayName: m.DisplayName,
+					SortOrder:   int32(m.SortOrder),
+					Type:        adminv1.Resource_Type(m.ResourceType),
+					Status:      adminv1.Resource_Status(m.ResourceStatus),
+					Visibility:  adminv1.Resource_Visibility(m.Visibility),
+					Locator:     m.Locator,
+					Visual:      m.Visual,
+					Manifest:    m.Manifest,
+					Description: m.Description,
+					CreatedAt:   timestamppb.New(m.CreatedAt),
+					UpdatedAt:   timestamppb.New(m.UpdatedAt),
+				}
+			}
+			for _, rs := range rsList {
+				item := &adminv1.ScopeResourceItem{
+					ResourceScopeId: int64(rs.ID),
+					Resource:        resourceToProto(rs.Edges.LionResources),
+				}
+				if item.Resource != nil {
+					result.ScopeResourceItems = append(result.ScopeResourceItems, item)
+				}
+			}
+		}
+	}
+
 	// 处理结构（树状或列表）
 	switch req.Structure.String() {
 	case adminv1.Structure_TREE.String():
