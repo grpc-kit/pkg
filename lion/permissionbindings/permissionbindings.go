@@ -24,6 +24,8 @@ const (
 	FieldPermissionID = "permission_id"
 	// FieldResourceScopeID holds the string denoting the resource_scope_id field in the database.
 	FieldResourceScopeID = "resource_scope_id"
+	// FieldIsRecursive holds the string denoting the is_recursive field in the database.
+	FieldIsRecursive = "is_recursive"
 	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
 	EdgeLionPermissions = "lion_permissions"
 	// EdgeLionResourceScopes holds the string denoting the lion_resource_scopes edge name in mutations.
@@ -54,6 +56,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldPermissionID,
 	FieldResourceScopeID,
+	FieldIsRecursive,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -77,6 +80,8 @@ var (
 	PermissionIDValidator func(int) error
 	// ResourceScopeIDValidator is a validator for the "resource_scope_id" field. It is called by the builders before save.
 	ResourceScopeIDValidator func(int) error
+	// DefaultIsRecursive holds the default value on creation for the "is_recursive" field.
+	DefaultIsRecursive bool
 )
 
 // OrderOption defines the ordering options for the PermissionBindings queries.
@@ -110,6 +115,11 @@ func ByPermissionID(opts ...sql.OrderTermOption) OrderOption {
 // ByResourceScopeID orders the results by the resource_scope_id field.
 func ByResourceScopeID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResourceScopeID, opts...).ToFunc()
+}
+
+// ByIsRecursive orders the results by the is_recursive field.
+func ByIsRecursive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsRecursive, opts...).ToFunc()
 }
 
 // ByLionPermissionsField orders the results by lion_permissions field.

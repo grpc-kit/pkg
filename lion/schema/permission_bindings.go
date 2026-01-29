@@ -22,6 +22,9 @@ func (PermissionBindings) Fields() []ent.Field {
 		field.Int("resource_scope_id").
 			Positive().
 			Comment("关联 lion_resource_scopes 表的资源 ID"),
+		field.Bool("is_recursive").
+			Default(false).
+			Comment("是否递归"),
 	}
 }
 

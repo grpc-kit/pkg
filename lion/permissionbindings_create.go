@@ -76,6 +76,20 @@ func (_c *PermissionBindingsCreate) SetResourceScopeID(v int) *PermissionBinding
 	return _c
 }
 
+// SetIsRecursive sets the "is_recursive" field.
+func (_c *PermissionBindingsCreate) SetIsRecursive(v bool) *PermissionBindingsCreate {
+	_c.mutation.SetIsRecursive(v)
+	return _c
+}
+
+// SetNillableIsRecursive sets the "is_recursive" field if the given value is not nil.
+func (_c *PermissionBindingsCreate) SetNillableIsRecursive(v *bool) *PermissionBindingsCreate {
+	if v != nil {
+		_c.SetIsRecursive(*v)
+	}
+	return _c
+}
+
 // SetLionPermissionsID sets the "lion_permissions" edge to the Permissions entity by ID.
 func (_c *PermissionBindingsCreate) SetLionPermissionsID(id int) *PermissionBindingsCreate {
 	_c.mutation.SetLionPermissionsID(id)
@@ -141,6 +155,10 @@ func (_c *PermissionBindingsCreate) defaults() {
 		v := permissionbindings.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.IsRecursive(); !ok {
+		v := permissionbindings.DefaultIsRecursive
+		_c.mutation.SetIsRecursive(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -166,6 +184,9 @@ func (_c *PermissionBindingsCreate) check() error {
 		if err := permissionbindings.ResourceScopeIDValidator(v); err != nil {
 			return &ValidationError{Name: "resource_scope_id", err: fmt.Errorf(`lion: validator failed for field "PermissionBindings.resource_scope_id": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.IsRecursive(); !ok {
+		return &ValidationError{Name: "is_recursive", err: errors.New(`lion: missing required field "PermissionBindings.is_recursive"`)}
 	}
 	if len(_c.mutation.LionPermissionsIDs()) == 0 {
 		return &ValidationError{Name: "lion_permissions", err: errors.New(`lion: missing required edge "PermissionBindings.lion_permissions"`)}
@@ -210,6 +231,10 @@ func (_c *PermissionBindingsCreate) createSpec() (*PermissionBindings, *sqlgraph
 	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(permissionbindings.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
+	}
+	if value, ok := _c.mutation.IsRecursive(); ok {
+		_spec.SetField(permissionbindings.FieldIsRecursive, field.TypeBool, value)
+		_node.IsRecursive = value
 	}
 	if nodes := _c.mutation.LionPermissionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

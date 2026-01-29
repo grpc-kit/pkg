@@ -990,63 +990,12 @@ func (a *KnownAdminAPI) ListRolePermissions(ctx context.Context, req *adminv1.Li
 				}
 			}
 
-			// 加载资源信息（通过 permission_bindings -> resource_scopes -> resources）
+			// 加载权限绑定资源（permission_bindings -> resource_scopes -> resources），使用 Bindings 替代已废弃的 Resources
 			if perm.Edges.LionPermissionBindings != nil {
-				resourceMap := make(map[int64]*adminv1.Resource)
-				resourceScopesMap := make(map[int64]map[int64]*adminv1.Scope) // resource_id -> scope_id -> scope
 				for _, binding := range perm.Edges.LionPermissionBindings {
-					if binding.Edges.LionResourceScopes != nil {
-						rs := binding.Edges.LionResourceScopes
-						resourceID := int64(0)
-
-						// 加载资源
-						if rs.Edges.LionResources != nil {
-							res := rs.Edges.LionResources
-							resourceID = int64(res.ID)
-							if _, exists := resourceMap[resourceID]; !exists {
-								resourceMap[resourceID] = &adminv1.Resource{
-									Id:          int64(res.ID),
-									ParentId:    res.ParentID,
-									Code:        res.Code,
-									DisplayName: res.DisplayName,
-									SortOrder:   int32(res.SortOrder),
-									Type:        adminv1.Resource_Type(res.ResourceType),
-									Status:      adminv1.Resource_Status(res.ResourceStatus),
-									Visibility:  adminv1.Resource_Visibility(res.Visibility),
-									Locator:     res.Locator,
-									Visual:      res.Visual,
-									Manifest:    res.Manifest,
-									Description: res.Description,
-								}
-							}
-						}
-
-						// 加载作用域
-						if rs.Edges.LionScopes != nil && resourceID != 0 {
-							s := rs.Edges.LionScopes
-							if resourceScopesMap[resourceID] == nil {
-								resourceScopesMap[resourceID] = make(map[int64]*adminv1.Scope)
-							}
-							// 使用 scope ID 作为 key 去重
-							if _, exists := resourceScopesMap[resourceID][int64(s.ID)]; !exists {
-								resourceScopesMap[resourceID][int64(s.ID)] = &adminv1.Scope{
-									Id:          int64(s.ID),
-									Code:        s.Code,
-									DisplayName: s.DisplayName,
-									Type:        adminv1.Scope_Type(s.ScopeType),
-								}
-							}
-						}
+					if pb := lionPermissionBindingToProto(binding); pb != nil {
+						permission.Bindings = append(permission.Bindings, pb)
 					}
-				}
-				// 将 map 转换为 slice，并添加 scopes
-				for resourceID, res := range resourceMap {
-					if scopesMap, exists := resourceScopesMap[resourceID]; exists {
-						for _, scope := range scopesMap {
-							res.Scopes = append(res.Scopes, scope)
-						}
-					}
-					permission.Resources = append(permission.Resources, res)
 				}
 			}
 		}

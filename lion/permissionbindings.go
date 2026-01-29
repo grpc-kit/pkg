@@ -29,6 +29,8 @@ type PermissionBindings struct {
 	PermissionID int `json:"permission_id,omitempty"`
 	// 关联 lion_resource_scopes 表的资源 ID
 	ResourceScopeID int `json:"resource_scope_id,omitempty"`
+	// 是否递归
+	IsRecursive bool `json:"is_recursive,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PermissionBindingsQuery when eager-loading is set.
 	Edges        PermissionBindingsEdges `json:"edges"`
@@ -73,6 +75,8 @@ func (*PermissionBindings) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case permissionbindings.FieldIsRecursive:
+			values[i] = new(sql.NullBool)
 		case permissionbindings.FieldID, permissionbindings.FieldPermissionID, permissionbindings.FieldResourceScopeID:
 			values[i] = new(sql.NullInt64)
 		case permissionbindings.FieldCreatedAt, permissionbindings.FieldUpdatedAt, permissionbindings.FieldDeletedAt:
@@ -128,6 +132,12 @@ func (_m *PermissionBindings) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field resource_scope_id", values[i])
 			} else if value.Valid {
 				_m.ResourceScopeID = int(value.Int64)
+			}
+		case permissionbindings.FieldIsRecursive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_recursive", values[i])
+			} else if value.Valid {
+				_m.IsRecursive = value.Bool
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -191,6 +201,9 @@ func (_m *PermissionBindings) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("resource_scope_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ResourceScopeID))
+	builder.WriteString(", ")
+	builder.WriteString("is_recursive=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsRecursive))
 	builder.WriteByte(')')
 	return builder.String()
 }

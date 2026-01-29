@@ -84,6 +84,20 @@ func (_u *PermissionBindingsUpdate) SetNillableResourceScopeID(v *int) *Permissi
 	return _u
 }
 
+// SetIsRecursive sets the "is_recursive" field.
+func (_u *PermissionBindingsUpdate) SetIsRecursive(v bool) *PermissionBindingsUpdate {
+	_u.mutation.SetIsRecursive(v)
+	return _u
+}
+
+// SetNillableIsRecursive sets the "is_recursive" field if the given value is not nil.
+func (_u *PermissionBindingsUpdate) SetNillableIsRecursive(v *bool) *PermissionBindingsUpdate {
+	if v != nil {
+		_u.SetIsRecursive(*v)
+	}
+	return _u
+}
+
 // SetLionPermissionsID sets the "lion_permissions" edge to the Permissions entity by ID.
 func (_u *PermissionBindingsUpdate) SetLionPermissionsID(id int) *PermissionBindingsUpdate {
 	_u.mutation.SetLionPermissionsID(id)
@@ -200,6 +214,9 @@ func (_u *PermissionBindingsUpdate) sqlSave(ctx context.Context) (_node int, err
 	}
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(permissionbindings.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.IsRecursive(); ok {
+		_spec.SetField(permissionbindings.FieldIsRecursive, field.TypeBool, value)
 	}
 	if _u.mutation.LionPermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -329,6 +346,20 @@ func (_u *PermissionBindingsUpdateOne) SetResourceScopeID(v int) *PermissionBind
 func (_u *PermissionBindingsUpdateOne) SetNillableResourceScopeID(v *int) *PermissionBindingsUpdateOne {
 	if v != nil {
 		_u.SetResourceScopeID(*v)
+	}
+	return _u
+}
+
+// SetIsRecursive sets the "is_recursive" field.
+func (_u *PermissionBindingsUpdateOne) SetIsRecursive(v bool) *PermissionBindingsUpdateOne {
+	_u.mutation.SetIsRecursive(v)
+	return _u
+}
+
+// SetNillableIsRecursive sets the "is_recursive" field if the given value is not nil.
+func (_u *PermissionBindingsUpdateOne) SetNillableIsRecursive(v *bool) *PermissionBindingsUpdateOne {
+	if v != nil {
+		_u.SetIsRecursive(*v)
 	}
 	return _u
 }
@@ -479,6 +510,9 @@ func (_u *PermissionBindingsUpdateOne) sqlSave(ctx context.Context) (_node *Perm
 	}
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(permissionbindings.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.IsRecursive(); ok {
+		_spec.SetField(permissionbindings.FieldIsRecursive, field.TypeBool, value)
 	}
 	if _u.mutation.LionPermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{

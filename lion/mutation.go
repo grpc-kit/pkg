@@ -8296,6 +8296,7 @@ type PermissionBindingsMutation struct {
 	created_at                  *time.Time
 	updated_at                  *time.Time
 	deleted_at                  *time.Time
+	is_recursive                *bool
 	clearedFields               map[string]struct{}
 	lion_permissions            *int
 	clearedlion_permissions     bool
@@ -8597,6 +8598,42 @@ func (m *PermissionBindingsMutation) ResetResourceScopeID() {
 	m.lion_resource_scopes = nil
 }
 
+// SetIsRecursive sets the "is_recursive" field.
+func (m *PermissionBindingsMutation) SetIsRecursive(b bool) {
+	m.is_recursive = &b
+}
+
+// IsRecursive returns the value of the "is_recursive" field in the mutation.
+func (m *PermissionBindingsMutation) IsRecursive() (r bool, exists bool) {
+	v := m.is_recursive
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsRecursive returns the old "is_recursive" field's value of the PermissionBindings entity.
+// If the PermissionBindings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PermissionBindingsMutation) OldIsRecursive(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsRecursive is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsRecursive requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsRecursive: %w", err)
+	}
+	return oldValue.IsRecursive, nil
+}
+
+// ResetIsRecursive resets all changes to the "is_recursive" field.
+func (m *PermissionBindingsMutation) ResetIsRecursive() {
+	m.is_recursive = nil
+}
+
 // SetLionPermissionsID sets the "lion_permissions" edge to the Permissions entity by id.
 func (m *PermissionBindingsMutation) SetLionPermissionsID(id int) {
 	m.lion_permissions = &id
@@ -8711,7 +8748,7 @@ func (m *PermissionBindingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PermissionBindingsMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, permissionbindings.FieldCreatedAt)
 	}
@@ -8726,6 +8763,9 @@ func (m *PermissionBindingsMutation) Fields() []string {
 	}
 	if m.lion_resource_scopes != nil {
 		fields = append(fields, permissionbindings.FieldResourceScopeID)
+	}
+	if m.is_recursive != nil {
+		fields = append(fields, permissionbindings.FieldIsRecursive)
 	}
 	return fields
 }
@@ -8745,6 +8785,8 @@ func (m *PermissionBindingsMutation) Field(name string) (ent.Value, bool) {
 		return m.PermissionID()
 	case permissionbindings.FieldResourceScopeID:
 		return m.ResourceScopeID()
+	case permissionbindings.FieldIsRecursive:
+		return m.IsRecursive()
 	}
 	return nil, false
 }
@@ -8764,6 +8806,8 @@ func (m *PermissionBindingsMutation) OldField(ctx context.Context, name string) 
 		return m.OldPermissionID(ctx)
 	case permissionbindings.FieldResourceScopeID:
 		return m.OldResourceScopeID(ctx)
+	case permissionbindings.FieldIsRecursive:
+		return m.OldIsRecursive(ctx)
 	}
 	return nil, fmt.Errorf("unknown PermissionBindings field %s", name)
 }
@@ -8807,6 +8851,13 @@ func (m *PermissionBindingsMutation) SetField(name string, value ent.Value) erro
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetResourceScopeID(v)
+		return nil
+	case permissionbindings.FieldIsRecursive:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsRecursive(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PermissionBindings field %s", name)
@@ -8883,6 +8934,9 @@ func (m *PermissionBindingsMutation) ResetField(name string) error {
 		return nil
 	case permissionbindings.FieldResourceScopeID:
 		m.ResetResourceScopeID()
+		return nil
+	case permissionbindings.FieldIsRecursive:
+		m.ResetIsRecursive()
 		return nil
 	}
 	return fmt.Errorf("unknown PermissionBindings field %s", name)

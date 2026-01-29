@@ -253,10 +253,13 @@ type CreatePermissionRequest struct {
 	// {
 	// "code": "permission_001",
 	// "display_name": "管理用户列表",
-	// "policy_id": 1,
-	// "resources": [
+	// "policy": {
+	// "id": "10",
+	// },
+	// "bindings": [
 	// {
-	// "id": 1
+	// "resource_scope_id": 1
+	// "is_recursive": true
 	// }
 	// ],
 	// "description": "允许查看和管理用户列表"

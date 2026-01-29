@@ -380,6 +380,10 @@ func init() {
 	permissionbindingsDescResourceScopeID := permissionbindingsFields[1].Descriptor()
 	// permissionbindings.ResourceScopeIDValidator is a validator for the "resource_scope_id" field. It is called by the builders before save.
 	permissionbindings.ResourceScopeIDValidator = permissionbindingsDescResourceScopeID.Validators[0].(func(int) error)
+	// permissionbindingsDescIsRecursive is the schema descriptor for is_recursive field.
+	permissionbindingsDescIsRecursive := permissionbindingsFields[2].Descriptor()
+	// permissionbindings.DefaultIsRecursive holds the default value on creation for the is_recursive field.
+	permissionbindings.DefaultIsRecursive = permissionbindingsDescIsRecursive.Default.(bool)
 	permissionsMixin := schema.Permissions{}.Mixin()
 	permissionsMixinFields0 := permissionsMixin[0].Fields()
 	_ = permissionsMixinFields0

@@ -12,10 +12,52 @@ import (
 	"github.com/grpc-kit/pkg/lion/permissionbindings"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+// lionPermissionBindingToProto 将 lion PermissionBindings（含预加载的 resource_scope -> resource/scopes）转为 adminv1.Permission_Binding。
+// 权限资源仅通过 Permission.Bindings 暴露，已废弃的 Permission.Resources 不再使用。
+func lionPermissionBindingToProto(binding *lion.PermissionBindings) *adminv1.Permission_Binding {
+	if binding == nil {
+		return nil
+	}
+	out := &adminv1.Permission_Binding{
+		Id:              int64(binding.ID),
+		ResourceScopeId: int64(binding.ResourceScopeID),
+		IsRecursive:     binding.IsRecursive,
+	}
+	if binding.Edges.LionResourceScopes != nil {
+		rs := binding.Edges.LionResourceScopes
+		if rs.Edges.LionResources != nil {
+			res := rs.Edges.LionResources
+			out.Resources = &adminv1.Resource{
+				Id:          int64(res.ID),
+				ParentId:    res.ParentID,
+				Code:        res.Code,
+				DisplayName: res.DisplayName,
+				SortOrder:   int32(res.SortOrder),
+				Type:        adminv1.Resource_Type(res.ResourceType),
+				Status:      adminv1.Resource_Status(res.ResourceStatus),
+				Visibility:  adminv1.Resource_Visibility(res.Visibility),
+				Locator:     res.Locator,
+				Visual:      res.Visual,
+				Manifest:    res.Manifest,
+				Description: res.Description,
+			}
+			if rs.Edges.LionScopes != nil {
+				s := rs.Edges.LionScopes
+				out.Resources.Scopes = append(out.Resources.Scopes, &adminv1.Scope{
+					Id:          int64(s.ID),
+					Code:        s.Code,
+					DisplayName: s.DisplayName,
+					Type:        adminv1.Scope_Type(s.ScopeType),
+				})
+			}
+		}
+	}
+	return out
+}
 
 // ListPermissions 获取权限列表
 func (a *KnownAdminAPI) ListPermissions(ctx context.Context, req *adminv1.ListPermissionsRequest) (*adminv1.ListPermissionsResponse, error) {
@@ -141,63 +183,12 @@ func (a *KnownAdminAPI) ListPermissions(ctx context.Context, req *adminv1.ListPe
 				}
 			}
 
-			// 加载资源信息（通过 permission_bindings -> resource_scopes -> resources）
+			// 加载权限绑定资源（permission_bindings -> resource_scopes -> resources）
 			if p.Edges.LionPermissionBindings != nil {
-				resourceMap := make(map[int64]*adminv1.Resource)
-				resourceScopesMap := make(map[int64]map[int64]*adminv1.Scope) // resource_id -> scope_id -> scope
 				for _, binding := range p.Edges.LionPermissionBindings {
-					if binding.Edges.LionResourceScopes != nil {
-						rs := binding.Edges.LionResourceScopes
-						resourceID := int64(0)
-
-						// 加载资源
-						if rs.Edges.LionResources != nil {
-							res := rs.Edges.LionResources
-							resourceID = int64(res.ID)
-							if _, exists := resourceMap[resourceID]; !exists {
-								resourceMap[resourceID] = &adminv1.Resource{
-									Id:          int64(res.ID),
-									ParentId:    res.ParentID,
-									Code:        res.Code,
-									DisplayName: res.DisplayName,
-									SortOrder:   int32(res.SortOrder),
-									Type:        adminv1.Resource_Type(res.ResourceType),
-									Status:      adminv1.Resource_Status(res.ResourceStatus),
-									Visibility:  adminv1.Resource_Visibility(res.Visibility),
-									Locator:     res.Locator,
-									Visual:      res.Visual,
-									Manifest:    res.Manifest,
-									Description: res.Description,
-								}
-							}
-						}
-
-						// 加载作用域
-						if rs.Edges.LionScopes != nil && resourceID != 0 {
-							s := rs.Edges.LionScopes
-							if resourceScopesMap[resourceID] == nil {
-								resourceScopesMap[resourceID] = make(map[int64]*adminv1.Scope)
-							}
-							// 使用 scope ID 作为 key 去重
-							if _, exists := resourceScopesMap[resourceID][int64(s.ID)]; !exists {
-								resourceScopesMap[resourceID][int64(s.ID)] = &adminv1.Scope{
-									Id:          int64(s.ID),
-									Code:        s.Code,
-									DisplayName: s.DisplayName,
-									Type:        adminv1.Scope_Type(s.ScopeType),
-								}
-							}
-						}
+					if pb := lionPermissionBindingToProto(binding); pb != nil {
+						permission.Bindings = append(permission.Bindings, pb)
 					}
-				}
-				// 将 map 转换为 slice，并添加 scopes
-				for resourceID, res := range resourceMap {
-					if scopesMap, exists := resourceScopesMap[resourceID]; exists {
-						for _, scope := range scopesMap {
-							res.Scopes = append(res.Scopes, scope)
-						}
-					}
-					permission.Resources = append(permission.Resources, res)
 				}
 			}
 		}
@@ -271,63 +262,12 @@ func (a *KnownAdminAPI) GetPermission(ctx context.Context, req *adminv1.GetPermi
 		}
 	}
 
-	// 加载资源信息（通过 permission_bindings -> resource_scopes -> resources）
+	// 加载权限绑定资源（permission_bindings -> resource_scopes -> resources）
 	if permission.Edges.LionPermissionBindings != nil {
-		resourceMap := make(map[int64]*adminv1.Resource)
-		resourceScopesMap := make(map[int64]map[int64]*adminv1.Scope) // resource_id -> scope_id -> scope
 		for _, binding := range permission.Edges.LionPermissionBindings {
-			if binding.Edges.LionResourceScopes != nil {
-				rs := binding.Edges.LionResourceScopes
-				resourceID := int64(0)
-
-				// 加载资源
-				if rs.Edges.LionResources != nil {
-					res := rs.Edges.LionResources
-					resourceID = int64(res.ID)
-					if _, exists := resourceMap[resourceID]; !exists {
-						resourceMap[resourceID] = &adminv1.Resource{
-							Id:          int64(res.ID),
-							ParentId:    res.ParentID,
-							Code:        res.Code,
-							DisplayName: res.DisplayName,
-							SortOrder:   int32(res.SortOrder),
-							Type:        adminv1.Resource_Type(res.ResourceType),
-							Status:      adminv1.Resource_Status(res.ResourceStatus),
-							Visibility:  adminv1.Resource_Visibility(res.Visibility),
-							Locator:     res.Locator,
-							Visual:      res.Visual,
-							Manifest:    res.Manifest,
-							Description: res.Description,
-						}
-					}
-				}
-
-				// 加载作用域
-				if rs.Edges.LionScopes != nil && resourceID != 0 {
-					s := rs.Edges.LionScopes
-					if resourceScopesMap[resourceID] == nil {
-						resourceScopesMap[resourceID] = make(map[int64]*adminv1.Scope)
-					}
-					// 使用 scope ID 作为 key 去重
-					if _, exists := resourceScopesMap[resourceID][int64(s.ID)]; !exists {
-						resourceScopesMap[resourceID][int64(s.ID)] = &adminv1.Scope{
-							Id:          int64(s.ID),
-							Code:        s.Code,
-							DisplayName: s.DisplayName,
-							Type:        adminv1.Scope_Type(s.ScopeType),
-						}
-					}
-				}
+			if pb := lionPermissionBindingToProto(binding); pb != nil {
+				result.Bindings = append(result.Bindings, pb)
 			}
-		}
-		// 将 map 转换为 slice，并添加 scopes
-		for resourceID, res := range resourceMap {
-			if scopesMap, exists := resourceScopesMap[resourceID]; exists {
-				for _, scope := range scopesMap {
-					res.Scopes = append(res.Scopes, scope)
-				}
-			}
-			result.Resources = append(result.Resources, res)
 		}
 	}
 
@@ -376,42 +316,26 @@ func (a *KnownAdminAPI) CreatePermission(ctx context.Context, req *adminv1.Creat
 		return nil, err
 	}
 
-	// 创建权限与资源的关联（permission_bindings）
-	if len(req.Permission.Resources) > 0 {
-		// 收集有效的 resource_scope IDs
-		resourceScopeIDs := make([]int, 0)
-		for _, res := range req.Permission.Resources {
-			if res.Id == 0 {
+	// 创建权限绑定（permission_bindings），使用 req.Permission.Bindings
+	if len(req.Permission.Bindings) > 0 {
+		builders := make([]*lion.PermissionBindingsCreate, 0, len(req.Permission.Bindings))
+		for _, b := range req.Permission.Bindings {
+			if b.ResourceScopeId == 0 {
 				continue
 			}
-
-			// 查找资源对应的 resource_scopes
-			// 注意：这里需要根据业务逻辑确定如何关联资源和作用域
-			// 暂时假设每个资源都有一个默认的 resource_scope
-			resourceScopes, err := db.ResourceScopes.Query().
-				Where(resourcescopes.ResourceIDEQ(int(res.Id))).
-				All(ctx)
-			if err != nil {
-				continue
+			// 校验 resource_scope 存在
+			if _, err := db.ResourceScopes.Get(ctx, int(b.ResourceScopeId)); err != nil {
+				_ = db.Permissions.DeleteOneID(newPermission.ID).Exec(ctx)
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("resource_scope_id %d not found", b.ResourceScopeId))
 			}
-
-			for _, rs := range resourceScopes {
-				resourceScopeIDs = append(resourceScopeIDs, rs.ID)
-			}
+			builders = append(builders, db.PermissionBindings.Create().
+				SetPermissionID(newPermission.ID).
+				SetResourceScopeID(int(b.ResourceScopeId)).
+				SetIsRecursive(b.IsRecursive))
 		}
-
-		// 批量创建 permission_bindings
-		if len(resourceScopeIDs) > 0 {
-			bindings := make([]*lion.PermissionBindingsCreate, 0, len(resourceScopeIDs))
-			for _, rsID := range resourceScopeIDs {
-				binding := db.PermissionBindings.Create().
-					SetPermissionID(newPermission.ID).
-					SetResourceScopeID(rsID)
-				bindings = append(bindings, binding)
-			}
-			_, err = db.PermissionBindings.CreateBulk(bindings...).Save(ctx)
+		if len(builders) > 0 {
+			_, err = db.PermissionBindings.CreateBulk(builders...).Save(ctx)
 			if err != nil {
-				// 如果创建关联失败，删除已创建的权限
 				_ = db.Permissions.DeleteOneID(newPermission.ID).Exec(ctx)
 				return nil, err
 			}
@@ -471,6 +395,8 @@ func (a *KnownAdminAPI) UpdatePermission(ctx context.Context, req *adminv1.Updat
 					}
 					update.SetPolicyID(int(req.Permission.Policy.Id))
 				}
+			case "bindings":
+				// bindings 在下面统一同步，此处仅标记需要更新
 			}
 		}
 		// 始终更新 UpdatedBy
@@ -501,48 +427,42 @@ func (a *KnownAdminAPI) UpdatePermission(ctx context.Context, req *adminv1.Updat
 		return nil, err
 	}
 
-	// 如果提供了资源列表，更新关联的资源
-	if len(req.Permission.Resources) > 0 {
-		// 删除现有的 permission_bindings
+	// 若请求中带有 bindings，则同步权限绑定（全量替换）
+	shouldSyncBindings := len(req.Permission.Bindings) > 0
+	if req.UpdateMask != nil && len(req.UpdateMask.Paths) > 0 {
+		for _, p := range req.UpdateMask.Paths {
+			if p == "bindings" {
+				shouldSyncBindings = true
+				break
+			}
+		}
+	}
+	if shouldSyncBindings {
 		_, err = db.PermissionBindings.Delete().
 			Where(permissionbindings.PermissionIDEQ(int(req.Permission.Id))).
 			Exec(ctx)
 		if err != nil {
 			return nil, err
 		}
-
-		// 创建新的 permission_bindings
-		resourceScopeIDs := make([]int, 0)
-		for _, res := range req.Permission.Resources {
-			if res.Id == 0 {
-				continue
-			}
-
-			// 查找资源对应的 resource_scopes
-			resourceScopes, err := db.ResourceScopes.Query().
-				Where(resourcescopes.ResourceIDEQ(int(res.Id))).
-				All(ctx)
-			if err != nil {
-				continue
-			}
-
-			for _, rs := range resourceScopes {
-				resourceScopeIDs = append(resourceScopeIDs, rs.ID)
-			}
-		}
-
-		// 批量创建 permission_bindings
-		if len(resourceScopeIDs) > 0 {
-			bindings := make([]*lion.PermissionBindingsCreate, 0, len(resourceScopeIDs))
-			for _, rsID := range resourceScopeIDs {
-				binding := db.PermissionBindings.Create().
+		if len(req.Permission.Bindings) > 0 {
+			builders := make([]*lion.PermissionBindingsCreate, 0, len(req.Permission.Bindings))
+			for _, b := range req.Permission.Bindings {
+				if b.ResourceScopeId == 0 {
+					continue
+				}
+				if _, err := db.ResourceScopes.Get(ctx, int(b.ResourceScopeId)); err != nil {
+					return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("resource_scope_id %d not found", b.ResourceScopeId))
+				}
+				builders = append(builders, db.PermissionBindings.Create().
 					SetPermissionID(int(req.Permission.Id)).
-					SetResourceScopeID(rsID)
-				bindings = append(bindings, binding)
+					SetResourceScopeID(int(b.ResourceScopeId)).
+					SetIsRecursive(b.IsRecursive))
 			}
-			_, err = db.PermissionBindings.CreateBulk(bindings...).Save(ctx)
-			if err != nil {
-				return nil, err
+			if len(builders) > 0 {
+				_, err = db.PermissionBindings.CreateBulk(builders...).Save(ctx)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	}

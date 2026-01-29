@@ -195,6 +195,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "is_recursive", Type: field.TypeBool, Default: false},
 		{Name: "permission_id", Type: field.TypeInt},
 		{Name: "resource_scope_id", Type: field.TypeInt},
 	}
@@ -206,13 +207,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_permission_bindings_lion_permissions_lion_permission_bindings",
-				Columns:    []*schema.Column{LionPermissionBindingsColumns[4]},
+				Columns:    []*schema.Column{LionPermissionBindingsColumns[5]},
 				RefColumns: []*schema.Column{LionPermissionsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_permission_bindings_lion_resource_scopes_lion_permission_bindings",
-				Columns:    []*schema.Column{LionPermissionBindingsColumns[5]},
+				Columns:    []*schema.Column{LionPermissionBindingsColumns[6]},
 				RefColumns: []*schema.Column{LionResourceScopesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

@@ -80,6 +80,11 @@ func ResourceScopeID(v int) predicate.PermissionBindings {
 	return predicate.PermissionBindings(sql.FieldEQ(FieldResourceScopeID, v))
 }
 
+// IsRecursive applies equality check predicate on the "is_recursive" field. It's identical to IsRecursiveEQ.
+func IsRecursive(v bool) predicate.PermissionBindings {
+	return predicate.PermissionBindings(sql.FieldEQ(FieldIsRecursive, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.PermissionBindings {
 	return predicate.PermissionBindings(sql.FieldEQ(FieldCreatedAt, v))
@@ -248,6 +253,16 @@ func ResourceScopeIDIn(vs ...int) predicate.PermissionBindings {
 // ResourceScopeIDNotIn applies the NotIn predicate on the "resource_scope_id" field.
 func ResourceScopeIDNotIn(vs ...int) predicate.PermissionBindings {
 	return predicate.PermissionBindings(sql.FieldNotIn(FieldResourceScopeID, vs...))
+}
+
+// IsRecursiveEQ applies the EQ predicate on the "is_recursive" field.
+func IsRecursiveEQ(v bool) predicate.PermissionBindings {
+	return predicate.PermissionBindings(sql.FieldEQ(FieldIsRecursive, v))
+}
+
+// IsRecursiveNEQ applies the NEQ predicate on the "is_recursive" field.
+func IsRecursiveNEQ(v bool) predicate.PermissionBindings {
+	return predicate.PermissionBindings(sql.FieldNEQ(FieldIsRecursive, v))
 }
 
 // HasLionPermissions applies the HasEdge predicate on the "lion_permissions" edge.
