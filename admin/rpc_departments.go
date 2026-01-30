@@ -2,8 +2,12 @@ package admin
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -13,6 +17,7 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/predicate"
 	// 数据范围表已注释，同步取消依赖
 	// "github.com/grpc-kit/pkg/lion/roledataranges"
 	// "github.com/grpc-kit/pkg/lion/roles"
@@ -20,11 +25,17 @@ import (
 )
 
 // CreateDepartment 创建部门
+// 请求字段与 proto Department 定义对齐，支持：parent_id, code, display_name, type, status, sort_order,
+// description, cost_center_code, budget_item_code, max_members, external_id, metadata；created_by/updated_by 从上下文获取
 func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.CreateDepartmentRequest) (*adminv1.Department, error) {
 	result := &adminv1.Department{}
 
 	if req == nil || req.Department == nil {
 		return result, errs.InvalidArgument(ctx).WithMessage("request body department is nil")
+	}
+
+	if req.Department.Code == "" {
+		return result, errs.InvalidArgument(ctx).WithMessage("department code is required")
 	}
 
 	tx, err := a.config.db.Tx(ctx)
@@ -47,54 +58,82 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		}
 	} else {
 		// 创建根部门（parent_id = 0）需要检查用户是否有权限操作根部门
-		// 如果用户没有根部门的权限，则返回权限错误
 		if err := a.checkDepartmentPermissionTx(ctx, tx, 0); err != nil {
 			_ = tx.Rollback()
 			return result, err
 		}
 	}
 
-	// 创建部门
-	// 设置 display_name：如果请求中提供了则使用，否则使用 code 作为默认值
+	// display_name：请求未提供时使用 code
 	displayName := req.Department.DisplayName
 	if displayName == "" {
 		displayName = req.Department.Code
 	}
-	dp, err := tx.Departments.Create().
+
+	// sort_order：未指定时使用默认 100
+	sortOrder := int(req.Department.SortOrder)
+	if sortOrder == 0 {
+		sortOrder = 100
+	}
+
+	create := tx.Departments.Create().
 		SetParentID(int(req.Department.ParentId)).
 		SetCode(req.Department.Code).
 		SetDisplayName(displayName).
-		// SetI18nName(req.Department.I18NName).
-		SetSortOrder(int(req.Department.SortOrder)).
-		Save(ctx)
+		SetSortOrder(sortOrder).
+		SetDepartmentType(int(req.Department.Type)).
+		SetDepartmentStatus(int(req.Department.Status))
+
+	if req.Department.Description != "" {
+		create = create.SetDescription(req.Department.Description)
+	}
+	if req.Department.CostCenterCode != "" {
+		create = create.SetCostCenterCode(req.Department.CostCenterCode)
+	}
+	if req.Department.BudgetItemCode != "" {
+		create = create.SetBudgetItemCode(req.Department.BudgetItemCode)
+	}
+	if req.Department.MaxMembers != 0 {
+		create = create.SetMaxMembers(int(req.Department.MaxMembers))
+	}
+	if req.Department.ExternalId != "" {
+		create = create.SetExternalID(req.Department.ExternalId)
+	}
+	if len(req.Department.Metadata) > 0 {
+		create = create.SetMetadata(req.Department.Metadata)
+	}
+
+	// 从上下文设置创建人/更新人（审计）
+	if userID, err := GetUserID(ctx); err == nil {
+		create = create.SetCreatedBy(userID).SetUpdatedBy(userID)
+	}
+
+	dp, err := create.Save(ctx)
 	if err != nil {
 		_ = tx.Rollback()
 		return result, err
 	}
 
-	// 数据范围表已注释，同步取消依赖：不再为 superadmin 创建角色数据范围关联
-	// ros, err := tx.Roles.Query().Select(roles.FieldID).Where(roles.CodeEQ("superadmin")).Only(ctx)
-	// if err != nil {
-	// 	_ = tx.Rollback()
-	// 	return result, err
-	// }
-	// _, err = tx.RoleDataRanges.Create().
-	// 	SetRoleID(ros.ID).
-	// 	SetDataType(int(adminv1.RoleDataRange_DEPARTMENT)).
-	// 	SetDataID(dp.ID).
-	// 	Save(ctx)
-	// if err != nil {
-	// 	_ = tx.Rollback()
-	// 	return result, err
-	// }
-
+	// 返回与 proto Department 一致的完整信息（不含 managers，创建时无成员）
 	result = &adminv1.Department{
-		Id:          int32(dp.ID),
-		Code:        dp.Code,
-		DisplayName: dp.DisplayName,
-		// I18NName:    dp.I18nName,
-		SortOrder: int32(dp.SortOrder),
-		Managers:  make([]*adminv1.DepartmentMember, 0),
+		Id:               int32(dp.ID),
+		ParentId:         int32(dp.ParentID),
+		Code:             dp.Code,
+		DisplayName:      dp.DisplayName,
+		Type:             adminv1.Department_Type(dp.DepartmentType),
+		Status:           adminv1.Department_Status(dp.DepartmentStatus),
+		SortOrder:        int32(dp.SortOrder),
+		Description:      dp.Description,
+		CostCenterCode:   dp.CostCenterCode,
+		BudgetItemCode:   dp.BudgetItemCode,
+		MaxMembers:       int32(dp.MaxMembers),
+		ExternalId:       dp.ExternalID,
+		Metadata:         dp.Metadata,
+		CreatedBy:        dp.CreatedBy,
+		UpdatedBy:        dp.UpdatedBy,
+		CreatedAt:        timestamppb.New(dp.CreatedAt),
+		UpdatedAt:        timestamppb.New(dp.UpdatedAt),
+		Managers:         make([]*adminv1.DepartmentMember, 0),
 	}
 
 	_ = tx.Commit()
@@ -102,23 +141,47 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	return result, nil
 }
 
+// parseListDepartmentsParent 解析 ListDepartments 的 parent 参数。
+// 格式: "departments/123" 表示 parent_id=123；"departments" 或 "departments/0" 表示仅根部门；空表示不按父级过滤。
+// 返回: parentID, filterByParent（是否按 parent 过滤）。
+func parseListDepartmentsParent(parent string) (parentID int, filterByParent bool) {
+	if parent == "" {
+		return 0, false
+	}
+	prefix := "departments/"
+	if strings.HasPrefix(parent, prefix) {
+		idStr := strings.TrimPrefix(parent, prefix)
+		if idStr == "" || idStr == "0" {
+			return 0, true
+		}
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return 0, false
+		}
+		return id, true
+	}
+	// 兼容仅传部门 ID 的情况
+	id, err := strconv.Atoi(parent)
+	if err != nil {
+		return 0, false
+	}
+	return id, true
+}
+
 // ListDepartments 列出部门
 func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDepartmentsRequest) (*adminv1.ListDepartmentsResponse, error) {
 	result := &adminv1.ListDepartmentsResponse{}
 
-	// 获取当前用户的角色ID列表
 	rids, err := a.getUserRoleID(ctx)
 	if err != nil {
 		return result, err
 	}
 
 	if len(rids) == 0 {
-		// 用户没有任何角色，返回空列表
 		result.Departments = []*adminv1.Department{}
 		return result, nil
 	}
 
-	// 数据范围表已注释：不再按角色数据范围过滤，改为返回全部部门 ID
 	allDeps, err := a.config.db.Departments.Query().Select(departments.FieldID).All(ctx)
 	if err != nil {
 		return result, err
@@ -132,41 +195,103 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 		return result, nil
 	}
 
-	// 查询用户有权限的部门
-	depObj, err := a.config.db.Departments.Query().
-		Select().
-		Where(
-			departments.IDIn(depIDList...),
-		).
-		WithLionUserDepartments(
+	// 构建查询条件
+	where := []predicate.Departments{departments.IDIn(depIDList...)}
+
+	parentID, filterByParent := parseListDepartmentsParent(req.GetParent())
+	if filterByParent {
+		where = append(where, departments.ParentIDEQ(parentID))
+	}
+	if req.DepartmentType != 0 {
+		where = append(where, departments.DepartmentTypeEQ(int(req.DepartmentType)))
+	}
+	if req.DepartmentStatus != 0 {
+		where = append(where, departments.DepartmentStatusEQ(int(req.DepartmentStatus)))
+	}
+
+	depQuery := a.config.db.Departments.Query().Where(where...)
+
+	// 排序
+	if req.OrderBy != "" {
+		switch req.OrderBy {
+		case "sort_order asc":
+			depQuery = depQuery.Order(lion.Asc(departments.FieldSortOrder))
+		case "sort_order desc":
+			depQuery = depQuery.Order(lion.Desc(departments.FieldSortOrder))
+		case "create_time desc":
+			depQuery = depQuery.Order(lion.Desc(departments.FieldCreatedAt))
+		case "create_time asc":
+			depQuery = depQuery.Order(lion.Asc(departments.FieldCreatedAt))
+		default:
+			depQuery = depQuery.Order(lion.Asc(departments.FieldSortOrder), lion.Asc(departments.FieldID))
+		}
+	} else {
+		depQuery = depQuery.Order(lion.Asc(departments.FieldSortOrder), lion.Asc(departments.FieldID))
+	}
+
+	// 在分页前计算总数
+	totalSize, err := depQuery.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result.TotalSize = int32(totalSize)
+
+	pageSize := GetPageSize(ctx, req.PageSize)
+
+	// Cursor-based 分页
+	var lastID int
+	if req.GetPageToken() != "" {
+		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", err))
+		}
+		if err := json.Unmarshal(data, &lastID); err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", err))
+		}
+		if lastID > 0 {
+			depQuery = depQuery.Where(departments.IDGT(lastID))
+		}
+	}
+
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListDepartmentsRequest_Offset:
+		depQuery = depQuery.Offset(int(p.Offset))
+	case *adminv1.ListDepartmentsRequest_PageToken:
+		// cursor 已在上面处理
+	}
+
+	depQuery = depQuery.Limit(int(pageSize))
+
+	// View FULL 时预加载管理者
+	if req.View == adminv1.View_FULL {
+		depQuery = depQuery.WithLionUserDepartments(
 			func(query *lion.UserDepartmentsQuery) {
 				query.Where(
-					userdepartments.DepartmentIDIn(depIDList...),
 					userdepartments.MemberRoleIn(int(adminv1.DepartmentMember_ROLE_OWNER.Number()), int(adminv1.DepartmentMember_ROLE_MANAGER.Number())),
 				)
 				query.WithLionUsers()
-			}).
-		All(ctx)
-	if err != nil {
-		return result, err
+			},
+		)
 	}
 
-	// 构建树状菜单
-	menuMap := make(map[int32]*adminv1.Department)
-	var roots []*adminv1.Department
+	depObj, err := depQuery.All(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	for _, m := range depObj {
+	// 将 ent 实体转为 proto，并按 structure 返回平铺或树形
+	depToProto := func(m *lion.Departments) *adminv1.Department {
 		menu := &adminv1.Department{
 			Id:          int32(m.ID),
 			ParentId:    int32(m.ParentID),
 			Code:        m.Code,
 			DisplayName: I18NName(m.Code),
-			// I18NName:    m.I18nName,
-			SortOrder: int32(m.SortOrder),
-			Managers:  make([]*adminv1.DepartmentMember, 0),
+			SortOrder:   int32(m.SortOrder),
+			Type:        adminv1.Department_Type(m.DepartmentType),
+			Status:      adminv1.Department_Status(m.DepartmentStatus),
+			Managers:    make([]*adminv1.DepartmentMember, 0),
 		}
-
-		if m.Edges.LionUserDepartments != nil {
+		if req.View == adminv1.View_FULL && m.Edges.LionUserDepartments != nil {
 			for _, l := range m.Edges.LionUserDepartments {
 				leader := &adminv1.DepartmentMember{
 					Id:           int32(l.ID),
@@ -177,70 +302,56 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 					CreatedAt:    timestamppb.New(l.CreatedAt),
 					UpdatedAt:    timestamppb.New(l.UpdatedAt),
 				}
-
 				if l.Edges.LionUsers != nil {
 					leader.Username = l.Edges.LionUsers.Username
 					leader.Nickname = l.Edges.LionUsers.Nickname
 				}
-
 				menu.Managers = append(menu.Managers, leader)
 			}
 		}
-
-		menuMap[int32(m.ID)] = menu
+		return menu
 	}
 
-	for _, menu := range menuMap {
-		if parent, ok := menuMap[menu.ParentId]; ok {
-			parent.Children = append(parent.Children, menu)
+	if req.Structure == adminv1.Structure_TREE || req.Structure == adminv1.Structure_TREE_EXPANDED {
+		// 树形：用当前页数据构建树（仅包含本页节点及其在本页内的父子关系）
+		menuMap := make(map[int32]*adminv1.Department)
+		var roots []*adminv1.Department
+
+		for _, m := range depObj {
+			menu := depToProto(m)
+			menuMap[int32(m.ID)] = menu
 		}
-	}
-
-	// TODO；如果不存在 "parent_id=0" 的情况，动态找出最上层节点
-	hasParent := make(map[int32]bool)
-	for _, menu := range menuMap {
-		if _, ok := menuMap[menu.ParentId]; ok {
-			hasParent[menu.Id] = true
-		}
-	}
-	for _, menu := range menuMap {
-		if !hasParent[menu.Id] { // 没有父节点
-			roots = append(roots, menu)
-		}
-	}
-
-	// 可选：对根菜单排序
-	sort.Slice(roots, func(i, j int) bool {
-		return roots[i].SortOrder < roots[j].SortOrder
-	})
-
-	result.Departments = roots
-
-	/*
-		leaders, err := a.config.db.UserDepartments.Query().
-			Where(userdepartments.UserIDEQ(userIDInt)).
-			WithLionDepartments().All(ctx)
-		if err != nil {
-			return result, err
-		}
-
-		var deps []*adminv1.Department
-		for _, l := range leaders {
-			dep := l.Edges.LionDepartments
-			if dep == nil {
+		for _, menu := range menuMap {
+			if menu.ParentId == 0 {
+				roots = append(roots, menu)
 				continue
 			}
-
-			tree, err := a.buildDepartmentTree(ctx, dep)
-			if err != nil {
-				return result, err
+			if parent, ok := menuMap[menu.ParentId]; ok {
+				parent.Children = append(parent.Children, menu)
+			} else {
+				roots = append(roots, menu)
 			}
-
-			deps = append(deps, tree)
 		}
-	*/
+		sort.Slice(roots, func(i, j int) bool {
+			return roots[i].SortOrder < roots[j].SortOrder
+		})
+		result.Departments = roots
+	} else {
+		// 平铺列表（FLAT 或未指定）
+		for _, m := range depObj {
+			result.Departments = append(result.Departments, depToProto(m))
+		}
+	}
 
-	// result.Departments = deps
+	// Cursor 分页时返回 next_page_token
+	switch req.GetPagination().(type) {
+	case *adminv1.ListDepartmentsRequest_PageToken:
+		if len(depObj) == int(pageSize) && len(depObj) > 0 {
+			last := depObj[len(depObj)-1].ID
+			tokenData, _ := json.Marshal(last)
+			result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+		}
+	}
 
 	return result, nil
 }
@@ -368,7 +479,7 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 	return result, nil
 }
 
-// ListDepartmentMembers 获取部门成员
+// ListDepartmentMembers 获取部门成员（与 proto DepartmentMember 定义对齐）
 func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.ListDepartmentMembersRequest) (*adminv1.ListDepartmentMembersResponse, error) {
 	result := &adminv1.ListDepartmentMembersResponse{}
 
@@ -386,140 +497,178 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 		return nil, err
 	}
 
-	// 检查用户是否有权限操作该部门
 	if err := a.checkDepartmentPermission(ctx, db, departmentID); err != nil {
 		return result, err
 	}
 
-	// 查找用户并实现分页
-	pageSize := int(req.GetPageSize())
-	if pageSize <= 0 {
-		pageSize = 20
-	}
-	if pageSize > 100 {
-		pageSize = 100
-	}
+	pageSize := int(GetPageSize(ctx, req.PageSize))
+	memberQuery := db.UserDepartments.Query().Where(userdepartments.DepartmentIDEQ(departmentID))
 
-	userQuery := db.UserDepartments.Query().Where(
-		userdepartments.DepartmentIDEQ(departmentID),
-	)
-
-	// OrderBy
-	if req.GetOrderBy() != "" {
-		switch req.GetOrderBy() {
-		case "create_at desc":
-			userQuery = userQuery.Order(lion.Desc(userdepartments.FieldCreatedAt))
-		case "create_at asc":
-			userQuery = userQuery.Order(lion.Asc(userdepartments.FieldCreatedAt))
-		default:
-			// 默认按 ID 升序
-			userQuery = userQuery.Order(lion.Desc(userdepartments.FieldID))
-		}
-	} else {
-		userQuery = userQuery.Order(lion.Desc(userdepartments.FieldID))
+	// 排序（与 proto order_by 约定一致）
+	switch req.GetOrderBy() {
+	case "created_at desc", "create_at desc":
+		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldCreatedAt))
+	case "created_at asc", "create_at asc":
+		memberQuery = memberQuery.Order(lion.Asc(userdepartments.FieldCreatedAt))
+	case "member_role asc":
+		memberQuery = memberQuery.Order(lion.Asc(userdepartments.FieldMemberRole))
+	case "member_role desc":
+		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldMemberRole))
+	case "member_status asc":
+		memberQuery = memberQuery.Order(lion.Asc(userdepartments.FieldMemberStatus))
+	case "member_status desc":
+		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldMemberStatus))
+	default:
+		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldID))
 	}
 
-	totalSize, err := userQuery.Count(ctx)
+	totalSize, err := memberQuery.Clone().Count(ctx)
 	if err != nil {
 		return nil, err
 	}
-
 	result.TotalSize = int32(totalSize)
 
+	// 分页
 	switch p := req.GetPagination().(type) {
 	case *adminv1.ListDepartmentMembersRequest_Offset:
-		// Offset 分页
-		userQuery = userQuery.Offset(int(p.Offset))
+		memberQuery = memberQuery.Offset(int(p.Offset))
 	case *adminv1.ListDepartmentMembersRequest_PageToken:
-		// Cursor 分页
-		// TODO;
+		if req.GetPageToken() != "" {
+			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
+			if decErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
+			}
+			var lastID int
+			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
+			}
+			if lastID > 0 {
+				memberQuery = memberQuery.Where(userdepartments.IDLT(lastID))
+			}
+		}
 	}
 
-	userQuery = userQuery.Limit(pageSize)
+	memberQuery = memberQuery.Limit(pageSize)
 
-	members, err := userQuery.Select(
+	members, err := memberQuery.Select(
+		userdepartments.FieldID,
 		userdepartments.FieldUserID,
 		userdepartments.FieldDepartmentID,
 		userdepartments.FieldMemberRole,
 		userdepartments.FieldMemberStatus,
 		userdepartments.FieldMemberType,
+		userdepartments.FieldDescription,
+		userdepartments.FieldMetadata,
+		userdepartments.FieldCreatedBy,
+		userdepartments.FieldUpdatedBy,
 		userdepartments.FieldCreatedAt,
 		userdepartments.FieldUpdatedAt,
-	).WithLionUsers(func(query *lion.UsersQuery) {
-		query.Select(
-			users.FieldID,
-			users.FieldUsername,
-			users.FieldNickname,
-		)
+	).WithLionUsers(func(q *lion.UsersQuery) {
+		q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
 	}).All(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	for _, member := range members {
-		user := member.Edges.LionUsers
+	for _, m := range members {
+		user := m.Edges.LionUsers
 		if user == nil {
 			continue
 		}
+		pm := &adminv1.DepartmentMember{
+			Id:           int32(m.ID),
+			UserId:       int64(m.UserID),
+			Username:     user.Username,
+			Nickname:     user.Nickname,
+			DepartmentId: int32(m.DepartmentID),
+			MemberRole:   adminv1.DepartmentMember_Role(m.MemberRole),
+			MemberStatus: adminv1.DepartmentMember_Status(m.MemberStatus),
+			MemberType:   adminv1.DepartmentMember_MemberType(m.MemberType),
+			Description:  m.Description,
+			CreatedBy:    m.CreatedBy,
+			UpdatedBy:    m.UpdatedBy,
+			CreatedAt:    timestamppb.New(m.CreatedAt),
+			UpdatedAt:    timestamppb.New(m.UpdatedAt),
+		}
+		if m.Metadata != "" {
+			pm.Metadata = MetadataParse(m.Metadata)
+		}
+		result.DepartmentMembers = append(result.DepartmentMembers, pm)
+	}
 
-		result.DepartmentMembers = append(result.DepartmentMembers, &adminv1.DepartmentMember{
-			Id:           int32(int64(member.ID)),
-			UserId:       int64(member.UserID),
-			Username:     member.Edges.LionUsers.Username,
-			Nickname:     member.Edges.LionUsers.Nickname,
-			DepartmentId: int32(member.DepartmentID),
-			MemberRole:   adminv1.DepartmentMember_Role(member.MemberRole),
-			MemberStatus: adminv1.DepartmentMember_Status(member.MemberStatus),
-			MemberType:   adminv1.DepartmentMember_MemberType(member.MemberType),
-			CreatedAt:    timestamppb.New(member.CreatedAt),
-			UpdatedAt:    timestamppb.New(member.UpdatedAt),
-			Description:  member.Description,
-		})
+	// Cursor 分页时返回 next_page_token
+	if _, ok := req.GetPagination().(*adminv1.ListDepartmentMembersRequest_PageToken); ok {
+		if len(members) == pageSize && len(members) > 0 {
+			lastID := members[len(members)-1].ID
+			tokenData, _ := json.Marshal(lastID)
+			result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+		}
 	}
 
 	return result, nil
 }
 
-// CreateDepartmentMembers 创建部门成员
+// CreateDepartmentMembers 创建部门成员（与 proto DepartmentMember 定义对齐）
 func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv1.CreateDepartmentMembersRequest) (*adminv1.CreateDepartmentMembersResponse, error) {
 	result := &adminv1.CreateDepartmentMembersResponse{}
 
-	departmentID := req.DepartmentId
+	if req.DepartmentId == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("department_id is required")
+	}
+	if len(req.DepartmentMembers) == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("department_members is required")
+	}
 
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
 	}
 
-	// 检查用户是否有权限操作该部门
-	if err := a.checkDepartmentPermission(ctx, db, int(departmentID)); err != nil {
+	if err := a.checkDepartmentPermission(ctx, db, int(req.DepartmentId)); err != nil {
 		return result, err
 	}
 
-	depMembers := make([]*lion.UserDepartmentsCreate, 0)
+	var userID int64
+	if uid, err := GetUserID(ctx); err == nil {
+		userID = uid
+	}
+
+	depMembers := make([]*lion.UserDepartmentsCreate, 0, len(req.DepartmentMembers))
 
 	for _, member := range req.DepartmentMembers {
-		defaultRole := adminv1.DepartmentMember_ROLE_MEMBER
-		defaultStatus := adminv1.DepartmentMember_STATUS_ACTIVE
-		defaultType := adminv1.DepartmentMember_TYPE_PRIMARY
+		if member.UserId == 0 {
+			return result, errs.InvalidArgument(ctx).WithMessage("department_member.user_id is required")
+		}
 
+		role := int(adminv1.DepartmentMember_ROLE_MEMBER)
+		if member.MemberRole != adminv1.DepartmentMember_ROLE_UNSPECIFIED {
+			role = int(member.MemberRole)
+		}
+		status := int(adminv1.DepartmentMember_STATUS_ACTIVE)
+		if member.MemberStatus != adminv1.DepartmentMember_STATUS_UNSPECIFIED {
+			status = int(member.MemberStatus)
+		}
+		memberType := int(adminv1.DepartmentMember_TYPE_PRIMARY)
 		if member.MemberType != adminv1.DepartmentMember_TYPE_UNSPECIFIED {
-			defaultType = member.MemberType
+			memberType = int(member.MemberType)
 		}
 
-		if member.MemberRole == adminv1.DepartmentMember_ROLE_UNSPECIFIED {
-			member.MemberRole = defaultRole
+		create := db.UserDepartments.Create().
+			SetUserID(int(member.UserId)).
+			SetDepartmentID(int(req.DepartmentId)).
+			SetMemberRole(role).
+			SetMemberStatus(status).
+			SetMemberType(memberType)
+		if member.Description != "" {
+			create = create.SetDescription(member.Description)
 		}
-		if member.MemberStatus == adminv1.DepartmentMember_STATUS_UNSPECIFIED {
-			member.MemberStatus = defaultStatus
+		if len(member.Metadata) > 0 {
+			create = create.SetMetadata(MetadataJSON(member.Metadata))
 		}
-
-		depMembers = append(depMembers,
-			db.UserDepartments.Create().
-				SetUserID(int(member.UserId)).
-				SetDepartmentID(int(departmentID)).
-				SetMemberRole(int(defaultRole)).
-				SetMemberStatus(int(defaultStatus)).
-				SetMemberType(int(defaultType)).
-				SetDescription(member.Description),
-		)
+		if userID != 0 {
+			create = create.SetCreatedBy(userID).SetUpdatedBy(userID)
+		}
+		depMembers = append(depMembers, create)
 	}
 
 	_, err = db.UserDepartments.CreateBulk(depMembers...).Save(ctx)
@@ -530,11 +679,65 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 	return result, nil
 }
 
-// UpdateDepartmentMembers 更新部门成员
+// UpdateDepartmentMembers 更新部门成员（按 department_id + user_id 定位，与 proto DepartmentMember 对齐）
 func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv1.UpdateDepartmentMembersRequest) (*adminv1.UpdateDepartmentMembersResponse, error) {
 	result := &adminv1.UpdateDepartmentMembersResponse{}
 
-	// TODO;
+	if req.DepartmentId == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("department_id is required")
+	}
+	if len(req.DepartmentMembers) == 0 {
+		return result, nil
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := a.checkDepartmentPermission(ctx, db, int(req.DepartmentId)); err != nil {
+		return result, err
+	}
+
+	var updatedBy int64
+	if uid, err := GetUserID(ctx); err == nil {
+		updatedBy = uid
+	}
+
+	for _, member := range req.DepartmentMembers {
+		if member.UserId == 0 {
+			continue
+		}
+
+		upd := db.UserDepartments.Update().
+			Where(
+				userdepartments.DepartmentIDEQ(int(req.DepartmentId)),
+				userdepartments.UserIDEQ(int(member.UserId)),
+			)
+
+		if member.MemberRole != adminv1.DepartmentMember_ROLE_UNSPECIFIED {
+			upd = upd.SetMemberRole(int(member.MemberRole))
+		}
+		if member.MemberStatus != adminv1.DepartmentMember_STATUS_UNSPECIFIED {
+			upd = upd.SetMemberStatus(int(member.MemberStatus))
+		}
+		if member.MemberType != adminv1.DepartmentMember_TYPE_UNSPECIFIED {
+			upd = upd.SetMemberType(int(member.MemberType))
+		}
+		// description 允许置空，按请求更新
+		upd = upd.SetDescription(member.Description)
+		if len(member.Metadata) > 0 {
+			upd = upd.SetMetadata(MetadataJSON(member.Metadata))
+		}
+		if updatedBy != 0 {
+			upd = upd.SetUpdatedBy(updatedBy)
+		}
+
+		_, err := upd.Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	return result, nil
 }
