@@ -44,8 +44,6 @@ const (
 	EdgeLionUserRoles = "lion_user_roles"
 	// EdgeLionRoleGroups holds the string denoting the lion_role_groups edge name in mutations.
 	EdgeLionRoleGroups = "lion_role_groups"
-	// EdgeLionRoleDataRanges holds the string denoting the lion_role_data_ranges edge name in mutations.
-	EdgeLionRoleDataRanges = "lion_role_data_ranges"
 	// Table holds the table name of the roles in the database.
 	Table = "lion_roles"
 	// LionRolePermissionsTable is the table that holds the lion_role_permissions relation/edge.
@@ -69,13 +67,6 @@ const (
 	LionRoleGroupsInverseTable = "lion_group_roles"
 	// LionRoleGroupsColumn is the table column denoting the lion_role_groups relation/edge.
 	LionRoleGroupsColumn = "role_id"
-	// LionRoleDataRangesTable is the table that holds the lion_role_data_ranges relation/edge.
-	LionRoleDataRangesTable = "lion_role_data_ranges"
-	// LionRoleDataRangesInverseTable is the table name for the RoleDataRanges entity.
-	// It exists in this package in order to avoid circular dependency with the "roledataranges" package.
-	LionRoleDataRangesInverseTable = "lion_role_data_ranges"
-	// LionRoleDataRangesColumn is the table column denoting the lion_role_data_ranges relation/edge.
-	LionRoleDataRangesColumn = "role_id"
 )
 
 // Columns holds all SQL columns for roles fields.
@@ -241,20 +232,6 @@ func ByLionRoleGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionRoleGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByLionRoleDataRangesCount orders the results by lion_role_data_ranges count.
-func ByLionRoleDataRangesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionRoleDataRangesStep(), opts...)
-	}
-}
-
-// ByLionRoleDataRanges orders the results by lion_role_data_ranges terms.
-func ByLionRoleDataRanges(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionRoleDataRangesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newLionRolePermissionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -274,12 +251,5 @@ func newLionRoleGroupsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionRoleGroupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleGroupsTable, LionRoleGroupsColumn),
-	)
-}
-func newLionRoleDataRangesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionRoleDataRangesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleDataRangesTable, LionRoleDataRangesColumn),
 	)
 }

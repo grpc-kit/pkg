@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
-	"strings"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/grouproles"
-	"github.com/grpc-kit/pkg/lion/roledataranges"
+	// 数据范围表已注释，同步取消依赖
+	// "github.com/grpc-kit/pkg/lion/roledataranges"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -534,9 +534,10 @@ func (a *KnownAdminAPI) DeleteRole(ctx context.Context, req *adminv1.DeleteRoleR
 		return nil, errs.InvalidArgument(ctx).WithMessage("role has group")
 	}
 
-	if db.RoleDataRanges.Query().Where(roledataranges.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("role has department")
-	}
+	// 数据范围表已注释，同步取消依赖
+	// if db.RoleDataRanges.Query().Where(roledataranges.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
+	// 	return nil, errs.InvalidArgument(ctx).WithMessage("role has department")
+	// }
 
 	if db.RolePermissions.Query().Where(rolepermissions.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("role has permission")
@@ -1017,360 +1018,362 @@ func (a *KnownAdminAPI) ListRolePermissions(ctx context.Context, req *adminv1.Li
 	return result, nil
 }
 
-// CreateRoleDataRanges 为角色关联资源数据范围
-func (a *KnownAdminAPI) CreateRoleDataRanges(ctx context.Context, req *adminv1.CreateRoleDataRangesRequest) (*adminv1.CreateRoleDataRangesResponse, error) {
-	result := &adminv1.CreateRoleDataRangesResponse{}
-
-	if req.RoleId == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("role_id is required")
-	}
-
-	if len(req.DataRanges) == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("data_ranges list is empty")
-	}
-
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
-	}
-
-	// 检查用户是否有权限操作该角色
-	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
-		return nil, err
-	}
-
-	// 获取创建者用户 ID
-	userID, err := GetUserID(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// 检查角色是否存在
-	_, err = db.Roles.Get(ctx, int(req.RoleId))
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("role not found")
-	}
-
-	// 验证并收集有效的数据范围
-	validDataRanges := make([]*adminv1.RoleDataRange, 0, len(req.DataRanges))
-	dataRangeKeys := make(map[string]bool) // 用于去重: "data_type:data_id"
-
-	for _, dr := range req.DataRanges {
-		// 验证 data_type
-		if dr.DataType == adminv1.RoleDataRange_DATA_TYPE_UNSPECIFIED {
-			continue
-		}
-
-		// 验证 data_id
-		if dr.DataId == 0 {
-			continue
-		}
-
-		// 根据 data_type 验证 data_id 是否存在
-		dataTypeInt := int(dr.DataType)
-		dataIDInt := int(dr.DataId)
-
-		switch dr.DataType {
-		case adminv1.RoleDataRange_DEPARTMENT:
-			// 验证部门是否存在
-			_, err := db.Departments.Get(ctx, dataIDInt)
-			if err != nil {
-				continue
-			}
-		case adminv1.RoleDataRange_RESOURCE:
-			// 验证资源是否存在
-			_, err := db.Resources.Get(ctx, dataIDInt)
-			if err != nil {
-				continue
-			}
-		default:
-			continue
-		}
-
-		// 检查是否已存在相同的关联关系
-		key := fmt.Sprintf("%d:%d", dataTypeInt, dataIDInt)
-		if dataRangeKeys[key] {
-			continue
-		}
-
-		// 检查数据库中是否已存在
-		existing, err := db.RoleDataRanges.Query().
-			Where(
-				roledataranges.RoleIDEQ(int(req.RoleId)),
-				roledataranges.DataTypeEQ(dataTypeInt),
-				roledataranges.DataIDEQ(dataIDInt),
-			).
-			Only(ctx)
-		if err == nil && existing != nil {
-			// 已存在，跳过
-			continue
-		}
-
-		dataRangeKeys[key] = true
-		validDataRanges = append(validDataRanges, dr)
-	}
-
-	if len(validDataRanges) == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("no valid data ranges found")
-	}
-
-	// 批量创建关联关系
-	allRoleDataRanges := make([]*lion.RoleDataRangesCreate, 0, len(validDataRanges))
-	for _, dr := range validDataRanges {
-		rd := db.RoleDataRanges.Create().
-			SetRoleID(int(req.RoleId)).
-			SetDataType(int(dr.DataType)).
-			SetDataID(int(dr.DataId)).
-			SetIsRecursive(dr.IsRecursive).
-			SetCreatedBy(userID).
-			SetUpdatedBy(userID)
-
-		allRoleDataRanges = append(allRoleDataRanges, rd)
-	}
-
-	createdRanges, err := db.RoleDataRanges.CreateBulk(allRoleDataRanges...).Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// 转换为响应格式
-	for _, rd := range createdRanges {
-		dataRange := &adminv1.RoleDataRange{
-			Id:          int64(rd.ID),
-			RoleId:      int64(rd.RoleID),
-			DataType:    adminv1.RoleDataRange_DataType(rd.DataType),
-			DataId:      int64(rd.DataID),
-			IsRecursive: rd.IsRecursive,
-			CreatedAt:   timestamppb.New(rd.CreatedAt),
-			UpdatedAt:   timestamppb.New(rd.UpdatedAt),
-			CreatedBy:   rd.CreatedBy,
-			UpdatedBy:   rd.UpdatedBy,
-		}
-
-		// 根据 data_type 和 data_id 从对应表补充 code/display_name/description
-		a.enrichRoleDataRange(ctx, db, rd, dataRange)
-
-		result.DataRanges = append(result.DataRanges, dataRange)
-	}
-
-	return result, nil
-}
-
-// DeleteRoleDataRanges 删除角色下关联资源数据范围
-func (a *KnownAdminAPI) DeleteRoleDataRanges(ctx context.Context, req *adminv1.DeleteRoleDataRangesRequest) (*emptypb.Empty, error) {
-	if req.RoleId == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("role_id is required")
-	}
-
-	if req.DataRangeId == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("data_range_id is required")
-	}
-
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
-	}
-
-	// 检查用户是否有权限操作该角色
-	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
-		return nil, err
-	}
-
-	// 检查角色是否存在
-	_, err = db.Roles.Get(ctx, int(req.RoleId))
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("role not found")
-	}
-
-	// 检查数据范围是否存在且属于该角色
-	dataRange, err := db.RoleDataRanges.Query().
-		Where(
-			roledataranges.ID(int(req.DataRangeId)),
-			roledataranges.RoleIDEQ(int(req.RoleId)),
-		).
-		Only(ctx)
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("role data range not found")
-	}
-
-	// 删除关联关系
-	err = db.RoleDataRanges.DeleteOne(dataRange).Exec(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &emptypb.Empty{}, nil
-}
-
-// ListRoleDataRanges 列出角色下关联资源数据范围
-func (a *KnownAdminAPI) ListRoleDataRanges(ctx context.Context, req *adminv1.ListRoleDataRangesRequest) (*adminv1.ListRoleDataRangesResponse, error) {
-	result := &adminv1.ListRoleDataRangesResponse{}
-
-	if req.RoleId == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("role_id is required")
-	}
-
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
-	}
-
-	// 检查用户是否有权限操作该角色
-	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
-		return nil, err
-	}
-
-	// 检查角色是否存在
-	_, err = db.Roles.Get(ctx, int(req.RoleId))
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("role not found")
-	}
-
-	// 查询角色数据范围关联
-	query := db.RoleDataRanges.Query().
-		Where(roledataranges.RoleIDEQ(int(req.RoleId)))
-
-	// 处理过滤条件（filter）
-	// TODO: 实现完整的 AIP-160 filter 语法解析
-	// 这里先支持简单的 data_type 过滤
-	if req.Filter != "" {
-		// 简单实现：支持 data_type=1 格式
-		// 实际应该使用完整的 filter 解析器
-		if strings.HasPrefix(req.Filter, "data_type=") {
-			dataTypeStr := strings.TrimPrefix(req.Filter, "data_type=")
-			if dataType, err := strconv.Atoi(dataTypeStr); err == nil {
-				query = query.Where(roledataranges.DataTypeEQ(dataType))
-			}
-		}
-	}
-
-	// 计算总数（在应用分页前）
-	totalSize, err := query.Clone().Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	result.TotalSize = int32(totalSize)
-
-	// 处理分页
-	pageSize := GetPageSize(ctx, req.PageSize)
-
-	// 处理排序
-	if req.OrderBy != "" {
-		// 支持多种排序字段
-		orderParts := strings.Split(req.OrderBy, ",")
-		for _, part := range orderParts {
-			part = strings.TrimSpace(part)
-			if strings.HasPrefix(part, "created_at desc") || strings.HasPrefix(part, "create_time desc") {
-				query = query.Order(lion.Desc(roledataranges.FieldCreatedAt))
-			} else if strings.HasPrefix(part, "created_at asc") || strings.HasPrefix(part, "create_time asc") {
-				query = query.Order(lion.Asc(roledataranges.FieldCreatedAt))
-			} else if strings.HasPrefix(part, "data_type desc") {
-				query = query.Order(lion.Desc(roledataranges.FieldDataType))
-			} else if strings.HasPrefix(part, "data_type asc") {
-				query = query.Order(lion.Asc(roledataranges.FieldDataType))
-			}
-		}
-	} else {
-		// 默认排序：按创建时间倒序
-		query = query.Order(lion.Desc(roledataranges.FieldCreatedAt))
-	}
-
-	var lastID int
-	if req.GetPageToken() != "" {
-		// Cursor-based 分页
-		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
-		if err != nil {
-			return nil, fmt.Errorf("invalid page_token: %w", err)
-		}
-		if err := json.Unmarshal(data, &lastID); err != nil {
-			return nil, fmt.Errorf("invalid page_token format: %w", err)
-		}
-		if lastID > 0 {
-			query = query.Where(roledataranges.IDGT(lastID))
-		}
-	}
-
-	switch p := req.GetPagination().(type) {
-	case *adminv1.ListRoleDataRangesRequest_Offset:
-		// Offset-based 分页
-		query = query.Offset(int(p.Offset))
-	case *adminv1.ListRoleDataRangesRequest_PageToken:
-		// Cursor-based 分页已在上面处理
-	}
-
-	// 应用 Limit
-	query = query.Limit(int(pageSize))
-
-	// 执行查询
-	roleDataRangeList, err := query.All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// 转换为响应格式
-	for _, rd := range roleDataRangeList {
-		dataRange := &adminv1.RoleDataRange{
-			Id:          int64(rd.ID),
-			RoleId:      int64(rd.RoleID),
-			DataType:    adminv1.RoleDataRange_DataType(rd.DataType),
-			DataId:      int64(rd.DataID),
-			IsRecursive: rd.IsRecursive,
-		}
-
-		// 根据 data_type 和 data_id 从对应表补充 code/display_name/description
-		a.enrichRoleDataRange(ctx, db, rd, dataRange)
-
-		// 如果 View 为 FULL，添加更多详细信息
-		if req.View == adminv1.View_FULL {
-			dataRange.CreatedAt = timestamppb.New(rd.CreatedAt)
-			dataRange.UpdatedAt = timestamppb.New(rd.UpdatedAt)
-			dataRange.CreatedBy = rd.CreatedBy
-			dataRange.UpdatedBy = rd.UpdatedBy
-		}
-
-		result.DataRanges = append(result.DataRanges, dataRange)
-	}
-
-	// 构造 next_page_token（仅用于 cursor-based 分页）
-	switch req.GetPagination().(type) {
-	case *adminv1.ListRoleDataRangesRequest_PageToken:
-		// 只有在使用 cursor-based 分页时才生成 next_page_token
-		if len(roleDataRangeList) == int(pageSize) && len(roleDataRangeList) > 0 {
-			last := roleDataRangeList[len(roleDataRangeList)-1].ID
-			tokenData, _ := json.Marshal(last)
-			result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
-		}
-	}
-
-	return result, nil
-}
-
-// enrichRoleDataRange 根据 data_type 从对应表补全 RoleDataRange 的展示字段
-// - 当 data_type=RESOURCE 时，从 lion_resources 表获取 code/display_name/description
-// - 当 data_type=DEPARTMENT 时，从 lion_departments 表获取 code/display_name/description
-func (a *KnownAdminAPI) enrichRoleDataRange(ctx context.Context, db *lion.Client, rd *lion.RoleDataRanges, dataRange *adminv1.RoleDataRange) {
-	switch adminv1.RoleDataRange_DataType(rd.DataType) {
-	case adminv1.RoleDataRange_RESOURCE:
-		res, err := db.Resources.Get(ctx, rd.DataID)
-		if err != nil {
-			return
-		}
-		dataRange.Code = res.Code
-		dataRange.DisplayName = res.DisplayName
-		if res.Description != "" {
-			dataRange.Description = res.Description
-		}
-	case adminv1.RoleDataRange_DEPARTMENT:
-		dep, err := db.Departments.Get(ctx, rd.DataID)
-		if err != nil {
-			return
-		}
-		dataRange.Code = dep.Code
-		dataRange.DisplayName = dep.DisplayName
-		if dep.Description != "" {
-			dataRange.Description = dep.Description
-		}
-	default:
-		// 其他类型暂不处理
-	}
-}
+// 以下三个 RPC 及 enrichRoleDataRange 临时注释
+//
+// // CreateRoleDataRanges 为角色关联资源数据范围
+// func (a *KnownAdminAPI) CreateRoleDataRanges(ctx context.Context, req *adminv1.CreateRoleDataRangesRequest) (*adminv1.CreateRoleDataRangesResponse, error) {
+// 	result := &adminv1.CreateRoleDataRangesResponse{}
+//
+// 	if req.RoleId == 0 {
+// 		return result, errs.InvalidArgument(ctx).WithMessage("role_id is required")
+// 	}
+//
+// 	if len(req.DataRanges) == 0 {
+// 		return result, errs.InvalidArgument(ctx).WithMessage("data_ranges list is empty")
+// 	}
+//
+// 	db, err := a.GetLionClient()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 检查用户是否有权限操作该角色
+// 	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 获取创建者用户 ID
+// 	userID, err := GetUserID(ctx)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 检查角色是否存在
+// 	_, err = db.Roles.Get(ctx, int(req.RoleId))
+// 	if err != nil {
+// 		return nil, errs.NotFound(ctx).WithMessage("role not found")
+// 	}
+//
+// 	// 验证并收集有效的数据范围
+// 	validDataRanges := make([]*adminv1.RoleDataRange, 0, len(req.DataRanges))
+// 	dataRangeKeys := make(map[string]bool) // 用于去重: "data_type:data_id"
+//
+// 	for _, dr := range req.DataRanges {
+// 		// 验证 data_type
+// 		if dr.DataType == adminv1.RoleDataRange_DATA_TYPE_UNSPECIFIED {
+// 			continue
+// 		}
+//
+// 		// 验证 data_id
+// 		if dr.DataId == 0 {
+// 			continue
+// 		}
+//
+// 		// 根据 data_type 验证 data_id 是否存在
+// 		dataTypeInt := int(dr.DataType)
+// 		dataIDInt := int(dr.DataId)
+//
+// 		switch dr.DataType {
+// 		case adminv1.RoleDataRange_DEPARTMENT:
+// 			// 验证部门是否存在
+// 			_, err := db.Departments.Get(ctx, dataIDInt)
+// 			if err != nil {
+// 				continue
+// 			}
+// 		case adminv1.RoleDataRange_RESOURCE:
+// 			// 验证资源是否存在
+// 			_, err := db.Resources.Get(ctx, dataIDInt)
+// 			if err != nil {
+// 				continue
+// 			}
+// 		default:
+// 			continue
+// 		}
+//
+// 		// 检查是否已存在相同的关联关系
+// 		key := fmt.Sprintf("%d:%d", dataTypeInt, dataIDInt)
+// 		if dataRangeKeys[key] {
+// 			continue
+// 		}
+//
+// 		// 检查数据库中是否已存在
+// 		existing, err := db.RoleDataRanges.Query().
+// 			Where(
+// 				roledataranges.RoleIDEQ(int(req.RoleId)),
+// 				roledataranges.DataTypeEQ(dataTypeInt),
+// 				roledataranges.DataIDEQ(dataIDInt),
+// 			).
+// 			Only(ctx)
+// 		if err == nil && existing != nil {
+// 			// 已存在，跳过
+// 			continue
+// 		}
+//
+// 		dataRangeKeys[key] = true
+// 		validDataRanges = append(validDataRanges, dr)
+// 	}
+//
+// 	if len(validDataRanges) == 0 {
+// 		return result, errs.InvalidArgument(ctx).WithMessage("no valid data ranges found")
+// 	}
+//
+// 	// 批量创建关联关系
+// 	allRoleDataRanges := make([]*lion.RoleDataRangesCreate, 0, len(validDataRanges))
+// 	for _, dr := range validDataRanges {
+// 		rd := db.RoleDataRanges.Create().
+// 			SetRoleID(int(req.RoleId)).
+// 			SetDataType(int(dr.DataType)).
+// 			SetDataID(int(dr.DataId)).
+// 			SetIsRecursive(dr.IsRecursive).
+// 			SetCreatedBy(userID).
+// 			SetUpdatedBy(userID)
+//
+// 		allRoleDataRanges = append(allRoleDataRanges, rd)
+// 	}
+//
+// 	createdRanges, err := db.RoleDataRanges.CreateBulk(allRoleDataRanges...).Save(ctx)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 转换为响应格式
+// 	for _, rd := range createdRanges {
+// 		dataRange := &adminv1.RoleDataRange{
+// 			Id:          int64(rd.ID),
+// 			RoleId:      int64(rd.RoleID),
+// 			DataType:    adminv1.RoleDataRange_DataType(rd.DataType),
+// 			DataId:      int64(rd.DataID),
+// 			IsRecursive: rd.IsRecursive,
+// 			CreatedAt:   timestamppb.New(rd.CreatedAt),
+// 			UpdatedAt:   timestamppb.New(rd.UpdatedAt),
+// 			CreatedBy:   rd.CreatedBy,
+// 			UpdatedBy:   rd.UpdatedBy,
+// 		}
+//
+// 		// 根据 data_type 和 data_id 从对应表补充 code/display_name/description
+// 		a.enrichRoleDataRange(ctx, db, rd, dataRange)
+//
+// 		result.DataRanges = append(result.DataRanges, dataRange)
+// 	}
+//
+// 	return result, nil
+// }
+//
+// // DeleteRoleDataRanges 删除角色下关联资源数据范围
+// func (a *KnownAdminAPI) DeleteRoleDataRanges(ctx context.Context, req *adminv1.DeleteRoleDataRangesRequest) (*emptypb.Empty, error) {
+// 	if req.RoleId == 0 {
+// 		return nil, errs.InvalidArgument(ctx).WithMessage("role_id is required")
+// 	}
+//
+// 	if req.DataRangeId == 0 {
+// 		return nil, errs.InvalidArgument(ctx).WithMessage("data_range_id is required")
+// 	}
+//
+// 	db, err := a.GetLionClient()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 检查用户是否有权限操作该角色
+// 	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 检查角色是否存在
+// 	_, err = db.Roles.Get(ctx, int(req.RoleId))
+// 	if err != nil {
+// 		return nil, errs.NotFound(ctx).WithMessage("role not found")
+// 	}
+//
+// 	// 检查数据范围是否存在且属于该角色
+// 	dataRange, err := db.RoleDataRanges.Query().
+// 		Where(
+// 			roledataranges.ID(int(req.DataRangeId)),
+// 			roledataranges.RoleIDEQ(int(req.RoleId)),
+// 		).
+// 		Only(ctx)
+// 	if err != nil {
+// 		return nil, errs.NotFound(ctx).WithMessage("role data range not found")
+// 	}
+//
+// 	// 删除关联关系
+// 	err = db.RoleDataRanges.DeleteOne(dataRange).Exec(ctx)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	return &emptypb.Empty{}, nil
+// }
+//
+// // ListRoleDataRanges 列出角色下关联资源数据范围
+// func (a *KnownAdminAPI) ListRoleDataRanges(ctx context.Context, req *adminv1.ListRoleDataRangesRequest) (*adminv1.ListRoleDataRangesResponse, error) {
+// 	result := &adminv1.ListRoleDataRangesResponse{}
+//
+// 	if req.RoleId == 0 {
+// 		return result, errs.InvalidArgument(ctx).WithMessage("role_id is required")
+// 	}
+//
+// 	db, err := a.GetLionClient()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 检查用户是否有权限操作该角色
+// 	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 检查角色是否存在
+// 	_, err = db.Roles.Get(ctx, int(req.RoleId))
+// 	if err != nil {
+// 		return nil, errs.NotFound(ctx).WithMessage("role not found")
+// 	}
+//
+// 	// 查询角色数据范围关联
+// 	query := db.RoleDataRanges.Query().
+// 		Where(roledataranges.RoleIDEQ(int(req.RoleId)))
+//
+// 	// 处理过滤条件（filter）
+// 	// TODO: 实现完整的 AIP-160 filter 语法解析
+// 	// 这里先支持简单的 data_type 过滤
+// 	if req.Filter != "" {
+// 		// 简单实现：支持 data_type=1 格式
+// 		// 实际应该使用完整的 filter 解析器
+// 		if strings.HasPrefix(req.Filter, "data_type=") {
+// 			dataTypeStr := strings.TrimPrefix(req.Filter, "data_type=")
+// 			if dataType, err := strconv.Atoi(dataTypeStr); err == nil {
+// 				query = query.Where(roledataranges.DataTypeEQ(dataType))
+// 			}
+// 		}
+// 	}
+//
+// 	// 计算总数（在应用分页前）
+// 	totalSize, err := query.Clone().Count(ctx)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	result.TotalSize = int32(totalSize)
+//
+// 	// 处理分页
+// 	pageSize := GetPageSize(ctx, req.PageSize)
+//
+// 	// 处理排序
+// 	if req.OrderBy != "" {
+// 		// 支持多种排序字段
+// 		orderParts := strings.Split(req.OrderBy, ",")
+// 		for _, part := range orderParts {
+// 			part = strings.TrimSpace(part)
+// 			if strings.HasPrefix(part, "created_at desc") || strings.HasPrefix(part, "create_time desc") {
+// 				query = query.Order(lion.Desc(roledataranges.FieldCreatedAt))
+// 			} else if strings.HasPrefix(part, "created_at asc") || strings.HasPrefix(part, "create_time asc") {
+// 				query = query.Order(lion.Asc(roledataranges.FieldCreatedAt))
+// 			} else if strings.HasPrefix(part, "data_type desc") {
+// 				query = query.Order(lion.Desc(roledataranges.FieldDataType))
+// 			} else if strings.HasPrefix(part, "data_type asc") {
+// 				query = query.Order(lion.Asc(roledataranges.FieldDataType))
+// 			}
+// 		}
+// 	} else {
+// 		// 默认排序：按创建时间倒序
+// 		query = query.Order(lion.Desc(roledataranges.FieldCreatedAt))
+// 	}
+//
+// 	var lastID int
+// 	if req.GetPageToken() != "" {
+// 		// Cursor-based 分页
+// 		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
+// 		if err != nil {
+// 			return nil, fmt.Errorf("invalid page_token: %w", err)
+// 		}
+// 		if err := json.Unmarshal(data, &lastID); err != nil {
+// 			return nil, fmt.Errorf("invalid page_token format: %w", err)
+// 		}
+// 		if lastID > 0 {
+// 			query = query.Where(roledataranges.IDGT(lastID))
+// 		}
+// 	}
+//
+// 	switch p := req.GetPagination().(type) {
+// 	case *adminv1.ListRoleDataRangesRequest_Offset:
+// 		// Offset-based 分页
+// 		query = query.Offset(int(p.Offset))
+// 	case *adminv1.ListRoleDataRangesRequest_PageToken:
+// 		// Cursor-based 分页已在上面处理
+// 	}
+//
+// 	// 应用 Limit
+// 	query = query.Limit(int(pageSize))
+//
+// 	// 执行查询
+// 	roleDataRangeList, err := query.All(ctx)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	// 转换为响应格式
+// 	for _, rd := range roleDataRangeList {
+// 		dataRange := &adminv1.RoleDataRange{
+// 			Id:          int64(rd.ID),
+// 			RoleId:      int64(rd.RoleID),
+// 			DataType:    adminv1.RoleDataRange_DataType(rd.DataType),
+// 			DataId:      int64(rd.DataID),
+// 			IsRecursive: rd.IsRecursive,
+// 		}
+//
+// 		// 根据 data_type 和 data_id 从对应表补充 code/display_name/description
+// 		a.enrichRoleDataRange(ctx, db, rd, dataRange)
+//
+// 		// 如果 View 为 FULL，添加更多详细信息
+// 		if req.View == adminv1.View_FULL {
+// 			dataRange.CreatedAt = timestamppb.New(rd.CreatedAt)
+// 			dataRange.UpdatedAt = timestamppb.New(rd.UpdatedAt)
+// 			dataRange.CreatedBy = rd.CreatedBy
+// 			dataRange.UpdatedBy = rd.UpdatedBy
+// 		}
+//
+// 		result.DataRanges = append(result.DataRanges, dataRange)
+// 	}
+//
+// 	// 构造 next_page_token（仅用于 cursor-based 分页）
+// 	switch req.GetPagination().(type) {
+// 	case *adminv1.ListRoleDataRangesRequest_PageToken:
+// 		// 只有在使用 cursor-based 分页时才生成 next_page_token
+// 		if len(roleDataRangeList) == int(pageSize) && len(roleDataRangeList) > 0 {
+// 			last := roleDataRangeList[len(roleDataRangeList)-1].ID
+// 			tokenData, _ := json.Marshal(last)
+// 			result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+// 		}
+// 	}
+//
+// 	return result, nil
+// }
+//
+// // enrichRoleDataRange 根据 data_type 从对应表补全 RoleDataRange 的展示字段
+// // - 当 data_type=RESOURCE 时，从 lion_resources 表获取 code/display_name/description
+// // - 当 data_type=DEPARTMENT 时，从 lion_departments 表获取 code/display_name/description
+// func (a *KnownAdminAPI) enrichRoleDataRange(ctx context.Context, db *lion.Client, rd *lion.RoleDataRanges, dataRange *adminv1.RoleDataRange) {
+// 	switch adminv1.RoleDataRange_DataType(rd.DataType) {
+// 	case adminv1.RoleDataRange_RESOURCE:
+// 		res, err := db.Resources.Get(ctx, rd.DataID)
+// 		if err != nil {
+// 			return
+// 		}
+// 		dataRange.Code = res.Code
+// 		dataRange.DisplayName = res.DisplayName
+// 		if res.Description != "" {
+// 			dataRange.Description = res.Description
+// 		}
+// 	case adminv1.RoleDataRange_DEPARTMENT:
+// 		dep, err := db.Departments.Get(ctx, rd.DataID)
+// 		if err != nil {
+// 			return
+// 		}
+// 		dataRange.Code = dep.Code
+// 		dataRange.DisplayName = dep.DisplayName
+// 		if dep.Description != "" {
+// 			dataRange.Description = dep.Description
+// 		}
+// 	default:
+// 		// 其他类型暂不处理
+// 	}
+// }

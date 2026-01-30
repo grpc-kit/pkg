@@ -1,5 +1,6 @@
 package schema
 
+/*
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
@@ -30,17 +31,6 @@ func (RoleDataRanges) Fields() []ent.Field {
 		field.Bool("is_recursive").
 			Default(false).
 			Comment("是否继承父级数据范围"),
-		/*
-			field.String("code").
-				Default("").
-				Comment("关联 lion_departments 表的资源 ID"),
-			field.String("display_name").
-				Default("").
-				Comment("友好展示名称"),
-			field.String("description").
-				Default("").
-				Comment("描述"),
-		*/
 	}
 }
 
@@ -54,13 +44,6 @@ func (RoleDataRanges) Edges() []ent.Edge {
 			Unique().                     // 一条 RoleMenu 记录只属于一个 Role
 			Required(),
 		// 每条 RoleMenu 记录必须属于一个 Menu
-		/*
-			edge.From("lion_departments", Departments.Type).
-				Ref("lion_role_departments").
-				Field("department_id").
-				Unique().
-				Required(),
-		*/
 	}
 }
 
@@ -85,3 +68,4 @@ func (RoleDataRanges) Annotations() []schema.Annotation {
 		entsql.Annotation{Table: "lion_role_data_ranges"},
 	}
 }
+*/

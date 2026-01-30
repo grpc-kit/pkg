@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/roledataranges"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 )
 
@@ -253,21 +252,6 @@ func (_c *DepartmentsCreate) SetNillableDescription(v *string) *DepartmentsCreat
 		_c.SetDescription(*v)
 	}
 	return _c
-}
-
-// AddLionRoleDataRangeIDs adds the "lion_role_data_ranges" edge to the RoleDataRanges entity by IDs.
-func (_c *DepartmentsCreate) AddLionRoleDataRangeIDs(ids ...int) *DepartmentsCreate {
-	_c.mutation.AddLionRoleDataRangeIDs(ids...)
-	return _c
-}
-
-// AddLionRoleDataRanges adds the "lion_role_data_ranges" edges to the RoleDataRanges entity.
-func (_c *DepartmentsCreate) AddLionRoleDataRanges(v ...*RoleDataRanges) *DepartmentsCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionRoleDataRangeIDs(ids...)
 }
 
 // AddLionUserDepartmentIDs adds the "lion_user_departments" edge to the UserDepartments entity by IDs.
@@ -524,22 +508,6 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(departments.FieldDescription, field.TypeString, value)
 		_node.Description = value
-	}
-	if nodes := _c.mutation.LionRoleDataRangesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   departments.LionRoleDataRangesTable,
-			Columns: []string{departments.LionRoleDataRangesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roledataranges.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.LionUserDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

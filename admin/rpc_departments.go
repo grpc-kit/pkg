@@ -13,8 +13,9 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/roledataranges"
-	"github.com/grpc-kit/pkg/lion/roles"
+	// 数据范围表已注释，同步取消依赖
+	// "github.com/grpc-kit/pkg/lion/roledataranges"
+	// "github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 )
 
@@ -71,23 +72,21 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		return result, err
 	}
 
-	// 自动插入对超级管理员插入权限
-	ros, err := tx.Roles.Query().Select(roles.FieldID).Where(roles.CodeEQ("superadmin")).Only(ctx)
-	if err != nil {
-		_ = tx.Rollback()
-		return result, err
-	}
-	// 创建角色数据范围关联，data_type 为 DEPARTMENT (值为 2)
-	// code/display_name/description 字段将从 lion_departments 表中获取，不在此处存储
-	_, err = tx.RoleDataRanges.Create().
-		SetRoleID(ros.ID).
-		SetDataType(int(adminv1.RoleDataRange_DEPARTMENT)).
-		SetDataID(dp.ID).
-		Save(ctx)
-	if err != nil {
-		_ = tx.Rollback()
-		return result, err
-	}
+	// 数据范围表已注释，同步取消依赖：不再为 superadmin 创建角色数据范围关联
+	// ros, err := tx.Roles.Query().Select(roles.FieldID).Where(roles.CodeEQ("superadmin")).Only(ctx)
+	// if err != nil {
+	// 	_ = tx.Rollback()
+	// 	return result, err
+	// }
+	// _, err = tx.RoleDataRanges.Create().
+	// 	SetRoleID(ros.ID).
+	// 	SetDataType(int(adminv1.RoleDataRange_DEPARTMENT)).
+	// 	SetDataID(dp.ID).
+	// 	Save(ctx)
+	// if err != nil {
+	// 	_ = tx.Rollback()
+	// 	return result, err
+	// }
 
 	result = &adminv1.Department{
 		Id:          int32(dp.ID),
@@ -119,52 +118,16 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 		return result, nil
 	}
 
-	// 查询用户角色拥有的部门数据范围权限
-	res, err := a.config.db.RoleDataRanges.Query().Select(
-		roledataranges.FieldRoleID,
-		roledataranges.FieldDataType,
-		roledataranges.FieldDataID,
-		roledataranges.FieldIsRecursive,
-	).Where(
-		roledataranges.RoleIDIn(rids...),
-		roledataranges.DataTypeEQ(int(adminv1.RoleDataRange_DEPARTMENT)),
-	).All(ctx)
+	// 数据范围表已注释：不再按角色数据范围过滤，改为返回全部部门 ID
+	allDeps, err := a.config.db.Departments.Query().Select(departments.FieldID).All(ctx)
 	if err != nil {
 		return result, err
 	}
-
-	// 收集用户有权限的部门ID（包括直接权限和递归权限）
-	depIDs := make(map[int]bool)
-	recursiveDepIDs := make(map[int]bool)
-
-	for _, v := range res {
-		depIDs[v.DataID] = true
-		if v.IsRecursive {
-			recursiveDepIDs[v.DataID] = true
-		}
+	depIDList := make([]int, 0, len(allDeps))
+	for _, d := range allDeps {
+		depIDList = append(depIDList, d.ID)
 	}
-
-	// 如果有递归权限，需要获取所有子部门
-	if len(recursiveDepIDs) > 0 {
-		for depID := range recursiveDepIDs {
-			subIDs, err := a.getAllSubDeptIDs(ctx, depID)
-			if err != nil {
-				return result, err
-			}
-			for _, subID := range subIDs {
-				depIDs[subID] = true
-			}
-		}
-	}
-
-	// 转换为切片
-	depIDList := make([]int, 0, len(depIDs))
-	for depID := range depIDs {
-		depIDList = append(depIDList, depID)
-	}
-
 	if len(depIDList) == 0 {
-		// 用户没有任何部门权限，返回空列表
 		result.Departments = []*adminv1.Department{}
 		return result, nil
 	}
@@ -666,141 +629,29 @@ func (a *KnownAdminAPI) getAllSubDeptIDs(ctx context.Context, deptID int) ([]int
 // 权限检查逻辑：
 // 1. 检查用户的角色是否有该部门的数据范围权限
 // 2. 如果设置了 is_recursive，还需要检查父部门权限（递归检查）
+// 数据范围表已注释：不再按角色数据范围校验，仅校验用户是否有角色
 func (a *KnownAdminAPI) checkDepartmentPermission(ctx context.Context, db *lion.Client, departmentID int) error {
-	// 获取当前用户的角色ID列表
 	userRoleIDs, err := a.getUserRoleID(ctx)
 	if err != nil {
 		return err
 	}
-
 	if len(userRoleIDs) == 0 {
 		return errs.PermissionDenied(ctx).WithMessage("user has no roles")
 	}
-
-	// 查询用户角色是否有该部门的数据范围权限
-	dataRanges, err := db.RoleDataRanges.Query().
-		Select(
-			roledataranges.FieldRoleID,
-			roledataranges.FieldDataType,
-			roledataranges.FieldDataID,
-			roledataranges.FieldIsRecursive,
-		).
-		Where(
-			roledataranges.RoleIDIn(userRoleIDs...),
-			roledataranges.DataTypeEQ(int(adminv1.RoleDataRange_DEPARTMENT)),
-			roledataranges.DataIDEQ(departmentID),
-		).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-
-	// 如果找到直接权限，则允许操作
-	if len(dataRanges) > 0 {
-		return nil
-	}
-
-	// 检查是否有递归权限（需要检查父部门）
-	// 获取该部门的所有父部门ID
-	parentIDs, err := a.getDepartmentAncestorIDs(ctx, db, departmentID)
-	if err != nil {
-		return err
-	}
-
-	// 检查是否有任何父部门设置了递归权限
-	recursiveRanges, err := db.RoleDataRanges.Query().
-		Select(
-			roledataranges.FieldRoleID,
-			roledataranges.FieldDataType,
-			roledataranges.FieldDataID,
-			roledataranges.FieldIsRecursive,
-		).
-		Where(
-			roledataranges.RoleIDIn(userRoleIDs...),
-			roledataranges.DataTypeEQ(int(adminv1.RoleDataRange_DEPARTMENT)),
-			roledataranges.DataIDIn(parentIDs...),
-			roledataranges.IsRecursiveEQ(true),
-		).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-
-	if len(recursiveRanges) > 0 {
-		return nil
-	}
-
-	// 没有权限
-	return errs.PermissionDenied(ctx).WithMessage("user does not have permission to access this department")
+	return nil
 }
 
 // checkDepartmentPermissionTx 检查用户是否有权限操作指定部门（事务版本）
+// 数据范围表已注释：不再按角色数据范围校验，仅校验用户是否有角色
 func (a *KnownAdminAPI) checkDepartmentPermissionTx(ctx context.Context, tx *lion.Tx, departmentID int) error {
-	// 获取当前用户的角色ID列表
 	userRoleIDs, err := a.getUserRoleID(ctx)
 	if err != nil {
 		return err
 	}
-
 	if len(userRoleIDs) == 0 {
 		return errs.PermissionDenied(ctx).WithMessage("user has no roles")
 	}
-
-	// 查询用户角色是否有该部门的数据范围权限
-	dataRanges, err := tx.RoleDataRanges.Query().
-		Select(
-			roledataranges.FieldRoleID,
-			roledataranges.FieldDataType,
-			roledataranges.FieldDataID,
-			roledataranges.FieldIsRecursive,
-		).
-		Where(
-			roledataranges.RoleIDIn(userRoleIDs...),
-			roledataranges.DataTypeEQ(int(adminv1.RoleDataRange_DEPARTMENT)),
-			roledataranges.DataIDEQ(departmentID),
-		).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-
-	// 如果找到直接权限，则允许操作
-	if len(dataRanges) > 0 {
-		return nil
-	}
-
-	// 检查是否有递归权限（需要检查父部门）
-	// 获取该部门的所有父部门ID
-	parentIDs, err := a.getDepartmentAncestorIDsTx(ctx, tx, departmentID)
-	if err != nil {
-		return err
-	}
-
-	// 检查是否有任何父部门设置了递归权限
-	recursiveRanges, err := tx.RoleDataRanges.Query().
-		Select(
-			roledataranges.FieldRoleID,
-			roledataranges.FieldDataType,
-			roledataranges.FieldDataID,
-			roledataranges.FieldIsRecursive,
-		).
-		Where(
-			roledataranges.RoleIDIn(userRoleIDs...),
-			roledataranges.DataTypeEQ(int(adminv1.RoleDataRange_DEPARTMENT)),
-			roledataranges.DataIDIn(parentIDs...),
-			roledataranges.IsRecursiveEQ(true),
-		).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-
-	if len(recursiveRanges) > 0 {
-		return nil
-	}
-
-	// 没有权限
-	return errs.PermissionDenied(ctx).WithMessage("user does not have permission to access this department")
+	return nil
 }
 
 // getDepartmentAncestorIDs 递归获取部门的所有祖先部门ID（包括父部门、祖父部门等）

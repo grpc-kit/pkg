@@ -769,29 +769,6 @@ func HasLionRoleGroupsWith(preds ...predicate.GroupRoles) predicate.Roles {
 	})
 }
 
-// HasLionRoleDataRanges applies the HasEdge predicate on the "lion_role_data_ranges" edge.
-func HasLionRoleDataRanges() predicate.Roles {
-	return predicate.Roles(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionRoleDataRangesTable, LionRoleDataRangesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionRoleDataRangesWith applies the HasEdge predicate on the "lion_role_data_ranges" edge with a given conditions (other predicates).
-func HasLionRoleDataRangesWith(preds ...predicate.RoleDataRanges) predicate.Roles {
-	return predicate.Roles(func(s *sql.Selector) {
-		step := newLionRoleDataRangesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Roles) predicate.Roles {
 	return predicate.Roles(sql.AndPredicates(predicates...))

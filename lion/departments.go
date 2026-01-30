@@ -66,30 +66,19 @@ type Departments struct {
 
 // DepartmentsEdges holds the relations/edges for other nodes in the graph.
 type DepartmentsEdges struct {
-	// LionRoleDataRanges holds the value of the lion_role_data_ranges edge.
-	LionRoleDataRanges []*RoleDataRanges `json:"lion_role_data_ranges,omitempty"`
 	// LionUserDepartments holds the value of the lion_user_departments edge.
 	LionUserDepartments []*UserDepartments `json:"lion_user_departments,omitempty"`
 	// LionGroups holds the value of the lion_groups edge.
 	LionGroups []*Groups `json:"lion_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
-}
-
-// LionRoleDataRangesOrErr returns the LionRoleDataRanges value or an error if the edge
-// was not loaded in eager-loading.
-func (e DepartmentsEdges) LionRoleDataRangesOrErr() ([]*RoleDataRanges, error) {
-	if e.loadedTypes[0] {
-		return e.LionRoleDataRanges, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_role_data_ranges"}
+	loadedTypes [2]bool
 }
 
 // LionUserDepartmentsOrErr returns the LionUserDepartments value or an error if the edge
 // was not loaded in eager-loading.
 func (e DepartmentsEdges) LionUserDepartmentsOrErr() ([]*UserDepartments, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.LionUserDepartments, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_user_departments"}
@@ -98,7 +87,7 @@ func (e DepartmentsEdges) LionUserDepartmentsOrErr() ([]*UserDepartments, error)
 // LionGroupsOrErr returns the LionGroups value or an error if the edge
 // was not loaded in eager-loading.
 func (e DepartmentsEdges) LionGroupsOrErr() ([]*Groups, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.LionGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_groups"}
@@ -272,11 +261,6 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Departments) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryLionRoleDataRanges queries the "lion_role_data_ranges" edge of the Departments entity.
-func (_m *Departments) QueryLionRoleDataRanges() *RoleDataRangesQuery {
-	return NewDepartmentsClient(_m.config).QueryLionRoleDataRanges(_m)
 }
 
 // QueryLionUserDepartments queries the "lion_user_departments" edge of the Departments entity.

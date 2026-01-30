@@ -332,46 +332,6 @@ var (
 			},
 		},
 	}
-	// LionRoleDataRangesColumns holds the columns for the "lion_role_data_ranges" table.
-	LionRoleDataRangesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "data_type", Type: field.TypeInt, Default: 0},
-		{Name: "data_id", Type: field.TypeInt, Default: 0},
-		{Name: "is_recursive", Type: field.TypeBool, Default: false},
-		{Name: "departments_lion_role_data_ranges", Type: field.TypeInt, Nullable: true},
-		{Name: "role_id", Type: field.TypeInt},
-	}
-	// LionRoleDataRangesTable holds the schema information for the "lion_role_data_ranges" table.
-	LionRoleDataRangesTable = &schema.Table{
-		Name:       "lion_role_data_ranges",
-		Columns:    LionRoleDataRangesColumns,
-		PrimaryKey: []*schema.Column{LionRoleDataRangesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_role_data_ranges_lion_departments_lion_role_data_ranges",
-				Columns:    []*schema.Column{LionRoleDataRangesColumns[8]},
-				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "lion_role_data_ranges_lion_roles_lion_role_data_ranges",
-				Columns:    []*schema.Column{LionRoleDataRangesColumns[9]},
-				RefColumns: []*schema.Column{LionRolesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "roledataranges_role_id_data_type_data_id",
-				Unique:  true,
-				Columns: []*schema.Column{LionRoleDataRangesColumns[9], LionRoleDataRangesColumns[5], LionRoleDataRangesColumns[6]},
-			},
-		},
-	}
 	// LionRolePermissionsColumns holds the columns for the "lion_role_permissions" table.
 	LionRolePermissionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -798,7 +758,6 @@ var (
 		LionPoliciesTable,
 		LionResourceScopesTable,
 		LionResourcesTable,
-		LionRoleDataRangesTable,
 		LionRolePermissionsTable,
 		LionRolesTable,
 		LionScopesTable,
@@ -849,11 +808,6 @@ func init() {
 	}
 	LionResourcesTable.Annotation = &entsql.Annotation{
 		Table: "lion_resources",
-	}
-	LionRoleDataRangesTable.ForeignKeys[0].RefTable = LionDepartmentsTable
-	LionRoleDataRangesTable.ForeignKeys[1].RefTable = LionRolesTable
-	LionRoleDataRangesTable.Annotation = &entsql.Annotation{
-		Table: "lion_role_data_ranges",
 	}
 	LionRolePermissionsTable.ForeignKeys[0].RefTable = LionPermissionsTable
 	LionRolePermissionsTable.ForeignKeys[1].RefTable = LionRolesTable

@@ -22,7 +22,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
-	"github.com/grpc-kit/pkg/lion/roledataranges"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/scopes"
@@ -102,7 +101,6 @@ func checkColumn(t, c string) error {
 			policies.Table:           policies.ValidColumn,
 			resourcescopes.Table:     resourcescopes.ValidColumn,
 			resources.Table:          resources.ValidColumn,
-			roledataranges.Table:     roledataranges.ValidColumn,
 			rolepermissions.Table:    rolepermissions.ValidColumn,
 			roles.Table:              roles.ValidColumn,
 			scopes.Table:             scopes.ValidColumn,

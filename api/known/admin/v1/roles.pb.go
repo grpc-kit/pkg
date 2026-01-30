@@ -1092,367 +1092,6 @@ func (x *ListRolePermissionsResponse) GetTotalSize() int32 {
 	return 0
 }
 
-type CreateRoleDataRangesRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	RoleId     int32            `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	DataRanges []*RoleDataRange `protobuf:"bytes,2,rep,name=data_ranges,json=dataRanges,proto3" json:"data_ranges,omitempty"`
-}
-
-func (x *CreateRoleDataRangesRequest) Reset() {
-	*x = CreateRoleDataRangesRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_roles_proto_msgTypes[15]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CreateRoleDataRangesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateRoleDataRangesRequest) ProtoMessage() {}
-
-func (x *CreateRoleDataRangesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_roles_proto_msgTypes[15]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateRoleDataRangesRequest.ProtoReflect.Descriptor instead.
-func (*CreateRoleDataRangesRequest) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{15}
-}
-
-func (x *CreateRoleDataRangesRequest) GetRoleId() int32 {
-	if x != nil {
-		return x.RoleId
-	}
-	return 0
-}
-
-func (x *CreateRoleDataRangesRequest) GetDataRanges() []*RoleDataRange {
-	if x != nil {
-		return x.DataRanges
-	}
-	return nil
-}
-
-type CreateRoleDataRangesResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	DataRanges []*RoleDataRange `protobuf:"bytes,1,rep,name=data_ranges,json=dataRanges,proto3" json:"data_ranges,omitempty"`
-}
-
-func (x *CreateRoleDataRangesResponse) Reset() {
-	*x = CreateRoleDataRangesResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_roles_proto_msgTypes[16]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CreateRoleDataRangesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateRoleDataRangesResponse) ProtoMessage() {}
-
-func (x *CreateRoleDataRangesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_roles_proto_msgTypes[16]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateRoleDataRangesResponse.ProtoReflect.Descriptor instead.
-func (*CreateRoleDataRangesResponse) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{16}
-}
-
-func (x *CreateRoleDataRangesResponse) GetDataRanges() []*RoleDataRange {
-	if x != nil {
-		return x.DataRanges
-	}
-	return nil
-}
-
-type DeleteRoleDataRangesRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	RoleId      int32 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	DataRangeId int32 `protobuf:"varint,2,opt,name=data_range_id,json=dataRangeId,proto3" json:"data_range_id,omitempty"`
-}
-
-func (x *DeleteRoleDataRangesRequest) Reset() {
-	*x = DeleteRoleDataRangesRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_roles_proto_msgTypes[17]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *DeleteRoleDataRangesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteRoleDataRangesRequest) ProtoMessage() {}
-
-func (x *DeleteRoleDataRangesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_roles_proto_msgTypes[17]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteRoleDataRangesRequest.ProtoReflect.Descriptor instead.
-func (*DeleteRoleDataRangesRequest) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{17}
-}
-
-func (x *DeleteRoleDataRangesRequest) GetRoleId() int32 {
-	if x != nil {
-		return x.RoleId
-	}
-	return 0
-}
-
-func (x *DeleteRoleDataRangesRequest) GetDataRangeId() int32 {
-	if x != nil {
-		return x.DataRangeId
-	}
-	return 0
-}
-
-type ListRoleDataRangesRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	// 角色 ID，从路径参数中获取
-	RoleId int32 `protobuf:"varint,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
-	// 每页返回的最大权限数。
-	// - 如果未指定，则使用服务端默认值 (如 20)。
-	// - 最大不超过 100 (超出时强制截断)。
-	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	// Types that are assignable to Pagination:
-	//
-	//	*ListRoleDataRangesRequest_PageToken
-	//	*ListRoleDataRangesRequest_Offset
-	Pagination isListRoleDataRangesRequest_Pagination `protobuf_oneof:"pagination"`
-	View       View                                   `protobuf:"varint,5,opt,name=view,proto3,enum=grpc_kit.api.known.admin.v1.View" json:"view,omitempty"`
-	// 过滤条件，采用 AIP-160 定义的标准 filter 语法。
-	// 示例: `code="permission_001"`
-	Filter string `protobuf:"bytes,6,opt,name=filter,proto3" json:"filter,omitempty"`
-	// 排序规则，指定结果返回顺序。
-	// 格式: "field_name [asc|desc], ..."。
-	// 示例: "create_time desc, code asc"
-	// AIP-132: order_by 是可选字段。
-	OrderBy string `protobuf:"bytes,7,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
-}
-
-func (x *ListRoleDataRangesRequest) Reset() {
-	*x = ListRoleDataRangesRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_roles_proto_msgTypes[18]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ListRoleDataRangesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListRoleDataRangesRequest) ProtoMessage() {}
-
-func (x *ListRoleDataRangesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_roles_proto_msgTypes[18]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListRoleDataRangesRequest.ProtoReflect.Descriptor instead.
-func (*ListRoleDataRangesRequest) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{18}
-}
-
-func (x *ListRoleDataRangesRequest) GetRoleId() int32 {
-	if x != nil {
-		return x.RoleId
-	}
-	return 0
-}
-
-func (x *ListRoleDataRangesRequest) GetPageSize() int32 {
-	if x != nil {
-		return x.PageSize
-	}
-	return 0
-}
-
-func (m *ListRoleDataRangesRequest) GetPagination() isListRoleDataRangesRequest_Pagination {
-	if m != nil {
-		return m.Pagination
-	}
-	return nil
-}
-
-func (x *ListRoleDataRangesRequest) GetPageToken() string {
-	if x, ok := x.GetPagination().(*ListRoleDataRangesRequest_PageToken); ok {
-		return x.PageToken
-	}
-	return ""
-}
-
-func (x *ListRoleDataRangesRequest) GetOffset() int32 {
-	if x, ok := x.GetPagination().(*ListRoleDataRangesRequest_Offset); ok {
-		return x.Offset
-	}
-	return 0
-}
-
-func (x *ListRoleDataRangesRequest) GetView() View {
-	if x != nil {
-		return x.View
-	}
-	return View_VIEW_UNSPECIFIED
-}
-
-func (x *ListRoleDataRangesRequest) GetFilter() string {
-	if x != nil {
-		return x.Filter
-	}
-	return ""
-}
-
-func (x *ListRoleDataRangesRequest) GetOrderBy() string {
-	if x != nil {
-		return x.OrderBy
-	}
-	return ""
-}
-
-type isListRoleDataRangesRequest_Pagination interface {
-	isListRoleDataRangesRequest_Pagination()
-}
-
-type ListRoleDataRangesRequest_PageToken struct {
-	// Cursor-based 分页
-	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3,oneof"`
-}
-
-type ListRoleDataRangesRequest_Offset struct {
-	// Offset-based 分页
-	Offset int32 `protobuf:"varint,4,opt,name=offset,proto3,oneof"`
-}
-
-func (*ListRoleDataRangesRequest_PageToken) isListRoleDataRangesRequest_Pagination() {}
-
-func (*ListRoleDataRangesRequest_Offset) isListRoleDataRangesRequest_Pagination() {}
-
-type ListRoleDataRangesResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	DataRanges []*RoleDataRange `protobuf:"bytes,1,rep,name=data_ranges,json=dataRanges,proto3" json:"data_ranges,omitempty"`
-	// 用于获取下一页结果的 token。
-	// - 如果为空，表示没有更多结果。
-	// - 客户端不需要理解其内容，只需原样传回。
-	// AIP-132: 必须字段。
-	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	// 符合条件的权限总数。
-	// - 常用于前端分页控件。
-	// - 注意：可能会因性能原因而近似。
-	// AIP-132: total_size 是可选字段。
-	TotalSize int32 `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
-}
-
-func (x *ListRoleDataRangesResponse) Reset() {
-	*x = ListRoleDataRangesResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_roles_proto_msgTypes[19]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ListRoleDataRangesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListRoleDataRangesResponse) ProtoMessage() {}
-
-func (x *ListRoleDataRangesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_roles_proto_msgTypes[19]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListRoleDataRangesResponse.ProtoReflect.Descriptor instead.
-func (*ListRoleDataRangesResponse) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{19}
-}
-
-func (x *ListRoleDataRangesResponse) GetDataRanges() []*RoleDataRange {
-	if x != nil {
-		return x.DataRanges
-	}
-	return nil
-}
-
-func (x *ListRoleDataRangesResponse) GetNextPageToken() string {
-	if x != nil {
-		return x.NextPageToken
-	}
-	return ""
-}
-
-func (x *ListRoleDataRangesResponse) GetTotalSize() int32 {
-	if x != nil {
-		return x.TotalSize
-	}
-	return 0
-}
-
 var File_known_admin_v1_roles_proto protoreflect.FileDescriptor
 
 var file_known_admin_v1_roles_proto_rawDesc = []byte{
@@ -1585,60 +1224,11 @@ var file_known_admin_v1_roles_proto_rawDesc = []byte{
 	0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x6e, 0x65,
 	0x78, 0x74, 0x50, 0x61, 0x67, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74,
 	0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52,
-	0x09, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x53, 0x69, 0x7a, 0x65, 0x22, 0x83, 0x01, 0x0a, 0x1b, 0x43,
-	0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x61, 0x74, 0x61, 0x52, 0x61, 0x6e,
-	0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f,
-	0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x72, 0x6f, 0x6c,
-	0x65, 0x49, 0x64, 0x12, 0x4b, 0x0a, 0x0b, 0x64, 0x61, 0x74, 0x61, 0x5f, 0x72, 0x61, 0x6e, 0x67,
-	0x65, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f,
-	0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64,
-	0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x61, 0x74, 0x61, 0x52,
-	0x61, 0x6e, 0x67, 0x65, 0x52, 0x0a, 0x64, 0x61, 0x74, 0x61, 0x52, 0x61, 0x6e, 0x67, 0x65, 0x73,
-	0x22, 0x6b, 0x0a, 0x1c, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x61,
-	0x74, 0x61, 0x52, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x12, 0x4b, 0x0a, 0x0b, 0x64, 0x61, 0x74, 0x61, 0x5f, 0x72, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x18,
-	0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e,
-	0x2e, 0x76, 0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x61, 0x74, 0x61, 0x52, 0x61, 0x6e, 0x67,
-	0x65, 0x52, 0x0a, 0x64, 0x61, 0x74, 0x61, 0x52, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x22, 0x5a, 0x0a,
-	0x1b, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x61, 0x74, 0x61, 0x52,
-	0x61, 0x6e, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07,
-	0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x72,
-	0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x22, 0x0a, 0x0d, 0x64, 0x61, 0x74, 0x61, 0x5f, 0x72, 0x61,
-	0x6e, 0x67, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x64, 0x61,
-	0x74, 0x61, 0x52, 0x61, 0x6e, 0x67, 0x65, 0x49, 0x64, 0x22, 0x84, 0x02, 0x0a, 0x19, 0x4c, 0x69,
-	0x73, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x61, 0x74, 0x61, 0x52, 0x61, 0x6e, 0x67, 0x65, 0x73,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f,
-	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64,
-	0x12, 0x1b, 0x0a, 0x09, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x05, 0x52, 0x08, 0x70, 0x61, 0x67, 0x65, 0x53, 0x69, 0x7a, 0x65, 0x12, 0x1f, 0x0a,
-	0x0a, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28,
-	0x09, 0x48, 0x00, 0x52, 0x09, 0x70, 0x61, 0x67, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x18,
-	0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x48, 0x00,
-	0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x12, 0x35, 0x0a, 0x04, 0x76, 0x69, 0x65, 0x77,
-	0x18, 0x05, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x21, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69,
-	0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x65, 0x77, 0x52, 0x04, 0x76, 0x69, 0x65, 0x77, 0x12,
-	0x16, 0x0a, 0x06, 0x66, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x06, 0x66, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x12, 0x19, 0x0a, 0x08, 0x6f, 0x72, 0x64, 0x65, 0x72,
-	0x5f, 0x62, 0x79, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6f, 0x72, 0x64, 0x65, 0x72,
-	0x42, 0x79, 0x42, 0x0c, 0x0a, 0x0a, 0x70, 0x61, 0x67, 0x69, 0x6e, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x22, 0xb0, 0x01, 0x0a, 0x1a, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x61, 0x74,
-	0x61, 0x52, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
-	0x4b, 0x0a, 0x0b, 0x64, 0x61, 0x74, 0x61, 0x5f, 0x72, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x18, 0x01,
-	0x20, 0x03, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e,
-	0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e,
-	0x76, 0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x61, 0x74, 0x61, 0x52, 0x61, 0x6e, 0x67, 0x65,
-	0x52, 0x0a, 0x64, 0x61, 0x74, 0x61, 0x52, 0x61, 0x6e, 0x67, 0x65, 0x73, 0x12, 0x26, 0x0a, 0x0f,
-	0x6e, 0x65, 0x78, 0x74, 0x5f, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x6e, 0x65, 0x78, 0x74, 0x50, 0x61, 0x67, 0x65, 0x54,
-	0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x73, 0x69,
-	0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x53,
-	0x69, 0x7a, 0x65, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61,
-	0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76,
-	0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x09, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x53, 0x69, 0x7a, 0x65, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69,
+	0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f,
+	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1653,7 +1243,7 @@ func file_known_admin_v1_roles_proto_rawDescGZIP() []byte {
 	return file_known_admin_v1_roles_proto_rawDescData
 }
 
-var file_known_admin_v1_roles_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_known_admin_v1_roles_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_known_admin_v1_roles_proto_goTypes = []interface{}{
 	(*CreateRoleRequest)(nil),             // 0: grpc_kit.api.known.admin.v1.CreateRoleRequest
 	(*GetRoleRequest)(nil),                // 1: grpc_kit.api.known.admin.v1.GetRoleRequest
@@ -1670,38 +1260,28 @@ var file_known_admin_v1_roles_proto_goTypes = []interface{}{
 	(*DeleteRolePermissionRequest)(nil),   // 12: grpc_kit.api.known.admin.v1.DeleteRolePermissionRequest
 	(*ListRolePermissionsRequest)(nil),    // 13: grpc_kit.api.known.admin.v1.ListRolePermissionsRequest
 	(*ListRolePermissionsResponse)(nil),   // 14: grpc_kit.api.known.admin.v1.ListRolePermissionsResponse
-	(*CreateRoleDataRangesRequest)(nil),   // 15: grpc_kit.api.known.admin.v1.CreateRoleDataRangesRequest
-	(*CreateRoleDataRangesResponse)(nil),  // 16: grpc_kit.api.known.admin.v1.CreateRoleDataRangesResponse
-	(*DeleteRoleDataRangesRequest)(nil),   // 17: grpc_kit.api.known.admin.v1.DeleteRoleDataRangesRequest
-	(*ListRoleDataRangesRequest)(nil),     // 18: grpc_kit.api.known.admin.v1.ListRoleDataRangesRequest
-	(*ListRoleDataRangesResponse)(nil),    // 19: grpc_kit.api.known.admin.v1.ListRoleDataRangesResponse
-	(*Role)(nil),                          // 20: grpc_kit.api.known.admin.v1.Role
-	(*fieldmaskpb.FieldMask)(nil),         // 21: google.protobuf.FieldMask
-	(*User)(nil),                          // 22: grpc_kit.api.known.admin.v1.User
-	(*Permission)(nil),                    // 23: grpc_kit.api.known.admin.v1.Permission
-	(View)(0),                             // 24: grpc_kit.api.known.admin.v1.View
-	(*RoleDataRange)(nil),                 // 25: grpc_kit.api.known.admin.v1.RoleDataRange
+	(*Role)(nil),                          // 15: grpc_kit.api.known.admin.v1.Role
+	(*fieldmaskpb.FieldMask)(nil),         // 16: google.protobuf.FieldMask
+	(*User)(nil),                          // 17: grpc_kit.api.known.admin.v1.User
+	(*Permission)(nil),                    // 18: grpc_kit.api.known.admin.v1.Permission
+	(View)(0),                             // 19: grpc_kit.api.known.admin.v1.View
 }
 var file_known_admin_v1_roles_proto_depIdxs = []int32{
-	20, // 0: grpc_kit.api.known.admin.v1.CreateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
-	20, // 1: grpc_kit.api.known.admin.v1.UpdateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
-	21, // 2: grpc_kit.api.known.admin.v1.UpdateRoleRequest.update_mask:type_name -> google.protobuf.FieldMask
-	20, // 3: grpc_kit.api.known.admin.v1.ListRolesResponse.roles:type_name -> grpc_kit.api.known.admin.v1.Role
-	22, // 4: grpc_kit.api.known.admin.v1.ListRoleUsersResponse.users:type_name -> grpc_kit.api.known.admin.v1.User
-	22, // 5: grpc_kit.api.known.admin.v1.AssignRoleToUserRequest.users:type_name -> grpc_kit.api.known.admin.v1.User
-	23, // 6: grpc_kit.api.known.admin.v1.CreateRolePermissionsRequest.permissions:type_name -> grpc_kit.api.known.admin.v1.Permission
-	23, // 7: grpc_kit.api.known.admin.v1.CreateRolePermissionsResponse.permissions:type_name -> grpc_kit.api.known.admin.v1.Permission
-	24, // 8: grpc_kit.api.known.admin.v1.ListRolePermissionsRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
-	23, // 9: grpc_kit.api.known.admin.v1.ListRolePermissionsResponse.permissions:type_name -> grpc_kit.api.known.admin.v1.Permission
-	25, // 10: grpc_kit.api.known.admin.v1.CreateRoleDataRangesRequest.data_ranges:type_name -> grpc_kit.api.known.admin.v1.RoleDataRange
-	25, // 11: grpc_kit.api.known.admin.v1.CreateRoleDataRangesResponse.data_ranges:type_name -> grpc_kit.api.known.admin.v1.RoleDataRange
-	24, // 12: grpc_kit.api.known.admin.v1.ListRoleDataRangesRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
-	25, // 13: grpc_kit.api.known.admin.v1.ListRoleDataRangesResponse.data_ranges:type_name -> grpc_kit.api.known.admin.v1.RoleDataRange
-	14, // [14:14] is the sub-list for method output_type
-	14, // [14:14] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	15, // 0: grpc_kit.api.known.admin.v1.CreateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
+	15, // 1: grpc_kit.api.known.admin.v1.UpdateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
+	16, // 2: grpc_kit.api.known.admin.v1.UpdateRoleRequest.update_mask:type_name -> google.protobuf.FieldMask
+	15, // 3: grpc_kit.api.known.admin.v1.ListRolesResponse.roles:type_name -> grpc_kit.api.known.admin.v1.Role
+	17, // 4: grpc_kit.api.known.admin.v1.ListRoleUsersResponse.users:type_name -> grpc_kit.api.known.admin.v1.User
+	17, // 5: grpc_kit.api.known.admin.v1.AssignRoleToUserRequest.users:type_name -> grpc_kit.api.known.admin.v1.User
+	18, // 6: grpc_kit.api.known.admin.v1.CreateRolePermissionsRequest.permissions:type_name -> grpc_kit.api.known.admin.v1.Permission
+	18, // 7: grpc_kit.api.known.admin.v1.CreateRolePermissionsResponse.permissions:type_name -> grpc_kit.api.known.admin.v1.Permission
+	19, // 8: grpc_kit.api.known.admin.v1.ListRolePermissionsRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
+	18, // 9: grpc_kit.api.known.admin.v1.ListRolePermissionsResponse.permissions:type_name -> grpc_kit.api.known.admin.v1.Permission
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_roles_proto_init() }
@@ -1891,66 +1471,6 @@ func file_known_admin_v1_roles_proto_init() {
 				return nil
 			}
 		}
-		file_known_admin_v1_roles_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateRoleDataRangesRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_known_admin_v1_roles_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateRoleDataRangesResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_known_admin_v1_roles_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteRoleDataRangesRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_known_admin_v1_roles_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListRoleDataRangesRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_known_admin_v1_roles_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListRoleDataRangesResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
 	}
 	file_known_admin_v1_roles_proto_msgTypes[4].OneofWrappers = []interface{}{
 		(*ListRolesRequest_PageToken)(nil),
@@ -1964,17 +1484,13 @@ func file_known_admin_v1_roles_proto_init() {
 		(*ListRolePermissionsRequest_PageToken)(nil),
 		(*ListRolePermissionsRequest_Offset)(nil),
 	}
-	file_known_admin_v1_roles_proto_msgTypes[18].OneofWrappers = []interface{}{
-		(*ListRoleDataRangesRequest_PageToken)(nil),
-		(*ListRoleDataRangesRequest_Offset)(nil),
-	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_roles_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

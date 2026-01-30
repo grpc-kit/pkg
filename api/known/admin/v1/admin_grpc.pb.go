@@ -75,9 +75,6 @@ type KnownAdminClient interface {
 	CreateRolePermissions(ctx context.Context, in *CreateRolePermissionsRequest, opts ...grpc.CallOption) (*CreateRolePermissionsResponse, error)
 	DeleteRolePermission(ctx context.Context, in *DeleteRolePermissionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListRolePermissions(ctx context.Context, in *ListRolePermissionsRequest, opts ...grpc.CallOption) (*ListRolePermissionsResponse, error)
-	CreateRoleDataRanges(ctx context.Context, in *CreateRoleDataRangesRequest, opts ...grpc.CallOption) (*CreateRoleDataRangesResponse, error)
-	DeleteRoleDataRanges(ctx context.Context, in *DeleteRoleDataRangesRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	ListRoleDataRanges(ctx context.Context, in *ListRoleDataRangesRequest, opts ...grpc.CallOption) (*ListRoleDataRangesResponse, error)
 	// 部门管理
 	CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
@@ -516,33 +513,6 @@ func (c *knownAdminClient) ListRolePermissions(ctx context.Context, in *ListRole
 	return out, nil
 }
 
-func (c *knownAdminClient) CreateRoleDataRanges(ctx context.Context, in *CreateRoleDataRangesRequest, opts ...grpc.CallOption) (*CreateRoleDataRangesResponse, error) {
-	out := new(CreateRoleDataRangesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleDataRanges", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteRoleDataRanges(ctx context.Context, in *DeleteRoleDataRangesRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleDataRanges", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListRoleDataRanges(ctx context.Context, in *ListRoleDataRangesRequest, opts ...grpc.CallOption) (*ListRoleDataRangesResponse, error) {
-	out := new(ListRoleDataRangesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleDataRanges", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *knownAdminClient) CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error) {
 	out := new(Department)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartment", in, out, opts...)
@@ -833,9 +803,6 @@ type KnownAdminServer interface {
 	CreateRolePermissions(context.Context, *CreateRolePermissionsRequest) (*CreateRolePermissionsResponse, error)
 	DeleteRolePermission(context.Context, *DeleteRolePermissionRequest) (*emptypb.Empty, error)
 	ListRolePermissions(context.Context, *ListRolePermissionsRequest) (*ListRolePermissionsResponse, error)
-	CreateRoleDataRanges(context.Context, *CreateRoleDataRangesRequest) (*CreateRoleDataRangesResponse, error)
-	DeleteRoleDataRanges(context.Context, *DeleteRoleDataRangesRequest) (*emptypb.Empty, error)
-	ListRoleDataRanges(context.Context, *ListRoleDataRangesRequest) (*ListRoleDataRangesResponse, error)
 	// 部门管理
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
@@ -1005,15 +972,6 @@ func (UnimplementedKnownAdminServer) DeleteRolePermission(context.Context, *Dele
 }
 func (UnimplementedKnownAdminServer) ListRolePermissions(context.Context, *ListRolePermissionsRequest) (*ListRolePermissionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRolePermissions not implemented")
-}
-func (UnimplementedKnownAdminServer) CreateRoleDataRanges(context.Context, *CreateRoleDataRangesRequest) (*CreateRoleDataRangesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateRoleDataRanges not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteRoleDataRanges(context.Context, *DeleteRoleDataRangesRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteRoleDataRanges not implemented")
-}
-func (UnimplementedKnownAdminServer) ListRoleDataRanges(context.Context, *ListRoleDataRangesRequest) (*ListRoleDataRangesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListRoleDataRanges not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDepartment not implemented")
@@ -1897,60 +1855,6 @@ func _KnownAdmin_ListRolePermissions_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_CreateRoleDataRanges_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateRoleDataRangesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateRoleDataRanges(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleDataRanges",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateRoleDataRanges(ctx, req.(*CreateRoleDataRangesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteRoleDataRanges_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteRoleDataRangesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteRoleDataRanges(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleDataRanges",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteRoleDataRanges(ctx, req.(*DeleteRoleDataRangesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListRoleDataRanges_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListRoleDataRangesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListRoleDataRanges(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleDataRanges",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListRoleDataRanges(ctx, req.(*ListRoleDataRangesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _KnownAdmin_CreateDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDepartmentRequest)
 	if err := dec(in); err != nil {
@@ -2601,18 +2505,6 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListRolePermissions",
 			Handler:    _KnownAdmin_ListRolePermissions_Handler,
-		},
-		{
-			MethodName: "CreateRoleDataRanges",
-			Handler:    _KnownAdmin_CreateRoleDataRanges_Handler,
-		},
-		{
-			MethodName: "DeleteRoleDataRanges",
-			Handler:    _KnownAdmin_DeleteRoleDataRanges_Handler,
-		},
-		{
-			MethodName: "ListRoleDataRanges",
-			Handler:    _KnownAdmin_ListRoleDataRanges_Handler,
 		},
 		{
 			MethodName: "CreateDepartment",

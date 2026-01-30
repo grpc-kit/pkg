@@ -129,18 +129,6 @@ func (f ResourcesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.ResourcesMutation", m)
 }
 
-// The RoleDataRangesFunc type is an adapter to allow the use of ordinary
-// function as RoleDataRanges mutator.
-type RoleDataRangesFunc func(context.Context, *lion.RoleDataRangesMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f RoleDataRangesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.RoleDataRangesMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RoleDataRangesMutation", m)
-}
-
 // The RolePermissionsFunc type is an adapter to allow the use of ordinary
 // function as RolePermissions mutator.
 type RolePermissionsFunc func(context.Context, *lion.RolePermissionsMutation) (lion.Value, error)

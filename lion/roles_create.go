@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/grouproles"
-	"github.com/grpc-kit/pkg/lion/roledataranges"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -219,21 +218,6 @@ func (_c *RolesCreate) AddLionRoleGroups(v ...*GroupRoles) *RolesCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddLionRoleGroupIDs(ids...)
-}
-
-// AddLionRoleDataRangeIDs adds the "lion_role_data_ranges" edge to the RoleDataRanges entity by IDs.
-func (_c *RolesCreate) AddLionRoleDataRangeIDs(ids ...int) *RolesCreate {
-	_c.mutation.AddLionRoleDataRangeIDs(ids...)
-	return _c
-}
-
-// AddLionRoleDataRanges adds the "lion_role_data_ranges" edges to the RoleDataRanges entity.
-func (_c *RolesCreate) AddLionRoleDataRanges(v ...*RoleDataRanges) *RolesCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionRoleDataRangeIDs(ids...)
 }
 
 // Mutation returns the RolesMutation object of the builder.
@@ -463,22 +447,6 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.LionRoleDataRangesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   roles.LionRoleDataRangesTable,
-			Columns: []string{roles.LionRoleDataRangesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(roledataranges.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
