@@ -173,7 +173,7 @@ func (a *KnownAdminAPI) ListPermissions(ctx context.Context, req *adminv1.ListPe
 			if p.Edges.LionPolicies != nil {
 				policy := p.Edges.LionPolicies
 				permission.Policy = &adminv1.Policy{
-					Id:          int32(policy.ID),
+					Id:          int64(policy.ID),
 					Code:        policy.Code,
 					DisplayName: policy.DisplayName,
 					Type:        adminv1.Policy_Type(policy.PolicyType),
@@ -252,7 +252,7 @@ func (a *KnownAdminAPI) GetPermission(ctx context.Context, req *adminv1.GetPermi
 	if permission.Edges.LionPolicies != nil {
 		policy := permission.Edges.LionPolicies
 		result.Policy = &adminv1.Policy{
-			Id:          int32(policy.ID),
+			Id:          int64(policy.ID),
 			Code:        policy.Code,
 			DisplayName: policy.DisplayName,
 			Type:        adminv1.Policy_Type(policy.PolicyType),

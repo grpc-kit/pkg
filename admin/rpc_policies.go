@@ -104,7 +104,7 @@ func (a *KnownAdminAPI) ListPolicies(ctx context.Context, req *adminv1.ListPolic
 	// 转换为响应格式
 	for _, p := range policyList {
 		policy := &adminv1.Policy{
-			Id:          int32(p.ID),
+			Id:          int64(p.ID),
 			Code:        p.Code,
 			DisplayName: p.DisplayName,
 			Type:        adminv1.Policy_Type(p.PolicyType),
@@ -165,7 +165,7 @@ func (a *KnownAdminAPI) CreatePolicy(ctx context.Context, req *adminv1.CreatePol
 
 	// 构建返回的策略对象
 	result := &adminv1.Policy{
-		Id:          int32(newPolicy.ID),
+		Id:          int64(newPolicy.ID),
 		Code:        newPolicy.Code,
 		DisplayName: newPolicy.DisplayName,
 		Type:        adminv1.Policy_Type(newPolicy.PolicyType),
@@ -247,7 +247,7 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 
 	// 构建返回的策略对象
 	result := &adminv1.Policy{
-		Id:          int32(updatedPolicy.ID),
+		Id:          int64(updatedPolicy.ID),
 		Code:        updatedPolicy.Code,
 		DisplayName: updatedPolicy.DisplayName,
 		Type:        adminv1.Policy_Type(updatedPolicy.PolicyType),

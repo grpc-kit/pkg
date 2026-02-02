@@ -124,8 +124,8 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 
 	// 返回与 proto Department 一致的完整信息（不含 managers，创建时无成员）
 	result = &adminv1.Department{
-		Id:             int32(dp.ID),
-		ParentId:       int32(dp.ParentID),
+		Id:             int64(dp.ID),
+		ParentId:       int64(dp.ParentID),
 		Code:           dp.Code,
 		DisplayName:    dp.DisplayName,
 		Type:           adminv1.Department_Type(dp.DepartmentType),
@@ -298,8 +298,8 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 	// 将 ent 实体转为 proto，并按 structure 返回平铺或树形
 	depToProto := func(m *lion.Departments) *adminv1.Department {
 		menu := &adminv1.Department{
-			Id:          int32(m.ID),
-			ParentId:    int32(m.ParentID),
+			Id:          int64(m.ID),
+			ParentId:    int64(m.ParentID),
 			Code:        m.Code,
 			DisplayName: I18NName(m.Code),
 			SortOrder:   int32(m.SortOrder),
@@ -311,9 +311,9 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 		if req.View == adminv1.View_VIEW_FULL && m.Edges.LionUserDepartments != nil {
 			for _, l := range m.Edges.LionUserDepartments {
 				pm := &adminv1.DepartmentMember{
-					Id:           int32(l.ID),
+					Id:           int64(l.ID),
 					UserId:       int64(l.UserID),
-					DepartmentId: int32(l.DepartmentID),
+					DepartmentId: int64(l.DepartmentID),
 					MemberRole:   adminv1.DepartmentMember_Role(l.MemberRole),
 					MemberStatus: adminv1.DepartmentMember_Status(l.MemberStatus),
 					MemberType:   adminv1.DepartmentMember_MemberType(l.MemberType),
@@ -338,12 +338,12 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 
 	if req.Structure == adminv1.Structure_STRUCTURE_TREE || req.Structure == adminv1.Structure_STRUCTURE_TREE_EXPANDED {
 		// 树形：用当前页数据构建树（仅包含本页节点及其在本页内的父子关系）
-		menuMap := make(map[int32]*adminv1.Department)
+		menuMap := make(map[int64]*adminv1.Department)
 		var roots []*adminv1.Department
 
 		for _, m := range depObj {
 			menu := depToProto(m)
-			menuMap[int32(m.ID)] = menu
+			menuMap[int64(m.ID)] = menu
 		}
 		for _, menu := range menuMap {
 			if menu.ParentId == 0 {
@@ -602,11 +602,11 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 			continue
 		}
 		pm := &adminv1.DepartmentMember{
-			Id:           int32(m.ID),
+			Id:           int64(m.ID),
 			UserId:       int64(m.UserID),
 			Username:     user.Username,
 			Nickname:     user.Nickname,
-			DepartmentId: int32(m.DepartmentID),
+			DepartmentId: int64(m.DepartmentID),
 			MemberRole:   adminv1.DepartmentMember_Role(m.MemberRole),
 			MemberStatus: adminv1.DepartmentMember_Status(m.MemberStatus),
 			MemberType:   adminv1.DepartmentMember_MemberType(m.MemberType),
@@ -807,8 +807,8 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 	}
 
 	pbDep := &adminv1.Department{
-		Id:         int32(dep.ID),
-		ParentId:   int32(dep.ParentID),
+		Id:         int64(dep.ID),
+		ParentId:   int64(dep.ParentID),
 		Code:       dep.Code,
 		SortOrder:  int32(dep.SortOrder),
 		Visibility: adminv1.Visibility(dep.Visibility),

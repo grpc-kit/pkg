@@ -98,7 +98,7 @@ func (a *KnownAdminAPI) checkRolePermission(ctx context.Context, db *lion.Client
 
 // checkParentRolePermission 检查用户是否有权限将新角色创建为指定父角色的子角色
 // 如果 parentID 为 0，表示创建根角色，需要检查用户是否有根角色权限
-func (a *KnownAdminAPI) checkParentRolePermission(ctx context.Context, db *lion.Client, parentID int32) error {
+func (a *KnownAdminAPI) checkParentRolePermission(ctx context.Context, db *lion.Client, parentID int64) error {
 	if parentID == 0 {
 		// 创建根角色，需要检查用户是否有根角色
 		userRoleIDs, err := a.getUserRoleID(ctx)
@@ -234,14 +234,14 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 	}
 
 	// 构建角色映射和树状结构
-	roleMap := make(map[int32]*adminv1.Role)
+	roleMap := make(map[int64]*adminv1.Role)
 	var roots []*adminv1.Role
 
 	// 首先将所有角色转换为 protobuf 格式并存入 map
 	for _, r := range rl {
 		role := &adminv1.Role{
-			Id:          int32(r.ID),
-			ParentId:    int32(r.ParentID),
+			Id:          int64(r.ID),
+			ParentId:    int64(r.ParentID),
 			Code:        r.Code,
 			DisplayName: r.DisplayName,
 			Type:        adminv1.Role_Type(r.RoleType),
@@ -253,7 +253,7 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 			Children:    make([]*adminv1.Role, 0),
 		}
 
-		roleMap[int32(r.ID)] = role
+		roleMap[int64(r.ID)] = role
 	}
 
 	// 构建父子关系
@@ -443,8 +443,8 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 	}
 
 	result = &adminv1.Role{
-		Id:          int32(role.ID),
-		ParentId:    int32(role.ParentID),
+		Id:          int64(role.ID),
+		ParentId:    int64(role.ParentID),
 		Code:        role.Code,
 		DisplayName: role.DisplayName,
 		Description: role.Description,
@@ -499,8 +499,8 @@ func (a *KnownAdminAPI) GetRole(ctx context.Context, req *adminv1.GetRoleRequest
 	}
 
 	result := &adminv1.Role{
-		Id:          int32(role.ID),
-		ParentId:    int32(role.ParentID),
+		Id:          int64(role.ID),
+		ParentId:    int64(role.ParentID),
 		Code:        role.Code,
 		DisplayName: role.DisplayName,
 		Description: role.Description,
@@ -633,8 +633,8 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 		}
 
 		result = &adminv1.Role{
-			Id:          int32(q.ID),
-			ParentId:    int32(q.ParentID),
+			Id:          int64(q.ID),
+			ParentId:    int64(q.ParentID),
 			Code:        q.Code,
 			DisplayName: q.DisplayName,
 			Description: q.Description,
@@ -982,7 +982,7 @@ func (a *KnownAdminAPI) ListRolePermissions(ctx context.Context, req *adminv1.Li
 			if perm.Edges.LionPolicies != nil {
 				policy := perm.Edges.LionPolicies
 				permission.Policy = &adminv1.Policy{
-					Id:          int32(policy.ID),
+					Id:          int64(policy.ID),
 					Code:        policy.Code,
 					DisplayName: policy.DisplayName,
 					Type:        adminv1.Policy_Type(policy.PolicyType),

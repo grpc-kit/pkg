@@ -275,17 +275,17 @@ func parseListGroupsFilter(filter string) ([]predicate.Groups, error) {
 
 func groupToProto(g *lion.Groups, includeTimestamps bool) *adminv1.Group {
 	grp := &adminv1.Group{
-		Id:           int32(g.ID),
+		Id:           int64(g.ID),
 		Code:         g.Code,
 		Type:         adminv1.Group_Type(g.GroupType),
 		Status:       adminv1.Group_Status(g.GroupStatus),
 		DisplayName:  g.DisplayName,
 		SortOrder:    int32(g.SortOrder),
-		ParentId:     int32(g.ParentID),
+		ParentId:     int64(g.ParentID),
 		MaxMembers:   int32(g.MaxMembers),
 		Metadata:     g.Metadata,
 		ExternalId:   g.ExternalID,
-		DepartmentId: int32(g.DepartmentID),
+		DepartmentId: int64(g.DepartmentID),
 		Description:  g.Description,
 		CreatedBy:    g.CreatedBy,
 		UpdatedBy:    g.UpdatedBy,
@@ -559,9 +559,9 @@ func parseListGroupMembersFilter(filter string) ([]predicate.UserGroups, error) 
 // userGroupToProto 将 *lion.UserGroups 转为 *adminv1.GroupMember（含 Metadata）
 func userGroupToProto(member *lion.UserGroups) *adminv1.GroupMember {
 	gm := &adminv1.GroupMember{
-		Id:           int32(member.ID),
+		Id:           int64(member.ID),
 		UserId:       int64(member.UserID),
-		GroupId:      int32(member.GroupID),
+		GroupId:      int64(member.GroupID),
 		MemberRole:   adminv1.GroupMember_Role(member.MemberRole),
 		MemberStatus: adminv1.GroupMember_Status(member.MemberStatus),
 		JoinedAt:     timestamppb.New(member.JoinedAt),

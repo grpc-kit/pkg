@@ -149,7 +149,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 	rows := db.AuthProviders.Query().Select(selectFields...).AllX(ctx)
 	for _, row := range rows {
 		p := &adminv1.AuthProvider{
-			Id:                    int32(row.ID),
+			Id:                    int64(row.ID),
 			Code:                  row.Code,
 			ClientId:              row.ClientID,
 			Enabled:               row.Enabled,
@@ -273,7 +273,7 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 		return nil, err
 	}
 
-	result.Id = int32(x.ID)
+	result.Id = int64(x.ID)
 	result.Code = x.Code
 	result.Type = adminv1.AuthProvider_Type(x.ProviderType)
 	result.ClientId = x.ClientID
@@ -318,7 +318,7 @@ func (a *KnownAdminAPI) GetAuthProvider(ctx context.Context, req *adminv1.GetAut
 	}
 
 	result := &adminv1.AuthProvider{
-		Id:                    int32(provider.ID),
+		Id:                    int64(provider.ID),
 		Code:                  provider.Code,
 		Type:                  adminv1.AuthProvider_Type(provider.ProviderType),
 		ClientId:              provider.ClientID,
@@ -446,7 +446,7 @@ func (a *KnownAdminAPI) UpdateAuthProvider(ctx context.Context, req *adminv1.Upd
 	}
 
 	result := &adminv1.AuthProvider{
-		Id:                    int32(updatedProvider.ID),
+		Id:                    int64(updatedProvider.ID),
 		Code:                  updatedProvider.Code,
 		Type:                  adminv1.AuthProvider_Type(updatedProvider.ProviderType),
 		ClientId:              updatedProvider.ClientID,
