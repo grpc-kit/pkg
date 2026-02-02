@@ -165,7 +165,7 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 	var groupList []*lion.Groups
 
 	switch req.GetStructure() {
-	case adminv1.Structure_TREE, adminv1.Structure_TREE_EXPANDED:
+	case adminv1.Structure_STRUCTURE_TREE, adminv1.Structure_STRUCTURE_TREE_EXPANDED:
 		groupList, err = query.All(ctx)
 		if err != nil {
 			return nil, err
@@ -199,11 +199,11 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 	}
 
 	// 根据 View 决定是否返回时间戳等字段（STANDARD/FULL 含 created_at, updated_at, deleted_at）
-	includeTimestamps := req.GetView() == adminv1.View_STANDARD || req.GetView() == adminv1.View_FULL
+	includeTimestamps := req.GetView() == adminv1.View_VIEW_STANDARD || req.GetView() == adminv1.View_VIEW_FULL
 
 	// 按 structure 输出：平铺 或 树形（Group 当前 proto 无 Children 字段，树形时返回全量平铺并按 sort_order 排序）
 	switch req.GetStructure() {
-	case adminv1.Structure_TREE, adminv1.Structure_TREE_EXPANDED:
+	case adminv1.Structure_STRUCTURE_TREE, adminv1.Structure_STRUCTURE_TREE_EXPANDED:
 		// 树形结构：返回全量平铺列表，按 sort_order、parent_id、id 排序便于前端建树
 		result.Groups = make([]*adminv1.Group, 0, len(groupList))
 		for _, g := range groupList {

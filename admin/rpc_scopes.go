@@ -419,7 +419,7 @@ func (a *KnownAdminAPI) ListScopeResources(ctx context.Context, req *adminv1.Lis
 
 	// 处理结构（树状或列表）
 	switch req.Structure.String() {
-	case adminv1.Structure_TREE.String():
+	case adminv1.Structure_STRUCTURE_TREE.String():
 		// 构建树状菜单
 		// 注意：树状结构的分页比较特殊，这里先构建完整的树，实际项目中可能需要调整策略
 		menuMap := make(map[int64]*adminv1.Resource)

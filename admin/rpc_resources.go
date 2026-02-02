@@ -240,7 +240,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 
 	// 执行查询
 	// 如果 View 为 FULL，需要预加载作用域信息
-	if req.View == adminv1.View_FULL {
+	if req.View == adminv1.View_VIEW_FULL {
 		resourceQuery = resourceQuery.WithLionResourceScopes(
 			func(query *lion.ResourceScopesQuery) {
 				query.WithLionScopes()
@@ -255,7 +255,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 
 	// 如果 View 为 FULL，收集作用域信息
 	var resourceScopesMap map[int][]*adminv1.Scope
-	if req.View == adminv1.View_FULL {
+	if req.View == adminv1.View_VIEW_FULL {
 		resourceScopesMap = make(map[int][]*adminv1.Scope)
 		for _, res := range resList {
 			if res.Edges.LionResourceScopes != nil {
@@ -277,7 +277,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	}
 
 	switch req.Structure.String() {
-	case adminv1.Structure_TREE.String():
+	case adminv1.Structure_STRUCTURE_TREE.String():
 		// 构建树状菜单
 		// 注意：树状结构的分页比较特殊，这里先构建完整的树，实际项目中可能需要调整策略
 		menuMap := make(map[int64]*adminv1.Resource)
@@ -306,7 +306,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			}
 
 			// 如果 View 为 FULL，填充作用域列表
-			if req.View == adminv1.View_FULL {
+			if req.View == adminv1.View_VIEW_FULL {
 				if scopes, ok := resourceScopesMap[m.ID]; ok {
 					menu.Scopes = scopes
 				}
@@ -356,7 +356,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			}
 
 			// 如果 View 为 FULL，填充作用域列表
-			if req.View == adminv1.View_FULL {
+			if req.View == adminv1.View_VIEW_FULL {
 				if scopes, ok := resourceScopesMap[m.ID]; ok {
 					resource.Scopes = scopes
 				}

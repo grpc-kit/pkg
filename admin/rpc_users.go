@@ -748,7 +748,7 @@ func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.Upd
 		Select(
 			authproviders.FieldCode,
 		).
-		Where(authproviders.ProviderTypeEQ(int(adminv1.AuthProvider_TYPE_LOCAL.Number()))).
+		Where(authproviders.ProviderTypeEQ(int(adminv1.AuthProvider_LOCAL.Number()))).
 		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
 			q.Select(
 				useridentities.FieldID,

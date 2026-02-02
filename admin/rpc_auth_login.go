@@ -125,7 +125,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 		// 支持本地登录
 		result.Providers = append(result.Providers, &adminv1.AuthProvider{
 			Code:    "local",
-			Type:    adminv1.AuthProvider_TYPE_LOCAL,
+			Type:    adminv1.AuthProvider_LOCAL,
 			Enabled: true,
 		})
 

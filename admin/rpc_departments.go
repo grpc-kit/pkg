@@ -80,7 +80,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 	// 可见性：未指定时默认 SUBTREE（本部门及下属可见）
 	visibility := int(req.Department.Visibility)
 	if req.Department.Visibility == adminv1.Visibility_VISIBILITY_UNSPECIFIED {
-		visibility = int(adminv1.Visibility_SUBTREE.Number())
+		visibility = int(adminv1.Visibility_VISIBILITY_SUBTREE.Number())
 	}
 
 	create := tx.Departments.Create().
@@ -282,7 +282,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 	depQuery = depQuery.Limit(int(pageSize))
 
 	// View FULL 时预加载部门成员列表（含用户信息）
-	if req.View == adminv1.View_FULL {
+	if req.View == adminv1.View_VIEW_FULL {
 		depQuery = depQuery.WithLionUserDepartments(
 			func(query *lion.UserDepartmentsQuery) {
 				query.WithLionUsers()
@@ -308,7 +308,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Visibility:  adminv1.Visibility(m.Visibility),
 			Members:     make([]*adminv1.DepartmentMember, 0),
 		}
-		if req.View == adminv1.View_FULL && m.Edges.LionUserDepartments != nil {
+		if req.View == adminv1.View_VIEW_FULL && m.Edges.LionUserDepartments != nil {
 			for _, l := range m.Edges.LionUserDepartments {
 				pm := &adminv1.DepartmentMember{
 					Id:           int32(l.ID),
@@ -336,7 +336,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 		return menu
 	}
 
-	if req.Structure == adminv1.Structure_TREE || req.Structure == adminv1.Structure_TREE_EXPANDED {
+	if req.Structure == adminv1.Structure_STRUCTURE_TREE || req.Structure == adminv1.Structure_STRUCTURE_TREE_EXPANDED {
 		// 树形：用当前页数据构建树（仅包含本页节点及其在本页内的父子关系）
 		menuMap := make(map[int32]*adminv1.Department)
 		var roots []*adminv1.Department
@@ -666,15 +666,15 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 			return result, errs.InvalidArgument(ctx).WithMessage("department_member.user_id is required")
 		}
 
-		role := int(adminv1.DepartmentMember_ROLE_MEMBER)
+		role := int(adminv1.DepartmentMember_MEMBER)
 		if member.MemberRole != adminv1.DepartmentMember_ROLE_UNSPECIFIED {
 			role = int(member.MemberRole)
 		}
-		status := int(adminv1.DepartmentMember_STATUS_ACTIVE)
+		status := int(adminv1.DepartmentMember_ACTIVE)
 		if member.MemberStatus != adminv1.DepartmentMember_STATUS_UNSPECIFIED {
 			status = int(member.MemberStatus)
 		}
-		memberType := int(adminv1.DepartmentMember_TYPE_PRIMARY)
+		memberType := int(adminv1.DepartmentMember_PRIMARY)
 		if member.MemberType != adminv1.DepartmentMember_TYPE_UNSPECIFIED {
 			memberType = int(member.MemberType)
 		}
@@ -940,8 +940,8 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 		Where(
 			userdepartments.UserIDEQ(int(userID)),
 			userdepartments.MemberRoleIn(
-				int(adminv1.DepartmentMember_ROLE_OWNER.Number()),
-				int(adminv1.DepartmentMember_ROLE_MANAGER.Number()),
+				int(adminv1.DepartmentMember_OWNER.Number()),
+				int(adminv1.DepartmentMember_MANAGER.Number()),
 			),
 		).
 		Select(userdepartments.FieldDepartmentID).
@@ -972,10 +972,10 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 	for _, d := range deps {
 		vis := adminv1.Visibility(d.Visibility)
 		switch vis {
-		case adminv1.Visibility_VISIBILITY_UNSPECIFIED, adminv1.Visibility_GLOBAL:
+		case adminv1.Visibility_VISIBILITY_UNSPECIFIED, adminv1.Visibility_VISIBILITY_GLOBAL:
 			visibleIDs = append(visibleIDs, d.ID)
 			continue
-		case adminv1.Visibility_SUBTREE:
+		case adminv1.Visibility_VISIBILITY_SUBTREE:
 			// 本部门及上级节点可见其下属：用户在该部门或在该部门的任一祖先部门
 			ancestors, _ := a.getDepartmentAncestorIDs(ctx, db, d.ID)
 			if _, ok := userDeptIDSet[d.ID]; ok {
@@ -989,12 +989,12 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 				}
 			}
 			continue
-		case adminv1.Visibility_LOCAL:
+		case adminv1.Visibility_VISIBILITY_LOCAL:
 			if _, ok := userDeptIDSet[d.ID]; ok {
 				visibleIDs = append(visibleIDs, d.ID)
 			}
 			continue
-		case adminv1.Visibility_RESTRICTED, adminv1.Visibility_SPECIFIC:
+		case adminv1.Visibility_VISIBILITY_RESTRICTED, adminv1.Visibility_VISIBILITY_SPECIFIC:
 			// 仅创建者或负责人可见
 			if d.CreatedBy == userID {
 				visibleIDs = append(visibleIDs, d.ID)
@@ -1025,7 +1025,7 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 			continue
 		}
 		vis := adminv1.Visibility(d.Visibility)
-		if vis != adminv1.Visibility_SUBTREE && vis != adminv1.Visibility_VISIBILITY_UNSPECIFIED {
+		if vis != adminv1.Visibility_VISIBILITY_SUBTREE && vis != adminv1.Visibility_VISIBILITY_UNSPECIFIED {
 			continue
 		}
 		subIDs, err := a.getAllSubDeptIDs(ctx, userDeptID)
@@ -1041,7 +1041,7 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 	}
 	// 已可见且可见性为 SUBTREE 的部门，其所有下属也加入；下属节点若设为 LOCAL/RESTRICTED 等不可见，此处忽略，均可见
 	for _, d := range deps {
-		if adminv1.Visibility(d.Visibility) != adminv1.Visibility_SUBTREE {
+		if adminv1.Visibility(d.Visibility) != adminv1.Visibility_VISIBILITY_SUBTREE {
 			continue
 		}
 		if _, ok := visibleSet[d.ID]; !ok {

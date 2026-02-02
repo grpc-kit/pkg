@@ -137,7 +137,7 @@ func (a *KnownAdminAPI) ListPermissions(ctx context.Context, req *adminv1.ListPe
 	permissionQuery = permissionQuery.Limit(int(pageSize))
 
 	// 如果 View 为 FULL，需要预加载策略和资源信息
-	if req.View == adminv1.View_FULL {
+	if req.View == adminv1.View_VIEW_FULL {
 		permissionQuery = permissionQuery.
 			WithLionPolicies().
 			WithLionPermissionBindings(
@@ -168,7 +168,7 @@ func (a *KnownAdminAPI) ListPermissions(ctx context.Context, req *adminv1.ListPe
 		}
 
 		// 如果 View 为 FULL，加载策略和资源信息
-		if req.View == adminv1.View_FULL {
+		if req.View == adminv1.View_VIEW_FULL {
 			// 加载策略信息
 			if p.Edges.LionPolicies != nil {
 				policy := p.Edges.LionPolicies

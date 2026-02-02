@@ -12,6 +12,7 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/grouproles"
+
 	// 数据范围表已注释，同步取消依赖
 	// "github.com/grpc-kit/pkg/lion/roledataranges"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
@@ -882,7 +883,7 @@ func (a *KnownAdminAPI) ListRolePermissions(ctx context.Context, req *adminv1.Li
 		Where(rolepermissions.RoleIDEQ(int(req.RoleId)))
 
 	// 如果 View 为 FULL，需要预加载权限的详细信息（策略和资源）
-	if req.View == adminv1.View_FULL {
+	if req.View == adminv1.View_VIEW_FULL {
 		rolePermissionQuery = rolePermissionQuery.
 			WithLionPermissions(
 				func(query *lion.PermissionsQuery) {
@@ -976,7 +977,7 @@ func (a *KnownAdminAPI) ListRolePermissions(ctx context.Context, req *adminv1.Li
 		}
 
 		// 如果 View 为 FULL，加载策略和资源信息
-		if req.View == adminv1.View_FULL {
+		if req.View == adminv1.View_VIEW_FULL {
 			// 加载策略信息
 			if perm.Edges.LionPolicies != nil {
 				policy := perm.Edges.LionPolicies
@@ -1324,7 +1325,7 @@ func (a *KnownAdminAPI) ListRolePermissions(ctx context.Context, req *adminv1.Li
 // 		a.enrichRoleDataRange(ctx, db, rd, dataRange)
 //
 // 		// 如果 View 为 FULL，添加更多详细信息
-// 		if req.View == adminv1.View_FULL {
+// 		if req.View == adminv1.View_VIEW_FULL {
 // 			dataRange.CreatedAt = timestamppb.New(rd.CreatedAt)
 // 			dataRange.UpdatedAt = timestamppb.New(rd.UpdatedAt)
 // 			dataRange.CreatedBy = rd.CreatedBy

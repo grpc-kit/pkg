@@ -38,8 +38,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 
 	adminUser, err := tx.Users.Create().
 		SetUsername("admin").
-		SetUserType(int(adminv1.User_TYPE_SYSTEM.Number())).
-		SetUserStatus(int(adminv1.User_STATUS_ACTIVE.Number())).
+		SetUserType(int(adminv1.User_SYSTEM.Number())).
+		SetUserStatus(int(adminv1.User_ACTIVE.Number())).
 		SetNickname("超级管理员").
 		SetDescription("初始超级管理员，系统配置成功后建议删除或者禁用！").
 		Save(ctx)
@@ -51,7 +51,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	adminRole, err := tx.Roles.Create().
 		SetCode("superadmin").
 		SetDisplayName("superadmin").
-		SetRoleType(int(adminv1.Role_TYPE_SYSTEM.Number())).
+		SetRoleType(int(adminv1.Role_SYSTEM.Number())).
 		SetDescription("超级管理员").
 		Save(ctx)
 	if err != nil {
@@ -63,7 +63,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 
 	localProvider, err := tx.AuthProviders.Create().
 		SetCode("local").
-		SetProviderType(int(adminv1.AuthProvider_TYPE_LOCAL.Number())).
+		SetProviderType(int(adminv1.AuthProvider_LOCAL.Number())).
 		SetEnabled(true).
 		Save(ctx)
 	if err != nil {
@@ -101,12 +101,12 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 	tx.Credentials.Create().
 		SetCode("key1").
-		SetCredentialType(int(adminv1.Credential_TYPE_JWKS.Number())).
-		SetCredentialAlgorithm(int(adminv1.Credential_ALGORITHM_RSA.Number())).
-		SetCredentialUsage(int(adminv1.Credential_USAGE_SIGNING.Number())).
-		SetCredentialVisibility(int(adminv1.Visibility_RESTRICTED.Number())).
-		SetCredentialStatus(int(adminv1.Credential_STATUS_ACTIVE.Number())).
-		SetCredentialSource(int(adminv1.Credential_SOURCE_SYSTEM.Number())).
+		SetCredentialType(int(adminv1.Credential_JWKS.Number())).
+		SetCredentialAlgorithm(int(adminv1.Credential_RSA.Number())).
+		SetCredentialUsage(int(adminv1.Credential_SIGNING.Number())).
+		SetCredentialVisibility(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())).
+		SetCredentialStatus(int(adminv1.Credential_ACTIVE.Number())).
+		SetCredentialSource(int(adminv1.Credential_SYSTEM.Number())).
 		SetKeyID(uuid.New().String()).
 		SetPublicKey(crypto.Base64Encode(publicKeyBytes)).
 		SetPrivateKeyEncrypted(privateKeyEnc).
