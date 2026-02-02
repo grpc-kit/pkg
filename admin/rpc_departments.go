@@ -142,7 +142,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		UpdatedBy:      dp.UpdatedBy,
 		CreatedAt:      timestamppb.New(dp.CreatedAt),
 		UpdatedAt:      timestamppb.New(dp.UpdatedAt),
-		Managers:       make([]*adminv1.DepartmentMember, 0),
+		Members:        make([]*adminv1.DepartmentMember, 0),
 	}
 
 	_ = tx.Commit()
@@ -281,13 +281,10 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 
 	depQuery = depQuery.Limit(int(pageSize))
 
-	// View FULL 时预加载管理者
+	// View FULL 时预加载部门成员列表（含用户信息）
 	if req.View == adminv1.View_FULL {
 		depQuery = depQuery.WithLionUserDepartments(
 			func(query *lion.UserDepartmentsQuery) {
-				query.Where(
-					userdepartments.MemberRoleIn(int(adminv1.DepartmentMember_ROLE_OWNER.Number()), int(adminv1.DepartmentMember_ROLE_MANAGER.Number())),
-				)
 				query.WithLionUsers()
 			},
 		)
@@ -309,24 +306,31 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Type:        adminv1.Department_Type(m.DepartmentType),
 			Status:      adminv1.Department_Status(m.DepartmentStatus),
 			Visibility:  adminv1.Visibility(m.Visibility),
-			Managers:    make([]*adminv1.DepartmentMember, 0),
+			Members:     make([]*adminv1.DepartmentMember, 0),
 		}
 		if req.View == adminv1.View_FULL && m.Edges.LionUserDepartments != nil {
 			for _, l := range m.Edges.LionUserDepartments {
-				leader := &adminv1.DepartmentMember{
+				pm := &adminv1.DepartmentMember{
 					Id:           int32(l.ID),
 					UserId:       int64(l.UserID),
 					DepartmentId: int32(l.DepartmentID),
-					MemberStatus: adminv1.DepartmentMember_Status(l.MemberStatus),
 					MemberRole:   adminv1.DepartmentMember_Role(l.MemberRole),
+					MemberStatus: adminv1.DepartmentMember_Status(l.MemberStatus),
+					MemberType:   adminv1.DepartmentMember_MemberType(l.MemberType),
+					Description:  l.Description,
+					CreatedBy:    l.CreatedBy,
+					UpdatedBy:    l.UpdatedBy,
 					CreatedAt:    timestamppb.New(l.CreatedAt),
 					UpdatedAt:    timestamppb.New(l.UpdatedAt),
 				}
 				if l.Edges.LionUsers != nil {
-					leader.Username = l.Edges.LionUsers.Username
-					leader.Nickname = l.Edges.LionUsers.Nickname
+					pm.Username = l.Edges.LionUsers.Username
+					pm.Nickname = l.Edges.LionUsers.Nickname
 				}
-				menu.Managers = append(menu.Managers, leader)
+				if l.Metadata != "" {
+					pm.Metadata = MetadataParse(l.Metadata)
+				}
+				menu.Members = append(menu.Members, pm)
 			}
 		}
 		return menu
@@ -808,7 +812,7 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 		Code:       dep.Code,
 		SortOrder:  int32(dep.SortOrder),
 		Visibility: adminv1.Visibility(dep.Visibility),
-		Managers:   make([]*adminv1.DepartmentMember, 0),
+		Members:    make([]*adminv1.DepartmentMember, 0),
 	}
 
 	// 递归子部门
