@@ -914,6 +914,34 @@ func (a *KnownAdminAPI) getDepartmentAncestorIDs(ctx context.Context, db *lion.C
 	return ancestorIDs, nil
 }
 
+// getAncestorIDsInMemory 在内存中沿 parent 链求祖先 ID 列表，无 DB 调用
+func getAncestorIDsInMemory(depByID map[int]*lion.Departments, departmentID int) []int {
+	var ancestors []int
+	currentID := departmentID
+	for {
+		d := depByID[currentID]
+		if d == nil || d.ParentID == 0 {
+			break
+		}
+		ancestors = append(ancestors, d.ParentID)
+		currentID = d.ParentID
+	}
+	return ancestors
+}
+
+// getAllSubDeptIDsInMemory 在内存中 BFS 求某部门及其全部子部门 ID，无 DB 调用
+func getAllSubDeptIDsInMemory(childrenByParentID map[int][]int, deptID int) []int {
+	var ids []int
+	queue := []int{deptID}
+	for len(queue) > 0 {
+		id := queue[0]
+		queue = queue[1:]
+		ids = append(ids, id)
+		queue = append(queue, childrenByParentID[id]...)
+	}
+	return ids
+}
+
 // getVisibleDepartmentIDs 根据可见性策略过滤部门 ID
 // 规则：GLOBAL 全员可见；SUBTREE 本部门及上级节点可见下属（不管下级节点设置的可见性，下属均可见）；LOCAL 仅本部门成员可见；RESTRICTED/SPECIFIC 仅创建者或负责人可见
 func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Client, candidateIDs []int) ([]int, error) {
@@ -922,36 +950,21 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 		return nil, nil
 	}
 
-	// 用户所在部门 ID（成员关系）
+	// 用户所在部门及担任负责人/经理的部门（一次查询后拆分，避免两次 DB 往返）
 	udList, err := db.UserDepartments.Query().
 		Where(userdepartments.UserIDEQ(int(userID))).
-		Select(userdepartments.FieldDepartmentID).
+		Select(userdepartments.FieldDepartmentID, userdepartments.FieldMemberRole).
 		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	userDeptIDSet := make(map[int]struct{})
+	managedDeptIDSet := make(map[int]struct{})
 	for _, ud := range udList {
 		userDeptIDSet[ud.DepartmentID] = struct{}{}
-	}
-
-	// 用户担任负责人/经理的部门 ID
-	managedList, err := db.UserDepartments.Query().
-		Where(
-			userdepartments.UserIDEQ(int(userID)),
-			userdepartments.MemberRoleIn(
-				int(adminv1.DepartmentMember_OWNER.Number()),
-				int(adminv1.DepartmentMember_MANAGER.Number()),
-			),
-		).
-		Select(userdepartments.FieldDepartmentID).
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	managedDeptIDSet := make(map[int]struct{})
-	for _, ud := range managedList {
-		managedDeptIDSet[ud.DepartmentID] = struct{}{}
+		if ud.MemberRole == int(adminv1.DepartmentMember_OWNER.Number()) || ud.MemberRole == int(adminv1.DepartmentMember_MANAGER.Number()) {
+			managedDeptIDSet[ud.DepartmentID] = struct{}{}
+		}
 	}
 
 	// 候选部门的 ID、父级、可见性、创建者
@@ -968,6 +981,15 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 		return nil, err
 	}
 
+	// 内存建表：避免在循环内对每个 SUBTREE 部门做 N 次 DB 查询（祖先链、子树）
+	depByID := make(map[int]*lion.Departments)
+	childrenByParentID := make(map[int][]int)
+	for i := range deps {
+		depByID[deps[i].ID] = deps[i]
+		pid := deps[i].ParentID
+		childrenByParentID[pid] = append(childrenByParentID[pid], deps[i].ID)
+	}
+
 	var visibleIDs []int
 	for _, d := range deps {
 		vis := adminv1.Visibility(d.Visibility)
@@ -976,8 +998,8 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 			visibleIDs = append(visibleIDs, d.ID)
 			continue
 		case adminv1.Visibility_VISIBILITY_SUBTREE:
-			// 本部门及上级节点可见其下属：用户在该部门或在该部门的任一祖先部门
-			ancestors, _ := a.getDepartmentAncestorIDs(ctx, db, d.ID)
+			// 本部门及上级节点可见其下属：用户在该部门或在该部门的任一祖先部门（内存遍历，无 DB）
+			ancestors := getAncestorIDsInMemory(depByID, d.ID)
 			if _, ok := userDeptIDSet[d.ID]; ok {
 				visibleIDs = append(visibleIDs, d.ID)
 				continue
@@ -1014,11 +1036,7 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 	for _, id := range visibleIDs {
 		visibleSet[id] = struct{}{}
 	}
-	depByID := make(map[int]*lion.Departments)
-	for i := range deps {
-		depByID[deps[i].ID] = deps[i]
-	}
-	// 从用户所属的部门出发，若该部门为 SUBTREE 或未指定，则加入该部门及全部下属（不检查下属自身可见性）
+	// 从用户所属的部门出发，若该部门为 SUBTREE 或未指定，则加入该部门及全部下属（内存 BFS，无递归 DB）
 	for userDeptID := range userDeptIDSet {
 		d := depByID[userDeptID]
 		if d == nil {
@@ -1028,10 +1046,7 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 		if vis != adminv1.Visibility_VISIBILITY_SUBTREE && vis != adminv1.Visibility_VISIBILITY_UNSPECIFIED {
 			continue
 		}
-		subIDs, err := a.getAllSubDeptIDs(ctx, userDeptID)
-		if err != nil {
-			return nil, err
-		}
+		subIDs := getAllSubDeptIDsInMemory(childrenByParentID, userDeptID)
 		for _, id := range subIDs {
 			if _, ok := visibleSet[id]; !ok {
 				visibleSet[id] = struct{}{}
@@ -1039,7 +1054,7 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 			}
 		}
 	}
-	// 已可见且可见性为 SUBTREE 的部门，其所有下属也加入；下属节点若设为 LOCAL/RESTRICTED 等不可见，此处忽略，均可见
+	// 已可见且可见性为 SUBTREE 的部门，其所有下属也加入（内存 BFS）
 	for _, d := range deps {
 		if adminv1.Visibility(d.Visibility) != adminv1.Visibility_VISIBILITY_SUBTREE {
 			continue
@@ -1047,10 +1062,7 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 		if _, ok := visibleSet[d.ID]; !ok {
 			continue
 		}
-		subIDs, err := a.getAllSubDeptIDs(ctx, d.ID)
-		if err != nil {
-			return nil, err
-		}
+		subIDs := getAllSubDeptIDsInMemory(childrenByParentID, d.ID)
 		for _, id := range subIDs {
 			if _, ok := visibleSet[id]; !ok {
 				visibleSet[id] = struct{}{}
