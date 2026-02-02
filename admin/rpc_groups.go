@@ -28,9 +28,7 @@ func parseGroupParent(parent string) (int, error) {
 	if parent == "" {
 		return 0, fmt.Errorf("parent is empty")
 	}
-	if strings.HasPrefix(parent, "groups/") {
-		parent = strings.TrimPrefix(parent, "groups/")
-	}
+	parent = strings.TrimPrefix(parent, "groups/")
 	return strconv.Atoi(strings.TrimSpace(parent))
 }
 
