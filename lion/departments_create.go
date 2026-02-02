@@ -234,6 +234,20 @@ func (_c *DepartmentsCreate) SetNillableExternalID(v *string) *DepartmentsCreate
 	return _c
 }
 
+// SetVisibility sets the "visibility" field.
+func (_c *DepartmentsCreate) SetVisibility(v int) *DepartmentsCreate {
+	_c.mutation.SetVisibility(v)
+	return _c
+}
+
+// SetNillableVisibility sets the "visibility" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableVisibility(v *int) *DepartmentsCreate {
+	if v != nil {
+		_c.SetVisibility(*v)
+	}
+	return _c
+}
+
 // SetMetadata sets the "metadata" field.
 func (_c *DepartmentsCreate) SetMetadata(v map[string]string) *DepartmentsCreate {
 	_c.mutation.SetMetadata(v)
@@ -355,6 +369,10 @@ func (_c *DepartmentsCreate) defaults() {
 		v := departments.DefaultMaxMembers
 		_c.mutation.SetMaxMembers(v)
 	}
+	if _, ok := _c.mutation.Visibility(); !ok {
+		v := departments.DefaultVisibility
+		_c.mutation.SetVisibility(v)
+	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := departments.DefaultDescription
 		_c.mutation.SetDescription(v)
@@ -399,6 +417,9 @@ func (_c *DepartmentsCreate) check() error {
 	}
 	if _, ok := _c.mutation.MaxMembers(); !ok {
 		return &ValidationError{Name: "max_members", err: errors.New(`lion: missing required field "Departments.max_members"`)}
+	}
+	if _, ok := _c.mutation.Visibility(); !ok {
+		return &ValidationError{Name: "visibility", err: errors.New(`lion: missing required field "Departments.visibility"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Departments.description"`)}
@@ -500,6 +521,10 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ExternalID(); ok {
 		_spec.SetField(departments.FieldExternalID, field.TypeString, value)
 		_node.ExternalID = value
+	}
+	if value, ok := _c.mutation.Visibility(); ok {
+		_spec.SetField(departments.FieldVisibility, field.TypeInt, value)
+		_node.Visibility = value
 	}
 	if value, ok := _c.mutation.Metadata(); ok {
 		_spec.SetField(departments.FieldMetadata, field.TypeJSON, value)

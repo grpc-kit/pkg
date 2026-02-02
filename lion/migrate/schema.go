@@ -92,6 +92,7 @@ var (
 		{Name: "budget_item_code", Type: field.TypeString, Nullable: true},
 		{Name: "max_members", Type: field.TypeInt, Default: 0},
 		{Name: "external_id", Type: field.TypeString, Nullable: true},
+		{Name: "visibility", Type: field.TypeInt, Default: 0},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}

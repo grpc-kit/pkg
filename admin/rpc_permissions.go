@@ -39,7 +39,7 @@ func lionPermissionBindingToProto(binding *lion.PermissionBindings) *adminv1.Per
 				SortOrder:   int32(res.SortOrder),
 				Type:        adminv1.Resource_Type(res.ResourceType),
 				Status:      adminv1.Resource_Status(res.ResourceStatus),
-				Visibility:  adminv1.Resource_Visibility(res.Visibility),
+				Visibility:  adminv1.Visibility(res.Visibility),
 				Locator:     res.Locator,
 				Visual:      res.Visual,
 				Manifest:    res.Manifest,

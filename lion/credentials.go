@@ -34,7 +34,7 @@ type Credentials struct {
 	CredentialAlgorithm int `json:"credential_algorithm,omitempty"`
 	// 凭证用途: 0=未指定, 1=SIGNING, 2=ENCRYPTION, 10=AUTH, 11=LICENSE, 12=OTP
 	CredentialUsage int `json:"credential_usage,omitempty"`
-	// 可见性: 0=未指定, 1=PRIVATE, 2=INTERNAL, 3=PUBLIC, 4=GROUP
+	// 可见性: 0=未指定, 6=PRIVATE, 4=INTERNAL, 7=PUBLIC, 8=TEAM(凭证常用); 1-3,5,9-10 见 Visibility 枚举
 	CredentialVisibility int `json:"credential_visibility,omitempty"`
 	// 状态: 0=未指定, 1=ACTIVE, 2=PENDING, 3=DISABLED, 4=EXPIRED, 5=REVOKED
 	CredentialStatus int `json:"credential_status,omitempty"`

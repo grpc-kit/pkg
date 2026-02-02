@@ -50,6 +50,8 @@ const (
 	FieldMaxMembers = "max_members"
 	// FieldExternalID holds the string denoting the external_id field in the database.
 	FieldExternalID = "external_id"
+	// FieldVisibility holds the string denoting the visibility field in the database.
+	FieldVisibility = "visibility"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
 	// FieldDescription holds the string denoting the description field in the database.
@@ -97,6 +99,7 @@ var Columns = []string{
 	FieldBudgetItemCode,
 	FieldMaxMembers,
 	FieldExternalID,
+	FieldVisibility,
 	FieldMetadata,
 	FieldDescription,
 }
@@ -136,6 +139,8 @@ var (
 	DefaultSortOrder int
 	// DefaultMaxMembers holds the default value on creation for the "max_members" field.
 	DefaultMaxMembers int
+	// DefaultVisibility holds the default value on creation for the "visibility" field.
+	DefaultVisibility int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -221,6 +226,11 @@ func ByMaxMembers(opts ...sql.OrderTermOption) OrderOption {
 // ByExternalID orders the results by the external_id field.
 func ByExternalID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExternalID, opts...).ToFunc()
+}
+
+// ByVisibility orders the results by the visibility field.
+func ByVisibility(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVisibility, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

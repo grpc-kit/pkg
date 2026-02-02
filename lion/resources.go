@@ -37,7 +37,7 @@ type Resources struct {
 	ResourceType int `json:"resource_type,omitempty"`
 	// 是否启用该资源项，禁用后完全不可访问
 	ResourceStatus int `json:"resource_status,omitempty"`
-	// 是否启用该资源项，禁用后完全不可访问
+	// 可见性定义，对应 api/known/admin/v1/common.proto 中定义
 	Visibility int `json:"visibility,omitempty"`
 	// 资源排序顺序，用于同级资源的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999
 	SortOrder int `json:"sort_order,omitempty"`

@@ -104,7 +104,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		SetCredentialType(int(adminv1.Credential_TYPE_JWKS.Number())).
 		SetCredentialAlgorithm(int(adminv1.Credential_ALGORITHM_RSA.Number())).
 		SetCredentialUsage(int(adminv1.Credential_USAGE_SIGNING.Number())).
-		SetCredentialVisibility(int(adminv1.Credential_VISIBILITY_PRIVATE.Number())).
+		SetCredentialVisibility(int(adminv1.Visibility_RESTRICTED.Number())).
 		SetCredentialStatus(int(adminv1.Credential_STATUS_ACTIVE.Number())).
 		SetCredentialSource(int(adminv1.Credential_SOURCE_SYSTEM.Number())).
 		SetKeyID(uuid.New().String()).

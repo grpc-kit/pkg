@@ -65,6 +65,9 @@ func (Departments) Fields() []ent.Field {
 		field.String("external_id").
 			Optional().
 			Comment("外部系统标识符，用于第三方系统集成"),
+		field.Int("visibility").
+			Default(0).
+			Comment("可见性定义，对应 api/known/admin/v1/common.proto 中定义"),
 		field.JSON("metadata", map[string]string{}).
 			Optional().
 			Comment("扩展元数据，存储自定义业务属性"),

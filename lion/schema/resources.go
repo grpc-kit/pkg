@@ -35,7 +35,7 @@ func (Resources) Fields() []ent.Field {
 			Comment("是否启用该资源项，禁用后完全不可访问"),
 		field.Int("visibility").
 			Default(0).
-			Comment("是否启用该资源项，禁用后完全不可访问"),
+			Comment("可见性定义，对应 api/known/admin/v1/common.proto 中定义"),
 		field.Int("sort_order").
 			Default(100).
 			Comment("资源排序顺序，用于同级资源的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999"),

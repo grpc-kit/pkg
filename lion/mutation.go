@@ -3775,6 +3775,8 @@ type DepartmentsMutation struct {
 	max_members                  *int
 	addmax_members               *int
 	external_id                  *string
+	visibility                   *int
+	addvisibility                *int
 	metadata                     *map[string]string
 	description                  *string
 	clearedFields                map[string]struct{}
@@ -4794,6 +4796,62 @@ func (m *DepartmentsMutation) ResetExternalID() {
 	delete(m.clearedFields, departments.FieldExternalID)
 }
 
+// SetVisibility sets the "visibility" field.
+func (m *DepartmentsMutation) SetVisibility(i int) {
+	m.visibility = &i
+	m.addvisibility = nil
+}
+
+// Visibility returns the value of the "visibility" field in the mutation.
+func (m *DepartmentsMutation) Visibility() (r int, exists bool) {
+	v := m.visibility
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisibility returns the old "visibility" field's value of the Departments entity.
+// If the Departments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DepartmentsMutation) OldVisibility(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisibility is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisibility requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisibility: %w", err)
+	}
+	return oldValue.Visibility, nil
+}
+
+// AddVisibility adds i to the "visibility" field.
+func (m *DepartmentsMutation) AddVisibility(i int) {
+	if m.addvisibility != nil {
+		*m.addvisibility += i
+	} else {
+		m.addvisibility = &i
+	}
+}
+
+// AddedVisibility returns the value that was added to the "visibility" field in this mutation.
+func (m *DepartmentsMutation) AddedVisibility() (r int, exists bool) {
+	v := m.addvisibility
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetVisibility resets all changes to the "visibility" field.
+func (m *DepartmentsMutation) ResetVisibility() {
+	m.visibility = nil
+	m.addvisibility = nil
+}
+
 // SetMetadata sets the "metadata" field.
 func (m *DepartmentsMutation) SetMetadata(value map[string]string) {
 	m.metadata = &value
@@ -5021,7 +5079,7 @@ func (m *DepartmentsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DepartmentsMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 21)
 	if m.created_at != nil {
 		fields = append(fields, departments.FieldCreatedAt)
 	}
@@ -5076,6 +5134,9 @@ func (m *DepartmentsMutation) Fields() []string {
 	if m.external_id != nil {
 		fields = append(fields, departments.FieldExternalID)
 	}
+	if m.visibility != nil {
+		fields = append(fields, departments.FieldVisibility)
+	}
 	if m.metadata != nil {
 		fields = append(fields, departments.FieldMetadata)
 	}
@@ -5126,6 +5187,8 @@ func (m *DepartmentsMutation) Field(name string) (ent.Value, bool) {
 		return m.MaxMembers()
 	case departments.FieldExternalID:
 		return m.ExternalID()
+	case departments.FieldVisibility:
+		return m.Visibility()
 	case departments.FieldMetadata:
 		return m.Metadata()
 	case departments.FieldDescription:
@@ -5175,6 +5238,8 @@ func (m *DepartmentsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldMaxMembers(ctx)
 	case departments.FieldExternalID:
 		return m.OldExternalID(ctx)
+	case departments.FieldVisibility:
+		return m.OldVisibility(ctx)
 	case departments.FieldMetadata:
 		return m.OldMetadata(ctx)
 	case departments.FieldDescription:
@@ -5314,6 +5379,13 @@ func (m *DepartmentsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetExternalID(v)
 		return nil
+	case departments.FieldVisibility:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisibility(v)
+		return nil
 	case departments.FieldMetadata:
 		v, ok := value.(map[string]string)
 		if !ok {
@@ -5357,6 +5429,9 @@ func (m *DepartmentsMutation) AddedFields() []string {
 	if m.addmax_members != nil {
 		fields = append(fields, departments.FieldMaxMembers)
 	}
+	if m.addvisibility != nil {
+		fields = append(fields, departments.FieldVisibility)
+	}
 	return fields
 }
 
@@ -5379,6 +5454,8 @@ func (m *DepartmentsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedSortOrder()
 	case departments.FieldMaxMembers:
 		return m.AddedMaxMembers()
+	case departments.FieldVisibility:
+		return m.AddedVisibility()
 	}
 	return nil, false
 }
@@ -5436,6 +5513,13 @@ func (m *DepartmentsMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddMaxMembers(v)
+		return nil
+	case departments.FieldVisibility:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVisibility(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Departments numeric field %s", name)
@@ -5580,6 +5664,9 @@ func (m *DepartmentsMutation) ResetField(name string) error {
 		return nil
 	case departments.FieldExternalID:
 		m.ResetExternalID()
+		return nil
+	case departments.FieldVisibility:
+		m.ResetVisibility()
 		return nil
 	case departments.FieldMetadata:
 		m.ResetMetadata()

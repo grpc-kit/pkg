@@ -339,6 +339,27 @@ func (_u *DepartmentsUpdate) ClearExternalID() *DepartmentsUpdate {
 	return _u
 }
 
+// SetVisibility sets the "visibility" field.
+func (_u *DepartmentsUpdate) SetVisibility(v int) *DepartmentsUpdate {
+	_u.mutation.ResetVisibility()
+	_u.mutation.SetVisibility(v)
+	return _u
+}
+
+// SetNillableVisibility sets the "visibility" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableVisibility(v *int) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetVisibility(*v)
+	}
+	return _u
+}
+
+// AddVisibility adds value to the "visibility" field.
+func (_u *DepartmentsUpdate) AddVisibility(v int) *DepartmentsUpdate {
+	_u.mutation.AddVisibility(v)
+	return _u
+}
+
 // SetMetadata sets the "metadata" field.
 func (_u *DepartmentsUpdate) SetMetadata(v map[string]string) *DepartmentsUpdate {
 	_u.mutation.SetMetadata(v)
@@ -603,6 +624,12 @@ func (_u *DepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if _u.mutation.ExternalIDCleared() {
 		_spec.ClearField(departments.FieldExternalID, field.TypeString)
+	}
+	if value, ok := _u.mutation.Visibility(); ok {
+		_spec.SetField(departments.FieldVisibility, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedVisibility(); ok {
+		_spec.AddField(departments.FieldVisibility, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(departments.FieldMetadata, field.TypeJSON, value)
@@ -1032,6 +1059,27 @@ func (_u *DepartmentsUpdateOne) ClearExternalID() *DepartmentsUpdateOne {
 	return _u
 }
 
+// SetVisibility sets the "visibility" field.
+func (_u *DepartmentsUpdateOne) SetVisibility(v int) *DepartmentsUpdateOne {
+	_u.mutation.ResetVisibility()
+	_u.mutation.SetVisibility(v)
+	return _u
+}
+
+// SetNillableVisibility sets the "visibility" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableVisibility(v *int) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetVisibility(*v)
+	}
+	return _u
+}
+
+// AddVisibility adds value to the "visibility" field.
+func (_u *DepartmentsUpdateOne) AddVisibility(v int) *DepartmentsUpdateOne {
+	_u.mutation.AddVisibility(v)
+	return _u
+}
+
 // SetMetadata sets the "metadata" field.
 func (_u *DepartmentsUpdateOne) SetMetadata(v map[string]string) *DepartmentsUpdateOne {
 	_u.mutation.SetMetadata(v)
@@ -1326,6 +1374,12 @@ func (_u *DepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *Departments
 	}
 	if _u.mutation.ExternalIDCleared() {
 		_spec.ClearField(departments.FieldExternalID, field.TypeString)
+	}
+	if value, ok := _u.mutation.Visibility(); ok {
+		_spec.SetField(departments.FieldVisibility, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedVisibility(); ok {
+		_spec.AddField(departments.FieldVisibility, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(departments.FieldMetadata, field.TypeJSON, value)

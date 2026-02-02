@@ -54,6 +54,8 @@ type Departments struct {
 	MaxMembers int `json:"max_members,omitempty"`
 	// 外部系统标识符，用于第三方系统集成
 	ExternalID string `json:"external_id,omitempty"`
+	// 可见性定义，对应 api/known/admin/v1/common.proto 中定义
+	Visibility int `json:"visibility,omitempty"`
 	// 扩展元数据，存储自定义业务属性
 	Metadata map[string]string `json:"metadata,omitempty"`
 	// 部门描述信息，详细说明部门职责和业务范围
@@ -100,7 +102,7 @@ func (*Departments) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case departments.FieldEmailEncrypted, departments.FieldPhoneNumberEncrypted, departments.FieldAddressEncrypted, departments.FieldMetadata:
 			values[i] = new([]byte)
-		case departments.FieldID, departments.FieldCreatedBy, departments.FieldUpdatedBy, departments.FieldParentID, departments.FieldDepartmentType, departments.FieldDepartmentStatus, departments.FieldSortOrder, departments.FieldMaxMembers:
+		case departments.FieldID, departments.FieldCreatedBy, departments.FieldUpdatedBy, departments.FieldParentID, departments.FieldDepartmentType, departments.FieldDepartmentStatus, departments.FieldSortOrder, departments.FieldMaxMembers, departments.FieldVisibility:
 			values[i] = new(sql.NullInt64)
 		case departments.FieldCode, departments.FieldDisplayName, departments.FieldCostCenterCode, departments.FieldBudgetItemCode, departments.FieldExternalID, departments.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -236,6 +238,12 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ExternalID = value.String
 			}
+		case departments.FieldVisibility:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field visibility", values[i])
+			} else if value.Valid {
+				_m.Visibility = int(value.Int64)
+			}
 		case departments.FieldMetadata:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field metadata", values[i])
@@ -346,6 +354,9 @@ func (_m *Departments) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("external_id=")
 	builder.WriteString(_m.ExternalID)
+	builder.WriteString(", ")
+	builder.WriteString("visibility=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Visibility))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))

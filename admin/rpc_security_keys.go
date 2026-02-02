@@ -114,7 +114,7 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 			credentials.CredentialTypeEQ(int(adminv1.Credential_TYPE_JWKS.Number())),
 			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_ALGORITHM_RSA.Number())),
 			credentials.CredentialUsageEQ(int(adminv1.Credential_USAGE_SIGNING.Number())),
-			credentials.CredentialVisibilityEQ(int(adminv1.Credential_VISIBILITY_PRIVATE.Number())),
+			credentials.CredentialVisibilityEQ(int(adminv1.Visibility_RESTRICTED.Number())),
 			credentials.CredentialStatusEQ(int(adminv1.Credential_STATUS_ACTIVE.Number())),
 			credentials.CredentialSourceEQ(int(adminv1.Credential_SOURCE_SYSTEM.Number())),
 		).

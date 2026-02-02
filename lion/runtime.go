@@ -222,8 +222,12 @@ func init() {
 	departmentsDescMaxMembers := departmentsFields[11].Descriptor()
 	// departments.DefaultMaxMembers holds the default value on creation for the max_members field.
 	departments.DefaultMaxMembers = departmentsDescMaxMembers.Default.(int)
+	// departmentsDescVisibility is the schema descriptor for visibility field.
+	departmentsDescVisibility := departmentsFields[13].Descriptor()
+	// departments.DefaultVisibility holds the default value on creation for the visibility field.
+	departments.DefaultVisibility = departmentsDescVisibility.Default.(int)
 	// departmentsDescDescription is the schema descriptor for description field.
-	departmentsDescDescription := departmentsFields[14].Descriptor()
+	departmentsDescDescription := departmentsFields[15].Descriptor()
 	// departments.DefaultDescription holds the default value on creation for the description field.
 	departments.DefaultDescription = departmentsDescDescription.Default.(string)
 	grouprolesMixin := schema.GroupRoles{}.Mixin()

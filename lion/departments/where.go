@@ -145,6 +145,11 @@ func ExternalID(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldExternalID, v))
 }
 
+// Visibility applies equality check predicate on the "visibility" field. It's identical to VisibilityEQ.
+func Visibility(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldVisibility, v))
+}
+
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldDescription, v))
@@ -1083,6 +1088,46 @@ func ExternalIDEqualFold(v string) predicate.Departments {
 // ExternalIDContainsFold applies the ContainsFold predicate on the "external_id" field.
 func ExternalIDContainsFold(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldContainsFold(FieldExternalID, v))
+}
+
+// VisibilityEQ applies the EQ predicate on the "visibility" field.
+func VisibilityEQ(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldVisibility, v))
+}
+
+// VisibilityNEQ applies the NEQ predicate on the "visibility" field.
+func VisibilityNEQ(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldVisibility, v))
+}
+
+// VisibilityIn applies the In predicate on the "visibility" field.
+func VisibilityIn(vs ...int) predicate.Departments {
+	return predicate.Departments(sql.FieldIn(FieldVisibility, vs...))
+}
+
+// VisibilityNotIn applies the NotIn predicate on the "visibility" field.
+func VisibilityNotIn(vs ...int) predicate.Departments {
+	return predicate.Departments(sql.FieldNotIn(FieldVisibility, vs...))
+}
+
+// VisibilityGT applies the GT predicate on the "visibility" field.
+func VisibilityGT(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldGT(FieldVisibility, v))
+}
+
+// VisibilityGTE applies the GTE predicate on the "visibility" field.
+func VisibilityGTE(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldGTE(FieldVisibility, v))
+}
+
+// VisibilityLT applies the LT predicate on the "visibility" field.
+func VisibilityLT(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldLT(FieldVisibility, v))
+}
+
+// VisibilityLTE applies the LTE predicate on the "visibility" field.
+func VisibilityLTE(v int) predicate.Departments {
+	return predicate.Departments(sql.FieldLTE(FieldVisibility, v))
 }
 
 // MetadataIsNil applies the IsNil predicate on the "metadata" field.
