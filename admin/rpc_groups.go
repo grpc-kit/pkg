@@ -74,7 +74,6 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		SetGroupType(int(req.Group.Type.Number())).
 		SetGroupStatus(int(req.Group.Status.Number())).
 		SetSortOrder(int(req.Group.SortOrder)).
-		SetParentID(int(req.Group.ParentId)).
 		SetMaxMembers(int(req.Group.MaxMembers)).
 		SetMetadata(req.Group.Metadata).
 		SetExternalID(req.Group.ExternalId).
@@ -279,7 +278,6 @@ func groupToProto(g *lion.Groups, includeTimestamps bool) *adminv1.Group {
 		Status:       adminv1.Group_Status(g.GroupStatus),
 		DisplayName:  g.DisplayName,
 		SortOrder:    int32(g.SortOrder),
-		ParentId:     int64(g.ParentID),
 		MaxMembers:   int32(g.MaxMembers),
 		Metadata:     g.Metadata,
 		ExternalId:   g.ExternalID,
@@ -346,8 +344,6 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 				update.SetGroupStatus(int(req.Group.Status.Number()))
 			case "sort_order":
 				update.SetSortOrder(int(req.Group.SortOrder))
-			case "parent_id":
-				update.SetParentID(int(req.Group.ParentId))
 			case "max_members":
 				update.SetMaxMembers(int(req.Group.MaxMembers))
 			case "metadata":
@@ -374,7 +370,6 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			SetGroupType(int(req.Group.Type.Number())).
 			SetGroupStatus(int(req.Group.Status.Number())).
 			SetSortOrder(int(req.Group.SortOrder)).
-			SetParentID(int(req.Group.ParentId)).
 			SetMaxMembers(int(req.Group.MaxMembers)).
 			SetMetadata(req.Group.Metadata).
 			SetExternalID(req.Group.ExternalId).
@@ -414,7 +409,7 @@ func (a *KnownAdminAPI) DeleteGroup(ctx context.Context, req *adminv1.DeleteGrou
 // ListGroupMembers 获取群组成员列表
 func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListGroupMembersRequest) (*adminv1.ListGroupMembersResponse, error) {
 	result := &adminv1.ListGroupMembersResponse{
-		GroupMembers: make([]*adminv1.GroupMember, 0),
+		Members: make([]*adminv1.Membership, 0),
 	}
 
 	if req.Parent == "" {
@@ -509,7 +504,7 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 	}
 
 	for _, member := range members {
-		result.GroupMembers = append(result.GroupMembers, userGroupToProto(member))
+		result.Members = append(result.Members, userGroupToProto(member))
 	}
 
 	if _, ok := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken); ok && len(members) == int(pageSize) && len(members) > 0 {
@@ -554,14 +549,15 @@ func parseListGroupMembersFilter(filter string) ([]predicate.UserGroups, error) 
 	return out, nil
 }
 
-// userGroupToProto 将 *lion.UserGroups 转为 *adminv1.GroupMember（含 Metadata）
-func userGroupToProto(member *lion.UserGroups) *adminv1.GroupMember {
-	gm := &adminv1.GroupMember{
+// userGroupToProto 将 *lion.UserGroups 转为 *adminv1.Membership（含 Metadata）
+func userGroupToProto(member *lion.UserGroups) *adminv1.Membership {
+	gm := &adminv1.Membership{
 		Id:           int64(member.ID),
 		UserId:       int64(member.UserID),
-		GroupId:      int64(member.GroupID),
-		MemberRole:   adminv1.GroupMember_Role(member.MemberRole),
-		MemberStatus: adminv1.GroupMember_Status(member.MemberStatus),
+		TargetType:   adminv1.Membership_GROUP,
+		TargetId:     int64(member.GroupID),
+		MemberRole:   adminv1.Membership_Role(member.MemberRole),
+		MemberStatus: adminv1.Membership_Status(member.MemberStatus),
 		JoinedAt:     timestamppb.New(member.JoinedAt),
 		CreatedBy:    member.CreatedBy,
 		UpdatedBy:    member.UpdatedBy,
@@ -603,9 +599,9 @@ func (a *KnownAdminAPI) CreateGroupMembers(ctx context.Context, req *adminv1.Cre
 		return nil, err
 	}
 
-	allMembers := make([]*lion.UserGroupsCreate, 0, len(req.GroupMembers))
+	allMembers := make([]*lion.UserGroupsCreate, 0, len(req.Members))
 
-	for _, member := range req.GroupMembers {
+	for _, member := range req.Members {
 		create := db.UserGroups.Create().
 			SetUserID(int(member.UserId)).
 			SetGroupID(groupID).
@@ -664,14 +660,14 @@ func (a *KnownAdminAPI) DeleteGroupMember(ctx context.Context, req *adminv1.Dele
 }
 
 // UpdateGroupMember 更新群组成员
-func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.UpdateGroupMemberRequest) (*adminv1.GroupMember, error) {
-	result := &adminv1.GroupMember{}
+func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.UpdateGroupMemberRequest) (*adminv1.Membership, error) {
+	result := &adminv1.Membership{}
 
 	if req.Parent == "" {
 		return result, errs.InvalidArgument(ctx).WithMessage("request body parent is empty")
 	}
-	if req.GroupMember == nil {
-		return result, errs.InvalidArgument(ctx).WithMessage("request body group_member is nil")
+	if req.Member == nil {
+		return result, errs.InvalidArgument(ctx).WithMessage("request body member is nil")
 	}
 
 	userID, err := GetUserID(ctx)
@@ -708,31 +704,31 @@ func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.Upda
 		for _, field := range req.UpdateMask.Paths {
 			switch field {
 			case "member_role":
-				update.SetMemberRole(int(req.GroupMember.MemberRole))
+				update.SetMemberRole(int(req.Member.MemberRole))
 			case "member_status":
-				update.SetMemberStatus(int(req.GroupMember.MemberStatus))
+				update.SetMemberStatus(int(req.Member.MemberStatus))
 			case "description":
-				update.SetDescription(req.GroupMember.Description)
+				update.SetDescription(req.Member.Description)
 			case "expired_at":
-				if req.GroupMember.ExpiredAt != nil {
-					update.SetExpiredAt(req.GroupMember.ExpiredAt.AsTime())
+				if req.Member.ExpiredAt != nil {
+					update.SetExpiredAt(req.Member.ExpiredAt.AsTime())
 				}
 			case "metadata":
-				if len(req.GroupMember.Metadata) > 0 {
-					update.SetMetadata(req.GroupMember.Metadata)
+				if len(req.Member.Metadata) > 0 {
+					update.SetMetadata(req.Member.Metadata)
 				}
 			}
 		}
 	} else {
 		update.
-			SetMemberRole(int(req.GroupMember.MemberRole)).
-			SetMemberStatus(int(req.GroupMember.MemberStatus)).
-			SetDescription(req.GroupMember.Description)
-		if req.GroupMember.ExpiredAt != nil {
-			update.SetExpiredAt(req.GroupMember.ExpiredAt.AsTime())
+			SetMemberRole(int(req.Member.MemberRole)).
+			SetMemberStatus(int(req.Member.MemberStatus)).
+			SetDescription(req.Member.Description)
+		if req.Member.ExpiredAt != nil {
+			update.SetExpiredAt(req.Member.ExpiredAt.AsTime())
 		}
-		if len(req.GroupMember.Metadata) > 0 {
-			update.SetMetadata(req.GroupMember.Metadata)
+		if len(req.Member.Metadata) > 0 {
+			update.SetMetadata(req.Member.Metadata)
 		}
 	}
 

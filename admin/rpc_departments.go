@@ -142,7 +142,7 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		UpdatedBy:      dp.UpdatedBy,
 		CreatedAt:      timestamppb.New(dp.CreatedAt),
 		UpdatedAt:      timestamppb.New(dp.UpdatedAt),
-		Members:        make([]*adminv1.DepartmentMember, 0),
+		Members:        make([]*adminv1.Membership, 0),
 	}
 
 	_ = tx.Commit()
@@ -306,17 +306,18 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Type:        adminv1.Department_Type(m.DepartmentType),
 			Status:      adminv1.Department_Status(m.DepartmentStatus),
 			Visibility:  adminv1.Visibility(m.Visibility),
-			Members:     make([]*adminv1.DepartmentMember, 0),
+			Members:     make([]*adminv1.Membership, 0),
 		}
 		if req.View == adminv1.View_VIEW_FULL && m.Edges.LionUserDepartments != nil {
 			for _, l := range m.Edges.LionUserDepartments {
-				pm := &adminv1.DepartmentMember{
+				pm := &adminv1.Membership{
 					Id:           int64(l.ID),
 					UserId:       int64(l.UserID),
-					DepartmentId: int64(l.DepartmentID),
-					MemberRole:   adminv1.DepartmentMember_Role(l.MemberRole),
-					MemberStatus: adminv1.DepartmentMember_Status(l.MemberStatus),
-					MemberType:   adminv1.DepartmentMember_MemberType(l.MemberType),
+					TargetType:   adminv1.Membership_DEPARTMENT,
+					TargetId:     int64(l.DepartmentID),
+					MemberRole:   adminv1.Membership_Role(l.MemberRole),
+					MemberStatus: adminv1.Membership_Status(l.MemberStatus),
+					MemberType:   adminv1.Membership_MemberType(l.MemberType),
 					Description:  l.Description,
 					CreatedBy:    l.CreatedBy,
 					UpdatedBy:    l.UpdatedBy,
@@ -505,7 +506,7 @@ func (a *KnownAdminAPI) UpdateDepartment(ctx context.Context, req *adminv1.Updat
 	return result, nil
 }
 
-// ListDepartmentMembers 获取部门成员（与 proto DepartmentMember 定义对齐）
+// ListDepartmentMembers 获取部门成员（与 proto Membership 定义对齐）
 func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.ListDepartmentMembersRequest) (*adminv1.ListDepartmentMembersResponse, error) {
 	result := &adminv1.ListDepartmentMembersResponse{}
 
@@ -601,15 +602,16 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 		if user == nil {
 			continue
 		}
-		pm := &adminv1.DepartmentMember{
+		pm := &adminv1.Membership{
 			Id:           int64(m.ID),
 			UserId:       int64(m.UserID),
 			Username:     user.Username,
 			Nickname:     user.Nickname,
-			DepartmentId: int64(m.DepartmentID),
-			MemberRole:   adminv1.DepartmentMember_Role(m.MemberRole),
-			MemberStatus: adminv1.DepartmentMember_Status(m.MemberStatus),
-			MemberType:   adminv1.DepartmentMember_MemberType(m.MemberType),
+			TargetType:   adminv1.Membership_DEPARTMENT,
+			TargetId:     int64(m.DepartmentID),
+			MemberRole:   adminv1.Membership_Role(m.MemberRole),
+			MemberStatus: adminv1.Membership_Status(m.MemberStatus),
+			MemberType:   adminv1.Membership_MemberType(m.MemberType),
 			Description:  m.Description,
 			CreatedBy:    m.CreatedBy,
 			UpdatedBy:    m.UpdatedBy,
@@ -619,7 +621,7 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 		if m.Metadata != "" {
 			pm.Metadata = MetadataParse(m.Metadata)
 		}
-		result.DepartmentMembers = append(result.DepartmentMembers, pm)
+		result.Members = append(result.Members, pm)
 	}
 
 	// Cursor 分页时返回 next_page_token
@@ -634,15 +636,15 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 	return result, nil
 }
 
-// CreateDepartmentMembers 创建部门成员（与 proto DepartmentMember 定义对齐）
+// CreateDepartmentMembers 创建部门成员（与 proto Membership 定义对齐）
 func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv1.CreateDepartmentMembersRequest) (*adminv1.CreateDepartmentMembersResponse, error) {
 	result := &adminv1.CreateDepartmentMembersResponse{}
 
 	if req.DepartmentId == 0 {
 		return result, errs.InvalidArgument(ctx).WithMessage("department_id is required")
 	}
-	if len(req.DepartmentMembers) == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("department_members is required")
+	if len(req.Members) == 0 {
+		return result, errs.InvalidArgument(ctx).WithMessage("memberships is required")
 	}
 
 	db, err := a.GetLionClient()
@@ -659,23 +661,23 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 		userID = uid
 	}
 
-	depMembers := make([]*lion.UserDepartmentsCreate, 0, len(req.DepartmentMembers))
+	depMembers := make([]*lion.UserDepartmentsCreate, 0, len(req.Members))
 
-	for _, member := range req.DepartmentMembers {
+	for _, member := range req.Members {
 		if member.UserId == 0 {
-			return result, errs.InvalidArgument(ctx).WithMessage("department_member.user_id is required")
+			return result, errs.InvalidArgument(ctx).WithMessage("membership.user_id is required")
 		}
 
-		role := int(adminv1.DepartmentMember_MEMBER)
-		if member.MemberRole != adminv1.DepartmentMember_ROLE_UNSPECIFIED {
+		role := int(adminv1.Membership_MEMBER)
+		if member.MemberRole != adminv1.Membership_ROLE_UNSPECIFIED {
 			role = int(member.MemberRole)
 		}
-		status := int(adminv1.DepartmentMember_ACTIVE)
-		if member.MemberStatus != adminv1.DepartmentMember_STATUS_UNSPECIFIED {
+		status := int(adminv1.Membership_ACTIVE)
+		if member.MemberStatus != adminv1.Membership_STATUS_UNSPECIFIED {
 			status = int(member.MemberStatus)
 		}
-		memberType := int(adminv1.DepartmentMember_PRIMARY)
-		if member.MemberType != adminv1.DepartmentMember_TYPE_UNSPECIFIED {
+		memberType := int(adminv1.Membership_PRIMARY)
+		if member.MemberType != adminv1.Membership_MEMBER_TYPE_UNSPECIFIED {
 			memberType = int(member.MemberType)
 		}
 
@@ -705,14 +707,14 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 	return result, nil
 }
 
-// UpdateDepartmentMembers 更新部门成员（按 department_id + user_id 定位，与 proto DepartmentMember 对齐）
+// UpdateDepartmentMembers 更新部门成员（按 department_id + user_id 定位，与 proto Membership 对齐）
 func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv1.UpdateDepartmentMembersRequest) (*adminv1.UpdateDepartmentMembersResponse, error) {
 	result := &adminv1.UpdateDepartmentMembersResponse{}
 
 	if req.DepartmentId == 0 {
 		return result, errs.InvalidArgument(ctx).WithMessage("department_id is required")
 	}
-	if len(req.DepartmentMembers) == 0 {
+	if len(req.Members) == 0 {
 		return result, nil
 	}
 
@@ -730,7 +732,7 @@ func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv
 		updatedBy = uid
 	}
 
-	for _, member := range req.DepartmentMembers {
+	for _, member := range req.Members {
 		if member.UserId == 0 {
 			continue
 		}
@@ -741,13 +743,13 @@ func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv
 				userdepartments.UserIDEQ(int(member.UserId)),
 			)
 
-		if member.MemberRole != adminv1.DepartmentMember_ROLE_UNSPECIFIED {
+		if member.MemberRole != adminv1.Membership_ROLE_UNSPECIFIED {
 			upd = upd.SetMemberRole(int(member.MemberRole))
 		}
-		if member.MemberStatus != adminv1.DepartmentMember_STATUS_UNSPECIFIED {
+		if member.MemberStatus != adminv1.Membership_STATUS_UNSPECIFIED {
 			upd = upd.SetMemberStatus(int(member.MemberStatus))
 		}
-		if member.MemberType != adminv1.DepartmentMember_TYPE_UNSPECIFIED {
+		if member.MemberType != adminv1.Membership_MEMBER_TYPE_UNSPECIFIED {
 			upd = upd.SetMemberType(int(member.MemberType))
 		}
 		// description 允许置空，按请求更新
@@ -812,7 +814,7 @@ func (a *KnownAdminAPI) buildDepartmentTree(ctx context.Context, dep *lion.Depar
 		Code:       dep.Code,
 		SortOrder:  int32(dep.SortOrder),
 		Visibility: adminv1.Visibility(dep.Visibility),
-		Members:    make([]*adminv1.DepartmentMember, 0),
+		Members:    make([]*adminv1.Membership, 0),
 	}
 
 	// 递归子部门
@@ -962,7 +964,7 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 	managedDeptIDSet := make(map[int]struct{})
 	for _, ud := range udList {
 		userDeptIDSet[ud.DepartmentID] = struct{}{}
-		if ud.MemberRole == int(adminv1.DepartmentMember_OWNER.Number()) || ud.MemberRole == int(adminv1.DepartmentMember_MANAGER.Number()) {
+		if ud.MemberRole == int(adminv1.Membership_OWNER.Number()) || ud.MemberRole == int(adminv1.Membership_MANAGER.Number()) {
 			managedDeptIDSet[ud.DepartmentID] = struct{}{}
 		}
 	}

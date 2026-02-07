@@ -99,7 +99,7 @@ type KnownAdminClient interface {
 	ListGroupMembers(ctx context.Context, in *ListGroupMembersRequest, opts ...grpc.CallOption) (*ListGroupMembersResponse, error)
 	CreateGroupMembers(ctx context.Context, in *CreateGroupMembersRequest, opts ...grpc.CallOption) (*CreateGroupMembersResponse, error)
 	DeleteGroupMember(ctx context.Context, in *DeleteGroupMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	UpdateGroupMember(ctx context.Context, in *UpdateGroupMemberRequest, opts ...grpc.CallOption) (*GroupMember, error)
+	UpdateGroupMember(ctx context.Context, in *UpdateGroupMemberRequest, opts ...grpc.CallOption) (*Membership, error)
 	// 安全相关
 	CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*Credential, error)
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
@@ -693,8 +693,8 @@ func (c *knownAdminClient) DeleteGroupMember(ctx context.Context, in *DeleteGrou
 	return out, nil
 }
 
-func (c *knownAdminClient) UpdateGroupMember(ctx context.Context, in *UpdateGroupMemberRequest, opts ...grpc.CallOption) (*GroupMember, error) {
-	out := new(GroupMember)
+func (c *knownAdminClient) UpdateGroupMember(ctx context.Context, in *UpdateGroupMemberRequest, opts ...grpc.CallOption) (*Membership, error) {
+	out := new(Membership)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGroupMember", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -827,7 +827,7 @@ type KnownAdminServer interface {
 	ListGroupMembers(context.Context, *ListGroupMembersRequest) (*ListGroupMembersResponse, error)
 	CreateGroupMembers(context.Context, *CreateGroupMembersRequest) (*CreateGroupMembersResponse, error)
 	DeleteGroupMember(context.Context, *DeleteGroupMemberRequest) (*emptypb.Empty, error)
-	UpdateGroupMember(context.Context, *UpdateGroupMemberRequest) (*GroupMember, error)
+	UpdateGroupMember(context.Context, *UpdateGroupMemberRequest) (*Membership, error)
 	// 安全相关
 	CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error)
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
@@ -1033,7 +1033,7 @@ func (UnimplementedKnownAdminServer) CreateGroupMembers(context.Context, *Create
 func (UnimplementedKnownAdminServer) DeleteGroupMember(context.Context, *DeleteGroupMemberRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteGroupMember not implemented")
 }
-func (UnimplementedKnownAdminServer) UpdateGroupMember(context.Context, *UpdateGroupMemberRequest) (*GroupMember, error) {
+func (UnimplementedKnownAdminServer) UpdateGroupMember(context.Context, *UpdateGroupMemberRequest) (*Membership, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateGroupMember not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error) {
