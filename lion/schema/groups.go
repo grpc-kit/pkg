@@ -51,9 +51,16 @@ func (Groups) Fields() []ent.Field {
 		field.String("external_id").
 			Default("").
 			Comment("外部系统ID，用于与外部系统集成"),
+		field.String("external_source").
+			Default("").
+			Comment("外部系统来源，如 ldap、sso、custom；type=EXTERNAL 时必填"),
 		field.Int("department_id").
-			Default(1).
-			Comment("关联 lion_departments 表的 ID"),
+			Optional().
+			Default(0).
+			Comment("关联 lion_departments 表的 ID，type=DEPARTMENT 时必填"),
+		field.Int("role_id").
+			Default(0).
+			Comment("关联 lion_roles 表的 ID，type=ROLE 时必填"),
 		field.String("description").
 			Default("").
 			Comment("用户组描述"),
@@ -69,8 +76,7 @@ func (Groups) Edges() []ent.Edge {
 		edge.From("lion_departments", Departments.Type).
 			Ref("lion_groups").
 			Field("department_id").
-			Unique().
-			Required(),
+			Unique(),
 	}
 }
 
@@ -91,6 +97,8 @@ func (Groups) Indexes() []ent.Index {
 		index.Fields("group_type"),
 		// 群组状态索引，用于按状态过滤查询
 		index.Fields("group_status"),
+		// 关联角色ID索引，用于 ROLE 类型群组查询
+		index.Fields("role_id"),
 	}
 }
 

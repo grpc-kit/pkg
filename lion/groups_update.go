@@ -264,6 +264,20 @@ func (_u *GroupsUpdate) SetNillableExternalID(v *string) *GroupsUpdate {
 	return _u
 }
 
+// SetExternalSource sets the "external_source" field.
+func (_u *GroupsUpdate) SetExternalSource(v string) *GroupsUpdate {
+	_u.mutation.SetExternalSource(v)
+	return _u
+}
+
+// SetNillableExternalSource sets the "external_source" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableExternalSource(v *string) *GroupsUpdate {
+	if v != nil {
+		_u.SetExternalSource(*v)
+	}
+	return _u
+}
+
 // SetDepartmentID sets the "department_id" field.
 func (_u *GroupsUpdate) SetDepartmentID(v int) *GroupsUpdate {
 	_u.mutation.SetDepartmentID(v)
@@ -275,6 +289,33 @@ func (_u *GroupsUpdate) SetNillableDepartmentID(v *int) *GroupsUpdate {
 	if v != nil {
 		_u.SetDepartmentID(*v)
 	}
+	return _u
+}
+
+// ClearDepartmentID clears the value of the "department_id" field.
+func (_u *GroupsUpdate) ClearDepartmentID() *GroupsUpdate {
+	_u.mutation.ClearDepartmentID()
+	return _u
+}
+
+// SetRoleID sets the "role_id" field.
+func (_u *GroupsUpdate) SetRoleID(v int) *GroupsUpdate {
+	_u.mutation.ResetRoleID()
+	_u.mutation.SetRoleID(v)
+	return _u
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableRoleID(v *int) *GroupsUpdate {
+	if v != nil {
+		_u.SetRoleID(*v)
+	}
+	return _u
+}
+
+// AddRoleID adds value to the "role_id" field.
+func (_u *GroupsUpdate) AddRoleID(v int) *GroupsUpdate {
+	_u.mutation.AddRoleID(v)
 	return _u
 }
 
@@ -325,6 +366,14 @@ func (_u *GroupsUpdate) AddLionUserGroups(v ...*UserGroups) *GroupsUpdate {
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
 func (_u *GroupsUpdate) SetLionDepartmentsID(id int) *GroupsUpdate {
 	_u.mutation.SetLionDepartmentsID(id)
+	return _u
+}
+
+// SetNillableLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableLionDepartmentsID(id *int) *GroupsUpdate {
+	if id != nil {
+		_u = _u.SetLionDepartmentsID(*id)
+	}
 	return _u
 }
 
@@ -434,9 +483,6 @@ func (_u *GroupsUpdate) check() error {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Groups.display_name": %w`, err)}
 		}
 	}
-	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "Groups.lion_departments"`)
-	}
 	return nil
 }
 
@@ -520,6 +566,15 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.ExternalID(); ok {
 		_spec.SetField(groups.FieldExternalID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ExternalSource(); ok {
+		_spec.SetField(groups.FieldExternalSource, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.RoleID(); ok {
+		_spec.SetField(groups.FieldRoleID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRoleID(); ok {
+		_spec.AddField(groups.FieldRoleID, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
@@ -896,6 +951,20 @@ func (_u *GroupsUpdateOne) SetNillableExternalID(v *string) *GroupsUpdateOne {
 	return _u
 }
 
+// SetExternalSource sets the "external_source" field.
+func (_u *GroupsUpdateOne) SetExternalSource(v string) *GroupsUpdateOne {
+	_u.mutation.SetExternalSource(v)
+	return _u
+}
+
+// SetNillableExternalSource sets the "external_source" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableExternalSource(v *string) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetExternalSource(*v)
+	}
+	return _u
+}
+
 // SetDepartmentID sets the "department_id" field.
 func (_u *GroupsUpdateOne) SetDepartmentID(v int) *GroupsUpdateOne {
 	_u.mutation.SetDepartmentID(v)
@@ -907,6 +976,33 @@ func (_u *GroupsUpdateOne) SetNillableDepartmentID(v *int) *GroupsUpdateOne {
 	if v != nil {
 		_u.SetDepartmentID(*v)
 	}
+	return _u
+}
+
+// ClearDepartmentID clears the value of the "department_id" field.
+func (_u *GroupsUpdateOne) ClearDepartmentID() *GroupsUpdateOne {
+	_u.mutation.ClearDepartmentID()
+	return _u
+}
+
+// SetRoleID sets the "role_id" field.
+func (_u *GroupsUpdateOne) SetRoleID(v int) *GroupsUpdateOne {
+	_u.mutation.ResetRoleID()
+	_u.mutation.SetRoleID(v)
+	return _u
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableRoleID(v *int) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetRoleID(*v)
+	}
+	return _u
+}
+
+// AddRoleID adds value to the "role_id" field.
+func (_u *GroupsUpdateOne) AddRoleID(v int) *GroupsUpdateOne {
+	_u.mutation.AddRoleID(v)
 	return _u
 }
 
@@ -957,6 +1053,14 @@ func (_u *GroupsUpdateOne) AddLionUserGroups(v ...*UserGroups) *GroupsUpdateOne 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
 func (_u *GroupsUpdateOne) SetLionDepartmentsID(id int) *GroupsUpdateOne {
 	_u.mutation.SetLionDepartmentsID(id)
+	return _u
+}
+
+// SetNillableLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableLionDepartmentsID(id *int) *GroupsUpdateOne {
+	if id != nil {
+		_u = _u.SetLionDepartmentsID(*id)
+	}
 	return _u
 }
 
@@ -1079,9 +1183,6 @@ func (_u *GroupsUpdateOne) check() error {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Groups.display_name": %w`, err)}
 		}
 	}
-	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "Groups.lion_departments"`)
-	}
 	return nil
 }
 
@@ -1182,6 +1283,15 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	}
 	if value, ok := _u.mutation.ExternalID(); ok {
 		_spec.SetField(groups.FieldExternalID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ExternalSource(); ok {
+		_spec.SetField(groups.FieldExternalSource, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.RoleID(); ok {
+		_spec.SetField(groups.FieldRoleID, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRoleID(); ok {
+		_spec.AddField(groups.FieldRoleID, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)

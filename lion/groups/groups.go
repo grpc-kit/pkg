@@ -42,8 +42,12 @@ const (
 	FieldMetadata = "metadata"
 	// FieldExternalID holds the string denoting the external_id field in the database.
 	FieldExternalID = "external_id"
+	// FieldExternalSource holds the string denoting the external_source field in the database.
+	FieldExternalSource = "external_source"
 	// FieldDepartmentID holds the string denoting the department_id field in the database.
 	FieldDepartmentID = "department_id"
+	// FieldRoleID holds the string denoting the role_id field in the database.
+	FieldRoleID = "role_id"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
@@ -94,7 +98,9 @@ var Columns = []string{
 	FieldMaxMembers,
 	FieldMetadata,
 	FieldExternalID,
+	FieldExternalSource,
 	FieldDepartmentID,
+	FieldRoleID,
 	FieldDescription,
 }
 
@@ -137,8 +143,12 @@ var (
 	DefaultMetadata map[string]string
 	// DefaultExternalID holds the default value on creation for the "external_id" field.
 	DefaultExternalID string
+	// DefaultExternalSource holds the default value on creation for the "external_source" field.
+	DefaultExternalSource string
 	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
 	DefaultDepartmentID int
+	// DefaultRoleID holds the default value on creation for the "role_id" field.
+	DefaultRoleID int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -216,9 +226,19 @@ func ByExternalID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExternalID, opts...).ToFunc()
 }
 
+// ByExternalSource orders the results by the external_source field.
+func ByExternalSource(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExternalSource, opts...).ToFunc()
+}
+
 // ByDepartmentID orders the results by the department_id field.
 func ByDepartmentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDepartmentID, opts...).ToFunc()
+}
+
+// ByRoleID orders the results by the role_id field.
+func ByRoleID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRoleID, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

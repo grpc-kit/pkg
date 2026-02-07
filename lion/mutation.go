@@ -6649,6 +6649,9 @@ type GroupsMutation struct {
 	addmax_members          *int
 	metadata                *map[string]string
 	external_id             *string
+	external_source         *string
+	role_id                 *int
+	addrole_id              *int
 	description             *string
 	clearedFields           map[string]struct{}
 	lion_groups             map[int]struct{}
@@ -7447,6 +7450,42 @@ func (m *GroupsMutation) ResetExternalID() {
 	m.external_id = nil
 }
 
+// SetExternalSource sets the "external_source" field.
+func (m *GroupsMutation) SetExternalSource(s string) {
+	m.external_source = &s
+}
+
+// ExternalSource returns the value of the "external_source" field in the mutation.
+func (m *GroupsMutation) ExternalSource() (r string, exists bool) {
+	v := m.external_source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExternalSource returns the old "external_source" field's value of the Groups entity.
+// If the Groups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupsMutation) OldExternalSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExternalSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExternalSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExternalSource: %w", err)
+	}
+	return oldValue.ExternalSource, nil
+}
+
+// ResetExternalSource resets all changes to the "external_source" field.
+func (m *GroupsMutation) ResetExternalSource() {
+	m.external_source = nil
+}
+
 // SetDepartmentID sets the "department_id" field.
 func (m *GroupsMutation) SetDepartmentID(i int) {
 	m.lion_departments = &i
@@ -7478,9 +7517,78 @@ func (m *GroupsMutation) OldDepartmentID(ctx context.Context) (v int, err error)
 	return oldValue.DepartmentID, nil
 }
 
+// ClearDepartmentID clears the value of the "department_id" field.
+func (m *GroupsMutation) ClearDepartmentID() {
+	m.lion_departments = nil
+	m.clearedFields[groups.FieldDepartmentID] = struct{}{}
+}
+
+// DepartmentIDCleared returns if the "department_id" field was cleared in this mutation.
+func (m *GroupsMutation) DepartmentIDCleared() bool {
+	_, ok := m.clearedFields[groups.FieldDepartmentID]
+	return ok
+}
+
 // ResetDepartmentID resets all changes to the "department_id" field.
 func (m *GroupsMutation) ResetDepartmentID() {
 	m.lion_departments = nil
+	delete(m.clearedFields, groups.FieldDepartmentID)
+}
+
+// SetRoleID sets the "role_id" field.
+func (m *GroupsMutation) SetRoleID(i int) {
+	m.role_id = &i
+	m.addrole_id = nil
+}
+
+// RoleID returns the value of the "role_id" field in the mutation.
+func (m *GroupsMutation) RoleID() (r int, exists bool) {
+	v := m.role_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRoleID returns the old "role_id" field's value of the Groups entity.
+// If the Groups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GroupsMutation) OldRoleID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRoleID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRoleID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRoleID: %w", err)
+	}
+	return oldValue.RoleID, nil
+}
+
+// AddRoleID adds i to the "role_id" field.
+func (m *GroupsMutation) AddRoleID(i int) {
+	if m.addrole_id != nil {
+		*m.addrole_id += i
+	} else {
+		m.addrole_id = &i
+	}
+}
+
+// AddedRoleID returns the value that was added to the "role_id" field in this mutation.
+func (m *GroupsMutation) AddedRoleID() (r int, exists bool) {
+	v := m.addrole_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRoleID resets all changes to the "role_id" field.
+func (m *GroupsMutation) ResetRoleID() {
+	m.role_id = nil
+	m.addrole_id = nil
 }
 
 // SetDescription sets the "description" field.
@@ -7640,7 +7748,7 @@ func (m *GroupsMutation) ClearLionDepartments() {
 
 // LionDepartmentsCleared reports if the "lion_departments" edge to the Departments entity was cleared.
 func (m *GroupsMutation) LionDepartmentsCleared() bool {
-	return m.clearedlion_departments
+	return m.DepartmentIDCleared() || m.clearedlion_departments
 }
 
 // LionDepartmentsID returns the "lion_departments" edge ID in the mutation.
@@ -7701,7 +7809,7 @@ func (m *GroupsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *GroupsMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 18)
 	if m.created_at != nil {
 		fields = append(fields, groups.FieldCreatedAt)
 	}
@@ -7744,8 +7852,14 @@ func (m *GroupsMutation) Fields() []string {
 	if m.external_id != nil {
 		fields = append(fields, groups.FieldExternalID)
 	}
+	if m.external_source != nil {
+		fields = append(fields, groups.FieldExternalSource)
+	}
 	if m.lion_departments != nil {
 		fields = append(fields, groups.FieldDepartmentID)
+	}
+	if m.role_id != nil {
+		fields = append(fields, groups.FieldRoleID)
 	}
 	if m.description != nil {
 		fields = append(fields, groups.FieldDescription)
@@ -7786,8 +7900,12 @@ func (m *GroupsMutation) Field(name string) (ent.Value, bool) {
 		return m.Metadata()
 	case groups.FieldExternalID:
 		return m.ExternalID()
+	case groups.FieldExternalSource:
+		return m.ExternalSource()
 	case groups.FieldDepartmentID:
 		return m.DepartmentID()
+	case groups.FieldRoleID:
+		return m.RoleID()
 	case groups.FieldDescription:
 		return m.Description()
 	}
@@ -7827,8 +7945,12 @@ func (m *GroupsMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldMetadata(ctx)
 	case groups.FieldExternalID:
 		return m.OldExternalID(ctx)
+	case groups.FieldExternalSource:
+		return m.OldExternalSource(ctx)
 	case groups.FieldDepartmentID:
 		return m.OldDepartmentID(ctx)
+	case groups.FieldRoleID:
+		return m.OldRoleID(ctx)
 	case groups.FieldDescription:
 		return m.OldDescription(ctx)
 	}
@@ -7938,12 +8060,26 @@ func (m *GroupsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetExternalID(v)
 		return nil
+	case groups.FieldExternalSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExternalSource(v)
+		return nil
 	case groups.FieldDepartmentID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDepartmentID(v)
+		return nil
+	case groups.FieldRoleID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRoleID(v)
 		return nil
 	case groups.FieldDescription:
 		v, ok := value.(string)
@@ -7981,6 +8117,9 @@ func (m *GroupsMutation) AddedFields() []string {
 	if m.addmax_members != nil {
 		fields = append(fields, groups.FieldMaxMembers)
 	}
+	if m.addrole_id != nil {
+		fields = append(fields, groups.FieldRoleID)
+	}
 	return fields
 }
 
@@ -8003,6 +8142,8 @@ func (m *GroupsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedParentID()
 	case groups.FieldMaxMembers:
 		return m.AddedMaxMembers()
+	case groups.FieldRoleID:
+		return m.AddedRoleID()
 	}
 	return nil, false
 }
@@ -8061,6 +8202,13 @@ func (m *GroupsMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddMaxMembers(v)
 		return nil
+	case groups.FieldRoleID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRoleID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Groups numeric field %s", name)
 }
@@ -8077,6 +8225,9 @@ func (m *GroupsMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(groups.FieldUpdatedBy) {
 		fields = append(fields, groups.FieldUpdatedBy)
+	}
+	if m.FieldCleared(groups.FieldDepartmentID) {
+		fields = append(fields, groups.FieldDepartmentID)
 	}
 	return fields
 }
@@ -8100,6 +8251,9 @@ func (m *GroupsMutation) ClearField(name string) error {
 		return nil
 	case groups.FieldUpdatedBy:
 		m.ClearUpdatedBy()
+		return nil
+	case groups.FieldDepartmentID:
+		m.ClearDepartmentID()
 		return nil
 	}
 	return fmt.Errorf("unknown Groups nullable field %s", name)
@@ -8151,8 +8305,14 @@ func (m *GroupsMutation) ResetField(name string) error {
 	case groups.FieldExternalID:
 		m.ResetExternalID()
 		return nil
+	case groups.FieldExternalSource:
+		m.ResetExternalSource()
+		return nil
 	case groups.FieldDepartmentID:
 		m.ResetDepartmentID()
+		return nil
+	case groups.FieldRoleID:
+		m.ResetRoleID()
 		return nil
 	case groups.FieldDescription:
 		m.ResetDescription()

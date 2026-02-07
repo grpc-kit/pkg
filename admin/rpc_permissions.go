@@ -31,7 +31,7 @@ func lionPermissionBindingToProto(binding *lion.PermissionBindings) *adminv1.Per
 		rs := binding.Edges.LionResourceScopes
 		if rs.Edges.LionResources != nil {
 			res := rs.Edges.LionResources
-			out.Resources = &adminv1.Resource{
+			out.Resource = &adminv1.Resource{
 				Id:          int64(res.ID),
 				ParentId:    res.ParentID,
 				Code:        res.Code,
@@ -47,7 +47,7 @@ func lionPermissionBindingToProto(binding *lion.PermissionBindings) *adminv1.Per
 			}
 			if rs.Edges.LionScopes != nil {
 				s := rs.Edges.LionScopes
-				out.Resources.Scopes = append(out.Resources.Scopes, &adminv1.Scope{
+				out.Resource.Scopes = append(out.Resource.Scopes, &adminv1.Scope{
 					Id:          int64(s.ID),
 					Code:        s.Code,
 					DisplayName: s.DisplayName,

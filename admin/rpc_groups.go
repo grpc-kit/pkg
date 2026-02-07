@@ -11,7 +11,9 @@ import (
 	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/usergroups"
+	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -32,6 +34,20 @@ func parseGroupParent(parent string) (int, error) {
 	return strconv.Atoi(strings.TrimSpace(parent))
 }
 
+// getGroupType 获取群组类型（返回 adminv1.Group_Type）
+func (a *KnownAdminAPI) getGroupType(ctx context.Context, db *lion.Client, groupID int) (adminv1.Group_Type, error) {
+	group, err := db.Groups.Get(ctx, groupID)
+	if err != nil {
+		return adminv1.Group_TYPE_UNSPECIFIED, err
+	}
+	return adminv1.Group_Type(group.GroupType), nil
+}
+
+// isAutoManagedGroupType 判断群组类型是否为自动管理成员类型（不允许手动添加/删除/编辑成员）
+func isAutoManagedGroupType(t adminv1.Group_Type) bool {
+	return t == adminv1.Group_DEPARTMENT || t == adminv1.Group_ROLE
+}
+
 // CreateGroup 创建用户组
 func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGroupRequest) (*adminv1.Group, error) {
 	result := &adminv1.Group{}
@@ -40,14 +56,39 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		return result, errs.InvalidArgument(ctx).WithMessage("request body group is nil")
 	}
 
+	// 类型校验：不允许 TYPE_UNSPECIFIED 和 SYSTEM
+	groupType := req.Group.Type
+	switch groupType {
+	case adminv1.Group_TYPE_UNSPECIFIED:
+		return result, errs.InvalidArgument(ctx).WithMessage("group type must be specified")
+	case adminv1.Group_SYSTEM:
+		return result, errs.InvalidArgument(ctx).WithMessage("SYSTEM type groups cannot be created via API")
+	case adminv1.Group_DEPARTMENT:
+		if req.Group.DepartmentId == 0 {
+			return result, errs.InvalidArgument(ctx).WithMessage("department_id is required when type is DEPARTMENT")
+		}
+	case adminv1.Group_ROLE:
+		if req.Group.RoleId == 0 {
+			return result, errs.InvalidArgument(ctx).WithMessage("role_id is required when type is ROLE")
+		}
+	case adminv1.Group_EXTERNAL:
+		if req.Group.ExternalId == "" {
+			return result, errs.InvalidArgument(ctx).WithMessage("external_id is required when type is EXTERNAL")
+		}
+		if req.Group.ExternalSource == "" {
+			return result, errs.InvalidArgument(ctx).WithMessage("external_source is required when type is EXTERNAL")
+		}
+	}
+
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
 	}
 
-	departmentID := int(req.Group.DepartmentId)
-	if departmentID == 0 {
-		departmentID = 1
+	// 仅 DEPARTMENT 类型需要 department_id，其他类型不设置
+	departmentID := 0
+	if groupType == adminv1.Group_DEPARTMENT {
+		departmentID = int(req.Group.DepartmentId)
 	}
 
 	displayName := req.Group.DisplayName
@@ -68,20 +109,23 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		}
 	}
 
-	group, err := db.Groups.Create().
+	create := db.Groups.Create().
 		SetCode(req.Group.Code).
 		SetDisplayName(displayName).
-		SetGroupType(int(req.Group.Type.Number())).
+		SetGroupType(int(groupType.Number())).
 		SetGroupStatus(int(req.Group.Status.Number())).
 		SetSortOrder(int(req.Group.SortOrder)).
 		SetMaxMembers(int(req.Group.MaxMembers)).
 		SetMetadata(req.Group.Metadata).
 		SetExternalID(req.Group.ExternalId).
+		SetExternalSource(req.Group.ExternalSource).
 		SetDepartmentID(departmentID).
+		SetRoleID(int(req.Group.RoleId)).
 		SetDescription(req.Group.Description).
 		SetCreatedBy(createdBy).
-		SetUpdatedBy(updatedBy).
-		Save(ctx)
+		SetUpdatedBy(updatedBy)
+
+	group, err := create.Save(ctx)
 	if err != nil {
 		return result, err
 	}
@@ -265,6 +309,14 @@ func parseListGroupsFilter(filter string) ([]predicate.Groups, error) {
 				return nil, fmt.Errorf("department_id must be int: %s", val)
 			}
 			out = append(out, groups.DepartmentID(n))
+		case "role_id":
+			n, err := strconv.Atoi(val)
+			if err != nil {
+				return nil, fmt.Errorf("role_id must be int: %s", val)
+			}
+			out = append(out, groups.RoleID(n))
+		case "external_source":
+			out = append(out, groups.ExternalSourceEQ(val))
 		}
 	}
 	return out, nil
@@ -272,19 +324,21 @@ func parseListGroupsFilter(filter string) ([]predicate.Groups, error) {
 
 func groupToProto(g *lion.Groups, includeTimestamps bool) *adminv1.Group {
 	grp := &adminv1.Group{
-		Id:           int64(g.ID),
-		Code:         g.Code,
-		Type:         adminv1.Group_Type(g.GroupType),
-		Status:       adminv1.Group_Status(g.GroupStatus),
-		DisplayName:  g.DisplayName,
-		SortOrder:    int32(g.SortOrder),
-		MaxMembers:   int32(g.MaxMembers),
-		Metadata:     g.Metadata,
-		ExternalId:   g.ExternalID,
-		DepartmentId: int64(g.DepartmentID),
-		Description:  g.Description,
-		CreatedBy:    g.CreatedBy,
-		UpdatedBy:    g.UpdatedBy,
+		Id:             int64(g.ID),
+		Code:           g.Code,
+		Type:           adminv1.Group_Type(g.GroupType),
+		Status:         adminv1.Group_Status(g.GroupStatus),
+		DisplayName:    g.DisplayName,
+		SortOrder:      int32(g.SortOrder),
+		MaxMembers:     int32(g.MaxMembers),
+		Metadata:       g.Metadata,
+		ExternalId:     g.ExternalID,
+		ExternalSource: g.ExternalSource,
+		DepartmentId:   int64(g.DepartmentID),
+		RoleId:         int64(g.RoleID),
+		Description:    g.Description,
+		CreatedBy:      g.CreatedBy,
+		UpdatedBy:      g.UpdatedBy,
 	}
 	if includeTimestamps {
 		grp.CreatedAt = timestamppb.New(g.CreatedAt)
@@ -339,6 +393,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			case "display_name":
 				update.SetDisplayName(req.Group.DisplayName)
 			case "type":
+				// type 创建后不建议修改，但保留 update_mask 支持
 				update.SetGroupType(int(req.Group.Type.Number()))
 			case "status":
 				update.SetGroupStatus(int(req.Group.Status.Number()))
@@ -350,8 +405,12 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 				update.SetMetadata(req.Group.Metadata)
 			case "external_id":
 				update.SetExternalID(req.Group.ExternalId)
+			case "external_source":
+				update.SetExternalSource(req.Group.ExternalSource)
 			case "department_id":
 				update.SetDepartmentID(int(req.Group.DepartmentId))
+			case "role_id":
+				update.SetRoleID(int(req.Group.RoleId))
 			case "description":
 				update.SetDescription(req.Group.Description)
 			case "updated_by":
@@ -373,7 +432,9 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			SetMaxMembers(int(req.Group.MaxMembers)).
 			SetMetadata(req.Group.Metadata).
 			SetExternalID(req.Group.ExternalId).
+			SetExternalSource(req.Group.ExternalSource).
 			SetDepartmentID(int(req.Group.DepartmentId)).
+			SetRoleID(int(req.Group.RoleId)).
 			SetDescription(req.Group.Description).
 			SetUpdatedBy(updatedBy)
 	}
@@ -398,6 +459,11 @@ func (a *KnownAdminAPI) DeleteGroup(ctx context.Context, req *adminv1.DeleteGrou
 		return nil, err
 	}
 
+	// SYSTEM 类型群组不允许删除
+	if adminv1.Group_Type(group.GroupType) == adminv1.Group_SYSTEM {
+		return nil, errs.InvalidArgument(ctx).WithMessage("SYSTEM type groups cannot be deleted")
+	}
+
 	_, err = group.Update().SetDeletedAt(time.Now()).Save(ctx)
 	if err != nil {
 		return nil, err
@@ -407,6 +473,10 @@ func (a *KnownAdminAPI) DeleteGroup(ctx context.Context, req *adminv1.DeleteGrou
 }
 
 // ListGroupMembers 获取群组成员列表
+// 根据群组类型从不同数据源获取成员：
+//   - DEPARTMENT: 从 user_departments 表查询关联部门的成员
+//   - ROLE: 从 user_roles 表查询关联角色的成员
+//   - 其他类型: 从 user_groups 表查询
 func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListGroupMembersRequest) (*adminv1.ListGroupMembersResponse, error) {
 	result := &adminv1.ListGroupMembersResponse{
 		Members: make([]*adminv1.Membership, 0),
@@ -424,6 +494,236 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
+	}
+
+	// 查询群组信息以确定类型和关联ID
+	group, err := db.Groups.Get(ctx, groupID)
+	if err != nil {
+		return result, err
+	}
+
+	groupType := adminv1.Group_Type(group.GroupType)
+
+	// 根据群组类型路由到不同的数据源
+	switch groupType {
+	case adminv1.Group_DEPARTMENT:
+		return a.listGroupMembersFromDepartment(ctx, req, db, group.DepartmentID)
+	case adminv1.Group_ROLE:
+		return a.listGroupMembersFromRole(ctx, req, db, group.RoleID)
+	default:
+		return a.listGroupMembersFromUserGroups(ctx, req, db, groupID)
+	}
+}
+
+// listGroupMembersFromDepartment 从 user_departments 表查询部门群组成员
+func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, departmentID int) (*adminv1.ListGroupMembersResponse, error) {
+	result := &adminv1.ListGroupMembersResponse{
+		Members: make([]*adminv1.Membership, 0),
+	}
+
+	if departmentID == 0 {
+		return result, nil
+	}
+
+	memberQuery := db.UserDepartments.Query().Where(userdepartments.DepartmentIDEQ(departmentID))
+
+	// 排序
+	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+	case "created_at desc", "create_time desc":
+		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldCreatedAt))
+	case "created_at asc", "create_time asc":
+		memberQuery = memberQuery.Order(lion.Asc(userdepartments.FieldCreatedAt))
+	default:
+		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldID))
+	}
+
+	totalSize, err := memberQuery.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result.TotalSize = int32(totalSize)
+
+	pageSize := GetPageSize(ctx, req.GetPageSize())
+
+	// 分页
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListGroupMembersRequest_Offset:
+		memberQuery = memberQuery.Offset(int(p.Offset))
+	case *adminv1.ListGroupMembersRequest_PageToken:
+		if req.GetPageToken() != "" {
+			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
+			if decErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
+			}
+			var lastID int
+			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
+			}
+			if lastID > 0 {
+				memberQuery = memberQuery.Where(userdepartments.IDGT(lastID))
+			}
+		}
+	}
+	memberQuery = memberQuery.Limit(int(pageSize))
+
+	members, err := memberQuery.Select(
+		userdepartments.FieldID,
+		userdepartments.FieldUserID,
+		userdepartments.FieldDepartmentID,
+		userdepartments.FieldMemberRole,
+		userdepartments.FieldMemberStatus,
+		userdepartments.FieldMemberType,
+		userdepartments.FieldDescription,
+		userdepartments.FieldMetadata,
+		userdepartments.FieldCreatedBy,
+		userdepartments.FieldUpdatedBy,
+		userdepartments.FieldCreatedAt,
+		userdepartments.FieldUpdatedAt,
+	).WithLionUsers(func(q *lion.UsersQuery) {
+		q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
+	}).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, m := range members {
+		user := m.Edges.LionUsers
+		if user == nil {
+			continue
+		}
+		pm := &adminv1.Membership{
+			Id:           int64(m.ID),
+			UserId:       int64(m.UserID),
+			Username:     user.Username,
+			Nickname:     user.Nickname,
+			TargetType:   adminv1.Membership_DEPARTMENT,
+			TargetId:     int64(m.DepartmentID),
+			MemberRole:   adminv1.Membership_Role(m.MemberRole),
+			MemberStatus: adminv1.Membership_Status(m.MemberStatus),
+			MemberType:   adminv1.Membership_MemberType(m.MemberType),
+			Description:  m.Description,
+			CreatedBy:    m.CreatedBy,
+			UpdatedBy:    m.UpdatedBy,
+			CreatedAt:    timestamppb.New(m.CreatedAt),
+			UpdatedAt:    timestamppb.New(m.UpdatedAt),
+		}
+		if m.Metadata != "" {
+			pm.Metadata = MetadataParse(m.Metadata)
+		}
+		result.Members = append(result.Members, pm)
+	}
+
+	// Cursor 分页
+	if _, ok := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken); ok && len(members) == int(pageSize) && len(members) > 0 {
+		lastID := members[len(members)-1].ID
+		tokenData, _ := json.Marshal(lastID)
+		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	}
+
+	return result, nil
+}
+
+// listGroupMembersFromRole 从 user_roles 表查询角色群组成员
+func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, roleID int) (*adminv1.ListGroupMembersResponse, error) {
+	result := &adminv1.ListGroupMembersResponse{
+		Members: make([]*adminv1.Membership, 0),
+	}
+
+	if roleID == 0 {
+		return result, nil
+	}
+
+	memberQuery := db.UserRoles.Query().Where(userroles.RoleIDEQ(roleID))
+
+	// 排序
+	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+	case "created_at desc", "create_time desc":
+		memberQuery = memberQuery.Order(lion.Desc(userroles.FieldCreatedAt))
+	case "created_at asc", "create_time asc":
+		memberQuery = memberQuery.Order(lion.Asc(userroles.FieldCreatedAt))
+	default:
+		memberQuery = memberQuery.Order(lion.Desc(userroles.FieldID))
+	}
+
+	totalSize, err := memberQuery.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result.TotalSize = int32(totalSize)
+
+	pageSize := GetPageSize(ctx, req.GetPageSize())
+
+	// 分页
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListGroupMembersRequest_Offset:
+		memberQuery = memberQuery.Offset(int(p.Offset))
+	case *adminv1.ListGroupMembersRequest_PageToken:
+		if req.GetPageToken() != "" {
+			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
+			if decErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
+			}
+			var lastID int
+			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
+			}
+			if lastID > 0 {
+				memberQuery = memberQuery.Where(userroles.IDGT(lastID))
+			}
+		}
+	}
+	memberQuery = memberQuery.Limit(int(pageSize))
+
+	members, err := memberQuery.Select(
+		userroles.FieldID,
+		userroles.FieldUserID,
+		userroles.FieldRoleID,
+		userroles.FieldCreatedBy,
+		userroles.FieldUpdatedBy,
+		userroles.FieldCreatedAt,
+		userroles.FieldUpdatedAt,
+	).WithLionUsers(func(q *lion.UsersQuery) {
+		q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
+	}).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, m := range members {
+		user := m.Edges.LionUsers
+		if user == nil {
+			continue
+		}
+		pm := &adminv1.Membership{
+			Id:         int64(m.ID),
+			UserId:     int64(m.UserID),
+			Username:   user.Username,
+			Nickname:   user.Nickname,
+			TargetType: adminv1.Membership_GROUP,
+			TargetId:   int64(m.RoleID),
+			MemberRole: adminv1.Membership_MEMBER,
+			CreatedBy:  m.CreatedBy,
+			UpdatedBy:  m.UpdatedBy,
+			CreatedAt:  timestamppb.New(m.CreatedAt),
+			UpdatedAt:  timestamppb.New(m.UpdatedAt),
+		}
+		result.Members = append(result.Members, pm)
+	}
+
+	// Cursor 分页
+	if _, ok := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken); ok && len(members) == int(pageSize) && len(members) > 0 {
+		lastID := members[len(members)-1].ID
+		tokenData, _ := json.Marshal(lastID)
+		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	}
+
+	return result, nil
+}
+
+// listGroupMembersFromUserGroups 从 user_groups 表查询普通群组成员（默认方式）
+func (a *KnownAdminAPI) listGroupMembersFromUserGroups(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, groupID int) (*adminv1.ListGroupMembersResponse, error) {
+	result := &adminv1.ListGroupMembersResponse{
+		Members: make([]*adminv1.Membership, 0),
 	}
 
 	where := []predicate.UserGroups{usergroups.GroupIDEQ(groupID)}
@@ -599,6 +899,16 @@ func (a *KnownAdminAPI) CreateGroupMembers(ctx context.Context, req *adminv1.Cre
 		return nil, err
 	}
 
+	// 校验群组类型：DEPARTMENT/ROLE 类型不允许手动添加成员
+	groupType, err := a.getGroupType(ctx, db, groupID)
+	if err != nil {
+		return result, err
+	}
+	if isAutoManagedGroupType(groupType) {
+		typeName := groupType.String()
+		return result, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("%s type groups do not support manual member management, members are synced automatically", typeName))
+	}
+
 	allMembers := make([]*lion.UserGroupsCreate, 0, len(req.Members))
 
 	for _, member := range req.Members {
@@ -647,6 +957,16 @@ func (a *KnownAdminAPI) DeleteGroupMember(ctx context.Context, req *adminv1.Dele
 		return nil, err
 	}
 
+	// 校验群组类型：DEPARTMENT/ROLE 类型不允许手动删除成员
+	groupType, err := a.getGroupType(ctx, db, groupID)
+	if err != nil {
+		return nil, err
+	}
+	if isAutoManagedGroupType(groupType) {
+		typeName := groupType.String()
+		return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("%s type groups do not support manual member management, members are synced automatically", typeName))
+	}
+
 	_, err = db.UserGroups.Delete().
 		Where(
 			usergroups.GroupIDEQ(groupID),
@@ -683,6 +1003,16 @@ func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.Upda
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
+	}
+
+	// 校验群组类型：DEPARTMENT/ROLE 类型不允许手动编辑成员
+	groupType, err := a.getGroupType(ctx, db, groupID)
+	if err != nil {
+		return result, err
+	}
+	if isAutoManagedGroupType(groupType) {
+		typeName := groupType.String()
+		return result, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("%s type groups do not support manual member management, members are synced automatically", typeName))
 	}
 
 	member, err := db.UserGroups.Query().

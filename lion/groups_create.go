@@ -195,6 +195,20 @@ func (_c *GroupsCreate) SetNillableExternalID(v *string) *GroupsCreate {
 	return _c
 }
 
+// SetExternalSource sets the "external_source" field.
+func (_c *GroupsCreate) SetExternalSource(v string) *GroupsCreate {
+	_c.mutation.SetExternalSource(v)
+	return _c
+}
+
+// SetNillableExternalSource sets the "external_source" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableExternalSource(v *string) *GroupsCreate {
+	if v != nil {
+		_c.SetExternalSource(*v)
+	}
+	return _c
+}
+
 // SetDepartmentID sets the "department_id" field.
 func (_c *GroupsCreate) SetDepartmentID(v int) *GroupsCreate {
 	_c.mutation.SetDepartmentID(v)
@@ -205,6 +219,20 @@ func (_c *GroupsCreate) SetDepartmentID(v int) *GroupsCreate {
 func (_c *GroupsCreate) SetNillableDepartmentID(v *int) *GroupsCreate {
 	if v != nil {
 		_c.SetDepartmentID(*v)
+	}
+	return _c
+}
+
+// SetRoleID sets the "role_id" field.
+func (_c *GroupsCreate) SetRoleID(v int) *GroupsCreate {
+	_c.mutation.SetRoleID(v)
+	return _c
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableRoleID(v *int) *GroupsCreate {
+	if v != nil {
+		_c.SetRoleID(*v)
 	}
 	return _c
 }
@@ -256,6 +284,14 @@ func (_c *GroupsCreate) AddLionUserGroups(v ...*UserGroups) *GroupsCreate {
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
 func (_c *GroupsCreate) SetLionDepartmentsID(id int) *GroupsCreate {
 	_c.mutation.SetLionDepartmentsID(id)
+	return _c
+}
+
+// SetNillableLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID if the given value is not nil.
+func (_c *GroupsCreate) SetNillableLionDepartmentsID(id *int) *GroupsCreate {
+	if id != nil {
+		_c = _c.SetLionDepartmentsID(*id)
+	}
 	return _c
 }
 
@@ -343,9 +379,17 @@ func (_c *GroupsCreate) defaults() {
 		v := groups.DefaultExternalID
 		_c.mutation.SetExternalID(v)
 	}
+	if _, ok := _c.mutation.ExternalSource(); !ok {
+		v := groups.DefaultExternalSource
+		_c.mutation.SetExternalSource(v)
+	}
 	if _, ok := _c.mutation.DepartmentID(); !ok {
 		v := groups.DefaultDepartmentID
 		_c.mutation.SetDepartmentID(v)
+	}
+	if _, ok := _c.mutation.RoleID(); !ok {
+		v := groups.DefaultRoleID
+		_c.mutation.SetRoleID(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := groups.DefaultDescription
@@ -398,14 +442,14 @@ func (_c *GroupsCreate) check() error {
 	if _, ok := _c.mutation.ExternalID(); !ok {
 		return &ValidationError{Name: "external_id", err: errors.New(`lion: missing required field "Groups.external_id"`)}
 	}
-	if _, ok := _c.mutation.DepartmentID(); !ok {
-		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "Groups.department_id"`)}
+	if _, ok := _c.mutation.ExternalSource(); !ok {
+		return &ValidationError{Name: "external_source", err: errors.New(`lion: missing required field "Groups.external_source"`)}
+	}
+	if _, ok := _c.mutation.RoleID(); !ok {
+		return &ValidationError{Name: "role_id", err: errors.New(`lion: missing required field "Groups.role_id"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Groups.description"`)}
-	}
-	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
-		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "Groups.lion_departments"`)}
 	}
 	return nil
 }
@@ -488,6 +532,14 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ExternalID(); ok {
 		_spec.SetField(groups.FieldExternalID, field.TypeString, value)
 		_node.ExternalID = value
+	}
+	if value, ok := _c.mutation.ExternalSource(); ok {
+		_spec.SetField(groups.FieldExternalSource, field.TypeString, value)
+		_node.ExternalSource = value
+	}
+	if value, ok := _c.mutation.RoleID(); ok {
+		_spec.SetField(groups.FieldRoleID, field.TypeInt, value)
+		_node.RoleID = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)

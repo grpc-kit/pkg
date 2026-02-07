@@ -47,8 +47,12 @@ type Groups struct {
 	Metadata map[string]string `json:"metadata,omitempty"`
 	// 外部系统ID，用于与外部系统集成
 	ExternalID string `json:"external_id,omitempty"`
-	// 关联 lion_departments 表的 ID
+	// 外部系统来源，如 ldap、sso、custom；type=EXTERNAL 时必填
+	ExternalSource string `json:"external_source,omitempty"`
+	// 关联 lion_departments 表的 ID，type=DEPARTMENT 时必填
 	DepartmentID int `json:"department_id,omitempty"`
+	// 关联 lion_roles 表的 ID，type=ROLE 时必填
+	RoleID int `json:"role_id,omitempty"`
 	// 用户组描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -106,9 +110,9 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case groups.FieldMetadata:
 			values[i] = new([]byte)
-		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID:
+		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID, groups.FieldRoleID:
 			values[i] = new(sql.NullInt64)
-		case groups.FieldCode, groups.FieldDisplayName, groups.FieldExternalID, groups.FieldDescription:
+		case groups.FieldCode, groups.FieldDisplayName, groups.FieldExternalID, groups.FieldExternalSource, groups.FieldDescription:
 			values[i] = new(sql.NullString)
 		case groups.FieldCreatedAt, groups.FieldUpdatedAt, groups.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -220,11 +224,23 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ExternalID = value.String
 			}
+		case groups.FieldExternalSource:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field external_source", values[i])
+			} else if value.Valid {
+				_m.ExternalSource = value.String
+			}
 		case groups.FieldDepartmentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field department_id", values[i])
 			} else if value.Valid {
 				_m.DepartmentID = int(value.Int64)
+			}
+		case groups.FieldRoleID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field role_id", values[i])
+			} else if value.Valid {
+				_m.RoleID = int(value.Int64)
 			}
 		case groups.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -327,8 +343,14 @@ func (_m *Groups) String() string {
 	builder.WriteString("external_id=")
 	builder.WriteString(_m.ExternalID)
 	builder.WriteString(", ")
+	builder.WriteString("external_source=")
+	builder.WriteString(_m.ExternalSource)
+	builder.WriteString(", ")
 	builder.WriteString("department_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentID))
+	builder.WriteString(", ")
+	builder.WriteString("role_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RoleID))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

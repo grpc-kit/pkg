@@ -352,12 +352,20 @@ func init() {
 	groupsDescExternalID := groupsFields[8].Descriptor()
 	// groups.DefaultExternalID holds the default value on creation for the external_id field.
 	groups.DefaultExternalID = groupsDescExternalID.Default.(string)
+	// groupsDescExternalSource is the schema descriptor for external_source field.
+	groupsDescExternalSource := groupsFields[9].Descriptor()
+	// groups.DefaultExternalSource holds the default value on creation for the external_source field.
+	groups.DefaultExternalSource = groupsDescExternalSource.Default.(string)
 	// groupsDescDepartmentID is the schema descriptor for department_id field.
-	groupsDescDepartmentID := groupsFields[9].Descriptor()
+	groupsDescDepartmentID := groupsFields[10].Descriptor()
 	// groups.DefaultDepartmentID holds the default value on creation for the department_id field.
 	groups.DefaultDepartmentID = groupsDescDepartmentID.Default.(int)
+	// groupsDescRoleID is the schema descriptor for role_id field.
+	groupsDescRoleID := groupsFields[11].Descriptor()
+	// groups.DefaultRoleID holds the default value on creation for the role_id field.
+	groups.DefaultRoleID = groupsDescRoleID.Default.(int)
 	// groupsDescDescription is the schema descriptor for description field.
-	groupsDescDescription := groupsFields[10].Descriptor()
+	groupsDescDescription := groupsFields[12].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
 	permissionbindingsMixin := schema.PermissionBindings{}.Mixin()
