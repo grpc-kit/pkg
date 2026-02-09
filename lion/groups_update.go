@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
@@ -250,72 +249,38 @@ func (_u *GroupsUpdate) SetMetadata(v map[string]string) *GroupsUpdate {
 	return _u
 }
 
-// SetExternalID sets the "external_id" field.
-func (_u *GroupsUpdate) SetExternalID(v string) *GroupsUpdate {
-	_u.mutation.SetExternalID(v)
+// SetRefID sets the "ref_id" field.
+func (_u *GroupsUpdate) SetRefID(v int) *GroupsUpdate {
+	_u.mutation.ResetRefID()
+	_u.mutation.SetRefID(v)
 	return _u
 }
 
-// SetNillableExternalID sets the "external_id" field if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableExternalID(v *string) *GroupsUpdate {
+// SetNillableRefID sets the "ref_id" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableRefID(v *int) *GroupsUpdate {
 	if v != nil {
-		_u.SetExternalID(*v)
+		_u.SetRefID(*v)
 	}
 	return _u
 }
 
-// SetExternalSource sets the "external_source" field.
-func (_u *GroupsUpdate) SetExternalSource(v string) *GroupsUpdate {
-	_u.mutation.SetExternalSource(v)
+// AddRefID adds value to the "ref_id" field.
+func (_u *GroupsUpdate) AddRefID(v int) *GroupsUpdate {
+	_u.mutation.AddRefID(v)
 	return _u
 }
 
-// SetNillableExternalSource sets the "external_source" field if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableExternalSource(v *string) *GroupsUpdate {
+// SetRefExpr sets the "ref_expr" field.
+func (_u *GroupsUpdate) SetRefExpr(v string) *GroupsUpdate {
+	_u.mutation.SetRefExpr(v)
+	return _u
+}
+
+// SetNillableRefExpr sets the "ref_expr" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableRefExpr(v *string) *GroupsUpdate {
 	if v != nil {
-		_u.SetExternalSource(*v)
+		_u.SetRefExpr(*v)
 	}
-	return _u
-}
-
-// SetDepartmentID sets the "department_id" field.
-func (_u *GroupsUpdate) SetDepartmentID(v int) *GroupsUpdate {
-	_u.mutation.SetDepartmentID(v)
-	return _u
-}
-
-// SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableDepartmentID(v *int) *GroupsUpdate {
-	if v != nil {
-		_u.SetDepartmentID(*v)
-	}
-	return _u
-}
-
-// ClearDepartmentID clears the value of the "department_id" field.
-func (_u *GroupsUpdate) ClearDepartmentID() *GroupsUpdate {
-	_u.mutation.ClearDepartmentID()
-	return _u
-}
-
-// SetRoleID sets the "role_id" field.
-func (_u *GroupsUpdate) SetRoleID(v int) *GroupsUpdate {
-	_u.mutation.ResetRoleID()
-	_u.mutation.SetRoleID(v)
-	return _u
-}
-
-// SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableRoleID(v *int) *GroupsUpdate {
-	if v != nil {
-		_u.SetRoleID(*v)
-	}
-	return _u
-}
-
-// AddRoleID adds value to the "role_id" field.
-func (_u *GroupsUpdate) AddRoleID(v int) *GroupsUpdate {
-	_u.mutation.AddRoleID(v)
 	return _u
 }
 
@@ -361,25 +326,6 @@ func (_u *GroupsUpdate) AddLionUserGroups(v ...*UserGroups) *GroupsUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddLionUserGroupIDs(ids...)
-}
-
-// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_u *GroupsUpdate) SetLionDepartmentsID(id int) *GroupsUpdate {
-	_u.mutation.SetLionDepartmentsID(id)
-	return _u
-}
-
-// SetNillableLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID if the given value is not nil.
-func (_u *GroupsUpdate) SetNillableLionDepartmentsID(id *int) *GroupsUpdate {
-	if id != nil {
-		_u = _u.SetLionDepartmentsID(*id)
-	}
-	return _u
-}
-
-// SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_u *GroupsUpdate) SetLionDepartments(v *Departments) *GroupsUpdate {
-	return _u.SetLionDepartmentsID(v.ID)
 }
 
 // Mutation returns the GroupsMutation object of the builder.
@@ -429,12 +375,6 @@ func (_u *GroupsUpdate) RemoveLionUserGroups(v ...*UserGroups) *GroupsUpdate {
 	return _u.RemoveLionUserGroupIDs(ids...)
 }
 
-// ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
-func (_u *GroupsUpdate) ClearLionDepartments() *GroupsUpdate {
-	_u.mutation.ClearLionDepartments()
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupsUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
@@ -481,6 +421,11 @@ func (_u *GroupsUpdate) check() error {
 	if v, ok := _u.mutation.DisplayName(); ok {
 		if err := groups.DisplayNameValidator(v); err != nil {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Groups.display_name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RefExpr(); ok {
+		if err := groups.RefExprValidator(v); err != nil {
+			return &ValidationError{Name: "ref_expr", err: fmt.Errorf(`lion: validator failed for field "Groups.ref_expr": %w`, err)}
 		}
 	}
 	return nil
@@ -564,17 +509,14 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(groups.FieldMetadata, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.ExternalID(); ok {
-		_spec.SetField(groups.FieldExternalID, field.TypeString, value)
+	if value, ok := _u.mutation.RefID(); ok {
+		_spec.SetField(groups.FieldRefID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.ExternalSource(); ok {
-		_spec.SetField(groups.FieldExternalSource, field.TypeString, value)
+	if value, ok := _u.mutation.AddedRefID(); ok {
+		_spec.AddField(groups.FieldRefID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.RoleID(); ok {
-		_spec.SetField(groups.FieldRoleID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedRoleID(); ok {
-		_spec.AddField(groups.FieldRoleID, field.TypeInt, value)
+	if value, ok := _u.mutation.RefExpr(); ok {
+		_spec.SetField(groups.FieldRefExpr, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
@@ -662,35 +604,6 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.LionDepartmentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   groups.LionDepartmentsTable,
-			Columns: []string{groups.LionDepartmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   groups.LionDepartmentsTable,
-			Columns: []string{groups.LionDepartmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -937,72 +850,38 @@ func (_u *GroupsUpdateOne) SetMetadata(v map[string]string) *GroupsUpdateOne {
 	return _u
 }
 
-// SetExternalID sets the "external_id" field.
-func (_u *GroupsUpdateOne) SetExternalID(v string) *GroupsUpdateOne {
-	_u.mutation.SetExternalID(v)
+// SetRefID sets the "ref_id" field.
+func (_u *GroupsUpdateOne) SetRefID(v int) *GroupsUpdateOne {
+	_u.mutation.ResetRefID()
+	_u.mutation.SetRefID(v)
 	return _u
 }
 
-// SetNillableExternalID sets the "external_id" field if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableExternalID(v *string) *GroupsUpdateOne {
+// SetNillableRefID sets the "ref_id" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableRefID(v *int) *GroupsUpdateOne {
 	if v != nil {
-		_u.SetExternalID(*v)
+		_u.SetRefID(*v)
 	}
 	return _u
 }
 
-// SetExternalSource sets the "external_source" field.
-func (_u *GroupsUpdateOne) SetExternalSource(v string) *GroupsUpdateOne {
-	_u.mutation.SetExternalSource(v)
+// AddRefID adds value to the "ref_id" field.
+func (_u *GroupsUpdateOne) AddRefID(v int) *GroupsUpdateOne {
+	_u.mutation.AddRefID(v)
 	return _u
 }
 
-// SetNillableExternalSource sets the "external_source" field if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableExternalSource(v *string) *GroupsUpdateOne {
+// SetRefExpr sets the "ref_expr" field.
+func (_u *GroupsUpdateOne) SetRefExpr(v string) *GroupsUpdateOne {
+	_u.mutation.SetRefExpr(v)
+	return _u
+}
+
+// SetNillableRefExpr sets the "ref_expr" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableRefExpr(v *string) *GroupsUpdateOne {
 	if v != nil {
-		_u.SetExternalSource(*v)
+		_u.SetRefExpr(*v)
 	}
-	return _u
-}
-
-// SetDepartmentID sets the "department_id" field.
-func (_u *GroupsUpdateOne) SetDepartmentID(v int) *GroupsUpdateOne {
-	_u.mutation.SetDepartmentID(v)
-	return _u
-}
-
-// SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableDepartmentID(v *int) *GroupsUpdateOne {
-	if v != nil {
-		_u.SetDepartmentID(*v)
-	}
-	return _u
-}
-
-// ClearDepartmentID clears the value of the "department_id" field.
-func (_u *GroupsUpdateOne) ClearDepartmentID() *GroupsUpdateOne {
-	_u.mutation.ClearDepartmentID()
-	return _u
-}
-
-// SetRoleID sets the "role_id" field.
-func (_u *GroupsUpdateOne) SetRoleID(v int) *GroupsUpdateOne {
-	_u.mutation.ResetRoleID()
-	_u.mutation.SetRoleID(v)
-	return _u
-}
-
-// SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableRoleID(v *int) *GroupsUpdateOne {
-	if v != nil {
-		_u.SetRoleID(*v)
-	}
-	return _u
-}
-
-// AddRoleID adds value to the "role_id" field.
-func (_u *GroupsUpdateOne) AddRoleID(v int) *GroupsUpdateOne {
-	_u.mutation.AddRoleID(v)
 	return _u
 }
 
@@ -1050,25 +929,6 @@ func (_u *GroupsUpdateOne) AddLionUserGroups(v ...*UserGroups) *GroupsUpdateOne 
 	return _u.AddLionUserGroupIDs(ids...)
 }
 
-// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_u *GroupsUpdateOne) SetLionDepartmentsID(id int) *GroupsUpdateOne {
-	_u.mutation.SetLionDepartmentsID(id)
-	return _u
-}
-
-// SetNillableLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID if the given value is not nil.
-func (_u *GroupsUpdateOne) SetNillableLionDepartmentsID(id *int) *GroupsUpdateOne {
-	if id != nil {
-		_u = _u.SetLionDepartmentsID(*id)
-	}
-	return _u
-}
-
-// SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_u *GroupsUpdateOne) SetLionDepartments(v *Departments) *GroupsUpdateOne {
-	return _u.SetLionDepartmentsID(v.ID)
-}
-
 // Mutation returns the GroupsMutation object of the builder.
 func (_u *GroupsUpdateOne) Mutation() *GroupsMutation {
 	return _u.mutation
@@ -1114,12 +974,6 @@ func (_u *GroupsUpdateOne) RemoveLionUserGroups(v ...*UserGroups) *GroupsUpdateO
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveLionUserGroupIDs(ids...)
-}
-
-// ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
-func (_u *GroupsUpdateOne) ClearLionDepartments() *GroupsUpdateOne {
-	_u.mutation.ClearLionDepartments()
-	return _u
 }
 
 // Where appends a list predicates to the GroupsUpdate builder.
@@ -1181,6 +1035,11 @@ func (_u *GroupsUpdateOne) check() error {
 	if v, ok := _u.mutation.DisplayName(); ok {
 		if err := groups.DisplayNameValidator(v); err != nil {
 			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Groups.display_name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RefExpr(); ok {
+		if err := groups.RefExprValidator(v); err != nil {
+			return &ValidationError{Name: "ref_expr", err: fmt.Errorf(`lion: validator failed for field "Groups.ref_expr": %w`, err)}
 		}
 	}
 	return nil
@@ -1281,17 +1140,14 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(groups.FieldMetadata, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.ExternalID(); ok {
-		_spec.SetField(groups.FieldExternalID, field.TypeString, value)
+	if value, ok := _u.mutation.RefID(); ok {
+		_spec.SetField(groups.FieldRefID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.ExternalSource(); ok {
-		_spec.SetField(groups.FieldExternalSource, field.TypeString, value)
+	if value, ok := _u.mutation.AddedRefID(); ok {
+		_spec.AddField(groups.FieldRefID, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.RoleID(); ok {
-		_spec.SetField(groups.FieldRoleID, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedRoleID(); ok {
-		_spec.AddField(groups.FieldRoleID, field.TypeInt, value)
+	if value, ok := _u.mutation.RefExpr(); ok {
+		_spec.SetField(groups.FieldRefExpr, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
@@ -1379,35 +1235,6 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.LionDepartmentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   groups.LionDepartmentsTable,
-			Columns: []string{groups.LionDepartmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   groups.LionDepartmentsTable,
-			Columns: []string{groups.LionDepartmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

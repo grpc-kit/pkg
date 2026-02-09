@@ -115,24 +115,14 @@ func MaxMembers(v int) predicate.Groups {
 	return predicate.Groups(sql.FieldEQ(FieldMaxMembers, v))
 }
 
-// ExternalID applies equality check predicate on the "external_id" field. It's identical to ExternalIDEQ.
-func ExternalID(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldExternalID, v))
+// RefID applies equality check predicate on the "ref_id" field. It's identical to RefIDEQ.
+func RefID(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldRefID, v))
 }
 
-// ExternalSource applies equality check predicate on the "external_source" field. It's identical to ExternalSourceEQ.
-func ExternalSource(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldExternalSource, v))
-}
-
-// DepartmentID applies equality check predicate on the "department_id" field. It's identical to DepartmentIDEQ.
-func DepartmentID(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldDepartmentID, v))
-}
-
-// RoleID applies equality check predicate on the "role_id" field. It's identical to RoleIDEQ.
-func RoleID(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldRoleID, v))
+// RefExpr applies equality check predicate on the "ref_expr" field. It's identical to RefExprEQ.
+func RefExpr(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldRefExpr, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
@@ -700,204 +690,109 @@ func MaxMembersLTE(v int) predicate.Groups {
 	return predicate.Groups(sql.FieldLTE(FieldMaxMembers, v))
 }
 
-// ExternalIDEQ applies the EQ predicate on the "external_id" field.
-func ExternalIDEQ(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldExternalID, v))
+// RefIDEQ applies the EQ predicate on the "ref_id" field.
+func RefIDEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldRefID, v))
 }
 
-// ExternalIDNEQ applies the NEQ predicate on the "external_id" field.
-func ExternalIDNEQ(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldNEQ(FieldExternalID, v))
+// RefIDNEQ applies the NEQ predicate on the "ref_id" field.
+func RefIDNEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldRefID, v))
 }
 
-// ExternalIDIn applies the In predicate on the "external_id" field.
-func ExternalIDIn(vs ...string) predicate.Groups {
-	return predicate.Groups(sql.FieldIn(FieldExternalID, vs...))
+// RefIDIn applies the In predicate on the "ref_id" field.
+func RefIDIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldRefID, vs...))
 }
 
-// ExternalIDNotIn applies the NotIn predicate on the "external_id" field.
-func ExternalIDNotIn(vs ...string) predicate.Groups {
-	return predicate.Groups(sql.FieldNotIn(FieldExternalID, vs...))
+// RefIDNotIn applies the NotIn predicate on the "ref_id" field.
+func RefIDNotIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldRefID, vs...))
 }
 
-// ExternalIDGT applies the GT predicate on the "external_id" field.
-func ExternalIDGT(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldGT(FieldExternalID, v))
+// RefIDGT applies the GT predicate on the "ref_id" field.
+func RefIDGT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldRefID, v))
 }
 
-// ExternalIDGTE applies the GTE predicate on the "external_id" field.
-func ExternalIDGTE(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldGTE(FieldExternalID, v))
+// RefIDGTE applies the GTE predicate on the "ref_id" field.
+func RefIDGTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldRefID, v))
 }
 
-// ExternalIDLT applies the LT predicate on the "external_id" field.
-func ExternalIDLT(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldLT(FieldExternalID, v))
+// RefIDLT applies the LT predicate on the "ref_id" field.
+func RefIDLT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldRefID, v))
 }
 
-// ExternalIDLTE applies the LTE predicate on the "external_id" field.
-func ExternalIDLTE(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldLTE(FieldExternalID, v))
+// RefIDLTE applies the LTE predicate on the "ref_id" field.
+func RefIDLTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldRefID, v))
 }
 
-// ExternalIDContains applies the Contains predicate on the "external_id" field.
-func ExternalIDContains(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldContains(FieldExternalID, v))
+// RefExprEQ applies the EQ predicate on the "ref_expr" field.
+func RefExprEQ(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldRefExpr, v))
 }
 
-// ExternalIDHasPrefix applies the HasPrefix predicate on the "external_id" field.
-func ExternalIDHasPrefix(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldHasPrefix(FieldExternalID, v))
+// RefExprNEQ applies the NEQ predicate on the "ref_expr" field.
+func RefExprNEQ(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldRefExpr, v))
 }
 
-// ExternalIDHasSuffix applies the HasSuffix predicate on the "external_id" field.
-func ExternalIDHasSuffix(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldHasSuffix(FieldExternalID, v))
+// RefExprIn applies the In predicate on the "ref_expr" field.
+func RefExprIn(vs ...string) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldRefExpr, vs...))
 }
 
-// ExternalIDEqualFold applies the EqualFold predicate on the "external_id" field.
-func ExternalIDEqualFold(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldEqualFold(FieldExternalID, v))
+// RefExprNotIn applies the NotIn predicate on the "ref_expr" field.
+func RefExprNotIn(vs ...string) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldRefExpr, vs...))
 }
 
-// ExternalIDContainsFold applies the ContainsFold predicate on the "external_id" field.
-func ExternalIDContainsFold(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldContainsFold(FieldExternalID, v))
+// RefExprGT applies the GT predicate on the "ref_expr" field.
+func RefExprGT(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldRefExpr, v))
 }
 
-// ExternalSourceEQ applies the EQ predicate on the "external_source" field.
-func ExternalSourceEQ(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldExternalSource, v))
+// RefExprGTE applies the GTE predicate on the "ref_expr" field.
+func RefExprGTE(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldRefExpr, v))
 }
 
-// ExternalSourceNEQ applies the NEQ predicate on the "external_source" field.
-func ExternalSourceNEQ(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldNEQ(FieldExternalSource, v))
+// RefExprLT applies the LT predicate on the "ref_expr" field.
+func RefExprLT(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldRefExpr, v))
 }
 
-// ExternalSourceIn applies the In predicate on the "external_source" field.
-func ExternalSourceIn(vs ...string) predicate.Groups {
-	return predicate.Groups(sql.FieldIn(FieldExternalSource, vs...))
+// RefExprLTE applies the LTE predicate on the "ref_expr" field.
+func RefExprLTE(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldRefExpr, v))
 }
 
-// ExternalSourceNotIn applies the NotIn predicate on the "external_source" field.
-func ExternalSourceNotIn(vs ...string) predicate.Groups {
-	return predicate.Groups(sql.FieldNotIn(FieldExternalSource, vs...))
+// RefExprContains applies the Contains predicate on the "ref_expr" field.
+func RefExprContains(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldContains(FieldRefExpr, v))
 }
 
-// ExternalSourceGT applies the GT predicate on the "external_source" field.
-func ExternalSourceGT(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldGT(FieldExternalSource, v))
+// RefExprHasPrefix applies the HasPrefix predicate on the "ref_expr" field.
+func RefExprHasPrefix(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldHasPrefix(FieldRefExpr, v))
 }
 
-// ExternalSourceGTE applies the GTE predicate on the "external_source" field.
-func ExternalSourceGTE(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldGTE(FieldExternalSource, v))
+// RefExprHasSuffix applies the HasSuffix predicate on the "ref_expr" field.
+func RefExprHasSuffix(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldHasSuffix(FieldRefExpr, v))
 }
 
-// ExternalSourceLT applies the LT predicate on the "external_source" field.
-func ExternalSourceLT(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldLT(FieldExternalSource, v))
+// RefExprEqualFold applies the EqualFold predicate on the "ref_expr" field.
+func RefExprEqualFold(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldEqualFold(FieldRefExpr, v))
 }
 
-// ExternalSourceLTE applies the LTE predicate on the "external_source" field.
-func ExternalSourceLTE(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldLTE(FieldExternalSource, v))
-}
-
-// ExternalSourceContains applies the Contains predicate on the "external_source" field.
-func ExternalSourceContains(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldContains(FieldExternalSource, v))
-}
-
-// ExternalSourceHasPrefix applies the HasPrefix predicate on the "external_source" field.
-func ExternalSourceHasPrefix(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldHasPrefix(FieldExternalSource, v))
-}
-
-// ExternalSourceHasSuffix applies the HasSuffix predicate on the "external_source" field.
-func ExternalSourceHasSuffix(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldHasSuffix(FieldExternalSource, v))
-}
-
-// ExternalSourceEqualFold applies the EqualFold predicate on the "external_source" field.
-func ExternalSourceEqualFold(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldEqualFold(FieldExternalSource, v))
-}
-
-// ExternalSourceContainsFold applies the ContainsFold predicate on the "external_source" field.
-func ExternalSourceContainsFold(v string) predicate.Groups {
-	return predicate.Groups(sql.FieldContainsFold(FieldExternalSource, v))
-}
-
-// DepartmentIDEQ applies the EQ predicate on the "department_id" field.
-func DepartmentIDEQ(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldDepartmentID, v))
-}
-
-// DepartmentIDNEQ applies the NEQ predicate on the "department_id" field.
-func DepartmentIDNEQ(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldNEQ(FieldDepartmentID, v))
-}
-
-// DepartmentIDIn applies the In predicate on the "department_id" field.
-func DepartmentIDIn(vs ...int) predicate.Groups {
-	return predicate.Groups(sql.FieldIn(FieldDepartmentID, vs...))
-}
-
-// DepartmentIDNotIn applies the NotIn predicate on the "department_id" field.
-func DepartmentIDNotIn(vs ...int) predicate.Groups {
-	return predicate.Groups(sql.FieldNotIn(FieldDepartmentID, vs...))
-}
-
-// DepartmentIDIsNil applies the IsNil predicate on the "department_id" field.
-func DepartmentIDIsNil() predicate.Groups {
-	return predicate.Groups(sql.FieldIsNull(FieldDepartmentID))
-}
-
-// DepartmentIDNotNil applies the NotNil predicate on the "department_id" field.
-func DepartmentIDNotNil() predicate.Groups {
-	return predicate.Groups(sql.FieldNotNull(FieldDepartmentID))
-}
-
-// RoleIDEQ applies the EQ predicate on the "role_id" field.
-func RoleIDEQ(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldEQ(FieldRoleID, v))
-}
-
-// RoleIDNEQ applies the NEQ predicate on the "role_id" field.
-func RoleIDNEQ(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldNEQ(FieldRoleID, v))
-}
-
-// RoleIDIn applies the In predicate on the "role_id" field.
-func RoleIDIn(vs ...int) predicate.Groups {
-	return predicate.Groups(sql.FieldIn(FieldRoleID, vs...))
-}
-
-// RoleIDNotIn applies the NotIn predicate on the "role_id" field.
-func RoleIDNotIn(vs ...int) predicate.Groups {
-	return predicate.Groups(sql.FieldNotIn(FieldRoleID, vs...))
-}
-
-// RoleIDGT applies the GT predicate on the "role_id" field.
-func RoleIDGT(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldGT(FieldRoleID, v))
-}
-
-// RoleIDGTE applies the GTE predicate on the "role_id" field.
-func RoleIDGTE(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldGTE(FieldRoleID, v))
-}
-
-// RoleIDLT applies the LT predicate on the "role_id" field.
-func RoleIDLT(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldLT(FieldRoleID, v))
-}
-
-// RoleIDLTE applies the LTE predicate on the "role_id" field.
-func RoleIDLTE(v int) predicate.Groups {
-	return predicate.Groups(sql.FieldLTE(FieldRoleID, v))
+// RefExprContainsFold applies the ContainsFold predicate on the "ref_expr" field.
+func RefExprContainsFold(v string) predicate.Groups {
+	return predicate.Groups(sql.FieldContainsFold(FieldRefExpr, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.
@@ -1003,29 +898,6 @@ func HasLionUserGroups() predicate.Groups {
 func HasLionUserGroupsWith(preds ...predicate.UserGroups) predicate.Groups {
 	return predicate.Groups(func(s *sql.Selector) {
 		step := newLionUserGroupsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasLionDepartments applies the HasEdge predicate on the "lion_departments" edge.
-func HasLionDepartments() predicate.Groups {
-	return predicate.Groups(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentsTable, LionDepartmentsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionDepartmentsWith applies the HasEdge predicate on the "lion_departments" edge with a given conditions (other predicates).
-func HasLionDepartmentsWith(preds ...predicate.Departments) predicate.Groups {
-	return predicate.Groups(func(s *sql.Selector) {
-		step := newLionDepartmentsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

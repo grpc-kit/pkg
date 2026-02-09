@@ -45,7 +45,7 @@ func (a *KnownAdminAPI) getGroupType(ctx context.Context, db *lion.Client, group
 
 // isAutoManagedGroupType 判断群组类型是否为自动管理成员类型（不允许手动添加/删除/编辑成员）
 func isAutoManagedGroupType(t adminv1.Group_Type) bool {
-	return t == adminv1.Group_DEPARTMENT || t == adminv1.Group_ROLE
+	return t == adminv1.Group_DEPARTMENT || t == adminv1.Group_ROLE || t == adminv1.Group_DYNAMIC
 }
 
 // CreateGroup 创建用户组
@@ -64,31 +64,26 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 	case adminv1.Group_SYSTEM:
 		return result, errs.InvalidArgument(ctx).WithMessage("SYSTEM type groups cannot be created via API")
 	case adminv1.Group_DEPARTMENT:
-		if req.Group.DepartmentId == 0 {
-			return result, errs.InvalidArgument(ctx).WithMessage("department_id is required when type is DEPARTMENT")
+		if req.Group.RefId == 0 {
+			return result, errs.InvalidArgument(ctx).WithMessage("ref_id (department_id) is required when type is DEPARTMENT")
 		}
 	case adminv1.Group_ROLE:
-		if req.Group.RoleId == 0 {
-			return result, errs.InvalidArgument(ctx).WithMessage("role_id is required when type is ROLE")
+		if req.Group.RefId == 0 {
+			return result, errs.InvalidArgument(ctx).WithMessage("ref_id (role_id) is required when type is ROLE")
 		}
 	case adminv1.Group_EXTERNAL:
-		if req.Group.ExternalId == "" {
-			return result, errs.InvalidArgument(ctx).WithMessage("external_id is required when type is EXTERNAL")
+		if req.Group.RefExpr == "" {
+			return result, errs.InvalidArgument(ctx).WithMessage("ref_expr is required when type is EXTERNAL, format: {\"external_id\":\"...\",\"external_source\":\"...\"}")
 		}
-		if req.Group.ExternalSource == "" {
-			return result, errs.InvalidArgument(ctx).WithMessage("external_source is required when type is EXTERNAL")
+	case adminv1.Group_DYNAMIC:
+		if req.Group.RefExpr == "" {
+			return result, errs.InvalidArgument(ctx).WithMessage("ref_expr (member_rule) is required when type is DYNAMIC")
 		}
 	}
 
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
-	}
-
-	// 仅 DEPARTMENT 类型需要 department_id，其他类型不设置
-	departmentID := 0
-	if groupType == adminv1.Group_DEPARTMENT {
-		departmentID = int(req.Group.DepartmentId)
 	}
 
 	displayName := req.Group.DisplayName
@@ -117,10 +112,8 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		SetSortOrder(int(req.Group.SortOrder)).
 		SetMaxMembers(int(req.Group.MaxMembers)).
 		SetMetadata(req.Group.Metadata).
-		SetExternalID(req.Group.ExternalId).
-		SetExternalSource(req.Group.ExternalSource).
-		SetDepartmentID(departmentID).
-		SetRoleID(int(req.Group.RoleId)).
+		SetRefID(int(req.Group.RefId)).
+		SetRefExpr(req.Group.RefExpr).
 		SetDescription(req.Group.Description).
 		SetCreatedBy(createdBy).
 		SetUpdatedBy(updatedBy)
@@ -156,7 +149,15 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 		}
 	}
 
-	// filter: 简单 AIP-160 风格解析，支持 status=2, type=1, parent_id=0, code=xxx, department_id=123
+	// group_type / group_status 独立参数过滤
+	if req.GetGroupType() > 0 {
+		where = append(where, groups.GroupType(int(req.GetGroupType())))
+	}
+	if req.GetGroupStatus() > 0 {
+		where = append(where, groups.GroupStatus(int(req.GetGroupStatus())))
+	}
+
+	// filter: 简单 AIP-160 风格解析，支持 status=2, type=1, parent_id=0, code=xxx, ref_id=123
 	if req.GetFilter() != "" {
 		filterPredicates, err := parseListGroupsFilter(req.GetFilter())
 		if err != nil {
@@ -267,6 +268,47 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 	return result, nil
 }
 
+// GetGroup 获取群组详情
+func (a *KnownAdminAPI) GetGroup(ctx context.Context, req *adminv1.GetGroupRequest) (*adminv1.Group, error) {
+	if req.Id == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("group id is required")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	group, err := db.Groups.Query().Select(
+		groups.FieldID,
+		groups.FieldCode,
+		groups.FieldDisplayName,
+		groups.FieldGroupType,
+		groups.FieldGroupStatus,
+		groups.FieldSortOrder,
+		groups.FieldParentID,
+		groups.FieldMaxMembers,
+		groups.FieldMetadata,
+		groups.FieldRefID,
+		groups.FieldRefExpr,
+		groups.FieldDescription,
+		groups.FieldCreatedBy,
+		groups.FieldUpdatedBy,
+		groups.FieldCreatedAt,
+		groups.FieldUpdatedAt,
+		groups.FieldDeletedAt,
+	).Where(
+		groups.ID(int(req.Id)),
+		groups.DeletedAtIsNil(),
+	).Only(ctx)
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("group not found")
+	}
+
+	// 详情接口默认返回完整信息（含时间戳）
+	return groupToProto(group, true), nil
+}
+
 // parseListGroupsFilter 解析 filter 字符串为 predicate 列表，支持 key=value 与 AND 组合
 func parseListGroupsFilter(filter string) ([]predicate.Groups, error) {
 	out := make([]predicate.Groups, 0)
@@ -303,20 +345,12 @@ func parseListGroupsFilter(filter string) ([]predicate.Groups, error) {
 			out = append(out, groups.ParentID(n))
 		case "code":
 			out = append(out, groups.CodeEQ(val))
-		case "department_id":
+		case "ref_id":
 			n, err := strconv.Atoi(val)
 			if err != nil {
-				return nil, fmt.Errorf("department_id must be int: %s", val)
+				return nil, fmt.Errorf("ref_id must be int: %s", val)
 			}
-			out = append(out, groups.DepartmentID(n))
-		case "role_id":
-			n, err := strconv.Atoi(val)
-			if err != nil {
-				return nil, fmt.Errorf("role_id must be int: %s", val)
-			}
-			out = append(out, groups.RoleID(n))
-		case "external_source":
-			out = append(out, groups.ExternalSourceEQ(val))
+			out = append(out, groups.RefID(n))
 		}
 	}
 	return out, nil
@@ -324,21 +358,19 @@ func parseListGroupsFilter(filter string) ([]predicate.Groups, error) {
 
 func groupToProto(g *lion.Groups, includeTimestamps bool) *adminv1.Group {
 	grp := &adminv1.Group{
-		Id:             int64(g.ID),
-		Code:           g.Code,
-		Type:           adminv1.Group_Type(g.GroupType),
-		Status:         adminv1.Group_Status(g.GroupStatus),
-		DisplayName:    g.DisplayName,
-		SortOrder:      int32(g.SortOrder),
-		MaxMembers:     int32(g.MaxMembers),
-		Metadata:       g.Metadata,
-		ExternalId:     g.ExternalID,
-		ExternalSource: g.ExternalSource,
-		DepartmentId:   int64(g.DepartmentID),
-		RoleId:         int64(g.RoleID),
-		Description:    g.Description,
-		CreatedBy:      g.CreatedBy,
-		UpdatedBy:      g.UpdatedBy,
+		Id:          int64(g.ID),
+		Code:        g.Code,
+		Type:        adminv1.Group_Type(g.GroupType),
+		Status:      adminv1.Group_Status(g.GroupStatus),
+		DisplayName: g.DisplayName,
+		SortOrder:   int32(g.SortOrder),
+		MaxMembers:  int32(g.MaxMembers),
+		Metadata:    g.Metadata,
+		RefId:       int64(g.RefID),
+		RefExpr:     g.RefExpr,
+		Description: g.Description,
+		CreatedBy:   g.CreatedBy,
+		UpdatedBy:   g.UpdatedBy,
 	}
 	if includeTimestamps {
 		grp.CreatedAt = timestamppb.New(g.CreatedAt)
@@ -403,14 +435,10 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 				update.SetMaxMembers(int(req.Group.MaxMembers))
 			case "metadata":
 				update.SetMetadata(req.Group.Metadata)
-			case "external_id":
-				update.SetExternalID(req.Group.ExternalId)
-			case "external_source":
-				update.SetExternalSource(req.Group.ExternalSource)
-			case "department_id":
-				update.SetDepartmentID(int(req.Group.DepartmentId))
-			case "role_id":
-				update.SetRoleID(int(req.Group.RoleId))
+			case "ref_id":
+				update.SetRefID(int(req.Group.RefId))
+			case "ref_expr":
+				update.SetRefExpr(req.Group.RefExpr)
 			case "description":
 				update.SetDescription(req.Group.Description)
 			case "updated_by":
@@ -431,10 +459,8 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			SetSortOrder(int(req.Group.SortOrder)).
 			SetMaxMembers(int(req.Group.MaxMembers)).
 			SetMetadata(req.Group.Metadata).
-			SetExternalID(req.Group.ExternalId).
-			SetExternalSource(req.Group.ExternalSource).
-			SetDepartmentID(int(req.Group.DepartmentId)).
-			SetRoleID(int(req.Group.RoleId)).
+			SetRefID(int(req.Group.RefId)).
+			SetRefExpr(req.Group.RefExpr).
 			SetDescription(req.Group.Description).
 			SetUpdatedBy(updatedBy)
 	}
@@ -507,9 +533,11 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 	// 根据群组类型路由到不同的数据源
 	switch groupType {
 	case adminv1.Group_DEPARTMENT:
-		return a.listGroupMembersFromDepartment(ctx, req, db, group.DepartmentID)
+		return a.listGroupMembersFromDepartment(ctx, req, db, group.RefID)
 	case adminv1.Group_ROLE:
-		return a.listGroupMembersFromRole(ctx, req, db, group.RoleID)
+		return a.listGroupMembersFromRole(ctx, req, db, group.RefID)
+	case adminv1.Group_DYNAMIC:
+		return a.listGroupMembersFromDynamicRule(ctx, req, db, group.RefExpr)
 	default:
 		return a.listGroupMembersFromUserGroups(ctx, req, db, groupID)
 	}
@@ -718,6 +746,260 @@ func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *admin
 	}
 
 	return result, nil
+}
+
+// dynamicRuleAllowedFields 动态规则允许过滤的用户字段白名单（非敏感、非加密字段）
+var dynamicRuleAllowedFields = map[string]string{
+	"user_type":              "int",
+	"user_status":            "int",
+	"gender":                 "int",
+	"email_verified":         "bool",
+	"phone_number_verified":  "bool",
+	"timezone":               "string",
+	"locale":                 "string",
+}
+
+// listGroupMembersFromDynamicRule 根据动态规则表达式从 users 表查询成员
+func (a *KnownAdminAPI) listGroupMembersFromDynamicRule(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, memberRule string) (*adminv1.ListGroupMembersResponse, error) {
+	result := &adminv1.ListGroupMembersResponse{
+		Members: make([]*adminv1.Membership, 0),
+	}
+
+	if memberRule == "" {
+		return result, nil
+	}
+
+	// 解析规则表达式为 ent predicates
+	predicates, err := parseDynamicRule(memberRule)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage(fmt.Sprintf("invalid member_rule: %v", err))
+	}
+
+	// 默认排除已删除的用户
+	predicates = append(predicates, users.DeletedAtIsNil())
+
+	query := db.Users.Query().Where(predicates...)
+
+	// 排序
+	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+	case "created_at desc", "create_time desc":
+		query = query.Order(lion.Desc(users.FieldCreatedAt))
+	case "created_at asc", "create_time asc":
+		query = query.Order(lion.Asc(users.FieldCreatedAt))
+	default:
+		query = query.Order(lion.Asc(users.FieldID))
+	}
+
+	totalSize, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result.TotalSize = int32(totalSize)
+
+	pageSize := GetPageSize(ctx, req.GetPageSize())
+
+	// 分页
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListGroupMembersRequest_Offset:
+		query = query.Offset(int(p.Offset))
+	case *adminv1.ListGroupMembersRequest_PageToken:
+		if req.GetPageToken() != "" {
+			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
+			if decErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
+			}
+			var lastID int
+			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
+			}
+			if lastID > 0 {
+				query = query.Where(users.IDGT(lastID))
+			}
+		}
+	}
+	query = query.Limit(int(pageSize))
+
+	userList, err := query.Select(
+		users.FieldID,
+		users.FieldUsername,
+		users.FieldNickname,
+	).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换为虚拟成员关系
+	for _, u := range userList {
+		result.Members = append(result.Members, &adminv1.Membership{
+			UserId:     int64(u.ID),
+			Username:   u.Username,
+			Nickname:   u.Nickname,
+			TargetType: adminv1.Membership_GROUP,
+			MemberRole: adminv1.Membership_MEMBER,
+		})
+	}
+
+	// Cursor 分页
+	if _, ok := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken); ok && len(userList) == int(pageSize) && len(userList) > 0 {
+		lastID := userList[len(userList)-1].ID
+		tokenData, _ := json.Marshal(lastID)
+		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	}
+
+	return result, nil
+}
+
+// parseDynamicRule 解析动态规则表达式为 ent predicates
+// 格式: "field op value AND field op value ..."
+// 支持操作符: =, !=, >, >=, <, <=
+func parseDynamicRule(rule string) ([]predicate.Users, error) {
+	var predicates []predicate.Users
+	parts := strings.Split(rule, " AND ")
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		pred, err := parseDynamicRuleCondition(p)
+		if err != nil {
+			return nil, err
+		}
+		predicates = append(predicates, pred)
+	}
+	if len(predicates) == 0 {
+		return nil, fmt.Errorf("empty rule")
+	}
+	return predicates, nil
+}
+
+// parseDynamicRuleCondition 解析单个条件表达式
+func parseDynamicRuleCondition(cond string) (predicate.Users, error) {
+	// 支持 >=, <=, !=, >, <, = 操作符
+	operators := []string{">=", "<=", "!=", ">", "<", "="}
+	var fieldName, op, val string
+	for _, operator := range operators {
+		idx := strings.Index(cond, operator)
+		if idx > 0 {
+			fieldName = strings.TrimSpace(cond[:idx])
+			op = operator
+			val = strings.TrimSpace(cond[idx+len(operator):])
+			break
+		}
+	}
+	if fieldName == "" || op == "" {
+		return nil, fmt.Errorf("invalid condition: %s", cond)
+	}
+
+	// 去掉值的引号
+	val = strings.Trim(val, "'\"")
+
+	// 校验字段在白名单中
+	fieldType, ok := dynamicRuleAllowedFields[fieldName]
+	if !ok {
+		return nil, fmt.Errorf("field %q is not allowed in dynamic rule", fieldName)
+	}
+
+	switch fieldType {
+	case "int":
+		n, err := strconv.Atoi(val)
+		if err != nil {
+			return nil, fmt.Errorf("field %q expects int value, got %q", fieldName, val)
+		}
+		return dynamicRuleIntPredicate(fieldName, op, n)
+	case "bool":
+		b, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, fmt.Errorf("field %q expects bool value, got %q", fieldName, val)
+		}
+		return dynamicRuleBoolPredicate(fieldName, op, b)
+	case "string":
+		return dynamicRuleStringPredicate(fieldName, op, val)
+	default:
+		return nil, fmt.Errorf("unsupported field type %q for field %q", fieldType, fieldName)
+	}
+}
+
+// dynamicRuleIntPredicate 构建 int 类型字段的 predicate
+func dynamicRuleIntPredicate(fieldName, op string, val int) (predicate.Users, error) {
+	switch fieldName {
+	case "user_type":
+		switch op {
+		case "=":
+			return users.UserTypeEQ(val), nil
+		case "!=":
+			return users.UserTypeNEQ(val), nil
+		case ">":
+			return users.UserTypeGT(val), nil
+		case ">=":
+			return users.UserTypeGTE(val), nil
+		case "<":
+			return users.UserTypeLT(val), nil
+		case "<=":
+			return users.UserTypeLTE(val), nil
+		}
+	case "user_status":
+		switch op {
+		case "=":
+			return users.UserStatusEQ(val), nil
+		case "!=":
+			return users.UserStatusNEQ(val), nil
+		case ">":
+			return users.UserStatusGT(val), nil
+		case ">=":
+			return users.UserStatusGTE(val), nil
+		case "<":
+			return users.UserStatusLT(val), nil
+		case "<=":
+			return users.UserStatusLTE(val), nil
+		}
+	case "gender":
+		switch op {
+		case "=":
+			return users.GenderEQ(val), nil
+		case "!=":
+			return users.GenderNEQ(val), nil
+		}
+	}
+	return nil, fmt.Errorf("unsupported operator %q for field %q", op, fieldName)
+}
+
+// dynamicRuleBoolPredicate 构建 bool 类型字段的 predicate
+func dynamicRuleBoolPredicate(fieldName, op string, val bool) (predicate.Users, error) {
+	if op != "=" && op != "!=" {
+		return nil, fmt.Errorf("bool field %q only supports = and != operators", fieldName)
+	}
+	target := val
+	if op == "!=" {
+		target = !val
+	}
+	switch fieldName {
+	case "email_verified":
+		return users.EmailVerifiedEQ(target), nil
+	case "phone_number_verified":
+		return users.PhoneNumberVerifiedEQ(target), nil
+	}
+	return nil, fmt.Errorf("unsupported bool field %q", fieldName)
+}
+
+// dynamicRuleStringPredicate 构建 string 类型字段的 predicate
+func dynamicRuleStringPredicate(fieldName, op string, val string) (predicate.Users, error) {
+	switch fieldName {
+	case "timezone":
+		switch op {
+		case "=":
+			return users.TimezoneEQ(val), nil
+		case "!=":
+			return users.TimezoneNEQ(val), nil
+		}
+	case "locale":
+		switch op {
+		case "=":
+			return users.LocaleEQ(val), nil
+		case "!=":
+			return users.LocaleNEQ(val), nil
+		}
+	}
+	return nil, fmt.Errorf("unsupported operator %q for string field %q", op, fieldName)
 }
 
 // listGroupMembersFromUserGroups 从 user_groups 表查询普通群组成员（默认方式）

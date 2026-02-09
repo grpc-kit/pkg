@@ -100,6 +100,7 @@ type KnownAdminClient interface {
 	CreateGroupMembers(ctx context.Context, in *CreateGroupMembersRequest, opts ...grpc.CallOption) (*CreateGroupMembersResponse, error)
 	DeleteGroupMember(ctx context.Context, in *DeleteGroupMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateGroupMember(ctx context.Context, in *UpdateGroupMemberRequest, opts ...grpc.CallOption) (*Membership, error)
+	GetGroup(ctx context.Context, in *GetGroupRequest, opts ...grpc.CallOption) (*Group, error)
 	// 安全相关
 	CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*Credential, error)
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
@@ -702,6 +703,15 @@ func (c *knownAdminClient) UpdateGroupMember(ctx context.Context, in *UpdateGrou
 	return out, nil
 }
 
+func (c *knownAdminClient) GetGroup(ctx context.Context, in *GetGroupRequest, opts ...grpc.CallOption) (*Group, error) {
+	out := new(Group)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGroup", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) CreateCredential(ctx context.Context, in *CreateCredentialRequest, opts ...grpc.CallOption) (*Credential, error) {
 	out := new(Credential)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateCredential", in, out, opts...)
@@ -828,6 +838,7 @@ type KnownAdminServer interface {
 	CreateGroupMembers(context.Context, *CreateGroupMembersRequest) (*CreateGroupMembersResponse, error)
 	DeleteGroupMember(context.Context, *DeleteGroupMemberRequest) (*emptypb.Empty, error)
 	UpdateGroupMember(context.Context, *UpdateGroupMemberRequest) (*Membership, error)
+	GetGroup(context.Context, *GetGroupRequest) (*Group, error)
 	// 安全相关
 	CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error)
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
@@ -1035,6 +1046,9 @@ func (UnimplementedKnownAdminServer) DeleteGroupMember(context.Context, *DeleteG
 }
 func (UnimplementedKnownAdminServer) UpdateGroupMember(context.Context, *UpdateGroupMemberRequest) (*Membership, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateGroupMember not implemented")
+}
+func (UnimplementedKnownAdminServer) GetGroup(context.Context, *GetGroupRequest) (*Group, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGroup not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateCredential(context.Context, *CreateCredentialRequest) (*Credential, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCredential not implemented")
@@ -2233,6 +2247,24 @@ func _KnownAdmin_UpdateGroupMember_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_GetGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGroupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGroup",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetGroup(ctx, req.(*GetGroupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_CreateCredential_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateCredentialRequest)
 	if err := dec(in); err != nil {
@@ -2589,6 +2621,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateGroupMember",
 			Handler:    _KnownAdmin_UpdateGroupMember_Handler,
+		},
+		{
+			MethodName: "GetGroup",
+			Handler:    _KnownAdmin_GetGroup_Handler,
 		},
 		{
 			MethodName: "CreateCredential",

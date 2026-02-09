@@ -155,11 +155,10 @@ var (
 		{Name: "parent_id", Type: field.TypeInt, Default: 0},
 		{Name: "max_members", Type: field.TypeInt, Default: 0},
 		{Name: "metadata", Type: field.TypeJSON},
-		{Name: "external_id", Type: field.TypeString, Default: ""},
-		{Name: "external_source", Type: field.TypeString, Default: ""},
-		{Name: "role_id", Type: field.TypeInt, Default: 0},
+		{Name: "ref_id", Type: field.TypeInt, Default: 0},
+		{Name: "ref_expr", Type: field.TypeString, Size: 4096, Default: ""},
 		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "department_id", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "departments_lion_groups", Type: field.TypeInt, Nullable: true},
 	}
 	// LionGroupsTable holds the schema information for the "lion_groups" table.
 	LionGroupsTable = &schema.Table{
@@ -169,7 +168,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_groups_lion_departments_lion_groups",
-				Columns:    []*schema.Column{LionGroupsColumns[18]},
+				Columns:    []*schema.Column{LionGroupsColumns[17]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -191,9 +190,9 @@ var (
 				Columns: []*schema.Column{LionGroupsColumns[9]},
 			},
 			{
-				Name:    "groups_role_id",
+				Name:    "groups_group_type_ref_id",
 				Unique:  false,
-				Columns: []*schema.Column{LionGroupsColumns[16]},
+				Columns: []*schema.Column{LionGroupsColumns[8], LionGroupsColumns[14]},
 			},
 		},
 	}

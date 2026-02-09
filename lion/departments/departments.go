@@ -75,7 +75,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "groups" package.
 	LionGroupsInverseTable = "lion_groups"
 	// LionGroupsColumn is the table column denoting the lion_groups relation/edge.
-	LionGroupsColumn = "department_id"
+	LionGroupsColumn = "departments_lion_groups"
 )
 
 // Columns holds all SQL columns for departments fields.

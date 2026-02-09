@@ -48,19 +48,13 @@ func (Groups) Fields() []ent.Field {
 		field.JSON("metadata", map[string]string{}).
 			Default(map[string]string{}).
 			Comment("元数据，用于存储自定义属性，对应 proto 中的 map<string, string> metadata"),
-		field.String("external_id").
-			Default("").
-			Comment("外部系统ID，用于与外部系统集成"),
-		field.String("external_source").
-			Default("").
-			Comment("外部系统来源，如 ldap、sso、custom；type=EXTERNAL 时必填"),
-		field.Int("department_id").
-			Optional().
+		field.Int("ref_id").
 			Default(0).
-			Comment("关联 lion_departments 表的 ID，type=DEPARTMENT 时必填"),
-		field.Int("role_id").
-			Default(0).
-			Comment("关联 lion_roles 表的 ID，type=ROLE 时必填"),
+			Comment("类型关联引用ID：DEPARTMENT→部门ID，ROLE→角色ID；其他类型为0"),
+		field.String("ref_expr").
+			Default("").
+			MaxLen(4096).
+			Comment("类型关联表达式：DYNAMIC→成员过滤规则，EXTERNAL→外部源描述(JSON)；其他类型为空"),
 		field.String("description").
 			Default("").
 			Comment("用户组描述"),
@@ -73,10 +67,12 @@ func (Groups) Edges() []ent.Edge {
 		// 一个 Role 可以对应多个 RoleMenu (中间实体)
 		edge.To("lion_groups", GroupRoles.Type),
 		edge.To("lion_user_groups", UserGroups.Type),
+		/*
 		edge.From("lion_departments", Departments.Type).
 			Ref("lion_groups").
 			Field("department_id").
 			Unique(),
+		*/
 	}
 }
 
@@ -97,8 +93,8 @@ func (Groups) Indexes() []ent.Index {
 		index.Fields("group_type"),
 		// 群组状态索引，用于按状态过滤查询
 		index.Fields("group_status"),
-		// 关联角色ID索引，用于 ROLE 类型群组查询
-		index.Fields("role_id"),
+		// 类型+引用ID组合索引，支持按类型+关联ID查询（如查找关联某角色/部门的群组）
+		index.Fields("group_type", "ref_id"),
 	}
 }
 

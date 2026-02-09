@@ -40,22 +40,16 @@ const (
 	FieldMaxMembers = "max_members"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
-	// FieldExternalID holds the string denoting the external_id field in the database.
-	FieldExternalID = "external_id"
-	// FieldExternalSource holds the string denoting the external_source field in the database.
-	FieldExternalSource = "external_source"
-	// FieldDepartmentID holds the string denoting the department_id field in the database.
-	FieldDepartmentID = "department_id"
-	// FieldRoleID holds the string denoting the role_id field in the database.
-	FieldRoleID = "role_id"
+	// FieldRefID holds the string denoting the ref_id field in the database.
+	FieldRefID = "ref_id"
+	// FieldRefExpr holds the string denoting the ref_expr field in the database.
+	FieldRefExpr = "ref_expr"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
 	EdgeLionGroups = "lion_groups"
 	// EdgeLionUserGroups holds the string denoting the lion_user_groups edge name in mutations.
 	EdgeLionUserGroups = "lion_user_groups"
-	// EdgeLionDepartments holds the string denoting the lion_departments edge name in mutations.
-	EdgeLionDepartments = "lion_departments"
 	// Table holds the table name of the groups in the database.
 	Table = "lion_groups"
 	// LionGroupsTable is the table that holds the lion_groups relation/edge.
@@ -72,13 +66,6 @@ const (
 	LionUserGroupsInverseTable = "lion_user_groups"
 	// LionUserGroupsColumn is the table column denoting the lion_user_groups relation/edge.
 	LionUserGroupsColumn = "group_id"
-	// LionDepartmentsTable is the table that holds the lion_departments relation/edge.
-	LionDepartmentsTable = "lion_groups"
-	// LionDepartmentsInverseTable is the table name for the Departments entity.
-	// It exists in this package in order to avoid circular dependency with the "departments" package.
-	LionDepartmentsInverseTable = "lion_departments"
-	// LionDepartmentsColumn is the table column denoting the lion_departments relation/edge.
-	LionDepartmentsColumn = "department_id"
 )
 
 // Columns holds all SQL columns for groups fields.
@@ -97,17 +84,26 @@ var Columns = []string{
 	FieldParentID,
 	FieldMaxMembers,
 	FieldMetadata,
-	FieldExternalID,
-	FieldExternalSource,
-	FieldDepartmentID,
-	FieldRoleID,
+	FieldRefID,
+	FieldRefExpr,
 	FieldDescription,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "lion_groups"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"departments_lion_groups",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -141,14 +137,12 @@ var (
 	DefaultMaxMembers int
 	// DefaultMetadata holds the default value on creation for the "metadata" field.
 	DefaultMetadata map[string]string
-	// DefaultExternalID holds the default value on creation for the "external_id" field.
-	DefaultExternalID string
-	// DefaultExternalSource holds the default value on creation for the "external_source" field.
-	DefaultExternalSource string
-	// DefaultDepartmentID holds the default value on creation for the "department_id" field.
-	DefaultDepartmentID int
-	// DefaultRoleID holds the default value on creation for the "role_id" field.
-	DefaultRoleID int
+	// DefaultRefID holds the default value on creation for the "ref_id" field.
+	DefaultRefID int
+	// DefaultRefExpr holds the default value on creation for the "ref_expr" field.
+	DefaultRefExpr string
+	// RefExprValidator is a validator for the "ref_expr" field. It is called by the builders before save.
+	RefExprValidator func(string) error
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -221,24 +215,14 @@ func ByMaxMembers(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMaxMembers, opts...).ToFunc()
 }
 
-// ByExternalID orders the results by the external_id field.
-func ByExternalID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldExternalID, opts...).ToFunc()
+// ByRefID orders the results by the ref_id field.
+func ByRefID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRefID, opts...).ToFunc()
 }
 
-// ByExternalSource orders the results by the external_source field.
-func ByExternalSource(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldExternalSource, opts...).ToFunc()
-}
-
-// ByDepartmentID orders the results by the department_id field.
-func ByDepartmentID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDepartmentID, opts...).ToFunc()
-}
-
-// ByRoleID orders the results by the role_id field.
-func ByRoleID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRoleID, opts...).ToFunc()
+// ByRefExpr orders the results by the ref_expr field.
+func ByRefExpr(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRefExpr, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.
@@ -273,13 +257,6 @@ func ByLionUserGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionUserGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByLionDepartmentsField orders the results by lion_departments field.
-func ByLionDepartmentsField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentsStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newLionGroupsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -292,12 +269,5 @@ func newLionUserGroupsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionUserGroupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionUserGroupsTable, LionUserGroupsColumn),
-	)
-}
-func newLionDepartmentsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionDepartmentsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, LionDepartmentsTable, LionDepartmentsColumn),
 	)
 }

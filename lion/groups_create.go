@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/usergroups"
@@ -181,58 +180,30 @@ func (_c *GroupsCreate) SetMetadata(v map[string]string) *GroupsCreate {
 	return _c
 }
 
-// SetExternalID sets the "external_id" field.
-func (_c *GroupsCreate) SetExternalID(v string) *GroupsCreate {
-	_c.mutation.SetExternalID(v)
+// SetRefID sets the "ref_id" field.
+func (_c *GroupsCreate) SetRefID(v int) *GroupsCreate {
+	_c.mutation.SetRefID(v)
 	return _c
 }
 
-// SetNillableExternalID sets the "external_id" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableExternalID(v *string) *GroupsCreate {
+// SetNillableRefID sets the "ref_id" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableRefID(v *int) *GroupsCreate {
 	if v != nil {
-		_c.SetExternalID(*v)
+		_c.SetRefID(*v)
 	}
 	return _c
 }
 
-// SetExternalSource sets the "external_source" field.
-func (_c *GroupsCreate) SetExternalSource(v string) *GroupsCreate {
-	_c.mutation.SetExternalSource(v)
+// SetRefExpr sets the "ref_expr" field.
+func (_c *GroupsCreate) SetRefExpr(v string) *GroupsCreate {
+	_c.mutation.SetRefExpr(v)
 	return _c
 }
 
-// SetNillableExternalSource sets the "external_source" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableExternalSource(v *string) *GroupsCreate {
+// SetNillableRefExpr sets the "ref_expr" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableRefExpr(v *string) *GroupsCreate {
 	if v != nil {
-		_c.SetExternalSource(*v)
-	}
-	return _c
-}
-
-// SetDepartmentID sets the "department_id" field.
-func (_c *GroupsCreate) SetDepartmentID(v int) *GroupsCreate {
-	_c.mutation.SetDepartmentID(v)
-	return _c
-}
-
-// SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableDepartmentID(v *int) *GroupsCreate {
-	if v != nil {
-		_c.SetDepartmentID(*v)
-	}
-	return _c
-}
-
-// SetRoleID sets the "role_id" field.
-func (_c *GroupsCreate) SetRoleID(v int) *GroupsCreate {
-	_c.mutation.SetRoleID(v)
-	return _c
-}
-
-// SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (_c *GroupsCreate) SetNillableRoleID(v *int) *GroupsCreate {
-	if v != nil {
-		_c.SetRoleID(*v)
+		_c.SetRefExpr(*v)
 	}
 	return _c
 }
@@ -279,25 +250,6 @@ func (_c *GroupsCreate) AddLionUserGroups(v ...*UserGroups) *GroupsCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddLionUserGroupIDs(ids...)
-}
-
-// SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_c *GroupsCreate) SetLionDepartmentsID(id int) *GroupsCreate {
-	_c.mutation.SetLionDepartmentsID(id)
-	return _c
-}
-
-// SetNillableLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID if the given value is not nil.
-func (_c *GroupsCreate) SetNillableLionDepartmentsID(id *int) *GroupsCreate {
-	if id != nil {
-		_c = _c.SetLionDepartmentsID(*id)
-	}
-	return _c
-}
-
-// SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_c *GroupsCreate) SetLionDepartments(v *Departments) *GroupsCreate {
-	return _c.SetLionDepartmentsID(v.ID)
 }
 
 // Mutation returns the GroupsMutation object of the builder.
@@ -375,21 +327,13 @@ func (_c *GroupsCreate) defaults() {
 		v := groups.DefaultMetadata
 		_c.mutation.SetMetadata(v)
 	}
-	if _, ok := _c.mutation.ExternalID(); !ok {
-		v := groups.DefaultExternalID
-		_c.mutation.SetExternalID(v)
+	if _, ok := _c.mutation.RefID(); !ok {
+		v := groups.DefaultRefID
+		_c.mutation.SetRefID(v)
 	}
-	if _, ok := _c.mutation.ExternalSource(); !ok {
-		v := groups.DefaultExternalSource
-		_c.mutation.SetExternalSource(v)
-	}
-	if _, ok := _c.mutation.DepartmentID(); !ok {
-		v := groups.DefaultDepartmentID
-		_c.mutation.SetDepartmentID(v)
-	}
-	if _, ok := _c.mutation.RoleID(); !ok {
-		v := groups.DefaultRoleID
-		_c.mutation.SetRoleID(v)
+	if _, ok := _c.mutation.RefExpr(); !ok {
+		v := groups.DefaultRefExpr
+		_c.mutation.SetRefExpr(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := groups.DefaultDescription
@@ -439,14 +383,16 @@ func (_c *GroupsCreate) check() error {
 	if _, ok := _c.mutation.Metadata(); !ok {
 		return &ValidationError{Name: "metadata", err: errors.New(`lion: missing required field "Groups.metadata"`)}
 	}
-	if _, ok := _c.mutation.ExternalID(); !ok {
-		return &ValidationError{Name: "external_id", err: errors.New(`lion: missing required field "Groups.external_id"`)}
+	if _, ok := _c.mutation.RefID(); !ok {
+		return &ValidationError{Name: "ref_id", err: errors.New(`lion: missing required field "Groups.ref_id"`)}
 	}
-	if _, ok := _c.mutation.ExternalSource(); !ok {
-		return &ValidationError{Name: "external_source", err: errors.New(`lion: missing required field "Groups.external_source"`)}
+	if _, ok := _c.mutation.RefExpr(); !ok {
+		return &ValidationError{Name: "ref_expr", err: errors.New(`lion: missing required field "Groups.ref_expr"`)}
 	}
-	if _, ok := _c.mutation.RoleID(); !ok {
-		return &ValidationError{Name: "role_id", err: errors.New(`lion: missing required field "Groups.role_id"`)}
+	if v, ok := _c.mutation.RefExpr(); ok {
+		if err := groups.RefExprValidator(v); err != nil {
+			return &ValidationError{Name: "ref_expr", err: fmt.Errorf(`lion: validator failed for field "Groups.ref_expr": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Groups.description"`)}
@@ -529,17 +475,13 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		_spec.SetField(groups.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
 	}
-	if value, ok := _c.mutation.ExternalID(); ok {
-		_spec.SetField(groups.FieldExternalID, field.TypeString, value)
-		_node.ExternalID = value
+	if value, ok := _c.mutation.RefID(); ok {
+		_spec.SetField(groups.FieldRefID, field.TypeInt, value)
+		_node.RefID = value
 	}
-	if value, ok := _c.mutation.ExternalSource(); ok {
-		_spec.SetField(groups.FieldExternalSource, field.TypeString, value)
-		_node.ExternalSource = value
-	}
-	if value, ok := _c.mutation.RoleID(); ok {
-		_spec.SetField(groups.FieldRoleID, field.TypeInt, value)
-		_node.RoleID = value
+	if value, ok := _c.mutation.RefExpr(); ok {
+		_spec.SetField(groups.FieldRefExpr, field.TypeString, value)
+		_node.RefExpr = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
@@ -575,23 +517,6 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   groups.LionDepartmentsTable,
-			Columns: []string{groups.LionDepartmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.DepartmentID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

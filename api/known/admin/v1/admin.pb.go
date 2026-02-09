@@ -54,7 +54,7 @@ var file_known_admin_v1_admin_proto_rawDesc = []byte{
 	0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x2f, 0x70,
 	0x6f, 0x6c, 0x69, 0x63, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x1f, 0x6b, 0x6e, 0x6f,
 	0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x2f, 0x70, 0x65, 0x72, 0x6d,
-	0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x32, 0xb3, 0x3d, 0x0a,
+	0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x32, 0x91, 0x3e, 0x0a,
 	0x0a, 0x4b, 0x6e, 0x6f, 0x77, 0x6e, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x12, 0x64, 0x0a, 0x09, 0x47,
 	0x65, 0x74, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x2d, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f,
 	0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64,
@@ -514,42 +514,48 @@ var file_known_admin_v1_admin_proto_rawDesc = []byte{
 	0x70, 0x4d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x27,
 	0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e,
 	0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x65, 0x6d,
-	0x62, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70, 0x12, 0x71, 0x0a, 0x10, 0x43, 0x72, 0x65, 0x61, 0x74,
-	0x65, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x12, 0x34, 0x2e, 0x67, 0x72,
-	0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e,
-	0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
-	0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x27, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69,
-	0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e,
-	0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x12, 0x5a, 0x0a, 0x12, 0x47, 0x65,
-	0x74, 0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x76, 0x65, 0x72, 0x79,
-	0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
-	0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x2c, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f,
-	0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64,
-	0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x44, 0x69, 0x73,
-	0x63, 0x6f, 0x76, 0x65, 0x72, 0x79, 0x12, 0x5e, 0x0a, 0x14, 0x47, 0x65, 0x74, 0x4f, 0x41, 0x75,
-	0x74, 0x68, 0x32, 0x4a, 0x53, 0x4f, 0x4e, 0x57, 0x65, 0x62, 0x4b, 0x65, 0x79, 0x73, 0x12, 0x16,
-	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
-	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x2e, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69,
-	0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x4a, 0x53, 0x4f, 0x4e, 0x57,
-	0x65, 0x62, 0x4b, 0x65, 0x79, 0x73, 0x12, 0x58, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x4f, 0x41, 0x75,
-	0x74, 0x68, 0x32, 0x55, 0x73, 0x65, 0x72, 0x69, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x2e, 0x67, 0x6f,
-	0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d,
-	0x70, 0x74, 0x79, 0x1a, 0x2b, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61,
+	0x62, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70, 0x12, 0x5c, 0x0a, 0x08, 0x47, 0x65, 0x74, 0x47, 0x72,
+	0x6f, 0x75, 0x70, 0x12, 0x2c, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61,
 	0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76,
-	0x31, 0x2e, 0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x55, 0x73, 0x65, 0x72, 0x69, 0x6e, 0x66, 0x6f,
-	0x12, 0x70, 0x0a, 0x18, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61,
-	0x73, 0x65, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x12, 0x3c, 0x2e, 0x67,
-	0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77,
-	0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74,
-	0x65, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c,
-	0x69, 0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f,
-	0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70,
-	0x74, 0x79, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
-	0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70,
-	0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31,
-	0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x31, 0x2e, 0x47, 0x65, 0x74, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x22, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e,
+	0x47, 0x72, 0x6f, 0x75, 0x70, 0x12, 0x71, 0x0a, 0x10, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43,
+	0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x12, 0x34, 0x2e, 0x67, 0x72, 0x70, 0x63,
+	0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61,
+	0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x72,
+	0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x27, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b,
+	0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72,
+	0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x12, 0x5a, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x4f,
+	0x41, 0x75, 0x74, 0x68, 0x32, 0x44, 0x69, 0x73, 0x63, 0x6f, 0x76, 0x65, 0x72, 0x79, 0x12, 0x16,
+	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
+	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x2c, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69,
+	0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69,
+	0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x44, 0x69, 0x73, 0x63, 0x6f,
+	0x76, 0x65, 0x72, 0x79, 0x12, 0x5e, 0x0a, 0x14, 0x47, 0x65, 0x74, 0x4f, 0x41, 0x75, 0x74, 0x68,
+	0x32, 0x4a, 0x53, 0x4f, 0x4e, 0x57, 0x65, 0x62, 0x4b, 0x65, 0x79, 0x73, 0x12, 0x16, 0x2e, 0x67,
+	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45,
+	0x6d, 0x70, 0x74, 0x79, 0x1a, 0x2e, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e,
+	0x76, 0x31, 0x2e, 0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x4a, 0x53, 0x4f, 0x4e, 0x57, 0x65, 0x62,
+	0x4b, 0x65, 0x79, 0x73, 0x12, 0x58, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x4f, 0x41, 0x75, 0x74, 0x68,
+	0x32, 0x55, 0x73, 0x65, 0x72, 0x69, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67,
+	0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74,
+	0x79, 0x1a, 0x2b, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e,
+	0x4f, 0x41, 0x75, 0x74, 0x68, 0x32, 0x55, 0x73, 0x65, 0x72, 0x69, 0x6e, 0x66, 0x6f, 0x12, 0x70,
+	0x0a, 0x18, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65,
+	0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x12, 0x3c, 0x2e, 0x67, 0x72, 0x70,
+	0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e,
+	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x44,
+	0x61, 0x74, 0x61, 0x62, 0x61, 0x73, 0x65, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a,
+	0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
+	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
+	0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67,
+	0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f,
+	0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61,
+	0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var file_known_admin_v1_admin_proto_goTypes = []interface{}{
@@ -618,49 +624,50 @@ var file_known_admin_v1_admin_proto_goTypes = []interface{}{
 	(*CreateGroupMembersRequest)(nil),       // 62: grpc_kit.api.known.admin.v1.CreateGroupMembersRequest
 	(*DeleteGroupMemberRequest)(nil),        // 63: grpc_kit.api.known.admin.v1.DeleteGroupMemberRequest
 	(*UpdateGroupMemberRequest)(nil),        // 64: grpc_kit.api.known.admin.v1.UpdateGroupMemberRequest
-	(*CreateCredentialRequest)(nil),         // 65: grpc_kit.api.known.admin.v1.CreateCredentialRequest
-	(*emptypb.Empty)(nil),                   // 66: google.protobuf.Empty
-	(*CreateDatabaseInitializeRequest)(nil), // 67: grpc_kit.api.known.admin.v1.CreateDatabaseInitializeRequest
-	(*LocalConfig)(nil),                     // 68: grpc_kit.api.known.admin.v1.LocalConfig
-	(*SecurityConfig)(nil),                  // 69: grpc_kit.api.known.admin.v1.SecurityConfig
-	(*UpsertAuthProvidersResponse)(nil),     // 70: grpc_kit.api.known.admin.v1.UpsertAuthProvidersResponse
-	(*ListAuthProvidersResponse)(nil),       // 71: grpc_kit.api.known.admin.v1.ListAuthProvidersResponse
-	(*AuthProvider)(nil),                    // 72: grpc_kit.api.known.admin.v1.AuthProvider
-	(*AuthToken)(nil),                       // 73: grpc_kit.api.known.admin.v1.AuthToken
-	(*GetAuthCallbackResponse)(nil),         // 74: grpc_kit.api.known.admin.v1.GetAuthCallbackResponse
-	(*Resource)(nil),                        // 75: grpc_kit.api.known.admin.v1.Resource
-	(*ListResourcesResponse)(nil),           // 76: grpc_kit.api.known.admin.v1.ListResourcesResponse
-	(*CreateResourceScopesResponse)(nil),    // 77: grpc_kit.api.known.admin.v1.CreateResourceScopesResponse
-	(*ListScopesResponse)(nil),              // 78: grpc_kit.api.known.admin.v1.ListScopesResponse
-	(*Scope)(nil),                           // 79: grpc_kit.api.known.admin.v1.Scope
-	(*ListScopeResourcesResponse)(nil),      // 80: grpc_kit.api.known.admin.v1.ListScopeResourcesResponse
-	(*CreateScopeResourcesResponse)(nil),    // 81: grpc_kit.api.known.admin.v1.CreateScopeResourcesResponse
-	(*ListPoliciesResponse)(nil),            // 82: grpc_kit.api.known.admin.v1.ListPoliciesResponse
-	(*Policy)(nil),                          // 83: grpc_kit.api.known.admin.v1.Policy
-	(*ListPermissionsResponse)(nil),         // 84: grpc_kit.api.known.admin.v1.ListPermissionsResponse
-	(*Permission)(nil),                      // 85: grpc_kit.api.known.admin.v1.Permission
-	(*Role)(nil),                            // 86: grpc_kit.api.known.admin.v1.Role
-	(*ListRolesResponse)(nil),               // 87: grpc_kit.api.known.admin.v1.ListRolesResponse
-	(*ListRoleUsersResponse)(nil),           // 88: grpc_kit.api.known.admin.v1.ListRoleUsersResponse
-	(*CreateRolePermissionsResponse)(nil),   // 89: grpc_kit.api.known.admin.v1.CreateRolePermissionsResponse
-	(*ListRolePermissionsResponse)(nil),     // 90: grpc_kit.api.known.admin.v1.ListRolePermissionsResponse
-	(*Department)(nil),                      // 91: grpc_kit.api.known.admin.v1.Department
-	(*ListDepartmentsResponse)(nil),         // 92: grpc_kit.api.known.admin.v1.ListDepartmentsResponse
-	(*ListDepartmentMembersResponse)(nil),   // 93: grpc_kit.api.known.admin.v1.ListDepartmentMembersResponse
-	(*CreateDepartmentMembersResponse)(nil), // 94: grpc_kit.api.known.admin.v1.CreateDepartmentMembersResponse
-	(*UpdateDepartmentMembersResponse)(nil), // 95: grpc_kit.api.known.admin.v1.UpdateDepartmentMembersResponse
-	(*User)(nil),                            // 96: grpc_kit.api.known.admin.v1.User
-	(*ListUsersResponse)(nil),               // 97: grpc_kit.api.known.admin.v1.ListUsersResponse
-	(*UpdateUserPasswordResponse)(nil),      // 98: grpc_kit.api.known.admin.v1.UpdateUserPasswordResponse
-	(*Group)(nil),                           // 99: grpc_kit.api.known.admin.v1.Group
-	(*ListGroupsResponse)(nil),              // 100: grpc_kit.api.known.admin.v1.ListGroupsResponse
-	(*ListGroupMembersResponse)(nil),        // 101: grpc_kit.api.known.admin.v1.ListGroupMembersResponse
-	(*CreateGroupMembersResponse)(nil),      // 102: grpc_kit.api.known.admin.v1.CreateGroupMembersResponse
-	(*Membership)(nil),                      // 103: grpc_kit.api.known.admin.v1.Membership
-	(*Credential)(nil),                      // 104: grpc_kit.api.known.admin.v1.Credential
-	(*OAuth2Discovery)(nil),                 // 105: grpc_kit.api.known.admin.v1.OAuth2Discovery
-	(*OAuth2JSONWebKeys)(nil),               // 106: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys
-	(*OAuth2Userinfo)(nil),                  // 107: grpc_kit.api.known.admin.v1.OAuth2Userinfo
+	(*GetGroupRequest)(nil),                 // 65: grpc_kit.api.known.admin.v1.GetGroupRequest
+	(*CreateCredentialRequest)(nil),         // 66: grpc_kit.api.known.admin.v1.CreateCredentialRequest
+	(*emptypb.Empty)(nil),                   // 67: google.protobuf.Empty
+	(*CreateDatabaseInitializeRequest)(nil), // 68: grpc_kit.api.known.admin.v1.CreateDatabaseInitializeRequest
+	(*LocalConfig)(nil),                     // 69: grpc_kit.api.known.admin.v1.LocalConfig
+	(*SecurityConfig)(nil),                  // 70: grpc_kit.api.known.admin.v1.SecurityConfig
+	(*UpsertAuthProvidersResponse)(nil),     // 71: grpc_kit.api.known.admin.v1.UpsertAuthProvidersResponse
+	(*ListAuthProvidersResponse)(nil),       // 72: grpc_kit.api.known.admin.v1.ListAuthProvidersResponse
+	(*AuthProvider)(nil),                    // 73: grpc_kit.api.known.admin.v1.AuthProvider
+	(*AuthToken)(nil),                       // 74: grpc_kit.api.known.admin.v1.AuthToken
+	(*GetAuthCallbackResponse)(nil),         // 75: grpc_kit.api.known.admin.v1.GetAuthCallbackResponse
+	(*Resource)(nil),                        // 76: grpc_kit.api.known.admin.v1.Resource
+	(*ListResourcesResponse)(nil),           // 77: grpc_kit.api.known.admin.v1.ListResourcesResponse
+	(*CreateResourceScopesResponse)(nil),    // 78: grpc_kit.api.known.admin.v1.CreateResourceScopesResponse
+	(*ListScopesResponse)(nil),              // 79: grpc_kit.api.known.admin.v1.ListScopesResponse
+	(*Scope)(nil),                           // 80: grpc_kit.api.known.admin.v1.Scope
+	(*ListScopeResourcesResponse)(nil),      // 81: grpc_kit.api.known.admin.v1.ListScopeResourcesResponse
+	(*CreateScopeResourcesResponse)(nil),    // 82: grpc_kit.api.known.admin.v1.CreateScopeResourcesResponse
+	(*ListPoliciesResponse)(nil),            // 83: grpc_kit.api.known.admin.v1.ListPoliciesResponse
+	(*Policy)(nil),                          // 84: grpc_kit.api.known.admin.v1.Policy
+	(*ListPermissionsResponse)(nil),         // 85: grpc_kit.api.known.admin.v1.ListPermissionsResponse
+	(*Permission)(nil),                      // 86: grpc_kit.api.known.admin.v1.Permission
+	(*Role)(nil),                            // 87: grpc_kit.api.known.admin.v1.Role
+	(*ListRolesResponse)(nil),               // 88: grpc_kit.api.known.admin.v1.ListRolesResponse
+	(*ListRoleUsersResponse)(nil),           // 89: grpc_kit.api.known.admin.v1.ListRoleUsersResponse
+	(*CreateRolePermissionsResponse)(nil),   // 90: grpc_kit.api.known.admin.v1.CreateRolePermissionsResponse
+	(*ListRolePermissionsResponse)(nil),     // 91: grpc_kit.api.known.admin.v1.ListRolePermissionsResponse
+	(*Department)(nil),                      // 92: grpc_kit.api.known.admin.v1.Department
+	(*ListDepartmentsResponse)(nil),         // 93: grpc_kit.api.known.admin.v1.ListDepartmentsResponse
+	(*ListDepartmentMembersResponse)(nil),   // 94: grpc_kit.api.known.admin.v1.ListDepartmentMembersResponse
+	(*CreateDepartmentMembersResponse)(nil), // 95: grpc_kit.api.known.admin.v1.CreateDepartmentMembersResponse
+	(*UpdateDepartmentMembersResponse)(nil), // 96: grpc_kit.api.known.admin.v1.UpdateDepartmentMembersResponse
+	(*User)(nil),                            // 97: grpc_kit.api.known.admin.v1.User
+	(*ListUsersResponse)(nil),               // 98: grpc_kit.api.known.admin.v1.ListUsersResponse
+	(*UpdateUserPasswordResponse)(nil),      // 99: grpc_kit.api.known.admin.v1.UpdateUserPasswordResponse
+	(*Group)(nil),                           // 100: grpc_kit.api.known.admin.v1.Group
+	(*ListGroupsResponse)(nil),              // 101: grpc_kit.api.known.admin.v1.ListGroupsResponse
+	(*ListGroupMembersResponse)(nil),        // 102: grpc_kit.api.known.admin.v1.ListGroupMembersResponse
+	(*CreateGroupMembersResponse)(nil),      // 103: grpc_kit.api.known.admin.v1.CreateGroupMembersResponse
+	(*Membership)(nil),                      // 104: grpc_kit.api.known.admin.v1.Membership
+	(*Credential)(nil),                      // 105: grpc_kit.api.known.admin.v1.Credential
+	(*OAuth2Discovery)(nil),                 // 106: grpc_kit.api.known.admin.v1.OAuth2Discovery
+	(*OAuth2JSONWebKeys)(nil),               // 107: grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys
+	(*OAuth2Userinfo)(nil),                  // 108: grpc_kit.api.known.admin.v1.OAuth2Userinfo
 }
 var file_known_admin_v1_admin_proto_depIdxs = []int32{
 	0,   // 0: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfig:input_type -> grpc_kit.api.known.admin.v1.GetConfigRequest
@@ -728,83 +735,85 @@ var file_known_admin_v1_admin_proto_depIdxs = []int32{
 	62,  // 62: grpc_kit.api.known.admin.v1.KnownAdmin.CreateGroupMembers:input_type -> grpc_kit.api.known.admin.v1.CreateGroupMembersRequest
 	63,  // 63: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGroupMember:input_type -> grpc_kit.api.known.admin.v1.DeleteGroupMemberRequest
 	64,  // 64: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGroupMember:input_type -> grpc_kit.api.known.admin.v1.UpdateGroupMemberRequest
-	65,  // 65: grpc_kit.api.known.admin.v1.KnownAdmin.CreateCredential:input_type -> grpc_kit.api.known.admin.v1.CreateCredentialRequest
-	66,  // 66: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery:input_type -> google.protobuf.Empty
-	66,  // 67: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2JSONWebKeys:input_type -> google.protobuf.Empty
-	66,  // 68: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Userinfo:input_type -> google.protobuf.Empty
-	67,  // 69: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDatabaseInitialize:input_type -> grpc_kit.api.known.admin.v1.CreateDatabaseInitializeRequest
-	68,  // 70: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfig:output_type -> grpc_kit.api.known.admin.v1.LocalConfig
-	69,  // 71: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigSecurity:output_type -> grpc_kit.api.known.admin.v1.SecurityConfig
-	70,  // 72: grpc_kit.api.known.admin.v1.KnownAdmin.UpsertAuthProviders:output_type -> grpc_kit.api.known.admin.v1.UpsertAuthProvidersResponse
-	71,  // 73: grpc_kit.api.known.admin.v1.KnownAdmin.ListAuthProviders:output_type -> grpc_kit.api.known.admin.v1.ListAuthProvidersResponse
-	72,  // 74: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthProvider:output_type -> grpc_kit.api.known.admin.v1.AuthProvider
-	72,  // 75: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthProvider:output_type -> grpc_kit.api.known.admin.v1.AuthProvider
-	66,  // 76: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteAuthProvider:output_type -> google.protobuf.Empty
-	72,  // 77: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateAuthProvider:output_type -> grpc_kit.api.known.admin.v1.AuthProvider
-	73,  // 78: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthLogin:output_type -> grpc_kit.api.known.admin.v1.AuthToken
-	73,  // 79: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthToken:output_type -> grpc_kit.api.known.admin.v1.AuthToken
-	74,  // 80: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthCallback:output_type -> grpc_kit.api.known.admin.v1.GetAuthCallbackResponse
-	75,  // 81: grpc_kit.api.known.admin.v1.KnownAdmin.GetResource:output_type -> grpc_kit.api.known.admin.v1.Resource
-	76,  // 82: grpc_kit.api.known.admin.v1.KnownAdmin.ListResources:output_type -> grpc_kit.api.known.admin.v1.ListResourcesResponse
-	75,  // 83: grpc_kit.api.known.admin.v1.KnownAdmin.CreateResource:output_type -> grpc_kit.api.known.admin.v1.Resource
-	75,  // 84: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateResource:output_type -> grpc_kit.api.known.admin.v1.Resource
-	66,  // 85: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteResource:output_type -> google.protobuf.Empty
-	77,  // 86: grpc_kit.api.known.admin.v1.KnownAdmin.CreateResourceScopes:output_type -> grpc_kit.api.known.admin.v1.CreateResourceScopesResponse
-	78,  // 87: grpc_kit.api.known.admin.v1.KnownAdmin.ListScopes:output_type -> grpc_kit.api.known.admin.v1.ListScopesResponse
-	79,  // 88: grpc_kit.api.known.admin.v1.KnownAdmin.CreateScope:output_type -> grpc_kit.api.known.admin.v1.Scope
-	79,  // 89: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateScope:output_type -> grpc_kit.api.known.admin.v1.Scope
-	66,  // 90: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteScope:output_type -> google.protobuf.Empty
-	80,  // 91: grpc_kit.api.known.admin.v1.KnownAdmin.ListScopeResources:output_type -> grpc_kit.api.known.admin.v1.ListScopeResourcesResponse
-	66,  // 92: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteScopeResource:output_type -> google.protobuf.Empty
-	81,  // 93: grpc_kit.api.known.admin.v1.KnownAdmin.CreateScopeResources:output_type -> grpc_kit.api.known.admin.v1.CreateScopeResourcesResponse
-	82,  // 94: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicies:output_type -> grpc_kit.api.known.admin.v1.ListPoliciesResponse
-	83,  // 95: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicy:output_type -> grpc_kit.api.known.admin.v1.Policy
-	83,  // 96: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePolicy:output_type -> grpc_kit.api.known.admin.v1.Policy
-	66,  // 97: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePolicy:output_type -> google.protobuf.Empty
-	84,  // 98: grpc_kit.api.known.admin.v1.KnownAdmin.ListPermissions:output_type -> grpc_kit.api.known.admin.v1.ListPermissionsResponse
-	85,  // 99: grpc_kit.api.known.admin.v1.KnownAdmin.GetPermission:output_type -> grpc_kit.api.known.admin.v1.Permission
-	85,  // 100: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePermission:output_type -> grpc_kit.api.known.admin.v1.Permission
-	85,  // 101: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePermission:output_type -> grpc_kit.api.known.admin.v1.Permission
-	66,  // 102: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePermission:output_type -> google.protobuf.Empty
-	86,  // 103: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRole:output_type -> grpc_kit.api.known.admin.v1.Role
-	86,  // 104: grpc_kit.api.known.admin.v1.KnownAdmin.GetRole:output_type -> grpc_kit.api.known.admin.v1.Role
-	86,  // 105: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateRole:output_type -> grpc_kit.api.known.admin.v1.Role
-	66,  // 106: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRole:output_type -> google.protobuf.Empty
-	87,  // 107: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoles:output_type -> grpc_kit.api.known.admin.v1.ListRolesResponse
-	88,  // 108: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoleUsers:output_type -> grpc_kit.api.known.admin.v1.ListRoleUsersResponse
-	66,  // 109: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleUser:output_type -> google.protobuf.Empty
-	66,  // 110: grpc_kit.api.known.admin.v1.KnownAdmin.AssignRoleToUser:output_type -> google.protobuf.Empty
-	89,  // 111: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRolePermissions:output_type -> grpc_kit.api.known.admin.v1.CreateRolePermissionsResponse
-	66,  // 112: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRolePermission:output_type -> google.protobuf.Empty
-	90,  // 113: grpc_kit.api.known.admin.v1.KnownAdmin.ListRolePermissions:output_type -> grpc_kit.api.known.admin.v1.ListRolePermissionsResponse
-	91,  // 114: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDepartment:output_type -> grpc_kit.api.known.admin.v1.Department
-	92,  // 115: grpc_kit.api.known.admin.v1.KnownAdmin.ListDepartments:output_type -> grpc_kit.api.known.admin.v1.ListDepartmentsResponse
-	66,  // 116: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteDepartment:output_type -> google.protobuf.Empty
-	91,  // 117: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateDepartment:output_type -> grpc_kit.api.known.admin.v1.Department
-	93,  // 118: grpc_kit.api.known.admin.v1.KnownAdmin.ListDepartmentMembers:output_type -> grpc_kit.api.known.admin.v1.ListDepartmentMembersResponse
-	94,  // 119: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDepartmentMembers:output_type -> grpc_kit.api.known.admin.v1.CreateDepartmentMembersResponse
-	95,  // 120: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateDepartmentMembers:output_type -> grpc_kit.api.known.admin.v1.UpdateDepartmentMembersResponse
-	66,  // 121: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteDepartmentMember:output_type -> google.protobuf.Empty
-	96,  // 122: grpc_kit.api.known.admin.v1.KnownAdmin.GetUser:output_type -> grpc_kit.api.known.admin.v1.User
-	96,  // 123: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser:output_type -> grpc_kit.api.known.admin.v1.User
-	96,  // 124: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUser:output_type -> grpc_kit.api.known.admin.v1.User
-	97,  // 125: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers:output_type -> grpc_kit.api.known.admin.v1.ListUsersResponse
-	98,  // 126: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUserPassword:output_type -> grpc_kit.api.known.admin.v1.UpdateUserPasswordResponse
-	99,  // 127: grpc_kit.api.known.admin.v1.KnownAdmin.CreateGroup:output_type -> grpc_kit.api.known.admin.v1.Group
-	100, // 128: grpc_kit.api.known.admin.v1.KnownAdmin.ListGroups:output_type -> grpc_kit.api.known.admin.v1.ListGroupsResponse
-	99,  // 129: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGroup:output_type -> grpc_kit.api.known.admin.v1.Group
-	66,  // 130: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGroup:output_type -> google.protobuf.Empty
-	101, // 131: grpc_kit.api.known.admin.v1.KnownAdmin.ListGroupMembers:output_type -> grpc_kit.api.known.admin.v1.ListGroupMembersResponse
-	102, // 132: grpc_kit.api.known.admin.v1.KnownAdmin.CreateGroupMembers:output_type -> grpc_kit.api.known.admin.v1.CreateGroupMembersResponse
-	66,  // 133: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGroupMember:output_type -> google.protobuf.Empty
-	103, // 134: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGroupMember:output_type -> grpc_kit.api.known.admin.v1.Membership
-	104, // 135: grpc_kit.api.known.admin.v1.KnownAdmin.CreateCredential:output_type -> grpc_kit.api.known.admin.v1.Credential
-	105, // 136: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery:output_type -> grpc_kit.api.known.admin.v1.OAuth2Discovery
-	106, // 137: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2JSONWebKeys:output_type -> grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys
-	107, // 138: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Userinfo:output_type -> grpc_kit.api.known.admin.v1.OAuth2Userinfo
-	66,  // 139: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDatabaseInitialize:output_type -> google.protobuf.Empty
-	70,  // [70:140] is the sub-list for method output_type
-	0,   // [0:70] is the sub-list for method input_type
+	65,  // 65: grpc_kit.api.known.admin.v1.KnownAdmin.GetGroup:input_type -> grpc_kit.api.known.admin.v1.GetGroupRequest
+	66,  // 66: grpc_kit.api.known.admin.v1.KnownAdmin.CreateCredential:input_type -> grpc_kit.api.known.admin.v1.CreateCredentialRequest
+	67,  // 67: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery:input_type -> google.protobuf.Empty
+	67,  // 68: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2JSONWebKeys:input_type -> google.protobuf.Empty
+	67,  // 69: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Userinfo:input_type -> google.protobuf.Empty
+	68,  // 70: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDatabaseInitialize:input_type -> grpc_kit.api.known.admin.v1.CreateDatabaseInitializeRequest
+	69,  // 71: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfig:output_type -> grpc_kit.api.known.admin.v1.LocalConfig
+	70,  // 72: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigSecurity:output_type -> grpc_kit.api.known.admin.v1.SecurityConfig
+	71,  // 73: grpc_kit.api.known.admin.v1.KnownAdmin.UpsertAuthProviders:output_type -> grpc_kit.api.known.admin.v1.UpsertAuthProvidersResponse
+	72,  // 74: grpc_kit.api.known.admin.v1.KnownAdmin.ListAuthProviders:output_type -> grpc_kit.api.known.admin.v1.ListAuthProvidersResponse
+	73,  // 75: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthProvider:output_type -> grpc_kit.api.known.admin.v1.AuthProvider
+	73,  // 76: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthProvider:output_type -> grpc_kit.api.known.admin.v1.AuthProvider
+	67,  // 77: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteAuthProvider:output_type -> google.protobuf.Empty
+	73,  // 78: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateAuthProvider:output_type -> grpc_kit.api.known.admin.v1.AuthProvider
+	74,  // 79: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthLogin:output_type -> grpc_kit.api.known.admin.v1.AuthToken
+	74,  // 80: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthToken:output_type -> grpc_kit.api.known.admin.v1.AuthToken
+	75,  // 81: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthCallback:output_type -> grpc_kit.api.known.admin.v1.GetAuthCallbackResponse
+	76,  // 82: grpc_kit.api.known.admin.v1.KnownAdmin.GetResource:output_type -> grpc_kit.api.known.admin.v1.Resource
+	77,  // 83: grpc_kit.api.known.admin.v1.KnownAdmin.ListResources:output_type -> grpc_kit.api.known.admin.v1.ListResourcesResponse
+	76,  // 84: grpc_kit.api.known.admin.v1.KnownAdmin.CreateResource:output_type -> grpc_kit.api.known.admin.v1.Resource
+	76,  // 85: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateResource:output_type -> grpc_kit.api.known.admin.v1.Resource
+	67,  // 86: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteResource:output_type -> google.protobuf.Empty
+	78,  // 87: grpc_kit.api.known.admin.v1.KnownAdmin.CreateResourceScopes:output_type -> grpc_kit.api.known.admin.v1.CreateResourceScopesResponse
+	79,  // 88: grpc_kit.api.known.admin.v1.KnownAdmin.ListScopes:output_type -> grpc_kit.api.known.admin.v1.ListScopesResponse
+	80,  // 89: grpc_kit.api.known.admin.v1.KnownAdmin.CreateScope:output_type -> grpc_kit.api.known.admin.v1.Scope
+	80,  // 90: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateScope:output_type -> grpc_kit.api.known.admin.v1.Scope
+	67,  // 91: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteScope:output_type -> google.protobuf.Empty
+	81,  // 92: grpc_kit.api.known.admin.v1.KnownAdmin.ListScopeResources:output_type -> grpc_kit.api.known.admin.v1.ListScopeResourcesResponse
+	67,  // 93: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteScopeResource:output_type -> google.protobuf.Empty
+	82,  // 94: grpc_kit.api.known.admin.v1.KnownAdmin.CreateScopeResources:output_type -> grpc_kit.api.known.admin.v1.CreateScopeResourcesResponse
+	83,  // 95: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicies:output_type -> grpc_kit.api.known.admin.v1.ListPoliciesResponse
+	84,  // 96: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicy:output_type -> grpc_kit.api.known.admin.v1.Policy
+	84,  // 97: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePolicy:output_type -> grpc_kit.api.known.admin.v1.Policy
+	67,  // 98: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePolicy:output_type -> google.protobuf.Empty
+	85,  // 99: grpc_kit.api.known.admin.v1.KnownAdmin.ListPermissions:output_type -> grpc_kit.api.known.admin.v1.ListPermissionsResponse
+	86,  // 100: grpc_kit.api.known.admin.v1.KnownAdmin.GetPermission:output_type -> grpc_kit.api.known.admin.v1.Permission
+	86,  // 101: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePermission:output_type -> grpc_kit.api.known.admin.v1.Permission
+	86,  // 102: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePermission:output_type -> grpc_kit.api.known.admin.v1.Permission
+	67,  // 103: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePermission:output_type -> google.protobuf.Empty
+	87,  // 104: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRole:output_type -> grpc_kit.api.known.admin.v1.Role
+	87,  // 105: grpc_kit.api.known.admin.v1.KnownAdmin.GetRole:output_type -> grpc_kit.api.known.admin.v1.Role
+	87,  // 106: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateRole:output_type -> grpc_kit.api.known.admin.v1.Role
+	67,  // 107: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRole:output_type -> google.protobuf.Empty
+	88,  // 108: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoles:output_type -> grpc_kit.api.known.admin.v1.ListRolesResponse
+	89,  // 109: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoleUsers:output_type -> grpc_kit.api.known.admin.v1.ListRoleUsersResponse
+	67,  // 110: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleUser:output_type -> google.protobuf.Empty
+	67,  // 111: grpc_kit.api.known.admin.v1.KnownAdmin.AssignRoleToUser:output_type -> google.protobuf.Empty
+	90,  // 112: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRolePermissions:output_type -> grpc_kit.api.known.admin.v1.CreateRolePermissionsResponse
+	67,  // 113: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRolePermission:output_type -> google.protobuf.Empty
+	91,  // 114: grpc_kit.api.known.admin.v1.KnownAdmin.ListRolePermissions:output_type -> grpc_kit.api.known.admin.v1.ListRolePermissionsResponse
+	92,  // 115: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDepartment:output_type -> grpc_kit.api.known.admin.v1.Department
+	93,  // 116: grpc_kit.api.known.admin.v1.KnownAdmin.ListDepartments:output_type -> grpc_kit.api.known.admin.v1.ListDepartmentsResponse
+	67,  // 117: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteDepartment:output_type -> google.protobuf.Empty
+	92,  // 118: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateDepartment:output_type -> grpc_kit.api.known.admin.v1.Department
+	94,  // 119: grpc_kit.api.known.admin.v1.KnownAdmin.ListDepartmentMembers:output_type -> grpc_kit.api.known.admin.v1.ListDepartmentMembersResponse
+	95,  // 120: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDepartmentMembers:output_type -> grpc_kit.api.known.admin.v1.CreateDepartmentMembersResponse
+	96,  // 121: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateDepartmentMembers:output_type -> grpc_kit.api.known.admin.v1.UpdateDepartmentMembersResponse
+	67,  // 122: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteDepartmentMember:output_type -> google.protobuf.Empty
+	97,  // 123: grpc_kit.api.known.admin.v1.KnownAdmin.GetUser:output_type -> grpc_kit.api.known.admin.v1.User
+	97,  // 124: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser:output_type -> grpc_kit.api.known.admin.v1.User
+	97,  // 125: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUser:output_type -> grpc_kit.api.known.admin.v1.User
+	98,  // 126: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers:output_type -> grpc_kit.api.known.admin.v1.ListUsersResponse
+	99,  // 127: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUserPassword:output_type -> grpc_kit.api.known.admin.v1.UpdateUserPasswordResponse
+	100, // 128: grpc_kit.api.known.admin.v1.KnownAdmin.CreateGroup:output_type -> grpc_kit.api.known.admin.v1.Group
+	101, // 129: grpc_kit.api.known.admin.v1.KnownAdmin.ListGroups:output_type -> grpc_kit.api.known.admin.v1.ListGroupsResponse
+	100, // 130: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGroup:output_type -> grpc_kit.api.known.admin.v1.Group
+	67,  // 131: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGroup:output_type -> google.protobuf.Empty
+	102, // 132: grpc_kit.api.known.admin.v1.KnownAdmin.ListGroupMembers:output_type -> grpc_kit.api.known.admin.v1.ListGroupMembersResponse
+	103, // 133: grpc_kit.api.known.admin.v1.KnownAdmin.CreateGroupMembers:output_type -> grpc_kit.api.known.admin.v1.CreateGroupMembersResponse
+	67,  // 134: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGroupMember:output_type -> google.protobuf.Empty
+	104, // 135: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGroupMember:output_type -> grpc_kit.api.known.admin.v1.Membership
+	100, // 136: grpc_kit.api.known.admin.v1.KnownAdmin.GetGroup:output_type -> grpc_kit.api.known.admin.v1.Group
+	105, // 137: grpc_kit.api.known.admin.v1.KnownAdmin.CreateCredential:output_type -> grpc_kit.api.known.admin.v1.Credential
+	106, // 138: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery:output_type -> grpc_kit.api.known.admin.v1.OAuth2Discovery
+	107, // 139: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2JSONWebKeys:output_type -> grpc_kit.api.known.admin.v1.OAuth2JSONWebKeys
+	108, // 140: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Userinfo:output_type -> grpc_kit.api.known.admin.v1.OAuth2Userinfo
+	67,  // 141: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDatabaseInitialize:output_type -> google.protobuf.Empty
+	71,  // [71:142] is the sub-list for method output_type
+	0,   // [0:71] is the sub-list for method input_type
 	0,   // [0:0] is the sub-list for extension type_name
 	0,   // [0:0] is the sub-list for extension extendee
 	0,   // [0:0] is the sub-list for field type_name

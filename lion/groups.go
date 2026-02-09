@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
 )
 
@@ -45,20 +44,17 @@ type Groups struct {
 	MaxMembers int `json:"max_members,omitempty"`
 	// 元数据，用于存储自定义属性，对应 proto 中的 map<string, string> metadata
 	Metadata map[string]string `json:"metadata,omitempty"`
-	// 外部系统ID，用于与外部系统集成
-	ExternalID string `json:"external_id,omitempty"`
-	// 外部系统来源，如 ldap、sso、custom；type=EXTERNAL 时必填
-	ExternalSource string `json:"external_source,omitempty"`
-	// 关联 lion_departments 表的 ID，type=DEPARTMENT 时必填
-	DepartmentID int `json:"department_id,omitempty"`
-	// 关联 lion_roles 表的 ID，type=ROLE 时必填
-	RoleID int `json:"role_id,omitempty"`
+	// 类型关联引用ID：DEPARTMENT→部门ID，ROLE→角色ID；其他类型为0
+	RefID int `json:"ref_id,omitempty"`
+	// 类型关联表达式：DYNAMIC→成员过滤规则，EXTERNAL→外部源描述(JSON)；其他类型为空
+	RefExpr string `json:"ref_expr,omitempty"`
 	// 用户组描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupsQuery when eager-loading is set.
-	Edges        GroupsEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges                   GroupsEdges `json:"edges"`
+	departments_lion_groups *int
+	selectValues            sql.SelectValues
 }
 
 // GroupsEdges holds the relations/edges for other nodes in the graph.
@@ -67,11 +63,9 @@ type GroupsEdges struct {
 	LionGroups []*GroupRoles `json:"lion_groups,omitempty"`
 	// LionUserGroups holds the value of the lion_user_groups edge.
 	LionUserGroups []*UserGroups `json:"lion_user_groups,omitempty"`
-	// LionDepartments holds the value of the lion_departments edge.
-	LionDepartments *Departments `json:"lion_departments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // LionGroupsOrErr returns the LionGroups value or an error if the edge
@@ -92,17 +86,6 @@ func (e GroupsEdges) LionUserGroupsOrErr() ([]*UserGroups, error) {
 	return nil, &NotLoadedError{edge: "lion_user_groups"}
 }
 
-// LionDepartmentsOrErr returns the LionDepartments value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e GroupsEdges) LionDepartmentsOrErr() (*Departments, error) {
-	if e.LionDepartments != nil {
-		return e.LionDepartments, nil
-	} else if e.loadedTypes[2] {
-		return nil, &NotFoundError{label: departments.Label}
-	}
-	return nil, &NotLoadedError{edge: "lion_departments"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Groups) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -110,12 +93,14 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case groups.FieldMetadata:
 			values[i] = new([]byte)
-		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldDepartmentID, groups.FieldRoleID:
+		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldRefID:
 			values[i] = new(sql.NullInt64)
-		case groups.FieldCode, groups.FieldDisplayName, groups.FieldExternalID, groups.FieldExternalSource, groups.FieldDescription:
+		case groups.FieldCode, groups.FieldDisplayName, groups.FieldRefExpr, groups.FieldDescription:
 			values[i] = new(sql.NullString)
 		case groups.FieldCreatedAt, groups.FieldUpdatedAt, groups.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
+		case groups.ForeignKeys[0]: // departments_lion_groups
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -218,35 +203,30 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field metadata: %w", err)
 				}
 			}
-		case groups.FieldExternalID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field external_id", values[i])
-			} else if value.Valid {
-				_m.ExternalID = value.String
-			}
-		case groups.FieldExternalSource:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field external_source", values[i])
-			} else if value.Valid {
-				_m.ExternalSource = value.String
-			}
-		case groups.FieldDepartmentID:
+		case groups.FieldRefID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field department_id", values[i])
+				return fmt.Errorf("unexpected type %T for field ref_id", values[i])
 			} else if value.Valid {
-				_m.DepartmentID = int(value.Int64)
+				_m.RefID = int(value.Int64)
 			}
-		case groups.FieldRoleID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field role_id", values[i])
+		case groups.FieldRefExpr:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ref_expr", values[i])
 			} else if value.Valid {
-				_m.RoleID = int(value.Int64)
+				_m.RefExpr = value.String
 			}
 		case groups.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
 				_m.Description = value.String
+			}
+		case groups.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field departments_lion_groups", value)
+			} else if value.Valid {
+				_m.departments_lion_groups = new(int)
+				*_m.departments_lion_groups = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -269,11 +249,6 @@ func (_m *Groups) QueryLionGroups() *GroupRolesQuery {
 // QueryLionUserGroups queries the "lion_user_groups" edge of the Groups entity.
 func (_m *Groups) QueryLionUserGroups() *UserGroupsQuery {
 	return NewGroupsClient(_m.config).QueryLionUserGroups(_m)
-}
-
-// QueryLionDepartments queries the "lion_departments" edge of the Groups entity.
-func (_m *Groups) QueryLionDepartments() *DepartmentsQuery {
-	return NewGroupsClient(_m.config).QueryLionDepartments(_m)
 }
 
 // Update returns a builder for updating this Groups.
@@ -340,17 +315,11 @@ func (_m *Groups) String() string {
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
-	builder.WriteString("external_id=")
-	builder.WriteString(_m.ExternalID)
+	builder.WriteString("ref_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RefID))
 	builder.WriteString(", ")
-	builder.WriteString("external_source=")
-	builder.WriteString(_m.ExternalSource)
-	builder.WriteString(", ")
-	builder.WriteString("department_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentID))
-	builder.WriteString(", ")
-	builder.WriteString("role_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.RoleID))
+	builder.WriteString("ref_expr=")
+	builder.WriteString(_m.RefExpr)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
