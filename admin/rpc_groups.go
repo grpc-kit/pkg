@@ -157,7 +157,15 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 		where = append(where, groups.GroupStatus(int(req.GetGroupStatus())))
 	}
 
-	// filter: 简单 AIP-160 风格解析，支持 status=2, type=1, parent_id=0, code=xxx, ref_id=123
+	// code / display_name 独立参数过滤（模糊匹配，不区分大小写）
+	if req.GetCode() != "" {
+		where = append(where, groups.CodeContainsFold(req.GetCode()))
+	}
+	if req.GetDisplayName() != "" {
+		where = append(where, groups.DisplayNameContainsFold(req.GetDisplayName()))
+	}
+
+	// filter: 简单 AIP-160 风格解析，支持 status=2, type=1, parent_id=0, code=xxx, display_name=xxx, ref_id=123
 	if req.GetFilter() != "" {
 		filterPredicates, err := parseListGroupsFilter(req.GetFilter())
 		if err != nil {
@@ -344,7 +352,9 @@ func parseListGroupsFilter(filter string) ([]predicate.Groups, error) {
 			}
 			out = append(out, groups.ParentID(n))
 		case "code":
-			out = append(out, groups.CodeEQ(val))
+			out = append(out, groups.CodeContainsFold(val))
+		case "display_name":
+			out = append(out, groups.DisplayNameContainsFold(val))
 		case "ref_id":
 			n, err := strconv.Atoi(val)
 			if err != nil {
