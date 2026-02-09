@@ -173,7 +173,7 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 
 	query := db.Groups.Query().Where(where...)
 
-	// 排序 order_by: create_time desc/asc, sort_order asc/desc, id asc/desc
+	// 排序 order_by: sort_order asc(默认), create_time desc/asc, id asc/desc
 	if req.GetOrderBy() != "" {
 		switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
 		case "create_time desc", "created_at desc":
@@ -189,10 +189,10 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 		case "id desc":
 			query = query.Order(lion.Desc(groups.FieldID))
 		default:
-			query = query.Order(lion.Desc(groups.FieldCreatedAt))
+			query = query.Order(lion.Asc(groups.FieldSortOrder), lion.Asc(groups.FieldID))
 		}
 	} else {
-		query = query.Order(lion.Desc(groups.FieldCreatedAt))
+		query = query.Order(lion.Asc(groups.FieldSortOrder), lion.Asc(groups.FieldID))
 	}
 
 	// 计算总数（分页前）
