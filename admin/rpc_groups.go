@@ -45,8 +45,9 @@ func (a *KnownAdminAPI) getGroupType(ctx context.Context, db *lion.Client, group
 }
 
 // isAutoManagedGroupType 判断群组类型是否为自动管理成员类型（不允许手动添加/删除/编辑成员）
+// DEPARTMENT(1), ROLE(2), DYNAMIC(3), SYSTEM(4) 的成员均由系统自动管理
 func isAutoManagedGroupType(t adminv1.Group_Type) bool {
-	return t == adminv1.Group_DEPARTMENT || t == adminv1.Group_ROLE || t == adminv1.Group_DYNAMIC
+	return t == adminv1.Group_DEPARTMENT || t == adminv1.Group_ROLE || t == adminv1.Group_DYNAMIC || t == adminv1.Group_SYSTEM
 }
 
 // CreateGroup 创建用户组
@@ -429,6 +430,9 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 		return result, err
 	}
 
+	// SYSTEM 类型群组不允许修改 code, type, ref_id, ref_expr
+	isSystem := adminv1.Group_Type(group.GroupType) == adminv1.Group_SYSTEM
+
 	update := group.Update()
 	updatedBy := req.Group.UpdatedBy
 	if updatedBy == 0 {
@@ -437,8 +441,17 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 		}
 	}
 
+	// SYSTEM 类型群组受保护的字段，不允许修改
+	systemProtectedFields := map[string]bool{
+		"code": true, "type": true, "ref_id": true, "ref_expr": true,
+	}
+
 	if req.UpdateMask != nil && len(req.UpdateMask.Paths) > 0 {
 		for _, field := range req.UpdateMask.Paths {
+			// SYSTEM 群组跳过受保护字段
+			if isSystem && systemProtectedFields[field] {
+				continue
+			}
 			switch field {
 			case "code":
 				update.SetCode(req.Group.Code)
@@ -473,19 +486,32 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 		if displayName == "" {
 			displayName = group.DisplayName
 		}
-		update.
-			SetCode(req.Group.Code).
-			SetDisplayName(displayName).
-			SetGroupType(int(req.Group.Type.Number())).
-			SetGroupStatus(int(req.Group.Status.Number())).
-			SetSortOrder(int(req.Group.SortOrder)).
-			SetMaxMembers(int(req.Group.MaxMembers)).
-			SetMetadata(req.Group.Metadata).
-			SetRefID(int(req.Group.RefId)).
-			SetRefExpr(req.Group.RefExpr).
-			SetVisibility(int(req.Group.Visibility.Number())).
-			SetDescription(req.Group.Description).
-			SetUpdatedBy(updatedBy)
+		// SYSTEM 群组：仅更新允许的字段，跳过 code/type/ref_id/ref_expr
+		if isSystem {
+			update.
+				SetDisplayName(displayName).
+				SetGroupStatus(int(req.Group.Status.Number())).
+				SetSortOrder(int(req.Group.SortOrder)).
+				SetMaxMembers(int(req.Group.MaxMembers)).
+				SetMetadata(req.Group.Metadata).
+				SetVisibility(int(req.Group.Visibility.Number())).
+				SetDescription(req.Group.Description).
+				SetUpdatedBy(updatedBy)
+		} else {
+			update.
+				SetCode(req.Group.Code).
+				SetDisplayName(displayName).
+				SetGroupType(int(req.Group.Type.Number())).
+				SetGroupStatus(int(req.Group.Status.Number())).
+				SetSortOrder(int(req.Group.SortOrder)).
+				SetMaxMembers(int(req.Group.MaxMembers)).
+				SetMetadata(req.Group.Metadata).
+				SetRefID(int(req.Group.RefId)).
+				SetRefExpr(req.Group.RefExpr).
+				SetVisibility(int(req.Group.Visibility.Number())).
+				SetDescription(req.Group.Description).
+				SetUpdatedBy(updatedBy)
+		}
 	}
 
 	updatedGroup, err := update.Save(ctx)
@@ -525,6 +551,8 @@ func (a *KnownAdminAPI) DeleteGroup(ctx context.Context, req *adminv1.DeleteGrou
 // 根据群组类型从不同数据源获取成员：
 //   - DEPARTMENT: 从 user_departments 表查询关联部门的成员
 //   - ROLE: 从 user_roles 表查询关联角色的成员
+//   - DYNAMIC: 根据 ref_expr 动态规则从 users 表查询
+//   - SYSTEM: 同 DYNAMIC，根据 ref_expr 动态规则从 users 表查询（系统内置，不可创建/修改/删除）
 //   - 其他类型: 从 user_groups 表查询
 func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListGroupMembersRequest) (*adminv1.ListGroupMembersResponse, error) {
 	result := &adminv1.ListGroupMembersResponse{
@@ -559,7 +587,8 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 		return a.listGroupMembersFromDepartment(ctx, req, db, group.RefID)
 	case adminv1.Group_ROLE:
 		return a.listGroupMembersFromRole(ctx, req, db, group.RefID)
-	case adminv1.Group_DYNAMIC:
+	case adminv1.Group_DYNAMIC, adminv1.Group_SYSTEM:
+		// DYNAMIC 和 SYSTEM 均通过 ref_expr 动态规则自动关联成员
 		return a.listGroupMembersFromDynamicRule(ctx, req, db, group.RefExpr)
 	default:
 		return a.listGroupMembersFromUserGroups(ctx, req, db, groupID)
