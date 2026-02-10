@@ -44,6 +44,8 @@ const (
 	FieldRefID = "ref_id"
 	// FieldRefExpr holds the string denoting the ref_expr field in the database.
 	FieldRefExpr = "ref_expr"
+	// FieldVisibility holds the string denoting the visibility field in the database.
+	FieldVisibility = "visibility"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
@@ -86,6 +88,7 @@ var Columns = []string{
 	FieldMetadata,
 	FieldRefID,
 	FieldRefExpr,
+	FieldVisibility,
 	FieldDescription,
 }
 
@@ -143,6 +146,8 @@ var (
 	DefaultRefExpr string
 	// RefExprValidator is a validator for the "ref_expr" field. It is called by the builders before save.
 	RefExprValidator func(string) error
+	// DefaultVisibility holds the default value on creation for the "visibility" field.
+	DefaultVisibility int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -223,6 +228,11 @@ func ByRefID(opts ...sql.OrderTermOption) OrderOption {
 // ByRefExpr orders the results by the ref_expr field.
 func ByRefExpr(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRefExpr, opts...).ToFunc()
+}
+
+// ByVisibility orders the results by the visibility field.
+func ByVisibility(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVisibility, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

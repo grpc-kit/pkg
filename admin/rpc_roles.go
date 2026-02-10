@@ -17,6 +17,7 @@ import (
 	// "github.com/grpc-kit/pkg/lion/roledataranges"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
+	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -409,6 +410,12 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 	if req.Role == nil {
 		return result, errs.InvalidArgument(ctx).WithMessage("request body role is nil")
 	}
+
+	code, err := schema.EnsureCode(req.Role.Code)
+	if err != nil {
+		return result, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	req.Role.Code = code
 
 	db, err := a.GetLionClient()
 	if err != nil {

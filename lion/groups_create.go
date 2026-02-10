@@ -208,6 +208,20 @@ func (_c *GroupsCreate) SetNillableRefExpr(v *string) *GroupsCreate {
 	return _c
 }
 
+// SetVisibility sets the "visibility" field.
+func (_c *GroupsCreate) SetVisibility(v int) *GroupsCreate {
+	_c.mutation.SetVisibility(v)
+	return _c
+}
+
+// SetNillableVisibility sets the "visibility" field if the given value is not nil.
+func (_c *GroupsCreate) SetNillableVisibility(v *int) *GroupsCreate {
+	if v != nil {
+		_c.SetVisibility(*v)
+	}
+	return _c
+}
+
 // SetDescription sets the "description" field.
 func (_c *GroupsCreate) SetDescription(v string) *GroupsCreate {
 	_c.mutation.SetDescription(v)
@@ -335,6 +349,10 @@ func (_c *GroupsCreate) defaults() {
 		v := groups.DefaultRefExpr
 		_c.mutation.SetRefExpr(v)
 	}
+	if _, ok := _c.mutation.Visibility(); !ok {
+		v := groups.DefaultVisibility
+		_c.mutation.SetVisibility(v)
+	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := groups.DefaultDescription
 		_c.mutation.SetDescription(v)
@@ -393,6 +411,9 @@ func (_c *GroupsCreate) check() error {
 		if err := groups.RefExprValidator(v); err != nil {
 			return &ValidationError{Name: "ref_expr", err: fmt.Errorf(`lion: validator failed for field "Groups.ref_expr": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.Visibility(); !ok {
+		return &ValidationError{Name: "visibility", err: errors.New(`lion: missing required field "Groups.visibility"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Groups.description"`)}
@@ -482,6 +503,10 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.RefExpr(); ok {
 		_spec.SetField(groups.FieldRefExpr, field.TypeString, value)
 		_node.RefExpr = value
+	}
+	if value, ok := _c.mutation.Visibility(); ok {
+		_spec.SetField(groups.FieldVisibility, field.TypeInt, value)
+		_node.Visibility = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)

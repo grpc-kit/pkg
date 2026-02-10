@@ -48,6 +48,8 @@ type Groups struct {
 	RefID int `json:"ref_id,omitempty"`
 	// 类型关联表达式：DYNAMIC→成员过滤规则，EXTERNAL→外部源描述(JSON)；其他类型为空
 	RefExpr string `json:"ref_expr,omitempty"`
+	// 可见性定义，对应 api/known/admin/v1/common.proto 中定义
+	Visibility int `json:"visibility,omitempty"`
 	// 用户组描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -93,7 +95,7 @@ func (*Groups) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case groups.FieldMetadata:
 			values[i] = new([]byte)
-		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldRefID:
+		case groups.FieldID, groups.FieldCreatedBy, groups.FieldUpdatedBy, groups.FieldGroupType, groups.FieldGroupStatus, groups.FieldSortOrder, groups.FieldParentID, groups.FieldMaxMembers, groups.FieldRefID, groups.FieldVisibility:
 			values[i] = new(sql.NullInt64)
 		case groups.FieldCode, groups.FieldDisplayName, groups.FieldRefExpr, groups.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -215,6 +217,12 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.RefExpr = value.String
 			}
+		case groups.FieldVisibility:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field visibility", values[i])
+			} else if value.Valid {
+				_m.Visibility = int(value.Int64)
+			}
 		case groups.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
@@ -320,6 +328,9 @@ func (_m *Groups) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("ref_expr=")
 	builder.WriteString(_m.RefExpr)
+	builder.WriteString(", ")
+	builder.WriteString("visibility=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Visibility))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

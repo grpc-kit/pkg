@@ -157,6 +157,7 @@ var (
 		{Name: "metadata", Type: field.TypeJSON},
 		{Name: "ref_id", Type: field.TypeInt, Default: 0},
 		{Name: "ref_expr", Type: field.TypeString, Size: 4096, Default: ""},
+		{Name: "visibility", Type: field.TypeInt, Default: 0},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "departments_lion_groups", Type: field.TypeInt, Nullable: true},
 	}
@@ -168,7 +169,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_groups_lion_departments_lion_groups",
-				Columns:    []*schema.Column{LionGroupsColumns[17]},
+				Columns:    []*schema.Column{LionGroupsColumns[18]},
 				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

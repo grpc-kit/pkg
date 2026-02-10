@@ -251,19 +251,22 @@ type CreatePermissionRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	// {
-	// "code": "permission_001",
+	// "code": "manage-users",
 	// "display_name": "管理用户列表",
 	// "policy": {
-	// "id": "10",
+	// "id": "10"
 	// },
 	// "bindings": [
 	// {
-	// "resource_scope_id": 1
+	// "resource_scope_id": 1,
 	// "is_recursive": true
 	// }
 	// ],
 	// "description": "允许查看和管理用户列表"
 	// }
+	//
+	// 注意：code 为可选字段，如客户端未提供，服务端将自动生成 12 位随机编码。
+	// 如提供，需符合 code 规范：以小写字母开头，仅 [a-z0-9-]，长度 2-32，不允许连续 "--"。
 	Permission *Permission `protobuf:"bytes,1,opt,name=permission,proto3" json:"permission,omitempty"`
 }
 

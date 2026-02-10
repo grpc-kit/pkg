@@ -12,6 +12,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -135,6 +136,12 @@ func (a *KnownAdminAPI) CreatePolicy(ctx context.Context, req *adminv1.CreatePol
 	if req == nil || req.Policy == nil {
 		return nil, errs.InvalidArgument(ctx).WithMessage("request body policy is nil")
 	}
+
+	code, err := schema.EnsureCode(req.Policy.Code)
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	req.Policy.Code = code
 
 	db, err := a.GetLionClient()
 	if err != nil {

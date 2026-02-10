@@ -13,6 +13,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/scopes"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -146,6 +147,12 @@ func (a *KnownAdminAPI) CreateScope(ctx context.Context, req *adminv1.CreateScop
 	if req.Scope == nil {
 		return result, errs.InvalidArgument(ctx).WithMessage("request body scope is nil")
 	}
+
+	code, err := schema.EnsureCode(req.Scope.Code)
+	if err != nil {
+		return result, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	req.Scope.Code = code
 
 	db, err := a.GetLionClient()
 	if err != nil {

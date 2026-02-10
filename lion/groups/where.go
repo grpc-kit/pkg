@@ -125,6 +125,11 @@ func RefExpr(v string) predicate.Groups {
 	return predicate.Groups(sql.FieldEQ(FieldRefExpr, v))
 }
 
+// Visibility applies equality check predicate on the "visibility" field. It's identical to VisibilityEQ.
+func Visibility(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldVisibility, v))
+}
+
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.Groups {
 	return predicate.Groups(sql.FieldEQ(FieldDescription, v))
@@ -793,6 +798,46 @@ func RefExprEqualFold(v string) predicate.Groups {
 // RefExprContainsFold applies the ContainsFold predicate on the "ref_expr" field.
 func RefExprContainsFold(v string) predicate.Groups {
 	return predicate.Groups(sql.FieldContainsFold(FieldRefExpr, v))
+}
+
+// VisibilityEQ applies the EQ predicate on the "visibility" field.
+func VisibilityEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldEQ(FieldVisibility, v))
+}
+
+// VisibilityNEQ applies the NEQ predicate on the "visibility" field.
+func VisibilityNEQ(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldNEQ(FieldVisibility, v))
+}
+
+// VisibilityIn applies the In predicate on the "visibility" field.
+func VisibilityIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldIn(FieldVisibility, vs...))
+}
+
+// VisibilityNotIn applies the NotIn predicate on the "visibility" field.
+func VisibilityNotIn(vs ...int) predicate.Groups {
+	return predicate.Groups(sql.FieldNotIn(FieldVisibility, vs...))
+}
+
+// VisibilityGT applies the GT predicate on the "visibility" field.
+func VisibilityGT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGT(FieldVisibility, v))
+}
+
+// VisibilityGTE applies the GTE predicate on the "visibility" field.
+func VisibilityGTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldGTE(FieldVisibility, v))
+}
+
+// VisibilityLT applies the LT predicate on the "visibility" field.
+func VisibilityLT(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLT(FieldVisibility, v))
+}
+
+// VisibilityLTE applies the LTE predicate on the "visibility" field.
+func VisibilityLTE(v int) predicate.Groups {
+	return predicate.Groups(sql.FieldLTE(FieldVisibility, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.

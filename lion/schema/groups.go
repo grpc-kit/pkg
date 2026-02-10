@@ -55,6 +55,11 @@ func (Groups) Fields() []ent.Field {
 			Default("").
 			MaxLen(4096).
 			Comment("类型关联表达式：DYNAMIC→成员过滤规则，EXTERNAL→外部源描述(JSON)；其他类型为空"),
+
+		field.Int("visibility").
+			Default(0).
+			Comment("可见性定义，对应 api/known/admin/v1/common.proto 中定义"),
+
 		field.String("description").
 			Default("").
 			Comment("用户组描述"),
@@ -68,10 +73,10 @@ func (Groups) Edges() []ent.Edge {
 		edge.To("lion_groups", GroupRoles.Type),
 		edge.To("lion_user_groups", UserGroups.Type),
 		/*
-		edge.From("lion_departments", Departments.Type).
-			Ref("lion_groups").
-			Field("department_id").
-			Unique(),
+			edge.From("lion_departments", Departments.Type).
+				Ref("lion_groups").
+				Field("department_id").
+				Unique(),
 		*/
 	}
 }

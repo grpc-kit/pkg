@@ -284,6 +284,27 @@ func (_u *GroupsUpdate) SetNillableRefExpr(v *string) *GroupsUpdate {
 	return _u
 }
 
+// SetVisibility sets the "visibility" field.
+func (_u *GroupsUpdate) SetVisibility(v int) *GroupsUpdate {
+	_u.mutation.ResetVisibility()
+	_u.mutation.SetVisibility(v)
+	return _u
+}
+
+// SetNillableVisibility sets the "visibility" field if the given value is not nil.
+func (_u *GroupsUpdate) SetNillableVisibility(v *int) *GroupsUpdate {
+	if v != nil {
+		_u.SetVisibility(*v)
+	}
+	return _u
+}
+
+// AddVisibility adds value to the "visibility" field.
+func (_u *GroupsUpdate) AddVisibility(v int) *GroupsUpdate {
+	_u.mutation.AddVisibility(v)
+	return _u
+}
+
 // SetDescription sets the "description" field.
 func (_u *GroupsUpdate) SetDescription(v string) *GroupsUpdate {
 	_u.mutation.SetDescription(v)
@@ -517,6 +538,12 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.RefExpr(); ok {
 		_spec.SetField(groups.FieldRefExpr, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Visibility(); ok {
+		_spec.SetField(groups.FieldVisibility, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedVisibility(); ok {
+		_spec.AddField(groups.FieldVisibility, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
@@ -885,6 +912,27 @@ func (_u *GroupsUpdateOne) SetNillableRefExpr(v *string) *GroupsUpdateOne {
 	return _u
 }
 
+// SetVisibility sets the "visibility" field.
+func (_u *GroupsUpdateOne) SetVisibility(v int) *GroupsUpdateOne {
+	_u.mutation.ResetVisibility()
+	_u.mutation.SetVisibility(v)
+	return _u
+}
+
+// SetNillableVisibility sets the "visibility" field if the given value is not nil.
+func (_u *GroupsUpdateOne) SetNillableVisibility(v *int) *GroupsUpdateOne {
+	if v != nil {
+		_u.SetVisibility(*v)
+	}
+	return _u
+}
+
+// AddVisibility adds value to the "visibility" field.
+func (_u *GroupsUpdateOne) AddVisibility(v int) *GroupsUpdateOne {
+	_u.mutation.AddVisibility(v)
+	return _u
+}
+
 // SetDescription sets the "description" field.
 func (_u *GroupsUpdateOne) SetDescription(v string) *GroupsUpdateOne {
 	_u.mutation.SetDescription(v)
@@ -1148,6 +1196,12 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 	}
 	if value, ok := _u.mutation.RefExpr(); ok {
 		_spec.SetField(groups.FieldRefExpr, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Visibility(); ok {
+		_spec.SetField(groups.FieldVisibility, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedVisibility(); ok {
+		_spec.AddField(groups.FieldVisibility, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)

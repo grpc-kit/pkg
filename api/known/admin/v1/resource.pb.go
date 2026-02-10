@@ -292,8 +292,8 @@ type CreateResourceRequest struct {
 
 	// {
 	// "parent_id": "1",
-	// "code": "hello.test",
-	// "display_name": "admin",
+	// "code": "user-management",
+	// "display_name": "用户管理",
 	// "sort_order": 0,
 	// "type": "MENU",
 	// "status": "ENABLED",
@@ -306,6 +306,9 @@ type CreateResourceRequest struct {
 	// },
 	// "description": "admin"
 	// }
+	//
+	// 注意：code 为可选字段，如客户端未提供，服务端将自动生成 12 位随机编码。
+	// 如提供，需符合 code 规范：以小写字母开头，仅 [a-z0-9-]，长度 2-32，不允许连续 "--"。
 	Resource *Resource `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
 }
 

@@ -1821,10 +1821,10 @@ type Department struct {
 	// 值为 0 表示顶级部门（如：总公司、集团总部）
 	// 支持多级嵌套，建议层级深度不超过 6 级以保证查询性能
 	ParentId int64 `protobuf:"varint,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	// Name 部门系统标识符，仅支持英文字符，用于权限表关联和系统内部逻辑
-	// 要求：长度 1-100 字符，仅支持英文字母、数字和下划线，同级部门标识符不可重复
-	// 示例："tech_dept"、"marketing_dept"、"hr_dept"
-	// 注意：此字段创建后不支持修改，以确保权限关联的稳定性
+	// Code 系统标识符，创建后不可修改
+	// 规则：以小写字母开头，仅包含小写字母、数字和连字符，不允许连续连字符，以字母或数字结尾
+	// 长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码
+	// 示例：手动 "tech-dept"、"hr"；自动 "a7k2m3x9b5f1"
 	Code string `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
 	// DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明
 	// 用于部门名称的多语言显示，提升用户体验和国际化支持
@@ -2108,10 +2108,11 @@ type Scope struct {
 	// ID 资源 ID
 	Id   int64      `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Type Scope_Type `protobuf:"varint,2,opt,name=type,proto3,enum=grpc_kit.api.known.admin.v1.Scope_Type" json:"type,omitempty"`
-	// Name 作用域系统标识符，仅支持英文字符，用于权限表关联和系统内部逻辑
-	// 默认存在以下内部作用域：
-	// admin 后天用户菜单查看权限
-	// user 前端用户菜单查看权限
+	// Code 系统标识符，创建后不可修改
+	// 规则：以小写字母开头，仅包含小写字母、数字和连字符，不允许连续连字符，以字母或数字结尾
+	// 长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码
+	// 示例：手动 "admin"、"readonly"；自动 "a7k2m3x9b5f1"
+	// 默认存在以下内部作用域：admin（后台用户菜单查看权限）、user（前端用户菜单查看权限）
 	Code        string `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
 	DisplayName string `protobuf:"bytes,4,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	Description string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
@@ -2194,10 +2195,10 @@ type Resource struct {
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// ParentID 父资源 ID，为 0 表示顶级资源
 	ParentId int64 `protobuf:"varint,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	// Name 资源系统标识符，仅支持英文字符，用于权限表关联和系统内部逻辑
-	// 要求：仅支持英文字母、数字和下划线，全局唯一标识符
-	// 示例："user_management"、"role_admin"、"system_config"
-	// 注意：此字段创建后不支持修改，以确保权限关联的稳定性
+	// Code 系统标识符，创建后不可修改
+	// 规则：以小写字母开头，仅包含小写字母、数字和连字符，不允许连续连字符，以字母或数字结尾
+	// 长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码
+	// 示例：手动 "user-management"、"system-config"；自动 "a7k2m3x9b5f1"
 	Code string `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
 	// DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明
 	// 用于资源名称的多语言显示，支持菜单、按钮等界面元素的国际化
@@ -2408,9 +2409,10 @@ type Policy struct {
 	Id     int64         `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Type   Policy_Type   `protobuf:"varint,2,opt,name=type,proto3,enum=grpc_kit.api.known.admin.v1.Policy_Type" json:"type,omitempty"`
 	Status Policy_Status `protobuf:"varint,3,opt,name=status,proto3,enum=grpc_kit.api.known.admin.v1.Policy_Status" json:"status,omitempty"`
-	// Name 策略系统标识符，仅支持英文字符，用于权限表关联和系统内部逻辑
-	// 要求：仅支持英文字母、数字和下划线，全局唯一标识符
-	// 注意：此字段创建后不支持修改，以确保权限关联的稳定性
+	// Code 系统标识符，创建后不可修改
+	// 规则：以小写字母开头，仅包含小写字母、数字和连字符，不允许连续连字符，以字母或数字结尾
+	// 长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码
+	// 示例：手动 "allow-read"、"deny-delete"；自动 "a7k2m3x9b5f1"
 	Code string `protobuf:"bytes,4,opt,name=code,proto3" json:"code,omitempty"`
 	// DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明
 	DisplayName string `protobuf:"bytes,5,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
@@ -2507,7 +2509,10 @@ type Permission struct {
 	unknownFields protoimpl.UnknownFields
 
 	// ID 资源 ID
-	Id          int64   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Code 系统标识符，创建后不可修改
+	// 规则：以小写字母开头，仅包含小写字母、数字和连字符，不允许连续连字符，以字母或数字结尾
+	// 长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码
 	Code        string  `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
 	DisplayName string  `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	Policy      *Policy `protobuf:"bytes,4,opt,name=policy,proto3" json:"policy,omitempty"`
@@ -2865,8 +2870,12 @@ type Role struct {
 	// ParentID 父角色ID，构建树形组织结构
 	// 值为 0 表示顶级角色（如：系统内置角色）
 	// 支持多级嵌套，建议层级深度不超过 3 级以保证查询性能
-	ParentId int64  `protobuf:"varint,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	Code     string `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
+	ParentId int64 `protobuf:"varint,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	// Code 系统标识符，创建后不可修改
+	// 规则：以小写字母开头，仅包含小写字母、数字和连字符，不允许连续连字符，以字母或数字结尾
+	// 长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码
+	// 示例：手动 "admin"、"user-manager"；自动 "a7k2m3x9b5f1"
+	Code string `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
 	// DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明
 	// 用于角色名称的多语言显示，便于不同地区用户理解角色含义
 	DisplayName string `protobuf:"bytes,4,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
@@ -3023,10 +3032,10 @@ type Group struct {
 
 	// ID 群组 ID，全局唯一标识
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// Code 群组系统标识符，仅支持英文字符，用于权限表关联和系统内部逻辑
-	// 要求：仅支持英文字母、数字和下划线，全局唯一标识符
-	// 示例："dev_team"、"project_alpha"、"admin_group"
-	// 注意：此字段创建后不支持修改，以确保权限关联的稳定性
+	// Code 系统标识符，创建后不可修改
+	// 规则：以小写字母开头，仅包含小写字母、数字和连字符，不允许连续连字符，以字母或数字结尾
+	// 长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码
+	// 示例：手动 "dev-team"、"project-alpha"；自动 "a7k2m3x9b5f1"
 	Code   string       `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
 	Type   Group_Type   `protobuf:"varint,3,opt,name=type,proto3,enum=grpc_kit.api.known.admin.v1.Group_Type" json:"type,omitempty"`
 	Status Group_Status `protobuf:"varint,4,opt,name=status,proto3,enum=grpc_kit.api.known.admin.v1.Group_Status" json:"status,omitempty"`
@@ -3420,7 +3429,10 @@ type AuthProvider struct {
 
 	// ID 全局唯一标识
 	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	// Name 身份提供商名称，全局唯一
+	// Code 系统标识符，创建后不可修改
+	// 规则：以小写字母开头，仅包含小写字母、数字和连字符，不允许连续连字符，以字母或数字结尾
+	// 长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码
+	// 示例：手动 "github"、"corp-ldap"；自动 "a7k2m3x9b5f1"
 	Code string            `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
 	Type AuthProvider_Type `protobuf:"varint,3,opt,name=type,proto3,enum=grpc_kit.api.known.admin.v1.AuthProvider_Type" json:"type,omitempty"`
 	// ClientID 身份提供商客户端 ID
@@ -3567,8 +3579,12 @@ type Credential struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         int64                `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                                                     // 凭证唯一 ID
-	Code       string               `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`                                                                  // 凭证显示名称
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // 凭证唯一 ID
+	// Code 系统标识符，创建后不可修改
+	// 规则：以小写字母开头，仅包含小写字母、数字和连字符，不允许连续连字符，以字母或数字结尾
+	// 长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码
+	// 示例：手动 "api-signing-key"、"tls-cert"；自动 "a7k2m3x9b5f1"
+	Code       string               `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
 	Type       Credential_Type      `protobuf:"varint,3,opt,name=type,proto3,enum=grpc_kit.api.known.admin.v1.Credential_Type" json:"type,omitempty"`                // 凭证类型
 	Algorithm  Credential_Algorithm `protobuf:"varint,4,opt,name=algorithm,proto3,enum=grpc_kit.api.known.admin.v1.Credential_Algorithm" json:"algorithm,omitempty"` // 技术算法
 	Usage      Credential_Usage     `protobuf:"varint,5,opt,name=usage,proto3,enum=grpc_kit.api.known.admin.v1.Credential_Usage" json:"usage,omitempty"`             // 业务用途

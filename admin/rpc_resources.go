@@ -18,6 +18,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
+	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/scopes"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -390,6 +391,12 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 	if err != nil {
 		return nil, err
 	}
+
+	code, err := schema.EnsureCode(req.Resource.Code)
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	req.Resource.Code = code
 
 	// 获取创建者用户 ID
 	userID, err := GetUserID(ctx)

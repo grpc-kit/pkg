@@ -259,13 +259,16 @@ type CreatePolicyRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	// {
-	// "code": "policy_001",
+	// "code": "admin-policy",
 	// "display_name": "管理员策略",
 	// "type": "ROLE",
 	// "status": "ENABLED",
 	// "value": "admin",
 	// "description": "管理员权限策略"
 	// }
+	//
+	// 注意：code 为可选字段，如客户端未提供，服务端将自动生成 12 位随机编码。
+	// 如提供，需符合 code 规范：以小写字母开头，仅 [a-z0-9-]，长度 2-32，不允许连续 "--"。
 	Policy *Policy `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
 }
 

@@ -358,8 +358,12 @@ func init() {
 	groups.DefaultRefExpr = groupsDescRefExpr.Default.(string)
 	// groups.RefExprValidator is a validator for the "ref_expr" field. It is called by the builders before save.
 	groups.RefExprValidator = groupsDescRefExpr.Validators[0].(func(string) error)
+	// groupsDescVisibility is the schema descriptor for visibility field.
+	groupsDescVisibility := groupsFields[10].Descriptor()
+	// groups.DefaultVisibility holds the default value on creation for the visibility field.
+	groups.DefaultVisibility = groupsDescVisibility.Default.(int)
 	// groupsDescDescription is the schema descriptor for description field.
-	groupsDescDescription := groupsFields[10].Descriptor()
+	groupsDescDescription := groupsFields[11].Descriptor()
 	// groups.DefaultDescription holds the default value on creation for the description field.
 	groups.DefaultDescription = groupsDescDescription.Default.(string)
 	permissionbindingsMixin := schema.PermissionBindings{}.Mixin()

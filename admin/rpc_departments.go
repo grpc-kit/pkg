@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -35,9 +36,11 @@ func (a *KnownAdminAPI) CreateDepartment(ctx context.Context, req *adminv1.Creat
 		return result, errs.InvalidArgument(ctx).WithMessage("request body department is nil")
 	}
 
-	if req.Department.Code == "" {
-		return result, errs.InvalidArgument(ctx).WithMessage("department code is required")
+	code, err := schema.EnsureCode(req.Department.Code)
+	if err != nil {
+		return result, errs.InvalidArgument(ctx).WithMessage(err.Error())
 	}
+	req.Department.Code = code
 
 	tx, err := a.config.db.Tx(ctx)
 	if err != nil {

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -81,6 +82,12 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		}
 	}
 
+	code, err := schema.EnsureCode(req.Group.Code)
+	if err != nil {
+		return result, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	req.Group.Code = code
+
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
@@ -114,6 +121,7 @@ func (a *KnownAdminAPI) CreateGroup(ctx context.Context, req *adminv1.CreateGrou
 		SetMetadata(req.Group.Metadata).
 		SetRefID(int(req.Group.RefId)).
 		SetRefExpr(req.Group.RefExpr).
+		SetVisibility(int(req.Group.Visibility.Number())).
 		SetDescription(req.Group.Description).
 		SetCreatedBy(createdBy).
 		SetUpdatedBy(updatedBy)
@@ -299,6 +307,7 @@ func (a *KnownAdminAPI) GetGroup(ctx context.Context, req *adminv1.GetGroupReque
 		groups.FieldMetadata,
 		groups.FieldRefID,
 		groups.FieldRefExpr,
+		groups.FieldVisibility,
 		groups.FieldDescription,
 		groups.FieldCreatedBy,
 		groups.FieldUpdatedBy,
@@ -378,6 +387,7 @@ func groupToProto(g *lion.Groups, includeTimestamps bool) *adminv1.Group {
 		Metadata:    g.Metadata,
 		RefId:       int64(g.RefID),
 		RefExpr:     g.RefExpr,
+		Visibility:  adminv1.Visibility(g.Visibility),
 		Description: g.Description,
 		CreatedBy:   g.CreatedBy,
 		UpdatedBy:   g.UpdatedBy,
@@ -449,6 +459,8 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 				update.SetRefID(int(req.Group.RefId))
 			case "ref_expr":
 				update.SetRefExpr(req.Group.RefExpr)
+			case "visibility":
+				update.SetVisibility(int(req.Group.Visibility.Number()))
 			case "description":
 				update.SetDescription(req.Group.Description)
 			case "updated_by":
@@ -471,6 +483,7 @@ func (a *KnownAdminAPI) UpdateGroup(ctx context.Context, req *adminv1.UpdateGrou
 			SetMetadata(req.Group.Metadata).
 			SetRefID(int(req.Group.RefId)).
 			SetRefExpr(req.Group.RefExpr).
+			SetVisibility(int(req.Group.Visibility.Number())).
 			SetDescription(req.Group.Description).
 			SetUpdatedBy(updatedBy)
 	}

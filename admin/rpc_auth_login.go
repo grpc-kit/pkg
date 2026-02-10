@@ -8,6 +8,7 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
+	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -249,6 +250,12 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 	if req.Provider == nil {
 		return nil, errs.InvalidArgument(ctx).WithMessage("request body provider is nil")
 	}
+
+	code, err := schema.EnsureCode(req.Provider.Code)
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	req.Provider.Code = code
 
 	db, err := a.GetLionClient()
 	if err != nil {

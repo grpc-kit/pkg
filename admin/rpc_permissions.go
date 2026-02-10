@@ -13,6 +13,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
+	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -279,6 +280,12 @@ func (a *KnownAdminAPI) CreatePermission(ctx context.Context, req *adminv1.Creat
 	if req == nil || req.Permission == nil {
 		return nil, errs.InvalidArgument(ctx).WithMessage("request body permission is nil")
 	}
+
+	code, err := schema.EnsureCode(req.Permission.Code)
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	req.Permission.Code = code
 
 	db, err := a.GetLionClient()
 	if err != nil {
