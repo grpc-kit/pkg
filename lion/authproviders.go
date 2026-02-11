@@ -3,6 +3,7 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -21,32 +22,30 @@ type AuthProviders struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// CreatedBy holds the value of the "created_by" field.
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
-	// 认证提供方名称
+	// 系统标识符，创建后不可修改
 	Code string `json:"code,omitempty"`
-	// 支持的认证提供方
+	// 提供商类型: 0=未指定, 1=LOCAL, 2=LDAP, 3=OIDC, 4=OAUTH2, 5=GITHUB, 6=GOOGLE, 7=WECHAT
 	ProviderType int `json:"provider_type,omitempty"`
-	// ClientID holds the value of the "client_id" field.
-	ClientID string `json:"client_id,omitempty"`
-	// Enabled holds the value of the "enabled" field.
-	Enabled bool `json:"enabled,omitempty"`
-	// ClientSecretEncrypted holds the value of the "client_secret_encrypted" field.
-	ClientSecretEncrypted []byte `json:"-"`
-	// Scopes holds the value of the "scopes" field.
-	Scopes string `json:"scopes,omitempty"`
-	// RedirectURI holds the value of the "redirect_uri" field.
-	RedirectURI string `json:"redirect_uri,omitempty"`
-	// Issuer holds the value of the "issuer" field.
-	Issuer string `json:"issuer,omitempty"`
-	// AuthorizationEndpoint holds the value of the "authorization_endpoint" field.
-	AuthorizationEndpoint string `json:"authorization_endpoint,omitempty"`
-	// TokenEndpoint holds the value of the "token_endpoint" field.
-	TokenEndpoint string `json:"token_endpoint,omitempty"`
-	// UserinfoEndpoint holds the value of the "userinfo_endpoint" field.
-	UserinfoEndpoint string `json:"userinfo_endpoint,omitempty"`
+	// 提供商状态: 0=未指定, 1=启用, 2=禁用, 3=待配置
+	ProviderStatus int `json:"provider_status,omitempty"`
+	// 展示名称，用于登录界面等用户可见场景
+	DisplayName string `json:"display_name,omitempty"`
+	// 提供商描述信息
+	Description string `json:"description,omitempty"`
+	// 排序权重，数值越小排序越靠前，默认 100，范围 1-9999
+	SortOrder int `json:"sort_order,omitempty"`
+	// 提供商图标地址
+	IconURL string `json:"icon_url,omitempty"`
+	// 类型特有的非敏感配置，JSON 格式，根据 provider_type 解析为对应结构
+	Config json.RawMessage `json:"config,omitempty"`
+	// 加密存储的敏感凭证：LDAP 为 bind_password，OAuth2 系为 client_secret
+	SecretEncrypted []byte `json:"-"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AuthProvidersQuery when eager-loading is set.
 	Edges        AuthProvidersEdges `json:"edges"`
@@ -76,15 +75,13 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case authproviders.FieldClientSecretEncrypted:
+		case authproviders.FieldConfig, authproviders.FieldSecretEncrypted:
 			values[i] = new([]byte)
-		case authproviders.FieldEnabled:
-			values[i] = new(sql.NullBool)
-		case authproviders.FieldID, authproviders.FieldCreatedBy, authproviders.FieldUpdatedBy, authproviders.FieldProviderType:
+		case authproviders.FieldID, authproviders.FieldCreatedBy, authproviders.FieldUpdatedBy, authproviders.FieldProviderType, authproviders.FieldProviderStatus, authproviders.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case authproviders.FieldCode, authproviders.FieldClientID, authproviders.FieldScopes, authproviders.FieldRedirectURI, authproviders.FieldIssuer, authproviders.FieldAuthorizationEndpoint, authproviders.FieldTokenEndpoint, authproviders.FieldUserinfoEndpoint:
+		case authproviders.FieldCode, authproviders.FieldDisplayName, authproviders.FieldDescription, authproviders.FieldIconURL:
 			values[i] = new(sql.NullString)
-		case authproviders.FieldCreatedAt, authproviders.FieldUpdatedAt:
+		case authproviders.FieldCreatedAt, authproviders.FieldUpdatedAt, authproviders.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -119,6 +116,13 @@ func (_m *AuthProviders) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
+		case authproviders.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				_m.DeletedAt = new(time.Time)
+				*_m.DeletedAt = value.Time
+			}
 		case authproviders.FieldCreatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_by", values[i])
@@ -143,59 +147,49 @@ func (_m *AuthProviders) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ProviderType = int(value.Int64)
 			}
-		case authproviders.FieldClientID:
+		case authproviders.FieldProviderStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field provider_status", values[i])
+			} else if value.Valid {
+				_m.ProviderStatus = int(value.Int64)
+			}
+		case authproviders.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field client_id", values[i])
+				return fmt.Errorf("unexpected type %T for field display_name", values[i])
 			} else if value.Valid {
-				_m.ClientID = value.String
+				_m.DisplayName = value.String
 			}
-		case authproviders.FieldEnabled:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field enabled", values[i])
+		case authproviders.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				_m.Enabled = value.Bool
+				_m.Description = value.String
 			}
-		case authproviders.FieldClientSecretEncrypted:
+		case authproviders.FieldSortOrder:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field sort_order", values[i])
+			} else if value.Valid {
+				_m.SortOrder = int(value.Int64)
+			}
+		case authproviders.FieldIconURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field icon_url", values[i])
+			} else if value.Valid {
+				_m.IconURL = value.String
+			}
+		case authproviders.FieldConfig:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field client_secret_encrypted", values[i])
+				return fmt.Errorf("unexpected type %T for field config", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Config); err != nil {
+					return fmt.Errorf("unmarshal field config: %w", err)
+				}
+			}
+		case authproviders.FieldSecretEncrypted:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field secret_encrypted", values[i])
 			} else if value != nil {
-				_m.ClientSecretEncrypted = *value
-			}
-		case authproviders.FieldScopes:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field scopes", values[i])
-			} else if value.Valid {
-				_m.Scopes = value.String
-			}
-		case authproviders.FieldRedirectURI:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field redirect_uri", values[i])
-			} else if value.Valid {
-				_m.RedirectURI = value.String
-			}
-		case authproviders.FieldIssuer:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field issuer", values[i])
-			} else if value.Valid {
-				_m.Issuer = value.String
-			}
-		case authproviders.FieldAuthorizationEndpoint:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field authorization_endpoint", values[i])
-			} else if value.Valid {
-				_m.AuthorizationEndpoint = value.String
-			}
-		case authproviders.FieldTokenEndpoint:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field token_endpoint", values[i])
-			} else if value.Valid {
-				_m.TokenEndpoint = value.String
-			}
-		case authproviders.FieldUserinfoEndpoint:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field userinfo_endpoint", values[i])
-			} else if value.Valid {
-				_m.UserinfoEndpoint = value.String
+				_m.SecretEncrypted = *value
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -244,6 +238,11 @@ func (_m *AuthProviders) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
+	if v := _m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("created_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.CreatedBy))
 	builder.WriteString(", ")
@@ -256,31 +255,25 @@ func (_m *AuthProviders) String() string {
 	builder.WriteString("provider_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ProviderType))
 	builder.WriteString(", ")
-	builder.WriteString("client_id=")
-	builder.WriteString(_m.ClientID)
+	builder.WriteString("provider_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ProviderStatus))
 	builder.WriteString(", ")
-	builder.WriteString("enabled=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))
+	builder.WriteString("display_name=")
+	builder.WriteString(_m.DisplayName)
 	builder.WriteString(", ")
-	builder.WriteString("client_secret_encrypted=<sensitive>")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
-	builder.WriteString("scopes=")
-	builder.WriteString(_m.Scopes)
+	builder.WriteString("sort_order=")
+	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))
 	builder.WriteString(", ")
-	builder.WriteString("redirect_uri=")
-	builder.WriteString(_m.RedirectURI)
+	builder.WriteString("icon_url=")
+	builder.WriteString(_m.IconURL)
 	builder.WriteString(", ")
-	builder.WriteString("issuer=")
-	builder.WriteString(_m.Issuer)
+	builder.WriteString("config=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Config))
 	builder.WriteString(", ")
-	builder.WriteString("authorization_endpoint=")
-	builder.WriteString(_m.AuthorizationEndpoint)
-	builder.WriteString(", ")
-	builder.WriteString("token_endpoint=")
-	builder.WriteString(_m.TokenEndpoint)
-	builder.WriteString(", ")
-	builder.WriteString("userinfo_endpoint=")
-	builder.WriteString(_m.UserinfoEndpoint)
+	builder.WriteString("secret_encrypted=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

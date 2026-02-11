@@ -56,42 +56,32 @@ func init() {
 	authprovidersDescUpdatedBy := authprovidersMixinFields1[1].Descriptor()
 	// authproviders.DefaultUpdatedBy holds the default value on creation for the updated_by field.
 	authproviders.DefaultUpdatedBy = authprovidersDescUpdatedBy.Default.(int64)
-	// authprovidersDescClientID is the schema descriptor for client_id field.
-	authprovidersDescClientID := authprovidersFields[2].Descriptor()
-	// authproviders.DefaultClientID holds the default value on creation for the client_id field.
-	authproviders.DefaultClientID = authprovidersDescClientID.Default.(string)
-	// authprovidersDescEnabled is the schema descriptor for enabled field.
-	authprovidersDescEnabled := authprovidersFields[3].Descriptor()
-	// authproviders.DefaultEnabled holds the default value on creation for the enabled field.
-	authproviders.DefaultEnabled = authprovidersDescEnabled.Default.(bool)
-	// authprovidersDescClientSecretEncrypted is the schema descriptor for client_secret_encrypted field.
-	authprovidersDescClientSecretEncrypted := authprovidersFields[4].Descriptor()
-	// authproviders.DefaultClientSecretEncrypted holds the default value on creation for the client_secret_encrypted field.
-	authproviders.DefaultClientSecretEncrypted = authprovidersDescClientSecretEncrypted.Default.([]byte)
-	// authprovidersDescScopes is the schema descriptor for scopes field.
-	authprovidersDescScopes := authprovidersFields[5].Descriptor()
-	// authproviders.DefaultScopes holds the default value on creation for the scopes field.
-	authproviders.DefaultScopes = authprovidersDescScopes.Default.(string)
-	// authprovidersDescRedirectURI is the schema descriptor for redirect_uri field.
-	authprovidersDescRedirectURI := authprovidersFields[6].Descriptor()
-	// authproviders.DefaultRedirectURI holds the default value on creation for the redirect_uri field.
-	authproviders.DefaultRedirectURI = authprovidersDescRedirectURI.Default.(string)
-	// authprovidersDescIssuer is the schema descriptor for issuer field.
-	authprovidersDescIssuer := authprovidersFields[7].Descriptor()
-	// authproviders.DefaultIssuer holds the default value on creation for the issuer field.
-	authproviders.DefaultIssuer = authprovidersDescIssuer.Default.(string)
-	// authprovidersDescAuthorizationEndpoint is the schema descriptor for authorization_endpoint field.
-	authprovidersDescAuthorizationEndpoint := authprovidersFields[8].Descriptor()
-	// authproviders.DefaultAuthorizationEndpoint holds the default value on creation for the authorization_endpoint field.
-	authproviders.DefaultAuthorizationEndpoint = authprovidersDescAuthorizationEndpoint.Default.(string)
-	// authprovidersDescTokenEndpoint is the schema descriptor for token_endpoint field.
-	authprovidersDescTokenEndpoint := authprovidersFields[9].Descriptor()
-	// authproviders.DefaultTokenEndpoint holds the default value on creation for the token_endpoint field.
-	authproviders.DefaultTokenEndpoint = authprovidersDescTokenEndpoint.Default.(string)
-	// authprovidersDescUserinfoEndpoint is the schema descriptor for userinfo_endpoint field.
-	authprovidersDescUserinfoEndpoint := authprovidersFields[10].Descriptor()
-	// authproviders.DefaultUserinfoEndpoint holds the default value on creation for the userinfo_endpoint field.
-	authproviders.DefaultUserinfoEndpoint = authprovidersDescUserinfoEndpoint.Default.(string)
+	// authprovidersDescCode is the schema descriptor for code field.
+	authprovidersDescCode := authprovidersFields[0].Descriptor()
+	// authproviders.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	authproviders.CodeValidator = authprovidersDescCode.Validators[0].(func(string) error)
+	// authprovidersDescProviderStatus is the schema descriptor for provider_status field.
+	authprovidersDescProviderStatus := authprovidersFields[2].Descriptor()
+	// authproviders.DefaultProviderStatus holds the default value on creation for the provider_status field.
+	authproviders.DefaultProviderStatus = authprovidersDescProviderStatus.Default.(int)
+	// authprovidersDescDisplayName is the schema descriptor for display_name field.
+	authprovidersDescDisplayName := authprovidersFields[3].Descriptor()
+	// authproviders.DefaultDisplayName holds the default value on creation for the display_name field.
+	authproviders.DefaultDisplayName = authprovidersDescDisplayName.Default.(string)
+	// authproviders.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	authproviders.DisplayNameValidator = authprovidersDescDisplayName.Validators[0].(func(string) error)
+	// authprovidersDescDescription is the schema descriptor for description field.
+	authprovidersDescDescription := authprovidersFields[4].Descriptor()
+	// authproviders.DefaultDescription holds the default value on creation for the description field.
+	authproviders.DefaultDescription = authprovidersDescDescription.Default.(string)
+	// authprovidersDescSortOrder is the schema descriptor for sort_order field.
+	authprovidersDescSortOrder := authprovidersFields[5].Descriptor()
+	// authproviders.DefaultSortOrder holds the default value on creation for the sort_order field.
+	authproviders.DefaultSortOrder = authprovidersDescSortOrder.Default.(int)
+	// authprovidersDescIconURL is the schema descriptor for icon_url field.
+	authprovidersDescIconURL := authprovidersFields[6].Descriptor()
+	// authproviders.DefaultIconURL holds the default value on creation for the icon_url field.
+	authproviders.DefaultIconURL = authprovidersDescIconURL.Default.(string)
 	credentialsMixin := schema.Credentials{}.Mixin()
 	credentialsMixinFields0 := credentialsMixin[0].Fields()
 	_ = credentialsMixinFields0

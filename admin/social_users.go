@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -34,6 +35,12 @@ type socialUsers struct {
 	ProviderName string
 	AuthProvider *lion.AuthProviders
 
+	// 解析后的类型特有配置（根据 provider_type 二选一）
+	oauthCfg *oauthConfigData
+	ldapCfg  *ldapConfigData
+	// 解密后的敏感凭证（LDAP 为 bind_password，OAuth2 系为 client_secret）
+	secret string
+
 	Groups []string `json:"groups"`
 }
 
@@ -43,13 +50,9 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 			authproviders.FieldID,
 			authproviders.FieldCode,
 			authproviders.FieldProviderType,
-			authproviders.FieldEnabled,
-			authproviders.FieldClientID,
-			authproviders.FieldClientSecretEncrypted,
-			authproviders.FieldIssuer,
-			authproviders.FieldAuthorizationEndpoint,
-			authproviders.FieldScopes,
-			authproviders.FieldRedirectURI,
+			authproviders.FieldProviderStatus,
+			authproviders.FieldConfig,
+			authproviders.FieldSecretEncrypted,
 		).
 		Where(
 			authproviders.CodeEQ(providerName),
@@ -83,6 +86,45 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 		privateKey:   privateKey,
 		ProviderName: providerName,
 		AuthProvider: ap,
+	}
+
+	// 根据 provider_type 解析 config JSON 和解密凭证
+	switch adminv1.AuthProvider_Type(ap.ProviderType) {
+	case adminv1.AuthProvider_LDAP:
+		var ldapCfg ldapConfigData
+		if len(ap.Config) > 0 {
+			if err := json.Unmarshal(ap.Config, &ldapCfg); err != nil {
+				return nil, fmt.Errorf("parse ldap config: %w", err)
+			}
+		}
+		s.ldapCfg = &ldapCfg
+		if len(ap.SecretEncrypted) > 0 {
+			decrypted, decErr := crypto.DecryptAES(aesKey, ap.SecretEncrypted)
+			if decErr != nil {
+				return nil, fmt.Errorf("decrypt ldap secret: %w", decErr)
+			}
+			s.secret = string(decrypted)
+		}
+
+	case adminv1.AuthProvider_OIDC, adminv1.AuthProvider_OAUTH2,
+		adminv1.AuthProvider_GITHUB, adminv1.AuthProvider_GOOGLE,
+		adminv1.AuthProvider_WECHAT:
+		cfg, secret, err := parseOAuthConfigFromDB(ap, aesKey)
+		if err != nil {
+			return nil, fmt.Errorf("parse oauth provider config: %w", err)
+		}
+		s.oauthCfg = cfg
+		s.secret = secret
+
+	case adminv1.AuthProvider_LOCAL:
+		// LOCAL 类型无额外配置，仅解密凭证（如有）
+		if len(ap.SecretEncrypted) > 0 {
+			decrypted, decErr := crypto.DecryptAES(aesKey, ap.SecretEncrypted)
+			if decErr != nil {
+				return nil, fmt.Errorf("decrypt local secret: %w", decErr)
+			}
+			s.secret = string(decrypted)
+		}
 	}
 
 	return s, nil
@@ -314,23 +356,21 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 }
 
 func (s *socialUsers) oauth2Exchange(ctx context.Context, code string) (*oauth2.Token, error) {
-	op, err := oidc.NewProvider(ctx, s.AuthProvider.Issuer)
-	if err != nil {
-		return nil, err
+	if s.oauthCfg == nil {
+		return nil, fmt.Errorf("oauth config not initialized")
 	}
 
-	var clientSecret []byte
-	clientSecret, err = crypto.DecryptAES(s.aesKey, s.AuthProvider.ClientSecretEncrypted)
+	op, err := oidc.NewProvider(ctx, s.oauthCfg.Issuer)
 	if err != nil {
 		return nil, err
 	}
 
 	oauth2Config := oauth2.Config{
-		ClientID:     s.AuthProvider.ClientID,
-		ClientSecret: string(clientSecret),
+		ClientID:     s.oauthCfg.ClientID,
+		ClientSecret: s.secret,
 		Endpoint:     op.Endpoint(),
-		Scopes:       strings.Split(s.AuthProvider.Scopes, " "),
-		RedirectURL:  s.AuthProvider.RedirectURI,
+		Scopes:       s.oauthCfg.Scopes,
+		RedirectURL:  s.oauthCfg.RedirectURI,
 	}
 
 	token, err := oauth2Config.Exchange(ctx, code)
@@ -342,14 +382,12 @@ func (s *socialUsers) oauth2Exchange(ctx context.Context, code string) (*oauth2.
 }
 
 func (s *socialUsers) weixinExchange(ctx context.Context, code string) (*wechatCode2SessionResponse, error) {
-	var clientSecret []byte
-	clientSecret, err := crypto.DecryptAES(s.aesKey, s.AuthProvider.ClientSecretEncrypted)
-	if err != nil {
-		return nil, err
+	if s.oauthCfg == nil {
+		return nil, fmt.Errorf("oauth config not initialized")
 	}
 
-	wx := newWechatOpen(s.logger, s.AuthProvider.ClientID, string(clientSecret))
-	return wx.code2Session(s.AuthProvider.AuthorizationEndpoint, code)
+	wx := newWechatOpen(s.logger, s.oauthCfg.ClientID, s.secret)
+	return wx.code2Session(s.oauthCfg.AuthorizationEndpoint, code)
 }
 
 func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2SessionResponse) (int, error) {

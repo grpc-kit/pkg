@@ -14,25 +14,41 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "code", Type: field.TypeString, Unique: true},
+		{Name: "code", Type: field.TypeString, Unique: true, Size: 32},
 		{Name: "provider_type", Type: field.TypeInt},
-		{Name: "client_id", Type: field.TypeString, Default: ""},
-		{Name: "enabled", Type: field.TypeBool, Default: true},
-		{Name: "client_secret_encrypted", Type: field.TypeBytes},
-		{Name: "scopes", Type: field.TypeString, Default: ""},
-		{Name: "redirect_uri", Type: field.TypeString, Default: ""},
-		{Name: "issuer", Type: field.TypeString, Default: ""},
-		{Name: "authorization_endpoint", Type: field.TypeString, Default: ""},
-		{Name: "token_endpoint", Type: field.TypeString, Default: ""},
-		{Name: "userinfo_endpoint", Type: field.TypeString, Default: ""},
+		{Name: "provider_status", Type: field.TypeInt, Default: 1},
+		{Name: "display_name", Type: field.TypeString, Size: 256, Default: ""},
+		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "sort_order", Type: field.TypeInt, Default: 100},
+		{Name: "icon_url", Type: field.TypeString, Default: ""},
+		{Name: "config", Type: field.TypeJSON, Nullable: true},
+		{Name: "secret_encrypted", Type: field.TypeBytes, Nullable: true},
 	}
 	// LionAuthProvidersTable holds the schema information for the "lion_auth_providers" table.
 	LionAuthProvidersTable = &schema.Table{
 		Name:       "lion_auth_providers",
 		Columns:    LionAuthProvidersColumns,
 		PrimaryKey: []*schema.Column{LionAuthProvidersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "authproviders_provider_type",
+				Unique:  false,
+				Columns: []*schema.Column{LionAuthProvidersColumns[7]},
+			},
+			{
+				Name:    "authproviders_provider_status",
+				Unique:  false,
+				Columns: []*schema.Column{LionAuthProvidersColumns[8]},
+			},
+			{
+				Name:    "authproviders_sort_order",
+				Unique:  false,
+				Columns: []*schema.Column{LionAuthProvidersColumns[11]},
+			},
+		},
 	}
 	// LionCredentialsColumns holds the columns for the "lion_credentials" table.
 	LionCredentialsColumns = []*schema.Column{

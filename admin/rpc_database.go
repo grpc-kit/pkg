@@ -64,7 +64,9 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	localProvider, err := tx.AuthProviders.Create().
 		SetCode("local").
 		SetProviderType(int(adminv1.AuthProvider_LOCAL.Number())).
-		SetEnabled(true).
+		SetProviderStatus(int(adminv1.AuthProvider_ACTIVE.Number())).
+		SetDisplayName("本地账号密码登录").
+		SetSortOrder(1).
 		Save(ctx)
 	if err != nil {
 		_ = tx.Rollback()

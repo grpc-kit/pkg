@@ -18,6 +18,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
 	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
@@ -26,24 +28,20 @@ const (
 	FieldCode = "code"
 	// FieldProviderType holds the string denoting the provider_type field in the database.
 	FieldProviderType = "provider_type"
-	// FieldClientID holds the string denoting the client_id field in the database.
-	FieldClientID = "client_id"
-	// FieldEnabled holds the string denoting the enabled field in the database.
-	FieldEnabled = "enabled"
-	// FieldClientSecretEncrypted holds the string denoting the client_secret_encrypted field in the database.
-	FieldClientSecretEncrypted = "client_secret_encrypted"
-	// FieldScopes holds the string denoting the scopes field in the database.
-	FieldScopes = "scopes"
-	// FieldRedirectURI holds the string denoting the redirect_uri field in the database.
-	FieldRedirectURI = "redirect_uri"
-	// FieldIssuer holds the string denoting the issuer field in the database.
-	FieldIssuer = "issuer"
-	// FieldAuthorizationEndpoint holds the string denoting the authorization_endpoint field in the database.
-	FieldAuthorizationEndpoint = "authorization_endpoint"
-	// FieldTokenEndpoint holds the string denoting the token_endpoint field in the database.
-	FieldTokenEndpoint = "token_endpoint"
-	// FieldUserinfoEndpoint holds the string denoting the userinfo_endpoint field in the database.
-	FieldUserinfoEndpoint = "userinfo_endpoint"
+	// FieldProviderStatus holds the string denoting the provider_status field in the database.
+	FieldProviderStatus = "provider_status"
+	// FieldDisplayName holds the string denoting the display_name field in the database.
+	FieldDisplayName = "display_name"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
+	// FieldSortOrder holds the string denoting the sort_order field in the database.
+	FieldSortOrder = "sort_order"
+	// FieldIconURL holds the string denoting the icon_url field in the database.
+	FieldIconURL = "icon_url"
+	// FieldConfig holds the string denoting the config field in the database.
+	FieldConfig = "config"
+	// FieldSecretEncrypted holds the string denoting the secret_encrypted field in the database.
+	FieldSecretEncrypted = "secret_encrypted"
 	// EdgeLionUserIdentities holds the string denoting the lion_user_identities edge name in mutations.
 	EdgeLionUserIdentities = "lion_user_identities"
 	// Table holds the table name of the authproviders in the database.
@@ -62,19 +60,18 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldCode,
 	FieldProviderType,
-	FieldClientID,
-	FieldEnabled,
-	FieldClientSecretEncrypted,
-	FieldScopes,
-	FieldRedirectURI,
-	FieldIssuer,
-	FieldAuthorizationEndpoint,
-	FieldTokenEndpoint,
-	FieldUserinfoEndpoint,
+	FieldProviderStatus,
+	FieldDisplayName,
+	FieldDescription,
+	FieldSortOrder,
+	FieldIconURL,
+	FieldConfig,
+	FieldSecretEncrypted,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -98,24 +95,20 @@ var (
 	DefaultCreatedBy int64
 	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
 	DefaultUpdatedBy int64
-	// DefaultClientID holds the default value on creation for the "client_id" field.
-	DefaultClientID string
-	// DefaultEnabled holds the default value on creation for the "enabled" field.
-	DefaultEnabled bool
-	// DefaultClientSecretEncrypted holds the default value on creation for the "client_secret_encrypted" field.
-	DefaultClientSecretEncrypted []byte
-	// DefaultScopes holds the default value on creation for the "scopes" field.
-	DefaultScopes string
-	// DefaultRedirectURI holds the default value on creation for the "redirect_uri" field.
-	DefaultRedirectURI string
-	// DefaultIssuer holds the default value on creation for the "issuer" field.
-	DefaultIssuer string
-	// DefaultAuthorizationEndpoint holds the default value on creation for the "authorization_endpoint" field.
-	DefaultAuthorizationEndpoint string
-	// DefaultTokenEndpoint holds the default value on creation for the "token_endpoint" field.
-	DefaultTokenEndpoint string
-	// DefaultUserinfoEndpoint holds the default value on creation for the "userinfo_endpoint" field.
-	DefaultUserinfoEndpoint string
+	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	CodeValidator func(string) error
+	// DefaultProviderStatus holds the default value on creation for the "provider_status" field.
+	DefaultProviderStatus int
+	// DefaultDisplayName holds the default value on creation for the "display_name" field.
+	DefaultDisplayName string
+	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	DisplayNameValidator func(string) error
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
+	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
+	DefaultSortOrder int
+	// DefaultIconURL holds the default value on creation for the "icon_url" field.
+	DefaultIconURL string
 )
 
 // OrderOption defines the ordering options for the AuthProviders queries.
@@ -134,6 +127,11 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByUpdatedAt orders the results by the updated_at field.
 func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
 // ByCreatedBy orders the results by the created_by field.
@@ -156,44 +154,29 @@ func ByProviderType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProviderType, opts...).ToFunc()
 }
 
-// ByClientID orders the results by the client_id field.
-func ByClientID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldClientID, opts...).ToFunc()
+// ByProviderStatus orders the results by the provider_status field.
+func ByProviderStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProviderStatus, opts...).ToFunc()
 }
 
-// ByEnabled orders the results by the enabled field.
-func ByEnabled(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldEnabled, opts...).ToFunc()
+// ByDisplayName orders the results by the display_name field.
+func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
 }
 
-// ByScopes orders the results by the scopes field.
-func ByScopes(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldScopes, opts...).ToFunc()
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByRedirectURI orders the results by the redirect_uri field.
-func ByRedirectURI(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldRedirectURI, opts...).ToFunc()
+// BySortOrder orders the results by the sort_order field.
+func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
 }
 
-// ByIssuer orders the results by the issuer field.
-func ByIssuer(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIssuer, opts...).ToFunc()
-}
-
-// ByAuthorizationEndpoint orders the results by the authorization_endpoint field.
-func ByAuthorizationEndpoint(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAuthorizationEndpoint, opts...).ToFunc()
-}
-
-// ByTokenEndpoint orders the results by the token_endpoint field.
-func ByTokenEndpoint(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTokenEndpoint, opts...).ToFunc()
-}
-
-// ByUserinfoEndpoint orders the results by the userinfo_endpoint field.
-func ByUserinfoEndpoint(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserinfoEndpoint, opts...).ToFunc()
+// ByIconURL orders the results by the icon_url field.
+func ByIconURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIconURL, opts...).ToFunc()
 }
 
 // ByLionUserIdentitiesCount orders the results by lion_user_identities count.

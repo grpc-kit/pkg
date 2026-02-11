@@ -68,9 +68,20 @@ func local_request_KnownAdmin_GetConfigSecurity_0(ctx context.Context, marshaler
 
 }
 
+var (
+	filter_KnownAdmin_ListAuthProviders_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+)
+
 func request_KnownAdmin_ListAuthProviders_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ListAuthProvidersRequest
 	var metadata runtime.ServerMetadata
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_KnownAdmin_ListAuthProviders_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
 
 	msg, err := client.ListAuthProviders(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -80,6 +91,13 @@ func request_KnownAdmin_ListAuthProviders_0(ctx context.Context, marshaler runti
 func local_request_KnownAdmin_ListAuthProviders_0(ctx context.Context, marshaler runtime.Marshaler, server KnownAdminServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq ListAuthProvidersRequest
 	var metadata runtime.ServerMetadata
+
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_KnownAdmin_ListAuthProviders_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
 
 	msg, err := server.ListAuthProviders(ctx, &protoReq)
 	return msg, metadata, err
@@ -225,12 +243,27 @@ func local_request_KnownAdmin_DeleteAuthProvider_0(ctx context.Context, marshale
 }
 
 var (
-	filter_KnownAdmin_UpdateAuthProvider_0 = &utilities.DoubleArray{Encoding: map[string]int{"provider": 0, "id": 1}, Base: []int{1, 2, 3, 2, 0, 0}, Check: []int{0, 1, 1, 2, 4, 3}}
+	filter_KnownAdmin_UpdateAuthProvider_0 = &utilities.DoubleArray{Encoding: map[string]int{"provider": 0, "id": 1}, Base: []int{1, 2, 4, 0, 0, 0, 0}, Check: []int{0, 1, 1, 2, 2, 3, 3}}
 )
 
 func request_KnownAdmin_UpdateAuthProvider_0(ctx context.Context, marshaler runtime.Marshaler, client KnownAdminClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq UpdateAuthProviderRequest
 	var metadata runtime.ServerMetadata
+
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Provider); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if protoReq.UpdateMask == nil || len(protoReq.UpdateMask.GetPaths()) == 0 {
+		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), protoReq.Provider); err != nil {
+			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		} else {
+			protoReq.UpdateMask = fieldMask
+		}
+	}
 
 	var (
 		val string
@@ -239,14 +272,14 @@ func request_KnownAdmin_UpdateAuthProvider_0(ctx context.Context, marshaler runt
 		_   = err
 	)
 
-	val, ok = pathParams["provider.id"]
+	val, ok = pathParams["id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "provider.id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
 
-	err = runtime.PopulateFieldFromPath(&protoReq, "provider.id", val)
+	protoReq.Id, err = runtime.Int64(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "provider.id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -265,6 +298,21 @@ func local_request_KnownAdmin_UpdateAuthProvider_0(ctx context.Context, marshale
 	var protoReq UpdateAuthProviderRequest
 	var metadata runtime.ServerMetadata
 
+	newReader, berr := utilities.IOReaderFactory(req.Body)
+	if berr != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
+	}
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Provider); err != nil && err != io.EOF {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if protoReq.UpdateMask == nil || len(protoReq.UpdateMask.GetPaths()) == 0 {
+		if fieldMask, err := runtime.FieldMaskFromRequestBody(newReader(), protoReq.Provider); err != nil {
+			return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+		} else {
+			protoReq.UpdateMask = fieldMask
+		}
+	}
+
 	var (
 		val string
 		ok  bool
@@ -272,14 +320,14 @@ func local_request_KnownAdmin_UpdateAuthProvider_0(ctx context.Context, marshale
 		_   = err
 	)
 
-	val, ok = pathParams["provider.id"]
+	val, ok = pathParams["id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "provider.id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
 
-	err = runtime.PopulateFieldFromPath(&protoReq, "provider.id", val)
+	protoReq.Id, err = runtime.Int64(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "provider.id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -4112,7 +4160,7 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateAuthProvider", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/providers/{provider.id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateAuthProvider", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/providers/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -5883,7 +5931,7 @@ func RegisterKnownAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateAuthProvider", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/providers/{provider.id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateAuthProvider", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/auth/providers/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -7301,7 +7349,7 @@ var (
 
 	pattern_KnownAdmin_DeleteAuthProvider_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 1, 0, 4, 1, 5, 6}, []string{"builtin", "admin", "api", "v1", "auth", "providers", "id"}, ""))
 
-	pattern_KnownAdmin_UpdateAuthProvider_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 1, 0, 4, 1, 5, 6}, []string{"builtin", "admin", "api", "v1", "auth", "providers", "provider.id"}, ""))
+	pattern_KnownAdmin_UpdateAuthProvider_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 1, 0, 4, 1, 5, 6}, []string{"builtin", "admin", "api", "v1", "auth", "providers", "id"}, ""))
 
 	pattern_KnownAdmin_CreateAuthLogin_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"builtin", "admin", "api", "v1", "auth", "login"}, ""))
 

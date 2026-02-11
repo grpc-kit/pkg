@@ -4,6 +4,7 @@ package lion
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -49,6 +50,20 @@ func (_c *AuthProvidersCreate) SetNillableUpdatedAt(v *time.Time) *AuthProviders
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *AuthProvidersCreate) SetDeletedAt(v time.Time) *AuthProvidersCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableDeletedAt(v *time.Time) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetCreatedBy sets the "created_by" field.
 func (_c *AuthProvidersCreate) SetCreatedBy(v int64) *AuthProvidersCreate {
 	_c.mutation.SetCreatedBy(v)
@@ -89,121 +104,85 @@ func (_c *AuthProvidersCreate) SetProviderType(v int) *AuthProvidersCreate {
 	return _c
 }
 
-// SetClientID sets the "client_id" field.
-func (_c *AuthProvidersCreate) SetClientID(v string) *AuthProvidersCreate {
-	_c.mutation.SetClientID(v)
+// SetProviderStatus sets the "provider_status" field.
+func (_c *AuthProvidersCreate) SetProviderStatus(v int) *AuthProvidersCreate {
+	_c.mutation.SetProviderStatus(v)
 	return _c
 }
 
-// SetNillableClientID sets the "client_id" field if the given value is not nil.
-func (_c *AuthProvidersCreate) SetNillableClientID(v *string) *AuthProvidersCreate {
+// SetNillableProviderStatus sets the "provider_status" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableProviderStatus(v *int) *AuthProvidersCreate {
 	if v != nil {
-		_c.SetClientID(*v)
+		_c.SetProviderStatus(*v)
 	}
 	return _c
 }
 
-// SetEnabled sets the "enabled" field.
-func (_c *AuthProvidersCreate) SetEnabled(v bool) *AuthProvidersCreate {
-	_c.mutation.SetEnabled(v)
+// SetDisplayName sets the "display_name" field.
+func (_c *AuthProvidersCreate) SetDisplayName(v string) *AuthProvidersCreate {
+	_c.mutation.SetDisplayName(v)
 	return _c
 }
 
-// SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (_c *AuthProvidersCreate) SetNillableEnabled(v *bool) *AuthProvidersCreate {
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableDisplayName(v *string) *AuthProvidersCreate {
 	if v != nil {
-		_c.SetEnabled(*v)
+		_c.SetDisplayName(*v)
 	}
 	return _c
 }
 
-// SetClientSecretEncrypted sets the "client_secret_encrypted" field.
-func (_c *AuthProvidersCreate) SetClientSecretEncrypted(v []byte) *AuthProvidersCreate {
-	_c.mutation.SetClientSecretEncrypted(v)
+// SetDescription sets the "description" field.
+func (_c *AuthProvidersCreate) SetDescription(v string) *AuthProvidersCreate {
+	_c.mutation.SetDescription(v)
 	return _c
 }
 
-// SetScopes sets the "scopes" field.
-func (_c *AuthProvidersCreate) SetScopes(v string) *AuthProvidersCreate {
-	_c.mutation.SetScopes(v)
-	return _c
-}
-
-// SetNillableScopes sets the "scopes" field if the given value is not nil.
-func (_c *AuthProvidersCreate) SetNillableScopes(v *string) *AuthProvidersCreate {
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableDescription(v *string) *AuthProvidersCreate {
 	if v != nil {
-		_c.SetScopes(*v)
+		_c.SetDescription(*v)
 	}
 	return _c
 }
 
-// SetRedirectURI sets the "redirect_uri" field.
-func (_c *AuthProvidersCreate) SetRedirectURI(v string) *AuthProvidersCreate {
-	_c.mutation.SetRedirectURI(v)
+// SetSortOrder sets the "sort_order" field.
+func (_c *AuthProvidersCreate) SetSortOrder(v int) *AuthProvidersCreate {
+	_c.mutation.SetSortOrder(v)
 	return _c
 }
 
-// SetNillableRedirectURI sets the "redirect_uri" field if the given value is not nil.
-func (_c *AuthProvidersCreate) SetNillableRedirectURI(v *string) *AuthProvidersCreate {
+// SetNillableSortOrder sets the "sort_order" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableSortOrder(v *int) *AuthProvidersCreate {
 	if v != nil {
-		_c.SetRedirectURI(*v)
+		_c.SetSortOrder(*v)
 	}
 	return _c
 }
 
-// SetIssuer sets the "issuer" field.
-func (_c *AuthProvidersCreate) SetIssuer(v string) *AuthProvidersCreate {
-	_c.mutation.SetIssuer(v)
+// SetIconURL sets the "icon_url" field.
+func (_c *AuthProvidersCreate) SetIconURL(v string) *AuthProvidersCreate {
+	_c.mutation.SetIconURL(v)
 	return _c
 }
 
-// SetNillableIssuer sets the "issuer" field if the given value is not nil.
-func (_c *AuthProvidersCreate) SetNillableIssuer(v *string) *AuthProvidersCreate {
+// SetNillableIconURL sets the "icon_url" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableIconURL(v *string) *AuthProvidersCreate {
 	if v != nil {
-		_c.SetIssuer(*v)
+		_c.SetIconURL(*v)
 	}
 	return _c
 }
 
-// SetAuthorizationEndpoint sets the "authorization_endpoint" field.
-func (_c *AuthProvidersCreate) SetAuthorizationEndpoint(v string) *AuthProvidersCreate {
-	_c.mutation.SetAuthorizationEndpoint(v)
+// SetConfig sets the "config" field.
+func (_c *AuthProvidersCreate) SetConfig(v json.RawMessage) *AuthProvidersCreate {
+	_c.mutation.SetConfig(v)
 	return _c
 }
 
-// SetNillableAuthorizationEndpoint sets the "authorization_endpoint" field if the given value is not nil.
-func (_c *AuthProvidersCreate) SetNillableAuthorizationEndpoint(v *string) *AuthProvidersCreate {
-	if v != nil {
-		_c.SetAuthorizationEndpoint(*v)
-	}
-	return _c
-}
-
-// SetTokenEndpoint sets the "token_endpoint" field.
-func (_c *AuthProvidersCreate) SetTokenEndpoint(v string) *AuthProvidersCreate {
-	_c.mutation.SetTokenEndpoint(v)
-	return _c
-}
-
-// SetNillableTokenEndpoint sets the "token_endpoint" field if the given value is not nil.
-func (_c *AuthProvidersCreate) SetNillableTokenEndpoint(v *string) *AuthProvidersCreate {
-	if v != nil {
-		_c.SetTokenEndpoint(*v)
-	}
-	return _c
-}
-
-// SetUserinfoEndpoint sets the "userinfo_endpoint" field.
-func (_c *AuthProvidersCreate) SetUserinfoEndpoint(v string) *AuthProvidersCreate {
-	_c.mutation.SetUserinfoEndpoint(v)
-	return _c
-}
-
-// SetNillableUserinfoEndpoint sets the "userinfo_endpoint" field if the given value is not nil.
-func (_c *AuthProvidersCreate) SetNillableUserinfoEndpoint(v *string) *AuthProvidersCreate {
-	if v != nil {
-		_c.SetUserinfoEndpoint(*v)
-	}
+// SetSecretEncrypted sets the "secret_encrypted" field.
+func (_c *AuthProvidersCreate) SetSecretEncrypted(v []byte) *AuthProvidersCreate {
+	_c.mutation.SetSecretEncrypted(v)
 	return _c
 }
 
@@ -273,41 +252,25 @@ func (_c *AuthProvidersCreate) defaults() {
 		v := authproviders.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
-	if _, ok := _c.mutation.ClientID(); !ok {
-		v := authproviders.DefaultClientID
-		_c.mutation.SetClientID(v)
+	if _, ok := _c.mutation.ProviderStatus(); !ok {
+		v := authproviders.DefaultProviderStatus
+		_c.mutation.SetProviderStatus(v)
 	}
-	if _, ok := _c.mutation.Enabled(); !ok {
-		v := authproviders.DefaultEnabled
-		_c.mutation.SetEnabled(v)
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		v := authproviders.DefaultDisplayName
+		_c.mutation.SetDisplayName(v)
 	}
-	if _, ok := _c.mutation.ClientSecretEncrypted(); !ok {
-		v := authproviders.DefaultClientSecretEncrypted
-		_c.mutation.SetClientSecretEncrypted(v)
+	if _, ok := _c.mutation.Description(); !ok {
+		v := authproviders.DefaultDescription
+		_c.mutation.SetDescription(v)
 	}
-	if _, ok := _c.mutation.Scopes(); !ok {
-		v := authproviders.DefaultScopes
-		_c.mutation.SetScopes(v)
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		v := authproviders.DefaultSortOrder
+		_c.mutation.SetSortOrder(v)
 	}
-	if _, ok := _c.mutation.RedirectURI(); !ok {
-		v := authproviders.DefaultRedirectURI
-		_c.mutation.SetRedirectURI(v)
-	}
-	if _, ok := _c.mutation.Issuer(); !ok {
-		v := authproviders.DefaultIssuer
-		_c.mutation.SetIssuer(v)
-	}
-	if _, ok := _c.mutation.AuthorizationEndpoint(); !ok {
-		v := authproviders.DefaultAuthorizationEndpoint
-		_c.mutation.SetAuthorizationEndpoint(v)
-	}
-	if _, ok := _c.mutation.TokenEndpoint(); !ok {
-		v := authproviders.DefaultTokenEndpoint
-		_c.mutation.SetTokenEndpoint(v)
-	}
-	if _, ok := _c.mutation.UserinfoEndpoint(); !ok {
-		v := authproviders.DefaultUserinfoEndpoint
-		_c.mutation.SetUserinfoEndpoint(v)
+	if _, ok := _c.mutation.IconURL(); !ok {
+		v := authproviders.DefaultIconURL
+		_c.mutation.SetIconURL(v)
 	}
 }
 
@@ -322,35 +285,33 @@ func (_c *AuthProvidersCreate) check() error {
 	if _, ok := _c.mutation.Code(); !ok {
 		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "AuthProviders.code"`)}
 	}
+	if v, ok := _c.mutation.Code(); ok {
+		if err := authproviders.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.code": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.ProviderType(); !ok {
 		return &ValidationError{Name: "provider_type", err: errors.New(`lion: missing required field "AuthProviders.provider_type"`)}
 	}
-	if _, ok := _c.mutation.ClientID(); !ok {
-		return &ValidationError{Name: "client_id", err: errors.New(`lion: missing required field "AuthProviders.client_id"`)}
+	if _, ok := _c.mutation.ProviderStatus(); !ok {
+		return &ValidationError{Name: "provider_status", err: errors.New(`lion: missing required field "AuthProviders.provider_status"`)}
 	}
-	if _, ok := _c.mutation.Enabled(); !ok {
-		return &ValidationError{Name: "enabled", err: errors.New(`lion: missing required field "AuthProviders.enabled"`)}
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "AuthProviders.display_name"`)}
 	}
-	if _, ok := _c.mutation.ClientSecretEncrypted(); !ok {
-		return &ValidationError{Name: "client_secret_encrypted", err: errors.New(`lion: missing required field "AuthProviders.client_secret_encrypted"`)}
+	if v, ok := _c.mutation.DisplayName(); ok {
+		if err := authproviders.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "AuthProviders.display_name": %w`, err)}
+		}
 	}
-	if _, ok := _c.mutation.Scopes(); !ok {
-		return &ValidationError{Name: "scopes", err: errors.New(`lion: missing required field "AuthProviders.scopes"`)}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "AuthProviders.description"`)}
 	}
-	if _, ok := _c.mutation.RedirectURI(); !ok {
-		return &ValidationError{Name: "redirect_uri", err: errors.New(`lion: missing required field "AuthProviders.redirect_uri"`)}
+	if _, ok := _c.mutation.SortOrder(); !ok {
+		return &ValidationError{Name: "sort_order", err: errors.New(`lion: missing required field "AuthProviders.sort_order"`)}
 	}
-	if _, ok := _c.mutation.Issuer(); !ok {
-		return &ValidationError{Name: "issuer", err: errors.New(`lion: missing required field "AuthProviders.issuer"`)}
-	}
-	if _, ok := _c.mutation.AuthorizationEndpoint(); !ok {
-		return &ValidationError{Name: "authorization_endpoint", err: errors.New(`lion: missing required field "AuthProviders.authorization_endpoint"`)}
-	}
-	if _, ok := _c.mutation.TokenEndpoint(); !ok {
-		return &ValidationError{Name: "token_endpoint", err: errors.New(`lion: missing required field "AuthProviders.token_endpoint"`)}
-	}
-	if _, ok := _c.mutation.UserinfoEndpoint(); !ok {
-		return &ValidationError{Name: "userinfo_endpoint", err: errors.New(`lion: missing required field "AuthProviders.userinfo_endpoint"`)}
+	if _, ok := _c.mutation.IconURL(); !ok {
+		return &ValidationError{Name: "icon_url", err: errors.New(`lion: missing required field "AuthProviders.icon_url"`)}
 	}
 	return nil
 }
@@ -386,6 +347,10 @@ func (_c *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSpe
 		_spec.SetField(authproviders.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(authproviders.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
 		_spec.SetField(authproviders.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = value
@@ -402,41 +367,33 @@ func (_c *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSpe
 		_spec.SetField(authproviders.FieldProviderType, field.TypeInt, value)
 		_node.ProviderType = value
 	}
-	if value, ok := _c.mutation.ClientID(); ok {
-		_spec.SetField(authproviders.FieldClientID, field.TypeString, value)
-		_node.ClientID = value
+	if value, ok := _c.mutation.ProviderStatus(); ok {
+		_spec.SetField(authproviders.FieldProviderStatus, field.TypeInt, value)
+		_node.ProviderStatus = value
 	}
-	if value, ok := _c.mutation.Enabled(); ok {
-		_spec.SetField(authproviders.FieldEnabled, field.TypeBool, value)
-		_node.Enabled = value
+	if value, ok := _c.mutation.DisplayName(); ok {
+		_spec.SetField(authproviders.FieldDisplayName, field.TypeString, value)
+		_node.DisplayName = value
 	}
-	if value, ok := _c.mutation.ClientSecretEncrypted(); ok {
-		_spec.SetField(authproviders.FieldClientSecretEncrypted, field.TypeBytes, value)
-		_node.ClientSecretEncrypted = value
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(authproviders.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
-	if value, ok := _c.mutation.Scopes(); ok {
-		_spec.SetField(authproviders.FieldScopes, field.TypeString, value)
-		_node.Scopes = value
+	if value, ok := _c.mutation.SortOrder(); ok {
+		_spec.SetField(authproviders.FieldSortOrder, field.TypeInt, value)
+		_node.SortOrder = value
 	}
-	if value, ok := _c.mutation.RedirectURI(); ok {
-		_spec.SetField(authproviders.FieldRedirectURI, field.TypeString, value)
-		_node.RedirectURI = value
+	if value, ok := _c.mutation.IconURL(); ok {
+		_spec.SetField(authproviders.FieldIconURL, field.TypeString, value)
+		_node.IconURL = value
 	}
-	if value, ok := _c.mutation.Issuer(); ok {
-		_spec.SetField(authproviders.FieldIssuer, field.TypeString, value)
-		_node.Issuer = value
+	if value, ok := _c.mutation.Config(); ok {
+		_spec.SetField(authproviders.FieldConfig, field.TypeJSON, value)
+		_node.Config = value
 	}
-	if value, ok := _c.mutation.AuthorizationEndpoint(); ok {
-		_spec.SetField(authproviders.FieldAuthorizationEndpoint, field.TypeString, value)
-		_node.AuthorizationEndpoint = value
-	}
-	if value, ok := _c.mutation.TokenEndpoint(); ok {
-		_spec.SetField(authproviders.FieldTokenEndpoint, field.TypeString, value)
-		_node.TokenEndpoint = value
-	}
-	if value, ok := _c.mutation.UserinfoEndpoint(); ok {
-		_spec.SetField(authproviders.FieldUserinfoEndpoint, field.TypeString, value)
-		_node.UserinfoEndpoint = value
+	if value, ok := _c.mutation.SecretEncrypted(); ok {
+		_spec.SetField(authproviders.FieldSecretEncrypted, field.TypeBytes, value)
+		_node.SecretEncrypted = value
 	}
 	if nodes := _c.mutation.LionUserIdentitiesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
