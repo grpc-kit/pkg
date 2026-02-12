@@ -261,14 +261,20 @@ func (s *socialUsers) GetAccessToken(expiresIn int32, appid string) {
 }
 
 func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, idToken *auth.IDTokenClaims) (int, error) {
-	existUserID, err := s.db.UserIdentities.Query().
+	existIdentity, err := s.db.UserIdentities.Query().
 		Where(
 			useridentities.ProviderID(s.AuthProvider.ID),
 			useridentities.ProviderUserIDEQ(idToken.Subject),
 		).
-		OnlyID(ctx)
+		Select(useridentities.FieldID, useridentities.FieldUserID).
+		Only(ctx)
 	if err != nil && !lion.IsNotFound(err) {
 		return 0, err
+	}
+
+	var existUserID int
+	if existIdentity != nil {
+		existUserID = existIdentity.UserID
 	}
 
 	if existUserID == 0 && lion.IsNotFound(err) {
@@ -344,7 +350,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		}
 
 		s.db.UserIdentities.Update().
-			Where(useridentities.IDEQ(existUserID)).
+			Where(useridentities.IDEQ(existIdentity.ID)).
 			SetAccessTokenEncrypted(accessTokenEnc).
 			SetRefreshTokenEncrypted(refreshTokenEnc).
 			SetTokenExpiresAt(oauth2Token.Expiry)
@@ -391,14 +397,20 @@ func (s *socialUsers) weixinExchange(ctx context.Context, code string) (*wechatC
 }
 
 func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2SessionResponse) (int, error) {
-	existUserID, err := s.db.UserIdentities.Query().
+	existIdentity, err := s.db.UserIdentities.Query().
 		Where(
 			useridentities.ProviderIDEQ(s.AuthProvider.ID),
 			useridentities.ProviderUserIDEQ(resp.Openid),
 		).
-		OnlyID(ctx)
+		Select(useridentities.FieldID, useridentities.FieldUserID).
+		Only(ctx)
 	if err != nil && !lion.IsNotFound(err) {
-		return existUserID, err
+		return 0, err
+	}
+
+	var existUserID int
+	if existIdentity != nil {
+		existUserID = existIdentity.UserID
 	}
 
 	if existUserID == 0 && lion.IsNotFound(err) {

@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
@@ -238,6 +240,14 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 		if err != nil {
 			return nil, errs.Internal(ctx).WithMessage(err.Error())
 		}
+
+		// 对配置了 issuer 但缺少端点的 OAuth 提供商，通过 OIDC Discovery 自动补全
+		if oc := p.GetOauthConfig(); oc != nil && oc.Issuer != "" {
+			if oc.AuthorizationEndpoint == "" || oc.TokenEndpoint == "" || oc.UserinfoEndpoint == "" {
+				a.enrichOAuthEndpoints(ctx, oc)
+			}
+		}
+
 		result.Providers = append(result.Providers, p)
 	}
 
@@ -560,4 +570,41 @@ func (a *KnownAdminAPI) UpdateAuthProvider(ctx context.Context, req *adminv1.Upd
 	}
 
 	return result, nil
+}
+
+// enrichOAuthEndpoints 通过 OIDC Discovery 自动补全缺失的 OAuth 端点
+// 当 OAuthConfig 配置了 issuer 但缺少 authorization_endpoint/token_endpoint/userinfo_endpoint 时调用
+// 仅补全空字段，不覆盖已配置的值
+func (a *KnownAdminAPI) enrichOAuthEndpoints(ctx context.Context, oc *adminv1.OAuthConfig) {
+	discoverCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	provider, err := oidc.NewProvider(discoverCtx, oc.Issuer)
+	if err != nil {
+		a.logger.Warnf("OIDC discovery failed for issuer %s: %v", oc.Issuer, err)
+		return
+	}
+
+	// go-oidc Provider.Endpoint() 返回 authorization_endpoint 和 token_endpoint
+	endpoint := provider.Endpoint()
+	if oc.AuthorizationEndpoint == "" {
+		oc.AuthorizationEndpoint = endpoint.AuthURL
+	}
+	if oc.TokenEndpoint == "" {
+		oc.TokenEndpoint = endpoint.TokenURL
+	}
+
+	// userinfo_endpoint 和 jwks_uri 需要从 discovery 原始 claims 中提取
+	var claims struct {
+		UserinfoEndpoint string `json:"userinfo_endpoint"`
+		JwksURI          string `json:"jwks_uri"`
+	}
+	if err := provider.Claims(&claims); err == nil {
+		if oc.UserinfoEndpoint == "" && claims.UserinfoEndpoint != "" {
+			oc.UserinfoEndpoint = claims.UserinfoEndpoint
+		}
+		if oc.JwksUri == "" && claims.JwksURI != "" {
+			oc.JwksUri = claims.JwksURI
+		}
+	}
 }
