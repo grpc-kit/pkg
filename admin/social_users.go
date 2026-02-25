@@ -6,8 +6,11 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
@@ -200,9 +203,108 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		if err != nil {
 			return accessToken, err
 		}
+
+	case adminv1.AuthProvider_OAUTH2, adminv1.AuthProvider_GITHUB, adminv1.AuthProvider_GOOGLE:
+		oauth2Token, err := s.oauth2Exchange(ctx, code)
+		if err != nil {
+			return accessToken, err
+		}
+
+		userinfo, err := s.oauth2Userinfo(ctx, oauth2Token)
+		if err != nil {
+			return accessToken, err
+		}
+
+		idField := "sub"
+		nameField := "name"
+		emailField := "email"
+		if s.oauthCfg != nil {
+			if s.oauthCfg.UserinfoIdField != "" {
+				idField = s.oauthCfg.UserinfoIdField
+			}
+			if s.oauthCfg.UserinfoNameField != "" {
+				nameField = s.oauthCfg.UserinfoNameField
+			}
+			if s.oauthCfg.UserinfoEmailField != "" {
+				emailField = s.oauthCfg.UserinfoEmailField
+			}
+		}
+		if adminv1.AuthProvider_Type(s.AuthProvider.ProviderType) == adminv1.AuthProvider_GITHUB {
+			// GitHub userinfo 默认主键为 id，用户名通常是 login。
+			idField = "id"
+			nameField = "login"
+			emailField = "email"
+		}
+
+		providerUserID := getMapString(userinfo, idField)
+		if providerUserID == "" {
+			providerUserID = getMapString(userinfo, "sub")
+		}
+		if providerUserID == "" {
+			return accessToken, fmt.Errorf("oauth userinfo missing id field: %s", idField)
+		}
+
+		username := getMapString(userinfo, nameField)
+		if username == "" {
+			username = providerUserID
+		}
+		email := getMapString(userinfo, emailField)
+
+		idToken = &auth.IDTokenClaims{
+			Username:      username,
+			Nickname:      username,
+			Email:         email,
+			EmailVerified: email != "",
+		}
+		idToken.SetSubject(providerUserID)
+
+		expiresIn := int64(3600)
+		if !oauth2Token.Expiry.IsZero() {
+			if sec := int64(time.Until(oauth2Token.Expiry).Seconds()); sec > 0 {
+				expiresIn = sec
+			}
+		}
+		idToken.SetExpiresAt(expiresIn)
+
+		userID, err := s.upsertUserOIDC(ctx, oauth2Token, idToken)
+		if err != nil {
+			return accessToken, err
+		}
+
+		if err = s.setUserRoles(ctx, userID); err != nil {
+			return "", err
+		}
+
+		idToken.SetSubject(strconv.Itoa(userID))
+		idToken.SetGroups(s.Groups)
+
+		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey)
+		if err != nil {
+			return accessToken, err
+		}
 	}
 
 	return accessToken, nil
+}
+
+func getMapString(m map[string]interface{}, key string) string {
+	if m == nil || key == "" {
+		return ""
+	}
+	v, ok := m[key]
+	if !ok || v == nil {
+		return ""
+	}
+	switch vv := v.(type) {
+	case string:
+		return strings.TrimSpace(vv)
+	case float64:
+		return strconv.FormatInt(int64(vv), 10)
+	case json.Number:
+		return vv.String()
+	default:
+		return fmt.Sprintf("%v", vv)
+	}
 }
 
 func (s *socialUsers) PasswordCheck(ctx context.Context, username, password string) (string, bool, error) {
@@ -366,15 +468,37 @@ func (s *socialUsers) oauth2Exchange(ctx context.Context, code string) (*oauth2.
 		return nil, fmt.Errorf("oauth config not initialized")
 	}
 
-	op, err := oidc.NewProvider(ctx, s.oauthCfg.Issuer)
-	if err != nil {
-		return nil, err
+	endpoint := oauth2.Endpoint{}
+	if s.oauthCfg.Issuer != "" {
+		op, err := oidc.NewProvider(ctx, s.oauthCfg.Issuer)
+		if err != nil {
+			return nil, err
+		}
+		endpoint = op.Endpoint()
+	} else {
+		endpoint = oauth2.Endpoint{
+			AuthURL:  s.oauthCfg.AuthorizationEndpoint,
+			TokenURL: s.oauthCfg.TokenEndpoint,
+		}
+
+		// GitHub 场景默认端点兜底，避免必须配置 issuer。
+		if adminv1.AuthProvider_Type(s.AuthProvider.ProviderType) == adminv1.AuthProvider_GITHUB {
+			if endpoint.AuthURL == "" {
+				endpoint.AuthURL = "https://github.com/login/oauth/authorize"
+			}
+			if endpoint.TokenURL == "" {
+				endpoint.TokenURL = "https://github.com/login/oauth/access_token"
+			}
+		}
+		if endpoint.AuthURL == "" || endpoint.TokenURL == "" {
+			return nil, fmt.Errorf("oauth endpoints not configured: authorization_endpoint/token_endpoint")
+		}
 	}
 
 	oauth2Config := oauth2.Config{
 		ClientID:     s.oauthCfg.ClientID,
 		ClientSecret: s.secret,
-		Endpoint:     op.Endpoint(),
+		Endpoint:     endpoint,
 		Scopes:       s.oauthCfg.Scopes,
 		RedirectURL:  s.oauthCfg.RedirectURI,
 	}
@@ -385,6 +509,120 @@ func (s *socialUsers) oauth2Exchange(ctx context.Context, code string) (*oauth2.
 	}
 
 	return token, nil
+}
+
+func (s *socialUsers) oauth2Userinfo(ctx context.Context, oauth2Token *oauth2.Token) (map[string]interface{}, error) {
+	if s.oauthCfg == nil {
+		return nil, fmt.Errorf("oauth config not initialized")
+	}
+	if oauth2Token == nil || oauth2Token.AccessToken == "" {
+		return nil, fmt.Errorf("oauth access token is empty")
+	}
+
+	userinfoEndpoint := s.oauthCfg.UserinfoEndpoint
+	if userinfoEndpoint == "" && adminv1.AuthProvider_Type(s.AuthProvider.ProviderType) == adminv1.AuthProvider_GITHUB {
+		apiURL := strings.TrimSuffix(s.oauthCfg.ApiURL, "/")
+		if apiURL == "" {
+			apiURL = "https://api.github.com"
+		}
+		userinfoEndpoint = apiURL + "/user"
+	}
+	if userinfoEndpoint == "" {
+		return nil, fmt.Errorf("userinfo endpoint not configured")
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, userinfoEndpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+oauth2Token.AccessToken)
+	req.Header.Set("Accept", "application/json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("userinfo request failed: %d %s", resp.StatusCode, strings.TrimSpace(string(body)))
+	}
+
+	userinfo := map[string]interface{}{}
+	if err = json.Unmarshal(body, &userinfo); err != nil {
+		return nil, fmt.Errorf("unmarshal userinfo: %w", err)
+	}
+
+	// GitHub 在 /user 可能拿不到公开邮箱，补查 /user/emails。
+	if adminv1.AuthProvider_Type(s.AuthProvider.ProviderType) == adminv1.AuthProvider_GITHUB && getMapString(userinfo, "email") == "" {
+		if email := s.githubPrimaryEmail(ctx, oauth2Token.AccessToken); email != "" {
+			userinfo["email"] = email
+		}
+	}
+
+	return userinfo, nil
+}
+
+func (s *socialUsers) githubPrimaryEmail(ctx context.Context, accessToken string) string {
+	apiURL := strings.TrimSuffix(s.oauthCfg.ApiURL, "/")
+	if apiURL == "" {
+		apiURL = "https://api.github.com"
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL+"/user/emails", nil)
+	if err != nil {
+		return ""
+	}
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("Accept", "application/vnd.github+json")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return ""
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ""
+	}
+
+	var emails []struct {
+		Email    string `json:"email"`
+		Primary  bool   `json:"primary"`
+		Verified bool   `json:"verified"`
+	}
+	if err = json.Unmarshal(body, &emails); err != nil {
+		return ""
+	}
+
+	for _, e := range emails {
+		if e.Primary && e.Verified && e.Email != "" {
+			return e.Email
+		}
+	}
+	for _, e := range emails {
+		if e.Verified && e.Email != "" {
+			return e.Email
+		}
+	}
+	for _, e := range emails {
+		if e.Primary && e.Email != "" {
+			return e.Email
+		}
+	}
+	if len(emails) > 0 {
+		return emails[0].Email
+	}
+	return ""
 }
 
 func (s *socialUsers) weixinExchange(ctx context.Context, code string) (*wechatCode2SessionResponse, error) {
