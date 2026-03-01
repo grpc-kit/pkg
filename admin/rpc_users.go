@@ -33,6 +33,15 @@ func (a *KnownAdminAPI) requireUserManagePermission(ctx context.Context) (int64,
 	return userID, nil
 }
 
+func isSupportedGender(g adminv1.User_Gender) bool {
+	switch g {
+	case adminv1.User_GENDER_UNSPECIFIED, adminv1.User_MALE, adminv1.User_FEMALE, adminv1.User_OTHER, adminv1.User_PRIVATE:
+		return true
+	default:
+		return false
+	}
+}
+
 func (a *KnownAdminAPI) decryptStringField(ctx context.Context, fieldName string, encrypted []byte) (string, error) {
 	if len(encrypted) == 0 {
 		return "", nil
@@ -159,7 +168,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	if err != nil {
 		return nil, err
 	}
-	if req.User.GetGender() > adminv1.User_FEMALE {
+	if !isSupportedGender(req.User.GetGender()) {
 		return nil, errs.InvalidArgument(ctx).WithMessage("gender is out of supported range")
 	}
 
@@ -717,7 +726,7 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 			x.SetUserStatus(int(req.User.GetStatus()))
 
 		case "gender":
-			if req.User.GetGender() > adminv1.User_FEMALE {
+			if !isSupportedGender(req.User.GetGender()) {
 				return nil, errs.InvalidArgument(ctx).WithMessage("gender is out of supported range")
 			}
 			x.SetGender(int(req.User.GetGender()))

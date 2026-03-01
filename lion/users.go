@@ -54,7 +54,7 @@ type Users struct {
 	EmailHash string `json:"email_hash,omitempty"`
 	// 邮箱是否验证过
 	EmailVerified bool `json:"email_verified,omitempty"`
-	// 用户的性别：0-未知，1-男性，2-女性
+	// 用户的性别：0-未知，1-男性，2-女性，3-其他，4-保密
 	Gender int `json:"gender,omitempty"`
 	// 用户的出生日期，格式为 YYYY-MM-DD，如 1990-12-31
 	Birthdate *time.Time `json:"birthdate,omitempty"`

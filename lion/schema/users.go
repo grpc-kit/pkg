@@ -75,8 +75,8 @@ func (Users) Fields() []ent.Field {
 			Comment("邮箱是否验证过"),
 		field.Int("gender").
 			Default(0).
-			Range(0, 2).
-			Comment("用户的性别：0-未知，1-男性，2-女性"),
+			Range(0, 4).
+			Comment("用户的性别：0-未知，1-男性，2-女性，3-其他，4-保密"),
 		field.Time("birthdate").
 			Optional().
 			Nillable().
