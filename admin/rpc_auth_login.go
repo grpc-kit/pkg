@@ -312,6 +312,26 @@ func parseListAuthProvidersFilter(filter string) ([]predicate.AuthProviders, err
 	return out, nil
 }
 
+func isLocalProviderType(providerType int) bool {
+	return providerType == int(adminv1.AuthProvider_LOCAL.Number())
+}
+
+func ensureSingleLocalProviderHealth(ctx context.Context, db *lion.Client) error {
+	localCount, err := db.AuthProviders.Query().
+		Where(
+			authproviders.ProviderTypeEQ(int(adminv1.AuthProvider_LOCAL.Number())),
+			authproviders.DeletedAtIsNil(),
+		).
+		Count(ctx)
+	if err != nil {
+		return err
+	}
+	if localCount > 1 {
+		return errs.FailedPrecondition(ctx).WithMessage("invalid auth providers state: LOCAL provider must be unique")
+	}
+	return nil
+}
+
 // UpsertAuthProviders 更新认证提供方列表
 func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.UpsertAuthProvidersRequest) (*adminv1.UpsertAuthProvidersResponse, error) {
 	result := &adminv1.UpsertAuthProvidersResponse{}
@@ -321,11 +341,29 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
 	}
 
+	if err := ensureSingleLocalProviderHealth(ctx, db); err != nil {
+		return nil, err
+	}
+
 	for _, p := range req.Providers {
+		if p.GetType() == adminv1.AuthProvider_LOCAL {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider is system-initialized and cannot be upserted")
+		}
+
 		name := p.Code
 		existID, err := db.AuthProviders.Query().Where(authproviders.CodeEQ(name)).OnlyID(ctx)
 		if err != nil && !lion.IsNotFound(err) {
 			return nil, err
+		}
+
+		if existID > 0 {
+			existProvider, getErr := db.AuthProviders.Get(ctx, existID)
+			if getErr != nil {
+				return nil, getErr
+			}
+			if isLocalProviderType(existProvider.ProviderType) {
+				return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider is system-initialized and cannot be upserted")
+			}
 		}
 
 		configJSON, secretEnc, err := protoToDBConfig(p, a.config.aesKey)
@@ -391,6 +429,10 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 		return nil, errs.InvalidArgument(ctx).WithMessage("request body provider is nil")
 	}
 
+	if req.Provider.Type == adminv1.AuthProvider_LOCAL {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider is system-initialized and cannot be created")
+	}
+
 	code, err := schema.EnsureCode(req.Provider.Code)
 	if err != nil {
 		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
@@ -400,6 +442,10 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+	}
+
+	if err := ensureSingleLocalProviderHealth(ctx, db); err != nil {
+		return nil, err
 	}
 
 	configJSON, secretEnc, err := protoToDBConfig(req.Provider, a.config.aesKey)
@@ -477,13 +523,20 @@ func (a *KnownAdminAPI) DeleteAuthProvider(ctx context.Context, req *adminv1.Del
 		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
 	}
 
+	if err := ensureSingleLocalProviderHealth(ctx, db); err != nil {
+		return nil, err
+	}
+
 	// 检查认证提供方是否存在
-	_, err = db.AuthProviders.Get(ctx, int(req.Id))
+	provider, err := db.AuthProviders.Get(ctx, int(req.Id))
 	if err != nil {
 		if lion.IsNotFound(err) {
 			return nil, errs.NotFound(ctx).WithMessage("auth provider not found")
 		}
 		return nil, err
+	}
+	if isLocalProviderType(provider.ProviderType) {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider is system-initialized and cannot be deleted")
 	}
 
 	// 执行删除
@@ -510,6 +563,10 @@ func (a *KnownAdminAPI) UpdateAuthProvider(ctx context.Context, req *adminv1.Upd
 		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
 	}
 
+	if err := ensureSingleLocalProviderHealth(ctx, db); err != nil {
+		return nil, err
+	}
+
 	// 查找要更新的认证提供方
 	provider, err := db.AuthProviders.Get(ctx, int(req.Id))
 	if err != nil {
@@ -517,6 +574,19 @@ func (a *KnownAdminAPI) UpdateAuthProvider(ctx context.Context, req *adminv1.Upd
 			return nil, errs.NotFound(ctx).WithMessage("auth provider not found")
 		}
 		return nil, err
+	}
+	existingIsLocal := isLocalProviderType(provider.ProviderType)
+
+	if existingIsLocal {
+		if req.Provider.Code != "" && req.Provider.Code != provider.Code {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider code is immutable")
+		}
+		if req.Provider.Type != adminv1.AuthProvider_TYPE_UNSPECIFIED && req.Provider.Type != adminv1.AuthProvider_LOCAL {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider type is immutable")
+		}
+	}
+	if !existingIsLocal && req.Provider.Type == adminv1.AuthProvider_LOCAL {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider is system-initialized and cannot be assigned via update")
 	}
 
 	// 构建更新操作

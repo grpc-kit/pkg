@@ -3,6 +3,7 @@ package admin
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
@@ -87,14 +88,36 @@ func protoToDBConfig(p *adminv1.AuthProvider, aesKey []byte) (configJSON json.Ra
 	case *adminv1.AuthProvider_OauthConfig:
 		oc := cfg.OauthConfig
 		secret = oc.GetClientSecret()
+		isGoogleProvider := p.GetType() == adminv1.AuthProvider_GOOGLE
+		isGithubProvider := p.GetType() == adminv1.AuthProvider_GITHUB
+		isWechatProvider := p.GetType() == adminv1.AuthProvider_WECHAT
+		authorizationEndpoint := strings.TrimSpace(oc.GetAuthorizationEndpoint())
+		if authorizationEndpoint == "" && isGithubProvider {
+			authorizationEndpoint = "https://github.com/login/oauth/authorize"
+		}
+		if authorizationEndpoint == "" && isWechatProvider {
+			authorizationEndpoint = "https://api.weixin.qq.com/sns/jscode2session"
+		}
+		tokenEndpoint := strings.TrimSpace(oc.GetTokenEndpoint())
+		if tokenEndpoint == "" && isGithubProvider {
+			tokenEndpoint = "https://github.com/login/oauth/access_token"
+		}
+		userinfoEndpoint := strings.TrimSpace(oc.GetUserinfoEndpoint())
+		if userinfoEndpoint == "" && isGithubProvider {
+			userinfoEndpoint = "https://api.github.com/user"
+		}
+		issuer := strings.TrimSpace(oc.GetIssuer())
+		if issuer == "" && isGoogleProvider {
+			issuer = "https://accounts.google.com"
+		}
 		data := &oauthConfigData{
 			ClientID:              oc.GetClientId(),
 			RedirectURI:           oc.GetRedirectUri(),
 			Scopes:                oc.GetScopes(),
-			AuthorizationEndpoint: oc.GetAuthorizationEndpoint(),
-			TokenEndpoint:         oc.GetTokenEndpoint(),
-			UserinfoEndpoint:      oc.GetUserinfoEndpoint(),
-			Issuer:                oc.GetIssuer(),
+			AuthorizationEndpoint: authorizationEndpoint,
+			TokenEndpoint:         tokenEndpoint,
+			UserinfoEndpoint:      userinfoEndpoint,
+			Issuer:                issuer,
 			JwksURI:               oc.GetJwksUri(),
 			UserinfoIdField:       oc.GetUserinfoIdField(),
 			UserinfoNameField:     oc.GetUserinfoNameField(),
