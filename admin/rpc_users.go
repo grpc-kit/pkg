@@ -15,7 +15,6 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
-	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -23,53 +22,173 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+func (a *KnownAdminAPI) requireUserManagePermission(ctx context.Context) (int64, error) {
+	userID, err := GetUserID(ctx)
+	if err != nil || userID <= 0 {
+		return 0, errs.PermissionDenied(ctx).WithMessage("not found user id")
+	}
+	if _, err := a.getUserRoleID(ctx); err != nil {
+		return 0, err
+	}
+	return userID, nil
+}
+
+func (a *KnownAdminAPI) decryptStringField(ctx context.Context, fieldName string, encrypted []byte) (string, error) {
+	if len(encrypted) == 0 {
+		return "", nil
+	}
+	raw, err := crypto.DecryptAES(a.config.aesKey, encrypted)
+	if err != nil {
+		return "", errs.Internal(ctx).WithMessage(fmt.Sprintf("decrypt %s failed", fieldName)).Err()
+	}
+	return string(raw), nil
+}
+
+func (a *KnownAdminAPI) decryptPhoneNumberField(ctx context.Context, encrypted []byte) (*adminv1.PhoneNumber, error) {
+	if len(encrypted) == 0 {
+		return nil, nil
+	}
+	raw, err := crypto.DecryptAES(a.config.aesKey, encrypted)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("decrypt phone_number failed").Err()
+	}
+	pn := &adminv1.PhoneNumber{}
+	if err := proto.Unmarshal(raw, pn); err != nil {
+		return nil, errs.Internal(ctx).WithMessage("decode phone_number failed").Err()
+	}
+	return pn, nil
+}
+
+func (a *KnownAdminAPI) decryptAddressField(ctx context.Context, encrypted []byte) (*adminv1.Address, error) {
+	if len(encrypted) == 0 {
+		return nil, nil
+	}
+	raw, err := crypto.DecryptAES(a.config.aesKey, encrypted)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("decrypt address failed").Err()
+	}
+	address := &adminv1.Address{}
+	if err := proto.Unmarshal(raw, address); err != nil {
+		return nil, errs.Internal(ctx).WithMessage("decode address failed").Err()
+	}
+	return address, nil
+}
+
+func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, includeSensitive bool) (*adminv1.User, error) {
+	if user == nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("user is nil").Err()
+	}
+
+	var birthday *timestamppb.Timestamp
+	if user.Birthdate != nil {
+		birthday = timestamppb.New(*user.Birthdate)
+	}
+	var deletedAt *timestamppb.Timestamp
+	if user.DeletedAt != nil {
+		deletedAt = timestamppb.New(*user.DeletedAt)
+	}
+
+	resp := &adminv1.User{
+		Id:                  int64(user.ID),
+		Username:            user.Username,
+		Type:                adminv1.User_Type(user.UserType),
+		Status:              adminv1.User_Status(user.UserStatus),
+		Nickname:            user.Nickname,
+		Profile:             user.Profile,
+		Picture:             user.Picture,
+		Website:             user.Website,
+		Gender:              adminv1.User_Gender(user.Gender),
+		Birthday:            birthday,
+		Timezone:            user.Timezone,
+		Locale:              user.Locale,
+		EmailVerified:       user.EmailVerified,
+		PhoneNumberVerified: user.PhoneNumberVerified,
+		CreatedAt:           timestamppb.New(user.CreatedAt),
+		UpdatedAt:           timestamppb.New(user.UpdatedAt),
+		DeletedAt:           deletedAt,
+		CreatedBy:           user.CreatedBy,
+		UpdatedBy:           user.UpdatedBy,
+		Metadata:            user.Metadata,
+	}
+
+	if !includeSensitive {
+		return resp, nil
+	}
+
+	realname, err := a.decryptStringField(ctx, users.FieldRealnameEncrypted, user.RealnameEncrypted)
+	if err != nil {
+		return nil, err
+	}
+	nationalID, err := a.decryptStringField(ctx, users.FieldNationalIDEncrypted, user.NationalIDEncrypted)
+	if err != nil {
+		return nil, err
+	}
+	email, err := a.decryptStringField(ctx, users.FieldEmailEncrypted, user.EmailEncrypted)
+	if err != nil {
+		return nil, err
+	}
+	phoneNumber, err := a.decryptPhoneNumberField(ctx, user.PhoneNumberEncrypted)
+	if err != nil {
+		return nil, err
+	}
+	address, err := a.decryptAddressField(ctx, user.AddressEncrypted)
+	if err != nil {
+		return nil, err
+	}
+
+	resp.Realname = realname
+	resp.NationalId = nationalID
+	resp.Email = email
+	resp.PhoneNumber = phoneNumber
+	resp.Address = address
+
+	return resp, nil
+}
+
 // CreateUser 创建用户
 func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserRequest) (*adminv1.User, error) {
-	result := &adminv1.User{}
-
 	if req == nil || req.User == nil {
-		return result, errs.InvalidArgument(ctx).
+		return nil, errs.InvalidArgument(ctx).
 			WithMessage("request body user is nil")
 	}
 
 	if req.User.GetUsername() == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("username is empty")
 	}
-
-	// 只能在自己部门下创建，且为部门负责人
-	/*
-		userIDInt, err := GetUserID(ctx)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
-	// 默认查看所有用户（仅部门管理下所有可见）
-	// 先找到 user 对应的 department_id
-	/*
-		leaders, err := a.config.db.UserDepartments.
-			Query().
-			Select(
-				userdepartments.FieldID,
-				userdepartments.FieldLeaderType,
-				userdepartments.FieldDepartmentID,
-				userdepartments.FieldUserID,
-			).
-			Where(userdepartments.UserID(userIDInt)).
-			WithLionDepartments().
-			All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		if len(leaders) == 0 {
-			return nil, errs.PermissionDenied(ctx).WithMessage("you are not allowed to create user")
-		}
-	*/
-
-	// TODO；还需验证创建的用户必须是负责部门内
+	userIDInt, err := a.requireUserManagePermission(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if req.User.GetGender() > adminv1.User_FEMALE {
+		return nil, errs.InvalidArgument(ctx).WithMessage("gender is out of supported range")
+	}
 
 	userCreate := a.config.db.Users.Create()
 	userCreate.SetUsername(req.User.GetUsername())
+	userCreate.SetCreatedBy(userIDInt)
+	userCreate.SetUpdatedBy(userIDInt)
+	userCreate.SetUserType(int(req.User.GetType()))
+	userCreate.SetUserStatus(int(req.User.GetStatus()))
+	userCreate.SetGender(int(req.User.GetGender()))
+	userCreate.SetEmailVerified(req.User.GetEmailVerified())
+	userCreate.SetPhoneNumberVerified(req.User.GetPhoneNumberVerified())
+	userCreate.SetTimezone(req.User.GetTimezone())
+	userCreate.SetLocale(req.User.GetLocale())
+	if req.User.GetMetadata() != nil {
+		userCreate.SetMetadata(req.User.GetMetadata())
+	}
+	if req.User.GetCreatedAt() != nil {
+		userCreate.SetCreatedAt(req.User.GetCreatedAt().AsTime())
+	}
+	if req.User.GetUpdatedAt() != nil {
+		userCreate.SetUpdatedAt(req.User.GetUpdatedAt().AsTime())
+	}
+	if req.User.GetDeletedAt() != nil {
+		userCreate.SetDeletedAt(req.User.GetDeletedAt().AsTime())
+	}
+	if req.User.GetBirthday() != nil {
+		userCreate.SetBirthdate(req.User.GetBirthday().AsTime())
+	}
 
 	if req.User.GetRealname() != "" {
 		realname, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.GetRealname()))
@@ -84,6 +203,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 			return nil, err
 		}
 		userCreate.SetNationalIDEncrypted(idcard)
+		userCreate.SetNationalIDHash(crypto.SHA256([]byte(req.User.GetNationalId())))
 	}
 	if req.GetUser().GetNickname() != "" {
 		userCreate.SetNickname(req.GetUser().GetNickname())
@@ -103,26 +223,31 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 			return nil, err
 		}
 		userCreate.SetEmailEncrypted(email)
+		userCreate.SetEmailHash(crypto.SHA256([]byte(req.GetUser().GetEmail())))
 	}
 	if req.GetUser().PhoneNumber != nil {
 		tmp, err := proto.Marshal(req.GetUser().GetPhoneNumber())
-		if err == nil {
-			phoneNumber, err := crypto.EncryptAES(a.config.aesKey, tmp)
-			if err != nil {
-				return nil, err
-			}
-			userCreate.SetPhoneNumberEncrypted(phoneNumber)
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage("invalid phone_number format")
 		}
-	}
-	if req.GetUser().Birthday == nil {
-		// userCreate.SetBirthdate(time.)
-	}
-	/*
-		if req.GetUser().GetDepartment() != nil {
-			userCreate.SetDepartmentID(int(req.User.GetDepartment().GetId()))
+		phoneNumber, err := crypto.EncryptAES(a.config.aesKey, tmp)
+		if err != nil {
+			return nil, err
 		}
-	*/
-
+		userCreate.SetPhoneNumberEncrypted(phoneNumber)
+		userCreate.SetPhoneNumberHash(crypto.SHA256(tmp))
+	}
+	if req.GetUser().GetAddress() != nil {
+		rawAddress, err := proto.Marshal(req.GetUser().GetAddress())
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage("invalid address format")
+		}
+		encAddress, err := crypto.EncryptAES(a.config.aesKey, rawAddress)
+		if err != nil {
+			return nil, err
+		}
+		userCreate.SetAddressEncrypted(encAddress)
+	}
 	thisUser, err := userCreate.Save(ctx)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value") {
@@ -137,23 +262,24 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 			WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "创建用户失败！"}).Err()
 	}
 
-	result = &adminv1.User{
-		Id:          int64(thisUser.ID),
-		Username:    thisUser.Username,
-		Realname:    req.GetUser().Realname,
-		NationalId:  req.GetUser().NationalId,
-		Email:       req.GetUser().Email,
-		PhoneNumber: req.GetUser().PhoneNumber,
-		Nickname:    thisUser.Nickname,
-		Profile:     thisUser.Profile,
-		Picture:     thisUser.Picture,
+	row, err := a.config.db.Users.Query().
+		Where(users.IDEQ(thisUser.ID)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
 	}
-
-	return result, nil
+	return a.toAdminUser(ctx, row, true)
 }
 
 // ListUsers 获取用户列表
 func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersRequest) (*adminv1.ListUsersResponse, error) {
+	if _, err := a.requireUserManagePermission(ctx); err != nil {
+		return nil, err
+	}
+	if req == nil {
+		req = &adminv1.ListUsersRequest{}
+	}
+
 	result := &adminv1.ListUsersResponse{}
 
 	db, err := a.GetLionClient()
@@ -166,6 +292,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	basicViewFields := []string{
 		users.FieldID,
 		users.FieldUsername,
+		users.FieldUserType,
 		users.FieldUserStatus,
 		users.FieldNickname,
 		users.FieldProfile,
@@ -173,8 +300,12 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		users.FieldWebsite,
 		users.FieldTimezone,
 		users.FieldLocale,
+		users.FieldCreatedBy,
+		users.FieldUpdatedBy,
 		users.FieldCreatedAt,
 		users.FieldUpdatedAt,
+		users.FieldDeletedAt,
+		users.FieldMetadata,
 	}
 
 	fullViewFields := append(basicViewFields, []string{
@@ -187,7 +318,9 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		users.FieldPhoneNumberEncrypted,
 		users.FieldPhoneNumberVerified,
 		users.FieldAddressEncrypted,
-		// users.FieldDepartmentID,
+		users.FieldNationalIDHash,
+		users.FieldEmailHash,
+		users.FieldPhoneNumberHash,
 		users.FieldDescription,
 	}...)
 
@@ -211,10 +344,10 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	if req.GetPageToken() != "" {
 		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
 		if err != nil {
-			return nil, fmt.Errorf("invalid page_token: %w", err)
+			return nil, errs.InvalidArgument(ctx).WithMessage("invalid page_token")
 		}
 		if err := json.Unmarshal(data, &lastID); err != nil {
-			return nil, fmt.Errorf("invalid page_token format: %w", err)
+			return nil, errs.InvalidArgument(ctx).WithMessage("invalid page_token format")
 		}
 	}
 
@@ -224,7 +357,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	if req.GetFilterId() != "" {
 		uid, err := strconv.Atoi(req.GetFilterId())
 		if err != nil {
-			return nil, fmt.Errorf("invalid filter_id: %w", err)
+			return nil, errs.InvalidArgument(ctx).WithMessage("invalid filter_id")
 		}
 
 		userQuery = userQuery.Where(users.IDEQ(uid))
@@ -238,7 +371,7 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	if req.GetFilterStatus() != "" {
 		status, err := strconv.Atoi(req.GetFilterStatus())
 		if err != nil {
-			return nil, fmt.Errorf("invalid filter_status: %w", err)
+			return nil, errs.InvalidArgument(ctx).WithMessage("invalid filter_status")
 		}
 		userQuery = userQuery.Where(users.UserStatusEQ(status))
 	}
@@ -246,19 +379,23 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		userQuery = userQuery.Where(users.DeletedAtIsNil())
 	}
 
-	// OrderBy
+	// OrderBy，游标分页只支持默认 ID 倒序，避免排序字段与游标条件不一致。
+	cursorByIDDesc := true
 	if req.GetOrderBy() != "" {
 		switch req.GetOrderBy() {
 		case "create_time desc":
+			cursorByIDDesc = false
 			userQuery = userQuery.Order(lion.Desc(users.FieldCreatedAt))
 		case "create_time asc":
+			cursorByIDDesc = false
 			userQuery = userQuery.Order(lion.Asc(users.FieldCreatedAt))
 		case "nickname asc":
+			cursorByIDDesc = false
 			userQuery = userQuery.Order(lion.Asc(users.FieldNickname))
 		case "nickname desc":
+			cursorByIDDesc = false
 			userQuery = userQuery.Order(lion.Desc(users.FieldNickname))
 		default:
-			// 默认按 ID 升序
 			userQuery = userQuery.Order(lion.Desc(users.FieldID))
 		}
 	} else {
@@ -275,9 +412,12 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 		// Offset 分页
 		userQuery = userQuery.Offset(int(p.Offset))
 	case *adminv1.ListUsersRequest_PageToken:
+		if !cursorByIDDesc {
+			return nil, errs.InvalidArgument(ctx).WithMessage("page_token only supports default id-desc sorting")
+		}
 		// Cursor 分页
 		if lastID > 0 {
-			userQuery = userQuery.Where(users.IDGT(lastID))
+			userQuery = userQuery.Where(users.IDLT(lastID))
 		}
 	}
 
@@ -299,42 +439,13 @@ func (a *KnownAdminAPI) ListUsers(ctx context.Context, req *adminv1.ListUsersReq
 	result.NextPageToken = nextPageToken
 	result.TotalSize = int32(totalSize)
 
+	includeSensitive := req.GetView() == adminv1.ListUsersRequest_USER_VIEW_FULL
 	for _, user := range searchUsers {
-		realname, _ := crypto.DecryptAES(a.config.aesKey, user.RealnameEncrypted)
-		idcard, _ := crypto.DecryptAES(a.config.aesKey, user.NationalIDEncrypted)
-		email, _ := crypto.DecryptAES(a.config.aesKey, user.EmailEncrypted)
-		phoneNumberByte, _ := crypto.DecryptAES(a.config.aesKey, user.PhoneNumberEncrypted)
-		// address, _ := crypto.DecryptAES(a.config.aesKey, user.AddressEncrypted)
-
-		var phoneNumber adminv1.PhoneNumber
-		_ = proto.Unmarshal(phoneNumberByte, &phoneNumber)
-
-		var birthday *timestamppb.Timestamp
-		if user.Birthdate != nil {
-			birthday = timestamppb.New(*user.Birthdate)
+		respUser, err := a.toAdminUser(ctx, user, includeSensitive)
+		if err != nil {
+			return nil, err
 		}
-		result.Users = append(result.Users, &adminv1.User{
-			Id:                  int64(user.ID),
-			Username:            user.Username,
-			Status:              adminv1.User_Status(user.UserStatus),
-			Realname:            string(realname),
-			NationalId:          string(idcard),
-			Nickname:            user.Nickname,
-			Profile:             user.Profile,
-			Picture:             user.Picture,
-			Website:             user.Website,
-			Email:               string(email),
-			EmailVerified:       user.EmailVerified,
-			Gender:              adminv1.User_Gender(user.Gender),
-			Birthday:            birthday,
-			Timezone:            user.Timezone,
-			Locale:              user.Locale,
-			PhoneNumber:         &phoneNumber,
-			PhoneNumberVerified: user.PhoneNumberVerified,
-			CreatedAt:           timestamppb.New(user.CreatedAt),
-			UpdatedAt:           timestamppb.New(user.UpdatedAt),
-			// Address:             address,
-		})
+		result.Users = append(result.Users, respUser)
 	}
 
 	return result, nil
@@ -567,102 +678,151 @@ func (a *KnownAdminAPI) ListUsersV1(ctx context.Context, req *adminv1.ListUsersR
 
 // UpdateUser 更新用户信息
 func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserRequest) (*adminv1.User, error) {
-	result := &adminv1.User{}
+	operatorID, err := a.requireUserManagePermission(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if req == nil || req.User == nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body user is nil")
+	}
+	if req.User.GetId() <= 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("user.id is invalid")
+	}
+	if req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("update_mask is empty")
+	}
 
-	// TODO; 验证权限
+	x := a.config.db.Users.Update()
+	x.SetUpdatedBy(operatorID)
 
-	if req.UpdateMask != nil && len(req.UpdateMask.Paths) != 0 {
-		x := a.config.db.Users.Update()
+	for _, path := range req.UpdateMask.Paths {
+		switch path {
+		case "username":
+			x.SetUsername(req.User.GetUsername())
+		case "nickname":
+			x.SetNickname(req.User.GetNickname())
+		case "profile":
+			x.SetProfile(req.User.GetProfile())
+		case "picture":
+			x.SetPicture(req.User.GetPicture())
+		case "website":
+			x.SetWebsite(req.User.GetWebsite())
+		case "timezone":
+			x.SetTimezone(req.User.GetTimezone())
+		case "locale":
+			x.SetLocale(req.User.GetLocale())
+		case users.FieldUserType, "type":
+			x.SetUserType(int(req.User.GetType()))
+		case users.FieldUserStatus, "status":
+			x.SetUserStatus(int(req.User.GetStatus()))
 
-		for _, path := range req.UpdateMask.Paths {
-			// a.logger.Infof("update mask path: %v", path)
-
-			switch path {
-			// 基本信息
-			case users.FieldUsername:
-				x.SetUsername(req.User.Username)
-			case users.FieldNickname:
-				x.SetNickname(req.User.Nickname)
-			case users.FieldProfile:
-				x.SetProfile(req.User.Profile)
-			case users.FieldPicture:
-				x.SetPicture(req.User.Picture)
-			case users.FieldWebsite:
-				x.SetWebsite(req.User.Website)
-			case users.FieldTimezone:
-				x.SetTimezone(req.User.Timezone)
-			case users.FieldLocale:
-				x.SetLocale(req.User.Locale)
-			case users.FieldUserType:
-				x.SetUserType(int(req.User.Type))
-			case users.FieldUserStatus:
-				x.SetUserStatus(int(req.User.Status))
-
-				// 身份信息
-			case users.FieldGender:
-				x.SetGender(int(req.User.Gender))
-			case schema.FieldNameNormalize(users.FieldRealnameEncrypted):
-				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.Realname))
-				if err == nil {
-					x.SetRealnameEncrypted(encBody)
-				}
-			case schema.FieldNameNormalize(users.FieldNationalIDEncrypted):
-				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.NationalId))
-				if err == nil {
-					x.SetNationalIDEncrypted(encBody)
-				}
-			case users.FieldBirthdate:
-				x.SetBirthdate(req.User.Birthday.AsTime())
-
-				// 联系信息
-			case users.FieldEmailVerified:
-				x.SetEmailVerified(req.User.EmailVerified)
-			case schema.FieldNameNormalize(users.FieldEmailEncrypted):
-				encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.Email))
-				if err == nil {
-					x.SetEmailEncrypted(encBody)
-				}
-			case users.FieldPhoneNumberVerified:
-				x.SetPhoneNumberVerified(req.User.PhoneNumberVerified)
-			case "phone_number.national_number":
-				rawBody, err := proto.Marshal(req.User.PhoneNumber)
-				if err != nil {
-					continue
-				}
-				encBody, err := crypto.EncryptAES(a.config.aesKey, rawBody)
-				if err == nil {
-					x.SetPhoneNumberEncrypted(encBody)
-				}
-
-				// 地址信息
-			case "address.street_address":
-				rawBody, err := proto.Marshal(req.User.Address)
-				if err != nil {
-					continue
-				}
-				encBody, err := crypto.EncryptAES(a.config.aesKey, rawBody)
-				if err == nil {
-					x.SetAddressEncrypted(encBody)
-				}
+		case "gender":
+			if req.User.GetGender() > adminv1.User_FEMALE {
+				return nil, errs.InvalidArgument(ctx).WithMessage("gender is out of supported range")
 			}
-		}
+			x.SetGender(int(req.User.GetGender()))
+		case "realname":
+			encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.GetRealname()))
+			if err != nil {
+				return nil, err
+			}
+			x.SetRealnameEncrypted(encBody)
+		case "national_id":
+			encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.GetNationalId()))
+			if err != nil {
+				return nil, err
+			}
+			x.SetNationalIDEncrypted(encBody)
+			x.SetNationalIDHash(crypto.SHA256([]byte(req.User.GetNationalId())))
+		case users.FieldBirthdate, "birthday":
+			if req.User.GetBirthday() == nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage("birthday is nil")
+			}
+			x.SetBirthdate(req.User.GetBirthday().AsTime())
 
-		_, err := x.Where(users.IDEQ(int(req.User.Id))).Save(ctx)
-		if err != nil {
-			return nil, err
+		case "email_verified":
+			x.SetEmailVerified(req.User.GetEmailVerified())
+		case "email":
+			encBody, err := crypto.EncryptAES(a.config.aesKey, []byte(req.User.GetEmail()))
+			if err != nil {
+				return nil, err
+			}
+			x.SetEmailEncrypted(encBody)
+			x.SetEmailHash(crypto.SHA256([]byte(req.User.GetEmail())))
+		case "phone_number_verified":
+			x.SetPhoneNumberVerified(req.User.GetPhoneNumberVerified())
+		case "phone_number", "phone_number.country_code", "phone_number.national_number":
+			rawBody, err := proto.Marshal(req.User.GetPhoneNumber())
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage("invalid phone_number format")
+			}
+			encBody, err := crypto.EncryptAES(a.config.aesKey, rawBody)
+			if err != nil {
+				return nil, err
+			}
+			x.SetPhoneNumberEncrypted(encBody)
+			x.SetPhoneNumberHash(crypto.SHA256(rawBody))
+		case "address", "address.country", "address.postal_code", "address.region", "address.locality", "address.street_address":
+			rawBody, err := proto.Marshal(req.User.GetAddress())
+			if err != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage("invalid address format")
+			}
+			encBody, err := crypto.EncryptAES(a.config.aesKey, rawBody)
+			if err != nil {
+				return nil, err
+			}
+			x.SetAddressEncrypted(encBody)
+		case users.FieldMetadata:
+			x.SetMetadata(req.User.GetMetadata())
+		case users.FieldCreatedBy:
+			x.SetCreatedBy(req.User.GetCreatedBy())
+		case users.FieldUpdatedBy:
+			x.SetUpdatedBy(req.User.GetUpdatedBy())
+		case users.FieldDeletedAt:
+			if req.User.GetDeletedAt() == nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage("deleted_at is nil")
+			}
+			x.SetDeletedAt(req.User.GetDeletedAt().AsTime())
+		default:
+			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("unsupported update_mask path: %s", path))
 		}
 	}
 
-	return result, nil
+	if _, err := x.Where(users.IDEQ(int(req.User.GetId()))).Save(ctx); err != nil {
+		return nil, err
+	}
+
+	row, err := a.config.db.Users.Query().
+		Where(users.IDEQ(int(req.User.GetId()))).
+		Only(ctx)
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("user not found").Err()
+		}
+		return nil, err
+	}
+
+	return a.toAdminUser(ctx, row, true)
 }
 
 // GetUser 获取用户详情
 func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest) (*adminv1.User, error) {
+	if _, err := a.requireUserManagePermission(ctx); err != nil {
+		return nil, err
+	}
+	if req == nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request is nil")
+	}
+	if req.GetId() <= 0 && req.GetUsername() == "" {
+		return nil, errs.InvalidArgument(ctx).WithMessage("id or username is required")
+	}
+
 	var selectViewFields []string
 
 	basicViewFields := []string{
 		users.FieldID,
 		users.FieldUsername,
+		users.FieldUserType,
 		users.FieldUserStatus,
 		users.FieldNickname,
 		users.FieldProfile,
@@ -670,6 +830,12 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 		users.FieldWebsite,
 		users.FieldTimezone,
 		users.FieldLocale,
+		users.FieldCreatedBy,
+		users.FieldUpdatedBy,
+		users.FieldMetadata,
+		users.FieldCreatedAt,
+		users.FieldUpdatedAt,
+		users.FieldDeletedAt,
 	}
 
 	fullViewFields := append(basicViewFields, []string{
@@ -687,62 +853,65 @@ func (a *KnownAdminAPI) GetUser(ctx context.Context, req *adminv1.GetUserRequest
 
 	selectViewFields = fullViewFields
 
-	// TODO; 验证权限
-	row, err := a.config.db.Users.Query().
-		Select(selectViewFields...).
-		Where(users.IDEQ(int(req.Id))).
-		Only(ctx)
+	userQuery := a.config.db.Users.Query()
+	if req.GetId() > 0 {
+		userQuery = userQuery.Where(users.IDEQ(int(req.GetId())))
+	} else {
+		userQuery = userQuery.Where(users.UsernameEQ(req.GetUsername()))
+	}
+	row, err := userQuery.Select(selectViewFields...).Only(ctx)
 	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("user not found").Err()
+		}
 		return nil, err
 	}
 
-	var phoneNumber adminv1.PhoneNumber
-	phoneNumberByte := crypto.DecryptAESMust(a.config.aesKey, row.PhoneNumberEncrypted)
-	_ = proto.Unmarshal(phoneNumberByte, &phoneNumber)
-
-	var address adminv1.Address
-	addressByte := crypto.DecryptAESMust(a.config.aesKey, row.AddressEncrypted)
-	_ = proto.Unmarshal(addressByte, &address)
-
-	var birthday *timestamppb.Timestamp
-	if row.Birthdate != nil {
-		birthday = timestamppb.New(*row.Birthdate)
-	}
-	result := &adminv1.User{
-		Id:                  int64(row.ID),
-		Username:            row.Username,
-		Status:              adminv1.User_Status(row.UserStatus),
-		Realname:            string(crypto.DecryptAESMust(a.config.aesKey, row.RealnameEncrypted)),
-		NationalId:          string(crypto.DecryptAESMust(a.config.aesKey, row.NationalIDEncrypted)),
-		Nickname:            row.Nickname,
-		Profile:             row.Profile,
-		Picture:             row.Picture,
-		Website:             row.Website,
-		Email:               string(crypto.DecryptAESMust(a.config.aesKey, row.EmailEncrypted)),
-		EmailVerified:       row.EmailVerified,
-		Gender:              adminv1.User_Gender(row.Gender),
-		Birthday:            birthday,
-		Timezone:            row.Timezone,
-		Locale:              row.Locale,
-		PhoneNumber:         &phoneNumber,
-		PhoneNumberVerified: row.PhoneNumberVerified,
-		Address:             &address,
-	}
-
-	return result, nil
+	return a.toAdminUser(ctx, row, true)
 }
 
 // UpdateUserPassword 修改用户密码
 func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.UpdateUserPasswordRequest) (*adminv1.UpdateUserPasswordResponse, error) {
+	operatorID, err := a.requireUserManagePermission(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if req == nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request is nil")
+	}
+	if req.GetUserId() <= 0 && req.GetUsername() == "" {
+		return nil, errs.InvalidArgument(ctx).WithMessage("user_id or username is required")
+	}
+	if req.GetNewPasswordHash() == "" {
+		return nil, errs.InvalidArgument(ctx).WithMessage("new_password_hash is empty")
+	}
+
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
+	}
+	targetUserID := int(req.GetUserId())
+	if targetUserID <= 0 {
+		targetUser, err := db.Users.Query().
+			Select(users.FieldID).
+			Where(users.UsernameEQ(req.GetUsername())).
+			Only(ctx)
+		if err != nil {
+			if lion.IsNotFound(err) {
+				return nil, errs.NotFound(ctx).WithMessage("user not found").Err()
+			}
+			return nil, err
+		}
+		targetUserID = targetUser.ID
 	}
 
 	tx, err := db.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
 
 	provider, err := tx.AuthProviders.Query().
 		Select(
@@ -755,35 +924,58 @@ func (a *KnownAdminAPI) UpdateUserPassword(ctx context.Context, req *adminv1.Upd
 				useridentities.FieldUserID,
 				useridentities.FieldProviderID,
 				useridentities.FieldProviderUserID,
+				useridentities.FieldPasswordHash,
 			).Where(
-				useridentities.UserIDEQ(int(req.UserId)),
+				useridentities.UserIDEQ(targetUserID),
 			)
 		}).
 		Only(ctx)
 	if err != nil {
-		defer tx.Rollback()
 		return nil, err
+	}
+
+	if len(provider.Edges.LionUserIdentities) > 0 {
+		currentIdentity := provider.Edges.LionUserIdentities[0]
+		if operatorID == int64(targetUserID) && req.GetOldPasswordHash() == "" {
+			return nil, errs.InvalidArgument(ctx).WithMessage("old_password_hash is required for self password update")
+		}
+		if req.GetOldPasswordHash() != "" {
+			if err := crypto.BcryptCompare(currentIdentity.PasswordHash, req.GetOldPasswordHash()); err != nil {
+				return nil, errs.PermissionDenied(ctx).WithMessage("old_password_hash is incorrect").Err()
+			}
+		}
+	}
+
+	newPasswordHash := crypto.BcryptHashMust(req.GetNewPasswordHash())
+	if newPasswordHash == "" {
+		return nil, errs.Internal(ctx).WithMessage("new password hash encrypt failed").Err()
 	}
 
 	// 不存在则新建
 	if len(provider.Edges.LionUserIdentities) == 0 {
-		tx.UserIdentities.Create().
-			SetUserID(int(req.UserId)).
+		if _, err := tx.UserIdentities.Create().
+			SetUserID(targetUserID).
 			SetProviderID(provider.ID).
-			SetProviderUserID(strconv.Itoa(int(req.UserId))).
+			SetProviderUserID(strconv.Itoa(targetUserID)).
 			SetPasswordChangedAt(time.Now()).
-			SetPasswordHash(crypto.BcryptHashMust(req.NewPasswordHash)).Save(ctx)
+			SetPasswordHash(newPasswordHash).Save(ctx); err != nil {
+			return nil, err
+		}
 	} else {
-		tx.UserIdentities.Update().
+		if _, err := tx.UserIdentities.Update().
 			SetPasswordChangedAt(time.Now()).
-			SetPasswordHash(crypto.BcryptHashMust(req.NewPasswordHash)).
+			SetPasswordHash(newPasswordHash).
 			Where(
-				useridentities.UserIDEQ(int(req.UserId)),
+				useridentities.UserIDEQ(targetUserID),
 				useridentities.ProviderIDEQ(provider.ID),
-			).Save(ctx)
+			).Save(ctx); err != nil {
+			return nil, err
+		}
 	}
 
-	tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 
 	return &adminv1.UpdateUserPasswordResponse{}, nil
 }
