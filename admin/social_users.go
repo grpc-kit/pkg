@@ -3,16 +3,20 @@ package admin
 import (
 	"context"
 	"crypto/rsa"
+	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/go-ldap/ldap/v3"
 	"github.com/golang-jwt/jwt/v4"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
@@ -308,6 +312,17 @@ func getMapString(m map[string]interface{}, key string) string {
 }
 
 func (s *socialUsers) PasswordCheck(ctx context.Context, username, password string) (string, bool, error) {
+	switch adminv1.AuthProvider_Type(s.AuthProvider.ProviderType) {
+	case adminv1.AuthProvider_LOCAL:
+		return s.PasswordCheckLocal(ctx, username, password)
+	case adminv1.AuthProvider_LDAP:
+		return s.PasswordCheckLDAP(ctx, username, password)
+	default:
+		return "", false, fmt.Errorf("password check does not support provider type: %s", adminv1.AuthProvider_Type(s.AuthProvider.ProviderType).String())
+	}
+}
+
+func (s *socialUsers) PasswordCheckLocal(ctx context.Context, username, passwordHash string) (string, bool, error) {
 	u, err := s.db.Users.Query().
 		Select(
 			users.FieldID,
@@ -332,11 +347,256 @@ func (s *socialUsers) PasswordCheck(ctx context.Context, username, password stri
 		return "", false, nil
 	}
 
-	if err := crypto.BcryptCompare(u.Edges.LionUserIdentities[0].PasswordHash, password); err != nil {
+	if err := crypto.BcryptCompare(u.Edges.LionUserIdentities[0].PasswordHash, passwordHash); err != nil {
 		return "", false, nil
 	}
 
-	if err = s.setUserRoles(ctx, u.ID); err != nil {
+	return s.issueAccessTokenForUser(ctx, u)
+}
+
+func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordPlain string) (string, bool, error) {
+	if strings.TrimSpace(username) == "" || passwordPlain == "" {
+		s.logger.Warnf("ldap login skipped: empty username or password, provider=%s", s.ProviderName)
+		return "", false, nil
+	}
+	if s.ldapCfg == nil {
+		s.logger.Errorf("ldap login failed: ldap config not initialized, provider=%s", s.ProviderName)
+		return "", false, fmt.Errorf("ldap config not initialized")
+	}
+	s.logger.Infof(
+		"ldap login start: provider=%s username=%s host=%s port=%d use_tls=%t start_tls=%t",
+		s.ProviderName,
+		username,
+		strings.TrimSpace(s.ldapCfg.Host),
+		s.ldapCfg.Port,
+		s.ldapCfg.UseTLS,
+		s.ldapCfg.StartTLS,
+	)
+
+	conn, err := s.newLDAPConn()
+	if err != nil {
+		s.logger.Errorf("ldap login failed: connect failed, provider=%s err=%v", s.ProviderName, err)
+		return "", false, err
+	}
+	defer conn.Close()
+
+	// 管理员绑定用于搜索用户 DN，未配置时允许匿名搜索。
+	bindDN := strings.TrimSpace(s.ldapCfg.BindDN)
+	if bindDN != "" || s.secret != "" {
+		if err := conn.Bind(bindDN, s.secret); err != nil {
+			s.logger.Errorf(
+				"ldap login failed: service bind failed, provider=%s bind_dn=%s err=%v",
+				s.ProviderName,
+				maskLDAPDN(bindDN),
+				err,
+			)
+			return "", false, fmt.Errorf("ldap bind service account failed")
+		}
+		s.logger.Infof("ldap login debug: service bind success, provider=%s bind_dn=%s", s.ProviderName, maskLDAPDN(bindDN))
+	}
+
+	userDN, resolvedUsername, err := s.findLDAPUserDN(conn, username)
+	if err != nil {
+		s.logger.Errorf("ldap login failed: user search failed, provider=%s username=%s err=%v", s.ProviderName, username, err)
+		return "", false, err
+	}
+	if userDN == "" {
+		s.logger.Warnf("ldap login failed: user not found in ldap, provider=%s username=%s", s.ProviderName, username)
+		return "", false, nil
+	}
+	s.logger.Infof(
+		"ldap login debug: user found, provider=%s username=%s resolved_username=%s user_dn=%s",
+		s.ProviderName,
+		username,
+		resolvedUsername,
+		maskLDAPDN(userDN),
+	)
+
+	// 用户口令校验：二次 bind。
+	if err := conn.Bind(userDN, passwordPlain); err != nil {
+		s.logger.Warnf(
+			"ldap login failed: user bind failed, provider=%s username=%s user_dn=%s err=%v",
+			s.ProviderName,
+			username,
+			maskLDAPDN(userDN),
+			err,
+		)
+		return "", false, nil
+	}
+	s.logger.Infof("ldap login debug: user bind success, provider=%s username=%s user_dn=%s", s.ProviderName, username, maskLDAPDN(userDN))
+
+	identity, err := s.db.UserIdentities.Query().
+		Select(
+			useridentities.FieldID,
+			useridentities.FieldUserID,
+		).
+		Where(
+			useridentities.ProviderIDEQ(s.AuthProvider.ID),
+			useridentities.ProviderUserIDEQ(userDN),
+		).
+		Only(ctx)
+	if err != nil && !lion.IsNotFound(err) {
+		s.logger.Errorf(
+			"ldap login failed: query identity error, provider=%s user_dn=%s err=%v",
+			s.ProviderName,
+			maskLDAPDN(userDN),
+			err,
+		)
+		return "", false, err
+	}
+
+	var localUserID int
+	if identity != nil {
+		localUserID = identity.UserID
+		s.logger.Infof(
+			"ldap login debug: identity hit, provider=%s user_dn=%s local_user_id=%d",
+			s.ProviderName,
+			maskLDAPDN(userDN),
+			localUserID,
+		)
+	} else {
+		s.logger.Warnf(
+			"ldap login debug: identity miss, start auto provision, provider=%s username=%s resolved_username=%s user_dn=%s",
+			s.ProviderName,
+			username,
+			resolvedUsername,
+			maskLDAPDN(userDN),
+		)
+		localUserID, err = s.provisionLDAPUserOnFirstLogin(ctx, userDN, resolvedUsername)
+		if err != nil {
+			s.logger.Errorf(
+				"ldap login failed: auto provision error, provider=%s username=%s resolved_username=%s user_dn=%s err=%v",
+				s.ProviderName,
+				username,
+				resolvedUsername,
+				maskLDAPDN(userDN),
+				err,
+			)
+			return "", false, err
+		}
+		s.logger.Infof(
+			"ldap login debug: auto provision success, provider=%s user_dn=%s local_user_id=%d",
+			s.ProviderName,
+			maskLDAPDN(userDN),
+			localUserID,
+		)
+	}
+
+	userEntity, err := s.db.Users.Query().
+		Select(
+			users.FieldID,
+			users.FieldUsername,
+			users.FieldNickname,
+		).
+		Where(
+			users.IDEQ(localUserID),
+			users.UserStatusEQ(int(adminv1.User_ACTIVE.Number())),
+		).
+		Only(ctx)
+	if err != nil {
+		if lion.IsNotFound(err) {
+			s.logger.Warnf(
+				"ldap login failed: local user not active or not found, provider=%s local_user_id=%d user_dn=%s",
+				s.ProviderName,
+				localUserID,
+				maskLDAPDN(userDN),
+			)
+			return "", false, nil
+		}
+		s.logger.Errorf(
+			"ldap login failed: local user query error, provider=%s local_user_id=%d err=%v",
+			s.ProviderName,
+			localUserID,
+			err,
+		)
+		return "", false, err
+	}
+
+	return s.issueAccessTokenForUser(ctx, userEntity)
+}
+
+func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, userDN, ldapUsername string) (int, error) {
+	tx, err := s.db.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	baseUsername := buildLDAPLocalUsernameBase(s.ProviderName, ldapUsername)
+	localUsername, err := findAvailableUsername(ctx, tx, baseUsername)
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+
+	newUser, err := tx.Users.Create().
+		SetUsername(localUsername).
+		SetNickname(ldapUsername).
+		SetUserStatus(int(adminv1.User_ACTIVE.Number())).
+		Save(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+
+	_, err = tx.UserIdentities.Create().
+		SetUserID(newUser.ID).
+		SetProviderID(s.AuthProvider.ID).
+		SetProviderUserID(userDN).
+		Save(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return newUser.ID, nil
+}
+
+func buildLDAPLocalUsernameBase(providerCode, ldapUsername string) string {
+	safeProvider := sanitizeUsernamePart(providerCode)
+	if safeProvider == "" {
+		safeProvider = "ldap"
+	}
+	safeUsername := sanitizeUsernamePart(ldapUsername)
+	if safeUsername == "" {
+		safeUsername = "user"
+	}
+	return strings.ToLower(fmt.Sprintf("%s_%s", safeProvider, safeUsername))
+}
+
+func sanitizeUsernamePart(raw string) string {
+	v := strings.TrimSpace(strings.ToLower(raw))
+	if v == "" {
+		return ""
+	}
+	re := regexp.MustCompile(`[^a-z0-9_]+`)
+	v = re.ReplaceAllString(v, "_")
+	v = strings.Trim(v, "_")
+	return v
+}
+
+func findAvailableUsername(ctx context.Context, tx *lion.Tx, base string) (string, error) {
+	const maxTry = 100
+	for i := 0; i < maxTry; i++ {
+		candidate := base
+		if i > 0 {
+			candidate = fmt.Sprintf("%s_%d", base, i+1)
+		}
+		_, err := tx.Users.Query().Where(users.UsernameEQ(candidate)).OnlyID(ctx)
+		if lion.IsNotFound(err) {
+			return candidate, nil
+		}
+		if err != nil {
+			return "", err
+		}
+	}
+	return "", fmt.Errorf("unable to allocate available username for base=%s", base)
+}
+
+func (s *socialUsers) issueAccessTokenForUser(ctx context.Context, u *lion.Users) (string, bool, error) {
+	if err := s.setUserRoles(ctx, u.ID); err != nil {
 	}
 
 	idToken := &auth.IDTokenClaims{
@@ -356,6 +616,134 @@ func (s *socialUsers) PasswordCheck(ctx context.Context, username, password stri
 	}
 
 	return accessToken, true, nil
+}
+
+func (s *socialUsers) newLDAPConn() (*ldap.Conn, error) {
+	host := strings.TrimSpace(s.ldapCfg.Host)
+	if host == "" {
+		return nil, fmt.Errorf("ldap host is required")
+	}
+
+	port := s.ldapCfg.Port
+	if port == 0 {
+		if s.ldapCfg.UseTLS {
+			port = 636
+		} else {
+			port = 389
+		}
+	}
+	address := net.JoinHostPort(host, strconv.Itoa(int(port)))
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: s.ldapCfg.InsecureSkipVerify,
+		ServerName:         host,
+	}
+
+	var (
+		conn *ldap.Conn
+		err  error
+	)
+	if s.ldapCfg.UseTLS {
+		conn, err = ldap.DialURL("ldaps://"+address, ldap.DialWithTLSConfig(tlsConfig))
+	} else {
+		conn, err = ldap.DialURL("ldap://" + address)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	conn.SetTimeout(10 * time.Second)
+	if !s.ldapCfg.UseTLS && s.ldapCfg.StartTLS {
+		if err := conn.StartTLS(tlsConfig); err != nil {
+			conn.Close()
+			return nil, err
+		}
+	}
+
+	return conn, nil
+}
+
+func (s *socialUsers) findLDAPUserDN(conn *ldap.Conn, username string) (string, string, error) {
+	searchBase := strings.TrimSpace(s.ldapCfg.UserSearchBase)
+	if searchBase == "" {
+		s.logger.Errorf("ldap search failed: empty user_search_base, provider=%s username=%s", s.ProviderName, username)
+		return "", "", fmt.Errorf("ldap user_search_base is required")
+	}
+
+	usernameAttribute := strings.TrimSpace(s.ldapCfg.UsernameAttribute)
+	if usernameAttribute == "" {
+		usernameAttribute = "uid"
+	}
+
+	escapedUsername := ldap.EscapeFilter(username)
+	filterTemplate := strings.TrimSpace(s.ldapCfg.UserSearchFilter)
+	var filter string
+	switch {
+	case filterTemplate == "":
+		filter = fmt.Sprintf("(%s=%s)", usernameAttribute, escapedUsername)
+	case strings.Contains(filterTemplate, "%s"):
+		filter = fmt.Sprintf(filterTemplate, escapedUsername)
+	case strings.Contains(filterTemplate, "{username}"):
+		filter = strings.ReplaceAll(filterTemplate, "{username}", escapedUsername)
+	default:
+		filter = fmt.Sprintf("(&%s(%s=%s))", filterTemplate, usernameAttribute, escapedUsername)
+	}
+	s.logger.Infof(
+		"ldap search debug: provider=%s username=%s search_base=%s username_attr=%s filter=%s",
+		s.ProviderName,
+		username,
+		searchBase,
+		usernameAttribute,
+		filter,
+	)
+
+	searchReq := ldap.NewSearchRequest(
+		searchBase,
+		ldap.ScopeWholeSubtree,
+		ldap.NeverDerefAliases,
+		2,
+		0,
+		false,
+		filter,
+		[]string{usernameAttribute},
+		nil,
+	)
+	searchResp, err := conn.Search(searchReq)
+	if err != nil {
+		s.logger.Errorf("ldap search failed: provider=%s username=%s err=%v", s.ProviderName, username, err)
+		return "", "", err
+	}
+	s.logger.Infof(
+		"ldap search debug: provider=%s username=%s entry_count=%d",
+		s.ProviderName,
+		username,
+		len(searchResp.Entries),
+	)
+	if len(searchResp.Entries) == 0 {
+		return "", "", nil
+	}
+	if len(searchResp.Entries) > 1 {
+		s.logger.Warnf("ldap search failed: multiple entries, provider=%s username=%s entry_count=%d", s.ProviderName, username, len(searchResp.Entries))
+		return "", "", fmt.Errorf("ldap user search returned multiple entries")
+	}
+
+	entry := searchResp.Entries[0]
+	resolvedUsername := strings.TrimSpace(entry.GetAttributeValue(usernameAttribute))
+	if resolvedUsername == "" {
+		resolvedUsername = username
+	}
+
+	return entry.DN, resolvedUsername, nil
+}
+
+func maskLDAPDN(dn string) string {
+	dn = strings.TrimSpace(dn)
+	if dn == "" {
+		return ""
+	}
+	if len(dn) <= 16 {
+		return dn
+	}
+	return dn[:8] + "...(masked)"
 }
 
 func (s *socialUsers) GetAccessToken(expiresIn int32, appid string) {

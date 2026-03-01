@@ -26,13 +26,20 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	var accessToken string
 
 	if req.Username == "" {
-		return nil, errs.Unauthenticated(ctx)
+		return nil, errs.InvalidArgument(ctx).WithMessage("username is required")
+	}
+	if req.PasswordHash == "" {
+		return nil, errs.InvalidArgument(ctx).WithMessage("password_hash is required")
 	}
 
 	// TODO; 不允许创建过长过期的 token
 	expiresIn := req.ExpiresIn
 	if expiresIn <= 0 {
 		expiresIn = 24 * 60 * 60
+	}
+	providerCode := strings.TrimSpace(req.GetProviderCode())
+	if providerCode == "" {
+		providerCode = "local"
 	}
 
 	hasDBEnabled := false
@@ -45,25 +52,75 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 		return nil, errs.Unauthenticated(ctx)
 	}
 
-	// 优先本地静态用户验证
-	u, ok := a.config.staticUsers.Valid(req.Username, req.PasswordHash)
-	if ok {
-		tk, err := u.GetAccessToken(expiresIn, "")
-		if err != nil {
-			return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+	// local provider 支持静态用户兜底；LDAP 不走静态用户。
+	if providerCode == "local" && a.config.staticUsers != nil {
+		u, ok := a.config.staticUsers.Valid(req.Username, req.PasswordHash)
+		if ok {
+			tk, err := u.GetAccessToken(expiresIn, "")
+			if err != nil {
+				return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
+			}
+
+			accessToken = tk
+		}
+	}
+	if accessToken == "" {
+		if !hasDBEnabled {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("database auth provider is unavailable")
 		}
 
-		accessToken = tk
-	} else {
 		// 尝试数据库验证
-		// 根据不同的 provider_name 选择个性处理方式
-		su, err := newSocialUsers(ctx, a.logger, a.config.aesKey, db, "local")
+		// 根据 provider_code 选择 local/ldap 登录路径
+		su, err := newSocialUsers(ctx, a.logger, a.config.aesKey, db, providerCode)
 		if err != nil {
+			if lion.IsNotFound(err) {
+				return nil, errs.NotFound(ctx).WithMessage("auth provider not found")
+			}
 			return nil, err
 		}
 
-		tk, ok, err := su.PasswordCheck(ctx, req.Username, req.PasswordHash)
+		if su.AuthProvider.ProviderStatus != int(adminv1.AuthProvider_ACTIVE.Number()) {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("auth provider is not active")
+		}
+
+		providerType := adminv1.AuthProvider_Type(su.AuthProvider.ProviderType)
+		if providerType != adminv1.AuthProvider_LOCAL && providerType != adminv1.AuthProvider_LDAP {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("only LOCAL and LDAP providers are supported")
+		}
+
+		passwordPayload := req.PasswordHash
+		if providerType == adminv1.AuthProvider_LDAP {
+			a.logger.Infof(
+				"ldap login debug: received password payload, provider_code=%s encoded_len=%d",
+				providerCode,
+				len(req.PasswordHash),
+			)
+			decodedPassword, decErr := base64.StdEncoding.DecodeString(req.PasswordHash)
+			if decErr != nil {
+				a.logger.Warnf(
+					"ldap login debug: invalid base64 payload, provider_code=%s err=%v",
+					providerCode,
+					decErr,
+				)
+				return nil, errs.InvalidArgument(ctx).WithMessage("password_hash must be valid base64 for LDAP provider")
+			}
+			if len(decodedPassword) == 0 {
+				a.logger.Warnf("ldap login debug: empty decoded password payload, provider_code=%s", providerCode)
+				return nil, errs.InvalidArgument(ctx).WithMessage("ldap password payload is empty")
+			}
+			a.logger.Infof(
+				"ldap login debug: base64 decode success, provider_code=%s decoded_len=%d",
+				providerCode,
+				len(decodedPassword),
+			)
+			passwordPayload = string(decodedPassword)
+		}
+
+		tk, ok, err := su.PasswordCheck(ctx, req.Username, passwordPayload)
 		if err != nil {
+			if lion.IsNotFound(err) {
+				return nil, errs.Unauthenticated(ctx)
+			}
 			return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
 		}
 		if !ok {
@@ -165,6 +222,10 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid filter: %v", err))
 		}
 		where = append(where, filterPredicates...)
+	}
+	// provider_status: 独立快捷过滤参数（与 filter 按 AND 叠加）
+	if req.GetProviderStatus() > 0 {
+		where = append(where, authproviders.ProviderStatusEQ(int(req.GetProviderStatus())))
 	}
 
 	// 默认排除已软删除的记录
