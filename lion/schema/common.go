@@ -23,11 +23,11 @@ const (
 	CodeAutoLen = 12
 )
 
-// codeAlphabet 自动生成 code 使用的字符集 [a-z0-9]
-const codeAlphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
+// codeAlphabet 自动生成 code 使用的字符集（移除易混淆字符 i/l/o/0/1）
+const codeAlphabet = "abcdefghjkmnpqrstuvwxyz23456789"
 
-// codeLetters 仅小写字母，用于生成 code 首字符
-const codeLetters = "abcdefghijklmnopqrstuvwxyz"
+// codeLetters 仅小写字母（移除易混淆字符 i/l/o），用于生成 code 首字符
+const codeLetters = "abcdefghjkmnpqrstuvwxyz"
 
 // codeRegexp 合法 code 基础正则：
 // 以小写字母开头，中间允许小写字母/数字/连字符，以字母或数字结尾
@@ -37,7 +37,8 @@ var codeRegexp = regexp.MustCompile(`^[a-z][a-z0-9-]*[a-z0-9]$`)
 
 // GenerateCode 自动生成一个 12 位的随机 code
 // 格式: [a-z] 开头 + 11 位 [a-z0-9]，使用 crypto/rand 确保加密安全
-// 总组合数: 26 × 36^11 ≈ 1.85 × 10^18，碰撞概率极低
+// 生成字符集移除了易混淆字符 i/l/o/0/1
+// 总组合数: 23 × 31^11 ≈ 1.79 × 10^17，碰撞概率极低
 func GenerateCode() (string, error) {
 	buf := make([]byte, CodeAutoLen)
 	randBytes := make([]byte, CodeAutoLen)
@@ -46,10 +47,10 @@ func GenerateCode() (string, error) {
 		return "", fmt.Errorf("generate code: crypto/rand read failed: %w", err)
 	}
 
-	// 首字符限定 [a-z]（26 个字母），确保 code 以字母开头
+	// 首字符限定小写字母（23 个字母），确保 code 以字母开头
 	buf[0] = codeLetters[int(randBytes[0])%len(codeLetters)]
 
-	// 后续字符 [a-z0-9]（36 个字符）
+	// 后续字符使用去除易混淆字符后的字母数字集（31 个字符）
 	for i := 1; i < CodeAutoLen; i++ {
 		buf[i] = codeAlphabet[int(randBytes[i])%len(codeAlphabet)]
 	}
