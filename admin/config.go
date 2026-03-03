@@ -1,6 +1,7 @@
 package admin
 
 import (
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/sirupsen/logrus"
 )
@@ -21,6 +22,9 @@ type config struct {
 
 	// 静态用户
 	staticUsers *StaticUsers
+
+	// 运行时本地配置快照
+	localConfigSnapshot *adminv1.LocalConfig
 }
 
 // Options xx
@@ -62,5 +66,12 @@ func WithAESKey(key []byte) Options {
 func WithStaticUsers(users *StaticUsers) Options {
 	return func(c *config) {
 		c.staticUsers = users
+	}
+}
+
+// WithLocalConfigSnapshot 设置运行时本地配置快照
+func WithLocalConfigSnapshot(snapshot *adminv1.LocalConfig) Options {
+	return func(c *config) {
+		c.localConfigSnapshot = snapshot
 	}
 }

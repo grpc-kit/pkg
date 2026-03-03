@@ -362,6 +362,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 			admin.WithLionClient(client),
 			admin.WithAESKey([]byte(c.Services.SecurityKey)),
 			admin.WithStaticUsers(su),
+			admin.WithLocalConfigSnapshot(c.toAdminLocalConfigSnapshot()),
 		}
 
 		if c.Security != nil && c.Security.Authentication != nil && c.Security.Authentication.OIDCProvider != nil {
