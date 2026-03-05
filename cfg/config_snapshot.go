@@ -106,7 +106,7 @@ func (c *LocalConfig) toAdminLocalConfigSnapshot() *adminv1.LocalConfig {
 }
 
 func (c *LocalConfig) toAdminServicesConfig() *adminv1.ServicesConfig {
-	out := &adminv1.ServicesConfig{Name: "基础服务"}
+	out := &adminv1.ServicesConfig{Name: "services"}
 	if c.Services == nil {
 		return out
 	}
@@ -164,7 +164,7 @@ func (c *LocalConfig) toAdminServicesConfig() *adminv1.ServicesConfig {
 }
 
 func (c *LocalConfig) toAdminDiscoverConfig() *adminv1.DiscoverConfig {
-	out := &adminv1.DiscoverConfig{Name: "服务发现"}
+	out := &adminv1.DiscoverConfig{Name: "discover"}
 	if c.Discover == nil {
 		return out
 	}
@@ -178,7 +178,7 @@ func (c *LocalConfig) toAdminDiscoverConfig() *adminv1.DiscoverConfig {
 
 func (c *LocalConfig) toAdminSecurityConfig() *adminv1.SecurityConfig {
 	out := &adminv1.SecurityConfig{
-		Name:    "认证鉴权",
+		Name:    "security",
 		Enabled: false,
 	}
 	if c.Security == nil {
@@ -249,7 +249,7 @@ func (c *LocalConfig) toAdminSecurityConfig() *adminv1.SecurityConfig {
 }
 
 func (c *LocalConfig) toAdminDatabaseConfig() *adminv1.DatabaseConfig {
-	out := &adminv1.DatabaseConfig{Name: "关系存储"}
+	out := &adminv1.DatabaseConfig{Name: "database"}
 	if c.Database == nil {
 		return out
 	}
@@ -271,7 +271,7 @@ func (c *LocalConfig) toAdminDatabaseConfig() *adminv1.DatabaseConfig {
 }
 
 func (c *LocalConfig) toAdminCacheboxConfig() *adminv1.CacheboxConfig {
-	out := &adminv1.CacheboxConfig{Name: "缓存服务"}
+	out := &adminv1.CacheboxConfig{Name: "cachebox"}
 	if c.Cachebox == nil {
 		return out
 	}
@@ -294,7 +294,7 @@ func (c *LocalConfig) toAdminCacheboxConfig() *adminv1.CacheboxConfig {
 }
 
 func (c *LocalConfig) toAdminDebuggerConfig() *adminv1.DebuggerConfig {
-	out := &adminv1.DebuggerConfig{Name: "日志调试"}
+	out := &adminv1.DebuggerConfig{Name: "debugger"}
 	if c.Debugger == nil {
 		return out
 	}
@@ -306,7 +306,7 @@ func (c *LocalConfig) toAdminDebuggerConfig() *adminv1.DebuggerConfig {
 }
 
 func (c *LocalConfig) toAdminObjstoreConfig() *adminv1.ObjstoreConfig {
-	out := &adminv1.ObjstoreConfig{Name: "对象存储"}
+	out := &adminv1.ObjstoreConfig{Name: "objstore"}
 	if c.Objstore == nil {
 		return out
 	}
@@ -338,7 +338,7 @@ func (c *LocalConfig) toAdminObjstoreConfig() *adminv1.ObjstoreConfig {
 }
 
 func (c *LocalConfig) toAdminFrontendConfig() *adminv1.FrontendConfig {
-	out := &adminv1.FrontendConfig{Name: "前端托管"}
+	out := &adminv1.FrontendConfig{Name: "frontend"}
 	if c.Frontend == nil {
 		return out
 	}
@@ -352,7 +352,7 @@ func (c *LocalConfig) toAdminFrontendConfig() *adminv1.FrontendConfig {
 }
 
 func (c *LocalConfig) toAdminObservablesConfig() *adminv1.ObservablesConfig {
-	out := &adminv1.ObservablesConfig{Name: "可观测性"}
+	out := &adminv1.ObservablesConfig{Name: "observables"}
 	if c.Observables == nil {
 		return out
 	}
@@ -419,7 +419,7 @@ func (c *LocalConfig) toAdminObservablesConfig() *adminv1.ObservablesConfig {
 }
 
 func (c *LocalConfig) toAdminCloudEventsConfig() *adminv1.CloudEventsConfig {
-	out := &adminv1.CloudEventsConfig{Name: "消息事件"}
+	out := &adminv1.CloudEventsConfig{Name: "cloudevents"}
 	if c.CloudEvents == nil {
 		return out
 	}
@@ -443,7 +443,7 @@ func (c *LocalConfig) toAdminCloudEventsConfig() *adminv1.CloudEventsConfig {
 }
 
 func (c *LocalConfig) toAdminAutomationsConfig() *adminv1.AutomationsConfig {
-	out := &adminv1.AutomationsConfig{Name: "流程编排"}
+	out := &adminv1.AutomationsConfig{Name: "automations"}
 	if c.Automations == nil {
 		return out
 	}
