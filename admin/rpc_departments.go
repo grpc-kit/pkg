@@ -258,7 +258,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 	}
 	result.TotalSize = int32(totalSize)
 
-	pageSize := GetPageSize(ctx, req.PageSize)
+	pageSize := GetPageSizeByStructure(ctx, req.PageSize, req.Structure)
 
 	// Cursor-based 分页
 	var lastID int

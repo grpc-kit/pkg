@@ -82,7 +82,7 @@ func (a *KnownAdminAPI) ListScopes(ctx context.Context, req *adminv1.ListScopesR
 	result.TotalSize = int32(totalSize)
 
 	// 处理分页
-	pageSize := GetPageSize(ctx, req.PageSize)
+	pageSize := GetPageSizeByStructure(ctx, req.PageSize, req.Structure)
 
 	var lastID int
 	if req.GetPageToken() != "" {
@@ -343,7 +343,7 @@ func (a *KnownAdminAPI) ListScopeResources(ctx context.Context, req *adminv1.Lis
 	result.TotalSize = int32(totalSize)
 
 	// 处理分页
-	pageSize := GetPageSize(ctx, req.PageSize)
+	pageSize := GetPageSizeByStructure(ctx, req.PageSize, req.Structure)
 
 	var lastID int
 	if req.GetPageToken() != "" {

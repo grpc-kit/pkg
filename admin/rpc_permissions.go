@@ -109,7 +109,7 @@ func (a *KnownAdminAPI) ListPermissions(ctx context.Context, req *adminv1.ListPe
 	result.TotalSize = int32(totalSize)
 
 	// 处理分页
-	pageSize := GetPageSize(ctx, req.PageSize)
+	pageSize := GetPageSizeByStructure(ctx, req.PageSize, req.Structure)
 
 	var lastID int
 	if req.GetPageToken() != "" {

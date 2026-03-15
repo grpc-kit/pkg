@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/rpc"
 )
 
@@ -50,13 +51,27 @@ func GetUserID(ctx context.Context) (int64, error) {
 
 // GetPageSize 实现分页参数获取
 func GetPageSize(ctx context.Context, pageSize int32) int32 {
+	return GetPageSizeByStructure(ctx, pageSize, adminv1.Structure_STRUCTURE_FLAT)
+}
+
+// GetPageSizeByStructure 根据 Structure 返回分页参数
+func GetPageSizeByStructure(ctx context.Context, pageSize int32, structure adminv1.Structure) int32 {
+	defaultPageSize := int32(20)
+	maxPageSize := int32(100)
+
+	switch structure {
+	case adminv1.Structure_STRUCTURE_TREE, adminv1.Structure_STRUCTURE_TREE_EXPANDED:
+		defaultPageSize = 1000
+		maxPageSize = 5000
+	}
+
 	currentPageSize := pageSize
 
 	if currentPageSize <= 0 {
-		currentPageSize = 20
+		currentPageSize = defaultPageSize
 	}
-	if currentPageSize > 100 {
-		currentPageSize = 100
+	if currentPageSize > maxPageSize {
+		currentPageSize = maxPageSize
 	}
 
 	return currentPageSize
