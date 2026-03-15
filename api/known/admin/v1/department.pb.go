@@ -79,8 +79,8 @@ type ListDepartmentsRequest struct {
 	// 格式示例: "departments/123" 表示仅返回 parent_id=123 的直接子部门；空表示不按父级过滤。
 	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
 	// 每页返回的最大部门数。
-	// - 如果未指定，则使用服务端默认值 (如 20)。
-	// - 最大不超过 100 (超出时强制截断)。
+	// - structure=STRUCTURE_UNSPECIFIED 或 STRUCTURE_FLAT：默认 20，最大 100。
+	// - structure=STRUCTURE_TREE 或 STRUCTURE_TREE_EXPANDED：默认 1000，最大 5000。
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// Types that are assignable to Pagination:
 	//

@@ -350,6 +350,14 @@ var (
 				Columns: []*schema.Column{LionResourcesColumns[6]},
 			},
 			{
+				Name:    "resources_resource_type",
+				Unique:  true,
+				Columns: []*schema.Column{LionResourcesColumns[9]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "parent_id = 0",
+				},
+			},
+			{
 				Name:    "resources_sort_order",
 				Unique:  false,
 				Columns: []*schema.Column{LionResourcesColumns[12]},

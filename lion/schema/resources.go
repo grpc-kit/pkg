@@ -90,6 +90,10 @@ func (Resources) Indexes() []ent.Index {
 	return []ent.Index{
 		// 父资源ID索引，用于快速查找子资源
 		index.Fields("parent_id"),
+		// 仅限制同一类型只能有一个根节点（parent_id = 0）
+		index.Fields("resource_type").Unique().Annotations(
+			entsql.IndexWhere("parent_id = 0"),
+		),
 		// 排序顺序索引，用于排序查询
 		index.Fields("sort_order"),
 	}

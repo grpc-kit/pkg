@@ -398,6 +398,22 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 	}
 	req.Resource.Code = code
 
+	if req.Resource.ParentId == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("parent_id cannot be 0 when creating resource")
+	}
+
+	parentResource, err := db.Resources.Get(ctx, int(req.Resource.ParentId))
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.InvalidArgument(ctx).WithMessage("parent resource not found")
+		}
+		return nil, err
+	}
+
+	if parentResource.ResourceType != int(req.Resource.Type) {
+		return nil, errs.InvalidArgument(ctx).WithMessage("resource type must match parent resource type")
+	}
+
 	// 获取创建者用户 ID
 	userID, err := GetUserID(ctx)
 	if err != nil {
@@ -482,6 +498,19 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 	resource, err := db.Resources.Get(ctx, int(req.Resource.Id))
 	if err != nil {
 		return nil, err
+	}
+
+	shouldUpdateParentID := req.UpdateMask == nil || len(req.UpdateMask.Paths) == 0
+	if !shouldUpdateParentID {
+		for _, field := range req.UpdateMask.Paths {
+			if field == resources.FieldParentID {
+				shouldUpdateParentID = true
+				break
+			}
+		}
+	}
+	if shouldUpdateParentID && resource.ParentID == 0 && req.Resource.ParentId != resource.ParentID {
+		return nil, errs.InvalidArgument(ctx).WithMessage("root resource parent_id cannot be changed")
 	}
 
 	// 构建更新操作

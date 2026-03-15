@@ -31,9 +31,9 @@ type ListScopesRequest struct {
 	// 父资源名称，用于限定范围。
 	// 格式示例: "organizations/123" 或 "projects/456"。
 	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	// 每页返回的最大用户数。
-	// - 如果未指定，则使用服务端默认值 (如 20)。
-	// - 最大不超过 100 (超出时强制截断)。
+	// 每页返回的最大作用域数。
+	// - structure=STRUCTURE_UNSPECIFIED 或 STRUCTURE_FLAT：默认 20，最大 100。
+	// - structure=STRUCTURE_TREE 或 STRUCTURE_TREE_EXPANDED：默认 1000，最大 5000。
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// Types that are assignable to Pagination:
 	//
@@ -408,9 +408,9 @@ type ListScopeResourcesRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	ScopeId int64 `protobuf:"varint,1,opt,name=scope_id,json=scopeId,proto3" json:"scope_id,omitempty"`
-	// 每页返回的最大用户数。
-	// - 如果未指定，则使用服务端默认值 (如 20)。
-	// - 最大不超过 100 (超出时强制截断)。
+	// 每页返回的最大资源数。
+	// - structure=STRUCTURE_UNSPECIFIED 或 STRUCTURE_FLAT：默认 20，最大 100。
+	// - structure=STRUCTURE_TREE 或 STRUCTURE_TREE_EXPANDED：默认 1000，最大 5000。
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// Types that are assignable to Pagination:
 	//

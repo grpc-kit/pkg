@@ -88,6 +88,57 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetParentID(0),
 	).SaveX(ctx)
 
+	tx.Resources.CreateBulk(
+		tx.Resources.Create().
+			SetCode("root_menu").
+			SetDisplayName("菜单根节点").
+			SetResourceType(int(adminv1.Resource_MENU.Number())).
+			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
+			SetVisibility(int(adminv1.Visibility_VISIBILITY_GLOBAL.Number())).
+			SetSortOrder(10).
+			SetParentID(0),
+		tx.Resources.Create().
+			SetCode("root_page").
+			SetDisplayName("页面根节点").
+			SetResourceType(int(adminv1.Resource_PAGE.Number())).
+			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
+			SetVisibility(int(adminv1.Visibility_VISIBILITY_GLOBAL.Number())).
+			SetSortOrder(20).
+			SetParentID(0),
+		tx.Resources.Create().
+			SetCode("root_button").
+			SetDisplayName("按钮根节点").
+			SetResourceType(int(adminv1.Resource_BUTTON.Number())).
+			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
+			SetVisibility(int(adminv1.Visibility_VISIBILITY_GLOBAL.Number())).
+			SetSortOrder(30).
+			SetParentID(0),
+		tx.Resources.Create().
+			SetCode("root_api").
+			SetDisplayName("接口根节点").
+			SetResourceType(int(adminv1.Resource_API.Number())).
+			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
+			SetVisibility(int(adminv1.Visibility_VISIBILITY_GLOBAL.Number())).
+			SetSortOrder(40).
+			SetParentID(0),
+		tx.Resources.Create().
+			SetCode("root_data").
+			SetDisplayName("数据根节点").
+			SetResourceType(int(adminv1.Resource_DATA.Number())).
+			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
+			SetVisibility(int(adminv1.Visibility_VISIBILITY_GLOBAL.Number())).
+			SetSortOrder(50).
+			SetParentID(0),
+		tx.Resources.Create().
+			SetCode("root_system").
+			SetDisplayName("系统根节点").
+			SetResourceType(int(adminv1.Resource_SYSTEM.Number())).
+			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
+			SetVisibility(int(adminv1.Visibility_VISIBILITY_GLOBAL.Number())).
+			SetSortOrder(60).
+			SetParentID(0),
+	).SaveX(ctx)
+
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, err
