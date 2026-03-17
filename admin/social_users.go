@@ -311,18 +311,27 @@ func getMapString(m map[string]interface{}, key string) string {
 	}
 }
 
-func (s *socialUsers) PasswordCheck(ctx context.Context, username, password string) (string, bool, error) {
+// passwordCheckResult 密码校验结果
+type passwordCheckResult struct {
+	AccessToken string
+	OK          bool
+	MfaEnabled  bool
+	UserID      int
+	Username    string
+}
+
+func (s *socialUsers) PasswordCheck(ctx context.Context, username, password string) (*passwordCheckResult, error) {
 	switch adminv1.AuthProvider_Type(s.AuthProvider.ProviderType) {
 	case adminv1.AuthProvider_LOCAL:
 		return s.PasswordCheckLocal(ctx, username, password)
 	case adminv1.AuthProvider_LDAP:
 		return s.PasswordCheckLDAP(ctx, username, password)
 	default:
-		return "", false, fmt.Errorf("password check does not support provider type: %s", adminv1.AuthProvider_Type(s.AuthProvider.ProviderType).String())
+		return nil, fmt.Errorf("password check does not support provider type: %s", adminv1.AuthProvider_Type(s.AuthProvider.ProviderType).String())
 	}
 }
 
-func (s *socialUsers) PasswordCheckLocal(ctx context.Context, username, passwordHash string) (string, bool, error) {
+func (s *socialUsers) PasswordCheckLocal(ctx context.Context, username, passwordHash string) (*passwordCheckResult, error) {
 	u, err := s.db.Users.Query().
 		Select(
 			users.FieldID,
@@ -336,32 +345,52 @@ func (s *socialUsers) PasswordCheckLocal(ctx context.Context, username, password
 		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
 			q.Select(
 				useridentities.FieldPasswordHash,
+				useridentities.FieldMfaEnabled,
 			)
 		}).
 		Only(ctx)
 	if err != nil {
-		return "", false, err
+		return &passwordCheckResult{}, err
 	}
 
 	if len(u.Edges.LionUserIdentities) == 0 {
-		return "", false, nil
+		return &passwordCheckResult{}, nil
 	}
 
-	if err := crypto.BcryptCompare(u.Edges.LionUserIdentities[0].PasswordHash, passwordHash); err != nil {
-		return "", false, nil
+	identity := u.Edges.LionUserIdentities[0]
+	if err := crypto.BcryptCompare(identity.PasswordHash, passwordHash); err != nil {
+		return &passwordCheckResult{}, nil
 	}
 
-	return s.issueAccessTokenForUser(ctx, u)
+	if identity.MfaEnabled {
+		return &passwordCheckResult{
+			OK:         true,
+			MfaEnabled: true,
+			UserID:     u.ID,
+			Username:   u.Username,
+		}, nil
+	}
+
+	tk, ok, err := s.issueAccessTokenForUser(ctx, u)
+	if err != nil {
+		return &passwordCheckResult{}, err
+	}
+	return &passwordCheckResult{
+		AccessToken: tk,
+		OK:          ok,
+		UserID:      u.ID,
+		Username:    u.Username,
+	}, nil
 }
 
-func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordPlain string) (string, bool, error) {
+func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordPlain string) (*passwordCheckResult, error) {
 	if strings.TrimSpace(username) == "" || passwordPlain == "" {
 		s.logger.Warnf("ldap login skipped: empty username or password, provider=%s", s.ProviderName)
-		return "", false, nil
+		return &passwordCheckResult{}, nil
 	}
 	if s.ldapCfg == nil {
 		s.logger.Errorf("ldap login failed: ldap config not initialized, provider=%s", s.ProviderName)
-		return "", false, fmt.Errorf("ldap config not initialized")
+		return nil, fmt.Errorf("ldap config not initialized")
 	}
 	s.logger.Infof(
 		"ldap login start: provider=%s username=%s host=%s port=%d use_tls=%t start_tls=%t",
@@ -376,7 +405,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	conn, err := s.newLDAPConn()
 	if err != nil {
 		s.logger.Errorf("ldap login failed: connect failed, provider=%s err=%v", s.ProviderName, err)
-		return "", false, err
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -390,7 +419,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 				maskLDAPDN(bindDN),
 				err,
 			)
-			return "", false, fmt.Errorf("ldap bind service account failed")
+			return nil, fmt.Errorf("ldap bind service account failed")
 		}
 		s.logger.Infof("ldap login debug: service bind success, provider=%s bind_dn=%s", s.ProviderName, maskLDAPDN(bindDN))
 	}
@@ -398,11 +427,11 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	userDN, resolvedUsername, err := s.findLDAPUserDN(conn, username)
 	if err != nil {
 		s.logger.Errorf("ldap login failed: user search failed, provider=%s username=%s err=%v", s.ProviderName, username, err)
-		return "", false, err
+		return nil, err
 	}
 	if userDN == "" {
 		s.logger.Warnf("ldap login failed: user not found in ldap, provider=%s username=%s", s.ProviderName, username)
-		return "", false, nil
+		return &passwordCheckResult{}, nil
 	}
 	s.logger.Infof(
 		"ldap login debug: user found, provider=%s username=%s resolved_username=%s user_dn=%s",
@@ -421,14 +450,15 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			maskLDAPDN(userDN),
 			err,
 		)
-		return "", false, nil
+		return &passwordCheckResult{}, nil
 	}
 	s.logger.Infof("ldap login debug: user bind success, provider=%s username=%s user_dn=%s", s.ProviderName, username, maskLDAPDN(userDN))
 
-	identity, err := s.db.UserIdentities.Query().
+	ldapIdentity, err := s.db.UserIdentities.Query().
 		Select(
 			useridentities.FieldID,
 			useridentities.FieldUserID,
+			useridentities.FieldMfaEnabled,
 		).
 		Where(
 			useridentities.ProviderIDEQ(s.AuthProvider.ID),
@@ -442,12 +472,14 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			maskLDAPDN(userDN),
 			err,
 		)
-		return "", false, err
+		return nil, err
 	}
 
 	var localUserID int
-	if identity != nil {
-		localUserID = identity.UserID
+	var ldapMfaEnabled bool
+	if ldapIdentity != nil {
+		localUserID = ldapIdentity.UserID
+		ldapMfaEnabled = ldapIdentity.MfaEnabled
 		s.logger.Infof(
 			"ldap login debug: identity hit, provider=%s user_dn=%s local_user_id=%d",
 			s.ProviderName,
@@ -472,7 +504,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 				maskLDAPDN(userDN),
 				err,
 			)
-			return "", false, err
+			return nil, err
 		}
 		s.logger.Infof(
 			"ldap login debug: auto provision success, provider=%s user_dn=%s local_user_id=%d",
@@ -501,7 +533,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 				localUserID,
 				maskLDAPDN(userDN),
 			)
-			return "", false, nil
+			return &passwordCheckResult{}, nil
 		}
 		s.logger.Errorf(
 			"ldap login failed: local user query error, provider=%s local_user_id=%d err=%v",
@@ -509,10 +541,28 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			localUserID,
 			err,
 		)
-		return "", false, err
+		return nil, err
 	}
 
-	return s.issueAccessTokenForUser(ctx, userEntity)
+	if ldapMfaEnabled {
+		return &passwordCheckResult{
+			OK:         true,
+			MfaEnabled: true,
+			UserID:     userEntity.ID,
+			Username:   userEntity.Username,
+		}, nil
+	}
+
+	tk, ok, err := s.issueAccessTokenForUser(ctx, userEntity)
+	if err != nil {
+		return nil, err
+	}
+	return &passwordCheckResult{
+		AccessToken: tk,
+		OK:          ok,
+		UserID:      userEntity.ID,
+		Username:    userEntity.Username,
+	}, nil
 }
 
 func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, userDN, ldapUsername string) (int, error) {

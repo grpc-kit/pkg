@@ -116,18 +116,30 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			passwordPayload = string(decodedPassword)
 		}
 
-		tk, ok, err := su.PasswordCheck(ctx, req.Username, passwordPayload)
+		pcResult, err := su.PasswordCheck(ctx, req.Username, passwordPayload)
 		if err != nil {
 			if lion.IsNotFound(err) {
 				return nil, errs.Unauthenticated(ctx)
 			}
 			return nil, errs.Unauthenticated(ctx).WithMessage(err.Error())
 		}
-		if !ok {
+		if pcResult == nil || !pcResult.OK {
 			return nil, errs.Unauthenticated(ctx)
 		}
 
-		accessToken = tk
+		if pcResult.MfaEnabled {
+			challenge, cErr := a.mfaChallenges.Create(mfaChallengeTypeLogin, pcResult.UserID, pcResult.Username)
+			if cErr != nil {
+				return nil, errs.Internal(ctx).WithMessage("failed to create MFA challenge")
+			}
+			return &adminv1.AuthToken{
+				MfaRequired:   true,
+				ChallengeId:   challenge.ChallengeID,
+				ChallengeType: "TOTP",
+			}, nil
+		}
+
+		accessToken = pcResult.AccessToken
 	}
 
 	result.AccessToken = accessToken

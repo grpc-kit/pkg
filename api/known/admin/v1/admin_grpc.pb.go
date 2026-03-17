@@ -47,6 +47,11 @@ type KnownAdminClient interface {
 	CreateAuthLogin(ctx context.Context, in *CreateAuthLoginRequest, opts ...grpc.CallOption) (*AuthToken, error)
 	CreateAuthToken(ctx context.Context, in *CreateAuthTokenRequest, opts ...grpc.CallOption) (*AuthToken, error)
 	GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error)
+	// MFA 多因素认证
+	VerifyAuthMFA(ctx context.Context, in *VerifyAuthMFARequest, opts ...grpc.CallOption) (*AuthToken, error)
+	SetupUserMFA(ctx context.Context, in *SetupUserMFARequest, opts ...grpc.CallOption) (*SetupUserMFAResponse, error)
+	ConfirmUserMFA(ctx context.Context, in *ConfirmUserMFARequest, opts ...grpc.CallOption) (*ConfirmUserMFAResponse, error)
+	DisableUserMFA(ctx context.Context, in *DisableUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 资源管理
 	GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*Resource, error)
 	ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error)
@@ -311,6 +316,42 @@ func (c *knownAdminClient) CreateAuthToken(ctx context.Context, in *CreateAuthTo
 func (c *knownAdminClient) GetAuthCallback(ctx context.Context, in *GetAuthCallbackRequest, opts ...grpc.CallOption) (*GetAuthCallbackResponse, error) {
 	out := new(GetAuthCallbackResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) VerifyAuthMFA(ctx context.Context, in *VerifyAuthMFARequest, opts ...grpc.CallOption) (*AuthToken, error) {
+	out := new(AuthToken)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/VerifyAuthMFA", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) SetupUserMFA(ctx context.Context, in *SetupUserMFARequest, opts ...grpc.CallOption) (*SetupUserMFAResponse, error) {
+	out := new(SetupUserMFAResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ConfirmUserMFA(ctx context.Context, in *ConfirmUserMFARequest, opts ...grpc.CallOption) (*ConfirmUserMFAResponse, error) {
+	out := new(ConfirmUserMFAResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DisableUserMFA(ctx context.Context, in *DisableUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -885,6 +926,11 @@ type KnownAdminServer interface {
 	CreateAuthLogin(context.Context, *CreateAuthLoginRequest) (*AuthToken, error)
 	CreateAuthToken(context.Context, *CreateAuthTokenRequest) (*AuthToken, error)
 	GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error)
+	// MFA 多因素认证
+	VerifyAuthMFA(context.Context, *VerifyAuthMFARequest) (*AuthToken, error)
+	SetupUserMFA(context.Context, *SetupUserMFARequest) (*SetupUserMFAResponse, error)
+	ConfirmUserMFA(context.Context, *ConfirmUserMFARequest) (*ConfirmUserMFAResponse, error)
+	DisableUserMFA(context.Context, *DisableUserMFARequest) (*emptypb.Empty, error)
 	// 资源管理
 	GetResource(context.Context, *GetResourceRequest) (*Resource, error)
 	ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error)
@@ -1024,6 +1070,18 @@ func (UnimplementedKnownAdminServer) CreateAuthToken(context.Context, *CreateAut
 }
 func (UnimplementedKnownAdminServer) GetAuthCallback(context.Context, *GetAuthCallbackRequest) (*GetAuthCallbackResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAuthCallback not implemented")
+}
+func (UnimplementedKnownAdminServer) VerifyAuthMFA(context.Context, *VerifyAuthMFARequest) (*AuthToken, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyAuthMFA not implemented")
+}
+func (UnimplementedKnownAdminServer) SetupUserMFA(context.Context, *SetupUserMFARequest) (*SetupUserMFAResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetupUserMFA not implemented")
+}
+func (UnimplementedKnownAdminServer) ConfirmUserMFA(context.Context, *ConfirmUserMFARequest) (*ConfirmUserMFAResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmUserMFA not implemented")
+}
+func (UnimplementedKnownAdminServer) DisableUserMFA(context.Context, *DisableUserMFARequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisableUserMFA not implemented")
 }
 func (UnimplementedKnownAdminServer) GetResource(context.Context, *GetResourceRequest) (*Resource, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetResource not implemented")
@@ -1591,6 +1649,78 @@ func _KnownAdmin_GetAuthCallback_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).GetAuthCallback(ctx, req.(*GetAuthCallbackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_VerifyAuthMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyAuthMFARequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).VerifyAuthMFA(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/VerifyAuthMFA",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).VerifyAuthMFA(ctx, req.(*VerifyAuthMFARequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_SetupUserMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetupUserMFARequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).SetupUserMFA(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).SetupUserMFA(ctx, req.(*SetupUserMFARequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ConfirmUserMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmUserMFARequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ConfirmUserMFA(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ConfirmUserMFA(ctx, req.(*ConfirmUserMFARequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DisableUserMFA_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DisableUserMFARequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DisableUserMFA(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DisableUserMFA(ctx, req.(*DisableUserMFARequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2765,6 +2895,22 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAuthCallback",
 			Handler:    _KnownAdmin_GetAuthCallback_Handler,
+		},
+		{
+			MethodName: "VerifyAuthMFA",
+			Handler:    _KnownAdmin_VerifyAuthMFA_Handler,
+		},
+		{
+			MethodName: "SetupUserMFA",
+			Handler:    _KnownAdmin_SetupUserMFA_Handler,
+		},
+		{
+			MethodName: "ConfirmUserMFA",
+			Handler:    _KnownAdmin_ConfirmUserMFA_Handler,
+		},
+		{
+			MethodName: "DisableUserMFA",
+			Handler:    _KnownAdmin_DisableUserMFA_Handler,
 		},
 		{
 			MethodName: "GetResource",

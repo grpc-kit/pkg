@@ -564,6 +564,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 		switch currentMethod {
 		case "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin",
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/VerifyAuthMFA",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthToken",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery",

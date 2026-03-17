@@ -13,8 +13,9 @@ import (
 
 // KnownAdminAPI xx
 type KnownAdminAPI struct {
-	config *config
-	logger *logrus.Entry
+	config        *config
+	logger        *logrus.Entry
+	mfaChallenges *mfaChallengeStore
 }
 
 // New xx
@@ -31,8 +32,9 @@ func New(opts ...Options) *KnownAdminAPI {
 	}
 
 	return &KnownAdminAPI{
-		config: c,
-		logger: c.logger,
+		config:        c,
+		logger:        c.logger,
+		mfaChallenges: newMFAChallengeStore(),
 	}
 }
 

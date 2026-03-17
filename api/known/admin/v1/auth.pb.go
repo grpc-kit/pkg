@@ -841,6 +841,346 @@ func (x *UpdateAuthProviderRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+// VerifyAuthMFARequest 登录时的 MFA 二步验证请求
+// 在 CreateAuthLogin 返回 mfa_required=true 后，前端携带 challenge_id 和 TOTP 码调用此接口。
+type VerifyAuthMFARequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// CreateAuthLogin 返回的一次性 challenge 标识
+	ChallengeId string `protobuf:"bytes,1,opt,name=challenge_id,json=challengeId,proto3" json:"challenge_id,omitempty"`
+	// 用户从验证器应用获取的 6 位 TOTP 验证码
+	TotpCode string `protobuf:"bytes,2,opt,name=totp_code,json=totpCode,proto3" json:"totp_code,omitempty"`
+}
+
+func (x *VerifyAuthMFARequest) Reset() {
+	*x = VerifyAuthMFARequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_auth_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *VerifyAuthMFARequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyAuthMFARequest) ProtoMessage() {}
+
+func (x *VerifyAuthMFARequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_auth_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyAuthMFARequest.ProtoReflect.Descriptor instead.
+func (*VerifyAuthMFARequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_auth_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *VerifyAuthMFARequest) GetChallengeId() string {
+	if x != nil {
+		return x.ChallengeId
+	}
+	return ""
+}
+
+func (x *VerifyAuthMFARequest) GetTotpCode() string {
+	if x != nil {
+		return x.TotpCode
+	}
+	return ""
+}
+
+// SetupUserMFARequest 初始化用户 MFA 设置（生成密钥 + 二维码 URI）
+type SetupUserMFARequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 目标用户 ID
+	UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+}
+
+func (x *SetupUserMFARequest) Reset() {
+	*x = SetupUserMFARequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_auth_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetupUserMFARequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetupUserMFARequest) ProtoMessage() {}
+
+func (x *SetupUserMFARequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_auth_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetupUserMFARequest.ProtoReflect.Descriptor instead.
+func (*SetupUserMFARequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_auth_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *SetupUserMFARequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+// SetupUserMFAResponse 返回 TOTP 密钥和 otpauth URI 供前端展示
+type SetupUserMFAResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Base32 编码的 TOTP 密钥（仅此次返回，后续不再可见）
+	Secret string `protobuf:"bytes,1,opt,name=secret,proto3" json:"secret,omitempty"`
+	// otpauth://totp/... 格式的 URI，前端可据此生成二维码
+	QrUri string `protobuf:"bytes,2,opt,name=qr_uri,json=qrUri,proto3" json:"qr_uri,omitempty"`
+	// 确认验证用的 challenge_id，TTL 5 分钟
+	ChallengeId string `protobuf:"bytes,3,opt,name=challenge_id,json=challengeId,proto3" json:"challenge_id,omitempty"`
+}
+
+func (x *SetupUserMFAResponse) Reset() {
+	*x = SetupUserMFAResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_auth_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SetupUserMFAResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetupUserMFAResponse) ProtoMessage() {}
+
+func (x *SetupUserMFAResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_auth_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetupUserMFAResponse.ProtoReflect.Descriptor instead.
+func (*SetupUserMFAResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_auth_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *SetupUserMFAResponse) GetSecret() string {
+	if x != nil {
+		return x.Secret
+	}
+	return ""
+}
+
+func (x *SetupUserMFAResponse) GetQrUri() string {
+	if x != nil {
+		return x.QrUri
+	}
+	return ""
+}
+
+func (x *SetupUserMFAResponse) GetChallengeId() string {
+	if x != nil {
+		return x.ChallengeId
+	}
+	return ""
+}
+
+// ConfirmUserMFARequest 确认开启 MFA（用户扫码后输入验证码确认）
+type ConfirmUserMFARequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// SetupUserMFA 返回的 challenge_id
+	ChallengeId string `protobuf:"bytes,1,opt,name=challenge_id,json=challengeId,proto3" json:"challenge_id,omitempty"`
+	// 用户从验证器应用获取的 6 位 TOTP 验证码
+	TotpCode string `protobuf:"bytes,2,opt,name=totp_code,json=totpCode,proto3" json:"totp_code,omitempty"`
+}
+
+func (x *ConfirmUserMFARequest) Reset() {
+	*x = ConfirmUserMFARequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_auth_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ConfirmUserMFARequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConfirmUserMFARequest) ProtoMessage() {}
+
+func (x *ConfirmUserMFARequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_auth_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConfirmUserMFARequest.ProtoReflect.Descriptor instead.
+func (*ConfirmUserMFARequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_auth_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ConfirmUserMFARequest) GetChallengeId() string {
+	if x != nil {
+		return x.ChallengeId
+	}
+	return ""
+}
+
+func (x *ConfirmUserMFARequest) GetTotpCode() string {
+	if x != nil {
+		return x.TotpCode
+	}
+	return ""
+}
+
+// ConfirmUserMFAResponse 确认成功后返回恢复码
+type ConfirmUserMFAResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 恢复码列表（一次性展示，用户必须安全保存）
+	RecoveryCodes []string `protobuf:"bytes,1,rep,name=recovery_codes,json=recoveryCodes,proto3" json:"recovery_codes,omitempty"`
+}
+
+func (x *ConfirmUserMFAResponse) Reset() {
+	*x = ConfirmUserMFAResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_auth_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ConfirmUserMFAResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConfirmUserMFAResponse) ProtoMessage() {}
+
+func (x *ConfirmUserMFAResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_auth_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConfirmUserMFAResponse.ProtoReflect.Descriptor instead.
+func (*ConfirmUserMFAResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_auth_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ConfirmUserMFAResponse) GetRecoveryCodes() []string {
+	if x != nil {
+		return x.RecoveryCodes
+	}
+	return nil
+}
+
+// DisableUserMFARequest 关闭用户 MFA
+type DisableUserMFARequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 目标用户 ID
+	UserId int64 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// 当前有效的 6 位 TOTP 验证码（或恢复码）
+	TotpCode string `protobuf:"bytes,2,opt,name=totp_code,json=totpCode,proto3" json:"totp_code,omitempty"`
+}
+
+func (x *DisableUserMFARequest) Reset() {
+	*x = DisableUserMFARequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_auth_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DisableUserMFARequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DisableUserMFARequest) ProtoMessage() {}
+
+func (x *DisableUserMFARequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_auth_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DisableUserMFARequest.ProtoReflect.Descriptor instead.
+func (*DisableUserMFARequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_auth_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *DisableUserMFARequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *DisableUserMFARequest) GetTotpCode() string {
+	if x != nil {
+		return x.TotpCode
+	}
+	return ""
+}
+
 var File_known_admin_v1_auth_proto protoreflect.FileDescriptor
 
 var file_known_admin_v1_auth_proto_rawDesc = []byte{
@@ -954,11 +1294,40 @@ var file_known_admin_v1_auth_proto_rawDesc = []byte{
 	0x61, 0x74, 0x65, 0x5f, 0x6d, 0x61, 0x73, 0x6b, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a,
 	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
 	0x2e, 0x46, 0x69, 0x65, 0x6c, 0x64, 0x4d, 0x61, 0x73, 0x6b, 0x52, 0x0a, 0x75, 0x70, 0x64, 0x61,
-	0x74, 0x65, 0x4d, 0x61, 0x73, 0x6b, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
-	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b,
-	0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x65, 0x4d, 0x61, 0x73, 0x6b, 0x22, 0x56, 0x0a, 0x14, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79,
+	0x41, 0x75, 0x74, 0x68, 0x4d, 0x46, 0x41, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x21,
+	0x0a, 0x0c, 0x63, 0x68, 0x61, 0x6c, 0x6c, 0x65, 0x6e, 0x67, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x63, 0x68, 0x61, 0x6c, 0x6c, 0x65, 0x6e, 0x67, 0x65, 0x49,
+	0x64, 0x12, 0x1b, 0x0a, 0x09, 0x74, 0x6f, 0x74, 0x70, 0x5f, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x74, 0x6f, 0x74, 0x70, 0x43, 0x6f, 0x64, 0x65, 0x22, 0x2e,
+	0x0a, 0x13, 0x53, 0x65, 0x74, 0x75, 0x70, 0x55, 0x73, 0x65, 0x72, 0x4d, 0x46, 0x41, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x68,
+	0x0a, 0x14, 0x53, 0x65, 0x74, 0x75, 0x70, 0x55, 0x73, 0x65, 0x72, 0x4d, 0x46, 0x41, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x12, 0x15,
+	0x0a, 0x06, 0x71, 0x72, 0x5f, 0x75, 0x72, 0x69, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05,
+	0x71, 0x72, 0x55, 0x72, 0x69, 0x12, 0x21, 0x0a, 0x0c, 0x63, 0x68, 0x61, 0x6c, 0x6c, 0x65, 0x6e,
+	0x67, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x63, 0x68, 0x61,
+	0x6c, 0x6c, 0x65, 0x6e, 0x67, 0x65, 0x49, 0x64, 0x22, 0x57, 0x0a, 0x15, 0x43, 0x6f, 0x6e, 0x66,
+	0x69, 0x72, 0x6d, 0x55, 0x73, 0x65, 0x72, 0x4d, 0x46, 0x41, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x21, 0x0a, 0x0c, 0x63, 0x68, 0x61, 0x6c, 0x6c, 0x65, 0x6e, 0x67, 0x65, 0x5f, 0x69,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x63, 0x68, 0x61, 0x6c, 0x6c, 0x65, 0x6e,
+	0x67, 0x65, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x74, 0x6f, 0x74, 0x70, 0x5f, 0x63, 0x6f, 0x64,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x74, 0x6f, 0x74, 0x70, 0x43, 0x6f, 0x64,
+	0x65, 0x22, 0x3f, 0x0a, 0x16, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x72, 0x6d, 0x55, 0x73, 0x65, 0x72,
+	0x4d, 0x46, 0x41, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x25, 0x0a, 0x0e, 0x72,
+	0x65, 0x63, 0x6f, 0x76, 0x65, 0x72, 0x79, 0x5f, 0x63, 0x6f, 0x64, 0x65, 0x73, 0x18, 0x01, 0x20,
+	0x03, 0x28, 0x09, 0x52, 0x0d, 0x72, 0x65, 0x63, 0x6f, 0x76, 0x65, 0x72, 0x79, 0x43, 0x6f, 0x64,
+	0x65, 0x73, 0x22, 0x4d, 0x0a, 0x15, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x55, 0x73, 0x65,
+	0x72, 0x4d, 0x46, 0x41, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75,
+	0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73,
+	0x65, 0x72, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x74, 0x6f, 0x74, 0x70, 0x5f, 0x63, 0x6f, 0x64,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x74, 0x6f, 0x74, 0x70, 0x43, 0x6f, 0x64,
+	0x65, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
+	0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69,
+	0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b,
+	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -973,7 +1342,7 @@ func file_known_admin_v1_auth_proto_rawDescGZIP() []byte {
 	return file_known_admin_v1_auth_proto_rawDescData
 }
 
-var file_known_admin_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_known_admin_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_known_admin_v1_auth_proto_goTypes = []interface{}{
 	(*CreateAuthLoginRequest)(nil),      // 0: grpc_kit.api.known.admin.v1.CreateAuthLoginRequest
 	(*CreateAuthTokenRequest)(nil),      // 1: grpc_kit.api.known.admin.v1.CreateAuthTokenRequest
@@ -987,18 +1356,24 @@ var file_known_admin_v1_auth_proto_goTypes = []interface{}{
 	(*GetAuthProviderRequest)(nil),      // 9: grpc_kit.api.known.admin.v1.GetAuthProviderRequest
 	(*DeleteAuthProviderRequest)(nil),   // 10: grpc_kit.api.known.admin.v1.DeleteAuthProviderRequest
 	(*UpdateAuthProviderRequest)(nil),   // 11: grpc_kit.api.known.admin.v1.UpdateAuthProviderRequest
-	(View)(0),                           // 12: grpc_kit.api.known.admin.v1.View
-	(*AuthProvider)(nil),                // 13: grpc_kit.api.known.admin.v1.AuthProvider
-	(*fieldmaskpb.FieldMask)(nil),       // 14: google.protobuf.FieldMask
+	(*VerifyAuthMFARequest)(nil),        // 12: grpc_kit.api.known.admin.v1.VerifyAuthMFARequest
+	(*SetupUserMFARequest)(nil),         // 13: grpc_kit.api.known.admin.v1.SetupUserMFARequest
+	(*SetupUserMFAResponse)(nil),        // 14: grpc_kit.api.known.admin.v1.SetupUserMFAResponse
+	(*ConfirmUserMFARequest)(nil),       // 15: grpc_kit.api.known.admin.v1.ConfirmUserMFARequest
+	(*ConfirmUserMFAResponse)(nil),      // 16: grpc_kit.api.known.admin.v1.ConfirmUserMFAResponse
+	(*DisableUserMFARequest)(nil),       // 17: grpc_kit.api.known.admin.v1.DisableUserMFARequest
+	(View)(0),                           // 18: grpc_kit.api.known.admin.v1.View
+	(*AuthProvider)(nil),                // 19: grpc_kit.api.known.admin.v1.AuthProvider
+	(*fieldmaskpb.FieldMask)(nil),       // 20: google.protobuf.FieldMask
 }
 var file_known_admin_v1_auth_proto_depIdxs = []int32{
-	12, // 0: grpc_kit.api.known.admin.v1.ListAuthProvidersRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
-	13, // 1: grpc_kit.api.known.admin.v1.ListAuthProvidersResponse.providers:type_name -> grpc_kit.api.known.admin.v1.AuthProvider
-	13, // 2: grpc_kit.api.known.admin.v1.UpsertAuthProvidersRequest.providers:type_name -> grpc_kit.api.known.admin.v1.AuthProvider
-	13, // 3: grpc_kit.api.known.admin.v1.UpsertAuthProvidersResponse.providers:type_name -> grpc_kit.api.known.admin.v1.AuthProvider
-	13, // 4: grpc_kit.api.known.admin.v1.CreateAuthProviderRequest.provider:type_name -> grpc_kit.api.known.admin.v1.AuthProvider
-	13, // 5: grpc_kit.api.known.admin.v1.UpdateAuthProviderRequest.provider:type_name -> grpc_kit.api.known.admin.v1.AuthProvider
-	14, // 6: grpc_kit.api.known.admin.v1.UpdateAuthProviderRequest.update_mask:type_name -> google.protobuf.FieldMask
+	18, // 0: grpc_kit.api.known.admin.v1.ListAuthProvidersRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
+	19, // 1: grpc_kit.api.known.admin.v1.ListAuthProvidersResponse.providers:type_name -> grpc_kit.api.known.admin.v1.AuthProvider
+	19, // 2: grpc_kit.api.known.admin.v1.UpsertAuthProvidersRequest.providers:type_name -> grpc_kit.api.known.admin.v1.AuthProvider
+	19, // 3: grpc_kit.api.known.admin.v1.UpsertAuthProvidersResponse.providers:type_name -> grpc_kit.api.known.admin.v1.AuthProvider
+	19, // 4: grpc_kit.api.known.admin.v1.CreateAuthProviderRequest.provider:type_name -> grpc_kit.api.known.admin.v1.AuthProvider
+	19, // 5: grpc_kit.api.known.admin.v1.UpdateAuthProviderRequest.provider:type_name -> grpc_kit.api.known.admin.v1.AuthProvider
+	20, // 6: grpc_kit.api.known.admin.v1.UpdateAuthProviderRequest.update_mask:type_name -> google.protobuf.FieldMask
 	7,  // [7:7] is the sub-list for method output_type
 	7,  // [7:7] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
@@ -1157,6 +1532,78 @@ func file_known_admin_v1_auth_proto_init() {
 				return nil
 			}
 		}
+		file_known_admin_v1_auth_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*VerifyAuthMFARequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_auth_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SetupUserMFARequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_auth_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SetupUserMFAResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_auth_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ConfirmUserMFARequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_auth_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ConfirmUserMFAResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_auth_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DisableUserMFARequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_known_admin_v1_auth_proto_msgTypes[2].OneofWrappers = []interface{}{
 		(*ListAuthProvidersRequest_PageToken)(nil),
@@ -1168,7 +1615,7 @@ func file_known_admin_v1_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_auth_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

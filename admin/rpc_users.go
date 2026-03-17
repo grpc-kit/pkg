@@ -120,6 +120,21 @@ func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, inclu
 		Metadata:            user.Metadata,
 	}
 
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("not found database client").Err()
+	}
+	mfaEnabled, err := db.UserIdentities.Query().
+		Where(
+			useridentities.UserIDEQ(user.ID),
+			useridentities.MfaEnabledEQ(true),
+		).
+		Exist(ctx)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("query user mfa status failed").Err()
+	}
+	resp.MfaEnabled = mfaEnabled
+
 	if !includeSensitive {
 		return resp, nil
 	}
