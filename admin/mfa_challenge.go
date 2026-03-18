@@ -10,8 +10,14 @@ import (
 type mfaChallengeType int
 
 const (
-	mfaChallengeTypeLogin mfaChallengeType = iota
-	mfaChallengeTypeSetup
+	// 登录场景：已有 MFA，要求输入 TOTP 验证
+	mfaChallengeTypeLoginVerify mfaChallengeType = iota
+	// 登录场景：未配置 MFA，要求先进行首次配置
+	mfaChallengeTypeLoginSetup
+	// 登录场景：首次配置中，等待输入验证码确认绑定
+	mfaChallengeTypeLoginSetupConfirm
+	// 管理场景：管理员为指定用户开启 MFA
+	mfaChallengeTypeAdminSetup
 )
 
 type mfaChallenge struct {

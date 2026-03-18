@@ -2,7 +2,10 @@ package admin
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 
+	"github.com/golang-jwt/jwt/v4"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 )
@@ -11,6 +14,7 @@ import (
 func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAuthCallbackRequest) (*adminv1.GetAuthCallbackResponse, error) {
 	result := &adminv1.GetAuthCallbackResponse{
 		TokenType: "Bearer",
+		ExpiresIn: 24 * 60 * 60,
 	}
 
 	db, err := a.GetLionClient()
@@ -29,7 +33,43 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		return nil, err
 	}
 
-	result.AccessToken = accessToken
+	userID, username, err := extractUserFromAccessToken(accessToken)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to parse callback access token")
+	}
+
+	authToken, err := a.applyMFAGateAfterPrimaryAuth(ctx, db, userID, username, false, accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	if authToken.GetMfaRequired() {
+		result.MfaRequired = true
+		result.ChallengeId = authToken.GetChallengeId()
+		result.ChallengeType = authToken.GetChallengeType()
+		return result, nil
+	}
+	result.AccessToken = authToken.GetAccessToken()
 
 	return result, nil
+}
+
+func extractUserFromAccessToken(accessToken string) (int, string, error) {
+	parser := jwt.NewParser()
+	claims := jwt.MapClaims{}
+	if _, _, err := parser.ParseUnverified(accessToken, claims); err != nil {
+		return 0, "", err
+	}
+
+	sub, ok := claims["sub"].(string)
+	if !ok || sub == "" {
+		return 0, "", fmt.Errorf("subject is empty")
+	}
+	userID, err := strconv.Atoi(sub)
+	if err != nil {
+		return 0, "", err
+	}
+
+	username, _ := claims["username"].(string)
+	return userID, username, nil
 }

@@ -127,19 +127,23 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 			return nil, errs.Unauthenticated(ctx)
 		}
 
-		if pcResult.MfaEnabled {
-			challenge, cErr := a.mfaChallenges.Create(mfaChallengeTypeLogin, pcResult.UserID, pcResult.Username)
-			if cErr != nil {
-				return nil, errs.Internal(ctx).WithMessage("failed to create MFA challenge")
-			}
-			return &adminv1.AuthToken{
-				MfaRequired:   true,
-				ChallengeId:   challenge.ChallengeID,
-				ChallengeType: "TOTP",
-			}, nil
+		authToken, gateErr := a.applyMFAGateAfterPrimaryAuth(
+			ctx,
+			db,
+			pcResult.UserID,
+			pcResult.Username,
+			pcResult.MfaEnabled,
+			pcResult.AccessToken,
+		)
+		if gateErr != nil {
+			return nil, gateErr
 		}
 
-		accessToken = pcResult.AccessToken
+		if authToken.GetMfaRequired() {
+			return authToken, nil
+		}
+
+		accessToken = authToken.GetAccessToken()
 	}
 
 	result.AccessToken = accessToken
