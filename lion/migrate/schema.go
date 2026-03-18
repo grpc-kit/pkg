@@ -552,6 +552,7 @@ var (
 		{Name: "password_hash", Type: field.TypeString, Default: ""},
 		{Name: "mfa_enabled", Type: field.TypeBool, Default: false},
 		{Name: "mfa_secret_encrypted", Type: field.TypeBytes},
+		{Name: "mfa_recovery_codes_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "access_token_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "refresh_token_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "password_changed_at", Type: field.TypeTime, Nullable: true},
@@ -569,13 +570,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_user_identities_lion_auth_providers_lion_user_identities",
-				Columns:    []*schema.Column{LionUserIdentitiesColumns[16]},
+				Columns:    []*schema.Column{LionUserIdentitiesColumns[17]},
 				RefColumns: []*schema.Column{LionAuthProvidersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_user_identities_lion_users_lion_user_identities",
-				Columns:    []*schema.Column{LionUserIdentitiesColumns[17]},
+				Columns:    []*schema.Column{LionUserIdentitiesColumns[18]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -584,7 +585,7 @@ var (
 			{
 				Name:    "useridentities_user_id_provider_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserIdentitiesColumns[17], LionUserIdentitiesColumns[16]},
+				Columns: []*schema.Column{LionUserIdentitiesColumns[18], LionUserIdentitiesColumns[17]},
 			},
 		},
 	}

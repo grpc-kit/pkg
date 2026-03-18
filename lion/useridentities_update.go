@@ -186,6 +186,18 @@ func (_u *UserIdentitiesUpdate) SetMfaSecretEncrypted(v []byte) *UserIdentitiesU
 	return _u
 }
 
+// SetMfaRecoveryCodesEncrypted sets the "mfa_recovery_codes_encrypted" field.
+func (_u *UserIdentitiesUpdate) SetMfaRecoveryCodesEncrypted(v []byte) *UserIdentitiesUpdate {
+	_u.mutation.SetMfaRecoveryCodesEncrypted(v)
+	return _u
+}
+
+// ClearMfaRecoveryCodesEncrypted clears the value of the "mfa_recovery_codes_encrypted" field.
+func (_u *UserIdentitiesUpdate) ClearMfaRecoveryCodesEncrypted() *UserIdentitiesUpdate {
+	_u.mutation.ClearMfaRecoveryCodesEncrypted()
+	return _u
+}
+
 // SetAccessTokenEncrypted sets the "access_token_encrypted" field.
 func (_u *UserIdentitiesUpdate) SetAccessTokenEncrypted(v []byte) *UserIdentitiesUpdate {
 	_u.mutation.SetAccessTokenEncrypted(v)
@@ -436,6 +448,12 @@ func (_u *UserIdentitiesUpdate) sqlSave(ctx context.Context) (_node int, err err
 	}
 	if value, ok := _u.mutation.MfaSecretEncrypted(); ok {
 		_spec.SetField(useridentities.FieldMfaSecretEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.MfaRecoveryCodesEncrypted(); ok {
+		_spec.SetField(useridentities.FieldMfaRecoveryCodesEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.MfaRecoveryCodesEncryptedCleared() {
+		_spec.ClearField(useridentities.FieldMfaRecoveryCodesEncrypted, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.AccessTokenEncrypted(); ok {
 		_spec.SetField(useridentities.FieldAccessTokenEncrypted, field.TypeBytes, value)
@@ -704,6 +722,18 @@ func (_u *UserIdentitiesUpdateOne) SetNillableMfaEnabled(v *bool) *UserIdentitie
 // SetMfaSecretEncrypted sets the "mfa_secret_encrypted" field.
 func (_u *UserIdentitiesUpdateOne) SetMfaSecretEncrypted(v []byte) *UserIdentitiesUpdateOne {
 	_u.mutation.SetMfaSecretEncrypted(v)
+	return _u
+}
+
+// SetMfaRecoveryCodesEncrypted sets the "mfa_recovery_codes_encrypted" field.
+func (_u *UserIdentitiesUpdateOne) SetMfaRecoveryCodesEncrypted(v []byte) *UserIdentitiesUpdateOne {
+	_u.mutation.SetMfaRecoveryCodesEncrypted(v)
+	return _u
+}
+
+// ClearMfaRecoveryCodesEncrypted clears the value of the "mfa_recovery_codes_encrypted" field.
+func (_u *UserIdentitiesUpdateOne) ClearMfaRecoveryCodesEncrypted() *UserIdentitiesUpdateOne {
+	_u.mutation.ClearMfaRecoveryCodesEncrypted()
 	return _u
 }
 
@@ -987,6 +1017,12 @@ func (_u *UserIdentitiesUpdateOne) sqlSave(ctx context.Context) (_node *UserIden
 	}
 	if value, ok := _u.mutation.MfaSecretEncrypted(); ok {
 		_spec.SetField(useridentities.FieldMfaSecretEncrypted, field.TypeBytes, value)
+	}
+	if value, ok := _u.mutation.MfaRecoveryCodesEncrypted(); ok {
+		_spec.SetField(useridentities.FieldMfaRecoveryCodesEncrypted, field.TypeBytes, value)
+	}
+	if _u.mutation.MfaRecoveryCodesEncryptedCleared() {
+		_spec.ClearField(useridentities.FieldMfaRecoveryCodesEncrypted, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.AccessTokenEncrypted(); ok {
 		_spec.SetField(useridentities.FieldAccessTokenEncrypted, field.TypeBytes, value)

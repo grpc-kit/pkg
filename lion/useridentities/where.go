@@ -110,6 +110,11 @@ func MfaSecretEncrypted(v []byte) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldEQ(FieldMfaSecretEncrypted, v))
 }
 
+// MfaRecoveryCodesEncrypted applies equality check predicate on the "mfa_recovery_codes_encrypted" field. It's identical to MfaRecoveryCodesEncryptedEQ.
+func MfaRecoveryCodesEncrypted(v []byte) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldEQ(FieldMfaRecoveryCodesEncrypted, v))
+}
+
 // AccessTokenEncrypted applies equality check predicate on the "access_token_encrypted" field. It's identical to AccessTokenEncryptedEQ.
 func AccessTokenEncrypted(v []byte) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldEQ(FieldAccessTokenEncrypted, v))
@@ -613,6 +618,56 @@ func MfaSecretEncryptedLT(v []byte) predicate.UserIdentities {
 // MfaSecretEncryptedLTE applies the LTE predicate on the "mfa_secret_encrypted" field.
 func MfaSecretEncryptedLTE(v []byte) predicate.UserIdentities {
 	return predicate.UserIdentities(sql.FieldLTE(FieldMfaSecretEncrypted, v))
+}
+
+// MfaRecoveryCodesEncryptedEQ applies the EQ predicate on the "mfa_recovery_codes_encrypted" field.
+func MfaRecoveryCodesEncryptedEQ(v []byte) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldEQ(FieldMfaRecoveryCodesEncrypted, v))
+}
+
+// MfaRecoveryCodesEncryptedNEQ applies the NEQ predicate on the "mfa_recovery_codes_encrypted" field.
+func MfaRecoveryCodesEncryptedNEQ(v []byte) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNEQ(FieldMfaRecoveryCodesEncrypted, v))
+}
+
+// MfaRecoveryCodesEncryptedIn applies the In predicate on the "mfa_recovery_codes_encrypted" field.
+func MfaRecoveryCodesEncryptedIn(vs ...[]byte) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldIn(FieldMfaRecoveryCodesEncrypted, vs...))
+}
+
+// MfaRecoveryCodesEncryptedNotIn applies the NotIn predicate on the "mfa_recovery_codes_encrypted" field.
+func MfaRecoveryCodesEncryptedNotIn(vs ...[]byte) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNotIn(FieldMfaRecoveryCodesEncrypted, vs...))
+}
+
+// MfaRecoveryCodesEncryptedGT applies the GT predicate on the "mfa_recovery_codes_encrypted" field.
+func MfaRecoveryCodesEncryptedGT(v []byte) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldGT(FieldMfaRecoveryCodesEncrypted, v))
+}
+
+// MfaRecoveryCodesEncryptedGTE applies the GTE predicate on the "mfa_recovery_codes_encrypted" field.
+func MfaRecoveryCodesEncryptedGTE(v []byte) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldGTE(FieldMfaRecoveryCodesEncrypted, v))
+}
+
+// MfaRecoveryCodesEncryptedLT applies the LT predicate on the "mfa_recovery_codes_encrypted" field.
+func MfaRecoveryCodesEncryptedLT(v []byte) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldLT(FieldMfaRecoveryCodesEncrypted, v))
+}
+
+// MfaRecoveryCodesEncryptedLTE applies the LTE predicate on the "mfa_recovery_codes_encrypted" field.
+func MfaRecoveryCodesEncryptedLTE(v []byte) predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldLTE(FieldMfaRecoveryCodesEncrypted, v))
+}
+
+// MfaRecoveryCodesEncryptedIsNil applies the IsNil predicate on the "mfa_recovery_codes_encrypted" field.
+func MfaRecoveryCodesEncryptedIsNil() predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldIsNull(FieldMfaRecoveryCodesEncrypted))
+}
+
+// MfaRecoveryCodesEncryptedNotNil applies the NotNil predicate on the "mfa_recovery_codes_encrypted" field.
+func MfaRecoveryCodesEncryptedNotNil() predicate.UserIdentities {
+	return predicate.UserIdentities(sql.FieldNotNull(FieldMfaRecoveryCodesEncrypted))
 }
 
 // AccessTokenEncryptedEQ applies the EQ predicate on the "access_token_encrypted" field.

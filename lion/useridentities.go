@@ -41,6 +41,8 @@ type UserIdentities struct {
 	MfaEnabled bool `json:"mfa_enabled,omitempty"`
 	// 加密后的 MFA 密钥
 	MfaSecretEncrypted []byte `json:"-"`
+	// 加密后的 MFA 恢复码元数据
+	MfaRecoveryCodesEncrypted []byte `json:"-"`
 	// 加密后的访问令牌
 	AccessTokenEncrypted []byte `json:"-"`
 	// 加密后的刷新令牌
@@ -97,7 +99,7 @@ func (*UserIdentities) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case useridentities.FieldMfaSecretEncrypted, useridentities.FieldAccessTokenEncrypted, useridentities.FieldRefreshTokenEncrypted:
+		case useridentities.FieldMfaSecretEncrypted, useridentities.FieldMfaRecoveryCodesEncrypted, useridentities.FieldAccessTokenEncrypted, useridentities.FieldRefreshTokenEncrypted:
 			values[i] = new([]byte)
 		case useridentities.FieldMfaEnabled:
 			values[i] = new(sql.NullBool)
@@ -193,6 +195,12 @@ func (_m *UserIdentities) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field mfa_secret_encrypted", values[i])
 			} else if value != nil {
 				_m.MfaSecretEncrypted = *value
+			}
+		case useridentities.FieldMfaRecoveryCodesEncrypted:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field mfa_recovery_codes_encrypted", values[i])
+			} else if value != nil {
+				_m.MfaRecoveryCodesEncrypted = *value
 			}
 		case useridentities.FieldAccessTokenEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -309,6 +317,8 @@ func (_m *UserIdentities) String() string {
 	builder.WriteString(fmt.Sprintf("%v", _m.MfaEnabled))
 	builder.WriteString(", ")
 	builder.WriteString("mfa_secret_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("mfa_recovery_codes_encrypted=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("access_token_encrypted=<sensitive>")
 	builder.WriteString(", ")

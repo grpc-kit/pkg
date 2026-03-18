@@ -39,6 +39,10 @@ func (UserIdentities) Fields() []ent.Field {
 			Sensitive().
 			Default([]byte("")).
 			Comment("加密后的 MFA 密钥"),
+		field.Bytes("mfa_recovery_codes_encrypted").
+			Sensitive().
+			Optional().
+			Comment("加密后的 MFA 恢复码元数据"),
 		field.Bytes("access_token_encrypted").
 			Sensitive().
 			Optional().

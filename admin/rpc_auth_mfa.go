@@ -3,10 +3,14 @@ package admin
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/x509"
+	"encoding/json"
 	"encoding/hex"
 	"fmt"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/pquerna/otp/totp"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -54,9 +58,20 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 		return nil, errs.Internal(ctx).WithMessage("failed to query local MFA policy")
 	}
 
-	query := db.UserIdentities.Query().
+	tx, err := db.Tx(ctx)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to begin transaction")
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	query := tx.UserIdentities.Query().
 		Select(
+			useridentities.FieldID,
+			useridentities.FieldProviderID,
 			useridentities.FieldMfaSecretEncrypted,
+			useridentities.FieldMfaRecoveryCodesEncrypted,
 			useridentities.FieldMfaEnabled,
 		).
 		Where(
@@ -80,16 +95,50 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 		return nil, errs.Internal(ctx).WithMessage("failed to decrypt MFA secret")
 	}
 
+	recoveryCodeConsumed := false
 	if !totp.Validate(req.TotpCode, string(secretBytes)) {
-		return nil, errs.Unauthenticated(ctx).WithMessage("invalid TOTP code")
-	}
+		recoveryCodesEncryptedAfterConsume, consumed, consumeErr := consumeRecoveryCodeEncrypted(
+			a.config.aesKey,
+			identity.MfaRecoveryCodesEncrypted,
+			req.TotpCode,
+			time.Now(),
+		)
+		if consumeErr != nil {
+			return nil, errs.Internal(ctx).WithMessage("failed to verify recovery code")
+		}
+		if !consumed {
+			return nil, errs.Unauthenticated(ctx).WithMessage("invalid TOTP code or recovery code")
+		}
+		recoveryCodeConsumed = true
 
-	a.mfaChallenges.Delete(req.ChallengeId)
+		affected, saveErr := tx.UserIdentities.Update().
+			Where(
+				useridentities.UserIDEQ(challenge.UserID),
+				useridentities.ProviderIDEQ(identity.ProviderID),
+				useridentities.MfaEnabledEQ(true),
+				useridentities.MfaRecoveryCodesEncryptedEQ(identity.MfaRecoveryCodesEncrypted),
+			).
+			SetMfaRecoveryCodesEncrypted(recoveryCodesEncryptedAfterConsume).
+			Save(ctx)
+		if saveErr != nil {
+			return nil, errs.Internal(ctx).WithMessage("failed to consume recovery code")
+		}
+		if affected == 0 {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("recovery code already used or MFA state changed")
+		}
+	}
 
 	accessToken, err := a.issueTokenForUser(ctx, db, challenge.UserID)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to issue access token")
 	}
+	if err := tx.Commit(); err != nil {
+		if recoveryCodeConsumed {
+			return nil, errs.Internal(ctx).WithMessage("failed to commit recovery code consumption")
+		}
+		return nil, errs.Internal(ctx).WithMessage("failed to finalize MFA verification")
+	}
+	a.mfaChallenges.Delete(req.ChallengeId)
 
 	return &adminv1.AuthToken{
 		AccessToken: accessToken,
@@ -205,6 +254,14 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to encrypt MFA secret")
 	}
+	recoveryCodes, err := generateRecoveryCodes(8)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to generate recovery codes")
+	}
+	recoveryCodesEnc, err := encryptRecoveryCodes(a.config.aesKey, recoveryCodes)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to encrypt recovery codes")
+	}
 
 	_, localProviderID, pErr := a.getLocalMFAPolicy(ctx, db)
 	if pErr != nil {
@@ -225,17 +282,13 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 		).
 		SetMfaEnabled(true).
 		SetMfaSecretEncrypted(secretEnc).
+		SetMfaRecoveryCodesEncrypted(recoveryCodesEnc).
 		Save(ctx)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to enable MFA")
 	}
 
 	a.mfaChallenges.Delete(req.ChallengeId)
-
-	recoveryCodes, err := generateRecoveryCodes(8)
-	if err != nil {
-		return nil, errs.Internal(ctx).WithMessage("failed to generate recovery codes")
-	}
 
 	return &adminv1.ConfirmUserMFAResponse{
 		RecoveryCodes: recoveryCodes,
@@ -264,10 +317,19 @@ func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.Disable
 		return nil, errs.FailedPrecondition(ctx).WithMessage("local auth provider not found")
 	}
 
-	identity, err := db.UserIdentities.Query().
+	tx, err := db.Tx(ctx)
+	if err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to begin transaction")
+	}
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	identity, err := tx.UserIdentities.Query().
 		Select(
 			useridentities.FieldMfaEnabled,
 			useridentities.FieldMfaSecretEncrypted,
+			useridentities.FieldMfaRecoveryCodesEncrypted,
 		).
 		Where(
 			useridentities.UserIDEQ(int(req.UserId)),
@@ -282,25 +344,61 @@ func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.Disable
 		return nil, errs.Internal(ctx).WithMessage("failed to query user identity")
 	}
 
+	verifiedByRecoveryCode := false
+	recoveryCodesEncryptedAfterConsume := []byte(nil)
+
 	secretBytes, err := crypto.DecryptAES(a.config.aesKey, identity.MfaSecretEncrypted)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to decrypt MFA secret")
 	}
-
 	if !totp.Validate(req.TotpCode, string(secretBytes)) {
-		return nil, errs.Unauthenticated(ctx).WithMessage("invalid TOTP code")
+		recoveryCodesEncryptedAfterConsume, verifiedByRecoveryCode, err = consumeRecoveryCodeEncrypted(a.config.aesKey, identity.MfaRecoveryCodesEncrypted, req.TotpCode, time.Now())
+		if err != nil {
+			return nil, errs.Internal(ctx).WithMessage("failed to verify recovery code")
+		}
+		if !verifiedByRecoveryCode {
+			return nil, errs.Unauthenticated(ctx).WithMessage("invalid TOTP code or recovery code")
+		}
+
+		affected, saveErr := tx.UserIdentities.Update().
+			Where(
+				useridentities.UserIDEQ(int(req.UserId)),
+				useridentities.ProviderIDEQ(localProviderID),
+				useridentities.MfaEnabledEQ(true),
+				useridentities.MfaRecoveryCodesEncryptedEQ(identity.MfaRecoveryCodesEncrypted),
+			).
+			SetMfaRecoveryCodesEncrypted(recoveryCodesEncryptedAfterConsume).
+			Save(ctx)
+		if saveErr != nil {
+			return nil, errs.Internal(ctx).WithMessage("failed to consume recovery code")
+		}
+		if affected == 0 {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("recovery code already used or MFA state changed")
+		}
 	}
 
-	_, err = db.UserIdentities.Update().
+	updater := tx.UserIdentities.Update().
 		Where(
 			useridentities.UserIDEQ(int(req.UserId)),
 			useridentities.ProviderIDEQ(localProviderID),
-		).
+			useridentities.MfaEnabledEQ(true),
+		)
+	if verifiedByRecoveryCode {
+		updater = updater.Where(useridentities.MfaRecoveryCodesEncryptedEQ(recoveryCodesEncryptedAfterConsume))
+	}
+	affected, err := updater.
 		SetMfaEnabled(false).
 		SetMfaSecretEncrypted([]byte("")).
+		SetMfaRecoveryCodesEncrypted([]byte("")).
 		Save(ctx)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to disable MFA")
+	}
+	if affected == 0 {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("MFA state changed, please retry")
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, errs.Internal(ctx).WithMessage("failed to commit MFA disable transaction")
 	}
 
 	return &emptypb.Empty{}, nil
@@ -399,6 +497,7 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 		).
 		SetMfaEnabled(true).
 		SetMfaSecretEncrypted(secretEnc).
+		SetMfaRecoveryCodesEncrypted([]byte("")).
 		Save(ctx)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to enable MFA for local identity")
@@ -481,4 +580,96 @@ func generateRecoveryCodes(count int) ([]string, error) {
 		codes[i] = hex.EncodeToString(b)
 	}
 	return codes, nil
+}
+
+type mfaRecoveryCodesState struct {
+	Version int                   `json:"version"`
+	Items   []mfaRecoveryCodeItem `json:"items"`
+}
+
+type mfaRecoveryCodeItem struct {
+	Hash   string     `json:"hash"`
+	Used   bool       `json:"used"`
+	UsedAt *time.Time `json:"used_at,omitempty"`
+}
+
+func encryptRecoveryCodes(aesKey []byte, recoveryCodes []string) ([]byte, error) {
+	items := make([]mfaRecoveryCodeItem, 0, len(recoveryCodes))
+	for _, code := range recoveryCodes {
+		items = append(items, mfaRecoveryCodeItem{
+			Hash: hashRecoveryCode(aesKey, code),
+			Used: false,
+		})
+	}
+	payload, err := json.Marshal(mfaRecoveryCodesState{
+		Version: 1,
+		Items:   items,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return crypto.EncryptAES(aesKey, payload)
+}
+
+func consumeRecoveryCodeEncrypted(aesKey, encrypted []byte, inputCode string, now time.Time) ([]byte, bool, error) {
+	if len(encrypted) == 0 {
+		return nil, false, nil
+	}
+	raw, err := crypto.DecryptAES(aesKey, encrypted)
+	if err != nil {
+		return nil, false, err
+	}
+
+	var state mfaRecoveryCodesState
+	if err := json.Unmarshal(raw, &state); err != nil {
+		return nil, false, err
+	}
+	if state.Version != 1 {
+		return nil, false, fmt.Errorf("unsupported recovery code state version: %d", state.Version)
+	}
+
+	inputHash := hashRecoveryCode(aesKey, inputCode)
+	matched := false
+	for idx := range state.Items {
+		if state.Items[idx].Hash != inputHash {
+			continue
+		}
+		if state.Items[idx].Used {
+			return nil, false, nil
+		}
+		state.Items[idx].Used = true
+		usedAt := now
+		state.Items[idx].UsedAt = &usedAt
+		matched = true
+		break
+	}
+	if !matched {
+		return nil, false, nil
+	}
+
+	nextRaw, err := json.Marshal(state)
+	if err != nil {
+		return nil, false, err
+	}
+	nextEncrypted, err := crypto.EncryptAES(aesKey, nextRaw)
+	if err != nil {
+		return nil, false, err
+	}
+	return nextEncrypted, true, nil
+}
+
+func hashRecoveryCode(aesKey []byte, code string) string {
+	h := sha256.New()
+	h.Write([]byte("mfa-recovery-code:v1:"))
+	h.Write(aesKey)
+	h.Write([]byte{':'})
+	h.Write([]byte(normalizeRecoveryCode(code)))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func normalizeRecoveryCode(code string) string {
+	normalized := strings.TrimSpace(strings.ToLower(code))
+	normalized = strings.ReplaceAll(normalized, "-", "")
+	normalized = strings.ReplaceAll(normalized, " ", "")
+	return normalized
 }

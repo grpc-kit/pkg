@@ -36,6 +36,8 @@ const (
 	FieldMfaEnabled = "mfa_enabled"
 	// FieldMfaSecretEncrypted holds the string denoting the mfa_secret_encrypted field in the database.
 	FieldMfaSecretEncrypted = "mfa_secret_encrypted"
+	// FieldMfaRecoveryCodesEncrypted holds the string denoting the mfa_recovery_codes_encrypted field in the database.
+	FieldMfaRecoveryCodesEncrypted = "mfa_recovery_codes_encrypted"
 	// FieldAccessTokenEncrypted holds the string denoting the access_token_encrypted field in the database.
 	FieldAccessTokenEncrypted = "access_token_encrypted"
 	// FieldRefreshTokenEncrypted holds the string denoting the refresh_token_encrypted field in the database.
@@ -84,6 +86,7 @@ var Columns = []string{
 	FieldPasswordHash,
 	FieldMfaEnabled,
 	FieldMfaSecretEncrypted,
+	FieldMfaRecoveryCodesEncrypted,
 	FieldAccessTokenEncrypted,
 	FieldRefreshTokenEncrypted,
 	FieldPasswordChangedAt,

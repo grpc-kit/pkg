@@ -19226,34 +19226,35 @@ func (m *UserGroupsMutation) ResetEdge(name string) error {
 // UserIdentitiesMutation represents an operation that mutates the UserIdentities nodes in the graph.
 type UserIdentitiesMutation struct {
 	config
-	op                         Op
-	typ                        string
-	id                         *int
-	created_at                 *time.Time
-	updated_at                 *time.Time
-	created_by                 *int64
-	addcreated_by              *int64
-	updated_by                 *int64
-	addupdated_by              *int64
-	provider_user_id           *string
-	provider_union_id          *string
-	password_hash              *string
-	mfa_enabled                *bool
-	mfa_secret_encrypted       *[]byte
-	access_token_encrypted     *[]byte
-	refresh_token_encrypted    *[]byte
-	password_changed_at        *time.Time
-	password_expires_at        *time.Time
-	token_expires_at           *time.Time
-	last_login_at              *time.Time
-	clearedFields              map[string]struct{}
-	lion_users                 *int
-	clearedlion_users          bool
-	lion_auth_providers        *int
-	clearedlion_auth_providers bool
-	done                       bool
-	oldValue                   func(context.Context) (*UserIdentities, error)
-	predicates                 []predicate.UserIdentities
+	op                           Op
+	typ                          string
+	id                           *int
+	created_at                   *time.Time
+	updated_at                   *time.Time
+	created_by                   *int64
+	addcreated_by                *int64
+	updated_by                   *int64
+	addupdated_by                *int64
+	provider_user_id             *string
+	provider_union_id            *string
+	password_hash                *string
+	mfa_enabled                  *bool
+	mfa_secret_encrypted         *[]byte
+	mfa_recovery_codes_encrypted *[]byte
+	access_token_encrypted       *[]byte
+	refresh_token_encrypted      *[]byte
+	password_changed_at          *time.Time
+	password_expires_at          *time.Time
+	token_expires_at             *time.Time
+	last_login_at                *time.Time
+	clearedFields                map[string]struct{}
+	lion_users                   *int
+	clearedlion_users            bool
+	lion_auth_providers          *int
+	clearedlion_auth_providers   bool
+	done                         bool
+	oldValue                     func(context.Context) (*UserIdentities, error)
+	predicates                   []predicate.UserIdentities
 }
 
 var _ ent.Mutation = (*UserIdentitiesMutation)(nil)
@@ -19831,6 +19832,55 @@ func (m *UserIdentitiesMutation) ResetMfaSecretEncrypted() {
 	m.mfa_secret_encrypted = nil
 }
 
+// SetMfaRecoveryCodesEncrypted sets the "mfa_recovery_codes_encrypted" field.
+func (m *UserIdentitiesMutation) SetMfaRecoveryCodesEncrypted(b []byte) {
+	m.mfa_recovery_codes_encrypted = &b
+}
+
+// MfaRecoveryCodesEncrypted returns the value of the "mfa_recovery_codes_encrypted" field in the mutation.
+func (m *UserIdentitiesMutation) MfaRecoveryCodesEncrypted() (r []byte, exists bool) {
+	v := m.mfa_recovery_codes_encrypted
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMfaRecoveryCodesEncrypted returns the old "mfa_recovery_codes_encrypted" field's value of the UserIdentities entity.
+// If the UserIdentities object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserIdentitiesMutation) OldMfaRecoveryCodesEncrypted(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMfaRecoveryCodesEncrypted is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMfaRecoveryCodesEncrypted requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMfaRecoveryCodesEncrypted: %w", err)
+	}
+	return oldValue.MfaRecoveryCodesEncrypted, nil
+}
+
+// ClearMfaRecoveryCodesEncrypted clears the value of the "mfa_recovery_codes_encrypted" field.
+func (m *UserIdentitiesMutation) ClearMfaRecoveryCodesEncrypted() {
+	m.mfa_recovery_codes_encrypted = nil
+	m.clearedFields[useridentities.FieldMfaRecoveryCodesEncrypted] = struct{}{}
+}
+
+// MfaRecoveryCodesEncryptedCleared returns if the "mfa_recovery_codes_encrypted" field was cleared in this mutation.
+func (m *UserIdentitiesMutation) MfaRecoveryCodesEncryptedCleared() bool {
+	_, ok := m.clearedFields[useridentities.FieldMfaRecoveryCodesEncrypted]
+	return ok
+}
+
+// ResetMfaRecoveryCodesEncrypted resets all changes to the "mfa_recovery_codes_encrypted" field.
+func (m *UserIdentitiesMutation) ResetMfaRecoveryCodesEncrypted() {
+	m.mfa_recovery_codes_encrypted = nil
+	delete(m.clearedFields, useridentities.FieldMfaRecoveryCodesEncrypted)
+}
+
 // SetAccessTokenEncrypted sets the "access_token_encrypted" field.
 func (m *UserIdentitiesMutation) SetAccessTokenEncrypted(b []byte) {
 	m.access_token_encrypted = &b
@@ -20239,7 +20289,7 @@ func (m *UserIdentitiesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserIdentitiesMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 18)
 	if m.created_at != nil {
 		fields = append(fields, useridentities.FieldCreatedAt)
 	}
@@ -20272,6 +20322,9 @@ func (m *UserIdentitiesMutation) Fields() []string {
 	}
 	if m.mfa_secret_encrypted != nil {
 		fields = append(fields, useridentities.FieldMfaSecretEncrypted)
+	}
+	if m.mfa_recovery_codes_encrypted != nil {
+		fields = append(fields, useridentities.FieldMfaRecoveryCodesEncrypted)
 	}
 	if m.access_token_encrypted != nil {
 		fields = append(fields, useridentities.FieldAccessTokenEncrypted)
@@ -20321,6 +20374,8 @@ func (m *UserIdentitiesMutation) Field(name string) (ent.Value, bool) {
 		return m.MfaEnabled()
 	case useridentities.FieldMfaSecretEncrypted:
 		return m.MfaSecretEncrypted()
+	case useridentities.FieldMfaRecoveryCodesEncrypted:
+		return m.MfaRecoveryCodesEncrypted()
 	case useridentities.FieldAccessTokenEncrypted:
 		return m.AccessTokenEncrypted()
 	case useridentities.FieldRefreshTokenEncrypted:
@@ -20364,6 +20419,8 @@ func (m *UserIdentitiesMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldMfaEnabled(ctx)
 	case useridentities.FieldMfaSecretEncrypted:
 		return m.OldMfaSecretEncrypted(ctx)
+	case useridentities.FieldMfaRecoveryCodesEncrypted:
+		return m.OldMfaRecoveryCodesEncrypted(ctx)
 	case useridentities.FieldAccessTokenEncrypted:
 		return m.OldAccessTokenEncrypted(ctx)
 	case useridentities.FieldRefreshTokenEncrypted:
@@ -20461,6 +20518,13 @@ func (m *UserIdentitiesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMfaSecretEncrypted(v)
+		return nil
+	case useridentities.FieldMfaRecoveryCodesEncrypted:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMfaRecoveryCodesEncrypted(v)
 		return nil
 	case useridentities.FieldAccessTokenEncrypted:
 		v, ok := value.([]byte)
@@ -20570,6 +20634,9 @@ func (m *UserIdentitiesMutation) ClearedFields() []string {
 	if m.FieldCleared(useridentities.FieldProviderUnionID) {
 		fields = append(fields, useridentities.FieldProviderUnionID)
 	}
+	if m.FieldCleared(useridentities.FieldMfaRecoveryCodesEncrypted) {
+		fields = append(fields, useridentities.FieldMfaRecoveryCodesEncrypted)
+	}
 	if m.FieldCleared(useridentities.FieldAccessTokenEncrypted) {
 		fields = append(fields, useridentities.FieldAccessTokenEncrypted)
 	}
@@ -20610,6 +20677,9 @@ func (m *UserIdentitiesMutation) ClearField(name string) error {
 		return nil
 	case useridentities.FieldProviderUnionID:
 		m.ClearProviderUnionID()
+		return nil
+	case useridentities.FieldMfaRecoveryCodesEncrypted:
+		m.ClearMfaRecoveryCodesEncrypted()
 		return nil
 	case useridentities.FieldAccessTokenEncrypted:
 		m.ClearAccessTokenEncrypted()
@@ -20669,6 +20739,9 @@ func (m *UserIdentitiesMutation) ResetField(name string) error {
 		return nil
 	case useridentities.FieldMfaSecretEncrypted:
 		m.ResetMfaSecretEncrypted()
+		return nil
+	case useridentities.FieldMfaRecoveryCodesEncrypted:
+		m.ResetMfaRecoveryCodesEncrypted()
 		return nil
 	case useridentities.FieldAccessTokenEncrypted:
 		m.ResetAccessTokenEncrypted()

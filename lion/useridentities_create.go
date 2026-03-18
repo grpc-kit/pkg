@@ -144,6 +144,12 @@ func (_c *UserIdentitiesCreate) SetMfaSecretEncrypted(v []byte) *UserIdentitiesC
 	return _c
 }
 
+// SetMfaRecoveryCodesEncrypted sets the "mfa_recovery_codes_encrypted" field.
+func (_c *UserIdentitiesCreate) SetMfaRecoveryCodesEncrypted(v []byte) *UserIdentitiesCreate {
+	_c.mutation.SetMfaRecoveryCodesEncrypted(v)
+	return _c
+}
+
 // SetAccessTokenEncrypted sets the "access_token_encrypted" field.
 func (_c *UserIdentitiesCreate) SetAccessTokenEncrypted(v []byte) *UserIdentitiesCreate {
 	_c.mutation.SetAccessTokenEncrypted(v)
@@ -402,6 +408,10 @@ func (_c *UserIdentitiesCreate) createSpec() (*UserIdentities, *sqlgraph.CreateS
 	if value, ok := _c.mutation.MfaSecretEncrypted(); ok {
 		_spec.SetField(useridentities.FieldMfaSecretEncrypted, field.TypeBytes, value)
 		_node.MfaSecretEncrypted = value
+	}
+	if value, ok := _c.mutation.MfaRecoveryCodesEncrypted(); ok {
+		_spec.SetField(useridentities.FieldMfaRecoveryCodesEncrypted, field.TypeBytes, value)
+		_node.MfaRecoveryCodesEncrypted = value
 	}
 	if value, ok := _c.mutation.AccessTokenEncrypted(); ok {
 		_spec.SetField(useridentities.FieldAccessTokenEncrypted, field.TypeBytes, value)
