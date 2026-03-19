@@ -16,6 +16,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/schema"
+	"github.com/grpc-kit/pkg/lion/useridentities"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -614,6 +615,16 @@ func (a *KnownAdminAPI) DeleteAuthProvider(ctx context.Context, req *adminv1.Del
 	}
 	if isLocalProviderType(provider.ProviderType) {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("LOCAL auth provider is system-initialized and cannot be deleted")
+	}
+
+	linkedUsers, err := db.UserIdentities.Query().
+		Where(useridentities.ProviderIDEQ(int(req.Id))).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if linkedUsers > 0 {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("cannot delete auth provider with associated users")
 	}
 
 	// 执行删除
