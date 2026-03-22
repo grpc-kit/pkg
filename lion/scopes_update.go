@@ -104,6 +104,34 @@ func (_u *ScopesUpdate) SetNillableDisplayName(v *string) *ScopesUpdate {
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *ScopesUpdate) SetProtected(v bool) *ScopesUpdate {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *ScopesUpdate) SetNillableProtected(v *bool) *ScopesUpdate {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *ScopesUpdate) SetDescription(v string) *ScopesUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *ScopesUpdate) SetNillableDescription(v *string) *ScopesUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
 // AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
 func (_u *ScopesUpdate) AddLionResourceScopeIDs(ids ...int) *ScopesUpdate {
 	_u.mutation.AddLionResourceScopeIDs(ids...)
@@ -223,6 +251,12 @@ func (_u *ScopesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(scopes.FieldDisplayName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(scopes.FieldProtected, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(scopes.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionResourceScopesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -360,6 +394,34 @@ func (_u *ScopesUpdateOne) SetDisplayName(v string) *ScopesUpdateOne {
 func (_u *ScopesUpdateOne) SetNillableDisplayName(v *string) *ScopesUpdateOne {
 	if v != nil {
 		_u.SetDisplayName(*v)
+	}
+	return _u
+}
+
+// SetProtected sets the "protected" field.
+func (_u *ScopesUpdateOne) SetProtected(v bool) *ScopesUpdateOne {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *ScopesUpdateOne) SetNillableProtected(v *bool) *ScopesUpdateOne {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *ScopesUpdateOne) SetDescription(v string) *ScopesUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *ScopesUpdateOne) SetNillableDescription(v *string) *ScopesUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
 	return _u
 }
@@ -513,6 +575,12 @@ func (_u *ScopesUpdateOne) sqlSave(ctx context.Context) (_node *Scopes, err erro
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(scopes.FieldDisplayName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(scopes.FieldProtected, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(scopes.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionResourceScopesCleared() {
 		edge := &sqlgraph.EdgeSpec{

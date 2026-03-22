@@ -177,6 +177,7 @@ func dbToProtoAuthProvider(row *lion.AuthProviders, aesKey []byte, withSecret bo
 		Description: row.Description,
 		SortOrder:   int32(row.SortOrder),
 		IconUrl:     row.IconURL,
+		Protected:   row.Protected,
 	}
 
 	// 解密敏感凭证

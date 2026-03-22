@@ -97,6 +97,34 @@ func (_c *ScopesCreate) SetNillableDisplayName(v *string) *ScopesCreate {
 	return _c
 }
 
+// SetProtected sets the "protected" field.
+func (_c *ScopesCreate) SetProtected(v bool) *ScopesCreate {
+	_c.mutation.SetProtected(v)
+	return _c
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_c *ScopesCreate) SetNillableProtected(v *bool) *ScopesCreate {
+	if v != nil {
+		_c.SetProtected(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *ScopesCreate) SetDescription(v string) *ScopesCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *ScopesCreate) SetNillableDescription(v *string) *ScopesCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
 // AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
 func (_c *ScopesCreate) AddLionResourceScopeIDs(ids ...int) *ScopesCreate {
 	_c.mutation.AddLionResourceScopeIDs(ids...)
@@ -163,6 +191,14 @@ func (_c *ScopesCreate) defaults() {
 		v := scopes.DefaultDisplayName
 		_c.mutation.SetDisplayName(v)
 	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		v := scopes.DefaultProtected
+		_c.mutation.SetProtected(v)
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := scopes.DefaultDescription
+		_c.mutation.SetDescription(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -186,6 +222,12 @@ func (_c *ScopesCreate) check() error {
 	}
 	if _, ok := _c.mutation.DisplayName(); !ok {
 		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "Scopes.display_name"`)}
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Scopes.protected"`)}
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Scopes.description"`)}
 	}
 	return nil
 }
@@ -236,6 +278,14 @@ func (_c *ScopesCreate) createSpec() (*Scopes, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.DisplayName(); ok {
 		_spec.SetField(scopes.FieldDisplayName, field.TypeString, value)
 		_node.DisplayName = value
+	}
+	if value, ok := _c.mutation.Protected(); ok {
+		_spec.SetField(scopes.FieldProtected, field.TypeBool, value)
+		_node.Protected = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(scopes.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if nodes := _c.mutation.LionResourceScopesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

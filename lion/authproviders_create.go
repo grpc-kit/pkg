@@ -186,6 +186,20 @@ func (_c *AuthProvidersCreate) SetSecretEncrypted(v []byte) *AuthProvidersCreate
 	return _c
 }
 
+// SetProtected sets the "protected" field.
+func (_c *AuthProvidersCreate) SetProtected(v bool) *AuthProvidersCreate {
+	_c.mutation.SetProtected(v)
+	return _c
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_c *AuthProvidersCreate) SetNillableProtected(v *bool) *AuthProvidersCreate {
+	if v != nil {
+		_c.SetProtected(*v)
+	}
+	return _c
+}
+
 // AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by IDs.
 func (_c *AuthProvidersCreate) AddLionUserIdentityIDs(ids ...int) *AuthProvidersCreate {
 	_c.mutation.AddLionUserIdentityIDs(ids...)
@@ -272,6 +286,10 @@ func (_c *AuthProvidersCreate) defaults() {
 		v := authproviders.DefaultIconURL
 		_c.mutation.SetIconURL(v)
 	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		v := authproviders.DefaultProtected
+		_c.mutation.SetProtected(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -312,6 +330,9 @@ func (_c *AuthProvidersCreate) check() error {
 	}
 	if _, ok := _c.mutation.IconURL(); !ok {
 		return &ValidationError{Name: "icon_url", err: errors.New(`lion: missing required field "AuthProviders.icon_url"`)}
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "AuthProviders.protected"`)}
 	}
 	return nil
 }
@@ -394,6 +415,10 @@ func (_c *AuthProvidersCreate) createSpec() (*AuthProviders, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.SecretEncrypted(); ok {
 		_spec.SetField(authproviders.FieldSecretEncrypted, field.TypeBytes, value)
 		_node.SecretEncrypted = value
+	}
+	if value, ok := _c.mutation.Protected(); ok {
+		_spec.SetField(authproviders.FieldProtected, field.TypeBool, value)
+		_node.Protected = value
 	}
 	if nodes := _c.mutation.LionUserIdentitiesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -53,6 +53,7 @@ func lionPermissionBindingToProto(binding *lion.PermissionBindings) *adminv1.Per
 					Code:        s.Code,
 					DisplayName: s.DisplayName,
 					Type:        adminv1.Scope_Type(s.ScopeType),
+					Protected:   s.Protected,
 				})
 			}
 		}

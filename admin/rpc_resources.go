@@ -269,6 +269,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 							Code:        s.Code,
 							DisplayName: s.DisplayName,
 							Type:        adminv1.Scope_Type(s.ScopeType),
+							Protected:   s.Protected,
 						})
 					}
 				}
@@ -680,6 +681,7 @@ func (a *KnownAdminAPI) CreateResourceScopes(ctx context.Context, req *adminv1.C
 			Code:        dbScope.Code,
 			DisplayName: dbScope.DisplayName,
 			Type:        adminv1.Scope_Type(dbScope.ScopeType),
+			Protected:   dbScope.Protected,
 		}
 	}
 
@@ -797,6 +799,7 @@ func (a *KnownAdminAPI) GetResource(ctx context.Context, req *adminv1.GetResourc
 					Code:        s.Code,
 					DisplayName: s.DisplayName,
 					Type:        adminv1.Scope_Type(s.ScopeType),
+					Protected:   s.Protected,
 				})
 			}
 		}

@@ -42,6 +42,8 @@ const (
 	FieldConfig = "config"
 	// FieldSecretEncrypted holds the string denoting the secret_encrypted field in the database.
 	FieldSecretEncrypted = "secret_encrypted"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
 	// EdgeLionUserIdentities holds the string denoting the lion_user_identities edge name in mutations.
 	EdgeLionUserIdentities = "lion_user_identities"
 	// Table holds the table name of the authproviders in the database.
@@ -72,6 +74,7 @@ var Columns = []string{
 	FieldIconURL,
 	FieldConfig,
 	FieldSecretEncrypted,
+	FieldProtected,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -109,6 +112,8 @@ var (
 	DefaultSortOrder int
 	// DefaultIconURL holds the default value on creation for the "icon_url" field.
 	DefaultIconURL string
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
 )
 
 // OrderOption defines the ordering options for the AuthProviders queries.
@@ -177,6 +182,11 @@ func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
 // ByIconURL orders the results by the icon_url field.
 func ByIconURL(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIconURL, opts...).ToFunc()
+}
+
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
 // ByLionUserIdentitiesCount orders the results by lion_user_identities count.

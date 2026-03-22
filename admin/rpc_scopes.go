@@ -34,6 +34,7 @@ func (a *KnownAdminAPI) ListScopes(ctx context.Context, req *adminv1.ListScopesR
 		scopes.FieldCode,
 		scopes.FieldScopeType,
 		scopes.FieldDisplayName,
+		scopes.FieldProtected,
 		scopes.FieldCreatedAt,
 		scopes.FieldUpdatedAt,
 	}
@@ -123,6 +124,7 @@ func (a *KnownAdminAPI) ListScopes(ctx context.Context, req *adminv1.ListScopesR
 			Code:        s.Code,
 			DisplayName: s.DisplayName,
 			Type:        adminv1.Scope_Type(s.ScopeType),
+			Protected:   s.Protected,
 		}
 
 		// 注意：数据库中不存在description字段，但proto中有定义
@@ -159,11 +161,12 @@ func (a *KnownAdminAPI) CreateScope(ctx context.Context, req *adminv1.CreateScop
 		return nil, err
 	}
 
-	// 创建作用域
+	// 创建作用域（API 创建不可标记为受保护，防止客户端伪造）
 	newScope, err := db.Scopes.Create().
 		SetCode(req.Scope.Code).
 		SetDisplayName(req.Scope.DisplayName).
 		SetScopeType(int(req.Scope.Type)).
+		SetProtected(false).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -174,6 +177,7 @@ func (a *KnownAdminAPI) CreateScope(ctx context.Context, req *adminv1.CreateScop
 		Code:        newScope.Code,
 		DisplayName: newScope.DisplayName,
 		Type:        adminv1.Scope_Type(newScope.ScopeType),
+		Protected:   newScope.Protected,
 	}
 
 	// 注意：数据库中不存在description字段，但proto中有定义
@@ -239,6 +243,7 @@ func (a *KnownAdminAPI) UpdateScope(ctx context.Context, req *adminv1.UpdateScop
 		Code:        updatedScope.Code,
 		DisplayName: updatedScope.DisplayName,
 		Type:        adminv1.Scope_Type(updatedScope.ScopeType),
+		Protected:   updatedScope.Protected,
 	}
 
 	// 注意：数据库中不存在description字段，但proto中有定义
@@ -259,9 +264,12 @@ func (a *KnownAdminAPI) DeleteScope(ctx context.Context, req *adminv1.DeleteScop
 	}
 
 	// 检查作用域是否存在
-	_, err = db.Scopes.Get(ctx, int(req.Id))
+	scopeEnt, err := db.Scopes.Get(ctx, int(req.Id))
 	if err != nil {
 		return nil, errs.NotFound(ctx).WithMessage("scope not found")
+	}
+	if scopeEnt.Protected {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("protected scope cannot be deleted")
 	}
 
 	// 检查是否存在关联的资源作用域

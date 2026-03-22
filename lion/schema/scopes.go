@@ -8,7 +8,8 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// Scopes holds the schema definition for the Demo entity.
+// Scopes 系统作用域（表 lion_scopes）。
+// 内置数据由 pkg/admin CreateDatabaseInitialize 幂等写入：PLATFORM(1) 为 admin、user、app；ACTION(2) 为 create、update、delete、readonly。
 type Scopes struct {
 	ent.Schema
 }
@@ -27,6 +28,12 @@ func (Scopes) Fields() []ent.Field {
 		field.String("display_name").
 			Default("").
 			Comment("友好展示名称"),
+		field.Bool("protected").
+			Default(false).
+			Comment("是否为保护资源，保护资源不能被删除，描述等可更改"),
+		field.String("description").
+			Default("").
+			Comment("详细描述"),
 	}
 }
 

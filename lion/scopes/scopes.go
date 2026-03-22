@@ -26,6 +26,10 @@ const (
 	FieldScopeType = "scope_type"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// EdgeLionResourceScopes holds the string denoting the lion_resource_scopes edge name in mutations.
 	EdgeLionResourceScopes = "lion_resource_scopes"
 	// Table holds the table name of the scopes in the database.
@@ -48,6 +52,8 @@ var Columns = []string{
 	FieldCode,
 	FieldScopeType,
 	FieldDisplayName,
+	FieldProtected,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -73,6 +79,10 @@ var (
 	DefaultScopeType int
 	// DefaultDisplayName holds the default value on creation for the "display_name" field.
 	DefaultDisplayName string
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
 )
 
 // OrderOption defines the ordering options for the Scopes queries.
@@ -111,6 +121,16 @@ func ByScopeType(opts ...sql.OrderTermOption) OrderOption {
 // ByDisplayName orders the results by the display_name field.
 func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
+}
+
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByLionResourceScopesCount orders the results by lion_resource_scopes count.

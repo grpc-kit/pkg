@@ -90,6 +90,7 @@ type AuthProvidersMutation struct {
 	_config                     *json.RawMessage
 	append_config               json.RawMessage
 	secret_encrypted            *[]byte
+	protected                   *bool
 	clearedFields               map[string]struct{}
 	lion_user_identities        map[int]struct{}
 	removedlion_user_identities map[int]struct{}
@@ -884,6 +885,42 @@ func (m *AuthProvidersMutation) ResetSecretEncrypted() {
 	delete(m.clearedFields, authproviders.FieldSecretEncrypted)
 }
 
+// SetProtected sets the "protected" field.
+func (m *AuthProvidersMutation) SetProtected(b bool) {
+	m.protected = &b
+}
+
+// Protected returns the value of the "protected" field in the mutation.
+func (m *AuthProvidersMutation) Protected() (r bool, exists bool) {
+	v := m.protected
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtected returns the old "protected" field's value of the AuthProviders entity.
+// If the AuthProviders object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthProvidersMutation) OldProtected(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtected requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
+	}
+	return oldValue.Protected, nil
+}
+
+// ResetProtected resets all changes to the "protected" field.
+func (m *AuthProvidersMutation) ResetProtected() {
+	m.protected = nil
+}
+
 // AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by ids.
 func (m *AuthProvidersMutation) AddLionUserIdentityIDs(ids ...int) {
 	if m.lion_user_identities == nil {
@@ -972,7 +1009,7 @@ func (m *AuthProvidersMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AuthProvidersMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 15)
 	if m.created_at != nil {
 		fields = append(fields, authproviders.FieldCreatedAt)
 	}
@@ -1015,6 +1052,9 @@ func (m *AuthProvidersMutation) Fields() []string {
 	if m.secret_encrypted != nil {
 		fields = append(fields, authproviders.FieldSecretEncrypted)
 	}
+	if m.protected != nil {
+		fields = append(fields, authproviders.FieldProtected)
+	}
 	return fields
 }
 
@@ -1051,6 +1091,8 @@ func (m *AuthProvidersMutation) Field(name string) (ent.Value, bool) {
 		return m.Config()
 	case authproviders.FieldSecretEncrypted:
 		return m.SecretEncrypted()
+	case authproviders.FieldProtected:
+		return m.Protected()
 	}
 	return nil, false
 }
@@ -1088,6 +1130,8 @@ func (m *AuthProvidersMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldConfig(ctx)
 	case authproviders.FieldSecretEncrypted:
 		return m.OldSecretEncrypted(ctx)
+	case authproviders.FieldProtected:
+		return m.OldProtected(ctx)
 	}
 	return nil, fmt.Errorf("unknown AuthProviders field %s", name)
 }
@@ -1194,6 +1238,13 @@ func (m *AuthProvidersMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSecretEncrypted(v)
+		return nil
+	case authproviders.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
 		return nil
 	}
 	return fmt.Errorf("unknown AuthProviders field %s", name)
@@ -1381,6 +1432,9 @@ func (m *AuthProvidersMutation) ResetField(name string) error {
 		return nil
 	case authproviders.FieldSecretEncrypted:
 		m.ResetSecretEncrypted()
+		return nil
+	case authproviders.FieldProtected:
+		m.ResetProtected()
 		return nil
 	}
 	return fmt.Errorf("unknown AuthProviders field %s", name)
@@ -16015,6 +16069,8 @@ type ScopesMutation struct {
 	scope_type                  *int
 	addscope_type               *int
 	display_name                *string
+	protected                   *bool
+	description                 *string
 	clearedFields               map[string]struct{}
 	lion_resource_scopes        map[int]struct{}
 	removedlion_resource_scopes map[int]struct{}
@@ -16371,6 +16427,78 @@ func (m *ScopesMutation) ResetDisplayName() {
 	m.display_name = nil
 }
 
+// SetProtected sets the "protected" field.
+func (m *ScopesMutation) SetProtected(b bool) {
+	m.protected = &b
+}
+
+// Protected returns the value of the "protected" field in the mutation.
+func (m *ScopesMutation) Protected() (r bool, exists bool) {
+	v := m.protected
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtected returns the old "protected" field's value of the Scopes entity.
+// If the Scopes object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ScopesMutation) OldProtected(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtected requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
+	}
+	return oldValue.Protected, nil
+}
+
+// ResetProtected resets all changes to the "protected" field.
+func (m *ScopesMutation) ResetProtected() {
+	m.protected = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *ScopesMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *ScopesMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Scopes entity.
+// If the Scopes object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ScopesMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *ScopesMutation) ResetDescription() {
+	m.description = nil
+}
+
 // AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by ids.
 func (m *ScopesMutation) AddLionResourceScopeIDs(ids ...int) {
 	if m.lion_resource_scopes == nil {
@@ -16459,7 +16587,7 @@ func (m *ScopesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ScopesMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, scopes.FieldCreatedAt)
 	}
@@ -16477,6 +16605,12 @@ func (m *ScopesMutation) Fields() []string {
 	}
 	if m.display_name != nil {
 		fields = append(fields, scopes.FieldDisplayName)
+	}
+	if m.protected != nil {
+		fields = append(fields, scopes.FieldProtected)
+	}
+	if m.description != nil {
+		fields = append(fields, scopes.FieldDescription)
 	}
 	return fields
 }
@@ -16498,6 +16632,10 @@ func (m *ScopesMutation) Field(name string) (ent.Value, bool) {
 		return m.ScopeType()
 	case scopes.FieldDisplayName:
 		return m.DisplayName()
+	case scopes.FieldProtected:
+		return m.Protected()
+	case scopes.FieldDescription:
+		return m.Description()
 	}
 	return nil, false
 }
@@ -16519,6 +16657,10 @@ func (m *ScopesMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldScopeType(ctx)
 	case scopes.FieldDisplayName:
 		return m.OldDisplayName(ctx)
+	case scopes.FieldProtected:
+		return m.OldProtected(ctx)
+	case scopes.FieldDescription:
+		return m.OldDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown Scopes field %s", name)
 }
@@ -16569,6 +16711,20 @@ func (m *ScopesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDisplayName(v)
+		return nil
+	case scopes.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
+		return nil
+	case scopes.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Scopes field %s", name)
@@ -16660,6 +16816,12 @@ func (m *ScopesMutation) ResetField(name string) error {
 		return nil
 	case scopes.FieldDisplayName:
 		m.ResetDisplayName()
+		return nil
+	case scopes.FieldProtected:
+		m.ResetProtected()
+		return nil
+	case scopes.FieldDescription:
+		m.ResetDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown Scopes field %s", name)

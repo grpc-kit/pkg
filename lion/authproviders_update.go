@@ -260,6 +260,20 @@ func (_u *AuthProvidersUpdate) ClearSecretEncrypted() *AuthProvidersUpdate {
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *AuthProvidersUpdate) SetProtected(v bool) *AuthProvidersUpdate {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *AuthProvidersUpdate) SetNillableProtected(v *bool) *AuthProvidersUpdate {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by IDs.
 func (_u *AuthProvidersUpdate) AddLionUserIdentityIDs(ids ...int) *AuthProvidersUpdate {
 	_u.mutation.AddLionUserIdentityIDs(ids...)
@@ -437,6 +451,9 @@ func (_u *AuthProvidersUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	}
 	if _u.mutation.SecretEncryptedCleared() {
 		_spec.ClearField(authproviders.FieldSecretEncrypted, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(authproviders.FieldProtected, field.TypeBool, value)
 	}
 	if _u.mutation.LionUserIdentitiesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -732,6 +749,20 @@ func (_u *AuthProvidersUpdateOne) ClearSecretEncrypted() *AuthProvidersUpdateOne
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *AuthProvidersUpdateOne) SetProtected(v bool) *AuthProvidersUpdateOne {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *AuthProvidersUpdateOne) SetNillableProtected(v *bool) *AuthProvidersUpdateOne {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by IDs.
 func (_u *AuthProvidersUpdateOne) AddLionUserIdentityIDs(ids ...int) *AuthProvidersUpdateOne {
 	_u.mutation.AddLionUserIdentityIDs(ids...)
@@ -939,6 +970,9 @@ func (_u *AuthProvidersUpdateOne) sqlSave(ctx context.Context) (_node *AuthProvi
 	}
 	if _u.mutation.SecretEncryptedCleared() {
 		_spec.ClearField(authproviders.FieldSecretEncrypted, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(authproviders.FieldProtected, field.TypeBool, value)
 	}
 	if _u.mutation.LionUserIdentitiesCleared() {
 		edge := &sqlgraph.EdgeSpec{

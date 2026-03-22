@@ -85,6 +85,16 @@ func DisplayName(v string) predicate.Scopes {
 	return predicate.Scopes(sql.FieldEQ(FieldDisplayName, v))
 }
 
+// Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
+func Protected(v bool) predicate.Scopes {
+	return predicate.Scopes(sql.FieldEQ(FieldProtected, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldEQ(FieldDescription, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Scopes {
 	return predicate.Scopes(sql.FieldEQ(FieldCreatedAt, v))
@@ -383,6 +393,81 @@ func DisplayNameEqualFold(v string) predicate.Scopes {
 // DisplayNameContainsFold applies the ContainsFold predicate on the "display_name" field.
 func DisplayNameContainsFold(v string) predicate.Scopes {
 	return predicate.Scopes(sql.FieldContainsFold(FieldDisplayName, v))
+}
+
+// ProtectedEQ applies the EQ predicate on the "protected" field.
+func ProtectedEQ(v bool) predicate.Scopes {
+	return predicate.Scopes(sql.FieldEQ(FieldProtected, v))
+}
+
+// ProtectedNEQ applies the NEQ predicate on the "protected" field.
+func ProtectedNEQ(v bool) predicate.Scopes {
+	return predicate.Scopes(sql.FieldNEQ(FieldProtected, v))
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.Scopes {
+	return predicate.Scopes(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // HasLionResourceScopes applies the HasEdge predicate on the "lion_resource_scopes" edge.

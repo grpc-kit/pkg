@@ -120,6 +120,11 @@ func SecretEncrypted(v []byte) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldSecretEncrypted, v))
 }
 
+// Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
+func Protected(v bool) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldProtected, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldEQ(FieldCreatedAt, v))
@@ -788,6 +793,16 @@ func SecretEncryptedIsNil() predicate.AuthProviders {
 // SecretEncryptedNotNil applies the NotNil predicate on the "secret_encrypted" field.
 func SecretEncryptedNotNil() predicate.AuthProviders {
 	return predicate.AuthProviders(sql.FieldNotNull(FieldSecretEncrypted))
+}
+
+// ProtectedEQ applies the EQ predicate on the "protected" field.
+func ProtectedEQ(v bool) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldEQ(FieldProtected, v))
+}
+
+// ProtectedNEQ applies the NEQ predicate on the "protected" field.
+func ProtectedNEQ(v bool) predicate.AuthProviders {
+	return predicate.AuthProviders(sql.FieldNEQ(FieldProtected, v))
 }
 
 // HasLionUserIdentities applies the HasEdge predicate on the "lion_user_identities" edge.

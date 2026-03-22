@@ -206,9 +206,10 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 
 		// 支持本地登录
 		result.Providers = append(result.Providers, &adminv1.AuthProvider{
-			Code:   "local",
-			Type:   adminv1.AuthProvider_LOCAL,
-			Status: adminv1.AuthProvider_ACTIVE,
+			Code:      "local",
+			Type:      adminv1.AuthProvider_LOCAL,
+			Status:    adminv1.AuthProvider_ACTIVE,
+			Protected: true,
 		})
 
 		return result, nil
@@ -223,6 +224,7 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 		authproviders.FieldDescription,
 		authproviders.FieldSortOrder,
 		authproviders.FieldIconURL,
+		authproviders.FieldProtected,
 		authproviders.FieldConfig,
 		authproviders.FieldCreatedAt,
 		authproviders.FieldUpdatedAt,

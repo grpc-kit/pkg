@@ -82,6 +82,10 @@ func init() {
 	authprovidersDescIconURL := authprovidersFields[6].Descriptor()
 	// authproviders.DefaultIconURL holds the default value on creation for the icon_url field.
 	authproviders.DefaultIconURL = authprovidersDescIconURL.Default.(string)
+	// authprovidersDescProtected is the schema descriptor for protected field.
+	authprovidersDescProtected := authprovidersFields[9].Descriptor()
+	// authproviders.DefaultProtected holds the default value on creation for the protected field.
+	authproviders.DefaultProtected = authprovidersDescProtected.Default.(bool)
 	credentialsMixin := schema.Credentials{}.Mixin()
 	credentialsMixinFields0 := credentialsMixin[0].Fields()
 	_ = credentialsMixinFields0
@@ -774,6 +778,14 @@ func init() {
 	scopesDescDisplayName := scopesFields[2].Descriptor()
 	// scopes.DefaultDisplayName holds the default value on creation for the display_name field.
 	scopes.DefaultDisplayName = scopesDescDisplayName.Default.(string)
+	// scopesDescProtected is the schema descriptor for protected field.
+	scopesDescProtected := scopesFields[3].Descriptor()
+	// scopes.DefaultProtected holds the default value on creation for the protected field.
+	scopes.DefaultProtected = scopesDescProtected.Default.(bool)
+	// scopesDescDescription is the schema descriptor for description field.
+	scopesDescDescription := scopesFields[4].Descriptor()
+	// scopes.DefaultDescription holds the default value on creation for the description field.
+	scopes.DefaultDescription = scopesDescDescription.Default.(string)
 	userdepartmentsMixin := schema.UserDepartments{}.Mixin()
 	userdepartmentsMixinFields0 := userdepartmentsMixin[0].Fields()
 	_ = userdepartmentsMixinFields0

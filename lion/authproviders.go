@@ -46,6 +46,8 @@ type AuthProviders struct {
 	Config json.RawMessage `json:"config,omitempty"`
 	// 加密存储的敏感凭证：LDAP 为 bind_password，OAuth2 系为 client_secret
 	SecretEncrypted []byte `json:"-"`
+	// 是否为保护资源，保护资源不能被删除，描述等可更改
+	Protected bool `json:"protected,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AuthProvidersQuery when eager-loading is set.
 	Edges        AuthProvidersEdges `json:"edges"`
@@ -77,6 +79,8 @@ func (*AuthProviders) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case authproviders.FieldConfig, authproviders.FieldSecretEncrypted:
 			values[i] = new([]byte)
+		case authproviders.FieldProtected:
+			values[i] = new(sql.NullBool)
 		case authproviders.FieldID, authproviders.FieldCreatedBy, authproviders.FieldUpdatedBy, authproviders.FieldProviderType, authproviders.FieldProviderStatus, authproviders.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
 		case authproviders.FieldCode, authproviders.FieldDisplayName, authproviders.FieldDescription, authproviders.FieldIconURL:
@@ -191,6 +195,12 @@ func (_m *AuthProviders) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.SecretEncrypted = *value
 			}
+		case authproviders.FieldProtected:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field protected", values[i])
+			} else if value.Valid {
+				_m.Protected = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -274,6 +284,9 @@ func (_m *AuthProviders) String() string {
 	builder.WriteString(fmt.Sprintf("%v", _m.Config))
 	builder.WriteString(", ")
 	builder.WriteString("secret_encrypted=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("protected=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
 	builder.WriteByte(')')
 	return builder.String()
 }

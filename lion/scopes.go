@@ -29,6 +29,10 @@ type Scopes struct {
 	ScopeType int `json:"scope_type,omitempty"`
 	// 友好展示名称
 	DisplayName string `json:"display_name,omitempty"`
+	// 是否为保护资源，保护资源不能被删除，描述等可更改
+	Protected bool `json:"protected,omitempty"`
+	// 详细描述
+	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ScopesQuery when eager-loading is set.
 	Edges        ScopesEdges `json:"edges"`
@@ -58,9 +62,11 @@ func (*Scopes) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case scopes.FieldProtected:
+			values[i] = new(sql.NullBool)
 		case scopes.FieldID, scopes.FieldScopeType:
 			values[i] = new(sql.NullInt64)
-		case scopes.FieldCode, scopes.FieldDisplayName:
+		case scopes.FieldCode, scopes.FieldDisplayName, scopes.FieldDescription:
 			values[i] = new(sql.NullString)
 		case scopes.FieldCreatedAt, scopes.FieldUpdatedAt, scopes.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -122,6 +128,18 @@ func (_m *Scopes) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DisplayName = value.String
 			}
+		case scopes.FieldProtected:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field protected", values[i])
+			} else if value.Valid {
+				_m.Protected = value.Bool
+			}
+		case scopes.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -182,6 +200,12 @@ func (_m *Scopes) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)
+	builder.WriteString(", ")
+	builder.WriteString("protected=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

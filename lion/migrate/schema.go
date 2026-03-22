@@ -26,6 +26,7 @@ var (
 		{Name: "icon_url", Type: field.TypeString, Default: ""},
 		{Name: "config", Type: field.TypeJSON, Nullable: true},
 		{Name: "secret_encrypted", Type: field.TypeBytes, Nullable: true},
+		{Name: "protected", Type: field.TypeBool, Default: false},
 	}
 	// LionAuthProvidersTable holds the schema information for the "lion_auth_providers" table.
 	LionAuthProvidersTable = &schema.Table{
@@ -441,6 +442,8 @@ var (
 		{Name: "code", Type: field.TypeString, Unique: true, Size: 128},
 		{Name: "scope_type", Type: field.TypeInt, Default: 0},
 		{Name: "display_name", Type: field.TypeString, Default: ""},
+		{Name: "protected", Type: field.TypeBool, Default: false},
+		{Name: "description", Type: field.TypeString, Default: ""},
 	}
 	// LionScopesTable holds the schema information for the "lion_scopes" table.
 	LionScopesTable = &schema.Table{

@@ -60,6 +60,10 @@ func (AuthProviders) Fields() []ent.Field {
 			Sensitive().
 			Optional().
 			Comment("加密存储的敏感凭证：LDAP 为 bind_password，OAuth2 系为 client_secret"),
+
+		field.Bool("protected").
+			Default(false).
+			Comment("是否为保护资源，保护资源不能被删除，描述等可更改"),
 	}
 }
 
