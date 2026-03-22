@@ -111,6 +111,7 @@ var (
 		{Name: "visibility", Type: field.TypeInt, Default: 0},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "protected", Type: field.TypeBool, Default: false},
 	}
 	// LionDepartmentsTable holds the schema information for the "lion_departments" table.
 	LionDepartmentsTable = &schema.Table{
@@ -337,6 +338,7 @@ var (
 		{Name: "visual", Type: field.TypeString, Size: 256, Default: ""},
 		{Name: "manifest", Type: field.TypeString, Default: ""},
 		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "protected", Type: field.TypeBool, Default: false},
 	}
 	// LionResourcesTable holds the schema information for the "lion_resources" table.
 	LionResourcesTable = &schema.Table{

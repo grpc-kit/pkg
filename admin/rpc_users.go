@@ -15,6 +15,7 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
+	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -187,7 +188,32 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		return nil, errs.InvalidArgument(ctx).WithMessage("gender is out of supported range")
 	}
 
-	userCreate := a.config.db.Users.Create()
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+	tx, err := db.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	guestDept, err := tx.Departments.Query().
+		Where(departments.CodeEQ(seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_GUEST))).
+		Only(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		if lion.IsNotFound(err) {
+			return nil, errs.FailedPrecondition(ctx).
+				WithMessage("guest department not found, run database initialize").
+				WithDetails(&errdetails.LocalizedMessage{
+					Locale:  "zh-CN",
+					Message: "未找到默认访客部门，请先完成数据库初始化。",
+				}).Err()
+		}
+		return nil, err
+	}
+
+	userCreate := tx.Users.Create()
 	userCreate.SetUsername(req.User.GetUsername())
 	userCreate.SetCreatedBy(userIDInt)
 	userCreate.SetUpdatedBy(userIDInt)
@@ -274,6 +300,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 	}
 	thisUser, err := userCreate.Save(ctx)
 	if err != nil {
+		_ = tx.Rollback()
 		if strings.Contains(err.Error(), "duplicate key value") {
 			return nil, errs.AlreadyExists(ctx).
 				WithLogger(a.logger, "create user err: %v", err).
@@ -284,6 +311,24 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		return nil, errs.InvalidArgument(ctx).
 			WithMessage("user create fail.").
 			WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "创建用户失败！"}).Err()
+	}
+
+	_, err = tx.UserDepartments.Create().
+		SetUserID(thisUser.ID).
+		SetDepartmentID(guestDept.ID).
+		SetMemberRole(int(adminv1.Membership_MEMBER)).
+		SetMemberStatus(int(adminv1.Membership_ACTIVE)).
+		SetMemberType(int(adminv1.Membership_PRIMARY)).
+		SetCreatedBy(userIDInt).
+		SetUpdatedBy(userIDInt).
+		Save(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	row, err := a.config.db.Users.Query().

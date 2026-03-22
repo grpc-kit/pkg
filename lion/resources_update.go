@@ -298,6 +298,20 @@ func (_u *ResourcesUpdate) SetNillableDescription(v *string) *ResourcesUpdate {
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *ResourcesUpdate) SetProtected(v bool) *ResourcesUpdate {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableProtected(v *bool) *ResourcesUpdate {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
 func (_u *ResourcesUpdate) AddLionResourceScopeIDs(ids ...int) *ResourcesUpdate {
 	_u.mutation.AddLionResourceScopeIDs(ids...)
@@ -481,6 +495,9 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(resources.FieldProtected, field.TypeBool, value)
 	}
 	if _u.mutation.LionResourceScopesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -816,6 +833,20 @@ func (_u *ResourcesUpdateOne) SetNillableDescription(v *string) *ResourcesUpdate
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *ResourcesUpdateOne) SetProtected(v bool) *ResourcesUpdateOne {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableProtected(v *bool) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
 func (_u *ResourcesUpdateOne) AddLionResourceScopeIDs(ids ...int) *ResourcesUpdateOne {
 	_u.mutation.AddLionResourceScopeIDs(ids...)
@@ -1029,6 +1060,9 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(resources.FieldProtected, field.TypeBool, value)
 	}
 	if _u.mutation.LionResourceScopesCleared() {
 		edge := &sqlgraph.EdgeSpec{

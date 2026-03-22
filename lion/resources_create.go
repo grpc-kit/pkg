@@ -237,6 +237,20 @@ func (_c *ResourcesCreate) SetNillableDescription(v *string) *ResourcesCreate {
 	return _c
 }
 
+// SetProtected sets the "protected" field.
+func (_c *ResourcesCreate) SetProtected(v bool) *ResourcesCreate {
+	_c.mutation.SetProtected(v)
+	return _c
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableProtected(v *bool) *ResourcesCreate {
+	if v != nil {
+		_c.SetProtected(*v)
+	}
+	return _c
+}
+
 // AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
 func (_c *ResourcesCreate) AddLionResourceScopeIDs(ids ...int) *ResourcesCreate {
 	_c.mutation.AddLionResourceScopeIDs(ids...)
@@ -343,6 +357,10 @@ func (_c *ResourcesCreate) defaults() {
 		v := resources.DefaultDescription
 		_c.mutation.SetDescription(v)
 	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		v := resources.DefaultProtected
+		_c.mutation.SetProtected(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -400,6 +418,9 @@ func (_c *ResourcesCreate) check() error {
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Resources.description"`)}
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Resources.protected"`)}
 	}
 	return nil
 }
@@ -490,6 +511,10 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(resources.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := _c.mutation.Protected(); ok {
+		_spec.SetField(resources.FieldProtected, field.TypeBool, value)
+		_node.Protected = value
 	}
 	if nodes := _c.mutation.LionResourceScopesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -155,6 +155,11 @@ func Description(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldDescription, v))
 }
 
+// Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
+func Protected(v bool) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldProtected, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Departments {
 	return predicate.Departments(sql.FieldEQ(FieldCreatedAt, v))
@@ -1203,6 +1208,16 @@ func DescriptionEqualFold(v string) predicate.Departments {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Departments {
 	return predicate.Departments(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// ProtectedEQ applies the EQ predicate on the "protected" field.
+func ProtectedEQ(v bool) predicate.Departments {
+	return predicate.Departments(sql.FieldEQ(FieldProtected, v))
+}
+
+// ProtectedNEQ applies the NEQ predicate on the "protected" field.
+func ProtectedNEQ(v bool) predicate.Departments {
+	return predicate.Departments(sql.FieldNEQ(FieldProtected, v))
 }
 
 // HasLionUserDepartments applies the HasEdge predicate on the "lion_user_departments" edge.

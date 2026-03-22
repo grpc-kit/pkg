@@ -3866,6 +3866,7 @@ type DepartmentsMutation struct {
 	addvisibility                *int
 	metadata                     *map[string]string
 	description                  *string
+	protected                    *bool
 	clearedFields                map[string]struct{}
 	lion_user_departments        map[int]struct{}
 	removedlion_user_departments map[int]struct{}
@@ -5024,6 +5025,42 @@ func (m *DepartmentsMutation) ResetDescription() {
 	m.description = nil
 }
 
+// SetProtected sets the "protected" field.
+func (m *DepartmentsMutation) SetProtected(b bool) {
+	m.protected = &b
+}
+
+// Protected returns the value of the "protected" field in the mutation.
+func (m *DepartmentsMutation) Protected() (r bool, exists bool) {
+	v := m.protected
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtected returns the old "protected" field's value of the Departments entity.
+// If the Departments object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DepartmentsMutation) OldProtected(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtected requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
+	}
+	return oldValue.Protected, nil
+}
+
+// ResetProtected resets all changes to the "protected" field.
+func (m *DepartmentsMutation) ResetProtected() {
+	m.protected = nil
+}
+
 // AddLionUserDepartmentIDs adds the "lion_user_departments" edge to the UserDepartments entity by ids.
 func (m *DepartmentsMutation) AddLionUserDepartmentIDs(ids ...int) {
 	if m.lion_user_departments == nil {
@@ -5166,7 +5203,7 @@ func (m *DepartmentsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DepartmentsMutation) Fields() []string {
-	fields := make([]string, 0, 21)
+	fields := make([]string, 0, 22)
 	if m.created_at != nil {
 		fields = append(fields, departments.FieldCreatedAt)
 	}
@@ -5230,6 +5267,9 @@ func (m *DepartmentsMutation) Fields() []string {
 	if m.description != nil {
 		fields = append(fields, departments.FieldDescription)
 	}
+	if m.protected != nil {
+		fields = append(fields, departments.FieldProtected)
+	}
 	return fields
 }
 
@@ -5280,6 +5320,8 @@ func (m *DepartmentsMutation) Field(name string) (ent.Value, bool) {
 		return m.Metadata()
 	case departments.FieldDescription:
 		return m.Description()
+	case departments.FieldProtected:
+		return m.Protected()
 	}
 	return nil, false
 }
@@ -5331,6 +5373,8 @@ func (m *DepartmentsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldMetadata(ctx)
 	case departments.FieldDescription:
 		return m.OldDescription(ctx)
+	case departments.FieldProtected:
+		return m.OldProtected(ctx)
 	}
 	return nil, fmt.Errorf("unknown Departments field %s", name)
 }
@@ -5486,6 +5530,13 @@ func (m *DepartmentsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
+		return nil
+	case departments.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Departments field %s", name)
@@ -5760,6 +5811,9 @@ func (m *DepartmentsMutation) ResetField(name string) error {
 		return nil
 	case departments.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case departments.FieldProtected:
+		m.ResetProtected()
 		return nil
 	}
 	return fmt.Errorf("unknown Departments field %s", name)
@@ -12122,6 +12176,7 @@ type ResourcesMutation struct {
 	visual                      *string
 	manifest                    *string
 	description                 *string
+	protected                   *bool
 	clearedFields               map[string]struct{}
 	lion_resource_scopes        map[int]struct{}
 	removedlion_resource_scopes map[int]struct{}
@@ -12986,6 +13041,42 @@ func (m *ResourcesMutation) ResetDescription() {
 	m.description = nil
 }
 
+// SetProtected sets the "protected" field.
+func (m *ResourcesMutation) SetProtected(b bool) {
+	m.protected = &b
+}
+
+// Protected returns the value of the "protected" field in the mutation.
+func (m *ResourcesMutation) Protected() (r bool, exists bool) {
+	v := m.protected
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtected returns the old "protected" field's value of the Resources entity.
+// If the Resources object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourcesMutation) OldProtected(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtected requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
+	}
+	return oldValue.Protected, nil
+}
+
+// ResetProtected resets all changes to the "protected" field.
+func (m *ResourcesMutation) ResetProtected() {
+	m.protected = nil
+}
+
 // AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by ids.
 func (m *ResourcesMutation) AddLionResourceScopeIDs(ids ...int) {
 	if m.lion_resource_scopes == nil {
@@ -13074,7 +13165,7 @@ func (m *ResourcesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResourcesMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 17)
 	if m.created_at != nil {
 		fields = append(fields, resources.FieldCreatedAt)
 	}
@@ -13123,6 +13214,9 @@ func (m *ResourcesMutation) Fields() []string {
 	if m.description != nil {
 		fields = append(fields, resources.FieldDescription)
 	}
+	if m.protected != nil {
+		fields = append(fields, resources.FieldProtected)
+	}
 	return fields
 }
 
@@ -13163,6 +13257,8 @@ func (m *ResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.Manifest()
 	case resources.FieldDescription:
 		return m.Description()
+	case resources.FieldProtected:
+		return m.Protected()
 	}
 	return nil, false
 }
@@ -13204,6 +13300,8 @@ func (m *ResourcesMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldManifest(ctx)
 	case resources.FieldDescription:
 		return m.OldDescription(ctx)
+	case resources.FieldProtected:
+		return m.OldProtected(ctx)
 	}
 	return nil, fmt.Errorf("unknown Resources field %s", name)
 }
@@ -13324,6 +13422,13 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
+		return nil
+	case resources.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Resources field %s", name)
@@ -13529,6 +13634,9 @@ func (m *ResourcesMutation) ResetField(name string) error {
 		return nil
 	case resources.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case resources.FieldProtected:
+		m.ResetProtected()
 		return nil
 	}
 	return fmt.Errorf("unknown Resources field %s", name)

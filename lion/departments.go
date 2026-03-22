@@ -60,6 +60,8 @@ type Departments struct {
 	Metadata map[string]string `json:"metadata,omitempty"`
 	// 部门描述信息，详细说明部门职责和业务范围
 	Description string `json:"description,omitempty"`
+	// 是否为保护资源，保护资源不能被删除，描述等可更改
+	Protected bool `json:"protected,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DepartmentsQuery when eager-loading is set.
 	Edges        DepartmentsEdges `json:"edges"`
@@ -102,6 +104,8 @@ func (*Departments) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case departments.FieldEmailEncrypted, departments.FieldPhoneNumberEncrypted, departments.FieldAddressEncrypted, departments.FieldMetadata:
 			values[i] = new([]byte)
+		case departments.FieldProtected:
+			values[i] = new(sql.NullBool)
 		case departments.FieldID, departments.FieldCreatedBy, departments.FieldUpdatedBy, departments.FieldParentID, departments.FieldDepartmentType, departments.FieldDepartmentStatus, departments.FieldSortOrder, departments.FieldMaxMembers, departments.FieldVisibility:
 			values[i] = new(sql.NullInt64)
 		case departments.FieldCode, departments.FieldDisplayName, departments.FieldCostCenterCode, departments.FieldBudgetItemCode, departments.FieldExternalID, departments.FieldDescription:
@@ -258,6 +262,12 @@ func (_m *Departments) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
+		case departments.FieldProtected:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field protected", values[i])
+			} else if value.Valid {
+				_m.Protected = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -363,6 +373,9 @@ func (_m *Departments) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("protected=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
 	builder.WriteByte(')')
 	return builder.String()
 }

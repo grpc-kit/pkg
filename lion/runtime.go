@@ -220,6 +220,10 @@ func init() {
 	departmentsDescDescription := departmentsFields[15].Descriptor()
 	// departments.DefaultDescription holds the default value on creation for the description field.
 	departments.DefaultDescription = departmentsDescDescription.Default.(string)
+	// departmentsDescProtected is the schema descriptor for protected field.
+	departmentsDescProtected := departmentsFields[16].Descriptor()
+	// departments.DefaultProtected holds the default value on creation for the protected field.
+	departments.DefaultProtected = departmentsDescProtected.Default.(bool)
 	grouprolesMixin := schema.GroupRoles{}.Mixin()
 	grouprolesMixinFields0 := grouprolesMixin[0].Fields()
 	_ = grouprolesMixinFields0
@@ -611,6 +615,10 @@ func init() {
 	resourcesDescDescription := resourcesFields[10].Descriptor()
 	// resources.DefaultDescription holds the default value on creation for the description field.
 	resources.DefaultDescription = resourcesDescDescription.Default.(string)
+	// resourcesDescProtected is the schema descriptor for protected field.
+	resourcesDescProtected := resourcesFields[11].Descriptor()
+	// resources.DefaultProtected holds the default value on creation for the protected field.
+	resources.DefaultProtected = resourcesDescProtected.Default.(bool)
 	rolepermissionsMixin := schema.RolePermissions{}.Mixin()
 	rolepermissionsMixinFields0 := rolepermissionsMixin[0].Fields()
 	_ = rolepermissionsMixinFields0

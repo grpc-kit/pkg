@@ -268,6 +268,20 @@ func (_c *DepartmentsCreate) SetNillableDescription(v *string) *DepartmentsCreat
 	return _c
 }
 
+// SetProtected sets the "protected" field.
+func (_c *DepartmentsCreate) SetProtected(v bool) *DepartmentsCreate {
+	_c.mutation.SetProtected(v)
+	return _c
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_c *DepartmentsCreate) SetNillableProtected(v *bool) *DepartmentsCreate {
+	if v != nil {
+		_c.SetProtected(*v)
+	}
+	return _c
+}
+
 // AddLionUserDepartmentIDs adds the "lion_user_departments" edge to the UserDepartments entity by IDs.
 func (_c *DepartmentsCreate) AddLionUserDepartmentIDs(ids ...int) *DepartmentsCreate {
 	_c.mutation.AddLionUserDepartmentIDs(ids...)
@@ -377,6 +391,10 @@ func (_c *DepartmentsCreate) defaults() {
 		v := departments.DefaultDescription
 		_c.mutation.SetDescription(v)
 	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		v := departments.DefaultProtected
+		_c.mutation.SetProtected(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -423,6 +441,9 @@ func (_c *DepartmentsCreate) check() error {
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Departments.description"`)}
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Departments.protected"`)}
 	}
 	return nil
 }
@@ -533,6 +554,10 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(departments.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := _c.mutation.Protected(); ok {
+		_spec.SetField(departments.FieldProtected, field.TypeBool, value)
+		_node.Protected = value
 	}
 	if nodes := _c.mutation.LionUserDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

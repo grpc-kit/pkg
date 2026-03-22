@@ -74,6 +74,9 @@ func (Departments) Fields() []ent.Field {
 		field.String("description").
 			Default("").
 			Comment("部门描述信息，详细说明部门职责和业务范围"),
+		field.Bool("protected").
+			Default(false).
+			Comment("是否为保护资源，保护资源不能被删除，描述等可更改"),
 	}
 }
 

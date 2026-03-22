@@ -37,7 +37,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 
 	adminUser, err := tx.Users.Create().
-		SetUsername("admin").
+		SetUsername(seedBootstrapUsername(adminv1.BootstrapUsername_BOOTSTRAP_USERNAME_ADMIN)).
 		SetUserType(int(adminv1.User_SYSTEM.Number())).
 		SetUserStatus(int(adminv1.User_ACTIVE.Number())).
 		SetNickname("超级管理员").
@@ -49,8 +49,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 
 	adminRole, err := tx.Roles.Create().
-		SetCode("superadmin").
-		SetDisplayName("superadmin").
+		SetCode(seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)).
+		SetDisplayName(seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)).
 		SetRoleType(int(adminv1.Role_SYSTEM.Number())).
 		SetDescription("超级管理员").
 		Save(ctx)
@@ -62,7 +62,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	tx.UserRoles.Create().SetUserID(adminUser.ID).SetRoleID(adminRole.ID).SaveX(ctx)
 
 	localProvider, err := tx.AuthProviders.Create().
-		SetCode("local").
+		SetCode(seedAuthProviderCode(adminv1.AuthProviderCode_AUTH_PROVIDER_CODE_LOCAL)).
 		SetProviderType(int(adminv1.AuthProvider_LOCAL.Number())).
 		SetProviderStatus(int(adminv1.AuthProvider_ACTIVE.Number())).
 		SetDisplayName("本地账号密码登录").
@@ -80,17 +80,32 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		SetPasswordHash(crypto.BcryptHashMust(crypto.SHA256([]byte("grpc-kit-cli")))). // TODO; 由客户端参数获取
 		SaveX(ctx)
 
-	tx.Departments.CreateBulk(
-		tx.Departments.Create().
-			SetCode("root").
-			SetDisplayName("root").
-			SetSortOrder(1).
-			SetParentID(0),
-	).SaveX(ctx)
+	rootDept, err := tx.Departments.Create().
+		SetCode(seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_ROOT)).
+		SetDisplayName(seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_ROOT)).
+		SetSortOrder(1).
+		SetProtected(true).
+		SetParentID(0).
+		Save(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return result, err
+	}
+	_, err = tx.Departments.Create().
+		SetParentID(rootDept.ID).
+		SetCode(seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_GUEST)).
+		SetDisplayName(seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_GUEST)).
+		SetSortOrder(2).
+		SetProtected(true).
+		Save(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return result, err
+	}
 
 	tx.Resources.CreateBulk(
 		tx.Resources.Create().
-			SetCode("root_menu").
+			SetCode(seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_MENU)).
 			SetDisplayName("菜单根节点").
 			SetResourceType(int(adminv1.Resource_MENU.Number())).
 			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
@@ -98,7 +113,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetSortOrder(10).
 			SetParentID(0),
 		tx.Resources.Create().
-			SetCode("root_page").
+			SetCode(seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_PAGE)).
 			SetDisplayName("页面根节点").
 			SetResourceType(int(adminv1.Resource_PAGE.Number())).
 			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
@@ -106,7 +121,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetSortOrder(20).
 			SetParentID(0),
 		tx.Resources.Create().
-			SetCode("root_button").
+			SetCode(seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_BUTTON)).
 			SetDisplayName("按钮根节点").
 			SetResourceType(int(adminv1.Resource_BUTTON.Number())).
 			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
@@ -114,7 +129,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetSortOrder(30).
 			SetParentID(0),
 		tx.Resources.Create().
-			SetCode("root_api").
+			SetCode(seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_API)).
 			SetDisplayName("接口根节点").
 			SetResourceType(int(adminv1.Resource_API.Number())).
 			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
@@ -122,7 +137,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetSortOrder(40).
 			SetParentID(0),
 		tx.Resources.Create().
-			SetCode("root_data").
+			SetCode(seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_DATA)).
 			SetDisplayName("数据根节点").
 			SetResourceType(int(adminv1.Resource_DATA.Number())).
 			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
@@ -130,7 +145,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetSortOrder(50).
 			SetParentID(0),
 		tx.Resources.Create().
-			SetCode("root_system").
+			SetCode(seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_SYSTEM)).
 			SetDisplayName("系统根节点").
 			SetResourceType(int(adminv1.Resource_SYSTEM.Number())).
 			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
@@ -153,7 +168,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 	tx.Credentials.Create().
-		SetCode("key1").
+		SetCode(seedCredentialSeedCode(adminv1.CredentialSeedCode_CREDENTIAL_SEED_CODE_KEY1)).
 		SetCredentialType(int(adminv1.Credential_JWKS.Number())).
 		SetCredentialAlgorithm(int(adminv1.Credential_RSA.Number())).
 		SetCredentialUsage(int(adminv1.Credential_SIGNING.Number())).

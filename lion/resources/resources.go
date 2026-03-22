@@ -46,6 +46,8 @@ const (
 	FieldManifest = "manifest"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
 	// EdgeLionResourceScopes holds the string denoting the lion_resource_scopes edge name in mutations.
 	EdgeLionResourceScopes = "lion_resource_scopes"
 	// Table holds the table name of the resources in the database.
@@ -78,6 +80,7 @@ var Columns = []string{
 	FieldVisual,
 	FieldManifest,
 	FieldDescription,
+	FieldProtected,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -127,6 +130,8 @@ var (
 	DefaultManifest string
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
 )
 
 // OrderOption defines the ordering options for the Resources queries.
@@ -215,6 +220,11 @@ func ByManifest(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
 // ByLionResourceScopesCount orders the results by lion_resource_scopes count.

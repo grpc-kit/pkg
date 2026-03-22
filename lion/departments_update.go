@@ -386,6 +386,20 @@ func (_u *DepartmentsUpdate) SetNillableDescription(v *string) *DepartmentsUpdat
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *DepartmentsUpdate) SetProtected(v bool) *DepartmentsUpdate {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *DepartmentsUpdate) SetNillableProtected(v *bool) *DepartmentsUpdate {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // AddLionUserDepartmentIDs adds the "lion_user_departments" edge to the UserDepartments entity by IDs.
 func (_u *DepartmentsUpdate) AddLionUserDepartmentIDs(ids ...int) *DepartmentsUpdate {
 	_u.mutation.AddLionUserDepartmentIDs(ids...)
@@ -639,6 +653,9 @@ func (_u *DepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(departments.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(departments.FieldProtected, field.TypeBool, value)
 	}
 	if _u.mutation.LionUserDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1106,6 +1123,20 @@ func (_u *DepartmentsUpdateOne) SetNillableDescription(v *string) *DepartmentsUp
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *DepartmentsUpdateOne) SetProtected(v bool) *DepartmentsUpdateOne {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *DepartmentsUpdateOne) SetNillableProtected(v *bool) *DepartmentsUpdateOne {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // AddLionUserDepartmentIDs adds the "lion_user_departments" edge to the UserDepartments entity by IDs.
 func (_u *DepartmentsUpdateOne) AddLionUserDepartmentIDs(ids ...int) *DepartmentsUpdateOne {
 	_u.mutation.AddLionUserDepartmentIDs(ids...)
@@ -1389,6 +1420,9 @@ func (_u *DepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *Departments
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(departments.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(departments.FieldProtected, field.TypeBool, value)
 	}
 	if _u.mutation.LionUserDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -56,6 +56,8 @@ const (
 	FieldMetadata = "metadata"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
 	// EdgeLionUserDepartments holds the string denoting the lion_user_departments edge name in mutations.
 	EdgeLionUserDepartments = "lion_user_departments"
 	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
@@ -102,6 +104,7 @@ var Columns = []string{
 	FieldVisibility,
 	FieldMetadata,
 	FieldDescription,
+	FieldProtected,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -143,6 +146,8 @@ var (
 	DefaultVisibility int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
 )
 
 // OrderOption defines the ordering options for the Departments queries.
@@ -236,6 +241,11 @@ func ByVisibility(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
 // ByLionUserDepartmentsCount orders the results by lion_user_departments count.

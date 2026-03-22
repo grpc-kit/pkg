@@ -135,6 +135,11 @@ func Description(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldDescription, v))
 }
 
+// Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
+func Protected(v bool) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldProtected, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldCreatedAt, v))
@@ -953,6 +958,16 @@ func DescriptionEqualFold(v string) predicate.Resources {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// ProtectedEQ applies the EQ predicate on the "protected" field.
+func ProtectedEQ(v bool) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldProtected, v))
+}
+
+// ProtectedNEQ applies the NEQ predicate on the "protected" field.
+func ProtectedNEQ(v bool) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldProtected, v))
 }
 
 // HasLionResourceScopes applies the HasEdge predicate on the "lion_resource_scopes" edge.
