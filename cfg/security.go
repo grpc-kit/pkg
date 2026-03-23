@@ -2,12 +2,11 @@ package cfg
 
 import (
 	"context"
-	"crypto/sha256"
 	"crypto/tls"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -231,6 +230,23 @@ func (s *SecurityConfig) foundUserID(userID int64) (bool, *BasicAuth) {
 	return false, nil
 }
 
+// basicAuthEffectivePasswordHash 返回用于静态用户、JWT HS256 密钥及口令比较的“有效”材料：
+// password_hash（trim 后非空）则原样返回；否则 password（trim 后非空）则返回其 SHA256 十六进制字符串。
+func basicAuthEffectivePasswordHash(b *BasicAuth) string {
+	if b == nil {
+		return ""
+	}
+	ph := strings.TrimSpace(b.PasswordHash)
+	if ph != "" {
+		return ph
+	}
+	pw := strings.TrimSpace(b.Password)
+	if pw != "" {
+		return crypto.SHA256([]byte(pw))
+	}
+	return ""
+}
+
 // verifyBearerToken 用于验证 bearerToken
 // 需判断服务端是否允许 HS256 的签名算法，如果有在判断 token 是否使用 HS256
 func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString string) (auth.IDTokenClaims, error) {
@@ -249,16 +265,11 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 				// 根据 sub 获取作为 username 获取对应的 password 作为 token 的签名验证
 				f, b := s.foundUserID(claims.GetMustUserID())
 				if f {
-					// TODO; 使用 password sha256 后作为密钥进行验证
-					jwtKey := []byte(b.PasswordHash)
-					if b.Password != "" {
-						h := sha256.New()
-						h.Write([]byte(b.Password))
-						jwtKey = []byte(hex.EncodeToString(h.Sum(nil)))
+					eff := basicAuthEffectivePasswordHash(b)
+					if eff == "" {
+						return nil, fmt.Errorf("not found key")
 					}
-					return jwtKey, nil
-
-					//return []byte(b.Password), nil
+					return []byte(eff), nil
 				}
 
 				return nil, fmt.Errorf("not found key")

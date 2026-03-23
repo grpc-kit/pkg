@@ -2,10 +2,8 @@ package cfg
 
 import (
 	"context"
-	"crypto/sha256"
 	"database/sql"
 	"embed"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -208,8 +206,10 @@ type Authorization struct {
 type BasicAuth struct {
 	UserID   int64  `mapstructure:"user_id"`
 	Username string `mapstructure:"username"`
-	// Deprecated: 使用 PasswordHash 代替，优先级低于 Password 配置
+	// Password 明文口令；仅当 password_hash（trim 后）为空时，服务端用其 SHA256 十六进制作为有效口令材料（与 LOCAL 登录约定一致）。
+	// Deprecated: 生产环境优先使用 password_hash。
 	Password     string   `mapstructure:"password"`
+	// PasswordHash 优先使用（trim 后非空）：可为 sha256 十六进制或 bcrypt 串（与库表 LOCAL 用户一致时，客户端仍传 sha256(明文)）。
 	PasswordHash string   `mapstructure:"password_hash"`
 	Groups       []string `mapstructure:"groups"`
 	// 租户，默认均为 'default' 下
@@ -335,17 +335,15 @@ func (c *LocalConfig) Register(ctx context.Context,
 	su := &admin.StaticUsers{}
 	if c.Security != nil && c.Security.Authentication != nil {
 		for _, v := range c.Security.Authentication.HTTPUsers {
+			if v == nil {
+				continue
+			}
 			uu := &admin.StaticUser{
 				UserID:       v.UserID,
 				Username:     v.Username,
-				PasswordHash: v.PasswordHash,
+				PasswordHash: basicAuthEffectivePasswordHash(v),
 				Groups:       v.Groups,
 				Tenant:       v.Tenant,
-			}
-			if uu.PasswordHash == "" && v.Password != "" {
-				h := sha256.New()
-				h.Write([]byte(v.Password))
-				uu.PasswordHash = hex.EncodeToString(h.Sum(nil))
 			}
 			su.Append(uu)
 		}

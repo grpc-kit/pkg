@@ -597,12 +597,22 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 				}
 
 				for _, v := range c.Security.Authentication.HTTPUsers {
+					if v == nil {
+						continue
+					}
 					if v.Username == tmps[0] {
-						h := sha256.New()
-						h.Write([]byte(tmps[1]))
-						userHash := hex.EncodeToString(h.Sum(nil))
-
-						if v.Password == tmps[1] || v.PasswordHash == userHash {
+						pwTrim := strings.TrimSpace(v.Password)
+						okAuth := pwTrim != "" && pwTrim == tmps[1]
+						if !okAuth {
+							eff := basicAuthEffectivePasswordHash(v)
+							if eff != "" {
+								h := sha256.New()
+								h.Write([]byte(tmps[1]))
+								userHash := hex.EncodeToString(h.Sum(nil))
+								okAuth = eff == userHash
+							}
+						}
+						if okAuth {
 							// 认证成功
 							ctx = c.Security.withUserID(ctx, v.UserID)
 							ctx = c.Security.withUsername(ctx, tmps[0])

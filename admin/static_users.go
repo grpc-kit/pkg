@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -61,10 +62,17 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 
 type StaticUsers []*StaticUser
 
-// Valid 验证用户密码是否正确
+// Valid 验证 LOCAL 登录载荷（CreateAuthLoginRequest.password_hash）是否与静态用户匹配。
+// 存储为 sha256 十六进制时做字符串相等比较；存储为 bcrypt 时（以 “$2” 开头）用 BcryptCompare，与库表 LOCAL 用户约定一致。
 func (s *StaticUsers) Valid(username, passwordHash string) (*StaticUser, bool) {
 	for _, user := range *s {
-		if user.Username == username && user.PasswordHash == passwordHash {
+		if user.Username != username {
+			continue
+		}
+		if user.PasswordHash == passwordHash {
+			return user, true
+		}
+		if strings.HasPrefix(user.PasswordHash, "$2") && crypto.BcryptCompare(user.PasswordHash, passwordHash) == nil {
 			return user, true
 		}
 	}
