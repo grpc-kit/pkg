@@ -101,37 +101,36 @@ func (a *KnownAdminAPI) checkRolePermission(ctx context.Context, db *lion.Client
 // 如果 parentID 为 0，表示创建根角色，需要检查用户是否有根角色权限
 func (a *KnownAdminAPI) checkParentRolePermission(ctx context.Context, db *lion.Client, parentID int64) error {
 	if parentID == 0 {
-		// 创建根角色，需要检查用户是否有根角色
-		userRoleIDs, err := a.getUserRoleID(ctx)
-		if err != nil {
-			return err
-		}
-
-		if len(userRoleIDs) == 0 {
-			return errs.PermissionDenied(ctx).WithMessage("user has no roles")
-		}
-
-		// 检查用户是否有根角色（parent_id = 0）
-		userRootRoles, err := db.Roles.Query().
-			Select(roles.FieldID, roles.FieldParentID).
-			Where(
-				roles.IDIn(userRoleIDs...),
-				roles.ParentIDEQ(0),
-			).
-			All(ctx)
-		if err != nil {
-			return err
-		}
-
-		if len(userRootRoles) == 0 {
-			return errs.PermissionDenied(ctx).WithMessage("user does not have root role permission to create root role")
-		}
-
 		return nil
 	}
 
 	// 检查用户是否有权限操作父角色
 	return a.checkRolePermission(ctx, db, int(parentID))
+}
+
+func (a *KnownAdminAPI) checkRootRoleConstraint(ctx context.Context, db *lion.Client, roleID int, roleCode string, parentID int64) error {
+	if parentID != 0 {
+		return nil
+	}
+
+	superadminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)
+	if roleCode != superadminCode {
+		return errs.InvalidArgument(ctx).WithMessage("only superadmin role can be root role")
+	}
+
+	query := db.Roles.Query().Where(roles.ParentIDEQ(0))
+	if roleID > 0 {
+		query = query.Where(roles.IDNEQ(roleID))
+	}
+
+	count, err := query.Count(ctx)
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return errs.InvalidArgument(ctx).WithMessage("root role already exists")
+	}
+	return nil
 }
 
 // ListRoles 获取角色列表，默认返回树状结构
@@ -426,6 +425,9 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 	if err := a.checkParentRolePermission(ctx, db, req.Role.ParentId); err != nil {
 		return nil, err
 	}
+	if err := a.checkRootRoleConstraint(ctx, db, 0, req.Role.Code, req.Role.ParentId); err != nil {
+		return nil, err
+	}
 
 	createBuilder := db.Roles.Create().
 		SetCode(req.Role.Code).
@@ -581,22 +583,48 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 		return nil, err
 	}
 
+	currentRole, err := db.Roles.Query().
+		Select(roles.FieldID, roles.FieldCode, roles.FieldParentID).
+		Where(roles.ID(int(req.Role.Id))).
+		Only(ctx)
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("role not found")
+	}
+
 	if req.UpdateMask != nil && len(req.UpdateMask.Paths) != 0 {
 		x := db.Roles.Update()
 
 		// 获取更新者用户 ID
 		userID, _ := GetUserID(ctx)
+		nextParentID := int64(currentRole.ParentID)
+		nextCode := currentRole.Code
 
 		for _, path := range req.UpdateMask.Paths {
 			switch path {
 			case roles.FieldCode:
 				x.SetCode(req.Role.Code)
+				nextCode = req.Role.Code
 			case roles.FieldParentID:
 				// 更新 parent_id，需要检查新父角色的权限
 				if err := a.checkParentRolePermission(ctx, db, req.Role.ParentId); err != nil {
 					return nil, err
 				}
+				if req.Role.ParentId == req.Role.Id {
+					return nil, errs.InvalidArgument(ctx).WithMessage("parent_id cannot be self")
+				}
+				if req.Role.ParentId > 0 {
+					allChildRoleIDs, err := a.getAllChildRoleIDs(ctx, db, []int{int(req.Role.Id)})
+					if err != nil {
+						return nil, err
+					}
+					for _, childID := range allChildRoleIDs {
+						if int64(childID) == req.Role.ParentId {
+							return nil, errs.InvalidArgument(ctx).WithMessage("parent_id cannot be descendant role")
+						}
+					}
+				}
 				x.SetParentID(int(req.Role.ParentId))
+				nextParentID = req.Role.ParentId
 			case roles.FieldSortOrder:
 				x.SetSortOrder(int(req.Role.SortOrder))
 			case roles.FieldDescription:
@@ -604,6 +632,9 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 			case roles.FieldDisplayName:
 				x.SetDisplayName(req.Role.DisplayName)
 			}
+		}
+		if err := a.checkRootRoleConstraint(ctx, db, int(req.Role.Id), nextCode, nextParentID); err != nil {
+			return nil, err
 		}
 
 		// 更新 updated_by
