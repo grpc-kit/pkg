@@ -118,6 +118,123 @@ func (_u *UserRolesUpdate) SetNillableRoleID(v *int) *UserRolesUpdate {
 	return _u
 }
 
+// SetMemberRole sets the "member_role" field.
+func (_u *UserRolesUpdate) SetMemberRole(v int) *UserRolesUpdate {
+	_u.mutation.ResetMemberRole()
+	_u.mutation.SetMemberRole(v)
+	return _u
+}
+
+// SetNillableMemberRole sets the "member_role" field if the given value is not nil.
+func (_u *UserRolesUpdate) SetNillableMemberRole(v *int) *UserRolesUpdate {
+	if v != nil {
+		_u.SetMemberRole(*v)
+	}
+	return _u
+}
+
+// AddMemberRole adds value to the "member_role" field.
+func (_u *UserRolesUpdate) AddMemberRole(v int) *UserRolesUpdate {
+	_u.mutation.AddMemberRole(v)
+	return _u
+}
+
+// SetMemberStatus sets the "member_status" field.
+func (_u *UserRolesUpdate) SetMemberStatus(v int) *UserRolesUpdate {
+	_u.mutation.ResetMemberStatus()
+	_u.mutation.SetMemberStatus(v)
+	return _u
+}
+
+// SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
+func (_u *UserRolesUpdate) SetNillableMemberStatus(v *int) *UserRolesUpdate {
+	if v != nil {
+		_u.SetMemberStatus(*v)
+	}
+	return _u
+}
+
+// AddMemberStatus adds value to the "member_status" field.
+func (_u *UserRolesUpdate) AddMemberStatus(v int) *UserRolesUpdate {
+	_u.mutation.AddMemberStatus(v)
+	return _u
+}
+
+// SetMemberType sets the "member_type" field.
+func (_u *UserRolesUpdate) SetMemberType(v int) *UserRolesUpdate {
+	_u.mutation.ResetMemberType()
+	_u.mutation.SetMemberType(v)
+	return _u
+}
+
+// SetNillableMemberType sets the "member_type" field if the given value is not nil.
+func (_u *UserRolesUpdate) SetNillableMemberType(v *int) *UserRolesUpdate {
+	if v != nil {
+		_u.SetMemberType(*v)
+	}
+	return _u
+}
+
+// AddMemberType adds value to the "member_type" field.
+func (_u *UserRolesUpdate) AddMemberType(v int) *UserRolesUpdate {
+	_u.mutation.AddMemberType(v)
+	return _u
+}
+
+// SetExpiredAt sets the "expired_at" field.
+func (_u *UserRolesUpdate) SetExpiredAt(v time.Time) *UserRolesUpdate {
+	_u.mutation.SetExpiredAt(v)
+	return _u
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (_u *UserRolesUpdate) SetNillableExpiredAt(v *time.Time) *UserRolesUpdate {
+	if v != nil {
+		_u.SetExpiredAt(*v)
+	}
+	return _u
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (_u *UserRolesUpdate) ClearExpiredAt() *UserRolesUpdate {
+	_u.mutation.ClearExpiredAt()
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *UserRolesUpdate) SetMetadata(v string) *UserRolesUpdate {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_u *UserRolesUpdate) SetNillableMetadata(v *string) *UserRolesUpdate {
+	if v != nil {
+		_u.SetMetadata(*v)
+	}
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *UserRolesUpdate) ClearMetadata() *UserRolesUpdate {
+	_u.mutation.ClearMetadata()
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *UserRolesUpdate) SetDescription(v string) *UserRolesUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *UserRolesUpdate) SetNillableDescription(v *string) *UserRolesUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
 func (_u *UserRolesUpdate) SetLionUsersID(id int) *UserRolesUpdate {
 	_u.mutation.SetLionUsersID(id)
@@ -246,6 +363,39 @@ func (_u *UserRolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(userroles.FieldUpdatedBy, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.MemberRole(); ok {
+		_spec.SetField(userroles.FieldMemberRole, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMemberRole(); ok {
+		_spec.AddField(userroles.FieldMemberRole, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MemberStatus(); ok {
+		_spec.SetField(userroles.FieldMemberStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMemberStatus(); ok {
+		_spec.AddField(userroles.FieldMemberStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MemberType(); ok {
+		_spec.SetField(userroles.FieldMemberType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMemberType(); ok {
+		_spec.AddField(userroles.FieldMemberType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ExpiredAt(); ok {
+		_spec.SetField(userroles.FieldExpiredAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiredAtCleared() {
+		_spec.ClearField(userroles.FieldExpiredAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(userroles.FieldMetadata, field.TypeString, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(userroles.FieldMetadata, field.TypeString)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(userroles.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -413,6 +563,123 @@ func (_u *UserRolesUpdateOne) SetNillableRoleID(v *int) *UserRolesUpdateOne {
 	return _u
 }
 
+// SetMemberRole sets the "member_role" field.
+func (_u *UserRolesUpdateOne) SetMemberRole(v int) *UserRolesUpdateOne {
+	_u.mutation.ResetMemberRole()
+	_u.mutation.SetMemberRole(v)
+	return _u
+}
+
+// SetNillableMemberRole sets the "member_role" field if the given value is not nil.
+func (_u *UserRolesUpdateOne) SetNillableMemberRole(v *int) *UserRolesUpdateOne {
+	if v != nil {
+		_u.SetMemberRole(*v)
+	}
+	return _u
+}
+
+// AddMemberRole adds value to the "member_role" field.
+func (_u *UserRolesUpdateOne) AddMemberRole(v int) *UserRolesUpdateOne {
+	_u.mutation.AddMemberRole(v)
+	return _u
+}
+
+// SetMemberStatus sets the "member_status" field.
+func (_u *UserRolesUpdateOne) SetMemberStatus(v int) *UserRolesUpdateOne {
+	_u.mutation.ResetMemberStatus()
+	_u.mutation.SetMemberStatus(v)
+	return _u
+}
+
+// SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
+func (_u *UserRolesUpdateOne) SetNillableMemberStatus(v *int) *UserRolesUpdateOne {
+	if v != nil {
+		_u.SetMemberStatus(*v)
+	}
+	return _u
+}
+
+// AddMemberStatus adds value to the "member_status" field.
+func (_u *UserRolesUpdateOne) AddMemberStatus(v int) *UserRolesUpdateOne {
+	_u.mutation.AddMemberStatus(v)
+	return _u
+}
+
+// SetMemberType sets the "member_type" field.
+func (_u *UserRolesUpdateOne) SetMemberType(v int) *UserRolesUpdateOne {
+	_u.mutation.ResetMemberType()
+	_u.mutation.SetMemberType(v)
+	return _u
+}
+
+// SetNillableMemberType sets the "member_type" field if the given value is not nil.
+func (_u *UserRolesUpdateOne) SetNillableMemberType(v *int) *UserRolesUpdateOne {
+	if v != nil {
+		_u.SetMemberType(*v)
+	}
+	return _u
+}
+
+// AddMemberType adds value to the "member_type" field.
+func (_u *UserRolesUpdateOne) AddMemberType(v int) *UserRolesUpdateOne {
+	_u.mutation.AddMemberType(v)
+	return _u
+}
+
+// SetExpiredAt sets the "expired_at" field.
+func (_u *UserRolesUpdateOne) SetExpiredAt(v time.Time) *UserRolesUpdateOne {
+	_u.mutation.SetExpiredAt(v)
+	return _u
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (_u *UserRolesUpdateOne) SetNillableExpiredAt(v *time.Time) *UserRolesUpdateOne {
+	if v != nil {
+		_u.SetExpiredAt(*v)
+	}
+	return _u
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (_u *UserRolesUpdateOne) ClearExpiredAt() *UserRolesUpdateOne {
+	_u.mutation.ClearExpiredAt()
+	return _u
+}
+
+// SetMetadata sets the "metadata" field.
+func (_u *UserRolesUpdateOne) SetMetadata(v string) *UserRolesUpdateOne {
+	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_u *UserRolesUpdateOne) SetNillableMetadata(v *string) *UserRolesUpdateOne {
+	if v != nil {
+		_u.SetMetadata(*v)
+	}
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *UserRolesUpdateOne) ClearMetadata() *UserRolesUpdateOne {
+	_u.mutation.ClearMetadata()
+	return _u
+}
+
+// SetDescription sets the "description" field.
+func (_u *UserRolesUpdateOne) SetDescription(v string) *UserRolesUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_u *UserRolesUpdateOne) SetNillableDescription(v *string) *UserRolesUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
+	}
+	return _u
+}
+
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
 func (_u *UserRolesUpdateOne) SetLionUsersID(id int) *UserRolesUpdateOne {
 	_u.mutation.SetLionUsersID(id)
@@ -571,6 +838,39 @@ func (_u *UserRolesUpdateOne) sqlSave(ctx context.Context) (_node *UserRoles, er
 	}
 	if _u.mutation.UpdatedByCleared() {
 		_spec.ClearField(userroles.FieldUpdatedBy, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.MemberRole(); ok {
+		_spec.SetField(userroles.FieldMemberRole, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMemberRole(); ok {
+		_spec.AddField(userroles.FieldMemberRole, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MemberStatus(); ok {
+		_spec.SetField(userroles.FieldMemberStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMemberStatus(); ok {
+		_spec.AddField(userroles.FieldMemberStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.MemberType(); ok {
+		_spec.SetField(userroles.FieldMemberType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedMemberType(); ok {
+		_spec.AddField(userroles.FieldMemberType, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ExpiredAt(); ok {
+		_spec.SetField(userroles.FieldExpiredAt, field.TypeTime, value)
+	}
+	if _u.mutation.ExpiredAtCleared() {
+		_spec.ClearField(userroles.FieldExpiredAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Metadata(); ok {
+		_spec.SetField(userroles.FieldMetadata, field.TypeString, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(userroles.FieldMetadata, field.TypeString)
+	}
+	if value, ok := _u.mutation.Description(); ok {
+		_spec.SetField(userroles.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{

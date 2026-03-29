@@ -90,6 +90,90 @@ func (_c *UserRolesCreate) SetRoleID(v int) *UserRolesCreate {
 	return _c
 }
 
+// SetMemberRole sets the "member_role" field.
+func (_c *UserRolesCreate) SetMemberRole(v int) *UserRolesCreate {
+	_c.mutation.SetMemberRole(v)
+	return _c
+}
+
+// SetNillableMemberRole sets the "member_role" field if the given value is not nil.
+func (_c *UserRolesCreate) SetNillableMemberRole(v *int) *UserRolesCreate {
+	if v != nil {
+		_c.SetMemberRole(*v)
+	}
+	return _c
+}
+
+// SetMemberStatus sets the "member_status" field.
+func (_c *UserRolesCreate) SetMemberStatus(v int) *UserRolesCreate {
+	_c.mutation.SetMemberStatus(v)
+	return _c
+}
+
+// SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
+func (_c *UserRolesCreate) SetNillableMemberStatus(v *int) *UserRolesCreate {
+	if v != nil {
+		_c.SetMemberStatus(*v)
+	}
+	return _c
+}
+
+// SetMemberType sets the "member_type" field.
+func (_c *UserRolesCreate) SetMemberType(v int) *UserRolesCreate {
+	_c.mutation.SetMemberType(v)
+	return _c
+}
+
+// SetNillableMemberType sets the "member_type" field if the given value is not nil.
+func (_c *UserRolesCreate) SetNillableMemberType(v *int) *UserRolesCreate {
+	if v != nil {
+		_c.SetMemberType(*v)
+	}
+	return _c
+}
+
+// SetExpiredAt sets the "expired_at" field.
+func (_c *UserRolesCreate) SetExpiredAt(v time.Time) *UserRolesCreate {
+	_c.mutation.SetExpiredAt(v)
+	return _c
+}
+
+// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
+func (_c *UserRolesCreate) SetNillableExpiredAt(v *time.Time) *UserRolesCreate {
+	if v != nil {
+		_c.SetExpiredAt(*v)
+	}
+	return _c
+}
+
+// SetMetadata sets the "metadata" field.
+func (_c *UserRolesCreate) SetMetadata(v string) *UserRolesCreate {
+	_c.mutation.SetMetadata(v)
+	return _c
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_c *UserRolesCreate) SetNillableMetadata(v *string) *UserRolesCreate {
+	if v != nil {
+		_c.SetMetadata(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *UserRolesCreate) SetDescription(v string) *UserRolesCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *UserRolesCreate) SetNillableDescription(v *string) *UserRolesCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
+	return _c
+}
+
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
 func (_c *UserRolesCreate) SetLionUsersID(id int) *UserRolesCreate {
 	_c.mutation.SetLionUsersID(id)
@@ -163,6 +247,22 @@ func (_c *UserRolesCreate) defaults() {
 		v := userroles.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
+	if _, ok := _c.mutation.MemberRole(); !ok {
+		v := userroles.DefaultMemberRole
+		_c.mutation.SetMemberRole(v)
+	}
+	if _, ok := _c.mutation.MemberStatus(); !ok {
+		v := userroles.DefaultMemberStatus
+		_c.mutation.SetMemberStatus(v)
+	}
+	if _, ok := _c.mutation.MemberType(); !ok {
+		v := userroles.DefaultMemberType
+		_c.mutation.SetMemberType(v)
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		v := userroles.DefaultDescription
+		_c.mutation.SetDescription(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -188,6 +288,18 @@ func (_c *UserRolesCreate) check() error {
 		if err := userroles.RoleIDValidator(v); err != nil {
 			return &ValidationError{Name: "role_id", err: fmt.Errorf(`lion: validator failed for field "UserRoles.role_id": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.MemberRole(); !ok {
+		return &ValidationError{Name: "member_role", err: errors.New(`lion: missing required field "UserRoles.member_role"`)}
+	}
+	if _, ok := _c.mutation.MemberStatus(); !ok {
+		return &ValidationError{Name: "member_status", err: errors.New(`lion: missing required field "UserRoles.member_status"`)}
+	}
+	if _, ok := _c.mutation.MemberType(); !ok {
+		return &ValidationError{Name: "member_type", err: errors.New(`lion: missing required field "UserRoles.member_type"`)}
+	}
+	if _, ok := _c.mutation.Description(); !ok {
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "UserRoles.description"`)}
 	}
 	if len(_c.mutation.LionUsersIDs()) == 0 {
 		return &ValidationError{Name: "lion_users", err: errors.New(`lion: missing required edge "UserRoles.lion_users"`)}
@@ -236,6 +348,30 @@ func (_c *UserRolesCreate) createSpec() (*UserRoles, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UpdatedBy(); ok {
 		_spec.SetField(userroles.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
+	}
+	if value, ok := _c.mutation.MemberRole(); ok {
+		_spec.SetField(userroles.FieldMemberRole, field.TypeInt, value)
+		_node.MemberRole = value
+	}
+	if value, ok := _c.mutation.MemberStatus(); ok {
+		_spec.SetField(userroles.FieldMemberStatus, field.TypeInt, value)
+		_node.MemberStatus = value
+	}
+	if value, ok := _c.mutation.MemberType(); ok {
+		_spec.SetField(userroles.FieldMemberType, field.TypeInt, value)
+		_node.MemberType = value
+	}
+	if value, ok := _c.mutation.ExpiredAt(); ok {
+		_spec.SetField(userroles.FieldExpiredAt, field.TypeTime, value)
+		_node.ExpiredAt = value
+	}
+	if value, ok := _c.mutation.Metadata(); ok {
+		_spec.SetField(userroles.FieldMetadata, field.TypeString, value)
+		_node.Metadata = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(userroles.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -43,6 +43,14 @@ func isSupportedGender(g adminv1.User_Gender) bool {
 	}
 }
 
+// phoneNumberComplete 表示国家码与本地号码均已提供，才持久化加密与哈希。
+func phoneNumberComplete(pn *adminv1.PhoneNumber) bool {
+	if pn == nil {
+		return false
+	}
+	return strings.TrimSpace(pn.GetCountryCode()) != "" && strings.TrimSpace(pn.GetNationalNumber()) != ""
+}
+
 func (a *KnownAdminAPI) decryptStringField(ctx context.Context, fieldName string, encrypted []byte) (string, error) {
 	if len(encrypted) == 0 {
 		return "", nil
@@ -275,7 +283,7 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 		userCreate.SetEmailEncrypted(email)
 		userCreate.SetEmailHash(crypto.SHA256([]byte(req.GetUser().GetEmail())))
 	}
-	if req.GetUser().PhoneNumber != nil {
+	if phoneNumberComplete(req.GetUser().GetPhoneNumber()) {
 		tmp, err := proto.Marshal(req.GetUser().GetPhoneNumber())
 		if err != nil {
 			return nil, errs.InvalidArgument(ctx).WithMessage("invalid phone_number format")
@@ -821,16 +829,21 @@ func (a *KnownAdminAPI) UpdateUser(ctx context.Context, req *adminv1.UpdateUserR
 		case "phone_number_verified":
 			x.SetPhoneNumberVerified(req.User.GetPhoneNumberVerified())
 		case "phone_number", "phone_number.country_code", "phone_number.national_number":
-			rawBody, err := proto.Marshal(req.User.GetPhoneNumber())
-			if err != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage("invalid phone_number format")
+			if phoneNumberComplete(req.User.GetPhoneNumber()) {
+				rawBody, err := proto.Marshal(req.User.GetPhoneNumber())
+				if err != nil {
+					return nil, errs.InvalidArgument(ctx).WithMessage("invalid phone_number format")
+				}
+				encBody, err := crypto.EncryptAES(a.config.aesKey, rawBody)
+				if err != nil {
+					return nil, err
+				}
+				x.SetPhoneNumberEncrypted(encBody)
+				x.SetPhoneNumberHash(crypto.SHA256(rawBody))
+			} else {
+				x.ClearPhoneNumberEncrypted()
+				x.ClearPhoneNumberHash()
 			}
-			encBody, err := crypto.EncryptAES(a.config.aesKey, rawBody)
-			if err != nil {
-				return nil, err
-			}
-			x.SetPhoneNumberEncrypted(encBody)
-			x.SetPhoneNumberHash(crypto.SHA256(rawBody))
 		case "address", "address.country", "address.postal_code", "address.region", "address.locality", "address.street_address":
 			rawBody, err := proto.Marshal(req.User.GetAddress())
 			if err != nil {

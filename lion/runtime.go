@@ -981,6 +981,22 @@ func init() {
 	userrolesDescRoleID := userrolesFields[1].Descriptor()
 	// userroles.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
 	userroles.RoleIDValidator = userrolesDescRoleID.Validators[0].(func(int) error)
+	// userrolesDescMemberRole is the schema descriptor for member_role field.
+	userrolesDescMemberRole := userrolesFields[2].Descriptor()
+	// userroles.DefaultMemberRole holds the default value on creation for the member_role field.
+	userroles.DefaultMemberRole = userrolesDescMemberRole.Default.(int)
+	// userrolesDescMemberStatus is the schema descriptor for member_status field.
+	userrolesDescMemberStatus := userrolesFields[3].Descriptor()
+	// userroles.DefaultMemberStatus holds the default value on creation for the member_status field.
+	userroles.DefaultMemberStatus = userrolesDescMemberStatus.Default.(int)
+	// userrolesDescMemberType is the schema descriptor for member_type field.
+	userrolesDescMemberType := userrolesFields[4].Descriptor()
+	// userroles.DefaultMemberType holds the default value on creation for the member_type field.
+	userroles.DefaultMemberType = userrolesDescMemberType.Default.(int)
+	// userrolesDescDescription is the schema descriptor for description field.
+	userrolesDescDescription := userrolesFields[7].Descriptor()
+	// userroles.DefaultDescription holds the default value on creation for the description field.
+	userroles.DefaultDescription = userrolesDescDescription.Default.(string)
 	usersMixin := schema.Users{}.Mixin()
 	usersMixinFields0 := usersMixin[0].Fields()
 	_ = usersMixinFields0

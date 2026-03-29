@@ -758,6 +758,12 @@ func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *admin
 		userroles.FieldID,
 		userroles.FieldUserID,
 		userroles.FieldRoleID,
+		userroles.FieldMemberRole,
+		userroles.FieldMemberStatus,
+		userroles.FieldMemberType,
+		userroles.FieldExpiredAt,
+		userroles.FieldMetadata,
+		userroles.FieldDescription,
 		userroles.FieldCreatedBy,
 		userroles.FieldUpdatedBy,
 		userroles.FieldCreatedAt,
@@ -775,17 +781,26 @@ func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *admin
 			continue
 		}
 		pm := &adminv1.Membership{
-			Id:         int64(m.ID),
-			UserId:     int64(m.UserID),
-			Username:   user.Username,
-			Nickname:   user.Nickname,
-			TargetType: adminv1.Membership_GROUP,
-			TargetId:   int64(m.RoleID),
-			MemberRole: adminv1.Membership_MEMBER,
-			CreatedBy:  m.CreatedBy,
-			UpdatedBy:  m.UpdatedBy,
-			CreatedAt:  timestamppb.New(m.CreatedAt),
-			UpdatedAt:  timestamppb.New(m.UpdatedAt),
+			Id:           int64(m.ID),
+			UserId:       int64(m.UserID),
+			Username:     user.Username,
+			Nickname:     user.Nickname,
+			TargetType:   adminv1.Membership_ROLE,
+			TargetId:     int64(m.RoleID),
+			MemberRole:   adminv1.Membership_Role(m.MemberRole),
+			MemberStatus: adminv1.Membership_Status(m.MemberStatus),
+			MemberType:   adminv1.Membership_MemberType(m.MemberType),
+			Description:  m.Description,
+			CreatedBy:    m.CreatedBy,
+			UpdatedBy:    m.UpdatedBy,
+			CreatedAt:    timestamppb.New(m.CreatedAt),
+			UpdatedAt:    timestamppb.New(m.UpdatedAt),
+		}
+		if !m.ExpiredAt.IsZero() {
+			pm.ExpiredAt = timestamppb.New(m.ExpiredAt)
+		}
+		if m.Metadata != "" {
+			pm.Metadata = MetadataParse(m.Metadata)
 		}
 		result.Members = append(result.Members, pm)
 	}

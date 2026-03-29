@@ -624,6 +624,12 @@ var (
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "member_role", Type: field.TypeInt, Default: 0},
+		{Name: "member_status", Type: field.TypeInt, Default: 0},
+		{Name: "member_type", Type: field.TypeInt, Default: 0},
+		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+		{Name: "metadata", Type: field.TypeString, Nullable: true},
+		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "role_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
@@ -635,13 +641,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_user_roles_lion_roles_lion_user_roles",
-				Columns:    []*schema.Column{LionUserRolesColumns[5]},
+				Columns:    []*schema.Column{LionUserRolesColumns[11]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "lion_user_roles_lion_users_lion_user_roles",
-				Columns:    []*schema.Column{LionUserRolesColumns[6]},
+				Columns:    []*schema.Column{LionUserRolesColumns[12]},
 				RefColumns: []*schema.Column{LionUsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -650,7 +656,7 @@ var (
 			{
 				Name:    "userroles_user_id_role_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionUserRolesColumns[6], LionUserRolesColumns[5]},
+				Columns: []*schema.Column{LionUserRolesColumns[12], LionUserRolesColumns[11]},
 			},
 		},
 	}

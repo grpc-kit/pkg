@@ -21793,6 +21793,15 @@ type UserRolesMutation struct {
 	addcreated_by     *int64
 	updated_by        *int64
 	addupdated_by     *int64
+	member_role       *int
+	addmember_role    *int
+	member_status     *int
+	addmember_status  *int
+	member_type       *int
+	addmember_type    *int
+	expired_at        *time.Time
+	metadata          *string
+	description       *string
 	clearedFields     map[string]struct{}
 	lion_users        *int
 	clearedlion_users bool
@@ -22185,6 +22194,308 @@ func (m *UserRolesMutation) ResetRoleID() {
 	m.lion_roles = nil
 }
 
+// SetMemberRole sets the "member_role" field.
+func (m *UserRolesMutation) SetMemberRole(i int) {
+	m.member_role = &i
+	m.addmember_role = nil
+}
+
+// MemberRole returns the value of the "member_role" field in the mutation.
+func (m *UserRolesMutation) MemberRole() (r int, exists bool) {
+	v := m.member_role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMemberRole returns the old "member_role" field's value of the UserRoles entity.
+// If the UserRoles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserRolesMutation) OldMemberRole(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMemberRole is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMemberRole requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMemberRole: %w", err)
+	}
+	return oldValue.MemberRole, nil
+}
+
+// AddMemberRole adds i to the "member_role" field.
+func (m *UserRolesMutation) AddMemberRole(i int) {
+	if m.addmember_role != nil {
+		*m.addmember_role += i
+	} else {
+		m.addmember_role = &i
+	}
+}
+
+// AddedMemberRole returns the value that was added to the "member_role" field in this mutation.
+func (m *UserRolesMutation) AddedMemberRole() (r int, exists bool) {
+	v := m.addmember_role
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMemberRole resets all changes to the "member_role" field.
+func (m *UserRolesMutation) ResetMemberRole() {
+	m.member_role = nil
+	m.addmember_role = nil
+}
+
+// SetMemberStatus sets the "member_status" field.
+func (m *UserRolesMutation) SetMemberStatus(i int) {
+	m.member_status = &i
+	m.addmember_status = nil
+}
+
+// MemberStatus returns the value of the "member_status" field in the mutation.
+func (m *UserRolesMutation) MemberStatus() (r int, exists bool) {
+	v := m.member_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMemberStatus returns the old "member_status" field's value of the UserRoles entity.
+// If the UserRoles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserRolesMutation) OldMemberStatus(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMemberStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMemberStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMemberStatus: %w", err)
+	}
+	return oldValue.MemberStatus, nil
+}
+
+// AddMemberStatus adds i to the "member_status" field.
+func (m *UserRolesMutation) AddMemberStatus(i int) {
+	if m.addmember_status != nil {
+		*m.addmember_status += i
+	} else {
+		m.addmember_status = &i
+	}
+}
+
+// AddedMemberStatus returns the value that was added to the "member_status" field in this mutation.
+func (m *UserRolesMutation) AddedMemberStatus() (r int, exists bool) {
+	v := m.addmember_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMemberStatus resets all changes to the "member_status" field.
+func (m *UserRolesMutation) ResetMemberStatus() {
+	m.member_status = nil
+	m.addmember_status = nil
+}
+
+// SetMemberType sets the "member_type" field.
+func (m *UserRolesMutation) SetMemberType(i int) {
+	m.member_type = &i
+	m.addmember_type = nil
+}
+
+// MemberType returns the value of the "member_type" field in the mutation.
+func (m *UserRolesMutation) MemberType() (r int, exists bool) {
+	v := m.member_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMemberType returns the old "member_type" field's value of the UserRoles entity.
+// If the UserRoles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserRolesMutation) OldMemberType(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMemberType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMemberType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMemberType: %w", err)
+	}
+	return oldValue.MemberType, nil
+}
+
+// AddMemberType adds i to the "member_type" field.
+func (m *UserRolesMutation) AddMemberType(i int) {
+	if m.addmember_type != nil {
+		*m.addmember_type += i
+	} else {
+		m.addmember_type = &i
+	}
+}
+
+// AddedMemberType returns the value that was added to the "member_type" field in this mutation.
+func (m *UserRolesMutation) AddedMemberType() (r int, exists bool) {
+	v := m.addmember_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMemberType resets all changes to the "member_type" field.
+func (m *UserRolesMutation) ResetMemberType() {
+	m.member_type = nil
+	m.addmember_type = nil
+}
+
+// SetExpiredAt sets the "expired_at" field.
+func (m *UserRolesMutation) SetExpiredAt(t time.Time) {
+	m.expired_at = &t
+}
+
+// ExpiredAt returns the value of the "expired_at" field in the mutation.
+func (m *UserRolesMutation) ExpiredAt() (r time.Time, exists bool) {
+	v := m.expired_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpiredAt returns the old "expired_at" field's value of the UserRoles entity.
+// If the UserRoles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserRolesMutation) OldExpiredAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpiredAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpiredAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpiredAt: %w", err)
+	}
+	return oldValue.ExpiredAt, nil
+}
+
+// ClearExpiredAt clears the value of the "expired_at" field.
+func (m *UserRolesMutation) ClearExpiredAt() {
+	m.expired_at = nil
+	m.clearedFields[userroles.FieldExpiredAt] = struct{}{}
+}
+
+// ExpiredAtCleared returns if the "expired_at" field was cleared in this mutation.
+func (m *UserRolesMutation) ExpiredAtCleared() bool {
+	_, ok := m.clearedFields[userroles.FieldExpiredAt]
+	return ok
+}
+
+// ResetExpiredAt resets all changes to the "expired_at" field.
+func (m *UserRolesMutation) ResetExpiredAt() {
+	m.expired_at = nil
+	delete(m.clearedFields, userroles.FieldExpiredAt)
+}
+
+// SetMetadata sets the "metadata" field.
+func (m *UserRolesMutation) SetMetadata(s string) {
+	m.metadata = &s
+}
+
+// Metadata returns the value of the "metadata" field in the mutation.
+func (m *UserRolesMutation) Metadata() (r string, exists bool) {
+	v := m.metadata
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetadata returns the old "metadata" field's value of the UserRoles entity.
+// If the UserRoles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserRolesMutation) OldMetadata(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetadata requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetadata: %w", err)
+	}
+	return oldValue.Metadata, nil
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (m *UserRolesMutation) ClearMetadata() {
+	m.metadata = nil
+	m.clearedFields[userroles.FieldMetadata] = struct{}{}
+}
+
+// MetadataCleared returns if the "metadata" field was cleared in this mutation.
+func (m *UserRolesMutation) MetadataCleared() bool {
+	_, ok := m.clearedFields[userroles.FieldMetadata]
+	return ok
+}
+
+// ResetMetadata resets all changes to the "metadata" field.
+func (m *UserRolesMutation) ResetMetadata() {
+	m.metadata = nil
+	delete(m.clearedFields, userroles.FieldMetadata)
+}
+
+// SetDescription sets the "description" field.
+func (m *UserRolesMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *UserRolesMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the UserRoles entity.
+// If the UserRoles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserRolesMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *UserRolesMutation) ResetDescription() {
+	m.description = nil
+}
+
 // SetLionUsersID sets the "lion_users" edge to the Users entity by id.
 func (m *UserRolesMutation) SetLionUsersID(id int) {
 	m.lion_users = &id
@@ -22299,7 +22610,7 @@ func (m *UserRolesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserRolesMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, userroles.FieldCreatedAt)
 	}
@@ -22317,6 +22628,24 @@ func (m *UserRolesMutation) Fields() []string {
 	}
 	if m.lion_roles != nil {
 		fields = append(fields, userroles.FieldRoleID)
+	}
+	if m.member_role != nil {
+		fields = append(fields, userroles.FieldMemberRole)
+	}
+	if m.member_status != nil {
+		fields = append(fields, userroles.FieldMemberStatus)
+	}
+	if m.member_type != nil {
+		fields = append(fields, userroles.FieldMemberType)
+	}
+	if m.expired_at != nil {
+		fields = append(fields, userroles.FieldExpiredAt)
+	}
+	if m.metadata != nil {
+		fields = append(fields, userroles.FieldMetadata)
+	}
+	if m.description != nil {
+		fields = append(fields, userroles.FieldDescription)
 	}
 	return fields
 }
@@ -22338,6 +22667,18 @@ func (m *UserRolesMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case userroles.FieldRoleID:
 		return m.RoleID()
+	case userroles.FieldMemberRole:
+		return m.MemberRole()
+	case userroles.FieldMemberStatus:
+		return m.MemberStatus()
+	case userroles.FieldMemberType:
+		return m.MemberType()
+	case userroles.FieldExpiredAt:
+		return m.ExpiredAt()
+	case userroles.FieldMetadata:
+		return m.Metadata()
+	case userroles.FieldDescription:
+		return m.Description()
 	}
 	return nil, false
 }
@@ -22359,6 +22700,18 @@ func (m *UserRolesMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldUserID(ctx)
 	case userroles.FieldRoleID:
 		return m.OldRoleID(ctx)
+	case userroles.FieldMemberRole:
+		return m.OldMemberRole(ctx)
+	case userroles.FieldMemberStatus:
+		return m.OldMemberStatus(ctx)
+	case userroles.FieldMemberType:
+		return m.OldMemberType(ctx)
+	case userroles.FieldExpiredAt:
+		return m.OldExpiredAt(ctx)
+	case userroles.FieldMetadata:
+		return m.OldMetadata(ctx)
+	case userroles.FieldDescription:
+		return m.OldDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown UserRoles field %s", name)
 }
@@ -22410,6 +22763,48 @@ func (m *UserRolesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRoleID(v)
 		return nil
+	case userroles.FieldMemberRole:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMemberRole(v)
+		return nil
+	case userroles.FieldMemberStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMemberStatus(v)
+		return nil
+	case userroles.FieldMemberType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMemberType(v)
+		return nil
+	case userroles.FieldExpiredAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpiredAt(v)
+		return nil
+	case userroles.FieldMetadata:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetadata(v)
+		return nil
+	case userroles.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
 	}
 	return fmt.Errorf("unknown UserRoles field %s", name)
 }
@@ -22424,6 +22819,15 @@ func (m *UserRolesMutation) AddedFields() []string {
 	if m.addupdated_by != nil {
 		fields = append(fields, userroles.FieldUpdatedBy)
 	}
+	if m.addmember_role != nil {
+		fields = append(fields, userroles.FieldMemberRole)
+	}
+	if m.addmember_status != nil {
+		fields = append(fields, userroles.FieldMemberStatus)
+	}
+	if m.addmember_type != nil {
+		fields = append(fields, userroles.FieldMemberType)
+	}
 	return fields
 }
 
@@ -22436,6 +22840,12 @@ func (m *UserRolesMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCreatedBy()
 	case userroles.FieldUpdatedBy:
 		return m.AddedUpdatedBy()
+	case userroles.FieldMemberRole:
+		return m.AddedMemberRole()
+	case userroles.FieldMemberStatus:
+		return m.AddedMemberStatus()
+	case userroles.FieldMemberType:
+		return m.AddedMemberType()
 	}
 	return nil, false
 }
@@ -22459,6 +22869,27 @@ func (m *UserRolesMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddUpdatedBy(v)
 		return nil
+	case userroles.FieldMemberRole:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMemberRole(v)
+		return nil
+	case userroles.FieldMemberStatus:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMemberStatus(v)
+		return nil
+	case userroles.FieldMemberType:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMemberType(v)
+		return nil
 	}
 	return fmt.Errorf("unknown UserRoles numeric field %s", name)
 }
@@ -22472,6 +22903,12 @@ func (m *UserRolesMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(userroles.FieldUpdatedBy) {
 		fields = append(fields, userroles.FieldUpdatedBy)
+	}
+	if m.FieldCleared(userroles.FieldExpiredAt) {
+		fields = append(fields, userroles.FieldExpiredAt)
+	}
+	if m.FieldCleared(userroles.FieldMetadata) {
+		fields = append(fields, userroles.FieldMetadata)
 	}
 	return fields
 }
@@ -22492,6 +22929,12 @@ func (m *UserRolesMutation) ClearField(name string) error {
 		return nil
 	case userroles.FieldUpdatedBy:
 		m.ClearUpdatedBy()
+		return nil
+	case userroles.FieldExpiredAt:
+		m.ClearExpiredAt()
+		return nil
+	case userroles.FieldMetadata:
+		m.ClearMetadata()
 		return nil
 	}
 	return fmt.Errorf("unknown UserRoles nullable field %s", name)
@@ -22518,6 +22961,24 @@ func (m *UserRolesMutation) ResetField(name string) error {
 		return nil
 	case userroles.FieldRoleID:
 		m.ResetRoleID()
+		return nil
+	case userroles.FieldMemberRole:
+		m.ResetMemberRole()
+		return nil
+	case userroles.FieldMemberStatus:
+		m.ResetMemberStatus()
+		return nil
+	case userroles.FieldMemberType:
+		m.ResetMemberType()
+		return nil
+	case userroles.FieldExpiredAt:
+		m.ResetExpiredAt()
+		return nil
+	case userroles.FieldMetadata:
+		m.ResetMetadata()
+		return nil
+	case userroles.FieldDescription:
+		m.ResetDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown UserRoles field %s", name)

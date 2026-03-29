@@ -85,6 +85,36 @@ func RoleID(v int) predicate.UserRoles {
 	return predicate.UserRoles(sql.FieldEQ(FieldRoleID, v))
 }
 
+// MemberRole applies equality check predicate on the "member_role" field. It's identical to MemberRoleEQ.
+func MemberRole(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldMemberRole, v))
+}
+
+// MemberStatus applies equality check predicate on the "member_status" field. It's identical to MemberStatusEQ.
+func MemberStatus(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldMemberStatus, v))
+}
+
+// MemberType applies equality check predicate on the "member_type" field. It's identical to MemberTypeEQ.
+func MemberType(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldMemberType, v))
+}
+
+// ExpiredAt applies equality check predicate on the "expired_at" field. It's identical to ExpiredAtEQ.
+func ExpiredAt(v time.Time) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldExpiredAt, v))
+}
+
+// Metadata applies equality check predicate on the "metadata" field. It's identical to MetadataEQ.
+func Metadata(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldMetadata, v))
+}
+
+// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
+func Description(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldDescription, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.UserRoles {
 	return predicate.UserRoles(sql.FieldEQ(FieldCreatedAt, v))
@@ -303,6 +333,316 @@ func RoleIDIn(vs ...int) predicate.UserRoles {
 // RoleIDNotIn applies the NotIn predicate on the "role_id" field.
 func RoleIDNotIn(vs ...int) predicate.UserRoles {
 	return predicate.UserRoles(sql.FieldNotIn(FieldRoleID, vs...))
+}
+
+// MemberRoleEQ applies the EQ predicate on the "member_role" field.
+func MemberRoleEQ(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldMemberRole, v))
+}
+
+// MemberRoleNEQ applies the NEQ predicate on the "member_role" field.
+func MemberRoleNEQ(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNEQ(FieldMemberRole, v))
+}
+
+// MemberRoleIn applies the In predicate on the "member_role" field.
+func MemberRoleIn(vs ...int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldIn(FieldMemberRole, vs...))
+}
+
+// MemberRoleNotIn applies the NotIn predicate on the "member_role" field.
+func MemberRoleNotIn(vs ...int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNotIn(FieldMemberRole, vs...))
+}
+
+// MemberRoleGT applies the GT predicate on the "member_role" field.
+func MemberRoleGT(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGT(FieldMemberRole, v))
+}
+
+// MemberRoleGTE applies the GTE predicate on the "member_role" field.
+func MemberRoleGTE(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGTE(FieldMemberRole, v))
+}
+
+// MemberRoleLT applies the LT predicate on the "member_role" field.
+func MemberRoleLT(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLT(FieldMemberRole, v))
+}
+
+// MemberRoleLTE applies the LTE predicate on the "member_role" field.
+func MemberRoleLTE(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLTE(FieldMemberRole, v))
+}
+
+// MemberStatusEQ applies the EQ predicate on the "member_status" field.
+func MemberStatusEQ(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldMemberStatus, v))
+}
+
+// MemberStatusNEQ applies the NEQ predicate on the "member_status" field.
+func MemberStatusNEQ(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNEQ(FieldMemberStatus, v))
+}
+
+// MemberStatusIn applies the In predicate on the "member_status" field.
+func MemberStatusIn(vs ...int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldIn(FieldMemberStatus, vs...))
+}
+
+// MemberStatusNotIn applies the NotIn predicate on the "member_status" field.
+func MemberStatusNotIn(vs ...int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNotIn(FieldMemberStatus, vs...))
+}
+
+// MemberStatusGT applies the GT predicate on the "member_status" field.
+func MemberStatusGT(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGT(FieldMemberStatus, v))
+}
+
+// MemberStatusGTE applies the GTE predicate on the "member_status" field.
+func MemberStatusGTE(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGTE(FieldMemberStatus, v))
+}
+
+// MemberStatusLT applies the LT predicate on the "member_status" field.
+func MemberStatusLT(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLT(FieldMemberStatus, v))
+}
+
+// MemberStatusLTE applies the LTE predicate on the "member_status" field.
+func MemberStatusLTE(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLTE(FieldMemberStatus, v))
+}
+
+// MemberTypeEQ applies the EQ predicate on the "member_type" field.
+func MemberTypeEQ(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldMemberType, v))
+}
+
+// MemberTypeNEQ applies the NEQ predicate on the "member_type" field.
+func MemberTypeNEQ(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNEQ(FieldMemberType, v))
+}
+
+// MemberTypeIn applies the In predicate on the "member_type" field.
+func MemberTypeIn(vs ...int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldIn(FieldMemberType, vs...))
+}
+
+// MemberTypeNotIn applies the NotIn predicate on the "member_type" field.
+func MemberTypeNotIn(vs ...int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNotIn(FieldMemberType, vs...))
+}
+
+// MemberTypeGT applies the GT predicate on the "member_type" field.
+func MemberTypeGT(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGT(FieldMemberType, v))
+}
+
+// MemberTypeGTE applies the GTE predicate on the "member_type" field.
+func MemberTypeGTE(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGTE(FieldMemberType, v))
+}
+
+// MemberTypeLT applies the LT predicate on the "member_type" field.
+func MemberTypeLT(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLT(FieldMemberType, v))
+}
+
+// MemberTypeLTE applies the LTE predicate on the "member_type" field.
+func MemberTypeLTE(v int) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLTE(FieldMemberType, v))
+}
+
+// ExpiredAtEQ applies the EQ predicate on the "expired_at" field.
+func ExpiredAtEQ(v time.Time) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldExpiredAt, v))
+}
+
+// ExpiredAtNEQ applies the NEQ predicate on the "expired_at" field.
+func ExpiredAtNEQ(v time.Time) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNEQ(FieldExpiredAt, v))
+}
+
+// ExpiredAtIn applies the In predicate on the "expired_at" field.
+func ExpiredAtIn(vs ...time.Time) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldIn(FieldExpiredAt, vs...))
+}
+
+// ExpiredAtNotIn applies the NotIn predicate on the "expired_at" field.
+func ExpiredAtNotIn(vs ...time.Time) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNotIn(FieldExpiredAt, vs...))
+}
+
+// ExpiredAtGT applies the GT predicate on the "expired_at" field.
+func ExpiredAtGT(v time.Time) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGT(FieldExpiredAt, v))
+}
+
+// ExpiredAtGTE applies the GTE predicate on the "expired_at" field.
+func ExpiredAtGTE(v time.Time) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGTE(FieldExpiredAt, v))
+}
+
+// ExpiredAtLT applies the LT predicate on the "expired_at" field.
+func ExpiredAtLT(v time.Time) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLT(FieldExpiredAt, v))
+}
+
+// ExpiredAtLTE applies the LTE predicate on the "expired_at" field.
+func ExpiredAtLTE(v time.Time) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLTE(FieldExpiredAt, v))
+}
+
+// ExpiredAtIsNil applies the IsNil predicate on the "expired_at" field.
+func ExpiredAtIsNil() predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldIsNull(FieldExpiredAt))
+}
+
+// ExpiredAtNotNil applies the NotNil predicate on the "expired_at" field.
+func ExpiredAtNotNil() predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNotNull(FieldExpiredAt))
+}
+
+// MetadataEQ applies the EQ predicate on the "metadata" field.
+func MetadataEQ(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldMetadata, v))
+}
+
+// MetadataNEQ applies the NEQ predicate on the "metadata" field.
+func MetadataNEQ(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNEQ(FieldMetadata, v))
+}
+
+// MetadataIn applies the In predicate on the "metadata" field.
+func MetadataIn(vs ...string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldIn(FieldMetadata, vs...))
+}
+
+// MetadataNotIn applies the NotIn predicate on the "metadata" field.
+func MetadataNotIn(vs ...string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNotIn(FieldMetadata, vs...))
+}
+
+// MetadataGT applies the GT predicate on the "metadata" field.
+func MetadataGT(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGT(FieldMetadata, v))
+}
+
+// MetadataGTE applies the GTE predicate on the "metadata" field.
+func MetadataGTE(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGTE(FieldMetadata, v))
+}
+
+// MetadataLT applies the LT predicate on the "metadata" field.
+func MetadataLT(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLT(FieldMetadata, v))
+}
+
+// MetadataLTE applies the LTE predicate on the "metadata" field.
+func MetadataLTE(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLTE(FieldMetadata, v))
+}
+
+// MetadataContains applies the Contains predicate on the "metadata" field.
+func MetadataContains(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldContains(FieldMetadata, v))
+}
+
+// MetadataHasPrefix applies the HasPrefix predicate on the "metadata" field.
+func MetadataHasPrefix(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldHasPrefix(FieldMetadata, v))
+}
+
+// MetadataHasSuffix applies the HasSuffix predicate on the "metadata" field.
+func MetadataHasSuffix(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldHasSuffix(FieldMetadata, v))
+}
+
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNotNull(FieldMetadata))
+}
+
+// MetadataEqualFold applies the EqualFold predicate on the "metadata" field.
+func MetadataEqualFold(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEqualFold(FieldMetadata, v))
+}
+
+// MetadataContainsFold applies the ContainsFold predicate on the "metadata" field.
+func MetadataContainsFold(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldContainsFold(FieldMetadata, v))
+}
+
+// DescriptionEQ applies the EQ predicate on the "description" field.
+func DescriptionEQ(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEQ(FieldDescription, v))
+}
+
+// DescriptionNEQ applies the NEQ predicate on the "description" field.
+func DescriptionNEQ(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNEQ(FieldDescription, v))
+}
+
+// DescriptionIn applies the In predicate on the "description" field.
+func DescriptionIn(vs ...string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldIn(FieldDescription, vs...))
+}
+
+// DescriptionNotIn applies the NotIn predicate on the "description" field.
+func DescriptionNotIn(vs ...string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldNotIn(FieldDescription, vs...))
+}
+
+// DescriptionGT applies the GT predicate on the "description" field.
+func DescriptionGT(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGT(FieldDescription, v))
+}
+
+// DescriptionGTE applies the GTE predicate on the "description" field.
+func DescriptionGTE(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldGTE(FieldDescription, v))
+}
+
+// DescriptionLT applies the LT predicate on the "description" field.
+func DescriptionLT(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLT(FieldDescription, v))
+}
+
+// DescriptionLTE applies the LTE predicate on the "description" field.
+func DescriptionLTE(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldLTE(FieldDescription, v))
+}
+
+// DescriptionContains applies the Contains predicate on the "description" field.
+func DescriptionContains(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldContains(FieldDescription, v))
+}
+
+// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
+func DescriptionHasPrefix(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldHasPrefix(FieldDescription, v))
+}
+
+// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
+func DescriptionHasSuffix(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
+func DescriptionEqualFold(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldEqualFold(FieldDescription, v))
+}
+
+// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
+func DescriptionContainsFold(v string) predicate.UserRoles {
+	return predicate.UserRoles(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // HasLionUsers applies the HasEdge predicate on the "lion_users" edge.

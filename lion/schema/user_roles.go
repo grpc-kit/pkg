@@ -25,6 +25,24 @@ func (UserRoles) Fields() []ent.Field {
 			Positive().
 			// Immutable().
 			Comment("关联 lion_roles 表的用户组 ID"),
+		field.Int("member_role").
+			Default(0).
+			Comment("用户在群组中的角色：0-未指定，1-所有者，2-管理员，3-普通成员，4-访客"),
+		field.Int("member_status").
+			Default(0).
+			Comment("用户群组关系状态：0-未知状态，1-待激活，2-正常启用，3-被邀请，4-禁用，5-被拒绝，6-已退出"),
+		field.Int("member_type").
+			Default(0).
+			Comment("成员关系类型，区分主部门和兼职部门"),
+		field.Time("expired_at").
+			Optional().
+			Comment("关系有效期，用于临时成员管理，0表示永久有效"),
+		field.String("metadata").
+			Optional().
+			Comment("元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储"),
+		field.String("description").
+			Default("").
+			Comment("用户组描述"),
 	}
 }
 

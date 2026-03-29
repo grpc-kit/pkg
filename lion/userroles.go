@@ -31,6 +31,18 @@ type UserRoles struct {
 	UserID int `json:"user_id,omitempty"`
 	// 关联 lion_roles 表的用户组 ID
 	RoleID int `json:"role_id,omitempty"`
+	// 用户在群组中的角色：0-未指定，1-所有者，2-管理员，3-普通成员，4-访客
+	MemberRole int `json:"member_role,omitempty"`
+	// 用户群组关系状态：0-未知状态，1-待激活，2-正常启用，3-被邀请，4-禁用，5-被拒绝，6-已退出
+	MemberStatus int `json:"member_status,omitempty"`
+	// 成员关系类型，区分主部门和兼职部门
+	MemberType int `json:"member_type,omitempty"`
+	// 关系有效期，用于临时成员管理，0表示永久有效
+	ExpiredAt time.Time `json:"expired_at,omitempty"`
+	// 元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储
+	Metadata string `json:"metadata,omitempty"`
+	// 用户组描述
+	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserRolesQuery when eager-loading is set.
 	Edges        UserRolesEdges `json:"edges"`
@@ -75,9 +87,11 @@ func (*UserRoles) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case userroles.FieldID, userroles.FieldCreatedBy, userroles.FieldUpdatedBy, userroles.FieldUserID, userroles.FieldRoleID:
+		case userroles.FieldID, userroles.FieldCreatedBy, userroles.FieldUpdatedBy, userroles.FieldUserID, userroles.FieldRoleID, userroles.FieldMemberRole, userroles.FieldMemberStatus, userroles.FieldMemberType:
 			values[i] = new(sql.NullInt64)
-		case userroles.FieldCreatedAt, userroles.FieldUpdatedAt:
+		case userroles.FieldMetadata, userroles.FieldDescription:
+			values[i] = new(sql.NullString)
+		case userroles.FieldCreatedAt, userroles.FieldUpdatedAt, userroles.FieldExpiredAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -135,6 +149,42 @@ func (_m *UserRoles) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field role_id", values[i])
 			} else if value.Valid {
 				_m.RoleID = int(value.Int64)
+			}
+		case userroles.FieldMemberRole:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field member_role", values[i])
+			} else if value.Valid {
+				_m.MemberRole = int(value.Int64)
+			}
+		case userroles.FieldMemberStatus:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field member_status", values[i])
+			} else if value.Valid {
+				_m.MemberStatus = int(value.Int64)
+			}
+		case userroles.FieldMemberType:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field member_type", values[i])
+			} else if value.Valid {
+				_m.MemberType = int(value.Int64)
+			}
+		case userroles.FieldExpiredAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expired_at", values[i])
+			} else if value.Valid {
+				_m.ExpiredAt = value.Time
+			}
+		case userroles.FieldMetadata:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field metadata", values[i])
+			} else if value.Valid {
+				_m.Metadata = value.String
+			}
+		case userroles.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				_m.Description = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -199,6 +249,24 @@ func (_m *UserRoles) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("role_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RoleID))
+	builder.WriteString(", ")
+	builder.WriteString("member_role=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MemberRole))
+	builder.WriteString(", ")
+	builder.WriteString("member_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MemberStatus))
+	builder.WriteString(", ")
+	builder.WriteString("member_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.MemberType))
+	builder.WriteString(", ")
+	builder.WriteString("expired_at=")
+	builder.WriteString(_m.ExpiredAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("metadata=")
+	builder.WriteString(_m.Metadata)
+	builder.WriteString(", ")
+	builder.WriteString("description=")
+	builder.WriteString(_m.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

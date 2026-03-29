@@ -26,6 +26,18 @@ const (
 	FieldUserID = "user_id"
 	// FieldRoleID holds the string denoting the role_id field in the database.
 	FieldRoleID = "role_id"
+	// FieldMemberRole holds the string denoting the member_role field in the database.
+	FieldMemberRole = "member_role"
+	// FieldMemberStatus holds the string denoting the member_status field in the database.
+	FieldMemberStatus = "member_status"
+	// FieldMemberType holds the string denoting the member_type field in the database.
+	FieldMemberType = "member_type"
+	// FieldExpiredAt holds the string denoting the expired_at field in the database.
+	FieldExpiredAt = "expired_at"
+	// FieldMetadata holds the string denoting the metadata field in the database.
+	FieldMetadata = "metadata"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// EdgeLionUsers holds the string denoting the lion_users edge name in mutations.
 	EdgeLionUsers = "lion_users"
 	// EdgeLionRoles holds the string denoting the lion_roles edge name in mutations.
@@ -57,6 +69,12 @@ var Columns = []string{
 	FieldUpdatedBy,
 	FieldUserID,
 	FieldRoleID,
+	FieldMemberRole,
+	FieldMemberStatus,
+	FieldMemberType,
+	FieldExpiredAt,
+	FieldMetadata,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -84,6 +102,14 @@ var (
 	UserIDValidator func(int) error
 	// RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
 	RoleIDValidator func(int) error
+	// DefaultMemberRole holds the default value on creation for the "member_role" field.
+	DefaultMemberRole int
+	// DefaultMemberStatus holds the default value on creation for the "member_status" field.
+	DefaultMemberStatus int
+	// DefaultMemberType holds the default value on creation for the "member_type" field.
+	DefaultMemberType int
+	// DefaultDescription holds the default value on creation for the "description" field.
+	DefaultDescription string
 )
 
 // OrderOption defines the ordering options for the UserRoles queries.
@@ -122,6 +148,36 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 // ByRoleID orders the results by the role_id field.
 func ByRoleID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRoleID, opts...).ToFunc()
+}
+
+// ByMemberRole orders the results by the member_role field.
+func ByMemberRole(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMemberRole, opts...).ToFunc()
+}
+
+// ByMemberStatus orders the results by the member_status field.
+func ByMemberStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMemberStatus, opts...).ToFunc()
+}
+
+// ByMemberType orders the results by the member_type field.
+func ByMemberType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMemberType, opts...).ToFunc()
+}
+
+// ByExpiredAt orders the results by the expired_at field.
+func ByExpiredAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpiredAt, opts...).ToFunc()
+}
+
+// ByMetadata orders the results by the metadata field.
+func ByMetadata(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMetadata, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByLionUsersField orders the results by lion_users field.

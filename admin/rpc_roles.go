@@ -19,7 +19,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/userroles"
-	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -303,76 +302,53 @@ func (a *KnownAdminAPI) sortRoleChildren(roles []*adminv1.Role) {
 	}
 }
 
-// ListRoleUsers 获取角色用户列表
-func (a *KnownAdminAPI) ListRoleUsers(ctx context.Context, req *adminv1.ListRoleUsersRequest) (*adminv1.ListRoleUsersResponse, error) {
-	result := &adminv1.ListRoleUsersResponse{}
+// roleMembersToGroupMembersListReq 将 ListRoleMembers 请求映射为 ListGroupMembers 请求，
+// 以便复用 listGroupMembersFromRole（user_roles → Membership）逻辑。
+func roleMembersToGroupMembersListReq(req *adminv1.ListRoleMembersRequest) *adminv1.ListGroupMembersRequest {
+	g := &adminv1.ListGroupMembersRequest{
+		Parent:   req.GetParent(),
+		PageSize: req.GetPageSize(),
+		Filter:   req.GetFilter(),
+		OrderBy:  req.GetOrderBy(),
+	}
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListRoleMembersRequest_PageToken:
+		g.Pagination = &adminv1.ListGroupMembersRequest_PageToken{PageToken: p.PageToken}
+	case *adminv1.ListRoleMembersRequest_Offset:
+		g.Pagination = &adminv1.ListGroupMembersRequest_Offset{Offset: p.Offset}
+	}
+	return g
+}
 
+// ListRoleMembers 获取角色成员列表（与 ListGroupMembers 中基于 user_roles 的成员结构一致）
+func (a *KnownAdminAPI) ListRoleMembers(ctx context.Context, req *adminv1.ListRoleMembersRequest) (*adminv1.ListRoleMembersResponse, error) {
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
 	}
 
-	roleID, err := strconv.Atoi(req.Parent)
+	roleID, err := strconv.Atoi(req.GetParent())
 	if err != nil {
 		return nil, err
 	}
 
-	// 检查用户是否有权限操作该角色
 	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
 		return nil, err
 	}
 
-	uidObjs, err := db.UserRoles.Query().Select(
-		userroles.FieldUserID,
-	).Where(
-		userroles.RoleIDEQ(roleID),
-	).All(ctx)
-
+	gr, err := a.listGroupMembersFromRole(ctx, roleMembersToGroupMembersListReq(req), db, roleID)
 	if err != nil {
 		return nil, err
 	}
-
-	uidInts := make([]int, len(uidObjs))
-	for i, uidObj := range uidObjs {
-		uidInts[i] = int(uidObj.UserID)
-	}
-
-	userObjs, err := db.Users.Query().Select(
-		users.FieldID,
-		users.FieldUsername,
-		users.FieldUserStatus,
-		users.FieldNickname,
-		users.FieldProfile,
-		users.FieldPicture,
-		users.FieldWebsite,
-		users.FieldTimezone,
-		users.FieldLocale,
-	).Where(
-		users.IDIn(uidInts...),
-	).All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, user := range userObjs {
-		result.Users = append(result.Users, &adminv1.User{
-			Id:       int64(user.ID),
-			Username: user.Username,
-			Status:   adminv1.User_Status(user.UserStatus),
-			Nickname: user.Nickname,
-			Profile:  user.Profile,
-			Picture:  user.Picture,
-			Website:  user.Website,
-			Timezone: user.Timezone,
-			Locale:   user.Locale,
-		})
-	}
-
-	return result, nil
+	return &adminv1.ListRoleMembersResponse{
+		Members:       gr.GetMembers(),
+		NextPageToken: gr.GetNextPageToken(),
+		TotalSize:     gr.GetTotalSize(),
+	}, nil
 }
 
-// DeleteRoleUser 删除角色用户
-func (a *KnownAdminAPI) DeleteRoleUser(ctx context.Context, req *adminv1.DeleteRoleUserRequest) (*emptypb.Empty, error) {
+// DeleteRoleMember 移除角色下的成员（user_roles 一行）
+func (a *KnownAdminAPI) DeleteRoleMember(ctx context.Context, req *adminv1.DeleteRoleMemberRequest) (*emptypb.Empty, error) {
 	empty := &emptypb.Empty{}
 
 	roleID, err := strconv.Atoi(req.Parent)
@@ -690,27 +666,178 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 	return result, nil
 }
 
-// AssignRoleToUser 角色分配用户
-func (a *KnownAdminAPI) AssignRoleToUser(ctx context.Context, req *adminv1.AssignRoleToUserRequest) (*emptypb.Empty, error) {
+func membershipMetadataToJSON(md map[string]string) (string, error) {
+	if len(md) == 0 {
+		return "", nil
+	}
+	b, err := json.Marshal(md)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
+func applyMembershipToUserRolesCreate(cb *lion.UserRolesCreate, m *adminv1.Membership) (*lion.UserRolesCreate, error) {
+	cb = cb.SetMemberRole(int(m.GetMemberRole())).
+		SetMemberStatus(int(m.GetMemberStatus())).
+		SetMemberType(int(m.GetMemberType())).
+		SetDescription(m.GetDescription())
+	if m.GetExpiredAt() != nil {
+		cb = cb.SetExpiredAt(m.GetExpiredAt().AsTime())
+	}
+	meta, err := membershipMetadataToJSON(m.GetMetadata())
+	if err != nil {
+		return nil, err
+	}
+	if meta != "" {
+		cb = cb.SetMetadata(meta)
+	}
+	return cb, nil
+}
+
+func applyMembershipToUserRolesUpdate(ur *lion.UserRolesUpdateOne, m *adminv1.Membership) (*lion.UserRolesUpdateOne, error) {
+	ur = ur.SetMemberRole(int(m.GetMemberRole())).
+		SetMemberStatus(int(m.GetMemberStatus())).
+		SetMemberType(int(m.GetMemberType())).
+		SetDescription(m.GetDescription())
+	if m.GetExpiredAt() != nil {
+		ur = ur.SetExpiredAt(m.GetExpiredAt().AsTime())
+	} else {
+		ur = ur.ClearExpiredAt()
+	}
+	meta, err := membershipMetadataToJSON(m.GetMetadata())
+	if err != nil {
+		return nil, err
+	}
+	if meta == "" {
+		ur = ur.ClearMetadata()
+	} else {
+		ur = ur.SetMetadata(meta)
+	}
+	return ur, nil
+}
+
+func (a *KnownAdminAPI) userRoleForRoleMemberUpdate(ctx context.Context, db *lion.Client, roleID int, m *adminv1.Membership) (*lion.UserRoles, error) {
+	if m.GetId() > 0 {
+		ur, err := db.UserRoles.Get(ctx, int(m.GetId()))
+		if err != nil {
+			if lion.IsNotFound(err) {
+				return nil, errs.NotFound(ctx).WithMessage("user role not found")
+			}
+			return nil, err
+		}
+		if ur.RoleID != roleID {
+			return nil, errs.InvalidArgument(ctx).WithMessage("member id does not belong to this role")
+		}
+		if m.GetUserId() > 0 && int(m.GetUserId()) != ur.UserID {
+			return nil, errs.InvalidArgument(ctx).WithMessage("user_id does not match member record")
+		}
+		return ur, nil
+	}
+	if m.GetUserId() <= 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("member user_id or id is required")
+	}
+	ur, err := db.UserRoles.Query().
+		Where(userroles.RoleIDEQ(roleID), userroles.UserIDEQ(int(m.GetUserId()))).
+		Only(ctx)
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("user role membership not found")
+		}
+		return nil, err
+	}
+	return ur, nil
+}
+
+// CreateRoleMembers 批量添加角色成员（与 CreateGroupMembers REST 形态一致）
+func (a *KnownAdminAPI) CreateRoleMembers(ctx context.Context, req *adminv1.CreateRoleMembersRequest) (*adminv1.CreateRoleMembersResponse, error) {
+	result := &adminv1.CreateRoleMembersResponse{}
+
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
 	}
 
-	// 检查用户是否有权限操作该角色
-	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
+	roleID, err := strconv.Atoi(req.GetParent())
+	if err != nil {
 		return nil, err
 	}
 
-	if len(req.Users) == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("users is empty")
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
 	}
 
-	for _, userID := range req.Users {
-		_, _ = db.UserRoles.Create().SetRoleID(int(req.RoleId)).SetUserID(int(userID.Id)).Save(ctx)
+	if len(req.GetMembers()) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("members is empty")
 	}
 
-	return &emptypb.Empty{}, nil
+	for _, m := range req.GetMembers() {
+		uid := m.GetUserId()
+		if uid == 0 {
+			continue
+		}
+		cb := db.UserRoles.Create().SetRoleID(roleID).SetUserID(int(uid))
+		cb, err = applyMembershipToUserRolesCreate(cb, m)
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+		}
+		if v, err := GetUserID(ctx); err == nil {
+			cb = cb.SetCreatedBy(v).SetUpdatedBy(v)
+		}
+		if _, err := cb.Save(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
+// UpdateRoleMembers 批量更新角色下成员（PATCH .../roles/{parent}/members）
+func (a *KnownAdminAPI) UpdateRoleMembers(ctx context.Context, req *adminv1.UpdateRoleMembersRequest) (*adminv1.UpdateRoleMembersResponse, error) {
+	result := &adminv1.UpdateRoleMembersResponse{}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	roleID, err := strconv.Atoi(req.GetParent())
+	if err != nil {
+		return nil, err
+	}
+
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
+	if len(req.GetMembers()) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("members is empty")
+	}
+
+	var actor int64
+	if v, err := GetUserID(ctx); err == nil {
+		actor = v
+	}
+
+	for _, m := range req.GetMembers() {
+		ur, err := a.userRoleForRoleMemberUpdate(ctx, db, roleID, m)
+		if err != nil {
+			return nil, err
+		}
+		upd := ur.Update()
+		upd, err = applyMembershipToUserRolesUpdate(upd, m)
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+		}
+		if actor != 0 {
+			upd = upd.SetUpdatedBy(actor)
+		}
+		if _, err := upd.Save(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
 }
 
 // CreateRolePermissions 为角色关联权限
