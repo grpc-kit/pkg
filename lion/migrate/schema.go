@@ -419,6 +419,7 @@ var (
 		{Name: "role_status", Type: field.TypeInt, Default: 0},
 		{Name: "sort_order", Type: field.TypeInt, Default: 100},
 		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "protected", Type: field.TypeBool, Default: false},
 	}
 	// LionRolesTable holds the schema information for the "lion_roles" table.
 	LionRolesTable = &schema.Table{

@@ -237,6 +237,20 @@ func (_u *RolesUpdate) SetNillableDescription(v *string) *RolesUpdate {
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *RolesUpdate) SetProtected(v bool) *RolesUpdate {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *RolesUpdate) SetNillableProtected(v *bool) *RolesUpdate {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by IDs.
 func (_u *RolesUpdate) AddLionRolePermissionIDs(ids ...int) *RolesUpdate {
 	_u.mutation.AddLionRolePermissionIDs(ids...)
@@ -472,6 +486,9 @@ func (_u *RolesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(roles.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
 	}
 	if _u.mutation.LionRolePermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -834,6 +851,20 @@ func (_u *RolesUpdateOne) SetNillableDescription(v *string) *RolesUpdateOne {
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *RolesUpdateOne) SetProtected(v bool) *RolesUpdateOne {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *RolesUpdateOne) SetNillableProtected(v *bool) *RolesUpdateOne {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by IDs.
 func (_u *RolesUpdateOne) AddLionRolePermissionIDs(ids ...int) *RolesUpdateOne {
 	_u.mutation.AddLionRolePermissionIDs(ids...)
@@ -1099,6 +1130,9 @@ func (_u *RolesUpdateOne) sqlSave(ctx context.Context) (_node *Roles, err error)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(roles.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
 	}
 	if _u.mutation.LionRolePermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{

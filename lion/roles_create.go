@@ -175,6 +175,20 @@ func (_c *RolesCreate) SetNillableDescription(v *string) *RolesCreate {
 	return _c
 }
 
+// SetProtected sets the "protected" field.
+func (_c *RolesCreate) SetProtected(v bool) *RolesCreate {
+	_c.mutation.SetProtected(v)
+	return _c
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_c *RolesCreate) SetNillableProtected(v *bool) *RolesCreate {
+	if v != nil {
+		_c.SetProtected(*v)
+	}
+	return _c
+}
+
 // AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by IDs.
 func (_c *RolesCreate) AddLionRolePermissionIDs(ids ...int) *RolesCreate {
 	_c.mutation.AddLionRolePermissionIDs(ids...)
@@ -291,6 +305,10 @@ func (_c *RolesCreate) defaults() {
 		v := roles.DefaultDescription
 		_c.mutation.SetDescription(v)
 	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		v := roles.DefaultProtected
+		_c.mutation.SetProtected(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -331,6 +349,9 @@ func (_c *RolesCreate) check() error {
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Roles.description"`)}
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Roles.protected"`)}
 	}
 	return nil
 }
@@ -405,6 +426,10 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(roles.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := _c.mutation.Protected(); ok {
+		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
+		_node.Protected = value
 	}
 	if nodes := _c.mutation.LionRolePermissionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

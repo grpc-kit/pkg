@@ -115,6 +115,11 @@ func Description(v string) predicate.Roles {
 	return predicate.Roles(sql.FieldEQ(FieldDescription, v))
 }
 
+// Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
+func Protected(v bool) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldProtected, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Roles {
 	return predicate.Roles(sql.FieldEQ(FieldCreatedAt, v))
@@ -698,6 +703,16 @@ func DescriptionEqualFold(v string) predicate.Roles {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Roles {
 	return predicate.Roles(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// ProtectedEQ applies the EQ predicate on the "protected" field.
+func ProtectedEQ(v bool) predicate.Roles {
+	return predicate.Roles(sql.FieldEQ(FieldProtected, v))
+}
+
+// ProtectedNEQ applies the NEQ predicate on the "protected" field.
+func ProtectedNEQ(v bool) predicate.Roles {
+	return predicate.Roles(sql.FieldNEQ(FieldProtected, v))
 }
 
 // HasLionRolePermissions applies the HasEdge predicate on the "lion_role_permissions" edge.

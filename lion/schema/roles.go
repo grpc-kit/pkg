@@ -41,6 +41,9 @@ func (Roles) Fields() []ent.Field {
 		field.String("description").
 			Default("").
 			Comment("用途详细描述"),
+		field.Bool("protected").
+			Default(false).
+			Comment("是否为保护资源，保护资源不能被删除，描述等可更改"),
 	}
 }
 

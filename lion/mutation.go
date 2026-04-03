@@ -14638,6 +14638,7 @@ type RolesMutation struct {
 	sort_order                   *int
 	addsort_order                *int
 	description                  *string
+	protected                    *bool
 	clearedFields                map[string]struct{}
 	lion_role_permissions        map[int]struct{}
 	removedlion_role_permissions map[int]struct{}
@@ -15344,6 +15345,42 @@ func (m *RolesMutation) ResetDescription() {
 	m.description = nil
 }
 
+// SetProtected sets the "protected" field.
+func (m *RolesMutation) SetProtected(b bool) {
+	m.protected = &b
+}
+
+// Protected returns the value of the "protected" field in the mutation.
+func (m *RolesMutation) Protected() (r bool, exists bool) {
+	v := m.protected
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtected returns the old "protected" field's value of the Roles entity.
+// If the Roles object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RolesMutation) OldProtected(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtected requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
+	}
+	return oldValue.Protected, nil
+}
+
+// ResetProtected resets all changes to the "protected" field.
+func (m *RolesMutation) ResetProtected() {
+	m.protected = nil
+}
+
 // AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by ids.
 func (m *RolesMutation) AddLionRolePermissionIDs(ids ...int) {
 	if m.lion_role_permissions == nil {
@@ -15540,7 +15577,7 @@ func (m *RolesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RolesMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, roles.FieldCreatedAt)
 	}
@@ -15577,6 +15614,9 @@ func (m *RolesMutation) Fields() []string {
 	if m.description != nil {
 		fields = append(fields, roles.FieldDescription)
 	}
+	if m.protected != nil {
+		fields = append(fields, roles.FieldProtected)
+	}
 	return fields
 }
 
@@ -15609,6 +15649,8 @@ func (m *RolesMutation) Field(name string) (ent.Value, bool) {
 		return m.SortOrder()
 	case roles.FieldDescription:
 		return m.Description()
+	case roles.FieldProtected:
+		return m.Protected()
 	}
 	return nil, false
 }
@@ -15642,6 +15684,8 @@ func (m *RolesMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldSortOrder(ctx)
 	case roles.FieldDescription:
 		return m.OldDescription(ctx)
+	case roles.FieldProtected:
+		return m.OldProtected(ctx)
 	}
 	return nil, fmt.Errorf("unknown Roles field %s", name)
 }
@@ -15734,6 +15778,13 @@ func (m *RolesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
+		return nil
+	case roles.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Roles field %s", name)
@@ -15915,6 +15966,9 @@ func (m *RolesMutation) ResetField(name string) error {
 		return nil
 	case roles.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case roles.FieldProtected:
+		m.ResetProtected()
 		return nil
 	}
 	return fmt.Errorf("unknown Roles field %s", name)

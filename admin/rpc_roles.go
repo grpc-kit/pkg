@@ -184,6 +184,7 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 		roles.FieldDisplayName,
 		roles.FieldRoleType,
 		roles.FieldRoleStatus,
+		roles.FieldProtected,
 		roles.FieldSortOrder,
 		roles.FieldDescription,
 		roles.FieldCreatedAt,
@@ -245,6 +246,7 @@ func (a *KnownAdminAPI) ListRoles(ctx context.Context, req *adminv1.ListRolesReq
 			DisplayName: r.DisplayName,
 			Type:        adminv1.Role_Type(r.RoleType),
 			Status:      adminv1.Role_Status(r.RoleStatus),
+			Protected:   r.Protected,
 			SortOrder:   int32(r.SortOrder),
 			Description: r.Description,
 			CreatedAt:   timestamppb.New(r.CreatedAt),
@@ -409,6 +411,7 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 		SetCode(req.Role.Code).
 		SetDisplayName(req.Role.DisplayName).
 		SetDescription(req.Role.Description).
+		SetProtected(false).
 		SetSortOrder(int(req.Role.SortOrder))
 
 	// 设置 parent_id（如果提供）
@@ -436,6 +439,7 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 		SortOrder:   int32(role.SortOrder),
 		Type:        adminv1.Role_Type(role.RoleType),
 		Status:      adminv1.Role_Status(role.RoleStatus),
+		Protected:   role.Protected,
 		CreatedBy:   role.CreatedBy,
 		UpdatedBy:   role.UpdatedBy,
 		CreatedAt:   timestamppb.New(role.CreatedAt),
@@ -465,6 +469,7 @@ func (a *KnownAdminAPI) GetRole(ctx context.Context, req *adminv1.GetRoleRequest
 		roles.FieldDisplayName,
 		roles.FieldRoleType,
 		roles.FieldRoleStatus,
+		roles.FieldProtected,
 		roles.FieldSortOrder,
 		roles.FieldDescription,
 		roles.FieldCreatedBy,
@@ -492,6 +497,7 @@ func (a *KnownAdminAPI) GetRole(ctx context.Context, req *adminv1.GetRoleRequest
 		SortOrder:   int32(role.SortOrder),
 		Type:        adminv1.Role_Type(role.RoleType),
 		Status:      adminv1.Role_Status(role.RoleStatus),
+		Protected:   role.Protected,
 		CreatedBy:   role.CreatedBy,
 		UpdatedBy:   role.UpdatedBy,
 		CreatedAt:   timestamppb.New(role.CreatedAt),
@@ -514,6 +520,17 @@ func (a *KnownAdminAPI) DeleteRole(ctx context.Context, req *adminv1.DeleteRoleR
 	// 检查用户是否有权限操作该角色
 	if err := a.checkRolePermission(ctx, db, int(req.Id)); err != nil {
 		return nil, err
+	}
+
+	roleEnt, err := db.Roles.Get(ctx, int(req.Id))
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("role not found")
+		}
+		return nil, err
+	}
+	if roleEnt.Protected {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("protected role cannot be deleted")
 	}
 
 	if db.GroupRoles.Query().Where(grouproles.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
@@ -633,6 +650,7 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 			roles.FieldDisplayName,
 			roles.FieldRoleType,
 			roles.FieldRoleStatus,
+			roles.FieldProtected,
 			roles.FieldSortOrder,
 			roles.FieldDescription,
 			roles.FieldCreatedBy,
@@ -655,6 +673,7 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 			SortOrder:   int32(q.SortOrder),
 			Type:        adminv1.Role_Type(q.RoleType),
 			Status:      adminv1.Role_Status(q.RoleStatus),
+			Protected:   q.Protected,
 			CreatedBy:   q.CreatedBy,
 			UpdatedBy:   q.UpdatedBy,
 			CreatedAt:   timestamppb.New(q.CreatedAt),

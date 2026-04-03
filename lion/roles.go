@@ -41,6 +41,8 @@ type Roles struct {
 	SortOrder int `json:"sort_order,omitempty"`
 	// 用途详细描述
 	Description string `json:"description,omitempty"`
+	// 是否为保护资源，保护资源不能被删除，描述等可更改
+	Protected bool `json:"protected,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RolesQuery when eager-loading is set.
 	Edges        RolesEdges `json:"edges"`
@@ -92,6 +94,8 @@ func (*Roles) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case roles.FieldProtected:
+			values[i] = new(sql.NullBool)
 		case roles.FieldID, roles.FieldCreatedBy, roles.FieldUpdatedBy, roles.FieldParentID, roles.FieldRoleType, roles.FieldRoleStatus, roles.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
 		case roles.FieldCode, roles.FieldDisplayName, roles.FieldDescription:
@@ -192,6 +196,12 @@ func (_m *Roles) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
+		case roles.FieldProtected:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field protected", values[i])
+			} else if value.Valid {
+				_m.Protected = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -280,6 +290,9 @@ func (_m *Roles) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("protected=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
 	builder.WriteByte(')')
 	return builder.String()
 }

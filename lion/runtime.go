@@ -737,6 +737,10 @@ func init() {
 	rolesDescDescription := rolesFields[6].Descriptor()
 	// roles.DefaultDescription holds the default value on creation for the description field.
 	roles.DefaultDescription = rolesDescDescription.Default.(string)
+	// rolesDescProtected is the schema descriptor for protected field.
+	rolesDescProtected := rolesFields[7].Descriptor()
+	// roles.DefaultProtected holds the default value on creation for the protected field.
+	roles.DefaultProtected = rolesDescProtected.Default.(bool)
 	scopesMixin := schema.Scopes{}.Mixin()
 	scopesMixinFields0 := scopesMixin[0].Fields()
 	_ = scopesMixinFields0

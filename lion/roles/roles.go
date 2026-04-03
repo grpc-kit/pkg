@@ -38,6 +38,8 @@ const (
 	FieldSortOrder = "sort_order"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
 	// EdgeLionRolePermissions holds the string denoting the lion_role_permissions edge name in mutations.
 	EdgeLionRolePermissions = "lion_role_permissions"
 	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
@@ -84,6 +86,7 @@ var Columns = []string{
 	FieldRoleStatus,
 	FieldSortOrder,
 	FieldDescription,
+	FieldProtected,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -121,6 +124,8 @@ var (
 	DefaultSortOrder int
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
 )
 
 // OrderOption defines the ordering options for the Roles queries.
@@ -189,6 +194,11 @@ func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
 // ByLionRolePermissionsCount orders the results by lion_role_permissions count.
