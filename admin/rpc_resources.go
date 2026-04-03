@@ -25,6 +25,148 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// listResourceAuthFilter 用于在权限图中收窄可见资源；零值表示不按该维度过滤。
+// ListResources 可传入请求中的 policy / scope；单资源读写应传空 filter，使用「全并集」与列表默认可见范围一致（不受列表时附带 policy/scope 参数影响）。
+type listResourceAuthFilter struct {
+	PolicyType   int32
+	PolicyStatus int32
+	ScopeType    int32
+	ScopeName    string
+}
+
+// allowedResourceIDsForContext 按与 ListResources 相同的 Lion 角色树、角色权限、permission_bindings、资源树递归规则，解析当前用户可访问的资源 ID 集合。
+// superAdmin 为 true 时不返回 allowed（调用方视为不裁剪）；err 表示上下文缺失 groups 等错误。
+func (a *KnownAdminAPI) allowedResourceIDsForContext(ctx context.Context, db *lion.Client, f listResourceAuthFilter) (superAdmin bool, allowed map[int]struct{}, err error) {
+	gs, ok := rpc.GetGroupsFromContext(ctx)
+	if !ok {
+		return false, nil, fmt.Errorf("not found groups")
+	}
+	if len(gs) == 0 {
+		return false, map[int]struct{}{}, nil
+	}
+	for _, g := range gs {
+		if g == "superadmin" {
+			return true, nil, nil
+		}
+	}
+	roleRows, err := db.Roles.Query().Select(roles.FieldID).Where(roles.CodeIn(gs...)).All(ctx)
+	if err != nil {
+		return false, nil, err
+	}
+	if len(roleRows) == 0 {
+		return false, map[int]struct{}{}, nil
+	}
+	parentRoleIDs := make([]int, len(roleRows))
+	for i, r := range roleRows {
+		parentRoleIDs[i] = r.ID
+	}
+	childRoleIDs, err := a.getAllChildRoleIDs(ctx, db, parentRoleIDs)
+	if err != nil {
+		return false, nil, err
+	}
+	allRoleIDs := mergeUniqueInts(parentRoleIDs, childRoleIDs)
+
+	permissionsWhere := make([]predicate.Permissions, 0)
+	permissionsWhere = append(permissionsWhere, permissions.HasLionRolePermissionsWith(
+		rolepermissions.HasLionRolesWith(
+			roles.IDIn(allRoleIDs...),
+		),
+	))
+	policiesWhere := make([]predicate.Policies, 0)
+	if f.PolicyType != 0 {
+		policiesWhere = append(policiesWhere, policies.PolicyTypeEQ(int(f.PolicyType)))
+	}
+	if f.PolicyStatus != 0 {
+		policiesWhere = append(policiesWhere, policies.PolicyStatusEQ(int(f.PolicyStatus)))
+	}
+	if len(policiesWhere) > 0 {
+		permissionsWhere = append(permissionsWhere, permissions.HasLionPoliciesWith(policiesWhere...))
+	}
+
+	bindingList, err := db.PermissionBindings.
+		Query().
+		Select(
+			permissionbindings.FieldResourceScopeID,
+			permissionbindings.FieldIsRecursive,
+		).
+		Where(
+			permissionbindings.HasLionPermissionsWith(permissionsWhere...),
+		).
+		All(ctx)
+	if err != nil {
+		return false, nil, err
+	}
+	if len(bindingList) == 0 {
+		return false, map[int]struct{}{}, nil
+	}
+
+	scopeRecursive := make(map[int]bool)
+	resourceScopeAllID := make([]int, 0)
+	for _, b := range bindingList {
+		resourceScopeAllID = append(resourceScopeAllID, b.ResourceScopeID)
+		if b.IsRecursive {
+			scopeRecursive[b.ResourceScopeID] = true
+		} else if _, set := scopeRecursive[b.ResourceScopeID]; !set {
+			scopeRecursive[b.ResourceScopeID] = false
+		}
+	}
+
+	scopeID := 0
+	if f.ScopeType != 0 && f.ScopeName != "" {
+		scopeID, err = db.Scopes.Query().Where(scopes.ScopeTypeEQ(int(f.ScopeType)), scopes.CodeEQ(f.ScopeName)).OnlyID(ctx)
+		if err != nil {
+			return false, nil, err
+		}
+	}
+
+	rsWhere := []predicate.ResourceScopes{resourcescopes.IDIn(resourceScopeAllID...)}
+	if scopeID != 0 {
+		rsWhere = append(rsWhere, resourcescopes.ScopeIDEQ(scopeID))
+	}
+	rsList, err := db.ResourceScopes.Query().Where(rsWhere...).Select(resourcescopes.FieldID, resourcescopes.FieldResourceID).All(ctx)
+	if err != nil {
+		return false, nil, err
+	}
+	if len(rsList) == 0 {
+		return false, map[int]struct{}{}, nil
+	}
+
+	recursiveRootIDs := make(map[int]struct{})
+	allowedIDs := make(map[int]struct{})
+	for _, rs := range rsList {
+		allowedIDs[rs.ResourceID] = struct{}{}
+		if scopeRecursive[rs.ID] {
+			recursiveRootIDs[rs.ResourceID] = struct{}{}
+		}
+	}
+	if len(recursiveRootIDs) > 0 {
+		allRes, err := db.Resources.Query().Select(resources.FieldID, resources.FieldParentID).All(ctx)
+		if err != nil {
+			return false, nil, err
+		}
+		children := make(map[int64][]int)
+		for _, r := range allRes {
+			pid := r.ParentID
+			children[pid] = append(children[pid], r.ID)
+		}
+		for rootID := range recursiveRootIDs {
+			collectDescendantIDs(int64(rootID), children, allowedIDs)
+		}
+	}
+	return false, allowedIDs, nil
+}
+
+// ensureResourceIDInAccessScope 非 superadmin 时要求 resourceID 落在 allowed 集合中；否则返回 NotFound（与「资源不存在」统一，避免泄漏）。
+func ensureResourceIDInAccessScope(ctx context.Context, superAdmin bool, allowed map[int]struct{}, resourceID int) error {
+	if superAdmin {
+		return nil
+	}
+	if _, ok := allowed[resourceID]; !ok {
+		return errs.NotFound(ctx).WithMessage("resource not found")
+	}
+	return nil
+}
+
 // ListResources 获取资源列表
 func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListResourcesRequest) (*adminv1.ListResourcesResponse, error) {
 	result := &adminv1.ListResourcesResponse{}
@@ -37,127 +179,23 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 		return result, nil
 	}
 
-	// 从 jwt 中获取用户组
-	gs, ok := rpc.GetGroupsFromContext(ctx)
-	if !ok {
-		return result, fmt.Errorf("not found groups")
-	}
-
-	if len(gs) == 0 {
-		return result, nil
-	}
-
-	// 检查是否包含 superadmin 角色
-	hasSuperAdmin := false
-	for _, g := range gs {
-		if g == "superadmin" {
-			hasSuperAdmin = true
-			break
-		}
+	hasSuperAdmin, allowedIDs, err := a.allowedResourceIDsForContext(ctx, db, listResourceAuthFilter{
+		PolicyType:   req.PolicyType,
+		PolicyStatus: req.PolicyStatus,
+		ScopeType:    req.ScopeType,
+		ScopeName:    req.ScopeName,
+	})
+	if err != nil {
+		return result, err
 	}
 
 	// 3 获取资源列表
 	resourcesWhere := make([]predicate.Resources, 0)
 
-	// 如果不是 superadmin，则需要权限验证
 	if !hasSuperAdmin {
-		permissionsWhere := make([]predicate.Permissions, 0)
-		permissionsWhere = append(permissionsWhere, permissions.HasLionRolePermissionsWith(
-			rolepermissions.HasLionRolesWith(
-				roles.CodeIn(gs...),
-			),
-		))
-
-		policiesWhere := make([]predicate.Policies, 0)
-		if req.PolicyType != 0 {
-			policiesWhere = append(policiesWhere, policies.PolicyTypeEQ(int(req.PolicyType)))
-		}
-		if req.PolicyStatus != 0 {
-			policiesWhere = append(policiesWhere, policies.PolicyStatusEQ(int(req.PolicyStatus)))
-		}
-		if len(policiesWhere) > 0 {
-			permissionsWhere = append(permissionsWhere, permissions.HasLionPoliciesWith(policiesWhere...))
-		}
-
-		// 1 查询对应角色在 lion_permission_bindings 中的资源范围及是否递归（resource_scope_id + is_recursive）
-		bindingList, err := db.PermissionBindings.
-			Query().
-			Select(
-				permissionbindings.FieldResourceScopeID,
-				permissionbindings.FieldIsRecursive,
-			).
-			Where(
-				permissionbindings.HasLionPermissionsWith(permissionsWhere...),
-			).
-			All(ctx)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(bindingList) == 0 {
+		if len(allowedIDs) == 0 {
 			return result, nil
 		}
-
-		// resource_scope_id -> is_recursive（同一 scope 若既有 true 又有 false 则按 true 处理，允许递归）
-		scopeRecursive := make(map[int]bool)
-		resourceScopeAllID := make([]int, 0)
-		for _, b := range bindingList {
-			resourceScopeAllID = append(resourceScopeAllID, b.ResourceScopeID)
-			if b.IsRecursive {
-				scopeRecursive[b.ResourceScopeID] = true
-			} else if _, set := scopeRecursive[b.ResourceScopeID]; !set {
-				scopeRecursive[b.ResourceScopeID] = false
-			}
-		}
-
-		// 2 判断是否过滤资源作用域
-		scopeID := 0
-		if req.ScopeType != 0 && req.ScopeName != "" {
-			scopeID, err = db.Scopes.Query().Where(scopes.ScopeTypeEQ(int(req.ScopeType)), scopes.CodeEQ(req.ScopeName)).OnlyID(ctx)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		// 3 通过 resource_scopes 解析出 resource_id，并按 is_recursive 计算允许访问的资源 ID 集合
-		rsWhere := []predicate.ResourceScopes{resourcescopes.IDIn(resourceScopeAllID...)}
-		if scopeID != 0 {
-			rsWhere = append(rsWhere, resourcescopes.ScopeIDEQ(scopeID))
-		}
-		rsList, err := db.ResourceScopes.Query().Where(rsWhere...).Select(resourcescopes.FieldID, resourcescopes.FieldResourceID).All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		if len(rsList) == 0 {
-			return result, nil
-		}
-
-		// 收集需递归的根 resource_id 与仅自身的 resource_id
-		recursiveRootIDs := make(map[int]struct{})
-		allowedIDs := make(map[int]struct{})
-		for _, rs := range rsList {
-			allowedIDs[rs.ResourceID] = struct{}{}
-			if scopeRecursive[rs.ID] {
-				recursiveRootIDs[rs.ResourceID] = struct{}{}
-			}
-		}
-
-		// 4 is_recursive 为 true 时，将子孙资源 ID 加入允许集合
-		if len(recursiveRootIDs) > 0 {
-			allRes, err := db.Resources.Query().Select(resources.FieldID, resources.FieldParentID).All(ctx)
-			if err != nil {
-				return nil, err
-			}
-			children := make(map[int64][]int)
-			for _, r := range allRes {
-				pid := r.ParentID
-				children[pid] = append(children[pid], r.ID)
-			}
-			for rootID := range recursiveRootIDs {
-				collectDescendantIDs(int64(rootID), children, allowedIDs)
-			}
-		}
-
 		resourcesWhere = append(resourcesWhere, resources.IDIn(mapKeys(allowedIDs)...))
 	} else {
 		// superadmin 可以查看所有资源，但仍需要支持资源作用域过滤
@@ -403,6 +441,14 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		return nil, errs.InvalidArgument(ctx).WithMessage("parent_id cannot be 0 when creating resource")
 	}
 
+	super, allowed, err := a.allowedResourceIDsForContext(ctx, db, listResourceAuthFilter{})
+	if err != nil {
+		return nil, err
+	}
+	if err := ensureResourceIDInAccessScope(ctx, super, allowed, int(req.Resource.ParentId)); err != nil {
+		return nil, err
+	}
+
 	parentResource, err := db.Resources.Get(ctx, int(req.Resource.ParentId))
 	if err != nil {
 		if lion.IsNotFound(err) {
@@ -486,6 +532,14 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 
 	db, err := a.GetLionClient()
 	if err != nil {
+		return nil, err
+	}
+
+	super, allowed, err := a.allowedResourceIDsForContext(ctx, db, listResourceAuthFilter{})
+	if err != nil {
+		return nil, err
+	}
+	if err := ensureResourceIDInAccessScope(ctx, super, allowed, int(req.Resource.Id)); err != nil {
 		return nil, err
 	}
 
@@ -607,6 +661,14 @@ func (a *KnownAdminAPI) DeleteResource(ctx context.Context, req *adminv1.DeleteR
 		return nil, err
 	}
 
+	super, allowed, err := a.allowedResourceIDsForContext(ctx, db, listResourceAuthFilter{})
+	if err != nil {
+		return nil, err
+	}
+	if err := ensureResourceIDInAccessScope(ctx, super, allowed, int(req.Id)); err != nil {
+		return nil, err
+	}
+
 	// 检查资源是否存在
 	_, err = db.Resources.Get(ctx, int(req.Id))
 	if err != nil {
@@ -648,6 +710,14 @@ func (a *KnownAdminAPI) CreateResourceScopes(ctx context.Context, req *adminv1.C
 
 	db, err := a.GetLionClient()
 	if err != nil {
+		return nil, err
+	}
+
+	super, allowed, err := a.allowedResourceIDsForContext(ctx, db, listResourceAuthFilter{})
+	if err != nil {
+		return nil, err
+	}
+	if err := ensureResourceIDInAccessScope(ctx, super, allowed, int(req.ResourceId)); err != nil {
 		return nil, err
 	}
 
@@ -755,6 +825,14 @@ func (a *KnownAdminAPI) GetResource(ctx context.Context, req *adminv1.GetResourc
 		return nil, err
 	}
 
+	super, allowed, err := a.allowedResourceIDsForContext(ctx, db, listResourceAuthFilter{})
+	if err != nil {
+		return nil, err
+	}
+	if err := ensureResourceIDInAccessScope(ctx, super, allowed, int(req.Id)); err != nil {
+		return nil, err
+	}
+
 	// 查询资源，并预加载作用域信息
 	resource, err := db.Resources.Query().
 		Where(resources.IDEQ(int(req.Id))).
@@ -829,4 +907,25 @@ func mapKeys(m map[int]struct{}) []int {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+// mergeUniqueInts 合并两段 int 切片并去重，保持先 a 后 b 的稳定顺序。
+func mergeUniqueInts(a, b []int) []int {
+	seen := make(map[int]struct{}, len(a)+len(b))
+	out := make([]int, 0, len(a)+len(b))
+	for _, id := range a {
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		out = append(out, id)
+	}
+	for _, id := range b {
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		out = append(out, id)
+	}
+	return out
 }
