@@ -81,6 +81,22 @@ func (c *Client) initOPARego(ctx context.Context) error {
 		dataRego = c.config.defaultRego()
 	}
 
+	// 动态数据优先级：DataProviderFunc > DataBody > defaultRBAC()
+	// 若 DataProviderFunc 未配置、调用失败或返回为空，则依次降级。
+	if c.config.OPARego.DataProviderFunc != nil {
+		dynData, provErr := c.config.OPARego.DataProviderFunc(ctx)
+		if provErr != nil {
+			c.logger.Warnf("opa dynamic data provider error, fallback to static config: %v", provErr)
+		} else {
+			dynNCL, _ := c.nonCommentLineLength(dynData)
+			if dynNCL > 0 {
+				dataRBAC = dynData
+			} else {
+				c.logger.Warn("opa dynamic data provider returned empty data, fallback to static config")
+			}
+		}
+	}
+
 	ncl, err = c.nonCommentLineLength(dataRBAC)
 	if err != nil {
 		return err
