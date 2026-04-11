@@ -138,10 +138,12 @@ func (a *KnownAdminAPI) ListPermissions(ctx context.Context, req *adminv1.ListPe
 	// 应用 Limit
 	permissionQuery = permissionQuery.Limit(int(pageSize))
 
-	// 如果 View 为 FULL，需要预加载策略和资源信息
+	// VIEW_BASIC 及以上均预加载策略信息；VIEW_FULL 额外预加载权限绑定资源
+	if req.View >= adminv1.View_VIEW_BASIC {
+		permissionQuery = permissionQuery.WithLionPolicies()
+	}
 	if req.View == adminv1.View_VIEW_FULL {
 		permissionQuery = permissionQuery.
-			WithLionPolicies().
 			WithLionPermissionBindings(
 				func(query *lion.PermissionBindingsQuery) {
 					query.WithLionResourceScopes(
@@ -169,9 +171,8 @@ func (a *KnownAdminAPI) ListPermissions(ctx context.Context, req *adminv1.ListPe
 			Description: p.Description,
 		}
 
-		// 如果 View 为 FULL，加载策略和资源信息
-		if req.View == adminv1.View_VIEW_FULL {
-			// 加载策略信息
+		// VIEW_BASIC 及以上加载策略信息
+		if req.View >= adminv1.View_VIEW_BASIC {
 			if p.Edges.LionPolicies != nil {
 				policy := p.Edges.LionPolicies
 				permission.Policy = &adminv1.Policy{
@@ -184,8 +185,10 @@ func (a *KnownAdminAPI) ListPermissions(ctx context.Context, req *adminv1.ListPe
 					Description: policy.Description,
 				}
 			}
+		}
 
-			// 加载权限绑定资源（permission_bindings -> resource_scopes -> resources）
+		// VIEW_FULL 额外加载权限绑定资源
+		if req.View == adminv1.View_VIEW_FULL {
 			if p.Edges.LionPermissionBindings != nil {
 				for _, binding := range p.Edges.LionPermissionBindings {
 					if pb := lionPermissionBindingToProto(binding); pb != nil {
