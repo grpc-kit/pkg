@@ -265,6 +265,16 @@ func IsRecursiveNEQ(v bool) predicate.PermissionBindings {
 	return predicate.PermissionBindings(sql.FieldNEQ(FieldIsRecursive, v))
 }
 
+// AllowMethodsIsNil applies the IsNil predicate on the "allow_methods" field.
+func AllowMethodsIsNil() predicate.PermissionBindings {
+	return predicate.PermissionBindings(sql.FieldIsNull(FieldAllowMethods))
+}
+
+// AllowMethodsNotNil applies the NotNil predicate on the "allow_methods" field.
+func AllowMethodsNotNil() predicate.PermissionBindings {
+	return predicate.PermissionBindings(sql.FieldNotNull(FieldAllowMethods))
+}
+
 // HasLionPermissions applies the HasEdge predicate on the "lion_permissions" edge.
 func HasLionPermissions() predicate.PermissionBindings {
 	return predicate.PermissionBindings(func(s *sql.Selector) {

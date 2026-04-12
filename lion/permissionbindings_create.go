@@ -90,6 +90,12 @@ func (_c *PermissionBindingsCreate) SetNillableIsRecursive(v *bool) *PermissionB
 	return _c
 }
 
+// SetAllowMethods sets the "allow_methods" field.
+func (_c *PermissionBindingsCreate) SetAllowMethods(v []string) *PermissionBindingsCreate {
+	_c.mutation.SetAllowMethods(v)
+	return _c
+}
+
 // SetLionPermissionsID sets the "lion_permissions" edge to the Permissions entity by ID.
 func (_c *PermissionBindingsCreate) SetLionPermissionsID(id int) *PermissionBindingsCreate {
 	_c.mutation.SetLionPermissionsID(id)
@@ -235,6 +241,10 @@ func (_c *PermissionBindingsCreate) createSpec() (*PermissionBindings, *sqlgraph
 	if value, ok := _c.mutation.IsRecursive(); ok {
 		_spec.SetField(permissionbindings.FieldIsRecursive, field.TypeBool, value)
 		_node.IsRecursive = value
+	}
+	if value, ok := _c.mutation.AllowMethods(); ok {
+		_spec.SetField(permissionbindings.FieldAllowMethods, field.TypeJSON, value)
+		_node.AllowMethods = value
 	}
 	if nodes := _c.mutation.LionPermissionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

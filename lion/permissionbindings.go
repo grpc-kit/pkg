@@ -3,6 +3,7 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -31,6 +32,8 @@ type PermissionBindings struct {
 	ResourceScopeID int `json:"resource_scope_id,omitempty"`
 	// 是否递归
 	IsRecursive bool `json:"is_recursive,omitempty"`
+	// 允许的 HTTP method 列表；为空时按 scope 默认映射
+	AllowMethods []string `json:"allow_methods,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PermissionBindingsQuery when eager-loading is set.
 	Edges        PermissionBindingsEdges `json:"edges"`
@@ -75,6 +78,8 @@ func (*PermissionBindings) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case permissionbindings.FieldAllowMethods:
+			values[i] = new([]byte)
 		case permissionbindings.FieldIsRecursive:
 			values[i] = new(sql.NullBool)
 		case permissionbindings.FieldID, permissionbindings.FieldPermissionID, permissionbindings.FieldResourceScopeID:
@@ -138,6 +143,14 @@ func (_m *PermissionBindings) assignValues(columns []string, values []any) error
 				return fmt.Errorf("unexpected type %T for field is_recursive", values[i])
 			} else if value.Valid {
 				_m.IsRecursive = value.Bool
+			}
+		case permissionbindings.FieldAllowMethods:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field allow_methods", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.AllowMethods); err != nil {
+					return fmt.Errorf("unmarshal field allow_methods: %w", err)
+				}
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -204,6 +217,9 @@ func (_m *PermissionBindings) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("is_recursive=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsRecursive))
+	builder.WriteString(", ")
+	builder.WriteString("allow_methods=")
+	builder.WriteString(fmt.Sprintf("%v", _m.AllowMethods))
 	builder.WriteByte(')')
 	return builder.String()
 }

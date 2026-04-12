@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"sort"
+	"strings"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
@@ -17,6 +19,46 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+var allowedHTTPMethods = map[string]struct{}{
+	"GET":     {},
+	"HEAD":    {},
+	"POST":    {},
+	"PUT":     {},
+	"PATCH":   {},
+	"DELETE":  {},
+	"OPTIONS": {},
+}
+
+func normalizeAllowMethods(methods []string) ([]string, error) {
+	if len(methods) == 0 {
+		return nil, nil
+	}
+
+	set := make(map[string]struct{}, len(methods))
+	for _, m := range methods {
+		method := strings.ToUpper(strings.TrimSpace(m))
+		if method == "" {
+			continue
+		}
+		if _, ok := allowedHTTPMethods[method]; !ok {
+			return nil, fmt.Errorf("invalid allow_method %q", m)
+		}
+		set[method] = struct{}{}
+	}
+
+	if len(set) == 0 {
+		return nil, nil
+	}
+
+	out := make([]string, 0, len(set))
+	for m := range set {
+		out = append(out, m)
+	}
+	sort.Strings(out)
+
+	return out, nil
+}
+
 // lionPermissionBindingToProto 将 lion PermissionBindings（含预加载的 resource_scope -> resource/scopes）转为 adminv1.Permission_Binding。
 // 权限资源仅通过 Permission.Bindings 暴露，已废弃的 Permission.Resources 不再使用。
 func lionPermissionBindingToProto(binding *lion.PermissionBindings) *adminv1.Permission_Binding {
@@ -27,6 +69,7 @@ func lionPermissionBindingToProto(binding *lion.PermissionBindings) *adminv1.Per
 		Id:              int64(binding.ID),
 		ResourceScopeId: int64(binding.ResourceScopeID),
 		IsRecursive:     binding.IsRecursive,
+		AllowMethods:    binding.AllowMethods,
 	}
 	if binding.Edges.LionResourceScopes != nil {
 		rs := binding.Edges.LionResourceScopes
@@ -334,6 +377,11 @@ func (a *KnownAdminAPI) CreatePermission(ctx context.Context, req *adminv1.Creat
 			if b.ResourceScopeId == 0 {
 				continue
 			}
+			allowMethods, err := normalizeAllowMethods(b.AllowMethods)
+			if err != nil {
+				_ = db.Permissions.DeleteOneID(newPermission.ID).Exec(ctx)
+				return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+			}
 			// 校验 resource_scope 存在
 			if _, err := db.ResourceScopes.Get(ctx, int(b.ResourceScopeId)); err != nil {
 				_ = db.Permissions.DeleteOneID(newPermission.ID).Exec(ctx)
@@ -342,7 +390,8 @@ func (a *KnownAdminAPI) CreatePermission(ctx context.Context, req *adminv1.Creat
 			builders = append(builders, db.PermissionBindings.Create().
 				SetPermissionID(newPermission.ID).
 				SetResourceScopeID(int(b.ResourceScopeId)).
-				SetIsRecursive(b.IsRecursive))
+				SetIsRecursive(b.IsRecursive).
+				SetAllowMethods(allowMethods))
 		}
 		if len(builders) > 0 {
 			_, err = db.PermissionBindings.CreateBulk(builders...).Save(ctx)
@@ -461,13 +510,18 @@ func (a *KnownAdminAPI) UpdatePermission(ctx context.Context, req *adminv1.Updat
 				if b.ResourceScopeId == 0 {
 					continue
 				}
+				allowMethods, err := normalizeAllowMethods(b.AllowMethods)
+				if err != nil {
+					return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+				}
 				if _, err := db.ResourceScopes.Get(ctx, int(b.ResourceScopeId)); err != nil {
 					return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("resource_scope_id %d not found", b.ResourceScopeId))
 				}
 				builders = append(builders, db.PermissionBindings.Create().
 					SetPermissionID(int(req.Permission.Id)).
 					SetResourceScopeID(int(b.ResourceScopeId)).
-					SetIsRecursive(b.IsRecursive))
+					SetIsRecursive(b.IsRecursive).
+					SetAllowMethods(allowMethods))
 			}
 			if len(builders) > 0 {
 				_, err = db.PermissionBindings.CreateBulk(builders...).Save(ctx)

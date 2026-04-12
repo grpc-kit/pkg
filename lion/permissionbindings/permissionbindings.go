@@ -26,6 +26,8 @@ const (
 	FieldResourceScopeID = "resource_scope_id"
 	// FieldIsRecursive holds the string denoting the is_recursive field in the database.
 	FieldIsRecursive = "is_recursive"
+	// FieldAllowMethods holds the string denoting the allow_methods field in the database.
+	FieldAllowMethods = "allow_methods"
 	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
 	EdgeLionPermissions = "lion_permissions"
 	// EdgeLionResourceScopes holds the string denoting the lion_resource_scopes edge name in mutations.
@@ -57,6 +59,7 @@ var Columns = []string{
 	FieldPermissionID,
 	FieldResourceScopeID,
 	FieldIsRecursive,
+	FieldAllowMethods,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

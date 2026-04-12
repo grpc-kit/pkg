@@ -25,6 +25,9 @@ func (PermissionBindings) Fields() []ent.Field {
 		field.Bool("is_recursive").
 			Default(false).
 			Comment("是否递归"),
+		field.JSON("allow_methods", []string{}).
+			Optional().
+			Comment("允许的 HTTP method 列表；为空时按 scope 默认映射"),
 	}
 }
 

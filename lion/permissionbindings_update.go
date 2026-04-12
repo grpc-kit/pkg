@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/permissionbindings"
 	"github.com/grpc-kit/pkg/lion/permissions"
@@ -95,6 +96,24 @@ func (_u *PermissionBindingsUpdate) SetNillableIsRecursive(v *bool) *PermissionB
 	if v != nil {
 		_u.SetIsRecursive(*v)
 	}
+	return _u
+}
+
+// SetAllowMethods sets the "allow_methods" field.
+func (_u *PermissionBindingsUpdate) SetAllowMethods(v []string) *PermissionBindingsUpdate {
+	_u.mutation.SetAllowMethods(v)
+	return _u
+}
+
+// AppendAllowMethods appends value to the "allow_methods" field.
+func (_u *PermissionBindingsUpdate) AppendAllowMethods(v []string) *PermissionBindingsUpdate {
+	_u.mutation.AppendAllowMethods(v)
+	return _u
+}
+
+// ClearAllowMethods clears the value of the "allow_methods" field.
+func (_u *PermissionBindingsUpdate) ClearAllowMethods() *PermissionBindingsUpdate {
+	_u.mutation.ClearAllowMethods()
 	return _u
 }
 
@@ -217,6 +236,17 @@ func (_u *PermissionBindingsUpdate) sqlSave(ctx context.Context) (_node int, err
 	}
 	if value, ok := _u.mutation.IsRecursive(); ok {
 		_spec.SetField(permissionbindings.FieldIsRecursive, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AllowMethods(); ok {
+		_spec.SetField(permissionbindings.FieldAllowMethods, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedAllowMethods(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, permissionbindings.FieldAllowMethods, value)
+		})
+	}
+	if _u.mutation.AllowMethodsCleared() {
+		_spec.ClearField(permissionbindings.FieldAllowMethods, field.TypeJSON)
 	}
 	if _u.mutation.LionPermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -361,6 +391,24 @@ func (_u *PermissionBindingsUpdateOne) SetNillableIsRecursive(v *bool) *Permissi
 	if v != nil {
 		_u.SetIsRecursive(*v)
 	}
+	return _u
+}
+
+// SetAllowMethods sets the "allow_methods" field.
+func (_u *PermissionBindingsUpdateOne) SetAllowMethods(v []string) *PermissionBindingsUpdateOne {
+	_u.mutation.SetAllowMethods(v)
+	return _u
+}
+
+// AppendAllowMethods appends value to the "allow_methods" field.
+func (_u *PermissionBindingsUpdateOne) AppendAllowMethods(v []string) *PermissionBindingsUpdateOne {
+	_u.mutation.AppendAllowMethods(v)
+	return _u
+}
+
+// ClearAllowMethods clears the value of the "allow_methods" field.
+func (_u *PermissionBindingsUpdateOne) ClearAllowMethods() *PermissionBindingsUpdateOne {
+	_u.mutation.ClearAllowMethods()
 	return _u
 }
 
@@ -513,6 +561,17 @@ func (_u *PermissionBindingsUpdateOne) sqlSave(ctx context.Context) (_node *Perm
 	}
 	if value, ok := _u.mutation.IsRecursive(); ok {
 		_spec.SetField(permissionbindings.FieldIsRecursive, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.AllowMethods(); ok {
+		_spec.SetField(permissionbindings.FieldAllowMethods, field.TypeJSON, value)
+	}
+	if value, ok := _u.mutation.AppendedAllowMethods(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, permissionbindings.FieldAllowMethods, value)
+		})
+	}
+	if _u.mutation.AllowMethodsCleared() {
+		_spec.ClearField(permissionbindings.FieldAllowMethods, field.TypeJSON)
 	}
 	if _u.mutation.LionPermissionsCleared() {
 		edge := &sqlgraph.EdgeSpec{

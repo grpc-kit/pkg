@@ -8555,6 +8555,8 @@ type PermissionBindingsMutation struct {
 	updated_at                  *time.Time
 	deleted_at                  *time.Time
 	is_recursive                *bool
+	allow_methods               *[]string
+	appendallow_methods         []string
 	clearedFields               map[string]struct{}
 	lion_permissions            *int
 	clearedlion_permissions     bool
@@ -8892,6 +8894,71 @@ func (m *PermissionBindingsMutation) ResetIsRecursive() {
 	m.is_recursive = nil
 }
 
+// SetAllowMethods sets the "allow_methods" field.
+func (m *PermissionBindingsMutation) SetAllowMethods(s []string) {
+	m.allow_methods = &s
+	m.appendallow_methods = nil
+}
+
+// AllowMethods returns the value of the "allow_methods" field in the mutation.
+func (m *PermissionBindingsMutation) AllowMethods() (r []string, exists bool) {
+	v := m.allow_methods
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAllowMethods returns the old "allow_methods" field's value of the PermissionBindings entity.
+// If the PermissionBindings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PermissionBindingsMutation) OldAllowMethods(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAllowMethods is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAllowMethods requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAllowMethods: %w", err)
+	}
+	return oldValue.AllowMethods, nil
+}
+
+// AppendAllowMethods adds s to the "allow_methods" field.
+func (m *PermissionBindingsMutation) AppendAllowMethods(s []string) {
+	m.appendallow_methods = append(m.appendallow_methods, s...)
+}
+
+// AppendedAllowMethods returns the list of values that were appended to the "allow_methods" field in this mutation.
+func (m *PermissionBindingsMutation) AppendedAllowMethods() ([]string, bool) {
+	if len(m.appendallow_methods) == 0 {
+		return nil, false
+	}
+	return m.appendallow_methods, true
+}
+
+// ClearAllowMethods clears the value of the "allow_methods" field.
+func (m *PermissionBindingsMutation) ClearAllowMethods() {
+	m.allow_methods = nil
+	m.appendallow_methods = nil
+	m.clearedFields[permissionbindings.FieldAllowMethods] = struct{}{}
+}
+
+// AllowMethodsCleared returns if the "allow_methods" field was cleared in this mutation.
+func (m *PermissionBindingsMutation) AllowMethodsCleared() bool {
+	_, ok := m.clearedFields[permissionbindings.FieldAllowMethods]
+	return ok
+}
+
+// ResetAllowMethods resets all changes to the "allow_methods" field.
+func (m *PermissionBindingsMutation) ResetAllowMethods() {
+	m.allow_methods = nil
+	m.appendallow_methods = nil
+	delete(m.clearedFields, permissionbindings.FieldAllowMethods)
+}
+
 // SetLionPermissionsID sets the "lion_permissions" edge to the Permissions entity by id.
 func (m *PermissionBindingsMutation) SetLionPermissionsID(id int) {
 	m.lion_permissions = &id
@@ -9006,7 +9073,7 @@ func (m *PermissionBindingsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PermissionBindingsMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, permissionbindings.FieldCreatedAt)
 	}
@@ -9024,6 +9091,9 @@ func (m *PermissionBindingsMutation) Fields() []string {
 	}
 	if m.is_recursive != nil {
 		fields = append(fields, permissionbindings.FieldIsRecursive)
+	}
+	if m.allow_methods != nil {
+		fields = append(fields, permissionbindings.FieldAllowMethods)
 	}
 	return fields
 }
@@ -9045,6 +9115,8 @@ func (m *PermissionBindingsMutation) Field(name string) (ent.Value, bool) {
 		return m.ResourceScopeID()
 	case permissionbindings.FieldIsRecursive:
 		return m.IsRecursive()
+	case permissionbindings.FieldAllowMethods:
+		return m.AllowMethods()
 	}
 	return nil, false
 }
@@ -9066,6 +9138,8 @@ func (m *PermissionBindingsMutation) OldField(ctx context.Context, name string) 
 		return m.OldResourceScopeID(ctx)
 	case permissionbindings.FieldIsRecursive:
 		return m.OldIsRecursive(ctx)
+	case permissionbindings.FieldAllowMethods:
+		return m.OldAllowMethods(ctx)
 	}
 	return nil, fmt.Errorf("unknown PermissionBindings field %s", name)
 }
@@ -9117,6 +9191,13 @@ func (m *PermissionBindingsMutation) SetField(name string, value ent.Value) erro
 		}
 		m.SetIsRecursive(v)
 		return nil
+	case permissionbindings.FieldAllowMethods:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAllowMethods(v)
+		return nil
 	}
 	return fmt.Errorf("unknown PermissionBindings field %s", name)
 }
@@ -9153,6 +9234,9 @@ func (m *PermissionBindingsMutation) ClearedFields() []string {
 	if m.FieldCleared(permissionbindings.FieldDeletedAt) {
 		fields = append(fields, permissionbindings.FieldDeletedAt)
 	}
+	if m.FieldCleared(permissionbindings.FieldAllowMethods) {
+		fields = append(fields, permissionbindings.FieldAllowMethods)
+	}
 	return fields
 }
 
@@ -9169,6 +9253,9 @@ func (m *PermissionBindingsMutation) ClearField(name string) error {
 	switch name {
 	case permissionbindings.FieldDeletedAt:
 		m.ClearDeletedAt()
+		return nil
+	case permissionbindings.FieldAllowMethods:
+		m.ClearAllowMethods()
 		return nil
 	}
 	return fmt.Errorf("unknown PermissionBindings nullable field %s", name)
@@ -9195,6 +9282,9 @@ func (m *PermissionBindingsMutation) ResetField(name string) error {
 		return nil
 	case permissionbindings.FieldIsRecursive:
 		m.ResetIsRecursive()
+		return nil
+	case permissionbindings.FieldAllowMethods:
+		m.ResetAllowMethods()
 		return nil
 	}
 	return fmt.Errorf("unknown PermissionBindings field %s", name)
