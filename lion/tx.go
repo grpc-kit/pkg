@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Actions is the client for interacting with the Actions builders.
+	Actions *ActionsClient
 	// AuthProviders is the client for interacting with the AuthProviders builders.
 	AuthProviders *AuthProvidersClient
 	// Credentials is the client for interacting with the Credentials builders.
@@ -28,6 +30,10 @@ type Tx struct {
 	Permissions *PermissionsClient
 	// Policies is the client for interacting with the Policies builders.
 	Policies *PoliciesClient
+	// PolicyAttachments is the client for interacting with the PolicyAttachments builders.
+	PolicyAttachments *PolicyAttachmentsClient
+	// PolicyStatements is the client for interacting with the PolicyStatements builders.
+	PolicyStatements *PolicyStatementsClient
 	// ResourceScopes is the client for interacting with the ResourceScopes builders.
 	ResourceScopes *ResourceScopesClient
 	// Resources is the client for interacting with the Resources builders.
@@ -181,6 +187,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Actions = NewActionsClient(tx.config)
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
 	tx.Credentials = NewCredentialsClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
@@ -189,6 +196,8 @@ func (tx *Tx) init() {
 	tx.PermissionBindings = NewPermissionBindingsClient(tx.config)
 	tx.Permissions = NewPermissionsClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
+	tx.PolicyAttachments = NewPolicyAttachmentsClient(tx.config)
+	tx.PolicyStatements = NewPolicyStatementsClient(tx.config)
 	tx.ResourceScopes = NewResourceScopesClient(tx.config)
 	tx.Resources = NewResourcesClient(tx.config)
 	tx.RolePermissions = NewRolePermissionsClient(tx.config)
@@ -209,7 +218,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: AuthProviders.QueryXXX(), the query will be executed
+// applies a query, for example: Actions.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

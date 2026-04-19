@@ -32,6 +32,15 @@ func (Policies) Fields() []ent.Field {
 		field.String("value").
 			Default("").
 			Comment("策略内容"),
+		field.Int64("version_no").
+			Default(1).
+			Comment("策略版本号，用于发布与回滚"),
+		field.Int("publish_state").
+			Default(0).
+			Comment("策略发布状态，对应 V3 的发布流程"),
+		field.Bool("is_system").
+			Default(false).
+			Comment("是否系统内置策略"),
 		field.String("description").
 			Default("").
 			Comment("详细描述"),
@@ -42,6 +51,8 @@ func (Policies) Fields() []ent.Field {
 func (Policies) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("lion_permissions", Permissions.Type),
+		edge.To("lion_policy_statements", PolicyStatements.Type),
+		edge.To("lion_policy_attachments", PolicyAttachments.Type),
 	}
 }
 

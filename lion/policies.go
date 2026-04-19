@@ -37,6 +37,12 @@ type Policies struct {
 	PolicyStatus int `json:"policy_status,omitempty"`
 	// 策略内容
 	Value string `json:"value,omitempty"`
+	// 策略版本号，用于发布与回滚
+	VersionNo int64 `json:"version_no,omitempty"`
+	// 策略发布状态，对应 V3 的发布流程
+	PublishState int `json:"publish_state,omitempty"`
+	// 是否系统内置策略
+	IsSystem bool `json:"is_system,omitempty"`
 	// 详细描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -49,9 +55,13 @@ type Policies struct {
 type PoliciesEdges struct {
 	// LionPermissions holds the value of the lion_permissions edge.
 	LionPermissions []*Permissions `json:"lion_permissions,omitempty"`
+	// LionPolicyStatements holds the value of the lion_policy_statements edge.
+	LionPolicyStatements []*PolicyStatements `json:"lion_policy_statements,omitempty"`
+	// LionPolicyAttachments holds the value of the lion_policy_attachments edge.
+	LionPolicyAttachments []*PolicyAttachments `json:"lion_policy_attachments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // LionPermissionsOrErr returns the LionPermissions value or an error if the edge
@@ -63,12 +73,32 @@ func (e PoliciesEdges) LionPermissionsOrErr() ([]*Permissions, error) {
 	return nil, &NotLoadedError{edge: "lion_permissions"}
 }
 
+// LionPolicyStatementsOrErr returns the LionPolicyStatements value or an error if the edge
+// was not loaded in eager-loading.
+func (e PoliciesEdges) LionPolicyStatementsOrErr() ([]*PolicyStatements, error) {
+	if e.loadedTypes[1] {
+		return e.LionPolicyStatements, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_policy_statements"}
+}
+
+// LionPolicyAttachmentsOrErr returns the LionPolicyAttachments value or an error if the edge
+// was not loaded in eager-loading.
+func (e PoliciesEdges) LionPolicyAttachmentsOrErr() ([]*PolicyAttachments, error) {
+	if e.loadedTypes[2] {
+		return e.LionPolicyAttachments, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_policy_attachments"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Policies) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case policies.FieldID, policies.FieldCreatedBy, policies.FieldUpdatedBy, policies.FieldPolicyType, policies.FieldPolicyStatus:
+		case policies.FieldIsSystem:
+			values[i] = new(sql.NullBool)
+		case policies.FieldID, policies.FieldCreatedBy, policies.FieldUpdatedBy, policies.FieldPolicyType, policies.FieldPolicyStatus, policies.FieldVersionNo, policies.FieldPublishState:
 			values[i] = new(sql.NullInt64)
 		case policies.FieldCode, policies.FieldDisplayName, policies.FieldValue, policies.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -156,6 +186,24 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Value = value.String
 			}
+		case policies.FieldVersionNo:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field version_no", values[i])
+			} else if value.Valid {
+				_m.VersionNo = value.Int64
+			}
+		case policies.FieldPublishState:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field publish_state", values[i])
+			} else if value.Valid {
+				_m.PublishState = int(value.Int64)
+			}
+		case policies.FieldIsSystem:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_system", values[i])
+			} else if value.Valid {
+				_m.IsSystem = value.Bool
+			}
 		case policies.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
@@ -178,6 +226,16 @@ func (_m *Policies) GetValue(name string) (ent.Value, error) {
 // QueryLionPermissions queries the "lion_permissions" edge of the Policies entity.
 func (_m *Policies) QueryLionPermissions() *PermissionsQuery {
 	return NewPoliciesClient(_m.config).QueryLionPermissions(_m)
+}
+
+// QueryLionPolicyStatements queries the "lion_policy_statements" edge of the Policies entity.
+func (_m *Policies) QueryLionPolicyStatements() *PolicyStatementsQuery {
+	return NewPoliciesClient(_m.config).QueryLionPolicyStatements(_m)
+}
+
+// QueryLionPolicyAttachments queries the "lion_policy_attachments" edge of the Policies entity.
+func (_m *Policies) QueryLionPolicyAttachments() *PolicyAttachmentsQuery {
+	return NewPoliciesClient(_m.config).QueryLionPolicyAttachments(_m)
 }
 
 // Update returns a builder for updating this Policies.
@@ -234,6 +292,15 @@ func (_m *Policies) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("value=")
 	builder.WriteString(_m.Value)
+	builder.WriteString(", ")
+	builder.WriteString("version_no=")
+	builder.WriteString(fmt.Sprintf("%v", _m.VersionNo))
+	builder.WriteString(", ")
+	builder.WriteString("publish_state=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PublishState))
+	builder.WriteString(", ")
+	builder.WriteString("is_system=")
+	builder.WriteString(fmt.Sprintf("%v", _m.IsSystem))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

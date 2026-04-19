@@ -5,6 +5,7 @@ package lion
 import (
 	"time"
 
+	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
@@ -13,6 +14,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/permissionbindings"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/policyattachments"
+	"github.com/grpc-kit/pkg/lion/policystatements"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
@@ -31,6 +34,71 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	actionsMixin := schema.Actions{}.Mixin()
+	actionsMixinFields0 := actionsMixin[0].Fields()
+	_ = actionsMixinFields0
+	actionsMixinFields1 := actionsMixin[1].Fields()
+	_ = actionsMixinFields1
+	actionsFields := schema.Actions{}.Fields()
+	_ = actionsFields
+	// actionsDescCreatedAt is the schema descriptor for created_at field.
+	actionsDescCreatedAt := actionsMixinFields0[0].Descriptor()
+	// actions.DefaultCreatedAt holds the default value on creation for the created_at field.
+	actions.DefaultCreatedAt = actionsDescCreatedAt.Default.(func() time.Time)
+	// actionsDescUpdatedAt is the schema descriptor for updated_at field.
+	actionsDescUpdatedAt := actionsMixinFields0[1].Descriptor()
+	// actions.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	actions.DefaultUpdatedAt = actionsDescUpdatedAt.Default.(func() time.Time)
+	// actions.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	actions.UpdateDefaultUpdatedAt = actionsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// actionsDescCreatedBy is the schema descriptor for created_by field.
+	actionsDescCreatedBy := actionsMixinFields1[0].Descriptor()
+	// actions.DefaultCreatedBy holds the default value on creation for the created_by field.
+	actions.DefaultCreatedBy = actionsDescCreatedBy.Default.(int64)
+	// actionsDescUpdatedBy is the schema descriptor for updated_by field.
+	actionsDescUpdatedBy := actionsMixinFields1[1].Descriptor()
+	// actions.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	actions.DefaultUpdatedBy = actionsDescUpdatedBy.Default.(int64)
+	// actionsDescCode is the schema descriptor for code field.
+	actionsDescCode := actionsFields[0].Descriptor()
+	// actions.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	actions.CodeValidator = func() func(string) error {
+		validators := actionsDescCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(code string) error {
+			for _, fn := range fns {
+				if err := fn(code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// actionsDescDisplayName is the schema descriptor for display_name field.
+	actionsDescDisplayName := actionsFields[1].Descriptor()
+	// actions.DefaultDisplayName holds the default value on creation for the display_name field.
+	actions.DefaultDisplayName = actionsDescDisplayName.Default.(string)
+	// actionsDescResourceType is the schema descriptor for resource_type field.
+	actionsDescResourceType := actionsFields[2].Descriptor()
+	// actions.DefaultResourceType holds the default value on creation for the resource_type field.
+	actions.DefaultResourceType = actionsDescResourceType.Default.(int)
+	// actionsDescHTTPMethod is the schema descriptor for http_method field.
+	actionsDescHTTPMethod := actionsFields[3].Descriptor()
+	// actions.DefaultHTTPMethod holds the default value on creation for the http_method field.
+	actions.DefaultHTTPMethod = actionsDescHTTPMethod.Default.(string)
+	// actions.HTTPMethodValidator is a validator for the "http_method" field. It is called by the builders before save.
+	actions.HTTPMethodValidator = actionsDescHTTPMethod.Validators[0].(func(string) error)
+	// actionsDescProtected is the schema descriptor for protected field.
+	actionsDescProtected := actionsFields[4].Descriptor()
+	// actions.DefaultProtected holds the default value on creation for the protected field.
+	actions.DefaultProtected = actionsDescProtected.Default.(bool)
+	// actionsDescDescription is the schema descriptor for description field.
+	actionsDescDescription := actionsFields[5].Descriptor()
+	// actions.DefaultDescription holds the default value on creation for the description field.
+	actions.DefaultDescription = actionsDescDescription.Default.(string)
 	authprovidersMixin := schema.AuthProviders{}.Mixin()
 	authprovidersMixinFields0 := authprovidersMixin[0].Fields()
 	_ = authprovidersMixinFields0
@@ -505,10 +573,152 @@ func init() {
 	policiesDescValue := policiesFields[4].Descriptor()
 	// policies.DefaultValue holds the default value on creation for the value field.
 	policies.DefaultValue = policiesDescValue.Default.(string)
+	// policiesDescVersionNo is the schema descriptor for version_no field.
+	policiesDescVersionNo := policiesFields[5].Descriptor()
+	// policies.DefaultVersionNo holds the default value on creation for the version_no field.
+	policies.DefaultVersionNo = policiesDescVersionNo.Default.(int64)
+	// policiesDescPublishState is the schema descriptor for publish_state field.
+	policiesDescPublishState := policiesFields[6].Descriptor()
+	// policies.DefaultPublishState holds the default value on creation for the publish_state field.
+	policies.DefaultPublishState = policiesDescPublishState.Default.(int)
+	// policiesDescIsSystem is the schema descriptor for is_system field.
+	policiesDescIsSystem := policiesFields[7].Descriptor()
+	// policies.DefaultIsSystem holds the default value on creation for the is_system field.
+	policies.DefaultIsSystem = policiesDescIsSystem.Default.(bool)
 	// policiesDescDescription is the schema descriptor for description field.
-	policiesDescDescription := policiesFields[5].Descriptor()
+	policiesDescDescription := policiesFields[8].Descriptor()
 	// policies.DefaultDescription holds the default value on creation for the description field.
 	policies.DefaultDescription = policiesDescDescription.Default.(string)
+	policyattachmentsMixin := schema.PolicyAttachments{}.Mixin()
+	policyattachmentsMixinFields0 := policyattachmentsMixin[0].Fields()
+	_ = policyattachmentsMixinFields0
+	policyattachmentsMixinFields1 := policyattachmentsMixin[1].Fields()
+	_ = policyattachmentsMixinFields1
+	policyattachmentsFields := schema.PolicyAttachments{}.Fields()
+	_ = policyattachmentsFields
+	// policyattachmentsDescCreatedAt is the schema descriptor for created_at field.
+	policyattachmentsDescCreatedAt := policyattachmentsMixinFields0[0].Descriptor()
+	// policyattachments.DefaultCreatedAt holds the default value on creation for the created_at field.
+	policyattachments.DefaultCreatedAt = policyattachmentsDescCreatedAt.Default.(func() time.Time)
+	// policyattachmentsDescUpdatedAt is the schema descriptor for updated_at field.
+	policyattachmentsDescUpdatedAt := policyattachmentsMixinFields0[1].Descriptor()
+	// policyattachments.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	policyattachments.DefaultUpdatedAt = policyattachmentsDescUpdatedAt.Default.(func() time.Time)
+	// policyattachments.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	policyattachments.UpdateDefaultUpdatedAt = policyattachmentsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// policyattachmentsDescCreatedBy is the schema descriptor for created_by field.
+	policyattachmentsDescCreatedBy := policyattachmentsMixinFields1[0].Descriptor()
+	// policyattachments.DefaultCreatedBy holds the default value on creation for the created_by field.
+	policyattachments.DefaultCreatedBy = policyattachmentsDescCreatedBy.Default.(int64)
+	// policyattachmentsDescUpdatedBy is the schema descriptor for updated_by field.
+	policyattachmentsDescUpdatedBy := policyattachmentsMixinFields1[1].Descriptor()
+	// policyattachments.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	policyattachments.DefaultUpdatedBy = policyattachmentsDescUpdatedBy.Default.(int64)
+	// policyattachmentsDescPolicyID is the schema descriptor for policy_id field.
+	policyattachmentsDescPolicyID := policyattachmentsFields[0].Descriptor()
+	// policyattachments.PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
+	policyattachments.PolicyIDValidator = policyattachmentsDescPolicyID.Validators[0].(func(int) error)
+	// policyattachmentsDescPrincipalType is the schema descriptor for principal_type field.
+	policyattachmentsDescPrincipalType := policyattachmentsFields[1].Descriptor()
+	// policyattachments.DefaultPrincipalType holds the default value on creation for the principal_type field.
+	policyattachments.DefaultPrincipalType = policyattachmentsDescPrincipalType.Default.(string)
+	// policyattachments.PrincipalTypeValidator is a validator for the "principal_type" field. It is called by the builders before save.
+	policyattachments.PrincipalTypeValidator = policyattachmentsDescPrincipalType.Validators[0].(func(string) error)
+	// policyattachmentsDescPrincipalID is the schema descriptor for principal_id field.
+	policyattachmentsDescPrincipalID := policyattachmentsFields[2].Descriptor()
+	// policyattachments.DefaultPrincipalID holds the default value on creation for the principal_id field.
+	policyattachments.DefaultPrincipalID = policyattachmentsDescPrincipalID.Default.(int64)
+	// policyattachmentsDescResourceID is the schema descriptor for resource_id field.
+	policyattachmentsDescResourceID := policyattachmentsFields[3].Descriptor()
+	// policyattachments.DefaultResourceID holds the default value on creation for the resource_id field.
+	policyattachments.DefaultResourceID = policyattachmentsDescResourceID.Default.(int64)
+	// policyattachmentsDescIsRecursive is the schema descriptor for is_recursive field.
+	policyattachmentsDescIsRecursive := policyattachmentsFields[4].Descriptor()
+	// policyattachments.DefaultIsRecursive holds the default value on creation for the is_recursive field.
+	policyattachments.DefaultIsRecursive = policyattachmentsDescIsRecursive.Default.(bool)
+	// policyattachmentsDescAttachmentStatus is the schema descriptor for attachment_status field.
+	policyattachmentsDescAttachmentStatus := policyattachmentsFields[5].Descriptor()
+	// policyattachments.DefaultAttachmentStatus holds the default value on creation for the attachment_status field.
+	policyattachments.DefaultAttachmentStatus = policyattachmentsDescAttachmentStatus.Default.(int)
+	// policyattachmentsDescConditionJSON is the schema descriptor for condition_json field.
+	policyattachmentsDescConditionJSON := policyattachmentsFields[6].Descriptor()
+	// policyattachments.DefaultConditionJSON holds the default value on creation for the condition_json field.
+	policyattachments.DefaultConditionJSON = policyattachmentsDescConditionJSON.Default.(string)
+	// policyattachmentsDescDescription is the schema descriptor for description field.
+	policyattachmentsDescDescription := policyattachmentsFields[8].Descriptor()
+	// policyattachments.DefaultDescription holds the default value on creation for the description field.
+	policyattachments.DefaultDescription = policyattachmentsDescDescription.Default.(string)
+	policystatementsMixin := schema.PolicyStatements{}.Mixin()
+	policystatementsMixinFields0 := policystatementsMixin[0].Fields()
+	_ = policystatementsMixinFields0
+	policystatementsMixinFields1 := policystatementsMixin[1].Fields()
+	_ = policystatementsMixinFields1
+	policystatementsFields := schema.PolicyStatements{}.Fields()
+	_ = policystatementsFields
+	// policystatementsDescCreatedAt is the schema descriptor for created_at field.
+	policystatementsDescCreatedAt := policystatementsMixinFields0[0].Descriptor()
+	// policystatements.DefaultCreatedAt holds the default value on creation for the created_at field.
+	policystatements.DefaultCreatedAt = policystatementsDescCreatedAt.Default.(func() time.Time)
+	// policystatementsDescUpdatedAt is the schema descriptor for updated_at field.
+	policystatementsDescUpdatedAt := policystatementsMixinFields0[1].Descriptor()
+	// policystatements.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	policystatements.DefaultUpdatedAt = policystatementsDescUpdatedAt.Default.(func() time.Time)
+	// policystatements.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	policystatements.UpdateDefaultUpdatedAt = policystatementsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// policystatementsDescCreatedBy is the schema descriptor for created_by field.
+	policystatementsDescCreatedBy := policystatementsMixinFields1[0].Descriptor()
+	// policystatements.DefaultCreatedBy holds the default value on creation for the created_by field.
+	policystatements.DefaultCreatedBy = policystatementsDescCreatedBy.Default.(int64)
+	// policystatementsDescUpdatedBy is the schema descriptor for updated_by field.
+	policystatementsDescUpdatedBy := policystatementsMixinFields1[1].Descriptor()
+	// policystatements.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	policystatements.DefaultUpdatedBy = policystatementsDescUpdatedBy.Default.(int64)
+	// policystatementsDescPolicyID is the schema descriptor for policy_id field.
+	policystatementsDescPolicyID := policystatementsFields[0].Descriptor()
+	// policystatements.PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
+	policystatements.PolicyIDValidator = policystatementsDescPolicyID.Validators[0].(func(int) error)
+	// policystatementsDescSid is the schema descriptor for sid field.
+	policystatementsDescSid := policystatementsFields[1].Descriptor()
+	// policystatements.SidValidator is a validator for the "sid" field. It is called by the builders before save.
+	policystatements.SidValidator = func() func(string) error {
+		validators := policystatementsDescSid.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(sid string) error {
+			for _, fn := range fns {
+				if err := fn(sid); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// policystatementsDescEffect is the schema descriptor for effect field.
+	policystatementsDescEffect := policystatementsFields[2].Descriptor()
+	// policystatements.DefaultEffect holds the default value on creation for the effect field.
+	policystatements.DefaultEffect = policystatementsDescEffect.Default.(int)
+	// policystatementsDescActionSelector is the schema descriptor for action_selector field.
+	policystatementsDescActionSelector := policystatementsFields[3].Descriptor()
+	// policystatements.DefaultActionSelector holds the default value on creation for the action_selector field.
+	policystatements.DefaultActionSelector = policystatementsDescActionSelector.Default.(string)
+	// policystatementsDescResourceSelector is the schema descriptor for resource_selector field.
+	policystatementsDescResourceSelector := policystatementsFields[4].Descriptor()
+	// policystatements.DefaultResourceSelector holds the default value on creation for the resource_selector field.
+	policystatements.DefaultResourceSelector = policystatementsDescResourceSelector.Default.(string)
+	// policystatementsDescConditionJSON is the schema descriptor for condition_json field.
+	policystatementsDescConditionJSON := policystatementsFields[5].Descriptor()
+	// policystatements.DefaultConditionJSON holds the default value on creation for the condition_json field.
+	policystatements.DefaultConditionJSON = policystatementsDescConditionJSON.Default.(string)
+	// policystatementsDescPriority is the schema descriptor for priority field.
+	policystatementsDescPriority := policystatementsFields[6].Descriptor()
+	// policystatements.DefaultPriority holds the default value on creation for the priority field.
+	policystatements.DefaultPriority = policystatementsDescPriority.Default.(int)
+	// policystatementsDescDescription is the schema descriptor for description field.
+	policystatementsDescDescription := policystatementsFields[7].Descriptor()
+	// policystatements.DefaultDescription holds the default value on creation for the description field.
+	policystatements.DefaultDescription = policystatementsDescDescription.Default.(string)
 	resourcescopesMixin := schema.ResourceScopes{}.Mixin()
 	resourcescopesMixinFields0 := resourcescopesMixin[0].Fields()
 	_ = resourcescopesMixinFields0

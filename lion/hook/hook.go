@@ -9,6 +9,18 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 )
 
+// The ActionsFunc type is an adapter to allow the use of ordinary
+// function as Actions mutator.
+type ActionsFunc func(context.Context, *lion.ActionsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ActionsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.ActionsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.ActionsMutation", m)
+}
+
 // The AuthProvidersFunc type is an adapter to allow the use of ordinary
 // function as AuthProviders mutator.
 type AuthProvidersFunc func(context.Context, *lion.AuthProvidersMutation) (lion.Value, error)
@@ -103,6 +115,30 @@ func (f PoliciesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, 
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.PoliciesMutation", m)
+}
+
+// The PolicyAttachmentsFunc type is an adapter to allow the use of ordinary
+// function as PolicyAttachments mutator.
+type PolicyAttachmentsFunc func(context.Context, *lion.PolicyAttachmentsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PolicyAttachmentsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.PolicyAttachmentsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.PolicyAttachmentsMutation", m)
+}
+
+// The PolicyStatementsFunc type is an adapter to allow the use of ordinary
+// function as PolicyStatements mutator.
+type PolicyStatementsFunc func(context.Context, *lion.PolicyStatementsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PolicyStatementsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.PolicyStatementsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.PolicyStatementsMutation", m)
 }
 
 // The ResourceScopesFunc type is an adapter to allow the use of ordinary

@@ -34,10 +34,20 @@ const (
 	FieldPolicyStatus = "policy_status"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
+	// FieldVersionNo holds the string denoting the version_no field in the database.
+	FieldVersionNo = "version_no"
+	// FieldPublishState holds the string denoting the publish_state field in the database.
+	FieldPublishState = "publish_state"
+	// FieldIsSystem holds the string denoting the is_system field in the database.
+	FieldIsSystem = "is_system"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
 	EdgeLionPermissions = "lion_permissions"
+	// EdgeLionPolicyStatements holds the string denoting the lion_policy_statements edge name in mutations.
+	EdgeLionPolicyStatements = "lion_policy_statements"
+	// EdgeLionPolicyAttachments holds the string denoting the lion_policy_attachments edge name in mutations.
+	EdgeLionPolicyAttachments = "lion_policy_attachments"
 	// Table holds the table name of the policies in the database.
 	Table = "lion_policies"
 	// LionPermissionsTable is the table that holds the lion_permissions relation/edge.
@@ -47,6 +57,20 @@ const (
 	LionPermissionsInverseTable = "lion_permissions"
 	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
 	LionPermissionsColumn = "policy_id"
+	// LionPolicyStatementsTable is the table that holds the lion_policy_statements relation/edge.
+	LionPolicyStatementsTable = "lion_policy_statements"
+	// LionPolicyStatementsInverseTable is the table name for the PolicyStatements entity.
+	// It exists in this package in order to avoid circular dependency with the "policystatements" package.
+	LionPolicyStatementsInverseTable = "lion_policy_statements"
+	// LionPolicyStatementsColumn is the table column denoting the lion_policy_statements relation/edge.
+	LionPolicyStatementsColumn = "policy_id"
+	// LionPolicyAttachmentsTable is the table that holds the lion_policy_attachments relation/edge.
+	LionPolicyAttachmentsTable = "lion_policy_attachments"
+	// LionPolicyAttachmentsInverseTable is the table name for the PolicyAttachments entity.
+	// It exists in this package in order to avoid circular dependency with the "policyattachments" package.
+	LionPolicyAttachmentsInverseTable = "lion_policy_attachments"
+	// LionPolicyAttachmentsColumn is the table column denoting the lion_policy_attachments relation/edge.
+	LionPolicyAttachmentsColumn = "policy_id"
 )
 
 // Columns holds all SQL columns for policies fields.
@@ -62,6 +86,9 @@ var Columns = []string{
 	FieldPolicyType,
 	FieldPolicyStatus,
 	FieldValue,
+	FieldVersionNo,
+	FieldPublishState,
+	FieldIsSystem,
 	FieldDescription,
 }
 
@@ -96,6 +123,12 @@ var (
 	DefaultPolicyStatus int
 	// DefaultValue holds the default value on creation for the "value" field.
 	DefaultValue string
+	// DefaultVersionNo holds the default value on creation for the "version_no" field.
+	DefaultVersionNo int64
+	// DefaultPublishState holds the default value on creation for the "publish_state" field.
+	DefaultPublishState int
+	// DefaultIsSystem holds the default value on creation for the "is_system" field.
+	DefaultIsSystem bool
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -158,6 +191,21 @@ func ByValue(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldValue, opts...).ToFunc()
 }
 
+// ByVersionNo orders the results by the version_no field.
+func ByVersionNo(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVersionNo, opts...).ToFunc()
+}
+
+// ByPublishState orders the results by the publish_state field.
+func ByPublishState(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPublishState, opts...).ToFunc()
+}
+
+// ByIsSystem orders the results by the is_system field.
+func ByIsSystem(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsSystem, opts...).ToFunc()
+}
+
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
@@ -176,10 +224,52 @@ func ByLionPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionPermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByLionPolicyStatementsCount orders the results by lion_policy_statements count.
+func ByLionPolicyStatementsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionPolicyStatementsStep(), opts...)
+	}
+}
+
+// ByLionPolicyStatements orders the results by lion_policy_statements terms.
+func ByLionPolicyStatements(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionPolicyStatementsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByLionPolicyAttachmentsCount orders the results by lion_policy_attachments count.
+func ByLionPolicyAttachmentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionPolicyAttachmentsStep(), opts...)
+	}
+}
+
+// ByLionPolicyAttachments orders the results by lion_policy_attachments terms.
+func ByLionPolicyAttachments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionPolicyAttachmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newLionPermissionsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionPermissionsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
+	)
+}
+func newLionPolicyStatementsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionPolicyStatementsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionPolicyStatementsTable, LionPolicyStatementsColumn),
+	)
+}
+func newLionPolicyAttachmentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionPolicyAttachmentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionPolicyAttachmentsTable, LionPolicyAttachmentsColumn),
 	)
 }

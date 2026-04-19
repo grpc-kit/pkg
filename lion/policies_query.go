@@ -14,17 +14,21 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/policyattachments"
+	"github.com/grpc-kit/pkg/lion/policystatements"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
 // PoliciesQuery is the builder for querying Policies entities.
 type PoliciesQuery struct {
 	config
-	ctx                 *QueryContext
-	order               []policies.OrderOption
-	inters              []Interceptor
-	predicates          []predicate.Policies
-	withLionPermissions *PermissionsQuery
+	ctx                       *QueryContext
+	order                     []policies.OrderOption
+	inters                    []Interceptor
+	predicates                []predicate.Policies
+	withLionPermissions       *PermissionsQuery
+	withLionPolicyStatements  *PolicyStatementsQuery
+	withLionPolicyAttachments *PolicyAttachmentsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +80,50 @@ func (_q *PoliciesQuery) QueryLionPermissions() *PermissionsQuery {
 			sqlgraph.From(policies.Table, policies.FieldID, selector),
 			sqlgraph.To(permissions.Table, permissions.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, policies.LionPermissionsTable, policies.LionPermissionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLionPolicyStatements chains the current query on the "lion_policy_statements" edge.
+func (_q *PoliciesQuery) QueryLionPolicyStatements() *PolicyStatementsQuery {
+	query := (&PolicyStatementsClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(policies.Table, policies.FieldID, selector),
+			sqlgraph.To(policystatements.Table, policystatements.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, policies.LionPolicyStatementsTable, policies.LionPolicyStatementsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLionPolicyAttachments chains the current query on the "lion_policy_attachments" edge.
+func (_q *PoliciesQuery) QueryLionPolicyAttachments() *PolicyAttachmentsQuery {
+	query := (&PolicyAttachmentsClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(policies.Table, policies.FieldID, selector),
+			sqlgraph.To(policyattachments.Table, policyattachments.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, policies.LionPolicyAttachmentsTable, policies.LionPolicyAttachmentsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -270,12 +318,14 @@ func (_q *PoliciesQuery) Clone() *PoliciesQuery {
 		return nil
 	}
 	return &PoliciesQuery{
-		config:              _q.config,
-		ctx:                 _q.ctx.Clone(),
-		order:               append([]policies.OrderOption{}, _q.order...),
-		inters:              append([]Interceptor{}, _q.inters...),
-		predicates:          append([]predicate.Policies{}, _q.predicates...),
-		withLionPermissions: _q.withLionPermissions.Clone(),
+		config:                    _q.config,
+		ctx:                       _q.ctx.Clone(),
+		order:                     append([]policies.OrderOption{}, _q.order...),
+		inters:                    append([]Interceptor{}, _q.inters...),
+		predicates:                append([]predicate.Policies{}, _q.predicates...),
+		withLionPermissions:       _q.withLionPermissions.Clone(),
+		withLionPolicyStatements:  _q.withLionPolicyStatements.Clone(),
+		withLionPolicyAttachments: _q.withLionPolicyAttachments.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -290,6 +340,28 @@ func (_q *PoliciesQuery) WithLionPermissions(opts ...func(*PermissionsQuery)) *P
 		opt(query)
 	}
 	_q.withLionPermissions = query
+	return _q
+}
+
+// WithLionPolicyStatements tells the query-builder to eager-load the nodes that are connected to
+// the "lion_policy_statements" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *PoliciesQuery) WithLionPolicyStatements(opts ...func(*PolicyStatementsQuery)) *PoliciesQuery {
+	query := (&PolicyStatementsClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionPolicyStatements = query
+	return _q
+}
+
+// WithLionPolicyAttachments tells the query-builder to eager-load the nodes that are connected to
+// the "lion_policy_attachments" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *PoliciesQuery) WithLionPolicyAttachments(opts ...func(*PolicyAttachmentsQuery)) *PoliciesQuery {
+	query := (&PolicyAttachmentsClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionPolicyAttachments = query
 	return _q
 }
 
@@ -371,8 +443,10 @@ func (_q *PoliciesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pol
 	var (
 		nodes       = []*Policies{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
 			_q.withLionPermissions != nil,
+			_q.withLionPolicyStatements != nil,
+			_q.withLionPolicyAttachments != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -400,6 +474,24 @@ func (_q *PoliciesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pol
 			return nil, err
 		}
 	}
+	if query := _q.withLionPolicyStatements; query != nil {
+		if err := _q.loadLionPolicyStatements(ctx, query, nodes,
+			func(n *Policies) { n.Edges.LionPolicyStatements = []*PolicyStatements{} },
+			func(n *Policies, e *PolicyStatements) {
+				n.Edges.LionPolicyStatements = append(n.Edges.LionPolicyStatements, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLionPolicyAttachments; query != nil {
+		if err := _q.loadLionPolicyAttachments(ctx, query, nodes,
+			func(n *Policies) { n.Edges.LionPolicyAttachments = []*PolicyAttachments{} },
+			func(n *Policies, e *PolicyAttachments) {
+				n.Edges.LionPolicyAttachments = append(n.Edges.LionPolicyAttachments, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -418,6 +510,66 @@ func (_q *PoliciesQuery) loadLionPermissions(ctx context.Context, query *Permiss
 	}
 	query.Where(predicate.Permissions(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(policies.LionPermissionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PolicyID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "policy_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *PoliciesQuery) loadLionPolicyStatements(ctx context.Context, query *PolicyStatementsQuery, nodes []*Policies, init func(*Policies), assign func(*Policies, *PolicyStatements)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Policies)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(policystatements.FieldPolicyID)
+	}
+	query.Where(predicate.PolicyStatements(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(policies.LionPolicyStatementsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PolicyID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "policy_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *PoliciesQuery) loadLionPolicyAttachments(ctx context.Context, query *PolicyAttachmentsQuery, nodes []*Policies, init func(*Policies), assign func(*Policies, *PolicyAttachments)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Policies)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(policyattachments.FieldPolicyID)
+	}
+	query.Where(predicate.PolicyAttachments(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(policies.LionPolicyAttachmentsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

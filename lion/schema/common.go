@@ -30,10 +30,9 @@ const codeAlphabet = "abcdefghjkmnpqrstuvwxyz23456789"
 const codeLetters = "abcdefghjkmnpqrstuvwxyz"
 
 // codeRegexp 合法 code 基础正则：
-// 以小写字母开头，中间允许小写字母/数字/连字符，以字母或数字结尾
-// 连续连字符 "--" 的检查在 ValidateCode 中通过 strings.Contains 单独处理
-// （Go regexp 不支持 lookahead，故拆分校验）
-var codeRegexp = regexp.MustCompile(`^[a-z][a-z0-9-]*[a-z0-9]$`)
+// 以小写字母开头，中间允许小写字母/数字/连字符/点号，以字母或数字结尾。
+// 连续分隔符（如 "--"、".."、"-."、".-"）的检查在 ValidateCode 中单独处理。
+var codeRegexp = regexp.MustCompile(`^[a-z][a-z0-9.-]*[a-z0-9]$`)
 
 // GenerateCode 自动生成一个 12 位的随机 code
 // 格式: [a-z] 开头 + 11 位 [a-z0-9]，使用 crypto/rand 确保加密安全
@@ -62,7 +61,7 @@ func GenerateCode() (string, error) {
 // 规则：
 //   - 长度：2-32 字符
 //   - 以小写字母 [a-z] 开头
-//   - 中间允许 [a-z0-9-]，不允许连续连字符 "--"
+//   - 中间允许 [a-z0-9.-]，不允许连续分隔符（"--"、".."、"-."、".-"）
 //   - 以字母或数字 [a-z0-9] 结尾
 //   - 不允许大写字母、下划线、空格等特殊字符
 func ValidateCode(code string) error {
@@ -74,12 +73,18 @@ func ValidateCode(code string) error {
 		return fmt.Errorf("code length %d exceeds maximum %d", n, CodeMaxLen)
 	}
 	if !codeRegexp.MatchString(code) {
-		return fmt.Errorf("code %q is invalid: must start with [a-z], contain only [a-z0-9-], end with [a-z0-9]", code)
+		return fmt.Errorf("code %q is invalid: must start with [a-z], contain only [a-z0-9.-], end with [a-z0-9]", code)
 	}
-	if strings.Contains(code, "--") {
-		return fmt.Errorf("code %q is invalid: consecutive hyphens \"--\" are not allowed", code)
+	for i := 1; i < len(code); i++ {
+		if isCodeSeparator(code[i-1]) && isCodeSeparator(code[i]) {
+			return fmt.Errorf("code %q is invalid: consecutive separators are not allowed", code)
+		}
 	}
 	return nil
+}
+
+func isCodeSeparator(ch byte) bool {
+	return ch == '-' || ch == '.'
 }
 
 // EnsureCode 确保 code 有值：如果传入的 code 为空则自动生成，否则校验合法性

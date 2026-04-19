@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
@@ -20,6 +21,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/permissionbindings"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/policyattachments"
+	"github.com/grpc-kit/pkg/lion/policystatements"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
@@ -91,6 +94,7 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			actions.Table:            actions.ValidColumn,
 			authproviders.Table:      authproviders.ValidColumn,
 			credentials.Table:        credentials.ValidColumn,
 			departments.Table:        departments.ValidColumn,
@@ -99,6 +103,8 @@ func checkColumn(t, c string) error {
 			permissionbindings.Table: permissionbindings.ValidColumn,
 			permissions.Table:        permissions.ValidColumn,
 			policies.Table:           policies.ValidColumn,
+			policyattachments.Table:  policyattachments.ValidColumn,
+			policystatements.Table:   policystatements.ValidColumn,
 			resourcescopes.Table:     resourcescopes.ValidColumn,
 			resources.Table:          resources.ValidColumn,
 			rolepermissions.Table:    rolepermissions.ValidColumn,

@@ -12,6 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/policyattachments"
+	"github.com/grpc-kit/pkg/lion/policystatements"
 )
 
 // PoliciesCreate is the builder for creating a Policies entity.
@@ -145,6 +147,48 @@ func (_c *PoliciesCreate) SetNillableValue(v *string) *PoliciesCreate {
 	return _c
 }
 
+// SetVersionNo sets the "version_no" field.
+func (_c *PoliciesCreate) SetVersionNo(v int64) *PoliciesCreate {
+	_c.mutation.SetVersionNo(v)
+	return _c
+}
+
+// SetNillableVersionNo sets the "version_no" field if the given value is not nil.
+func (_c *PoliciesCreate) SetNillableVersionNo(v *int64) *PoliciesCreate {
+	if v != nil {
+		_c.SetVersionNo(*v)
+	}
+	return _c
+}
+
+// SetPublishState sets the "publish_state" field.
+func (_c *PoliciesCreate) SetPublishState(v int) *PoliciesCreate {
+	_c.mutation.SetPublishState(v)
+	return _c
+}
+
+// SetNillablePublishState sets the "publish_state" field if the given value is not nil.
+func (_c *PoliciesCreate) SetNillablePublishState(v *int) *PoliciesCreate {
+	if v != nil {
+		_c.SetPublishState(*v)
+	}
+	return _c
+}
+
+// SetIsSystem sets the "is_system" field.
+func (_c *PoliciesCreate) SetIsSystem(v bool) *PoliciesCreate {
+	_c.mutation.SetIsSystem(v)
+	return _c
+}
+
+// SetNillableIsSystem sets the "is_system" field if the given value is not nil.
+func (_c *PoliciesCreate) SetNillableIsSystem(v *bool) *PoliciesCreate {
+	if v != nil {
+		_c.SetIsSystem(*v)
+	}
+	return _c
+}
+
 // SetDescription sets the "description" field.
 func (_c *PoliciesCreate) SetDescription(v string) *PoliciesCreate {
 	_c.mutation.SetDescription(v)
@@ -172,6 +216,36 @@ func (_c *PoliciesCreate) AddLionPermissions(v ...*Permissions) *PoliciesCreate 
 		ids[i] = v[i].ID
 	}
 	return _c.AddLionPermissionIDs(ids...)
+}
+
+// AddLionPolicyStatementIDs adds the "lion_policy_statements" edge to the PolicyStatements entity by IDs.
+func (_c *PoliciesCreate) AddLionPolicyStatementIDs(ids ...int) *PoliciesCreate {
+	_c.mutation.AddLionPolicyStatementIDs(ids...)
+	return _c
+}
+
+// AddLionPolicyStatements adds the "lion_policy_statements" edges to the PolicyStatements entity.
+func (_c *PoliciesCreate) AddLionPolicyStatements(v ...*PolicyStatements) *PoliciesCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionPolicyStatementIDs(ids...)
+}
+
+// AddLionPolicyAttachmentIDs adds the "lion_policy_attachments" edge to the PolicyAttachments entity by IDs.
+func (_c *PoliciesCreate) AddLionPolicyAttachmentIDs(ids ...int) *PoliciesCreate {
+	_c.mutation.AddLionPolicyAttachmentIDs(ids...)
+	return _c
+}
+
+// AddLionPolicyAttachments adds the "lion_policy_attachments" edges to the PolicyAttachments entity.
+func (_c *PoliciesCreate) AddLionPolicyAttachments(v ...*PolicyAttachments) *PoliciesCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionPolicyAttachmentIDs(ids...)
 }
 
 // Mutation returns the PoliciesMutation object of the builder.
@@ -237,6 +311,18 @@ func (_c *PoliciesCreate) defaults() {
 		v := policies.DefaultValue
 		_c.mutation.SetValue(v)
 	}
+	if _, ok := _c.mutation.VersionNo(); !ok {
+		v := policies.DefaultVersionNo
+		_c.mutation.SetVersionNo(v)
+	}
+	if _, ok := _c.mutation.PublishState(); !ok {
+		v := policies.DefaultPublishState
+		_c.mutation.SetPublishState(v)
+	}
+	if _, ok := _c.mutation.IsSystem(); !ok {
+		v := policies.DefaultIsSystem
+		_c.mutation.SetIsSystem(v)
+	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := policies.DefaultDescription
 		_c.mutation.SetDescription(v)
@@ -275,6 +361,15 @@ func (_c *PoliciesCreate) check() error {
 	}
 	if _, ok := _c.mutation.Value(); !ok {
 		return &ValidationError{Name: "value", err: errors.New(`lion: missing required field "Policies.value"`)}
+	}
+	if _, ok := _c.mutation.VersionNo(); !ok {
+		return &ValidationError{Name: "version_no", err: errors.New(`lion: missing required field "Policies.version_no"`)}
+	}
+	if _, ok := _c.mutation.PublishState(); !ok {
+		return &ValidationError{Name: "publish_state", err: errors.New(`lion: missing required field "Policies.publish_state"`)}
+	}
+	if _, ok := _c.mutation.IsSystem(); !ok {
+		return &ValidationError{Name: "is_system", err: errors.New(`lion: missing required field "Policies.is_system"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Policies.description"`)}
@@ -345,6 +440,18 @@ func (_c *PoliciesCreate) createSpec() (*Policies, *sqlgraph.CreateSpec) {
 		_spec.SetField(policies.FieldValue, field.TypeString, value)
 		_node.Value = value
 	}
+	if value, ok := _c.mutation.VersionNo(); ok {
+		_spec.SetField(policies.FieldVersionNo, field.TypeInt64, value)
+		_node.VersionNo = value
+	}
+	if value, ok := _c.mutation.PublishState(); ok {
+		_spec.SetField(policies.FieldPublishState, field.TypeInt, value)
+		_node.PublishState = value
+	}
+	if value, ok := _c.mutation.IsSystem(); ok {
+		_spec.SetField(policies.FieldIsSystem, field.TypeBool, value)
+		_node.IsSystem = value
+	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
 		_node.Description = value
@@ -358,6 +465,38 @@ func (_c *PoliciesCreate) createSpec() (*Policies, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionPolicyStatementsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   policies.LionPolicyStatementsTable,
+			Columns: []string{policies.LionPolicyStatementsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(policystatements.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionPolicyAttachmentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   policies.LionPolicyAttachmentsTable,
+			Columns: []string{policies.LionPolicyAttachmentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(policyattachments.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

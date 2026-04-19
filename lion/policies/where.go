@@ -105,6 +105,21 @@ func Value(v string) predicate.Policies {
 	return predicate.Policies(sql.FieldEQ(FieldValue, v))
 }
 
+// VersionNo applies equality check predicate on the "version_no" field. It's identical to VersionNoEQ.
+func VersionNo(v int64) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldVersionNo, v))
+}
+
+// PublishState applies equality check predicate on the "publish_state" field. It's identical to PublishStateEQ.
+func PublishState(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldPublishState, v))
+}
+
+// IsSystem applies equality check predicate on the "is_system" field. It's identical to IsSystemEQ.
+func IsSystem(v bool) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldIsSystem, v))
+}
+
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.Policies {
 	return predicate.Policies(sql.FieldEQ(FieldDescription, v))
@@ -615,6 +630,96 @@ func ValueContainsFold(v string) predicate.Policies {
 	return predicate.Policies(sql.FieldContainsFold(FieldValue, v))
 }
 
+// VersionNoEQ applies the EQ predicate on the "version_no" field.
+func VersionNoEQ(v int64) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldVersionNo, v))
+}
+
+// VersionNoNEQ applies the NEQ predicate on the "version_no" field.
+func VersionNoNEQ(v int64) predicate.Policies {
+	return predicate.Policies(sql.FieldNEQ(FieldVersionNo, v))
+}
+
+// VersionNoIn applies the In predicate on the "version_no" field.
+func VersionNoIn(vs ...int64) predicate.Policies {
+	return predicate.Policies(sql.FieldIn(FieldVersionNo, vs...))
+}
+
+// VersionNoNotIn applies the NotIn predicate on the "version_no" field.
+func VersionNoNotIn(vs ...int64) predicate.Policies {
+	return predicate.Policies(sql.FieldNotIn(FieldVersionNo, vs...))
+}
+
+// VersionNoGT applies the GT predicate on the "version_no" field.
+func VersionNoGT(v int64) predicate.Policies {
+	return predicate.Policies(sql.FieldGT(FieldVersionNo, v))
+}
+
+// VersionNoGTE applies the GTE predicate on the "version_no" field.
+func VersionNoGTE(v int64) predicate.Policies {
+	return predicate.Policies(sql.FieldGTE(FieldVersionNo, v))
+}
+
+// VersionNoLT applies the LT predicate on the "version_no" field.
+func VersionNoLT(v int64) predicate.Policies {
+	return predicate.Policies(sql.FieldLT(FieldVersionNo, v))
+}
+
+// VersionNoLTE applies the LTE predicate on the "version_no" field.
+func VersionNoLTE(v int64) predicate.Policies {
+	return predicate.Policies(sql.FieldLTE(FieldVersionNo, v))
+}
+
+// PublishStateEQ applies the EQ predicate on the "publish_state" field.
+func PublishStateEQ(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldPublishState, v))
+}
+
+// PublishStateNEQ applies the NEQ predicate on the "publish_state" field.
+func PublishStateNEQ(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldNEQ(FieldPublishState, v))
+}
+
+// PublishStateIn applies the In predicate on the "publish_state" field.
+func PublishStateIn(vs ...int) predicate.Policies {
+	return predicate.Policies(sql.FieldIn(FieldPublishState, vs...))
+}
+
+// PublishStateNotIn applies the NotIn predicate on the "publish_state" field.
+func PublishStateNotIn(vs ...int) predicate.Policies {
+	return predicate.Policies(sql.FieldNotIn(FieldPublishState, vs...))
+}
+
+// PublishStateGT applies the GT predicate on the "publish_state" field.
+func PublishStateGT(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldGT(FieldPublishState, v))
+}
+
+// PublishStateGTE applies the GTE predicate on the "publish_state" field.
+func PublishStateGTE(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldGTE(FieldPublishState, v))
+}
+
+// PublishStateLT applies the LT predicate on the "publish_state" field.
+func PublishStateLT(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldLT(FieldPublishState, v))
+}
+
+// PublishStateLTE applies the LTE predicate on the "publish_state" field.
+func PublishStateLTE(v int) predicate.Policies {
+	return predicate.Policies(sql.FieldLTE(FieldPublishState, v))
+}
+
+// IsSystemEQ applies the EQ predicate on the "is_system" field.
+func IsSystemEQ(v bool) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldIsSystem, v))
+}
+
+// IsSystemNEQ applies the NEQ predicate on the "is_system" field.
+func IsSystemNEQ(v bool) predicate.Policies {
+	return predicate.Policies(sql.FieldNEQ(FieldIsSystem, v))
+}
+
 // DescriptionEQ applies the EQ predicate on the "description" field.
 func DescriptionEQ(v string) predicate.Policies {
 	return predicate.Policies(sql.FieldEQ(FieldDescription, v))
@@ -695,6 +800,52 @@ func HasLionPermissions() predicate.Policies {
 func HasLionPermissionsWith(preds ...predicate.Permissions) predicate.Policies {
 	return predicate.Policies(func(s *sql.Selector) {
 		step := newLionPermissionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLionPolicyStatements applies the HasEdge predicate on the "lion_policy_statements" edge.
+func HasLionPolicyStatements() predicate.Policies {
+	return predicate.Policies(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionPolicyStatementsTable, LionPolicyStatementsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionPolicyStatementsWith applies the HasEdge predicate on the "lion_policy_statements" edge with a given conditions (other predicates).
+func HasLionPolicyStatementsWith(preds ...predicate.PolicyStatements) predicate.Policies {
+	return predicate.Policies(func(s *sql.Selector) {
+		step := newLionPolicyStatementsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLionPolicyAttachments applies the HasEdge predicate on the "lion_policy_attachments" edge.
+func HasLionPolicyAttachments() predicate.Policies {
+	return predicate.Policies(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionPolicyAttachmentsTable, LionPolicyAttachmentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionPolicyAttachmentsWith applies the HasEdge predicate on the "lion_policy_attachments" edge with a given conditions (other predicates).
+func HasLionPolicyAttachmentsWith(preds ...predicate.PolicyAttachments) predicate.Policies {
+	return predicate.Policies(func(s *sql.Selector) {
+		step := newLionPolicyAttachmentsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
