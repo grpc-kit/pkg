@@ -110,14 +110,9 @@ func VersionNo(v int64) predicate.Policies {
 	return predicate.Policies(sql.FieldEQ(FieldVersionNo, v))
 }
 
-// PublishState applies equality check predicate on the "publish_state" field. It's identical to PublishStateEQ.
-func PublishState(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldEQ(FieldPublishState, v))
-}
-
-// IsSystem applies equality check predicate on the "is_system" field. It's identical to IsSystemEQ.
-func IsSystem(v bool) predicate.Policies {
-	return predicate.Policies(sql.FieldEQ(FieldIsSystem, v))
+// Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
+func Protected(v bool) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldProtected, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
@@ -670,54 +665,14 @@ func VersionNoLTE(v int64) predicate.Policies {
 	return predicate.Policies(sql.FieldLTE(FieldVersionNo, v))
 }
 
-// PublishStateEQ applies the EQ predicate on the "publish_state" field.
-func PublishStateEQ(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldEQ(FieldPublishState, v))
+// ProtectedEQ applies the EQ predicate on the "protected" field.
+func ProtectedEQ(v bool) predicate.Policies {
+	return predicate.Policies(sql.FieldEQ(FieldProtected, v))
 }
 
-// PublishStateNEQ applies the NEQ predicate on the "publish_state" field.
-func PublishStateNEQ(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldNEQ(FieldPublishState, v))
-}
-
-// PublishStateIn applies the In predicate on the "publish_state" field.
-func PublishStateIn(vs ...int) predicate.Policies {
-	return predicate.Policies(sql.FieldIn(FieldPublishState, vs...))
-}
-
-// PublishStateNotIn applies the NotIn predicate on the "publish_state" field.
-func PublishStateNotIn(vs ...int) predicate.Policies {
-	return predicate.Policies(sql.FieldNotIn(FieldPublishState, vs...))
-}
-
-// PublishStateGT applies the GT predicate on the "publish_state" field.
-func PublishStateGT(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldGT(FieldPublishState, v))
-}
-
-// PublishStateGTE applies the GTE predicate on the "publish_state" field.
-func PublishStateGTE(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldGTE(FieldPublishState, v))
-}
-
-// PublishStateLT applies the LT predicate on the "publish_state" field.
-func PublishStateLT(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldLT(FieldPublishState, v))
-}
-
-// PublishStateLTE applies the LTE predicate on the "publish_state" field.
-func PublishStateLTE(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldLTE(FieldPublishState, v))
-}
-
-// IsSystemEQ applies the EQ predicate on the "is_system" field.
-func IsSystemEQ(v bool) predicate.Policies {
-	return predicate.Policies(sql.FieldEQ(FieldIsSystem, v))
-}
-
-// IsSystemNEQ applies the NEQ predicate on the "is_system" field.
-func IsSystemNEQ(v bool) predicate.Policies {
-	return predicate.Policies(sql.FieldNEQ(FieldIsSystem, v))
+// ProtectedNEQ applies the NEQ predicate on the "protected" field.
+func ProtectedNEQ(v bool) predicate.Policies {
+	return predicate.Policies(sql.FieldNEQ(FieldProtected, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.

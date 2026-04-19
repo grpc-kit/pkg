@@ -17,7 +17,7 @@ const (
 	prefixBootstrapUsername  = "BOOTSTRAP_USERNAME_"
 )
 
-// codeFromEnumName 将 protobuf 枚举符号名（如 RESOURCE_SEED_CODE_ROOT_PAGE）转为种子使用的字符串（root-page）。
+// codeFromEnumName 将 protobuf 枚举符号名（如 RESOURCE_SEED_CODE_ROOT_DOMAIN）转为种子使用的字符串（root-domain）。
 func codeFromEnumName(prefix, full string) string {
 	if full == "" {
 		return ""

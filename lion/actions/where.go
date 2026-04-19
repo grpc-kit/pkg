@@ -89,9 +89,9 @@ func ResourceType(v int) predicate.Actions {
 	return predicate.Actions(sql.FieldEQ(FieldResourceType, v))
 }
 
-// HTTPMethod applies equality check predicate on the "http_method" field. It's identical to HTTPMethodEQ.
-func HTTPMethod(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldEQ(FieldHTTPMethod, v))
+// ProjectionMapping applies equality check predicate on the "projection_mapping" field. It's identical to ProjectionMappingEQ.
+func ProjectionMapping(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldEQ(FieldProjectionMapping, v))
 }
 
 // Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
@@ -454,69 +454,69 @@ func ResourceTypeLTE(v int) predicate.Actions {
 	return predicate.Actions(sql.FieldLTE(FieldResourceType, v))
 }
 
-// HTTPMethodEQ applies the EQ predicate on the "http_method" field.
-func HTTPMethodEQ(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldEQ(FieldHTTPMethod, v))
+// ProjectionMappingEQ applies the EQ predicate on the "projection_mapping" field.
+func ProjectionMappingEQ(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldEQ(FieldProjectionMapping, v))
 }
 
-// HTTPMethodNEQ applies the NEQ predicate on the "http_method" field.
-func HTTPMethodNEQ(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldNEQ(FieldHTTPMethod, v))
+// ProjectionMappingNEQ applies the NEQ predicate on the "projection_mapping" field.
+func ProjectionMappingNEQ(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldNEQ(FieldProjectionMapping, v))
 }
 
-// HTTPMethodIn applies the In predicate on the "http_method" field.
-func HTTPMethodIn(vs ...string) predicate.Actions {
-	return predicate.Actions(sql.FieldIn(FieldHTTPMethod, vs...))
+// ProjectionMappingIn applies the In predicate on the "projection_mapping" field.
+func ProjectionMappingIn(vs ...string) predicate.Actions {
+	return predicate.Actions(sql.FieldIn(FieldProjectionMapping, vs...))
 }
 
-// HTTPMethodNotIn applies the NotIn predicate on the "http_method" field.
-func HTTPMethodNotIn(vs ...string) predicate.Actions {
-	return predicate.Actions(sql.FieldNotIn(FieldHTTPMethod, vs...))
+// ProjectionMappingNotIn applies the NotIn predicate on the "projection_mapping" field.
+func ProjectionMappingNotIn(vs ...string) predicate.Actions {
+	return predicate.Actions(sql.FieldNotIn(FieldProjectionMapping, vs...))
 }
 
-// HTTPMethodGT applies the GT predicate on the "http_method" field.
-func HTTPMethodGT(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldGT(FieldHTTPMethod, v))
+// ProjectionMappingGT applies the GT predicate on the "projection_mapping" field.
+func ProjectionMappingGT(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldGT(FieldProjectionMapping, v))
 }
 
-// HTTPMethodGTE applies the GTE predicate on the "http_method" field.
-func HTTPMethodGTE(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldGTE(FieldHTTPMethod, v))
+// ProjectionMappingGTE applies the GTE predicate on the "projection_mapping" field.
+func ProjectionMappingGTE(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldGTE(FieldProjectionMapping, v))
 }
 
-// HTTPMethodLT applies the LT predicate on the "http_method" field.
-func HTTPMethodLT(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldLT(FieldHTTPMethod, v))
+// ProjectionMappingLT applies the LT predicate on the "projection_mapping" field.
+func ProjectionMappingLT(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldLT(FieldProjectionMapping, v))
 }
 
-// HTTPMethodLTE applies the LTE predicate on the "http_method" field.
-func HTTPMethodLTE(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldLTE(FieldHTTPMethod, v))
+// ProjectionMappingLTE applies the LTE predicate on the "projection_mapping" field.
+func ProjectionMappingLTE(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldLTE(FieldProjectionMapping, v))
 }
 
-// HTTPMethodContains applies the Contains predicate on the "http_method" field.
-func HTTPMethodContains(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldContains(FieldHTTPMethod, v))
+// ProjectionMappingContains applies the Contains predicate on the "projection_mapping" field.
+func ProjectionMappingContains(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldContains(FieldProjectionMapping, v))
 }
 
-// HTTPMethodHasPrefix applies the HasPrefix predicate on the "http_method" field.
-func HTTPMethodHasPrefix(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldHasPrefix(FieldHTTPMethod, v))
+// ProjectionMappingHasPrefix applies the HasPrefix predicate on the "projection_mapping" field.
+func ProjectionMappingHasPrefix(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldHasPrefix(FieldProjectionMapping, v))
 }
 
-// HTTPMethodHasSuffix applies the HasSuffix predicate on the "http_method" field.
-func HTTPMethodHasSuffix(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldHasSuffix(FieldHTTPMethod, v))
+// ProjectionMappingHasSuffix applies the HasSuffix predicate on the "projection_mapping" field.
+func ProjectionMappingHasSuffix(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldHasSuffix(FieldProjectionMapping, v))
 }
 
-// HTTPMethodEqualFold applies the EqualFold predicate on the "http_method" field.
-func HTTPMethodEqualFold(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldEqualFold(FieldHTTPMethod, v))
+// ProjectionMappingEqualFold applies the EqualFold predicate on the "projection_mapping" field.
+func ProjectionMappingEqualFold(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldEqualFold(FieldProjectionMapping, v))
 }
 
-// HTTPMethodContainsFold applies the ContainsFold predicate on the "http_method" field.
-func HTTPMethodContainsFold(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldContainsFold(FieldHTTPMethod, v))
+// ProjectionMappingContainsFold applies the ContainsFold predicate on the "projection_mapping" field.
+func ProjectionMappingContainsFold(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldContainsFold(FieldProjectionMapping, v))
 }
 
 // ProtectedEQ applies the EQ predicate on the "protected" field.

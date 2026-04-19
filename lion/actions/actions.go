@@ -27,8 +27,8 @@ const (
 	FieldDisplayName = "display_name"
 	// FieldResourceType holds the string denoting the resource_type field in the database.
 	FieldResourceType = "resource_type"
-	// FieldHTTPMethod holds the string denoting the http_method field in the database.
-	FieldHTTPMethod = "http_method"
+	// FieldProjectionMapping holds the string denoting the projection_mapping field in the database.
+	FieldProjectionMapping = "projection_mapping"
 	// FieldProtected holds the string denoting the protected field in the database.
 	FieldProtected = "protected"
 	// FieldDescription holds the string denoting the description field in the database.
@@ -47,7 +47,7 @@ var Columns = []string{
 	FieldCode,
 	FieldDisplayName,
 	FieldResourceType,
-	FieldHTTPMethod,
+	FieldProjectionMapping,
 	FieldProtected,
 	FieldDescription,
 }
@@ -79,10 +79,10 @@ var (
 	DefaultDisplayName string
 	// DefaultResourceType holds the default value on creation for the "resource_type" field.
 	DefaultResourceType int
-	// DefaultHTTPMethod holds the default value on creation for the "http_method" field.
-	DefaultHTTPMethod string
-	// HTTPMethodValidator is a validator for the "http_method" field. It is called by the builders before save.
-	HTTPMethodValidator func(string) error
+	// DefaultProjectionMapping holds the default value on creation for the "projection_mapping" field.
+	DefaultProjectionMapping string
+	// ProjectionMappingValidator is a validator for the "projection_mapping" field. It is called by the builders before save.
+	ProjectionMappingValidator func(string) error
 	// DefaultProtected holds the default value on creation for the "protected" field.
 	DefaultProtected bool
 	// DefaultDescription holds the default value on creation for the "description" field.
@@ -132,9 +132,9 @@ func ByResourceType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResourceType, opts...).ToFunc()
 }
 
-// ByHTTPMethod orders the results by the http_method field.
-func ByHTTPMethod(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldHTTPMethod, opts...).ToFunc()
+// ByProjectionMapping orders the results by the projection_mapping field.
+func ByProjectionMapping(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProjectionMapping, opts...).ToFunc()
 }
 
 // ByProtected orders the results by the protected field.

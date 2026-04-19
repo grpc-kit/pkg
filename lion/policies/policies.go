@@ -36,10 +36,8 @@ const (
 	FieldValue = "value"
 	// FieldVersionNo holds the string denoting the version_no field in the database.
 	FieldVersionNo = "version_no"
-	// FieldPublishState holds the string denoting the publish_state field in the database.
-	FieldPublishState = "publish_state"
-	// FieldIsSystem holds the string denoting the is_system field in the database.
-	FieldIsSystem = "is_system"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
@@ -87,8 +85,7 @@ var Columns = []string{
 	FieldPolicyStatus,
 	FieldValue,
 	FieldVersionNo,
-	FieldPublishState,
-	FieldIsSystem,
+	FieldProtected,
 	FieldDescription,
 }
 
@@ -125,10 +122,8 @@ var (
 	DefaultValue string
 	// DefaultVersionNo holds the default value on creation for the "version_no" field.
 	DefaultVersionNo int64
-	// DefaultPublishState holds the default value on creation for the "publish_state" field.
-	DefaultPublishState int
-	// DefaultIsSystem holds the default value on creation for the "is_system" field.
-	DefaultIsSystem bool
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 )
@@ -196,14 +191,9 @@ func ByVersionNo(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVersionNo, opts...).ToFunc()
 }
 
-// ByPublishState orders the results by the publish_state field.
-func ByPublishState(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPublishState, opts...).ToFunc()
-}
-
-// ByIsSystem orders the results by the is_system field.
-func ByIsSystem(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsSystem, opts...).ToFunc()
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

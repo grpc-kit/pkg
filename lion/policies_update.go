@@ -216,37 +216,16 @@ func (_u *PoliciesUpdate) AddVersionNo(v int64) *PoliciesUpdate {
 	return _u
 }
 
-// SetPublishState sets the "publish_state" field.
-func (_u *PoliciesUpdate) SetPublishState(v int) *PoliciesUpdate {
-	_u.mutation.ResetPublishState()
-	_u.mutation.SetPublishState(v)
+// SetProtected sets the "protected" field.
+func (_u *PoliciesUpdate) SetProtected(v bool) *PoliciesUpdate {
+	_u.mutation.SetProtected(v)
 	return _u
 }
 
-// SetNillablePublishState sets the "publish_state" field if the given value is not nil.
-func (_u *PoliciesUpdate) SetNillablePublishState(v *int) *PoliciesUpdate {
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *PoliciesUpdate) SetNillableProtected(v *bool) *PoliciesUpdate {
 	if v != nil {
-		_u.SetPublishState(*v)
-	}
-	return _u
-}
-
-// AddPublishState adds value to the "publish_state" field.
-func (_u *PoliciesUpdate) AddPublishState(v int) *PoliciesUpdate {
-	_u.mutation.AddPublishState(v)
-	return _u
-}
-
-// SetIsSystem sets the "is_system" field.
-func (_u *PoliciesUpdate) SetIsSystem(v bool) *PoliciesUpdate {
-	_u.mutation.SetIsSystem(v)
-	return _u
-}
-
-// SetNillableIsSystem sets the "is_system" field if the given value is not nil.
-func (_u *PoliciesUpdate) SetNillableIsSystem(v *bool) *PoliciesUpdate {
-	if v != nil {
-		_u.SetIsSystem(*v)
+		_u.SetProtected(*v)
 	}
 	return _u
 }
@@ -495,14 +474,8 @@ func (_u *PoliciesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedVersionNo(); ok {
 		_spec.AddField(policies.FieldVersionNo, field.TypeInt64, value)
 	}
-	if value, ok := _u.mutation.PublishState(); ok {
-		_spec.SetField(policies.FieldPublishState, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedPublishState(); ok {
-		_spec.AddField(policies.FieldPublishState, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.IsSystem(); ok {
-		_spec.SetField(policies.FieldIsSystem, field.TypeBool, value)
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(policies.FieldProtected, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
@@ -847,37 +820,16 @@ func (_u *PoliciesUpdateOne) AddVersionNo(v int64) *PoliciesUpdateOne {
 	return _u
 }
 
-// SetPublishState sets the "publish_state" field.
-func (_u *PoliciesUpdateOne) SetPublishState(v int) *PoliciesUpdateOne {
-	_u.mutation.ResetPublishState()
-	_u.mutation.SetPublishState(v)
+// SetProtected sets the "protected" field.
+func (_u *PoliciesUpdateOne) SetProtected(v bool) *PoliciesUpdateOne {
+	_u.mutation.SetProtected(v)
 	return _u
 }
 
-// SetNillablePublishState sets the "publish_state" field if the given value is not nil.
-func (_u *PoliciesUpdateOne) SetNillablePublishState(v *int) *PoliciesUpdateOne {
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *PoliciesUpdateOne) SetNillableProtected(v *bool) *PoliciesUpdateOne {
 	if v != nil {
-		_u.SetPublishState(*v)
-	}
-	return _u
-}
-
-// AddPublishState adds value to the "publish_state" field.
-func (_u *PoliciesUpdateOne) AddPublishState(v int) *PoliciesUpdateOne {
-	_u.mutation.AddPublishState(v)
-	return _u
-}
-
-// SetIsSystem sets the "is_system" field.
-func (_u *PoliciesUpdateOne) SetIsSystem(v bool) *PoliciesUpdateOne {
-	_u.mutation.SetIsSystem(v)
-	return _u
-}
-
-// SetNillableIsSystem sets the "is_system" field if the given value is not nil.
-func (_u *PoliciesUpdateOne) SetNillableIsSystem(v *bool) *PoliciesUpdateOne {
-	if v != nil {
-		_u.SetIsSystem(*v)
+		_u.SetProtected(*v)
 	}
 	return _u
 }
@@ -1156,14 +1108,8 @@ func (_u *PoliciesUpdateOne) sqlSave(ctx context.Context) (_node *Policies, err 
 	if value, ok := _u.mutation.AddedVersionNo(); ok {
 		_spec.AddField(policies.FieldVersionNo, field.TypeInt64, value)
 	}
-	if value, ok := _u.mutation.PublishState(); ok {
-		_spec.SetField(policies.FieldPublishState, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedPublishState(); ok {
-		_spec.AddField(policies.FieldPublishState, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.IsSystem(); ok {
-		_spec.SetField(policies.FieldIsSystem, field.TypeBool, value)
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(policies.FieldProtected, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)

@@ -137,16 +137,16 @@ func (_u *ActionsUpdate) AddResourceType(v int) *ActionsUpdate {
 	return _u
 }
 
-// SetHTTPMethod sets the "http_method" field.
-func (_u *ActionsUpdate) SetHTTPMethod(v string) *ActionsUpdate {
-	_u.mutation.SetHTTPMethod(v)
+// SetProjectionMapping sets the "projection_mapping" field.
+func (_u *ActionsUpdate) SetProjectionMapping(v string) *ActionsUpdate {
+	_u.mutation.SetProjectionMapping(v)
 	return _u
 }
 
-// SetNillableHTTPMethod sets the "http_method" field if the given value is not nil.
-func (_u *ActionsUpdate) SetNillableHTTPMethod(v *string) *ActionsUpdate {
+// SetNillableProjectionMapping sets the "projection_mapping" field if the given value is not nil.
+func (_u *ActionsUpdate) SetNillableProjectionMapping(v *string) *ActionsUpdate {
 	if v != nil {
-		_u.SetHTTPMethod(*v)
+		_u.SetProjectionMapping(*v)
 	}
 	return _u
 }
@@ -227,9 +227,9 @@ func (_u *ActionsUpdate) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Actions.code": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.HTTPMethod(); ok {
-		if err := actions.HTTPMethodValidator(v); err != nil {
-			return &ValidationError{Name: "http_method", err: fmt.Errorf(`lion: validator failed for field "Actions.http_method": %w`, err)}
+	if v, ok := _u.mutation.ProjectionMapping(); ok {
+		if err := actions.ProjectionMappingValidator(v); err != nil {
+			return &ValidationError{Name: "projection_mapping", err: fmt.Errorf(`lion: validator failed for field "Actions.projection_mapping": %w`, err)}
 		}
 	}
 	return nil
@@ -280,8 +280,8 @@ func (_u *ActionsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedResourceType(); ok {
 		_spec.AddField(actions.FieldResourceType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.HTTPMethod(); ok {
-		_spec.SetField(actions.FieldHTTPMethod, field.TypeString, value)
+	if value, ok := _u.mutation.ProjectionMapping(); ok {
+		_spec.SetField(actions.FieldProjectionMapping, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Protected(); ok {
 		_spec.SetField(actions.FieldProtected, field.TypeBool, value)
@@ -418,16 +418,16 @@ func (_u *ActionsUpdateOne) AddResourceType(v int) *ActionsUpdateOne {
 	return _u
 }
 
-// SetHTTPMethod sets the "http_method" field.
-func (_u *ActionsUpdateOne) SetHTTPMethod(v string) *ActionsUpdateOne {
-	_u.mutation.SetHTTPMethod(v)
+// SetProjectionMapping sets the "projection_mapping" field.
+func (_u *ActionsUpdateOne) SetProjectionMapping(v string) *ActionsUpdateOne {
+	_u.mutation.SetProjectionMapping(v)
 	return _u
 }
 
-// SetNillableHTTPMethod sets the "http_method" field if the given value is not nil.
-func (_u *ActionsUpdateOne) SetNillableHTTPMethod(v *string) *ActionsUpdateOne {
+// SetNillableProjectionMapping sets the "projection_mapping" field if the given value is not nil.
+func (_u *ActionsUpdateOne) SetNillableProjectionMapping(v *string) *ActionsUpdateOne {
 	if v != nil {
-		_u.SetHTTPMethod(*v)
+		_u.SetProjectionMapping(*v)
 	}
 	return _u
 }
@@ -521,9 +521,9 @@ func (_u *ActionsUpdateOne) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Actions.code": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.HTTPMethod(); ok {
-		if err := actions.HTTPMethodValidator(v); err != nil {
-			return &ValidationError{Name: "http_method", err: fmt.Errorf(`lion: validator failed for field "Actions.http_method": %w`, err)}
+	if v, ok := _u.mutation.ProjectionMapping(); ok {
+		if err := actions.ProjectionMappingValidator(v); err != nil {
+			return &ValidationError{Name: "projection_mapping", err: fmt.Errorf(`lion: validator failed for field "Actions.projection_mapping": %w`, err)}
 		}
 	}
 	return nil
@@ -591,8 +591,8 @@ func (_u *ActionsUpdateOne) sqlSave(ctx context.Context) (_node *Actions, err er
 	if value, ok := _u.mutation.AddedResourceType(); ok {
 		_spec.AddField(actions.FieldResourceType, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.HTTPMethod(); ok {
-		_spec.SetField(actions.FieldHTTPMethod, field.TypeString, value)
+	if value, ok := _u.mutation.ProjectionMapping(); ok {
+		_spec.SetField(actions.FieldProjectionMapping, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Protected(); ok {
 		_spec.SetField(actions.FieldProtected, field.TypeBool, value)

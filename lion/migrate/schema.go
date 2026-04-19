@@ -19,7 +19,7 @@ var (
 		{Name: "code", Type: field.TypeString, Size: 128},
 		{Name: "display_name", Type: field.TypeString, Default: ""},
 		{Name: "resource_type", Type: field.TypeInt, Default: 0},
-		{Name: "http_method", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "projection_mapping", Type: field.TypeString, Size: 4096, Default: "{}"},
 		{Name: "protected", Type: field.TypeBool, Default: false},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}
@@ -318,8 +318,7 @@ var (
 		{Name: "policy_status", Type: field.TypeInt, Default: 0},
 		{Name: "value", Type: field.TypeString, Default: ""},
 		{Name: "version_no", Type: field.TypeInt64, Default: 1},
-		{Name: "publish_state", Type: field.TypeInt, Default: 0},
-		{Name: "is_system", Type: field.TypeBool, Default: false},
+		{Name: "protected", Type: field.TypeBool, Default: false},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}
 	// LionPoliciesTable holds the schema information for the "lion_policies" table.
@@ -456,6 +455,7 @@ var (
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "parent_id", Type: field.TypeInt64, Default: 0},
 		{Name: "code", Type: field.TypeString, Size: 128},
+		{Name: "name", Type: field.TypeString, Size: 512, Default: ""},
 		{Name: "display_name", Type: field.TypeString, Default: ""},
 		{Name: "resource_type", Type: field.TypeInt, Default: 0},
 		{Name: "resource_status", Type: field.TypeInt, Default: 0},
@@ -481,7 +481,7 @@ var (
 			{
 				Name:    "resources_resource_type",
 				Unique:  true,
-				Columns: []*schema.Column{LionResourcesColumns[9]},
+				Columns: []*schema.Column{LionResourcesColumns[10]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "parent_id = 0",
 				},
@@ -489,7 +489,15 @@ var (
 			{
 				Name:    "resources_sort_order",
 				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[12]},
+				Columns: []*schema.Column{LionResourcesColumns[13]},
+			},
+			{
+				Name:    "resources_name",
+				Unique:  true,
+				Columns: []*schema.Column{LionResourcesColumns[8]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "name <> ''",
+				},
 			},
 		},
 	}

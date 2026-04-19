@@ -13,8 +13,8 @@ func TestCodeFromEnumName(t *testing.T) {
 	}{
 		{"", ""},
 		{"RESOURCE_SEED_CODE_UNSPECIFIED", ""},
-		{"RESOURCE_SEED_CODE_ROOT_PAGE", "root-page"},
-		{"WRONG_PREFIX_ROOT_PAGE", ""},
+		{"RESOURCE_SEED_CODE_ROOT_DOMAIN", "root-domain"},
+		{"WRONG_PREFIX_ROOT_DOMAIN", ""},
 		{"RESOURCE_SEED_CODE_", ""},
 	}
 	for _, tt := range tests {
@@ -77,8 +77,8 @@ func TestSeedResourceSeedCode(t *testing.T) {
 	}{
 		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_UNSPECIFIED, ""},
 		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_MENU, "root-menu"},
-		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_PAGE, "root-page"},
-		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_BUTTON, "root-button"},
+		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_DOMAIN, "root-domain"},
+		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_LLM, "root-llm"},
 		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_API, "root-api"},
 		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_DATA, "root-data"},
 		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_SYSTEM, "root-system"},

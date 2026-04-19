@@ -308,7 +308,7 @@ type CreateResourceRequest struct {
 	// }
 	//
 	// 注意：code 为可选字段，如客户端未提供，服务端将自动生成 12 位随机编码。
-	// 如提供，需符合 code 规范：以小写字母开头，仅 [a-z0-9-]，长度 2-32，不允许连续 "--"。
+	// 如提供，需符合 code 规范：以小写字母开头，仅 [a-z0-9.:-]，长度 2-32，不允许连续分隔符（如 "--"、".."、"::"）。
 	Resource *Resource `protobuf:"bytes,1,opt,name=resource,proto3" json:"resource,omitempty"`
 }
 

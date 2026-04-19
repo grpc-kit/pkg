@@ -31,6 +31,8 @@ type Resources struct {
 	ParentID int64 `json:"parent_id,omitempty"`
 	// 资源名称
 	Code string `json:"code,omitempty"`
+	// 稳定资源名（GRN），格式：grn:{service}:{tenant}:{region}:{resource_type}:{resource_path}
+	Name string `json:"name,omitempty"`
 	// 友好展示名称
 	DisplayName string `json:"display_name,omitempty"`
 	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
@@ -84,7 +86,7 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldResourceType, resources.FieldResourceStatus, resources.FieldVisibility, resources.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case resources.FieldCode, resources.FieldDisplayName, resources.FieldLocator, resources.FieldVisual, resources.FieldManifest, resources.FieldDescription:
+		case resources.FieldCode, resources.FieldName, resources.FieldDisplayName, resources.FieldLocator, resources.FieldVisual, resources.FieldManifest, resources.FieldDescription:
 			values[i] = new(sql.NullString)
 		case resources.FieldCreatedAt, resources.FieldUpdatedAt, resources.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -151,6 +153,12 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
 				_m.Code = value.String
+			}
+		case resources.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				_m.Name = value.String
 			}
 		case resources.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -275,6 +283,9 @@ func (_m *Resources) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(_m.Code)
+	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)

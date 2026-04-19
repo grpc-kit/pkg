@@ -24,6 +24,10 @@ func (Resources) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("资源名称"),
+		field.String("name").
+			MaxLen(512).
+			Default("").
+			Comment("稳定资源名（GRN），格式：grn:{service}:{tenant}:{region}:{resource_type}:{resource_path}"),
 		field.String("display_name").
 			Default("").
 			Comment("友好展示名称"),
@@ -99,6 +103,10 @@ func (Resources) Indexes() []ent.Index {
 		),
 		// 排序顺序索引，用于排序查询
 		index.Fields("sort_order"),
+		// 资源名全局唯一（空值不参与唯一约束，便于平滑迁移）
+		index.Fields("name").Unique().Annotations(
+			entsql.IndexWhere("name <> ''"),
+		),
 	}
 }
 

@@ -31,8 +31,8 @@ type Actions struct {
 	DisplayName string `json:"display_name,omitempty"`
 	// 对应 api/known/admin/v1/admin.common.proto 中的 Resource.Type
 	ResourceType int `json:"resource_type,omitempty"`
-	// 默认投影的 HTTP Method
-	HTTPMethod string `json:"http_method,omitempty"`
+	// 协议映射配置（JSON），描述动作在 HTTP/gRPC/Event/MCP 等协议下的投影方式
+	ProjectionMapping string `json:"projection_mapping,omitempty"`
 	// 是否系统保护动作，保护动作不可删除
 	Protected bool `json:"protected,omitempty"`
 	// 详细描述
@@ -49,7 +49,7 @@ func (*Actions) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case actions.FieldID, actions.FieldCreatedBy, actions.FieldUpdatedBy, actions.FieldResourceType:
 			values[i] = new(sql.NullInt64)
-		case actions.FieldCode, actions.FieldDisplayName, actions.FieldHTTPMethod, actions.FieldDescription:
+		case actions.FieldCode, actions.FieldDisplayName, actions.FieldProjectionMapping, actions.FieldDescription:
 			values[i] = new(sql.NullString)
 		case actions.FieldCreatedAt, actions.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -116,11 +116,11 @@ func (_m *Actions) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ResourceType = int(value.Int64)
 			}
-		case actions.FieldHTTPMethod:
+		case actions.FieldProjectionMapping:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field http_method", values[i])
+				return fmt.Errorf("unexpected type %T for field projection_mapping", values[i])
 			} else if value.Valid {
-				_m.HTTPMethod = value.String
+				_m.ProjectionMapping = value.String
 			}
 		case actions.FieldProtected:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -191,8 +191,8 @@ func (_m *Actions) String() string {
 	builder.WriteString("resource_type=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ResourceType))
 	builder.WriteString(", ")
-	builder.WriteString("http_method=")
-	builder.WriteString(_m.HTTPMethod)
+	builder.WriteString("projection_mapping=")
+	builder.WriteString(_m.ProjectionMapping)
 	builder.WriteString(", ")
 	builder.WriteString("protected=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Protected))

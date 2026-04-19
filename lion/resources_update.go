@@ -144,6 +144,20 @@ func (_u *ResourcesUpdate) SetNillableCode(v *string) *ResourcesUpdate {
 	return _u
 }
 
+// SetName sets the "name" field.
+func (_u *ResourcesUpdate) SetName(v string) *ResourcesUpdate {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableName(v *string) *ResourcesUpdate {
+	if v != nil {
+		_u.SetName(*v)
+	}
+	return _u
+}
+
 // SetDisplayName sets the "display_name" field.
 func (_u *ResourcesUpdate) SetDisplayName(v string) *ResourcesUpdate {
 	_u.mutation.SetDisplayName(v)
@@ -396,6 +410,11 @@ func (_u *ResourcesUpdate) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Resources.code": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Name(); ok {
+		if err := resources.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Resources.name": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Locator(); ok {
 		if err := resources.LocatorValidator(v); err != nil {
 			return &ValidationError{Name: "locator", err: fmt.Errorf(`lion: validator failed for field "Resources.locator": %w`, err)}
@@ -456,6 +475,9 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Code(); ok {
 		_spec.SetField(resources.FieldCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(resources.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(resources.FieldDisplayName, field.TypeString, value)
@@ -675,6 +697,20 @@ func (_u *ResourcesUpdateOne) SetCode(v string) *ResourcesUpdateOne {
 func (_u *ResourcesUpdateOne) SetNillableCode(v *string) *ResourcesUpdateOne {
 	if v != nil {
 		_u.SetCode(*v)
+	}
+	return _u
+}
+
+// SetName sets the "name" field.
+func (_u *ResourcesUpdateOne) SetName(v string) *ResourcesUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableName(v *string) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -944,6 +980,11 @@ func (_u *ResourcesUpdateOne) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Resources.code": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Name(); ok {
+		if err := resources.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Resources.name": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Locator(); ok {
 		if err := resources.LocatorValidator(v); err != nil {
 			return &ValidationError{Name: "locator", err: fmt.Errorf(`lion: validator failed for field "Resources.locator": %w`, err)}
@@ -1021,6 +1062,9 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	}
 	if value, ok := _u.mutation.Code(); ok {
 		_spec.SetField(resources.FieldCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Name(); ok {
+		_spec.SetField(resources.FieldName, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(resources.FieldDisplayName, field.TypeString, value)

@@ -6,6 +6,7 @@ func TestValidateCode_AllowsDotSeparatedNames(t *testing.T) {
 	validCodes := []string{
 		"order.read",
 		"order-read",
+		"admin:user.read",
 		"order.read-v2",
 		"a1",
 	}
@@ -21,10 +22,15 @@ func TestValidateCode_RejectsInvalidSeparators(t *testing.T) {
 	invalidCodes := []string{
 		"order..read",
 		"order--read",
+		"order::read",
 		"order-.read",
 		"order.-read",
+		"order:-read",
+		"order:.read",
 		"order.",
+		"order:",
 		".order",
+		":order",
 	}
 
 	for _, code := range invalidCodes {

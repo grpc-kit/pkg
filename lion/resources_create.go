@@ -111,6 +111,20 @@ func (_c *ResourcesCreate) SetCode(v string) *ResourcesCreate {
 	return _c
 }
 
+// SetName sets the "name" field.
+func (_c *ResourcesCreate) SetName(v string) *ResourcesCreate {
+	_c.mutation.SetName(v)
+	return _c
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableName(v *string) *ResourcesCreate {
+	if v != nil {
+		_c.SetName(*v)
+	}
+	return _c
+}
+
 // SetDisplayName sets the "display_name" field.
 func (_c *ResourcesCreate) SetDisplayName(v string) *ResourcesCreate {
 	_c.mutation.SetDisplayName(v)
@@ -321,6 +335,10 @@ func (_c *ResourcesCreate) defaults() {
 		v := resources.DefaultParentID
 		_c.mutation.SetParentID(v)
 	}
+	if _, ok := _c.mutation.Name(); !ok {
+		v := resources.DefaultName
+		_c.mutation.SetName(v)
+	}
 	if _, ok := _c.mutation.DisplayName(); !ok {
 		v := resources.DefaultDisplayName
 		_c.mutation.SetDisplayName(v)
@@ -380,6 +398,14 @@ func (_c *ResourcesCreate) check() error {
 	if v, ok := _c.mutation.Code(); ok {
 		if err := resources.CodeValidator(v); err != nil {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Resources.code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`lion: missing required field "Resources.name"`)}
+	}
+	if v, ok := _c.mutation.Name(); ok {
+		if err := resources.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Resources.name": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.DisplayName(); !ok {
@@ -475,6 +501,10 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Code(); ok {
 		_spec.SetField(resources.FieldCode, field.TypeString, value)
 		_node.Code = value
+	}
+	if value, ok := _c.mutation.Name(); ok {
+		_spec.SetField(resources.FieldName, field.TypeString, value)
+		_node.Name = value
 	}
 	if value, ok := _c.mutation.DisplayName(); ok {
 		_spec.SetField(resources.FieldDisplayName, field.TypeString, value)

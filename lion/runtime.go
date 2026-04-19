@@ -85,12 +85,12 @@ func init() {
 	actionsDescResourceType := actionsFields[2].Descriptor()
 	// actions.DefaultResourceType holds the default value on creation for the resource_type field.
 	actions.DefaultResourceType = actionsDescResourceType.Default.(int)
-	// actionsDescHTTPMethod is the schema descriptor for http_method field.
-	actionsDescHTTPMethod := actionsFields[3].Descriptor()
-	// actions.DefaultHTTPMethod holds the default value on creation for the http_method field.
-	actions.DefaultHTTPMethod = actionsDescHTTPMethod.Default.(string)
-	// actions.HTTPMethodValidator is a validator for the "http_method" field. It is called by the builders before save.
-	actions.HTTPMethodValidator = actionsDescHTTPMethod.Validators[0].(func(string) error)
+	// actionsDescProjectionMapping is the schema descriptor for projection_mapping field.
+	actionsDescProjectionMapping := actionsFields[3].Descriptor()
+	// actions.DefaultProjectionMapping holds the default value on creation for the projection_mapping field.
+	actions.DefaultProjectionMapping = actionsDescProjectionMapping.Default.(string)
+	// actions.ProjectionMappingValidator is a validator for the "projection_mapping" field. It is called by the builders before save.
+	actions.ProjectionMappingValidator = actionsDescProjectionMapping.Validators[0].(func(string) error)
 	// actionsDescProtected is the schema descriptor for protected field.
 	actionsDescProtected := actionsFields[4].Descriptor()
 	// actions.DefaultProtected holds the default value on creation for the protected field.
@@ -577,16 +577,12 @@ func init() {
 	policiesDescVersionNo := policiesFields[5].Descriptor()
 	// policies.DefaultVersionNo holds the default value on creation for the version_no field.
 	policies.DefaultVersionNo = policiesDescVersionNo.Default.(int64)
-	// policiesDescPublishState is the schema descriptor for publish_state field.
-	policiesDescPublishState := policiesFields[6].Descriptor()
-	// policies.DefaultPublishState holds the default value on creation for the publish_state field.
-	policies.DefaultPublishState = policiesDescPublishState.Default.(int)
-	// policiesDescIsSystem is the schema descriptor for is_system field.
-	policiesDescIsSystem := policiesFields[7].Descriptor()
-	// policies.DefaultIsSystem holds the default value on creation for the is_system field.
-	policies.DefaultIsSystem = policiesDescIsSystem.Default.(bool)
+	// policiesDescProtected is the schema descriptor for protected field.
+	policiesDescProtected := policiesFields[6].Descriptor()
+	// policies.DefaultProtected holds the default value on creation for the protected field.
+	policies.DefaultProtected = policiesDescProtected.Default.(bool)
 	// policiesDescDescription is the schema descriptor for description field.
-	policiesDescDescription := policiesFields[8].Descriptor()
+	policiesDescDescription := policiesFields[7].Descriptor()
 	// policies.DefaultDescription holds the default value on creation for the description field.
 	policies.DefaultDescription = policiesDescDescription.Default.(string)
 	policyattachmentsMixin := schema.PolicyAttachments{}.Mixin()
@@ -789,48 +785,54 @@ func init() {
 			return nil
 		}
 	}()
+	// resourcesDescName is the schema descriptor for name field.
+	resourcesDescName := resourcesFields[2].Descriptor()
+	// resources.DefaultName holds the default value on creation for the name field.
+	resources.DefaultName = resourcesDescName.Default.(string)
+	// resources.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	resources.NameValidator = resourcesDescName.Validators[0].(func(string) error)
 	// resourcesDescDisplayName is the schema descriptor for display_name field.
-	resourcesDescDisplayName := resourcesFields[2].Descriptor()
+	resourcesDescDisplayName := resourcesFields[3].Descriptor()
 	// resources.DefaultDisplayName holds the default value on creation for the display_name field.
 	resources.DefaultDisplayName = resourcesDescDisplayName.Default.(string)
 	// resourcesDescResourceType is the schema descriptor for resource_type field.
-	resourcesDescResourceType := resourcesFields[3].Descriptor()
+	resourcesDescResourceType := resourcesFields[4].Descriptor()
 	// resources.DefaultResourceType holds the default value on creation for the resource_type field.
 	resources.DefaultResourceType = resourcesDescResourceType.Default.(int)
 	// resourcesDescResourceStatus is the schema descriptor for resource_status field.
-	resourcesDescResourceStatus := resourcesFields[4].Descriptor()
+	resourcesDescResourceStatus := resourcesFields[5].Descriptor()
 	// resources.DefaultResourceStatus holds the default value on creation for the resource_status field.
 	resources.DefaultResourceStatus = resourcesDescResourceStatus.Default.(int)
 	// resourcesDescVisibility is the schema descriptor for visibility field.
-	resourcesDescVisibility := resourcesFields[5].Descriptor()
+	resourcesDescVisibility := resourcesFields[6].Descriptor()
 	// resources.DefaultVisibility holds the default value on creation for the visibility field.
 	resources.DefaultVisibility = resourcesDescVisibility.Default.(int)
 	// resourcesDescSortOrder is the schema descriptor for sort_order field.
-	resourcesDescSortOrder := resourcesFields[6].Descriptor()
+	resourcesDescSortOrder := resourcesFields[7].Descriptor()
 	// resources.DefaultSortOrder holds the default value on creation for the sort_order field.
 	resources.DefaultSortOrder = resourcesDescSortOrder.Default.(int)
 	// resourcesDescLocator is the schema descriptor for locator field.
-	resourcesDescLocator := resourcesFields[7].Descriptor()
+	resourcesDescLocator := resourcesFields[8].Descriptor()
 	// resources.DefaultLocator holds the default value on creation for the locator field.
 	resources.DefaultLocator = resourcesDescLocator.Default.(string)
 	// resources.LocatorValidator is a validator for the "locator" field. It is called by the builders before save.
 	resources.LocatorValidator = resourcesDescLocator.Validators[0].(func(string) error)
 	// resourcesDescVisual is the schema descriptor for visual field.
-	resourcesDescVisual := resourcesFields[8].Descriptor()
+	resourcesDescVisual := resourcesFields[9].Descriptor()
 	// resources.DefaultVisual holds the default value on creation for the visual field.
 	resources.DefaultVisual = resourcesDescVisual.Default.(string)
 	// resources.VisualValidator is a validator for the "visual" field. It is called by the builders before save.
 	resources.VisualValidator = resourcesDescVisual.Validators[0].(func(string) error)
 	// resourcesDescManifest is the schema descriptor for manifest field.
-	resourcesDescManifest := resourcesFields[9].Descriptor()
+	resourcesDescManifest := resourcesFields[10].Descriptor()
 	// resources.DefaultManifest holds the default value on creation for the manifest field.
 	resources.DefaultManifest = resourcesDescManifest.Default.(string)
 	// resourcesDescDescription is the schema descriptor for description field.
-	resourcesDescDescription := resourcesFields[10].Descriptor()
+	resourcesDescDescription := resourcesFields[11].Descriptor()
 	// resources.DefaultDescription holds the default value on creation for the description field.
 	resources.DefaultDescription = resourcesDescDescription.Default.(string)
 	// resourcesDescProtected is the schema descriptor for protected field.
-	resourcesDescProtected := resourcesFields[11].Descriptor()
+	resourcesDescProtected := resourcesFields[12].Descriptor()
 	// resources.DefaultProtected holds the default value on creation for the protected field.
 	resources.DefaultProtected = resourcesDescProtected.Default.(bool)
 	rolepermissionsMixin := schema.RolePermissions{}.Mixin()

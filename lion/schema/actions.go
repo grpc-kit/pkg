@@ -26,10 +26,10 @@ func (Actions) Fields() []ent.Field {
 		field.Int("resource_type").
 			Default(0).
 			Comment("对应 api/known/admin/v1/admin.common.proto 中的 Resource.Type"),
-		field.String("http_method").
-			MaxLen(16).
-			Default("").
-			Comment("默认投影的 HTTP Method"),
+		field.String("projection_mapping").
+			MaxLen(4096).
+			Default("{}").
+			Comment("协议映射配置（JSON），描述动作在 HTTP/gRPC/Event/MCP 等协议下的投影方式"),
 		field.Bool("protected").
 			Default(false).
 			Comment("是否系统保护动作，保护动作不可删除"),

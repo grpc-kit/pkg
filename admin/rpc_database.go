@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -209,8 +210,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		sort     int
 	}{
 		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_MENU, "菜单根节点", adminv1.Resource_MENU, 10},
-		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_PAGE, "页面根节点", adminv1.Resource_PAGE, 20},
-		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_BUTTON, "按钮根节点", adminv1.Resource_BUTTON, 30},
+		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_DOMAIN, "领域根节点", adminv1.Resource_DOMAIN, 20},
+		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_LLM, "LLM 根节点", adminv1.Resource_LLM, 30},
 		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_API, "接口根节点", adminv1.Resource_API, 40},
 		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_DATA, "数据根节点", adminv1.Resource_DATA, 50},
 		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_SYSTEM, "系统根节点", adminv1.Resource_SYSTEM, 60},
@@ -230,6 +231,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 		if _, err := tx.Resources.Create().
 			SetCode(seedResourceSeedCode(rs.seedCode)).
+			SetName(fmt.Sprintf("grn:admin:default:global:%s:root", strings.ToLower(rs.resType.String()))).
 			SetDisplayName(rs.name).
 			SetResourceType(resType).
 			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).

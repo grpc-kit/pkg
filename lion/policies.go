@@ -39,10 +39,8 @@ type Policies struct {
 	Value string `json:"value,omitempty"`
 	// 策略版本号，用于发布与回滚
 	VersionNo int64 `json:"version_no,omitempty"`
-	// 策略发布状态，对应 V3 的发布流程
-	PublishState int `json:"publish_state,omitempty"`
-	// 是否系统内置策略
-	IsSystem bool `json:"is_system,omitempty"`
+	// 是否系统内置/受保护的策略，受保护的策略不可删除
+	Protected bool `json:"protected,omitempty"`
 	// 详细描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -96,9 +94,9 @@ func (*Policies) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case policies.FieldIsSystem:
+		case policies.FieldProtected:
 			values[i] = new(sql.NullBool)
-		case policies.FieldID, policies.FieldCreatedBy, policies.FieldUpdatedBy, policies.FieldPolicyType, policies.FieldPolicyStatus, policies.FieldVersionNo, policies.FieldPublishState:
+		case policies.FieldID, policies.FieldCreatedBy, policies.FieldUpdatedBy, policies.FieldPolicyType, policies.FieldPolicyStatus, policies.FieldVersionNo:
 			values[i] = new(sql.NullInt64)
 		case policies.FieldCode, policies.FieldDisplayName, policies.FieldValue, policies.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -192,17 +190,11 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.VersionNo = value.Int64
 			}
-		case policies.FieldPublishState:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field publish_state", values[i])
-			} else if value.Valid {
-				_m.PublishState = int(value.Int64)
-			}
-		case policies.FieldIsSystem:
+		case policies.FieldProtected:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_system", values[i])
+				return fmt.Errorf("unexpected type %T for field protected", values[i])
 			} else if value.Valid {
-				_m.IsSystem = value.Bool
+				_m.Protected = value.Bool
 			}
 		case policies.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -296,11 +288,8 @@ func (_m *Policies) String() string {
 	builder.WriteString("version_no=")
 	builder.WriteString(fmt.Sprintf("%v", _m.VersionNo))
 	builder.WriteString(", ")
-	builder.WriteString("publish_state=")
-	builder.WriteString(fmt.Sprintf("%v", _m.PublishState))
-	builder.WriteString(", ")
-	builder.WriteString("is_system=")
-	builder.WriteString(fmt.Sprintf("%v", _m.IsSystem))
+	builder.WriteString("protected=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

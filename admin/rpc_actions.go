@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
@@ -22,18 +21,30 @@ func lionActionToProto(in *lion.Actions) *adminv1.Action {
 		return nil
 	}
 	return &adminv1.Action{
-		Id:           int64(in.ID),
-		Code:         in.Code,
-		DisplayName:  in.DisplayName,
-		ResourceType: adminv1.Resource_Type(in.ResourceType),
-		HttpMethod:   in.HTTPMethod,
-		Protected:    in.Protected,
-		Description:  in.Description,
-		CreatedBy:    in.CreatedBy,
-		UpdatedBy:    in.UpdatedBy,
-		CreatedAt:    timestamppb.New(in.CreatedAt),
-		UpdatedAt:    timestamppb.New(in.UpdatedAt),
+		Id:                int64(in.ID),
+		Code:              in.Code,
+		DisplayName:       in.DisplayName,
+		ResourceType:      adminv1.Resource_Type(in.ResourceType),
+		ProjectionMapping: in.ProjectionMapping,
+		Protected:         in.Protected,
+		Description:       in.Description,
+		CreatedBy:         in.CreatedBy,
+		UpdatedBy:         in.UpdatedBy,
+		CreatedAt:         timestamppb.New(in.CreatedAt),
+		UpdatedAt:         timestamppb.New(in.UpdatedAt),
 	}
+}
+
+// validateProjectionMapping 校验 projection_mapping 是否为合法 JSON
+func validateProjectionMapping(raw string) (string, error) {
+	if raw == "" {
+		return "{}", nil
+	}
+	var m map[string]interface{}
+	if err := json.Unmarshal([]byte(raw), &m); err != nil {
+		return "", fmt.Errorf("projection_mapping must be valid JSON: %w", err)
+	}
+	return raw, nil
 }
 
 func (a *KnownAdminAPI) GetAction(ctx context.Context, req *adminv1.GetActionRequest) (*adminv1.Action, error) {
@@ -144,12 +155,15 @@ func (a *KnownAdminAPI) CreateAction(ctx context.Context, req *adminv1.CreateAct
 		return nil, err
 	}
 
-	httpMethod := strings.ToUpper(strings.TrimSpace(req.Action.HttpMethod))
+	projMapping, err := validateProjectionMapping(req.Action.ProjectionMapping)
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
 	obj, err := db.Actions.Create().
 		SetCode(req.Action.Code).
 		SetDisplayName(req.Action.DisplayName).
 		SetResourceType(int(req.Action.ResourceType)).
-		SetHTTPMethod(httpMethod).
+		SetProjectionMapping(projMapping).
 		SetProtected(req.Action.Protected).
 		SetDescription(req.Action.Description).
 		SetCreatedBy(userID).
@@ -194,8 +208,12 @@ func (a *KnownAdminAPI) UpdateAction(ctx context.Context, req *adminv1.UpdateAct
 				update.SetDisplayName(req.Action.DisplayName)
 			case "resource_type":
 				update.SetResourceType(int(req.Action.ResourceType))
-			case "http_method":
-				update.SetHTTPMethod(strings.ToUpper(strings.TrimSpace(req.Action.HttpMethod)))
+			case "projection_mapping":
+				pm, err := validateProjectionMapping(req.Action.ProjectionMapping)
+				if err != nil {
+					return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+				}
+				update.SetProjectionMapping(pm)
 			case "protected":
 				update.SetProtected(req.Action.Protected)
 			case "description":
@@ -203,11 +221,15 @@ func (a *KnownAdminAPI) UpdateAction(ctx context.Context, req *adminv1.UpdateAct
 			}
 		}
 	} else {
+		pm, err := validateProjectionMapping(req.Action.ProjectionMapping)
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+		}
 		update.
 			SetCode(req.Action.Code).
 			SetDisplayName(req.Action.DisplayName).
 			SetResourceType(int(req.Action.ResourceType)).
-			SetHTTPMethod(strings.ToUpper(strings.TrimSpace(req.Action.HttpMethod))).
+			SetProjectionMapping(pm).
 			SetProtected(req.Action.Protected).
 			SetDescription(req.Action.Description)
 	}

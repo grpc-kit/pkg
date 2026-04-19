@@ -35,12 +35,9 @@ func (Policies) Fields() []ent.Field {
 		field.Int64("version_no").
 			Default(1).
 			Comment("策略版本号，用于发布与回滚"),
-		field.Int("publish_state").
-			Default(0).
-			Comment("策略发布状态，对应 V3 的发布流程"),
-		field.Bool("is_system").
+		field.Bool("protected").
 			Default(false).
-			Comment("是否系统内置策略"),
+			Comment("是否系统内置/受保护的策略，受保护的策略不可删除"),
 		field.String("description").
 			Default("").
 			Comment("详细描述"),

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
@@ -328,6 +329,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 				Id:          int64(m.ID),
 				ParentId:    m.ParentID,
 				Code:        m.Code,
+				Name:        m.Name,
 				DisplayName: m.DisplayName,
 				SortOrder:   int32(m.SortOrder),
 				Type:        adminv1.Resource_Type(m.ResourceType),
@@ -378,6 +380,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 				Id:          int64(m.ID),
 				ParentId:    m.ParentID,
 				Code:        m.Code,
+				Name:        m.Name,
 				DisplayName: m.DisplayName,
 				SortOrder:   int32(m.SortOrder),
 				Type:        adminv1.Resource_Type(m.ResourceType),
@@ -436,6 +439,7 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 	}
 	req.Resource.Code = code
+	req.Resource.Name = normalizeResourceName(req.Resource.Name, req.Resource.Type, req.Resource.Code, req.Resource.Locator)
 
 	if req.Resource.ParentId == 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("parent_id cannot be 0 when creating resource")
@@ -476,6 +480,7 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 	// 创建资源
 	newResource, err := db.Resources.Create().
 		SetCode(req.Resource.Code).
+		SetName(req.Resource.Name).
 		SetDisplayName(req.Resource.DisplayName).
 		SetResourceType(int(req.Resource.Type)).
 		SetResourceStatus(int(req.Resource.Status)).
@@ -499,6 +504,7 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		Id:          int64(newResource.ID),
 		ParentId:    newResource.ParentID,
 		Code:        newResource.Code,
+		Name:        newResource.Name,
 		DisplayName: newResource.DisplayName,
 		SortOrder:   int32(newResource.SortOrder),
 		Type:        adminv1.Resource_Type(newResource.ResourceType),
@@ -568,6 +574,15 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 		return nil, errs.InvalidArgument(ctx).WithMessage("root resource parent_id cannot be changed")
 	}
 
+	if req.Resource.Code != "" {
+		code, err := schema.EnsureCode(req.Resource.Code)
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+		}
+		req.Resource.Code = code
+	}
+	req.Resource.Name = normalizeResourceName(req.Resource.Name, req.Resource.Type, req.Resource.Code, req.Resource.Locator)
+
 	// 构建更新操作
 	update := resource.Update()
 
@@ -577,6 +592,8 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 			switch field {
 			case resources.FieldCode:
 				update.SetCode(req.Resource.Code)
+			case resources.FieldName:
+				update.SetName(req.Resource.Name)
 			case resources.FieldDisplayName:
 				update.SetDisplayName(req.Resource.DisplayName)
 			case resources.FieldResourceType:
@@ -605,6 +622,7 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 		// 如果没有指定更新字段，则更新所有字段
 		update.
 			SetCode(req.Resource.Code).
+			SetName(req.Resource.Name).
 			SetDisplayName(req.Resource.DisplayName).
 			SetResourceType(int(req.Resource.Type)).
 			SetResourceStatus(int(req.Resource.Status)).
@@ -629,6 +647,7 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 		Id:          int64(updatedResource.ID),
 		ParentId:    updatedResource.ParentID,
 		Code:        updatedResource.Code,
+		Name:        updatedResource.Name,
 		DisplayName: updatedResource.DisplayName,
 		SortOrder:   int32(updatedResource.SortOrder),
 		Type:        adminv1.Resource_Type(updatedResource.ResourceType),
@@ -851,6 +870,7 @@ func (a *KnownAdminAPI) GetResource(ctx context.Context, req *adminv1.GetResourc
 		Id:          int64(resource.ID),
 		ParentId:    resource.ParentID,
 		Code:        resource.Code,
+		Name:        resource.Name,
 		DisplayName: resource.DisplayName,
 		SortOrder:   int32(resource.SortOrder),
 		Type:        adminv1.Resource_Type(resource.ResourceType),
@@ -928,4 +948,22 @@ func mergeUniqueInts(a, b []int) []int {
 		out = append(out, id)
 	}
 	return out
+}
+
+func normalizeResourceName(name string, resourceType adminv1.Resource_Type, code, locator string) string {
+	if strings.TrimSpace(name) != "" {
+		return strings.TrimSpace(name)
+	}
+	typePart := strings.ToLower(resourceType.String())
+	if typePart == "" || typePart == "type_unspecified" {
+		typePart = "resource"
+	}
+	pathPart := strings.TrimSpace(locator)
+	if pathPart == "" {
+		pathPart = strings.TrimSpace(code)
+	}
+	if pathPart == "" {
+		pathPart = "unnamed"
+	}
+	return fmt.Sprintf("grn:admin:default:global:%s:%s", typePart, pathPart)
 }

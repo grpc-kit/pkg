@@ -110,16 +110,16 @@ func (_c *ActionsCreate) SetNillableResourceType(v *int) *ActionsCreate {
 	return _c
 }
 
-// SetHTTPMethod sets the "http_method" field.
-func (_c *ActionsCreate) SetHTTPMethod(v string) *ActionsCreate {
-	_c.mutation.SetHTTPMethod(v)
+// SetProjectionMapping sets the "projection_mapping" field.
+func (_c *ActionsCreate) SetProjectionMapping(v string) *ActionsCreate {
+	_c.mutation.SetProjectionMapping(v)
 	return _c
 }
 
-// SetNillableHTTPMethod sets the "http_method" field if the given value is not nil.
-func (_c *ActionsCreate) SetNillableHTTPMethod(v *string) *ActionsCreate {
+// SetNillableProjectionMapping sets the "projection_mapping" field if the given value is not nil.
+func (_c *ActionsCreate) SetNillableProjectionMapping(v *string) *ActionsCreate {
 	if v != nil {
-		_c.SetHTTPMethod(*v)
+		_c.SetProjectionMapping(*v)
 	}
 	return _c
 }
@@ -211,9 +211,9 @@ func (_c *ActionsCreate) defaults() {
 		v := actions.DefaultResourceType
 		_c.mutation.SetResourceType(v)
 	}
-	if _, ok := _c.mutation.HTTPMethod(); !ok {
-		v := actions.DefaultHTTPMethod
-		_c.mutation.SetHTTPMethod(v)
+	if _, ok := _c.mutation.ProjectionMapping(); !ok {
+		v := actions.DefaultProjectionMapping
+		_c.mutation.SetProjectionMapping(v)
 	}
 	if _, ok := _c.mutation.Protected(); !ok {
 		v := actions.DefaultProtected
@@ -247,12 +247,12 @@ func (_c *ActionsCreate) check() error {
 	if _, ok := _c.mutation.ResourceType(); !ok {
 		return &ValidationError{Name: "resource_type", err: errors.New(`lion: missing required field "Actions.resource_type"`)}
 	}
-	if _, ok := _c.mutation.HTTPMethod(); !ok {
-		return &ValidationError{Name: "http_method", err: errors.New(`lion: missing required field "Actions.http_method"`)}
+	if _, ok := _c.mutation.ProjectionMapping(); !ok {
+		return &ValidationError{Name: "projection_mapping", err: errors.New(`lion: missing required field "Actions.projection_mapping"`)}
 	}
-	if v, ok := _c.mutation.HTTPMethod(); ok {
-		if err := actions.HTTPMethodValidator(v); err != nil {
-			return &ValidationError{Name: "http_method", err: fmt.Errorf(`lion: validator failed for field "Actions.http_method": %w`, err)}
+	if v, ok := _c.mutation.ProjectionMapping(); ok {
+		if err := actions.ProjectionMappingValidator(v); err != nil {
+			return &ValidationError{Name: "projection_mapping", err: fmt.Errorf(`lion: validator failed for field "Actions.projection_mapping": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Protected(); !ok {
@@ -315,9 +315,9 @@ func (_c *ActionsCreate) createSpec() (*Actions, *sqlgraph.CreateSpec) {
 		_spec.SetField(actions.FieldResourceType, field.TypeInt, value)
 		_node.ResourceType = value
 	}
-	if value, ok := _c.mutation.HTTPMethod(); ok {
-		_spec.SetField(actions.FieldHTTPMethod, field.TypeString, value)
-		_node.HTTPMethod = value
+	if value, ok := _c.mutation.ProjectionMapping(); ok {
+		_spec.SetField(actions.FieldProjectionMapping, field.TypeString, value)
+		_node.ProjectionMapping = value
 	}
 	if value, ok := _c.mutation.Protected(); ok {
 		_spec.SetField(actions.FieldProtected, field.TypeBool, value)

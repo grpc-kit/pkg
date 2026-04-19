@@ -73,26 +73,26 @@ const (
 // ActionsMutation represents an operation that mutates the Actions nodes in the graph.
 type ActionsMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	created_at       *time.Time
-	updated_at       *time.Time
-	created_by       *int64
-	addcreated_by    *int64
-	updated_by       *int64
-	addupdated_by    *int64
-	code             *string
-	display_name     *string
-	resource_type    *int
-	addresource_type *int
-	http_method      *string
-	protected        *bool
-	description      *string
-	clearedFields    map[string]struct{}
-	done             bool
-	oldValue         func(context.Context) (*Actions, error)
-	predicates       []predicate.Actions
+	op                 Op
+	typ                string
+	id                 *int
+	created_at         *time.Time
+	updated_at         *time.Time
+	created_by         *int64
+	addcreated_by      *int64
+	updated_by         *int64
+	addupdated_by      *int64
+	code               *string
+	display_name       *string
+	resource_type      *int
+	addresource_type   *int
+	projection_mapping *string
+	protected          *bool
+	description        *string
+	clearedFields      map[string]struct{}
+	done               bool
+	oldValue           func(context.Context) (*Actions, error)
+	predicates         []predicate.Actions
 }
 
 var _ ent.Mutation = (*ActionsMutation)(nil)
@@ -533,40 +533,40 @@ func (m *ActionsMutation) ResetResourceType() {
 	m.addresource_type = nil
 }
 
-// SetHTTPMethod sets the "http_method" field.
-func (m *ActionsMutation) SetHTTPMethod(s string) {
-	m.http_method = &s
+// SetProjectionMapping sets the "projection_mapping" field.
+func (m *ActionsMutation) SetProjectionMapping(s string) {
+	m.projection_mapping = &s
 }
 
-// HTTPMethod returns the value of the "http_method" field in the mutation.
-func (m *ActionsMutation) HTTPMethod() (r string, exists bool) {
-	v := m.http_method
+// ProjectionMapping returns the value of the "projection_mapping" field in the mutation.
+func (m *ActionsMutation) ProjectionMapping() (r string, exists bool) {
+	v := m.projection_mapping
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHTTPMethod returns the old "http_method" field's value of the Actions entity.
+// OldProjectionMapping returns the old "projection_mapping" field's value of the Actions entity.
 // If the Actions object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ActionsMutation) OldHTTPMethod(ctx context.Context) (v string, err error) {
+func (m *ActionsMutation) OldProjectionMapping(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHTTPMethod is only allowed on UpdateOne operations")
+		return v, errors.New("OldProjectionMapping is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHTTPMethod requires an ID field in the mutation")
+		return v, errors.New("OldProjectionMapping requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHTTPMethod: %w", err)
+		return v, fmt.Errorf("querying old value for OldProjectionMapping: %w", err)
 	}
-	return oldValue.HTTPMethod, nil
+	return oldValue.ProjectionMapping, nil
 }
 
-// ResetHTTPMethod resets all changes to the "http_method" field.
-func (m *ActionsMutation) ResetHTTPMethod() {
-	m.http_method = nil
+// ResetProjectionMapping resets all changes to the "projection_mapping" field.
+func (m *ActionsMutation) ResetProjectionMapping() {
+	m.projection_mapping = nil
 }
 
 // SetProtected sets the "protected" field.
@@ -697,8 +697,8 @@ func (m *ActionsMutation) Fields() []string {
 	if m.resource_type != nil {
 		fields = append(fields, actions.FieldResourceType)
 	}
-	if m.http_method != nil {
-		fields = append(fields, actions.FieldHTTPMethod)
+	if m.projection_mapping != nil {
+		fields = append(fields, actions.FieldProjectionMapping)
 	}
 	if m.protected != nil {
 		fields = append(fields, actions.FieldProtected)
@@ -728,8 +728,8 @@ func (m *ActionsMutation) Field(name string) (ent.Value, bool) {
 		return m.DisplayName()
 	case actions.FieldResourceType:
 		return m.ResourceType()
-	case actions.FieldHTTPMethod:
-		return m.HTTPMethod()
+	case actions.FieldProjectionMapping:
+		return m.ProjectionMapping()
 	case actions.FieldProtected:
 		return m.Protected()
 	case actions.FieldDescription:
@@ -757,8 +757,8 @@ func (m *ActionsMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldDisplayName(ctx)
 	case actions.FieldResourceType:
 		return m.OldResourceType(ctx)
-	case actions.FieldHTTPMethod:
-		return m.OldHTTPMethod(ctx)
+	case actions.FieldProjectionMapping:
+		return m.OldProjectionMapping(ctx)
 	case actions.FieldProtected:
 		return m.OldProtected(ctx)
 	case actions.FieldDescription:
@@ -821,12 +821,12 @@ func (m *ActionsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetResourceType(v)
 		return nil
-	case actions.FieldHTTPMethod:
+	case actions.FieldProjectionMapping:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHTTPMethod(v)
+		m.SetProjectionMapping(v)
 		return nil
 	case actions.FieldProtected:
 		v, ok := value.(bool)
@@ -966,8 +966,8 @@ func (m *ActionsMutation) ResetField(name string) error {
 	case actions.FieldResourceType:
 		m.ResetResourceType()
 		return nil
-	case actions.FieldHTTPMethod:
-		m.ResetHTTPMethod()
+	case actions.FieldProjectionMapping:
+		m.ResetProjectionMapping()
 		return nil
 	case actions.FieldProtected:
 		m.ResetProtected()
@@ -11418,9 +11418,7 @@ type PoliciesMutation struct {
 	value                          *string
 	version_no                     *int64
 	addversion_no                  *int64
-	publish_state                  *int
-	addpublish_state               *int
-	is_system                      *bool
+	protected                      *bool
 	description                    *string
 	clearedFields                  map[string]struct{}
 	lion_permissions               map[int]struct{}
@@ -12072,96 +12070,40 @@ func (m *PoliciesMutation) ResetVersionNo() {
 	m.addversion_no = nil
 }
 
-// SetPublishState sets the "publish_state" field.
-func (m *PoliciesMutation) SetPublishState(i int) {
-	m.publish_state = &i
-	m.addpublish_state = nil
+// SetProtected sets the "protected" field.
+func (m *PoliciesMutation) SetProtected(b bool) {
+	m.protected = &b
 }
 
-// PublishState returns the value of the "publish_state" field in the mutation.
-func (m *PoliciesMutation) PublishState() (r int, exists bool) {
-	v := m.publish_state
+// Protected returns the value of the "protected" field in the mutation.
+func (m *PoliciesMutation) Protected() (r bool, exists bool) {
+	v := m.protected
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPublishState returns the old "publish_state" field's value of the Policies entity.
+// OldProtected returns the old "protected" field's value of the Policies entity.
 // If the Policies object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PoliciesMutation) OldPublishState(ctx context.Context) (v int, err error) {
+func (m *PoliciesMutation) OldProtected(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPublishState is only allowed on UpdateOne operations")
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPublishState requires an ID field in the mutation")
+		return v, errors.New("OldProtected requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPublishState: %w", err)
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
 	}
-	return oldValue.PublishState, nil
+	return oldValue.Protected, nil
 }
 
-// AddPublishState adds i to the "publish_state" field.
-func (m *PoliciesMutation) AddPublishState(i int) {
-	if m.addpublish_state != nil {
-		*m.addpublish_state += i
-	} else {
-		m.addpublish_state = &i
-	}
-}
-
-// AddedPublishState returns the value that was added to the "publish_state" field in this mutation.
-func (m *PoliciesMutation) AddedPublishState() (r int, exists bool) {
-	v := m.addpublish_state
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPublishState resets all changes to the "publish_state" field.
-func (m *PoliciesMutation) ResetPublishState() {
-	m.publish_state = nil
-	m.addpublish_state = nil
-}
-
-// SetIsSystem sets the "is_system" field.
-func (m *PoliciesMutation) SetIsSystem(b bool) {
-	m.is_system = &b
-}
-
-// IsSystem returns the value of the "is_system" field in the mutation.
-func (m *PoliciesMutation) IsSystem() (r bool, exists bool) {
-	v := m.is_system
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIsSystem returns the old "is_system" field's value of the Policies entity.
-// If the Policies object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PoliciesMutation) OldIsSystem(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsSystem is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsSystem requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsSystem: %w", err)
-	}
-	return oldValue.IsSystem, nil
-}
-
-// ResetIsSystem resets all changes to the "is_system" field.
-func (m *PoliciesMutation) ResetIsSystem() {
-	m.is_system = nil
+// ResetProtected resets all changes to the "protected" field.
+func (m *PoliciesMutation) ResetProtected() {
+	m.protected = nil
 }
 
 // SetDescription sets the "description" field.
@@ -12396,7 +12338,7 @@ func (m *PoliciesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PoliciesMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, policies.FieldCreatedAt)
 	}
@@ -12430,11 +12372,8 @@ func (m *PoliciesMutation) Fields() []string {
 	if m.version_no != nil {
 		fields = append(fields, policies.FieldVersionNo)
 	}
-	if m.publish_state != nil {
-		fields = append(fields, policies.FieldPublishState)
-	}
-	if m.is_system != nil {
-		fields = append(fields, policies.FieldIsSystem)
+	if m.protected != nil {
+		fields = append(fields, policies.FieldProtected)
 	}
 	if m.description != nil {
 		fields = append(fields, policies.FieldDescription)
@@ -12469,10 +12408,8 @@ func (m *PoliciesMutation) Field(name string) (ent.Value, bool) {
 		return m.Value()
 	case policies.FieldVersionNo:
 		return m.VersionNo()
-	case policies.FieldPublishState:
-		return m.PublishState()
-	case policies.FieldIsSystem:
-		return m.IsSystem()
+	case policies.FieldProtected:
+		return m.Protected()
 	case policies.FieldDescription:
 		return m.Description()
 	}
@@ -12506,10 +12443,8 @@ func (m *PoliciesMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldValue(ctx)
 	case policies.FieldVersionNo:
 		return m.OldVersionNo(ctx)
-	case policies.FieldPublishState:
-		return m.OldPublishState(ctx)
-	case policies.FieldIsSystem:
-		return m.OldIsSystem(ctx)
+	case policies.FieldProtected:
+		return m.OldProtected(ctx)
 	case policies.FieldDescription:
 		return m.OldDescription(ctx)
 	}
@@ -12598,19 +12533,12 @@ func (m *PoliciesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetVersionNo(v)
 		return nil
-	case policies.FieldPublishState:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPublishState(v)
-		return nil
-	case policies.FieldIsSystem:
+	case policies.FieldProtected:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetIsSystem(v)
+		m.SetProtected(v)
 		return nil
 	case policies.FieldDescription:
 		v, ok := value.(string)
@@ -12642,9 +12570,6 @@ func (m *PoliciesMutation) AddedFields() []string {
 	if m.addversion_no != nil {
 		fields = append(fields, policies.FieldVersionNo)
 	}
-	if m.addpublish_state != nil {
-		fields = append(fields, policies.FieldPublishState)
-	}
 	return fields
 }
 
@@ -12663,8 +12588,6 @@ func (m *PoliciesMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedPolicyStatus()
 	case policies.FieldVersionNo:
 		return m.AddedVersionNo()
-	case policies.FieldPublishState:
-		return m.AddedPublishState()
 	}
 	return nil, false
 }
@@ -12708,13 +12631,6 @@ func (m *PoliciesMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddVersionNo(v)
-		return nil
-	case policies.FieldPublishState:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPublishState(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Policies numeric field %s", name)
@@ -12797,11 +12713,8 @@ func (m *PoliciesMutation) ResetField(name string) error {
 	case policies.FieldVersionNo:
 		m.ResetVersionNo()
 		return nil
-	case policies.FieldPublishState:
-		m.ResetPublishState()
-		return nil
-	case policies.FieldIsSystem:
-		m.ResetIsSystem()
+	case policies.FieldProtected:
+		m.ResetProtected()
 		return nil
 	case policies.FieldDescription:
 		m.ResetDescription()
@@ -16100,6 +16013,7 @@ type ResourcesMutation struct {
 	parent_id                   *int64
 	addparent_id                *int64
 	code                        *string
+	name                        *string
 	display_name                *string
 	resource_type               *int
 	addresource_type            *int
@@ -16572,6 +16486,42 @@ func (m *ResourcesMutation) OldCode(ctx context.Context) (v string, err error) {
 // ResetCode resets all changes to the "code" field.
 func (m *ResourcesMutation) ResetCode() {
 	m.code = nil
+}
+
+// SetName sets the "name" field.
+func (m *ResourcesMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *ResourcesMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Resources entity.
+// If the Resources object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourcesMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *ResourcesMutation) ResetName() {
+	m.name = nil
 }
 
 // SetDisplayName sets the "display_name" field.
@@ -17102,7 +17052,7 @@ func (m *ResourcesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResourcesMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 18)
 	if m.created_at != nil {
 		fields = append(fields, resources.FieldCreatedAt)
 	}
@@ -17123,6 +17073,9 @@ func (m *ResourcesMutation) Fields() []string {
 	}
 	if m.code != nil {
 		fields = append(fields, resources.FieldCode)
+	}
+	if m.name != nil {
+		fields = append(fields, resources.FieldName)
 	}
 	if m.display_name != nil {
 		fields = append(fields, resources.FieldDisplayName)
@@ -17176,6 +17129,8 @@ func (m *ResourcesMutation) Field(name string) (ent.Value, bool) {
 		return m.ParentID()
 	case resources.FieldCode:
 		return m.Code()
+	case resources.FieldName:
+		return m.Name()
 	case resources.FieldDisplayName:
 		return m.DisplayName()
 	case resources.FieldResourceType:
@@ -17219,6 +17174,8 @@ func (m *ResourcesMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldParentID(ctx)
 	case resources.FieldCode:
 		return m.OldCode(ctx)
+	case resources.FieldName:
+		return m.OldName(ctx)
 	case resources.FieldDisplayName:
 		return m.OldDisplayName(ctx)
 	case resources.FieldResourceType:
@@ -17296,6 +17253,13 @@ func (m *ResourcesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCode(v)
+		return nil
+	case resources.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
 		return nil
 	case resources.FieldDisplayName:
 		v, ok := value.(string)
@@ -17544,6 +17508,9 @@ func (m *ResourcesMutation) ResetField(name string) error {
 		return nil
 	case resources.FieldCode:
 		m.ResetCode()
+		return nil
+	case resources.FieldName:
+		m.ResetName()
 		return nil
 	case resources.FieldDisplayName:
 		m.ResetDisplayName()

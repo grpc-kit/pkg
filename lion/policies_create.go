@@ -161,30 +161,16 @@ func (_c *PoliciesCreate) SetNillableVersionNo(v *int64) *PoliciesCreate {
 	return _c
 }
 
-// SetPublishState sets the "publish_state" field.
-func (_c *PoliciesCreate) SetPublishState(v int) *PoliciesCreate {
-	_c.mutation.SetPublishState(v)
+// SetProtected sets the "protected" field.
+func (_c *PoliciesCreate) SetProtected(v bool) *PoliciesCreate {
+	_c.mutation.SetProtected(v)
 	return _c
 }
 
-// SetNillablePublishState sets the "publish_state" field if the given value is not nil.
-func (_c *PoliciesCreate) SetNillablePublishState(v *int) *PoliciesCreate {
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_c *PoliciesCreate) SetNillableProtected(v *bool) *PoliciesCreate {
 	if v != nil {
-		_c.SetPublishState(*v)
-	}
-	return _c
-}
-
-// SetIsSystem sets the "is_system" field.
-func (_c *PoliciesCreate) SetIsSystem(v bool) *PoliciesCreate {
-	_c.mutation.SetIsSystem(v)
-	return _c
-}
-
-// SetNillableIsSystem sets the "is_system" field if the given value is not nil.
-func (_c *PoliciesCreate) SetNillableIsSystem(v *bool) *PoliciesCreate {
-	if v != nil {
-		_c.SetIsSystem(*v)
+		_c.SetProtected(*v)
 	}
 	return _c
 }
@@ -315,13 +301,9 @@ func (_c *PoliciesCreate) defaults() {
 		v := policies.DefaultVersionNo
 		_c.mutation.SetVersionNo(v)
 	}
-	if _, ok := _c.mutation.PublishState(); !ok {
-		v := policies.DefaultPublishState
-		_c.mutation.SetPublishState(v)
-	}
-	if _, ok := _c.mutation.IsSystem(); !ok {
-		v := policies.DefaultIsSystem
-		_c.mutation.SetIsSystem(v)
+	if _, ok := _c.mutation.Protected(); !ok {
+		v := policies.DefaultProtected
+		_c.mutation.SetProtected(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		v := policies.DefaultDescription
@@ -365,11 +347,8 @@ func (_c *PoliciesCreate) check() error {
 	if _, ok := _c.mutation.VersionNo(); !ok {
 		return &ValidationError{Name: "version_no", err: errors.New(`lion: missing required field "Policies.version_no"`)}
 	}
-	if _, ok := _c.mutation.PublishState(); !ok {
-		return &ValidationError{Name: "publish_state", err: errors.New(`lion: missing required field "Policies.publish_state"`)}
-	}
-	if _, ok := _c.mutation.IsSystem(); !ok {
-		return &ValidationError{Name: "is_system", err: errors.New(`lion: missing required field "Policies.is_system"`)}
+	if _, ok := _c.mutation.Protected(); !ok {
+		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Policies.protected"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Policies.description"`)}
@@ -444,13 +423,9 @@ func (_c *PoliciesCreate) createSpec() (*Policies, *sqlgraph.CreateSpec) {
 		_spec.SetField(policies.FieldVersionNo, field.TypeInt64, value)
 		_node.VersionNo = value
 	}
-	if value, ok := _c.mutation.PublishState(); ok {
-		_spec.SetField(policies.FieldPublishState, field.TypeInt, value)
-		_node.PublishState = value
-	}
-	if value, ok := _c.mutation.IsSystem(); ok {
-		_spec.SetField(policies.FieldIsSystem, field.TypeBool, value)
-		_node.IsSystem = value
+	if value, ok := _c.mutation.Protected(); ok {
+		_spec.SetField(policies.FieldProtected, field.TypeBool, value)
+		_node.Protected = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
