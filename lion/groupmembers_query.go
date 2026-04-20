@@ -11,81 +11,59 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/groupmembers"
+	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
-// UserDepartmentsQuery is the builder for querying UserDepartments entities.
-type UserDepartmentsQuery struct {
+// GroupMembersQuery is the builder for querying GroupMembers entities.
+type GroupMembersQuery struct {
 	config
-	ctx                 *QueryContext
-	order               []userdepartments.OrderOption
-	inters              []Interceptor
-	predicates          []predicate.UserDepartments
-	withLionDepartments *DepartmentsQuery
-	withLionUsers       *UsersQuery
+	ctx            *QueryContext
+	order          []groupmembers.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.GroupMembers
+	withLionUsers  *UsersQuery
+	withLionGroups *GroupsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the UserDepartmentsQuery builder.
-func (_q *UserDepartmentsQuery) Where(ps ...predicate.UserDepartments) *UserDepartmentsQuery {
+// Where adds a new predicate for the GroupMembersQuery builder.
+func (_q *GroupMembersQuery) Where(ps ...predicate.GroupMembers) *GroupMembersQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *UserDepartmentsQuery) Limit(limit int) *UserDepartmentsQuery {
+func (_q *GroupMembersQuery) Limit(limit int) *GroupMembersQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *UserDepartmentsQuery) Offset(offset int) *UserDepartmentsQuery {
+func (_q *GroupMembersQuery) Offset(offset int) *GroupMembersQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *UserDepartmentsQuery) Unique(unique bool) *UserDepartmentsQuery {
+func (_q *GroupMembersQuery) Unique(unique bool) *GroupMembersQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *UserDepartmentsQuery) Order(o ...userdepartments.OrderOption) *UserDepartmentsQuery {
+func (_q *GroupMembersQuery) Order(o ...groupmembers.OrderOption) *GroupMembersQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryLionDepartments chains the current query on the "lion_departments" edge.
-func (_q *UserDepartmentsQuery) QueryLionDepartments() *DepartmentsQuery {
-	query := (&DepartmentsClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(userdepartments.Table, userdepartments.FieldID, selector),
-			sqlgraph.To(departments.Table, departments.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, userdepartments.LionDepartmentsTable, userdepartments.LionDepartmentsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryLionUsers chains the current query on the "lion_users" edge.
-func (_q *UserDepartmentsQuery) QueryLionUsers() *UsersQuery {
+func (_q *GroupMembersQuery) QueryLionUsers() *UsersQuery {
 	query := (&UsersClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -96,9 +74,9 @@ func (_q *UserDepartmentsQuery) QueryLionUsers() *UsersQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(userdepartments.Table, userdepartments.FieldID, selector),
+			sqlgraph.From(groupmembers.Table, groupmembers.FieldID, selector),
 			sqlgraph.To(users.Table, users.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, userdepartments.LionUsersTable, userdepartments.LionUsersColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, groupmembers.LionUsersTable, groupmembers.LionUsersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -106,21 +84,43 @@ func (_q *UserDepartmentsQuery) QueryLionUsers() *UsersQuery {
 	return query
 }
 
-// First returns the first UserDepartments entity from the query.
-// Returns a *NotFoundError when no UserDepartments was found.
-func (_q *UserDepartmentsQuery) First(ctx context.Context) (*UserDepartments, error) {
+// QueryLionGroups chains the current query on the "lion_groups" edge.
+func (_q *GroupMembersQuery) QueryLionGroups() *GroupsQuery {
+	query := (&GroupsClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(groupmembers.Table, groupmembers.FieldID, selector),
+			sqlgraph.To(groups.Table, groups.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, groupmembers.LionGroupsTable, groupmembers.LionGroupsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// First returns the first GroupMembers entity from the query.
+// Returns a *NotFoundError when no GroupMembers was found.
+func (_q *GroupMembersQuery) First(ctx context.Context) (*GroupMembers, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{userdepartments.Label}
+		return nil, &NotFoundError{groupmembers.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *UserDepartmentsQuery) FirstX(ctx context.Context) *UserDepartments {
+func (_q *GroupMembersQuery) FirstX(ctx context.Context) *GroupMembers {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -128,22 +128,22 @@ func (_q *UserDepartmentsQuery) FirstX(ctx context.Context) *UserDepartments {
 	return node
 }
 
-// FirstID returns the first UserDepartments ID from the query.
-// Returns a *NotFoundError when no UserDepartments ID was found.
-func (_q *UserDepartmentsQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first GroupMembers ID from the query.
+// Returns a *NotFoundError when no GroupMembers ID was found.
+func (_q *GroupMembersQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{userdepartments.Label}
+		err = &NotFoundError{groupmembers.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *UserDepartmentsQuery) FirstIDX(ctx context.Context) int {
+func (_q *GroupMembersQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -151,10 +151,10 @@ func (_q *UserDepartmentsQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single UserDepartments entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one UserDepartments entity is found.
-// Returns a *NotFoundError when no UserDepartments entities are found.
-func (_q *UserDepartmentsQuery) Only(ctx context.Context) (*UserDepartments, error) {
+// Only returns a single GroupMembers entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one GroupMembers entity is found.
+// Returns a *NotFoundError when no GroupMembers entities are found.
+func (_q *GroupMembersQuery) Only(ctx context.Context) (*GroupMembers, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -163,14 +163,14 @@ func (_q *UserDepartmentsQuery) Only(ctx context.Context) (*UserDepartments, err
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{userdepartments.Label}
+		return nil, &NotFoundError{groupmembers.Label}
 	default:
-		return nil, &NotSingularError{userdepartments.Label}
+		return nil, &NotSingularError{groupmembers.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *UserDepartmentsQuery) OnlyX(ctx context.Context) *UserDepartments {
+func (_q *GroupMembersQuery) OnlyX(ctx context.Context) *GroupMembers {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -178,10 +178,10 @@ func (_q *UserDepartmentsQuery) OnlyX(ctx context.Context) *UserDepartments {
 	return node
 }
 
-// OnlyID is like Only, but returns the only UserDepartments ID in the query.
-// Returns a *NotSingularError when more than one UserDepartments ID is found.
+// OnlyID is like Only, but returns the only GroupMembers ID in the query.
+// Returns a *NotSingularError when more than one GroupMembers ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *UserDepartmentsQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *GroupMembersQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -190,15 +190,15 @@ func (_q *UserDepartmentsQuery) OnlyID(ctx context.Context) (id int, err error) 
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{userdepartments.Label}
+		err = &NotFoundError{groupmembers.Label}
 	default:
-		err = &NotSingularError{userdepartments.Label}
+		err = &NotSingularError{groupmembers.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *UserDepartmentsQuery) OnlyIDX(ctx context.Context) int {
+func (_q *GroupMembersQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -206,18 +206,18 @@ func (_q *UserDepartmentsQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of UserDepartmentsSlice.
-func (_q *UserDepartmentsQuery) All(ctx context.Context) ([]*UserDepartments, error) {
+// All executes the query and returns a list of GroupMembersSlice.
+func (_q *GroupMembersQuery) All(ctx context.Context) ([]*GroupMembers, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*UserDepartments, *UserDepartmentsQuery]()
-	return withInterceptors[[]*UserDepartments](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*GroupMembers, *GroupMembersQuery]()
+	return withInterceptors[[]*GroupMembers](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *UserDepartmentsQuery) AllX(ctx context.Context) []*UserDepartments {
+func (_q *GroupMembersQuery) AllX(ctx context.Context) []*GroupMembers {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -225,20 +225,20 @@ func (_q *UserDepartmentsQuery) AllX(ctx context.Context) []*UserDepartments {
 	return nodes
 }
 
-// IDs executes the query and returns a list of UserDepartments IDs.
-func (_q *UserDepartmentsQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of GroupMembers IDs.
+func (_q *GroupMembersQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(userdepartments.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(groupmembers.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *UserDepartmentsQuery) IDsX(ctx context.Context) []int {
+func (_q *GroupMembersQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -247,16 +247,16 @@ func (_q *UserDepartmentsQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *UserDepartmentsQuery) Count(ctx context.Context) (int, error) {
+func (_q *GroupMembersQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*UserDepartmentsQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*GroupMembersQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *UserDepartmentsQuery) CountX(ctx context.Context) int {
+func (_q *GroupMembersQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -265,7 +265,7 @@ func (_q *UserDepartmentsQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *UserDepartmentsQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *GroupMembersQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -278,7 +278,7 @@ func (_q *UserDepartmentsQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *UserDepartmentsQuery) ExistX(ctx context.Context) bool {
+func (_q *GroupMembersQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -286,45 +286,45 @@ func (_q *UserDepartmentsQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the UserDepartmentsQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the GroupMembersQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *UserDepartmentsQuery) Clone() *UserDepartmentsQuery {
+func (_q *GroupMembersQuery) Clone() *GroupMembersQuery {
 	if _q == nil {
 		return nil
 	}
-	return &UserDepartmentsQuery{
-		config:              _q.config,
-		ctx:                 _q.ctx.Clone(),
-		order:               append([]userdepartments.OrderOption{}, _q.order...),
-		inters:              append([]Interceptor{}, _q.inters...),
-		predicates:          append([]predicate.UserDepartments{}, _q.predicates...),
-		withLionDepartments: _q.withLionDepartments.Clone(),
-		withLionUsers:       _q.withLionUsers.Clone(),
+	return &GroupMembersQuery{
+		config:         _q.config,
+		ctx:            _q.ctx.Clone(),
+		order:          append([]groupmembers.OrderOption{}, _q.order...),
+		inters:         append([]Interceptor{}, _q.inters...),
+		predicates:     append([]predicate.GroupMembers{}, _q.predicates...),
+		withLionUsers:  _q.withLionUsers.Clone(),
+		withLionGroups: _q.withLionGroups.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithLionDepartments tells the query-builder to eager-load the nodes that are connected to
-// the "lion_departments" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserDepartmentsQuery) WithLionDepartments(opts ...func(*DepartmentsQuery)) *UserDepartmentsQuery {
-	query := (&DepartmentsClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withLionDepartments = query
-	return _q
-}
-
 // WithLionUsers tells the query-builder to eager-load the nodes that are connected to
 // the "lion_users" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserDepartmentsQuery) WithLionUsers(opts ...func(*UsersQuery)) *UserDepartmentsQuery {
+func (_q *GroupMembersQuery) WithLionUsers(opts ...func(*UsersQuery)) *GroupMembersQuery {
 	query := (&UsersClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
 	_q.withLionUsers = query
+	return _q
+}
+
+// WithLionGroups tells the query-builder to eager-load the nodes that are connected to
+// the "lion_groups" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *GroupMembersQuery) WithLionGroups(opts ...func(*GroupsQuery)) *GroupMembersQuery {
+	query := (&GroupsClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionGroups = query
 	return _q
 }
 
@@ -338,15 +338,15 @@ func (_q *UserDepartmentsQuery) WithLionUsers(opts ...func(*UsersQuery)) *UserDe
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.UserDepartments.Query().
-//		GroupBy(userdepartments.FieldCreatedAt).
+//	client.GroupMembers.Query().
+//		GroupBy(groupmembers.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (_q *UserDepartmentsQuery) GroupBy(field string, fields ...string) *UserDepartmentsGroupBy {
+func (_q *GroupMembersQuery) GroupBy(field string, fields ...string) *GroupMembersGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &UserDepartmentsGroupBy{build: _q}
+	grbuild := &GroupMembersGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = userdepartments.Label
+	grbuild.label = groupmembers.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -360,23 +360,23 @@ func (_q *UserDepartmentsQuery) GroupBy(field string, fields ...string) *UserDep
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.UserDepartments.Query().
-//		Select(userdepartments.FieldCreatedAt).
+//	client.GroupMembers.Query().
+//		Select(groupmembers.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *UserDepartmentsQuery) Select(fields ...string) *UserDepartmentsSelect {
+func (_q *GroupMembersQuery) Select(fields ...string) *GroupMembersSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &UserDepartmentsSelect{UserDepartmentsQuery: _q}
-	sbuild.label = userdepartments.Label
+	sbuild := &GroupMembersSelect{GroupMembersQuery: _q}
+	sbuild.label = groupmembers.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a UserDepartmentsSelect configured with the given aggregations.
-func (_q *UserDepartmentsQuery) Aggregate(fns ...AggregateFunc) *UserDepartmentsSelect {
+// Aggregate returns a GroupMembersSelect configured with the given aggregations.
+func (_q *GroupMembersQuery) Aggregate(fns ...AggregateFunc) *GroupMembersSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *UserDepartmentsQuery) prepareQuery(ctx context.Context) error {
+func (_q *GroupMembersQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
@@ -388,7 +388,7 @@ func (_q *UserDepartmentsQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !userdepartments.ValidColumn(f) {
+		if !groupmembers.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
@@ -402,20 +402,20 @@ func (_q *UserDepartmentsQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *UserDepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UserDepartments, error) {
+func (_q *GroupMembersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*GroupMembers, error) {
 	var (
-		nodes       = []*UserDepartments{}
+		nodes       = []*GroupMembers{}
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			_q.withLionDepartments != nil,
 			_q.withLionUsers != nil,
+			_q.withLionGroups != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*UserDepartments).scanValues(nil, columns)
+		return (*GroupMembers).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &UserDepartments{config: _q.config}
+		node := &GroupMembers{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -429,53 +429,24 @@ func (_q *UserDepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withLionDepartments; query != nil {
-		if err := _q.loadLionDepartments(ctx, query, nodes, nil,
-			func(n *UserDepartments, e *Departments) { n.Edges.LionDepartments = e }); err != nil {
+	if query := _q.withLionUsers; query != nil {
+		if err := _q.loadLionUsers(ctx, query, nodes, nil,
+			func(n *GroupMembers, e *Users) { n.Edges.LionUsers = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := _q.withLionUsers; query != nil {
-		if err := _q.loadLionUsers(ctx, query, nodes, nil,
-			func(n *UserDepartments, e *Users) { n.Edges.LionUsers = e }); err != nil {
+	if query := _q.withLionGroups; query != nil {
+		if err := _q.loadLionGroups(ctx, query, nodes, nil,
+			func(n *GroupMembers, e *Groups) { n.Edges.LionGroups = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *UserDepartmentsQuery) loadLionDepartments(ctx context.Context, query *DepartmentsQuery, nodes []*UserDepartments, init func(*UserDepartments), assign func(*UserDepartments, *Departments)) error {
+func (_q *GroupMembersQuery) loadLionUsers(ctx context.Context, query *UsersQuery, nodes []*GroupMembers, init func(*GroupMembers), assign func(*GroupMembers, *Users)) error {
 	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*UserDepartments)
-	for i := range nodes {
-		fk := nodes[i].DepartmentID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(departments.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "department_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (_q *UserDepartmentsQuery) loadLionUsers(ctx context.Context, query *UsersQuery, nodes []*UserDepartments, init func(*UserDepartments), assign func(*UserDepartments, *Users)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*UserDepartments)
+	nodeids := make(map[int][]*GroupMembers)
 	for i := range nodes {
 		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
@@ -502,8 +473,37 @@ func (_q *UserDepartmentsQuery) loadLionUsers(ctx context.Context, query *UsersQ
 	}
 	return nil
 }
+func (_q *GroupMembersQuery) loadLionGroups(ctx context.Context, query *GroupsQuery, nodes []*GroupMembers, init func(*GroupMembers), assign func(*GroupMembers, *Groups)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*GroupMembers)
+	for i := range nodes {
+		fk := nodes[i].GroupID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(groups.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
-func (_q *UserDepartmentsQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *GroupMembersQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -512,8 +512,8 @@ func (_q *UserDepartmentsQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *UserDepartmentsQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(userdepartments.Table, userdepartments.Columns, sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt))
+func (_q *GroupMembersQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(groupmembers.Table, groupmembers.Columns, sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -522,17 +522,17 @@ func (_q *UserDepartmentsQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, userdepartments.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, groupmembers.FieldID)
 		for i := range fields {
-			if fields[i] != userdepartments.FieldID {
+			if fields[i] != groupmembers.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if _q.withLionDepartments != nil {
-			_spec.Node.AddColumnOnce(userdepartments.FieldDepartmentID)
-		}
 		if _q.withLionUsers != nil {
-			_spec.Node.AddColumnOnce(userdepartments.FieldUserID)
+			_spec.Node.AddColumnOnce(groupmembers.FieldUserID)
+		}
+		if _q.withLionGroups != nil {
+			_spec.Node.AddColumnOnce(groupmembers.FieldGroupID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -558,12 +558,12 @@ func (_q *UserDepartmentsQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *UserDepartmentsQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *GroupMembersQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(userdepartments.Table)
+	t1 := builder.Table(groupmembers.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = userdepartments.Columns
+		columns = groupmembers.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -590,28 +590,28 @@ func (_q *UserDepartmentsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// UserDepartmentsGroupBy is the group-by builder for UserDepartments entities.
-type UserDepartmentsGroupBy struct {
+// GroupMembersGroupBy is the group-by builder for GroupMembers entities.
+type GroupMembersGroupBy struct {
 	selector
-	build *UserDepartmentsQuery
+	build *GroupMembersQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *UserDepartmentsGroupBy) Aggregate(fns ...AggregateFunc) *UserDepartmentsGroupBy {
+func (_g *GroupMembersGroupBy) Aggregate(fns ...AggregateFunc) *GroupMembersGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *UserDepartmentsGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *GroupMembersGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserDepartmentsQuery, *UserDepartmentsGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*GroupMembersQuery, *GroupMembersGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *UserDepartmentsGroupBy) sqlScan(ctx context.Context, root *UserDepartmentsQuery, v any) error {
+func (_g *GroupMembersGroupBy) sqlScan(ctx context.Context, root *GroupMembersQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -638,28 +638,28 @@ func (_g *UserDepartmentsGroupBy) sqlScan(ctx context.Context, root *UserDepartm
 	return sql.ScanSlice(rows, v)
 }
 
-// UserDepartmentsSelect is the builder for selecting fields of UserDepartments entities.
-type UserDepartmentsSelect struct {
-	*UserDepartmentsQuery
+// GroupMembersSelect is the builder for selecting fields of GroupMembers entities.
+type GroupMembersSelect struct {
+	*GroupMembersQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *UserDepartmentsSelect) Aggregate(fns ...AggregateFunc) *UserDepartmentsSelect {
+func (_s *GroupMembersSelect) Aggregate(fns ...AggregateFunc) *GroupMembersSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *UserDepartmentsSelect) Scan(ctx context.Context, v any) error {
+func (_s *GroupMembersSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserDepartmentsQuery, *UserDepartmentsSelect](ctx, _s.UserDepartmentsQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*GroupMembersQuery, *GroupMembersSelect](ctx, _s.GroupMembersQuery, _s, _s.inters, v)
 }
 
-func (_s *UserDepartmentsSelect) sqlScan(ctx context.Context, root *UserDepartmentsQuery, v any) error {
+func (_s *GroupMembersSelect) sqlScan(ctx context.Context, root *GroupMembersQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

@@ -11,40 +11,40 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
-// UserDepartmentsUpdate is the builder for updating UserDepartments entities.
-type UserDepartmentsUpdate struct {
+// DepartmentMembersUpdate is the builder for updating DepartmentMembers entities.
+type DepartmentMembersUpdate struct {
 	config
 	hooks    []Hook
-	mutation *UserDepartmentsMutation
+	mutation *DepartmentMembersMutation
 }
 
-// Where appends a list predicates to the UserDepartmentsUpdate builder.
-func (_u *UserDepartmentsUpdate) Where(ps ...predicate.UserDepartments) *UserDepartmentsUpdate {
+// Where appends a list predicates to the DepartmentMembersUpdate builder.
+func (_u *DepartmentMembersUpdate) Where(ps ...predicate.DepartmentMembers) *DepartmentMembersUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *UserDepartmentsUpdate) SetUpdatedAt(v time.Time) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetUpdatedAt(v time.Time) *DepartmentMembersUpdate {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *UserDepartmentsUpdate) SetCreatedBy(v int64) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetCreatedBy(v int64) *DepartmentMembersUpdate {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableCreatedBy(v *int64) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetNillableCreatedBy(v *int64) *DepartmentMembersUpdate {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -52,26 +52,26 @@ func (_u *UserDepartmentsUpdate) SetNillableCreatedBy(v *int64) *UserDepartments
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *UserDepartmentsUpdate) AddCreatedBy(v int64) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) AddCreatedBy(v int64) *DepartmentMembersUpdate {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
 
 // ClearCreatedBy clears the value of the "created_by" field.
-func (_u *UserDepartmentsUpdate) ClearCreatedBy() *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) ClearCreatedBy() *DepartmentMembersUpdate {
 	_u.mutation.ClearCreatedBy()
 	return _u
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *UserDepartmentsUpdate) SetUpdatedBy(v int64) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetUpdatedBy(v int64) *DepartmentMembersUpdate {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableUpdatedBy(v *int64) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetNillableUpdatedBy(v *int64) *DepartmentMembersUpdate {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -79,25 +79,25 @@ func (_u *UserDepartmentsUpdate) SetNillableUpdatedBy(v *int64) *UserDepartments
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *UserDepartmentsUpdate) AddUpdatedBy(v int64) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) AddUpdatedBy(v int64) *DepartmentMembersUpdate {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
 // ClearUpdatedBy clears the value of the "updated_by" field.
-func (_u *UserDepartmentsUpdate) ClearUpdatedBy() *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) ClearUpdatedBy() *DepartmentMembersUpdate {
 	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
 // SetDepartmentID sets the "department_id" field.
-func (_u *UserDepartmentsUpdate) SetDepartmentID(v int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetDepartmentID(v int) *DepartmentMembersUpdate {
 	_u.mutation.SetDepartmentID(v)
 	return _u
 }
 
 // SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableDepartmentID(v *int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetNillableDepartmentID(v *int) *DepartmentMembersUpdate {
 	if v != nil {
 		_u.SetDepartmentID(*v)
 	}
@@ -105,13 +105,13 @@ func (_u *UserDepartmentsUpdate) SetNillableDepartmentID(v *int) *UserDepartment
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *UserDepartmentsUpdate) SetUserID(v int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetUserID(v int) *DepartmentMembersUpdate {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableUserID(v *int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetNillableUserID(v *int) *DepartmentMembersUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -119,14 +119,14 @@ func (_u *UserDepartmentsUpdate) SetNillableUserID(v *int) *UserDepartmentsUpdat
 }
 
 // SetMemberRole sets the "member_role" field.
-func (_u *UserDepartmentsUpdate) SetMemberRole(v int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetMemberRole(v int) *DepartmentMembersUpdate {
 	_u.mutation.ResetMemberRole()
 	_u.mutation.SetMemberRole(v)
 	return _u
 }
 
 // SetNillableMemberRole sets the "member_role" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableMemberRole(v *int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetNillableMemberRole(v *int) *DepartmentMembersUpdate {
 	if v != nil {
 		_u.SetMemberRole(*v)
 	}
@@ -134,20 +134,20 @@ func (_u *UserDepartmentsUpdate) SetNillableMemberRole(v *int) *UserDepartmentsU
 }
 
 // AddMemberRole adds value to the "member_role" field.
-func (_u *UserDepartmentsUpdate) AddMemberRole(v int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) AddMemberRole(v int) *DepartmentMembersUpdate {
 	_u.mutation.AddMemberRole(v)
 	return _u
 }
 
 // SetMemberStatus sets the "member_status" field.
-func (_u *UserDepartmentsUpdate) SetMemberStatus(v int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetMemberStatus(v int) *DepartmentMembersUpdate {
 	_u.mutation.ResetMemberStatus()
 	_u.mutation.SetMemberStatus(v)
 	return _u
 }
 
 // SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableMemberStatus(v *int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetNillableMemberStatus(v *int) *DepartmentMembersUpdate {
 	if v != nil {
 		_u.SetMemberStatus(*v)
 	}
@@ -155,20 +155,20 @@ func (_u *UserDepartmentsUpdate) SetNillableMemberStatus(v *int) *UserDepartment
 }
 
 // AddMemberStatus adds value to the "member_status" field.
-func (_u *UserDepartmentsUpdate) AddMemberStatus(v int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) AddMemberStatus(v int) *DepartmentMembersUpdate {
 	_u.mutation.AddMemberStatus(v)
 	return _u
 }
 
 // SetMemberType sets the "member_type" field.
-func (_u *UserDepartmentsUpdate) SetMemberType(v int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetMemberType(v int) *DepartmentMembersUpdate {
 	_u.mutation.ResetMemberType()
 	_u.mutation.SetMemberType(v)
 	return _u
 }
 
 // SetNillableMemberType sets the "member_type" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableMemberType(v *int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetNillableMemberType(v *int) *DepartmentMembersUpdate {
 	if v != nil {
 		_u.SetMemberType(*v)
 	}
@@ -176,19 +176,19 @@ func (_u *UserDepartmentsUpdate) SetNillableMemberType(v *int) *UserDepartmentsU
 }
 
 // AddMemberType adds value to the "member_type" field.
-func (_u *UserDepartmentsUpdate) AddMemberType(v int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) AddMemberType(v int) *DepartmentMembersUpdate {
 	_u.mutation.AddMemberType(v)
 	return _u
 }
 
 // SetExpiredAt sets the "expired_at" field.
-func (_u *UserDepartmentsUpdate) SetExpiredAt(v time.Time) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetExpiredAt(v time.Time) *DepartmentMembersUpdate {
 	_u.mutation.SetExpiredAt(v)
 	return _u
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableExpiredAt(v *time.Time) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetNillableExpiredAt(v *time.Time) *DepartmentMembersUpdate {
 	if v != nil {
 		_u.SetExpiredAt(*v)
 	}
@@ -196,19 +196,19 @@ func (_u *UserDepartmentsUpdate) SetNillableExpiredAt(v *time.Time) *UserDepartm
 }
 
 // ClearExpiredAt clears the value of the "expired_at" field.
-func (_u *UserDepartmentsUpdate) ClearExpiredAt() *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) ClearExpiredAt() *DepartmentMembersUpdate {
 	_u.mutation.ClearExpiredAt()
 	return _u
 }
 
 // SetMetadata sets the "metadata" field.
-func (_u *UserDepartmentsUpdate) SetMetadata(v string) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetMetadata(v string) *DepartmentMembersUpdate {
 	_u.mutation.SetMetadata(v)
 	return _u
 }
 
 // SetNillableMetadata sets the "metadata" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableMetadata(v *string) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetNillableMetadata(v *string) *DepartmentMembersUpdate {
 	if v != nil {
 		_u.SetMetadata(*v)
 	}
@@ -216,19 +216,19 @@ func (_u *UserDepartmentsUpdate) SetNillableMetadata(v *string) *UserDepartments
 }
 
 // ClearMetadata clears the value of the "metadata" field.
-func (_u *UserDepartmentsUpdate) ClearMetadata() *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) ClearMetadata() *DepartmentMembersUpdate {
 	_u.mutation.ClearMetadata()
 	return _u
 }
 
 // SetDescription sets the "description" field.
-func (_u *UserDepartmentsUpdate) SetDescription(v string) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetDescription(v string) *DepartmentMembersUpdate {
 	_u.mutation.SetDescription(v)
 	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *UserDepartmentsUpdate) SetNillableDescription(v *string) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetNillableDescription(v *string) *DepartmentMembersUpdate {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
@@ -236,52 +236,52 @@ func (_u *UserDepartmentsUpdate) SetNillableDescription(v *string) *UserDepartme
 }
 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_u *UserDepartmentsUpdate) SetLionDepartmentsID(id int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetLionDepartmentsID(id int) *DepartmentMembersUpdate {
 	_u.mutation.SetLionDepartmentsID(id)
 	return _u
 }
 
 // SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_u *UserDepartmentsUpdate) SetLionDepartments(v *Departments) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetLionDepartments(v *Departments) *DepartmentMembersUpdate {
 	return _u.SetLionDepartmentsID(v.ID)
 }
 
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
-func (_u *UserDepartmentsUpdate) SetLionUsersID(id int) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetLionUsersID(id int) *DepartmentMembersUpdate {
 	_u.mutation.SetLionUsersID(id)
 	return _u
 }
 
 // SetLionUsers sets the "lion_users" edge to the Users entity.
-func (_u *UserDepartmentsUpdate) SetLionUsers(v *Users) *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) SetLionUsers(v *Users) *DepartmentMembersUpdate {
 	return _u.SetLionUsersID(v.ID)
 }
 
-// Mutation returns the UserDepartmentsMutation object of the builder.
-func (_u *UserDepartmentsUpdate) Mutation() *UserDepartmentsMutation {
+// Mutation returns the DepartmentMembersMutation object of the builder.
+func (_u *DepartmentMembersUpdate) Mutation() *DepartmentMembersMutation {
 	return _u.mutation
 }
 
 // ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
-func (_u *UserDepartmentsUpdate) ClearLionDepartments() *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) ClearLionDepartments() *DepartmentMembersUpdate {
 	_u.mutation.ClearLionDepartments()
 	return _u
 }
 
 // ClearLionUsers clears the "lion_users" edge to the Users entity.
-func (_u *UserDepartmentsUpdate) ClearLionUsers() *UserDepartmentsUpdate {
+func (_u *DepartmentMembersUpdate) ClearLionUsers() *DepartmentMembersUpdate {
 	_u.mutation.ClearLionUsers()
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *UserDepartmentsUpdate) Save(ctx context.Context) (int, error) {
+func (_u *DepartmentMembersUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserDepartmentsUpdate) SaveX(ctx context.Context) int {
+func (_u *DepartmentMembersUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -290,42 +290,42 @@ func (_u *UserDepartmentsUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *UserDepartmentsUpdate) Exec(ctx context.Context) error {
+func (_u *DepartmentMembersUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *UserDepartmentsUpdate) ExecX(ctx context.Context) {
+func (_u *DepartmentMembersUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *UserDepartmentsUpdate) defaults() {
+func (_u *DepartmentMembersUpdate) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := userdepartments.UpdateDefaultUpdatedAt()
+		v := departmentmembers.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *UserDepartmentsUpdate) check() error {
+func (_u *DepartmentMembersUpdate) check() error {
 	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "UserDepartments.lion_departments"`)
+		return errors.New(`lion: clearing a required unique edge "DepartmentMembers.lion_departments"`)
 	}
 	if _u.mutation.LionUsersCleared() && len(_u.mutation.LionUsersIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "UserDepartments.lion_users"`)
+		return errors.New(`lion: clearing a required unique edge "DepartmentMembers.lion_users"`)
 	}
 	return nil
 }
 
-func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+func (_u *DepartmentMembersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(userdepartments.Table, userdepartments.Columns, sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(departmentmembers.Table, departmentmembers.Columns, sqlgraph.NewFieldSpec(departmentmembers.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -334,65 +334,65 @@ func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err er
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(userdepartments.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(departmentmembers.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
+		_spec.SetField(departmentmembers.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
+		_spec.AddField(departmentmembers.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(userdepartments.FieldCreatedBy, field.TypeInt64)
+		_spec.ClearField(departmentmembers.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.SetField(departmentmembers.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.AddField(departmentmembers.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(userdepartments.FieldUpdatedBy, field.TypeInt64)
+		_spec.ClearField(departmentmembers.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.MemberRole(); ok {
-		_spec.SetField(userdepartments.FieldMemberRole, field.TypeInt, value)
+		_spec.SetField(departmentmembers.FieldMemberRole, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedMemberRole(); ok {
-		_spec.AddField(userdepartments.FieldMemberRole, field.TypeInt, value)
+		_spec.AddField(departmentmembers.FieldMemberRole, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.MemberStatus(); ok {
-		_spec.SetField(userdepartments.FieldMemberStatus, field.TypeInt, value)
+		_spec.SetField(departmentmembers.FieldMemberStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedMemberStatus(); ok {
-		_spec.AddField(userdepartments.FieldMemberStatus, field.TypeInt, value)
+		_spec.AddField(departmentmembers.FieldMemberStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.MemberType(); ok {
-		_spec.SetField(userdepartments.FieldMemberType, field.TypeInt, value)
+		_spec.SetField(departmentmembers.FieldMemberType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedMemberType(); ok {
-		_spec.AddField(userdepartments.FieldMemberType, field.TypeInt, value)
+		_spec.AddField(departmentmembers.FieldMemberType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ExpiredAt(); ok {
-		_spec.SetField(userdepartments.FieldExpiredAt, field.TypeTime, value)
+		_spec.SetField(departmentmembers.FieldExpiredAt, field.TypeTime, value)
 	}
 	if _u.mutation.ExpiredAtCleared() {
-		_spec.ClearField(userdepartments.FieldExpiredAt, field.TypeTime)
+		_spec.ClearField(departmentmembers.FieldExpiredAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
-		_spec.SetField(userdepartments.FieldMetadata, field.TypeString, value)
+		_spec.SetField(departmentmembers.FieldMetadata, field.TypeString, value)
 	}
 	if _u.mutation.MetadataCleared() {
-		_spec.ClearField(userdepartments.FieldMetadata, field.TypeString)
+		_spec.ClearField(departmentmembers.FieldMetadata, field.TypeString)
 	}
 	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(userdepartments.FieldDescription, field.TypeString, value)
+		_spec.SetField(departmentmembers.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionDepartmentsTable,
-			Columns: []string{userdepartments.LionDepartmentsColumn},
+			Table:   departmentmembers.LionDepartmentsTable,
+			Columns: []string{departmentmembers.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -404,8 +404,8 @@ func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionDepartmentsTable,
-			Columns: []string{userdepartments.LionDepartmentsColumn},
+			Table:   departmentmembers.LionDepartmentsTable,
+			Columns: []string{departmentmembers.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -420,8 +420,8 @@ func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionUsersTable,
-			Columns: []string{userdepartments.LionUsersColumn},
+			Table:   departmentmembers.LionUsersTable,
+			Columns: []string{departmentmembers.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -433,8 +433,8 @@ func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionUsersTable,
-			Columns: []string{userdepartments.LionUsersColumn},
+			Table:   departmentmembers.LionUsersTable,
+			Columns: []string{departmentmembers.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -447,7 +447,7 @@ func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err er
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{userdepartments.Label}
+			err = &NotFoundError{departmentmembers.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -457,29 +457,29 @@ func (_u *UserDepartmentsUpdate) sqlSave(ctx context.Context) (_node int, err er
 	return _node, nil
 }
 
-// UserDepartmentsUpdateOne is the builder for updating a single UserDepartments entity.
-type UserDepartmentsUpdateOne struct {
+// DepartmentMembersUpdateOne is the builder for updating a single DepartmentMembers entity.
+type DepartmentMembersUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *UserDepartmentsMutation
+	mutation *DepartmentMembersMutation
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *UserDepartmentsUpdateOne) SetUpdatedAt(v time.Time) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetUpdatedAt(v time.Time) *DepartmentMembersUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *UserDepartmentsUpdateOne) SetCreatedBy(v int64) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetCreatedBy(v int64) *DepartmentMembersUpdateOne {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableCreatedBy(v *int64) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetNillableCreatedBy(v *int64) *DepartmentMembersUpdateOne {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -487,26 +487,26 @@ func (_u *UserDepartmentsUpdateOne) SetNillableCreatedBy(v *int64) *UserDepartme
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *UserDepartmentsUpdateOne) AddCreatedBy(v int64) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) AddCreatedBy(v int64) *DepartmentMembersUpdateOne {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
 
 // ClearCreatedBy clears the value of the "created_by" field.
-func (_u *UserDepartmentsUpdateOne) ClearCreatedBy() *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) ClearCreatedBy() *DepartmentMembersUpdateOne {
 	_u.mutation.ClearCreatedBy()
 	return _u
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *UserDepartmentsUpdateOne) SetUpdatedBy(v int64) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetUpdatedBy(v int64) *DepartmentMembersUpdateOne {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableUpdatedBy(v *int64) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetNillableUpdatedBy(v *int64) *DepartmentMembersUpdateOne {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -514,25 +514,25 @@ func (_u *UserDepartmentsUpdateOne) SetNillableUpdatedBy(v *int64) *UserDepartme
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *UserDepartmentsUpdateOne) AddUpdatedBy(v int64) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) AddUpdatedBy(v int64) *DepartmentMembersUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
 // ClearUpdatedBy clears the value of the "updated_by" field.
-func (_u *UserDepartmentsUpdateOne) ClearUpdatedBy() *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) ClearUpdatedBy() *DepartmentMembersUpdateOne {
 	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
 // SetDepartmentID sets the "department_id" field.
-func (_u *UserDepartmentsUpdateOne) SetDepartmentID(v int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetDepartmentID(v int) *DepartmentMembersUpdateOne {
 	_u.mutation.SetDepartmentID(v)
 	return _u
 }
 
 // SetNillableDepartmentID sets the "department_id" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableDepartmentID(v *int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetNillableDepartmentID(v *int) *DepartmentMembersUpdateOne {
 	if v != nil {
 		_u.SetDepartmentID(*v)
 	}
@@ -540,13 +540,13 @@ func (_u *UserDepartmentsUpdateOne) SetNillableDepartmentID(v *int) *UserDepartm
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *UserDepartmentsUpdateOne) SetUserID(v int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetUserID(v int) *DepartmentMembersUpdateOne {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableUserID(v *int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetNillableUserID(v *int) *DepartmentMembersUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -554,14 +554,14 @@ func (_u *UserDepartmentsUpdateOne) SetNillableUserID(v *int) *UserDepartmentsUp
 }
 
 // SetMemberRole sets the "member_role" field.
-func (_u *UserDepartmentsUpdateOne) SetMemberRole(v int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetMemberRole(v int) *DepartmentMembersUpdateOne {
 	_u.mutation.ResetMemberRole()
 	_u.mutation.SetMemberRole(v)
 	return _u
 }
 
 // SetNillableMemberRole sets the "member_role" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableMemberRole(v *int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetNillableMemberRole(v *int) *DepartmentMembersUpdateOne {
 	if v != nil {
 		_u.SetMemberRole(*v)
 	}
@@ -569,20 +569,20 @@ func (_u *UserDepartmentsUpdateOne) SetNillableMemberRole(v *int) *UserDepartmen
 }
 
 // AddMemberRole adds value to the "member_role" field.
-func (_u *UserDepartmentsUpdateOne) AddMemberRole(v int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) AddMemberRole(v int) *DepartmentMembersUpdateOne {
 	_u.mutation.AddMemberRole(v)
 	return _u
 }
 
 // SetMemberStatus sets the "member_status" field.
-func (_u *UserDepartmentsUpdateOne) SetMemberStatus(v int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetMemberStatus(v int) *DepartmentMembersUpdateOne {
 	_u.mutation.ResetMemberStatus()
 	_u.mutation.SetMemberStatus(v)
 	return _u
 }
 
 // SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableMemberStatus(v *int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetNillableMemberStatus(v *int) *DepartmentMembersUpdateOne {
 	if v != nil {
 		_u.SetMemberStatus(*v)
 	}
@@ -590,20 +590,20 @@ func (_u *UserDepartmentsUpdateOne) SetNillableMemberStatus(v *int) *UserDepartm
 }
 
 // AddMemberStatus adds value to the "member_status" field.
-func (_u *UserDepartmentsUpdateOne) AddMemberStatus(v int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) AddMemberStatus(v int) *DepartmentMembersUpdateOne {
 	_u.mutation.AddMemberStatus(v)
 	return _u
 }
 
 // SetMemberType sets the "member_type" field.
-func (_u *UserDepartmentsUpdateOne) SetMemberType(v int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetMemberType(v int) *DepartmentMembersUpdateOne {
 	_u.mutation.ResetMemberType()
 	_u.mutation.SetMemberType(v)
 	return _u
 }
 
 // SetNillableMemberType sets the "member_type" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableMemberType(v *int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetNillableMemberType(v *int) *DepartmentMembersUpdateOne {
 	if v != nil {
 		_u.SetMemberType(*v)
 	}
@@ -611,19 +611,19 @@ func (_u *UserDepartmentsUpdateOne) SetNillableMemberType(v *int) *UserDepartmen
 }
 
 // AddMemberType adds value to the "member_type" field.
-func (_u *UserDepartmentsUpdateOne) AddMemberType(v int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) AddMemberType(v int) *DepartmentMembersUpdateOne {
 	_u.mutation.AddMemberType(v)
 	return _u
 }
 
 // SetExpiredAt sets the "expired_at" field.
-func (_u *UserDepartmentsUpdateOne) SetExpiredAt(v time.Time) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetExpiredAt(v time.Time) *DepartmentMembersUpdateOne {
 	_u.mutation.SetExpiredAt(v)
 	return _u
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableExpiredAt(v *time.Time) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetNillableExpiredAt(v *time.Time) *DepartmentMembersUpdateOne {
 	if v != nil {
 		_u.SetExpiredAt(*v)
 	}
@@ -631,19 +631,19 @@ func (_u *UserDepartmentsUpdateOne) SetNillableExpiredAt(v *time.Time) *UserDepa
 }
 
 // ClearExpiredAt clears the value of the "expired_at" field.
-func (_u *UserDepartmentsUpdateOne) ClearExpiredAt() *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) ClearExpiredAt() *DepartmentMembersUpdateOne {
 	_u.mutation.ClearExpiredAt()
 	return _u
 }
 
 // SetMetadata sets the "metadata" field.
-func (_u *UserDepartmentsUpdateOne) SetMetadata(v string) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetMetadata(v string) *DepartmentMembersUpdateOne {
 	_u.mutation.SetMetadata(v)
 	return _u
 }
 
 // SetNillableMetadata sets the "metadata" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableMetadata(v *string) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetNillableMetadata(v *string) *DepartmentMembersUpdateOne {
 	if v != nil {
 		_u.SetMetadata(*v)
 	}
@@ -651,19 +651,19 @@ func (_u *UserDepartmentsUpdateOne) SetNillableMetadata(v *string) *UserDepartme
 }
 
 // ClearMetadata clears the value of the "metadata" field.
-func (_u *UserDepartmentsUpdateOne) ClearMetadata() *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) ClearMetadata() *DepartmentMembersUpdateOne {
 	_u.mutation.ClearMetadata()
 	return _u
 }
 
 // SetDescription sets the "description" field.
-func (_u *UserDepartmentsUpdateOne) SetDescription(v string) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetDescription(v string) *DepartmentMembersUpdateOne {
 	_u.mutation.SetDescription(v)
 	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *UserDepartmentsUpdateOne) SetNillableDescription(v *string) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetNillableDescription(v *string) *DepartmentMembersUpdateOne {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
@@ -671,65 +671,65 @@ func (_u *UserDepartmentsUpdateOne) SetNillableDescription(v *string) *UserDepar
 }
 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_u *UserDepartmentsUpdateOne) SetLionDepartmentsID(id int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetLionDepartmentsID(id int) *DepartmentMembersUpdateOne {
 	_u.mutation.SetLionDepartmentsID(id)
 	return _u
 }
 
 // SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_u *UserDepartmentsUpdateOne) SetLionDepartments(v *Departments) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetLionDepartments(v *Departments) *DepartmentMembersUpdateOne {
 	return _u.SetLionDepartmentsID(v.ID)
 }
 
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
-func (_u *UserDepartmentsUpdateOne) SetLionUsersID(id int) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetLionUsersID(id int) *DepartmentMembersUpdateOne {
 	_u.mutation.SetLionUsersID(id)
 	return _u
 }
 
 // SetLionUsers sets the "lion_users" edge to the Users entity.
-func (_u *UserDepartmentsUpdateOne) SetLionUsers(v *Users) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) SetLionUsers(v *Users) *DepartmentMembersUpdateOne {
 	return _u.SetLionUsersID(v.ID)
 }
 
-// Mutation returns the UserDepartmentsMutation object of the builder.
-func (_u *UserDepartmentsUpdateOne) Mutation() *UserDepartmentsMutation {
+// Mutation returns the DepartmentMembersMutation object of the builder.
+func (_u *DepartmentMembersUpdateOne) Mutation() *DepartmentMembersMutation {
 	return _u.mutation
 }
 
 // ClearLionDepartments clears the "lion_departments" edge to the Departments entity.
-func (_u *UserDepartmentsUpdateOne) ClearLionDepartments() *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) ClearLionDepartments() *DepartmentMembersUpdateOne {
 	_u.mutation.ClearLionDepartments()
 	return _u
 }
 
 // ClearLionUsers clears the "lion_users" edge to the Users entity.
-func (_u *UserDepartmentsUpdateOne) ClearLionUsers() *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) ClearLionUsers() *DepartmentMembersUpdateOne {
 	_u.mutation.ClearLionUsers()
 	return _u
 }
 
-// Where appends a list predicates to the UserDepartmentsUpdate builder.
-func (_u *UserDepartmentsUpdateOne) Where(ps ...predicate.UserDepartments) *UserDepartmentsUpdateOne {
+// Where appends a list predicates to the DepartmentMembersUpdate builder.
+func (_u *DepartmentMembersUpdateOne) Where(ps ...predicate.DepartmentMembers) *DepartmentMembersUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *UserDepartmentsUpdateOne) Select(field string, fields ...string) *UserDepartmentsUpdateOne {
+func (_u *DepartmentMembersUpdateOne) Select(field string, fields ...string) *DepartmentMembersUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated UserDepartments entity.
-func (_u *UserDepartmentsUpdateOne) Save(ctx context.Context) (*UserDepartments, error) {
+// Save executes the query and returns the updated DepartmentMembers entity.
+func (_u *DepartmentMembersUpdateOne) Save(ctx context.Context) (*DepartmentMembers, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserDepartmentsUpdateOne) SaveX(ctx context.Context) *UserDepartments {
+func (_u *DepartmentMembersUpdateOne) SaveX(ctx context.Context) *DepartmentMembers {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -738,55 +738,55 @@ func (_u *UserDepartmentsUpdateOne) SaveX(ctx context.Context) *UserDepartments 
 }
 
 // Exec executes the query on the entity.
-func (_u *UserDepartmentsUpdateOne) Exec(ctx context.Context) error {
+func (_u *DepartmentMembersUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *UserDepartmentsUpdateOne) ExecX(ctx context.Context) {
+func (_u *DepartmentMembersUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *UserDepartmentsUpdateOne) defaults() {
+func (_u *DepartmentMembersUpdateOne) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := userdepartments.UpdateDefaultUpdatedAt()
+		v := departmentmembers.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *UserDepartmentsUpdateOne) check() error {
+func (_u *DepartmentMembersUpdateOne) check() error {
 	if _u.mutation.LionDepartmentsCleared() && len(_u.mutation.LionDepartmentsIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "UserDepartments.lion_departments"`)
+		return errors.New(`lion: clearing a required unique edge "DepartmentMembers.lion_departments"`)
 	}
 	if _u.mutation.LionUsersCleared() && len(_u.mutation.LionUsersIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "UserDepartments.lion_users"`)
+		return errors.New(`lion: clearing a required unique edge "DepartmentMembers.lion_users"`)
 	}
 	return nil
 }
 
-func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDepartments, err error) {
+func (_u *DepartmentMembersUpdateOne) sqlSave(ctx context.Context) (_node *DepartmentMembers, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(userdepartments.Table, userdepartments.Columns, sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(departmentmembers.Table, departmentmembers.Columns, sqlgraph.NewFieldSpec(departmentmembers.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "UserDepartments.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "DepartmentMembers.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, userdepartments.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, departmentmembers.FieldID)
 		for _, f := range fields {
-			if !userdepartments.ValidColumn(f) {
+			if !departmentmembers.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 			}
-			if f != userdepartments.FieldID {
+			if f != departmentmembers.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -799,65 +799,65 @@ func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDep
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(userdepartments.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(departmentmembers.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
+		_spec.SetField(departmentmembers.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
+		_spec.AddField(departmentmembers.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(userdepartments.FieldCreatedBy, field.TypeInt64)
+		_spec.ClearField(departmentmembers.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.SetField(departmentmembers.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.AddField(departmentmembers.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(userdepartments.FieldUpdatedBy, field.TypeInt64)
+		_spec.ClearField(departmentmembers.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.MemberRole(); ok {
-		_spec.SetField(userdepartments.FieldMemberRole, field.TypeInt, value)
+		_spec.SetField(departmentmembers.FieldMemberRole, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedMemberRole(); ok {
-		_spec.AddField(userdepartments.FieldMemberRole, field.TypeInt, value)
+		_spec.AddField(departmentmembers.FieldMemberRole, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.MemberStatus(); ok {
-		_spec.SetField(userdepartments.FieldMemberStatus, field.TypeInt, value)
+		_spec.SetField(departmentmembers.FieldMemberStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedMemberStatus(); ok {
-		_spec.AddField(userdepartments.FieldMemberStatus, field.TypeInt, value)
+		_spec.AddField(departmentmembers.FieldMemberStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.MemberType(); ok {
-		_spec.SetField(userdepartments.FieldMemberType, field.TypeInt, value)
+		_spec.SetField(departmentmembers.FieldMemberType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedMemberType(); ok {
-		_spec.AddField(userdepartments.FieldMemberType, field.TypeInt, value)
+		_spec.AddField(departmentmembers.FieldMemberType, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ExpiredAt(); ok {
-		_spec.SetField(userdepartments.FieldExpiredAt, field.TypeTime, value)
+		_spec.SetField(departmentmembers.FieldExpiredAt, field.TypeTime, value)
 	}
 	if _u.mutation.ExpiredAtCleared() {
-		_spec.ClearField(userdepartments.FieldExpiredAt, field.TypeTime)
+		_spec.ClearField(departmentmembers.FieldExpiredAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
-		_spec.SetField(userdepartments.FieldMetadata, field.TypeString, value)
+		_spec.SetField(departmentmembers.FieldMetadata, field.TypeString, value)
 	}
 	if _u.mutation.MetadataCleared() {
-		_spec.ClearField(userdepartments.FieldMetadata, field.TypeString)
+		_spec.ClearField(departmentmembers.FieldMetadata, field.TypeString)
 	}
 	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(userdepartments.FieldDescription, field.TypeString, value)
+		_spec.SetField(departmentmembers.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionDepartmentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionDepartmentsTable,
-			Columns: []string{userdepartments.LionDepartmentsColumn},
+			Table:   departmentmembers.LionDepartmentsTable,
+			Columns: []string{departmentmembers.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -869,8 +869,8 @@ func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDep
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionDepartmentsTable,
-			Columns: []string{userdepartments.LionDepartmentsColumn},
+			Table:   departmentmembers.LionDepartmentsTable,
+			Columns: []string{departmentmembers.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -885,8 +885,8 @@ func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDep
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionUsersTable,
-			Columns: []string{userdepartments.LionUsersColumn},
+			Table:   departmentmembers.LionUsersTable,
+			Columns: []string{departmentmembers.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -898,8 +898,8 @@ func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDep
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionUsersTable,
-			Columns: []string{userdepartments.LionUsersColumn},
+			Table:   departmentmembers.LionUsersTable,
+			Columns: []string{departmentmembers.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -910,12 +910,12 @@ func (_u *UserDepartmentsUpdateOne) sqlSave(ctx context.Context) (_node *UserDep
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &UserDepartments{config: _u.config}
+	_node = &DepartmentMembers{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{userdepartments.Label}
+			err = &NotFoundError{departmentmembers.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

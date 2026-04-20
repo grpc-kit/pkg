@@ -11,10 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/groupmembers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/usergroups"
 )
 
 // GroupsUpdate is the builder for updating Groups entities.
@@ -334,19 +334,19 @@ func (_u *GroupsUpdate) AddLionGroups(v ...*GroupRoles) *GroupsUpdate {
 	return _u.AddLionGroupIDs(ids...)
 }
 
-// AddLionUserGroupIDs adds the "lion_user_groups" edge to the UserGroups entity by IDs.
-func (_u *GroupsUpdate) AddLionUserGroupIDs(ids ...int) *GroupsUpdate {
-	_u.mutation.AddLionUserGroupIDs(ids...)
+// AddLionGroupMemberIDs adds the "lion_group_members" edge to the GroupMembers entity by IDs.
+func (_u *GroupsUpdate) AddLionGroupMemberIDs(ids ...int) *GroupsUpdate {
+	_u.mutation.AddLionGroupMemberIDs(ids...)
 	return _u
 }
 
-// AddLionUserGroups adds the "lion_user_groups" edges to the UserGroups entity.
-func (_u *GroupsUpdate) AddLionUserGroups(v ...*UserGroups) *GroupsUpdate {
+// AddLionGroupMembers adds the "lion_group_members" edges to the GroupMembers entity.
+func (_u *GroupsUpdate) AddLionGroupMembers(v ...*GroupMembers) *GroupsUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddLionUserGroupIDs(ids...)
+	return _u.AddLionGroupMemberIDs(ids...)
 }
 
 // Mutation returns the GroupsMutation object of the builder.
@@ -375,25 +375,25 @@ func (_u *GroupsUpdate) RemoveLionGroups(v ...*GroupRoles) *GroupsUpdate {
 	return _u.RemoveLionGroupIDs(ids...)
 }
 
-// ClearLionUserGroups clears all "lion_user_groups" edges to the UserGroups entity.
-func (_u *GroupsUpdate) ClearLionUserGroups() *GroupsUpdate {
-	_u.mutation.ClearLionUserGroups()
+// ClearLionGroupMembers clears all "lion_group_members" edges to the GroupMembers entity.
+func (_u *GroupsUpdate) ClearLionGroupMembers() *GroupsUpdate {
+	_u.mutation.ClearLionGroupMembers()
 	return _u
 }
 
-// RemoveLionUserGroupIDs removes the "lion_user_groups" edge to UserGroups entities by IDs.
-func (_u *GroupsUpdate) RemoveLionUserGroupIDs(ids ...int) *GroupsUpdate {
-	_u.mutation.RemoveLionUserGroupIDs(ids...)
+// RemoveLionGroupMemberIDs removes the "lion_group_members" edge to GroupMembers entities by IDs.
+func (_u *GroupsUpdate) RemoveLionGroupMemberIDs(ids ...int) *GroupsUpdate {
+	_u.mutation.RemoveLionGroupMemberIDs(ids...)
 	return _u
 }
 
-// RemoveLionUserGroups removes "lion_user_groups" edges to UserGroups entities.
-func (_u *GroupsUpdate) RemoveLionUserGroups(v ...*UserGroups) *GroupsUpdate {
+// RemoveLionGroupMembers removes "lion_group_members" edges to GroupMembers entities.
+func (_u *GroupsUpdate) RemoveLionGroupMembers(v ...*GroupMembers) *GroupsUpdate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveLionUserGroupIDs(ids...)
+	return _u.RemoveLionGroupMemberIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -593,28 +593,28 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionUserGroupsCleared() {
+	if _u.mutation.LionGroupMembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   groups.LionUserGroupsTable,
-			Columns: []string{groups.LionUserGroupsColumn},
+			Table:   groups.LionGroupMembersTable,
+			Columns: []string{groups.LionGroupMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLionUserGroupsIDs(); len(nodes) > 0 && !_u.mutation.LionUserGroupsCleared() {
+	if nodes := _u.mutation.RemovedLionGroupMembersIDs(); len(nodes) > 0 && !_u.mutation.LionGroupMembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   groups.LionUserGroupsTable,
-			Columns: []string{groups.LionUserGroupsColumn},
+			Table:   groups.LionGroupMembersTable,
+			Columns: []string{groups.LionGroupMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -622,15 +622,15 @@ func (_u *GroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionUserGroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionGroupMembersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   groups.LionUserGroupsTable,
-			Columns: []string{groups.LionUserGroupsColumn},
+			Table:   groups.LionGroupMembersTable,
+			Columns: []string{groups.LionGroupMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -962,19 +962,19 @@ func (_u *GroupsUpdateOne) AddLionGroups(v ...*GroupRoles) *GroupsUpdateOne {
 	return _u.AddLionGroupIDs(ids...)
 }
 
-// AddLionUserGroupIDs adds the "lion_user_groups" edge to the UserGroups entity by IDs.
-func (_u *GroupsUpdateOne) AddLionUserGroupIDs(ids ...int) *GroupsUpdateOne {
-	_u.mutation.AddLionUserGroupIDs(ids...)
+// AddLionGroupMemberIDs adds the "lion_group_members" edge to the GroupMembers entity by IDs.
+func (_u *GroupsUpdateOne) AddLionGroupMemberIDs(ids ...int) *GroupsUpdateOne {
+	_u.mutation.AddLionGroupMemberIDs(ids...)
 	return _u
 }
 
-// AddLionUserGroups adds the "lion_user_groups" edges to the UserGroups entity.
-func (_u *GroupsUpdateOne) AddLionUserGroups(v ...*UserGroups) *GroupsUpdateOne {
+// AddLionGroupMembers adds the "lion_group_members" edges to the GroupMembers entity.
+func (_u *GroupsUpdateOne) AddLionGroupMembers(v ...*GroupMembers) *GroupsUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddLionUserGroupIDs(ids...)
+	return _u.AddLionGroupMemberIDs(ids...)
 }
 
 // Mutation returns the GroupsMutation object of the builder.
@@ -1003,25 +1003,25 @@ func (_u *GroupsUpdateOne) RemoveLionGroups(v ...*GroupRoles) *GroupsUpdateOne {
 	return _u.RemoveLionGroupIDs(ids...)
 }
 
-// ClearLionUserGroups clears all "lion_user_groups" edges to the UserGroups entity.
-func (_u *GroupsUpdateOne) ClearLionUserGroups() *GroupsUpdateOne {
-	_u.mutation.ClearLionUserGroups()
+// ClearLionGroupMembers clears all "lion_group_members" edges to the GroupMembers entity.
+func (_u *GroupsUpdateOne) ClearLionGroupMembers() *GroupsUpdateOne {
+	_u.mutation.ClearLionGroupMembers()
 	return _u
 }
 
-// RemoveLionUserGroupIDs removes the "lion_user_groups" edge to UserGroups entities by IDs.
-func (_u *GroupsUpdateOne) RemoveLionUserGroupIDs(ids ...int) *GroupsUpdateOne {
-	_u.mutation.RemoveLionUserGroupIDs(ids...)
+// RemoveLionGroupMemberIDs removes the "lion_group_members" edge to GroupMembers entities by IDs.
+func (_u *GroupsUpdateOne) RemoveLionGroupMemberIDs(ids ...int) *GroupsUpdateOne {
+	_u.mutation.RemoveLionGroupMemberIDs(ids...)
 	return _u
 }
 
-// RemoveLionUserGroups removes "lion_user_groups" edges to UserGroups entities.
-func (_u *GroupsUpdateOne) RemoveLionUserGroups(v ...*UserGroups) *GroupsUpdateOne {
+// RemoveLionGroupMembers removes "lion_group_members" edges to GroupMembers entities.
+func (_u *GroupsUpdateOne) RemoveLionGroupMembers(v ...*GroupMembers) *GroupsUpdateOne {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveLionUserGroupIDs(ids...)
+	return _u.RemoveLionGroupMemberIDs(ids...)
 }
 
 // Where appends a list predicates to the GroupsUpdate builder.
@@ -1251,28 +1251,28 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LionUserGroupsCleared() {
+	if _u.mutation.LionGroupMembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   groups.LionUserGroupsTable,
-			Columns: []string{groups.LionUserGroupsColumn},
+			Table:   groups.LionGroupMembersTable,
+			Columns: []string{groups.LionGroupMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLionUserGroupsIDs(); len(nodes) > 0 && !_u.mutation.LionUserGroupsCleared() {
+	if nodes := _u.mutation.RemovedLionGroupMembersIDs(); len(nodes) > 0 && !_u.mutation.LionGroupMembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   groups.LionUserGroupsTable,
-			Columns: []string{groups.LionUserGroupsColumn},
+			Table:   groups.LionGroupMembersTable,
+			Columns: []string{groups.LionGroupMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1280,15 +1280,15 @@ func (_u *GroupsUpdateOne) sqlSave(ctx context.Context) (_node *Groups, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LionUserGroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LionGroupMembersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   groups.LionUserGroupsTable,
-			Columns: []string{groups.LionUserGroupsColumn},
+			Table:   groups.LionGroupMembersTable,
+			Columns: []string{groups.LionGroupMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

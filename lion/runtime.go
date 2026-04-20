@@ -8,7 +8,9 @@ import (
 	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
+	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/groupmembers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/permissionbindings"
@@ -22,8 +24,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/scopes"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
-	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -203,6 +203,47 @@ func init() {
 	credentialsDescCredentialSource := credentialsFields[6].Descriptor()
 	// credentials.DefaultCredentialSource holds the default value on creation for the credential_source field.
 	credentials.DefaultCredentialSource = credentialsDescCredentialSource.Default.(int)
+	departmentmembersMixin := schema.DepartmentMembers{}.Mixin()
+	departmentmembersMixinFields0 := departmentmembersMixin[0].Fields()
+	_ = departmentmembersMixinFields0
+	departmentmembersMixinFields1 := departmentmembersMixin[1].Fields()
+	_ = departmentmembersMixinFields1
+	departmentmembersFields := schema.DepartmentMembers{}.Fields()
+	_ = departmentmembersFields
+	// departmentmembersDescCreatedAt is the schema descriptor for created_at field.
+	departmentmembersDescCreatedAt := departmentmembersMixinFields0[0].Descriptor()
+	// departmentmembers.DefaultCreatedAt holds the default value on creation for the created_at field.
+	departmentmembers.DefaultCreatedAt = departmentmembersDescCreatedAt.Default.(func() time.Time)
+	// departmentmembersDescUpdatedAt is the schema descriptor for updated_at field.
+	departmentmembersDescUpdatedAt := departmentmembersMixinFields0[1].Descriptor()
+	// departmentmembers.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	departmentmembers.DefaultUpdatedAt = departmentmembersDescUpdatedAt.Default.(func() time.Time)
+	// departmentmembers.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	departmentmembers.UpdateDefaultUpdatedAt = departmentmembersDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// departmentmembersDescCreatedBy is the schema descriptor for created_by field.
+	departmentmembersDescCreatedBy := departmentmembersMixinFields1[0].Descriptor()
+	// departmentmembers.DefaultCreatedBy holds the default value on creation for the created_by field.
+	departmentmembers.DefaultCreatedBy = departmentmembersDescCreatedBy.Default.(int64)
+	// departmentmembersDescUpdatedBy is the schema descriptor for updated_by field.
+	departmentmembersDescUpdatedBy := departmentmembersMixinFields1[1].Descriptor()
+	// departmentmembers.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	departmentmembers.DefaultUpdatedBy = departmentmembersDescUpdatedBy.Default.(int64)
+	// departmentmembersDescMemberRole is the schema descriptor for member_role field.
+	departmentmembersDescMemberRole := departmentmembersFields[2].Descriptor()
+	// departmentmembers.DefaultMemberRole holds the default value on creation for the member_role field.
+	departmentmembers.DefaultMemberRole = departmentmembersDescMemberRole.Default.(int)
+	// departmentmembersDescMemberStatus is the schema descriptor for member_status field.
+	departmentmembersDescMemberStatus := departmentmembersFields[3].Descriptor()
+	// departmentmembers.DefaultMemberStatus holds the default value on creation for the member_status field.
+	departmentmembers.DefaultMemberStatus = departmentmembersDescMemberStatus.Default.(int)
+	// departmentmembersDescMemberType is the schema descriptor for member_type field.
+	departmentmembersDescMemberType := departmentmembersFields[4].Descriptor()
+	// departmentmembers.DefaultMemberType holds the default value on creation for the member_type field.
+	departmentmembers.DefaultMemberType = departmentmembersDescMemberType.Default.(int)
+	// departmentmembersDescDescription is the schema descriptor for description field.
+	departmentmembersDescDescription := departmentmembersFields[7].Descriptor()
+	// departmentmembers.DefaultDescription holds the default value on creation for the description field.
+	departmentmembers.DefaultDescription = departmentmembersDescDescription.Default.(string)
 	departmentsMixin := schema.Departments{}.Mixin()
 	departmentsMixinFields0 := departmentsMixin[0].Fields()
 	_ = departmentsMixinFields0
@@ -296,6 +337,55 @@ func init() {
 	departmentsDescProtected := departmentsFields[16].Descriptor()
 	// departments.DefaultProtected holds the default value on creation for the protected field.
 	departments.DefaultProtected = departmentsDescProtected.Default.(bool)
+	groupmembersMixin := schema.GroupMembers{}.Mixin()
+	groupmembersMixinFields0 := groupmembersMixin[0].Fields()
+	_ = groupmembersMixinFields0
+	groupmembersMixinFields1 := groupmembersMixin[1].Fields()
+	_ = groupmembersMixinFields1
+	groupmembersFields := schema.GroupMembers{}.Fields()
+	_ = groupmembersFields
+	// groupmembersDescCreatedAt is the schema descriptor for created_at field.
+	groupmembersDescCreatedAt := groupmembersMixinFields0[0].Descriptor()
+	// groupmembers.DefaultCreatedAt holds the default value on creation for the created_at field.
+	groupmembers.DefaultCreatedAt = groupmembersDescCreatedAt.Default.(func() time.Time)
+	// groupmembersDescUpdatedAt is the schema descriptor for updated_at field.
+	groupmembersDescUpdatedAt := groupmembersMixinFields0[1].Descriptor()
+	// groupmembers.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	groupmembers.DefaultUpdatedAt = groupmembersDescUpdatedAt.Default.(func() time.Time)
+	// groupmembers.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	groupmembers.UpdateDefaultUpdatedAt = groupmembersDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// groupmembersDescCreatedBy is the schema descriptor for created_by field.
+	groupmembersDescCreatedBy := groupmembersMixinFields1[0].Descriptor()
+	// groupmembers.DefaultCreatedBy holds the default value on creation for the created_by field.
+	groupmembers.DefaultCreatedBy = groupmembersDescCreatedBy.Default.(int64)
+	// groupmembersDescUpdatedBy is the schema descriptor for updated_by field.
+	groupmembersDescUpdatedBy := groupmembersMixinFields1[1].Descriptor()
+	// groupmembers.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	groupmembers.DefaultUpdatedBy = groupmembersDescUpdatedBy.Default.(int64)
+	// groupmembersDescUserID is the schema descriptor for user_id field.
+	groupmembersDescUserID := groupmembersFields[1].Descriptor()
+	// groupmembers.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	groupmembers.UserIDValidator = groupmembersDescUserID.Validators[0].(func(int) error)
+	// groupmembersDescGroupID is the schema descriptor for group_id field.
+	groupmembersDescGroupID := groupmembersFields[2].Descriptor()
+	// groupmembers.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
+	groupmembers.GroupIDValidator = groupmembersDescGroupID.Validators[0].(func(int) error)
+	// groupmembersDescMemberRole is the schema descriptor for member_role field.
+	groupmembersDescMemberRole := groupmembersFields[3].Descriptor()
+	// groupmembers.DefaultMemberRole holds the default value on creation for the member_role field.
+	groupmembers.DefaultMemberRole = groupmembersDescMemberRole.Default.(int)
+	// groupmembersDescMemberStatus is the schema descriptor for member_status field.
+	groupmembersDescMemberStatus := groupmembersFields[4].Descriptor()
+	// groupmembers.DefaultMemberStatus holds the default value on creation for the member_status field.
+	groupmembers.DefaultMemberStatus = groupmembersDescMemberStatus.Default.(int)
+	// groupmembersDescDescription is the schema descriptor for description field.
+	groupmembersDescDescription := groupmembersFields[8].Descriptor()
+	// groupmembers.DefaultDescription holds the default value on creation for the description field.
+	groupmembers.DefaultDescription = groupmembersDescDescription.Default.(string)
+	// groupmembersDescID is the schema descriptor for id field.
+	groupmembersDescID := groupmembersFields[0].Descriptor()
+	// groupmembers.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	groupmembers.IDValidator = groupmembersDescID.Validators[0].(func(int) error)
 	grouprolesMixin := schema.GroupRoles{}.Mixin()
 	grouprolesMixinFields0 := grouprolesMixin[0].Fields()
 	_ = grouprolesMixinFields0
@@ -1002,96 +1092,6 @@ func init() {
 	scopesDescDescription := scopesFields[4].Descriptor()
 	// scopes.DefaultDescription holds the default value on creation for the description field.
 	scopes.DefaultDescription = scopesDescDescription.Default.(string)
-	userdepartmentsMixin := schema.UserDepartments{}.Mixin()
-	userdepartmentsMixinFields0 := userdepartmentsMixin[0].Fields()
-	_ = userdepartmentsMixinFields0
-	userdepartmentsMixinFields1 := userdepartmentsMixin[1].Fields()
-	_ = userdepartmentsMixinFields1
-	userdepartmentsFields := schema.UserDepartments{}.Fields()
-	_ = userdepartmentsFields
-	// userdepartmentsDescCreatedAt is the schema descriptor for created_at field.
-	userdepartmentsDescCreatedAt := userdepartmentsMixinFields0[0].Descriptor()
-	// userdepartments.DefaultCreatedAt holds the default value on creation for the created_at field.
-	userdepartments.DefaultCreatedAt = userdepartmentsDescCreatedAt.Default.(func() time.Time)
-	// userdepartmentsDescUpdatedAt is the schema descriptor for updated_at field.
-	userdepartmentsDescUpdatedAt := userdepartmentsMixinFields0[1].Descriptor()
-	// userdepartments.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	userdepartments.DefaultUpdatedAt = userdepartmentsDescUpdatedAt.Default.(func() time.Time)
-	// userdepartments.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	userdepartments.UpdateDefaultUpdatedAt = userdepartmentsDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// userdepartmentsDescCreatedBy is the schema descriptor for created_by field.
-	userdepartmentsDescCreatedBy := userdepartmentsMixinFields1[0].Descriptor()
-	// userdepartments.DefaultCreatedBy holds the default value on creation for the created_by field.
-	userdepartments.DefaultCreatedBy = userdepartmentsDescCreatedBy.Default.(int64)
-	// userdepartmentsDescUpdatedBy is the schema descriptor for updated_by field.
-	userdepartmentsDescUpdatedBy := userdepartmentsMixinFields1[1].Descriptor()
-	// userdepartments.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	userdepartments.DefaultUpdatedBy = userdepartmentsDescUpdatedBy.Default.(int64)
-	// userdepartmentsDescMemberRole is the schema descriptor for member_role field.
-	userdepartmentsDescMemberRole := userdepartmentsFields[2].Descriptor()
-	// userdepartments.DefaultMemberRole holds the default value on creation for the member_role field.
-	userdepartments.DefaultMemberRole = userdepartmentsDescMemberRole.Default.(int)
-	// userdepartmentsDescMemberStatus is the schema descriptor for member_status field.
-	userdepartmentsDescMemberStatus := userdepartmentsFields[3].Descriptor()
-	// userdepartments.DefaultMemberStatus holds the default value on creation for the member_status field.
-	userdepartments.DefaultMemberStatus = userdepartmentsDescMemberStatus.Default.(int)
-	// userdepartmentsDescMemberType is the schema descriptor for member_type field.
-	userdepartmentsDescMemberType := userdepartmentsFields[4].Descriptor()
-	// userdepartments.DefaultMemberType holds the default value on creation for the member_type field.
-	userdepartments.DefaultMemberType = userdepartmentsDescMemberType.Default.(int)
-	// userdepartmentsDescDescription is the schema descriptor for description field.
-	userdepartmentsDescDescription := userdepartmentsFields[7].Descriptor()
-	// userdepartments.DefaultDescription holds the default value on creation for the description field.
-	userdepartments.DefaultDescription = userdepartmentsDescDescription.Default.(string)
-	usergroupsMixin := schema.UserGroups{}.Mixin()
-	usergroupsMixinFields0 := usergroupsMixin[0].Fields()
-	_ = usergroupsMixinFields0
-	usergroupsMixinFields1 := usergroupsMixin[1].Fields()
-	_ = usergroupsMixinFields1
-	usergroupsFields := schema.UserGroups{}.Fields()
-	_ = usergroupsFields
-	// usergroupsDescCreatedAt is the schema descriptor for created_at field.
-	usergroupsDescCreatedAt := usergroupsMixinFields0[0].Descriptor()
-	// usergroups.DefaultCreatedAt holds the default value on creation for the created_at field.
-	usergroups.DefaultCreatedAt = usergroupsDescCreatedAt.Default.(func() time.Time)
-	// usergroupsDescUpdatedAt is the schema descriptor for updated_at field.
-	usergroupsDescUpdatedAt := usergroupsMixinFields0[1].Descriptor()
-	// usergroups.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	usergroups.DefaultUpdatedAt = usergroupsDescUpdatedAt.Default.(func() time.Time)
-	// usergroups.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	usergroups.UpdateDefaultUpdatedAt = usergroupsDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// usergroupsDescCreatedBy is the schema descriptor for created_by field.
-	usergroupsDescCreatedBy := usergroupsMixinFields1[0].Descriptor()
-	// usergroups.DefaultCreatedBy holds the default value on creation for the created_by field.
-	usergroups.DefaultCreatedBy = usergroupsDescCreatedBy.Default.(int64)
-	// usergroupsDescUpdatedBy is the schema descriptor for updated_by field.
-	usergroupsDescUpdatedBy := usergroupsMixinFields1[1].Descriptor()
-	// usergroups.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	usergroups.DefaultUpdatedBy = usergroupsDescUpdatedBy.Default.(int64)
-	// usergroupsDescUserID is the schema descriptor for user_id field.
-	usergroupsDescUserID := usergroupsFields[1].Descriptor()
-	// usergroups.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	usergroups.UserIDValidator = usergroupsDescUserID.Validators[0].(func(int) error)
-	// usergroupsDescGroupID is the schema descriptor for group_id field.
-	usergroupsDescGroupID := usergroupsFields[2].Descriptor()
-	// usergroups.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
-	usergroups.GroupIDValidator = usergroupsDescGroupID.Validators[0].(func(int) error)
-	// usergroupsDescMemberRole is the schema descriptor for member_role field.
-	usergroupsDescMemberRole := usergroupsFields[3].Descriptor()
-	// usergroups.DefaultMemberRole holds the default value on creation for the member_role field.
-	usergroups.DefaultMemberRole = usergroupsDescMemberRole.Default.(int)
-	// usergroupsDescMemberStatus is the schema descriptor for member_status field.
-	usergroupsDescMemberStatus := usergroupsFields[4].Descriptor()
-	// usergroups.DefaultMemberStatus holds the default value on creation for the member_status field.
-	usergroups.DefaultMemberStatus = usergroupsDescMemberStatus.Default.(int)
-	// usergroupsDescDescription is the schema descriptor for description field.
-	usergroupsDescDescription := usergroupsFields[8].Descriptor()
-	// usergroups.DefaultDescription holds the default value on creation for the description field.
-	usergroups.DefaultDescription = usergroupsDescDescription.Default.(string)
-	// usergroupsDescID is the schema descriptor for id field.
-	usergroupsDescID := usergroupsFields[0].Descriptor()
-	// usergroups.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	usergroups.IDValidator = usergroupsDescID.Validators[0].(func(int) error)
 	useridentitiesMixin := schema.UserIdentities{}.Mixin()
 	useridentitiesMixinFields0 := useridentitiesMixin[0].Fields()
 	_ = useridentitiesMixinFields0

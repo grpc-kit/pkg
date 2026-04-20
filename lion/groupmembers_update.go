@@ -11,40 +11,40 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/groupmembers"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
-// UserGroupsUpdate is the builder for updating UserGroups entities.
-type UserGroupsUpdate struct {
+// GroupMembersUpdate is the builder for updating GroupMembers entities.
+type GroupMembersUpdate struct {
 	config
 	hooks    []Hook
-	mutation *UserGroupsMutation
+	mutation *GroupMembersMutation
 }
 
-// Where appends a list predicates to the UserGroupsUpdate builder.
-func (_u *UserGroupsUpdate) Where(ps ...predicate.UserGroups) *UserGroupsUpdate {
+// Where appends a list predicates to the GroupMembersUpdate builder.
+func (_u *GroupMembersUpdate) Where(ps ...predicate.GroupMembers) *GroupMembersUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *UserGroupsUpdate) SetUpdatedAt(v time.Time) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetUpdatedAt(v time.Time) *GroupMembersUpdate {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *UserGroupsUpdate) SetCreatedBy(v int64) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetCreatedBy(v int64) *GroupMembersUpdate {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableCreatedBy(v *int64) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetNillableCreatedBy(v *int64) *GroupMembersUpdate {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -52,26 +52,26 @@ func (_u *UserGroupsUpdate) SetNillableCreatedBy(v *int64) *UserGroupsUpdate {
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *UserGroupsUpdate) AddCreatedBy(v int64) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) AddCreatedBy(v int64) *GroupMembersUpdate {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
 
 // ClearCreatedBy clears the value of the "created_by" field.
-func (_u *UserGroupsUpdate) ClearCreatedBy() *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) ClearCreatedBy() *GroupMembersUpdate {
 	_u.mutation.ClearCreatedBy()
 	return _u
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *UserGroupsUpdate) SetUpdatedBy(v int64) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetUpdatedBy(v int64) *GroupMembersUpdate {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableUpdatedBy(v *int64) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetNillableUpdatedBy(v *int64) *GroupMembersUpdate {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -79,25 +79,25 @@ func (_u *UserGroupsUpdate) SetNillableUpdatedBy(v *int64) *UserGroupsUpdate {
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *UserGroupsUpdate) AddUpdatedBy(v int64) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) AddUpdatedBy(v int64) *GroupMembersUpdate {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
 // ClearUpdatedBy clears the value of the "updated_by" field.
-func (_u *UserGroupsUpdate) ClearUpdatedBy() *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) ClearUpdatedBy() *GroupMembersUpdate {
 	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *UserGroupsUpdate) SetUserID(v int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetUserID(v int) *GroupMembersUpdate {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableUserID(v *int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetNillableUserID(v *int) *GroupMembersUpdate {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -105,13 +105,13 @@ func (_u *UserGroupsUpdate) SetNillableUserID(v *int) *UserGroupsUpdate {
 }
 
 // SetGroupID sets the "group_id" field.
-func (_u *UserGroupsUpdate) SetGroupID(v int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetGroupID(v int) *GroupMembersUpdate {
 	_u.mutation.SetGroupID(v)
 	return _u
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableGroupID(v *int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetNillableGroupID(v *int) *GroupMembersUpdate {
 	if v != nil {
 		_u.SetGroupID(*v)
 	}
@@ -119,14 +119,14 @@ func (_u *UserGroupsUpdate) SetNillableGroupID(v *int) *UserGroupsUpdate {
 }
 
 // SetMemberRole sets the "member_role" field.
-func (_u *UserGroupsUpdate) SetMemberRole(v int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetMemberRole(v int) *GroupMembersUpdate {
 	_u.mutation.ResetMemberRole()
 	_u.mutation.SetMemberRole(v)
 	return _u
 }
 
 // SetNillableMemberRole sets the "member_role" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableMemberRole(v *int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetNillableMemberRole(v *int) *GroupMembersUpdate {
 	if v != nil {
 		_u.SetMemberRole(*v)
 	}
@@ -134,20 +134,20 @@ func (_u *UserGroupsUpdate) SetNillableMemberRole(v *int) *UserGroupsUpdate {
 }
 
 // AddMemberRole adds value to the "member_role" field.
-func (_u *UserGroupsUpdate) AddMemberRole(v int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) AddMemberRole(v int) *GroupMembersUpdate {
 	_u.mutation.AddMemberRole(v)
 	return _u
 }
 
 // SetMemberStatus sets the "member_status" field.
-func (_u *UserGroupsUpdate) SetMemberStatus(v int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetMemberStatus(v int) *GroupMembersUpdate {
 	_u.mutation.ResetMemberStatus()
 	_u.mutation.SetMemberStatus(v)
 	return _u
 }
 
 // SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableMemberStatus(v *int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetNillableMemberStatus(v *int) *GroupMembersUpdate {
 	if v != nil {
 		_u.SetMemberStatus(*v)
 	}
@@ -155,19 +155,19 @@ func (_u *UserGroupsUpdate) SetNillableMemberStatus(v *int) *UserGroupsUpdate {
 }
 
 // AddMemberStatus adds value to the "member_status" field.
-func (_u *UserGroupsUpdate) AddMemberStatus(v int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) AddMemberStatus(v int) *GroupMembersUpdate {
 	_u.mutation.AddMemberStatus(v)
 	return _u
 }
 
 // SetJoinedAt sets the "joined_at" field.
-func (_u *UserGroupsUpdate) SetJoinedAt(v time.Time) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetJoinedAt(v time.Time) *GroupMembersUpdate {
 	_u.mutation.SetJoinedAt(v)
 	return _u
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableJoinedAt(v *time.Time) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetNillableJoinedAt(v *time.Time) *GroupMembersUpdate {
 	if v != nil {
 		_u.SetJoinedAt(*v)
 	}
@@ -175,19 +175,19 @@ func (_u *UserGroupsUpdate) SetNillableJoinedAt(v *time.Time) *UserGroupsUpdate 
 }
 
 // ClearJoinedAt clears the value of the "joined_at" field.
-func (_u *UserGroupsUpdate) ClearJoinedAt() *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) ClearJoinedAt() *GroupMembersUpdate {
 	_u.mutation.ClearJoinedAt()
 	return _u
 }
 
 // SetExpiredAt sets the "expired_at" field.
-func (_u *UserGroupsUpdate) SetExpiredAt(v time.Time) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetExpiredAt(v time.Time) *GroupMembersUpdate {
 	_u.mutation.SetExpiredAt(v)
 	return _u
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableExpiredAt(v *time.Time) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetNillableExpiredAt(v *time.Time) *GroupMembersUpdate {
 	if v != nil {
 		_u.SetExpiredAt(*v)
 	}
@@ -195,31 +195,31 @@ func (_u *UserGroupsUpdate) SetNillableExpiredAt(v *time.Time) *UserGroupsUpdate
 }
 
 // ClearExpiredAt clears the value of the "expired_at" field.
-func (_u *UserGroupsUpdate) ClearExpiredAt() *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) ClearExpiredAt() *GroupMembersUpdate {
 	_u.mutation.ClearExpiredAt()
 	return _u
 }
 
 // SetMetadata sets the "metadata" field.
-func (_u *UserGroupsUpdate) SetMetadata(v map[string]string) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetMetadata(v map[string]string) *GroupMembersUpdate {
 	_u.mutation.SetMetadata(v)
 	return _u
 }
 
 // ClearMetadata clears the value of the "metadata" field.
-func (_u *UserGroupsUpdate) ClearMetadata() *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) ClearMetadata() *GroupMembersUpdate {
 	_u.mutation.ClearMetadata()
 	return _u
 }
 
 // SetDescription sets the "description" field.
-func (_u *UserGroupsUpdate) SetDescription(v string) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetDescription(v string) *GroupMembersUpdate {
 	_u.mutation.SetDescription(v)
 	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *UserGroupsUpdate) SetNillableDescription(v *string) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetNillableDescription(v *string) *GroupMembersUpdate {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
@@ -227,52 +227,52 @@ func (_u *UserGroupsUpdate) SetNillableDescription(v *string) *UserGroupsUpdate 
 }
 
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
-func (_u *UserGroupsUpdate) SetLionUsersID(id int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetLionUsersID(id int) *GroupMembersUpdate {
 	_u.mutation.SetLionUsersID(id)
 	return _u
 }
 
 // SetLionUsers sets the "lion_users" edge to the Users entity.
-func (_u *UserGroupsUpdate) SetLionUsers(v *Users) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetLionUsers(v *Users) *GroupMembersUpdate {
 	return _u.SetLionUsersID(v.ID)
 }
 
 // SetLionGroupsID sets the "lion_groups" edge to the Groups entity by ID.
-func (_u *UserGroupsUpdate) SetLionGroupsID(id int) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetLionGroupsID(id int) *GroupMembersUpdate {
 	_u.mutation.SetLionGroupsID(id)
 	return _u
 }
 
 // SetLionGroups sets the "lion_groups" edge to the Groups entity.
-func (_u *UserGroupsUpdate) SetLionGroups(v *Groups) *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) SetLionGroups(v *Groups) *GroupMembersUpdate {
 	return _u.SetLionGroupsID(v.ID)
 }
 
-// Mutation returns the UserGroupsMutation object of the builder.
-func (_u *UserGroupsUpdate) Mutation() *UserGroupsMutation {
+// Mutation returns the GroupMembersMutation object of the builder.
+func (_u *GroupMembersUpdate) Mutation() *GroupMembersMutation {
 	return _u.mutation
 }
 
 // ClearLionUsers clears the "lion_users" edge to the Users entity.
-func (_u *UserGroupsUpdate) ClearLionUsers() *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) ClearLionUsers() *GroupMembersUpdate {
 	_u.mutation.ClearLionUsers()
 	return _u
 }
 
 // ClearLionGroups clears the "lion_groups" edge to the Groups entity.
-func (_u *UserGroupsUpdate) ClearLionGroups() *UserGroupsUpdate {
+func (_u *GroupMembersUpdate) ClearLionGroups() *GroupMembersUpdate {
 	_u.mutation.ClearLionGroups()
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *UserGroupsUpdate) Save(ctx context.Context) (int, error) {
+func (_u *GroupMembersUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserGroupsUpdate) SaveX(ctx context.Context) int {
+func (_u *GroupMembersUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -281,52 +281,52 @@ func (_u *UserGroupsUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *UserGroupsUpdate) Exec(ctx context.Context) error {
+func (_u *GroupMembersUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *UserGroupsUpdate) ExecX(ctx context.Context) {
+func (_u *GroupMembersUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *UserGroupsUpdate) defaults() {
+func (_u *GroupMembersUpdate) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := usergroups.UpdateDefaultUpdatedAt()
+		v := groupmembers.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *UserGroupsUpdate) check() error {
+func (_u *GroupMembersUpdate) check() error {
 	if v, ok := _u.mutation.UserID(); ok {
-		if err := usergroups.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.user_id": %w`, err)}
+		if err := groupmembers.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "GroupMembers.user_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.GroupID(); ok {
-		if err := usergroups.GroupIDValidator(v); err != nil {
-			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.group_id": %w`, err)}
+		if err := groupmembers.GroupIDValidator(v); err != nil {
+			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "GroupMembers.group_id": %w`, err)}
 		}
 	}
 	if _u.mutation.LionUsersCleared() && len(_u.mutation.LionUsersIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "UserGroups.lion_users"`)
+		return errors.New(`lion: clearing a required unique edge "GroupMembers.lion_users"`)
 	}
 	if _u.mutation.LionGroupsCleared() && len(_u.mutation.LionGroupsIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "UserGroups.lion_groups"`)
+		return errors.New(`lion: clearing a required unique edge "GroupMembers.lion_groups"`)
 	}
 	return nil
 }
 
-func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+func (_u *GroupMembersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(usergroups.Table, usergroups.Columns, sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(groupmembers.Table, groupmembers.Columns, sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -335,65 +335,65 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(usergroups.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(groupmembers.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt64, value)
+		_spec.SetField(groupmembers.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(usergroups.FieldCreatedBy, field.TypeInt64, value)
+		_spec.AddField(groupmembers.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(usergroups.FieldCreatedBy, field.TypeInt64)
+		_spec.ClearField(groupmembers.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.SetField(groupmembers.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.AddField(groupmembers.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(usergroups.FieldUpdatedBy, field.TypeInt64)
+		_spec.ClearField(groupmembers.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.MemberRole(); ok {
-		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)
+		_spec.SetField(groupmembers.FieldMemberRole, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedMemberRole(); ok {
-		_spec.AddField(usergroups.FieldMemberRole, field.TypeInt, value)
+		_spec.AddField(groupmembers.FieldMemberRole, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.MemberStatus(); ok {
-		_spec.SetField(usergroups.FieldMemberStatus, field.TypeInt, value)
+		_spec.SetField(groupmembers.FieldMemberStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedMemberStatus(); ok {
-		_spec.AddField(usergroups.FieldMemberStatus, field.TypeInt, value)
+		_spec.AddField(groupmembers.FieldMemberStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.JoinedAt(); ok {
-		_spec.SetField(usergroups.FieldJoinedAt, field.TypeTime, value)
+		_spec.SetField(groupmembers.FieldJoinedAt, field.TypeTime, value)
 	}
 	if _u.mutation.JoinedAtCleared() {
-		_spec.ClearField(usergroups.FieldJoinedAt, field.TypeTime)
+		_spec.ClearField(groupmembers.FieldJoinedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.ExpiredAt(); ok {
-		_spec.SetField(usergroups.FieldExpiredAt, field.TypeTime, value)
+		_spec.SetField(groupmembers.FieldExpiredAt, field.TypeTime, value)
 	}
 	if _u.mutation.ExpiredAtCleared() {
-		_spec.ClearField(usergroups.FieldExpiredAt, field.TypeTime)
+		_spec.ClearField(groupmembers.FieldExpiredAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
-		_spec.SetField(usergroups.FieldMetadata, field.TypeJSON, value)
+		_spec.SetField(groupmembers.FieldMetadata, field.TypeJSON, value)
 	}
 	if _u.mutation.MetadataCleared() {
-		_spec.ClearField(usergroups.FieldMetadata, field.TypeJSON)
+		_spec.ClearField(groupmembers.FieldMetadata, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(usergroups.FieldDescription, field.TypeString, value)
+		_spec.SetField(groupmembers.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   usergroups.LionUsersTable,
-			Columns: []string{usergroups.LionUsersColumn},
+			Table:   groupmembers.LionUsersTable,
+			Columns: []string{groupmembers.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -405,8 +405,8 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   usergroups.LionUsersTable,
-			Columns: []string{usergroups.LionUsersColumn},
+			Table:   groupmembers.LionUsersTable,
+			Columns: []string{groupmembers.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -421,8 +421,8 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   usergroups.LionGroupsTable,
-			Columns: []string{usergroups.LionGroupsColumn},
+			Table:   groupmembers.LionGroupsTable,
+			Columns: []string{groupmembers.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(groups.FieldID, field.TypeInt),
@@ -434,8 +434,8 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   usergroups.LionGroupsTable,
-			Columns: []string{usergroups.LionGroupsColumn},
+			Table:   groupmembers.LionGroupsTable,
+			Columns: []string{groupmembers.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(groups.FieldID, field.TypeInt),
@@ -448,7 +448,7 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{usergroups.Label}
+			err = &NotFoundError{groupmembers.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -458,29 +458,29 @@ func (_u *UserGroupsUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	return _node, nil
 }
 
-// UserGroupsUpdateOne is the builder for updating a single UserGroups entity.
-type UserGroupsUpdateOne struct {
+// GroupMembersUpdateOne is the builder for updating a single GroupMembers entity.
+type GroupMembersUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *UserGroupsMutation
+	mutation *GroupMembersMutation
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *UserGroupsUpdateOne) SetUpdatedAt(v time.Time) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetUpdatedAt(v time.Time) *GroupMembersUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_u *UserGroupsUpdateOne) SetCreatedBy(v int64) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetCreatedBy(v int64) *GroupMembersUpdateOne {
 	_u.mutation.ResetCreatedBy()
 	_u.mutation.SetCreatedBy(v)
 	return _u
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableCreatedBy(v *int64) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetNillableCreatedBy(v *int64) *GroupMembersUpdateOne {
 	if v != nil {
 		_u.SetCreatedBy(*v)
 	}
@@ -488,26 +488,26 @@ func (_u *UserGroupsUpdateOne) SetNillableCreatedBy(v *int64) *UserGroupsUpdateO
 }
 
 // AddCreatedBy adds value to the "created_by" field.
-func (_u *UserGroupsUpdateOne) AddCreatedBy(v int64) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) AddCreatedBy(v int64) *GroupMembersUpdateOne {
 	_u.mutation.AddCreatedBy(v)
 	return _u
 }
 
 // ClearCreatedBy clears the value of the "created_by" field.
-func (_u *UserGroupsUpdateOne) ClearCreatedBy() *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) ClearCreatedBy() *GroupMembersUpdateOne {
 	_u.mutation.ClearCreatedBy()
 	return _u
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_u *UserGroupsUpdateOne) SetUpdatedBy(v int64) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetUpdatedBy(v int64) *GroupMembersUpdateOne {
 	_u.mutation.ResetUpdatedBy()
 	_u.mutation.SetUpdatedBy(v)
 	return _u
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableUpdatedBy(v *int64) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetNillableUpdatedBy(v *int64) *GroupMembersUpdateOne {
 	if v != nil {
 		_u.SetUpdatedBy(*v)
 	}
@@ -515,25 +515,25 @@ func (_u *UserGroupsUpdateOne) SetNillableUpdatedBy(v *int64) *UserGroupsUpdateO
 }
 
 // AddUpdatedBy adds value to the "updated_by" field.
-func (_u *UserGroupsUpdateOne) AddUpdatedBy(v int64) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) AddUpdatedBy(v int64) *GroupMembersUpdateOne {
 	_u.mutation.AddUpdatedBy(v)
 	return _u
 }
 
 // ClearUpdatedBy clears the value of the "updated_by" field.
-func (_u *UserGroupsUpdateOne) ClearUpdatedBy() *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) ClearUpdatedBy() *GroupMembersUpdateOne {
 	_u.mutation.ClearUpdatedBy()
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *UserGroupsUpdateOne) SetUserID(v int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetUserID(v int) *GroupMembersUpdateOne {
 	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableUserID(v *int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetNillableUserID(v *int) *GroupMembersUpdateOne {
 	if v != nil {
 		_u.SetUserID(*v)
 	}
@@ -541,13 +541,13 @@ func (_u *UserGroupsUpdateOne) SetNillableUserID(v *int) *UserGroupsUpdateOne {
 }
 
 // SetGroupID sets the "group_id" field.
-func (_u *UserGroupsUpdateOne) SetGroupID(v int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetGroupID(v int) *GroupMembersUpdateOne {
 	_u.mutation.SetGroupID(v)
 	return _u
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableGroupID(v *int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetNillableGroupID(v *int) *GroupMembersUpdateOne {
 	if v != nil {
 		_u.SetGroupID(*v)
 	}
@@ -555,14 +555,14 @@ func (_u *UserGroupsUpdateOne) SetNillableGroupID(v *int) *UserGroupsUpdateOne {
 }
 
 // SetMemberRole sets the "member_role" field.
-func (_u *UserGroupsUpdateOne) SetMemberRole(v int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetMemberRole(v int) *GroupMembersUpdateOne {
 	_u.mutation.ResetMemberRole()
 	_u.mutation.SetMemberRole(v)
 	return _u
 }
 
 // SetNillableMemberRole sets the "member_role" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableMemberRole(v *int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetNillableMemberRole(v *int) *GroupMembersUpdateOne {
 	if v != nil {
 		_u.SetMemberRole(*v)
 	}
@@ -570,20 +570,20 @@ func (_u *UserGroupsUpdateOne) SetNillableMemberRole(v *int) *UserGroupsUpdateOn
 }
 
 // AddMemberRole adds value to the "member_role" field.
-func (_u *UserGroupsUpdateOne) AddMemberRole(v int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) AddMemberRole(v int) *GroupMembersUpdateOne {
 	_u.mutation.AddMemberRole(v)
 	return _u
 }
 
 // SetMemberStatus sets the "member_status" field.
-func (_u *UserGroupsUpdateOne) SetMemberStatus(v int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetMemberStatus(v int) *GroupMembersUpdateOne {
 	_u.mutation.ResetMemberStatus()
 	_u.mutation.SetMemberStatus(v)
 	return _u
 }
 
 // SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableMemberStatus(v *int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetNillableMemberStatus(v *int) *GroupMembersUpdateOne {
 	if v != nil {
 		_u.SetMemberStatus(*v)
 	}
@@ -591,19 +591,19 @@ func (_u *UserGroupsUpdateOne) SetNillableMemberStatus(v *int) *UserGroupsUpdate
 }
 
 // AddMemberStatus adds value to the "member_status" field.
-func (_u *UserGroupsUpdateOne) AddMemberStatus(v int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) AddMemberStatus(v int) *GroupMembersUpdateOne {
 	_u.mutation.AddMemberStatus(v)
 	return _u
 }
 
 // SetJoinedAt sets the "joined_at" field.
-func (_u *UserGroupsUpdateOne) SetJoinedAt(v time.Time) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetJoinedAt(v time.Time) *GroupMembersUpdateOne {
 	_u.mutation.SetJoinedAt(v)
 	return _u
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableJoinedAt(v *time.Time) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetNillableJoinedAt(v *time.Time) *GroupMembersUpdateOne {
 	if v != nil {
 		_u.SetJoinedAt(*v)
 	}
@@ -611,19 +611,19 @@ func (_u *UserGroupsUpdateOne) SetNillableJoinedAt(v *time.Time) *UserGroupsUpda
 }
 
 // ClearJoinedAt clears the value of the "joined_at" field.
-func (_u *UserGroupsUpdateOne) ClearJoinedAt() *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) ClearJoinedAt() *GroupMembersUpdateOne {
 	_u.mutation.ClearJoinedAt()
 	return _u
 }
 
 // SetExpiredAt sets the "expired_at" field.
-func (_u *UserGroupsUpdateOne) SetExpiredAt(v time.Time) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetExpiredAt(v time.Time) *GroupMembersUpdateOne {
 	_u.mutation.SetExpiredAt(v)
 	return _u
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableExpiredAt(v *time.Time) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetNillableExpiredAt(v *time.Time) *GroupMembersUpdateOne {
 	if v != nil {
 		_u.SetExpiredAt(*v)
 	}
@@ -631,31 +631,31 @@ func (_u *UserGroupsUpdateOne) SetNillableExpiredAt(v *time.Time) *UserGroupsUpd
 }
 
 // ClearExpiredAt clears the value of the "expired_at" field.
-func (_u *UserGroupsUpdateOne) ClearExpiredAt() *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) ClearExpiredAt() *GroupMembersUpdateOne {
 	_u.mutation.ClearExpiredAt()
 	return _u
 }
 
 // SetMetadata sets the "metadata" field.
-func (_u *UserGroupsUpdateOne) SetMetadata(v map[string]string) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetMetadata(v map[string]string) *GroupMembersUpdateOne {
 	_u.mutation.SetMetadata(v)
 	return _u
 }
 
 // ClearMetadata clears the value of the "metadata" field.
-func (_u *UserGroupsUpdateOne) ClearMetadata() *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) ClearMetadata() *GroupMembersUpdateOne {
 	_u.mutation.ClearMetadata()
 	return _u
 }
 
 // SetDescription sets the "description" field.
-func (_u *UserGroupsUpdateOne) SetDescription(v string) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetDescription(v string) *GroupMembersUpdateOne {
 	_u.mutation.SetDescription(v)
 	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *UserGroupsUpdateOne) SetNillableDescription(v *string) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetNillableDescription(v *string) *GroupMembersUpdateOne {
 	if v != nil {
 		_u.SetDescription(*v)
 	}
@@ -663,65 +663,65 @@ func (_u *UserGroupsUpdateOne) SetNillableDescription(v *string) *UserGroupsUpda
 }
 
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
-func (_u *UserGroupsUpdateOne) SetLionUsersID(id int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetLionUsersID(id int) *GroupMembersUpdateOne {
 	_u.mutation.SetLionUsersID(id)
 	return _u
 }
 
 // SetLionUsers sets the "lion_users" edge to the Users entity.
-func (_u *UserGroupsUpdateOne) SetLionUsers(v *Users) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetLionUsers(v *Users) *GroupMembersUpdateOne {
 	return _u.SetLionUsersID(v.ID)
 }
 
 // SetLionGroupsID sets the "lion_groups" edge to the Groups entity by ID.
-func (_u *UserGroupsUpdateOne) SetLionGroupsID(id int) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetLionGroupsID(id int) *GroupMembersUpdateOne {
 	_u.mutation.SetLionGroupsID(id)
 	return _u
 }
 
 // SetLionGroups sets the "lion_groups" edge to the Groups entity.
-func (_u *UserGroupsUpdateOne) SetLionGroups(v *Groups) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) SetLionGroups(v *Groups) *GroupMembersUpdateOne {
 	return _u.SetLionGroupsID(v.ID)
 }
 
-// Mutation returns the UserGroupsMutation object of the builder.
-func (_u *UserGroupsUpdateOne) Mutation() *UserGroupsMutation {
+// Mutation returns the GroupMembersMutation object of the builder.
+func (_u *GroupMembersUpdateOne) Mutation() *GroupMembersMutation {
 	return _u.mutation
 }
 
 // ClearLionUsers clears the "lion_users" edge to the Users entity.
-func (_u *UserGroupsUpdateOne) ClearLionUsers() *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) ClearLionUsers() *GroupMembersUpdateOne {
 	_u.mutation.ClearLionUsers()
 	return _u
 }
 
 // ClearLionGroups clears the "lion_groups" edge to the Groups entity.
-func (_u *UserGroupsUpdateOne) ClearLionGroups() *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) ClearLionGroups() *GroupMembersUpdateOne {
 	_u.mutation.ClearLionGroups()
 	return _u
 }
 
-// Where appends a list predicates to the UserGroupsUpdate builder.
-func (_u *UserGroupsUpdateOne) Where(ps ...predicate.UserGroups) *UserGroupsUpdateOne {
+// Where appends a list predicates to the GroupMembersUpdate builder.
+func (_u *GroupMembersUpdateOne) Where(ps ...predicate.GroupMembers) *GroupMembersUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *UserGroupsUpdateOne) Select(field string, fields ...string) *UserGroupsUpdateOne {
+func (_u *GroupMembersUpdateOne) Select(field string, fields ...string) *GroupMembersUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated UserGroups entity.
-func (_u *UserGroupsUpdateOne) Save(ctx context.Context) (*UserGroups, error) {
+// Save executes the query and returns the updated GroupMembers entity.
+func (_u *GroupMembersUpdateOne) Save(ctx context.Context) (*GroupMembers, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserGroupsUpdateOne) SaveX(ctx context.Context) *UserGroups {
+func (_u *GroupMembersUpdateOne) SaveX(ctx context.Context) *GroupMembers {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -730,65 +730,65 @@ func (_u *UserGroupsUpdateOne) SaveX(ctx context.Context) *UserGroups {
 }
 
 // Exec executes the query on the entity.
-func (_u *UserGroupsUpdateOne) Exec(ctx context.Context) error {
+func (_u *GroupMembersUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *UserGroupsUpdateOne) ExecX(ctx context.Context) {
+func (_u *GroupMembersUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *UserGroupsUpdateOne) defaults() {
+func (_u *GroupMembersUpdateOne) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := usergroups.UpdateDefaultUpdatedAt()
+		v := groupmembers.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *UserGroupsUpdateOne) check() error {
+func (_u *GroupMembersUpdateOne) check() error {
 	if v, ok := _u.mutation.UserID(); ok {
-		if err := usergroups.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.user_id": %w`, err)}
+		if err := groupmembers.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "GroupMembers.user_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.GroupID(); ok {
-		if err := usergroups.GroupIDValidator(v); err != nil {
-			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.group_id": %w`, err)}
+		if err := groupmembers.GroupIDValidator(v); err != nil {
+			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "GroupMembers.group_id": %w`, err)}
 		}
 	}
 	if _u.mutation.LionUsersCleared() && len(_u.mutation.LionUsersIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "UserGroups.lion_users"`)
+		return errors.New(`lion: clearing a required unique edge "GroupMembers.lion_users"`)
 	}
 	if _u.mutation.LionGroupsCleared() && len(_u.mutation.LionGroupsIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "UserGroups.lion_groups"`)
+		return errors.New(`lion: clearing a required unique edge "GroupMembers.lion_groups"`)
 	}
 	return nil
 }
 
-func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, err error) {
+func (_u *GroupMembersUpdateOne) sqlSave(ctx context.Context) (_node *GroupMembers, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(usergroups.Table, usergroups.Columns, sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(groupmembers.Table, groupmembers.Columns, sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "UserGroups.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`lion: missing "GroupMembers.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, usergroups.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, groupmembers.FieldID)
 		for _, f := range fields {
-			if !usergroups.ValidColumn(f) {
+			if !groupmembers.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 			}
-			if f != usergroups.FieldID {
+			if f != groupmembers.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -801,65 +801,65 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(usergroups.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(groupmembers.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.CreatedBy(); ok {
-		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt64, value)
+		_spec.SetField(groupmembers.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedCreatedBy(); ok {
-		_spec.AddField(usergroups.FieldCreatedBy, field.TypeInt64, value)
+		_spec.AddField(groupmembers.FieldCreatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.CreatedByCleared() {
-		_spec.ClearField(usergroups.FieldCreatedBy, field.TypeInt64)
+		_spec.ClearField(groupmembers.FieldCreatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.UpdatedBy(); ok {
-		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.SetField(groupmembers.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if value, ok := _u.mutation.AddedUpdatedBy(); ok {
-		_spec.AddField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.AddField(groupmembers.FieldUpdatedBy, field.TypeInt64, value)
 	}
 	if _u.mutation.UpdatedByCleared() {
-		_spec.ClearField(usergroups.FieldUpdatedBy, field.TypeInt64)
+		_spec.ClearField(groupmembers.FieldUpdatedBy, field.TypeInt64)
 	}
 	if value, ok := _u.mutation.MemberRole(); ok {
-		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)
+		_spec.SetField(groupmembers.FieldMemberRole, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedMemberRole(); ok {
-		_spec.AddField(usergroups.FieldMemberRole, field.TypeInt, value)
+		_spec.AddField(groupmembers.FieldMemberRole, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.MemberStatus(); ok {
-		_spec.SetField(usergroups.FieldMemberStatus, field.TypeInt, value)
+		_spec.SetField(groupmembers.FieldMemberStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedMemberStatus(); ok {
-		_spec.AddField(usergroups.FieldMemberStatus, field.TypeInt, value)
+		_spec.AddField(groupmembers.FieldMemberStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.JoinedAt(); ok {
-		_spec.SetField(usergroups.FieldJoinedAt, field.TypeTime, value)
+		_spec.SetField(groupmembers.FieldJoinedAt, field.TypeTime, value)
 	}
 	if _u.mutation.JoinedAtCleared() {
-		_spec.ClearField(usergroups.FieldJoinedAt, field.TypeTime)
+		_spec.ClearField(groupmembers.FieldJoinedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.ExpiredAt(); ok {
-		_spec.SetField(usergroups.FieldExpiredAt, field.TypeTime, value)
+		_spec.SetField(groupmembers.FieldExpiredAt, field.TypeTime, value)
 	}
 	if _u.mutation.ExpiredAtCleared() {
-		_spec.ClearField(usergroups.FieldExpiredAt, field.TypeTime)
+		_spec.ClearField(groupmembers.FieldExpiredAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
-		_spec.SetField(usergroups.FieldMetadata, field.TypeJSON, value)
+		_spec.SetField(groupmembers.FieldMetadata, field.TypeJSON, value)
 	}
 	if _u.mutation.MetadataCleared() {
-		_spec.ClearField(usergroups.FieldMetadata, field.TypeJSON)
+		_spec.ClearField(groupmembers.FieldMetadata, field.TypeJSON)
 	}
 	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(usergroups.FieldDescription, field.TypeString, value)
+		_spec.SetField(groupmembers.FieldDescription, field.TypeString, value)
 	}
 	if _u.mutation.LionUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   usergroups.LionUsersTable,
-			Columns: []string{usergroups.LionUsersColumn},
+			Table:   groupmembers.LionUsersTable,
+			Columns: []string{groupmembers.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -871,8 +871,8 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   usergroups.LionUsersTable,
-			Columns: []string{usergroups.LionUsersColumn},
+			Table:   groupmembers.LionUsersTable,
+			Columns: []string{groupmembers.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -887,8 +887,8 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   usergroups.LionGroupsTable,
-			Columns: []string{usergroups.LionGroupsColumn},
+			Table:   groupmembers.LionGroupsTable,
+			Columns: []string{groupmembers.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(groups.FieldID, field.TypeInt),
@@ -900,8 +900,8 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   usergroups.LionGroupsTable,
-			Columns: []string{usergroups.LionGroupsColumn},
+			Table:   groupmembers.LionGroupsTable,
+			Columns: []string{groupmembers.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(groups.FieldID, field.TypeInt),
@@ -912,12 +912,12 @@ func (_u *UserGroupsUpdateOne) sqlSave(ctx context.Context) (_node *UserGroups, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &UserGroups{config: _u.config}
+	_node = &GroupMembers{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{usergroups.Label}
+			err = &NotFoundError{groupmembers.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

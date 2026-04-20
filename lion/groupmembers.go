@@ -3,21 +3,23 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
+	"github.com/grpc-kit/pkg/lion/groupmembers"
+	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
-// UserDepartments is the model entity for the UserDepartments schema.
-type UserDepartments struct {
+// GroupMembers is the model entity for the GroupMembers schema.
+type GroupMembers struct {
 	config `json:"-"`
 	// ID of the ent.
+	// 用户群组关系 ID，全局唯一标识
 	ID int `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
@@ -27,71 +29,73 @@ type UserDepartments struct {
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
-	// 部门 ID
-	DepartmentID int `json:"department_id,omitempty"`
-	// 用户 ID
+	// 用户 ID，关联用户表
 	UserID int `json:"user_id,omitempty"`
+	// 群组 ID，关联群组表
+	GroupID int `json:"group_id,omitempty"`
 	// 用户在群组中的角色：0-未指定，1-所有者，2-管理员，3-普通成员，4-访客
 	MemberRole int `json:"member_role,omitempty"`
 	// 用户群组关系状态：0-未知状态，1-待激活，2-正常启用，3-被邀请，4-禁用，5-被拒绝，6-已退出
 	MemberStatus int `json:"member_status,omitempty"`
-	// 成员关系类型，区分主部门和兼职部门
-	MemberType int `json:"member_type,omitempty"`
+	// 用户加入群组的时间
+	JoinedAt time.Time `json:"joined_at,omitempty"`
 	// 关系有效期，用于临时成员管理，0表示永久有效
 	ExpiredAt time.Time `json:"expired_at,omitempty"`
-	// 元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储
-	Metadata string `json:"metadata,omitempty"`
+	// 元数据，用于存储自定义属性，支持业务扩展
+	Metadata map[string]string `json:"metadata,omitempty"`
 	// 用户组描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the UserDepartmentsQuery when eager-loading is set.
-	Edges        UserDepartmentsEdges `json:"edges"`
+	// The values are being populated by the GroupMembersQuery when eager-loading is set.
+	Edges        GroupMembersEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// UserDepartmentsEdges holds the relations/edges for other nodes in the graph.
-type UserDepartmentsEdges struct {
-	// LionDepartments holds the value of the lion_departments edge.
-	LionDepartments *Departments `json:"lion_departments,omitempty"`
+// GroupMembersEdges holds the relations/edges for other nodes in the graph.
+type GroupMembersEdges struct {
 	// LionUsers holds the value of the lion_users edge.
 	LionUsers *Users `json:"lion_users,omitempty"`
+	// LionGroups holds the value of the lion_groups edge.
+	LionGroups *Groups `json:"lion_groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
-// LionDepartmentsOrErr returns the LionDepartments value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UserDepartmentsEdges) LionDepartmentsOrErr() (*Departments, error) {
-	if e.LionDepartments != nil {
-		return e.LionDepartments, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: departments.Label}
-	}
-	return nil, &NotLoadedError{edge: "lion_departments"}
-}
-
 // LionUsersOrErr returns the LionUsers value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserDepartmentsEdges) LionUsersOrErr() (*Users, error) {
+func (e GroupMembersEdges) LionUsersOrErr() (*Users, error) {
 	if e.LionUsers != nil {
 		return e.LionUsers, nil
-	} else if e.loadedTypes[1] {
+	} else if e.loadedTypes[0] {
 		return nil, &NotFoundError{label: users.Label}
 	}
 	return nil, &NotLoadedError{edge: "lion_users"}
 }
 
+// LionGroupsOrErr returns the LionGroups value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e GroupMembersEdges) LionGroupsOrErr() (*Groups, error) {
+	if e.LionGroups != nil {
+		return e.LionGroups, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: groups.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_groups"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
-func (*UserDepartments) scanValues(columns []string) ([]any, error) {
+func (*GroupMembers) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case userdepartments.FieldID, userdepartments.FieldCreatedBy, userdepartments.FieldUpdatedBy, userdepartments.FieldDepartmentID, userdepartments.FieldUserID, userdepartments.FieldMemberRole, userdepartments.FieldMemberStatus, userdepartments.FieldMemberType:
+		case groupmembers.FieldMetadata:
+			values[i] = new([]byte)
+		case groupmembers.FieldID, groupmembers.FieldCreatedBy, groupmembers.FieldUpdatedBy, groupmembers.FieldUserID, groupmembers.FieldGroupID, groupmembers.FieldMemberRole, groupmembers.FieldMemberStatus:
 			values[i] = new(sql.NullInt64)
-		case userdepartments.FieldMetadata, userdepartments.FieldDescription:
+		case groupmembers.FieldDescription:
 			values[i] = new(sql.NullString)
-		case userdepartments.FieldCreatedAt, userdepartments.FieldUpdatedAt, userdepartments.FieldExpiredAt:
+		case groupmembers.FieldCreatedAt, groupmembers.FieldUpdatedAt, groupmembers.FieldJoinedAt, groupmembers.FieldExpiredAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -101,86 +105,88 @@ func (*UserDepartments) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the UserDepartments fields.
-func (_m *UserDepartments) assignValues(columns []string, values []any) error {
+// to the GroupMembers fields.
+func (_m *GroupMembers) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case userdepartments.FieldID:
+		case groupmembers.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case userdepartments.FieldCreatedAt:
+		case groupmembers.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case userdepartments.FieldUpdatedAt:
+		case groupmembers.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case userdepartments.FieldCreatedBy:
+		case groupmembers.FieldCreatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_by", values[i])
 			} else if value.Valid {
 				_m.CreatedBy = value.Int64
 			}
-		case userdepartments.FieldUpdatedBy:
+		case groupmembers.FieldUpdatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case userdepartments.FieldDepartmentID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field department_id", values[i])
-			} else if value.Valid {
-				_m.DepartmentID = int(value.Int64)
-			}
-		case userdepartments.FieldUserID:
+		case groupmembers.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				_m.UserID = int(value.Int64)
 			}
-		case userdepartments.FieldMemberRole:
+		case groupmembers.FieldGroupID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field group_id", values[i])
+			} else if value.Valid {
+				_m.GroupID = int(value.Int64)
+			}
+		case groupmembers.FieldMemberRole:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field member_role", values[i])
 			} else if value.Valid {
 				_m.MemberRole = int(value.Int64)
 			}
-		case userdepartments.FieldMemberStatus:
+		case groupmembers.FieldMemberStatus:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field member_status", values[i])
 			} else if value.Valid {
 				_m.MemberStatus = int(value.Int64)
 			}
-		case userdepartments.FieldMemberType:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field member_type", values[i])
+		case groupmembers.FieldJoinedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field joined_at", values[i])
 			} else if value.Valid {
-				_m.MemberType = int(value.Int64)
+				_m.JoinedAt = value.Time
 			}
-		case userdepartments.FieldExpiredAt:
+		case groupmembers.FieldExpiredAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expired_at", values[i])
 			} else if value.Valid {
 				_m.ExpiredAt = value.Time
 			}
-		case userdepartments.FieldMetadata:
-			if value, ok := values[i].(*sql.NullString); !ok {
+		case groupmembers.FieldMetadata:
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field metadata", values[i])
-			} else if value.Valid {
-				_m.Metadata = value.String
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
 			}
-		case userdepartments.FieldDescription:
+		case groupmembers.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
@@ -193,44 +199,44 @@ func (_m *UserDepartments) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the UserDepartments.
+// Value returns the ent.Value that was dynamically selected and assigned to the GroupMembers.
 // This includes values selected through modifiers, order, etc.
-func (_m *UserDepartments) Value(name string) (ent.Value, error) {
+func (_m *GroupMembers) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionDepartments queries the "lion_departments" edge of the UserDepartments entity.
-func (_m *UserDepartments) QueryLionDepartments() *DepartmentsQuery {
-	return NewUserDepartmentsClient(_m.config).QueryLionDepartments(_m)
+// QueryLionUsers queries the "lion_users" edge of the GroupMembers entity.
+func (_m *GroupMembers) QueryLionUsers() *UsersQuery {
+	return NewGroupMembersClient(_m.config).QueryLionUsers(_m)
 }
 
-// QueryLionUsers queries the "lion_users" edge of the UserDepartments entity.
-func (_m *UserDepartments) QueryLionUsers() *UsersQuery {
-	return NewUserDepartmentsClient(_m.config).QueryLionUsers(_m)
+// QueryLionGroups queries the "lion_groups" edge of the GroupMembers entity.
+func (_m *GroupMembers) QueryLionGroups() *GroupsQuery {
+	return NewGroupMembersClient(_m.config).QueryLionGroups(_m)
 }
 
-// Update returns a builder for updating this UserDepartments.
-// Note that you need to call UserDepartments.Unwrap() before calling this method if this UserDepartments
+// Update returns a builder for updating this GroupMembers.
+// Note that you need to call GroupMembers.Unwrap() before calling this method if this GroupMembers
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *UserDepartments) Update() *UserDepartmentsUpdateOne {
-	return NewUserDepartmentsClient(_m.config).UpdateOne(_m)
+func (_m *GroupMembers) Update() *GroupMembersUpdateOne {
+	return NewGroupMembersClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the UserDepartments entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the GroupMembers entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *UserDepartments) Unwrap() *UserDepartments {
+func (_m *GroupMembers) Unwrap() *GroupMembers {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: UserDepartments is not a transactional entity")
+		panic("lion: GroupMembers is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *UserDepartments) String() string {
+func (_m *GroupMembers) String() string {
 	var builder strings.Builder
-	builder.WriteString("UserDepartments(")
+	builder.WriteString("GroupMembers(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -244,11 +250,11 @@ func (_m *UserDepartments) String() string {
 	builder.WriteString("updated_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
-	builder.WriteString("department_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.DepartmentID))
-	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString(", ")
+	builder.WriteString("group_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.GroupID))
 	builder.WriteString(", ")
 	builder.WriteString("member_role=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MemberRole))
@@ -256,14 +262,14 @@ func (_m *UserDepartments) String() string {
 	builder.WriteString("member_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MemberStatus))
 	builder.WriteString(", ")
-	builder.WriteString("member_type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MemberType))
+	builder.WriteString("joined_at=")
+	builder.WriteString(_m.JoinedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("expired_at=")
 	builder.WriteString(_m.ExpiredAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
-	builder.WriteString(_m.Metadata)
+	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
@@ -271,5 +277,5 @@ func (_m *UserDepartments) String() string {
 	return builder.String()
 }
 
-// UserDepartmentsSlice is a parsable slice of UserDepartments.
-type UserDepartmentsSlice []*UserDepartments
+// GroupMembersSlice is a parsable slice of GroupMembers.
+type GroupMembersSlice []*GroupMembers

@@ -18,8 +18,12 @@ type Tx struct {
 	AuthProviders *AuthProvidersClient
 	// Credentials is the client for interacting with the Credentials builders.
 	Credentials *CredentialsClient
+	// DepartmentMembers is the client for interacting with the DepartmentMembers builders.
+	DepartmentMembers *DepartmentMembersClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
+	// GroupMembers is the client for interacting with the GroupMembers builders.
+	GroupMembers *GroupMembersClient
 	// GroupRoles is the client for interacting with the GroupRoles builders.
 	GroupRoles *GroupRolesClient
 	// Groups is the client for interacting with the Groups builders.
@@ -44,10 +48,6 @@ type Tx struct {
 	Roles *RolesClient
 	// Scopes is the client for interacting with the Scopes builders.
 	Scopes *ScopesClient
-	// UserDepartments is the client for interacting with the UserDepartments builders.
-	UserDepartments *UserDepartmentsClient
-	// UserGroups is the client for interacting with the UserGroups builders.
-	UserGroups *UserGroupsClient
 	// UserIdentities is the client for interacting with the UserIdentities builders.
 	UserIdentities *UserIdentitiesClient
 	// UserProfiles is the client for interacting with the UserProfiles builders.
@@ -190,7 +190,9 @@ func (tx *Tx) init() {
 	tx.Actions = NewActionsClient(tx.config)
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
 	tx.Credentials = NewCredentialsClient(tx.config)
+	tx.DepartmentMembers = NewDepartmentMembersClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
+	tx.GroupMembers = NewGroupMembersClient(tx.config)
 	tx.GroupRoles = NewGroupRolesClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.PermissionBindings = NewPermissionBindingsClient(tx.config)
@@ -203,8 +205,6 @@ func (tx *Tx) init() {
 	tx.RolePermissions = NewRolePermissionsClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
 	tx.Scopes = NewScopesClient(tx.config)
-	tx.UserDepartments = NewUserDepartmentsClient(tx.config)
-	tx.UserGroups = NewUserGroupsClient(tx.config)
 	tx.UserIdentities = NewUserIdentitiesClient(tx.config)
 	tx.UserProfiles = NewUserProfilesClient(tx.config)
 	tx.UserRoles = NewUserRolesClient(tx.config)

@@ -9,13 +9,13 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// UserDepartments holds the schema definition for the Demo entity.
-type UserDepartments struct {
+// DepartmentMembers holds the schema definition for department membership relations.
+type DepartmentMembers struct {
 	ent.Schema
 }
 
 // Fields of the table.
-func (UserDepartments) Fields() []ent.Field {
+func (DepartmentMembers) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("department_id").
 			Comment("部门 ID"),
@@ -43,16 +43,15 @@ func (UserDepartments) Fields() []ent.Field {
 }
 
 // Edges of the table.
-func (UserDepartments) Edges() []ent.Edge {
+func (DepartmentMembers) Edges() []ent.Edge {
 	return []ent.Edge{
-		// 一个 Menu 可以对应多个 RoleMenu (中间实体)
 		edge.From("lion_departments", Departments.Type).
-			Ref("lion_user_departments").
+			Ref("lion_department_members").
 			Field("department_id").
 			Unique().
 			Required(),
 		edge.From("lion_users", Users.Type).
-			Ref("lion_user_departments").
+			Ref("lion_department_members").
 			Field("user_id").
 			Unique().
 			Required(),
@@ -60,7 +59,7 @@ func (UserDepartments) Edges() []ent.Edge {
 }
 
 // Mixin of the table.
-func (UserDepartments) Mixin() []ent.Mixin {
+func (DepartmentMembers) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{},
 		AuditMixin{},
@@ -68,7 +67,7 @@ func (UserDepartments) Mixin() []ent.Mixin {
 }
 
 // Indexes of the table.
-func (UserDepartments) Indexes() []ent.Index {
+func (DepartmentMembers) Indexes() []ent.Index {
 	return []ent.Index{
 		// 确保用户和部门的组合是唯一的
 		index.Fields("user_id", "department_id").Unique(),
@@ -81,8 +80,8 @@ func (UserDepartments) Indexes() []ent.Index {
 }
 
 // Annotations 自定义表名
-func (UserDepartments) Annotations() []schema.Annotation {
+func (DepartmentMembers) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_user_departments"},
+		entsql.Annotation{Table: "lion_department_members"},
 	}
 }

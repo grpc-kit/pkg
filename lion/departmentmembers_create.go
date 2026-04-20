@@ -10,26 +10,26 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
-// UserDepartmentsCreate is the builder for creating a UserDepartments entity.
-type UserDepartmentsCreate struct {
+// DepartmentMembersCreate is the builder for creating a DepartmentMembers entity.
+type DepartmentMembersCreate struct {
 	config
-	mutation *UserDepartmentsMutation
+	mutation *DepartmentMembersMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *UserDepartmentsCreate) SetCreatedAt(v time.Time) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetCreatedAt(v time.Time) *DepartmentMembersCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *UserDepartmentsCreate) SetNillableCreatedAt(v *time.Time) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetNillableCreatedAt(v *time.Time) *DepartmentMembersCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -37,13 +37,13 @@ func (_c *UserDepartmentsCreate) SetNillableCreatedAt(v *time.Time) *UserDepartm
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *UserDepartmentsCreate) SetUpdatedAt(v time.Time) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetUpdatedAt(v time.Time) *DepartmentMembersCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *UserDepartmentsCreate) SetNillableUpdatedAt(v *time.Time) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetNillableUpdatedAt(v *time.Time) *DepartmentMembersCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -51,13 +51,13 @@ func (_c *UserDepartmentsCreate) SetNillableUpdatedAt(v *time.Time) *UserDepartm
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_c *UserDepartmentsCreate) SetCreatedBy(v int64) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetCreatedBy(v int64) *DepartmentMembersCreate {
 	_c.mutation.SetCreatedBy(v)
 	return _c
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_c *UserDepartmentsCreate) SetNillableCreatedBy(v *int64) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetNillableCreatedBy(v *int64) *DepartmentMembersCreate {
 	if v != nil {
 		_c.SetCreatedBy(*v)
 	}
@@ -65,13 +65,13 @@ func (_c *UserDepartmentsCreate) SetNillableCreatedBy(v *int64) *UserDepartments
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_c *UserDepartmentsCreate) SetUpdatedBy(v int64) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetUpdatedBy(v int64) *DepartmentMembersCreate {
 	_c.mutation.SetUpdatedBy(v)
 	return _c
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_c *UserDepartmentsCreate) SetNillableUpdatedBy(v *int64) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetNillableUpdatedBy(v *int64) *DepartmentMembersCreate {
 	if v != nil {
 		_c.SetUpdatedBy(*v)
 	}
@@ -79,25 +79,25 @@ func (_c *UserDepartmentsCreate) SetNillableUpdatedBy(v *int64) *UserDepartments
 }
 
 // SetDepartmentID sets the "department_id" field.
-func (_c *UserDepartmentsCreate) SetDepartmentID(v int) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetDepartmentID(v int) *DepartmentMembersCreate {
 	_c.mutation.SetDepartmentID(v)
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *UserDepartmentsCreate) SetUserID(v int) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetUserID(v int) *DepartmentMembersCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetMemberRole sets the "member_role" field.
-func (_c *UserDepartmentsCreate) SetMemberRole(v int) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetMemberRole(v int) *DepartmentMembersCreate {
 	_c.mutation.SetMemberRole(v)
 	return _c
 }
 
 // SetNillableMemberRole sets the "member_role" field if the given value is not nil.
-func (_c *UserDepartmentsCreate) SetNillableMemberRole(v *int) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetNillableMemberRole(v *int) *DepartmentMembersCreate {
 	if v != nil {
 		_c.SetMemberRole(*v)
 	}
@@ -105,13 +105,13 @@ func (_c *UserDepartmentsCreate) SetNillableMemberRole(v *int) *UserDepartmentsC
 }
 
 // SetMemberStatus sets the "member_status" field.
-func (_c *UserDepartmentsCreate) SetMemberStatus(v int) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetMemberStatus(v int) *DepartmentMembersCreate {
 	_c.mutation.SetMemberStatus(v)
 	return _c
 }
 
 // SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
-func (_c *UserDepartmentsCreate) SetNillableMemberStatus(v *int) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetNillableMemberStatus(v *int) *DepartmentMembersCreate {
 	if v != nil {
 		_c.SetMemberStatus(*v)
 	}
@@ -119,13 +119,13 @@ func (_c *UserDepartmentsCreate) SetNillableMemberStatus(v *int) *UserDepartment
 }
 
 // SetMemberType sets the "member_type" field.
-func (_c *UserDepartmentsCreate) SetMemberType(v int) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetMemberType(v int) *DepartmentMembersCreate {
 	_c.mutation.SetMemberType(v)
 	return _c
 }
 
 // SetNillableMemberType sets the "member_type" field if the given value is not nil.
-func (_c *UserDepartmentsCreate) SetNillableMemberType(v *int) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetNillableMemberType(v *int) *DepartmentMembersCreate {
 	if v != nil {
 		_c.SetMemberType(*v)
 	}
@@ -133,13 +133,13 @@ func (_c *UserDepartmentsCreate) SetNillableMemberType(v *int) *UserDepartmentsC
 }
 
 // SetExpiredAt sets the "expired_at" field.
-func (_c *UserDepartmentsCreate) SetExpiredAt(v time.Time) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetExpiredAt(v time.Time) *DepartmentMembersCreate {
 	_c.mutation.SetExpiredAt(v)
 	return _c
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_c *UserDepartmentsCreate) SetNillableExpiredAt(v *time.Time) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetNillableExpiredAt(v *time.Time) *DepartmentMembersCreate {
 	if v != nil {
 		_c.SetExpiredAt(*v)
 	}
@@ -147,13 +147,13 @@ func (_c *UserDepartmentsCreate) SetNillableExpiredAt(v *time.Time) *UserDepartm
 }
 
 // SetMetadata sets the "metadata" field.
-func (_c *UserDepartmentsCreate) SetMetadata(v string) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetMetadata(v string) *DepartmentMembersCreate {
 	_c.mutation.SetMetadata(v)
 	return _c
 }
 
 // SetNillableMetadata sets the "metadata" field if the given value is not nil.
-func (_c *UserDepartmentsCreate) SetNillableMetadata(v *string) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetNillableMetadata(v *string) *DepartmentMembersCreate {
 	if v != nil {
 		_c.SetMetadata(*v)
 	}
@@ -161,13 +161,13 @@ func (_c *UserDepartmentsCreate) SetNillableMetadata(v *string) *UserDepartments
 }
 
 // SetDescription sets the "description" field.
-func (_c *UserDepartmentsCreate) SetDescription(v string) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetDescription(v string) *DepartmentMembersCreate {
 	_c.mutation.SetDescription(v)
 	return _c
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_c *UserDepartmentsCreate) SetNillableDescription(v *string) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetNillableDescription(v *string) *DepartmentMembersCreate {
 	if v != nil {
 		_c.SetDescription(*v)
 	}
@@ -175,40 +175,40 @@ func (_c *UserDepartmentsCreate) SetNillableDescription(v *string) *UserDepartme
 }
 
 // SetLionDepartmentsID sets the "lion_departments" edge to the Departments entity by ID.
-func (_c *UserDepartmentsCreate) SetLionDepartmentsID(id int) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetLionDepartmentsID(id int) *DepartmentMembersCreate {
 	_c.mutation.SetLionDepartmentsID(id)
 	return _c
 }
 
 // SetLionDepartments sets the "lion_departments" edge to the Departments entity.
-func (_c *UserDepartmentsCreate) SetLionDepartments(v *Departments) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetLionDepartments(v *Departments) *DepartmentMembersCreate {
 	return _c.SetLionDepartmentsID(v.ID)
 }
 
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
-func (_c *UserDepartmentsCreate) SetLionUsersID(id int) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetLionUsersID(id int) *DepartmentMembersCreate {
 	_c.mutation.SetLionUsersID(id)
 	return _c
 }
 
 // SetLionUsers sets the "lion_users" edge to the Users entity.
-func (_c *UserDepartmentsCreate) SetLionUsers(v *Users) *UserDepartmentsCreate {
+func (_c *DepartmentMembersCreate) SetLionUsers(v *Users) *DepartmentMembersCreate {
 	return _c.SetLionUsersID(v.ID)
 }
 
-// Mutation returns the UserDepartmentsMutation object of the builder.
-func (_c *UserDepartmentsCreate) Mutation() *UserDepartmentsMutation {
+// Mutation returns the DepartmentMembersMutation object of the builder.
+func (_c *DepartmentMembersCreate) Mutation() *DepartmentMembersMutation {
 	return _c.mutation
 }
 
-// Save creates the UserDepartments in the database.
-func (_c *UserDepartmentsCreate) Save(ctx context.Context) (*UserDepartments, error) {
+// Save creates the DepartmentMembers in the database.
+func (_c *DepartmentMembersCreate) Save(ctx context.Context) (*DepartmentMembers, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *UserDepartmentsCreate) SaveX(ctx context.Context) *UserDepartments {
+func (_c *DepartmentMembersCreate) SaveX(ctx context.Context) *DepartmentMembers {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -217,90 +217,90 @@ func (_c *UserDepartmentsCreate) SaveX(ctx context.Context) *UserDepartments {
 }
 
 // Exec executes the query.
-func (_c *UserDepartmentsCreate) Exec(ctx context.Context) error {
+func (_c *DepartmentMembersCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *UserDepartmentsCreate) ExecX(ctx context.Context) {
+func (_c *DepartmentMembersCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *UserDepartmentsCreate) defaults() {
+func (_c *DepartmentMembersCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := userdepartments.DefaultCreatedAt()
+		v := departmentmembers.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := userdepartments.DefaultUpdatedAt()
+		v := departmentmembers.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := _c.mutation.CreatedBy(); !ok {
-		v := userdepartments.DefaultCreatedBy
+		v := departmentmembers.DefaultCreatedBy
 		_c.mutation.SetCreatedBy(v)
 	}
 	if _, ok := _c.mutation.UpdatedBy(); !ok {
-		v := userdepartments.DefaultUpdatedBy
+		v := departmentmembers.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
 	if _, ok := _c.mutation.MemberRole(); !ok {
-		v := userdepartments.DefaultMemberRole
+		v := departmentmembers.DefaultMemberRole
 		_c.mutation.SetMemberRole(v)
 	}
 	if _, ok := _c.mutation.MemberStatus(); !ok {
-		v := userdepartments.DefaultMemberStatus
+		v := departmentmembers.DefaultMemberStatus
 		_c.mutation.SetMemberStatus(v)
 	}
 	if _, ok := _c.mutation.MemberType(); !ok {
-		v := userdepartments.DefaultMemberType
+		v := departmentmembers.DefaultMemberType
 		_c.mutation.SetMemberType(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
-		v := userdepartments.DefaultDescription
+		v := departmentmembers.DefaultDescription
 		_c.mutation.SetDescription(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *UserDepartmentsCreate) check() error {
+func (_c *DepartmentMembersCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "UserDepartments.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "DepartmentMembers.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserDepartments.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "DepartmentMembers.updated_at"`)}
 	}
 	if _, ok := _c.mutation.DepartmentID(); !ok {
-		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "UserDepartments.department_id"`)}
+		return &ValidationError{Name: "department_id", err: errors.New(`lion: missing required field "DepartmentMembers.department_id"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserDepartments.user_id"`)}
+		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "DepartmentMembers.user_id"`)}
 	}
 	if _, ok := _c.mutation.MemberRole(); !ok {
-		return &ValidationError{Name: "member_role", err: errors.New(`lion: missing required field "UserDepartments.member_role"`)}
+		return &ValidationError{Name: "member_role", err: errors.New(`lion: missing required field "DepartmentMembers.member_role"`)}
 	}
 	if _, ok := _c.mutation.MemberStatus(); !ok {
-		return &ValidationError{Name: "member_status", err: errors.New(`lion: missing required field "UserDepartments.member_status"`)}
+		return &ValidationError{Name: "member_status", err: errors.New(`lion: missing required field "DepartmentMembers.member_status"`)}
 	}
 	if _, ok := _c.mutation.MemberType(); !ok {
-		return &ValidationError{Name: "member_type", err: errors.New(`lion: missing required field "UserDepartments.member_type"`)}
+		return &ValidationError{Name: "member_type", err: errors.New(`lion: missing required field "DepartmentMembers.member_type"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "UserDepartments.description"`)}
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "DepartmentMembers.description"`)}
 	}
 	if len(_c.mutation.LionDepartmentsIDs()) == 0 {
-		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "UserDepartments.lion_departments"`)}
+		return &ValidationError{Name: "lion_departments", err: errors.New(`lion: missing required edge "DepartmentMembers.lion_departments"`)}
 	}
 	if len(_c.mutation.LionUsersIDs()) == 0 {
-		return &ValidationError{Name: "lion_users", err: errors.New(`lion: missing required edge "UserDepartments.lion_users"`)}
+		return &ValidationError{Name: "lion_users", err: errors.New(`lion: missing required edge "DepartmentMembers.lion_users"`)}
 	}
 	return nil
 }
 
-func (_c *UserDepartmentsCreate) sqlSave(ctx context.Context) (*UserDepartments, error) {
+func (_c *DepartmentMembersCreate) sqlSave(ctx context.Context) (*DepartmentMembers, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -318,57 +318,57 @@ func (_c *UserDepartmentsCreate) sqlSave(ctx context.Context) (*UserDepartments,
 	return _node, nil
 }
 
-func (_c *UserDepartmentsCreate) createSpec() (*UserDepartments, *sqlgraph.CreateSpec) {
+func (_c *DepartmentMembersCreate) createSpec() (*DepartmentMembers, *sqlgraph.CreateSpec) {
 	var (
-		_node = &UserDepartments{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(userdepartments.Table, sqlgraph.NewFieldSpec(userdepartments.FieldID, field.TypeInt))
+		_node = &DepartmentMembers{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(departmentmembers.Table, sqlgraph.NewFieldSpec(departmentmembers.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(userdepartments.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(departmentmembers.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(userdepartments.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(departmentmembers.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
-		_spec.SetField(userdepartments.FieldCreatedBy, field.TypeInt64, value)
+		_spec.SetField(departmentmembers.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = value
 	}
 	if value, ok := _c.mutation.UpdatedBy(); ok {
-		_spec.SetField(userdepartments.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.SetField(departmentmembers.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
 	}
 	if value, ok := _c.mutation.MemberRole(); ok {
-		_spec.SetField(userdepartments.FieldMemberRole, field.TypeInt, value)
+		_spec.SetField(departmentmembers.FieldMemberRole, field.TypeInt, value)
 		_node.MemberRole = value
 	}
 	if value, ok := _c.mutation.MemberStatus(); ok {
-		_spec.SetField(userdepartments.FieldMemberStatus, field.TypeInt, value)
+		_spec.SetField(departmentmembers.FieldMemberStatus, field.TypeInt, value)
 		_node.MemberStatus = value
 	}
 	if value, ok := _c.mutation.MemberType(); ok {
-		_spec.SetField(userdepartments.FieldMemberType, field.TypeInt, value)
+		_spec.SetField(departmentmembers.FieldMemberType, field.TypeInt, value)
 		_node.MemberType = value
 	}
 	if value, ok := _c.mutation.ExpiredAt(); ok {
-		_spec.SetField(userdepartments.FieldExpiredAt, field.TypeTime, value)
+		_spec.SetField(departmentmembers.FieldExpiredAt, field.TypeTime, value)
 		_node.ExpiredAt = value
 	}
 	if value, ok := _c.mutation.Metadata(); ok {
-		_spec.SetField(userdepartments.FieldMetadata, field.TypeString, value)
+		_spec.SetField(departmentmembers.FieldMetadata, field.TypeString, value)
 		_node.Metadata = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
-		_spec.SetField(userdepartments.FieldDescription, field.TypeString, value)
+		_spec.SetField(departmentmembers.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
 	if nodes := _c.mutation.LionDepartmentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionDepartmentsTable,
-			Columns: []string{userdepartments.LionDepartmentsColumn},
+			Table:   departmentmembers.LionDepartmentsTable,
+			Columns: []string{departmentmembers.LionDepartmentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(departments.FieldID, field.TypeInt),
@@ -384,8 +384,8 @@ func (_c *UserDepartmentsCreate) createSpec() (*UserDepartments, *sqlgraph.Creat
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   userdepartments.LionUsersTable,
-			Columns: []string{userdepartments.LionUsersColumn},
+			Table:   departmentmembers.LionUsersTable,
+			Columns: []string{departmentmembers.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -400,27 +400,27 @@ func (_c *UserDepartmentsCreate) createSpec() (*UserDepartments, *sqlgraph.Creat
 	return _node, _spec
 }
 
-// UserDepartmentsCreateBulk is the builder for creating many UserDepartments entities in bulk.
-type UserDepartmentsCreateBulk struct {
+// DepartmentMembersCreateBulk is the builder for creating many DepartmentMembers entities in bulk.
+type DepartmentMembersCreateBulk struct {
 	config
 	err      error
-	builders []*UserDepartmentsCreate
+	builders []*DepartmentMembersCreate
 }
 
-// Save creates the UserDepartments entities in the database.
-func (_c *UserDepartmentsCreateBulk) Save(ctx context.Context) ([]*UserDepartments, error) {
+// Save creates the DepartmentMembers entities in the database.
+func (_c *DepartmentMembersCreateBulk) Save(ctx context.Context) ([]*DepartmentMembers, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*UserDepartments, len(_c.builders))
+	nodes := make([]*DepartmentMembers, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*UserDepartmentsMutation)
+				mutation, ok := m.(*DepartmentMembersMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -467,7 +467,7 @@ func (_c *UserDepartmentsCreateBulk) Save(ctx context.Context) ([]*UserDepartmen
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *UserDepartmentsCreateBulk) SaveX(ctx context.Context) []*UserDepartments {
+func (_c *DepartmentMembersCreateBulk) SaveX(ctx context.Context) []*DepartmentMembers {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -476,13 +476,13 @@ func (_c *UserDepartmentsCreateBulk) SaveX(ctx context.Context) []*UserDepartmen
 }
 
 // Exec executes the query.
-func (_c *UserDepartmentsCreateBulk) Exec(ctx context.Context) error {
+func (_c *DepartmentMembersCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *UserDepartmentsCreateBulk) ExecX(ctx context.Context) {
+func (_c *DepartmentMembersCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

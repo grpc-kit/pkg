@@ -84,12 +84,12 @@ type Users struct {
 type UsersEdges struct {
 	// LionUserRoles holds the value of the lion_user_roles edge.
 	LionUserRoles []*UserRoles `json:"lion_user_roles,omitempty"`
-	// LionUserGroups holds the value of the lion_user_groups edge.
-	LionUserGroups []*UserGroups `json:"lion_user_groups,omitempty"`
+	// LionGroupMembers holds the value of the lion_group_members edge.
+	LionGroupMembers []*GroupMembers `json:"lion_group_members,omitempty"`
 	// LionUserIdentities holds the value of the lion_user_identities edge.
 	LionUserIdentities []*UserIdentities `json:"lion_user_identities,omitempty"`
-	// LionUserDepartments holds the value of the lion_user_departments edge.
-	LionUserDepartments []*UserDepartments `json:"lion_user_departments,omitempty"`
+	// LionDepartmentMembers holds the value of the lion_department_members edge.
+	LionDepartmentMembers []*DepartmentMembers `json:"lion_department_members,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -104,13 +104,13 @@ func (e UsersEdges) LionUserRolesOrErr() ([]*UserRoles, error) {
 	return nil, &NotLoadedError{edge: "lion_user_roles"}
 }
 
-// LionUserGroupsOrErr returns the LionUserGroups value or an error if the edge
+// LionGroupMembersOrErr returns the LionGroupMembers value or an error if the edge
 // was not loaded in eager-loading.
-func (e UsersEdges) LionUserGroupsOrErr() ([]*UserGroups, error) {
+func (e UsersEdges) LionGroupMembersOrErr() ([]*GroupMembers, error) {
 	if e.loadedTypes[1] {
-		return e.LionUserGroups, nil
+		return e.LionGroupMembers, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_user_groups"}
+	return nil, &NotLoadedError{edge: "lion_group_members"}
 }
 
 // LionUserIdentitiesOrErr returns the LionUserIdentities value or an error if the edge
@@ -122,13 +122,13 @@ func (e UsersEdges) LionUserIdentitiesOrErr() ([]*UserIdentities, error) {
 	return nil, &NotLoadedError{edge: "lion_user_identities"}
 }
 
-// LionUserDepartmentsOrErr returns the LionUserDepartments value or an error if the edge
+// LionDepartmentMembersOrErr returns the LionDepartmentMembers value or an error if the edge
 // was not loaded in eager-loading.
-func (e UsersEdges) LionUserDepartmentsOrErr() ([]*UserDepartments, error) {
+func (e UsersEdges) LionDepartmentMembersOrErr() ([]*DepartmentMembers, error) {
 	if e.loadedTypes[3] {
-		return e.LionUserDepartments, nil
+		return e.LionDepartmentMembers, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_user_departments"}
+	return nil, &NotLoadedError{edge: "lion_department_members"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -357,9 +357,9 @@ func (_m *Users) QueryLionUserRoles() *UserRolesQuery {
 	return NewUsersClient(_m.config).QueryLionUserRoles(_m)
 }
 
-// QueryLionUserGroups queries the "lion_user_groups" edge of the Users entity.
-func (_m *Users) QueryLionUserGroups() *UserGroupsQuery {
-	return NewUsersClient(_m.config).QueryLionUserGroups(_m)
+// QueryLionGroupMembers queries the "lion_group_members" edge of the Users entity.
+func (_m *Users) QueryLionGroupMembers() *GroupMembersQuery {
+	return NewUsersClient(_m.config).QueryLionGroupMembers(_m)
 }
 
 // QueryLionUserIdentities queries the "lion_user_identities" edge of the Users entity.
@@ -367,9 +367,9 @@ func (_m *Users) QueryLionUserIdentities() *UserIdentitiesQuery {
 	return NewUsersClient(_m.config).QueryLionUserIdentities(_m)
 }
 
-// QueryLionUserDepartments queries the "lion_user_departments" edge of the Users entity.
-func (_m *Users) QueryLionUserDepartments() *UserDepartmentsQuery {
-	return NewUsersClient(_m.config).QueryLionUserDepartments(_m)
+// QueryLionDepartmentMembers queries the "lion_department_members" edge of the Users entity.
+func (_m *Users) QueryLionDepartmentMembers() *DepartmentMembersQuery {
+	return NewUsersClient(_m.config).QueryLionDepartmentMembers(_m)
 }
 
 // Update returns a builder for updating this Users.

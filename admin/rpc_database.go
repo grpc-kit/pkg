@@ -15,12 +15,12 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
+	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/scopes"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
@@ -156,10 +156,10 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 
-	rootDeptMemberExists, err := tx.UserDepartments.Query().
+	rootDeptMemberExists, err := tx.DepartmentMembers.Query().
 		Where(
-			userdepartments.UserIDEQ(adminUser.ID),
-			userdepartments.DepartmentIDEQ(rootDept.ID),
+			departmentmembers.UserIDEQ(adminUser.ID),
+			departmentmembers.DepartmentIDEQ(rootDept.ID),
 		).
 		Exist(ctx)
 	if err != nil {
@@ -167,7 +167,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 	if !rootDeptMemberExists {
-		if err := tx.UserDepartments.Create().
+		if err := tx.DepartmentMembers.Create().
 			SetUserID(adminUser.ID).
 			SetDepartmentID(rootDept.ID).
 			SetMemberType(int(adminv1.Membership_PRIMARY.Number())).

@@ -9,13 +9,13 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// UserGroups 组下关联的具体用户
-type UserGroups struct {
+// GroupMembers 表示群组下的具体成员关系。
+type GroupMembers struct {
 	ent.Schema
 }
 
 // Fields of the table.
-func (UserGroups) Fields() []ent.Field {
+func (GroupMembers) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
 			Positive().
@@ -49,15 +49,15 @@ func (UserGroups) Fields() []ent.Field {
 }
 
 // Edges of the table.
-func (UserGroups) Edges() []ent.Edge {
+func (GroupMembers) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("lion_users", Users.Type).
-			Ref("lion_user_groups").
+			Ref("lion_group_members").
 			Field("user_id").
 			Unique().
 			Required(),
 		edge.From("lion_groups", Groups.Type).
-			Ref("lion_user_groups").
+			Ref("lion_group_members").
 			Field("group_id").
 			Unique().
 			Required(),
@@ -65,7 +65,7 @@ func (UserGroups) Edges() []ent.Edge {
 }
 
 // Mixin of the table.
-func (UserGroups) Mixin() []ent.Mixin {
+func (GroupMembers) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixinWithoutDeleted{}, // 使用包含 deleted_at 的 TimeMixin 支持软删除
 		AuditMixin{},
@@ -73,7 +73,7 @@ func (UserGroups) Mixin() []ent.Mixin {
 }
 
 // Indexes of the table.
-func (UserGroups) Indexes() []ent.Index {
+func (GroupMembers) Indexes() []ent.Index {
 	return []ent.Index{
 		// 唯一索引：确保用户在同一群组中只有一个关系记录
 		index.Fields("user_id", "group_id").Unique(),
@@ -81,8 +81,8 @@ func (UserGroups) Indexes() []ent.Index {
 }
 
 // Annotations 自定义表名
-func (UserGroups) Annotations() []schema.Annotation {
+func (GroupMembers) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_user_groups"},
+		entsql.Annotation{Table: "lion_group_members"},
 	}
 }

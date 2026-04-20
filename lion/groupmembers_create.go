@@ -10,26 +10,26 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/groupmembers"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
-// UserGroupsCreate is the builder for creating a UserGroups entity.
-type UserGroupsCreate struct {
+// GroupMembersCreate is the builder for creating a GroupMembers entity.
+type GroupMembersCreate struct {
 	config
-	mutation *UserGroupsMutation
+	mutation *GroupMembersMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *UserGroupsCreate) SetCreatedAt(v time.Time) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetCreatedAt(v time.Time) *GroupMembersCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableCreatedAt(v *time.Time) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetNillableCreatedAt(v *time.Time) *GroupMembersCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -37,13 +37,13 @@ func (_c *UserGroupsCreate) SetNillableCreatedAt(v *time.Time) *UserGroupsCreate
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *UserGroupsCreate) SetUpdatedAt(v time.Time) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetUpdatedAt(v time.Time) *GroupMembersCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableUpdatedAt(v *time.Time) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetNillableUpdatedAt(v *time.Time) *GroupMembersCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -51,13 +51,13 @@ func (_c *UserGroupsCreate) SetNillableUpdatedAt(v *time.Time) *UserGroupsCreate
 }
 
 // SetCreatedBy sets the "created_by" field.
-func (_c *UserGroupsCreate) SetCreatedBy(v int64) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetCreatedBy(v int64) *GroupMembersCreate {
 	_c.mutation.SetCreatedBy(v)
 	return _c
 }
 
 // SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableCreatedBy(v *int64) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetNillableCreatedBy(v *int64) *GroupMembersCreate {
 	if v != nil {
 		_c.SetCreatedBy(*v)
 	}
@@ -65,13 +65,13 @@ func (_c *UserGroupsCreate) SetNillableCreatedBy(v *int64) *UserGroupsCreate {
 }
 
 // SetUpdatedBy sets the "updated_by" field.
-func (_c *UserGroupsCreate) SetUpdatedBy(v int64) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetUpdatedBy(v int64) *GroupMembersCreate {
 	_c.mutation.SetUpdatedBy(v)
 	return _c
 }
 
 // SetNillableUpdatedBy sets the "updated_by" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableUpdatedBy(v *int64) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetNillableUpdatedBy(v *int64) *GroupMembersCreate {
 	if v != nil {
 		_c.SetUpdatedBy(*v)
 	}
@@ -79,25 +79,25 @@ func (_c *UserGroupsCreate) SetNillableUpdatedBy(v *int64) *UserGroupsCreate {
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *UserGroupsCreate) SetUserID(v int) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetUserID(v int) *GroupMembersCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetGroupID sets the "group_id" field.
-func (_c *UserGroupsCreate) SetGroupID(v int) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetGroupID(v int) *GroupMembersCreate {
 	_c.mutation.SetGroupID(v)
 	return _c
 }
 
 // SetMemberRole sets the "member_role" field.
-func (_c *UserGroupsCreate) SetMemberRole(v int) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetMemberRole(v int) *GroupMembersCreate {
 	_c.mutation.SetMemberRole(v)
 	return _c
 }
 
 // SetNillableMemberRole sets the "member_role" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableMemberRole(v *int) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetNillableMemberRole(v *int) *GroupMembersCreate {
 	if v != nil {
 		_c.SetMemberRole(*v)
 	}
@@ -105,13 +105,13 @@ func (_c *UserGroupsCreate) SetNillableMemberRole(v *int) *UserGroupsCreate {
 }
 
 // SetMemberStatus sets the "member_status" field.
-func (_c *UserGroupsCreate) SetMemberStatus(v int) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetMemberStatus(v int) *GroupMembersCreate {
 	_c.mutation.SetMemberStatus(v)
 	return _c
 }
 
 // SetNillableMemberStatus sets the "member_status" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableMemberStatus(v *int) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetNillableMemberStatus(v *int) *GroupMembersCreate {
 	if v != nil {
 		_c.SetMemberStatus(*v)
 	}
@@ -119,13 +119,13 @@ func (_c *UserGroupsCreate) SetNillableMemberStatus(v *int) *UserGroupsCreate {
 }
 
 // SetJoinedAt sets the "joined_at" field.
-func (_c *UserGroupsCreate) SetJoinedAt(v time.Time) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetJoinedAt(v time.Time) *GroupMembersCreate {
 	_c.mutation.SetJoinedAt(v)
 	return _c
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableJoinedAt(v *time.Time) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetNillableJoinedAt(v *time.Time) *GroupMembersCreate {
 	if v != nil {
 		_c.SetJoinedAt(*v)
 	}
@@ -133,13 +133,13 @@ func (_c *UserGroupsCreate) SetNillableJoinedAt(v *time.Time) *UserGroupsCreate 
 }
 
 // SetExpiredAt sets the "expired_at" field.
-func (_c *UserGroupsCreate) SetExpiredAt(v time.Time) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetExpiredAt(v time.Time) *GroupMembersCreate {
 	_c.mutation.SetExpiredAt(v)
 	return _c
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableExpiredAt(v *time.Time) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetNillableExpiredAt(v *time.Time) *GroupMembersCreate {
 	if v != nil {
 		_c.SetExpiredAt(*v)
 	}
@@ -147,19 +147,19 @@ func (_c *UserGroupsCreate) SetNillableExpiredAt(v *time.Time) *UserGroupsCreate
 }
 
 // SetMetadata sets the "metadata" field.
-func (_c *UserGroupsCreate) SetMetadata(v map[string]string) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetMetadata(v map[string]string) *GroupMembersCreate {
 	_c.mutation.SetMetadata(v)
 	return _c
 }
 
 // SetDescription sets the "description" field.
-func (_c *UserGroupsCreate) SetDescription(v string) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetDescription(v string) *GroupMembersCreate {
 	_c.mutation.SetDescription(v)
 	return _c
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_c *UserGroupsCreate) SetNillableDescription(v *string) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetNillableDescription(v *string) *GroupMembersCreate {
 	if v != nil {
 		_c.SetDescription(*v)
 	}
@@ -167,46 +167,46 @@ func (_c *UserGroupsCreate) SetNillableDescription(v *string) *UserGroupsCreate 
 }
 
 // SetID sets the "id" field.
-func (_c *UserGroupsCreate) SetID(v int) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetID(v int) *GroupMembersCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetLionUsersID sets the "lion_users" edge to the Users entity by ID.
-func (_c *UserGroupsCreate) SetLionUsersID(id int) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetLionUsersID(id int) *GroupMembersCreate {
 	_c.mutation.SetLionUsersID(id)
 	return _c
 }
 
 // SetLionUsers sets the "lion_users" edge to the Users entity.
-func (_c *UserGroupsCreate) SetLionUsers(v *Users) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetLionUsers(v *Users) *GroupMembersCreate {
 	return _c.SetLionUsersID(v.ID)
 }
 
 // SetLionGroupsID sets the "lion_groups" edge to the Groups entity by ID.
-func (_c *UserGroupsCreate) SetLionGroupsID(id int) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetLionGroupsID(id int) *GroupMembersCreate {
 	_c.mutation.SetLionGroupsID(id)
 	return _c
 }
 
 // SetLionGroups sets the "lion_groups" edge to the Groups entity.
-func (_c *UserGroupsCreate) SetLionGroups(v *Groups) *UserGroupsCreate {
+func (_c *GroupMembersCreate) SetLionGroups(v *Groups) *GroupMembersCreate {
 	return _c.SetLionGroupsID(v.ID)
 }
 
-// Mutation returns the UserGroupsMutation object of the builder.
-func (_c *UserGroupsCreate) Mutation() *UserGroupsMutation {
+// Mutation returns the GroupMembersMutation object of the builder.
+func (_c *GroupMembersCreate) Mutation() *GroupMembersMutation {
 	return _c.mutation
 }
 
-// Save creates the UserGroups in the database.
-func (_c *UserGroupsCreate) Save(ctx context.Context) (*UserGroups, error) {
+// Save creates the GroupMembers in the database.
+func (_c *GroupMembersCreate) Save(ctx context.Context) (*GroupMembers, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *UserGroupsCreate) SaveX(ctx context.Context) *UserGroups {
+func (_c *GroupMembersCreate) SaveX(ctx context.Context) *GroupMembers {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -215,98 +215,98 @@ func (_c *UserGroupsCreate) SaveX(ctx context.Context) *UserGroups {
 }
 
 // Exec executes the query.
-func (_c *UserGroupsCreate) Exec(ctx context.Context) error {
+func (_c *GroupMembersCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *UserGroupsCreate) ExecX(ctx context.Context) {
+func (_c *GroupMembersCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *UserGroupsCreate) defaults() {
+func (_c *GroupMembersCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := usergroups.DefaultCreatedAt()
+		v := groupmembers.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := usergroups.DefaultUpdatedAt()
+		v := groupmembers.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := _c.mutation.CreatedBy(); !ok {
-		v := usergroups.DefaultCreatedBy
+		v := groupmembers.DefaultCreatedBy
 		_c.mutation.SetCreatedBy(v)
 	}
 	if _, ok := _c.mutation.UpdatedBy(); !ok {
-		v := usergroups.DefaultUpdatedBy
+		v := groupmembers.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
 	if _, ok := _c.mutation.MemberRole(); !ok {
-		v := usergroups.DefaultMemberRole
+		v := groupmembers.DefaultMemberRole
 		_c.mutation.SetMemberRole(v)
 	}
 	if _, ok := _c.mutation.MemberStatus(); !ok {
-		v := usergroups.DefaultMemberStatus
+		v := groupmembers.DefaultMemberStatus
 		_c.mutation.SetMemberStatus(v)
 	}
 	if _, ok := _c.mutation.Description(); !ok {
-		v := usergroups.DefaultDescription
+		v := groupmembers.DefaultDescription
 		_c.mutation.SetDescription(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *UserGroupsCreate) check() error {
+func (_c *GroupMembersCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "UserGroups.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`lion: missing required field "GroupMembers.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "UserGroups.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`lion: missing required field "GroupMembers.updated_at"`)}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "UserGroups.user_id"`)}
+		return &ValidationError{Name: "user_id", err: errors.New(`lion: missing required field "GroupMembers.user_id"`)}
 	}
 	if v, ok := _c.mutation.UserID(); ok {
-		if err := usergroups.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.user_id": %w`, err)}
+		if err := groupmembers.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`lion: validator failed for field "GroupMembers.user_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.GroupID(); !ok {
-		return &ValidationError{Name: "group_id", err: errors.New(`lion: missing required field "UserGroups.group_id"`)}
+		return &ValidationError{Name: "group_id", err: errors.New(`lion: missing required field "GroupMembers.group_id"`)}
 	}
 	if v, ok := _c.mutation.GroupID(); ok {
-		if err := usergroups.GroupIDValidator(v); err != nil {
-			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.group_id": %w`, err)}
+		if err := groupmembers.GroupIDValidator(v); err != nil {
+			return &ValidationError{Name: "group_id", err: fmt.Errorf(`lion: validator failed for field "GroupMembers.group_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.MemberRole(); !ok {
-		return &ValidationError{Name: "member_role", err: errors.New(`lion: missing required field "UserGroups.member_role"`)}
+		return &ValidationError{Name: "member_role", err: errors.New(`lion: missing required field "GroupMembers.member_role"`)}
 	}
 	if _, ok := _c.mutation.MemberStatus(); !ok {
-		return &ValidationError{Name: "member_status", err: errors.New(`lion: missing required field "UserGroups.member_status"`)}
+		return &ValidationError{Name: "member_status", err: errors.New(`lion: missing required field "GroupMembers.member_status"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "UserGroups.description"`)}
+		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "GroupMembers.description"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
-		if err := usergroups.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`lion: validator failed for field "UserGroups.id": %w`, err)}
+		if err := groupmembers.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`lion: validator failed for field "GroupMembers.id": %w`, err)}
 		}
 	}
 	if len(_c.mutation.LionUsersIDs()) == 0 {
-		return &ValidationError{Name: "lion_users", err: errors.New(`lion: missing required edge "UserGroups.lion_users"`)}
+		return &ValidationError{Name: "lion_users", err: errors.New(`lion: missing required edge "GroupMembers.lion_users"`)}
 	}
 	if len(_c.mutation.LionGroupsIDs()) == 0 {
-		return &ValidationError{Name: "lion_groups", err: errors.New(`lion: missing required edge "UserGroups.lion_groups"`)}
+		return &ValidationError{Name: "lion_groups", err: errors.New(`lion: missing required edge "GroupMembers.lion_groups"`)}
 	}
 	return nil
 }
 
-func (_c *UserGroupsCreate) sqlSave(ctx context.Context) (*UserGroups, error) {
+func (_c *GroupMembersCreate) sqlSave(ctx context.Context) (*GroupMembers, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -326,61 +326,61 @@ func (_c *UserGroupsCreate) sqlSave(ctx context.Context) (*UserGroups, error) {
 	return _node, nil
 }
 
-func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
+func (_c *GroupMembersCreate) createSpec() (*GroupMembers, *sqlgraph.CreateSpec) {
 	var (
-		_node = &UserGroups{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(usergroups.Table, sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt))
+		_node = &GroupMembers{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(groupmembers.Table, sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt))
 	)
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(usergroups.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(groupmembers.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(usergroups.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(groupmembers.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
-		_spec.SetField(usergroups.FieldCreatedBy, field.TypeInt64, value)
+		_spec.SetField(groupmembers.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = value
 	}
 	if value, ok := _c.mutation.UpdatedBy(); ok {
-		_spec.SetField(usergroups.FieldUpdatedBy, field.TypeInt64, value)
+		_spec.SetField(groupmembers.FieldUpdatedBy, field.TypeInt64, value)
 		_node.UpdatedBy = value
 	}
 	if value, ok := _c.mutation.MemberRole(); ok {
-		_spec.SetField(usergroups.FieldMemberRole, field.TypeInt, value)
+		_spec.SetField(groupmembers.FieldMemberRole, field.TypeInt, value)
 		_node.MemberRole = value
 	}
 	if value, ok := _c.mutation.MemberStatus(); ok {
-		_spec.SetField(usergroups.FieldMemberStatus, field.TypeInt, value)
+		_spec.SetField(groupmembers.FieldMemberStatus, field.TypeInt, value)
 		_node.MemberStatus = value
 	}
 	if value, ok := _c.mutation.JoinedAt(); ok {
-		_spec.SetField(usergroups.FieldJoinedAt, field.TypeTime, value)
+		_spec.SetField(groupmembers.FieldJoinedAt, field.TypeTime, value)
 		_node.JoinedAt = value
 	}
 	if value, ok := _c.mutation.ExpiredAt(); ok {
-		_spec.SetField(usergroups.FieldExpiredAt, field.TypeTime, value)
+		_spec.SetField(groupmembers.FieldExpiredAt, field.TypeTime, value)
 		_node.ExpiredAt = value
 	}
 	if value, ok := _c.mutation.Metadata(); ok {
-		_spec.SetField(usergroups.FieldMetadata, field.TypeJSON, value)
+		_spec.SetField(groupmembers.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
 	}
 	if value, ok := _c.mutation.Description(); ok {
-		_spec.SetField(usergroups.FieldDescription, field.TypeString, value)
+		_spec.SetField(groupmembers.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
 	if nodes := _c.mutation.LionUsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   usergroups.LionUsersTable,
-			Columns: []string{usergroups.LionUsersColumn},
+			Table:   groupmembers.LionUsersTable,
+			Columns: []string{groupmembers.LionUsersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(users.FieldID, field.TypeInt),
@@ -396,8 +396,8 @@ func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   usergroups.LionGroupsTable,
-			Columns: []string{usergroups.LionGroupsColumn},
+			Table:   groupmembers.LionGroupsTable,
+			Columns: []string{groupmembers.LionGroupsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(groups.FieldID, field.TypeInt),
@@ -412,27 +412,27 @@ func (_c *UserGroupsCreate) createSpec() (*UserGroups, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserGroupsCreateBulk is the builder for creating many UserGroups entities in bulk.
-type UserGroupsCreateBulk struct {
+// GroupMembersCreateBulk is the builder for creating many GroupMembers entities in bulk.
+type GroupMembersCreateBulk struct {
 	config
 	err      error
-	builders []*UserGroupsCreate
+	builders []*GroupMembersCreate
 }
 
-// Save creates the UserGroups entities in the database.
-func (_c *UserGroupsCreateBulk) Save(ctx context.Context) ([]*UserGroups, error) {
+// Save creates the GroupMembers entities in the database.
+func (_c *GroupMembersCreateBulk) Save(ctx context.Context) ([]*GroupMembers, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*UserGroups, len(_c.builders))
+	nodes := make([]*GroupMembers, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*UserGroupsMutation)
+				mutation, ok := m.(*GroupMembersMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -479,7 +479,7 @@ func (_c *UserGroupsCreateBulk) Save(ctx context.Context) ([]*UserGroups, error)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *UserGroupsCreateBulk) SaveX(ctx context.Context) []*UserGroups {
+func (_c *GroupMembersCreateBulk) SaveX(ctx context.Context) []*GroupMembers {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -488,13 +488,13 @@ func (_c *UserGroupsCreateBulk) SaveX(ctx context.Context) []*UserGroups {
 }
 
 // Exec executes the query.
-func (_c *UserGroupsCreateBulk) Exec(ctx context.Context) error {
+func (_c *GroupMembersCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *UserGroupsCreateBulk) ExecX(ctx context.Context) {
+func (_c *GroupMembersCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

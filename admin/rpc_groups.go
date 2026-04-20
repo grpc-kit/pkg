@@ -11,9 +11,9 @@ import (
 	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/lion/departmentmembers"
+	"github.com/grpc-kit/pkg/lion/groupmembers"
 	"github.com/grpc-kit/pkg/lion/schema"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
-	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -591,11 +591,11 @@ func (a *KnownAdminAPI) ListGroupMembers(ctx context.Context, req *adminv1.ListG
 		// DYNAMIC 和 SYSTEM 均通过 ref_expr 动态规则自动关联成员
 		return a.listGroupMembersFromDynamicRule(ctx, req, db, group.RefExpr)
 	default:
-		return a.listGroupMembersFromUserGroups(ctx, req, db, groupID)
+		return a.listGroupMembersFromGroupMembers(ctx, req, db, groupID)
 	}
 }
 
-// listGroupMembersFromDepartment 从 user_departments 表查询部门群组成员
+// listGroupMembersFromDepartment 从 department_members 表查询部门群组成员
 func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, departmentID int) (*adminv1.ListGroupMembersResponse, error) {
 	result := &adminv1.ListGroupMembersResponse{
 		Members: make([]*adminv1.Membership, 0),
@@ -605,16 +605,16 @@ func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req 
 		return result, nil
 	}
 
-	memberQuery := db.UserDepartments.Query().Where(userdepartments.DepartmentIDEQ(departmentID))
+	memberQuery := db.DepartmentMembers.Query().Where(departmentmembers.DepartmentIDEQ(departmentID))
 
 	// 排序
 	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
 	case "created_at desc", "create_time desc":
-		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldCreatedAt))
+		memberQuery = memberQuery.Order(lion.Desc(departmentmembers.FieldCreatedAt))
 	case "created_at asc", "create_time asc":
-		memberQuery = memberQuery.Order(lion.Asc(userdepartments.FieldCreatedAt))
+		memberQuery = memberQuery.Order(lion.Asc(departmentmembers.FieldCreatedAt))
 	default:
-		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldID))
+		memberQuery = memberQuery.Order(lion.Desc(departmentmembers.FieldID))
 	}
 
 	totalSize, err := memberQuery.Clone().Count(ctx)
@@ -640,25 +640,25 @@ func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req 
 				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
 			}
 			if lastID > 0 {
-				memberQuery = memberQuery.Where(userdepartments.IDGT(lastID))
+				memberQuery = memberQuery.Where(departmentmembers.IDGT(lastID))
 			}
 		}
 	}
 	memberQuery = memberQuery.Limit(int(pageSize))
 
 	members, err := memberQuery.Select(
-		userdepartments.FieldID,
-		userdepartments.FieldUserID,
-		userdepartments.FieldDepartmentID,
-		userdepartments.FieldMemberRole,
-		userdepartments.FieldMemberStatus,
-		userdepartments.FieldMemberType,
-		userdepartments.FieldDescription,
-		userdepartments.FieldMetadata,
-		userdepartments.FieldCreatedBy,
-		userdepartments.FieldUpdatedBy,
-		userdepartments.FieldCreatedAt,
-		userdepartments.FieldUpdatedAt,
+		departmentmembers.FieldID,
+		departmentmembers.FieldUserID,
+		departmentmembers.FieldDepartmentID,
+		departmentmembers.FieldMemberRole,
+		departmentmembers.FieldMemberStatus,
+		departmentmembers.FieldMemberType,
+		departmentmembers.FieldDescription,
+		departmentmembers.FieldMetadata,
+		departmentmembers.FieldCreatedBy,
+		departmentmembers.FieldUpdatedBy,
+		departmentmembers.FieldCreatedAt,
+		departmentmembers.FieldUpdatedAt,
 	).WithLionUsers(func(q *lion.UsersQuery) {
 		q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
 	}).All(ctx)
@@ -817,13 +817,13 @@ func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *admin
 
 // dynamicRuleAllowedFields 动态规则允许过滤的用户字段白名单（非敏感、非加密字段）
 var dynamicRuleAllowedFields = map[string]string{
-	"user_type":              "int",
-	"user_status":            "int",
-	"gender":                 "int",
-	"email_verified":         "bool",
-	"phone_number_verified":  "bool",
-	"timezone":               "string",
-	"locale":                 "string",
+	"user_type":             "int",
+	"user_status":           "int",
+	"gender":                "int",
+	"email_verified":        "bool",
+	"phone_number_verified": "bool",
+	"timezone":              "string",
+	"locale":                "string",
 }
 
 // listGroupMembersFromDynamicRule 根据动态规则表达式从 users 表查询成员
@@ -1069,13 +1069,13 @@ func dynamicRuleStringPredicate(fieldName, op string, val string) (predicate.Use
 	return nil, fmt.Errorf("unsupported operator %q for string field %q", op, fieldName)
 }
 
-// listGroupMembersFromUserGroups 从 user_groups 表查询普通群组成员（默认方式）
-func (a *KnownAdminAPI) listGroupMembersFromUserGroups(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, groupID int) (*adminv1.ListGroupMembersResponse, error) {
+// listGroupMembersFromGroupMembers 从 group_members 表查询普通群组成员（默认方式）
+func (a *KnownAdminAPI) listGroupMembersFromGroupMembers(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, groupID int) (*adminv1.ListGroupMembersResponse, error) {
 	result := &adminv1.ListGroupMembersResponse{
 		Members: make([]*adminv1.Membership, 0),
 	}
 
-	where := []predicate.UserGroups{usergroups.GroupIDEQ(groupID)}
+	where := []predicate.GroupMembers{groupmembers.GroupIDEQ(groupID)}
 	if req.GetFilter() != "" {
 		filterPredicates, err := parseListGroupMembersFilter(req.GetFilter())
 		if err != nil {
@@ -1084,23 +1084,23 @@ func (a *KnownAdminAPI) listGroupMembersFromUserGroups(ctx context.Context, req 
 		where = append(where, filterPredicates...)
 	}
 
-	query := db.UserGroups.Query().Where(where...)
+	query := db.GroupMembers.Query().Where(where...)
 
 	if req.GetOrderBy() != "" {
 		switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
 		case "joined_at desc":
-			query = query.Order(lion.Desc(usergroups.FieldJoinedAt), lion.Asc(usergroups.FieldID))
+			query = query.Order(lion.Desc(groupmembers.FieldJoinedAt), lion.Asc(groupmembers.FieldID))
 		case "joined_at asc":
-			query = query.Order(lion.Asc(usergroups.FieldJoinedAt), lion.Asc(usergroups.FieldID))
+			query = query.Order(lion.Asc(groupmembers.FieldJoinedAt), lion.Asc(groupmembers.FieldID))
 		case "create_time desc", "created_at desc":
-			query = query.Order(lion.Desc(usergroups.FieldCreatedAt), lion.Asc(usergroups.FieldID))
+			query = query.Order(lion.Desc(groupmembers.FieldCreatedAt), lion.Asc(groupmembers.FieldID))
 		case "create_time asc", "created_at asc":
-			query = query.Order(lion.Asc(usergroups.FieldCreatedAt), lion.Asc(usergroups.FieldID))
+			query = query.Order(lion.Asc(groupmembers.FieldCreatedAt), lion.Asc(groupmembers.FieldID))
 		default:
-			query = query.Order(lion.Desc(usergroups.FieldCreatedAt), lion.Asc(usergroups.FieldID))
+			query = query.Order(lion.Desc(groupmembers.FieldCreatedAt), lion.Asc(groupmembers.FieldID))
 		}
 	} else {
-		query = query.Order(lion.Desc(usergroups.FieldCreatedAt), lion.Asc(usergroups.FieldID))
+		query = query.Order(lion.Desc(groupmembers.FieldCreatedAt), lion.Asc(groupmembers.FieldID))
 	}
 
 	totalSize, err := query.Clone().Count(ctx)
@@ -1120,7 +1120,7 @@ func (a *KnownAdminAPI) listGroupMembersFromUserGroups(ctx context.Context, req 
 			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", err))
 		}
 		if lastID > 0 {
-			query = query.Where(usergroups.IDGT(lastID))
+			query = query.Where(groupmembers.IDGT(lastID))
 		}
 	}
 	switch p := req.GetPagination().(type) {
@@ -1132,19 +1132,19 @@ func (a *KnownAdminAPI) listGroupMembersFromUserGroups(ctx context.Context, req 
 	query = query.Limit(int(pageSize))
 
 	members, err := query.Select(
-		usergroups.FieldID,
-		usergroups.FieldUserID,
-		usergroups.FieldGroupID,
-		usergroups.FieldMemberRole,
-		usergroups.FieldMemberStatus,
-		usergroups.FieldJoinedAt,
-		usergroups.FieldExpiredAt,
-		usergroups.FieldMetadata,
-		usergroups.FieldDescription,
-		usergroups.FieldCreatedBy,
-		usergroups.FieldUpdatedBy,
-		usergroups.FieldCreatedAt,
-		usergroups.FieldUpdatedAt,
+		groupmembers.FieldID,
+		groupmembers.FieldUserID,
+		groupmembers.FieldGroupID,
+		groupmembers.FieldMemberRole,
+		groupmembers.FieldMemberStatus,
+		groupmembers.FieldJoinedAt,
+		groupmembers.FieldExpiredAt,
+		groupmembers.FieldMetadata,
+		groupmembers.FieldDescription,
+		groupmembers.FieldCreatedBy,
+		groupmembers.FieldUpdatedBy,
+		groupmembers.FieldCreatedAt,
+		groupmembers.FieldUpdatedAt,
 	).WithLionUsers(func(q *lion.UsersQuery) {
 		q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
 	}).All(ctx)
@@ -1166,8 +1166,8 @@ func (a *KnownAdminAPI) listGroupMembersFromUserGroups(ctx context.Context, req 
 }
 
 // parseListGroupMembersFilter 解析 filter，支持 member_status=2, member_role=3
-func parseListGroupMembersFilter(filter string) ([]predicate.UserGroups, error) {
-	var out []predicate.UserGroups
+func parseListGroupMembersFilter(filter string) ([]predicate.GroupMembers, error) {
+	var out []predicate.GroupMembers
 	parts := strings.Split(filter, " AND ")
 	for _, p := range parts {
 		p = strings.TrimSpace(p)
@@ -1186,20 +1186,20 @@ func parseListGroupMembersFilter(filter string) ([]predicate.UserGroups, error) 
 			if err != nil {
 				return nil, fmt.Errorf("member_status must be int: %s", val)
 			}
-			out = append(out, usergroups.MemberStatusEQ(n))
+			out = append(out, groupmembers.MemberStatusEQ(n))
 		case "member_role", "role":
 			n, err := strconv.Atoi(val)
 			if err != nil {
 				return nil, fmt.Errorf("member_role must be int: %s", val)
 			}
-			out = append(out, usergroups.MemberRoleEQ(n))
+			out = append(out, groupmembers.MemberRoleEQ(n))
 		}
 	}
 	return out, nil
 }
 
-// userGroupToProto 将 *lion.UserGroups 转为 *adminv1.Membership（含 Metadata）
-func userGroupToProto(member *lion.UserGroups) *adminv1.Membership {
+// userGroupToProto 将 *lion.GroupMembers 转为 *adminv1.Membership（含 Metadata）
+func userGroupToProto(member *lion.GroupMembers) *adminv1.Membership {
 	gm := &adminv1.Membership{
 		Id:           int64(member.ID),
 		UserId:       int64(member.UserID),
@@ -1258,10 +1258,10 @@ func (a *KnownAdminAPI) CreateGroupMembers(ctx context.Context, req *adminv1.Cre
 		return result, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("%s type groups do not support manual member management, members are synced automatically", typeName))
 	}
 
-	allMembers := make([]*lion.UserGroupsCreate, 0, len(req.Members))
+	allMembers := make([]*lion.GroupMembersCreate, 0, len(req.Members))
 
 	for _, member := range req.Members {
-		create := db.UserGroups.Create().
+		create := db.GroupMembers.Create().
 			SetUserID(int(member.UserId)).
 			SetGroupID(groupID).
 			SetMemberRole(int(member.MemberRole)).
@@ -1286,7 +1286,7 @@ func (a *KnownAdminAPI) CreateGroupMembers(ctx context.Context, req *adminv1.Cre
 		allMembers = append(allMembers, create)
 	}
 
-	_, err = db.UserGroups.CreateBulk(allMembers...).Save(ctx)
+	_, err = db.GroupMembers.CreateBulk(allMembers...).Save(ctx)
 	if err != nil {
 		return result, err
 	}
@@ -1316,10 +1316,10 @@ func (a *KnownAdminAPI) DeleteGroupMember(ctx context.Context, req *adminv1.Dele
 		return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("%s type groups do not support manual member management, members are synced automatically", typeName))
 	}
 
-	_, err = db.UserGroups.Delete().
+	_, err = db.GroupMembers.Delete().
 		Where(
-			usergroups.GroupIDEQ(groupID),
-			usergroups.UserIDEQ(int(req.UserId)),
+			groupmembers.GroupIDEQ(groupID),
+			groupmembers.UserIDEQ(int(req.UserId)),
 		).Exec(ctx)
 	if err != nil {
 		return nil, err
@@ -1364,10 +1364,10 @@ func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.Upda
 		return result, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("%s type groups do not support manual member management, members are synced automatically", typeName))
 	}
 
-	member, err := db.UserGroups.Query().
+	member, err := db.GroupMembers.Query().
 		Where(
-			usergroups.GroupIDEQ(groupID),
-			usergroups.UserIDEQ(int(req.UserId)),
+			groupmembers.GroupIDEQ(groupID),
+			groupmembers.UserIDEQ(int(req.UserId)),
 		).
 		WithLionUsers(func(q *lion.UsersQuery) {
 			q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
@@ -1417,8 +1417,8 @@ func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.Upda
 	}
 
 	// 重新加载以包含 Edges（WithLionUsers）
-	updated, err = db.UserGroups.Query().
-		Where(usergroups.IDEQ(updated.ID)).
+	updated, err = db.GroupMembers.Query().
+		Where(groupmembers.IDEQ(updated.ID)).
 		WithLionUsers(func(q *lion.UsersQuery) {
 			q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
 		}).

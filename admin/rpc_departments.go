@@ -23,7 +23,7 @@ import (
 	// 数据范围表已注释，同步取消依赖
 	// "github.com/grpc-kit/pkg/lion/roledataranges"
 	// "github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
+	"github.com/grpc-kit/pkg/lion/departmentmembers"
 )
 
 // CreateDepartment 创建部门
@@ -286,8 +286,8 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 
 	// View FULL 时预加载部门成员列表（含用户信息）
 	if req.View == adminv1.View_VIEW_FULL {
-		depQuery = depQuery.WithLionUserDepartments(
-			func(query *lion.UserDepartmentsQuery) {
+		depQuery = depQuery.WithLionDepartmentMembers(
+			func(query *lion.DepartmentMembersQuery) {
 				query.WithLionUsers()
 			},
 		)
@@ -311,8 +311,8 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Visibility:  adminv1.Visibility(m.Visibility),
 			Members:     make([]*adminv1.Membership, 0),
 		}
-		if req.View == adminv1.View_VIEW_FULL && m.Edges.LionUserDepartments != nil {
-			for _, l := range m.Edges.LionUserDepartments {
+		if req.View == adminv1.View_VIEW_FULL && m.Edges.LionDepartmentMembers != nil {
+			for _, l := range m.Edges.LionDepartmentMembers {
 				pm := &adminv1.Membership{
 					Id:           int64(l.ID),
 					UserId:       int64(l.UserID),
@@ -532,24 +532,24 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 	}
 
 	pageSize := int(GetPageSize(ctx, req.PageSize))
-	memberQuery := db.UserDepartments.Query().Where(userdepartments.DepartmentIDEQ(departmentID))
+	memberQuery := db.DepartmentMembers.Query().Where(departmentmembers.DepartmentIDEQ(departmentID))
 
 	// 排序（与 proto order_by 约定一致）
 	switch req.GetOrderBy() {
 	case "created_at desc", "create_at desc":
-		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldCreatedAt))
+		memberQuery = memberQuery.Order(lion.Desc(departmentmembers.FieldCreatedAt))
 	case "created_at asc", "create_at asc":
-		memberQuery = memberQuery.Order(lion.Asc(userdepartments.FieldCreatedAt))
+		memberQuery = memberQuery.Order(lion.Asc(departmentmembers.FieldCreatedAt))
 	case "member_role asc":
-		memberQuery = memberQuery.Order(lion.Asc(userdepartments.FieldMemberRole))
+		memberQuery = memberQuery.Order(lion.Asc(departmentmembers.FieldMemberRole))
 	case "member_role desc":
-		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldMemberRole))
+		memberQuery = memberQuery.Order(lion.Desc(departmentmembers.FieldMemberRole))
 	case "member_status asc":
-		memberQuery = memberQuery.Order(lion.Asc(userdepartments.FieldMemberStatus))
+		memberQuery = memberQuery.Order(lion.Asc(departmentmembers.FieldMemberStatus))
 	case "member_status desc":
-		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldMemberStatus))
+		memberQuery = memberQuery.Order(lion.Desc(departmentmembers.FieldMemberStatus))
 	default:
-		memberQuery = memberQuery.Order(lion.Desc(userdepartments.FieldID))
+		memberQuery = memberQuery.Order(lion.Desc(departmentmembers.FieldID))
 	}
 
 	totalSize, err := memberQuery.Clone().Count(ctx)
@@ -573,7 +573,7 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
 			}
 			if lastID > 0 {
-				memberQuery = memberQuery.Where(userdepartments.IDLT(lastID))
+				memberQuery = memberQuery.Where(departmentmembers.IDLT(lastID))
 			}
 		}
 	}
@@ -581,18 +581,18 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 	memberQuery = memberQuery.Limit(pageSize)
 
 	members, err := memberQuery.Select(
-		userdepartments.FieldID,
-		userdepartments.FieldUserID,
-		userdepartments.FieldDepartmentID,
-		userdepartments.FieldMemberRole,
-		userdepartments.FieldMemberStatus,
-		userdepartments.FieldMemberType,
-		userdepartments.FieldDescription,
-		userdepartments.FieldMetadata,
-		userdepartments.FieldCreatedBy,
-		userdepartments.FieldUpdatedBy,
-		userdepartments.FieldCreatedAt,
-		userdepartments.FieldUpdatedAt,
+		departmentmembers.FieldID,
+		departmentmembers.FieldUserID,
+		departmentmembers.FieldDepartmentID,
+		departmentmembers.FieldMemberRole,
+		departmentmembers.FieldMemberStatus,
+		departmentmembers.FieldMemberType,
+		departmentmembers.FieldDescription,
+		departmentmembers.FieldMetadata,
+		departmentmembers.FieldCreatedBy,
+		departmentmembers.FieldUpdatedBy,
+		departmentmembers.FieldCreatedAt,
+		departmentmembers.FieldUpdatedAt,
 	).WithLionUsers(func(q *lion.UsersQuery) {
 		q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
 	}).All(ctx)
@@ -664,7 +664,7 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 		userID = uid
 	}
 
-	depMembers := make([]*lion.UserDepartmentsCreate, 0, len(req.Members))
+	depMembers := make([]*lion.DepartmentMembersCreate, 0, len(req.Members))
 
 	for _, member := range req.Members {
 		if member.UserId == 0 {
@@ -684,7 +684,7 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 			memberType = int(member.MemberType)
 		}
 
-		create := db.UserDepartments.Create().
+		create := db.DepartmentMembers.Create().
 			SetUserID(int(member.UserId)).
 			SetDepartmentID(int(req.DepartmentId)).
 			SetMemberRole(role).
@@ -702,7 +702,7 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 		depMembers = append(depMembers, create)
 	}
 
-	_, err = db.UserDepartments.CreateBulk(depMembers...).Save(ctx)
+	_, err = db.DepartmentMembers.CreateBulk(depMembers...).Save(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -740,10 +740,10 @@ func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv
 			continue
 		}
 
-		upd := db.UserDepartments.Update().
+		upd := db.DepartmentMembers.Update().
 			Where(
-				userdepartments.DepartmentIDEQ(int(req.DepartmentId)),
-				userdepartments.UserIDEQ(int(member.UserId)),
+				departmentmembers.DepartmentIDEQ(int(req.DepartmentId)),
+				departmentmembers.UserIDEQ(int(member.UserId)),
 			)
 
 		if member.MemberRole != adminv1.Membership_ROLE_UNSPECIFIED {
@@ -788,10 +788,10 @@ func (a *KnownAdminAPI) DeleteDepartmentMember(ctx context.Context, req *adminv1
 		return nil, err
 	}
 
-	_, err = db.UserDepartments.Delete().
+	_, err = db.DepartmentMembers.Delete().
 		Where(
-			userdepartments.UserIDEQ(int(userID)),
-			userdepartments.DepartmentIDEQ(int(departmentID)),
+			departmentmembers.UserIDEQ(int(userID)),
+			departmentmembers.DepartmentIDEQ(int(departmentID)),
 		).
 		Exec(ctx)
 	if err != nil {
@@ -956,9 +956,9 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 	}
 
 	// 用户所在部门及担任负责人/经理的部门（一次查询后拆分，避免两次 DB 往返）
-	udList, err := db.UserDepartments.Query().
-		Where(userdepartments.UserIDEQ(int(userID))).
-		Select(userdepartments.FieldDepartmentID, userdepartments.FieldMemberRole).
+	udList, err := db.DepartmentMembers.Query().
+		Where(departmentmembers.UserIDEQ(int(userID))).
+		Select(departmentmembers.FieldDepartmentID, departmentmembers.FieldMemberRole).
 		All(ctx)
 	if err != nil {
 		return nil, err

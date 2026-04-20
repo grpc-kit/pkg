@@ -15,7 +15,9 @@ import (
 	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
+	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/groupmembers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/permissionbindings"
@@ -28,8 +30,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/scopes"
-	"github.com/grpc-kit/pkg/lion/userdepartments"
-	"github.com/grpc-kit/pkg/lion/usergroups"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -97,7 +97,9 @@ func checkColumn(t, c string) error {
 			actions.Table:            actions.ValidColumn,
 			authproviders.Table:      authproviders.ValidColumn,
 			credentials.Table:        credentials.ValidColumn,
+			departmentmembers.Table:  departmentmembers.ValidColumn,
 			departments.Table:        departments.ValidColumn,
+			groupmembers.Table:       groupmembers.ValidColumn,
 			grouproles.Table:         grouproles.ValidColumn,
 			groups.Table:             groups.ValidColumn,
 			permissionbindings.Table: permissionbindings.ValidColumn,
@@ -110,8 +112,6 @@ func checkColumn(t, c string) error {
 			rolepermissions.Table:    rolepermissions.ValidColumn,
 			roles.Table:              roles.ValidColumn,
 			scopes.Table:             scopes.ValidColumn,
-			userdepartments.Table:    userdepartments.ValidColumn,
-			usergroups.Table:         usergroups.ValidColumn,
 			useridentities.Table:     useridentities.ValidColumn,
 			userprofiles.Table:       userprofiles.ValidColumn,
 			userroles.Table:          userroles.ValidColumn,

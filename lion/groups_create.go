@@ -10,9 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/groupmembers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/usergroups"
 )
 
 // GroupsCreate is the builder for creating a Groups entity.
@@ -251,19 +251,19 @@ func (_c *GroupsCreate) AddLionGroups(v ...*GroupRoles) *GroupsCreate {
 	return _c.AddLionGroupIDs(ids...)
 }
 
-// AddLionUserGroupIDs adds the "lion_user_groups" edge to the UserGroups entity by IDs.
-func (_c *GroupsCreate) AddLionUserGroupIDs(ids ...int) *GroupsCreate {
-	_c.mutation.AddLionUserGroupIDs(ids...)
+// AddLionGroupMemberIDs adds the "lion_group_members" edge to the GroupMembers entity by IDs.
+func (_c *GroupsCreate) AddLionGroupMemberIDs(ids ...int) *GroupsCreate {
+	_c.mutation.AddLionGroupMemberIDs(ids...)
 	return _c
 }
 
-// AddLionUserGroups adds the "lion_user_groups" edges to the UserGroups entity.
-func (_c *GroupsCreate) AddLionUserGroups(v ...*UserGroups) *GroupsCreate {
+// AddLionGroupMembers adds the "lion_group_members" edges to the GroupMembers entity.
+func (_c *GroupsCreate) AddLionGroupMembers(v ...*GroupMembers) *GroupsCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddLionUserGroupIDs(ids...)
+	return _c.AddLionGroupMemberIDs(ids...)
 }
 
 // Mutation returns the GroupsMutation object of the builder.
@@ -528,15 +528,15 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LionUserGroupsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionGroupMembersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   groups.LionUserGroupsTable,
-			Columns: []string{groups.LionUserGroupsColumn},
+			Table:   groups.LionGroupMembersTable,
+			Columns: []string{groups.LionGroupMembersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(usergroups.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
