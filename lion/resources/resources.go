@@ -70,8 +70,6 @@ const (
 	EdgeLionResourceTypes = "lion_resource_types"
 	// EdgeLionMenus holds the string denoting the lion_menus edge name in mutations.
 	EdgeLionMenus = "lion_menus"
-	// EdgeLionResourceScopes holds the string denoting the lion_resource_scopes edge name in mutations.
-	EdgeLionResourceScopes = "lion_resource_scopes"
 	// Table holds the table name of the resources in the database.
 	Table = "lion_resources"
 	// LionResourceTypesTable is the table that holds the lion_resource_types relation/edge.
@@ -88,13 +86,6 @@ const (
 	LionMenusInverseTable = "lion_menus"
 	// LionMenusColumn is the table column denoting the lion_menus relation/edge.
 	LionMenusColumn = "resource_id"
-	// LionResourceScopesTable is the table that holds the lion_resource_scopes relation/edge.
-	LionResourceScopesTable = "lion_resource_scopes"
-	// LionResourceScopesInverseTable is the table name for the ResourceScopes entity.
-	// It exists in this package in order to avoid circular dependency with the "resourcescopes" package.
-	LionResourceScopesInverseTable = "lion_resource_scopes"
-	// LionResourceScopesColumn is the table column denoting the lion_resource_scopes relation/edge.
-	LionResourceScopesColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for resources fields.
@@ -365,20 +356,6 @@ func ByLionMenus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionMenusStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByLionResourceScopesCount orders the results by lion_resource_scopes count.
-func ByLionResourceScopesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionResourceScopesStep(), opts...)
-	}
-}
-
-// ByLionResourceScopes orders the results by lion_resource_scopes terms.
-func ByLionResourceScopes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionResourceScopesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newLionResourceTypesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -391,12 +368,5 @@ func newLionMenusStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionMenusInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionMenusTable, LionMenusColumn),
-	)
-}
-func newLionResourceScopesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionResourceScopesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionResourceScopesTable, LionResourceScopesColumn),
 	)
 }

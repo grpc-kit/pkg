@@ -50,8 +50,6 @@ func (Roles) Fields() []ent.Field {
 // Edges of the table.
 func (Roles) Edges() []ent.Edge {
 	return []ent.Edge{
-		// 一个 Role 可以对应多个 RoleMenu (中间实体)
-		edge.To("lion_role_permissions", RolePermissions.Type),
 		edge.To("lion_user_roles", UserRoles.Type),
 		edge.To("lion_role_groups", GroupRoles.Type),
 		// edge.To("lion_role_data_ranges", RoleDataRanges.Type),

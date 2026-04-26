@@ -5,37 +5,112 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/permissionbindings"
-	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/policyattachments"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourcescopes"
-	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
-	"github.com/grpc-kit/pkg/lion/scopes"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// listResourceAuthFilter 用于在权限图中收窄可见资源；零值表示不按该维度过滤。
-// ListResources 可传入请求中的 policy / scope；单资源读写应传空 filter，使用「全并集」与列表默认可见范围一致（不受列表时附带 policy/scope 参数影响）。
+// listResourceAuthFilter 用于在新策略链路中收窄可见资源；零值表示不按该维度过滤。
 type listResourceAuthFilter struct {
 	PolicyType   int32
 	PolicyStatus int32
-	ScopeType    int32
-	ScopeName    string
 }
 
-// allowedResourceIDsForContext 按与 ListResources 相同的 Lion 角色树、角色权限、permission_bindings、资源树递归规则，解析当前用户可访问的资源 ID 集合。
+func parseSelectorPatterns(raw string) []string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+
+	var list []string
+	if strings.HasPrefix(raw, "[") {
+		if err := json.Unmarshal([]byte(raw), &list); err == nil {
+			return compactNonEmptyStrings(list)
+		}
+	}
+
+	var single string
+	if strings.HasPrefix(raw, "\"") {
+		if err := json.Unmarshal([]byte(raw), &single); err == nil {
+			return compactNonEmptyStrings([]string{single})
+		}
+	}
+
+	return []string{raw}
+}
+
+func compactNonEmptyStrings(items []string) []string {
+	result := make([]string, 0, len(items))
+	for _, item := range items {
+		item = strings.TrimSpace(item)
+		if item == "" {
+			continue
+		}
+		result = append(result, item)
+	}
+	return result
+}
+
+func wildcardMatch(pattern, value string) bool {
+	if pattern == "*" {
+		return true
+	}
+	quoted := regexp.QuoteMeta(pattern)
+	quoted = strings.ReplaceAll(quoted, "\\*", ".*")
+	matched, err := regexp.MatchString("^"+quoted+"$", value)
+	return err == nil && matched
+}
+
+func policyStatementMatchesResource(statement *lion.PolicyStatements, resource *lion.Resources) bool {
+	if statement == nil || resource == nil {
+		return false
+	}
+
+	selectors := parseSelectorPatterns(statement.ResourceSelector)
+	if len(selectors) == 0 {
+		return false
+	}
+
+	resourceTypeCode := resource.ResourceTypeCode
+	if resourceTypeCode == "" {
+		resourceTypeCode = resourceTypeCodeFromLegacy(resource.ResourceType)
+	}
+	serviceCode := resource.ServiceCode
+	if serviceCode == "" {
+		serviceCode = "admin.v1.oneops"
+	}
+	resourcePath := normalizeResourcePath(resource.ResourcePath, resource.Code, resource.Locator)
+	grn := resource.Grn
+	if grn == "" {
+		grn = buildResourceGRN(serviceCode, resource.TenantID, resource.Region, resourceTypeCode, resourcePath, resource.Name)
+	}
+
+	candidates := []string{grn, resource.Name, resource.Code, resourcePath}
+	for _, selector := range selectors {
+		for _, candidate := range candidates {
+			if candidate != "" && wildcardMatch(selector, candidate) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// allowedResourceIDsForContext 按当前用户角色树、策略挂载和 policy statements.resource_selector 解析当前用户可访问的资源 ID 集合。
 // superAdmin 为 true 时不返回 allowed（调用方视为不裁剪）；err 表示上下文缺失 groups 等错误。
 func (a *KnownAdminAPI) allowedResourceIDsForContext(ctx context.Context, db *lion.Client, f listResourceAuthFilter) (superAdmin bool, allowed map[int]struct{}, err error) {
 	gs, ok := rpc.GetGroupsFromContext(ctx)
@@ -66,13 +141,11 @@ func (a *KnownAdminAPI) allowedResourceIDsForContext(ctx context.Context, db *li
 		return false, nil, err
 	}
 	allRoleIDs := mergeUniqueInts(parentRoleIDs, childRoleIDs)
+	allRoleID64s := make([]int64, 0, len(allRoleIDs))
+	for _, id := range allRoleIDs {
+		allRoleID64s = append(allRoleID64s, int64(id))
+	}
 
-	permissionsWhere := make([]predicate.Permissions, 0)
-	permissionsWhere = append(permissionsWhere, permissions.HasLionRolePermissionsWith(
-		rolepermissions.HasLionRolesWith(
-			roles.IDIn(allRoleIDs...),
-		),
-	))
 	policiesWhere := make([]predicate.Policies, 0)
 	if f.PolicyType != 0 {
 		policiesWhere = append(policiesWhere, policies.PolicyTypeEQ(int(f.PolicyType)))
@@ -80,85 +153,76 @@ func (a *KnownAdminAPI) allowedResourceIDsForContext(ctx context.Context, db *li
 	if f.PolicyStatus != 0 {
 		policiesWhere = append(policiesWhere, policies.PolicyStatusEQ(int(f.PolicyStatus)))
 	}
-	if len(policiesWhere) > 0 {
-		permissionsWhere = append(permissionsWhere, permissions.HasLionPoliciesWith(policiesWhere...))
-	}
 
-	bindingList, err := db.PermissionBindings.
-		Query().
-		Select(
-			permissionbindings.FieldResourceScopeID,
-			permissionbindings.FieldIsRecursive,
-		).
+	attachmentQuery := db.PolicyAttachments.Query().
 		Where(
-			permissionbindings.HasLionPermissionsWith(permissionsWhere...),
+			policyattachments.PrincipalTypeEQ("ROLE"),
+			policyattachments.PrincipalIDIn(allRoleID64s...),
+			policyattachments.AttachmentStatusIn(
+				int(adminv1.PolicyAttachment_STATUS_UNSPECIFIED),
+				int(adminv1.PolicyAttachment_ACTIVE),
+			),
+			policyattachments.Or(
+				policyattachments.ExpiresAtIsNil(),
+				policyattachments.ExpiresAtGT(time.Now()),
+			),
 		).
-		All(ctx)
+		WithLionPolicies(func(query *lion.PoliciesQuery) {
+			if len(policiesWhere) > 0 {
+				query.Where(policiesWhere...)
+			}
+			query.WithLionPolicyStatements()
+		})
+
+	attachments, err := attachmentQuery.All(ctx)
 	if err != nil {
 		return false, nil, err
 	}
-	if len(bindingList) == 0 {
+	if len(attachments) == 0 {
 		return false, map[int]struct{}{}, nil
 	}
 
-	scopeRecursive := make(map[int]bool)
-	resourceScopeAllID := make([]int, 0)
-	for _, b := range bindingList {
-		resourceScopeAllID = append(resourceScopeAllID, b.ResourceScopeID)
-		if b.IsRecursive {
-			scopeRecursive[b.ResourceScopeID] = true
-		} else if _, set := scopeRecursive[b.ResourceScopeID]; !set {
-			scopeRecursive[b.ResourceScopeID] = false
-		}
-	}
-
-	scopeID := 0
-	if f.ScopeType != 0 && f.ScopeName != "" {
-		scopeID, err = db.Scopes.Query().Where(scopes.ScopeTypeEQ(int(f.ScopeType)), scopes.CodeEQ(f.ScopeName)).OnlyID(ctx)
-		if err != nil {
-			return false, nil, err
-		}
-	}
-
-	rsWhere := []predicate.ResourceScopes{resourcescopes.IDIn(resourceScopeAllID...)}
-	if scopeID != 0 {
-		rsWhere = append(rsWhere, resourcescopes.ScopeIDEQ(scopeID))
-	}
-	rsList, err := db.ResourceScopes.Query().Where(rsWhere...).Select(resourcescopes.FieldID, resourcescopes.FieldResourceID).All(ctx)
+	resourceList, err := db.Resources.Query().All(ctx)
 	if err != nil {
 		return false, nil, err
 	}
-	if len(rsList) == 0 {
+	if len(resourceList) == 0 {
 		return false, map[int]struct{}{}, nil
 	}
 
-	recursiveRootIDs := make(map[int]struct{})
 	allowedIDs := make(map[int]struct{})
-	for _, rs := range rsList {
-		allowedIDs[rs.ResourceID] = struct{}{}
-		if scopeRecursive[rs.ID] {
-			recursiveRootIDs[rs.ResourceID] = struct{}{}
+	deniedIDs := make(map[int]struct{})
+	for _, attachment := range attachments {
+		policy := attachment.Edges.LionPolicies
+		if policy == nil {
+			continue
 		}
-	}
-	if len(recursiveRootIDs) > 0 {
-		allRes, err := db.Resources.Query().Select(resources.FieldID, resources.FieldParentID).All(ctx)
-		if err != nil {
-			return false, nil, err
-		}
-		children := make(map[int64][]int)
-		for _, r := range allRes {
-			pid := r.ParentID
-			children[pid] = append(children[pid], r.ID)
-		}
-		for rootID := range recursiveRootIDs {
-			collectDescendantIDs(int64(rootID), children, allowedIDs)
+		for _, statement := range policy.Edges.LionPolicyStatements {
+			if statement == nil {
+				continue
+			}
+			for _, resource := range resourceList {
+				if !policyStatementMatchesResource(statement, resource) {
+					continue
+				}
+				if statement.Effect == int(adminv1.PolicyStatement_DENY) {
+					deniedIDs[resource.ID] = struct{}{}
+					delete(allowedIDs, resource.ID)
+					continue
+				}
+				if statement.Effect == int(adminv1.PolicyStatement_ALLOW) {
+					if _, denied := deniedIDs[resource.ID]; !denied {
+						allowedIDs[resource.ID] = struct{}{}
+					}
+				}
+			}
 		}
 	}
 	return false, allowedIDs, nil
 }
 
-// ensureResourceIDInAccessScope 非 superadmin 时要求 resourceID 落在 allowed 集合中；否则返回 NotFound（与「资源不存在」统一，避免泄漏）。
-func ensureResourceIDInAccessScope(ctx context.Context, superAdmin bool, allowed map[int]struct{}, resourceID int) error {
+// ensureResourceIDAllowed 非 superadmin 时要求 resourceID 落在 allowed 集合中；否则返回 NotFound（与「资源不存在」统一，避免泄漏）。
+func ensureResourceIDAllowed(ctx context.Context, superAdmin bool, allowed map[int]struct{}, resourceID int) error {
 	if superAdmin {
 		return nil
 	}
@@ -209,7 +273,7 @@ func buildResourceGRN(serviceCode, tenantID, region, resourceTypeCode, resourceP
 	return fmt.Sprintf("grn:%s:%s:%s:%s/%s", serviceCode, tenantID, region, resourceTypeCode, resourcePath)
 }
 
-func (a *KnownAdminAPI) lionResourceToProto(in *lion.Resources, resourceScopes []*adminv1.Scope) *adminv1.Resource {
+func (a *KnownAdminAPI) lionResourceToProto(in *lion.Resources) *adminv1.Resource {
 	if in == nil {
 		return nil
 	}
@@ -252,7 +316,7 @@ func (a *KnownAdminAPI) lionResourceToProto(in *lion.Resources, resourceScopes [
 		Region:           in.Region,
 		ResourcePath:     resourcePath,
 		Grn:              grn,
-		Scopes:           resourceScopes,
+		Scopes:           nil,
 	}
 }
 
@@ -271,8 +335,6 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	hasSuperAdmin, allowedIDs, err := a.allowedResourceIDsForContext(ctx, db, listResourceAuthFilter{
 		PolicyType:   req.PolicyType,
 		PolicyStatus: req.PolicyStatus,
-		ScopeType:    req.ScopeType,
-		ScopeName:    req.ScopeName,
 	})
 	if err != nil {
 		return result, err
@@ -286,18 +348,6 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 			return result, nil
 		}
 		resourcesWhere = append(resourcesWhere, resources.IDIn(mapKeys(allowedIDs)...))
-	} else {
-		// superadmin 可以查看所有资源，但仍需要支持资源作用域过滤
-		if req.ScopeType != 0 && req.ScopeName != "" {
-			scopeID, err := db.Scopes.Query().Where(scopes.ScopeTypeEQ(int(req.ScopeType)), scopes.CodeEQ(req.ScopeName)).OnlyID(ctx)
-			if err != nil {
-				return nil, err
-			}
-			if scopeID != 0 {
-				resourceScopesWhere := []predicate.ResourceScopes{resourcescopes.ScopeIDEQ(scopeID)}
-				resourcesWhere = append(resourcesWhere, resources.HasLionResourceScopesWith(resourceScopesWhere...))
-			}
-		}
 	}
 
 	if req.ResourceType != 0 {
@@ -374,42 +424,10 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	resourceQuery = resourceQuery.Limit(int(pageSize))
 
 	// 执行查询
-	// 如果 View 为 FULL，需要预加载作用域信息
-	if req.View == adminv1.View_VIEW_FULL {
-		resourceQuery = resourceQuery.WithLionResourceScopes(
-			func(query *lion.ResourceScopesQuery) {
-				query.WithLionScopes()
-			},
-		)
-	}
 
 	resList, err := resourceQuery.All(ctx)
 	if err != nil {
 		return nil, err
-	}
-
-	// 如果 View 为 FULL，收集作用域信息
-	var resourceScopesMap map[int][]*adminv1.Scope
-	if req.View == adminv1.View_VIEW_FULL {
-		resourceScopesMap = make(map[int][]*adminv1.Scope)
-		for _, res := range resList {
-			if res.Edges.LionResourceScopes != nil {
-				scopes := make([]*adminv1.Scope, 0)
-				for _, rs := range res.Edges.LionResourceScopes {
-					if rs.Edges.LionScopes != nil {
-						s := rs.Edges.LionScopes
-						scopes = append(scopes, &adminv1.Scope{
-							Id:          int64(s.ID),
-							Code:        s.Code,
-							DisplayName: s.DisplayName,
-							Type:        adminv1.Scope_Type(s.ScopeType),
-							Protected:   s.Protected,
-						})
-					}
-				}
-				resourceScopesMap[res.ID] = scopes
-			}
-		}
 	}
 
 	switch req.Structure.String() {
@@ -442,13 +460,6 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 				UpdatedAt: timestamppb.New(m.UpdatedAt),
 			}
 
-			// 如果 View 为 FULL，填充作用域列表
-			if req.View == adminv1.View_VIEW_FULL {
-				if scopes, ok := resourceScopesMap[m.ID]; ok {
-					menu.Scopes = scopes
-				}
-			}
-
 			menuMap[int64(m.ID)] = menu
 		}
 
@@ -471,13 +482,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 		result.Resources = roots
 	default:
 		for _, m := range resList {
-			var scopes []*adminv1.Scope
-			if req.View == adminv1.View_VIEW_FULL {
-				if loadedScopes, ok := resourceScopesMap[m.ID]; ok {
-					scopes = loadedScopes
-				}
-			}
-			resource := a.lionResourceToProto(m, scopes)
+			resource := a.lionResourceToProto(m)
 			result.Resources = append(result.Resources, resource)
 		}
 	}
@@ -522,7 +527,7 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 	if err != nil {
 		return nil, err
 	}
-	if err := ensureResourceIDInAccessScope(ctx, super, allowed, int(req.Resource.ParentId)); err != nil {
+	if err := ensureResourceIDAllowed(ctx, super, allowed, int(req.Resource.ParentId)); err != nil {
 		return nil, err
 	}
 
@@ -591,7 +596,7 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		return nil, err
 	}
 
-	result := a.lionResourceToProto(newResource, nil)
+	result := a.lionResourceToProto(newResource)
 
 	// 处理 metadata（如果存在）
 	if len(req.Resource.Metadata) > 0 {
@@ -620,7 +625,7 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 	if err != nil {
 		return nil, err
 	}
-	if err := ensureResourceIDInAccessScope(ctx, super, allowed, int(req.Resource.Id)); err != nil {
+	if err := ensureResourceIDAllowed(ctx, super, allowed, int(req.Resource.Id)); err != nil {
 		return nil, err
 	}
 
@@ -755,7 +760,7 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 		return nil, err
 	}
 
-	result := a.lionResourceToProto(updatedResource, nil)
+	result := a.lionResourceToProto(updatedResource)
 
 	// 处理 metadata（如果存在）
 	if len(req.Resource.Metadata) > 0 {
@@ -780,7 +785,7 @@ func (a *KnownAdminAPI) DeleteResource(ctx context.Context, req *adminv1.DeleteR
 	if err != nil {
 		return nil, err
 	}
-	if err := ensureResourceIDInAccessScope(ctx, super, allowed, int(req.Id)); err != nil {
+	if err := ensureResourceIDAllowed(ctx, super, allowed, int(req.Id)); err != nil {
 		return nil, err
 	}
 
@@ -811,124 +816,6 @@ func (a *KnownAdminAPI) DeleteResource(ctx context.Context, req *adminv1.DeleteR
 	return &emptypb.Empty{}, nil
 }
 
-// CreateResourceScopes 创建资源与多个作用域的关联
-func (a *KnownAdminAPI) CreateResourceScopes(ctx context.Context, req *adminv1.CreateResourceScopesRequest) (*adminv1.CreateResourceScopesResponse, error) {
-	result := &adminv1.CreateResourceScopesResponse{}
-
-	if req.ResourceId == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("resource_id is required")
-	}
-
-	if len(req.Scopes) == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("scopes list is empty")
-	}
-
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
-	}
-
-	super, allowed, err := a.allowedResourceIDsForContext(ctx, db, listResourceAuthFilter{})
-	if err != nil {
-		return nil, err
-	}
-	if err := ensureResourceIDInAccessScope(ctx, super, allowed, int(req.ResourceId)); err != nil {
-		return nil, err
-	}
-
-	// 检查资源是否存在
-	_, err = db.Resources.Get(ctx, int(req.ResourceId))
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("resource not found")
-	}
-
-	// 收集有效的 scope IDs 并验证每个 scope 是否存在
-	scopeIDs := make([]int, 0, len(req.Scopes))
-	scopeIDMap := make(map[int64]*adminv1.Scope)
-
-	for _, scope := range req.Scopes {
-		if scope.Id == 0 {
-			continue
-		}
-
-		// 检查作用域是否存在
-		dbScope, err := db.Scopes.Get(ctx, int(scope.Id))
-		if err != nil {
-			// 如果某个 scope 不存在，可以选择跳过或返回错误
-			// 这里选择跳过不存在的 scope
-			continue
-		}
-
-		scopeIDs = append(scopeIDs, dbScope.ID)
-		// 保存 scope 信息以便后续返回
-		scopeIDMap[scope.Id] = &adminv1.Scope{
-			Id:          int64(dbScope.ID),
-			Code:        dbScope.Code,
-			DisplayName: dbScope.DisplayName,
-			Type:        adminv1.Scope_Type(dbScope.ScopeType),
-			Protected:   dbScope.Protected,
-		}
-	}
-
-	if len(scopeIDs) == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("no valid scopes found")
-	}
-
-	// 检查是否已存在关联关系，如果存在则跳过
-	existingResourceScopes, err := db.ResourceScopes.Query().
-		Where(
-			resourcescopes.ResourceIDEQ(int(req.ResourceId)),
-			resourcescopes.ScopeIDIn(scopeIDs...),
-		).
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// 构建已存在的 scope ID 集合
-	existingScopeIDSet := make(map[int]bool)
-	for _, rs := range existingResourceScopes {
-		existingScopeIDSet[rs.ScopeID] = true
-	}
-
-	// 过滤出需要创建的 scope IDs（排除已存在的）
-	scopesToCreate := make([]int, 0)
-	for _, scopeID := range scopeIDs {
-		if !existingScopeIDSet[scopeID] {
-			scopesToCreate = append(scopesToCreate, scopeID)
-		}
-	}
-
-	// 批量创建关联关系
-	if len(scopesToCreate) > 0 {
-		allResourceScopes := make([]*lion.ResourceScopesCreate, 0, len(scopesToCreate))
-
-		for _, scopeID := range scopesToCreate {
-			rs := db.ResourceScopes.Create().
-				SetResourceID(int(req.ResourceId)).
-				SetScopeID(scopeID)
-
-			allResourceScopes = append(allResourceScopes, rs)
-		}
-
-		_, err = db.ResourceScopes.CreateBulk(allResourceScopes...).Save(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// 返回所有关联的作用域（包括已存在的和新创建的）
-	for _, scope := range req.Scopes {
-		if scope.Id != 0 {
-			if s, ok := scopeIDMap[scope.Id]; ok {
-				result.Scopes = append(result.Scopes, s)
-			}
-		}
-	}
-
-	return result, nil
-}
-
 // GetResource 获取单个资源的详细信息
 func (a *KnownAdminAPI) GetResource(ctx context.Context, req *adminv1.GetResourceRequest) (*adminv1.Resource, error) {
 	if req.Id == 0 {
@@ -944,44 +831,19 @@ func (a *KnownAdminAPI) GetResource(ctx context.Context, req *adminv1.GetResourc
 	if err != nil {
 		return nil, err
 	}
-	if err := ensureResourceIDInAccessScope(ctx, super, allowed, int(req.Id)); err != nil {
+	if err := ensureResourceIDAllowed(ctx, super, allowed, int(req.Id)); err != nil {
 		return nil, err
 	}
 
-	// 查询资源，并预加载作用域信息
+	// 查询资源
 	resource, err := db.Resources.Query().
 		Where(resources.IDEQ(int(req.Id))).
-		WithLionResourceScopes(
-			func(query *lion.ResourceScopesQuery) {
-				query.WithLionScopes()
-			},
-		).
 		Only(ctx)
 	if err != nil {
 		return nil, errs.NotFound(ctx).WithMessage("resource not found")
 	}
 
-	result := a.lionResourceToProto(resource, nil)
-
-	// 加载关联的作用域列表
-	if resource.Edges.LionResourceScopes != nil {
-		scopes := make([]*adminv1.Scope, 0)
-		for _, rs := range resource.Edges.LionResourceScopes {
-			if rs.Edges.LionScopes != nil {
-				s := rs.Edges.LionScopes
-				scopes = append(scopes, &adminv1.Scope{
-					Id:          int64(s.ID),
-					Code:        s.Code,
-					DisplayName: s.DisplayName,
-					Type:        adminv1.Scope_Type(s.ScopeType),
-					Protected:   s.Protected,
-				})
-			}
-		}
-		result.Scopes = scopes
-	}
-
-	return result, nil
+	return a.lionResourceToProto(resource), nil
 }
 
 // collectDescendantIDs 从根节点起 BFS 收集所有子孙资源 ID 并加入 allowedIDs。

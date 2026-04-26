@@ -14,18 +14,13 @@ import (
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
-	"github.com/grpc-kit/pkg/lion/permissionbindings"
-	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/policyattachments"
 	"github.com/grpc-kit/pkg/lion/policystatements"
 	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/resourcetypes"
-	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
-	"github.com/grpc-kit/pkg/lion/scopes"
 	"github.com/grpc-kit/pkg/lion/services"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
@@ -624,88 +619,6 @@ func init() {
 	menusDescDescription := menusFields[12].Descriptor()
 	// menus.DefaultDescription holds the default value on creation for the description field.
 	menus.DefaultDescription = menusDescDescription.Default.(string)
-	permissionbindingsMixin := schema.PermissionBindings{}.Mixin()
-	permissionbindingsMixinFields0 := permissionbindingsMixin[0].Fields()
-	_ = permissionbindingsMixinFields0
-	permissionbindingsFields := schema.PermissionBindings{}.Fields()
-	_ = permissionbindingsFields
-	// permissionbindingsDescCreatedAt is the schema descriptor for created_at field.
-	permissionbindingsDescCreatedAt := permissionbindingsMixinFields0[0].Descriptor()
-	// permissionbindings.DefaultCreatedAt holds the default value on creation for the created_at field.
-	permissionbindings.DefaultCreatedAt = permissionbindingsDescCreatedAt.Default.(func() time.Time)
-	// permissionbindingsDescUpdatedAt is the schema descriptor for updated_at field.
-	permissionbindingsDescUpdatedAt := permissionbindingsMixinFields0[1].Descriptor()
-	// permissionbindings.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	permissionbindings.DefaultUpdatedAt = permissionbindingsDescUpdatedAt.Default.(func() time.Time)
-	// permissionbindings.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	permissionbindings.UpdateDefaultUpdatedAt = permissionbindingsDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// permissionbindingsDescPermissionID is the schema descriptor for permission_id field.
-	permissionbindingsDescPermissionID := permissionbindingsFields[0].Descriptor()
-	// permissionbindings.PermissionIDValidator is a validator for the "permission_id" field. It is called by the builders before save.
-	permissionbindings.PermissionIDValidator = permissionbindingsDescPermissionID.Validators[0].(func(int) error)
-	// permissionbindingsDescResourceScopeID is the schema descriptor for resource_scope_id field.
-	permissionbindingsDescResourceScopeID := permissionbindingsFields[1].Descriptor()
-	// permissionbindings.ResourceScopeIDValidator is a validator for the "resource_scope_id" field. It is called by the builders before save.
-	permissionbindings.ResourceScopeIDValidator = permissionbindingsDescResourceScopeID.Validators[0].(func(int) error)
-	// permissionbindingsDescIsRecursive is the schema descriptor for is_recursive field.
-	permissionbindingsDescIsRecursive := permissionbindingsFields[2].Descriptor()
-	// permissionbindings.DefaultIsRecursive holds the default value on creation for the is_recursive field.
-	permissionbindings.DefaultIsRecursive = permissionbindingsDescIsRecursive.Default.(bool)
-	permissionsMixin := schema.Permissions{}.Mixin()
-	permissionsMixinFields0 := permissionsMixin[0].Fields()
-	_ = permissionsMixinFields0
-	permissionsMixinFields1 := permissionsMixin[1].Fields()
-	_ = permissionsMixinFields1
-	permissionsFields := schema.Permissions{}.Fields()
-	_ = permissionsFields
-	// permissionsDescCreatedAt is the schema descriptor for created_at field.
-	permissionsDescCreatedAt := permissionsMixinFields0[0].Descriptor()
-	// permissions.DefaultCreatedAt holds the default value on creation for the created_at field.
-	permissions.DefaultCreatedAt = permissionsDescCreatedAt.Default.(func() time.Time)
-	// permissionsDescUpdatedAt is the schema descriptor for updated_at field.
-	permissionsDescUpdatedAt := permissionsMixinFields0[1].Descriptor()
-	// permissions.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	permissions.DefaultUpdatedAt = permissionsDescUpdatedAt.Default.(func() time.Time)
-	// permissions.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	permissions.UpdateDefaultUpdatedAt = permissionsDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// permissionsDescCreatedBy is the schema descriptor for created_by field.
-	permissionsDescCreatedBy := permissionsMixinFields1[0].Descriptor()
-	// permissions.DefaultCreatedBy holds the default value on creation for the created_by field.
-	permissions.DefaultCreatedBy = permissionsDescCreatedBy.Default.(int64)
-	// permissionsDescUpdatedBy is the schema descriptor for updated_by field.
-	permissionsDescUpdatedBy := permissionsMixinFields1[1].Descriptor()
-	// permissions.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	permissions.DefaultUpdatedBy = permissionsDescUpdatedBy.Default.(int64)
-	// permissionsDescPolicyID is the schema descriptor for policy_id field.
-	permissionsDescPolicyID := permissionsFields[0].Descriptor()
-	// permissions.PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
-	permissions.PolicyIDValidator = permissionsDescPolicyID.Validators[0].(func(int) error)
-	// permissionsDescCode is the schema descriptor for code field.
-	permissionsDescCode := permissionsFields[1].Descriptor()
-	// permissions.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	permissions.CodeValidator = func() func(string) error {
-		validators := permissionsDescCode.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(code string) error {
-			for _, fn := range fns {
-				if err := fn(code); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// permissionsDescDisplayName is the schema descriptor for display_name field.
-	permissionsDescDisplayName := permissionsFields[2].Descriptor()
-	// permissions.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
-	permissions.DisplayNameValidator = permissionsDescDisplayName.Validators[0].(func(string) error)
-	// permissionsDescDescription is the schema descriptor for description field.
-	permissionsDescDescription := permissionsFields[3].Descriptor()
-	// permissions.DefaultDescription holds the default value on creation for the description field.
-	permissions.DefaultDescription = permissionsDescDescription.Default.(string)
 	policiesMixin := schema.Policies{}.Mixin()
 	policiesMixinFields0 := policiesMixin[0].Fields()
 	_ = policiesMixinFields0
@@ -907,29 +820,6 @@ func init() {
 	policystatementsDescDescription := policystatementsFields[7].Descriptor()
 	// policystatements.DefaultDescription holds the default value on creation for the description field.
 	policystatements.DefaultDescription = policystatementsDescDescription.Default.(string)
-	resourcescopesMixin := schema.ResourceScopes{}.Mixin()
-	resourcescopesMixinFields0 := resourcescopesMixin[0].Fields()
-	_ = resourcescopesMixinFields0
-	resourcescopesFields := schema.ResourceScopes{}.Fields()
-	_ = resourcescopesFields
-	// resourcescopesDescCreatedAt is the schema descriptor for created_at field.
-	resourcescopesDescCreatedAt := resourcescopesMixinFields0[0].Descriptor()
-	// resourcescopes.DefaultCreatedAt holds the default value on creation for the created_at field.
-	resourcescopes.DefaultCreatedAt = resourcescopesDescCreatedAt.Default.(func() time.Time)
-	// resourcescopesDescUpdatedAt is the schema descriptor for updated_at field.
-	resourcescopesDescUpdatedAt := resourcescopesMixinFields0[1].Descriptor()
-	// resourcescopes.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	resourcescopes.DefaultUpdatedAt = resourcescopesDescUpdatedAt.Default.(func() time.Time)
-	// resourcescopes.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	resourcescopes.UpdateDefaultUpdatedAt = resourcescopesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// resourcescopesDescResourceID is the schema descriptor for resource_id field.
-	resourcescopesDescResourceID := resourcescopesFields[0].Descriptor()
-	// resourcescopes.ResourceIDValidator is a validator for the "resource_id" field. It is called by the builders before save.
-	resourcescopes.ResourceIDValidator = resourcescopesDescResourceID.Validators[0].(func(int) error)
-	// resourcescopesDescScopeID is the schema descriptor for scope_id field.
-	resourcescopesDescScopeID := resourcescopesFields[1].Descriptor()
-	// resourcescopes.ScopeIDValidator is a validator for the "scope_id" field. It is called by the builders before save.
-	resourcescopes.ScopeIDValidator = resourcescopesDescScopeID.Validators[0].(func(int) error)
 	resourcetypesMixin := schema.ResourceTypes{}.Mixin()
 	resourcetypesMixinFields0 := resourcetypesMixin[0].Fields()
 	_ = resourcetypesMixinFields0
@@ -1170,39 +1060,6 @@ func init() {
 	resourcesDescProtected := resourcesFields[20].Descriptor()
 	// resources.DefaultProtected holds the default value on creation for the protected field.
 	resources.DefaultProtected = resourcesDescProtected.Default.(bool)
-	rolepermissionsMixin := schema.RolePermissions{}.Mixin()
-	rolepermissionsMixinFields0 := rolepermissionsMixin[0].Fields()
-	_ = rolepermissionsMixinFields0
-	rolepermissionsMixinFields1 := rolepermissionsMixin[1].Fields()
-	_ = rolepermissionsMixinFields1
-	rolepermissionsFields := schema.RolePermissions{}.Fields()
-	_ = rolepermissionsFields
-	// rolepermissionsDescCreatedAt is the schema descriptor for created_at field.
-	rolepermissionsDescCreatedAt := rolepermissionsMixinFields0[0].Descriptor()
-	// rolepermissions.DefaultCreatedAt holds the default value on creation for the created_at field.
-	rolepermissions.DefaultCreatedAt = rolepermissionsDescCreatedAt.Default.(func() time.Time)
-	// rolepermissionsDescUpdatedAt is the schema descriptor for updated_at field.
-	rolepermissionsDescUpdatedAt := rolepermissionsMixinFields0[1].Descriptor()
-	// rolepermissions.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	rolepermissions.DefaultUpdatedAt = rolepermissionsDescUpdatedAt.Default.(func() time.Time)
-	// rolepermissions.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	rolepermissions.UpdateDefaultUpdatedAt = rolepermissionsDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// rolepermissionsDescCreatedBy is the schema descriptor for created_by field.
-	rolepermissionsDescCreatedBy := rolepermissionsMixinFields1[0].Descriptor()
-	// rolepermissions.DefaultCreatedBy holds the default value on creation for the created_by field.
-	rolepermissions.DefaultCreatedBy = rolepermissionsDescCreatedBy.Default.(int64)
-	// rolepermissionsDescUpdatedBy is the schema descriptor for updated_by field.
-	rolepermissionsDescUpdatedBy := rolepermissionsMixinFields1[1].Descriptor()
-	// rolepermissions.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	rolepermissions.DefaultUpdatedBy = rolepermissionsDescUpdatedBy.Default.(int64)
-	// rolepermissionsDescRoleID is the schema descriptor for role_id field.
-	rolepermissionsDescRoleID := rolepermissionsFields[0].Descriptor()
-	// rolepermissions.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
-	rolepermissions.RoleIDValidator = rolepermissionsDescRoleID.Validators[0].(func(int) error)
-	// rolepermissionsDescPermissionID is the schema descriptor for permission_id field.
-	rolepermissionsDescPermissionID := rolepermissionsFields[1].Descriptor()
-	// rolepermissions.PermissionIDValidator is a validator for the "permission_id" field. It is called by the builders before save.
-	rolepermissions.PermissionIDValidator = rolepermissionsDescPermissionID.Validators[0].(func(int) error)
 	rolesMixin := schema.Roles{}.Mixin()
 	rolesMixinFields0 := rolesMixin[0].Fields()
 	_ = rolesMixinFields0
@@ -1288,55 +1145,6 @@ func init() {
 	rolesDescProtected := rolesFields[7].Descriptor()
 	// roles.DefaultProtected holds the default value on creation for the protected field.
 	roles.DefaultProtected = rolesDescProtected.Default.(bool)
-	scopesMixin := schema.Scopes{}.Mixin()
-	scopesMixinFields0 := scopesMixin[0].Fields()
-	_ = scopesMixinFields0
-	scopesFields := schema.Scopes{}.Fields()
-	_ = scopesFields
-	// scopesDescCreatedAt is the schema descriptor for created_at field.
-	scopesDescCreatedAt := scopesMixinFields0[0].Descriptor()
-	// scopes.DefaultCreatedAt holds the default value on creation for the created_at field.
-	scopes.DefaultCreatedAt = scopesDescCreatedAt.Default.(func() time.Time)
-	// scopesDescUpdatedAt is the schema descriptor for updated_at field.
-	scopesDescUpdatedAt := scopesMixinFields0[1].Descriptor()
-	// scopes.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	scopes.DefaultUpdatedAt = scopesDescUpdatedAt.Default.(func() time.Time)
-	// scopes.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	scopes.UpdateDefaultUpdatedAt = scopesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// scopesDescCode is the schema descriptor for code field.
-	scopesDescCode := scopesFields[0].Descriptor()
-	// scopes.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	scopes.CodeValidator = func() func(string) error {
-		validators := scopesDescCode.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(code string) error {
-			for _, fn := range fns {
-				if err := fn(code); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// scopesDescScopeType is the schema descriptor for scope_type field.
-	scopesDescScopeType := scopesFields[1].Descriptor()
-	// scopes.DefaultScopeType holds the default value on creation for the scope_type field.
-	scopes.DefaultScopeType = scopesDescScopeType.Default.(int)
-	// scopesDescDisplayName is the schema descriptor for display_name field.
-	scopesDescDisplayName := scopesFields[2].Descriptor()
-	// scopes.DefaultDisplayName holds the default value on creation for the display_name field.
-	scopes.DefaultDisplayName = scopesDescDisplayName.Default.(string)
-	// scopesDescProtected is the schema descriptor for protected field.
-	scopesDescProtected := scopesFields[3].Descriptor()
-	// scopes.DefaultProtected holds the default value on creation for the protected field.
-	scopes.DefaultProtected = scopesDescProtected.Default.(bool)
-	// scopesDescDescription is the schema descriptor for description field.
-	scopesDescDescription := scopesFields[4].Descriptor()
-	// scopes.DefaultDescription holds the default value on creation for the description field.
-	scopes.DefaultDescription = scopesDescDescription.Default.(string)
 	servicesMixin := schema.Services{}.Mixin()
 	servicesMixinFields0 := servicesMixin[0].Fields()
 	_ = servicesMixinFields0

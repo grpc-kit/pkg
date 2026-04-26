@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/policyattachments"
 	"github.com/grpc-kit/pkg/lion/policystatements"
@@ -244,21 +243,6 @@ func (_u *PoliciesUpdate) SetNillableDescription(v *string) *PoliciesUpdate {
 	return _u
 }
 
-// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
-func (_u *PoliciesUpdate) AddLionPermissionIDs(ids ...int) *PoliciesUpdate {
-	_u.mutation.AddLionPermissionIDs(ids...)
-	return _u
-}
-
-// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
-func (_u *PoliciesUpdate) AddLionPermissions(v ...*Permissions) *PoliciesUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionPermissionIDs(ids...)
-}
-
 // AddLionPolicyStatementIDs adds the "lion_policy_statements" edge to the PolicyStatements entity by IDs.
 func (_u *PoliciesUpdate) AddLionPolicyStatementIDs(ids ...int) *PoliciesUpdate {
 	_u.mutation.AddLionPolicyStatementIDs(ids...)
@@ -292,27 +276,6 @@ func (_u *PoliciesUpdate) AddLionPolicyAttachments(v ...*PolicyAttachments) *Pol
 // Mutation returns the PoliciesMutation object of the builder.
 func (_u *PoliciesUpdate) Mutation() *PoliciesMutation {
 	return _u.mutation
-}
-
-// ClearLionPermissions clears all "lion_permissions" edges to the Permissions entity.
-func (_u *PoliciesUpdate) ClearLionPermissions() *PoliciesUpdate {
-	_u.mutation.ClearLionPermissions()
-	return _u
-}
-
-// RemoveLionPermissionIDs removes the "lion_permissions" edge to Permissions entities by IDs.
-func (_u *PoliciesUpdate) RemoveLionPermissionIDs(ids ...int) *PoliciesUpdate {
-	_u.mutation.RemoveLionPermissionIDs(ids...)
-	return _u
-}
-
-// RemoveLionPermissions removes "lion_permissions" edges to Permissions entities.
-func (_u *PoliciesUpdate) RemoveLionPermissions(v ...*Permissions) *PoliciesUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveLionPermissionIDs(ids...)
 }
 
 // ClearLionPolicyStatements clears all "lion_policy_statements" edges to the PolicyStatements entity.
@@ -479,51 +442,6 @@ func (_u *PoliciesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
-	}
-	if _u.mutation.LionPermissionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPermissionsTable,
-			Columns: []string{policies.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionPermissionsIDs(); len(nodes) > 0 && !_u.mutation.LionPermissionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPermissionsTable,
-			Columns: []string{policies.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionPermissionsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPermissionsTable,
-			Columns: []string{policies.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.LionPolicyStatementsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -848,21 +766,6 @@ func (_u *PoliciesUpdateOne) SetNillableDescription(v *string) *PoliciesUpdateOn
 	return _u
 }
 
-// AddLionPermissionIDs adds the "lion_permissions" edge to the Permissions entity by IDs.
-func (_u *PoliciesUpdateOne) AddLionPermissionIDs(ids ...int) *PoliciesUpdateOne {
-	_u.mutation.AddLionPermissionIDs(ids...)
-	return _u
-}
-
-// AddLionPermissions adds the "lion_permissions" edges to the Permissions entity.
-func (_u *PoliciesUpdateOne) AddLionPermissions(v ...*Permissions) *PoliciesUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionPermissionIDs(ids...)
-}
-
 // AddLionPolicyStatementIDs adds the "lion_policy_statements" edge to the PolicyStatements entity by IDs.
 func (_u *PoliciesUpdateOne) AddLionPolicyStatementIDs(ids ...int) *PoliciesUpdateOne {
 	_u.mutation.AddLionPolicyStatementIDs(ids...)
@@ -896,27 +799,6 @@ func (_u *PoliciesUpdateOne) AddLionPolicyAttachments(v ...*PolicyAttachments) *
 // Mutation returns the PoliciesMutation object of the builder.
 func (_u *PoliciesUpdateOne) Mutation() *PoliciesMutation {
 	return _u.mutation
-}
-
-// ClearLionPermissions clears all "lion_permissions" edges to the Permissions entity.
-func (_u *PoliciesUpdateOne) ClearLionPermissions() *PoliciesUpdateOne {
-	_u.mutation.ClearLionPermissions()
-	return _u
-}
-
-// RemoveLionPermissionIDs removes the "lion_permissions" edge to Permissions entities by IDs.
-func (_u *PoliciesUpdateOne) RemoveLionPermissionIDs(ids ...int) *PoliciesUpdateOne {
-	_u.mutation.RemoveLionPermissionIDs(ids...)
-	return _u
-}
-
-// RemoveLionPermissions removes "lion_permissions" edges to Permissions entities.
-func (_u *PoliciesUpdateOne) RemoveLionPermissions(v ...*Permissions) *PoliciesUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveLionPermissionIDs(ids...)
 }
 
 // ClearLionPolicyStatements clears all "lion_policy_statements" edges to the PolicyStatements entity.
@@ -1113,51 +995,6 @@ func (_u *PoliciesUpdateOne) sqlSave(ctx context.Context) (_node *Policies, err 
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
-	}
-	if _u.mutation.LionPermissionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPermissionsTable,
-			Columns: []string{policies.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionPermissionsIDs(); len(nodes) > 0 && !_u.mutation.LionPermissionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPermissionsTable,
-			Columns: []string{policies.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionPermissionsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPermissionsTable,
-			Columns: []string{policies.LionPermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.LionPolicyStatementsCleared() {
 		edge := &sqlgraph.EdgeSpec{

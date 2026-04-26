@@ -453,108 +453,6 @@ func (x *DeleteResourceRequest) GetId() int64 {
 	return 0
 }
 
-type CreateResourceScopesRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	ResourceId int64    `protobuf:"varint,1,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	Scopes     []*Scope `protobuf:"bytes,2,rep,name=scopes,proto3" json:"scopes,omitempty"`
-}
-
-func (x *CreateResourceScopesRequest) Reset() {
-	*x = CreateResourceScopesRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_resource_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CreateResourceScopesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateResourceScopesRequest) ProtoMessage() {}
-
-func (x *CreateResourceScopesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_resource_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateResourceScopesRequest.ProtoReflect.Descriptor instead.
-func (*CreateResourceScopesRequest) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_resource_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *CreateResourceScopesRequest) GetResourceId() int64 {
-	if x != nil {
-		return x.ResourceId
-	}
-	return 0
-}
-
-func (x *CreateResourceScopesRequest) GetScopes() []*Scope {
-	if x != nil {
-		return x.Scopes
-	}
-	return nil
-}
-
-type CreateResourceScopesResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Scopes []*Scope `protobuf:"bytes,1,rep,name=scopes,proto3" json:"scopes,omitempty"`
-}
-
-func (x *CreateResourceScopesResponse) Reset() {
-	*x = CreateResourceScopesResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_resource_proto_msgTypes[6]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CreateResourceScopesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateResourceScopesResponse) ProtoMessage() {}
-
-func (x *CreateResourceScopesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_resource_proto_msgTypes[6]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateResourceScopesResponse.ProtoReflect.Descriptor instead.
-func (*CreateResourceScopesResponse) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_resource_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *CreateResourceScopesResponse) GetScopes() []*Scope {
-	if x != nil {
-		return x.Scopes
-	}
-	return nil
-}
-
 type GetResourceRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -566,7 +464,7 @@ type GetResourceRequest struct {
 func (x *GetResourceRequest) Reset() {
 	*x = GetResourceRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_known_admin_v1_resource_proto_msgTypes[7]
+		mi := &file_known_admin_v1_resource_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -579,7 +477,7 @@ func (x *GetResourceRequest) String() string {
 func (*GetResourceRequest) ProtoMessage() {}
 
 func (x *GetResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_known_admin_v1_resource_proto_msgTypes[7]
+	mi := &file_known_admin_v1_resource_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -592,7 +490,7 @@ func (x *GetResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetResourceRequest.ProtoReflect.Descriptor instead.
 func (*GetResourceRequest) Descriptor() ([]byte, []int) {
-	return file_known_admin_v1_resource_proto_rawDescGZIP(), []int{7}
+	return file_known_admin_v1_resource_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetResourceRequest) GetId() int64 {
@@ -675,26 +573,13 @@ var file_known_admin_v1_resource_proto_rawDesc = []byte{
 	0x74, 0x65, 0x4d, 0x61, 0x73, 0x6b, 0x22, 0x27, 0x0a, 0x15, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65,
 	0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
 	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x22,
-	0x7a, 0x0a, 0x1b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63,
-	0x65, 0x53, 0x63, 0x6f, 0x70, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1f,
-	0x0a, 0x0b, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x03, 0x52, 0x0a, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x49, 0x64, 0x12,
-	0x3a, 0x0a, 0x06, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32,
-	0x22, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b,
-	0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x63,
-	0x6f, 0x70, 0x65, 0x52, 0x06, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x73, 0x22, 0x5a, 0x0a, 0x1c, 0x43,
-	0x72, 0x65, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x53, 0x63, 0x6f,
-	0x70, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3a, 0x0a, 0x06, 0x73,
-	0x63, 0x6f, 0x70, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x22, 0x2e, 0x67, 0x72,
-	0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e,
-	0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x63, 0x6f, 0x70, 0x65, 0x52,
-	0x06, 0x73, 0x63, 0x6f, 0x70, 0x65, 0x73, 0x22, 0x24, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x52, 0x65,
-	0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a,
-	0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x42, 0x34, 0x5a,
-	0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63,
-	0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f,
-	0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x24, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x02, 0x69, 0x64, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
+	0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67,
+	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e,
+	0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -709,36 +594,31 @@ func file_known_admin_v1_resource_proto_rawDescGZIP() []byte {
 	return file_known_admin_v1_resource_proto_rawDescData
 }
 
-var file_known_admin_v1_resource_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_known_admin_v1_resource_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_known_admin_v1_resource_proto_goTypes = []interface{}{
-	(*ListResourcesRequest)(nil),         // 0: grpc_kit.api.known.admin.v1.ListResourcesRequest
-	(*ListResourcesResponse)(nil),        // 1: grpc_kit.api.known.admin.v1.ListResourcesResponse
-	(*CreateResourceRequest)(nil),        // 2: grpc_kit.api.known.admin.v1.CreateResourceRequest
-	(*UpdateResourceRequest)(nil),        // 3: grpc_kit.api.known.admin.v1.UpdateResourceRequest
-	(*DeleteResourceRequest)(nil),        // 4: grpc_kit.api.known.admin.v1.DeleteResourceRequest
-	(*CreateResourceScopesRequest)(nil),  // 5: grpc_kit.api.known.admin.v1.CreateResourceScopesRequest
-	(*CreateResourceScopesResponse)(nil), // 6: grpc_kit.api.known.admin.v1.CreateResourceScopesResponse
-	(*GetResourceRequest)(nil),           // 7: grpc_kit.api.known.admin.v1.GetResourceRequest
-	(View)(0),                            // 8: grpc_kit.api.known.admin.v1.View
-	(Structure)(0),                       // 9: grpc_kit.api.known.admin.v1.Structure
-	(*Resource)(nil),                     // 10: grpc_kit.api.known.admin.v1.Resource
-	(*fieldmaskpb.FieldMask)(nil),        // 11: google.protobuf.FieldMask
-	(*Scope)(nil),                        // 12: grpc_kit.api.known.admin.v1.Scope
+	(*ListResourcesRequest)(nil),  // 0: grpc_kit.api.known.admin.v1.ListResourcesRequest
+	(*ListResourcesResponse)(nil), // 1: grpc_kit.api.known.admin.v1.ListResourcesResponse
+	(*CreateResourceRequest)(nil), // 2: grpc_kit.api.known.admin.v1.CreateResourceRequest
+	(*UpdateResourceRequest)(nil), // 3: grpc_kit.api.known.admin.v1.UpdateResourceRequest
+	(*DeleteResourceRequest)(nil), // 4: grpc_kit.api.known.admin.v1.DeleteResourceRequest
+	(*GetResourceRequest)(nil),    // 5: grpc_kit.api.known.admin.v1.GetResourceRequest
+	(View)(0),                     // 6: grpc_kit.api.known.admin.v1.View
+	(Structure)(0),                // 7: grpc_kit.api.known.admin.v1.Structure
+	(*Resource)(nil),              // 8: grpc_kit.api.known.admin.v1.Resource
+	(*fieldmaskpb.FieldMask)(nil), // 9: google.protobuf.FieldMask
 }
 var file_known_admin_v1_resource_proto_depIdxs = []int32{
-	8,  // 0: grpc_kit.api.known.admin.v1.ListResourcesRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
-	9,  // 1: grpc_kit.api.known.admin.v1.ListResourcesRequest.structure:type_name -> grpc_kit.api.known.admin.v1.Structure
-	10, // 2: grpc_kit.api.known.admin.v1.ListResourcesResponse.resources:type_name -> grpc_kit.api.known.admin.v1.Resource
-	10, // 3: grpc_kit.api.known.admin.v1.CreateResourceRequest.resource:type_name -> grpc_kit.api.known.admin.v1.Resource
-	10, // 4: grpc_kit.api.known.admin.v1.UpdateResourceRequest.resource:type_name -> grpc_kit.api.known.admin.v1.Resource
-	11, // 5: grpc_kit.api.known.admin.v1.UpdateResourceRequest.update_mask:type_name -> google.protobuf.FieldMask
-	12, // 6: grpc_kit.api.known.admin.v1.CreateResourceScopesRequest.scopes:type_name -> grpc_kit.api.known.admin.v1.Scope
-	12, // 7: grpc_kit.api.known.admin.v1.CreateResourceScopesResponse.scopes:type_name -> grpc_kit.api.known.admin.v1.Scope
-	8,  // [8:8] is the sub-list for method output_type
-	8,  // [8:8] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	6, // 0: grpc_kit.api.known.admin.v1.ListResourcesRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
+	7, // 1: grpc_kit.api.known.admin.v1.ListResourcesRequest.structure:type_name -> grpc_kit.api.known.admin.v1.Structure
+	8, // 2: grpc_kit.api.known.admin.v1.ListResourcesResponse.resources:type_name -> grpc_kit.api.known.admin.v1.Resource
+	8, // 3: grpc_kit.api.known.admin.v1.CreateResourceRequest.resource:type_name -> grpc_kit.api.known.admin.v1.Resource
+	8, // 4: grpc_kit.api.known.admin.v1.UpdateResourceRequest.resource:type_name -> grpc_kit.api.known.admin.v1.Resource
+	9, // 5: grpc_kit.api.known.admin.v1.UpdateResourceRequest.update_mask:type_name -> google.protobuf.FieldMask
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_resource_proto_init() }
@@ -809,30 +689,6 @@ func file_known_admin_v1_resource_proto_init() {
 			}
 		}
 		file_known_admin_v1_resource_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateResourceScopesRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_known_admin_v1_resource_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateResourceScopesResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_known_admin_v1_resource_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetResourceRequest); i {
 			case 0:
 				return &v.state
@@ -855,7 +711,7 @@ func file_known_admin_v1_resource_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_resource_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

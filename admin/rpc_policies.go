@@ -9,8 +9,9 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/policyattachments"
+	"github.com/grpc-kit/pkg/lion/policystatements"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -284,22 +285,32 @@ func (a *KnownAdminAPI) DeletePolicy(ctx context.Context, req *adminv1.DeletePol
 		return nil, err
 	}
 
-	// 检查策略是否存在
-	_, err = db.Policies.Get(ctx, int(req.Id))
+	policyEnt, err := db.Policies.Get(ctx, int(req.Id))
 	if err != nil {
 		return nil, errs.NotFound(ctx).WithMessage("policy not found")
 	}
+	if policyEnt.Protected {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("protected policy cannot be deleted")
+	}
 
-	// 检查是否存在关联的权限（通过 lion_permissions 表）
-	permissionsCount, err := db.Permissions.Query().
-		Where(permissions.PolicyIDEQ(int(req.Id))).
+	statementCount, err := db.PolicyStatements.Query().
+		Where(policystatements.PolicyIDEQ(int(req.Id))).
 		Count(ctx)
 	if err != nil {
 		return nil, err
 	}
+	if statementCount > 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("cannot delete policy with associated statements")
+	}
 
-	if permissionsCount > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("cannot delete policy with associated permissions")
+	attachmentCount, err := db.PolicyAttachments.Query().
+		Where(policyattachments.PolicyIDEQ(int(req.Id))).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if attachmentCount > 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("cannot delete policy with associated attachments")
 	}
 
 	// 执行删除

@@ -6,7 +6,6 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"fmt"
-	"sort"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -19,10 +18,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/resourcetypes"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/scopes"
 	"github.com/grpc-kit/pkg/lion/services"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -302,46 +299,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
-	menuTreeRIDs, err := seedBuiltinMenuTreeResources(ctx, tx, rollback, serviceCode, resourceTypeCatalog["sys_menu"])
+	_, err = seedBuiltinMenuTreeResources(ctx, tx, rollback, serviceCode, resourceTypeCatalog["sys_menu"])
 	if err != nil {
-		return nil, err
-	}
-
-	platformScopeType := int(adminv1.Scope_PLATFORM.Number())
-	actionScopeType := int(adminv1.Scope_ACTION.Number())
-	scopeSeeds := []struct {
-		code, displayName string
-		scopeType         int
-	}{
-		{"admin", "后台资源", platformScopeType},
-		{"user", "前台资源", platformScopeType},
-		{"app", "移动端资源", platformScopeType},
-		{"create", "创建", actionScopeType},
-		{"update", "更新", actionScopeType},
-		{"delete", "移除", actionScopeType},
-		{"readonly", "只读", actionScopeType},
-	}
-	for _, s := range scopeSeeds {
-		scopeExists, qerr := tx.Scopes.Query().Where(scopes.CodeEQ(s.code)).Exist(ctx)
-		if qerr != nil {
-			rollback()
-			return nil, qerr
-		}
-		if scopeExists {
-			continue
-		}
-		if err := tx.Scopes.Create().
-			SetCode(s.code).
-			SetScopeType(s.scopeType).
-			SetDisplayName(s.displayName).
-			SetProtected(true).
-			Exec(ctx); err != nil {
-			rollback()
-			return nil, err
-		}
-	}
-
-	if err := linkBuiltinMenuResourcesToAdminScope(ctx, tx, rollback, menuTreeRIDs); err != nil {
 		return nil, err
 	}
 
@@ -398,137 +357,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 // seedParentMenuRoot 表示挂在 parent_id=0 的 MENU 类型根节点下（与 ResourceSeedCode 根菜单 code 一致）。
 const seedParentMenuRoot = "__menu_root__"
 
-type builtinMenuResource struct {
-	code, displayName, parentRef string
-	resType                      adminv1.Resource_Type
-	sort                         int
-	locator, visual, component   string
-	protected                    bool
-}
-
-var builtinMenuResourceSeeds = []builtinMenuResource{
-	{code: "user", displayName: "个人中心", parentRef: seedParentMenuRoot, resType: adminv1.Resource_MENU, sort: 2, locator: "/user", visual: "UserOutlined", protected: true},
-	{code: "profile", displayName: "我的信息", parentRef: "user", resType: adminv1.Resource_MENU, sort: 7, locator: "/user/profile", protected: true},
-	{code: "setting", displayName: "系统设置", parentRef: seedParentMenuRoot, resType: adminv1.Resource_MENU, sort: 9, locator: "/setting", visual: "SettingOutlined", protected: true},
-	{code: "auth-providers", displayName: "身份认证", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 100, locator: "/setting/authentications", protected: true},
-	{code: "departments", displayName: "组织架构", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 200, locator: "/setting/departments", protected: true},
-	{code: "roles", displayName: "角色管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 300, locator: "/setting/roles", protected: true},
-	{code: "resources", displayName: "资源管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 400, locator: "/setting/resources", protected: true},
-	{code: "permissions", displayName: "权限管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 500, locator: "/setting/permissions", protected: true},
-	{code: "groups", displayName: "群组管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 600, locator: "/setting/groups", protected: true},
-	{code: "users", displayName: "用户管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 700, locator: "/setting/users", protected: true},
-	{code: "config", displayName: "配置管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 900, locator: "/setting/config", protected: true},
-	{code: "policies", displayName: "策略管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 1000, locator: "/setting/policies", protected: true},
-}
-
-func legacyResourceVisibilityToMenuVisibility(resourceVisibility int) string {
-	switch adminv1.Visibility(resourceVisibility) {
-	case adminv1.Visibility_VISIBILITY_GLOBAL:
-		return "global"
-	case adminv1.Visibility_VISIBILITY_SUBTREE:
-		return "subtree"
-	case adminv1.Visibility_VISIBILITY_LOCAL:
-		return "local"
-	case adminv1.Visibility_VISIBILITY_RESTRICTED:
-		return "restricted"
-	case adminv1.Visibility_VISIBILITY_SPECIFIC:
-		return "specific"
-	default:
-		return "full"
-	}
-}
-
-func legacyResourceStatusToMenuStatus(resourceStatus int) string {
-	if resourceStatus == int(adminv1.Resource_ENABLED.Number()) {
-		return "active"
-	}
-	return "inactive"
-}
-
-func syncLegacyMenuResourcesToMenus(ctx context.Context, tx *lion.Tx, rollback func(), menuRootID int) error {
-	menuResources, err := tx.Resources.Query().Where(
-		resources.Or(
-			resources.ResourceTypeCodeEQ("sys_menu"),
-			resources.ResourceTypeEQ(int(adminv1.Resource_MENU.Number())),
-		),
-	).All(ctx)
-	if err != nil {
-		rollback()
-		return err
-	}
-
-	childrenByParent := make(map[int64][]*lion.Resources)
-	for _, item := range menuResources {
-		if item.ID == menuRootID {
-			continue
-		}
-		childrenByParent[item.ParentID] = append(childrenByParent[item.ParentID], item)
-	}
-	for parentID := range childrenByParent {
-		sort.Slice(childrenByParent[parentID], func(i, j int) bool {
-			left := childrenByParent[parentID][i]
-			right := childrenByParent[parentID][j]
-			if left.SortOrder == right.SortOrder {
-				return left.ID < right.ID
-			}
-			return left.SortOrder < right.SortOrder
-		})
-	}
-
-	menuIDByResourceID := make(map[int]int)
-	var upsertMenus func(parentResourceID int64, parentMenuID int64) error
-	upsertMenus = func(parentResourceID int64, parentMenuID int64) error {
-		for _, item := range childrenByParent[parentResourceID] {
-			query := tx.Menus.Query().Where(menus.ResourceIDEQ(item.ID))
-			menuRow, err := query.Only(ctx)
-			if lion.IsNotFound(err) {
-				create := tx.Menus.Create().
-					SetParentID(parentMenuID).
-					SetResourceID(item.ID).
-					SetCode(item.Code).
-					SetDisplayName(item.DisplayName).
-					SetRoutePath(item.Locator).
-					SetComponent(item.Manifest).
-					SetIcon(item.Visual).
-					SetSortOrder(item.SortOrder).
-					SetSurfaceMask(1).
-					SetVisibility(legacyResourceVisibilityToMenuVisibility(item.Visibility)).
-					SetMenuStatus(legacyResourceStatusToMenuStatus(item.ResourceStatus)).
-					SetDescription(item.Description)
-				menuRow, err = create.Save(ctx)
-			} else if err == nil {
-				update := tx.Menus.UpdateOneID(menuRow.ID).
-					SetParentID(parentMenuID).
-					SetResourceID(item.ID).
-					SetCode(item.Code).
-					SetDisplayName(item.DisplayName).
-					SetRoutePath(item.Locator).
-					SetComponent(item.Manifest).
-					SetIcon(item.Visual).
-					SetSortOrder(item.SortOrder).
-					SetSurfaceMask(1).
-					SetVisibility(legacyResourceVisibilityToMenuVisibility(item.Visibility)).
-					SetMenuStatus(legacyResourceStatusToMenuStatus(item.ResourceStatus)).
-					SetDescription(item.Description)
-				menuRow, err = update.Save(ctx)
-			}
-			if err != nil {
-				rollback()
-				return err
-			}
-			menuIDByResourceID[item.ID] = menuRow.ID
-			if err := upsertMenus(int64(item.ID), int64(menuRow.ID)); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
-	return upsertMenus(int64(menuRootID), 0)
-}
-
 // seedBuiltinMenuTreeResources 幂等补全内置菜单/页面资源（与常见 lion_resources 种子数据对齐）。
-// 返回值为资源 code -> id，含菜单类型根节点（用于与 admin 等作用域建立 lion_resource_scopes）。
+// 返回值为资源 code -> id，含菜单类型根节点，供后续菜单资源初始化复用。
 func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback func(), serviceCode string, menuResourceType *lion.ResourceTypes) (map[string]int, error) {
 	menuRoot, err := tx.Resources.Query().Where(
 		resources.ParentIDEQ(0),
@@ -544,12 +374,34 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 
 	menuRootCode := seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_MENU)
 	idByCode := map[string]int{menuRootCode: menuRoot.ID}
+	menuIDByCode := map[string]int{}
 	resourceTypeObj := menuResourceType
+
+	type builtinMenuResource struct {
+		code, displayName, parentRef string
+		resType                      adminv1.Resource_Type
+		sort                         int
+		locator, visual              string
+		protected                    bool
+	}
+	seeds := []builtinMenuResource{
+		{"user", "个人中心", seedParentMenuRoot, adminv1.Resource_MENU, 2, "/user", "UserOutlined", true},
+		{"profile", "我的信息", "user", adminv1.Resource_MENU, 7, "/user/profile", "", true},
+		{"setting", "系统设置", seedParentMenuRoot, adminv1.Resource_MENU, 9, "/setting", "SettingOutlined", true},
+		{"auth-providers", "身份认证", "setting", adminv1.Resource_MENU, 100, "/setting/authentications", "", true},
+		{"departments", "组织架构", "setting", adminv1.Resource_MENU, 200, "/setting/departments", "", true},
+		{"roles", "角色管理", "setting", adminv1.Resource_MENU, 300, "/setting/roles", "", true},
+		{"resources", "资源管理", "setting", adminv1.Resource_MENU, 400, "/setting/resources", "", true},
+		{"permissions", "权限管理", "setting", adminv1.Resource_MENU, 500, "/setting/permissions", "", true},
+		{"groups", "群组管理", "setting", adminv1.Resource_MENU, 600, "/setting/groups", "", true},
+		{"users", "用户管理", "setting", adminv1.Resource_MENU, 700, "/setting/users", "", true},
+		{"config", "配置管理", "setting", adminv1.Resource_MENU, 900, "/setting/config", "", true},
+	}
 
 	visUnspecified := int(adminv1.Visibility_VISIBILITY_UNSPECIFIED.Number())
 	enabled := int(adminv1.Resource_ENABLED.Number())
 
-	for _, s := range builtinMenuResourceSeeds {
+	for _, s := range seeds {
 		var parentID int64
 		switch s.parentRef {
 		case seedParentMenuRoot:
@@ -587,6 +439,33 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 				}
 			}
 			idByCode[s.code] = row.ID
+
+			menuParentID := int64(0)
+			if s.parentRef != seedParentMenuRoot {
+				if parentMenuID, ok := menuIDByCode[s.parentRef]; ok {
+					menuParentID = int64(parentMenuID)
+				}
+			}
+			menuRow, err := tx.Menus.Query().Where(menus.CodeEQ(s.code), menus.ParentIDEQ(menuParentID)).Only(ctx)
+			if lion.IsNotFound(err) {
+				menuRow, err = tx.Menus.Create().
+					SetParentID(menuParentID).
+					SetResourceID(row.ID).
+					SetCode(s.code).
+					SetDisplayName(s.displayName).
+					SetRoutePath(s.locator).
+					SetIcon(s.visual).
+					SetSortOrder(s.sort).
+					SetSurfaceMask(1).
+					SetVisibility("full").
+					SetMenuStatus("active").
+					Save(ctx)
+			}
+			if err != nil {
+				rollback()
+				return nil, err
+			}
+			menuIDByCode[s.code] = menuRow.ID
 			continue
 		}
 
@@ -608,7 +487,6 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 			SetParentID(parentID).
 			SetLocator(s.locator).
 			SetVisual(s.visual).
-			SetManifest(s.component).
 			SetProtected(s.protected).
 			Save(ctx)
 		if err != nil {
@@ -616,52 +494,33 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 			return nil, err
 		}
 		idByCode[s.code] = row.ID
-	}
-	if err := syncLegacyMenuResourcesToMenus(ctx, tx, rollback, menuRoot.ID); err != nil {
-		return nil, err
-	}
-	return idByCode, nil
-}
 
-const seedScopeCodeAdmin = "admin"
-
-// linkBuiltinMenuResourcesToAdminScope 将内置后台菜单树挂到 PLATFORM scope「admin」（lion_resource_scopes）。
-// 说明：lion_departments 根组织无 scope 关联表，后台可见性由本菜单资源 + admin 作用域表达。
-func linkBuiltinMenuResourcesToAdminScope(ctx context.Context, tx *lion.Tx, rollback func(), menuTreeRIDs map[string]int) error {
-	adminScope, err := tx.Scopes.Query().Where(scopes.CodeEQ(seedScopeCodeAdmin)).Only(ctx)
-	if err != nil {
-		rollback()
-		return err
-	}
-
-	menuRootCode := seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_MENU)
-	codes := []string{menuRootCode}
-	for _, seed := range builtinMenuResourceSeeds {
-		codes = append(codes, seed.code)
-	}
-	for _, code := range codes {
-		rid := menuTreeRIDs[code]
-		if rid == 0 {
-			continue
+		menuParentID := int64(0)
+		if s.parentRef != seedParentMenuRoot {
+			if parentMenuID, ok := menuIDByCode[s.parentRef]; ok {
+				menuParentID = int64(parentMenuID)
+			}
 		}
-		linked, err := tx.ResourceScopes.Query().Where(
-			resourcescopes.ResourceIDEQ(rid),
-			resourcescopes.ScopeIDEQ(adminScope.ID),
-		).Exist(ctx)
+		menuRow, err := tx.Menus.Query().Where(menus.CodeEQ(s.code), menus.ParentIDEQ(menuParentID)).Only(ctx)
+		if lion.IsNotFound(err) {
+			menuRow, err = tx.Menus.Create().
+				SetParentID(menuParentID).
+				SetResourceID(row.ID).
+				SetCode(s.code).
+				SetDisplayName(s.displayName).
+				SetRoutePath(s.locator).
+				SetIcon(s.visual).
+				SetSortOrder(s.sort).
+				SetSurfaceMask(1).
+				SetVisibility("full").
+				SetMenuStatus("active").
+				Save(ctx)
+		}
 		if err != nil {
 			rollback()
-			return err
+			return nil, err
 		}
-		if linked {
-			continue
-		}
-		if err := tx.ResourceScopes.Create().
-			SetResourceID(rid).
-			SetScopeID(adminScope.ID).
-			Exec(ctx); err != nil {
-			rollback()
-			return err
-		}
+		menuIDByCode[s.code] = menuRow.ID
 	}
-	return nil
+	return idByCode, nil
 }

@@ -13,6 +13,14 @@ import (
 	_ "github.com/lib/pq"
 )
 
+var legacyLionAuthzTables = []string{
+	"lion_role_permissions",
+	"lion_permission_bindings",
+	"lion_resource_scopes",
+	"lion_permissions",
+	"lion_scopes",
+}
+
 var (
 	ErrDatabaseNotInit          = errors.New("database not initialize")
 	ErrDatabaseNotEnable        = errors.New("database not enable")
@@ -129,11 +137,28 @@ func (c *LocalConfig) GetDatabaseEntSQLDriver() (*entsql.Driver, error) {
 	return entsql.OpenDB(c.Database.Driver, db), nil
 }
 
+func dropLegacyLionAuthzTables(ctx context.Context, db *sql.DB) error {
+	for _, tableName := range legacyLionAuthzTables {
+		if _, err := db.ExecContext(ctx, fmt.Sprintf("DROP TABLE IF EXISTS %s", tableName)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // GetAdminDatabaseLion 用于测试 Lion 配置
 // TODO: 这里用于测试 lion 数据库
 func (c *LocalConfig) GetAdminDatabaseLion() (*lion.Client, error) {
 	if c.lionClient != nil {
 		return c.lionClient, nil
+	}
+
+	rawDB, err := c.GetDatabase()
+	if err != nil {
+		return nil, err
+	}
+	if err := dropLegacyLionAuthzTables(context.TODO(), rawDB); err != nil {
+		return nil, err
 	}
 
 	driver, err := c.GetDatabaseEntSQLDriver()

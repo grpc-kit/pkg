@@ -715,29 +715,6 @@ func ProtectedNEQ(v bool) predicate.Roles {
 	return predicate.Roles(sql.FieldNEQ(FieldProtected, v))
 }
 
-// HasLionRolePermissions applies the HasEdge predicate on the "lion_role_permissions" edge.
-func HasLionRolePermissions() predicate.Roles {
-	return predicate.Roles(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionRolePermissionsTable, LionRolePermissionsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionRolePermissionsWith applies the HasEdge predicate on the "lion_role_permissions" edge with a given conditions (other predicates).
-func HasLionRolePermissionsWith(preds ...predicate.RolePermissions) predicate.Roles {
-	return predicate.Roles(func(s *sql.Selector) {
-		step := newLionRolePermissionsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasLionUserRoles applies the HasEdge predicate on the "lion_user_roles" edge.
 func HasLionUserRoles() predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {

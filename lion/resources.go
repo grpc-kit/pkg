@@ -82,11 +82,9 @@ type ResourcesEdges struct {
 	LionResourceTypes *ResourceTypes `json:"lion_resource_types,omitempty"`
 	// LionMenus holds the value of the lion_menus edge.
 	LionMenus []*Menus `json:"lion_menus,omitempty"`
-	// LionResourceScopes holds the value of the lion_resource_scopes edge.
-	LionResourceScopes []*ResourceScopes `json:"lion_resource_scopes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // LionResourceTypesOrErr returns the LionResourceTypes value or an error if the edge
@@ -107,15 +105,6 @@ func (e ResourcesEdges) LionMenusOrErr() ([]*Menus, error) {
 		return e.LionMenus, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_menus"}
-}
-
-// LionResourceScopesOrErr returns the LionResourceScopes value or an error if the edge
-// was not loaded in eager-loading.
-func (e ResourcesEdges) LionResourceScopesOrErr() ([]*ResourceScopes, error) {
-	if e.loadedTypes[2] {
-		return e.LionResourceScopes, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_resource_scopes"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -330,11 +319,6 @@ func (_m *Resources) QueryLionResourceTypes() *ResourceTypesQuery {
 // QueryLionMenus queries the "lion_menus" edge of the Resources entity.
 func (_m *Resources) QueryLionMenus() *MenusQuery {
 	return NewResourcesClient(_m.config).QueryLionMenus(_m)
-}
-
-// QueryLionResourceScopes queries the "lion_resource_scopes" edge of the Resources entity.
-func (_m *Resources) QueryLionResourceScopes() *ResourceScopesQuery {
-	return NewResourcesClient(_m.config).QueryLionResourceScopes(_m)
 }
 
 // Update returns a builder for updating this Resources.

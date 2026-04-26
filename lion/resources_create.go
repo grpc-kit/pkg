@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourcescopes"
 	"github.com/grpc-kit/pkg/lion/resourcetypes"
 )
 
@@ -371,21 +370,6 @@ func (_c *ResourcesCreate) AddLionMenus(v ...*Menus) *ResourcesCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddLionMenuIDs(ids...)
-}
-
-// AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
-func (_c *ResourcesCreate) AddLionResourceScopeIDs(ids ...int) *ResourcesCreate {
-	_c.mutation.AddLionResourceScopeIDs(ids...)
-	return _c
-}
-
-// AddLionResourceScopes adds the "lion_resource_scopes" edges to the ResourceScopes entity.
-func (_c *ResourcesCreate) AddLionResourceScopes(v ...*ResourceScopes) *ResourcesCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionResourceScopeIDs(ids...)
 }
 
 // Mutation returns the ResourcesMutation object of the builder.
@@ -791,22 +775,6 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.LionResourceScopesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   resources.LionResourceScopesTable,
-			Columns: []string{resources.LionResourceScopesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resourcescopes.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

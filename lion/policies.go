@@ -51,30 +51,19 @@ type Policies struct {
 
 // PoliciesEdges holds the relations/edges for other nodes in the graph.
 type PoliciesEdges struct {
-	// LionPermissions holds the value of the lion_permissions edge.
-	LionPermissions []*Permissions `json:"lion_permissions,omitempty"`
 	// LionPolicyStatements holds the value of the lion_policy_statements edge.
 	LionPolicyStatements []*PolicyStatements `json:"lion_policy_statements,omitempty"`
 	// LionPolicyAttachments holds the value of the lion_policy_attachments edge.
 	LionPolicyAttachments []*PolicyAttachments `json:"lion_policy_attachments,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
-}
-
-// LionPermissionsOrErr returns the LionPermissions value or an error if the edge
-// was not loaded in eager-loading.
-func (e PoliciesEdges) LionPermissionsOrErr() ([]*Permissions, error) {
-	if e.loadedTypes[0] {
-		return e.LionPermissions, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_permissions"}
+	loadedTypes [2]bool
 }
 
 // LionPolicyStatementsOrErr returns the LionPolicyStatements value or an error if the edge
 // was not loaded in eager-loading.
 func (e PoliciesEdges) LionPolicyStatementsOrErr() ([]*PolicyStatements, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.LionPolicyStatements, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_policy_statements"}
@@ -83,7 +72,7 @@ func (e PoliciesEdges) LionPolicyStatementsOrErr() ([]*PolicyStatements, error) 
 // LionPolicyAttachmentsOrErr returns the LionPolicyAttachments value or an error if the edge
 // was not loaded in eager-loading.
 func (e PoliciesEdges) LionPolicyAttachmentsOrErr() ([]*PolicyAttachments, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.LionPolicyAttachments, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_policy_attachments"}
@@ -213,11 +202,6 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Policies) GetValue(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryLionPermissions queries the "lion_permissions" edge of the Policies entity.
-func (_m *Policies) QueryLionPermissions() *PermissionsQuery {
-	return NewPoliciesClient(_m.config).QueryLionPermissions(_m)
 }
 
 // QueryLionPolicyStatements queries the "lion_policy_statements" edge of the Policies entity.

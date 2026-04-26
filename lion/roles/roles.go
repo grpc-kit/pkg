@@ -40,21 +40,12 @@ const (
 	FieldDescription = "description"
 	// FieldProtected holds the string denoting the protected field in the database.
 	FieldProtected = "protected"
-	// EdgeLionRolePermissions holds the string denoting the lion_role_permissions edge name in mutations.
-	EdgeLionRolePermissions = "lion_role_permissions"
 	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
 	EdgeLionUserRoles = "lion_user_roles"
 	// EdgeLionRoleGroups holds the string denoting the lion_role_groups edge name in mutations.
 	EdgeLionRoleGroups = "lion_role_groups"
 	// Table holds the table name of the roles in the database.
 	Table = "lion_roles"
-	// LionRolePermissionsTable is the table that holds the lion_role_permissions relation/edge.
-	LionRolePermissionsTable = "lion_role_permissions"
-	// LionRolePermissionsInverseTable is the table name for the RolePermissions entity.
-	// It exists in this package in order to avoid circular dependency with the "rolepermissions" package.
-	LionRolePermissionsInverseTable = "lion_role_permissions"
-	// LionRolePermissionsColumn is the table column denoting the lion_role_permissions relation/edge.
-	LionRolePermissionsColumn = "role_id"
 	// LionUserRolesTable is the table that holds the lion_user_roles relation/edge.
 	LionUserRolesTable = "lion_user_roles"
 	// LionUserRolesInverseTable is the table name for the UserRoles entity.
@@ -201,20 +192,6 @@ func ByProtected(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
-// ByLionRolePermissionsCount orders the results by lion_role_permissions count.
-func ByLionRolePermissionsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionRolePermissionsStep(), opts...)
-	}
-}
-
-// ByLionRolePermissions orders the results by lion_role_permissions terms.
-func ByLionRolePermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionRolePermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByLionUserRolesCount orders the results by lion_user_roles count.
 func ByLionUserRolesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -241,13 +218,6 @@ func ByLionRoleGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newLionRoleGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
-}
-func newLionRolePermissionsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionRolePermissionsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionRolePermissionsTable, LionRolePermissionsColumn),
-	)
 }
 func newLionUserRolesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

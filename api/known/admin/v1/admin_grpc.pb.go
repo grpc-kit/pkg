@@ -60,7 +60,6 @@ type KnownAdminClient interface {
 	CreateResource(ctx context.Context, in *CreateResourceRequest, opts ...grpc.CallOption) (*Resource, error)
 	UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*Resource, error)
 	DeleteResource(ctx context.Context, in *DeleteResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	CreateResourceScopes(ctx context.Context, in *CreateResourceScopesRequest, opts ...grpc.CallOption) (*CreateResourceScopesResponse, error)
 	// 服务字典管理
 	ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error)
 	CreateService(ctx context.Context, in *CreateServiceRequest, opts ...grpc.CallOption) (*Service, error)
@@ -76,14 +75,6 @@ type KnownAdminClient interface {
 	CreateMenu(ctx context.Context, in *CreateMenuRequest, opts ...grpc.CallOption) (*Menu, error)
 	UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...grpc.CallOption) (*Menu, error)
 	DeleteMenu(ctx context.Context, in *DeleteMenuRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 作用域管理
-	ListScopes(ctx context.Context, in *ListScopesRequest, opts ...grpc.CallOption) (*ListScopesResponse, error)
-	CreateScope(ctx context.Context, in *CreateScopeRequest, opts ...grpc.CallOption) (*Scope, error)
-	UpdateScope(ctx context.Context, in *UpdateScopeRequest, opts ...grpc.CallOption) (*Scope, error)
-	DeleteScope(ctx context.Context, in *DeleteScopeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	ListScopeResources(ctx context.Context, in *ListScopeResourcesRequest, opts ...grpc.CallOption) (*ListScopeResourcesResponse, error)
-	DeleteScopeResource(ctx context.Context, in *DeleteScopeResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	CreateScopeResources(ctx context.Context, in *CreateScopeResourcesRequest, opts ...grpc.CallOption) (*CreateScopeResourcesResponse, error)
 	// 策略管理
 	ListPolicies(ctx context.Context, in *ListPoliciesRequest, opts ...grpc.CallOption) (*ListPoliciesResponse, error)
 	CreatePolicy(ctx context.Context, in *CreatePolicyRequest, opts ...grpc.CallOption) (*Policy, error)
@@ -107,12 +98,6 @@ type KnownAdminClient interface {
 	CreatePolicyAttachment(ctx context.Context, in *CreatePolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error)
 	UpdatePolicyAttachment(ctx context.Context, in *UpdatePolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error)
 	DeletePolicyAttachment(ctx context.Context, in *DeletePolicyAttachmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 权限管理
-	ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error)
-	GetPermission(ctx context.Context, in *GetPermissionRequest, opts ...grpc.CallOption) (*Permission, error)
-	CreatePermission(ctx context.Context, in *CreatePermissionRequest, opts ...grpc.CallOption) (*Permission, error)
-	UpdatePermission(ctx context.Context, in *UpdatePermissionRequest, opts ...grpc.CallOption) (*Permission, error)
-	DeletePermission(ctx context.Context, in *DeletePermissionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 角色相关
 	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error)
 	GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*Role, error)
@@ -123,9 +108,6 @@ type KnownAdminClient interface {
 	CreateRoleMembers(ctx context.Context, in *CreateRoleMembersRequest, opts ...grpc.CallOption) (*CreateRoleMembersResponse, error)
 	UpdateRoleMembers(ctx context.Context, in *UpdateRoleMembersRequest, opts ...grpc.CallOption) (*UpdateRoleMembersResponse, error)
 	DeleteRoleMember(ctx context.Context, in *DeleteRoleMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	CreateRolePermissions(ctx context.Context, in *CreateRolePermissionsRequest, opts ...grpc.CallOption) (*CreateRolePermissionsResponse, error)
-	DeleteRolePermission(ctx context.Context, in *DeleteRolePermissionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	ListRolePermissions(ctx context.Context, in *ListRolePermissionsRequest, opts ...grpc.CallOption) (*ListRolePermissionsResponse, error)
 	// 部门管理
 	CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
@@ -457,15 +439,6 @@ func (c *knownAdminClient) DeleteResource(ctx context.Context, in *DeleteResourc
 	return out, nil
 }
 
-func (c *knownAdminClient) CreateResourceScopes(ctx context.Context, in *CreateResourceScopesRequest, opts ...grpc.CallOption) (*CreateResourceScopesResponse, error) {
-	out := new(CreateResourceScopesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceScopes", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *knownAdminClient) ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error) {
 	out := new(ListServicesResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServices", in, out, opts...)
@@ -568,69 +541,6 @@ func (c *knownAdminClient) UpdateMenu(ctx context.Context, in *UpdateMenuRequest
 func (c *knownAdminClient) DeleteMenu(ctx context.Context, in *DeleteMenuRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteMenu", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListScopes(ctx context.Context, in *ListScopesRequest, opts ...grpc.CallOption) (*ListScopesResponse, error) {
-	out := new(ListScopesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopes", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreateScope(ctx context.Context, in *CreateScopeRequest, opts ...grpc.CallOption) (*Scope, error) {
-	out := new(Scope)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScope", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdateScope(ctx context.Context, in *UpdateScopeRequest, opts ...grpc.CallOption) (*Scope, error) {
-	out := new(Scope)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateScope", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteScope(ctx context.Context, in *DeleteScopeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScope", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListScopeResources(ctx context.Context, in *ListScopeResourcesRequest, opts ...grpc.CallOption) (*ListScopeResourcesResponse, error) {
-	out := new(ListScopeResourcesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopeResources", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteScopeResource(ctx context.Context, in *DeleteScopeResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScopeResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreateScopeResources(ctx context.Context, in *CreateScopeResourcesRequest, opts ...grpc.CallOption) (*CreateScopeResourcesResponse, error) {
-	out := new(CreateScopeResourcesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScopeResources", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -808,51 +718,6 @@ func (c *knownAdminClient) DeletePolicyAttachment(ctx context.Context, in *Delet
 	return out, nil
 }
 
-func (c *knownAdminClient) ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error) {
-	out := new(ListPermissionsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPermissions", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetPermission(ctx context.Context, in *GetPermissionRequest, opts ...grpc.CallOption) (*Permission, error) {
-	out := new(Permission)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPermission", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreatePermission(ctx context.Context, in *CreatePermissionRequest, opts ...grpc.CallOption) (*Permission, error) {
-	out := new(Permission)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePermission", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdatePermission(ctx context.Context, in *UpdatePermissionRequest, opts ...grpc.CallOption) (*Permission, error) {
-	out := new(Permission)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePermission", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeletePermission(ctx context.Context, in *DeletePermissionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePermission", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *knownAdminClient) CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error) {
 	out := new(Role)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRole", in, out, opts...)
@@ -928,33 +793,6 @@ func (c *knownAdminClient) UpdateRoleMembers(ctx context.Context, in *UpdateRole
 func (c *knownAdminClient) DeleteRoleMember(ctx context.Context, in *DeleteRoleMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMember", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreateRolePermissions(ctx context.Context, in *CreateRolePermissionsRequest, opts ...grpc.CallOption) (*CreateRolePermissionsResponse, error) {
-	out := new(CreateRolePermissionsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRolePermissions", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteRolePermission(ctx context.Context, in *DeleteRolePermissionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRolePermission", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListRolePermissions(ctx context.Context, in *ListRolePermissionsRequest, opts ...grpc.CallOption) (*ListRolePermissionsResponse, error) {
-	out := new(ListRolePermissionsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRolePermissions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1245,7 +1083,6 @@ type KnownAdminServer interface {
 	CreateResource(context.Context, *CreateResourceRequest) (*Resource, error)
 	UpdateResource(context.Context, *UpdateResourceRequest) (*Resource, error)
 	DeleteResource(context.Context, *DeleteResourceRequest) (*emptypb.Empty, error)
-	CreateResourceScopes(context.Context, *CreateResourceScopesRequest) (*CreateResourceScopesResponse, error)
 	// 服务字典管理
 	ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error)
 	CreateService(context.Context, *CreateServiceRequest) (*Service, error)
@@ -1261,14 +1098,6 @@ type KnownAdminServer interface {
 	CreateMenu(context.Context, *CreateMenuRequest) (*Menu, error)
 	UpdateMenu(context.Context, *UpdateMenuRequest) (*Menu, error)
 	DeleteMenu(context.Context, *DeleteMenuRequest) (*emptypb.Empty, error)
-	// 作用域管理
-	ListScopes(context.Context, *ListScopesRequest) (*ListScopesResponse, error)
-	CreateScope(context.Context, *CreateScopeRequest) (*Scope, error)
-	UpdateScope(context.Context, *UpdateScopeRequest) (*Scope, error)
-	DeleteScope(context.Context, *DeleteScopeRequest) (*emptypb.Empty, error)
-	ListScopeResources(context.Context, *ListScopeResourcesRequest) (*ListScopeResourcesResponse, error)
-	DeleteScopeResource(context.Context, *DeleteScopeResourceRequest) (*emptypb.Empty, error)
-	CreateScopeResources(context.Context, *CreateScopeResourcesRequest) (*CreateScopeResourcesResponse, error)
 	// 策略管理
 	ListPolicies(context.Context, *ListPoliciesRequest) (*ListPoliciesResponse, error)
 	CreatePolicy(context.Context, *CreatePolicyRequest) (*Policy, error)
@@ -1292,12 +1121,6 @@ type KnownAdminServer interface {
 	CreatePolicyAttachment(context.Context, *CreatePolicyAttachmentRequest) (*PolicyAttachment, error)
 	UpdatePolicyAttachment(context.Context, *UpdatePolicyAttachmentRequest) (*PolicyAttachment, error)
 	DeletePolicyAttachment(context.Context, *DeletePolicyAttachmentRequest) (*emptypb.Empty, error)
-	// 权限管理
-	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
-	GetPermission(context.Context, *GetPermissionRequest) (*Permission, error)
-	CreatePermission(context.Context, *CreatePermissionRequest) (*Permission, error)
-	UpdatePermission(context.Context, *UpdatePermissionRequest) (*Permission, error)
-	DeletePermission(context.Context, *DeletePermissionRequest) (*emptypb.Empty, error)
 	// 角色相关
 	CreateRole(context.Context, *CreateRoleRequest) (*Role, error)
 	GetRole(context.Context, *GetRoleRequest) (*Role, error)
@@ -1308,9 +1131,6 @@ type KnownAdminServer interface {
 	CreateRoleMembers(context.Context, *CreateRoleMembersRequest) (*CreateRoleMembersResponse, error)
 	UpdateRoleMembers(context.Context, *UpdateRoleMembersRequest) (*UpdateRoleMembersResponse, error)
 	DeleteRoleMember(context.Context, *DeleteRoleMemberRequest) (*emptypb.Empty, error)
-	CreateRolePermissions(context.Context, *CreateRolePermissionsRequest) (*CreateRolePermissionsResponse, error)
-	DeleteRolePermission(context.Context, *DeleteRolePermissionRequest) (*emptypb.Empty, error)
-	ListRolePermissions(context.Context, *ListRolePermissionsRequest) (*ListRolePermissionsResponse, error)
 	// 部门管理
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
@@ -1446,9 +1266,6 @@ func (UnimplementedKnownAdminServer) UpdateResource(context.Context, *UpdateReso
 func (UnimplementedKnownAdminServer) DeleteResource(context.Context, *DeleteResourceRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteResource not implemented")
 }
-func (UnimplementedKnownAdminServer) CreateResourceScopes(context.Context, *CreateResourceScopesRequest) (*CreateResourceScopesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateResourceScopes not implemented")
-}
 func (UnimplementedKnownAdminServer) ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListServices not implemented")
 }
@@ -1484,27 +1301,6 @@ func (UnimplementedKnownAdminServer) UpdateMenu(context.Context, *UpdateMenuRequ
 }
 func (UnimplementedKnownAdminServer) DeleteMenu(context.Context, *DeleteMenuRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMenu not implemented")
-}
-func (UnimplementedKnownAdminServer) ListScopes(context.Context, *ListScopesRequest) (*ListScopesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListScopes not implemented")
-}
-func (UnimplementedKnownAdminServer) CreateScope(context.Context, *CreateScopeRequest) (*Scope, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateScope not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdateScope(context.Context, *UpdateScopeRequest) (*Scope, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateScope not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteScope(context.Context, *DeleteScopeRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteScope not implemented")
-}
-func (UnimplementedKnownAdminServer) ListScopeResources(context.Context, *ListScopeResourcesRequest) (*ListScopeResourcesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListScopeResources not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteScopeResource(context.Context, *DeleteScopeResourceRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteScopeResource not implemented")
-}
-func (UnimplementedKnownAdminServer) CreateScopeResources(context.Context, *CreateScopeResourcesRequest) (*CreateScopeResourcesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateScopeResources not implemented")
 }
 func (UnimplementedKnownAdminServer) ListPolicies(context.Context, *ListPoliciesRequest) (*ListPoliciesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPolicies not implemented")
@@ -1563,21 +1359,6 @@ func (UnimplementedKnownAdminServer) UpdatePolicyAttachment(context.Context, *Up
 func (UnimplementedKnownAdminServer) DeletePolicyAttachment(context.Context, *DeletePolicyAttachmentRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePolicyAttachment not implemented")
 }
-func (UnimplementedKnownAdminServer) ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListPermissions not implemented")
-}
-func (UnimplementedKnownAdminServer) GetPermission(context.Context, *GetPermissionRequest) (*Permission, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPermission not implemented")
-}
-func (UnimplementedKnownAdminServer) CreatePermission(context.Context, *CreatePermissionRequest) (*Permission, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreatePermission not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdatePermission(context.Context, *UpdatePermissionRequest) (*Permission, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdatePermission not implemented")
-}
-func (UnimplementedKnownAdminServer) DeletePermission(context.Context, *DeletePermissionRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeletePermission not implemented")
-}
 func (UnimplementedKnownAdminServer) CreateRole(context.Context, *CreateRoleRequest) (*Role, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRole not implemented")
 }
@@ -1604,15 +1385,6 @@ func (UnimplementedKnownAdminServer) UpdateRoleMembers(context.Context, *UpdateR
 }
 func (UnimplementedKnownAdminServer) DeleteRoleMember(context.Context, *DeleteRoleMemberRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteRoleMember not implemented")
-}
-func (UnimplementedKnownAdminServer) CreateRolePermissions(context.Context, *CreateRolePermissionsRequest) (*CreateRolePermissionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateRolePermissions not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteRolePermission(context.Context, *DeleteRolePermissionRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteRolePermission not implemented")
-}
-func (UnimplementedKnownAdminServer) ListRolePermissions(context.Context, *ListRolePermissionsRequest) (*ListRolePermissionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListRolePermissions not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDepartment not implemented")
@@ -2283,24 +2055,6 @@ func _KnownAdmin_DeleteResource_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_CreateResourceScopes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateResourceScopesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateResourceScopes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceScopes",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateResourceScopes(ctx, req.(*CreateResourceScopesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _KnownAdmin_ListServices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListServicesRequest)
 	if err := dec(in); err != nil {
@@ -2513,132 +2267,6 @@ func _KnownAdmin_DeleteMenu_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).DeleteMenu(ctx, req.(*DeleteMenuRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListScopes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListScopesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListScopes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopes",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListScopes(ctx, req.(*ListScopesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreateScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateScopeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateScope(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScope",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateScope(ctx, req.(*CreateScopeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdateScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateScopeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdateScope(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateScope",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdateScope(ctx, req.(*UpdateScopeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteScopeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteScope(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScope",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteScope(ctx, req.(*DeleteScopeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListScopeResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListScopeResourcesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListScopeResources(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopeResources",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListScopeResources(ctx, req.(*ListScopeResourcesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteScopeResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteScopeResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteScopeResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScopeResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteScopeResource(ctx, req.(*DeleteScopeResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreateScopeResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateScopeResourcesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateScopeResources(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScopeResources",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateScopeResources(ctx, req.(*CreateScopeResourcesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2985,96 +2613,6 @@ func _KnownAdmin_DeletePolicyAttachment_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_ListPermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPermissionsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListPermissions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPermissions",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListPermissions(ctx, req.(*ListPermissionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetPermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPermission",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetPermission(ctx, req.(*GetPermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreatePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreatePermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreatePermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePermission",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreatePermission(ctx, req.(*CreatePermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdatePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdatePermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdatePermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePermission",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdatePermission(ctx, req.(*UpdatePermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeletePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeletePermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeletePermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePermission",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeletePermission(ctx, req.(*DeletePermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _KnownAdmin_CreateRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateRoleRequest)
 	if err := dec(in); err != nil {
@@ -3233,60 +2771,6 @@ func _KnownAdmin_DeleteRoleMember_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).DeleteRoleMember(ctx, req.(*DeleteRoleMemberRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreateRolePermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateRolePermissionsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateRolePermissions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRolePermissions",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateRolePermissions(ctx, req.(*CreateRolePermissionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteRolePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteRolePermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteRolePermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRolePermission",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteRolePermission(ctx, req.(*DeleteRolePermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListRolePermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListRolePermissionsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListRolePermissions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRolePermissions",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListRolePermissions(ctx, req.(*ListRolePermissionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -3913,10 +3397,6 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_DeleteResource_Handler,
 		},
 		{
-			MethodName: "CreateResourceScopes",
-			Handler:    _KnownAdmin_CreateResourceScopes_Handler,
-		},
-		{
 			MethodName: "ListServices",
 			Handler:    _KnownAdmin_ListServices_Handler,
 		},
@@ -3963,34 +3443,6 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteMenu",
 			Handler:    _KnownAdmin_DeleteMenu_Handler,
-		},
-		{
-			MethodName: "ListScopes",
-			Handler:    _KnownAdmin_ListScopes_Handler,
-		},
-		{
-			MethodName: "CreateScope",
-			Handler:    _KnownAdmin_CreateScope_Handler,
-		},
-		{
-			MethodName: "UpdateScope",
-			Handler:    _KnownAdmin_UpdateScope_Handler,
-		},
-		{
-			MethodName: "DeleteScope",
-			Handler:    _KnownAdmin_DeleteScope_Handler,
-		},
-		{
-			MethodName: "ListScopeResources",
-			Handler:    _KnownAdmin_ListScopeResources_Handler,
-		},
-		{
-			MethodName: "DeleteScopeResource",
-			Handler:    _KnownAdmin_DeleteScopeResource_Handler,
-		},
-		{
-			MethodName: "CreateScopeResources",
-			Handler:    _KnownAdmin_CreateScopeResources_Handler,
 		},
 		{
 			MethodName: "ListPolicies",
@@ -4069,26 +3521,6 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_DeletePolicyAttachment_Handler,
 		},
 		{
-			MethodName: "ListPermissions",
-			Handler:    _KnownAdmin_ListPermissions_Handler,
-		},
-		{
-			MethodName: "GetPermission",
-			Handler:    _KnownAdmin_GetPermission_Handler,
-		},
-		{
-			MethodName: "CreatePermission",
-			Handler:    _KnownAdmin_CreatePermission_Handler,
-		},
-		{
-			MethodName: "UpdatePermission",
-			Handler:    _KnownAdmin_UpdatePermission_Handler,
-		},
-		{
-			MethodName: "DeletePermission",
-			Handler:    _KnownAdmin_DeletePermission_Handler,
-		},
-		{
 			MethodName: "CreateRole",
 			Handler:    _KnownAdmin_CreateRole_Handler,
 		},
@@ -4123,18 +3555,6 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteRoleMember",
 			Handler:    _KnownAdmin_DeleteRoleMember_Handler,
-		},
-		{
-			MethodName: "CreateRolePermissions",
-			Handler:    _KnownAdmin_CreateRolePermissions_Handler,
-		},
-		{
-			MethodName: "DeleteRolePermission",
-			Handler:    _KnownAdmin_DeleteRolePermission_Handler,
-		},
-		{
-			MethodName: "ListRolePermissions",
-			Handler:    _KnownAdmin_ListRolePermissions_Handler,
 		},
 		{
 			MethodName: "CreateDepartment",

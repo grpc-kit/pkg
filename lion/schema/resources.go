@@ -116,8 +116,6 @@ func (Resources) Edges() []ent.Edge {
 			Unique().
 			Required(),
 		edge.To("lion_menus", Menus.Type),
-		edge.To("lion_resource_scopes", ResourceScopes.Type).
-			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
 

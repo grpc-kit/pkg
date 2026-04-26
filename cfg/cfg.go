@@ -265,7 +265,7 @@ type SaramaConfig struct {
 func New(v *viper.Viper) (*LocalConfig, error) {
 	var lc LocalConfig
 
-	if err := viper.Unmarshal(&lc); err != nil {
+	if err := v.Unmarshal(&lc); err != nil {
 		return nil, err
 	}
 

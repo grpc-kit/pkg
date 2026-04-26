@@ -1601,29 +1601,6 @@ func HasLionMenusWith(preds ...predicate.Menus) predicate.Resources {
 	})
 }
 
-// HasLionResourceScopes applies the HasEdge predicate on the "lion_resource_scopes" edge.
-func HasLionResourceScopes() predicate.Resources {
-	return predicate.Resources(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionResourceScopesTable, LionResourceScopesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionResourceScopesWith applies the HasEdge predicate on the "lion_resource_scopes" edge with a given conditions (other predicates).
-func HasLionResourceScopesWith(preds ...predicate.ResourceScopes) predicate.Resources {
-	return predicate.Resources(func(s *sql.Selector) {
-		step := newLionResourceScopesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Resources) predicate.Resources {
 	return predicate.Resources(sql.AndPredicates(predicates...))

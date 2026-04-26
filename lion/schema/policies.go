@@ -47,7 +47,6 @@ func (Policies) Fields() []ent.Field {
 // Edges of the table.
 func (Policies) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("lion_permissions", Permissions.Type),
 		edge.To("lion_policy_statements", PolicyStatements.Type),
 		edge.To("lion_policy_attachments", PolicyAttachments.Type),
 	}

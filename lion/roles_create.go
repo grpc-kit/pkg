@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/grouproles"
-	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/userroles"
 )
@@ -187,21 +186,6 @@ func (_c *RolesCreate) SetNillableProtected(v *bool) *RolesCreate {
 		_c.SetProtected(*v)
 	}
 	return _c
-}
-
-// AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by IDs.
-func (_c *RolesCreate) AddLionRolePermissionIDs(ids ...int) *RolesCreate {
-	_c.mutation.AddLionRolePermissionIDs(ids...)
-	return _c
-}
-
-// AddLionRolePermissions adds the "lion_role_permissions" edges to the RolePermissions entity.
-func (_c *RolesCreate) AddLionRolePermissions(v ...*RolePermissions) *RolesCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionRolePermissionIDs(ids...)
 }
 
 // AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by IDs.
@@ -430,22 +414,6 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Protected(); ok {
 		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
 		_node.Protected = value
-	}
-	if nodes := _c.mutation.LionRolePermissionsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   roles.LionRolePermissionsTable,
-			Columns: []string{roles.LionRolePermissionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolepermissions.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.LionUserRolesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
