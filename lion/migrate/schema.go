@@ -567,16 +567,9 @@ var (
 		{Name: "resource_path", Type: field.TypeString, Size: 255},
 		{Name: "grn", Type: field.TypeString, Size: 512, Default: ""},
 		{Name: "code", Type: field.TypeString, Size: 128},
-		{Name: "name", Type: field.TypeString, Size: 512, Default: ""},
 		{Name: "display_name", Type: field.TypeString, Default: ""},
-		{Name: "resource_type", Type: field.TypeInt, Default: 0},
-		{Name: "resource_status", Type: field.TypeInt, Default: 0},
 		{Name: "resource_status_code", Type: field.TypeString, Size: 16, Default: "active"},
 		{Name: "visibility", Type: field.TypeInt, Default: 0},
-		{Name: "sort_order", Type: field.TypeInt, Default: 100},
-		{Name: "locator", Type: field.TypeString, Size: 512, Default: ""},
-		{Name: "visual", Type: field.TypeString, Size: 256, Default: ""},
-		{Name: "manifest", Type: field.TypeString, Default: ""},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "protected", Type: field.TypeBool, Default: false},
 		{Name: "resource_type_id", Type: field.TypeInt},
@@ -589,7 +582,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_resources_lion_resource_types_lion_resources",
-				Columns:    []*schema.Column{LionResourcesColumns[26]},
+				Columns:    []*schema.Column{LionResourcesColumns[19]},
 				RefColumns: []*schema.Column{LionResourceTypesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -601,17 +594,9 @@ var (
 				Columns: []*schema.Column{LionResourcesColumns[6]},
 			},
 			{
-				Name:    "resources_resource_type",
-				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[16]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "parent_id = 0",
-				},
-			},
-			{
 				Name:    "resources_resource_type_id_tenant_id",
 				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[26], LionResourcesColumns[9]},
+				Columns: []*schema.Column{LionResourcesColumns[19], LionResourcesColumns[9]},
 			},
 			{
 				Name:    "resources_service_code_resource_path",
@@ -619,22 +604,9 @@ var (
 				Columns: []*schema.Column{LionResourcesColumns[8], LionResourcesColumns[11]},
 			},
 			{
-				Name:    "resources_sort_order",
-				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[20]},
-			},
-			{
 				Name:    "resources_code",
 				Unique:  true,
 				Columns: []*schema.Column{LionResourcesColumns[13]},
-			},
-			{
-				Name:    "resources_name",
-				Unique:  true,
-				Columns: []*schema.Column{LionResourcesColumns[14]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "name <> ''",
-				},
 			},
 			{
 				Name:    "resources_grn",

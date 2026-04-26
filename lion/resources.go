@@ -46,26 +46,12 @@ type Resources struct {
 	Grn string `json:"grn,omitempty"`
 	// 资源名称
 	Code string `json:"code,omitempty"`
-	// 兼容期保留的稳定资源名（旧 GRN 字段）
-	Name string `json:"name,omitempty"`
 	// 友好展示名称
 	DisplayName string `json:"display_name,omitempty"`
-	// 兼容期保留的旧资源类型枚举字段
-	ResourceType int `json:"resource_type,omitempty"`
-	// 兼容期保留的旧资源状态枚举字段
-	ResourceStatus int `json:"resource_status,omitempty"`
 	// 新资源状态代码，如 active / disabled
 	ResourceStatusCode string `json:"resource_status_code,omitempty"`
 	// 可见性定义，对应 api/known/admin/v1/common.proto 中定义
 	Visibility int `json:"visibility,omitempty"`
-	// 兼容期保留的资源排序顺序
-	SortOrder int `json:"sort_order,omitempty"`
-	// 兼容期保留的资源路径字段
-	Locator string `json:"locator,omitempty"`
-	// 兼容期保留的图标字段
-	Visual string `json:"visual,omitempty"`
-	// 兼容期保留的组件字段
-	Manifest string `json:"manifest,omitempty"`
 	// 详细描述
 	Description string `json:"description,omitempty"`
 	// 是否为保护资源，保护资源不能被删除，描述等可更改
@@ -114,9 +100,9 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case resources.FieldProtected:
 			values[i] = new(sql.NullBool)
-		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldResourceTypeID, resources.FieldResourceType, resources.FieldResourceStatus, resources.FieldVisibility, resources.FieldSortOrder:
+		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldResourceTypeID, resources.FieldVisibility:
 			values[i] = new(sql.NullInt64)
-		case resources.FieldResourceTypeCode, resources.FieldServiceCode, resources.FieldTenantID, resources.FieldRegion, resources.FieldResourcePath, resources.FieldGrn, resources.FieldCode, resources.FieldName, resources.FieldDisplayName, resources.FieldResourceStatusCode, resources.FieldLocator, resources.FieldVisual, resources.FieldManifest, resources.FieldDescription:
+		case resources.FieldResourceTypeCode, resources.FieldServiceCode, resources.FieldTenantID, resources.FieldRegion, resources.FieldResourcePath, resources.FieldGrn, resources.FieldCode, resources.FieldDisplayName, resources.FieldResourceStatusCode, resources.FieldDescription:
 			values[i] = new(sql.NullString)
 		case resources.FieldCreatedAt, resources.FieldUpdatedAt, resources.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -226,29 +212,11 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Code = value.String
 			}
-		case resources.FieldName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				_m.Name = value.String
-			}
 		case resources.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field display_name", values[i])
 			} else if value.Valid {
 				_m.DisplayName = value.String
-			}
-		case resources.FieldResourceType:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field resource_type", values[i])
-			} else if value.Valid {
-				_m.ResourceType = int(value.Int64)
-			}
-		case resources.FieldResourceStatus:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field resource_status", values[i])
-			} else if value.Valid {
-				_m.ResourceStatus = int(value.Int64)
 			}
 		case resources.FieldResourceStatusCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -261,30 +229,6 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field visibility", values[i])
 			} else if value.Valid {
 				_m.Visibility = int(value.Int64)
-			}
-		case resources.FieldSortOrder:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field sort_order", values[i])
-			} else if value.Valid {
-				_m.SortOrder = int(value.Int64)
-			}
-		case resources.FieldLocator:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field locator", values[i])
-			} else if value.Valid {
-				_m.Locator = value.String
-			}
-		case resources.FieldVisual:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field visual", values[i])
-			} else if value.Valid {
-				_m.Visual = value.String
-			}
-		case resources.FieldManifest:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field manifest", values[i])
-			} else if value.Valid {
-				_m.Manifest = value.String
 			}
 		case resources.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -388,35 +332,14 @@ func (_m *Resources) String() string {
 	builder.WriteString("code=")
 	builder.WriteString(_m.Code)
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)
-	builder.WriteString(", ")
-	builder.WriteString("resource_type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ResourceType))
-	builder.WriteString(", ")
-	builder.WriteString("resource_status=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ResourceStatus))
 	builder.WriteString(", ")
 	builder.WriteString("resource_status_code=")
 	builder.WriteString(_m.ResourceStatusCode)
 	builder.WriteString(", ")
 	builder.WriteString("visibility=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Visibility))
-	builder.WriteString(", ")
-	builder.WriteString("sort_order=")
-	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))
-	builder.WriteString(", ")
-	builder.WriteString("locator=")
-	builder.WriteString(_m.Locator)
-	builder.WriteString(", ")
-	builder.WriteString("visual=")
-	builder.WriteString(_m.Visual)
-	builder.WriteString(", ")
-	builder.WriteString("manifest=")
-	builder.WriteString(_m.Manifest)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)

@@ -294,13 +294,9 @@ type CreateResourceRequest struct {
 	// "parent_id": "1",
 	// "code": "user-management",
 	// "display_name": "用户管理",
-	// "sort_order": 0,
 	// "type": "MENU",
 	// "status": "ENABLED",
 	// "visibility": "VISIBLE",
-	// "locator": "/hello/world",
-	// "visual": "avatar",
-	// "manifest": "",
 	// "metadata": {
 	// "hello": "world"
 	// },

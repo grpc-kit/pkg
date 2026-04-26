@@ -42,26 +42,12 @@ const (
 	FieldGrn = "grn"
 	// FieldCode holds the string denoting the code field in the database.
 	FieldCode = "code"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
-	// FieldResourceType holds the string denoting the resource_type field in the database.
-	FieldResourceType = "resource_type"
-	// FieldResourceStatus holds the string denoting the resource_status field in the database.
-	FieldResourceStatus = "resource_status"
 	// FieldResourceStatusCode holds the string denoting the resource_status_code field in the database.
 	FieldResourceStatusCode = "resource_status_code"
 	// FieldVisibility holds the string denoting the visibility field in the database.
 	FieldVisibility = "visibility"
-	// FieldSortOrder holds the string denoting the sort_order field in the database.
-	FieldSortOrder = "sort_order"
-	// FieldLocator holds the string denoting the locator field in the database.
-	FieldLocator = "locator"
-	// FieldVisual holds the string denoting the visual field in the database.
-	FieldVisual = "visual"
-	// FieldManifest holds the string denoting the manifest field in the database.
-	FieldManifest = "manifest"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
 	// FieldProtected holds the string denoting the protected field in the database.
@@ -105,16 +91,9 @@ var Columns = []string{
 	FieldResourcePath,
 	FieldGrn,
 	FieldCode,
-	FieldName,
 	FieldDisplayName,
-	FieldResourceType,
-	FieldResourceStatus,
 	FieldResourceStatusCode,
 	FieldVisibility,
-	FieldSortOrder,
-	FieldLocator,
-	FieldVisual,
-	FieldManifest,
 	FieldDescription,
 	FieldProtected,
 }
@@ -164,34 +143,14 @@ var (
 	GrnValidator func(string) error
 	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	CodeValidator func(string) error
-	// DefaultName holds the default value on creation for the "name" field.
-	DefaultName string
-	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator func(string) error
 	// DefaultDisplayName holds the default value on creation for the "display_name" field.
 	DefaultDisplayName string
-	// DefaultResourceType holds the default value on creation for the "resource_type" field.
-	DefaultResourceType int
-	// DefaultResourceStatus holds the default value on creation for the "resource_status" field.
-	DefaultResourceStatus int
 	// DefaultResourceStatusCode holds the default value on creation for the "resource_status_code" field.
 	DefaultResourceStatusCode string
 	// ResourceStatusCodeValidator is a validator for the "resource_status_code" field. It is called by the builders before save.
 	ResourceStatusCodeValidator func(string) error
 	// DefaultVisibility holds the default value on creation for the "visibility" field.
 	DefaultVisibility int
-	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
-	DefaultSortOrder int
-	// DefaultLocator holds the default value on creation for the "locator" field.
-	DefaultLocator string
-	// LocatorValidator is a validator for the "locator" field. It is called by the builders before save.
-	LocatorValidator func(string) error
-	// DefaultVisual holds the default value on creation for the "visual" field.
-	DefaultVisual string
-	// VisualValidator is a validator for the "visual" field. It is called by the builders before save.
-	VisualValidator func(string) error
-	// DefaultManifest holds the default value on creation for the "manifest" field.
-	DefaultManifest string
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
 	// DefaultProtected holds the default value on creation for the "protected" field.
@@ -276,24 +235,9 @@ func ByCode(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCode, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
 // ByDisplayName orders the results by the display_name field.
 func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
-}
-
-// ByResourceType orders the results by the resource_type field.
-func ByResourceType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResourceType, opts...).ToFunc()
-}
-
-// ByResourceStatus orders the results by the resource_status field.
-func ByResourceStatus(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResourceStatus, opts...).ToFunc()
 }
 
 // ByResourceStatusCode orders the results by the resource_status_code field.
@@ -304,26 +248,6 @@ func ByResourceStatusCode(opts ...sql.OrderTermOption) OrderOption {
 // ByVisibility orders the results by the visibility field.
 func ByVisibility(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVisibility, opts...).ToFunc()
-}
-
-// BySortOrder orders the results by the sort_order field.
-func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
-}
-
-// ByLocator orders the results by the locator field.
-func ByLocator(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLocator, opts...).ToFunc()
-}
-
-// ByVisual orders the results by the visual field.
-func ByVisual(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldVisual, opts...).ToFunc()
-}
-
-// ByManifest orders the results by the manifest field.
-func ByManifest(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldManifest, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

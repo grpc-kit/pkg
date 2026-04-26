@@ -1004,60 +1004,26 @@ func init() {
 			return nil
 		}
 	}()
-	// resourcesDescName is the schema descriptor for name field.
-	resourcesDescName := resourcesFields[9].Descriptor()
-	// resources.DefaultName holds the default value on creation for the name field.
-	resources.DefaultName = resourcesDescName.Default.(string)
-	// resources.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	resources.NameValidator = resourcesDescName.Validators[0].(func(string) error)
 	// resourcesDescDisplayName is the schema descriptor for display_name field.
-	resourcesDescDisplayName := resourcesFields[10].Descriptor()
+	resourcesDescDisplayName := resourcesFields[9].Descriptor()
 	// resources.DefaultDisplayName holds the default value on creation for the display_name field.
 	resources.DefaultDisplayName = resourcesDescDisplayName.Default.(string)
-	// resourcesDescResourceType is the schema descriptor for resource_type field.
-	resourcesDescResourceType := resourcesFields[11].Descriptor()
-	// resources.DefaultResourceType holds the default value on creation for the resource_type field.
-	resources.DefaultResourceType = resourcesDescResourceType.Default.(int)
-	// resourcesDescResourceStatus is the schema descriptor for resource_status field.
-	resourcesDescResourceStatus := resourcesFields[12].Descriptor()
-	// resources.DefaultResourceStatus holds the default value on creation for the resource_status field.
-	resources.DefaultResourceStatus = resourcesDescResourceStatus.Default.(int)
 	// resourcesDescResourceStatusCode is the schema descriptor for resource_status_code field.
-	resourcesDescResourceStatusCode := resourcesFields[13].Descriptor()
+	resourcesDescResourceStatusCode := resourcesFields[10].Descriptor()
 	// resources.DefaultResourceStatusCode holds the default value on creation for the resource_status_code field.
 	resources.DefaultResourceStatusCode = resourcesDescResourceStatusCode.Default.(string)
 	// resources.ResourceStatusCodeValidator is a validator for the "resource_status_code" field. It is called by the builders before save.
 	resources.ResourceStatusCodeValidator = resourcesDescResourceStatusCode.Validators[0].(func(string) error)
 	// resourcesDescVisibility is the schema descriptor for visibility field.
-	resourcesDescVisibility := resourcesFields[14].Descriptor()
+	resourcesDescVisibility := resourcesFields[11].Descriptor()
 	// resources.DefaultVisibility holds the default value on creation for the visibility field.
 	resources.DefaultVisibility = resourcesDescVisibility.Default.(int)
-	// resourcesDescSortOrder is the schema descriptor for sort_order field.
-	resourcesDescSortOrder := resourcesFields[15].Descriptor()
-	// resources.DefaultSortOrder holds the default value on creation for the sort_order field.
-	resources.DefaultSortOrder = resourcesDescSortOrder.Default.(int)
-	// resourcesDescLocator is the schema descriptor for locator field.
-	resourcesDescLocator := resourcesFields[16].Descriptor()
-	// resources.DefaultLocator holds the default value on creation for the locator field.
-	resources.DefaultLocator = resourcesDescLocator.Default.(string)
-	// resources.LocatorValidator is a validator for the "locator" field. It is called by the builders before save.
-	resources.LocatorValidator = resourcesDescLocator.Validators[0].(func(string) error)
-	// resourcesDescVisual is the schema descriptor for visual field.
-	resourcesDescVisual := resourcesFields[17].Descriptor()
-	// resources.DefaultVisual holds the default value on creation for the visual field.
-	resources.DefaultVisual = resourcesDescVisual.Default.(string)
-	// resources.VisualValidator is a validator for the "visual" field. It is called by the builders before save.
-	resources.VisualValidator = resourcesDescVisual.Validators[0].(func(string) error)
-	// resourcesDescManifest is the schema descriptor for manifest field.
-	resourcesDescManifest := resourcesFields[18].Descriptor()
-	// resources.DefaultManifest holds the default value on creation for the manifest field.
-	resources.DefaultManifest = resourcesDescManifest.Default.(string)
 	// resourcesDescDescription is the schema descriptor for description field.
-	resourcesDescDescription := resourcesFields[19].Descriptor()
+	resourcesDescDescription := resourcesFields[12].Descriptor()
 	// resources.DefaultDescription holds the default value on creation for the description field.
 	resources.DefaultDescription = resourcesDescDescription.Default.(string)
 	// resourcesDescProtected is the schema descriptor for protected field.
-	resourcesDescProtected := resourcesFields[20].Descriptor()
+	resourcesDescProtected := resourcesFields[13].Descriptor()
 	// resources.DefaultProtected holds the default value on creation for the protected field.
 	resources.DefaultProtected = resourcesDescProtected.Default.(bool)
 	rolesMixin := schema.Roles{}.Mixin()

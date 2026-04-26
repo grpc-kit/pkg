@@ -85,21 +85,10 @@ func policyStatementMatchesResource(statement *lion.PolicyStatements, resource *
 		return false
 	}
 
-	resourceTypeCode := resource.ResourceTypeCode
-	if resourceTypeCode == "" {
-		resourceTypeCode = resourceTypeCodeFromLegacy(resource.ResourceType)
-	}
-	serviceCode := resource.ServiceCode
-	if serviceCode == "" {
-		serviceCode = "admin.v1.oneops"
-	}
-	resourcePath := normalizeResourcePath(resource.ResourcePath, resource.Code, resource.Locator)
+	resourcePath := normalizeResourcePath(resource.ResourcePath, resource.Code)
 	grn := resource.Grn
-	if grn == "" {
-		grn = buildResourceGRN(serviceCode, resource.TenantID, resource.Region, resourceTypeCode, resourcePath, resource.Name)
-	}
 
-	candidates := []string{grn, resource.Name, resource.Code, resourcePath}
+	candidates := []string{grn, resource.Code, resourcePath}
 	for _, selector := range selectors {
 		for _, candidate := range candidates {
 			if candidate != "" && wildcardMatch(selector, candidate) {
@@ -247,14 +236,10 @@ func resourceTypeCodeFromLegacy(resourceType int) string {
 	}
 }
 
-func normalizeResourcePath(path, code, locator string) string {
+func normalizeResourcePath(path, code string) string {
 	path = strings.TrimSpace(path)
 	if path != "" {
 		return path
-	}
-	locator = strings.TrimSpace(locator)
-	if locator != "" {
-		return locator
 	}
 	code = strings.TrimSpace(code)
 	if code != "" {
@@ -263,14 +248,44 @@ func normalizeResourcePath(path, code, locator string) string {
 	return "*"
 }
 
-func buildResourceGRN(serviceCode, tenantID, region, resourceTypeCode, resourcePath, legacyName string) string {
-	if strings.TrimSpace(legacyName) != "" {
-		return legacyName
-	}
+func buildResourceGRN(serviceCode, tenantID, region, resourceTypeCode, resourcePath string) string {
 	if serviceCode == "" || resourceTypeCode == "" {
 		return ""
 	}
 	return fmt.Sprintf("grn:%s:%s:%s:%s/%s", serviceCode, tenantID, region, resourceTypeCode, resourcePath)
+}
+
+func resourceTypeFromCode(code string) adminv1.Resource_Type {
+	switch code {
+	case "sys_menu":
+		return adminv1.Resource_MENU
+	case "sys_api":
+		return adminv1.Resource_API
+	default:
+		return adminv1.Resource_TYPE_UNSPECIFIED
+	}
+}
+
+func resourceStatusFromCode(code string) adminv1.Resource_Status {
+	switch code {
+	case "active":
+		return adminv1.Resource_ENABLED
+	case "disabled":
+		return adminv1.Resource_DISABLED
+	default:
+		return adminv1.Resource_STATUS_UNSPECIFIED
+	}
+}
+
+func resourceStatusToCode(status adminv1.Resource_Status) string {
+	switch status {
+	case adminv1.Resource_ENABLED:
+		return "active"
+	case adminv1.Resource_DISABLED:
+		return "disabled"
+	default:
+		return "active"
+	}
 }
 
 func (a *KnownAdminAPI) lionResourceToProto(in *lion.Resources) *adminv1.Resource {
@@ -279,32 +294,21 @@ func (a *KnownAdminAPI) lionResourceToProto(in *lion.Resources) *adminv1.Resourc
 	}
 
 	resourceTypeCode := in.ResourceTypeCode
-	if resourceTypeCode == "" {
-		resourceTypeCode = resourceTypeCodeFromLegacy(in.ResourceType)
-	}
 	serviceCode := in.ServiceCode
 	if serviceCode == "" {
 		serviceCode = a.defaultServiceCode()
 	}
-	resourcePath := normalizeResourcePath(in.ResourcePath, in.Code, in.Locator)
+	resourcePath := normalizeResourcePath(in.ResourcePath, in.Code)
 	grn := in.Grn
-	if grn == "" {
-		grn = buildResourceGRN(serviceCode, in.TenantID, in.Region, resourceTypeCode, resourcePath, in.Name)
-	}
 
 	return &adminv1.Resource{
 		Id:               int64(in.ID),
 		ParentId:         in.ParentID,
 		Code:             in.Code,
-		Name:             in.Name,
 		DisplayName:      in.DisplayName,
-		SortOrder:        int32(in.SortOrder),
-		Type:             adminv1.Resource_Type(in.ResourceType),
-		Status:           adminv1.Resource_Status(in.ResourceStatus),
+		Type:             resourceTypeFromCode(in.ResourceTypeCode),
+		Status:           resourceStatusFromCode(in.ResourceStatusCode),
 		Visibility:       adminv1.Visibility(in.Visibility),
-		Locator:          in.Locator,
-		Visual:           in.Visual,
-		Manifest:         in.Manifest,
 		Description:      in.Description,
 		CreatedBy:        in.CreatedBy,
 		UpdatedBy:        in.UpdatedBy,
@@ -352,16 +356,16 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 
 	if req.ResourceType != 0 {
 		if resourceType, err := a.resolveResourceTypeForLegacy(ctx, db, adminv1.Resource_Type(req.ResourceType)); err == nil {
-			resourcesWhere = append(resourcesWhere, resources.Or(
-				resources.ResourceTypeIDEQ(resourceType.ID),
-				resources.ResourceTypeEQ(int(req.ResourceType)),
-			))
-		} else {
-			resourcesWhere = append(resourcesWhere, resources.ResourceTypeEQ(int(req.ResourceType)))
+			resourcesWhere = append(resourcesWhere, resources.ResourceTypeIDEQ(resourceType.ID))
 		}
 	}
 	if req.ResourceStatus != 0 {
-		resourcesWhere = append(resourcesWhere, resources.ResourceStatusEQ(int(req.ResourceStatus)))
+		switch adminv1.Resource_Status(req.ResourceStatus) {
+		case adminv1.Resource_ENABLED:
+			resourcesWhere = append(resourcesWhere, resources.ResourceStatusCodeEQ("active"))
+		case adminv1.Resource_DISABLED:
+			resourcesWhere = append(resourcesWhere, resources.ResourceStatusCodeEQ("disabled"))
+		}
 	}
 
 	// 构建查询，但先不执行
@@ -370,21 +374,16 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	// 处理排序
 	if req.OrderBy != "" {
 		switch req.OrderBy {
-		case "sort_order asc":
-			resourceQuery = resourceQuery.Order(lion.Asc(resources.FieldSortOrder))
-		case "sort_order desc":
-			resourceQuery = resourceQuery.Order(lion.Desc(resources.FieldSortOrder))
 		case "create_time desc":
 			resourceQuery = resourceQuery.Order(lion.Desc(resources.FieldCreatedAt))
 		case "create_time asc":
 			resourceQuery = resourceQuery.Order(lion.Asc(resources.FieldCreatedAt))
 		default:
-			// 默认按 sort_order 升序，然后按 ID 升序
-			resourceQuery = resourceQuery.Order(lion.Asc(resources.FieldSortOrder), lion.Asc(resources.FieldID))
+			resourceQuery = resourceQuery.Order(lion.Asc(resources.FieldID))
 		}
 	} else {
 		// 默认排序
-		resourceQuery = resourceQuery.Order(lion.Asc(resources.FieldSortOrder), lion.Asc(resources.FieldID))
+		resourceQuery = resourceQuery.Order(lion.Asc(resources.FieldID))
 	}
 
 	// 计算总数（在应用分页前）
@@ -442,22 +441,12 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 				Id:          int64(m.ID),
 				ParentId:    m.ParentID,
 				Code:        m.Code,
-				Name:        m.Name,
 				DisplayName: m.DisplayName,
-				SortOrder:   int32(m.SortOrder),
-				Type:        adminv1.Resource_Type(m.ResourceType),
-				// Scope:        adminv1.Resource_Scope(m.ResourceScope),
-				Status:     adminv1.Resource_Status(m.ResourceStatus),
-				Visibility: adminv1.Visibility(m.Visibility),
-				/*
-					Hidden:       m.Hidden,
-					HideChildren: m.HideChildren,
-				*/
-				Locator:   m.Locator,
-				Visual:    m.Visual,
-				Manifest:  m.Manifest,
-				CreatedAt: timestamppb.New(m.CreatedAt),
-				UpdatedAt: timestamppb.New(m.UpdatedAt),
+				Type:        resourceTypeFromCode(m.ResourceTypeCode),
+				Status:      resourceStatusFromCode(m.ResourceStatusCode),
+				Visibility:  adminv1.Visibility(m.Visibility),
+				CreatedAt:   timestamppb.New(m.CreatedAt),
+				UpdatedAt:   timestamppb.New(m.UpdatedAt),
 			}
 
 			menuMap[int64(m.ID)] = menu
@@ -476,7 +465,7 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 
 		// 可选：对根菜单排序
 		sort.Slice(roots, func(i, j int) bool {
-			return roots[i].SortOrder < roots[j].SortOrder
+			return roots[i].Id < roots[j].Id
 		})
 
 		result.Resources = roots
@@ -517,7 +506,6 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 	}
 	req.Resource.Code = code
-	req.Resource.Name = normalizeResourceName(req.Resource.Name, req.Resource.Type, req.Resource.Code, req.Resource.Locator)
 
 	if req.Resource.ParentId == 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("parent_id cannot be 0 when creating resource")
@@ -547,7 +535,7 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		if parentResource.ResourceTypeID != resourceType.ID {
 			return nil, errs.InvalidArgument(ctx).WithMessage("resource type must match parent resource type")
 		}
-	} else if parentResource.ResourceType != int(req.Resource.Type) {
+	} else if parentResource.ResourceTypeCode != resourceType.Code {
 		return nil, errs.InvalidArgument(ctx).WithMessage("resource type must match parent resource type")
 	}
 
@@ -557,22 +545,14 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		return nil, err
 	}
 
-	// 设置默认值
-	sortOrder := int(req.Resource.SortOrder)
-	if sortOrder == 0 {
-		sortOrder = 100 // 默认排序权重
-	}
-
 	// 创建资源
 	resourceTypeCode := resourceType.Code
 	serviceCode := a.defaultServiceCode()
-	resourcePath := normalizeResourcePath(req.Resource.ResourcePath, req.Resource.Code, req.Resource.Locator)
-	grn := buildResourceGRN(serviceCode, req.Resource.TenantId, req.Resource.Region, resourceTypeCode, resourcePath, req.Resource.Name)
+	resourcePath := normalizeResourcePath(req.Resource.ResourcePath, req.Resource.Code)
+	grn := buildResourceGRN(serviceCode, req.Resource.TenantId, req.Resource.Region, resourceTypeCode, resourcePath)
 	newResource, err := db.Resources.Create().
 		SetCode(req.Resource.Code).
-		SetName(req.Resource.Name).
 		SetDisplayName(req.Resource.DisplayName).
-		SetResourceType(int(req.Resource.Type)).
 		SetResourceTypeID(resourceType.ID).
 		SetResourceTypeCode(resourceTypeCode).
 		SetServiceCode(serviceCode).
@@ -580,13 +560,9 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		SetRegion(req.Resource.Region).
 		SetResourcePath(resourcePath).
 		SetGrn(grn).
-		SetResourceStatus(int(req.Resource.Status)).
+		SetResourceStatusCode(resourceStatusToCode(req.Resource.Status)).
 		SetVisibility(int(req.Resource.Visibility)).
 		SetParentID(req.Resource.ParentId).
-		SetLocator(req.Resource.Locator).
-		SetVisual(req.Resource.Visual).
-		SetManifest(req.Resource.Manifest).
-		SetSortOrder(sortOrder).
 		SetDescription(req.Resource.Description).
 		SetCreatedBy(userID).
 		SetUpdatedBy(userID).
@@ -663,20 +639,19 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 	}
 	effectiveResourceType := req.Resource.Type
 	if effectiveResourceType == adminv1.Resource_TYPE_UNSPECIFIED {
-		effectiveResourceType = adminv1.Resource_Type(resource.ResourceType)
+		effectiveResourceType = resourceTypeFromCode(resource.ResourceTypeCode)
 	}
-	req.Resource.Name = normalizeResourceName(req.Resource.Name, effectiveResourceType, req.Resource.Code, req.Resource.Locator)
 	resolvedResourceType, err := a.resolveResourceTypeForLegacy(ctx, db, effectiveResourceType)
 	if err != nil {
 		return nil, err
 	}
 	resourceTypeCode := resolvedResourceType.Code
-	resourcePath := normalizeResourcePath(req.Resource.ResourcePath, req.Resource.Code, req.Resource.Locator)
+	resourcePath := normalizeResourcePath(req.Resource.ResourcePath, req.Resource.Code)
 	serviceCode := resource.ServiceCode
 	if serviceCode == "" {
 		serviceCode = a.defaultServiceCode()
 	}
-	grn := buildResourceGRN(serviceCode, req.Resource.TenantId, req.Resource.Region, resourceTypeCode, resourcePath, req.Resource.Name)
+	grn := buildResourceGRN(serviceCode, req.Resource.TenantId, req.Resource.Region, resourceTypeCode, resourcePath)
 
 	// 构建更新操作
 	update := resource.Update()
@@ -687,31 +662,17 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 			switch field {
 			case resources.FieldCode:
 				update.SetCode(req.Resource.Code)
-			case resources.FieldName:
-				update.SetName(req.Resource.Name)
-				update.SetGrn(grn)
 			case resources.FieldDisplayName:
 				update.SetDisplayName(req.Resource.DisplayName)
-			case resources.FieldResourceType:
-				update.SetResourceType(int(effectiveResourceType))
+			case resources.FieldResourceTypeID:
 				update.SetResourceTypeID(resolvedResourceType.ID)
 				update.SetResourceTypeCode(resourceTypeCode)
-			case resources.FieldResourceStatus:
-				update.SetResourceStatus(int(req.Resource.Status))
+			case resources.FieldResourceStatusCode:
+				update.SetResourceStatusCode(resourceStatusToCode(req.Resource.Status))
 			case resources.FieldVisibility:
 				update.SetVisibility(int(req.Resource.Visibility))
 			case resources.FieldParentID:
 				update.SetParentID(req.Resource.ParentId)
-			case resources.FieldLocator:
-				update.SetLocator(req.Resource.Locator)
-				update.SetResourcePath(resourcePath)
-				update.SetGrn(grn)
-			case resources.FieldVisual:
-				update.SetVisual(req.Resource.Visual)
-			case resources.FieldManifest:
-				update.SetManifest(req.Resource.Manifest)
-			case resources.FieldSortOrder:
-				update.SetSortOrder(int(req.Resource.SortOrder))
 			case resources.FieldDescription:
 				update.SetDescription(req.Resource.Description)
 			case resources.FieldTenantID:
@@ -724,7 +685,7 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 				update.SetServiceCode(req.Resource.ServiceCode)
 			case resources.FieldResourcePath:
 				update.SetResourcePath(req.Resource.ResourcePath)
-				update.SetGrn(buildResourceGRN(req.Resource.ServiceCode, req.Resource.TenantId, req.Resource.Region, resourceTypeCode, req.Resource.ResourcePath, req.Resource.Name))
+				update.SetGrn(buildResourceGRN(req.Resource.ServiceCode, req.Resource.TenantId, req.Resource.Region, resourceTypeCode, req.Resource.ResourcePath))
 			}
 		}
 		// 始终更新 UpdatedBy
@@ -733,23 +694,17 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 		// 如果没有指定更新字段，则更新所有字段
 		update.
 			SetCode(req.Resource.Code).
-			SetName(req.Resource.Name).
 			SetDisplayName(req.Resource.DisplayName).
-			SetResourceType(int(effectiveResourceType)).
 			SetResourceTypeID(resolvedResourceType.ID).
 			SetResourceTypeCode(resourceTypeCode).
-			SetResourceStatus(int(req.Resource.Status)).
+			SetResourceStatusCode(resourceStatusToCode(req.Resource.Status)).
 			SetVisibility(int(req.Resource.Visibility)).
 			SetParentID(req.Resource.ParentId).
-			SetLocator(req.Resource.Locator).
-			SetVisual(req.Resource.Visual).
-			SetManifest(req.Resource.Manifest).
 			SetServiceCode(serviceCode).
 			SetTenantID(req.Resource.TenantId).
 			SetRegion(req.Resource.Region).
 			SetResourcePath(resourcePath).
 			SetGrn(grn).
-			SetSortOrder(int(req.Resource.SortOrder)).
 			SetDescription(req.Resource.Description).
 			SetUpdatedBy(userID)
 	}
@@ -887,22 +842,4 @@ func mergeUniqueInts(a, b []int) []int {
 		out = append(out, id)
 	}
 	return out
-}
-
-func normalizeResourceName(name string, resourceType adminv1.Resource_Type, code, locator string) string {
-	if strings.TrimSpace(name) != "" {
-		return strings.TrimSpace(name)
-	}
-	typePart := strings.ToLower(resourceType.String())
-	if typePart == "" || typePart == "type_unspecified" {
-		typePart = "resource"
-	}
-	pathPart := strings.TrimSpace(locator)
-	if pathPart == "" {
-		pathPart = strings.TrimSpace(code)
-	}
-	if pathPart == "" {
-		pathPart = "unnamed"
-	}
-	return fmt.Sprintf("grn:admin:default:global:%s:%s", typePart, pathPart)
 }

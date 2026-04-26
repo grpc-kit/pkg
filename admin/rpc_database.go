@@ -266,10 +266,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		resourceTypeObj := resourceTypeCatalog[resourceTypeCode]
 		exists, qerr := tx.Resources.Query().Where(
 			resources.ParentIDEQ(0),
-			resources.Or(
-				resources.ResourceTypeIDEQ(resourceTypeObj.ID),
-				resources.ResourceTypeEQ(resType),
-			),
+			resources.ResourceTypeIDEQ(resourceTypeObj.ID),
 		).Exist(ctx)
 		if qerr != nil {
 			rollback()
@@ -280,18 +277,14 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 		if _, err := tx.Resources.Create().
 			SetCode(seedResourceSeedCode(rs.seedCode)).
-			SetName(fmt.Sprintf("grn:%s:::%s/root", serviceCode, resourceTypeCode)).
 			SetDisplayName(rs.name).
-			SetResourceType(resType).
 			SetResourceTypeID(resourceTypeObj.ID).
 			SetResourceTypeCode(resourceTypeObj.Code).
 			SetServiceCode(serviceCode).
 			SetResourcePath("root").
 			SetGrn(fmt.Sprintf("grn:%s:::%s/root", serviceCode, resourceTypeCode)).
-			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
 			SetResourceStatusCode("active").
 			SetVisibility(int(adminv1.Visibility_VISIBILITY_GLOBAL.Number())).
-			SetSortOrder(rs.sort).
 			SetParentID(0).
 			Save(ctx); err != nil {
 			rollback()
@@ -357,15 +350,15 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 // seedParentMenuRoot 表示挂在 parent_id=0 的 MENU 类型根节点下（与 ResourceSeedCode 根菜单 code 一致）。
 const seedParentMenuRoot = "__menu_root__"
 
+// seedMenuNavRoot 为 lion_menus 中仅菜单层根节点的 code，无对应 lion_resources 记录，用于包裹所有顶层菜单分支。
+const seedMenuNavRoot = "root_menu"
+
 // seedBuiltinMenuTreeResources 幂等补全内置菜单/页面资源（与常见 lion_resources 种子数据对齐）。
 // 返回值为资源 code -> id，含菜单类型根节点，供后续菜单资源初始化复用。
 func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback func(), serviceCode string, menuResourceType *lion.ResourceTypes) (map[string]int, error) {
 	menuRoot, err := tx.Resources.Query().Where(
 		resources.ParentIDEQ(0),
-		resources.Or(
-			resources.ResourceTypeCodeEQ("sys_menu"),
-			resources.ResourceTypeEQ(int(adminv1.Resource_MENU.Number())),
-		),
+		resources.ResourceTypeCodeEQ("sys_menu"),
 	).Only(ctx)
 	if err != nil {
 		rollback()
@@ -376,6 +369,25 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 	idByCode := map[string]int{menuRootCode: menuRoot.ID}
 	menuIDByCode := map[string]int{}
 	resourceTypeObj := menuResourceType
+
+	// 幂等补全 lion_menus 纯菜单层根节点（无 resource_id），用于包裹所有顶层菜单分支。
+	menuNavRoot, err := tx.Menus.Query().Where(menus.CodeEQ(seedMenuNavRoot)).Only(ctx)
+	if lion.IsNotFound(err) {
+		menuNavRoot, err = tx.Menus.Create().
+			SetParentID(0).
+			SetCode(seedMenuNavRoot).
+			SetDisplayName("后台根菜单").
+			SetSortOrder(1).
+			SetSurfaceMask(1).
+			SetVisibility("full").
+			SetMenuStatus("active").
+			Save(ctx)
+	}
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+	menuNavRootID := int64(menuNavRoot.ID)
 
 	type builtinMenuResource struct {
 		code, displayName, parentRef string
@@ -399,7 +411,6 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 	}
 
 	visUnspecified := int(adminv1.Visibility_VISIBILITY_UNSPECIFIED.Number())
-	enabled := int(adminv1.Resource_ENABLED.Number())
 
 	for _, s := range seeds {
 		var parentID int64
@@ -440,13 +451,14 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 			}
 			idByCode[s.code] = row.ID
 
-			menuParentID := int64(0)
+			menuParentID := menuNavRootID
 			if s.parentRef != seedParentMenuRoot {
 				if parentMenuID, ok := menuIDByCode[s.parentRef]; ok {
 					menuParentID = int64(parentMenuID)
 				}
 			}
-			menuRow, err := tx.Menus.Query().Where(menus.CodeEQ(s.code), menus.ParentIDEQ(menuParentID)).Only(ctx)
+			// 按 code（唯一索引）查询，支持幂等迁移已有菜单的 parent_id。
+			menuRow, err := tx.Menus.Query().Where(menus.CodeEQ(s.code)).Only(ctx)
 			if lion.IsNotFound(err) {
 				menuRow, err = tx.Menus.Create().
 					SetParentID(menuParentID).
@@ -460,6 +472,9 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 					SetVisibility("full").
 					SetMenuStatus("active").
 					Save(ctx)
+			} else if err == nil && menuRow.ParentID != menuParentID {
+				// 幂等升级：将旧 parent_id（如 0）修正为目标值。
+				menuRow, err = menuRow.Update().SetParentID(menuParentID).Save(ctx)
 			}
 			if err != nil {
 				rollback()
@@ -469,24 +484,18 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 			continue
 		}
 
-		grn := buildResourceGRN(serviceCode, "", "", resourceTypeObj.Code, normalizeResourcePath("", s.code, s.locator), "")
+		grn := buildResourceGRN(serviceCode, "", "", resourceTypeObj.Code, normalizeResourcePath(s.locator, s.code))
 		row, err := tx.Resources.Create().
 			SetCode(s.code).
-			SetName(grn).
 			SetDisplayName(s.displayName).
-			SetResourceType(int(s.resType.Number())).
 			SetResourceTypeID(resourceTypeObj.ID).
 			SetResourceTypeCode(resourceTypeObj.Code).
 			SetServiceCode(serviceCode).
-			SetResourcePath(normalizeResourcePath("", s.code, s.locator)).
+			SetResourcePath(normalizeResourcePath(s.locator, s.code)).
 			SetGrn(grn).
-			SetResourceStatus(enabled).
 			SetResourceStatusCode("active").
 			SetVisibility(visUnspecified).
-			SetSortOrder(s.sort).
 			SetParentID(parentID).
-			SetLocator(s.locator).
-			SetVisual(s.visual).
 			SetProtected(s.protected).
 			Save(ctx)
 		if err != nil {
@@ -495,13 +504,14 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 		}
 		idByCode[s.code] = row.ID
 
-		menuParentID := int64(0)
+		menuParentID := menuNavRootID
 		if s.parentRef != seedParentMenuRoot {
 			if parentMenuID, ok := menuIDByCode[s.parentRef]; ok {
 				menuParentID = int64(parentMenuID)
 			}
 		}
-		menuRow, err := tx.Menus.Query().Where(menus.CodeEQ(s.code), menus.ParentIDEQ(menuParentID)).Only(ctx)
+		// 按 code（唯一索引）查询，支持幂等迁移已有菜单的 parent_id。
+		menuRow, err := tx.Menus.Query().Where(menus.CodeEQ(s.code)).Only(ctx)
 		if lion.IsNotFound(err) {
 			menuRow, err = tx.Menus.Create().
 				SetParentID(menuParentID).
@@ -515,6 +525,9 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 				SetVisibility("full").
 				SetMenuStatus("active").
 				Save(ctx)
+		} else if err == nil && menuRow.ParentID != menuParentID {
+			// 幂等升级：将旧 parent_id（如 0）修正为目标值。
+			menuRow, err = menuRow.Update().SetParentID(menuParentID).Save(ctx)
 		}
 		if err != nil {
 			rollback()

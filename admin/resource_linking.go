@@ -40,10 +40,7 @@ func (a *KnownAdminAPI) resolveMenuParentResourceID(ctx context.Context, db *lio
 
 	rootResource, err := db.Resources.Query().Where(
 		resources.ParentIDEQ(0),
-		resources.Or(
-			resources.ResourceTypeCodeEQ("sys_menu"),
-			resources.ResourceTypeEQ(int(adminv1.Resource_MENU.Number())),
-		),
+		resources.ResourceTypeCodeEQ("sys_menu"),
 	).Order(lion.Asc(resources.FieldID)).First(ctx)
 	if err != nil {
 		if lion.IsNotFound(err) {
@@ -69,28 +66,20 @@ func (a *KnownAdminAPI) upsertMenuAnchorResource(ctx context.Context, db *lion.C
 	if resourceType.ServiceCode != "" {
 		serviceCode = resourceType.ServiceCode
 	}
-	resourcePath := normalizeResourcePath("", menu.Code, menu.RoutePath)
-	grn := buildResourceGRN(serviceCode, "", "", resourceType.Code, resourcePath, "")
-	resourceStatus := int(adminv1.Resource_ENABLED.Number())
+	resourcePath := normalizeResourcePath(menu.RoutePath, menu.Code)
+	grn := buildResourceGRN(serviceCode, "", "", resourceType.Code, resourcePath)
 	resourceVisibility := int(menu.Visibility)
 	resourceBuilder := func(update *lion.ResourcesUpdateOne) {
 		update.SetParentID(parentResourceID)
 		update.SetCode(menu.Code)
-		update.SetName(grn)
 		update.SetDisplayName(menu.DisplayName)
-		update.SetResourceType(int(adminv1.Resource_MENU.Number()))
 		update.SetResourceTypeID(resourceType.ID)
 		update.SetResourceTypeCode(resourceType.Code)
 		update.SetServiceCode(serviceCode)
 		update.SetResourcePath(resourcePath)
 		update.SetGrn(grn)
-		update.SetResourceStatus(resourceStatus)
 		update.SetResourceStatusCode("active")
 		update.SetVisibility(resourceVisibility)
-		update.SetSortOrder(int(menu.SortOrder))
-		update.SetLocator(menu.RoutePath)
-		update.SetVisual(menu.Icon)
-		update.SetManifest(menu.Component)
 		update.SetDescription(menu.Description)
 		update.SetUpdatedBy(userID)
 	}
@@ -141,21 +130,14 @@ func (a *KnownAdminAPI) upsertMenuAnchorResource(ctx context.Context, db *lion.C
 	create := db.Resources.Create().
 		SetParentID(parentResourceID).
 		SetCode(menu.Code).
-		SetName(grn).
 		SetDisplayName(menu.DisplayName).
-		SetResourceType(int(adminv1.Resource_MENU.Number())).
 		SetResourceTypeID(resourceType.ID).
 		SetResourceTypeCode(resourceType.Code).
 		SetServiceCode(serviceCode).
 		SetResourcePath(resourcePath).
 		SetGrn(grn).
-		SetResourceStatus(resourceStatus).
 		SetResourceStatusCode("active").
 		SetVisibility(resourceVisibility).
-		SetSortOrder(int(menu.SortOrder)).
-		SetLocator(menu.RoutePath).
-		SetVisual(menu.Icon).
-		SetManifest(menu.Component).
 		SetDescription(menu.Description).
 		SetCreatedBy(userID).
 		SetUpdatedBy(userID)

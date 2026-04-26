@@ -51,19 +51,9 @@ func (Resources) Fields() []ent.Field {
 			MaxLen(128).
 			NotEmpty().
 			Comment("资源名称"),
-		field.String("name").
-			MaxLen(512).
-			Default("").
-			Comment("兼容期保留的稳定资源名（旧 GRN 字段）"),
 		field.String("display_name").
 			Default("").
 			Comment("友好展示名称"),
-		field.Int("resource_type").
-			Default(0).
-			Comment("兼容期保留的旧资源类型枚举字段"),
-		field.Int("resource_status").
-			Default(0).
-			Comment("兼容期保留的旧资源状态枚举字段"),
 		field.String("resource_status_code").
 			MaxLen(16).
 			Default("active").
@@ -71,33 +61,6 @@ func (Resources) Fields() []ent.Field {
 		field.Int("visibility").
 			Default(0).
 			Comment("可见性定义，对应 api/known/admin/v1/common.proto 中定义"),
-		field.Int("sort_order").
-			Default(100).
-			Comment("兼容期保留的资源排序顺序"),
-		/*
-			field.Int("resource_scope").
-				Default(0).
-				Comment("作用范围，对应 api/known/admin/v1/common.proto 中定义"),
-		*/
-		/*
-			field.Bool("hidden").
-				Default(false).
-				Comment("是否在资源列表中隐藏该节点"),
-			field.Bool("hide_children").
-				Default(false).
-				Comment("是否隐藏该资源节点的子项"),
-		*/
-		field.String("locator").
-			MaxLen(512).
-			Default("").
-			Comment("兼容期保留的资源路径字段"),
-		field.String("visual").
-			MaxLen(256).
-			Default("").
-			Comment("兼容期保留的图标字段"),
-		field.String("manifest").
-			Default("").
-			Comment("兼容期保留的组件字段"),
 		field.String("description").
 			Default("").
 			Comment("详细描述"),
@@ -132,16 +95,9 @@ func (Resources) Indexes() []ent.Index {
 	return []ent.Index{
 		// 父资源ID索引，用于快速查找子资源
 		index.Fields("parent_id"),
-		index.Fields("resource_type").Annotations(
-			entsql.IndexWhere("parent_id = 0"),
-		),
 		index.Fields("resource_type_id", "tenant_id"),
 		index.Fields("service_code", "resource_path"),
-		index.Fields("sort_order"),
 		index.Fields("code").Unique(),
-		index.Fields("name").Unique().Annotations(
-			entsql.IndexWhere("name <> ''"),
-		),
 		index.Fields("grn").Unique().Annotations(
 			entsql.IndexWhere("grn <> ''"),
 		),
