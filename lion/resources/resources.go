@@ -26,6 +26,20 @@ const (
 	FieldUpdatedBy = "updated_by"
 	// FieldParentID holds the string denoting the parent_id field in the database.
 	FieldParentID = "parent_id"
+	// FieldResourceTypeID holds the string denoting the resource_type_id field in the database.
+	FieldResourceTypeID = "resource_type_id"
+	// FieldResourceTypeCode holds the string denoting the resource_type_code field in the database.
+	FieldResourceTypeCode = "resource_type_code"
+	// FieldServiceCode holds the string denoting the service_code field in the database.
+	FieldServiceCode = "service_code"
+	// FieldTenantID holds the string denoting the tenant_id field in the database.
+	FieldTenantID = "tenant_id"
+	// FieldRegion holds the string denoting the region field in the database.
+	FieldRegion = "region"
+	// FieldResourcePath holds the string denoting the resource_path field in the database.
+	FieldResourcePath = "resource_path"
+	// FieldGrn holds the string denoting the grn field in the database.
+	FieldGrn = "grn"
 	// FieldCode holds the string denoting the code field in the database.
 	FieldCode = "code"
 	// FieldName holds the string denoting the name field in the database.
@@ -36,6 +50,8 @@ const (
 	FieldResourceType = "resource_type"
 	// FieldResourceStatus holds the string denoting the resource_status field in the database.
 	FieldResourceStatus = "resource_status"
+	// FieldResourceStatusCode holds the string denoting the resource_status_code field in the database.
+	FieldResourceStatusCode = "resource_status_code"
 	// FieldVisibility holds the string denoting the visibility field in the database.
 	FieldVisibility = "visibility"
 	// FieldSortOrder holds the string denoting the sort_order field in the database.
@@ -50,10 +66,28 @@ const (
 	FieldDescription = "description"
 	// FieldProtected holds the string denoting the protected field in the database.
 	FieldProtected = "protected"
+	// EdgeLionResourceTypes holds the string denoting the lion_resource_types edge name in mutations.
+	EdgeLionResourceTypes = "lion_resource_types"
+	// EdgeLionMenus holds the string denoting the lion_menus edge name in mutations.
+	EdgeLionMenus = "lion_menus"
 	// EdgeLionResourceScopes holds the string denoting the lion_resource_scopes edge name in mutations.
 	EdgeLionResourceScopes = "lion_resource_scopes"
 	// Table holds the table name of the resources in the database.
 	Table = "lion_resources"
+	// LionResourceTypesTable is the table that holds the lion_resource_types relation/edge.
+	LionResourceTypesTable = "lion_resources"
+	// LionResourceTypesInverseTable is the table name for the ResourceTypes entity.
+	// It exists in this package in order to avoid circular dependency with the "resourcetypes" package.
+	LionResourceTypesInverseTable = "lion_resource_types"
+	// LionResourceTypesColumn is the table column denoting the lion_resource_types relation/edge.
+	LionResourceTypesColumn = "resource_type_id"
+	// LionMenusTable is the table that holds the lion_menus relation/edge.
+	LionMenusTable = "lion_menus"
+	// LionMenusInverseTable is the table name for the Menus entity.
+	// It exists in this package in order to avoid circular dependency with the "menus" package.
+	LionMenusInverseTable = "lion_menus"
+	// LionMenusColumn is the table column denoting the lion_menus relation/edge.
+	LionMenusColumn = "resource_id"
 	// LionResourceScopesTable is the table that holds the lion_resource_scopes relation/edge.
 	LionResourceScopesTable = "lion_resource_scopes"
 	// LionResourceScopesInverseTable is the table name for the ResourceScopes entity.
@@ -72,11 +106,19 @@ var Columns = []string{
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldParentID,
+	FieldResourceTypeID,
+	FieldResourceTypeCode,
+	FieldServiceCode,
+	FieldTenantID,
+	FieldRegion,
+	FieldResourcePath,
+	FieldGrn,
 	FieldCode,
 	FieldName,
 	FieldDisplayName,
 	FieldResourceType,
 	FieldResourceStatus,
+	FieldResourceStatusCode,
 	FieldVisibility,
 	FieldSortOrder,
 	FieldLocator,
@@ -109,6 +151,26 @@ var (
 	DefaultUpdatedBy int64
 	// DefaultParentID holds the default value on creation for the "parent_id" field.
 	DefaultParentID int64
+	// ResourceTypeIDValidator is a validator for the "resource_type_id" field. It is called by the builders before save.
+	ResourceTypeIDValidator func(int) error
+	// ResourceTypeCodeValidator is a validator for the "resource_type_code" field. It is called by the builders before save.
+	ResourceTypeCodeValidator func(string) error
+	// ServiceCodeValidator is a validator for the "service_code" field. It is called by the builders before save.
+	ServiceCodeValidator func(string) error
+	// DefaultTenantID holds the default value on creation for the "tenant_id" field.
+	DefaultTenantID string
+	// TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
+	TenantIDValidator func(string) error
+	// DefaultRegion holds the default value on creation for the "region" field.
+	DefaultRegion string
+	// RegionValidator is a validator for the "region" field. It is called by the builders before save.
+	RegionValidator func(string) error
+	// ResourcePathValidator is a validator for the "resource_path" field. It is called by the builders before save.
+	ResourcePathValidator func(string) error
+	// DefaultGrn holds the default value on creation for the "grn" field.
+	DefaultGrn string
+	// GrnValidator is a validator for the "grn" field. It is called by the builders before save.
+	GrnValidator func(string) error
 	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	CodeValidator func(string) error
 	// DefaultName holds the default value on creation for the "name" field.
@@ -121,6 +183,10 @@ var (
 	DefaultResourceType int
 	// DefaultResourceStatus holds the default value on creation for the "resource_status" field.
 	DefaultResourceStatus int
+	// DefaultResourceStatusCode holds the default value on creation for the "resource_status_code" field.
+	DefaultResourceStatusCode string
+	// ResourceStatusCodeValidator is a validator for the "resource_status_code" field. It is called by the builders before save.
+	ResourceStatusCodeValidator func(string) error
 	// DefaultVisibility holds the default value on creation for the "visibility" field.
 	DefaultVisibility int
 	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
@@ -179,6 +245,41 @@ func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentID, opts...).ToFunc()
 }
 
+// ByResourceTypeID orders the results by the resource_type_id field.
+func ByResourceTypeID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceTypeID, opts...).ToFunc()
+}
+
+// ByResourceTypeCode orders the results by the resource_type_code field.
+func ByResourceTypeCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceTypeCode, opts...).ToFunc()
+}
+
+// ByServiceCode orders the results by the service_code field.
+func ByServiceCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldServiceCode, opts...).ToFunc()
+}
+
+// ByTenantID orders the results by the tenant_id field.
+func ByTenantID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTenantID, opts...).ToFunc()
+}
+
+// ByRegion orders the results by the region field.
+func ByRegion(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRegion, opts...).ToFunc()
+}
+
+// ByResourcePath orders the results by the resource_path field.
+func ByResourcePath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourcePath, opts...).ToFunc()
+}
+
+// ByGrn orders the results by the grn field.
+func ByGrn(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGrn, opts...).ToFunc()
+}
+
 // ByCode orders the results by the code field.
 func ByCode(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCode, opts...).ToFunc()
@@ -202,6 +303,11 @@ func ByResourceType(opts ...sql.OrderTermOption) OrderOption {
 // ByResourceStatus orders the results by the resource_status field.
 func ByResourceStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResourceStatus, opts...).ToFunc()
+}
+
+// ByResourceStatusCode orders the results by the resource_status_code field.
+func ByResourceStatusCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldResourceStatusCode, opts...).ToFunc()
 }
 
 // ByVisibility orders the results by the visibility field.
@@ -239,6 +345,27 @@ func ByProtected(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
+// ByLionResourceTypesField orders the results by lion_resource_types field.
+func ByLionResourceTypesField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionResourceTypesStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLionMenusCount orders the results by lion_menus count.
+func ByLionMenusCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionMenusStep(), opts...)
+	}
+}
+
+// ByLionMenus orders the results by lion_menus terms.
+func ByLionMenus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionMenusStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByLionResourceScopesCount orders the results by lion_resource_scopes count.
 func ByLionResourceScopesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -251,6 +378,20 @@ func ByLionResourceScopes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOptio
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newLionResourceScopesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
+}
+func newLionResourceTypesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionResourceTypesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LionResourceTypesTable, LionResourceTypesColumn),
+	)
+}
+func newLionMenusStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionMenusInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionMenusTable, LionMenusColumn),
+	)
 }
 func newLionResourceScopesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -87,6 +88,11 @@ func DisplayName(v string) predicate.Actions {
 // ResourceType applies equality check predicate on the "resource_type" field. It's identical to ResourceTypeEQ.
 func ResourceType(v int) predicate.Actions {
 	return predicate.Actions(sql.FieldEQ(FieldResourceType, v))
+}
+
+// ResourceTypeID applies equality check predicate on the "resource_type_id" field. It's identical to ResourceTypeIDEQ.
+func ResourceTypeID(v int) predicate.Actions {
+	return predicate.Actions(sql.FieldEQ(FieldResourceTypeID, v))
 }
 
 // ProjectionMapping applies equality check predicate on the "projection_mapping" field. It's identical to ProjectionMappingEQ.
@@ -454,6 +460,26 @@ func ResourceTypeLTE(v int) predicate.Actions {
 	return predicate.Actions(sql.FieldLTE(FieldResourceType, v))
 }
 
+// ResourceTypeIDEQ applies the EQ predicate on the "resource_type_id" field.
+func ResourceTypeIDEQ(v int) predicate.Actions {
+	return predicate.Actions(sql.FieldEQ(FieldResourceTypeID, v))
+}
+
+// ResourceTypeIDNEQ applies the NEQ predicate on the "resource_type_id" field.
+func ResourceTypeIDNEQ(v int) predicate.Actions {
+	return predicate.Actions(sql.FieldNEQ(FieldResourceTypeID, v))
+}
+
+// ResourceTypeIDIn applies the In predicate on the "resource_type_id" field.
+func ResourceTypeIDIn(vs ...int) predicate.Actions {
+	return predicate.Actions(sql.FieldIn(FieldResourceTypeID, vs...))
+}
+
+// ResourceTypeIDNotIn applies the NotIn predicate on the "resource_type_id" field.
+func ResourceTypeIDNotIn(vs ...int) predicate.Actions {
+	return predicate.Actions(sql.FieldNotIn(FieldResourceTypeID, vs...))
+}
+
 // ProjectionMappingEQ applies the EQ predicate on the "projection_mapping" field.
 func ProjectionMappingEQ(v string) predicate.Actions {
 	return predicate.Actions(sql.FieldEQ(FieldProjectionMapping, v))
@@ -592,6 +618,29 @@ func DescriptionEqualFold(v string) predicate.Actions {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Actions {
 	return predicate.Actions(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// HasLionResourceTypes applies the HasEdge predicate on the "lion_resource_types" edge.
+func HasLionResourceTypes() predicate.Actions {
+	return predicate.Actions(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionResourceTypesTable, LionResourceTypesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionResourceTypesWith applies the HasEdge predicate on the "lion_resource_types" edge with a given conditions (other predicates).
+func HasLionResourceTypesWith(preds ...predicate.ResourceTypes) predicate.Actions {
+	return predicate.Actions(func(s *sql.Selector) {
+		step := newLionResourceTypesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

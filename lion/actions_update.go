@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/resourcetypes"
 )
 
 // ActionsUpdate is the builder for updating Actions entities.
@@ -137,6 +138,20 @@ func (_u *ActionsUpdate) AddResourceType(v int) *ActionsUpdate {
 	return _u
 }
 
+// SetResourceTypeID sets the "resource_type_id" field.
+func (_u *ActionsUpdate) SetResourceTypeID(v int) *ActionsUpdate {
+	_u.mutation.SetResourceTypeID(v)
+	return _u
+}
+
+// SetNillableResourceTypeID sets the "resource_type_id" field if the given value is not nil.
+func (_u *ActionsUpdate) SetNillableResourceTypeID(v *int) *ActionsUpdate {
+	if v != nil {
+		_u.SetResourceTypeID(*v)
+	}
+	return _u
+}
+
 // SetProjectionMapping sets the "projection_mapping" field.
 func (_u *ActionsUpdate) SetProjectionMapping(v string) *ActionsUpdate {
 	_u.mutation.SetProjectionMapping(v)
@@ -179,9 +194,26 @@ func (_u *ActionsUpdate) SetNillableDescription(v *string) *ActionsUpdate {
 	return _u
 }
 
+// SetLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID.
+func (_u *ActionsUpdate) SetLionResourceTypesID(id int) *ActionsUpdate {
+	_u.mutation.SetLionResourceTypesID(id)
+	return _u
+}
+
+// SetLionResourceTypes sets the "lion_resource_types" edge to the ResourceTypes entity.
+func (_u *ActionsUpdate) SetLionResourceTypes(v *ResourceTypes) *ActionsUpdate {
+	return _u.SetLionResourceTypesID(v.ID)
+}
+
 // Mutation returns the ActionsMutation object of the builder.
 func (_u *ActionsUpdate) Mutation() *ActionsMutation {
 	return _u.mutation
+}
+
+// ClearLionResourceTypes clears the "lion_resource_types" edge to the ResourceTypes entity.
+func (_u *ActionsUpdate) ClearLionResourceTypes() *ActionsUpdate {
+	_u.mutation.ClearLionResourceTypes()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -227,10 +259,18 @@ func (_u *ActionsUpdate) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Actions.code": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ResourceTypeID(); ok {
+		if err := actions.ResourceTypeIDValidator(v); err != nil {
+			return &ValidationError{Name: "resource_type_id", err: fmt.Errorf(`lion: validator failed for field "Actions.resource_type_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ProjectionMapping(); ok {
 		if err := actions.ProjectionMappingValidator(v); err != nil {
 			return &ValidationError{Name: "projection_mapping", err: fmt.Errorf(`lion: validator failed for field "Actions.projection_mapping": %w`, err)}
 		}
+	}
+	if _u.mutation.LionResourceTypesCleared() && len(_u.mutation.LionResourceTypesIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "Actions.lion_resource_types"`)
 	}
 	return nil
 }
@@ -288,6 +328,35 @@ func (_u *ActionsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(actions.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.LionResourceTypesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   actions.LionResourceTypesTable,
+			Columns: []string{actions.LionResourceTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcetypes.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionResourceTypesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   actions.LionResourceTypesTable,
+			Columns: []string{actions.LionResourceTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcetypes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -418,6 +487,20 @@ func (_u *ActionsUpdateOne) AddResourceType(v int) *ActionsUpdateOne {
 	return _u
 }
 
+// SetResourceTypeID sets the "resource_type_id" field.
+func (_u *ActionsUpdateOne) SetResourceTypeID(v int) *ActionsUpdateOne {
+	_u.mutation.SetResourceTypeID(v)
+	return _u
+}
+
+// SetNillableResourceTypeID sets the "resource_type_id" field if the given value is not nil.
+func (_u *ActionsUpdateOne) SetNillableResourceTypeID(v *int) *ActionsUpdateOne {
+	if v != nil {
+		_u.SetResourceTypeID(*v)
+	}
+	return _u
+}
+
 // SetProjectionMapping sets the "projection_mapping" field.
 func (_u *ActionsUpdateOne) SetProjectionMapping(v string) *ActionsUpdateOne {
 	_u.mutation.SetProjectionMapping(v)
@@ -460,9 +543,26 @@ func (_u *ActionsUpdateOne) SetNillableDescription(v *string) *ActionsUpdateOne 
 	return _u
 }
 
+// SetLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID.
+func (_u *ActionsUpdateOne) SetLionResourceTypesID(id int) *ActionsUpdateOne {
+	_u.mutation.SetLionResourceTypesID(id)
+	return _u
+}
+
+// SetLionResourceTypes sets the "lion_resource_types" edge to the ResourceTypes entity.
+func (_u *ActionsUpdateOne) SetLionResourceTypes(v *ResourceTypes) *ActionsUpdateOne {
+	return _u.SetLionResourceTypesID(v.ID)
+}
+
 // Mutation returns the ActionsMutation object of the builder.
 func (_u *ActionsUpdateOne) Mutation() *ActionsMutation {
 	return _u.mutation
+}
+
+// ClearLionResourceTypes clears the "lion_resource_types" edge to the ResourceTypes entity.
+func (_u *ActionsUpdateOne) ClearLionResourceTypes() *ActionsUpdateOne {
+	_u.mutation.ClearLionResourceTypes()
+	return _u
 }
 
 // Where appends a list predicates to the ActionsUpdate builder.
@@ -521,10 +621,18 @@ func (_u *ActionsUpdateOne) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Actions.code": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.ResourceTypeID(); ok {
+		if err := actions.ResourceTypeIDValidator(v); err != nil {
+			return &ValidationError{Name: "resource_type_id", err: fmt.Errorf(`lion: validator failed for field "Actions.resource_type_id": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.ProjectionMapping(); ok {
 		if err := actions.ProjectionMappingValidator(v); err != nil {
 			return &ValidationError{Name: "projection_mapping", err: fmt.Errorf(`lion: validator failed for field "Actions.projection_mapping": %w`, err)}
 		}
+	}
+	if _u.mutation.LionResourceTypesCleared() && len(_u.mutation.LionResourceTypesIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "Actions.lion_resource_types"`)
 	}
 	return nil
 }
@@ -599,6 +707,35 @@ func (_u *ActionsUpdateOne) sqlSave(ctx context.Context) (_node *Actions, err er
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(actions.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.LionResourceTypesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   actions.LionResourceTypesTable,
+			Columns: []string{actions.LionResourceTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcetypes.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionResourceTypesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   actions.LionResourceTypesTable,
+			Columns: []string{actions.LionResourceTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcetypes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Actions{config: _u.config}
 	_spec.Assign = _node.assignValues

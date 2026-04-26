@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/actions"
+	"github.com/grpc-kit/pkg/lion/resourcetypes"
 )
 
 // ActionsCreate is the builder for creating a Actions entity.
@@ -110,6 +111,12 @@ func (_c *ActionsCreate) SetNillableResourceType(v *int) *ActionsCreate {
 	return _c
 }
 
+// SetResourceTypeID sets the "resource_type_id" field.
+func (_c *ActionsCreate) SetResourceTypeID(v int) *ActionsCreate {
+	_c.mutation.SetResourceTypeID(v)
+	return _c
+}
+
 // SetProjectionMapping sets the "projection_mapping" field.
 func (_c *ActionsCreate) SetProjectionMapping(v string) *ActionsCreate {
 	_c.mutation.SetProjectionMapping(v)
@@ -150,6 +157,17 @@ func (_c *ActionsCreate) SetNillableDescription(v *string) *ActionsCreate {
 		_c.SetDescription(*v)
 	}
 	return _c
+}
+
+// SetLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID.
+func (_c *ActionsCreate) SetLionResourceTypesID(id int) *ActionsCreate {
+	_c.mutation.SetLionResourceTypesID(id)
+	return _c
+}
+
+// SetLionResourceTypes sets the "lion_resource_types" edge to the ResourceTypes entity.
+func (_c *ActionsCreate) SetLionResourceTypes(v *ResourceTypes) *ActionsCreate {
+	return _c.SetLionResourceTypesID(v.ID)
 }
 
 // Mutation returns the ActionsMutation object of the builder.
@@ -247,6 +265,14 @@ func (_c *ActionsCreate) check() error {
 	if _, ok := _c.mutation.ResourceType(); !ok {
 		return &ValidationError{Name: "resource_type", err: errors.New(`lion: missing required field "Actions.resource_type"`)}
 	}
+	if _, ok := _c.mutation.ResourceTypeID(); !ok {
+		return &ValidationError{Name: "resource_type_id", err: errors.New(`lion: missing required field "Actions.resource_type_id"`)}
+	}
+	if v, ok := _c.mutation.ResourceTypeID(); ok {
+		if err := actions.ResourceTypeIDValidator(v); err != nil {
+			return &ValidationError{Name: "resource_type_id", err: fmt.Errorf(`lion: validator failed for field "Actions.resource_type_id": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.ProjectionMapping(); !ok {
 		return &ValidationError{Name: "projection_mapping", err: errors.New(`lion: missing required field "Actions.projection_mapping"`)}
 	}
@@ -260,6 +286,9 @@ func (_c *ActionsCreate) check() error {
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Actions.description"`)}
+	}
+	if len(_c.mutation.LionResourceTypesIDs()) == 0 {
+		return &ValidationError{Name: "lion_resource_types", err: errors.New(`lion: missing required edge "Actions.lion_resource_types"`)}
 	}
 	return nil
 }
@@ -326,6 +355,23 @@ func (_c *ActionsCreate) createSpec() (*Actions, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(actions.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if nodes := _c.mutation.LionResourceTypesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   actions.LionResourceTypesTable,
+			Columns: []string{actions.LionResourceTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcetypes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ResourceTypeID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

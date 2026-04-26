@@ -168,6 +168,94 @@ func ensureResourceIDInAccessScope(ctx context.Context, superAdmin bool, allowed
 	return nil
 }
 
+func (a *KnownAdminAPI) defaultServiceCode() string {
+	return "admin.v1.oneops"
+}
+
+func resourceTypeCodeFromLegacy(resourceType int) string {
+	switch adminv1.Resource_Type(resourceType) {
+	case adminv1.Resource_MENU:
+		return "sys_menu"
+	case adminv1.Resource_API:
+		return "sys_api"
+	default:
+		return "sys_object"
+	}
+}
+
+func normalizeResourcePath(path, code, locator string) string {
+	path = strings.TrimSpace(path)
+	if path != "" {
+		return path
+	}
+	locator = strings.TrimSpace(locator)
+	if locator != "" {
+		return locator
+	}
+	code = strings.TrimSpace(code)
+	if code != "" {
+		return code
+	}
+	return "*"
+}
+
+func buildResourceGRN(serviceCode, tenantID, region, resourceTypeCode, resourcePath, legacyName string) string {
+	if strings.TrimSpace(legacyName) != "" {
+		return legacyName
+	}
+	if serviceCode == "" || resourceTypeCode == "" {
+		return ""
+	}
+	return fmt.Sprintf("grn:%s:%s:%s:%s/%s", serviceCode, tenantID, region, resourceTypeCode, resourcePath)
+}
+
+func (a *KnownAdminAPI) lionResourceToProto(in *lion.Resources, resourceScopes []*adminv1.Scope) *adminv1.Resource {
+	if in == nil {
+		return nil
+	}
+
+	resourceTypeCode := in.ResourceTypeCode
+	if resourceTypeCode == "" {
+		resourceTypeCode = resourceTypeCodeFromLegacy(in.ResourceType)
+	}
+	serviceCode := in.ServiceCode
+	if serviceCode == "" {
+		serviceCode = a.defaultServiceCode()
+	}
+	resourcePath := normalizeResourcePath(in.ResourcePath, in.Code, in.Locator)
+	grn := in.Grn
+	if grn == "" {
+		grn = buildResourceGRN(serviceCode, in.TenantID, in.Region, resourceTypeCode, resourcePath, in.Name)
+	}
+
+	return &adminv1.Resource{
+		Id:               int64(in.ID),
+		ParentId:         in.ParentID,
+		Code:             in.Code,
+		Name:             in.Name,
+		DisplayName:      in.DisplayName,
+		SortOrder:        int32(in.SortOrder),
+		Type:             adminv1.Resource_Type(in.ResourceType),
+		Status:           adminv1.Resource_Status(in.ResourceStatus),
+		Visibility:       adminv1.Visibility(in.Visibility),
+		Locator:          in.Locator,
+		Visual:           in.Visual,
+		Manifest:         in.Manifest,
+		Description:      in.Description,
+		CreatedBy:        in.CreatedBy,
+		UpdatedBy:        in.UpdatedBy,
+		CreatedAt:        timestamppb.New(in.CreatedAt),
+		UpdatedAt:        timestamppb.New(in.UpdatedAt),
+		ResourceTypeCode: resourceTypeCode,
+		ServiceCode:      serviceCode,
+		TenantId:         in.TenantID,
+		Region:           in.Region,
+		ResourcePath:     resourcePath,
+		Grn:              grn,
+		Scopes:           resourceScopes,
+	}
+}
+
 // ListResources 获取资源列表
 func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListResourcesRequest) (*adminv1.ListResourcesResponse, error) {
 	result := &adminv1.ListResourcesResponse{}
@@ -213,7 +301,14 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 	}
 
 	if req.ResourceType != 0 {
-		resourcesWhere = append(resourcesWhere, resources.ResourceTypeEQ(int(req.ResourceType)))
+		if resourceType, err := a.resolveResourceTypeForLegacy(ctx, db, adminv1.Resource_Type(req.ResourceType)); err == nil {
+			resourcesWhere = append(resourcesWhere, resources.Or(
+				resources.ResourceTypeIDEQ(resourceType.ID),
+				resources.ResourceTypeEQ(int(req.ResourceType)),
+			))
+		} else {
+			resourcesWhere = append(resourcesWhere, resources.ResourceTypeEQ(int(req.ResourceType)))
+		}
 	}
 	if req.ResourceStatus != 0 {
 		resourcesWhere = append(resourcesWhere, resources.ResourceStatusEQ(int(req.ResourceStatus)))
@@ -376,35 +471,13 @@ func (a *KnownAdminAPI) ListResources(ctx context.Context, req *adminv1.ListReso
 		result.Resources = roots
 	default:
 		for _, m := range resList {
-			resource := &adminv1.Resource{
-				Id:          int64(m.ID),
-				ParentId:    m.ParentID,
-				Code:        m.Code,
-				Name:        m.Name,
-				DisplayName: m.DisplayName,
-				SortOrder:   int32(m.SortOrder),
-				Type:        adminv1.Resource_Type(m.ResourceType),
-				// Scope:        adminv1.Resource_Scope(m.ResourceScope),
-				Status:     adminv1.Resource_Status(m.ResourceStatus),
-				Visibility: adminv1.Visibility(m.Visibility),
-				/*
-					Hidden:       m.Hidden,
-					HideChildren: m.HideChildren,
-				*/
-				Locator:   m.Locator,
-				Visual:    m.Visual,
-				Manifest:  m.Manifest,
-				CreatedAt: timestamppb.New(m.CreatedAt),
-				UpdatedAt: timestamppb.New(m.UpdatedAt),
-			}
-
-			// 如果 View 为 FULL，填充作用域列表
+			var scopes []*adminv1.Scope
 			if req.View == adminv1.View_VIEW_FULL {
-				if scopes, ok := resourceScopesMap[m.ID]; ok {
-					resource.Scopes = scopes
+				if loadedScopes, ok := resourceScopesMap[m.ID]; ok {
+					scopes = loadedScopes
 				}
 			}
-
+			resource := a.lionResourceToProto(m, scopes)
 			result.Resources = append(result.Resources, resource)
 		}
 	}
@@ -460,8 +533,16 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		}
 		return nil, err
 	}
+	resourceType, err := a.resolveResourceTypeForLegacy(ctx, db, req.Resource.Type)
+	if err != nil {
+		return nil, err
+	}
 
-	if parentResource.ResourceType != int(req.Resource.Type) {
+	if parentResource.ResourceTypeID != 0 {
+		if parentResource.ResourceTypeID != resourceType.ID {
+			return nil, errs.InvalidArgument(ctx).WithMessage("resource type must match parent resource type")
+		}
+	} else if parentResource.ResourceType != int(req.Resource.Type) {
 		return nil, errs.InvalidArgument(ctx).WithMessage("resource type must match parent resource type")
 	}
 
@@ -478,11 +559,22 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 	}
 
 	// 创建资源
+	resourceTypeCode := resourceType.Code
+	serviceCode := a.defaultServiceCode()
+	resourcePath := normalizeResourcePath(req.Resource.ResourcePath, req.Resource.Code, req.Resource.Locator)
+	grn := buildResourceGRN(serviceCode, req.Resource.TenantId, req.Resource.Region, resourceTypeCode, resourcePath, req.Resource.Name)
 	newResource, err := db.Resources.Create().
 		SetCode(req.Resource.Code).
 		SetName(req.Resource.Name).
 		SetDisplayName(req.Resource.DisplayName).
 		SetResourceType(int(req.Resource.Type)).
+		SetResourceTypeID(resourceType.ID).
+		SetResourceTypeCode(resourceTypeCode).
+		SetServiceCode(serviceCode).
+		SetTenantID(req.Resource.TenantId).
+		SetRegion(req.Resource.Region).
+		SetResourcePath(resourcePath).
+		SetGrn(grn).
 		SetResourceStatus(int(req.Resource.Status)).
 		SetVisibility(int(req.Resource.Visibility)).
 		SetParentID(req.Resource.ParentId).
@@ -499,24 +591,7 @@ func (a *KnownAdminAPI) CreateResource(ctx context.Context, req *adminv1.CreateR
 		return nil, err
 	}
 
-	// 构建返回的资源对象
-	result := &adminv1.Resource{
-		Id:          int64(newResource.ID),
-		ParentId:    newResource.ParentID,
-		Code:        newResource.Code,
-		Name:        newResource.Name,
-		DisplayName: newResource.DisplayName,
-		SortOrder:   int32(newResource.SortOrder),
-		Type:        adminv1.Resource_Type(newResource.ResourceType),
-		Status:      adminv1.Resource_Status(newResource.ResourceStatus),
-		Visibility:  adminv1.Visibility(newResource.Visibility),
-		Locator:     newResource.Locator,
-		Visual:      newResource.Visual,
-		Manifest:    newResource.Manifest,
-		Description: newResource.Description,
-		CreatedAt:   timestamppb.New(newResource.CreatedAt),
-		UpdatedAt:   timestamppb.New(newResource.UpdatedAt),
-	}
+	result := a.lionResourceToProto(newResource, nil)
 
 	// 处理 metadata（如果存在）
 	if len(req.Resource.Metadata) > 0 {
@@ -581,7 +656,22 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 		}
 		req.Resource.Code = code
 	}
-	req.Resource.Name = normalizeResourceName(req.Resource.Name, req.Resource.Type, req.Resource.Code, req.Resource.Locator)
+	effectiveResourceType := req.Resource.Type
+	if effectiveResourceType == adminv1.Resource_TYPE_UNSPECIFIED {
+		effectiveResourceType = adminv1.Resource_Type(resource.ResourceType)
+	}
+	req.Resource.Name = normalizeResourceName(req.Resource.Name, effectiveResourceType, req.Resource.Code, req.Resource.Locator)
+	resolvedResourceType, err := a.resolveResourceTypeForLegacy(ctx, db, effectiveResourceType)
+	if err != nil {
+		return nil, err
+	}
+	resourceTypeCode := resolvedResourceType.Code
+	resourcePath := normalizeResourcePath(req.Resource.ResourcePath, req.Resource.Code, req.Resource.Locator)
+	serviceCode := resource.ServiceCode
+	if serviceCode == "" {
+		serviceCode = a.defaultServiceCode()
+	}
+	grn := buildResourceGRN(serviceCode, req.Resource.TenantId, req.Resource.Region, resourceTypeCode, resourcePath, req.Resource.Name)
 
 	// 构建更新操作
 	update := resource.Update()
@@ -594,10 +684,13 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 				update.SetCode(req.Resource.Code)
 			case resources.FieldName:
 				update.SetName(req.Resource.Name)
+				update.SetGrn(grn)
 			case resources.FieldDisplayName:
 				update.SetDisplayName(req.Resource.DisplayName)
 			case resources.FieldResourceType:
-				update.SetResourceType(int(req.Resource.Type))
+				update.SetResourceType(int(effectiveResourceType))
+				update.SetResourceTypeID(resolvedResourceType.ID)
+				update.SetResourceTypeCode(resourceTypeCode)
 			case resources.FieldResourceStatus:
 				update.SetResourceStatus(int(req.Resource.Status))
 			case resources.FieldVisibility:
@@ -606,6 +699,8 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 				update.SetParentID(req.Resource.ParentId)
 			case resources.FieldLocator:
 				update.SetLocator(req.Resource.Locator)
+				update.SetResourcePath(resourcePath)
+				update.SetGrn(grn)
 			case resources.FieldVisual:
 				update.SetVisual(req.Resource.Visual)
 			case resources.FieldManifest:
@@ -614,6 +709,17 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 				update.SetSortOrder(int(req.Resource.SortOrder))
 			case resources.FieldDescription:
 				update.SetDescription(req.Resource.Description)
+			case resources.FieldTenantID:
+				update.SetTenantID(req.Resource.TenantId)
+				update.SetGrn(grn)
+			case resources.FieldRegion:
+				update.SetRegion(req.Resource.Region)
+				update.SetGrn(grn)
+			case resources.FieldServiceCode:
+				update.SetServiceCode(req.Resource.ServiceCode)
+			case resources.FieldResourcePath:
+				update.SetResourcePath(req.Resource.ResourcePath)
+				update.SetGrn(buildResourceGRN(req.Resource.ServiceCode, req.Resource.TenantId, req.Resource.Region, resourceTypeCode, req.Resource.ResourcePath, req.Resource.Name))
 			}
 		}
 		// 始终更新 UpdatedBy
@@ -624,13 +730,20 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 			SetCode(req.Resource.Code).
 			SetName(req.Resource.Name).
 			SetDisplayName(req.Resource.DisplayName).
-			SetResourceType(int(req.Resource.Type)).
+			SetResourceType(int(effectiveResourceType)).
+			SetResourceTypeID(resolvedResourceType.ID).
+			SetResourceTypeCode(resourceTypeCode).
 			SetResourceStatus(int(req.Resource.Status)).
 			SetVisibility(int(req.Resource.Visibility)).
 			SetParentID(req.Resource.ParentId).
 			SetLocator(req.Resource.Locator).
 			SetVisual(req.Resource.Visual).
 			SetManifest(req.Resource.Manifest).
+			SetServiceCode(serviceCode).
+			SetTenantID(req.Resource.TenantId).
+			SetRegion(req.Resource.Region).
+			SetResourcePath(resourcePath).
+			SetGrn(grn).
 			SetSortOrder(int(req.Resource.SortOrder)).
 			SetDescription(req.Resource.Description).
 			SetUpdatedBy(userID)
@@ -642,24 +755,7 @@ func (a *KnownAdminAPI) UpdateResource(ctx context.Context, req *adminv1.UpdateR
 		return nil, err
 	}
 
-	// 构建返回的资源对象
-	result := &adminv1.Resource{
-		Id:          int64(updatedResource.ID),
-		ParentId:    updatedResource.ParentID,
-		Code:        updatedResource.Code,
-		Name:        updatedResource.Name,
-		DisplayName: updatedResource.DisplayName,
-		SortOrder:   int32(updatedResource.SortOrder),
-		Type:        adminv1.Resource_Type(updatedResource.ResourceType),
-		Status:      adminv1.Resource_Status(updatedResource.ResourceStatus),
-		Visibility:  adminv1.Visibility(updatedResource.Visibility),
-		Locator:     updatedResource.Locator,
-		Visual:      updatedResource.Visual,
-		Manifest:    updatedResource.Manifest,
-		Description: updatedResource.Description,
-		CreatedAt:   timestamppb.New(updatedResource.CreatedAt),
-		UpdatedAt:   timestamppb.New(updatedResource.UpdatedAt),
-	}
+	result := a.lionResourceToProto(updatedResource, nil)
 
 	// 处理 metadata（如果存在）
 	if len(req.Resource.Metadata) > 0 {
@@ -865,26 +961,7 @@ func (a *KnownAdminAPI) GetResource(ctx context.Context, req *adminv1.GetResourc
 		return nil, errs.NotFound(ctx).WithMessage("resource not found")
 	}
 
-	// 构建返回的资源对象
-	result := &adminv1.Resource{
-		Id:          int64(resource.ID),
-		ParentId:    resource.ParentID,
-		Code:        resource.Code,
-		Name:        resource.Name,
-		DisplayName: resource.DisplayName,
-		SortOrder:   int32(resource.SortOrder),
-		Type:        adminv1.Resource_Type(resource.ResourceType),
-		Status:      adminv1.Resource_Status(resource.ResourceStatus),
-		Visibility:  adminv1.Visibility(resource.Visibility),
-		Locator:     resource.Locator,
-		Visual:      resource.Visual,
-		Manifest:    resource.Manifest,
-		Description: resource.Description,
-		CreatedBy:   resource.CreatedBy,
-		UpdatedBy:   resource.UpdatedBy,
-		CreatedAt:   timestamppb.New(resource.CreatedAt),
-		UpdatedAt:   timestamppb.New(resource.UpdatedAt),
-	}
+	result := a.lionResourceToProto(resource, nil)
 
 	// 加载关联的作用域列表
 	if resource.Edges.LionResourceScopes != nil {

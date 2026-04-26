@@ -11,58 +11,58 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/actions"
+	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/resourcetypes"
+	"github.com/grpc-kit/pkg/lion/resources"
 )
 
-// ActionsQuery is the builder for querying Actions entities.
-type ActionsQuery struct {
+// MenusQuery is the builder for querying Menus entities.
+type MenusQuery struct {
 	config
-	ctx                   *QueryContext
-	order                 []actions.OrderOption
-	inters                []Interceptor
-	predicates            []predicate.Actions
-	withLionResourceTypes *ResourceTypesQuery
+	ctx               *QueryContext
+	order             []menus.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.Menus
+	withLionResources *ResourcesQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the ActionsQuery builder.
-func (_q *ActionsQuery) Where(ps ...predicate.Actions) *ActionsQuery {
+// Where adds a new predicate for the MenusQuery builder.
+func (_q *MenusQuery) Where(ps ...predicate.Menus) *MenusQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *ActionsQuery) Limit(limit int) *ActionsQuery {
+func (_q *MenusQuery) Limit(limit int) *MenusQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *ActionsQuery) Offset(offset int) *ActionsQuery {
+func (_q *MenusQuery) Offset(offset int) *MenusQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *ActionsQuery) Unique(unique bool) *ActionsQuery {
+func (_q *MenusQuery) Unique(unique bool) *MenusQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *ActionsQuery) Order(o ...actions.OrderOption) *ActionsQuery {
+func (_q *MenusQuery) Order(o ...menus.OrderOption) *MenusQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryLionResourceTypes chains the current query on the "lion_resource_types" edge.
-func (_q *ActionsQuery) QueryLionResourceTypes() *ResourceTypesQuery {
-	query := (&ResourceTypesClient{config: _q.config}).Query()
+// QueryLionResources chains the current query on the "lion_resources" edge.
+func (_q *MenusQuery) QueryLionResources() *ResourcesQuery {
+	query := (&ResourcesClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -72,9 +72,9 @@ func (_q *ActionsQuery) QueryLionResourceTypes() *ResourceTypesQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(actions.Table, actions.FieldID, selector),
-			sqlgraph.To(resourcetypes.Table, resourcetypes.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, actions.LionResourceTypesTable, actions.LionResourceTypesColumn),
+			sqlgraph.From(menus.Table, menus.FieldID, selector),
+			sqlgraph.To(resources.Table, resources.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, menus.LionResourcesTable, menus.LionResourcesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -82,21 +82,21 @@ func (_q *ActionsQuery) QueryLionResourceTypes() *ResourceTypesQuery {
 	return query
 }
 
-// First returns the first Actions entity from the query.
-// Returns a *NotFoundError when no Actions was found.
-func (_q *ActionsQuery) First(ctx context.Context) (*Actions, error) {
+// First returns the first Menus entity from the query.
+// Returns a *NotFoundError when no Menus was found.
+func (_q *MenusQuery) First(ctx context.Context) (*Menus, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{actions.Label}
+		return nil, &NotFoundError{menus.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *ActionsQuery) FirstX(ctx context.Context) *Actions {
+func (_q *MenusQuery) FirstX(ctx context.Context) *Menus {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -104,22 +104,22 @@ func (_q *ActionsQuery) FirstX(ctx context.Context) *Actions {
 	return node
 }
 
-// FirstID returns the first Actions ID from the query.
-// Returns a *NotFoundError when no Actions ID was found.
-func (_q *ActionsQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first Menus ID from the query.
+// Returns a *NotFoundError when no Menus ID was found.
+func (_q *MenusQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{actions.Label}
+		err = &NotFoundError{menus.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *ActionsQuery) FirstIDX(ctx context.Context) int {
+func (_q *MenusQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -127,10 +127,10 @@ func (_q *ActionsQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single Actions entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Actions entity is found.
-// Returns a *NotFoundError when no Actions entities are found.
-func (_q *ActionsQuery) Only(ctx context.Context) (*Actions, error) {
+// Only returns a single Menus entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Menus entity is found.
+// Returns a *NotFoundError when no Menus entities are found.
+func (_q *MenusQuery) Only(ctx context.Context) (*Menus, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -139,14 +139,14 @@ func (_q *ActionsQuery) Only(ctx context.Context) (*Actions, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{actions.Label}
+		return nil, &NotFoundError{menus.Label}
 	default:
-		return nil, &NotSingularError{actions.Label}
+		return nil, &NotSingularError{menus.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *ActionsQuery) OnlyX(ctx context.Context) *Actions {
+func (_q *MenusQuery) OnlyX(ctx context.Context) *Menus {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -154,10 +154,10 @@ func (_q *ActionsQuery) OnlyX(ctx context.Context) *Actions {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Actions ID in the query.
-// Returns a *NotSingularError when more than one Actions ID is found.
+// OnlyID is like Only, but returns the only Menus ID in the query.
+// Returns a *NotSingularError when more than one Menus ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *ActionsQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *MenusQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -166,15 +166,15 @@ func (_q *ActionsQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{actions.Label}
+		err = &NotFoundError{menus.Label}
 	default:
-		err = &NotSingularError{actions.Label}
+		err = &NotSingularError{menus.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *ActionsQuery) OnlyIDX(ctx context.Context) int {
+func (_q *MenusQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -182,18 +182,18 @@ func (_q *ActionsQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of ActionsSlice.
-func (_q *ActionsQuery) All(ctx context.Context) ([]*Actions, error) {
+// All executes the query and returns a list of MenusSlice.
+func (_q *MenusQuery) All(ctx context.Context) ([]*Menus, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Actions, *ActionsQuery]()
-	return withInterceptors[[]*Actions](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Menus, *MenusQuery]()
+	return withInterceptors[[]*Menus](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *ActionsQuery) AllX(ctx context.Context) []*Actions {
+func (_q *MenusQuery) AllX(ctx context.Context) []*Menus {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -201,20 +201,20 @@ func (_q *ActionsQuery) AllX(ctx context.Context) []*Actions {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Actions IDs.
-func (_q *ActionsQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of Menus IDs.
+func (_q *MenusQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(actions.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(menus.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *ActionsQuery) IDsX(ctx context.Context) []int {
+func (_q *MenusQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -223,16 +223,16 @@ func (_q *ActionsQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *ActionsQuery) Count(ctx context.Context) (int, error) {
+func (_q *MenusQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*ActionsQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*MenusQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *ActionsQuery) CountX(ctx context.Context) int {
+func (_q *MenusQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -241,7 +241,7 @@ func (_q *ActionsQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *ActionsQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *MenusQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -254,7 +254,7 @@ func (_q *ActionsQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *ActionsQuery) ExistX(ctx context.Context) bool {
+func (_q *MenusQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -262,33 +262,33 @@ func (_q *ActionsQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the ActionsQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the MenusQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *ActionsQuery) Clone() *ActionsQuery {
+func (_q *MenusQuery) Clone() *MenusQuery {
 	if _q == nil {
 		return nil
 	}
-	return &ActionsQuery{
-		config:                _q.config,
-		ctx:                   _q.ctx.Clone(),
-		order:                 append([]actions.OrderOption{}, _q.order...),
-		inters:                append([]Interceptor{}, _q.inters...),
-		predicates:            append([]predicate.Actions{}, _q.predicates...),
-		withLionResourceTypes: _q.withLionResourceTypes.Clone(),
+	return &MenusQuery{
+		config:            _q.config,
+		ctx:               _q.ctx.Clone(),
+		order:             append([]menus.OrderOption{}, _q.order...),
+		inters:            append([]Interceptor{}, _q.inters...),
+		predicates:        append([]predicate.Menus{}, _q.predicates...),
+		withLionResources: _q.withLionResources.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithLionResourceTypes tells the query-builder to eager-load the nodes that are connected to
-// the "lion_resource_types" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ActionsQuery) WithLionResourceTypes(opts ...func(*ResourceTypesQuery)) *ActionsQuery {
-	query := (&ResourceTypesClient{config: _q.config}).Query()
+// WithLionResources tells the query-builder to eager-load the nodes that are connected to
+// the "lion_resources" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *MenusQuery) WithLionResources(opts ...func(*ResourcesQuery)) *MenusQuery {
+	query := (&ResourcesClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withLionResourceTypes = query
+	_q.withLionResources = query
 	return _q
 }
 
@@ -302,15 +302,15 @@ func (_q *ActionsQuery) WithLionResourceTypes(opts ...func(*ResourceTypesQuery))
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Actions.Query().
-//		GroupBy(actions.FieldCreatedAt).
+//	client.Menus.Query().
+//		GroupBy(menus.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (_q *ActionsQuery) GroupBy(field string, fields ...string) *ActionsGroupBy {
+func (_q *MenusQuery) GroupBy(field string, fields ...string) *MenusGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &ActionsGroupBy{build: _q}
+	grbuild := &MenusGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = actions.Label
+	grbuild.label = menus.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -324,23 +324,23 @@ func (_q *ActionsQuery) GroupBy(field string, fields ...string) *ActionsGroupBy 
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.Actions.Query().
-//		Select(actions.FieldCreatedAt).
+//	client.Menus.Query().
+//		Select(menus.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *ActionsQuery) Select(fields ...string) *ActionsSelect {
+func (_q *MenusQuery) Select(fields ...string) *MenusSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &ActionsSelect{ActionsQuery: _q}
-	sbuild.label = actions.Label
+	sbuild := &MenusSelect{MenusQuery: _q}
+	sbuild.label = menus.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a ActionsSelect configured with the given aggregations.
-func (_q *ActionsQuery) Aggregate(fns ...AggregateFunc) *ActionsSelect {
+// Aggregate returns a MenusSelect configured with the given aggregations.
+func (_q *MenusQuery) Aggregate(fns ...AggregateFunc) *MenusSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *ActionsQuery) prepareQuery(ctx context.Context) error {
+func (_q *MenusQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
@@ -352,7 +352,7 @@ func (_q *ActionsQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !actions.ValidColumn(f) {
+		if !menus.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
@@ -366,19 +366,19 @@ func (_q *ActionsQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *ActionsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Actions, error) {
+func (_q *MenusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Menus, error) {
 	var (
-		nodes       = []*Actions{}
+		nodes       = []*Menus{}
 		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
-			_q.withLionResourceTypes != nil,
+			_q.withLionResources != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Actions).scanValues(nil, columns)
+		return (*Menus).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Actions{config: _q.config}
+		node := &Menus{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -392,20 +392,23 @@ func (_q *ActionsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acti
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withLionResourceTypes; query != nil {
-		if err := _q.loadLionResourceTypes(ctx, query, nodes, nil,
-			func(n *Actions, e *ResourceTypes) { n.Edges.LionResourceTypes = e }); err != nil {
+	if query := _q.withLionResources; query != nil {
+		if err := _q.loadLionResources(ctx, query, nodes, nil,
+			func(n *Menus, e *Resources) { n.Edges.LionResources = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *ActionsQuery) loadLionResourceTypes(ctx context.Context, query *ResourceTypesQuery, nodes []*Actions, init func(*Actions), assign func(*Actions, *ResourceTypes)) error {
+func (_q *MenusQuery) loadLionResources(ctx context.Context, query *ResourcesQuery, nodes []*Menus, init func(*Menus), assign func(*Menus, *Resources)) error {
 	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Actions)
+	nodeids := make(map[int][]*Menus)
 	for i := range nodes {
-		fk := nodes[i].ResourceTypeID
+		if nodes[i].ResourceID == nil {
+			continue
+		}
+		fk := *nodes[i].ResourceID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -414,7 +417,7 @@ func (_q *ActionsQuery) loadLionResourceTypes(ctx context.Context, query *Resour
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(resourcetypes.IDIn(ids...))
+	query.Where(resources.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -422,7 +425,7 @@ func (_q *ActionsQuery) loadLionResourceTypes(ctx context.Context, query *Resour
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "resource_type_id" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "resource_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -431,7 +434,7 @@ func (_q *ActionsQuery) loadLionResourceTypes(ctx context.Context, query *Resour
 	return nil
 }
 
-func (_q *ActionsQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *MenusQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -440,8 +443,8 @@ func (_q *ActionsQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *ActionsQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(actions.Table, actions.Columns, sqlgraph.NewFieldSpec(actions.FieldID, field.TypeInt))
+func (_q *MenusQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(menus.Table, menus.Columns, sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -450,14 +453,14 @@ func (_q *ActionsQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, actions.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, menus.FieldID)
 		for i := range fields {
-			if fields[i] != actions.FieldID {
+			if fields[i] != menus.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if _q.withLionResourceTypes != nil {
-			_spec.Node.AddColumnOnce(actions.FieldResourceTypeID)
+		if _q.withLionResources != nil {
+			_spec.Node.AddColumnOnce(menus.FieldResourceID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -483,12 +486,12 @@ func (_q *ActionsQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *ActionsQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *MenusQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(actions.Table)
+	t1 := builder.Table(menus.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = actions.Columns
+		columns = menus.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -515,28 +518,28 @@ func (_q *ActionsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// ActionsGroupBy is the group-by builder for Actions entities.
-type ActionsGroupBy struct {
+// MenusGroupBy is the group-by builder for Menus entities.
+type MenusGroupBy struct {
 	selector
-	build *ActionsQuery
+	build *MenusQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *ActionsGroupBy) Aggregate(fns ...AggregateFunc) *ActionsGroupBy {
+func (_g *MenusGroupBy) Aggregate(fns ...AggregateFunc) *MenusGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *ActionsGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *MenusGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ActionsQuery, *ActionsGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*MenusQuery, *MenusGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *ActionsGroupBy) sqlScan(ctx context.Context, root *ActionsQuery, v any) error {
+func (_g *MenusGroupBy) sqlScan(ctx context.Context, root *MenusQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -563,28 +566,28 @@ func (_g *ActionsGroupBy) sqlScan(ctx context.Context, root *ActionsQuery, v any
 	return sql.ScanSlice(rows, v)
 }
 
-// ActionsSelect is the builder for selecting fields of Actions entities.
-type ActionsSelect struct {
-	*ActionsQuery
+// MenusSelect is the builder for selecting fields of Menus entities.
+type MenusSelect struct {
+	*MenusQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *ActionsSelect) Aggregate(fns ...AggregateFunc) *ActionsSelect {
+func (_s *MenusSelect) Aggregate(fns ...AggregateFunc) *MenusSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *ActionsSelect) Scan(ctx context.Context, v any) error {
+func (_s *MenusSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ActionsQuery, *ActionsSelect](ctx, _s.ActionsQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*MenusQuery, *MenusSelect](ctx, _s.MenusQuery, _s, _s.inters, v)
 }
 
-func (_s *ActionsSelect) sqlScan(ctx context.Context, root *ActionsQuery, v any) error {
+func (_s *MenusSelect) sqlScan(ctx context.Context, root *MenusQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

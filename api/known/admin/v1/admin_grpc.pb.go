@@ -61,6 +61,21 @@ type KnownAdminClient interface {
 	UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*Resource, error)
 	DeleteResource(ctx context.Context, in *DeleteResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CreateResourceScopes(ctx context.Context, in *CreateResourceScopesRequest, opts ...grpc.CallOption) (*CreateResourceScopesResponse, error)
+	// 服务字典管理
+	ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error)
+	CreateService(ctx context.Context, in *CreateServiceRequest, opts ...grpc.CallOption) (*Service, error)
+	UpdateService(ctx context.Context, in *UpdateServiceRequest, opts ...grpc.CallOption) (*Service, error)
+	DeleteService(ctx context.Context, in *DeleteServiceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// 资源类型字典管理
+	ListResourceTypes(ctx context.Context, in *ListResourceTypesRequest, opts ...grpc.CallOption) (*ListResourceTypesResponse, error)
+	CreateResourceType(ctx context.Context, in *CreateResourceTypeRequest, opts ...grpc.CallOption) (*ResourceType, error)
+	UpdateResourceType(ctx context.Context, in *UpdateResourceTypeRequest, opts ...grpc.CallOption) (*ResourceType, error)
+	DeleteResourceType(ctx context.Context, in *DeleteResourceTypeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// 菜单管理
+	ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error)
+	CreateMenu(ctx context.Context, in *CreateMenuRequest, opts ...grpc.CallOption) (*Menu, error)
+	UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...grpc.CallOption) (*Menu, error)
+	DeleteMenu(ctx context.Context, in *DeleteMenuRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 作用域管理
 	ListScopes(ctx context.Context, in *ListScopesRequest, opts ...grpc.CallOption) (*ListScopesResponse, error)
 	CreateScope(ctx context.Context, in *CreateScopeRequest, opts ...grpc.CallOption) (*Scope, error)
@@ -445,6 +460,114 @@ func (c *knownAdminClient) DeleteResource(ctx context.Context, in *DeleteResourc
 func (c *knownAdminClient) CreateResourceScopes(ctx context.Context, in *CreateResourceScopesRequest, opts ...grpc.CallOption) (*CreateResourceScopesResponse, error) {
 	out := new(CreateResourceScopesResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceScopes", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error) {
+	out := new(ListServicesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServices", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateService(ctx context.Context, in *CreateServiceRequest, opts ...grpc.CallOption) (*Service, error) {
+	out := new(Service)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateService", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateService(ctx context.Context, in *UpdateServiceRequest, opts ...grpc.CallOption) (*Service, error) {
+	out := new(Service)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateService", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteService(ctx context.Context, in *DeleteServiceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteService", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ListResourceTypes(ctx context.Context, in *ListResourceTypesRequest, opts ...grpc.CallOption) (*ListResourceTypesResponse, error) {
+	out := new(ListResourceTypesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResourceTypes", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateResourceType(ctx context.Context, in *CreateResourceTypeRequest, opts ...grpc.CallOption) (*ResourceType, error) {
+	out := new(ResourceType)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceType", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateResourceType(ctx context.Context, in *UpdateResourceTypeRequest, opts ...grpc.CallOption) (*ResourceType, error) {
+	out := new(ResourceType)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateResourceType", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteResourceType(ctx context.Context, in *DeleteResourceTypeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteResourceType", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error) {
+	out := new(ListMenusResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateMenu(ctx context.Context, in *CreateMenuRequest, opts ...grpc.CallOption) (*Menu, error) {
+	out := new(Menu)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateMenu", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...grpc.CallOption) (*Menu, error) {
+	out := new(Menu)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateMenu", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteMenu(ctx context.Context, in *DeleteMenuRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteMenu", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1123,6 +1246,21 @@ type KnownAdminServer interface {
 	UpdateResource(context.Context, *UpdateResourceRequest) (*Resource, error)
 	DeleteResource(context.Context, *DeleteResourceRequest) (*emptypb.Empty, error)
 	CreateResourceScopes(context.Context, *CreateResourceScopesRequest) (*CreateResourceScopesResponse, error)
+	// 服务字典管理
+	ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error)
+	CreateService(context.Context, *CreateServiceRequest) (*Service, error)
+	UpdateService(context.Context, *UpdateServiceRequest) (*Service, error)
+	DeleteService(context.Context, *DeleteServiceRequest) (*emptypb.Empty, error)
+	// 资源类型字典管理
+	ListResourceTypes(context.Context, *ListResourceTypesRequest) (*ListResourceTypesResponse, error)
+	CreateResourceType(context.Context, *CreateResourceTypeRequest) (*ResourceType, error)
+	UpdateResourceType(context.Context, *UpdateResourceTypeRequest) (*ResourceType, error)
+	DeleteResourceType(context.Context, *DeleteResourceTypeRequest) (*emptypb.Empty, error)
+	// 菜单管理
+	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
+	CreateMenu(context.Context, *CreateMenuRequest) (*Menu, error)
+	UpdateMenu(context.Context, *UpdateMenuRequest) (*Menu, error)
+	DeleteMenu(context.Context, *DeleteMenuRequest) (*emptypb.Empty, error)
 	// 作用域管理
 	ListScopes(context.Context, *ListScopesRequest) (*ListScopesResponse, error)
 	CreateScope(context.Context, *CreateScopeRequest) (*Scope, error)
@@ -1310,6 +1448,42 @@ func (UnimplementedKnownAdminServer) DeleteResource(context.Context, *DeleteReso
 }
 func (UnimplementedKnownAdminServer) CreateResourceScopes(context.Context, *CreateResourceScopesRequest) (*CreateResourceScopesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateResourceScopes not implemented")
+}
+func (UnimplementedKnownAdminServer) ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListServices not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateService(context.Context, *CreateServiceRequest) (*Service, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateService not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateService(context.Context, *UpdateServiceRequest) (*Service, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateService not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteService(context.Context, *DeleteServiceRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteService not implemented")
+}
+func (UnimplementedKnownAdminServer) ListResourceTypes(context.Context, *ListResourceTypesRequest) (*ListResourceTypesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListResourceTypes not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateResourceType(context.Context, *CreateResourceTypeRequest) (*ResourceType, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateResourceType not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateResourceType(context.Context, *UpdateResourceTypeRequest) (*ResourceType, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateResourceType not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteResourceType(context.Context, *DeleteResourceTypeRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteResourceType not implemented")
+}
+func (UnimplementedKnownAdminServer) ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMenus not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateMenu(context.Context, *CreateMenuRequest) (*Menu, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateMenu not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateMenu(context.Context, *UpdateMenuRequest) (*Menu, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateMenu not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteMenu(context.Context, *DeleteMenuRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteMenu not implemented")
 }
 func (UnimplementedKnownAdminServer) ListScopes(context.Context, *ListScopesRequest) (*ListScopesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListScopes not implemented")
@@ -2123,6 +2297,222 @@ func _KnownAdmin_CreateResourceScopes_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).CreateResourceScopes(ctx, req.(*CreateResourceScopesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListServices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListServicesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListServices(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServices",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListServices(ctx, req.(*ListServicesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateService",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateService(ctx, req.(*CreateServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateService",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateService(ctx, req.(*UpdateServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteServiceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteService(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteService",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteService(ctx, req.(*DeleteServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListResourceTypes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListResourceTypesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListResourceTypes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResourceTypes",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListResourceTypes(ctx, req.(*ListResourceTypesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateResourceType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateResourceTypeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateResourceType(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceType",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateResourceType(ctx, req.(*CreateResourceTypeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateResourceType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateResourceTypeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateResourceType(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateResourceType",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateResourceType(ctx, req.(*UpdateResourceTypeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteResourceType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteResourceTypeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteResourceType(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteResourceType",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteResourceType(ctx, req.(*DeleteResourceTypeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMenusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListMenus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListMenus(ctx, req.(*ListMenusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateMenuRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateMenu(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateMenu",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateMenu(ctx, req.(*CreateMenuRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMenuRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateMenu(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateMenu",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateMenu(ctx, req.(*UpdateMenuRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMenuRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteMenu(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteMenu",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteMenu(ctx, req.(*DeleteMenuRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -3525,6 +3915,54 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateResourceScopes",
 			Handler:    _KnownAdmin_CreateResourceScopes_Handler,
+		},
+		{
+			MethodName: "ListServices",
+			Handler:    _KnownAdmin_ListServices_Handler,
+		},
+		{
+			MethodName: "CreateService",
+			Handler:    _KnownAdmin_CreateService_Handler,
+		},
+		{
+			MethodName: "UpdateService",
+			Handler:    _KnownAdmin_UpdateService_Handler,
+		},
+		{
+			MethodName: "DeleteService",
+			Handler:    _KnownAdmin_DeleteService_Handler,
+		},
+		{
+			MethodName: "ListResourceTypes",
+			Handler:    _KnownAdmin_ListResourceTypes_Handler,
+		},
+		{
+			MethodName: "CreateResourceType",
+			Handler:    _KnownAdmin_CreateResourceType_Handler,
+		},
+		{
+			MethodName: "UpdateResourceType",
+			Handler:    _KnownAdmin_UpdateResourceType_Handler,
+		},
+		{
+			MethodName: "DeleteResourceType",
+			Handler:    _KnownAdmin_DeleteResourceType_Handler,
+		},
+		{
+			MethodName: "ListMenus",
+			Handler:    _KnownAdmin_ListMenus_Handler,
+		},
+		{
+			MethodName: "CreateMenu",
+			Handler:    _KnownAdmin_CreateMenu_Handler,
+		},
+		{
+			MethodName: "UpdateMenu",
+			Handler:    _KnownAdmin_UpdateMenu_Handler,
+		},
+		{
+			MethodName: "DeleteMenu",
+			Handler:    _KnownAdmin_DeleteMenu_Handler,
 		},
 		{
 			MethodName: "ListScopes",

@@ -11,92 +11,68 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/resourcetypes"
+	"github.com/grpc-kit/pkg/lion/services"
 )
 
-// ActionsQuery is the builder for querying Actions entities.
-type ActionsQuery struct {
+// ServicesQuery is the builder for querying Services entities.
+type ServicesQuery struct {
 	config
-	ctx                   *QueryContext
-	order                 []actions.OrderOption
-	inters                []Interceptor
-	predicates            []predicate.Actions
-	withLionResourceTypes *ResourceTypesQuery
+	ctx        *QueryContext
+	order      []services.OrderOption
+	inters     []Interceptor
+	predicates []predicate.Services
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the ActionsQuery builder.
-func (_q *ActionsQuery) Where(ps ...predicate.Actions) *ActionsQuery {
+// Where adds a new predicate for the ServicesQuery builder.
+func (_q *ServicesQuery) Where(ps ...predicate.Services) *ServicesQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *ActionsQuery) Limit(limit int) *ActionsQuery {
+func (_q *ServicesQuery) Limit(limit int) *ServicesQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *ActionsQuery) Offset(offset int) *ActionsQuery {
+func (_q *ServicesQuery) Offset(offset int) *ServicesQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *ActionsQuery) Unique(unique bool) *ActionsQuery {
+func (_q *ServicesQuery) Unique(unique bool) *ServicesQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *ActionsQuery) Order(o ...actions.OrderOption) *ActionsQuery {
+func (_q *ServicesQuery) Order(o ...services.OrderOption) *ServicesQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryLionResourceTypes chains the current query on the "lion_resource_types" edge.
-func (_q *ActionsQuery) QueryLionResourceTypes() *ResourceTypesQuery {
-	query := (&ResourceTypesClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(actions.Table, actions.FieldID, selector),
-			sqlgraph.To(resourcetypes.Table, resourcetypes.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, actions.LionResourceTypesTable, actions.LionResourceTypesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// First returns the first Actions entity from the query.
-// Returns a *NotFoundError when no Actions was found.
-func (_q *ActionsQuery) First(ctx context.Context) (*Actions, error) {
+// First returns the first Services entity from the query.
+// Returns a *NotFoundError when no Services was found.
+func (_q *ServicesQuery) First(ctx context.Context) (*Services, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{actions.Label}
+		return nil, &NotFoundError{services.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *ActionsQuery) FirstX(ctx context.Context) *Actions {
+func (_q *ServicesQuery) FirstX(ctx context.Context) *Services {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -104,22 +80,22 @@ func (_q *ActionsQuery) FirstX(ctx context.Context) *Actions {
 	return node
 }
 
-// FirstID returns the first Actions ID from the query.
-// Returns a *NotFoundError when no Actions ID was found.
-func (_q *ActionsQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first Services ID from the query.
+// Returns a *NotFoundError when no Services ID was found.
+func (_q *ServicesQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{actions.Label}
+		err = &NotFoundError{services.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *ActionsQuery) FirstIDX(ctx context.Context) int {
+func (_q *ServicesQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -127,10 +103,10 @@ func (_q *ActionsQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single Actions entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Actions entity is found.
-// Returns a *NotFoundError when no Actions entities are found.
-func (_q *ActionsQuery) Only(ctx context.Context) (*Actions, error) {
+// Only returns a single Services entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Services entity is found.
+// Returns a *NotFoundError when no Services entities are found.
+func (_q *ServicesQuery) Only(ctx context.Context) (*Services, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -139,14 +115,14 @@ func (_q *ActionsQuery) Only(ctx context.Context) (*Actions, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{actions.Label}
+		return nil, &NotFoundError{services.Label}
 	default:
-		return nil, &NotSingularError{actions.Label}
+		return nil, &NotSingularError{services.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *ActionsQuery) OnlyX(ctx context.Context) *Actions {
+func (_q *ServicesQuery) OnlyX(ctx context.Context) *Services {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -154,10 +130,10 @@ func (_q *ActionsQuery) OnlyX(ctx context.Context) *Actions {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Actions ID in the query.
-// Returns a *NotSingularError when more than one Actions ID is found.
+// OnlyID is like Only, but returns the only Services ID in the query.
+// Returns a *NotSingularError when more than one Services ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *ActionsQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *ServicesQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -166,15 +142,15 @@ func (_q *ActionsQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{actions.Label}
+		err = &NotFoundError{services.Label}
 	default:
-		err = &NotSingularError{actions.Label}
+		err = &NotSingularError{services.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *ActionsQuery) OnlyIDX(ctx context.Context) int {
+func (_q *ServicesQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -182,18 +158,18 @@ func (_q *ActionsQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of ActionsSlice.
-func (_q *ActionsQuery) All(ctx context.Context) ([]*Actions, error) {
+// All executes the query and returns a list of ServicesSlice.
+func (_q *ServicesQuery) All(ctx context.Context) ([]*Services, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Actions, *ActionsQuery]()
-	return withInterceptors[[]*Actions](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Services, *ServicesQuery]()
+	return withInterceptors[[]*Services](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *ActionsQuery) AllX(ctx context.Context) []*Actions {
+func (_q *ServicesQuery) AllX(ctx context.Context) []*Services {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -201,20 +177,20 @@ func (_q *ActionsQuery) AllX(ctx context.Context) []*Actions {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Actions IDs.
-func (_q *ActionsQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of Services IDs.
+func (_q *ServicesQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(actions.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(services.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *ActionsQuery) IDsX(ctx context.Context) []int {
+func (_q *ServicesQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -223,16 +199,16 @@ func (_q *ActionsQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *ActionsQuery) Count(ctx context.Context) (int, error) {
+func (_q *ServicesQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*ActionsQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*ServicesQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *ActionsQuery) CountX(ctx context.Context) int {
+func (_q *ServicesQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -241,7 +217,7 @@ func (_q *ActionsQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *ActionsQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *ServicesQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -254,7 +230,7 @@ func (_q *ActionsQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *ActionsQuery) ExistX(ctx context.Context) bool {
+func (_q *ServicesQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -262,34 +238,22 @@ func (_q *ActionsQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the ActionsQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the ServicesQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *ActionsQuery) Clone() *ActionsQuery {
+func (_q *ServicesQuery) Clone() *ServicesQuery {
 	if _q == nil {
 		return nil
 	}
-	return &ActionsQuery{
-		config:                _q.config,
-		ctx:                   _q.ctx.Clone(),
-		order:                 append([]actions.OrderOption{}, _q.order...),
-		inters:                append([]Interceptor{}, _q.inters...),
-		predicates:            append([]predicate.Actions{}, _q.predicates...),
-		withLionResourceTypes: _q.withLionResourceTypes.Clone(),
+	return &ServicesQuery{
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]services.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Services{}, _q.predicates...),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
-}
-
-// WithLionResourceTypes tells the query-builder to eager-load the nodes that are connected to
-// the "lion_resource_types" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ActionsQuery) WithLionResourceTypes(opts ...func(*ResourceTypesQuery)) *ActionsQuery {
-	query := (&ResourceTypesClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withLionResourceTypes = query
-	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -302,15 +266,15 @@ func (_q *ActionsQuery) WithLionResourceTypes(opts ...func(*ResourceTypesQuery))
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Actions.Query().
-//		GroupBy(actions.FieldCreatedAt).
+//	client.Services.Query().
+//		GroupBy(services.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (_q *ActionsQuery) GroupBy(field string, fields ...string) *ActionsGroupBy {
+func (_q *ServicesQuery) GroupBy(field string, fields ...string) *ServicesGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &ActionsGroupBy{build: _q}
+	grbuild := &ServicesGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = actions.Label
+	grbuild.label = services.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -324,23 +288,23 @@ func (_q *ActionsQuery) GroupBy(field string, fields ...string) *ActionsGroupBy 
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.Actions.Query().
-//		Select(actions.FieldCreatedAt).
+//	client.Services.Query().
+//		Select(services.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *ActionsQuery) Select(fields ...string) *ActionsSelect {
+func (_q *ServicesQuery) Select(fields ...string) *ServicesSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &ActionsSelect{ActionsQuery: _q}
-	sbuild.label = actions.Label
+	sbuild := &ServicesSelect{ServicesQuery: _q}
+	sbuild.label = services.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a ActionsSelect configured with the given aggregations.
-func (_q *ActionsQuery) Aggregate(fns ...AggregateFunc) *ActionsSelect {
+// Aggregate returns a ServicesSelect configured with the given aggregations.
+func (_q *ServicesQuery) Aggregate(fns ...AggregateFunc) *ServicesSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *ActionsQuery) prepareQuery(ctx context.Context) error {
+func (_q *ServicesQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
@@ -352,7 +316,7 @@ func (_q *ActionsQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !actions.ValidColumn(f) {
+		if !services.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
@@ -366,21 +330,17 @@ func (_q *ActionsQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *ActionsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Actions, error) {
+func (_q *ServicesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Services, error) {
 	var (
-		nodes       = []*Actions{}
-		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
-			_q.withLionResourceTypes != nil,
-		}
+		nodes = []*Services{}
+		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Actions).scanValues(nil, columns)
+		return (*Services).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Actions{config: _q.config}
+		node := &Services{config: _q.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -392,46 +352,10 @@ func (_q *ActionsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acti
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withLionResourceTypes; query != nil {
-		if err := _q.loadLionResourceTypes(ctx, query, nodes, nil,
-			func(n *Actions, e *ResourceTypes) { n.Edges.LionResourceTypes = e }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
 }
 
-func (_q *ActionsQuery) loadLionResourceTypes(ctx context.Context, query *ResourceTypesQuery, nodes []*Actions, init func(*Actions), assign func(*Actions, *ResourceTypes)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Actions)
-	for i := range nodes {
-		fk := nodes[i].ResourceTypeID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(resourcetypes.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "resource_type_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-
-func (_q *ActionsQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *ServicesQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -440,8 +364,8 @@ func (_q *ActionsQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *ActionsQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(actions.Table, actions.Columns, sqlgraph.NewFieldSpec(actions.FieldID, field.TypeInt))
+func (_q *ServicesQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(services.Table, services.Columns, sqlgraph.NewFieldSpec(services.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -450,14 +374,11 @@ func (_q *ActionsQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, actions.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, services.FieldID)
 		for i := range fields {
-			if fields[i] != actions.FieldID {
+			if fields[i] != services.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if _q.withLionResourceTypes != nil {
-			_spec.Node.AddColumnOnce(actions.FieldResourceTypeID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -483,12 +404,12 @@ func (_q *ActionsQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *ActionsQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *ServicesQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(actions.Table)
+	t1 := builder.Table(services.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = actions.Columns
+		columns = services.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -515,28 +436,28 @@ func (_q *ActionsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// ActionsGroupBy is the group-by builder for Actions entities.
-type ActionsGroupBy struct {
+// ServicesGroupBy is the group-by builder for Services entities.
+type ServicesGroupBy struct {
 	selector
-	build *ActionsQuery
+	build *ServicesQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *ActionsGroupBy) Aggregate(fns ...AggregateFunc) *ActionsGroupBy {
+func (_g *ServicesGroupBy) Aggregate(fns ...AggregateFunc) *ServicesGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *ActionsGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *ServicesGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ActionsQuery, *ActionsGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*ServicesQuery, *ServicesGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *ActionsGroupBy) sqlScan(ctx context.Context, root *ActionsQuery, v any) error {
+func (_g *ServicesGroupBy) sqlScan(ctx context.Context, root *ServicesQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -563,28 +484,28 @@ func (_g *ActionsGroupBy) sqlScan(ctx context.Context, root *ActionsQuery, v any
 	return sql.ScanSlice(rows, v)
 }
 
-// ActionsSelect is the builder for selecting fields of Actions entities.
-type ActionsSelect struct {
-	*ActionsQuery
+// ServicesSelect is the builder for selecting fields of Services entities.
+type ServicesSelect struct {
+	*ServicesQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *ActionsSelect) Aggregate(fns ...AggregateFunc) *ActionsSelect {
+func (_s *ServicesSelect) Aggregate(fns ...AggregateFunc) *ServicesSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *ActionsSelect) Scan(ctx context.Context, v any) error {
+func (_s *ServicesSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ActionsQuery, *ActionsSelect](ctx, _s.ActionsQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*ServicesQuery, *ServicesSelect](ctx, _s.ServicesQuery, _s, _s.inters, v)
 }
 
-func (_s *ActionsSelect) sqlScan(ctx context.Context, root *ActionsQuery, v any) error {
+func (_s *ServicesSelect) sqlScan(ctx context.Context, root *ServicesQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

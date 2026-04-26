@@ -10,8 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/resourcetypes"
 )
 
 // ResourcesCreate is the builder for creating a Resources entity.
@@ -105,6 +107,72 @@ func (_c *ResourcesCreate) SetNillableParentID(v *int64) *ResourcesCreate {
 	return _c
 }
 
+// SetResourceTypeID sets the "resource_type_id" field.
+func (_c *ResourcesCreate) SetResourceTypeID(v int) *ResourcesCreate {
+	_c.mutation.SetResourceTypeID(v)
+	return _c
+}
+
+// SetResourceTypeCode sets the "resource_type_code" field.
+func (_c *ResourcesCreate) SetResourceTypeCode(v string) *ResourcesCreate {
+	_c.mutation.SetResourceTypeCode(v)
+	return _c
+}
+
+// SetServiceCode sets the "service_code" field.
+func (_c *ResourcesCreate) SetServiceCode(v string) *ResourcesCreate {
+	_c.mutation.SetServiceCode(v)
+	return _c
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (_c *ResourcesCreate) SetTenantID(v string) *ResourcesCreate {
+	_c.mutation.SetTenantID(v)
+	return _c
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableTenantID(v *string) *ResourcesCreate {
+	if v != nil {
+		_c.SetTenantID(*v)
+	}
+	return _c
+}
+
+// SetRegion sets the "region" field.
+func (_c *ResourcesCreate) SetRegion(v string) *ResourcesCreate {
+	_c.mutation.SetRegion(v)
+	return _c
+}
+
+// SetNillableRegion sets the "region" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableRegion(v *string) *ResourcesCreate {
+	if v != nil {
+		_c.SetRegion(*v)
+	}
+	return _c
+}
+
+// SetResourcePath sets the "resource_path" field.
+func (_c *ResourcesCreate) SetResourcePath(v string) *ResourcesCreate {
+	_c.mutation.SetResourcePath(v)
+	return _c
+}
+
+// SetGrn sets the "grn" field.
+func (_c *ResourcesCreate) SetGrn(v string) *ResourcesCreate {
+	_c.mutation.SetGrn(v)
+	return _c
+}
+
+// SetNillableGrn sets the "grn" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableGrn(v *string) *ResourcesCreate {
+	if v != nil {
+		_c.SetGrn(*v)
+	}
+	return _c
+}
+
 // SetCode sets the "code" field.
 func (_c *ResourcesCreate) SetCode(v string) *ResourcesCreate {
 	_c.mutation.SetCode(v)
@@ -163,6 +231,20 @@ func (_c *ResourcesCreate) SetResourceStatus(v int) *ResourcesCreate {
 func (_c *ResourcesCreate) SetNillableResourceStatus(v *int) *ResourcesCreate {
 	if v != nil {
 		_c.SetResourceStatus(*v)
+	}
+	return _c
+}
+
+// SetResourceStatusCode sets the "resource_status_code" field.
+func (_c *ResourcesCreate) SetResourceStatusCode(v string) *ResourcesCreate {
+	_c.mutation.SetResourceStatusCode(v)
+	return _c
+}
+
+// SetNillableResourceStatusCode sets the "resource_status_code" field if the given value is not nil.
+func (_c *ResourcesCreate) SetNillableResourceStatusCode(v *string) *ResourcesCreate {
+	if v != nil {
+		_c.SetResourceStatusCode(*v)
 	}
 	return _c
 }
@@ -265,6 +347,32 @@ func (_c *ResourcesCreate) SetNillableProtected(v *bool) *ResourcesCreate {
 	return _c
 }
 
+// SetLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID.
+func (_c *ResourcesCreate) SetLionResourceTypesID(id int) *ResourcesCreate {
+	_c.mutation.SetLionResourceTypesID(id)
+	return _c
+}
+
+// SetLionResourceTypes sets the "lion_resource_types" edge to the ResourceTypes entity.
+func (_c *ResourcesCreate) SetLionResourceTypes(v *ResourceTypes) *ResourcesCreate {
+	return _c.SetLionResourceTypesID(v.ID)
+}
+
+// AddLionMenuIDs adds the "lion_menus" edge to the Menus entity by IDs.
+func (_c *ResourcesCreate) AddLionMenuIDs(ids ...int) *ResourcesCreate {
+	_c.mutation.AddLionMenuIDs(ids...)
+	return _c
+}
+
+// AddLionMenus adds the "lion_menus" edges to the Menus entity.
+func (_c *ResourcesCreate) AddLionMenus(v ...*Menus) *ResourcesCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionMenuIDs(ids...)
+}
+
 // AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
 func (_c *ResourcesCreate) AddLionResourceScopeIDs(ids ...int) *ResourcesCreate {
 	_c.mutation.AddLionResourceScopeIDs(ids...)
@@ -335,6 +443,18 @@ func (_c *ResourcesCreate) defaults() {
 		v := resources.DefaultParentID
 		_c.mutation.SetParentID(v)
 	}
+	if _, ok := _c.mutation.TenantID(); !ok {
+		v := resources.DefaultTenantID
+		_c.mutation.SetTenantID(v)
+	}
+	if _, ok := _c.mutation.Region(); !ok {
+		v := resources.DefaultRegion
+		_c.mutation.SetRegion(v)
+	}
+	if _, ok := _c.mutation.Grn(); !ok {
+		v := resources.DefaultGrn
+		_c.mutation.SetGrn(v)
+	}
 	if _, ok := _c.mutation.Name(); !ok {
 		v := resources.DefaultName
 		_c.mutation.SetName(v)
@@ -350,6 +470,10 @@ func (_c *ResourcesCreate) defaults() {
 	if _, ok := _c.mutation.ResourceStatus(); !ok {
 		v := resources.DefaultResourceStatus
 		_c.mutation.SetResourceStatus(v)
+	}
+	if _, ok := _c.mutation.ResourceStatusCode(); !ok {
+		v := resources.DefaultResourceStatusCode
+		_c.mutation.SetResourceStatusCode(v)
 	}
 	if _, ok := _c.mutation.Visibility(); !ok {
 		v := resources.DefaultVisibility
@@ -392,6 +516,62 @@ func (_c *ResourcesCreate) check() error {
 	if _, ok := _c.mutation.ParentID(); !ok {
 		return &ValidationError{Name: "parent_id", err: errors.New(`lion: missing required field "Resources.parent_id"`)}
 	}
+	if _, ok := _c.mutation.ResourceTypeID(); !ok {
+		return &ValidationError{Name: "resource_type_id", err: errors.New(`lion: missing required field "Resources.resource_type_id"`)}
+	}
+	if v, ok := _c.mutation.ResourceTypeID(); ok {
+		if err := resources.ResourceTypeIDValidator(v); err != nil {
+			return &ValidationError{Name: "resource_type_id", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_type_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ResourceTypeCode(); !ok {
+		return &ValidationError{Name: "resource_type_code", err: errors.New(`lion: missing required field "Resources.resource_type_code"`)}
+	}
+	if v, ok := _c.mutation.ResourceTypeCode(); ok {
+		if err := resources.ResourceTypeCodeValidator(v); err != nil {
+			return &ValidationError{Name: "resource_type_code", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_type_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ServiceCode(); !ok {
+		return &ValidationError{Name: "service_code", err: errors.New(`lion: missing required field "Resources.service_code"`)}
+	}
+	if v, ok := _c.mutation.ServiceCode(); ok {
+		if err := resources.ServiceCodeValidator(v); err != nil {
+			return &ValidationError{Name: "service_code", err: fmt.Errorf(`lion: validator failed for field "Resources.service_code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.TenantID(); !ok {
+		return &ValidationError{Name: "tenant_id", err: errors.New(`lion: missing required field "Resources.tenant_id"`)}
+	}
+	if v, ok := _c.mutation.TenantID(); ok {
+		if err := resources.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`lion: validator failed for field "Resources.tenant_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Region(); !ok {
+		return &ValidationError{Name: "region", err: errors.New(`lion: missing required field "Resources.region"`)}
+	}
+	if v, ok := _c.mutation.Region(); ok {
+		if err := resources.RegionValidator(v); err != nil {
+			return &ValidationError{Name: "region", err: fmt.Errorf(`lion: validator failed for field "Resources.region": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.ResourcePath(); !ok {
+		return &ValidationError{Name: "resource_path", err: errors.New(`lion: missing required field "Resources.resource_path"`)}
+	}
+	if v, ok := _c.mutation.ResourcePath(); ok {
+		if err := resources.ResourcePathValidator(v); err != nil {
+			return &ValidationError{Name: "resource_path", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_path": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Grn(); !ok {
+		return &ValidationError{Name: "grn", err: errors.New(`lion: missing required field "Resources.grn"`)}
+	}
+	if v, ok := _c.mutation.Grn(); ok {
+		if err := resources.GrnValidator(v); err != nil {
+			return &ValidationError{Name: "grn", err: fmt.Errorf(`lion: validator failed for field "Resources.grn": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Code(); !ok {
 		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "Resources.code"`)}
 	}
@@ -416,6 +596,14 @@ func (_c *ResourcesCreate) check() error {
 	}
 	if _, ok := _c.mutation.ResourceStatus(); !ok {
 		return &ValidationError{Name: "resource_status", err: errors.New(`lion: missing required field "Resources.resource_status"`)}
+	}
+	if _, ok := _c.mutation.ResourceStatusCode(); !ok {
+		return &ValidationError{Name: "resource_status_code", err: errors.New(`lion: missing required field "Resources.resource_status_code"`)}
+	}
+	if v, ok := _c.mutation.ResourceStatusCode(); ok {
+		if err := resources.ResourceStatusCodeValidator(v); err != nil {
+			return &ValidationError{Name: "resource_status_code", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_status_code": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.Visibility(); !ok {
 		return &ValidationError{Name: "visibility", err: errors.New(`lion: missing required field "Resources.visibility"`)}
@@ -447,6 +635,9 @@ func (_c *ResourcesCreate) check() error {
 	}
 	if _, ok := _c.mutation.Protected(); !ok {
 		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Resources.protected"`)}
+	}
+	if len(_c.mutation.LionResourceTypesIDs()) == 0 {
+		return &ValidationError{Name: "lion_resource_types", err: errors.New(`lion: missing required edge "Resources.lion_resource_types"`)}
 	}
 	return nil
 }
@@ -498,6 +689,30 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 		_spec.SetField(resources.FieldParentID, field.TypeInt64, value)
 		_node.ParentID = value
 	}
+	if value, ok := _c.mutation.ResourceTypeCode(); ok {
+		_spec.SetField(resources.FieldResourceTypeCode, field.TypeString, value)
+		_node.ResourceTypeCode = value
+	}
+	if value, ok := _c.mutation.ServiceCode(); ok {
+		_spec.SetField(resources.FieldServiceCode, field.TypeString, value)
+		_node.ServiceCode = value
+	}
+	if value, ok := _c.mutation.TenantID(); ok {
+		_spec.SetField(resources.FieldTenantID, field.TypeString, value)
+		_node.TenantID = value
+	}
+	if value, ok := _c.mutation.Region(); ok {
+		_spec.SetField(resources.FieldRegion, field.TypeString, value)
+		_node.Region = value
+	}
+	if value, ok := _c.mutation.ResourcePath(); ok {
+		_spec.SetField(resources.FieldResourcePath, field.TypeString, value)
+		_node.ResourcePath = value
+	}
+	if value, ok := _c.mutation.Grn(); ok {
+		_spec.SetField(resources.FieldGrn, field.TypeString, value)
+		_node.Grn = value
+	}
 	if value, ok := _c.mutation.Code(); ok {
 		_spec.SetField(resources.FieldCode, field.TypeString, value)
 		_node.Code = value
@@ -517,6 +732,10 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.ResourceStatus(); ok {
 		_spec.SetField(resources.FieldResourceStatus, field.TypeInt, value)
 		_node.ResourceStatus = value
+	}
+	if value, ok := _c.mutation.ResourceStatusCode(); ok {
+		_spec.SetField(resources.FieldResourceStatusCode, field.TypeString, value)
+		_node.ResourceStatusCode = value
 	}
 	if value, ok := _c.mutation.Visibility(); ok {
 		_spec.SetField(resources.FieldVisibility, field.TypeInt, value)
@@ -545,6 +764,39 @@ func (_c *ResourcesCreate) createSpec() (*Resources, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Protected(); ok {
 		_spec.SetField(resources.FieldProtected, field.TypeBool, value)
 		_node.Protected = value
+	}
+	if nodes := _c.mutation.LionResourceTypesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resources.LionResourceTypesTable,
+			Columns: []string{resources.LionResourceTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcetypes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ResourceTypeID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionMenusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resources.LionMenusTable,
+			Columns: []string{resources.LionMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.LionResourceScopesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

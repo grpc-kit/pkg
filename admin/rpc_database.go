@@ -6,8 +6,8 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"fmt"
+	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -17,10 +17,13 @@ import (
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/resourcetypes"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/scopes"
+	"github.com/grpc-kit/pkg/lion/services"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
@@ -41,6 +44,50 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 	rollback := func() { _ = tx.Rollback() }
+
+	serviceCode := a.defaultServiceCode()
+	serviceObj, err := tx.Services.Query().Where(services.CodeEQ(serviceCode)).Only(ctx)
+	if lion.IsNotFound(err) {
+		serviceObj, err = tx.Services.Create().
+			SetCode(serviceCode).
+			SetGrpcName("default.api.oneops.admin.v1.OneopsAdmin").
+			SetDisplayName("Admin 管理服务").
+			SetDescription("系统初始化创建的默认服务字典").
+			SetProtected(true).
+			Save(ctx)
+	} else if err != nil {
+		rollback()
+		return nil, err
+	}
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+
+	resourceTypeCatalog := map[string]*lion.ResourceTypes{}
+	for _, seed := range []struct {
+		code, displayName string
+	}{
+		{code: "sys_menu", displayName: "系统菜单"},
+		{code: "sys_api", displayName: "系统 API"},
+		{code: "sys_object", displayName: "系统对象"},
+	} {
+		obj, qErr := tx.ResourceTypes.Query().Where(resourcetypes.CodeEQ(seed.code)).Only(ctx)
+		if lion.IsNotFound(qErr) {
+			obj, qErr = tx.ResourceTypes.Create().
+				SetCode(seed.code).
+				SetDisplayName(seed.displayName).
+				SetServiceCode(serviceObj.Code).
+				SetDescription("系统初始化创建的默认资源类型").
+				SetProtected(true).
+				Save(ctx)
+		}
+		if qErr != nil {
+			rollback()
+			return nil, qErr
+		}
+		resourceTypeCatalog[seed.code] = obj
+	}
 
 	superadminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)
 	adminRole, err := tx.Roles.Query().Where(roles.CodeEQ(superadminCode)).Only(ctx)
@@ -218,9 +265,14 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 	for _, rs := range rootResourceSeeds {
 		resType := int(rs.resType.Number())
+		resourceTypeCode := resourceTypeCodeFromLegacy(resType)
+		resourceTypeObj := resourceTypeCatalog[resourceTypeCode]
 		exists, qerr := tx.Resources.Query().Where(
 			resources.ParentIDEQ(0),
-			resources.ResourceTypeEQ(resType),
+			resources.Or(
+				resources.ResourceTypeIDEQ(resourceTypeObj.ID),
+				resources.ResourceTypeEQ(resType),
+			),
 		).Exist(ctx)
 		if qerr != nil {
 			rollback()
@@ -231,10 +283,16 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 		if _, err := tx.Resources.Create().
 			SetCode(seedResourceSeedCode(rs.seedCode)).
-			SetName(fmt.Sprintf("grn:admin:default:global:%s:root", strings.ToLower(rs.resType.String()))).
+			SetName(fmt.Sprintf("grn:%s:::%s/root", serviceCode, resourceTypeCode)).
 			SetDisplayName(rs.name).
 			SetResourceType(resType).
+			SetResourceTypeID(resourceTypeObj.ID).
+			SetResourceTypeCode(resourceTypeObj.Code).
+			SetServiceCode(serviceCode).
+			SetResourcePath("root").
+			SetGrn(fmt.Sprintf("grn:%s:::%s/root", serviceCode, resourceTypeCode)).
 			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
+			SetResourceStatusCode("active").
 			SetVisibility(int(adminv1.Visibility_VISIBILITY_GLOBAL.Number())).
 			SetSortOrder(rs.sort).
 			SetParentID(0).
@@ -244,7 +302,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
-	menuTreeRIDs, err := seedBuiltinMenuTreeResources(ctx, tx, rollback)
+	menuTreeRIDs, err := seedBuiltinMenuTreeResources(ctx, tx, rollback, serviceCode, resourceTypeCatalog["sys_menu"])
 	if err != nil {
 		return nil, err
 	}
@@ -340,12 +398,144 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 // seedParentMenuRoot 表示挂在 parent_id=0 的 MENU 类型根节点下（与 ResourceSeedCode 根菜单 code 一致）。
 const seedParentMenuRoot = "__menu_root__"
 
+type builtinMenuResource struct {
+	code, displayName, parentRef string
+	resType                      adminv1.Resource_Type
+	sort                         int
+	locator, visual, component   string
+	protected                    bool
+}
+
+var builtinMenuResourceSeeds = []builtinMenuResource{
+	{code: "user", displayName: "个人中心", parentRef: seedParentMenuRoot, resType: adminv1.Resource_MENU, sort: 2, locator: "/user", visual: "UserOutlined", protected: true},
+	{code: "profile", displayName: "我的信息", parentRef: "user", resType: adminv1.Resource_MENU, sort: 7, locator: "/user/profile", protected: true},
+	{code: "setting", displayName: "系统设置", parentRef: seedParentMenuRoot, resType: adminv1.Resource_MENU, sort: 9, locator: "/setting", visual: "SettingOutlined", protected: true},
+	{code: "auth-providers", displayName: "身份认证", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 100, locator: "/setting/authentications", protected: true},
+	{code: "departments", displayName: "组织架构", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 200, locator: "/setting/departments", protected: true},
+	{code: "roles", displayName: "角色管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 300, locator: "/setting/roles", protected: true},
+	{code: "resources", displayName: "资源管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 400, locator: "/setting/resources", protected: true},
+	{code: "permissions", displayName: "权限管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 500, locator: "/setting/permissions", protected: true},
+	{code: "groups", displayName: "群组管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 600, locator: "/setting/groups", protected: true},
+	{code: "users", displayName: "用户管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 700, locator: "/setting/users", protected: true},
+	{code: "config", displayName: "配置管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 900, locator: "/setting/config", protected: true},
+	{code: "policies", displayName: "策略管理", parentRef: "setting", resType: adminv1.Resource_MENU, sort: 1000, locator: "/setting/policies", protected: true},
+}
+
+func legacyResourceVisibilityToMenuVisibility(resourceVisibility int) string {
+	switch adminv1.Visibility(resourceVisibility) {
+	case adminv1.Visibility_VISIBILITY_GLOBAL:
+		return "global"
+	case adminv1.Visibility_VISIBILITY_SUBTREE:
+		return "subtree"
+	case adminv1.Visibility_VISIBILITY_LOCAL:
+		return "local"
+	case adminv1.Visibility_VISIBILITY_RESTRICTED:
+		return "restricted"
+	case adminv1.Visibility_VISIBILITY_SPECIFIC:
+		return "specific"
+	default:
+		return "full"
+	}
+}
+
+func legacyResourceStatusToMenuStatus(resourceStatus int) string {
+	if resourceStatus == int(adminv1.Resource_ENABLED.Number()) {
+		return "active"
+	}
+	return "inactive"
+}
+
+func syncLegacyMenuResourcesToMenus(ctx context.Context, tx *lion.Tx, rollback func(), menuRootID int) error {
+	menuResources, err := tx.Resources.Query().Where(
+		resources.Or(
+			resources.ResourceTypeCodeEQ("sys_menu"),
+			resources.ResourceTypeEQ(int(adminv1.Resource_MENU.Number())),
+		),
+	).All(ctx)
+	if err != nil {
+		rollback()
+		return err
+	}
+
+	childrenByParent := make(map[int64][]*lion.Resources)
+	for _, item := range menuResources {
+		if item.ID == menuRootID {
+			continue
+		}
+		childrenByParent[item.ParentID] = append(childrenByParent[item.ParentID], item)
+	}
+	for parentID := range childrenByParent {
+		sort.Slice(childrenByParent[parentID], func(i, j int) bool {
+			left := childrenByParent[parentID][i]
+			right := childrenByParent[parentID][j]
+			if left.SortOrder == right.SortOrder {
+				return left.ID < right.ID
+			}
+			return left.SortOrder < right.SortOrder
+		})
+	}
+
+	menuIDByResourceID := make(map[int]int)
+	var upsertMenus func(parentResourceID int64, parentMenuID int64) error
+	upsertMenus = func(parentResourceID int64, parentMenuID int64) error {
+		for _, item := range childrenByParent[parentResourceID] {
+			query := tx.Menus.Query().Where(menus.ResourceIDEQ(item.ID))
+			menuRow, err := query.Only(ctx)
+			if lion.IsNotFound(err) {
+				create := tx.Menus.Create().
+					SetParentID(parentMenuID).
+					SetResourceID(item.ID).
+					SetCode(item.Code).
+					SetDisplayName(item.DisplayName).
+					SetRoutePath(item.Locator).
+					SetComponent(item.Manifest).
+					SetIcon(item.Visual).
+					SetSortOrder(item.SortOrder).
+					SetSurfaceMask(1).
+					SetVisibility(legacyResourceVisibilityToMenuVisibility(item.Visibility)).
+					SetMenuStatus(legacyResourceStatusToMenuStatus(item.ResourceStatus)).
+					SetDescription(item.Description)
+				menuRow, err = create.Save(ctx)
+			} else if err == nil {
+				update := tx.Menus.UpdateOneID(menuRow.ID).
+					SetParentID(parentMenuID).
+					SetResourceID(item.ID).
+					SetCode(item.Code).
+					SetDisplayName(item.DisplayName).
+					SetRoutePath(item.Locator).
+					SetComponent(item.Manifest).
+					SetIcon(item.Visual).
+					SetSortOrder(item.SortOrder).
+					SetSurfaceMask(1).
+					SetVisibility(legacyResourceVisibilityToMenuVisibility(item.Visibility)).
+					SetMenuStatus(legacyResourceStatusToMenuStatus(item.ResourceStatus)).
+					SetDescription(item.Description)
+				menuRow, err = update.Save(ctx)
+			}
+			if err != nil {
+				rollback()
+				return err
+			}
+			menuIDByResourceID[item.ID] = menuRow.ID
+			if err := upsertMenus(int64(item.ID), int64(menuRow.ID)); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	return upsertMenus(int64(menuRootID), 0)
+}
+
 // seedBuiltinMenuTreeResources 幂等补全内置菜单/页面资源（与常见 lion_resources 种子数据对齐）。
 // 返回值为资源 code -> id，含菜单类型根节点（用于与 admin 等作用域建立 lion_resource_scopes）。
-func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback func()) (map[string]int, error) {
+func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback func(), serviceCode string, menuResourceType *lion.ResourceTypes) (map[string]int, error) {
 	menuRoot, err := tx.Resources.Query().Where(
 		resources.ParentIDEQ(0),
-		resources.ResourceTypeEQ(int(adminv1.Resource_MENU.Number())),
+		resources.Or(
+			resources.ResourceTypeCodeEQ("sys_menu"),
+			resources.ResourceTypeEQ(int(adminv1.Resource_MENU.Number())),
+		),
 	).Only(ctx)
 	if err != nil {
 		rollback()
@@ -354,32 +544,12 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 
 	menuRootCode := seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_MENU)
 	idByCode := map[string]int{menuRootCode: menuRoot.ID}
-
-	type builtinMenuResource struct {
-		code, displayName, parentRef string
-		resType                      adminv1.Resource_Type
-		sort                         int
-		locator, visual              string
-		protected                    bool
-	}
-	seeds := []builtinMenuResource{
-		{"user", "个人中心", seedParentMenuRoot, adminv1.Resource_MENU, 2, "/user", "UserOutlined", true},
-		{"profile", "我的信息", "user", adminv1.Resource_MENU, 7, "/user/profile", "", true},
-		{"setting", "系统设置", seedParentMenuRoot, adminv1.Resource_MENU, 9, "/setting", "SettingOutlined", true},
-		{"auth-providers", "身份认证", "setting", adminv1.Resource_MENU, 100, "/setting/authentications", "", true},
-		{"departments", "组织架构", "setting", adminv1.Resource_MENU, 200, "/setting/departments", "", true},
-		{"roles", "角色管理", "setting", adminv1.Resource_MENU, 300, "/setting/roles", "", true},
-		{"resources", "资源管理", "setting", adminv1.Resource_MENU, 400, "/setting/resources", "", true},
-		{"permissions", "权限管理", "setting", adminv1.Resource_MENU, 500, "/setting/permissions", "", true},
-		{"groups", "群组管理", "setting", adminv1.Resource_MENU, 600, "/setting/groups", "", true},
-		{"users", "用户管理", "setting", adminv1.Resource_MENU, 700, "/setting/users", "", true},
-		{"config", "配置管理", "setting", adminv1.Resource_MENU, 900, "/setting/config", "", true},
-	}
+	resourceTypeObj := menuResourceType
 
 	visUnspecified := int(adminv1.Visibility_VISIBILITY_UNSPECIFIED.Number())
 	enabled := int(adminv1.Resource_ENABLED.Number())
 
-	for _, s := range seeds {
+	for _, s := range builtinMenuResourceSeeds {
 		var parentID int64
 		switch s.parentRef {
 		case seedParentMenuRoot:
@@ -420,16 +590,25 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 			continue
 		}
 
+		grn := buildResourceGRN(serviceCode, "", "", resourceTypeObj.Code, normalizeResourcePath("", s.code, s.locator), "")
 		row, err := tx.Resources.Create().
 			SetCode(s.code).
+			SetName(grn).
 			SetDisplayName(s.displayName).
 			SetResourceType(int(s.resType.Number())).
+			SetResourceTypeID(resourceTypeObj.ID).
+			SetResourceTypeCode(resourceTypeObj.Code).
+			SetServiceCode(serviceCode).
+			SetResourcePath(normalizeResourcePath("", s.code, s.locator)).
+			SetGrn(grn).
 			SetResourceStatus(enabled).
+			SetResourceStatusCode("active").
 			SetVisibility(visUnspecified).
 			SetSortOrder(s.sort).
 			SetParentID(parentID).
 			SetLocator(s.locator).
 			SetVisual(s.visual).
+			SetManifest(s.component).
 			SetProtected(s.protected).
 			Save(ctx)
 		if err != nil {
@@ -437,6 +616,9 @@ func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback fun
 			return nil, err
 		}
 		idByCode[s.code] = row.ID
+	}
+	if err := syncLegacyMenuResourcesToMenus(ctx, tx, rollback, menuRoot.ID); err != nil {
+		return nil, err
 	}
 	return idByCode, nil
 }
@@ -453,10 +635,9 @@ func linkBuiltinMenuResourcesToAdminScope(ctx context.Context, tx *lion.Tx, roll
 	}
 
 	menuRootCode := seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_MENU)
-	codes := []string{
-		menuRootCode,
-		"user", "profile", "setting", "auth-providers", "departments", "roles", "resources",
-		"permissions", "groups", "users", "config",
+	codes := []string{menuRootCode}
+	for _, seed := range builtinMenuResourceSeeds {
+		codes = append(codes, seed.code)
 	}
 	for _, code := range codes {
 		rid := menuTreeRIDs[code]

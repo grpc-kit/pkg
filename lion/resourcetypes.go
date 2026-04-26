@@ -9,12 +9,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/resourcetypes"
 )
 
-// Actions is the model entity for the Actions schema.
-type Actions struct {
+// ResourceTypes is the model entity for the ResourceTypes schema.
+type ResourceTypes struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -26,58 +25,63 @@ type Actions struct {
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
-	// 统一动作编码，如：admin.users.read
+	// 资源类型编码，如 sys_menu / sys_api
 	Code string `json:"code,omitempty"`
-	// 动作展示名称
+	// 资源类型展示名称
 	DisplayName string `json:"display_name,omitempty"`
-	// 兼容期保留的旧资源类型枚举字段
-	ResourceType int `json:"resource_type,omitempty"`
-	// 关联 lion_resource_types 表 ID
-	ResourceTypeID int `json:"resource_type_id,omitempty"`
-	// 兼容期保留的协议映射配置
-	ProjectionMapping string `json:"projection_mapping,omitempty"`
-	// 是否系统保护动作，保护动作不可删除
-	Protected bool `json:"protected,omitempty"`
+	// 归属服务代码，对应 lion_services.code
+	ServiceCode string `json:"service_code,omitempty"`
 	// 详细描述
 	Description string `json:"description,omitempty"`
+	// 是否系统保护资源类型
+	Protected bool `json:"protected,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the ActionsQuery when eager-loading is set.
-	Edges        ActionsEdges `json:"edges"`
+	// The values are being populated by the ResourceTypesQuery when eager-loading is set.
+	Edges        ResourceTypesEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// ActionsEdges holds the relations/edges for other nodes in the graph.
-type ActionsEdges struct {
-	// LionResourceTypes holds the value of the lion_resource_types edge.
-	LionResourceTypes *ResourceTypes `json:"lion_resource_types,omitempty"`
+// ResourceTypesEdges holds the relations/edges for other nodes in the graph.
+type ResourceTypesEdges struct {
+	// LionResources holds the value of the lion_resources edge.
+	LionResources []*Resources `json:"lion_resources,omitempty"`
+	// LionActions holds the value of the lion_actions edge.
+	LionActions []*Actions `json:"lion_actions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
-// LionResourceTypesOrErr returns the LionResourceTypes value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e ActionsEdges) LionResourceTypesOrErr() (*ResourceTypes, error) {
-	if e.LionResourceTypes != nil {
-		return e.LionResourceTypes, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: resourcetypes.Label}
+// LionResourcesOrErr returns the LionResources value or an error if the edge
+// was not loaded in eager-loading.
+func (e ResourceTypesEdges) LionResourcesOrErr() ([]*Resources, error) {
+	if e.loadedTypes[0] {
+		return e.LionResources, nil
 	}
-	return nil, &NotLoadedError{edge: "lion_resource_types"}
+	return nil, &NotLoadedError{edge: "lion_resources"}
+}
+
+// LionActionsOrErr returns the LionActions value or an error if the edge
+// was not loaded in eager-loading.
+func (e ResourceTypesEdges) LionActionsOrErr() ([]*Actions, error) {
+	if e.loadedTypes[1] {
+		return e.LionActions, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_actions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Actions) scanValues(columns []string) ([]any, error) {
+func (*ResourceTypes) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case actions.FieldProtected:
+		case resourcetypes.FieldProtected:
 			values[i] = new(sql.NullBool)
-		case actions.FieldID, actions.FieldCreatedBy, actions.FieldUpdatedBy, actions.FieldResourceType, actions.FieldResourceTypeID:
+		case resourcetypes.FieldID, resourcetypes.FieldCreatedBy, resourcetypes.FieldUpdatedBy:
 			values[i] = new(sql.NullInt64)
-		case actions.FieldCode, actions.FieldDisplayName, actions.FieldProjectionMapping, actions.FieldDescription:
+		case resourcetypes.FieldCode, resourcetypes.FieldDisplayName, resourcetypes.FieldServiceCode, resourcetypes.FieldDescription:
 			values[i] = new(sql.NullString)
-		case actions.FieldCreatedAt, actions.FieldUpdatedAt:
+		case resourcetypes.FieldCreatedAt, resourcetypes.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -87,84 +91,72 @@ func (*Actions) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Actions fields.
-func (_m *Actions) assignValues(columns []string, values []any) error {
+// to the ResourceTypes fields.
+func (_m *ResourceTypes) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case actions.FieldID:
+		case resourcetypes.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case actions.FieldCreatedAt:
+		case resourcetypes.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case actions.FieldUpdatedAt:
+		case resourcetypes.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case actions.FieldCreatedBy:
+		case resourcetypes.FieldCreatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_by", values[i])
 			} else if value.Valid {
 				_m.CreatedBy = value.Int64
 			}
-		case actions.FieldUpdatedBy:
+		case resourcetypes.FieldUpdatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case actions.FieldCode:
+		case resourcetypes.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
 				_m.Code = value.String
 			}
-		case actions.FieldDisplayName:
+		case resourcetypes.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field display_name", values[i])
 			} else if value.Valid {
 				_m.DisplayName = value.String
 			}
-		case actions.FieldResourceType:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field resource_type", values[i])
-			} else if value.Valid {
-				_m.ResourceType = int(value.Int64)
-			}
-		case actions.FieldResourceTypeID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field resource_type_id", values[i])
-			} else if value.Valid {
-				_m.ResourceTypeID = int(value.Int64)
-			}
-		case actions.FieldProjectionMapping:
+		case resourcetypes.FieldServiceCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field projection_mapping", values[i])
+				return fmt.Errorf("unexpected type %T for field service_code", values[i])
 			} else if value.Valid {
-				_m.ProjectionMapping = value.String
+				_m.ServiceCode = value.String
 			}
-		case actions.FieldProtected:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field protected", values[i])
-			} else if value.Valid {
-				_m.Protected = value.Bool
-			}
-		case actions.FieldDescription:
+		case resourcetypes.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
 				_m.Description = value.String
+			}
+		case resourcetypes.FieldProtected:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field protected", values[i])
+			} else if value.Valid {
+				_m.Protected = value.Bool
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -173,39 +165,44 @@ func (_m *Actions) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the Actions.
+// Value returns the ent.Value that was dynamically selected and assigned to the ResourceTypes.
 // This includes values selected through modifiers, order, etc.
-func (_m *Actions) Value(name string) (ent.Value, error) {
+func (_m *ResourceTypes) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionResourceTypes queries the "lion_resource_types" edge of the Actions entity.
-func (_m *Actions) QueryLionResourceTypes() *ResourceTypesQuery {
-	return NewActionsClient(_m.config).QueryLionResourceTypes(_m)
+// QueryLionResources queries the "lion_resources" edge of the ResourceTypes entity.
+func (_m *ResourceTypes) QueryLionResources() *ResourcesQuery {
+	return NewResourceTypesClient(_m.config).QueryLionResources(_m)
 }
 
-// Update returns a builder for updating this Actions.
-// Note that you need to call Actions.Unwrap() before calling this method if this Actions
+// QueryLionActions queries the "lion_actions" edge of the ResourceTypes entity.
+func (_m *ResourceTypes) QueryLionActions() *ActionsQuery {
+	return NewResourceTypesClient(_m.config).QueryLionActions(_m)
+}
+
+// Update returns a builder for updating this ResourceTypes.
+// Note that you need to call ResourceTypes.Unwrap() before calling this method if this ResourceTypes
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *Actions) Update() *ActionsUpdateOne {
-	return NewActionsClient(_m.config).UpdateOne(_m)
+func (_m *ResourceTypes) Update() *ResourceTypesUpdateOne {
+	return NewResourceTypesClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the Actions entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the ResourceTypes entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *Actions) Unwrap() *Actions {
+func (_m *ResourceTypes) Unwrap() *ResourceTypes {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: Actions is not a transactional entity")
+		panic("lion: ResourceTypes is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *Actions) String() string {
+func (_m *ResourceTypes) String() string {
 	var builder strings.Builder
-	builder.WriteString("Actions(")
+	builder.WriteString("ResourceTypes(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -225,23 +222,17 @@ func (_m *Actions) String() string {
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)
 	builder.WriteString(", ")
-	builder.WriteString("resource_type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ResourceType))
-	builder.WriteString(", ")
-	builder.WriteString("resource_type_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ResourceTypeID))
-	builder.WriteString(", ")
-	builder.WriteString("projection_mapping=")
-	builder.WriteString(_m.ProjectionMapping)
-	builder.WriteString(", ")
-	builder.WriteString("protected=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
+	builder.WriteString("service_code=")
+	builder.WriteString(_m.ServiceCode)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("protected=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// ActionsSlice is a parsable slice of Actions.
-type ActionsSlice []*Actions
+// ResourceTypesSlice is a parsable slice of ResourceTypes.
+type ResourceTypesSlice []*ResourceTypes

@@ -12,9 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/resourcetypes"
 )
 
 // ResourcesQuery is the builder for querying Resources entities.
@@ -24,6 +26,8 @@ type ResourcesQuery struct {
 	order                  []resources.OrderOption
 	inters                 []Interceptor
 	predicates             []predicate.Resources
+	withLionResourceTypes  *ResourceTypesQuery
+	withLionMenus          *MenusQuery
 	withLionResourceScopes *ResourceScopesQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -59,6 +63,50 @@ func (_q *ResourcesQuery) Unique(unique bool) *ResourcesQuery {
 func (_q *ResourcesQuery) Order(o ...resources.OrderOption) *ResourcesQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryLionResourceTypes chains the current query on the "lion_resource_types" edge.
+func (_q *ResourcesQuery) QueryLionResourceTypes() *ResourceTypesQuery {
+	query := (&ResourceTypesClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resources.Table, resources.FieldID, selector),
+			sqlgraph.To(resourcetypes.Table, resourcetypes.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, resources.LionResourceTypesTable, resources.LionResourceTypesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLionMenus chains the current query on the "lion_menus" edge.
+func (_q *ResourcesQuery) QueryLionMenus() *MenusQuery {
+	query := (&MenusClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resources.Table, resources.FieldID, selector),
+			sqlgraph.To(menus.Table, menus.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resources.LionMenusTable, resources.LionMenusColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // QueryLionResourceScopes chains the current query on the "lion_resource_scopes" edge.
@@ -275,11 +323,35 @@ func (_q *ResourcesQuery) Clone() *ResourcesQuery {
 		order:                  append([]resources.OrderOption{}, _q.order...),
 		inters:                 append([]Interceptor{}, _q.inters...),
 		predicates:             append([]predicate.Resources{}, _q.predicates...),
+		withLionResourceTypes:  _q.withLionResourceTypes.Clone(),
+		withLionMenus:          _q.withLionMenus.Clone(),
 		withLionResourceScopes: _q.withLionResourceScopes.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithLionResourceTypes tells the query-builder to eager-load the nodes that are connected to
+// the "lion_resource_types" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ResourcesQuery) WithLionResourceTypes(opts ...func(*ResourceTypesQuery)) *ResourcesQuery {
+	query := (&ResourceTypesClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionResourceTypes = query
+	return _q
+}
+
+// WithLionMenus tells the query-builder to eager-load the nodes that are connected to
+// the "lion_menus" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ResourcesQuery) WithLionMenus(opts ...func(*MenusQuery)) *ResourcesQuery {
+	query := (&MenusClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionMenus = query
+	return _q
 }
 
 // WithLionResourceScopes tells the query-builder to eager-load the nodes that are connected to
@@ -371,7 +443,9 @@ func (_q *ResourcesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Re
 	var (
 		nodes       = []*Resources{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
+			_q.withLionResourceTypes != nil,
+			_q.withLionMenus != nil,
 			_q.withLionResourceScopes != nil,
 		}
 	)
@@ -393,6 +467,19 @@ func (_q *ResourcesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Re
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withLionResourceTypes; query != nil {
+		if err := _q.loadLionResourceTypes(ctx, query, nodes, nil,
+			func(n *Resources, e *ResourceTypes) { n.Edges.LionResourceTypes = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLionMenus; query != nil {
+		if err := _q.loadLionMenus(ctx, query, nodes,
+			func(n *Resources) { n.Edges.LionMenus = []*Menus{} },
+			func(n *Resources, e *Menus) { n.Edges.LionMenus = append(n.Edges.LionMenus, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := _q.withLionResourceScopes; query != nil {
 		if err := _q.loadLionResourceScopes(ctx, query, nodes,
 			func(n *Resources) { n.Edges.LionResourceScopes = []*ResourceScopes{} },
@@ -405,6 +492,68 @@ func (_q *ResourcesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Re
 	return nodes, nil
 }
 
+func (_q *ResourcesQuery) loadLionResourceTypes(ctx context.Context, query *ResourceTypesQuery, nodes []*Resources, init func(*Resources), assign func(*Resources, *ResourceTypes)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Resources)
+	for i := range nodes {
+		fk := nodes[i].ResourceTypeID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(resourcetypes.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "resource_type_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *ResourcesQuery) loadLionMenus(ctx context.Context, query *MenusQuery, nodes []*Resources, init func(*Resources), assign func(*Resources, *Menus)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Resources)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(menus.FieldResourceID)
+	}
+	query.Where(predicate.Menus(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(resources.LionMenusColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ResourceID
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "resource_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "resource_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 func (_q *ResourcesQuery) loadLionResourceScopes(ctx context.Context, query *ResourceScopesQuery, nodes []*Resources, init func(*Resources), assign func(*Resources, *ResourceScopes)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Resources)
@@ -460,6 +609,9 @@ func (_q *ResourcesQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != resources.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withLionResourceTypes != nil {
+			_spec.Node.AddColumnOnce(resources.FieldResourceTypeID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

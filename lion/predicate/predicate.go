@@ -30,6 +30,9 @@ type GroupRoles func(*sql.Selector)
 // Groups is the predicate function for groups builders.
 type Groups func(*sql.Selector)
 
+// Menus is the predicate function for menus builders.
+type Menus func(*sql.Selector)
+
 // PermissionBindings is the predicate function for permissionbindings builders.
 type PermissionBindings func(*sql.Selector)
 
@@ -48,6 +51,9 @@ type PolicyStatements func(*sql.Selector)
 // ResourceScopes is the predicate function for resourcescopes builders.
 type ResourceScopes func(*sql.Selector)
 
+// ResourceTypes is the predicate function for resourcetypes builders.
+type ResourceTypes func(*sql.Selector)
+
 // Resources is the predicate function for resources builders.
 type Resources func(*sql.Selector)
 
@@ -59,6 +65,9 @@ type Roles func(*sql.Selector)
 
 // Scopes is the predicate function for scopes builders.
 type Scopes func(*sql.Selector)
+
+// Services is the predicate function for services builders.
+type Services func(*sql.Selector)
 
 // UserIdentities is the predicate function for useridentities builders.
 type UserIdentities func(*sql.Selector)

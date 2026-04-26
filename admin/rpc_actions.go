@@ -74,7 +74,11 @@ func (a *KnownAdminAPI) ListActions(ctx context.Context, req *adminv1.ListAction
 
 	where := make([]predicate.Actions, 0)
 	if req.GetResourceType() != 0 {
-		where = append(where, actions.ResourceTypeEQ(int(req.GetResourceType())))
+		resourceType, err := a.resolveResourceTypeForLegacy(ctx, db, adminv1.Resource_Type(req.GetResourceType()))
+		if err != nil {
+			return result, nil
+		}
+		where = append(where, actions.ResourceTypeIDEQ(resourceType.ID))
 	}
 
 	query := db.Actions.Query().Where(where...)
@@ -154,6 +158,10 @@ func (a *KnownAdminAPI) CreateAction(ctx context.Context, req *adminv1.CreateAct
 	if err != nil {
 		return nil, err
 	}
+	resourceType, err := a.resolveResourceTypeForLegacy(ctx, db, req.Action.ResourceType)
+	if err != nil {
+		return nil, err
+	}
 
 	projMapping, err := validateProjectionMapping(req.Action.ProjectionMapping)
 	if err != nil {
@@ -163,6 +171,7 @@ func (a *KnownAdminAPI) CreateAction(ctx context.Context, req *adminv1.CreateAct
 		SetCode(req.Action.Code).
 		SetDisplayName(req.Action.DisplayName).
 		SetResourceType(int(req.Action.ResourceType)).
+		SetResourceTypeID(resourceType.ID).
 		SetProjectionMapping(projMapping).
 		SetProtected(req.Action.Protected).
 		SetDescription(req.Action.Description).
@@ -199,6 +208,7 @@ func (a *KnownAdminAPI) UpdateAction(ctx context.Context, req *adminv1.UpdateAct
 	}
 
 	update := obj.Update().SetUpdatedBy(userID)
+	resolvedResourceTypeID := obj.ResourceTypeID
 	if req.UpdateMask != nil && len(req.UpdateMask.Paths) > 0 {
 		for _, path := range req.UpdateMask.Paths {
 			switch path {
@@ -207,7 +217,13 @@ func (a *KnownAdminAPI) UpdateAction(ctx context.Context, req *adminv1.UpdateAct
 			case "display_name":
 				update.SetDisplayName(req.Action.DisplayName)
 			case "resource_type":
+				resourceType, err := a.resolveResourceTypeForLegacy(ctx, db, req.Action.ResourceType)
+				if err != nil {
+					return nil, err
+				}
 				update.SetResourceType(int(req.Action.ResourceType))
+				update.SetResourceTypeID(resourceType.ID)
+				resolvedResourceTypeID = resourceType.ID
 			case "projection_mapping":
 				pm, err := validateProjectionMapping(req.Action.ProjectionMapping)
 				if err != nil {
@@ -221,6 +237,10 @@ func (a *KnownAdminAPI) UpdateAction(ctx context.Context, req *adminv1.UpdateAct
 			}
 		}
 	} else {
+		resourceType, err := a.resolveResourceTypeForLegacy(ctx, db, req.Action.ResourceType)
+		if err != nil {
+			return nil, err
+		}
 		pm, err := validateProjectionMapping(req.Action.ProjectionMapping)
 		if err != nil {
 			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
@@ -229,15 +249,18 @@ func (a *KnownAdminAPI) UpdateAction(ctx context.Context, req *adminv1.UpdateAct
 			SetCode(req.Action.Code).
 			SetDisplayName(req.Action.DisplayName).
 			SetResourceType(int(req.Action.ResourceType)).
+			SetResourceTypeID(resourceType.ID).
 			SetProjectionMapping(pm).
 			SetProtected(req.Action.Protected).
 			SetDescription(req.Action.Description)
+		resolvedResourceTypeID = resourceType.ID
 	}
 
 	saved, err := update.Save(ctx)
 	if err != nil {
 		return nil, err
 	}
+	saved.ResourceTypeID = resolvedResourceTypeID
 	return lionActionToProto(saved), nil
 }
 

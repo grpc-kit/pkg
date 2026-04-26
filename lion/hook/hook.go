@@ -105,6 +105,18 @@ func (f GroupsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GroupsMutation", m)
 }
 
+// The MenusFunc type is an adapter to allow the use of ordinary
+// function as Menus mutator.
+type MenusFunc func(context.Context, *lion.MenusMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MenusFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.MenusMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.MenusMutation", m)
+}
+
 // The PermissionBindingsFunc type is an adapter to allow the use of ordinary
 // function as PermissionBindings mutator.
 type PermissionBindingsFunc func(context.Context, *lion.PermissionBindingsMutation) (lion.Value, error)
@@ -177,6 +189,18 @@ func (f ResourceScopesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.ResourceScopesMutation", m)
 }
 
+// The ResourceTypesFunc type is an adapter to allow the use of ordinary
+// function as ResourceTypes mutator.
+type ResourceTypesFunc func(context.Context, *lion.ResourceTypesMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ResourceTypesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.ResourceTypesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.ResourceTypesMutation", m)
+}
+
 // The ResourcesFunc type is an adapter to allow the use of ordinary
 // function as Resources mutator.
 type ResourcesFunc func(context.Context, *lion.ResourcesMutation) (lion.Value, error)
@@ -223,6 +247,18 @@ func (f ScopesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, er
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.ScopesMutation", m)
+}
+
+// The ServicesFunc type is an adapter to allow the use of ordinary
+// function as Services mutator.
+type ServicesFunc func(context.Context, *lion.ServicesMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ServicesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.ServicesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.ServicesMutation", m)
 }
 
 // The UserIdentitiesFunc type is an adapter to allow the use of ordinary

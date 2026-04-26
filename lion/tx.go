@@ -28,6 +28,8 @@ type Tx struct {
 	GroupRoles *GroupRolesClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
+	// Menus is the client for interacting with the Menus builders.
+	Menus *MenusClient
 	// PermissionBindings is the client for interacting with the PermissionBindings builders.
 	PermissionBindings *PermissionBindingsClient
 	// Permissions is the client for interacting with the Permissions builders.
@@ -40,6 +42,8 @@ type Tx struct {
 	PolicyStatements *PolicyStatementsClient
 	// ResourceScopes is the client for interacting with the ResourceScopes builders.
 	ResourceScopes *ResourceScopesClient
+	// ResourceTypes is the client for interacting with the ResourceTypes builders.
+	ResourceTypes *ResourceTypesClient
 	// Resources is the client for interacting with the Resources builders.
 	Resources *ResourcesClient
 	// RolePermissions is the client for interacting with the RolePermissions builders.
@@ -48,6 +52,8 @@ type Tx struct {
 	Roles *RolesClient
 	// Scopes is the client for interacting with the Scopes builders.
 	Scopes *ScopesClient
+	// Services is the client for interacting with the Services builders.
+	Services *ServicesClient
 	// UserIdentities is the client for interacting with the UserIdentities builders.
 	UserIdentities *UserIdentitiesClient
 	// UserProfiles is the client for interacting with the UserProfiles builders.
@@ -195,16 +201,19 @@ func (tx *Tx) init() {
 	tx.GroupMembers = NewGroupMembersClient(tx.config)
 	tx.GroupRoles = NewGroupRolesClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
+	tx.Menus = NewMenusClient(tx.config)
 	tx.PermissionBindings = NewPermissionBindingsClient(tx.config)
 	tx.Permissions = NewPermissionsClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
 	tx.PolicyAttachments = NewPolicyAttachmentsClient(tx.config)
 	tx.PolicyStatements = NewPolicyStatementsClient(tx.config)
 	tx.ResourceScopes = NewResourceScopesClient(tx.config)
+	tx.ResourceTypes = NewResourceTypesClient(tx.config)
 	tx.Resources = NewResourcesClient(tx.config)
 	tx.RolePermissions = NewRolePermissionsClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
 	tx.Scopes = NewScopesClient(tx.config)
+	tx.Services = NewServicesClient(tx.config)
 	tx.UserIdentities = NewUserIdentitiesClient(tx.config)
 	tx.UserProfiles = NewUserProfilesClient(tx.config)
 	tx.UserRoles = NewUserRolesClient(tx.config)

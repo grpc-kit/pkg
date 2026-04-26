@@ -23,6 +23,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/groupmembers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
+	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/permissionbindings"
 	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
@@ -30,9 +31,11 @@ import (
 	"github.com/grpc-kit/pkg/lion/policystatements"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/resourcetypes"
 	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/scopes"
+	"github.com/grpc-kit/pkg/lion/services"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -60,6 +63,8 @@ type Client struct {
 	GroupRoles *GroupRolesClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
+	// Menus is the client for interacting with the Menus builders.
+	Menus *MenusClient
 	// PermissionBindings is the client for interacting with the PermissionBindings builders.
 	PermissionBindings *PermissionBindingsClient
 	// Permissions is the client for interacting with the Permissions builders.
@@ -72,6 +77,8 @@ type Client struct {
 	PolicyStatements *PolicyStatementsClient
 	// ResourceScopes is the client for interacting with the ResourceScopes builders.
 	ResourceScopes *ResourceScopesClient
+	// ResourceTypes is the client for interacting with the ResourceTypes builders.
+	ResourceTypes *ResourceTypesClient
 	// Resources is the client for interacting with the Resources builders.
 	Resources *ResourcesClient
 	// RolePermissions is the client for interacting with the RolePermissions builders.
@@ -80,6 +87,8 @@ type Client struct {
 	Roles *RolesClient
 	// Scopes is the client for interacting with the Scopes builders.
 	Scopes *ScopesClient
+	// Services is the client for interacting with the Services builders.
+	Services *ServicesClient
 	// UserIdentities is the client for interacting with the UserIdentities builders.
 	UserIdentities *UserIdentitiesClient
 	// UserProfiles is the client for interacting with the UserProfiles builders.
@@ -107,16 +116,19 @@ func (c *Client) init() {
 	c.GroupMembers = NewGroupMembersClient(c.config)
 	c.GroupRoles = NewGroupRolesClient(c.config)
 	c.Groups = NewGroupsClient(c.config)
+	c.Menus = NewMenusClient(c.config)
 	c.PermissionBindings = NewPermissionBindingsClient(c.config)
 	c.Permissions = NewPermissionsClient(c.config)
 	c.Policies = NewPoliciesClient(c.config)
 	c.PolicyAttachments = NewPolicyAttachmentsClient(c.config)
 	c.PolicyStatements = NewPolicyStatementsClient(c.config)
 	c.ResourceScopes = NewResourceScopesClient(c.config)
+	c.ResourceTypes = NewResourceTypesClient(c.config)
 	c.Resources = NewResourcesClient(c.config)
 	c.RolePermissions = NewRolePermissionsClient(c.config)
 	c.Roles = NewRolesClient(c.config)
 	c.Scopes = NewScopesClient(c.config)
+	c.Services = NewServicesClient(c.config)
 	c.UserIdentities = NewUserIdentitiesClient(c.config)
 	c.UserProfiles = NewUserProfilesClient(c.config)
 	c.UserRoles = NewUserRolesClient(c.config)
@@ -221,16 +233,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GroupMembers:       NewGroupMembersClient(cfg),
 		GroupRoles:         NewGroupRolesClient(cfg),
 		Groups:             NewGroupsClient(cfg),
+		Menus:              NewMenusClient(cfg),
 		PermissionBindings: NewPermissionBindingsClient(cfg),
 		Permissions:        NewPermissionsClient(cfg),
 		Policies:           NewPoliciesClient(cfg),
 		PolicyAttachments:  NewPolicyAttachmentsClient(cfg),
 		PolicyStatements:   NewPolicyStatementsClient(cfg),
 		ResourceScopes:     NewResourceScopesClient(cfg),
+		ResourceTypes:      NewResourceTypesClient(cfg),
 		Resources:          NewResourcesClient(cfg),
 		RolePermissions:    NewRolePermissionsClient(cfg),
 		Roles:              NewRolesClient(cfg),
 		Scopes:             NewScopesClient(cfg),
+		Services:           NewServicesClient(cfg),
 		UserIdentities:     NewUserIdentitiesClient(cfg),
 		UserProfiles:       NewUserProfilesClient(cfg),
 		UserRoles:          NewUserRolesClient(cfg),
@@ -262,16 +277,19 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GroupMembers:       NewGroupMembersClient(cfg),
 		GroupRoles:         NewGroupRolesClient(cfg),
 		Groups:             NewGroupsClient(cfg),
+		Menus:              NewMenusClient(cfg),
 		PermissionBindings: NewPermissionBindingsClient(cfg),
 		Permissions:        NewPermissionsClient(cfg),
 		Policies:           NewPoliciesClient(cfg),
 		PolicyAttachments:  NewPolicyAttachmentsClient(cfg),
 		PolicyStatements:   NewPolicyStatementsClient(cfg),
 		ResourceScopes:     NewResourceScopesClient(cfg),
+		ResourceTypes:      NewResourceTypesClient(cfg),
 		Resources:          NewResourcesClient(cfg),
 		RolePermissions:    NewRolePermissionsClient(cfg),
 		Roles:              NewRolesClient(cfg),
 		Scopes:             NewScopesClient(cfg),
+		Services:           NewServicesClient(cfg),
 		UserIdentities:     NewUserIdentitiesClient(cfg),
 		UserProfiles:       NewUserProfilesClient(cfg),
 		UserRoles:          NewUserRolesClient(cfg),
@@ -306,10 +324,10 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Actions, c.AuthProviders, c.Credentials, c.DepartmentMembers, c.Departments,
-		c.GroupMembers, c.GroupRoles, c.Groups, c.PermissionBindings, c.Permissions,
-		c.Policies, c.PolicyAttachments, c.PolicyStatements, c.ResourceScopes,
-		c.Resources, c.RolePermissions, c.Roles, c.Scopes, c.UserIdentities,
-		c.UserProfiles, c.UserRoles, c.Users,
+		c.GroupMembers, c.GroupRoles, c.Groups, c.Menus, c.PermissionBindings,
+		c.Permissions, c.Policies, c.PolicyAttachments, c.PolicyStatements,
+		c.ResourceScopes, c.ResourceTypes, c.Resources, c.RolePermissions, c.Roles,
+		c.Scopes, c.Services, c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -320,10 +338,10 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Actions, c.AuthProviders, c.Credentials, c.DepartmentMembers, c.Departments,
-		c.GroupMembers, c.GroupRoles, c.Groups, c.PermissionBindings, c.Permissions,
-		c.Policies, c.PolicyAttachments, c.PolicyStatements, c.ResourceScopes,
-		c.Resources, c.RolePermissions, c.Roles, c.Scopes, c.UserIdentities,
-		c.UserProfiles, c.UserRoles, c.Users,
+		c.GroupMembers, c.GroupRoles, c.Groups, c.Menus, c.PermissionBindings,
+		c.Permissions, c.Policies, c.PolicyAttachments, c.PolicyStatements,
+		c.ResourceScopes, c.ResourceTypes, c.Resources, c.RolePermissions, c.Roles,
+		c.Scopes, c.Services, c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -348,6 +366,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.GroupRoles.mutate(ctx, m)
 	case *GroupsMutation:
 		return c.Groups.mutate(ctx, m)
+	case *MenusMutation:
+		return c.Menus.mutate(ctx, m)
 	case *PermissionBindingsMutation:
 		return c.PermissionBindings.mutate(ctx, m)
 	case *PermissionsMutation:
@@ -360,6 +380,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PolicyStatements.mutate(ctx, m)
 	case *ResourceScopesMutation:
 		return c.ResourceScopes.mutate(ctx, m)
+	case *ResourceTypesMutation:
+		return c.ResourceTypes.mutate(ctx, m)
 	case *ResourcesMutation:
 		return c.Resources.mutate(ctx, m)
 	case *RolePermissionsMutation:
@@ -368,6 +390,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Roles.mutate(ctx, m)
 	case *ScopesMutation:
 		return c.Scopes.mutate(ctx, m)
+	case *ServicesMutation:
+		return c.Services.mutate(ctx, m)
 	case *UserIdentitiesMutation:
 		return c.UserIdentities.mutate(ctx, m)
 	case *UserProfilesMutation:
@@ -487,6 +511,22 @@ func (c *ActionsClient) GetX(ctx context.Context, id int) *Actions {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryLionResourceTypes queries the lion_resource_types edge of a Actions.
+func (c *ActionsClient) QueryLionResourceTypes(_m *Actions) *ResourceTypesQuery {
+	query := (&ResourceTypesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(actions.Table, actions.FieldID, id),
+			sqlgraph.To(resourcetypes.Table, resourcetypes.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, actions.LionResourceTypesTable, actions.LionResourceTypesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -1621,6 +1661,155 @@ func (c *GroupsClient) mutate(ctx context.Context, m *GroupsMutation) (Value, er
 	}
 }
 
+// MenusClient is a client for the Menus schema.
+type MenusClient struct {
+	config
+}
+
+// NewMenusClient returns a client for the Menus from the given config.
+func NewMenusClient(c config) *MenusClient {
+	return &MenusClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `menus.Hooks(f(g(h())))`.
+func (c *MenusClient) Use(hooks ...Hook) {
+	c.hooks.Menus = append(c.hooks.Menus, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `menus.Intercept(f(g(h())))`.
+func (c *MenusClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Menus = append(c.inters.Menus, interceptors...)
+}
+
+// Create returns a builder for creating a Menus entity.
+func (c *MenusClient) Create() *MenusCreate {
+	mutation := newMenusMutation(c.config, OpCreate)
+	return &MenusCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Menus entities.
+func (c *MenusClient) CreateBulk(builders ...*MenusCreate) *MenusCreateBulk {
+	return &MenusCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MenusClient) MapCreateBulk(slice any, setFunc func(*MenusCreate, int)) *MenusCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MenusCreateBulk{err: fmt.Errorf("calling to MenusClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MenusCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MenusCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Menus.
+func (c *MenusClient) Update() *MenusUpdate {
+	mutation := newMenusMutation(c.config, OpUpdate)
+	return &MenusUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MenusClient) UpdateOne(_m *Menus) *MenusUpdateOne {
+	mutation := newMenusMutation(c.config, OpUpdateOne, withMenus(_m))
+	return &MenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MenusClient) UpdateOneID(id int) *MenusUpdateOne {
+	mutation := newMenusMutation(c.config, OpUpdateOne, withMenusID(id))
+	return &MenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Menus.
+func (c *MenusClient) Delete() *MenusDelete {
+	mutation := newMenusMutation(c.config, OpDelete)
+	return &MenusDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MenusClient) DeleteOne(_m *Menus) *MenusDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MenusClient) DeleteOneID(id int) *MenusDeleteOne {
+	builder := c.Delete().Where(menus.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MenusDeleteOne{builder}
+}
+
+// Query returns a query builder for Menus.
+func (c *MenusClient) Query() *MenusQuery {
+	return &MenusQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMenus},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Menus entity by its id.
+func (c *MenusClient) Get(ctx context.Context, id int) (*Menus, error) {
+	return c.Query().Where(menus.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MenusClient) GetX(ctx context.Context, id int) *Menus {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryLionResources queries the lion_resources edge of a Menus.
+func (c *MenusClient) QueryLionResources(_m *Menus) *ResourcesQuery {
+	query := (&ResourcesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(menus.Table, menus.FieldID, id),
+			sqlgraph.To(resources.Table, resources.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, menus.LionResourcesTable, menus.LionResourcesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MenusClient) Hooks() []Hook {
+	return c.hooks.Menus
+}
+
+// Interceptors returns the client interceptors.
+func (c *MenusClient) Interceptors() []Interceptor {
+	return c.inters.Menus
+}
+
+func (c *MenusClient) mutate(ctx context.Context, m *MenusMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MenusCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MenusUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MenusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MenusDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown Menus mutation op: %q", m.Op())
+	}
+}
+
 // PermissionBindingsClient is a client for the PermissionBindings schema.
 type PermissionBindingsClient struct {
 	config
@@ -2627,6 +2816,171 @@ func (c *ResourceScopesClient) mutate(ctx context.Context, m *ResourceScopesMuta
 	}
 }
 
+// ResourceTypesClient is a client for the ResourceTypes schema.
+type ResourceTypesClient struct {
+	config
+}
+
+// NewResourceTypesClient returns a client for the ResourceTypes from the given config.
+func NewResourceTypesClient(c config) *ResourceTypesClient {
+	return &ResourceTypesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `resourcetypes.Hooks(f(g(h())))`.
+func (c *ResourceTypesClient) Use(hooks ...Hook) {
+	c.hooks.ResourceTypes = append(c.hooks.ResourceTypes, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `resourcetypes.Intercept(f(g(h())))`.
+func (c *ResourceTypesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ResourceTypes = append(c.inters.ResourceTypes, interceptors...)
+}
+
+// Create returns a builder for creating a ResourceTypes entity.
+func (c *ResourceTypesClient) Create() *ResourceTypesCreate {
+	mutation := newResourceTypesMutation(c.config, OpCreate)
+	return &ResourceTypesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ResourceTypes entities.
+func (c *ResourceTypesClient) CreateBulk(builders ...*ResourceTypesCreate) *ResourceTypesCreateBulk {
+	return &ResourceTypesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ResourceTypesClient) MapCreateBulk(slice any, setFunc func(*ResourceTypesCreate, int)) *ResourceTypesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ResourceTypesCreateBulk{err: fmt.Errorf("calling to ResourceTypesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ResourceTypesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ResourceTypesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ResourceTypes.
+func (c *ResourceTypesClient) Update() *ResourceTypesUpdate {
+	mutation := newResourceTypesMutation(c.config, OpUpdate)
+	return &ResourceTypesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ResourceTypesClient) UpdateOne(_m *ResourceTypes) *ResourceTypesUpdateOne {
+	mutation := newResourceTypesMutation(c.config, OpUpdateOne, withResourceTypes(_m))
+	return &ResourceTypesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ResourceTypesClient) UpdateOneID(id int) *ResourceTypesUpdateOne {
+	mutation := newResourceTypesMutation(c.config, OpUpdateOne, withResourceTypesID(id))
+	return &ResourceTypesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ResourceTypes.
+func (c *ResourceTypesClient) Delete() *ResourceTypesDelete {
+	mutation := newResourceTypesMutation(c.config, OpDelete)
+	return &ResourceTypesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ResourceTypesClient) DeleteOne(_m *ResourceTypes) *ResourceTypesDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ResourceTypesClient) DeleteOneID(id int) *ResourceTypesDeleteOne {
+	builder := c.Delete().Where(resourcetypes.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ResourceTypesDeleteOne{builder}
+}
+
+// Query returns a query builder for ResourceTypes.
+func (c *ResourceTypesClient) Query() *ResourceTypesQuery {
+	return &ResourceTypesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeResourceTypes},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ResourceTypes entity by its id.
+func (c *ResourceTypesClient) Get(ctx context.Context, id int) (*ResourceTypes, error) {
+	return c.Query().Where(resourcetypes.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ResourceTypesClient) GetX(ctx context.Context, id int) *ResourceTypes {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryLionResources queries the lion_resources edge of a ResourceTypes.
+func (c *ResourceTypesClient) QueryLionResources(_m *ResourceTypes) *ResourcesQuery {
+	query := (&ResourcesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourcetypes.Table, resourcetypes.FieldID, id),
+			sqlgraph.To(resources.Table, resources.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resourcetypes.LionResourcesTable, resourcetypes.LionResourcesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionActions queries the lion_actions edge of a ResourceTypes.
+func (c *ResourceTypesClient) QueryLionActions(_m *ResourceTypes) *ActionsQuery {
+	query := (&ActionsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resourcetypes.Table, resourcetypes.FieldID, id),
+			sqlgraph.To(actions.Table, actions.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resourcetypes.LionActionsTable, resourcetypes.LionActionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ResourceTypesClient) Hooks() []Hook {
+	return c.hooks.ResourceTypes
+}
+
+// Interceptors returns the client interceptors.
+func (c *ResourceTypesClient) Interceptors() []Interceptor {
+	return c.inters.ResourceTypes
+}
+
+func (c *ResourceTypesClient) mutate(ctx context.Context, m *ResourceTypesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ResourceTypesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ResourceTypesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ResourceTypesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ResourceTypesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown ResourceTypes mutation op: %q", m.Op())
+	}
+}
+
 // ResourcesClient is a client for the Resources schema.
 type ResourcesClient struct {
 	config
@@ -2733,6 +3087,38 @@ func (c *ResourcesClient) GetX(ctx context.Context, id int) *Resources {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryLionResourceTypes queries the lion_resource_types edge of a Resources.
+func (c *ResourcesClient) QueryLionResourceTypes(_m *Resources) *ResourceTypesQuery {
+	query := (&ResourceTypesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resources.Table, resources.FieldID, id),
+			sqlgraph.To(resourcetypes.Table, resourcetypes.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, resources.LionResourceTypesTable, resources.LionResourceTypesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionMenus queries the lion_menus edge of a Resources.
+func (c *ResourcesClient) QueryLionMenus(_m *Resources) *MenusQuery {
+	query := (&MenusClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(resources.Table, resources.FieldID, id),
+			sqlgraph.To(menus.Table, menus.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, resources.LionMenusTable, resources.LionMenusColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // QueryLionResourceScopes queries the lion_resource_scopes edge of a Resources.
@@ -3268,6 +3654,139 @@ func (c *ScopesClient) mutate(ctx context.Context, m *ScopesMutation) (Value, er
 		return (&ScopesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown Scopes mutation op: %q", m.Op())
+	}
+}
+
+// ServicesClient is a client for the Services schema.
+type ServicesClient struct {
+	config
+}
+
+// NewServicesClient returns a client for the Services from the given config.
+func NewServicesClient(c config) *ServicesClient {
+	return &ServicesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `services.Hooks(f(g(h())))`.
+func (c *ServicesClient) Use(hooks ...Hook) {
+	c.hooks.Services = append(c.hooks.Services, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `services.Intercept(f(g(h())))`.
+func (c *ServicesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Services = append(c.inters.Services, interceptors...)
+}
+
+// Create returns a builder for creating a Services entity.
+func (c *ServicesClient) Create() *ServicesCreate {
+	mutation := newServicesMutation(c.config, OpCreate)
+	return &ServicesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Services entities.
+func (c *ServicesClient) CreateBulk(builders ...*ServicesCreate) *ServicesCreateBulk {
+	return &ServicesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ServicesClient) MapCreateBulk(slice any, setFunc func(*ServicesCreate, int)) *ServicesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ServicesCreateBulk{err: fmt.Errorf("calling to ServicesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ServicesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ServicesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Services.
+func (c *ServicesClient) Update() *ServicesUpdate {
+	mutation := newServicesMutation(c.config, OpUpdate)
+	return &ServicesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ServicesClient) UpdateOne(_m *Services) *ServicesUpdateOne {
+	mutation := newServicesMutation(c.config, OpUpdateOne, withServices(_m))
+	return &ServicesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ServicesClient) UpdateOneID(id int) *ServicesUpdateOne {
+	mutation := newServicesMutation(c.config, OpUpdateOne, withServicesID(id))
+	return &ServicesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Services.
+func (c *ServicesClient) Delete() *ServicesDelete {
+	mutation := newServicesMutation(c.config, OpDelete)
+	return &ServicesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ServicesClient) DeleteOne(_m *Services) *ServicesDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ServicesClient) DeleteOneID(id int) *ServicesDeleteOne {
+	builder := c.Delete().Where(services.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ServicesDeleteOne{builder}
+}
+
+// Query returns a query builder for Services.
+func (c *ServicesClient) Query() *ServicesQuery {
+	return &ServicesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeServices},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Services entity by its id.
+func (c *ServicesClient) Get(ctx context.Context, id int) (*Services, error) {
+	return c.Query().Where(services.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ServicesClient) GetX(ctx context.Context, id int) *Services {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ServicesClient) Hooks() []Hook {
+	return c.hooks.Services
+}
+
+// Interceptors returns the client interceptors.
+func (c *ServicesClient) Interceptors() []Interceptor {
+	return c.inters.Services
+}
+
+func (c *ServicesClient) mutate(ctx context.Context, m *ServicesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ServicesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ServicesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ServicesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ServicesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown Services mutation op: %q", m.Op())
 	}
 }
 
@@ -3935,16 +4454,16 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 type (
 	hooks struct {
 		Actions, AuthProviders, Credentials, DepartmentMembers, Departments,
-		GroupMembers, GroupRoles, Groups, PermissionBindings, Permissions, Policies,
-		PolicyAttachments, PolicyStatements, ResourceScopes, Resources,
-		RolePermissions, Roles, Scopes, UserIdentities, UserProfiles, UserRoles,
-		Users []ent.Hook
+		GroupMembers, GroupRoles, Groups, Menus, PermissionBindings, Permissions,
+		Policies, PolicyAttachments, PolicyStatements, ResourceScopes, ResourceTypes,
+		Resources, RolePermissions, Roles, Scopes, Services, UserIdentities,
+		UserProfiles, UserRoles, Users []ent.Hook
 	}
 	inters struct {
 		Actions, AuthProviders, Credentials, DepartmentMembers, Departments,
-		GroupMembers, GroupRoles, Groups, PermissionBindings, Permissions, Policies,
-		PolicyAttachments, PolicyStatements, ResourceScopes, Resources,
-		RolePermissions, Roles, Scopes, UserIdentities, UserProfiles, UserRoles,
-		Users []ent.Interceptor
+		GroupMembers, GroupRoles, Groups, Menus, PermissionBindings, Permissions,
+		Policies, PolicyAttachments, PolicyStatements, ResourceScopes, ResourceTypes,
+		Resources, RolePermissions, Roles, Scopes, Services, UserIdentities,
+		UserProfiles, UserRoles, Users []ent.Interceptor
 	}
 )

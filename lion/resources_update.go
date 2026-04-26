@@ -11,9 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/resourcetypes"
 )
 
 // ResourcesUpdate is the builder for updating Resources entities.
@@ -130,6 +132,104 @@ func (_u *ResourcesUpdate) AddParentID(v int64) *ResourcesUpdate {
 	return _u
 }
 
+// SetResourceTypeID sets the "resource_type_id" field.
+func (_u *ResourcesUpdate) SetResourceTypeID(v int) *ResourcesUpdate {
+	_u.mutation.SetResourceTypeID(v)
+	return _u
+}
+
+// SetNillableResourceTypeID sets the "resource_type_id" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableResourceTypeID(v *int) *ResourcesUpdate {
+	if v != nil {
+		_u.SetResourceTypeID(*v)
+	}
+	return _u
+}
+
+// SetResourceTypeCode sets the "resource_type_code" field.
+func (_u *ResourcesUpdate) SetResourceTypeCode(v string) *ResourcesUpdate {
+	_u.mutation.SetResourceTypeCode(v)
+	return _u
+}
+
+// SetNillableResourceTypeCode sets the "resource_type_code" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableResourceTypeCode(v *string) *ResourcesUpdate {
+	if v != nil {
+		_u.SetResourceTypeCode(*v)
+	}
+	return _u
+}
+
+// SetServiceCode sets the "service_code" field.
+func (_u *ResourcesUpdate) SetServiceCode(v string) *ResourcesUpdate {
+	_u.mutation.SetServiceCode(v)
+	return _u
+}
+
+// SetNillableServiceCode sets the "service_code" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableServiceCode(v *string) *ResourcesUpdate {
+	if v != nil {
+		_u.SetServiceCode(*v)
+	}
+	return _u
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (_u *ResourcesUpdate) SetTenantID(v string) *ResourcesUpdate {
+	_u.mutation.SetTenantID(v)
+	return _u
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableTenantID(v *string) *ResourcesUpdate {
+	if v != nil {
+		_u.SetTenantID(*v)
+	}
+	return _u
+}
+
+// SetRegion sets the "region" field.
+func (_u *ResourcesUpdate) SetRegion(v string) *ResourcesUpdate {
+	_u.mutation.SetRegion(v)
+	return _u
+}
+
+// SetNillableRegion sets the "region" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableRegion(v *string) *ResourcesUpdate {
+	if v != nil {
+		_u.SetRegion(*v)
+	}
+	return _u
+}
+
+// SetResourcePath sets the "resource_path" field.
+func (_u *ResourcesUpdate) SetResourcePath(v string) *ResourcesUpdate {
+	_u.mutation.SetResourcePath(v)
+	return _u
+}
+
+// SetNillableResourcePath sets the "resource_path" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableResourcePath(v *string) *ResourcesUpdate {
+	if v != nil {
+		_u.SetResourcePath(*v)
+	}
+	return _u
+}
+
+// SetGrn sets the "grn" field.
+func (_u *ResourcesUpdate) SetGrn(v string) *ResourcesUpdate {
+	_u.mutation.SetGrn(v)
+	return _u
+}
+
+// SetNillableGrn sets the "grn" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableGrn(v *string) *ResourcesUpdate {
+	if v != nil {
+		_u.SetGrn(*v)
+	}
+	return _u
+}
+
 // SetCode sets the "code" field.
 func (_u *ResourcesUpdate) SetCode(v string) *ResourcesUpdate {
 	_u.mutation.SetCode(v)
@@ -211,6 +311,20 @@ func (_u *ResourcesUpdate) SetNillableResourceStatus(v *int) *ResourcesUpdate {
 // AddResourceStatus adds value to the "resource_status" field.
 func (_u *ResourcesUpdate) AddResourceStatus(v int) *ResourcesUpdate {
 	_u.mutation.AddResourceStatus(v)
+	return _u
+}
+
+// SetResourceStatusCode sets the "resource_status_code" field.
+func (_u *ResourcesUpdate) SetResourceStatusCode(v string) *ResourcesUpdate {
+	_u.mutation.SetResourceStatusCode(v)
+	return _u
+}
+
+// SetNillableResourceStatusCode sets the "resource_status_code" field if the given value is not nil.
+func (_u *ResourcesUpdate) SetNillableResourceStatusCode(v *string) *ResourcesUpdate {
+	if v != nil {
+		_u.SetResourceStatusCode(*v)
+	}
 	return _u
 }
 
@@ -326,6 +440,32 @@ func (_u *ResourcesUpdate) SetNillableProtected(v *bool) *ResourcesUpdate {
 	return _u
 }
 
+// SetLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID.
+func (_u *ResourcesUpdate) SetLionResourceTypesID(id int) *ResourcesUpdate {
+	_u.mutation.SetLionResourceTypesID(id)
+	return _u
+}
+
+// SetLionResourceTypes sets the "lion_resource_types" edge to the ResourceTypes entity.
+func (_u *ResourcesUpdate) SetLionResourceTypes(v *ResourceTypes) *ResourcesUpdate {
+	return _u.SetLionResourceTypesID(v.ID)
+}
+
+// AddLionMenuIDs adds the "lion_menus" edge to the Menus entity by IDs.
+func (_u *ResourcesUpdate) AddLionMenuIDs(ids ...int) *ResourcesUpdate {
+	_u.mutation.AddLionMenuIDs(ids...)
+	return _u
+}
+
+// AddLionMenus adds the "lion_menus" edges to the Menus entity.
+func (_u *ResourcesUpdate) AddLionMenus(v ...*Menus) *ResourcesUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionMenuIDs(ids...)
+}
+
 // AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
 func (_u *ResourcesUpdate) AddLionResourceScopeIDs(ids ...int) *ResourcesUpdate {
 	_u.mutation.AddLionResourceScopeIDs(ids...)
@@ -344,6 +484,33 @@ func (_u *ResourcesUpdate) AddLionResourceScopes(v ...*ResourceScopes) *Resource
 // Mutation returns the ResourcesMutation object of the builder.
 func (_u *ResourcesUpdate) Mutation() *ResourcesMutation {
 	return _u.mutation
+}
+
+// ClearLionResourceTypes clears the "lion_resource_types" edge to the ResourceTypes entity.
+func (_u *ResourcesUpdate) ClearLionResourceTypes() *ResourcesUpdate {
+	_u.mutation.ClearLionResourceTypes()
+	return _u
+}
+
+// ClearLionMenus clears all "lion_menus" edges to the Menus entity.
+func (_u *ResourcesUpdate) ClearLionMenus() *ResourcesUpdate {
+	_u.mutation.ClearLionMenus()
+	return _u
+}
+
+// RemoveLionMenuIDs removes the "lion_menus" edge to Menus entities by IDs.
+func (_u *ResourcesUpdate) RemoveLionMenuIDs(ids ...int) *ResourcesUpdate {
+	_u.mutation.RemoveLionMenuIDs(ids...)
+	return _u
+}
+
+// RemoveLionMenus removes "lion_menus" edges to Menus entities.
+func (_u *ResourcesUpdate) RemoveLionMenus(v ...*Menus) *ResourcesUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionMenuIDs(ids...)
 }
 
 // ClearLionResourceScopes clears all "lion_resource_scopes" edges to the ResourceScopes entity.
@@ -405,6 +572,41 @@ func (_u *ResourcesUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ResourcesUpdate) check() error {
+	if v, ok := _u.mutation.ResourceTypeID(); ok {
+		if err := resources.ResourceTypeIDValidator(v); err != nil {
+			return &ValidationError{Name: "resource_type_id", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_type_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ResourceTypeCode(); ok {
+		if err := resources.ResourceTypeCodeValidator(v); err != nil {
+			return &ValidationError{Name: "resource_type_code", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_type_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ServiceCode(); ok {
+		if err := resources.ServiceCodeValidator(v); err != nil {
+			return &ValidationError{Name: "service_code", err: fmt.Errorf(`lion: validator failed for field "Resources.service_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.TenantID(); ok {
+		if err := resources.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`lion: validator failed for field "Resources.tenant_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Region(); ok {
+		if err := resources.RegionValidator(v); err != nil {
+			return &ValidationError{Name: "region", err: fmt.Errorf(`lion: validator failed for field "Resources.region": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ResourcePath(); ok {
+		if err := resources.ResourcePathValidator(v); err != nil {
+			return &ValidationError{Name: "resource_path", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_path": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Grn(); ok {
+		if err := resources.GrnValidator(v); err != nil {
+			return &ValidationError{Name: "grn", err: fmt.Errorf(`lion: validator failed for field "Resources.grn": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Code(); ok {
 		if err := resources.CodeValidator(v); err != nil {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Resources.code": %w`, err)}
@@ -413,6 +615,11 @@ func (_u *ResourcesUpdate) check() error {
 	if v, ok := _u.mutation.Name(); ok {
 		if err := resources.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Resources.name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ResourceStatusCode(); ok {
+		if err := resources.ResourceStatusCodeValidator(v); err != nil {
+			return &ValidationError{Name: "resource_status_code", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_status_code": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Locator(); ok {
@@ -424,6 +631,9 @@ func (_u *ResourcesUpdate) check() error {
 		if err := resources.VisualValidator(v); err != nil {
 			return &ValidationError{Name: "visual", err: fmt.Errorf(`lion: validator failed for field "Resources.visual": %w`, err)}
 		}
+	}
+	if _u.mutation.LionResourceTypesCleared() && len(_u.mutation.LionResourceTypesIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "Resources.lion_resource_types"`)
 	}
 	return nil
 }
@@ -473,6 +683,24 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedParentID(); ok {
 		_spec.AddField(resources.FieldParentID, field.TypeInt64, value)
 	}
+	if value, ok := _u.mutation.ResourceTypeCode(); ok {
+		_spec.SetField(resources.FieldResourceTypeCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ServiceCode(); ok {
+		_spec.SetField(resources.FieldServiceCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.TenantID(); ok {
+		_spec.SetField(resources.FieldTenantID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Region(); ok {
+		_spec.SetField(resources.FieldRegion, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ResourcePath(); ok {
+		_spec.SetField(resources.FieldResourcePath, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Grn(); ok {
+		_spec.SetField(resources.FieldGrn, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Code(); ok {
 		_spec.SetField(resources.FieldCode, field.TypeString, value)
 	}
@@ -493,6 +721,9 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedResourceStatus(); ok {
 		_spec.AddField(resources.FieldResourceStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ResourceStatusCode(); ok {
+		_spec.SetField(resources.FieldResourceStatusCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Visibility(); ok {
 		_spec.SetField(resources.FieldVisibility, field.TypeInt, value)
@@ -520,6 +751,80 @@ func (_u *ResourcesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Protected(); ok {
 		_spec.SetField(resources.FieldProtected, field.TypeBool, value)
+	}
+	if _u.mutation.LionResourceTypesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resources.LionResourceTypesTable,
+			Columns: []string{resources.LionResourceTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcetypes.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionResourceTypesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resources.LionResourceTypesTable,
+			Columns: []string{resources.LionResourceTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcetypes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LionMenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resources.LionMenusTable,
+			Columns: []string{resources.LionMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionMenusIDs(); len(nodes) > 0 && !_u.mutation.LionMenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resources.LionMenusTable,
+			Columns: []string{resources.LionMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionMenusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resources.LionMenusTable,
+			Columns: []string{resources.LionMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.LionResourceScopesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -687,6 +992,104 @@ func (_u *ResourcesUpdateOne) AddParentID(v int64) *ResourcesUpdateOne {
 	return _u
 }
 
+// SetResourceTypeID sets the "resource_type_id" field.
+func (_u *ResourcesUpdateOne) SetResourceTypeID(v int) *ResourcesUpdateOne {
+	_u.mutation.SetResourceTypeID(v)
+	return _u
+}
+
+// SetNillableResourceTypeID sets the "resource_type_id" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableResourceTypeID(v *int) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetResourceTypeID(*v)
+	}
+	return _u
+}
+
+// SetResourceTypeCode sets the "resource_type_code" field.
+func (_u *ResourcesUpdateOne) SetResourceTypeCode(v string) *ResourcesUpdateOne {
+	_u.mutation.SetResourceTypeCode(v)
+	return _u
+}
+
+// SetNillableResourceTypeCode sets the "resource_type_code" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableResourceTypeCode(v *string) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetResourceTypeCode(*v)
+	}
+	return _u
+}
+
+// SetServiceCode sets the "service_code" field.
+func (_u *ResourcesUpdateOne) SetServiceCode(v string) *ResourcesUpdateOne {
+	_u.mutation.SetServiceCode(v)
+	return _u
+}
+
+// SetNillableServiceCode sets the "service_code" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableServiceCode(v *string) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetServiceCode(*v)
+	}
+	return _u
+}
+
+// SetTenantID sets the "tenant_id" field.
+func (_u *ResourcesUpdateOne) SetTenantID(v string) *ResourcesUpdateOne {
+	_u.mutation.SetTenantID(v)
+	return _u
+}
+
+// SetNillableTenantID sets the "tenant_id" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableTenantID(v *string) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetTenantID(*v)
+	}
+	return _u
+}
+
+// SetRegion sets the "region" field.
+func (_u *ResourcesUpdateOne) SetRegion(v string) *ResourcesUpdateOne {
+	_u.mutation.SetRegion(v)
+	return _u
+}
+
+// SetNillableRegion sets the "region" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableRegion(v *string) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetRegion(*v)
+	}
+	return _u
+}
+
+// SetResourcePath sets the "resource_path" field.
+func (_u *ResourcesUpdateOne) SetResourcePath(v string) *ResourcesUpdateOne {
+	_u.mutation.SetResourcePath(v)
+	return _u
+}
+
+// SetNillableResourcePath sets the "resource_path" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableResourcePath(v *string) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetResourcePath(*v)
+	}
+	return _u
+}
+
+// SetGrn sets the "grn" field.
+func (_u *ResourcesUpdateOne) SetGrn(v string) *ResourcesUpdateOne {
+	_u.mutation.SetGrn(v)
+	return _u
+}
+
+// SetNillableGrn sets the "grn" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableGrn(v *string) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetGrn(*v)
+	}
+	return _u
+}
+
 // SetCode sets the "code" field.
 func (_u *ResourcesUpdateOne) SetCode(v string) *ResourcesUpdateOne {
 	_u.mutation.SetCode(v)
@@ -768,6 +1171,20 @@ func (_u *ResourcesUpdateOne) SetNillableResourceStatus(v *int) *ResourcesUpdate
 // AddResourceStatus adds value to the "resource_status" field.
 func (_u *ResourcesUpdateOne) AddResourceStatus(v int) *ResourcesUpdateOne {
 	_u.mutation.AddResourceStatus(v)
+	return _u
+}
+
+// SetResourceStatusCode sets the "resource_status_code" field.
+func (_u *ResourcesUpdateOne) SetResourceStatusCode(v string) *ResourcesUpdateOne {
+	_u.mutation.SetResourceStatusCode(v)
+	return _u
+}
+
+// SetNillableResourceStatusCode sets the "resource_status_code" field if the given value is not nil.
+func (_u *ResourcesUpdateOne) SetNillableResourceStatusCode(v *string) *ResourcesUpdateOne {
+	if v != nil {
+		_u.SetResourceStatusCode(*v)
+	}
 	return _u
 }
 
@@ -883,6 +1300,32 @@ func (_u *ResourcesUpdateOne) SetNillableProtected(v *bool) *ResourcesUpdateOne 
 	return _u
 }
 
+// SetLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID.
+func (_u *ResourcesUpdateOne) SetLionResourceTypesID(id int) *ResourcesUpdateOne {
+	_u.mutation.SetLionResourceTypesID(id)
+	return _u
+}
+
+// SetLionResourceTypes sets the "lion_resource_types" edge to the ResourceTypes entity.
+func (_u *ResourcesUpdateOne) SetLionResourceTypes(v *ResourceTypes) *ResourcesUpdateOne {
+	return _u.SetLionResourceTypesID(v.ID)
+}
+
+// AddLionMenuIDs adds the "lion_menus" edge to the Menus entity by IDs.
+func (_u *ResourcesUpdateOne) AddLionMenuIDs(ids ...int) *ResourcesUpdateOne {
+	_u.mutation.AddLionMenuIDs(ids...)
+	return _u
+}
+
+// AddLionMenus adds the "lion_menus" edges to the Menus entity.
+func (_u *ResourcesUpdateOne) AddLionMenus(v ...*Menus) *ResourcesUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionMenuIDs(ids...)
+}
+
 // AddLionResourceScopeIDs adds the "lion_resource_scopes" edge to the ResourceScopes entity by IDs.
 func (_u *ResourcesUpdateOne) AddLionResourceScopeIDs(ids ...int) *ResourcesUpdateOne {
 	_u.mutation.AddLionResourceScopeIDs(ids...)
@@ -901,6 +1344,33 @@ func (_u *ResourcesUpdateOne) AddLionResourceScopes(v ...*ResourceScopes) *Resou
 // Mutation returns the ResourcesMutation object of the builder.
 func (_u *ResourcesUpdateOne) Mutation() *ResourcesMutation {
 	return _u.mutation
+}
+
+// ClearLionResourceTypes clears the "lion_resource_types" edge to the ResourceTypes entity.
+func (_u *ResourcesUpdateOne) ClearLionResourceTypes() *ResourcesUpdateOne {
+	_u.mutation.ClearLionResourceTypes()
+	return _u
+}
+
+// ClearLionMenus clears all "lion_menus" edges to the Menus entity.
+func (_u *ResourcesUpdateOne) ClearLionMenus() *ResourcesUpdateOne {
+	_u.mutation.ClearLionMenus()
+	return _u
+}
+
+// RemoveLionMenuIDs removes the "lion_menus" edge to Menus entities by IDs.
+func (_u *ResourcesUpdateOne) RemoveLionMenuIDs(ids ...int) *ResourcesUpdateOne {
+	_u.mutation.RemoveLionMenuIDs(ids...)
+	return _u
+}
+
+// RemoveLionMenus removes "lion_menus" edges to Menus entities.
+func (_u *ResourcesUpdateOne) RemoveLionMenus(v ...*Menus) *ResourcesUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionMenuIDs(ids...)
 }
 
 // ClearLionResourceScopes clears all "lion_resource_scopes" edges to the ResourceScopes entity.
@@ -975,6 +1445,41 @@ func (_u *ResourcesUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ResourcesUpdateOne) check() error {
+	if v, ok := _u.mutation.ResourceTypeID(); ok {
+		if err := resources.ResourceTypeIDValidator(v); err != nil {
+			return &ValidationError{Name: "resource_type_id", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_type_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ResourceTypeCode(); ok {
+		if err := resources.ResourceTypeCodeValidator(v); err != nil {
+			return &ValidationError{Name: "resource_type_code", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_type_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ServiceCode(); ok {
+		if err := resources.ServiceCodeValidator(v); err != nil {
+			return &ValidationError{Name: "service_code", err: fmt.Errorf(`lion: validator failed for field "Resources.service_code": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.TenantID(); ok {
+		if err := resources.TenantIDValidator(v); err != nil {
+			return &ValidationError{Name: "tenant_id", err: fmt.Errorf(`lion: validator failed for field "Resources.tenant_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Region(); ok {
+		if err := resources.RegionValidator(v); err != nil {
+			return &ValidationError{Name: "region", err: fmt.Errorf(`lion: validator failed for field "Resources.region": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ResourcePath(); ok {
+		if err := resources.ResourcePathValidator(v); err != nil {
+			return &ValidationError{Name: "resource_path", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_path": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Grn(); ok {
+		if err := resources.GrnValidator(v); err != nil {
+			return &ValidationError{Name: "grn", err: fmt.Errorf(`lion: validator failed for field "Resources.grn": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.Code(); ok {
 		if err := resources.CodeValidator(v); err != nil {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Resources.code": %w`, err)}
@@ -983,6 +1488,11 @@ func (_u *ResourcesUpdateOne) check() error {
 	if v, ok := _u.mutation.Name(); ok {
 		if err := resources.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`lion: validator failed for field "Resources.name": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.ResourceStatusCode(); ok {
+		if err := resources.ResourceStatusCodeValidator(v); err != nil {
+			return &ValidationError{Name: "resource_status_code", err: fmt.Errorf(`lion: validator failed for field "Resources.resource_status_code": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Locator(); ok {
@@ -994,6 +1504,9 @@ func (_u *ResourcesUpdateOne) check() error {
 		if err := resources.VisualValidator(v); err != nil {
 			return &ValidationError{Name: "visual", err: fmt.Errorf(`lion: validator failed for field "Resources.visual": %w`, err)}
 		}
+	}
+	if _u.mutation.LionResourceTypesCleared() && len(_u.mutation.LionResourceTypesIDs()) > 0 {
+		return errors.New(`lion: clearing a required unique edge "Resources.lion_resource_types"`)
 	}
 	return nil
 }
@@ -1060,6 +1573,24 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	if value, ok := _u.mutation.AddedParentID(); ok {
 		_spec.AddField(resources.FieldParentID, field.TypeInt64, value)
 	}
+	if value, ok := _u.mutation.ResourceTypeCode(); ok {
+		_spec.SetField(resources.FieldResourceTypeCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ServiceCode(); ok {
+		_spec.SetField(resources.FieldServiceCode, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.TenantID(); ok {
+		_spec.SetField(resources.FieldTenantID, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Region(); ok {
+		_spec.SetField(resources.FieldRegion, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.ResourcePath(); ok {
+		_spec.SetField(resources.FieldResourcePath, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Grn(); ok {
+		_spec.SetField(resources.FieldGrn, field.TypeString, value)
+	}
 	if value, ok := _u.mutation.Code(); ok {
 		_spec.SetField(resources.FieldCode, field.TypeString, value)
 	}
@@ -1080,6 +1611,9 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	}
 	if value, ok := _u.mutation.AddedResourceStatus(); ok {
 		_spec.AddField(resources.FieldResourceStatus, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.ResourceStatusCode(); ok {
+		_spec.SetField(resources.FieldResourceStatusCode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Visibility(); ok {
 		_spec.SetField(resources.FieldVisibility, field.TypeInt, value)
@@ -1107,6 +1641,80 @@ func (_u *ResourcesUpdateOne) sqlSave(ctx context.Context) (_node *Resources, er
 	}
 	if value, ok := _u.mutation.Protected(); ok {
 		_spec.SetField(resources.FieldProtected, field.TypeBool, value)
+	}
+	if _u.mutation.LionResourceTypesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resources.LionResourceTypesTable,
+			Columns: []string{resources.LionResourceTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcetypes.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionResourceTypesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   resources.LionResourceTypesTable,
+			Columns: []string{resources.LionResourceTypesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(resourcetypes.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.LionMenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resources.LionMenusTable,
+			Columns: []string{resources.LionMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionMenusIDs(); len(nodes) > 0 && !_u.mutation.LionMenusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resources.LionMenusTable,
+			Columns: []string{resources.LionMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionMenusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   resources.LionMenusTable,
+			Columns: []string{resources.LionMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.LionResourceScopesCleared() {
 		edge := &sqlgraph.EdgeSpec{

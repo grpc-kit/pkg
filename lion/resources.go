@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/grpc-kit/pkg/lion/resources"
+	"github.com/grpc-kit/pkg/lion/resourcetypes"
 )
 
 // Resources is the model entity for the Resources schema.
@@ -29,25 +30,41 @@ type Resources struct {
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 父资源 ID，为 0 表示顶级资源
 	ParentID int64 `json:"parent_id,omitempty"`
+	// 关联 lion_resource_types 表 ID
+	ResourceTypeID int `json:"resource_type_id,omitempty"`
+	// 资源类型代码，冗余自 lion_resource_types.code
+	ResourceTypeCode string `json:"resource_type_code,omitempty"`
+	// 服务短代码，对应 lion_services.code
+	ServiceCode string `json:"service_code,omitempty"`
+	// 租户 ID，单租户场景可为空
+	TenantID string `json:"tenant_id,omitempty"`
+	// 区域代码，单区域场景可为空
+	Region string `json:"region,omitempty"`
+	// 资源路径，支持 * 通配
+	ResourcePath string `json:"resource_path,omitempty"`
+	// 资源 GRN，迁移阶段由应用层或迁移脚本维护
+	Grn string `json:"grn,omitempty"`
 	// 资源名称
 	Code string `json:"code,omitempty"`
-	// 稳定资源名（GRN），格式：grn:{service}:{tenant}:{region}:{resource_type}:{resource_path}
+	// 兼容期保留的稳定资源名（旧 GRN 字段）
 	Name string `json:"name,omitempty"`
 	// 友好展示名称
 	DisplayName string `json:"display_name,omitempty"`
-	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
+	// 兼容期保留的旧资源类型枚举字段
 	ResourceType int `json:"resource_type,omitempty"`
-	// 是否启用该资源项，禁用后完全不可访问
+	// 兼容期保留的旧资源状态枚举字段
 	ResourceStatus int `json:"resource_status,omitempty"`
+	// 新资源状态代码，如 active / disabled
+	ResourceStatusCode string `json:"resource_status_code,omitempty"`
 	// 可见性定义，对应 api/known/admin/v1/common.proto 中定义
 	Visibility int `json:"visibility,omitempty"`
-	// 资源排序顺序，用于同级资源的显示顺序，数值越小排序越靠前，建议使用 10 的倍数便于后续插入，默认值：100，范围：1-9999
+	// 兼容期保留的资源排序顺序
 	SortOrder int `json:"sort_order,omitempty"`
-	// 资源路径
+	// 兼容期保留的资源路径字段
 	Locator string `json:"locator,omitempty"`
-	// 图标名称，如 UserOutlined
+	// 兼容期保留的图标字段
 	Visual string `json:"visual,omitempty"`
-	// 组件名称，如 UserOutlined
+	// 兼容期保留的组件字段
 	Manifest string `json:"manifest,omitempty"`
 	// 详细描述
 	Description string `json:"description,omitempty"`
@@ -61,17 +78,41 @@ type Resources struct {
 
 // ResourcesEdges holds the relations/edges for other nodes in the graph.
 type ResourcesEdges struct {
+	// LionResourceTypes holds the value of the lion_resource_types edge.
+	LionResourceTypes *ResourceTypes `json:"lion_resource_types,omitempty"`
+	// LionMenus holds the value of the lion_menus edge.
+	LionMenus []*Menus `json:"lion_menus,omitempty"`
 	// LionResourceScopes holds the value of the lion_resource_scopes edge.
 	LionResourceScopes []*ResourceScopes `json:"lion_resource_scopes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
+}
+
+// LionResourceTypesOrErr returns the LionResourceTypes value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ResourcesEdges) LionResourceTypesOrErr() (*ResourceTypes, error) {
+	if e.LionResourceTypes != nil {
+		return e.LionResourceTypes, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: resourcetypes.Label}
+	}
+	return nil, &NotLoadedError{edge: "lion_resource_types"}
+}
+
+// LionMenusOrErr returns the LionMenus value or an error if the edge
+// was not loaded in eager-loading.
+func (e ResourcesEdges) LionMenusOrErr() ([]*Menus, error) {
+	if e.loadedTypes[1] {
+		return e.LionMenus, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_menus"}
 }
 
 // LionResourceScopesOrErr returns the LionResourceScopes value or an error if the edge
 // was not loaded in eager-loading.
 func (e ResourcesEdges) LionResourceScopesOrErr() ([]*ResourceScopes, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[2] {
 		return e.LionResourceScopes, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_resource_scopes"}
@@ -84,9 +125,9 @@ func (*Resources) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case resources.FieldProtected:
 			values[i] = new(sql.NullBool)
-		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldResourceType, resources.FieldResourceStatus, resources.FieldVisibility, resources.FieldSortOrder:
+		case resources.FieldID, resources.FieldCreatedBy, resources.FieldUpdatedBy, resources.FieldParentID, resources.FieldResourceTypeID, resources.FieldResourceType, resources.FieldResourceStatus, resources.FieldVisibility, resources.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case resources.FieldCode, resources.FieldName, resources.FieldDisplayName, resources.FieldLocator, resources.FieldVisual, resources.FieldManifest, resources.FieldDescription:
+		case resources.FieldResourceTypeCode, resources.FieldServiceCode, resources.FieldTenantID, resources.FieldRegion, resources.FieldResourcePath, resources.FieldGrn, resources.FieldCode, resources.FieldName, resources.FieldDisplayName, resources.FieldResourceStatusCode, resources.FieldLocator, resources.FieldVisual, resources.FieldManifest, resources.FieldDescription:
 			values[i] = new(sql.NullString)
 		case resources.FieldCreatedAt, resources.FieldUpdatedAt, resources.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -148,6 +189,48 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ParentID = value.Int64
 			}
+		case resources.FieldResourceTypeID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_type_id", values[i])
+			} else if value.Valid {
+				_m.ResourceTypeID = int(value.Int64)
+			}
+		case resources.FieldResourceTypeCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_type_code", values[i])
+			} else if value.Valid {
+				_m.ResourceTypeCode = value.String
+			}
+		case resources.FieldServiceCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field service_code", values[i])
+			} else if value.Valid {
+				_m.ServiceCode = value.String
+			}
+		case resources.FieldTenantID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field tenant_id", values[i])
+			} else if value.Valid {
+				_m.TenantID = value.String
+			}
+		case resources.FieldRegion:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field region", values[i])
+			} else if value.Valid {
+				_m.Region = value.String
+			}
+		case resources.FieldResourcePath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_path", values[i])
+			} else if value.Valid {
+				_m.ResourcePath = value.String
+			}
+		case resources.FieldGrn:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field grn", values[i])
+			} else if value.Valid {
+				_m.Grn = value.String
+			}
 		case resources.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field code", values[i])
@@ -177,6 +260,12 @@ func (_m *Resources) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field resource_status", values[i])
 			} else if value.Valid {
 				_m.ResourceStatus = int(value.Int64)
+			}
+		case resources.FieldResourceStatusCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field resource_status_code", values[i])
+			} else if value.Valid {
+				_m.ResourceStatusCode = value.String
 			}
 		case resources.FieldVisibility:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -233,6 +322,16 @@ func (_m *Resources) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
+// QueryLionResourceTypes queries the "lion_resource_types" edge of the Resources entity.
+func (_m *Resources) QueryLionResourceTypes() *ResourceTypesQuery {
+	return NewResourcesClient(_m.config).QueryLionResourceTypes(_m)
+}
+
+// QueryLionMenus queries the "lion_menus" edge of the Resources entity.
+func (_m *Resources) QueryLionMenus() *MenusQuery {
+	return NewResourcesClient(_m.config).QueryLionMenus(_m)
+}
+
 // QueryLionResourceScopes queries the "lion_resource_scopes" edge of the Resources entity.
 func (_m *Resources) QueryLionResourceScopes() *ResourceScopesQuery {
 	return NewResourcesClient(_m.config).QueryLionResourceScopes(_m)
@@ -281,6 +380,27 @@ func (_m *Resources) String() string {
 	builder.WriteString("parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
 	builder.WriteString(", ")
+	builder.WriteString("resource_type_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.ResourceTypeID))
+	builder.WriteString(", ")
+	builder.WriteString("resource_type_code=")
+	builder.WriteString(_m.ResourceTypeCode)
+	builder.WriteString(", ")
+	builder.WriteString("service_code=")
+	builder.WriteString(_m.ServiceCode)
+	builder.WriteString(", ")
+	builder.WriteString("tenant_id=")
+	builder.WriteString(_m.TenantID)
+	builder.WriteString(", ")
+	builder.WriteString("region=")
+	builder.WriteString(_m.Region)
+	builder.WriteString(", ")
+	builder.WriteString("resource_path=")
+	builder.WriteString(_m.ResourcePath)
+	builder.WriteString(", ")
+	builder.WriteString("grn=")
+	builder.WriteString(_m.Grn)
+	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(_m.Code)
 	builder.WriteString(", ")
@@ -295,6 +415,9 @@ func (_m *Resources) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("resource_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ResourceStatus))
+	builder.WriteString(", ")
+	builder.WriteString("resource_status_code=")
+	builder.WriteString(_m.ResourceStatusCode)
 	builder.WriteString(", ")
 	builder.WriteString("visibility=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Visibility))

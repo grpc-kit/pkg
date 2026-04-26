@@ -85,6 +85,41 @@ func ParentID(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldParentID, v))
 }
 
+// ResourceTypeID applies equality check predicate on the "resource_type_id" field. It's identical to ResourceTypeIDEQ.
+func ResourceTypeID(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceTypeID, v))
+}
+
+// ResourceTypeCode applies equality check predicate on the "resource_type_code" field. It's identical to ResourceTypeCodeEQ.
+func ResourceTypeCode(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceTypeCode, v))
+}
+
+// ServiceCode applies equality check predicate on the "service_code" field. It's identical to ServiceCodeEQ.
+func ServiceCode(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldServiceCode, v))
+}
+
+// TenantID applies equality check predicate on the "tenant_id" field. It's identical to TenantIDEQ.
+func TenantID(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldTenantID, v))
+}
+
+// Region applies equality check predicate on the "region" field. It's identical to RegionEQ.
+func Region(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldRegion, v))
+}
+
+// ResourcePath applies equality check predicate on the "resource_path" field. It's identical to ResourcePathEQ.
+func ResourcePath(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourcePath, v))
+}
+
+// Grn applies equality check predicate on the "grn" field. It's identical to GrnEQ.
+func Grn(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldGrn, v))
+}
+
 // Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
 func Code(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldCode, v))
@@ -108,6 +143,11 @@ func ResourceType(v int) predicate.Resources {
 // ResourceStatus applies equality check predicate on the "resource_status" field. It's identical to ResourceStatusEQ.
 func ResourceStatus(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldResourceStatus, v))
+}
+
+// ResourceStatusCode applies equality check predicate on the "resource_status_code" field. It's identical to ResourceStatusCodeEQ.
+func ResourceStatusCode(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceStatusCode, v))
 }
 
 // Visibility applies equality check predicate on the "visibility" field. It's identical to VisibilityEQ.
@@ -415,6 +455,416 @@ func ParentIDLTE(v int64) predicate.Resources {
 	return predicate.Resources(sql.FieldLTE(FieldParentID, v))
 }
 
+// ResourceTypeIDEQ applies the EQ predicate on the "resource_type_id" field.
+func ResourceTypeIDEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceTypeID, v))
+}
+
+// ResourceTypeIDNEQ applies the NEQ predicate on the "resource_type_id" field.
+func ResourceTypeIDNEQ(v int) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldResourceTypeID, v))
+}
+
+// ResourceTypeIDIn applies the In predicate on the "resource_type_id" field.
+func ResourceTypeIDIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldResourceTypeID, vs...))
+}
+
+// ResourceTypeIDNotIn applies the NotIn predicate on the "resource_type_id" field.
+func ResourceTypeIDNotIn(vs ...int) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldResourceTypeID, vs...))
+}
+
+// ResourceTypeCodeEQ applies the EQ predicate on the "resource_type_code" field.
+func ResourceTypeCodeEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceTypeCode, v))
+}
+
+// ResourceTypeCodeNEQ applies the NEQ predicate on the "resource_type_code" field.
+func ResourceTypeCodeNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldResourceTypeCode, v))
+}
+
+// ResourceTypeCodeIn applies the In predicate on the "resource_type_code" field.
+func ResourceTypeCodeIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldResourceTypeCode, vs...))
+}
+
+// ResourceTypeCodeNotIn applies the NotIn predicate on the "resource_type_code" field.
+func ResourceTypeCodeNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldResourceTypeCode, vs...))
+}
+
+// ResourceTypeCodeGT applies the GT predicate on the "resource_type_code" field.
+func ResourceTypeCodeGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldResourceTypeCode, v))
+}
+
+// ResourceTypeCodeGTE applies the GTE predicate on the "resource_type_code" field.
+func ResourceTypeCodeGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldResourceTypeCode, v))
+}
+
+// ResourceTypeCodeLT applies the LT predicate on the "resource_type_code" field.
+func ResourceTypeCodeLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldResourceTypeCode, v))
+}
+
+// ResourceTypeCodeLTE applies the LTE predicate on the "resource_type_code" field.
+func ResourceTypeCodeLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldResourceTypeCode, v))
+}
+
+// ResourceTypeCodeContains applies the Contains predicate on the "resource_type_code" field.
+func ResourceTypeCodeContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldResourceTypeCode, v))
+}
+
+// ResourceTypeCodeHasPrefix applies the HasPrefix predicate on the "resource_type_code" field.
+func ResourceTypeCodeHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldResourceTypeCode, v))
+}
+
+// ResourceTypeCodeHasSuffix applies the HasSuffix predicate on the "resource_type_code" field.
+func ResourceTypeCodeHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldResourceTypeCode, v))
+}
+
+// ResourceTypeCodeEqualFold applies the EqualFold predicate on the "resource_type_code" field.
+func ResourceTypeCodeEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldResourceTypeCode, v))
+}
+
+// ResourceTypeCodeContainsFold applies the ContainsFold predicate on the "resource_type_code" field.
+func ResourceTypeCodeContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldResourceTypeCode, v))
+}
+
+// ServiceCodeEQ applies the EQ predicate on the "service_code" field.
+func ServiceCodeEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldServiceCode, v))
+}
+
+// ServiceCodeNEQ applies the NEQ predicate on the "service_code" field.
+func ServiceCodeNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldServiceCode, v))
+}
+
+// ServiceCodeIn applies the In predicate on the "service_code" field.
+func ServiceCodeIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldServiceCode, vs...))
+}
+
+// ServiceCodeNotIn applies the NotIn predicate on the "service_code" field.
+func ServiceCodeNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldServiceCode, vs...))
+}
+
+// ServiceCodeGT applies the GT predicate on the "service_code" field.
+func ServiceCodeGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldServiceCode, v))
+}
+
+// ServiceCodeGTE applies the GTE predicate on the "service_code" field.
+func ServiceCodeGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldServiceCode, v))
+}
+
+// ServiceCodeLT applies the LT predicate on the "service_code" field.
+func ServiceCodeLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldServiceCode, v))
+}
+
+// ServiceCodeLTE applies the LTE predicate on the "service_code" field.
+func ServiceCodeLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldServiceCode, v))
+}
+
+// ServiceCodeContains applies the Contains predicate on the "service_code" field.
+func ServiceCodeContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldServiceCode, v))
+}
+
+// ServiceCodeHasPrefix applies the HasPrefix predicate on the "service_code" field.
+func ServiceCodeHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldServiceCode, v))
+}
+
+// ServiceCodeHasSuffix applies the HasSuffix predicate on the "service_code" field.
+func ServiceCodeHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldServiceCode, v))
+}
+
+// ServiceCodeEqualFold applies the EqualFold predicate on the "service_code" field.
+func ServiceCodeEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldServiceCode, v))
+}
+
+// ServiceCodeContainsFold applies the ContainsFold predicate on the "service_code" field.
+func ServiceCodeContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldServiceCode, v))
+}
+
+// TenantIDEQ applies the EQ predicate on the "tenant_id" field.
+func TenantIDEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldTenantID, v))
+}
+
+// TenantIDNEQ applies the NEQ predicate on the "tenant_id" field.
+func TenantIDNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldTenantID, v))
+}
+
+// TenantIDIn applies the In predicate on the "tenant_id" field.
+func TenantIDIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldTenantID, vs...))
+}
+
+// TenantIDNotIn applies the NotIn predicate on the "tenant_id" field.
+func TenantIDNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldTenantID, vs...))
+}
+
+// TenantIDGT applies the GT predicate on the "tenant_id" field.
+func TenantIDGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldTenantID, v))
+}
+
+// TenantIDGTE applies the GTE predicate on the "tenant_id" field.
+func TenantIDGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldTenantID, v))
+}
+
+// TenantIDLT applies the LT predicate on the "tenant_id" field.
+func TenantIDLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldTenantID, v))
+}
+
+// TenantIDLTE applies the LTE predicate on the "tenant_id" field.
+func TenantIDLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldTenantID, v))
+}
+
+// TenantIDContains applies the Contains predicate on the "tenant_id" field.
+func TenantIDContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldTenantID, v))
+}
+
+// TenantIDHasPrefix applies the HasPrefix predicate on the "tenant_id" field.
+func TenantIDHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldTenantID, v))
+}
+
+// TenantIDHasSuffix applies the HasSuffix predicate on the "tenant_id" field.
+func TenantIDHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldTenantID, v))
+}
+
+// TenantIDEqualFold applies the EqualFold predicate on the "tenant_id" field.
+func TenantIDEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldTenantID, v))
+}
+
+// TenantIDContainsFold applies the ContainsFold predicate on the "tenant_id" field.
+func TenantIDContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldTenantID, v))
+}
+
+// RegionEQ applies the EQ predicate on the "region" field.
+func RegionEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldRegion, v))
+}
+
+// RegionNEQ applies the NEQ predicate on the "region" field.
+func RegionNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldRegion, v))
+}
+
+// RegionIn applies the In predicate on the "region" field.
+func RegionIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldRegion, vs...))
+}
+
+// RegionNotIn applies the NotIn predicate on the "region" field.
+func RegionNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldRegion, vs...))
+}
+
+// RegionGT applies the GT predicate on the "region" field.
+func RegionGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldRegion, v))
+}
+
+// RegionGTE applies the GTE predicate on the "region" field.
+func RegionGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldRegion, v))
+}
+
+// RegionLT applies the LT predicate on the "region" field.
+func RegionLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldRegion, v))
+}
+
+// RegionLTE applies the LTE predicate on the "region" field.
+func RegionLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldRegion, v))
+}
+
+// RegionContains applies the Contains predicate on the "region" field.
+func RegionContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldRegion, v))
+}
+
+// RegionHasPrefix applies the HasPrefix predicate on the "region" field.
+func RegionHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldRegion, v))
+}
+
+// RegionHasSuffix applies the HasSuffix predicate on the "region" field.
+func RegionHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldRegion, v))
+}
+
+// RegionEqualFold applies the EqualFold predicate on the "region" field.
+func RegionEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldRegion, v))
+}
+
+// RegionContainsFold applies the ContainsFold predicate on the "region" field.
+func RegionContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldRegion, v))
+}
+
+// ResourcePathEQ applies the EQ predicate on the "resource_path" field.
+func ResourcePathEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourcePath, v))
+}
+
+// ResourcePathNEQ applies the NEQ predicate on the "resource_path" field.
+func ResourcePathNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldResourcePath, v))
+}
+
+// ResourcePathIn applies the In predicate on the "resource_path" field.
+func ResourcePathIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldResourcePath, vs...))
+}
+
+// ResourcePathNotIn applies the NotIn predicate on the "resource_path" field.
+func ResourcePathNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldResourcePath, vs...))
+}
+
+// ResourcePathGT applies the GT predicate on the "resource_path" field.
+func ResourcePathGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldResourcePath, v))
+}
+
+// ResourcePathGTE applies the GTE predicate on the "resource_path" field.
+func ResourcePathGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldResourcePath, v))
+}
+
+// ResourcePathLT applies the LT predicate on the "resource_path" field.
+func ResourcePathLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldResourcePath, v))
+}
+
+// ResourcePathLTE applies the LTE predicate on the "resource_path" field.
+func ResourcePathLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldResourcePath, v))
+}
+
+// ResourcePathContains applies the Contains predicate on the "resource_path" field.
+func ResourcePathContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldResourcePath, v))
+}
+
+// ResourcePathHasPrefix applies the HasPrefix predicate on the "resource_path" field.
+func ResourcePathHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldResourcePath, v))
+}
+
+// ResourcePathHasSuffix applies the HasSuffix predicate on the "resource_path" field.
+func ResourcePathHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldResourcePath, v))
+}
+
+// ResourcePathEqualFold applies the EqualFold predicate on the "resource_path" field.
+func ResourcePathEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldResourcePath, v))
+}
+
+// ResourcePathContainsFold applies the ContainsFold predicate on the "resource_path" field.
+func ResourcePathContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldResourcePath, v))
+}
+
+// GrnEQ applies the EQ predicate on the "grn" field.
+func GrnEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldGrn, v))
+}
+
+// GrnNEQ applies the NEQ predicate on the "grn" field.
+func GrnNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldGrn, v))
+}
+
+// GrnIn applies the In predicate on the "grn" field.
+func GrnIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldGrn, vs...))
+}
+
+// GrnNotIn applies the NotIn predicate on the "grn" field.
+func GrnNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldGrn, vs...))
+}
+
+// GrnGT applies the GT predicate on the "grn" field.
+func GrnGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldGrn, v))
+}
+
+// GrnGTE applies the GTE predicate on the "grn" field.
+func GrnGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldGrn, v))
+}
+
+// GrnLT applies the LT predicate on the "grn" field.
+func GrnLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldGrn, v))
+}
+
+// GrnLTE applies the LTE predicate on the "grn" field.
+func GrnLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldGrn, v))
+}
+
+// GrnContains applies the Contains predicate on the "grn" field.
+func GrnContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldGrn, v))
+}
+
+// GrnHasPrefix applies the HasPrefix predicate on the "grn" field.
+func GrnHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldGrn, v))
+}
+
+// GrnHasSuffix applies the HasSuffix predicate on the "grn" field.
+func GrnHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldGrn, v))
+}
+
+// GrnEqualFold applies the EqualFold predicate on the "grn" field.
+func GrnEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldGrn, v))
+}
+
+// GrnContainsFold applies the ContainsFold predicate on the "grn" field.
+func GrnContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldGrn, v))
+}
+
 // CodeEQ applies the EQ predicate on the "code" field.
 func CodeEQ(v string) predicate.Resources {
 	return predicate.Resources(sql.FieldEQ(FieldCode, v))
@@ -688,6 +1138,71 @@ func ResourceStatusLT(v int) predicate.Resources {
 // ResourceStatusLTE applies the LTE predicate on the "resource_status" field.
 func ResourceStatusLTE(v int) predicate.Resources {
 	return predicate.Resources(sql.FieldLTE(FieldResourceStatus, v))
+}
+
+// ResourceStatusCodeEQ applies the EQ predicate on the "resource_status_code" field.
+func ResourceStatusCodeEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEQ(FieldResourceStatusCode, v))
+}
+
+// ResourceStatusCodeNEQ applies the NEQ predicate on the "resource_status_code" field.
+func ResourceStatusCodeNEQ(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldNEQ(FieldResourceStatusCode, v))
+}
+
+// ResourceStatusCodeIn applies the In predicate on the "resource_status_code" field.
+func ResourceStatusCodeIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldIn(FieldResourceStatusCode, vs...))
+}
+
+// ResourceStatusCodeNotIn applies the NotIn predicate on the "resource_status_code" field.
+func ResourceStatusCodeNotIn(vs ...string) predicate.Resources {
+	return predicate.Resources(sql.FieldNotIn(FieldResourceStatusCode, vs...))
+}
+
+// ResourceStatusCodeGT applies the GT predicate on the "resource_status_code" field.
+func ResourceStatusCodeGT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGT(FieldResourceStatusCode, v))
+}
+
+// ResourceStatusCodeGTE applies the GTE predicate on the "resource_status_code" field.
+func ResourceStatusCodeGTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldGTE(FieldResourceStatusCode, v))
+}
+
+// ResourceStatusCodeLT applies the LT predicate on the "resource_status_code" field.
+func ResourceStatusCodeLT(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLT(FieldResourceStatusCode, v))
+}
+
+// ResourceStatusCodeLTE applies the LTE predicate on the "resource_status_code" field.
+func ResourceStatusCodeLTE(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldLTE(FieldResourceStatusCode, v))
+}
+
+// ResourceStatusCodeContains applies the Contains predicate on the "resource_status_code" field.
+func ResourceStatusCodeContains(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContains(FieldResourceStatusCode, v))
+}
+
+// ResourceStatusCodeHasPrefix applies the HasPrefix predicate on the "resource_status_code" field.
+func ResourceStatusCodeHasPrefix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasPrefix(FieldResourceStatusCode, v))
+}
+
+// ResourceStatusCodeHasSuffix applies the HasSuffix predicate on the "resource_status_code" field.
+func ResourceStatusCodeHasSuffix(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldHasSuffix(FieldResourceStatusCode, v))
+}
+
+// ResourceStatusCodeEqualFold applies the EqualFold predicate on the "resource_status_code" field.
+func ResourceStatusCodeEqualFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldEqualFold(FieldResourceStatusCode, v))
+}
+
+// ResourceStatusCodeContainsFold applies the ContainsFold predicate on the "resource_status_code" field.
+func ResourceStatusCodeContainsFold(v string) predicate.Resources {
+	return predicate.Resources(sql.FieldContainsFold(FieldResourceStatusCode, v))
 }
 
 // VisibilityEQ applies the EQ predicate on the "visibility" field.
@@ -1038,6 +1553,52 @@ func ProtectedEQ(v bool) predicate.Resources {
 // ProtectedNEQ applies the NEQ predicate on the "protected" field.
 func ProtectedNEQ(v bool) predicate.Resources {
 	return predicate.Resources(sql.FieldNEQ(FieldProtected, v))
+}
+
+// HasLionResourceTypes applies the HasEdge predicate on the "lion_resource_types" edge.
+func HasLionResourceTypes() predicate.Resources {
+	return predicate.Resources(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, LionResourceTypesTable, LionResourceTypesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionResourceTypesWith applies the HasEdge predicate on the "lion_resource_types" edge with a given conditions (other predicates).
+func HasLionResourceTypesWith(preds ...predicate.ResourceTypes) predicate.Resources {
+	return predicate.Resources(func(s *sql.Selector) {
+		step := newLionResourceTypesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLionMenus applies the HasEdge predicate on the "lion_menus" edge.
+func HasLionMenus() predicate.Resources {
+	return predicate.Resources(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionMenusTable, LionMenusColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionMenusWith applies the HasEdge predicate on the "lion_menus" edge with a given conditions (other predicates).
+func HasLionMenusWith(preds ...predicate.Menus) predicate.Resources {
+	return predicate.Resources(func(s *sql.Selector) {
+		step := newLionMenusStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // HasLionResourceScopes applies the HasEdge predicate on the "lion_resource_scopes" edge.
