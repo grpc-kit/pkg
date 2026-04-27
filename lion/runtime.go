@@ -79,28 +79,30 @@ func init() {
 	actionsDescDisplayName := actionsFields[1].Descriptor()
 	// actions.DefaultDisplayName holds the default value on creation for the display_name field.
 	actions.DefaultDisplayName = actionsDescDisplayName.Default.(string)
-	// actionsDescResourceType is the schema descriptor for resource_type field.
-	actionsDescResourceType := actionsFields[2].Descriptor()
-	// actions.DefaultResourceType holds the default value on creation for the resource_type field.
-	actions.DefaultResourceType = actionsDescResourceType.Default.(int)
-	// actionsDescResourceTypeID is the schema descriptor for resource_type_id field.
-	actionsDescResourceTypeID := actionsFields[3].Descriptor()
-	// actions.ResourceTypeIDValidator is a validator for the "resource_type_id" field. It is called by the builders before save.
-	actions.ResourceTypeIDValidator = actionsDescResourceTypeID.Validators[0].(func(int) error)
-	// actionsDescProjectionMapping is the schema descriptor for projection_mapping field.
-	actionsDescProjectionMapping := actionsFields[4].Descriptor()
-	// actions.DefaultProjectionMapping holds the default value on creation for the projection_mapping field.
-	actions.DefaultProjectionMapping = actionsDescProjectionMapping.Default.(string)
-	// actions.ProjectionMappingValidator is a validator for the "projection_mapping" field. It is called by the builders before save.
-	actions.ProjectionMappingValidator = actionsDescProjectionMapping.Validators[0].(func(string) error)
 	// actionsDescProtected is the schema descriptor for protected field.
-	actionsDescProtected := actionsFields[5].Descriptor()
+	actionsDescProtected := actionsFields[3].Descriptor()
 	// actions.DefaultProtected holds the default value on creation for the protected field.
 	actions.DefaultProtected = actionsDescProtected.Default.(bool)
 	// actionsDescDescription is the schema descriptor for description field.
-	actionsDescDescription := actionsFields[6].Descriptor()
+	actionsDescDescription := actionsFields[4].Descriptor()
 	// actions.DefaultDescription holds the default value on creation for the description field.
 	actions.DefaultDescription = actionsDescDescription.Default.(string)
+	// actionsDescRiskLevel is the schema descriptor for risk_level field.
+	actionsDescRiskLevel := actionsFields[5].Descriptor()
+	// actions.DefaultRiskLevel holds the default value on creation for the risk_level field.
+	actions.DefaultRiskLevel = actionsDescRiskLevel.Default.(int)
+	// actionsDescOutputFields is the schema descriptor for output_fields field.
+	actionsDescOutputFields := actionsFields[6].Descriptor()
+	// actions.DefaultOutputFields holds the default value on creation for the output_fields field.
+	actions.DefaultOutputFields = actionsDescOutputFields.Default.(string)
+	// actions.OutputFieldsValidator is a validator for the "output_fields" field. It is called by the builders before save.
+	actions.OutputFieldsValidator = actionsDescOutputFields.Validators[0].(func(string) error)
+	// actionsDescEnforcementMode is the schema descriptor for enforcement_mode field.
+	actionsDescEnforcementMode := actionsFields[7].Descriptor()
+	// actions.DefaultEnforcementMode holds the default value on creation for the enforcement_mode field.
+	actions.DefaultEnforcementMode = actionsDescEnforcementMode.Default.(string)
+	// actions.EnforcementModeValidator is a validator for the "enforcement_mode" field. It is called by the builders before save.
+	actions.EnforcementModeValidator = actionsDescEnforcementMode.Validators[0].(func(string) error)
 	authprovidersMixin := schema.AuthProviders{}.Mixin()
 	authprovidersMixinFields0 := authprovidersMixin[0].Fields()
 	_ = authprovidersMixinFields0

@@ -26,16 +26,18 @@ const (
 	FieldCode = "code"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
-	// FieldResourceType holds the string denoting the resource_type field in the database.
-	FieldResourceType = "resource_type"
 	// FieldResourceTypeID holds the string denoting the resource_type_id field in the database.
 	FieldResourceTypeID = "resource_type_id"
-	// FieldProjectionMapping holds the string denoting the projection_mapping field in the database.
-	FieldProjectionMapping = "projection_mapping"
 	// FieldProtected holds the string denoting the protected field in the database.
 	FieldProtected = "protected"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldRiskLevel holds the string denoting the risk_level field in the database.
+	FieldRiskLevel = "risk_level"
+	// FieldOutputFields holds the string denoting the output_fields field in the database.
+	FieldOutputFields = "output_fields"
+	// FieldEnforcementMode holds the string denoting the enforcement_mode field in the database.
+	FieldEnforcementMode = "enforcement_mode"
 	// EdgeLionResourceTypes holds the string denoting the lion_resource_types edge name in mutations.
 	EdgeLionResourceTypes = "lion_resource_types"
 	// Table holds the table name of the actions in the database.
@@ -58,11 +60,12 @@ var Columns = []string{
 	FieldUpdatedBy,
 	FieldCode,
 	FieldDisplayName,
-	FieldResourceType,
 	FieldResourceTypeID,
-	FieldProjectionMapping,
 	FieldProtected,
 	FieldDescription,
+	FieldRiskLevel,
+	FieldOutputFields,
+	FieldEnforcementMode,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -90,18 +93,20 @@ var (
 	CodeValidator func(string) error
 	// DefaultDisplayName holds the default value on creation for the "display_name" field.
 	DefaultDisplayName string
-	// DefaultResourceType holds the default value on creation for the "resource_type" field.
-	DefaultResourceType int
-	// ResourceTypeIDValidator is a validator for the "resource_type_id" field. It is called by the builders before save.
-	ResourceTypeIDValidator func(int) error
-	// DefaultProjectionMapping holds the default value on creation for the "projection_mapping" field.
-	DefaultProjectionMapping string
-	// ProjectionMappingValidator is a validator for the "projection_mapping" field. It is called by the builders before save.
-	ProjectionMappingValidator func(string) error
 	// DefaultProtected holds the default value on creation for the "protected" field.
 	DefaultProtected bool
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
+	// DefaultRiskLevel holds the default value on creation for the "risk_level" field.
+	DefaultRiskLevel int
+	// DefaultOutputFields holds the default value on creation for the "output_fields" field.
+	DefaultOutputFields string
+	// OutputFieldsValidator is a validator for the "output_fields" field. It is called by the builders before save.
+	OutputFieldsValidator func(string) error
+	// DefaultEnforcementMode holds the default value on creation for the "enforcement_mode" field.
+	DefaultEnforcementMode string
+	// EnforcementModeValidator is a validator for the "enforcement_mode" field. It is called by the builders before save.
+	EnforcementModeValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Actions queries.
@@ -142,19 +147,9 @@ func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
 }
 
-// ByResourceType orders the results by the resource_type field.
-func ByResourceType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResourceType, opts...).ToFunc()
-}
-
 // ByResourceTypeID orders the results by the resource_type_id field.
 func ByResourceTypeID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldResourceTypeID, opts...).ToFunc()
-}
-
-// ByProjectionMapping orders the results by the projection_mapping field.
-func ByProjectionMapping(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProjectionMapping, opts...).ToFunc()
 }
 
 // ByProtected orders the results by the protected field.
@@ -165,6 +160,21 @@ func ByProtected(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByRiskLevel orders the results by the risk_level field.
+func ByRiskLevel(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRiskLevel, opts...).ToFunc()
+}
+
+// ByOutputFields orders the results by the output_fields field.
+func ByOutputFields(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOutputFields, opts...).ToFunc()
+}
+
+// ByEnforcementMode orders the results by the enforcement_mode field.
+func ByEnforcementMode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEnforcementMode, opts...).ToFunc()
 }
 
 // ByLionResourceTypesField orders the results by lion_resource_types field.

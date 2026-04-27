@@ -18,11 +18,12 @@ var (
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "code", Type: field.TypeString, Size: 128},
 		{Name: "display_name", Type: field.TypeString, Default: ""},
-		{Name: "resource_type", Type: field.TypeInt, Default: 0},
-		{Name: "projection_mapping", Type: field.TypeString, Size: 4096, Default: "{}"},
 		{Name: "protected", Type: field.TypeBool, Default: false},
 		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "resource_type_id", Type: field.TypeInt},
+		{Name: "risk_level", Type: field.TypeInt, Default: 0},
+		{Name: "output_fields", Type: field.TypeString, Size: 4096, Default: "[]"},
+		{Name: "enforcement_mode", Type: field.TypeString, Size: 32, Default: "ENFORCED"},
+		{Name: "resource_type_id", Type: field.TypeInt, Nullable: true},
 	}
 	// LionActionsTable holds the schema information for the "lion_actions" table.
 	LionActionsTable = &schema.Table{
@@ -32,9 +33,9 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "lion_actions_lion_resource_types_lion_actions",
-				Columns:    []*schema.Column{LionActionsColumns[11]},
+				Columns:    []*schema.Column{LionActionsColumns[12]},
 				RefColumns: []*schema.Column{LionResourceTypesColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.SetNull,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -44,14 +45,9 @@ var (
 				Columns: []*schema.Column{LionActionsColumns[5]},
 			},
 			{
-				Name:    "actions_resource_type",
-				Unique:  false,
-				Columns: []*schema.Column{LionActionsColumns[7]},
-			},
-			{
 				Name:    "actions_resource_type_id",
 				Unique:  false,
-				Columns: []*schema.Column{LionActionsColumns[11]},
+				Columns: []*schema.Column{LionActionsColumns[12]},
 			},
 		},
 	}

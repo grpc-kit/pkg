@@ -117,27 +117,6 @@ func (_u *ActionsUpdate) SetNillableDisplayName(v *string) *ActionsUpdate {
 	return _u
 }
 
-// SetResourceType sets the "resource_type" field.
-func (_u *ActionsUpdate) SetResourceType(v int) *ActionsUpdate {
-	_u.mutation.ResetResourceType()
-	_u.mutation.SetResourceType(v)
-	return _u
-}
-
-// SetNillableResourceType sets the "resource_type" field if the given value is not nil.
-func (_u *ActionsUpdate) SetNillableResourceType(v *int) *ActionsUpdate {
-	if v != nil {
-		_u.SetResourceType(*v)
-	}
-	return _u
-}
-
-// AddResourceType adds value to the "resource_type" field.
-func (_u *ActionsUpdate) AddResourceType(v int) *ActionsUpdate {
-	_u.mutation.AddResourceType(v)
-	return _u
-}
-
 // SetResourceTypeID sets the "resource_type_id" field.
 func (_u *ActionsUpdate) SetResourceTypeID(v int) *ActionsUpdate {
 	_u.mutation.SetResourceTypeID(v)
@@ -152,17 +131,9 @@ func (_u *ActionsUpdate) SetNillableResourceTypeID(v *int) *ActionsUpdate {
 	return _u
 }
 
-// SetProjectionMapping sets the "projection_mapping" field.
-func (_u *ActionsUpdate) SetProjectionMapping(v string) *ActionsUpdate {
-	_u.mutation.SetProjectionMapping(v)
-	return _u
-}
-
-// SetNillableProjectionMapping sets the "projection_mapping" field if the given value is not nil.
-func (_u *ActionsUpdate) SetNillableProjectionMapping(v *string) *ActionsUpdate {
-	if v != nil {
-		_u.SetProjectionMapping(*v)
-	}
+// ClearResourceTypeID clears the value of the "resource_type_id" field.
+func (_u *ActionsUpdate) ClearResourceTypeID() *ActionsUpdate {
+	_u.mutation.ClearResourceTypeID()
 	return _u
 }
 
@@ -194,9 +165,66 @@ func (_u *ActionsUpdate) SetNillableDescription(v *string) *ActionsUpdate {
 	return _u
 }
 
+// SetRiskLevel sets the "risk_level" field.
+func (_u *ActionsUpdate) SetRiskLevel(v int) *ActionsUpdate {
+	_u.mutation.ResetRiskLevel()
+	_u.mutation.SetRiskLevel(v)
+	return _u
+}
+
+// SetNillableRiskLevel sets the "risk_level" field if the given value is not nil.
+func (_u *ActionsUpdate) SetNillableRiskLevel(v *int) *ActionsUpdate {
+	if v != nil {
+		_u.SetRiskLevel(*v)
+	}
+	return _u
+}
+
+// AddRiskLevel adds value to the "risk_level" field.
+func (_u *ActionsUpdate) AddRiskLevel(v int) *ActionsUpdate {
+	_u.mutation.AddRiskLevel(v)
+	return _u
+}
+
+// SetOutputFields sets the "output_fields" field.
+func (_u *ActionsUpdate) SetOutputFields(v string) *ActionsUpdate {
+	_u.mutation.SetOutputFields(v)
+	return _u
+}
+
+// SetNillableOutputFields sets the "output_fields" field if the given value is not nil.
+func (_u *ActionsUpdate) SetNillableOutputFields(v *string) *ActionsUpdate {
+	if v != nil {
+		_u.SetOutputFields(*v)
+	}
+	return _u
+}
+
+// SetEnforcementMode sets the "enforcement_mode" field.
+func (_u *ActionsUpdate) SetEnforcementMode(v string) *ActionsUpdate {
+	_u.mutation.SetEnforcementMode(v)
+	return _u
+}
+
+// SetNillableEnforcementMode sets the "enforcement_mode" field if the given value is not nil.
+func (_u *ActionsUpdate) SetNillableEnforcementMode(v *string) *ActionsUpdate {
+	if v != nil {
+		_u.SetEnforcementMode(*v)
+	}
+	return _u
+}
+
 // SetLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID.
 func (_u *ActionsUpdate) SetLionResourceTypesID(id int) *ActionsUpdate {
 	_u.mutation.SetLionResourceTypesID(id)
+	return _u
+}
+
+// SetNillableLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID if the given value is not nil.
+func (_u *ActionsUpdate) SetNillableLionResourceTypesID(id *int) *ActionsUpdate {
+	if id != nil {
+		_u = _u.SetLionResourceTypesID(*id)
+	}
 	return _u
 }
 
@@ -259,18 +287,15 @@ func (_u *ActionsUpdate) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Actions.code": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.ResourceTypeID(); ok {
-		if err := actions.ResourceTypeIDValidator(v); err != nil {
-			return &ValidationError{Name: "resource_type_id", err: fmt.Errorf(`lion: validator failed for field "Actions.resource_type_id": %w`, err)}
+	if v, ok := _u.mutation.OutputFields(); ok {
+		if err := actions.OutputFieldsValidator(v); err != nil {
+			return &ValidationError{Name: "output_fields", err: fmt.Errorf(`lion: validator failed for field "Actions.output_fields": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.ProjectionMapping(); ok {
-		if err := actions.ProjectionMappingValidator(v); err != nil {
-			return &ValidationError{Name: "projection_mapping", err: fmt.Errorf(`lion: validator failed for field "Actions.projection_mapping": %w`, err)}
+	if v, ok := _u.mutation.EnforcementMode(); ok {
+		if err := actions.EnforcementModeValidator(v); err != nil {
+			return &ValidationError{Name: "enforcement_mode", err: fmt.Errorf(`lion: validator failed for field "Actions.enforcement_mode": %w`, err)}
 		}
-	}
-	if _u.mutation.LionResourceTypesCleared() && len(_u.mutation.LionResourceTypesIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "Actions.lion_resource_types"`)
 	}
 	return nil
 }
@@ -314,20 +339,23 @@ func (_u *ActionsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(actions.FieldDisplayName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.ResourceType(); ok {
-		_spec.SetField(actions.FieldResourceType, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedResourceType(); ok {
-		_spec.AddField(actions.FieldResourceType, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.ProjectionMapping(); ok {
-		_spec.SetField(actions.FieldProjectionMapping, field.TypeString, value)
-	}
 	if value, ok := _u.mutation.Protected(); ok {
 		_spec.SetField(actions.FieldProtected, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(actions.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.RiskLevel(); ok {
+		_spec.SetField(actions.FieldRiskLevel, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRiskLevel(); ok {
+		_spec.AddField(actions.FieldRiskLevel, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.OutputFields(); ok {
+		_spec.SetField(actions.FieldOutputFields, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EnforcementMode(); ok {
+		_spec.SetField(actions.FieldEnforcementMode, field.TypeString, value)
 	}
 	if _u.mutation.LionResourceTypesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -466,27 +494,6 @@ func (_u *ActionsUpdateOne) SetNillableDisplayName(v *string) *ActionsUpdateOne 
 	return _u
 }
 
-// SetResourceType sets the "resource_type" field.
-func (_u *ActionsUpdateOne) SetResourceType(v int) *ActionsUpdateOne {
-	_u.mutation.ResetResourceType()
-	_u.mutation.SetResourceType(v)
-	return _u
-}
-
-// SetNillableResourceType sets the "resource_type" field if the given value is not nil.
-func (_u *ActionsUpdateOne) SetNillableResourceType(v *int) *ActionsUpdateOne {
-	if v != nil {
-		_u.SetResourceType(*v)
-	}
-	return _u
-}
-
-// AddResourceType adds value to the "resource_type" field.
-func (_u *ActionsUpdateOne) AddResourceType(v int) *ActionsUpdateOne {
-	_u.mutation.AddResourceType(v)
-	return _u
-}
-
 // SetResourceTypeID sets the "resource_type_id" field.
 func (_u *ActionsUpdateOne) SetResourceTypeID(v int) *ActionsUpdateOne {
 	_u.mutation.SetResourceTypeID(v)
@@ -501,17 +508,9 @@ func (_u *ActionsUpdateOne) SetNillableResourceTypeID(v *int) *ActionsUpdateOne 
 	return _u
 }
 
-// SetProjectionMapping sets the "projection_mapping" field.
-func (_u *ActionsUpdateOne) SetProjectionMapping(v string) *ActionsUpdateOne {
-	_u.mutation.SetProjectionMapping(v)
-	return _u
-}
-
-// SetNillableProjectionMapping sets the "projection_mapping" field if the given value is not nil.
-func (_u *ActionsUpdateOne) SetNillableProjectionMapping(v *string) *ActionsUpdateOne {
-	if v != nil {
-		_u.SetProjectionMapping(*v)
-	}
+// ClearResourceTypeID clears the value of the "resource_type_id" field.
+func (_u *ActionsUpdateOne) ClearResourceTypeID() *ActionsUpdateOne {
+	_u.mutation.ClearResourceTypeID()
 	return _u
 }
 
@@ -543,9 +542,66 @@ func (_u *ActionsUpdateOne) SetNillableDescription(v *string) *ActionsUpdateOne 
 	return _u
 }
 
+// SetRiskLevel sets the "risk_level" field.
+func (_u *ActionsUpdateOne) SetRiskLevel(v int) *ActionsUpdateOne {
+	_u.mutation.ResetRiskLevel()
+	_u.mutation.SetRiskLevel(v)
+	return _u
+}
+
+// SetNillableRiskLevel sets the "risk_level" field if the given value is not nil.
+func (_u *ActionsUpdateOne) SetNillableRiskLevel(v *int) *ActionsUpdateOne {
+	if v != nil {
+		_u.SetRiskLevel(*v)
+	}
+	return _u
+}
+
+// AddRiskLevel adds value to the "risk_level" field.
+func (_u *ActionsUpdateOne) AddRiskLevel(v int) *ActionsUpdateOne {
+	_u.mutation.AddRiskLevel(v)
+	return _u
+}
+
+// SetOutputFields sets the "output_fields" field.
+func (_u *ActionsUpdateOne) SetOutputFields(v string) *ActionsUpdateOne {
+	_u.mutation.SetOutputFields(v)
+	return _u
+}
+
+// SetNillableOutputFields sets the "output_fields" field if the given value is not nil.
+func (_u *ActionsUpdateOne) SetNillableOutputFields(v *string) *ActionsUpdateOne {
+	if v != nil {
+		_u.SetOutputFields(*v)
+	}
+	return _u
+}
+
+// SetEnforcementMode sets the "enforcement_mode" field.
+func (_u *ActionsUpdateOne) SetEnforcementMode(v string) *ActionsUpdateOne {
+	_u.mutation.SetEnforcementMode(v)
+	return _u
+}
+
+// SetNillableEnforcementMode sets the "enforcement_mode" field if the given value is not nil.
+func (_u *ActionsUpdateOne) SetNillableEnforcementMode(v *string) *ActionsUpdateOne {
+	if v != nil {
+		_u.SetEnforcementMode(*v)
+	}
+	return _u
+}
+
 // SetLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID.
 func (_u *ActionsUpdateOne) SetLionResourceTypesID(id int) *ActionsUpdateOne {
 	_u.mutation.SetLionResourceTypesID(id)
+	return _u
+}
+
+// SetNillableLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID if the given value is not nil.
+func (_u *ActionsUpdateOne) SetNillableLionResourceTypesID(id *int) *ActionsUpdateOne {
+	if id != nil {
+		_u = _u.SetLionResourceTypesID(*id)
+	}
 	return _u
 }
 
@@ -621,18 +677,15 @@ func (_u *ActionsUpdateOne) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Actions.code": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.ResourceTypeID(); ok {
-		if err := actions.ResourceTypeIDValidator(v); err != nil {
-			return &ValidationError{Name: "resource_type_id", err: fmt.Errorf(`lion: validator failed for field "Actions.resource_type_id": %w`, err)}
+	if v, ok := _u.mutation.OutputFields(); ok {
+		if err := actions.OutputFieldsValidator(v); err != nil {
+			return &ValidationError{Name: "output_fields", err: fmt.Errorf(`lion: validator failed for field "Actions.output_fields": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.ProjectionMapping(); ok {
-		if err := actions.ProjectionMappingValidator(v); err != nil {
-			return &ValidationError{Name: "projection_mapping", err: fmt.Errorf(`lion: validator failed for field "Actions.projection_mapping": %w`, err)}
+	if v, ok := _u.mutation.EnforcementMode(); ok {
+		if err := actions.EnforcementModeValidator(v); err != nil {
+			return &ValidationError{Name: "enforcement_mode", err: fmt.Errorf(`lion: validator failed for field "Actions.enforcement_mode": %w`, err)}
 		}
-	}
-	if _u.mutation.LionResourceTypesCleared() && len(_u.mutation.LionResourceTypesIDs()) > 0 {
-		return errors.New(`lion: clearing a required unique edge "Actions.lion_resource_types"`)
 	}
 	return nil
 }
@@ -693,20 +746,23 @@ func (_u *ActionsUpdateOne) sqlSave(ctx context.Context) (_node *Actions, err er
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(actions.FieldDisplayName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.ResourceType(); ok {
-		_spec.SetField(actions.FieldResourceType, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedResourceType(); ok {
-		_spec.AddField(actions.FieldResourceType, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.ProjectionMapping(); ok {
-		_spec.SetField(actions.FieldProjectionMapping, field.TypeString, value)
-	}
 	if value, ok := _u.mutation.Protected(); ok {
 		_spec.SetField(actions.FieldProtected, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(actions.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.RiskLevel(); ok {
+		_spec.SetField(actions.FieldRiskLevel, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedRiskLevel(); ok {
+		_spec.AddField(actions.FieldRiskLevel, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.OutputFields(); ok {
+		_spec.SetField(actions.FieldOutputFields, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.EnforcementMode(); ok {
+		_spec.SetField(actions.FieldEnforcementMode, field.TypeString, value)
 	}
 	if _u.mutation.LionResourceTypesCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -26,20 +26,22 @@ type Actions struct {
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
-	// 统一动作编码，如：admin.users.read
+	// 统一动作编码，如：admin.iam:ListUsers
 	Code string `json:"code,omitempty"`
 	// 动作展示名称
 	DisplayName string `json:"display_name,omitempty"`
-	// 兼容期保留的旧资源类型枚举字段
-	ResourceType int `json:"resource_type,omitempty"`
-	// 关联 lion_resource_types 表 ID
-	ResourceTypeID int `json:"resource_type_id,omitempty"`
-	// 兼容期保留的协议映射配置
-	ProjectionMapping string `json:"projection_mapping,omitempty"`
+	// 关联 lion_resource_types 表 ID，可为空（跨类型动作）
+	ResourceTypeID *int `json:"resource_type_id,omitempty"`
 	// 是否系统保护动作，保护动作不可删除
 	Protected bool `json:"protected,omitempty"`
 	// 详细描述
 	Description string `json:"description,omitempty"`
+	// 风险等级：0=low 1=medium 2=high
+	RiskLevel int `json:"risk_level,omitempty"`
+	// 动作响应字段全集，JSON 数组，用于字段级权限控制
+	OutputFields string `json:"output_fields,omitempty"`
+	// 执行模式：ENFORCED / SHADOW / DISABLED
+	EnforcementMode string `json:"enforcement_mode,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ActionsQuery when eager-loading is set.
 	Edges        ActionsEdges `json:"edges"`
@@ -73,9 +75,9 @@ func (*Actions) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case actions.FieldProtected:
 			values[i] = new(sql.NullBool)
-		case actions.FieldID, actions.FieldCreatedBy, actions.FieldUpdatedBy, actions.FieldResourceType, actions.FieldResourceTypeID:
+		case actions.FieldID, actions.FieldCreatedBy, actions.FieldUpdatedBy, actions.FieldResourceTypeID, actions.FieldRiskLevel:
 			values[i] = new(sql.NullInt64)
-		case actions.FieldCode, actions.FieldDisplayName, actions.FieldProjectionMapping, actions.FieldDescription:
+		case actions.FieldCode, actions.FieldDisplayName, actions.FieldDescription, actions.FieldOutputFields, actions.FieldEnforcementMode:
 			values[i] = new(sql.NullString)
 		case actions.FieldCreatedAt, actions.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -136,23 +138,12 @@ func (_m *Actions) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DisplayName = value.String
 			}
-		case actions.FieldResourceType:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field resource_type", values[i])
-			} else if value.Valid {
-				_m.ResourceType = int(value.Int64)
-			}
 		case actions.FieldResourceTypeID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field resource_type_id", values[i])
 			} else if value.Valid {
-				_m.ResourceTypeID = int(value.Int64)
-			}
-		case actions.FieldProjectionMapping:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field projection_mapping", values[i])
-			} else if value.Valid {
-				_m.ProjectionMapping = value.String
+				_m.ResourceTypeID = new(int)
+				*_m.ResourceTypeID = int(value.Int64)
 			}
 		case actions.FieldProtected:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -165,6 +156,24 @@ func (_m *Actions) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
 				_m.Description = value.String
+			}
+		case actions.FieldRiskLevel:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field risk_level", values[i])
+			} else if value.Valid {
+				_m.RiskLevel = int(value.Int64)
+			}
+		case actions.FieldOutputFields:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field output_fields", values[i])
+			} else if value.Valid {
+				_m.OutputFields = value.String
+			}
+		case actions.FieldEnforcementMode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field enforcement_mode", values[i])
+			} else if value.Valid {
+				_m.EnforcementMode = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -225,20 +234,25 @@ func (_m *Actions) String() string {
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)
 	builder.WriteString(", ")
-	builder.WriteString("resource_type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ResourceType))
-	builder.WriteString(", ")
-	builder.WriteString("resource_type_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.ResourceTypeID))
-	builder.WriteString(", ")
-	builder.WriteString("projection_mapping=")
-	builder.WriteString(_m.ProjectionMapping)
+	if v := _m.ResourceTypeID; v != nil {
+		builder.WriteString("resource_type_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("protected=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("risk_level=")
+	builder.WriteString(fmt.Sprintf("%v", _m.RiskLevel))
+	builder.WriteString(", ")
+	builder.WriteString("output_fields=")
+	builder.WriteString(_m.OutputFields)
+	builder.WriteString(", ")
+	builder.WriteString("enforcement_mode=")
+	builder.WriteString(_m.EnforcementMode)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -405,7 +405,10 @@ func (_q *ActionsQuery) loadLionResourceTypes(ctx context.Context, query *Resour
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Actions)
 	for i := range nodes {
-		fk := nodes[i].ResourceTypeID
+		if nodes[i].ResourceTypeID == nil {
+			continue
+		}
+		fk := *nodes[i].ResourceTypeID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}

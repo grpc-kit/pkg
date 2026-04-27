@@ -85,19 +85,9 @@ func DisplayName(v string) predicate.Actions {
 	return predicate.Actions(sql.FieldEQ(FieldDisplayName, v))
 }
 
-// ResourceType applies equality check predicate on the "resource_type" field. It's identical to ResourceTypeEQ.
-func ResourceType(v int) predicate.Actions {
-	return predicate.Actions(sql.FieldEQ(FieldResourceType, v))
-}
-
 // ResourceTypeID applies equality check predicate on the "resource_type_id" field. It's identical to ResourceTypeIDEQ.
 func ResourceTypeID(v int) predicate.Actions {
 	return predicate.Actions(sql.FieldEQ(FieldResourceTypeID, v))
-}
-
-// ProjectionMapping applies equality check predicate on the "projection_mapping" field. It's identical to ProjectionMappingEQ.
-func ProjectionMapping(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldEQ(FieldProjectionMapping, v))
 }
 
 // Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
@@ -108,6 +98,21 @@ func Protected(v bool) predicate.Actions {
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.Actions {
 	return predicate.Actions(sql.FieldEQ(FieldDescription, v))
+}
+
+// RiskLevel applies equality check predicate on the "risk_level" field. It's identical to RiskLevelEQ.
+func RiskLevel(v int) predicate.Actions {
+	return predicate.Actions(sql.FieldEQ(FieldRiskLevel, v))
+}
+
+// OutputFields applies equality check predicate on the "output_fields" field. It's identical to OutputFieldsEQ.
+func OutputFields(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldEQ(FieldOutputFields, v))
+}
+
+// EnforcementMode applies equality check predicate on the "enforcement_mode" field. It's identical to EnforcementModeEQ.
+func EnforcementMode(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldEQ(FieldEnforcementMode, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -420,46 +425,6 @@ func DisplayNameContainsFold(v string) predicate.Actions {
 	return predicate.Actions(sql.FieldContainsFold(FieldDisplayName, v))
 }
 
-// ResourceTypeEQ applies the EQ predicate on the "resource_type" field.
-func ResourceTypeEQ(v int) predicate.Actions {
-	return predicate.Actions(sql.FieldEQ(FieldResourceType, v))
-}
-
-// ResourceTypeNEQ applies the NEQ predicate on the "resource_type" field.
-func ResourceTypeNEQ(v int) predicate.Actions {
-	return predicate.Actions(sql.FieldNEQ(FieldResourceType, v))
-}
-
-// ResourceTypeIn applies the In predicate on the "resource_type" field.
-func ResourceTypeIn(vs ...int) predicate.Actions {
-	return predicate.Actions(sql.FieldIn(FieldResourceType, vs...))
-}
-
-// ResourceTypeNotIn applies the NotIn predicate on the "resource_type" field.
-func ResourceTypeNotIn(vs ...int) predicate.Actions {
-	return predicate.Actions(sql.FieldNotIn(FieldResourceType, vs...))
-}
-
-// ResourceTypeGT applies the GT predicate on the "resource_type" field.
-func ResourceTypeGT(v int) predicate.Actions {
-	return predicate.Actions(sql.FieldGT(FieldResourceType, v))
-}
-
-// ResourceTypeGTE applies the GTE predicate on the "resource_type" field.
-func ResourceTypeGTE(v int) predicate.Actions {
-	return predicate.Actions(sql.FieldGTE(FieldResourceType, v))
-}
-
-// ResourceTypeLT applies the LT predicate on the "resource_type" field.
-func ResourceTypeLT(v int) predicate.Actions {
-	return predicate.Actions(sql.FieldLT(FieldResourceType, v))
-}
-
-// ResourceTypeLTE applies the LTE predicate on the "resource_type" field.
-func ResourceTypeLTE(v int) predicate.Actions {
-	return predicate.Actions(sql.FieldLTE(FieldResourceType, v))
-}
-
 // ResourceTypeIDEQ applies the EQ predicate on the "resource_type_id" field.
 func ResourceTypeIDEQ(v int) predicate.Actions {
 	return predicate.Actions(sql.FieldEQ(FieldResourceTypeID, v))
@@ -480,69 +445,14 @@ func ResourceTypeIDNotIn(vs ...int) predicate.Actions {
 	return predicate.Actions(sql.FieldNotIn(FieldResourceTypeID, vs...))
 }
 
-// ProjectionMappingEQ applies the EQ predicate on the "projection_mapping" field.
-func ProjectionMappingEQ(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldEQ(FieldProjectionMapping, v))
+// ResourceTypeIDIsNil applies the IsNil predicate on the "resource_type_id" field.
+func ResourceTypeIDIsNil() predicate.Actions {
+	return predicate.Actions(sql.FieldIsNull(FieldResourceTypeID))
 }
 
-// ProjectionMappingNEQ applies the NEQ predicate on the "projection_mapping" field.
-func ProjectionMappingNEQ(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldNEQ(FieldProjectionMapping, v))
-}
-
-// ProjectionMappingIn applies the In predicate on the "projection_mapping" field.
-func ProjectionMappingIn(vs ...string) predicate.Actions {
-	return predicate.Actions(sql.FieldIn(FieldProjectionMapping, vs...))
-}
-
-// ProjectionMappingNotIn applies the NotIn predicate on the "projection_mapping" field.
-func ProjectionMappingNotIn(vs ...string) predicate.Actions {
-	return predicate.Actions(sql.FieldNotIn(FieldProjectionMapping, vs...))
-}
-
-// ProjectionMappingGT applies the GT predicate on the "projection_mapping" field.
-func ProjectionMappingGT(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldGT(FieldProjectionMapping, v))
-}
-
-// ProjectionMappingGTE applies the GTE predicate on the "projection_mapping" field.
-func ProjectionMappingGTE(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldGTE(FieldProjectionMapping, v))
-}
-
-// ProjectionMappingLT applies the LT predicate on the "projection_mapping" field.
-func ProjectionMappingLT(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldLT(FieldProjectionMapping, v))
-}
-
-// ProjectionMappingLTE applies the LTE predicate on the "projection_mapping" field.
-func ProjectionMappingLTE(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldLTE(FieldProjectionMapping, v))
-}
-
-// ProjectionMappingContains applies the Contains predicate on the "projection_mapping" field.
-func ProjectionMappingContains(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldContains(FieldProjectionMapping, v))
-}
-
-// ProjectionMappingHasPrefix applies the HasPrefix predicate on the "projection_mapping" field.
-func ProjectionMappingHasPrefix(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldHasPrefix(FieldProjectionMapping, v))
-}
-
-// ProjectionMappingHasSuffix applies the HasSuffix predicate on the "projection_mapping" field.
-func ProjectionMappingHasSuffix(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldHasSuffix(FieldProjectionMapping, v))
-}
-
-// ProjectionMappingEqualFold applies the EqualFold predicate on the "projection_mapping" field.
-func ProjectionMappingEqualFold(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldEqualFold(FieldProjectionMapping, v))
-}
-
-// ProjectionMappingContainsFold applies the ContainsFold predicate on the "projection_mapping" field.
-func ProjectionMappingContainsFold(v string) predicate.Actions {
-	return predicate.Actions(sql.FieldContainsFold(FieldProjectionMapping, v))
+// ResourceTypeIDNotNil applies the NotNil predicate on the "resource_type_id" field.
+func ResourceTypeIDNotNil() predicate.Actions {
+	return predicate.Actions(sql.FieldNotNull(FieldResourceTypeID))
 }
 
 // ProtectedEQ applies the EQ predicate on the "protected" field.
@@ -618,6 +528,176 @@ func DescriptionEqualFold(v string) predicate.Actions {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Actions {
 	return predicate.Actions(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// RiskLevelEQ applies the EQ predicate on the "risk_level" field.
+func RiskLevelEQ(v int) predicate.Actions {
+	return predicate.Actions(sql.FieldEQ(FieldRiskLevel, v))
+}
+
+// RiskLevelNEQ applies the NEQ predicate on the "risk_level" field.
+func RiskLevelNEQ(v int) predicate.Actions {
+	return predicate.Actions(sql.FieldNEQ(FieldRiskLevel, v))
+}
+
+// RiskLevelIn applies the In predicate on the "risk_level" field.
+func RiskLevelIn(vs ...int) predicate.Actions {
+	return predicate.Actions(sql.FieldIn(FieldRiskLevel, vs...))
+}
+
+// RiskLevelNotIn applies the NotIn predicate on the "risk_level" field.
+func RiskLevelNotIn(vs ...int) predicate.Actions {
+	return predicate.Actions(sql.FieldNotIn(FieldRiskLevel, vs...))
+}
+
+// RiskLevelGT applies the GT predicate on the "risk_level" field.
+func RiskLevelGT(v int) predicate.Actions {
+	return predicate.Actions(sql.FieldGT(FieldRiskLevel, v))
+}
+
+// RiskLevelGTE applies the GTE predicate on the "risk_level" field.
+func RiskLevelGTE(v int) predicate.Actions {
+	return predicate.Actions(sql.FieldGTE(FieldRiskLevel, v))
+}
+
+// RiskLevelLT applies the LT predicate on the "risk_level" field.
+func RiskLevelLT(v int) predicate.Actions {
+	return predicate.Actions(sql.FieldLT(FieldRiskLevel, v))
+}
+
+// RiskLevelLTE applies the LTE predicate on the "risk_level" field.
+func RiskLevelLTE(v int) predicate.Actions {
+	return predicate.Actions(sql.FieldLTE(FieldRiskLevel, v))
+}
+
+// OutputFieldsEQ applies the EQ predicate on the "output_fields" field.
+func OutputFieldsEQ(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldEQ(FieldOutputFields, v))
+}
+
+// OutputFieldsNEQ applies the NEQ predicate on the "output_fields" field.
+func OutputFieldsNEQ(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldNEQ(FieldOutputFields, v))
+}
+
+// OutputFieldsIn applies the In predicate on the "output_fields" field.
+func OutputFieldsIn(vs ...string) predicate.Actions {
+	return predicate.Actions(sql.FieldIn(FieldOutputFields, vs...))
+}
+
+// OutputFieldsNotIn applies the NotIn predicate on the "output_fields" field.
+func OutputFieldsNotIn(vs ...string) predicate.Actions {
+	return predicate.Actions(sql.FieldNotIn(FieldOutputFields, vs...))
+}
+
+// OutputFieldsGT applies the GT predicate on the "output_fields" field.
+func OutputFieldsGT(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldGT(FieldOutputFields, v))
+}
+
+// OutputFieldsGTE applies the GTE predicate on the "output_fields" field.
+func OutputFieldsGTE(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldGTE(FieldOutputFields, v))
+}
+
+// OutputFieldsLT applies the LT predicate on the "output_fields" field.
+func OutputFieldsLT(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldLT(FieldOutputFields, v))
+}
+
+// OutputFieldsLTE applies the LTE predicate on the "output_fields" field.
+func OutputFieldsLTE(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldLTE(FieldOutputFields, v))
+}
+
+// OutputFieldsContains applies the Contains predicate on the "output_fields" field.
+func OutputFieldsContains(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldContains(FieldOutputFields, v))
+}
+
+// OutputFieldsHasPrefix applies the HasPrefix predicate on the "output_fields" field.
+func OutputFieldsHasPrefix(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldHasPrefix(FieldOutputFields, v))
+}
+
+// OutputFieldsHasSuffix applies the HasSuffix predicate on the "output_fields" field.
+func OutputFieldsHasSuffix(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldHasSuffix(FieldOutputFields, v))
+}
+
+// OutputFieldsEqualFold applies the EqualFold predicate on the "output_fields" field.
+func OutputFieldsEqualFold(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldEqualFold(FieldOutputFields, v))
+}
+
+// OutputFieldsContainsFold applies the ContainsFold predicate on the "output_fields" field.
+func OutputFieldsContainsFold(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldContainsFold(FieldOutputFields, v))
+}
+
+// EnforcementModeEQ applies the EQ predicate on the "enforcement_mode" field.
+func EnforcementModeEQ(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldEQ(FieldEnforcementMode, v))
+}
+
+// EnforcementModeNEQ applies the NEQ predicate on the "enforcement_mode" field.
+func EnforcementModeNEQ(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldNEQ(FieldEnforcementMode, v))
+}
+
+// EnforcementModeIn applies the In predicate on the "enforcement_mode" field.
+func EnforcementModeIn(vs ...string) predicate.Actions {
+	return predicate.Actions(sql.FieldIn(FieldEnforcementMode, vs...))
+}
+
+// EnforcementModeNotIn applies the NotIn predicate on the "enforcement_mode" field.
+func EnforcementModeNotIn(vs ...string) predicate.Actions {
+	return predicate.Actions(sql.FieldNotIn(FieldEnforcementMode, vs...))
+}
+
+// EnforcementModeGT applies the GT predicate on the "enforcement_mode" field.
+func EnforcementModeGT(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldGT(FieldEnforcementMode, v))
+}
+
+// EnforcementModeGTE applies the GTE predicate on the "enforcement_mode" field.
+func EnforcementModeGTE(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldGTE(FieldEnforcementMode, v))
+}
+
+// EnforcementModeLT applies the LT predicate on the "enforcement_mode" field.
+func EnforcementModeLT(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldLT(FieldEnforcementMode, v))
+}
+
+// EnforcementModeLTE applies the LTE predicate on the "enforcement_mode" field.
+func EnforcementModeLTE(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldLTE(FieldEnforcementMode, v))
+}
+
+// EnforcementModeContains applies the Contains predicate on the "enforcement_mode" field.
+func EnforcementModeContains(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldContains(FieldEnforcementMode, v))
+}
+
+// EnforcementModeHasPrefix applies the HasPrefix predicate on the "enforcement_mode" field.
+func EnforcementModeHasPrefix(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldHasPrefix(FieldEnforcementMode, v))
+}
+
+// EnforcementModeHasSuffix applies the HasSuffix predicate on the "enforcement_mode" field.
+func EnforcementModeHasSuffix(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldHasSuffix(FieldEnforcementMode, v))
+}
+
+// EnforcementModeEqualFold applies the EqualFold predicate on the "enforcement_mode" field.
+func EnforcementModeEqualFold(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldEqualFold(FieldEnforcementMode, v))
+}
+
+// EnforcementModeContainsFold applies the ContainsFold predicate on the "enforcement_mode" field.
+func EnforcementModeContainsFold(v string) predicate.Actions {
+	return predicate.Actions(sql.FieldContainsFold(FieldEnforcementMode, v))
 }
 
 // HasLionResourceTypes applies the HasEdge predicate on the "lion_resource_types" edge.

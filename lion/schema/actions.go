@@ -20,26 +20,31 @@ func (Actions) Fields() []ent.Field {
 		field.String("code").
 			MaxLen(128).
 			NotEmpty().
-			Comment("统一动作编码，如：admin.users.read"),
+			Comment("统一动作编码，如：admin.iam:ListUsers"),
 		field.String("display_name").
 			Default("").
 			Comment("动作展示名称"),
-		field.Int("resource_type").
-			Default(0).
-			Comment("兼容期保留的旧资源类型枚举字段"),
 		field.Int("resource_type_id").
-			Positive().
-			Comment("关联 lion_resource_types 表 ID"),
-		field.String("projection_mapping").
-			MaxLen(4096).
-			Default("{}").
-			Comment("兼容期保留的协议映射配置"),
+			Optional().
+			Nillable().
+			Comment("关联 lion_resource_types 表 ID，可为空（跨类型动作）"),
 		field.Bool("protected").
 			Default(false).
 			Comment("是否系统保护动作，保护动作不可删除"),
 		field.String("description").
 			Default("").
 			Comment("详细描述"),
+		field.Int("risk_level").
+			Default(0).
+			Comment("风险等级：0=low 1=medium 2=high"),
+		field.String("output_fields").
+			MaxLen(4096).
+			Default("[]").
+			Comment("动作响应字段全集，JSON 数组，用于字段级权限控制"),
+		field.String("enforcement_mode").
+			MaxLen(32).
+			Default("ENFORCED").
+			Comment("执行模式：ENFORCED / SHADOW / DISABLED"),
 	}
 }
 
@@ -49,8 +54,7 @@ func (Actions) Edges() []ent.Edge {
 		edge.From("lion_resource_types", ResourceTypes.Type).
 			Ref("lion_actions").
 			Field("resource_type_id").
-			Unique().
-			Required(),
+			Unique(),
 	}
 }
 
@@ -66,7 +70,6 @@ func (Actions) Mixin() []ent.Mixin {
 func (Actions) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("code").Unique(),
-		index.Fields("resource_type"),
 		index.Fields("resource_type_id"),
 	}
 }

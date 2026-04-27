@@ -80,11 +80,12 @@ type ActionsMutation struct {
 	addupdated_by              *int64
 	code                       *string
 	display_name               *string
-	resource_type              *int
-	addresource_type           *int
-	projection_mapping         *string
 	protected                  *bool
 	description                *string
+	risk_level                 *int
+	addrisk_level              *int
+	output_fields              *string
+	enforcement_mode           *string
 	clearedFields              map[string]struct{}
 	lion_resource_types        *int
 	clearedlion_resource_types bool
@@ -475,62 +476,6 @@ func (m *ActionsMutation) ResetDisplayName() {
 	m.display_name = nil
 }
 
-// SetResourceType sets the "resource_type" field.
-func (m *ActionsMutation) SetResourceType(i int) {
-	m.resource_type = &i
-	m.addresource_type = nil
-}
-
-// ResourceType returns the value of the "resource_type" field in the mutation.
-func (m *ActionsMutation) ResourceType() (r int, exists bool) {
-	v := m.resource_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldResourceType returns the old "resource_type" field's value of the Actions entity.
-// If the Actions object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ActionsMutation) OldResourceType(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldResourceType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldResourceType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldResourceType: %w", err)
-	}
-	return oldValue.ResourceType, nil
-}
-
-// AddResourceType adds i to the "resource_type" field.
-func (m *ActionsMutation) AddResourceType(i int) {
-	if m.addresource_type != nil {
-		*m.addresource_type += i
-	} else {
-		m.addresource_type = &i
-	}
-}
-
-// AddedResourceType returns the value that was added to the "resource_type" field in this mutation.
-func (m *ActionsMutation) AddedResourceType() (r int, exists bool) {
-	v := m.addresource_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetResourceType resets all changes to the "resource_type" field.
-func (m *ActionsMutation) ResetResourceType() {
-	m.resource_type = nil
-	m.addresource_type = nil
-}
-
 // SetResourceTypeID sets the "resource_type_id" field.
 func (m *ActionsMutation) SetResourceTypeID(i int) {
 	m.lion_resource_types = &i
@@ -548,7 +493,7 @@ func (m *ActionsMutation) ResourceTypeID() (r int, exists bool) {
 // OldResourceTypeID returns the old "resource_type_id" field's value of the Actions entity.
 // If the Actions object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ActionsMutation) OldResourceTypeID(ctx context.Context) (v int, err error) {
+func (m *ActionsMutation) OldResourceTypeID(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldResourceTypeID is only allowed on UpdateOne operations")
 	}
@@ -562,45 +507,22 @@ func (m *ActionsMutation) OldResourceTypeID(ctx context.Context) (v int, err err
 	return oldValue.ResourceTypeID, nil
 }
 
+// ClearResourceTypeID clears the value of the "resource_type_id" field.
+func (m *ActionsMutation) ClearResourceTypeID() {
+	m.lion_resource_types = nil
+	m.clearedFields[actions.FieldResourceTypeID] = struct{}{}
+}
+
+// ResourceTypeIDCleared returns if the "resource_type_id" field was cleared in this mutation.
+func (m *ActionsMutation) ResourceTypeIDCleared() bool {
+	_, ok := m.clearedFields[actions.FieldResourceTypeID]
+	return ok
+}
+
 // ResetResourceTypeID resets all changes to the "resource_type_id" field.
 func (m *ActionsMutation) ResetResourceTypeID() {
 	m.lion_resource_types = nil
-}
-
-// SetProjectionMapping sets the "projection_mapping" field.
-func (m *ActionsMutation) SetProjectionMapping(s string) {
-	m.projection_mapping = &s
-}
-
-// ProjectionMapping returns the value of the "projection_mapping" field in the mutation.
-func (m *ActionsMutation) ProjectionMapping() (r string, exists bool) {
-	v := m.projection_mapping
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProjectionMapping returns the old "projection_mapping" field's value of the Actions entity.
-// If the Actions object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ActionsMutation) OldProjectionMapping(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProjectionMapping is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProjectionMapping requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProjectionMapping: %w", err)
-	}
-	return oldValue.ProjectionMapping, nil
-}
-
-// ResetProjectionMapping resets all changes to the "projection_mapping" field.
-func (m *ActionsMutation) ResetProjectionMapping() {
-	m.projection_mapping = nil
+	delete(m.clearedFields, actions.FieldResourceTypeID)
 }
 
 // SetProtected sets the "protected" field.
@@ -675,6 +597,134 @@ func (m *ActionsMutation) ResetDescription() {
 	m.description = nil
 }
 
+// SetRiskLevel sets the "risk_level" field.
+func (m *ActionsMutation) SetRiskLevel(i int) {
+	m.risk_level = &i
+	m.addrisk_level = nil
+}
+
+// RiskLevel returns the value of the "risk_level" field in the mutation.
+func (m *ActionsMutation) RiskLevel() (r int, exists bool) {
+	v := m.risk_level
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRiskLevel returns the old "risk_level" field's value of the Actions entity.
+// If the Actions object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ActionsMutation) OldRiskLevel(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRiskLevel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRiskLevel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRiskLevel: %w", err)
+	}
+	return oldValue.RiskLevel, nil
+}
+
+// AddRiskLevel adds i to the "risk_level" field.
+func (m *ActionsMutation) AddRiskLevel(i int) {
+	if m.addrisk_level != nil {
+		*m.addrisk_level += i
+	} else {
+		m.addrisk_level = &i
+	}
+}
+
+// AddedRiskLevel returns the value that was added to the "risk_level" field in this mutation.
+func (m *ActionsMutation) AddedRiskLevel() (r int, exists bool) {
+	v := m.addrisk_level
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRiskLevel resets all changes to the "risk_level" field.
+func (m *ActionsMutation) ResetRiskLevel() {
+	m.risk_level = nil
+	m.addrisk_level = nil
+}
+
+// SetOutputFields sets the "output_fields" field.
+func (m *ActionsMutation) SetOutputFields(s string) {
+	m.output_fields = &s
+}
+
+// OutputFields returns the value of the "output_fields" field in the mutation.
+func (m *ActionsMutation) OutputFields() (r string, exists bool) {
+	v := m.output_fields
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOutputFields returns the old "output_fields" field's value of the Actions entity.
+// If the Actions object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ActionsMutation) OldOutputFields(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOutputFields is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOutputFields requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOutputFields: %w", err)
+	}
+	return oldValue.OutputFields, nil
+}
+
+// ResetOutputFields resets all changes to the "output_fields" field.
+func (m *ActionsMutation) ResetOutputFields() {
+	m.output_fields = nil
+}
+
+// SetEnforcementMode sets the "enforcement_mode" field.
+func (m *ActionsMutation) SetEnforcementMode(s string) {
+	m.enforcement_mode = &s
+}
+
+// EnforcementMode returns the value of the "enforcement_mode" field in the mutation.
+func (m *ActionsMutation) EnforcementMode() (r string, exists bool) {
+	v := m.enforcement_mode
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnforcementMode returns the old "enforcement_mode" field's value of the Actions entity.
+// If the Actions object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ActionsMutation) OldEnforcementMode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnforcementMode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnforcementMode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnforcementMode: %w", err)
+	}
+	return oldValue.EnforcementMode, nil
+}
+
+// ResetEnforcementMode resets all changes to the "enforcement_mode" field.
+func (m *ActionsMutation) ResetEnforcementMode() {
+	m.enforcement_mode = nil
+}
+
 // SetLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by id.
 func (m *ActionsMutation) SetLionResourceTypesID(id int) {
 	m.lion_resource_types = &id
@@ -688,7 +738,7 @@ func (m *ActionsMutation) ClearLionResourceTypes() {
 
 // LionResourceTypesCleared reports if the "lion_resource_types" edge to the ResourceTypes entity was cleared.
 func (m *ActionsMutation) LionResourceTypesCleared() bool {
-	return m.clearedlion_resource_types
+	return m.ResourceTypeIDCleared() || m.clearedlion_resource_types
 }
 
 // LionResourceTypesID returns the "lion_resource_types" edge ID in the mutation.
@@ -749,7 +799,7 @@ func (m *ActionsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ActionsMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, actions.FieldCreatedAt)
 	}
@@ -768,20 +818,23 @@ func (m *ActionsMutation) Fields() []string {
 	if m.display_name != nil {
 		fields = append(fields, actions.FieldDisplayName)
 	}
-	if m.resource_type != nil {
-		fields = append(fields, actions.FieldResourceType)
-	}
 	if m.lion_resource_types != nil {
 		fields = append(fields, actions.FieldResourceTypeID)
-	}
-	if m.projection_mapping != nil {
-		fields = append(fields, actions.FieldProjectionMapping)
 	}
 	if m.protected != nil {
 		fields = append(fields, actions.FieldProtected)
 	}
 	if m.description != nil {
 		fields = append(fields, actions.FieldDescription)
+	}
+	if m.risk_level != nil {
+		fields = append(fields, actions.FieldRiskLevel)
+	}
+	if m.output_fields != nil {
+		fields = append(fields, actions.FieldOutputFields)
+	}
+	if m.enforcement_mode != nil {
+		fields = append(fields, actions.FieldEnforcementMode)
 	}
 	return fields
 }
@@ -803,16 +856,18 @@ func (m *ActionsMutation) Field(name string) (ent.Value, bool) {
 		return m.Code()
 	case actions.FieldDisplayName:
 		return m.DisplayName()
-	case actions.FieldResourceType:
-		return m.ResourceType()
 	case actions.FieldResourceTypeID:
 		return m.ResourceTypeID()
-	case actions.FieldProjectionMapping:
-		return m.ProjectionMapping()
 	case actions.FieldProtected:
 		return m.Protected()
 	case actions.FieldDescription:
 		return m.Description()
+	case actions.FieldRiskLevel:
+		return m.RiskLevel()
+	case actions.FieldOutputFields:
+		return m.OutputFields()
+	case actions.FieldEnforcementMode:
+		return m.EnforcementMode()
 	}
 	return nil, false
 }
@@ -834,16 +889,18 @@ func (m *ActionsMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldCode(ctx)
 	case actions.FieldDisplayName:
 		return m.OldDisplayName(ctx)
-	case actions.FieldResourceType:
-		return m.OldResourceType(ctx)
 	case actions.FieldResourceTypeID:
 		return m.OldResourceTypeID(ctx)
-	case actions.FieldProjectionMapping:
-		return m.OldProjectionMapping(ctx)
 	case actions.FieldProtected:
 		return m.OldProtected(ctx)
 	case actions.FieldDescription:
 		return m.OldDescription(ctx)
+	case actions.FieldRiskLevel:
+		return m.OldRiskLevel(ctx)
+	case actions.FieldOutputFields:
+		return m.OldOutputFields(ctx)
+	case actions.FieldEnforcementMode:
+		return m.OldEnforcementMode(ctx)
 	}
 	return nil, fmt.Errorf("unknown Actions field %s", name)
 }
@@ -895,26 +952,12 @@ func (m *ActionsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDisplayName(v)
 		return nil
-	case actions.FieldResourceType:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetResourceType(v)
-		return nil
 	case actions.FieldResourceTypeID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetResourceTypeID(v)
-		return nil
-	case actions.FieldProjectionMapping:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProjectionMapping(v)
 		return nil
 	case actions.FieldProtected:
 		v, ok := value.(bool)
@@ -930,6 +973,27 @@ func (m *ActionsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDescription(v)
 		return nil
+	case actions.FieldRiskLevel:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRiskLevel(v)
+		return nil
+	case actions.FieldOutputFields:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOutputFields(v)
+		return nil
+	case actions.FieldEnforcementMode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnforcementMode(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Actions field %s", name)
 }
@@ -944,8 +1008,8 @@ func (m *ActionsMutation) AddedFields() []string {
 	if m.addupdated_by != nil {
 		fields = append(fields, actions.FieldUpdatedBy)
 	}
-	if m.addresource_type != nil {
-		fields = append(fields, actions.FieldResourceType)
+	if m.addrisk_level != nil {
+		fields = append(fields, actions.FieldRiskLevel)
 	}
 	return fields
 }
@@ -959,8 +1023,8 @@ func (m *ActionsMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCreatedBy()
 	case actions.FieldUpdatedBy:
 		return m.AddedUpdatedBy()
-	case actions.FieldResourceType:
-		return m.AddedResourceType()
+	case actions.FieldRiskLevel:
+		return m.AddedRiskLevel()
 	}
 	return nil, false
 }
@@ -984,12 +1048,12 @@ func (m *ActionsMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddUpdatedBy(v)
 		return nil
-	case actions.FieldResourceType:
+	case actions.FieldRiskLevel:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddResourceType(v)
+		m.AddRiskLevel(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Actions numeric field %s", name)
@@ -1004,6 +1068,9 @@ func (m *ActionsMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(actions.FieldUpdatedBy) {
 		fields = append(fields, actions.FieldUpdatedBy)
+	}
+	if m.FieldCleared(actions.FieldResourceTypeID) {
+		fields = append(fields, actions.FieldResourceTypeID)
 	}
 	return fields
 }
@@ -1024,6 +1091,9 @@ func (m *ActionsMutation) ClearField(name string) error {
 		return nil
 	case actions.FieldUpdatedBy:
 		m.ClearUpdatedBy()
+		return nil
+	case actions.FieldResourceTypeID:
+		m.ClearResourceTypeID()
 		return nil
 	}
 	return fmt.Errorf("unknown Actions nullable field %s", name)
@@ -1051,20 +1121,23 @@ func (m *ActionsMutation) ResetField(name string) error {
 	case actions.FieldDisplayName:
 		m.ResetDisplayName()
 		return nil
-	case actions.FieldResourceType:
-		m.ResetResourceType()
-		return nil
 	case actions.FieldResourceTypeID:
 		m.ResetResourceTypeID()
-		return nil
-	case actions.FieldProjectionMapping:
-		m.ResetProjectionMapping()
 		return nil
 	case actions.FieldProtected:
 		m.ResetProtected()
 		return nil
 	case actions.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case actions.FieldRiskLevel:
+		m.ResetRiskLevel()
+		return nil
+	case actions.FieldOutputFields:
+		m.ResetOutputFields()
+		return nil
+	case actions.FieldEnforcementMode:
+		m.ResetEnforcementMode()
 		return nil
 	}
 	return fmt.Errorf("unknown Actions field %s", name)

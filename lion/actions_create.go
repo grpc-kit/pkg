@@ -97,36 +97,16 @@ func (_c *ActionsCreate) SetNillableDisplayName(v *string) *ActionsCreate {
 	return _c
 }
 
-// SetResourceType sets the "resource_type" field.
-func (_c *ActionsCreate) SetResourceType(v int) *ActionsCreate {
-	_c.mutation.SetResourceType(v)
-	return _c
-}
-
-// SetNillableResourceType sets the "resource_type" field if the given value is not nil.
-func (_c *ActionsCreate) SetNillableResourceType(v *int) *ActionsCreate {
-	if v != nil {
-		_c.SetResourceType(*v)
-	}
-	return _c
-}
-
 // SetResourceTypeID sets the "resource_type_id" field.
 func (_c *ActionsCreate) SetResourceTypeID(v int) *ActionsCreate {
 	_c.mutation.SetResourceTypeID(v)
 	return _c
 }
 
-// SetProjectionMapping sets the "projection_mapping" field.
-func (_c *ActionsCreate) SetProjectionMapping(v string) *ActionsCreate {
-	_c.mutation.SetProjectionMapping(v)
-	return _c
-}
-
-// SetNillableProjectionMapping sets the "projection_mapping" field if the given value is not nil.
-func (_c *ActionsCreate) SetNillableProjectionMapping(v *string) *ActionsCreate {
+// SetNillableResourceTypeID sets the "resource_type_id" field if the given value is not nil.
+func (_c *ActionsCreate) SetNillableResourceTypeID(v *int) *ActionsCreate {
 	if v != nil {
-		_c.SetProjectionMapping(*v)
+		_c.SetResourceTypeID(*v)
 	}
 	return _c
 }
@@ -159,9 +139,59 @@ func (_c *ActionsCreate) SetNillableDescription(v *string) *ActionsCreate {
 	return _c
 }
 
+// SetRiskLevel sets the "risk_level" field.
+func (_c *ActionsCreate) SetRiskLevel(v int) *ActionsCreate {
+	_c.mutation.SetRiskLevel(v)
+	return _c
+}
+
+// SetNillableRiskLevel sets the "risk_level" field if the given value is not nil.
+func (_c *ActionsCreate) SetNillableRiskLevel(v *int) *ActionsCreate {
+	if v != nil {
+		_c.SetRiskLevel(*v)
+	}
+	return _c
+}
+
+// SetOutputFields sets the "output_fields" field.
+func (_c *ActionsCreate) SetOutputFields(v string) *ActionsCreate {
+	_c.mutation.SetOutputFields(v)
+	return _c
+}
+
+// SetNillableOutputFields sets the "output_fields" field if the given value is not nil.
+func (_c *ActionsCreate) SetNillableOutputFields(v *string) *ActionsCreate {
+	if v != nil {
+		_c.SetOutputFields(*v)
+	}
+	return _c
+}
+
+// SetEnforcementMode sets the "enforcement_mode" field.
+func (_c *ActionsCreate) SetEnforcementMode(v string) *ActionsCreate {
+	_c.mutation.SetEnforcementMode(v)
+	return _c
+}
+
+// SetNillableEnforcementMode sets the "enforcement_mode" field if the given value is not nil.
+func (_c *ActionsCreate) SetNillableEnforcementMode(v *string) *ActionsCreate {
+	if v != nil {
+		_c.SetEnforcementMode(*v)
+	}
+	return _c
+}
+
 // SetLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID.
 func (_c *ActionsCreate) SetLionResourceTypesID(id int) *ActionsCreate {
 	_c.mutation.SetLionResourceTypesID(id)
+	return _c
+}
+
+// SetNillableLionResourceTypesID sets the "lion_resource_types" edge to the ResourceTypes entity by ID if the given value is not nil.
+func (_c *ActionsCreate) SetNillableLionResourceTypesID(id *int) *ActionsCreate {
+	if id != nil {
+		_c = _c.SetLionResourceTypesID(*id)
+	}
 	return _c
 }
 
@@ -225,14 +255,6 @@ func (_c *ActionsCreate) defaults() {
 		v := actions.DefaultDisplayName
 		_c.mutation.SetDisplayName(v)
 	}
-	if _, ok := _c.mutation.ResourceType(); !ok {
-		v := actions.DefaultResourceType
-		_c.mutation.SetResourceType(v)
-	}
-	if _, ok := _c.mutation.ProjectionMapping(); !ok {
-		v := actions.DefaultProjectionMapping
-		_c.mutation.SetProjectionMapping(v)
-	}
 	if _, ok := _c.mutation.Protected(); !ok {
 		v := actions.DefaultProtected
 		_c.mutation.SetProtected(v)
@@ -240,6 +262,18 @@ func (_c *ActionsCreate) defaults() {
 	if _, ok := _c.mutation.Description(); !ok {
 		v := actions.DefaultDescription
 		_c.mutation.SetDescription(v)
+	}
+	if _, ok := _c.mutation.RiskLevel(); !ok {
+		v := actions.DefaultRiskLevel
+		_c.mutation.SetRiskLevel(v)
+	}
+	if _, ok := _c.mutation.OutputFields(); !ok {
+		v := actions.DefaultOutputFields
+		_c.mutation.SetOutputFields(v)
+	}
+	if _, ok := _c.mutation.EnforcementMode(); !ok {
+		v := actions.DefaultEnforcementMode
+		_c.mutation.SetEnforcementMode(v)
 	}
 }
 
@@ -262,33 +296,30 @@ func (_c *ActionsCreate) check() error {
 	if _, ok := _c.mutation.DisplayName(); !ok {
 		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "Actions.display_name"`)}
 	}
-	if _, ok := _c.mutation.ResourceType(); !ok {
-		return &ValidationError{Name: "resource_type", err: errors.New(`lion: missing required field "Actions.resource_type"`)}
-	}
-	if _, ok := _c.mutation.ResourceTypeID(); !ok {
-		return &ValidationError{Name: "resource_type_id", err: errors.New(`lion: missing required field "Actions.resource_type_id"`)}
-	}
-	if v, ok := _c.mutation.ResourceTypeID(); ok {
-		if err := actions.ResourceTypeIDValidator(v); err != nil {
-			return &ValidationError{Name: "resource_type_id", err: fmt.Errorf(`lion: validator failed for field "Actions.resource_type_id": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.ProjectionMapping(); !ok {
-		return &ValidationError{Name: "projection_mapping", err: errors.New(`lion: missing required field "Actions.projection_mapping"`)}
-	}
-	if v, ok := _c.mutation.ProjectionMapping(); ok {
-		if err := actions.ProjectionMappingValidator(v); err != nil {
-			return &ValidationError{Name: "projection_mapping", err: fmt.Errorf(`lion: validator failed for field "Actions.projection_mapping": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.Protected(); !ok {
 		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Actions.protected"`)}
 	}
 	if _, ok := _c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`lion: missing required field "Actions.description"`)}
 	}
-	if len(_c.mutation.LionResourceTypesIDs()) == 0 {
-		return &ValidationError{Name: "lion_resource_types", err: errors.New(`lion: missing required edge "Actions.lion_resource_types"`)}
+	if _, ok := _c.mutation.RiskLevel(); !ok {
+		return &ValidationError{Name: "risk_level", err: errors.New(`lion: missing required field "Actions.risk_level"`)}
+	}
+	if _, ok := _c.mutation.OutputFields(); !ok {
+		return &ValidationError{Name: "output_fields", err: errors.New(`lion: missing required field "Actions.output_fields"`)}
+	}
+	if v, ok := _c.mutation.OutputFields(); ok {
+		if err := actions.OutputFieldsValidator(v); err != nil {
+			return &ValidationError{Name: "output_fields", err: fmt.Errorf(`lion: validator failed for field "Actions.output_fields": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.EnforcementMode(); !ok {
+		return &ValidationError{Name: "enforcement_mode", err: errors.New(`lion: missing required field "Actions.enforcement_mode"`)}
+	}
+	if v, ok := _c.mutation.EnforcementMode(); ok {
+		if err := actions.EnforcementModeValidator(v); err != nil {
+			return &ValidationError{Name: "enforcement_mode", err: fmt.Errorf(`lion: validator failed for field "Actions.enforcement_mode": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -340,14 +371,6 @@ func (_c *ActionsCreate) createSpec() (*Actions, *sqlgraph.CreateSpec) {
 		_spec.SetField(actions.FieldDisplayName, field.TypeString, value)
 		_node.DisplayName = value
 	}
-	if value, ok := _c.mutation.ResourceType(); ok {
-		_spec.SetField(actions.FieldResourceType, field.TypeInt, value)
-		_node.ResourceType = value
-	}
-	if value, ok := _c.mutation.ProjectionMapping(); ok {
-		_spec.SetField(actions.FieldProjectionMapping, field.TypeString, value)
-		_node.ProjectionMapping = value
-	}
 	if value, ok := _c.mutation.Protected(); ok {
 		_spec.SetField(actions.FieldProtected, field.TypeBool, value)
 		_node.Protected = value
@@ -355,6 +378,18 @@ func (_c *ActionsCreate) createSpec() (*Actions, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(actions.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := _c.mutation.RiskLevel(); ok {
+		_spec.SetField(actions.FieldRiskLevel, field.TypeInt, value)
+		_node.RiskLevel = value
+	}
+	if value, ok := _c.mutation.OutputFields(); ok {
+		_spec.SetField(actions.FieldOutputFields, field.TypeString, value)
+		_node.OutputFields = value
+	}
+	if value, ok := _c.mutation.EnforcementMode(); ok {
+		_spec.SetField(actions.FieldEnforcementMode, field.TypeString, value)
+		_node.EnforcementMode = value
 	}
 	if nodes := _c.mutation.LionResourceTypesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -370,7 +405,7 @@ func (_c *ActionsCreate) createSpec() (*Actions, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.ResourceTypeID = nodes[0]
+		_node.ResourceTypeID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
