@@ -14,11 +14,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcetypes"
 	"github.com/grpc-kit/pkg/lion/services"
-	"google.golang.org/genproto/googleapis/api/serviceconfig"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"gopkg.in/yaml.v3"
 )
 
 func lionServiceToProto(in *lion.Services) *adminv1.Service {
@@ -41,30 +38,21 @@ func lionServiceToProto(in *lion.Services) *adminv1.Service {
 
 func (a *KnownAdminAPI) ListServices(ctx context.Context, req *adminv1.ListServicesRequest) (*adminv1.ListServicesResponse, error) {
 	// DEBUG, begin
-	rawBody, err := adminv1.Assets.ReadFile("admin.gateway.yaml")
+	xxx, err := a.getMicroserviceGatewayServiceConfig()
 	if err != nil {
-		return nil, fmt.Errorf("failed to read embedded admin.gateway.yaml: %w", err)
+		return nil, err
 	}
 
-	var raw map[string]interface{}
-	if err := yaml.Unmarshal(rawBody, &raw); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal admin.gateway.yaml: %w", err)
-	}
-	delete(raw, "type") // remove fields that are not in proto
-	for k, v := range raw {
-		fmt.Printf("Key: %s, Type: %T\n", k, v)
-	}
-	jsonBody, err := json.Marshal(raw)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal to json: %w", err)
-	}
-	xxx := &serviceconfig.Service{}
-	if err := protojson.Unmarshal(jsonBody, xxx); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal to proto: %w", err)
+	for _, rule := range xxx.Http.GetRules() {
+		fmt.Printf("rule: %v\n", rule)
 	}
 
-	for x, v := range xxx.Http.GetRules() {
-		fmt.Printf("Rule %d: selector=%s, pattern=%T\n", x, v.GetSelector(), v.Pattern)
+	yyy, err := a.getKnownAdminGatewayServiceConfig()
+	if err != nil {
+		return nil, err
+	}
+	for _, rule := range yyy.Http.GetRules() {
+		fmt.Printf("rule: %v\n", rule)
 	}
 	// DEBUG, end
 

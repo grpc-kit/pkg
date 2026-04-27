@@ -6,6 +6,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"net"
 	"net/http"
@@ -208,7 +209,7 @@ type BasicAuth struct {
 	Username string `mapstructure:"username"`
 	// Password 明文口令；仅当 password_hash（trim 后）为空时，服务端用其 SHA256 十六进制作为有效口令材料（与 LOCAL 登录约定一致）。
 	// Deprecated: 生产环境优先使用 password_hash。
-	Password     string   `mapstructure:"password"`
+	Password string `mapstructure:"password"`
 	// PasswordHash 优先使用（trim 后非空）：可为 sha256 十六进制或 bcrypt 串（与库表 LOCAL 用户一致时，客户端仍传 sha256(明文)）。
 	PasswordHash string   `mapstructure:"password_hash"`
 	Groups       []string `mapstructure:"groups"`
@@ -456,6 +457,19 @@ func (c *LocalConfig) HTTPHandler(handler http.Handler) http.Handler {
 func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) error {
 	if !*c.Frontend.Enable {
 		return nil
+	}
+
+	if c.adminServer != nil {
+		f, err := assets.Open("openapi/microservice.gateway.yaml")
+		if err == nil {
+			rawBody, err := io.ReadAll(f)
+			_ = f.Close()
+			if err == nil {
+				if err := c.adminServer.SetMicroserviceGatewayYAML(rawBody); err != nil {
+					return err
+				}
+			}
+		}
 	}
 
 	comps := []string{"admin", "openapi", "webroot"}

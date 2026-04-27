@@ -4,6 +4,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/genproto/googleapis/api/serviceconfig"
 )
 
 // config 配置信息
@@ -25,6 +26,10 @@ type config struct {
 
 	// 运行时本地配置快照
 	localConfigSnapshot *adminv1.LocalConfig
+
+	// 微服务网关 YAML 的解析结果
+	microserviceGatewayServiceConfig *serviceconfig.Service
+	knownAdminGatewayServiceConfig     *serviceconfig.Service
 }
 
 // Options xx

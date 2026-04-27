@@ -46,6 +46,15 @@ func (a *KnownAdminAPI) GetLionClient() (*lion.Client, error) {
 	return a.config.db, nil
 }
 
+// SetMicroserviceGatewayYAML 设置微服务网关的 YAML 配置，并在注入时立即完成解析
+func (a *KnownAdminAPI) SetMicroserviceGatewayYAML(data []byte) error {
+	if a == nil || a.config == nil {
+		return fmt.Errorf("admin config is nil")
+	}
+
+	return a.config.setMicroserviceGatewayYAML(data)
+}
+
 // getUserRoleID 获取用户的角色 ID 列表
 func (a *KnownAdminAPI) getUserRoleID(ctx context.Context) ([]int, error) {
 	result := make([]int, 0)
