@@ -1,0 +1,370 @@
+type: google.api.Service
+config_version: 3
+
+http:
+  rules:
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthLogin
+    post: "/builtin/admin/api/v1/auth/login"
+    body: "*"
+
+    # 本地配置
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfig
+    get: "/builtin/admin/api/v1/config"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigServices
+    get: "/builtin/admin/api/v1/config/services"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigDiscover
+    get: "/builtin/admin/api/v1/config/discover"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigSecurity
+    get: "/builtin/admin/api/v1/config/security"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigDatabase
+    get: "/builtin/admin/api/v1/config/database"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigCachebox
+    get: "/builtin/admin/api/v1/config/cachebox"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigDebugger
+    get: "/builtin/admin/api/v1/config/debugger"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigObjstore
+    get: "/builtin/admin/api/v1/config/objstore"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigFrontend
+    get: "/builtin/admin/api/v1/config/frontend"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigObservables
+    get: "/builtin/admin/api/v1/config/observables"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigCloudEvents
+    get: "/builtin/admin/api/v1/config/cloudevents"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigAutomations
+    get: "/builtin/admin/api/v1/config/automations"
+
+    # 认证鉴权
+    ## 创建认证令牌
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthToken
+    post: "/builtin/admin/api/v1/auth/token"
+    body: "*"
+    ## 获取认证提供方列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListAuthProviders
+    get: "/builtin/admin/api/v1/auth/providers"
+    ## 创建认证提供方
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthProvider
+    post: "/builtin/admin/api/v1/auth/providers"
+    body: "provider"
+    ## 获取认证提供方
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthProvider
+    get: "/builtin/admin/api/v1/auth/providers/{id}"
+    ## 删除认证提供方
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteAuthProvider
+    delete: "/builtin/admin/api/v1/auth/providers/{id}"
+    ## 更新认证提供方
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateAuthProvider
+    patch: "/builtin/admin/api/v1/auth/providers/{id}"
+    body: "provider"
+  #- selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpsertAuthProviders
+  #  post: "/builtin/admin/api/v1/auth/providers"
+  #  body: "*"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthCallback
+    get: "/builtin/admin/api/v1/auth/callback/{provider_name}"
+
+    # 资源管理
+    ## 获取资源
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetResource
+    get: "/builtin/admin/api/v1/resources/{id}"
+    ## 资源列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListResources
+    get: "/builtin/admin/api/v1/resources"
+    ## 创建资源
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateResource
+    post: "/builtin/admin/api/v1/resources"
+    body: "resource"
+    ## 更新资源
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateResource
+    patch: "/builtin/admin/api/v1/resources/{resource.id}"
+    body: "resource"
+    ## 删除资源
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteResource
+    delete: "/builtin/admin/api/v1/resources/{id}"
+
+    # 服务字典管理
+    ## 服务列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListServices
+    get: "/builtin/admin/api/v1/services"
+    ## 创建服务
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateService
+    post: "/builtin/admin/api/v1/services"
+    body: "service"
+    ## 更新服务
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateService
+    patch: "/builtin/admin/api/v1/services/{service.id}"
+    body: "service"
+    ## 删除服务
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteService
+    delete: "/builtin/admin/api/v1/services/{id}"
+
+    # 动作管理
+    ## 获取动作
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetAction
+    get: "/builtin/admin/api/v1/actions/{id}"
+    ## 动作列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListActions
+    get: "/builtin/admin/api/v1/actions"
+    ## 创建动作
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAction
+    post: "/builtin/admin/api/v1/actions"
+    body: "action"
+    ## 更新动作
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateAction
+    patch: "/builtin/admin/api/v1/actions/{action.id}"
+    body: "action"
+    ## 删除动作
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteAction
+    delete: "/builtin/admin/api/v1/actions/{id}"
+
+    # 资源类型字典管理
+    ## 资源类型列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListResourceTypes
+    get: "/builtin/admin/api/v1/resource-types"
+    ## 创建资源类型
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateResourceType
+    post: "/builtin/admin/api/v1/resource-types"
+    body: "resource_type"
+    ## 更新资源类型
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateResourceType
+    patch: "/builtin/admin/api/v1/resource-types/{resource_type.id}"
+    body: "resource_type"
+    ## 删除资源类型
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteResourceType
+    delete: "/builtin/admin/api/v1/resource-types/{id}"
+
+    # 菜单管理
+    ## 菜单列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListMenus
+    get: "/builtin/admin/api/v1/menus"
+    ## 创建菜单
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateMenu
+    post: "/builtin/admin/api/v1/menus"
+    body: "menu"
+    ## 更新菜单
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateMenu
+    patch: "/builtin/admin/api/v1/menus/{menu.id}"
+    body: "menu"
+    ## 删除菜单
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteMenu
+    delete: "/builtin/admin/api/v1/menus/{id}"
+    # 策略管理
+    ## 策略列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicies
+    get: "/builtin/admin/api/v1/policies"
+    ## 创建策略
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicy
+    post: "/builtin/admin/api/v1/policies"
+    body: "policy"
+    ## 更新策略
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePolicy
+    patch: "/builtin/admin/api/v1/policies/{policy.id}"
+    body: "policy"
+    ## 删除策略
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePolicy
+    delete: "/builtin/admin/api/v1/policies/{id}"
+
+    # 策略语句管理
+    ## 获取策略语句
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetPolicyStatement
+    get: "/builtin/admin/api/v1/policy-statements/{id}"
+    ## 策略语句列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicyStatements
+    get: "/builtin/admin/api/v1/policy-statements"
+    ## 创建策略语句
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicyStatement
+    post: "/builtin/admin/api/v1/policy-statements"
+    body: "statement"
+    ## 更新策略语句
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePolicyStatement
+    patch: "/builtin/admin/api/v1/policy-statements/{statement.id}"
+    body: "statement"
+    ## 删除策略语句
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePolicyStatement
+    delete: "/builtin/admin/api/v1/policy-statements/{id}"
+
+    # 策略挂载管理
+    ## 获取策略挂载
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetPolicyAttachment
+    get: "/builtin/admin/api/v1/policy-attachments/{id}"
+    ## 策略挂载列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicyAttachments
+    get: "/builtin/admin/api/v1/policy-attachments"
+    ## 创建策略挂载
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicyAttachment
+    post: "/builtin/admin/api/v1/policy-attachments"
+    body: "attachment"
+    ## 更新策略挂载
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePolicyAttachment
+    patch: "/builtin/admin/api/v1/policy-attachments/{attachment.id}"
+    body: "attachment"
+    ## 删除策略挂载
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePolicyAttachment
+    delete: "/builtin/admin/api/v1/policy-attachments/{id}"
+    # 角色管理
+    ## 角色实体
+    ### 角色列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoles
+    get: "/builtin/admin/api/v1/roles"
+    ### 创建角色
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRole
+    post: "/builtin/admin/api/v1/roles"
+    body: "role"
+    ### 角色详情
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetRole
+    get: "/builtin/admin/api/v1/roles/{id}"
+    ### 更新角色
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateRole
+    patch: "/builtin/admin/api/v1/roles/{role.id}"
+    body: "role"
+    ### 删除角色
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRole
+    delete: "/builtin/admin/api/v1/roles/{id}"
+    ## 角色成员
+    ### 创建角色成员
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRoleMembers
+    post: "/builtin/admin/api/v1/roles/{parent}/members"
+    body: "members"
+    ### 更新角色成员，对同角色下批量更新多个成员
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateRoleMembers
+    patch: "/builtin/admin/api/v1/roles/{parent}/members"
+    body: "members"
+    ### 角色成员列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoleMembers
+    get: "/builtin/admin/api/v1/roles/{parent}/members"
+    ### 删除角色成员
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleMember
+    delete: "/builtin/admin/api/v1/roles/{parent}/members/{user_id}"
+    # ## 为角色关联资源数据范围（临时注释）
+    # - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRoleDataRanges
+    #   post: "/builtin/admin/api/v1/roles/{role_id}/data/ranges"
+    #   body: "data_ranges"
+    # ## 删除角色下关联资源数据范围
+    # - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleDataRanges
+    #   delete: "/builtin/admin/api/v1/roles/{role_id}/data/ranges/{data_range_id}"
+    # ## 列出角色下关联资源数据范围
+    # - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoleDataRanges
+    #   get: "/builtin/admin/api/v1/roles/{role_id}/data/ranges"
+
+    # 部门管理
+    ## 创建部门
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDepartment
+    post: "/builtin/admin/api/v1/departments"
+    body: "department"
+    ## 部门列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListDepartments
+    get: "/builtin/admin/api/v1/departments"
+    ## 删除部门
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteDepartment
+    delete: "/builtin/admin/api/v1/departments/{id}"
+    ## 更新部门
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateDepartment
+    patch: "/builtin/admin/api/v1/departments/{department.id}"
+    body: "department"
+    ## 获取部门成员
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListDepartmentMembers
+    get: "/builtin/admin/api/v1/departments/{parent}/members"
+    ## 添加部门成员，通过该接口让用户加入多个部门
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDepartmentMembers
+    post: "/builtin/admin/api/v1/departments/{department_id}/members"
+    body: "members"
+    ## 更新部门成员，通过该接口更新指定部门成员
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateDepartmentMembers
+    patch: "/builtin/admin/api/v1/departments/{department_id}/members"
+    body: "members"
+    ## 移除部门成员
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteDepartmentMember
+    delete: "/builtin/admin/api/v1/departments/{department_id}/members/{user_id}"
+
+    # 用户管理
+    ## 用户列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers
+    get: "/builtin/admin/api/v1/users"
+    ## 创建用户
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser
+    post: "/builtin/admin/api/v1/users"
+    body: "user"
+    ## 更新用户
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUser
+    patch: "/builtin/admin/api/v1/users/{user.id}"
+    body: "user"
+    ## 获取用户
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetUser
+    get: "/builtin/admin/api/v1/users/{id}"
+    ## 更新用户密码
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUserPassword
+    put: "/builtin/admin/api/v1/users/{user_id}/password"
+    body: "*"
+
+    # MFA 多因素认证
+    ## 登录 MFA 验证
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.VerifyAuthMFA
+    post: "/builtin/admin/api/v1/auth/mfa/verify"
+    body: "*"
+    ## 登录态首次配置 MFA（获取密钥和二维码）
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.StartAuthMFASetup
+    post: "/builtin/admin/api/v1/auth/mfa/setup/start"
+    body: "*"
+    ## 登录态确认首次配置 MFA
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ConfirmAuthMFASetup
+    post: "/builtin/admin/api/v1/auth/mfa/setup/confirm"
+    body: "*"
+    ## 设置 MFA（获取密钥和二维码）
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.SetupUserMFA
+    post: "/builtin/admin/api/v1/users/{user_id}/mfa/setup"
+    body: "*"
+    ## 确认开启 MFA
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ConfirmUserMFA
+    post: "/builtin/admin/api/v1/auth/mfa/confirm"
+    body: "*"
+    ## 关闭 MFA
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DisableUserMFA
+    post: "/builtin/admin/api/v1/users/{user_id}/mfa/disable"
+    body: "*"
+
+    # 群组管理
+    ## 创建群组
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateGroup
+    post: "/builtin/admin/api/v1/groups"
+    body: "group"
+    ## 群组列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListGroups
+    get: "/builtin/admin/api/v1/groups"
+    ## 更新群组
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGroup
+    patch: "/builtin/admin/api/v1/groups/{group.id}"
+    body: "group"
+    ## 删除群组
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGroup
+    delete: "/builtin/admin/api/v1/groups/{id}"
+    ## 群组详情
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetGroup
+    get: "/builtin/admin/api/v1/groups/{id}"
+    ## 群组成员列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListGroupMembers
+    get: "/builtin/admin/api/v1/groups/{parent}/members"
+    ## 创建群组成员
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateGroupMembers
+    post: "/builtin/admin/api/v1/groups/{parent}/members"
+    body: "members"
+    ## 删除群组成员
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteGroupMember
+    delete: "/builtin/admin/api/v1/groups/{parent}/members/{user_id}"
+    ## 更新群组成员
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGroupMember
+    patch: "/builtin/admin/api/v1/groups/{parent}/members/{user_id}"
+    body: "member"
+
+    # 安全相关
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateCredential
+    post: "/builtin/admin/api/v1/credentials"
+    body: "credential"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery
+    get: "/builtin/admin/api/v1/oatuh2/.well-known/openid-configuration"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2JSONWebKeys
+    get: "/builtin/admin/api/v1/oatuh2/jwks"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Userinfo
+    get: "/builtin/admin/api/v1/oatuh2/userinfo"
+
+    # 数据库相关
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDatabaseInitialize
+    post: "/builtin/admin/api/v1/database/initialize"
+    body: "*"
