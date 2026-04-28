@@ -2,18 +2,14 @@ package admin
 
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/resourcetypes"
-	"github.com/grpc-kit/pkg/lion/services"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -37,94 +33,51 @@ func lionServiceToProto(in *lion.Services) *adminv1.Service {
 }
 
 func (a *KnownAdminAPI) ListServices(ctx context.Context, req *adminv1.ListServicesRequest) (*adminv1.ListServicesResponse, error) {
+	result := &adminv1.ListServicesResponse{
+		Services: make([]*adminv1.Service, 0),
+	}
+
 	// DEBUG, begin
-	xxx, err := a.getMicroserviceGatewayServiceConfig()
+	xxx, err := a.getKnownAdminGatewayServiceConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, rule := range xxx.Http.GetRules() {
-		fmt.Printf("rule: %v\n", rule)
-	}
+	grpcName1 := xxx.Http.GetRules()[0].Selector
+	temp1 := strings.Split(grpcName1, ".")
+	codeName1 := fmt.Sprintf("%v.%v.%v", temp1[3], temp1[4], temp1[2])
 
-	yyy, err := a.getKnownAdminGatewayServiceConfig()
+	result.Services = append(result.Services,
+		&adminv1.Service{Id: 1, Code: codeName1, GrpcName: strings.Join(temp1[:6], "."), DisplayName: xxx.Title, Protected: true},
+	)
+
+	yyy, err := a.getMicroserviceGatewayServiceConfig()
 	if err != nil {
 		return nil, err
 	}
-	for _, rule := range yyy.Http.GetRules() {
-		fmt.Printf("rule: %v\n", rule)
-	}
+
+	grpcName2 := yyy.Http.GetRules()[0].Selector
+	temp2 := strings.Split(grpcName2, ".")
+	codeName2 := fmt.Sprintf("%v.%v.%v", temp2[3], temp2[4], temp2[2])
+
+	result.Services = append(result.Services,
+		&adminv1.Service{Id: 2, Code: codeName2, GrpcName: strings.Join(temp2[:6], "."), DisplayName: yyy.Title, Protected: true},
+	)
 	// DEBUG, end
 
-	result := &adminv1.ListServicesResponse{}
+	result.TotalSize = 2
 
-	db, err := a.GetLionClient()
-	if err != nil {
-		return result, nil
-	}
-
-	query := db.Services.Query()
-	where := make([]predicate.Services, 0)
-	if strings.TrimSpace(req.Filter) != "" {
-		where = append(where, services.Or(
-			services.CodeContainsFold(req.Filter),
-			services.DisplayNameContainsFold(req.Filter),
-			services.GrpcNameContainsFold(req.Filter),
-		))
-	}
-	if len(where) > 0 {
-		query = query.Where(where...)
-	}
-
-	switch req.OrderBy {
-	case "code asc":
-		query = query.Order(lion.Asc(services.FieldCode))
-	case "code desc":
-		query = query.Order(lion.Desc(services.FieldCode))
-	case "create_time asc":
-		query = query.Order(lion.Asc(services.FieldCreatedAt))
-	default:
-		query = query.Order(lion.Desc(services.FieldCreatedAt))
-	}
-
-	totalSize, err := query.Clone().Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	result.TotalSize = int32(totalSize)
-
-	pageSize := GetPageSizeByStructure(ctx, req.PageSize, req.Structure)
-	var lastID int
-	if req.GetPageToken() != "" {
-		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
+	/*
+		knownSwagger, err := a.getKnownAdminGatewaySwagger()
 		if err != nil {
-			return nil, fmt.Errorf("invalid page_token: %w", err)
+			return nil, err
 		}
-		if err := json.Unmarshal(data, &lastID); err != nil {
-			return nil, fmt.Errorf("invalid page_token format: %w", err)
-		}
-		if lastID > 0 {
-			query = query.Where(services.IDGT(lastID))
-		}
-	}
 
-	switch p := req.GetPagination().(type) {
-	case *adminv1.ListServicesRequest_Offset:
-		query = query.Offset(int(p.Offset))
-	case *adminv1.ListServicesRequest_PageToken:
-	}
+		for k, v := range knownSwagger.OpenapiOptions.Method {
+			fmt.Println("k:", k, "v:", v)
+		}
+	*/
 
-	list, err := query.Limit(int(pageSize)).All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	for _, item := range list {
-		result.Services = append(result.Services, lionServiceToProto(item))
-	}
-	if len(list) == int(pageSize) && len(list) > 0 {
-		data, _ := json.Marshal(list[len(list)-1].ID)
-		result.NextPageToken = base64.StdEncoding.EncodeToString(data)
-	}
 	return result, nil
 }
 
