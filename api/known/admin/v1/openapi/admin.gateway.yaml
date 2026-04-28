@@ -1,5 +1,6 @@
 type: google.api.Service
 config_version: 3
+title: 公知 Admin 服务
 
 http:
   rules:

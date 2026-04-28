@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/sirupsen/logrus"
@@ -27,9 +28,13 @@ type config struct {
 	// 运行时本地配置快照
 	localConfigSnapshot *adminv1.LocalConfig
 
+	// 公知 admin 服务的网关
+	knownAdminGatewayServiceConfig *serviceconfig.Service
+	knownAdminGatewaySwagger       *openapiconfig.OpenAPIConfig
+
 	// 微服务网关 YAML 的解析结果
 	microserviceGatewayServiceConfig *serviceconfig.Service
-	knownAdminGatewayServiceConfig     *serviceconfig.Service
+	microserviceGatewaySwagger       *openapiconfig.OpenAPIConfig
 }
 
 // Options xx

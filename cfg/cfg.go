@@ -6,7 +6,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/fs"
 	"net"
 	"net/http"
@@ -460,15 +459,8 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 	}
 
 	if c.adminServer != nil {
-		f, err := assets.Open("openapi/microservice.gateway.yaml")
-		if err == nil {
-			rawBody, err := io.ReadAll(f)
-			_ = f.Close()
-			if err == nil {
-				if err := c.adminServer.SetMicroserviceGatewayYAML(rawBody); err != nil {
-					return err
-				}
-			}
+		if err := c.adminServer.SetMicroserviceGatewayYAML(assets); err != nil {
+			return err
 		}
 	}
 

@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 	"fmt"
+	"io/fs"
 
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
@@ -47,12 +48,12 @@ func (a *KnownAdminAPI) GetLionClient() (*lion.Client, error) {
 }
 
 // SetMicroserviceGatewayYAML 设置微服务网关的 YAML 配置，并在注入时立即完成解析
-func (a *KnownAdminAPI) SetMicroserviceGatewayYAML(data []byte) error {
+func (a *KnownAdminAPI) SetMicroserviceGatewayYAML(assets fs.FS) error {
 	if a == nil || a.config == nil {
 		return fmt.Errorf("admin config is nil")
 	}
 
-	return a.config.setMicroserviceGatewayYAML(data)
+	return a.config.setMicroserviceGatewayYAML(assets)
 }
 
 // getUserRoleID 获取用户的角色 ID 列表
