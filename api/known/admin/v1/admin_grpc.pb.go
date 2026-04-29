@@ -62,9 +62,7 @@ type KnownAdminClient interface {
 	DeleteResource(ctx context.Context, in *DeleteResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 服务字典管理
 	ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error)
-	CreateService(ctx context.Context, in *CreateServiceRequest, opts ...grpc.CallOption) (*Service, error)
-	UpdateService(ctx context.Context, in *UpdateServiceRequest, opts ...grpc.CallOption) (*Service, error)
-	DeleteService(ctx context.Context, in *DeleteServiceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ListServiceActions(ctx context.Context, in *ListServiceActionsRequest, opts ...grpc.CallOption) (*ListServiceActionsResponse, error)
 	// 资源类型字典管理
 	ListResourceTypes(ctx context.Context, in *ListResourceTypesRequest, opts ...grpc.CallOption) (*ListResourceTypesResponse, error)
 	CreateResourceType(ctx context.Context, in *CreateResourceTypeRequest, opts ...grpc.CallOption) (*ResourceType, error)
@@ -80,12 +78,6 @@ type KnownAdminClient interface {
 	CreatePolicy(ctx context.Context, in *CreatePolicyRequest, opts ...grpc.CallOption) (*Policy, error)
 	UpdatePolicy(ctx context.Context, in *UpdatePolicyRequest, opts ...grpc.CallOption) (*Policy, error)
 	DeletePolicy(ctx context.Context, in *DeletePolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 动作管理
-	GetAction(ctx context.Context, in *GetActionRequest, opts ...grpc.CallOption) (*Action, error)
-	ListActions(ctx context.Context, in *ListActionsRequest, opts ...grpc.CallOption) (*ListActionsResponse, error)
-	CreateAction(ctx context.Context, in *CreateActionRequest, opts ...grpc.CallOption) (*Action, error)
-	UpdateAction(ctx context.Context, in *UpdateActionRequest, opts ...grpc.CallOption) (*Action, error)
-	DeleteAction(ctx context.Context, in *DeleteActionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 策略语句管理
 	GetPolicyStatement(ctx context.Context, in *GetPolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error)
 	ListPolicyStatements(ctx context.Context, in *ListPolicyStatementsRequest, opts ...grpc.CallOption) (*ListPolicyStatementsResponse, error)
@@ -448,27 +440,9 @@ func (c *knownAdminClient) ListServices(ctx context.Context, in *ListServicesReq
 	return out, nil
 }
 
-func (c *knownAdminClient) CreateService(ctx context.Context, in *CreateServiceRequest, opts ...grpc.CallOption) (*Service, error) {
-	out := new(Service)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateService", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdateService(ctx context.Context, in *UpdateServiceRequest, opts ...grpc.CallOption) (*Service, error) {
-	out := new(Service)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateService", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteService(ctx context.Context, in *DeleteServiceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteService", in, out, opts...)
+func (c *knownAdminClient) ListServiceActions(ctx context.Context, in *ListServiceActionsRequest, opts ...grpc.CallOption) (*ListServiceActionsResponse, error) {
+	out := new(ListServiceActionsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServiceActions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -577,51 +551,6 @@ func (c *knownAdminClient) UpdatePolicy(ctx context.Context, in *UpdatePolicyReq
 func (c *knownAdminClient) DeletePolicy(ctx context.Context, in *DeletePolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicy", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetAction(ctx context.Context, in *GetActionRequest, opts ...grpc.CallOption) (*Action, error) {
-	out := new(Action)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAction", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListActions(ctx context.Context, in *ListActionsRequest, opts ...grpc.CallOption) (*ListActionsResponse, error) {
-	out := new(ListActionsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListActions", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreateAction(ctx context.Context, in *CreateActionRequest, opts ...grpc.CallOption) (*Action, error) {
-	out := new(Action)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAction", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdateAction(ctx context.Context, in *UpdateActionRequest, opts ...grpc.CallOption) (*Action, error) {
-	out := new(Action)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateAction", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteAction(ctx context.Context, in *DeleteActionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteAction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1085,9 +1014,7 @@ type KnownAdminServer interface {
 	DeleteResource(context.Context, *DeleteResourceRequest) (*emptypb.Empty, error)
 	// 服务字典管理
 	ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error)
-	CreateService(context.Context, *CreateServiceRequest) (*Service, error)
-	UpdateService(context.Context, *UpdateServiceRequest) (*Service, error)
-	DeleteService(context.Context, *DeleteServiceRequest) (*emptypb.Empty, error)
+	ListServiceActions(context.Context, *ListServiceActionsRequest) (*ListServiceActionsResponse, error)
 	// 资源类型字典管理
 	ListResourceTypes(context.Context, *ListResourceTypesRequest) (*ListResourceTypesResponse, error)
 	CreateResourceType(context.Context, *CreateResourceTypeRequest) (*ResourceType, error)
@@ -1103,12 +1030,6 @@ type KnownAdminServer interface {
 	CreatePolicy(context.Context, *CreatePolicyRequest) (*Policy, error)
 	UpdatePolicy(context.Context, *UpdatePolicyRequest) (*Policy, error)
 	DeletePolicy(context.Context, *DeletePolicyRequest) (*emptypb.Empty, error)
-	// 动作管理
-	GetAction(context.Context, *GetActionRequest) (*Action, error)
-	ListActions(context.Context, *ListActionsRequest) (*ListActionsResponse, error)
-	CreateAction(context.Context, *CreateActionRequest) (*Action, error)
-	UpdateAction(context.Context, *UpdateActionRequest) (*Action, error)
-	DeleteAction(context.Context, *DeleteActionRequest) (*emptypb.Empty, error)
 	// 策略语句管理
 	GetPolicyStatement(context.Context, *GetPolicyStatementRequest) (*PolicyStatement, error)
 	ListPolicyStatements(context.Context, *ListPolicyStatementsRequest) (*ListPolicyStatementsResponse, error)
@@ -1269,14 +1190,8 @@ func (UnimplementedKnownAdminServer) DeleteResource(context.Context, *DeleteReso
 func (UnimplementedKnownAdminServer) ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListServices not implemented")
 }
-func (UnimplementedKnownAdminServer) CreateService(context.Context, *CreateServiceRequest) (*Service, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateService not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdateService(context.Context, *UpdateServiceRequest) (*Service, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateService not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteService(context.Context, *DeleteServiceRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteService not implemented")
+func (UnimplementedKnownAdminServer) ListServiceActions(context.Context, *ListServiceActionsRequest) (*ListServiceActionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListServiceActions not implemented")
 }
 func (UnimplementedKnownAdminServer) ListResourceTypes(context.Context, *ListResourceTypesRequest) (*ListResourceTypesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListResourceTypes not implemented")
@@ -1313,21 +1228,6 @@ func (UnimplementedKnownAdminServer) UpdatePolicy(context.Context, *UpdatePolicy
 }
 func (UnimplementedKnownAdminServer) DeletePolicy(context.Context, *DeletePolicyRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePolicy not implemented")
-}
-func (UnimplementedKnownAdminServer) GetAction(context.Context, *GetActionRequest) (*Action, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAction not implemented")
-}
-func (UnimplementedKnownAdminServer) ListActions(context.Context, *ListActionsRequest) (*ListActionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListActions not implemented")
-}
-func (UnimplementedKnownAdminServer) CreateAction(context.Context, *CreateActionRequest) (*Action, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateAction not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdateAction(context.Context, *UpdateActionRequest) (*Action, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateAction not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteAction(context.Context, *DeleteActionRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteAction not implemented")
 }
 func (UnimplementedKnownAdminServer) GetPolicyStatement(context.Context, *GetPolicyStatementRequest) (*PolicyStatement, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPolicyStatement not implemented")
@@ -2073,56 +1973,20 @@ func _KnownAdmin_ListServices_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_CreateService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateServiceRequest)
+func _KnownAdmin_ListServiceActions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListServiceActionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateService(ctx, in)
+		return srv.(KnownAdminServer).ListServiceActions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateService",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServiceActions",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateService(ctx, req.(*CreateServiceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdateService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateServiceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdateService(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateService",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdateService(ctx, req.(*UpdateServiceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteServiceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteService(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteService",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteService(ctx, req.(*DeleteServiceRequest))
+		return srv.(KnownAdminServer).ListServiceActions(ctx, req.(*ListServiceActionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2339,96 +2203,6 @@ func _KnownAdmin_DeletePolicy_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).DeletePolicy(ctx, req.(*DeletePolicyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetActionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetAction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAction",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetAction(ctx, req.(*GetActionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListActions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListActionsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListActions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListActions",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListActions(ctx, req.(*ListActionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreateAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateActionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateAction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAction",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateAction(ctx, req.(*CreateActionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdateAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateActionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdateAction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateAction",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdateAction(ctx, req.(*UpdateActionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteActionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteAction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteAction",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteAction(ctx, req.(*DeleteActionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -3401,16 +3175,8 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_ListServices_Handler,
 		},
 		{
-			MethodName: "CreateService",
-			Handler:    _KnownAdmin_CreateService_Handler,
-		},
-		{
-			MethodName: "UpdateService",
-			Handler:    _KnownAdmin_UpdateService_Handler,
-		},
-		{
-			MethodName: "DeleteService",
-			Handler:    _KnownAdmin_DeleteService_Handler,
+			MethodName: "ListServiceActions",
+			Handler:    _KnownAdmin_ListServiceActions_Handler,
 		},
 		{
 			MethodName: "ListResourceTypes",
@@ -3459,26 +3225,6 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePolicy",
 			Handler:    _KnownAdmin_DeletePolicy_Handler,
-		},
-		{
-			MethodName: "GetAction",
-			Handler:    _KnownAdmin_GetAction_Handler,
-		},
-		{
-			MethodName: "ListActions",
-			Handler:    _KnownAdmin_ListActions_Handler,
-		},
-		{
-			MethodName: "CreateAction",
-			Handler:    _KnownAdmin_CreateAction_Handler,
-		},
-		{
-			MethodName: "UpdateAction",
-			Handler:    _KnownAdmin_UpdateAction_Handler,
-		},
-		{
-			MethodName: "DeleteAction",
-			Handler:    _KnownAdmin_DeleteAction_Handler,
 		},
 		{
 			MethodName: "GetPolicyStatement",

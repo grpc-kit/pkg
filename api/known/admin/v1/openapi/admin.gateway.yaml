@@ -85,36 +85,9 @@ http:
     ## 服务列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListServices
     get: "/builtin/admin/api/v1/services"
-    ## 创建服务
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateService
-    post: "/builtin/admin/api/v1/services"
-    body: "service"
-    ## 更新服务
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateService
-    patch: "/builtin/admin/api/v1/services/{service.id}"
-    body: "service"
-    ## 删除服务
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteService
-    delete: "/builtin/admin/api/v1/services/{id}"
-
-    # 动作管理
-    ## 获取动作
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetAction
-    get: "/builtin/admin/api/v1/actions/{id}"
-    ## 动作列表
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListActions
-    get: "/builtin/admin/api/v1/actions"
-    ## 创建动作
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAction
-    post: "/builtin/admin/api/v1/actions"
-    body: "action"
-    ## 更新动作
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateAction
-    patch: "/builtin/admin/api/v1/actions/{action.id}"
-    body: "action"
-    ## 删除动作
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteAction
-    delete: "/builtin/admin/api/v1/actions/{id}"
+    ## 获取服务动作
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListServiceActions
+    get: "/builtin/admin/api/v1/services/{parent}/actions"
 
     # 资源类型字典管理
     ## 资源类型列表

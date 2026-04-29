@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
+	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
-	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourcetypes"
-	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/genproto/googleapis/api/serviceconfig"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -21,7 +20,7 @@ func lionServiceToProto(in *lion.Services) *adminv1.Service {
 	return &adminv1.Service{
 		Id:          int64(in.ID),
 		Code:        in.Code,
-		GrpcName:    in.GrpcName,
+		GrpcService: in.GrpcName,
 		DisplayName: in.DisplayName,
 		Description: in.Description,
 		Protected:   in.Protected,
@@ -48,7 +47,7 @@ func (a *KnownAdminAPI) ListServices(ctx context.Context, req *adminv1.ListServi
 	codeName1 := fmt.Sprintf("%v.%v.%v", temp1[3], temp1[4], temp1[2])
 
 	result.Services = append(result.Services,
-		&adminv1.Service{Id: 1, Code: codeName1, GrpcName: strings.Join(temp1[:6], "."), DisplayName: xxx.Title, Protected: true},
+		&adminv1.Service{Id: 1, Code: codeName1, GrpcService: strings.Join(temp1[:6], "."), DisplayName: xxx.Title, Protected: true},
 	)
 
 	yyy, err := a.getMicroserviceGatewayServiceConfig()
@@ -61,7 +60,7 @@ func (a *KnownAdminAPI) ListServices(ctx context.Context, req *adminv1.ListServi
 	codeName2 := fmt.Sprintf("%v.%v.%v", temp2[3], temp2[4], temp2[2])
 
 	result.Services = append(result.Services,
-		&adminv1.Service{Id: 2, Code: codeName2, GrpcName: strings.Join(temp2[:6], "."), DisplayName: yyy.Title, Protected: true},
+		&adminv1.Service{Id: 2, Code: codeName2, GrpcService: strings.Join(temp2[:6], "."), DisplayName: yyy.Title, Protected: true},
 	)
 	// DEBUG, end
 
@@ -81,136 +80,74 @@ func (a *KnownAdminAPI) ListServices(ctx context.Context, req *adminv1.ListServi
 	return result, nil
 }
 
-func (a *KnownAdminAPI) CreateService(ctx context.Context, req *adminv1.CreateServiceRequest) (*adminv1.Service, error) {
-	if req == nil || req.Service == nil {
-		return nil, errs.InvalidArgument(ctx).WithMessage("request body service is nil")
-	}
-	code := strings.TrimSpace(req.Service.Code)
-	grpcName := strings.TrimSpace(req.Service.GrpcName)
-	if code == "" {
-		return nil, errs.InvalidArgument(ctx).WithMessage("service code is required")
-	}
-	if grpcName == "" {
-		return nil, errs.InvalidArgument(ctx).WithMessage("grpc_name is required")
+func (a *KnownAdminAPI) ListServiceActions(ctx context.Context, req *adminv1.ListServiceActionsRequest) (*adminv1.ListServiceActionsResponse, error) {
+	result := &adminv1.ListServiceActionsResponse{
+		Actions: make([]*adminv1.Action, 0),
 	}
 
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
-	}
+	var err error
+	var swaggers *openapiconfig.OpenAPIConfig
+	var yyy *serviceconfig.Service
 
-	obj, err := db.Services.Create().
-		SetCode(code).
-		SetGrpcName(grpcName).
-		SetDisplayName(req.Service.DisplayName).
-		SetDescription(req.Service.Description).
-		SetProtected(false).
-		Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return lionServiceToProto(obj), nil
-}
+	// DEBUG, begin
+	docsmap := make(map[string]*options.Operation, 0)
 
-func (a *KnownAdminAPI) UpdateService(ctx context.Context, req *adminv1.UpdateServiceRequest) (*adminv1.Service, error) {
-	if req == nil || req.Service == nil {
-		return nil, errs.InvalidArgument(ctx).WithMessage("request body service is nil")
-	}
-	if req.Service.Id == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("service id is required")
-	}
-
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
-	}
-
-	obj, err := db.Services.Get(ctx, int(req.Service.Id))
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("service not found")
-	}
-
-	update := obj.Update()
-	apply := func(path string) error {
-		switch path {
-		case "code":
-			code := strings.TrimSpace(req.Service.Code)
-			if code == "" {
-				return errs.InvalidArgument(ctx).WithMessage("service code is required")
-			}
-			update.SetCode(code)
-		case "grpc_name":
-			grpcName := strings.TrimSpace(req.Service.GrpcName)
-			if grpcName == "" {
-				return errs.InvalidArgument(ctx).WithMessage("grpc_name is required")
-			}
-			update.SetGrpcName(grpcName)
-		case "display_name":
-			update.SetDisplayName(req.Service.DisplayName)
-		case "description":
-			update.SetDescription(req.Service.Description)
-		case "protected":
-			return errs.InvalidArgument(ctx).WithMessage("protected field is managed by system")
+	if req.Parent == "admin.v1.known" {
+		swaggers, err = a.getKnownAdminGatewaySwagger()
+		if err != nil {
+			return nil, err
 		}
-		return nil
-	}
-
-	if req.UpdateMask != nil && len(req.UpdateMask.Paths) > 0 {
-		for _, path := range req.UpdateMask.Paths {
-			if err := apply(path); err != nil {
-				return nil, err
-			}
+		yyy, err = a.getKnownAdminGatewayServiceConfig()
+		if err != nil {
+			return nil, err
 		}
 	} else {
-		if err := apply("code"); err != nil {
+		swaggers, err = a.getMicroserviceGatewaySwagger()
+		if err != nil {
 			return nil, err
 		}
-		if err := apply("grpc_name"); err != nil {
+		yyy, err = a.getMicroserviceGatewayServiceConfig()
+		if err != nil {
 			return nil, err
 		}
-		update.SetDisplayName(req.Service.DisplayName)
-		update.SetDescription(req.Service.Description)
 	}
 
-	saved, err := update.Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return lionServiceToProto(saved), nil
-}
-
-func (a *KnownAdminAPI) DeleteService(ctx context.Context, req *adminv1.DeleteServiceRequest) (*emptypb.Empty, error) {
-	if req.GetId() <= 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("service id is required")
+	for _, v := range swaggers.OpenapiOptions.Method {
+		docsmap[v.Method] = v.Option
 	}
 
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
+	for k, v := range yyy.Http.GetRules() {
+		idx := k + 1
+
+		temp2 := strings.Split(v.Selector, ".")
+		serviceCode := fmt.Sprintf("%v.%v.%v", temp2[3], temp2[4], temp2[2])
+		grpcMethod := temp2[6]
+
+		act := &adminv1.Action{Id: int64(idx), Code: fmt.Sprintf("%v:%v", serviceCode, grpcMethod), GrpcMethod: grpcMethod, Protected: true}
+
+		opt, ok := docsmap[v.Selector]
+		if ok {
+			act.DisplayName = opt.GetSummary()
+			act.Description = opt.GetDescription()
+		}
+
+		result.Actions = append(result.Actions, act)
 	}
-	obj, err := db.Services.Get(ctx, int(req.GetId()))
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("service not found")
-	}
-	if obj.Protected {
-		return nil, errs.InvalidArgument(ctx).WithMessage("protected service can not be deleted")
-	}
-	usedByTypes, err := db.ResourceTypes.Query().Where(resourcetypes.ServiceCodeEQ(obj.Code)).Exist(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if usedByTypes {
-		return nil, errs.InvalidArgument(ctx).WithMessage("service is referenced by resource types")
-	}
-	usedByResources, err := db.Resources.Query().Where(resources.ServiceCodeEQ(obj.Code)).Exist(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if usedByResources {
-		return nil, errs.InvalidArgument(ctx).WithMessage("service is referenced by resources")
-	}
-	if err := db.Services.DeleteOneID(obj.ID).Exec(ctx); err != nil {
-		return nil, err
-	}
-	return &emptypb.Empty{}, nil
+
+	// DEBUG, end
+
+	result.TotalSize = int32(len(yyy.Http.GetRules()))
+
+	/*
+		knownSwagger, err := a.getKnownAdminGatewaySwagger()
+		if err != nil {
+			return nil, err
+		}
+
+		for k, v := range knownSwagger.OpenapiOptions.Method {
+			fmt.Println("k:", k, "v:", v)
+		}
+	*/
+
+	return result, nil
 }
