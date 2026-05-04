@@ -5,14 +5,13 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/x509"
-	"encoding/json"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/pquerna/otp/totp"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
@@ -22,6 +21,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
+	"github.com/pquerna/otp/totp"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
