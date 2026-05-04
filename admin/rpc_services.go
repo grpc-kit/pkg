@@ -3,15 +3,19 @@ package admin
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion"
+	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/genproto/googleapis/api/serviceconfig"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+var httpPathVarRegexp = regexp.MustCompile(`{([^{}]+)}`)
 
 func lionServiceToProto(in *lion.Services) *adminv1.Service {
 	if in == nil {
@@ -123,13 +127,30 @@ func (a *KnownAdminAPI) ListServiceActions(ctx context.Context, req *adminv1.Lis
 		serviceCode := fmt.Sprintf("%v.%v.%v", temp2[3], temp2[4], temp2[2])
 		grpcMethod := temp2[6]
 
-		act := &adminv1.Action{Id: int64(idx), Code: fmt.Sprintf("%v:%v", serviceCode, grpcMethod), GrpcMethod: grpcMethod, Protected: true}
+		act := &adminv1.Action{Id: int64(idx),
+			Code:              fmt.Sprintf("%v:%v", serviceCode, grpcMethod),
+			GrpcMethod:        grpcMethod,
+			Protected:         true,
+			ResourceSelectors: make([]*adminv1.Action_ResourceSelector, 0)}
 
 		opt, ok := docsmap[v.Selector]
 		if ok {
 			act.DisplayName = opt.GetSummary()
 			act.Description = opt.GetDescription()
 		}
+
+		// 如果 v 中的 url 定义存在变量，则把它添加到 resource_selectors 中，比如：
+		/*
+			  - selector: default.api.oneops.netdev.v1.OneopsNetdev.DeleteSwitchAdminUser
+				    delete: "/api/switch/admin/user/{username}"
+
+				  - selector: default.api.oneops.netdev.v1.OneopsNetdev.ListSwitchAdminUsers
+				    get: "/api/switch/admin/users"
+
+				  - selector: default.api.oneops.netdev.v1.OneopsNetdev.DeleteSSHBastionHost
+				    delete: "/api/ssh/bastion/host/{host}"
+		*/
+		act.ResourceSelectors = appendPathVariableSelectors(serviceCode, act.ResourceSelectors, httpRulePathTemplates(v))
 
 		result.Actions = append(result.Actions, act)
 	}
@@ -150,4 +171,125 @@ func (a *KnownAdminAPI) ListServiceActions(ctx context.Context, req *adminv1.Lis
 	*/
 
 	return result, nil
+}
+
+func httpRulePathTemplates(rule *annotations.HttpRule) []string {
+	if rule == nil {
+		return nil
+	}
+
+	templates := make([]string, 0, 1+len(rule.GetAdditionalBindings()))
+	if template := httpRulePrimaryPathTemplate(rule); template != "" {
+		templates = append(templates, template)
+	}
+
+	for _, binding := range rule.GetAdditionalBindings() {
+		templates = append(templates, httpRulePathTemplates(binding)...)
+	}
+
+	return templates
+}
+
+func httpRulePrimaryPathTemplate(rule *annotations.HttpRule) string {
+	if rule == nil {
+		return ""
+	}
+
+	switch {
+	case rule.GetGet() != "":
+		return rule.GetGet()
+	case rule.GetPut() != "":
+		return rule.GetPut()
+	case rule.GetPost() != "":
+		return rule.GetPost()
+	case rule.GetDelete() != "":
+		return rule.GetDelete()
+	case rule.GetPatch() != "":
+		return rule.GetPatch()
+	default:
+		if custom := rule.GetCustom(); custom != nil {
+			return custom.GetPath()
+		}
+	}
+
+	return ""
+}
+
+func appendPathVariableSelectors(serviceCode string, in []*adminv1.Action_ResourceSelector, templates []string) []*adminv1.Action_ResourceSelector {
+	// pattern 格式为：grn:${service_code}:${region_code}:${account_id}:${resource_type}/${resource_path}
+
+	if len(templates) == 0 {
+		return in
+	}
+
+	result := in
+	seen := make(map[string]struct{}, len(in))
+	for _, selector := range in {
+		if selector == nil {
+			continue
+		}
+		seen[selector.GetResourceType()+"\n"+selector.GetPattern()] = struct{}{}
+	}
+
+	for _, template := range templates {
+		for _, variable := range extractHTTPPathVariables(template) {
+			key := variable.resourceType + "\n" + variable.pattern
+			if _, ok := seen[key]; ok {
+				continue
+			}
+			seen[key] = struct{}{}
+			result = append(result, &adminv1.Action_ResourceSelector{
+				ResourceType: variable.resourceType,
+				Pattern:      fmt.Sprintf("grn:%v:${region_code}:${account_id}:%v/%v", serviceCode, variable.resourceType, variable.pattern),
+			})
+		}
+	}
+
+	return result
+}
+
+type pathVariable struct {
+	resourceType string
+	pattern      string
+}
+
+func extractHTTPPathVariables(template string) []pathVariable {
+	if template == "" {
+		return nil
+	}
+
+	matches := httpPathVarRegexp.FindAllStringSubmatch(template, -1)
+	if len(matches) == 0 {
+		return nil
+	}
+
+	result := make([]pathVariable, 0, len(matches))
+	for _, match := range matches {
+		if len(match) < 2 {
+			continue
+		}
+
+		token := strings.TrimSpace(match[1])
+		if token == "" {
+			continue
+		}
+
+		resourceType := token
+		pattern := "*"
+		if i := strings.Index(token, "="); i >= 0 {
+			resourceType = strings.TrimSpace(token[:i])
+			pattern = strings.TrimSpace(token[i+1:])
+			if pattern == "" {
+				pattern = "*"
+			}
+		}
+
+		if resourceType == "" {
+			continue
+		}
+
+		result = append(result, pathVariable{resourceType: resourceType, pattern: pattern})
+	}
+
+	return result
 }
