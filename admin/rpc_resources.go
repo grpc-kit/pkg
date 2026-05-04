@@ -320,7 +320,6 @@ func (a *KnownAdminAPI) lionResourceToProto(in *lion.Resources) *adminv1.Resourc
 		Region:           in.Region,
 		ResourcePath:     resourcePath,
 		Grn:              grn,
-		Scopes:           nil,
 	}
 }
 

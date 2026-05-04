@@ -82,7 +82,7 @@ http:
     delete: "/builtin/admin/api/v1/resources/{id}"
 
     # 服务字典管理
-    ## 服务列表
+    ## 获取服务列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListServices
     get: "/builtin/admin/api/v1/services"
     ## 获取服务动作
