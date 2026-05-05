@@ -31,9 +31,6 @@ func (a *KnownAdminAPI) ListPolicies(ctx context.Context, req *adminv1.ListPolic
 	policiesWhere := make([]predicate.Policies, 0)
 
 	// 过滤条件
-	if req.PolicyType != 0 {
-		policiesWhere = append(policiesWhere, policies.PolicyTypeEQ(int(req.PolicyType)))
-	}
 	if req.PolicyStatus != 0 {
 		policiesWhere = append(policiesWhere, policies.PolicyStatusEQ(int(req.PolicyStatus)))
 	}
@@ -109,11 +106,10 @@ func (a *KnownAdminAPI) ListPolicies(ctx context.Context, req *adminv1.ListPolic
 			Id:          int64(p.ID),
 			Code:        p.Code,
 			DisplayName: p.DisplayName,
-			Type:        adminv1.Policy_Type(p.PolicyType),
 			Status:      adminv1.Policy_Status(p.PolicyStatus),
-			Value:       p.Value,
 			Description: p.Description,
 			Protected:   p.Protected,
+			Statements:  p.Statements,
 		}
 
 		result.Policies = append(result.Policies, policy)
@@ -160,11 +156,10 @@ func (a *KnownAdminAPI) CreatePolicy(ctx context.Context, req *adminv1.CreatePol
 	newPolicy, err := db.Policies.Create().
 		SetCode(req.Policy.Code).
 		SetDisplayName(req.Policy.DisplayName).
-		SetPolicyType(int(req.Policy.Type)).
 		SetPolicyStatus(int(req.Policy.Status)).
-		SetValue(req.Policy.Value).
 		SetDescription(req.Policy.Description).
 		SetProtected(req.Policy.Protected).
+		SetStatements(req.Policy.Statements).
 		SetCreatedBy(userID).
 		SetUpdatedBy(userID).
 		Save(ctx)
@@ -178,11 +173,10 @@ func (a *KnownAdminAPI) CreatePolicy(ctx context.Context, req *adminv1.CreatePol
 		Id:          int64(newPolicy.ID),
 		Code:        newPolicy.Code,
 		DisplayName: newPolicy.DisplayName,
-		Type:        adminv1.Policy_Type(newPolicy.PolicyType),
 		Status:      adminv1.Policy_Status(newPolicy.PolicyStatus),
-		Value:       newPolicy.Value,
 		Description: newPolicy.Description,
 		Protected:   newPolicy.Protected,
+		Statements:  newPolicy.Statements,
 	}
 
 	return result, nil
@@ -226,16 +220,14 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 				update.SetCode(req.Policy.Code)
 			case policies.FieldDisplayName:
 				update.SetDisplayName(req.Policy.DisplayName)
-			case policies.FieldPolicyType:
-				update.SetPolicyType(int(req.Policy.Type))
 			case policies.FieldPolicyStatus:
 				update.SetPolicyStatus(int(req.Policy.Status))
-			case policies.FieldValue:
-				update.SetValue(req.Policy.Value)
 			case policies.FieldDescription:
 				update.SetDescription(req.Policy.Description)
 			case policies.FieldProtected:
 				update.SetProtected(req.Policy.Protected)
+			case policies.FieldStatements:
+				update.SetStatements(req.Policy.Statements)
 			}
 		}
 		// 始终更新 UpdatedBy
@@ -245,11 +237,10 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 		update.
 			SetCode(req.Policy.Code).
 			SetDisplayName(req.Policy.DisplayName).
-			SetPolicyType(int(req.Policy.Type)).
 			SetPolicyStatus(int(req.Policy.Status)).
-			SetValue(req.Policy.Value).
 			SetDescription(req.Policy.Description).
 			SetProtected(req.Policy.Protected).
+			SetStatements(req.Policy.Statements).
 			SetUpdatedBy(userID)
 	}
 
@@ -264,11 +255,10 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 		Id:          int64(updatedPolicy.ID),
 		Code:        updatedPolicy.Code,
 		DisplayName: updatedPolicy.DisplayName,
-		Type:        adminv1.Policy_Type(updatedPolicy.PolicyType),
 		Status:      adminv1.Policy_Status(updatedPolicy.PolicyStatus),
-		Value:       updatedPolicy.Value,
 		Description: updatedPolicy.Description,
 		Protected:   updatedPolicy.Protected,
+		Statements:  updatedPolicy.Statements,
 	}
 
 	return result, nil

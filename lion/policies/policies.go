@@ -28,14 +28,10 @@ const (
 	FieldCode = "code"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
-	// FieldPolicyType holds the string denoting the policy_type field in the database.
-	FieldPolicyType = "policy_type"
 	// FieldPolicyStatus holds the string denoting the policy_status field in the database.
 	FieldPolicyStatus = "policy_status"
-	// FieldValue holds the string denoting the value field in the database.
-	FieldValue = "value"
-	// FieldVersionNo holds the string denoting the version_no field in the database.
-	FieldVersionNo = "version_no"
+	// FieldStatements holds the string denoting the statements field in the database.
+	FieldStatements = "statements"
 	// FieldProtected holds the string denoting the protected field in the database.
 	FieldProtected = "protected"
 	// FieldDescription holds the string denoting the description field in the database.
@@ -72,10 +68,8 @@ var Columns = []string{
 	FieldUpdatedBy,
 	FieldCode,
 	FieldDisplayName,
-	FieldPolicyType,
 	FieldPolicyStatus,
-	FieldValue,
-	FieldVersionNo,
+	FieldStatements,
 	FieldProtected,
 	FieldDescription,
 }
@@ -105,14 +99,8 @@ var (
 	CodeValidator func(string) error
 	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	DisplayNameValidator func(string) error
-	// DefaultPolicyType holds the default value on creation for the "policy_type" field.
-	DefaultPolicyType int
 	// DefaultPolicyStatus holds the default value on creation for the "policy_status" field.
 	DefaultPolicyStatus int
-	// DefaultValue holds the default value on creation for the "value" field.
-	DefaultValue string
-	// DefaultVersionNo holds the default value on creation for the "version_no" field.
-	DefaultVersionNo int64
 	// DefaultProtected holds the default value on creation for the "protected" field.
 	DefaultProtected bool
 	// DefaultDescription holds the default value on creation for the "description" field.
@@ -162,24 +150,9 @@ func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
 }
 
-// ByPolicyType orders the results by the policy_type field.
-func ByPolicyType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPolicyType, opts...).ToFunc()
-}
-
 // ByPolicyStatus orders the results by the policy_status field.
 func ByPolicyStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPolicyStatus, opts...).ToFunc()
-}
-
-// ByValue orders the results by the value field.
-func ByValue(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldValue, opts...).ToFunc()
-}
-
-// ByVersionNo orders the results by the version_no field.
-func ByVersionNo(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldVersionNo, opts...).ToFunc()
 }
 
 // ByProtected orders the results by the protected field.

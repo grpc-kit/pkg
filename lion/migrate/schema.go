@@ -413,10 +413,8 @@ var (
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "code", Type: field.TypeString, Size: 256},
 		{Name: "display_name", Type: field.TypeString},
-		{Name: "policy_type", Type: field.TypeInt, Default: 0},
 		{Name: "policy_status", Type: field.TypeInt, Default: 0},
-		{Name: "value", Type: field.TypeString, Default: ""},
-		{Name: "version_no", Type: field.TypeInt64, Default: 1},
+		{Name: "statements", Type: field.TypeJSON},
 		{Name: "protected", Type: field.TypeBool, Default: false},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}

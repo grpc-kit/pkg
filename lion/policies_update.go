@@ -10,7 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/policyattachments"
 	"github.com/grpc-kit/pkg/lion/policystatements"
@@ -138,27 +140,6 @@ func (_u *PoliciesUpdate) SetNillableDisplayName(v *string) *PoliciesUpdate {
 	return _u
 }
 
-// SetPolicyType sets the "policy_type" field.
-func (_u *PoliciesUpdate) SetPolicyType(v int) *PoliciesUpdate {
-	_u.mutation.ResetPolicyType()
-	_u.mutation.SetPolicyType(v)
-	return _u
-}
-
-// SetNillablePolicyType sets the "policy_type" field if the given value is not nil.
-func (_u *PoliciesUpdate) SetNillablePolicyType(v *int) *PoliciesUpdate {
-	if v != nil {
-		_u.SetPolicyType(*v)
-	}
-	return _u
-}
-
-// AddPolicyType adds value to the "policy_type" field.
-func (_u *PoliciesUpdate) AddPolicyType(v int) *PoliciesUpdate {
-	_u.mutation.AddPolicyType(v)
-	return _u
-}
-
 // SetPolicyStatus sets the "policy_status" field.
 func (_u *PoliciesUpdate) SetPolicyStatus(v int) *PoliciesUpdate {
 	_u.mutation.ResetPolicyStatus()
@@ -180,38 +161,15 @@ func (_u *PoliciesUpdate) AddPolicyStatus(v int) *PoliciesUpdate {
 	return _u
 }
 
-// SetValue sets the "value" field.
-func (_u *PoliciesUpdate) SetValue(v string) *PoliciesUpdate {
-	_u.mutation.SetValue(v)
+// SetStatements sets the "statements" field.
+func (_u *PoliciesUpdate) SetStatements(v []*adminv1.PolicyStatement) *PoliciesUpdate {
+	_u.mutation.SetStatements(v)
 	return _u
 }
 
-// SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *PoliciesUpdate) SetNillableValue(v *string) *PoliciesUpdate {
-	if v != nil {
-		_u.SetValue(*v)
-	}
-	return _u
-}
-
-// SetVersionNo sets the "version_no" field.
-func (_u *PoliciesUpdate) SetVersionNo(v int64) *PoliciesUpdate {
-	_u.mutation.ResetVersionNo()
-	_u.mutation.SetVersionNo(v)
-	return _u
-}
-
-// SetNillableVersionNo sets the "version_no" field if the given value is not nil.
-func (_u *PoliciesUpdate) SetNillableVersionNo(v *int64) *PoliciesUpdate {
-	if v != nil {
-		_u.SetVersionNo(*v)
-	}
-	return _u
-}
-
-// AddVersionNo adds value to the "version_no" field.
-func (_u *PoliciesUpdate) AddVersionNo(v int64) *PoliciesUpdate {
-	_u.mutation.AddVersionNo(v)
+// AppendStatements appends value to the "statements" field.
+func (_u *PoliciesUpdate) AppendStatements(v []*adminv1.PolicyStatement) *PoliciesUpdate {
+	_u.mutation.AppendStatements(v)
 	return _u
 }
 
@@ -416,26 +374,19 @@ func (_u *PoliciesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(policies.FieldDisplayName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.PolicyType(); ok {
-		_spec.SetField(policies.FieldPolicyType, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedPolicyType(); ok {
-		_spec.AddField(policies.FieldPolicyType, field.TypeInt, value)
-	}
 	if value, ok := _u.mutation.PolicyStatus(); ok {
 		_spec.SetField(policies.FieldPolicyStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedPolicyStatus(); ok {
 		_spec.AddField(policies.FieldPolicyStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Value(); ok {
-		_spec.SetField(policies.FieldValue, field.TypeString, value)
+	if value, ok := _u.mutation.Statements(); ok {
+		_spec.SetField(policies.FieldStatements, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.VersionNo(); ok {
-		_spec.SetField(policies.FieldVersionNo, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedVersionNo(); ok {
-		_spec.AddField(policies.FieldVersionNo, field.TypeInt64, value)
+	if value, ok := _u.mutation.AppendedStatements(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, policies.FieldStatements, value)
+		})
 	}
 	if value, ok := _u.mutation.Protected(); ok {
 		_spec.SetField(policies.FieldProtected, field.TypeBool, value)
@@ -661,27 +612,6 @@ func (_u *PoliciesUpdateOne) SetNillableDisplayName(v *string) *PoliciesUpdateOn
 	return _u
 }
 
-// SetPolicyType sets the "policy_type" field.
-func (_u *PoliciesUpdateOne) SetPolicyType(v int) *PoliciesUpdateOne {
-	_u.mutation.ResetPolicyType()
-	_u.mutation.SetPolicyType(v)
-	return _u
-}
-
-// SetNillablePolicyType sets the "policy_type" field if the given value is not nil.
-func (_u *PoliciesUpdateOne) SetNillablePolicyType(v *int) *PoliciesUpdateOne {
-	if v != nil {
-		_u.SetPolicyType(*v)
-	}
-	return _u
-}
-
-// AddPolicyType adds value to the "policy_type" field.
-func (_u *PoliciesUpdateOne) AddPolicyType(v int) *PoliciesUpdateOne {
-	_u.mutation.AddPolicyType(v)
-	return _u
-}
-
 // SetPolicyStatus sets the "policy_status" field.
 func (_u *PoliciesUpdateOne) SetPolicyStatus(v int) *PoliciesUpdateOne {
 	_u.mutation.ResetPolicyStatus()
@@ -703,38 +633,15 @@ func (_u *PoliciesUpdateOne) AddPolicyStatus(v int) *PoliciesUpdateOne {
 	return _u
 }
 
-// SetValue sets the "value" field.
-func (_u *PoliciesUpdateOne) SetValue(v string) *PoliciesUpdateOne {
-	_u.mutation.SetValue(v)
+// SetStatements sets the "statements" field.
+func (_u *PoliciesUpdateOne) SetStatements(v []*adminv1.PolicyStatement) *PoliciesUpdateOne {
+	_u.mutation.SetStatements(v)
 	return _u
 }
 
-// SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *PoliciesUpdateOne) SetNillableValue(v *string) *PoliciesUpdateOne {
-	if v != nil {
-		_u.SetValue(*v)
-	}
-	return _u
-}
-
-// SetVersionNo sets the "version_no" field.
-func (_u *PoliciesUpdateOne) SetVersionNo(v int64) *PoliciesUpdateOne {
-	_u.mutation.ResetVersionNo()
-	_u.mutation.SetVersionNo(v)
-	return _u
-}
-
-// SetNillableVersionNo sets the "version_no" field if the given value is not nil.
-func (_u *PoliciesUpdateOne) SetNillableVersionNo(v *int64) *PoliciesUpdateOne {
-	if v != nil {
-		_u.SetVersionNo(*v)
-	}
-	return _u
-}
-
-// AddVersionNo adds value to the "version_no" field.
-func (_u *PoliciesUpdateOne) AddVersionNo(v int64) *PoliciesUpdateOne {
-	_u.mutation.AddVersionNo(v)
+// AppendStatements appends value to the "statements" field.
+func (_u *PoliciesUpdateOne) AppendStatements(v []*adminv1.PolicyStatement) *PoliciesUpdateOne {
+	_u.mutation.AppendStatements(v)
 	return _u
 }
 
@@ -969,26 +876,19 @@ func (_u *PoliciesUpdateOne) sqlSave(ctx context.Context) (_node *Policies, err 
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(policies.FieldDisplayName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.PolicyType(); ok {
-		_spec.SetField(policies.FieldPolicyType, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedPolicyType(); ok {
-		_spec.AddField(policies.FieldPolicyType, field.TypeInt, value)
-	}
 	if value, ok := _u.mutation.PolicyStatus(); ok {
 		_spec.SetField(policies.FieldPolicyStatus, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.AddedPolicyStatus(); ok {
 		_spec.AddField(policies.FieldPolicyStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Value(); ok {
-		_spec.SetField(policies.FieldValue, field.TypeString, value)
+	if value, ok := _u.mutation.Statements(); ok {
+		_spec.SetField(policies.FieldStatements, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.VersionNo(); ok {
-		_spec.SetField(policies.FieldVersionNo, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedVersionNo(); ok {
-		_spec.AddField(policies.FieldVersionNo, field.TypeInt64, value)
+	if value, ok := _u.mutation.AppendedStatements(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, policies.FieldStatements, value)
+		})
 	}
 	if value, ok := _u.mutation.Protected(); ok {
 		_spec.SetField(policies.FieldProtected, field.TypeBool, value)

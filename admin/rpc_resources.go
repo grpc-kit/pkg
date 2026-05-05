@@ -136,9 +136,6 @@ func (a *KnownAdminAPI) allowedResourceIDsForContext(ctx context.Context, db *li
 	}
 
 	policiesWhere := make([]predicate.Policies, 0)
-	if f.PolicyType != 0 {
-		policiesWhere = append(policiesWhere, policies.PolicyTypeEQ(int(f.PolicyType)))
-	}
 	if f.PolicyStatus != 0 {
 		policiesWhere = append(policiesWhere, policies.PolicyStatusEQ(int(f.PolicyStatus)))
 	}

@@ -89,6 +89,22 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListServiceActions
     get: "/builtin/admin/api/v1/services/{parent}/actions"
 
+    # 策略管理
+    ## 策略列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicies
+    get: "/builtin/admin/api/v1/policies"
+    ## 创建策略
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicy
+    put: "/builtin/admin/api/v1/policies/{policy.code}"
+    body: "policy"
+    ## 更新策略
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePolicy
+    patch: "/builtin/admin/api/v1/policies/{policy.id}"
+    body: "policy"
+    ## 删除策略
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePolicy
+    delete: "/builtin/admin/api/v1/policies/{id}"
+
     # 资源类型字典管理
     ## 资源类型列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListResourceTypes
@@ -120,21 +136,6 @@ http:
     ## 删除菜单
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteMenu
     delete: "/builtin/admin/api/v1/menus/{id}"
-    # 策略管理
-    ## 策略列表
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicies
-    get: "/builtin/admin/api/v1/policies"
-    ## 创建策略
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicy
-    post: "/builtin/admin/api/v1/policies"
-    body: "policy"
-    ## 更新策略
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePolicy
-    patch: "/builtin/admin/api/v1/policies/{policy.id}"
-    body: "policy"
-    ## 删除策略
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePolicy
-    delete: "/builtin/admin/api/v1/policies/{id}"
 
     # 策略语句管理
     ## 获取策略语句

@@ -3,12 +3,14 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/policies"
 )
 
@@ -31,14 +33,10 @@ type Policies struct {
 	Code string `json:"code,omitempty"`
 	// 国际化键值，用于前端多语言显示的标识符
 	DisplayName string `json:"display_name,omitempty"`
-	// 用途类型，对应 api/known/admin/v1/common.proto 中定义
-	PolicyType int `json:"policy_type,omitempty"`
 	// 是否启用该资源项，禁用后完全不可访问
 	PolicyStatus int `json:"policy_status,omitempty"`
 	// 策略内容
-	Value string `json:"value,omitempty"`
-	// 策略版本号，用于发布与回滚
-	VersionNo int64 `json:"version_no,omitempty"`
+	Statements []*adminv1.PolicyStatement `json:"statements,omitempty"`
 	// 是否系统内置/受保护的策略，受保护的策略不可删除
 	Protected bool `json:"protected,omitempty"`
 	// 详细描述
@@ -83,11 +81,13 @@ func (*Policies) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case policies.FieldStatements:
+			values[i] = new([]byte)
 		case policies.FieldProtected:
 			values[i] = new(sql.NullBool)
-		case policies.FieldID, policies.FieldCreatedBy, policies.FieldUpdatedBy, policies.FieldPolicyType, policies.FieldPolicyStatus, policies.FieldVersionNo:
+		case policies.FieldID, policies.FieldCreatedBy, policies.FieldUpdatedBy, policies.FieldPolicyStatus:
 			values[i] = new(sql.NullInt64)
-		case policies.FieldCode, policies.FieldDisplayName, policies.FieldValue, policies.FieldDescription:
+		case policies.FieldCode, policies.FieldDisplayName, policies.FieldDescription:
 			values[i] = new(sql.NullString)
 		case policies.FieldCreatedAt, policies.FieldUpdatedAt, policies.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -155,29 +155,19 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.DisplayName = value.String
 			}
-		case policies.FieldPolicyType:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field policy_type", values[i])
-			} else if value.Valid {
-				_m.PolicyType = int(value.Int64)
-			}
 		case policies.FieldPolicyStatus:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field policy_status", values[i])
 			} else if value.Valid {
 				_m.PolicyStatus = int(value.Int64)
 			}
-		case policies.FieldValue:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field value", values[i])
-			} else if value.Valid {
-				_m.Value = value.String
-			}
-		case policies.FieldVersionNo:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field version_no", values[i])
-			} else if value.Valid {
-				_m.VersionNo = value.Int64
+		case policies.FieldStatements:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field statements", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Statements); err != nil {
+					return fmt.Errorf("unmarshal field statements: %w", err)
+				}
 			}
 		case policies.FieldProtected:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -198,9 +188,9 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// GetValue returns the ent.Value that was dynamically selected and assigned to the Policies.
+// Value returns the ent.Value that was dynamically selected and assigned to the Policies.
 // This includes values selected through modifiers, order, etc.
-func (_m *Policies) GetValue(name string) (ent.Value, error) {
+func (_m *Policies) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
@@ -260,17 +250,11 @@ func (_m *Policies) String() string {
 	builder.WriteString("display_name=")
 	builder.WriteString(_m.DisplayName)
 	builder.WriteString(", ")
-	builder.WriteString("policy_type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.PolicyType))
-	builder.WriteString(", ")
 	builder.WriteString("policy_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.PolicyStatus))
 	builder.WriteString(", ")
-	builder.WriteString("value=")
-	builder.WriteString(_m.Value)
-	builder.WriteString(", ")
-	builder.WriteString("version_no=")
-	builder.WriteString(fmt.Sprintf("%v", _m.VersionNo))
+	builder.WriteString("statements=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Statements))
 	builder.WriteString(", ")
 	builder.WriteString("protected=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Protected))

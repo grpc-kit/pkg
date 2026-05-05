@@ -12,7 +12,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/policystatements"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -22,19 +21,13 @@ func lionPolicyStatementToProto(in *lion.PolicyStatements) *adminv1.PolicyStatem
 		return nil
 	}
 	return &adminv1.PolicyStatement{
-		Id:               int64(in.ID),
-		PolicyId:         int64(in.PolicyID),
-		Sid:              in.Sid,
-		Effect:           adminv1.PolicyStatement_Effect(in.Effect),
-		ActionSelector:   in.ActionSelector,
-		ResourceSelector: in.ResourceSelector,
-		ConditionJson:    in.ConditionJSON,
-		Priority:         int32(in.Priority),
-		Description:      in.Description,
-		CreatedBy:        in.CreatedBy,
-		UpdatedBy:        in.UpdatedBy,
-		CreatedAt:        timestamppb.New(in.CreatedAt),
-		UpdatedAt:        timestamppb.New(in.UpdatedAt),
+		Id:        int64(in.ID),
+		PolicyId:  int64(in.PolicyID),
+		Effect:    adminv1.PolicyStatement_Effect(in.Effect),
+		CreatedBy: in.CreatedBy,
+		UpdatedBy: in.UpdatedBy,
+		CreatedAt: timestamppb.New(in.CreatedAt),
+		UpdatedAt: timestamppb.New(in.UpdatedAt),
 	}
 }
 
@@ -129,12 +122,6 @@ func (a *KnownAdminAPI) CreatePolicyStatement(ctx context.Context, req *adminv1.
 		return nil, errs.InvalidArgument(ctx).WithMessage("policy_id is required")
 	}
 
-	sid, err := schema.EnsureCode(req.Statement.Sid)
-	if err != nil {
-		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
-	}
-	req.Statement.Sid = sid
-
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
@@ -149,13 +136,7 @@ func (a *KnownAdminAPI) CreatePolicyStatement(ctx context.Context, req *adminv1.
 
 	obj, err := db.PolicyStatements.Create().
 		SetPolicyID(int(req.Statement.PolicyId)).
-		SetSid(req.Statement.Sid).
 		SetEffect(int(req.Statement.Effect)).
-		SetActionSelector(req.Statement.ActionSelector).
-		SetResourceSelector(req.Statement.ResourceSelector).
-		SetConditionJSON(req.Statement.ConditionJson).
-		SetPriority(int(req.Statement.Priority)).
-		SetDescription(req.Statement.Description).
 		SetCreatedBy(userID).
 		SetUpdatedBy(userID).
 		Save(ctx)
@@ -192,32 +173,9 @@ func (a *KnownAdminAPI) UpdatePolicyStatement(ctx context.Context, req *adminv1.
 			switch path {
 			case "policy_id":
 				update.SetPolicyID(int(req.Statement.PolicyId))
-			case "sid":
-				update.SetSid(req.Statement.Sid)
-			case "effect":
-				update.SetEffect(int(req.Statement.Effect))
-			case "action_selector":
-				update.SetActionSelector(req.Statement.ActionSelector)
-			case "resource_selector":
-				update.SetResourceSelector(req.Statement.ResourceSelector)
-			case "condition_json":
-				update.SetConditionJSON(req.Statement.ConditionJson)
-			case "priority":
-				update.SetPriority(int(req.Statement.Priority))
-			case "description":
-				update.SetDescription(req.Statement.Description)
 			}
 		}
 	} else {
-		update.
-			SetPolicyID(int(req.Statement.PolicyId)).
-			SetSid(req.Statement.Sid).
-			SetEffect(int(req.Statement.Effect)).
-			SetActionSelector(req.Statement.ActionSelector).
-			SetResourceSelector(req.Statement.ResourceSelector).
-			SetConditionJSON(req.Statement.ConditionJson).
-			SetPriority(int(req.Statement.Priority)).
-			SetDescription(req.Statement.Description)
 	}
 
 	saved, err := update.Save(ctx)

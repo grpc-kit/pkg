@@ -90,24 +90,9 @@ func DisplayName(v string) predicate.Policies {
 	return predicate.Policies(sql.FieldEQ(FieldDisplayName, v))
 }
 
-// PolicyType applies equality check predicate on the "policy_type" field. It's identical to PolicyTypeEQ.
-func PolicyType(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldEQ(FieldPolicyType, v))
-}
-
 // PolicyStatus applies equality check predicate on the "policy_status" field. It's identical to PolicyStatusEQ.
 func PolicyStatus(v int) predicate.Policies {
 	return predicate.Policies(sql.FieldEQ(FieldPolicyStatus, v))
-}
-
-// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
-func Value(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldEQ(FieldValue, v))
-}
-
-// VersionNo applies equality check predicate on the "version_no" field. It's identical to VersionNoEQ.
-func VersionNo(v int64) predicate.Policies {
-	return predicate.Policies(sql.FieldEQ(FieldVersionNo, v))
 }
 
 // Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
@@ -480,46 +465,6 @@ func DisplayNameContainsFold(v string) predicate.Policies {
 	return predicate.Policies(sql.FieldContainsFold(FieldDisplayName, v))
 }
 
-// PolicyTypeEQ applies the EQ predicate on the "policy_type" field.
-func PolicyTypeEQ(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldEQ(FieldPolicyType, v))
-}
-
-// PolicyTypeNEQ applies the NEQ predicate on the "policy_type" field.
-func PolicyTypeNEQ(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldNEQ(FieldPolicyType, v))
-}
-
-// PolicyTypeIn applies the In predicate on the "policy_type" field.
-func PolicyTypeIn(vs ...int) predicate.Policies {
-	return predicate.Policies(sql.FieldIn(FieldPolicyType, vs...))
-}
-
-// PolicyTypeNotIn applies the NotIn predicate on the "policy_type" field.
-func PolicyTypeNotIn(vs ...int) predicate.Policies {
-	return predicate.Policies(sql.FieldNotIn(FieldPolicyType, vs...))
-}
-
-// PolicyTypeGT applies the GT predicate on the "policy_type" field.
-func PolicyTypeGT(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldGT(FieldPolicyType, v))
-}
-
-// PolicyTypeGTE applies the GTE predicate on the "policy_type" field.
-func PolicyTypeGTE(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldGTE(FieldPolicyType, v))
-}
-
-// PolicyTypeLT applies the LT predicate on the "policy_type" field.
-func PolicyTypeLT(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldLT(FieldPolicyType, v))
-}
-
-// PolicyTypeLTE applies the LTE predicate on the "policy_type" field.
-func PolicyTypeLTE(v int) predicate.Policies {
-	return predicate.Policies(sql.FieldLTE(FieldPolicyType, v))
-}
-
 // PolicyStatusEQ applies the EQ predicate on the "policy_status" field.
 func PolicyStatusEQ(v int) predicate.Policies {
 	return predicate.Policies(sql.FieldEQ(FieldPolicyStatus, v))
@@ -558,111 +503,6 @@ func PolicyStatusLT(v int) predicate.Policies {
 // PolicyStatusLTE applies the LTE predicate on the "policy_status" field.
 func PolicyStatusLTE(v int) predicate.Policies {
 	return predicate.Policies(sql.FieldLTE(FieldPolicyStatus, v))
-}
-
-// ValueEQ applies the EQ predicate on the "value" field.
-func ValueEQ(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldEQ(FieldValue, v))
-}
-
-// ValueNEQ applies the NEQ predicate on the "value" field.
-func ValueNEQ(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldNEQ(FieldValue, v))
-}
-
-// ValueIn applies the In predicate on the "value" field.
-func ValueIn(vs ...string) predicate.Policies {
-	return predicate.Policies(sql.FieldIn(FieldValue, vs...))
-}
-
-// ValueNotIn applies the NotIn predicate on the "value" field.
-func ValueNotIn(vs ...string) predicate.Policies {
-	return predicate.Policies(sql.FieldNotIn(FieldValue, vs...))
-}
-
-// ValueGT applies the GT predicate on the "value" field.
-func ValueGT(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldGT(FieldValue, v))
-}
-
-// ValueGTE applies the GTE predicate on the "value" field.
-func ValueGTE(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldGTE(FieldValue, v))
-}
-
-// ValueLT applies the LT predicate on the "value" field.
-func ValueLT(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldLT(FieldValue, v))
-}
-
-// ValueLTE applies the LTE predicate on the "value" field.
-func ValueLTE(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldLTE(FieldValue, v))
-}
-
-// ValueContains applies the Contains predicate on the "value" field.
-func ValueContains(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldContains(FieldValue, v))
-}
-
-// ValueHasPrefix applies the HasPrefix predicate on the "value" field.
-func ValueHasPrefix(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldHasPrefix(FieldValue, v))
-}
-
-// ValueHasSuffix applies the HasSuffix predicate on the "value" field.
-func ValueHasSuffix(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldHasSuffix(FieldValue, v))
-}
-
-// ValueEqualFold applies the EqualFold predicate on the "value" field.
-func ValueEqualFold(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldEqualFold(FieldValue, v))
-}
-
-// ValueContainsFold applies the ContainsFold predicate on the "value" field.
-func ValueContainsFold(v string) predicate.Policies {
-	return predicate.Policies(sql.FieldContainsFold(FieldValue, v))
-}
-
-// VersionNoEQ applies the EQ predicate on the "version_no" field.
-func VersionNoEQ(v int64) predicate.Policies {
-	return predicate.Policies(sql.FieldEQ(FieldVersionNo, v))
-}
-
-// VersionNoNEQ applies the NEQ predicate on the "version_no" field.
-func VersionNoNEQ(v int64) predicate.Policies {
-	return predicate.Policies(sql.FieldNEQ(FieldVersionNo, v))
-}
-
-// VersionNoIn applies the In predicate on the "version_no" field.
-func VersionNoIn(vs ...int64) predicate.Policies {
-	return predicate.Policies(sql.FieldIn(FieldVersionNo, vs...))
-}
-
-// VersionNoNotIn applies the NotIn predicate on the "version_no" field.
-func VersionNoNotIn(vs ...int64) predicate.Policies {
-	return predicate.Policies(sql.FieldNotIn(FieldVersionNo, vs...))
-}
-
-// VersionNoGT applies the GT predicate on the "version_no" field.
-func VersionNoGT(v int64) predicate.Policies {
-	return predicate.Policies(sql.FieldGT(FieldVersionNo, v))
-}
-
-// VersionNoGTE applies the GTE predicate on the "version_no" field.
-func VersionNoGTE(v int64) predicate.Policies {
-	return predicate.Policies(sql.FieldGTE(FieldVersionNo, v))
-}
-
-// VersionNoLT applies the LT predicate on the "version_no" field.
-func VersionNoLT(v int64) predicate.Policies {
-	return predicate.Policies(sql.FieldLT(FieldVersionNo, v))
-}
-
-// VersionNoLTE applies the LTE predicate on the "version_no" field.
-func VersionNoLTE(v int64) predicate.Policies {
-	return predicate.Policies(sql.FieldLTE(FieldVersionNo, v))
 }
 
 // ProtectedEQ applies the EQ predicate on the "protected" field.

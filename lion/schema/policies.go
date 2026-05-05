@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 )
 
 // Policies holds the schema definition for the Policies entity.
@@ -23,18 +24,11 @@ func (Policies) Fields() []ent.Field {
 		field.String("display_name").
 			NotEmpty().
 			Comment("国际化键值，用于前端多语言显示的标识符"),
-		field.Int("policy_type").
-			Default(0).
-			Comment("用途类型，对应 api/known/admin/v1/common.proto 中定义"),
 		field.Int("policy_status").
 			Default(0).
 			Comment("是否启用该资源项，禁用后完全不可访问"),
-		field.String("value").
-			Default("").
+		field.JSON("statements", []*adminv1.PolicyStatement{}).
 			Comment("策略内容"),
-		field.Int64("version_no").
-			Default(1).
-			Comment("策略版本号，用于发布与回滚"),
 		field.Bool("protected").
 			Default(false).
 			Comment("是否系统内置/受保护的策略，受保护的策略不可删除"),

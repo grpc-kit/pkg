@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
@@ -13801,13 +13802,10 @@ type PoliciesMutation struct {
 	addupdated_by                  *int64
 	code                           *string
 	display_name                   *string
-	policy_type                    *int
-	addpolicy_type                 *int
 	policy_status                  *int
 	addpolicy_status               *int
-	value                          *string
-	version_no                     *int64
-	addversion_no                  *int64
+	statements                     *[]*adminv1.PolicyStatement
+	appendstatements               []*adminv1.PolicyStatement
 	protected                      *bool
 	description                    *string
 	clearedFields                  map[string]struct{}
@@ -14253,62 +14251,6 @@ func (m *PoliciesMutation) ResetDisplayName() {
 	m.display_name = nil
 }
 
-// SetPolicyType sets the "policy_type" field.
-func (m *PoliciesMutation) SetPolicyType(i int) {
-	m.policy_type = &i
-	m.addpolicy_type = nil
-}
-
-// PolicyType returns the value of the "policy_type" field in the mutation.
-func (m *PoliciesMutation) PolicyType() (r int, exists bool) {
-	v := m.policy_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPolicyType returns the old "policy_type" field's value of the Policies entity.
-// If the Policies object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PoliciesMutation) OldPolicyType(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPolicyType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPolicyType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPolicyType: %w", err)
-	}
-	return oldValue.PolicyType, nil
-}
-
-// AddPolicyType adds i to the "policy_type" field.
-func (m *PoliciesMutation) AddPolicyType(i int) {
-	if m.addpolicy_type != nil {
-		*m.addpolicy_type += i
-	} else {
-		m.addpolicy_type = &i
-	}
-}
-
-// AddedPolicyType returns the value that was added to the "policy_type" field in this mutation.
-func (m *PoliciesMutation) AddedPolicyType() (r int, exists bool) {
-	v := m.addpolicy_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPolicyType resets all changes to the "policy_type" field.
-func (m *PoliciesMutation) ResetPolicyType() {
-	m.policy_type = nil
-	m.addpolicy_type = nil
-}
-
 // SetPolicyStatus sets the "policy_status" field.
 func (m *PoliciesMutation) SetPolicyStatus(i int) {
 	m.policy_status = &i
@@ -14365,96 +14307,55 @@ func (m *PoliciesMutation) ResetPolicyStatus() {
 	m.addpolicy_status = nil
 }
 
-// SetValue sets the "value" field.
-func (m *PoliciesMutation) SetValue(s string) {
-	m.value = &s
+// SetStatements sets the "statements" field.
+func (m *PoliciesMutation) SetStatements(as []*adminv1.PolicyStatement) {
+	m.statements = &as
+	m.appendstatements = nil
 }
 
-// Value returns the value of the "value" field in the mutation.
-func (m *PoliciesMutation) Value() (r string, exists bool) {
-	v := m.value
+// Statements returns the value of the "statements" field in the mutation.
+func (m *PoliciesMutation) Statements() (r []*adminv1.PolicyStatement, exists bool) {
+	v := m.statements
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldValue returns the old "value" field's value of the Policies entity.
+// OldStatements returns the old "statements" field's value of the Policies entity.
 // If the Policies object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PoliciesMutation) OldValue(ctx context.Context) (v string, err error) {
+func (m *PoliciesMutation) OldStatements(ctx context.Context) (v []*adminv1.PolicyStatement, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldValue is only allowed on UpdateOne operations")
+		return v, errors.New("OldStatements is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldValue requires an ID field in the mutation")
+		return v, errors.New("OldStatements requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+		return v, fmt.Errorf("querying old value for OldStatements: %w", err)
 	}
-	return oldValue.Value, nil
+	return oldValue.Statements, nil
 }
 
-// ResetValue resets all changes to the "value" field.
-func (m *PoliciesMutation) ResetValue() {
-	m.value = nil
+// AppendStatements adds as to the "statements" field.
+func (m *PoliciesMutation) AppendStatements(as []*adminv1.PolicyStatement) {
+	m.appendstatements = append(m.appendstatements, as...)
 }
 
-// SetVersionNo sets the "version_no" field.
-func (m *PoliciesMutation) SetVersionNo(i int64) {
-	m.version_no = &i
-	m.addversion_no = nil
+// AppendedStatements returns the list of values that were appended to the "statements" field in this mutation.
+func (m *PoliciesMutation) AppendedStatements() ([]*adminv1.PolicyStatement, bool) {
+	if len(m.appendstatements) == 0 {
+		return nil, false
+	}
+	return m.appendstatements, true
 }
 
-// VersionNo returns the value of the "version_no" field in the mutation.
-func (m *PoliciesMutation) VersionNo() (r int64, exists bool) {
-	v := m.version_no
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldVersionNo returns the old "version_no" field's value of the Policies entity.
-// If the Policies object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PoliciesMutation) OldVersionNo(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldVersionNo is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldVersionNo requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldVersionNo: %w", err)
-	}
-	return oldValue.VersionNo, nil
-}
-
-// AddVersionNo adds i to the "version_no" field.
-func (m *PoliciesMutation) AddVersionNo(i int64) {
-	if m.addversion_no != nil {
-		*m.addversion_no += i
-	} else {
-		m.addversion_no = &i
-	}
-}
-
-// AddedVersionNo returns the value that was added to the "version_no" field in this mutation.
-func (m *PoliciesMutation) AddedVersionNo() (r int64, exists bool) {
-	v := m.addversion_no
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetVersionNo resets all changes to the "version_no" field.
-func (m *PoliciesMutation) ResetVersionNo() {
-	m.version_no = nil
-	m.addversion_no = nil
+// ResetStatements resets all changes to the "statements" field.
+func (m *PoliciesMutation) ResetStatements() {
+	m.statements = nil
+	m.appendstatements = nil
 }
 
 // SetProtected sets the "protected" field.
@@ -14671,7 +14572,7 @@ func (m *PoliciesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PoliciesMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, policies.FieldCreatedAt)
 	}
@@ -14693,17 +14594,11 @@ func (m *PoliciesMutation) Fields() []string {
 	if m.display_name != nil {
 		fields = append(fields, policies.FieldDisplayName)
 	}
-	if m.policy_type != nil {
-		fields = append(fields, policies.FieldPolicyType)
-	}
 	if m.policy_status != nil {
 		fields = append(fields, policies.FieldPolicyStatus)
 	}
-	if m.value != nil {
-		fields = append(fields, policies.FieldValue)
-	}
-	if m.version_no != nil {
-		fields = append(fields, policies.FieldVersionNo)
+	if m.statements != nil {
+		fields = append(fields, policies.FieldStatements)
 	}
 	if m.protected != nil {
 		fields = append(fields, policies.FieldProtected)
@@ -14733,14 +14628,10 @@ func (m *PoliciesMutation) Field(name string) (ent.Value, bool) {
 		return m.Code()
 	case policies.FieldDisplayName:
 		return m.DisplayName()
-	case policies.FieldPolicyType:
-		return m.PolicyType()
 	case policies.FieldPolicyStatus:
 		return m.PolicyStatus()
-	case policies.FieldValue:
-		return m.Value()
-	case policies.FieldVersionNo:
-		return m.VersionNo()
+	case policies.FieldStatements:
+		return m.Statements()
 	case policies.FieldProtected:
 		return m.Protected()
 	case policies.FieldDescription:
@@ -14768,14 +14659,10 @@ func (m *PoliciesMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldCode(ctx)
 	case policies.FieldDisplayName:
 		return m.OldDisplayName(ctx)
-	case policies.FieldPolicyType:
-		return m.OldPolicyType(ctx)
 	case policies.FieldPolicyStatus:
 		return m.OldPolicyStatus(ctx)
-	case policies.FieldValue:
-		return m.OldValue(ctx)
-	case policies.FieldVersionNo:
-		return m.OldVersionNo(ctx)
+	case policies.FieldStatements:
+		return m.OldStatements(ctx)
 	case policies.FieldProtected:
 		return m.OldProtected(ctx)
 	case policies.FieldDescription:
@@ -14838,13 +14725,6 @@ func (m *PoliciesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDisplayName(v)
 		return nil
-	case policies.FieldPolicyType:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPolicyType(v)
-		return nil
 	case policies.FieldPolicyStatus:
 		v, ok := value.(int)
 		if !ok {
@@ -14852,19 +14732,12 @@ func (m *PoliciesMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPolicyStatus(v)
 		return nil
-	case policies.FieldValue:
-		v, ok := value.(string)
+	case policies.FieldStatements:
+		v, ok := value.([]*adminv1.PolicyStatement)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetValue(v)
-		return nil
-	case policies.FieldVersionNo:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetVersionNo(v)
+		m.SetStatements(v)
 		return nil
 	case policies.FieldProtected:
 		v, ok := value.(bool)
@@ -14894,14 +14767,8 @@ func (m *PoliciesMutation) AddedFields() []string {
 	if m.addupdated_by != nil {
 		fields = append(fields, policies.FieldUpdatedBy)
 	}
-	if m.addpolicy_type != nil {
-		fields = append(fields, policies.FieldPolicyType)
-	}
 	if m.addpolicy_status != nil {
 		fields = append(fields, policies.FieldPolicyStatus)
-	}
-	if m.addversion_no != nil {
-		fields = append(fields, policies.FieldVersionNo)
 	}
 	return fields
 }
@@ -14915,12 +14782,8 @@ func (m *PoliciesMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedCreatedBy()
 	case policies.FieldUpdatedBy:
 		return m.AddedUpdatedBy()
-	case policies.FieldPolicyType:
-		return m.AddedPolicyType()
 	case policies.FieldPolicyStatus:
 		return m.AddedPolicyStatus()
-	case policies.FieldVersionNo:
-		return m.AddedVersionNo()
 	}
 	return nil, false
 }
@@ -14944,26 +14807,12 @@ func (m *PoliciesMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddUpdatedBy(v)
 		return nil
-	case policies.FieldPolicyType:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPolicyType(v)
-		return nil
 	case policies.FieldPolicyStatus:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddPolicyStatus(v)
-		return nil
-	case policies.FieldVersionNo:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddVersionNo(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Policies numeric field %s", name)
@@ -15034,17 +14883,11 @@ func (m *PoliciesMutation) ResetField(name string) error {
 	case policies.FieldDisplayName:
 		m.ResetDisplayName()
 		return nil
-	case policies.FieldPolicyType:
-		m.ResetPolicyType()
-		return nil
 	case policies.FieldPolicyStatus:
 		m.ResetPolicyStatus()
 		return nil
-	case policies.FieldValue:
-		m.ResetValue()
-		return nil
-	case policies.FieldVersionNo:
-		m.ResetVersionNo()
+	case policies.FieldStatements:
+		m.ResetStatements()
 		return nil
 	case policies.FieldProtected:
 		m.ResetProtected()
