@@ -137,6 +137,10 @@ func (a *KnownAdminAPI) ListServiceActions(ctx context.Context, req *adminv1.Lis
 		if ok {
 			act.DisplayName = opt.GetSummary()
 			act.Description = opt.GetDescription()
+			act.Tags = opt.GetTags()
+		}
+		if len(act.Tags) == 0 {
+			act.Tags = []string{"unknown"}
 		}
 
 		// 如果 v 中的 url 定义存在变量，则把它添加到 resource_selectors 中，比如：
