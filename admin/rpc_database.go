@@ -266,19 +266,26 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	} else if err != nil {
 		rollback()
 		return nil, err
+	} else {
+		if err := rootDept.Update().
+			SetProtected(true).
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
 	}
 
-	adminDept, err := tx.Departments.Query().
+	systemDept, err := tx.Departments.Query().
 		Where(
-			departments.CodeEQ("admin"),
+			departments.CodeEQ("system"),
 			departments.ParentIDEQ(rootDept.ID),
 		).
 		Only(ctx)
 	if lion.IsNotFound(err) {
-		adminDept, err = tx.Departments.Create().
+		systemDept, err = tx.Departments.Create().
 			SetParentID(rootDept.ID).
-			SetCode("admin").
-			SetDisplayName("admin").
+			SetCode("system").
+			SetDisplayName("system").
 			SetSortOrder(1).
 			SetProtected(true).
 			Save(ctx)
@@ -289,23 +296,39 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	} else if err != nil {
 		rollback()
 		return nil, err
+	} else {
+		if err := systemDept.Update().
+			SetParentID(rootDept.ID).
+			SetSortOrder(1).
+			SetProtected(true).
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
 	}
 
-	/*
-		rootDeptMember, err := tx.DepartmentMembers.Query().
+	adminDept, err := tx.Departments.Query().
+		Where(
+			departments.CodeEQ("admin"),
+			departments.ParentIDEQ(systemDept.ID),
+		).
+		Only(ctx)
+	if lion.IsNotFound(err) {
+		adminDept, err = tx.Departments.Query().
 			Where(
-				departmentmembers.UserIDEQ(adminUser.ID),
-				departmentmembers.DepartmentIDEQ(rootDept.ID),
+				departments.CodeEQ("admin"),
+				departments.ParentIDEQ(rootDept.ID),
 			).
 			Only(ctx)
 		if lion.IsNotFound(err) {
-			if err := tx.DepartmentMembers.Create().
-				SetUserID(adminUser.ID).
-				SetDepartmentID(rootDept.ID).
-				SetMemberType(int(adminv1.Membership_DUAL.Number())).
-				SetMemberRole(int(adminv1.Membership_OWNER.Number())).
-				SetMemberStatus(int(adminv1.Membership_ACTIVE.Number())).
-				Exec(ctx); err != nil {
+			adminDept, err = tx.Departments.Create().
+				SetParentID(systemDept.ID).
+				SetCode("admin").
+				SetDisplayName("admin").
+				SetSortOrder(1).
+				SetProtected(true).
+				Save(ctx)
+			if err != nil {
 				rollback()
 				return nil, err
 			}
@@ -313,16 +336,28 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			rollback()
 			return nil, err
 		} else {
-			if err := rootDeptMember.Update().
-				SetMemberType(int(adminv1.Membership_DUAL.Number())).
-				SetMemberRole(int(adminv1.Membership_OWNER.Number())).
-				SetMemberStatus(int(adminv1.Membership_ACTIVE.Number())).
+			if err := adminDept.Update().
+				SetParentID(systemDept.ID).
+				SetSortOrder(1).
+				SetProtected(true).
 				Exec(ctx); err != nil {
 				rollback()
 				return nil, err
 			}
 		}
-	*/
+	} else if err != nil {
+		rollback()
+		return nil, err
+	} else {
+		if err := adminDept.Update().
+			SetParentID(systemDept.ID).
+			SetSortOrder(1).
+			SetProtected(true).
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
+	}
 
 	adminDeptMember, err := tx.DepartmentMembers.Query().
 		Where(
@@ -356,24 +391,53 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 
 	guestCode := seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_GUEST)
-	guestExists, err := tx.Departments.Query().
+	guestDept, err := tx.Departments.Query().
 		Where(
 			departments.CodeEQ(guestCode),
-			departments.ParentIDEQ(rootDept.ID),
+			departments.ParentIDEQ(systemDept.ID),
 		).
-		Exist(ctx)
-	if err != nil {
+		Only(ctx)
+	if lion.IsNotFound(err) {
+		guestDept, err = tx.Departments.Query().
+			Where(
+				departments.CodeEQ(guestCode),
+				departments.ParentIDEQ(rootDept.ID),
+			).
+			Only(ctx)
+		if lion.IsNotFound(err) {
+			guestDept, err = tx.Departments.Create().
+				SetParentID(systemDept.ID).
+				SetCode(guestCode).
+				SetDisplayName(guestCode).
+				SetSortOrder(2).
+				SetProtected(true).
+				Save(ctx)
+			if err != nil {
+				rollback()
+				return nil, err
+			}
+		} else if err != nil {
+			rollback()
+			return nil, err
+		} else {
+			if err := guestDept.Update().
+				SetParentID(systemDept.ID).
+				SetSortOrder(2).
+				SetProtected(true).
+				Exec(ctx); err != nil {
+				rollback()
+				return nil, err
+			}
+		}
+	} else if err != nil {
 		rollback()
 		return nil, err
-	}
-	if !guestExists {
-		if _, err := tx.Departments.Create().
-			SetParentID(rootDept.ID).
-			SetCode(guestCode).
-			SetDisplayName(guestCode).
+	} else {
+		if err := guestDept.Update().
+			SetParentID(systemDept.ID).
 			SetSortOrder(2).
 			SetProtected(true).
-			Save(ctx); err != nil {
+			Exec(ctx); err != nil {
 			rollback()
 			return nil, err
 		}
