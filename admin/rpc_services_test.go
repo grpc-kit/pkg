@@ -62,11 +62,11 @@ func TestAppendPathVariableSelectors(t *testing.T) {
 		"/api/resources/{resource.id}",
 	}
 
-	got := appendPathVariableSelectors(in, templates)
+	got := appendPathVariableSelectors("test-service", in, templates)
 	want := []adminv1.Action_ResourceSelector{
 		{ResourceType: "id", Pattern: "*"},
-		{ResourceType: "name", Pattern: "projects/*"},
-		{ResourceType: "resource.id", Pattern: "*"},
+		{ResourceType: "name", Pattern: "grn:test-service:${region_code}:${account_id}:name/projects/*"},
+		{ResourceType: "resource.id", Pattern: "grn:test-service:${region_code}:${account_id}:resource.id/*"},
 	}
 
 	if len(got) != len(want) {
