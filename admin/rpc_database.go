@@ -268,20 +268,84 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 
-	rootDeptMemberExists, err := tx.DepartmentMembers.Query().
+	adminDept, err := tx.Departments.Query().
 		Where(
-			departmentmembers.UserIDEQ(adminUser.ID),
-			departmentmembers.DepartmentIDEQ(rootDept.ID),
+			departments.CodeEQ("admin"),
+			departments.ParentIDEQ(rootDept.ID),
 		).
-		Exist(ctx)
-	if err != nil {
+		Only(ctx)
+	if lion.IsNotFound(err) {
+		adminDept, err = tx.Departments.Create().
+			SetParentID(rootDept.ID).
+			SetCode("admin").
+			SetDisplayName("admin").
+			SetSortOrder(1).
+			SetProtected(true).
+			Save(ctx)
+		if err != nil {
+			rollback()
+			return nil, err
+		}
+	} else if err != nil {
 		rollback()
 		return nil, err
 	}
-	if !rootDeptMemberExists {
+
+	/*
+		rootDeptMember, err := tx.DepartmentMembers.Query().
+			Where(
+				departmentmembers.UserIDEQ(adminUser.ID),
+				departmentmembers.DepartmentIDEQ(rootDept.ID),
+			).
+			Only(ctx)
+		if lion.IsNotFound(err) {
+			if err := tx.DepartmentMembers.Create().
+				SetUserID(adminUser.ID).
+				SetDepartmentID(rootDept.ID).
+				SetMemberType(int(adminv1.Membership_DUAL.Number())).
+				SetMemberRole(int(adminv1.Membership_OWNER.Number())).
+				SetMemberStatus(int(adminv1.Membership_ACTIVE.Number())).
+				Exec(ctx); err != nil {
+				rollback()
+				return nil, err
+			}
+		} else if err != nil {
+			rollback()
+			return nil, err
+		} else {
+			if err := rootDeptMember.Update().
+				SetMemberType(int(adminv1.Membership_DUAL.Number())).
+				SetMemberRole(int(adminv1.Membership_OWNER.Number())).
+				SetMemberStatus(int(adminv1.Membership_ACTIVE.Number())).
+				Exec(ctx); err != nil {
+				rollback()
+				return nil, err
+			}
+		}
+	*/
+
+	adminDeptMember, err := tx.DepartmentMembers.Query().
+		Where(
+			departmentmembers.UserIDEQ(adminUser.ID),
+			departmentmembers.DepartmentIDEQ(adminDept.ID),
+		).
+		Only(ctx)
+	if lion.IsNotFound(err) {
 		if err := tx.DepartmentMembers.Create().
 			SetUserID(adminUser.ID).
-			SetDepartmentID(rootDept.ID).
+			SetDepartmentID(adminDept.ID).
+			SetMemberType(int(adminv1.Membership_PRIMARY.Number())).
+			SetMemberRole(int(adminv1.Membership_OWNER.Number())).
+			SetMemberStatus(int(adminv1.Membership_ACTIVE.Number())).
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
+	} else if err != nil {
+		rollback()
+		return nil, err
+	} else {
+		if err := adminDeptMember.Update().
 			SetMemberType(int(adminv1.Membership_PRIMARY.Number())).
 			SetMemberRole(int(adminv1.Membership_OWNER.Number())).
 			SetMemberStatus(int(adminv1.Membership_ACTIVE.Number())).
