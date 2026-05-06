@@ -254,7 +254,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	if lion.IsNotFound(err) {
 		rootDept, err = tx.Departments.Create().
 			SetCode(rootCode).
-			SetDisplayName(rootCode).
+			SetDisplayName("根部门").
 			SetSortOrder(1).
 			SetProtected(true).
 			SetParentID(0).
@@ -268,6 +268,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	} else {
 		if err := rootDept.Update().
+			SetDisplayName("根部门").
 			SetProtected(true).
 			Exec(ctx); err != nil {
 			rollback()
@@ -285,7 +286,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		systemDept, err = tx.Departments.Create().
 			SetParentID(rootDept.ID).
 			SetCode("system").
-			SetDisplayName("system").
+			SetDisplayName("系统部门").
 			SetSortOrder(1).
 			SetProtected(true).
 			Save(ctx)
@@ -299,6 +300,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	} else {
 		if err := systemDept.Update().
 			SetParentID(rootDept.ID).
+			SetDisplayName("系统部门").
 			SetSortOrder(1).
 			SetProtected(true).
 			Exec(ctx); err != nil {
@@ -324,7 +326,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			adminDept, err = tx.Departments.Create().
 				SetParentID(systemDept.ID).
 				SetCode("admin").
-				SetDisplayName("admin").
+				SetDisplayName("管理员部门").
 				SetSortOrder(1).
 				SetProtected(true).
 				Save(ctx)
@@ -338,6 +340,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		} else {
 			if err := adminDept.Update().
 				SetParentID(systemDept.ID).
+				SetDisplayName("管理员部门").
 				SetSortOrder(1).
 				SetProtected(true).
 				Exec(ctx); err != nil {
@@ -351,6 +354,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	} else {
 		if err := adminDept.Update().
 			SetParentID(systemDept.ID).
+			SetDisplayName("管理员部门").
 			SetSortOrder(1).
 			SetProtected(true).
 			Exec(ctx); err != nil {
@@ -408,7 +412,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			guestDept, err = tx.Departments.Create().
 				SetParentID(systemDept.ID).
 				SetCode(guestCode).
-				SetDisplayName(guestCode).
+				SetDisplayName("访客部门").
 				SetSortOrder(2).
 				SetProtected(true).
 				Save(ctx)
@@ -422,6 +426,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		} else {
 			if err := guestDept.Update().
 				SetParentID(systemDept.ID).
+				SetDisplayName("访客部门").
 				SetSortOrder(2).
 				SetProtected(true).
 				Exec(ctx); err != nil {
@@ -435,6 +440,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	} else {
 		if err := guestDept.Update().
 			SetParentID(systemDept.ID).
+			SetDisplayName("访客部门").
 			SetSortOrder(2).
 			SetProtected(true).
 			Exec(ctx); err != nil {
