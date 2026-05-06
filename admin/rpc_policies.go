@@ -10,8 +10,6 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/policies"
-	"github.com/grpc-kit/pkg/lion/policyattachments"
-	"github.com/grpc-kit/pkg/lion/policystatements"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -281,26 +279,6 @@ func (a *KnownAdminAPI) DeletePolicy(ctx context.Context, req *adminv1.DeletePol
 	}
 	if policyEnt.Protected {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("protected policy cannot be deleted")
-	}
-
-	statementCount, err := db.PolicyStatements.Query().
-		Where(policystatements.PolicyIDEQ(int(req.Id))).
-		Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if statementCount > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("cannot delete policy with associated statements")
-	}
-
-	attachmentCount, err := db.PolicyAttachments.Query().
-		Where(policyattachments.PolicyIDEQ(int(req.Id))).
-		Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if attachmentCount > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("cannot delete policy with associated attachments")
 	}
 
 	// 执行删除

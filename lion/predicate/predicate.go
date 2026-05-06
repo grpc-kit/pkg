@@ -6,9 +6,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Actions is the predicate function for actions builders.
-type Actions func(*sql.Selector)
-
 // AuthProviders is the predicate function for authproviders builders.
 type AuthProviders func(*sql.Selector)
 
@@ -35,18 +32,6 @@ type Menus func(*sql.Selector)
 
 // Policies is the predicate function for policies builders.
 type Policies func(*sql.Selector)
-
-// PolicyAttachments is the predicate function for policyattachments builders.
-type PolicyAttachments func(*sql.Selector)
-
-// PolicyStatements is the predicate function for policystatements builders.
-type PolicyStatements func(*sql.Selector)
-
-// ResourceTypes is the predicate function for resourcetypes builders.
-type ResourceTypes func(*sql.Selector)
-
-// Resources is the predicate function for resources builders.
-type Resources func(*sql.Selector)
 
 // Roles is the predicate function for roles builders.
 type Roles func(*sql.Selector)

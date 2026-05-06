@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -24,8 +23,6 @@ const (
 	FieldUpdatedBy = "updated_by"
 	// FieldParentID holds the string denoting the parent_id field in the database.
 	FieldParentID = "parent_id"
-	// FieldResourceID holds the string denoting the resource_id field in the database.
-	FieldResourceID = "resource_id"
 	// FieldCode holds the string denoting the code field in the database.
 	FieldCode = "code"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
@@ -48,17 +45,8 @@ const (
 	FieldMetadata = "metadata"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLionResources holds the string denoting the lion_resources edge name in mutations.
-	EdgeLionResources = "lion_resources"
 	// Table holds the table name of the menus in the database.
 	Table = "lion_menus"
-	// LionResourcesTable is the table that holds the lion_resources relation/edge.
-	LionResourcesTable = "lion_menus"
-	// LionResourcesInverseTable is the table name for the Resources entity.
-	// It exists in this package in order to avoid circular dependency with the "resources" package.
-	LionResourcesInverseTable = "lion_resources"
-	// LionResourcesColumn is the table column denoting the lion_resources relation/edge.
-	LionResourcesColumn = "resource_id"
 )
 
 // Columns holds all SQL columns for menus fields.
@@ -69,7 +57,6 @@ var Columns = []string{
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldParentID,
-	FieldResourceID,
 	FieldCode,
 	FieldDisplayName,
 	FieldRoutePath,
@@ -173,11 +160,6 @@ func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldParentID, opts...).ToFunc()
 }
 
-// ByResourceID orders the results by the resource_id field.
-func ByResourceID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResourceID, opts...).ToFunc()
-}
-
 // ByCode orders the results by the code field.
 func ByCode(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCode, opts...).ToFunc()
@@ -226,18 +208,4 @@ func ByMenuStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
-}
-
-// ByLionResourcesField orders the results by lion_resources field.
-func ByLionResourcesField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionResourcesStep(), sql.OrderByField(field, opts...))
-	}
-}
-func newLionResourcesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionResourcesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, LionResourcesTable, LionResourcesColumn),
-	)
 }

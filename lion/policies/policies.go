@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -36,26 +35,8 @@ const (
 	FieldProtected = "protected"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLionPolicyStatements holds the string denoting the lion_policy_statements edge name in mutations.
-	EdgeLionPolicyStatements = "lion_policy_statements"
-	// EdgeLionPolicyAttachments holds the string denoting the lion_policy_attachments edge name in mutations.
-	EdgeLionPolicyAttachments = "lion_policy_attachments"
 	// Table holds the table name of the policies in the database.
 	Table = "lion_policies"
-	// LionPolicyStatementsTable is the table that holds the lion_policy_statements relation/edge.
-	LionPolicyStatementsTable = "lion_policy_statements"
-	// LionPolicyStatementsInverseTable is the table name for the PolicyStatements entity.
-	// It exists in this package in order to avoid circular dependency with the "policystatements" package.
-	LionPolicyStatementsInverseTable = "lion_policy_statements"
-	// LionPolicyStatementsColumn is the table column denoting the lion_policy_statements relation/edge.
-	LionPolicyStatementsColumn = "policy_id"
-	// LionPolicyAttachmentsTable is the table that holds the lion_policy_attachments relation/edge.
-	LionPolicyAttachmentsTable = "lion_policy_attachments"
-	// LionPolicyAttachmentsInverseTable is the table name for the PolicyAttachments entity.
-	// It exists in this package in order to avoid circular dependency with the "policyattachments" package.
-	LionPolicyAttachmentsInverseTable = "lion_policy_attachments"
-	// LionPolicyAttachmentsColumn is the table column denoting the lion_policy_attachments relation/edge.
-	LionPolicyAttachmentsColumn = "policy_id"
 )
 
 // Columns holds all SQL columns for policies fields.
@@ -163,46 +144,4 @@ func ByProtected(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
-}
-
-// ByLionPolicyStatementsCount orders the results by lion_policy_statements count.
-func ByLionPolicyStatementsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionPolicyStatementsStep(), opts...)
-	}
-}
-
-// ByLionPolicyStatements orders the results by lion_policy_statements terms.
-func ByLionPolicyStatements(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionPolicyStatementsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByLionPolicyAttachmentsCount orders the results by lion_policy_attachments count.
-func ByLionPolicyAttachmentsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionPolicyAttachmentsStep(), opts...)
-	}
-}
-
-// ByLionPolicyAttachments orders the results by lion_policy_attachments terms.
-func ByLionPolicyAttachments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionPolicyAttachmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-func newLionPolicyStatementsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionPolicyStatementsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionPolicyStatementsTable, LionPolicyStatementsColumn),
-	)
-}
-func newLionPolicyAttachmentsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionPolicyAttachmentsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionPolicyAttachmentsTable, LionPolicyAttachmentsColumn),
-	)
 }

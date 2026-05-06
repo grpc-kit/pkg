@@ -14,8 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/policies"
-	"github.com/grpc-kit/pkg/lion/policyattachments"
-	"github.com/grpc-kit/pkg/lion/policystatements"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -201,81 +199,9 @@ func (_u *PoliciesUpdate) SetNillableDescription(v *string) *PoliciesUpdate {
 	return _u
 }
 
-// AddLionPolicyStatementIDs adds the "lion_policy_statements" edge to the PolicyStatements entity by IDs.
-func (_u *PoliciesUpdate) AddLionPolicyStatementIDs(ids ...int) *PoliciesUpdate {
-	_u.mutation.AddLionPolicyStatementIDs(ids...)
-	return _u
-}
-
-// AddLionPolicyStatements adds the "lion_policy_statements" edges to the PolicyStatements entity.
-func (_u *PoliciesUpdate) AddLionPolicyStatements(v ...*PolicyStatements) *PoliciesUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionPolicyStatementIDs(ids...)
-}
-
-// AddLionPolicyAttachmentIDs adds the "lion_policy_attachments" edge to the PolicyAttachments entity by IDs.
-func (_u *PoliciesUpdate) AddLionPolicyAttachmentIDs(ids ...int) *PoliciesUpdate {
-	_u.mutation.AddLionPolicyAttachmentIDs(ids...)
-	return _u
-}
-
-// AddLionPolicyAttachments adds the "lion_policy_attachments" edges to the PolicyAttachments entity.
-func (_u *PoliciesUpdate) AddLionPolicyAttachments(v ...*PolicyAttachments) *PoliciesUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionPolicyAttachmentIDs(ids...)
-}
-
 // Mutation returns the PoliciesMutation object of the builder.
 func (_u *PoliciesUpdate) Mutation() *PoliciesMutation {
 	return _u.mutation
-}
-
-// ClearLionPolicyStatements clears all "lion_policy_statements" edges to the PolicyStatements entity.
-func (_u *PoliciesUpdate) ClearLionPolicyStatements() *PoliciesUpdate {
-	_u.mutation.ClearLionPolicyStatements()
-	return _u
-}
-
-// RemoveLionPolicyStatementIDs removes the "lion_policy_statements" edge to PolicyStatements entities by IDs.
-func (_u *PoliciesUpdate) RemoveLionPolicyStatementIDs(ids ...int) *PoliciesUpdate {
-	_u.mutation.RemoveLionPolicyStatementIDs(ids...)
-	return _u
-}
-
-// RemoveLionPolicyStatements removes "lion_policy_statements" edges to PolicyStatements entities.
-func (_u *PoliciesUpdate) RemoveLionPolicyStatements(v ...*PolicyStatements) *PoliciesUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveLionPolicyStatementIDs(ids...)
-}
-
-// ClearLionPolicyAttachments clears all "lion_policy_attachments" edges to the PolicyAttachments entity.
-func (_u *PoliciesUpdate) ClearLionPolicyAttachments() *PoliciesUpdate {
-	_u.mutation.ClearLionPolicyAttachments()
-	return _u
-}
-
-// RemoveLionPolicyAttachmentIDs removes the "lion_policy_attachments" edge to PolicyAttachments entities by IDs.
-func (_u *PoliciesUpdate) RemoveLionPolicyAttachmentIDs(ids ...int) *PoliciesUpdate {
-	_u.mutation.RemoveLionPolicyAttachmentIDs(ids...)
-	return _u
-}
-
-// RemoveLionPolicyAttachments removes "lion_policy_attachments" edges to PolicyAttachments entities.
-func (_u *PoliciesUpdate) RemoveLionPolicyAttachments(v ...*PolicyAttachments) *PoliciesUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveLionPolicyAttachmentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -393,96 +319,6 @@ func (_u *PoliciesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
-	}
-	if _u.mutation.LionPolicyStatementsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyStatementsTable,
-			Columns: []string{policies.LionPolicyStatementsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policystatements.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionPolicyStatementsIDs(); len(nodes) > 0 && !_u.mutation.LionPolicyStatementsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyStatementsTable,
-			Columns: []string{policies.LionPolicyStatementsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policystatements.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionPolicyStatementsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyStatementsTable,
-			Columns: []string{policies.LionPolicyStatementsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policystatements.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.LionPolicyAttachmentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyAttachmentsTable,
-			Columns: []string{policies.LionPolicyAttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policyattachments.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionPolicyAttachmentsIDs(); len(nodes) > 0 && !_u.mutation.LionPolicyAttachmentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyAttachmentsTable,
-			Columns: []string{policies.LionPolicyAttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policyattachments.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionPolicyAttachmentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyAttachmentsTable,
-			Columns: []string{policies.LionPolicyAttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policyattachments.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -673,81 +509,9 @@ func (_u *PoliciesUpdateOne) SetNillableDescription(v *string) *PoliciesUpdateOn
 	return _u
 }
 
-// AddLionPolicyStatementIDs adds the "lion_policy_statements" edge to the PolicyStatements entity by IDs.
-func (_u *PoliciesUpdateOne) AddLionPolicyStatementIDs(ids ...int) *PoliciesUpdateOne {
-	_u.mutation.AddLionPolicyStatementIDs(ids...)
-	return _u
-}
-
-// AddLionPolicyStatements adds the "lion_policy_statements" edges to the PolicyStatements entity.
-func (_u *PoliciesUpdateOne) AddLionPolicyStatements(v ...*PolicyStatements) *PoliciesUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionPolicyStatementIDs(ids...)
-}
-
-// AddLionPolicyAttachmentIDs adds the "lion_policy_attachments" edge to the PolicyAttachments entity by IDs.
-func (_u *PoliciesUpdateOne) AddLionPolicyAttachmentIDs(ids ...int) *PoliciesUpdateOne {
-	_u.mutation.AddLionPolicyAttachmentIDs(ids...)
-	return _u
-}
-
-// AddLionPolicyAttachments adds the "lion_policy_attachments" edges to the PolicyAttachments entity.
-func (_u *PoliciesUpdateOne) AddLionPolicyAttachments(v ...*PolicyAttachments) *PoliciesUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionPolicyAttachmentIDs(ids...)
-}
-
 // Mutation returns the PoliciesMutation object of the builder.
 func (_u *PoliciesUpdateOne) Mutation() *PoliciesMutation {
 	return _u.mutation
-}
-
-// ClearLionPolicyStatements clears all "lion_policy_statements" edges to the PolicyStatements entity.
-func (_u *PoliciesUpdateOne) ClearLionPolicyStatements() *PoliciesUpdateOne {
-	_u.mutation.ClearLionPolicyStatements()
-	return _u
-}
-
-// RemoveLionPolicyStatementIDs removes the "lion_policy_statements" edge to PolicyStatements entities by IDs.
-func (_u *PoliciesUpdateOne) RemoveLionPolicyStatementIDs(ids ...int) *PoliciesUpdateOne {
-	_u.mutation.RemoveLionPolicyStatementIDs(ids...)
-	return _u
-}
-
-// RemoveLionPolicyStatements removes "lion_policy_statements" edges to PolicyStatements entities.
-func (_u *PoliciesUpdateOne) RemoveLionPolicyStatements(v ...*PolicyStatements) *PoliciesUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveLionPolicyStatementIDs(ids...)
-}
-
-// ClearLionPolicyAttachments clears all "lion_policy_attachments" edges to the PolicyAttachments entity.
-func (_u *PoliciesUpdateOne) ClearLionPolicyAttachments() *PoliciesUpdateOne {
-	_u.mutation.ClearLionPolicyAttachments()
-	return _u
-}
-
-// RemoveLionPolicyAttachmentIDs removes the "lion_policy_attachments" edge to PolicyAttachments entities by IDs.
-func (_u *PoliciesUpdateOne) RemoveLionPolicyAttachmentIDs(ids ...int) *PoliciesUpdateOne {
-	_u.mutation.RemoveLionPolicyAttachmentIDs(ids...)
-	return _u
-}
-
-// RemoveLionPolicyAttachments removes "lion_policy_attachments" edges to PolicyAttachments entities.
-func (_u *PoliciesUpdateOne) RemoveLionPolicyAttachments(v ...*PolicyAttachments) *PoliciesUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveLionPolicyAttachmentIDs(ids...)
 }
 
 // Where appends a list predicates to the PoliciesUpdate builder.
@@ -895,96 +659,6 @@ func (_u *PoliciesUpdateOne) sqlSave(ctx context.Context) (_node *Policies, err 
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
-	}
-	if _u.mutation.LionPolicyStatementsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyStatementsTable,
-			Columns: []string{policies.LionPolicyStatementsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policystatements.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionPolicyStatementsIDs(); len(nodes) > 0 && !_u.mutation.LionPolicyStatementsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyStatementsTable,
-			Columns: []string{policies.LionPolicyStatementsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policystatements.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionPolicyStatementsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyStatementsTable,
-			Columns: []string{policies.LionPolicyStatementsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policystatements.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.LionPolicyAttachmentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyAttachmentsTable,
-			Columns: []string{policies.LionPolicyAttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policyattachments.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionPolicyAttachmentsIDs(); len(nodes) > 0 && !_u.mutation.LionPolicyAttachmentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyAttachmentsTable,
-			Columns: []string{policies.LionPolicyAttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policyattachments.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionPolicyAttachmentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyAttachmentsTable,
-			Columns: []string{policies.LionPolicyAttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policyattachments.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Policies{config: _u.config}
 	_spec.Assign = _node.assignValues

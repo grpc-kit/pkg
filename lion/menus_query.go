@@ -13,17 +13,15 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/resources"
 )
 
 // MenusQuery is the builder for querying Menus entities.
 type MenusQuery struct {
 	config
-	ctx               *QueryContext
-	order             []menus.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.Menus
-	withLionResources *ResourcesQuery
+	ctx        *QueryContext
+	order      []menus.OrderOption
+	inters     []Interceptor
+	predicates []predicate.Menus
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -58,28 +56,6 @@ func (_q *MenusQuery) Unique(unique bool) *MenusQuery {
 func (_q *MenusQuery) Order(o ...menus.OrderOption) *MenusQuery {
 	_q.order = append(_q.order, o...)
 	return _q
-}
-
-// QueryLionResources chains the current query on the "lion_resources" edge.
-func (_q *MenusQuery) QueryLionResources() *ResourcesQuery {
-	query := (&ResourcesClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(menus.Table, menus.FieldID, selector),
-			sqlgraph.To(resources.Table, resources.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, menus.LionResourcesTable, menus.LionResourcesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first Menus entity from the query.
@@ -269,27 +245,15 @@ func (_q *MenusQuery) Clone() *MenusQuery {
 		return nil
 	}
 	return &MenusQuery{
-		config:            _q.config,
-		ctx:               _q.ctx.Clone(),
-		order:             append([]menus.OrderOption{}, _q.order...),
-		inters:            append([]Interceptor{}, _q.inters...),
-		predicates:        append([]predicate.Menus{}, _q.predicates...),
-		withLionResources: _q.withLionResources.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]menus.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Menus{}, _q.predicates...),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
-}
-
-// WithLionResources tells the query-builder to eager-load the nodes that are connected to
-// the "lion_resources" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *MenusQuery) WithLionResources(opts ...func(*ResourcesQuery)) *MenusQuery {
-	query := (&ResourcesClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withLionResources = query
-	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -368,11 +332,8 @@ func (_q *MenusQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *MenusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Menus, error) {
 	var (
-		nodes       = []*Menus{}
-		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
-			_q.withLionResources != nil,
-		}
+		nodes = []*Menus{}
+		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Menus).scanValues(nil, columns)
@@ -380,7 +341,6 @@ func (_q *MenusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Menus,
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Menus{config: _q.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -392,46 +352,7 @@ func (_q *MenusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Menus,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withLionResources; query != nil {
-		if err := _q.loadLionResources(ctx, query, nodes, nil,
-			func(n *Menus, e *Resources) { n.Edges.LionResources = e }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
-}
-
-func (_q *MenusQuery) loadLionResources(ctx context.Context, query *ResourcesQuery, nodes []*Menus, init func(*Menus), assign func(*Menus, *Resources)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Menus)
-	for i := range nodes {
-		if nodes[i].ResourceID == nil {
-			continue
-		}
-		fk := *nodes[i].ResourceID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(resources.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "resource_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
 }
 
 func (_q *MenusQuery) sqlCount(ctx context.Context) (int, error) {
@@ -458,9 +379,6 @@ func (_q *MenusQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != menus.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
-		if _q.withLionResources != nil {
-			_spec.Node.AddColumnOnce(menus.FieldResourceID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

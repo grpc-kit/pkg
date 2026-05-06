@@ -193,16 +193,6 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListResources
-      option:
-        tags:
-          - "资源管理"
-        description: '接口格式：/builtin/admin/api/v1/resources'
-        summary: "资源列表"
-        responses:
-          "200":
-            examples:
-              "application/json": '{"resources":[{"id":"1","parent_id":"0","code":"sys-dashboard","display_name":"控制台","sort_order":10,"type":"MENU","status":"ENABLED","visibility":"VISIBLE","locator":"/console/dashboard","visual":"dashboard","manifest":"builtin://dashboard","metadata":{"module":"system"},"description":"后台首页入口"}],"next_page_token":"resources:2","total_size":35}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers
       option:
         tags:
@@ -273,46 +263,6 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"name":"security","enabled":true,"authentication":{"insecure_rpcs":["grpc.health.v1.Health/Check"],"http_users":[{"user_id":"1","username":"admin","groups":["root"],"tenant":"default"}]}}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetResource
-      option:
-        tags:
-          - "资源管理"
-        summary: "获取资源详情"
-        description: "接口格式：/builtin/admin/api/v1/resources/{id}。根据资源 ID 获取资源详情。"
-        responses:
-          "200":
-            examples:
-              "application/json": '{"id":"1","parent_id":"0","code":"sys-dashboard","display_name":"控制台","sort_order":10,"type":"MENU","status":"ENABLED","visibility":"VISIBLE","locator":"/console/dashboard","visual":"dashboard","manifest":"builtin://dashboard","metadata":{"module":"system"},"description":"后台首页入口"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateResource
-      option:
-        tags:
-          - "资源管理"
-        summary: "创建资源"
-        description: '接口格式：/builtin/admin/api/v1/resources。根据 resource 字段创建资源。请求体示例：{"resource":{"parent_id":"1","code":"report-center","display_name":"报表中心","type":"MENU","status":"ENABLED","visibility":"VISIBLE","locator":"/console/report"}}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"id":"2","parent_id":"1","code":"report-center","display_name":"报表中心","sort_order":20,"type":"MENU","status":"ENABLED","visibility":"VISIBLE","locator":"/console/report","visual":"bar-chart","manifest":"builtin://report-center","metadata":{"module":"report"},"description":"经营分析报表入口"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateResource
-      option:
-        tags:
-          - "资源管理"
-        summary: "更新资源"
-        description: '接口格式：/builtin/admin/api/v1/resources/{resource.id}。路径中的 resource.id 应与请求体一致，支持 update_mask 局部更新。请求体示例：{"resource":{"id":"2","display_name":"报表中心（更新）","sort_order":15},"update_mask":{"paths":["display_name","sort_order"]}}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"id":"2","parent_id":"1","code":"report-center","display_name":"报表中心（更新）","sort_order":15,"type":"MENU","status":"ENABLED","visibility":"VISIBLE","locator":"/console/report","visual":"bar-chart","manifest":"builtin://report-center","metadata":{"module":"report","owner":"bi-team"},"description":"经营分析报表入口（更新）"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteResource
-      option:
-        tags:
-          - "资源管理"
-        summary: "删除资源"
-        description: "接口格式：/builtin/admin/api/v1/resources/{id}。删除指定资源。"
-        responses:
-          "200":
-            examples:
-              "application/json": '{}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicies
       option:
         tags:

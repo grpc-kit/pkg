@@ -54,20 +54,9 @@ type KnownAdminClient interface {
 	SetupUserMFA(ctx context.Context, in *SetupUserMFARequest, opts ...grpc.CallOption) (*SetupUserMFAResponse, error)
 	ConfirmUserMFA(ctx context.Context, in *ConfirmUserMFARequest, opts ...grpc.CallOption) (*ConfirmUserMFAResponse, error)
 	DisableUserMFA(ctx context.Context, in *DisableUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 资源管理
-	GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*Resource, error)
-	ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error)
-	CreateResource(ctx context.Context, in *CreateResourceRequest, opts ...grpc.CallOption) (*Resource, error)
-	UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*Resource, error)
-	DeleteResource(ctx context.Context, in *DeleteResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 服务字典管理
 	ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error)
 	ListServiceActions(ctx context.Context, in *ListServiceActionsRequest, opts ...grpc.CallOption) (*ListServiceActionsResponse, error)
-	// 资源类型字典管理
-	ListResourceTypes(ctx context.Context, in *ListResourceTypesRequest, opts ...grpc.CallOption) (*ListResourceTypesResponse, error)
-	CreateResourceType(ctx context.Context, in *CreateResourceTypeRequest, opts ...grpc.CallOption) (*ResourceType, error)
-	UpdateResourceType(ctx context.Context, in *UpdateResourceTypeRequest, opts ...grpc.CallOption) (*ResourceType, error)
-	DeleteResourceType(ctx context.Context, in *DeleteResourceTypeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 菜单管理
 	ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error)
 	CreateMenu(ctx context.Context, in *CreateMenuRequest, opts ...grpc.CallOption) (*Menu, error)
@@ -78,18 +67,6 @@ type KnownAdminClient interface {
 	CreatePolicy(ctx context.Context, in *CreatePolicyRequest, opts ...grpc.CallOption) (*Policy, error)
 	UpdatePolicy(ctx context.Context, in *UpdatePolicyRequest, opts ...grpc.CallOption) (*Policy, error)
 	DeletePolicy(ctx context.Context, in *DeletePolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 策略语句管理
-	GetPolicyStatement(ctx context.Context, in *GetPolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error)
-	ListPolicyStatements(ctx context.Context, in *ListPolicyStatementsRequest, opts ...grpc.CallOption) (*ListPolicyStatementsResponse, error)
-	CreatePolicyStatement(ctx context.Context, in *CreatePolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error)
-	UpdatePolicyStatement(ctx context.Context, in *UpdatePolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error)
-	DeletePolicyStatement(ctx context.Context, in *DeletePolicyStatementRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 策略挂载管理
-	GetPolicyAttachment(ctx context.Context, in *GetPolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error)
-	ListPolicyAttachments(ctx context.Context, in *ListPolicyAttachmentsRequest, opts ...grpc.CallOption) (*ListPolicyAttachmentsResponse, error)
-	CreatePolicyAttachment(ctx context.Context, in *CreatePolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error)
-	UpdatePolicyAttachment(ctx context.Context, in *UpdatePolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error)
-	DeletePolicyAttachment(ctx context.Context, in *DeletePolicyAttachmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 角色相关
 	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error)
 	GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*Role, error)
@@ -386,51 +363,6 @@ func (c *knownAdminClient) DisableUserMFA(ctx context.Context, in *DisableUserMF
 	return out, nil
 }
 
-func (c *knownAdminClient) GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*Resource, error) {
-	out := new(Resource)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error) {
-	out := new(ListResourcesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResources", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreateResource(ctx context.Context, in *CreateResourceRequest, opts ...grpc.CallOption) (*Resource, error) {
-	out := new(Resource)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*Resource, error) {
-	out := new(Resource)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteResource(ctx context.Context, in *DeleteResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *knownAdminClient) ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error) {
 	out := new(ListServicesResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServices", in, out, opts...)
@@ -443,42 +375,6 @@ func (c *knownAdminClient) ListServices(ctx context.Context, in *ListServicesReq
 func (c *knownAdminClient) ListServiceActions(ctx context.Context, in *ListServiceActionsRequest, opts ...grpc.CallOption) (*ListServiceActionsResponse, error) {
 	out := new(ListServiceActionsResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServiceActions", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListResourceTypes(ctx context.Context, in *ListResourceTypesRequest, opts ...grpc.CallOption) (*ListResourceTypesResponse, error) {
-	out := new(ListResourceTypesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResourceTypes", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreateResourceType(ctx context.Context, in *CreateResourceTypeRequest, opts ...grpc.CallOption) (*ResourceType, error) {
-	out := new(ResourceType)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceType", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdateResourceType(ctx context.Context, in *UpdateResourceTypeRequest, opts ...grpc.CallOption) (*ResourceType, error) {
-	out := new(ResourceType)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateResourceType", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteResourceType(ctx context.Context, in *DeleteResourceTypeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteResourceType", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -551,96 +447,6 @@ func (c *knownAdminClient) UpdatePolicy(ctx context.Context, in *UpdatePolicyReq
 func (c *knownAdminClient) DeletePolicy(ctx context.Context, in *DeletePolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicy", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetPolicyStatement(ctx context.Context, in *GetPolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error) {
-	out := new(PolicyStatement)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicyStatement", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListPolicyStatements(ctx context.Context, in *ListPolicyStatementsRequest, opts ...grpc.CallOption) (*ListPolicyStatementsResponse, error) {
-	out := new(ListPolicyStatementsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicyStatements", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreatePolicyStatement(ctx context.Context, in *CreatePolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error) {
-	out := new(PolicyStatement)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicyStatement", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdatePolicyStatement(ctx context.Context, in *UpdatePolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error) {
-	out := new(PolicyStatement)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicyStatement", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeletePolicyStatement(ctx context.Context, in *DeletePolicyStatementRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicyStatement", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetPolicyAttachment(ctx context.Context, in *GetPolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error) {
-	out := new(PolicyAttachment)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicyAttachment", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListPolicyAttachments(ctx context.Context, in *ListPolicyAttachmentsRequest, opts ...grpc.CallOption) (*ListPolicyAttachmentsResponse, error) {
-	out := new(ListPolicyAttachmentsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicyAttachments", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreatePolicyAttachment(ctx context.Context, in *CreatePolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error) {
-	out := new(PolicyAttachment)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicyAttachment", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdatePolicyAttachment(ctx context.Context, in *UpdatePolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error) {
-	out := new(PolicyAttachment)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicyAttachment", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeletePolicyAttachment(ctx context.Context, in *DeletePolicyAttachmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicyAttachment", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1006,20 +812,9 @@ type KnownAdminServer interface {
 	SetupUserMFA(context.Context, *SetupUserMFARequest) (*SetupUserMFAResponse, error)
 	ConfirmUserMFA(context.Context, *ConfirmUserMFARequest) (*ConfirmUserMFAResponse, error)
 	DisableUserMFA(context.Context, *DisableUserMFARequest) (*emptypb.Empty, error)
-	// 资源管理
-	GetResource(context.Context, *GetResourceRequest) (*Resource, error)
-	ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error)
-	CreateResource(context.Context, *CreateResourceRequest) (*Resource, error)
-	UpdateResource(context.Context, *UpdateResourceRequest) (*Resource, error)
-	DeleteResource(context.Context, *DeleteResourceRequest) (*emptypb.Empty, error)
 	// 服务字典管理
 	ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error)
 	ListServiceActions(context.Context, *ListServiceActionsRequest) (*ListServiceActionsResponse, error)
-	// 资源类型字典管理
-	ListResourceTypes(context.Context, *ListResourceTypesRequest) (*ListResourceTypesResponse, error)
-	CreateResourceType(context.Context, *CreateResourceTypeRequest) (*ResourceType, error)
-	UpdateResourceType(context.Context, *UpdateResourceTypeRequest) (*ResourceType, error)
-	DeleteResourceType(context.Context, *DeleteResourceTypeRequest) (*emptypb.Empty, error)
 	// 菜单管理
 	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
 	CreateMenu(context.Context, *CreateMenuRequest) (*Menu, error)
@@ -1030,18 +825,6 @@ type KnownAdminServer interface {
 	CreatePolicy(context.Context, *CreatePolicyRequest) (*Policy, error)
 	UpdatePolicy(context.Context, *UpdatePolicyRequest) (*Policy, error)
 	DeletePolicy(context.Context, *DeletePolicyRequest) (*emptypb.Empty, error)
-	// 策略语句管理
-	GetPolicyStatement(context.Context, *GetPolicyStatementRequest) (*PolicyStatement, error)
-	ListPolicyStatements(context.Context, *ListPolicyStatementsRequest) (*ListPolicyStatementsResponse, error)
-	CreatePolicyStatement(context.Context, *CreatePolicyStatementRequest) (*PolicyStatement, error)
-	UpdatePolicyStatement(context.Context, *UpdatePolicyStatementRequest) (*PolicyStatement, error)
-	DeletePolicyStatement(context.Context, *DeletePolicyStatementRequest) (*emptypb.Empty, error)
-	// 策略挂载管理
-	GetPolicyAttachment(context.Context, *GetPolicyAttachmentRequest) (*PolicyAttachment, error)
-	ListPolicyAttachments(context.Context, *ListPolicyAttachmentsRequest) (*ListPolicyAttachmentsResponse, error)
-	CreatePolicyAttachment(context.Context, *CreatePolicyAttachmentRequest) (*PolicyAttachment, error)
-	UpdatePolicyAttachment(context.Context, *UpdatePolicyAttachmentRequest) (*PolicyAttachment, error)
-	DeletePolicyAttachment(context.Context, *DeletePolicyAttachmentRequest) (*emptypb.Empty, error)
 	// 角色相关
 	CreateRole(context.Context, *CreateRoleRequest) (*Role, error)
 	GetRole(context.Context, *GetRoleRequest) (*Role, error)
@@ -1172,38 +955,11 @@ func (UnimplementedKnownAdminServer) ConfirmUserMFA(context.Context, *ConfirmUse
 func (UnimplementedKnownAdminServer) DisableUserMFA(context.Context, *DisableUserMFARequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DisableUserMFA not implemented")
 }
-func (UnimplementedKnownAdminServer) GetResource(context.Context, *GetResourceRequest) (*Resource, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetResource not implemented")
-}
-func (UnimplementedKnownAdminServer) ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListResources not implemented")
-}
-func (UnimplementedKnownAdminServer) CreateResource(context.Context, *CreateResourceRequest) (*Resource, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateResource not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdateResource(context.Context, *UpdateResourceRequest) (*Resource, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateResource not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteResource(context.Context, *DeleteResourceRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteResource not implemented")
-}
 func (UnimplementedKnownAdminServer) ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListServices not implemented")
 }
 func (UnimplementedKnownAdminServer) ListServiceActions(context.Context, *ListServiceActionsRequest) (*ListServiceActionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListServiceActions not implemented")
-}
-func (UnimplementedKnownAdminServer) ListResourceTypes(context.Context, *ListResourceTypesRequest) (*ListResourceTypesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListResourceTypes not implemented")
-}
-func (UnimplementedKnownAdminServer) CreateResourceType(context.Context, *CreateResourceTypeRequest) (*ResourceType, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateResourceType not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdateResourceType(context.Context, *UpdateResourceTypeRequest) (*ResourceType, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateResourceType not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteResourceType(context.Context, *DeleteResourceTypeRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteResourceType not implemented")
 }
 func (UnimplementedKnownAdminServer) ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListMenus not implemented")
@@ -1228,36 +984,6 @@ func (UnimplementedKnownAdminServer) UpdatePolicy(context.Context, *UpdatePolicy
 }
 func (UnimplementedKnownAdminServer) DeletePolicy(context.Context, *DeletePolicyRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePolicy not implemented")
-}
-func (UnimplementedKnownAdminServer) GetPolicyStatement(context.Context, *GetPolicyStatementRequest) (*PolicyStatement, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPolicyStatement not implemented")
-}
-func (UnimplementedKnownAdminServer) ListPolicyStatements(context.Context, *ListPolicyStatementsRequest) (*ListPolicyStatementsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListPolicyStatements not implemented")
-}
-func (UnimplementedKnownAdminServer) CreatePolicyStatement(context.Context, *CreatePolicyStatementRequest) (*PolicyStatement, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreatePolicyStatement not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdatePolicyStatement(context.Context, *UpdatePolicyStatementRequest) (*PolicyStatement, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdatePolicyStatement not implemented")
-}
-func (UnimplementedKnownAdminServer) DeletePolicyStatement(context.Context, *DeletePolicyStatementRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeletePolicyStatement not implemented")
-}
-func (UnimplementedKnownAdminServer) GetPolicyAttachment(context.Context, *GetPolicyAttachmentRequest) (*PolicyAttachment, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPolicyAttachment not implemented")
-}
-func (UnimplementedKnownAdminServer) ListPolicyAttachments(context.Context, *ListPolicyAttachmentsRequest) (*ListPolicyAttachmentsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListPolicyAttachments not implemented")
-}
-func (UnimplementedKnownAdminServer) CreatePolicyAttachment(context.Context, *CreatePolicyAttachmentRequest) (*PolicyAttachment, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreatePolicyAttachment not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdatePolicyAttachment(context.Context, *UpdatePolicyAttachmentRequest) (*PolicyAttachment, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdatePolicyAttachment not implemented")
-}
-func (UnimplementedKnownAdminServer) DeletePolicyAttachment(context.Context, *DeletePolicyAttachmentRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeletePolicyAttachment not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateRole(context.Context, *CreateRoleRequest) (*Role, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRole not implemented")
@@ -1865,96 +1591,6 @@ func _KnownAdmin_DisableUserMFA_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_GetResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetResource(ctx, req.(*GetResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListResourcesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListResources(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResources",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListResources(ctx, req.(*ListResourcesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateResource(ctx, req.(*CreateResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdateResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdateResource(ctx, req.(*UpdateResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteResource(ctx, req.(*DeleteResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _KnownAdmin_ListServices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListServicesRequest)
 	if err := dec(in); err != nil {
@@ -1987,78 +1623,6 @@ func _KnownAdmin_ListServiceActions_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).ListServiceActions(ctx, req.(*ListServiceActionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListResourceTypes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListResourceTypesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListResourceTypes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResourceTypes",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListResourceTypes(ctx, req.(*ListResourceTypesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreateResourceType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateResourceTypeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateResourceType(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceType",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateResourceType(ctx, req.(*CreateResourceTypeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdateResourceType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateResourceTypeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdateResourceType(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateResourceType",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdateResourceType(ctx, req.(*UpdateResourceTypeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteResourceType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteResourceTypeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteResourceType(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteResourceType",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteResourceType(ctx, req.(*DeleteResourceTypeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2203,186 +1767,6 @@ func _KnownAdmin_DeletePolicy_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).DeletePolicy(ctx, req.(*DeletePolicyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetPolicyStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPolicyStatementRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetPolicyStatement(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicyStatement",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetPolicyStatement(ctx, req.(*GetPolicyStatementRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListPolicyStatements_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPolicyStatementsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListPolicyStatements(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicyStatements",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListPolicyStatements(ctx, req.(*ListPolicyStatementsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreatePolicyStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreatePolicyStatementRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreatePolicyStatement(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicyStatement",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreatePolicyStatement(ctx, req.(*CreatePolicyStatementRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdatePolicyStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdatePolicyStatementRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdatePolicyStatement(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicyStatement",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdatePolicyStatement(ctx, req.(*UpdatePolicyStatementRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeletePolicyStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeletePolicyStatementRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeletePolicyStatement(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicyStatement",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeletePolicyStatement(ctx, req.(*DeletePolicyStatementRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetPolicyAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPolicyAttachmentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetPolicyAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicyAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetPolicyAttachment(ctx, req.(*GetPolicyAttachmentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListPolicyAttachments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPolicyAttachmentsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListPolicyAttachments(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicyAttachments",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListPolicyAttachments(ctx, req.(*ListPolicyAttachmentsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreatePolicyAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreatePolicyAttachmentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreatePolicyAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicyAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreatePolicyAttachment(ctx, req.(*CreatePolicyAttachmentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdatePolicyAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdatePolicyAttachmentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdatePolicyAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicyAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdatePolicyAttachment(ctx, req.(*UpdatePolicyAttachmentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeletePolicyAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeletePolicyAttachmentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeletePolicyAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicyAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeletePolicyAttachment(ctx, req.(*DeletePolicyAttachmentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -3151,48 +2535,12 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_DisableUserMFA_Handler,
 		},
 		{
-			MethodName: "GetResource",
-			Handler:    _KnownAdmin_GetResource_Handler,
-		},
-		{
-			MethodName: "ListResources",
-			Handler:    _KnownAdmin_ListResources_Handler,
-		},
-		{
-			MethodName: "CreateResource",
-			Handler:    _KnownAdmin_CreateResource_Handler,
-		},
-		{
-			MethodName: "UpdateResource",
-			Handler:    _KnownAdmin_UpdateResource_Handler,
-		},
-		{
-			MethodName: "DeleteResource",
-			Handler:    _KnownAdmin_DeleteResource_Handler,
-		},
-		{
 			MethodName: "ListServices",
 			Handler:    _KnownAdmin_ListServices_Handler,
 		},
 		{
 			MethodName: "ListServiceActions",
 			Handler:    _KnownAdmin_ListServiceActions_Handler,
-		},
-		{
-			MethodName: "ListResourceTypes",
-			Handler:    _KnownAdmin_ListResourceTypes_Handler,
-		},
-		{
-			MethodName: "CreateResourceType",
-			Handler:    _KnownAdmin_CreateResourceType_Handler,
-		},
-		{
-			MethodName: "UpdateResourceType",
-			Handler:    _KnownAdmin_UpdateResourceType_Handler,
-		},
-		{
-			MethodName: "DeleteResourceType",
-			Handler:    _KnownAdmin_DeleteResourceType_Handler,
 		},
 		{
 			MethodName: "ListMenus",
@@ -3225,46 +2573,6 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePolicy",
 			Handler:    _KnownAdmin_DeletePolicy_Handler,
-		},
-		{
-			MethodName: "GetPolicyStatement",
-			Handler:    _KnownAdmin_GetPolicyStatement_Handler,
-		},
-		{
-			MethodName: "ListPolicyStatements",
-			Handler:    _KnownAdmin_ListPolicyStatements_Handler,
-		},
-		{
-			MethodName: "CreatePolicyStatement",
-			Handler:    _KnownAdmin_CreatePolicyStatement_Handler,
-		},
-		{
-			MethodName: "UpdatePolicyStatement",
-			Handler:    _KnownAdmin_UpdatePolicyStatement_Handler,
-		},
-		{
-			MethodName: "DeletePolicyStatement",
-			Handler:    _KnownAdmin_DeletePolicyStatement_Handler,
-		},
-		{
-			MethodName: "GetPolicyAttachment",
-			Handler:    _KnownAdmin_GetPolicyAttachment_Handler,
-		},
-		{
-			MethodName: "ListPolicyAttachments",
-			Handler:    _KnownAdmin_ListPolicyAttachments_Handler,
-		},
-		{
-			MethodName: "CreatePolicyAttachment",
-			Handler:    _KnownAdmin_CreatePolicyAttachment_Handler,
-		},
-		{
-			MethodName: "UpdatePolicyAttachment",
-			Handler:    _KnownAdmin_UpdatePolicyAttachment_Handler,
-		},
-		{
-			MethodName: "DeletePolicyAttachment",
-			Handler:    _KnownAdmin_DeletePolicyAttachment_Handler,
 		},
 		{
 			MethodName: "CreateRole",

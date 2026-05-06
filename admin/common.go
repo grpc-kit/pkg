@@ -76,3 +76,7 @@ func GetPageSizeByStructure(ctx context.Context, pageSize int32, structure admin
 
 	return currentPageSize
 }
+
+func (a *KnownAdminAPI) defaultServiceCode() string {
+	return "admin.v1.oneops"
+}

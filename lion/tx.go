@@ -12,8 +12,6 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Actions is the client for interacting with the Actions builders.
-	Actions *ActionsClient
 	// AuthProviders is the client for interacting with the AuthProviders builders.
 	AuthProviders *AuthProvidersClient
 	// Credentials is the client for interacting with the Credentials builders.
@@ -32,14 +30,6 @@ type Tx struct {
 	Menus *MenusClient
 	// Policies is the client for interacting with the Policies builders.
 	Policies *PoliciesClient
-	// PolicyAttachments is the client for interacting with the PolicyAttachments builders.
-	PolicyAttachments *PolicyAttachmentsClient
-	// PolicyStatements is the client for interacting with the PolicyStatements builders.
-	PolicyStatements *PolicyStatementsClient
-	// ResourceTypes is the client for interacting with the ResourceTypes builders.
-	ResourceTypes *ResourceTypesClient
-	// Resources is the client for interacting with the Resources builders.
-	Resources *ResourcesClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
 	// Services is the client for interacting with the Services builders.
@@ -183,7 +173,6 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Actions = NewActionsClient(tx.config)
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
 	tx.Credentials = NewCredentialsClient(tx.config)
 	tx.DepartmentMembers = NewDepartmentMembersClient(tx.config)
@@ -193,10 +182,6 @@ func (tx *Tx) init() {
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
-	tx.PolicyAttachments = NewPolicyAttachmentsClient(tx.config)
-	tx.PolicyStatements = NewPolicyStatementsClient(tx.config)
-	tx.ResourceTypes = NewResourceTypesClient(tx.config)
-	tx.Resources = NewResourcesClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
 	tx.Services = NewServicesClient(tx.config)
 	tx.UserIdentities = NewUserIdentitiesClient(tx.config)
@@ -212,7 +197,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Actions.QueryXXX(), the query will be executed
+// applies a query, for example: AuthProviders.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

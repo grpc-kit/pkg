@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/grpc-kit/pkg/lion/menus"
-	"github.com/grpc-kit/pkg/lion/resources"
 )
 
 // Menus is the model entity for the Menus schema.
@@ -29,8 +28,6 @@ type Menus struct {
 	UpdatedBy int64 `json:"updated_by,omitempty"`
 	// 父菜单 ID，为 0 表示顶级菜单
 	ParentID int64 `json:"parent_id,omitempty"`
-	// 关联 lion_resources 表 ID，可为空
-	ResourceID *int `json:"resource_id,omitempty"`
 	// 菜单代码
 	Code string `json:"code,omitempty"`
 	// 菜单展示名称
@@ -52,31 +49,8 @@ type Menus struct {
 	// 前端元数据
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// 详细描述
-	Description string `json:"description,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the MenusQuery when eager-loading is set.
-	Edges        MenusEdges `json:"edges"`
+	Description  string `json:"description,omitempty"`
 	selectValues sql.SelectValues
-}
-
-// MenusEdges holds the relations/edges for other nodes in the graph.
-type MenusEdges struct {
-	// LionResources holds the value of the lion_resources edge.
-	LionResources *Resources `json:"lion_resources,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// LionResourcesOrErr returns the LionResources value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e MenusEdges) LionResourcesOrErr() (*Resources, error) {
-	if e.LionResources != nil {
-		return e.LionResources, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: resources.Label}
-	}
-	return nil, &NotLoadedError{edge: "lion_resources"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -86,7 +60,7 @@ func (*Menus) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case menus.FieldMetadata:
 			values[i] = new([]byte)
-		case menus.FieldID, menus.FieldCreatedBy, menus.FieldUpdatedBy, menus.FieldParentID, menus.FieldResourceID, menus.FieldSortOrder, menus.FieldSurfaceMask:
+		case menus.FieldID, menus.FieldCreatedBy, menus.FieldUpdatedBy, menus.FieldParentID, menus.FieldSortOrder, menus.FieldSurfaceMask:
 			values[i] = new(sql.NullInt64)
 		case menus.FieldCode, menus.FieldDisplayName, menus.FieldRoutePath, menus.FieldComponent, menus.FieldIcon, menus.FieldVisibility, menus.FieldMenuStatus, menus.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -142,13 +116,6 @@ func (_m *Menus) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
 				_m.ParentID = value.Int64
-			}
-		case menus.FieldResourceID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field resource_id", values[i])
-			} else if value.Valid {
-				_m.ResourceID = new(int)
-				*_m.ResourceID = int(value.Int64)
 			}
 		case menus.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -231,11 +198,6 @@ func (_m *Menus) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionResources queries the "lion_resources" edge of the Menus entity.
-func (_m *Menus) QueryLionResources() *ResourcesQuery {
-	return NewMenusClient(_m.config).QueryLionResources(_m)
-}
-
 // Update returns a builder for updating this Menus.
 // Note that you need to call Menus.Unwrap() before calling this method if this Menus
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -273,11 +235,6 @@ func (_m *Menus) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
-	builder.WriteString(", ")
-	if v := _m.ResourceID; v != nil {
-		builder.WriteString("resource_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
 	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(_m.Code)

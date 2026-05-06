@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -78,11 +77,6 @@ func UpdatedBy(v int64) predicate.Menus {
 // ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
 func ParentID(v int64) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldParentID, v))
-}
-
-// ResourceID applies equality check predicate on the "resource_id" field. It's identical to ResourceIDEQ.
-func ResourceID(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldResourceID, v))
 }
 
 // Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
@@ -353,36 +347,6 @@ func ParentIDLT(v int64) predicate.Menus {
 // ParentIDLTE applies the LTE predicate on the "parent_id" field.
 func ParentIDLTE(v int64) predicate.Menus {
 	return predicate.Menus(sql.FieldLTE(FieldParentID, v))
-}
-
-// ResourceIDEQ applies the EQ predicate on the "resource_id" field.
-func ResourceIDEQ(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldResourceID, v))
-}
-
-// ResourceIDNEQ applies the NEQ predicate on the "resource_id" field.
-func ResourceIDNEQ(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldNEQ(FieldResourceID, v))
-}
-
-// ResourceIDIn applies the In predicate on the "resource_id" field.
-func ResourceIDIn(vs ...int) predicate.Menus {
-	return predicate.Menus(sql.FieldIn(FieldResourceID, vs...))
-}
-
-// ResourceIDNotIn applies the NotIn predicate on the "resource_id" field.
-func ResourceIDNotIn(vs ...int) predicate.Menus {
-	return predicate.Menus(sql.FieldNotIn(FieldResourceID, vs...))
-}
-
-// ResourceIDIsNil applies the IsNil predicate on the "resource_id" field.
-func ResourceIDIsNil() predicate.Menus {
-	return predicate.Menus(sql.FieldIsNull(FieldResourceID))
-}
-
-// ResourceIDNotNil applies the NotNil predicate on the "resource_id" field.
-func ResourceIDNotNil() predicate.Menus {
-	return predicate.Menus(sql.FieldNotNull(FieldResourceID))
 }
 
 // CodeEQ applies the EQ predicate on the "code" field.
@@ -993,29 +957,6 @@ func DescriptionEqualFold(v string) predicate.Menus {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Menus {
 	return predicate.Menus(sql.FieldContainsFold(FieldDescription, v))
-}
-
-// HasLionResources applies the HasEdge predicate on the "lion_resources" edge.
-func HasLionResources() predicate.Menus {
-	return predicate.Menus(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, LionResourcesTable, LionResourcesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionResourcesWith applies the HasEdge predicate on the "lion_resources" edge with a given conditions (other predicates).
-func HasLionResourcesWith(preds ...predicate.Resources) predicate.Menus {
-	return predicate.Menus(func(s *sql.Selector) {
-		step := newLionResourcesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

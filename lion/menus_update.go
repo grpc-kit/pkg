@@ -13,7 +13,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/resources"
 )
 
 // MenusUpdate is the builder for updating Menus entities.
@@ -107,26 +106,6 @@ func (_u *MenusUpdate) SetNillableParentID(v *int64) *MenusUpdate {
 // AddParentID adds value to the "parent_id" field.
 func (_u *MenusUpdate) AddParentID(v int64) *MenusUpdate {
 	_u.mutation.AddParentID(v)
-	return _u
-}
-
-// SetResourceID sets the "resource_id" field.
-func (_u *MenusUpdate) SetResourceID(v int) *MenusUpdate {
-	_u.mutation.SetResourceID(v)
-	return _u
-}
-
-// SetNillableResourceID sets the "resource_id" field if the given value is not nil.
-func (_u *MenusUpdate) SetNillableResourceID(v *int) *MenusUpdate {
-	if v != nil {
-		_u.SetResourceID(*v)
-	}
-	return _u
-}
-
-// ClearResourceID clears the value of the "resource_id" field.
-func (_u *MenusUpdate) ClearResourceID() *MenusUpdate {
-	_u.mutation.ClearResourceID()
 	return _u
 }
 
@@ -296,34 +275,9 @@ func (_u *MenusUpdate) SetNillableDescription(v *string) *MenusUpdate {
 	return _u
 }
 
-// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
-func (_u *MenusUpdate) SetLionResourcesID(id int) *MenusUpdate {
-	_u.mutation.SetLionResourcesID(id)
-	return _u
-}
-
-// SetNillableLionResourcesID sets the "lion_resources" edge to the Resources entity by ID if the given value is not nil.
-func (_u *MenusUpdate) SetNillableLionResourcesID(id *int) *MenusUpdate {
-	if id != nil {
-		_u = _u.SetLionResourcesID(*id)
-	}
-	return _u
-}
-
-// SetLionResources sets the "lion_resources" edge to the Resources entity.
-func (_u *MenusUpdate) SetLionResources(v *Resources) *MenusUpdate {
-	return _u.SetLionResourcesID(v.ID)
-}
-
 // Mutation returns the MenusMutation object of the builder.
 func (_u *MenusUpdate) Mutation() *MenusMutation {
 	return _u.mutation
-}
-
-// ClearLionResources clears the "lion_resources" edge to the Resources entity.
-func (_u *MenusUpdate) ClearLionResources() *MenusUpdate {
-	_u.mutation.ClearLionResources()
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -483,35 +437,6 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(menus.FieldDescription, field.TypeString, value)
 	}
-	if _u.mutation.LionResourcesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   menus.LionResourcesTable,
-			Columns: []string{menus.LionResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionResourcesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   menus.LionResourcesTable,
-			Columns: []string{menus.LionResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{menus.Label}
@@ -610,26 +535,6 @@ func (_u *MenusUpdateOne) SetNillableParentID(v *int64) *MenusUpdateOne {
 // AddParentID adds value to the "parent_id" field.
 func (_u *MenusUpdateOne) AddParentID(v int64) *MenusUpdateOne {
 	_u.mutation.AddParentID(v)
-	return _u
-}
-
-// SetResourceID sets the "resource_id" field.
-func (_u *MenusUpdateOne) SetResourceID(v int) *MenusUpdateOne {
-	_u.mutation.SetResourceID(v)
-	return _u
-}
-
-// SetNillableResourceID sets the "resource_id" field if the given value is not nil.
-func (_u *MenusUpdateOne) SetNillableResourceID(v *int) *MenusUpdateOne {
-	if v != nil {
-		_u.SetResourceID(*v)
-	}
-	return _u
-}
-
-// ClearResourceID clears the value of the "resource_id" field.
-func (_u *MenusUpdateOne) ClearResourceID() *MenusUpdateOne {
-	_u.mutation.ClearResourceID()
 	return _u
 }
 
@@ -799,34 +704,9 @@ func (_u *MenusUpdateOne) SetNillableDescription(v *string) *MenusUpdateOne {
 	return _u
 }
 
-// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
-func (_u *MenusUpdateOne) SetLionResourcesID(id int) *MenusUpdateOne {
-	_u.mutation.SetLionResourcesID(id)
-	return _u
-}
-
-// SetNillableLionResourcesID sets the "lion_resources" edge to the Resources entity by ID if the given value is not nil.
-func (_u *MenusUpdateOne) SetNillableLionResourcesID(id *int) *MenusUpdateOne {
-	if id != nil {
-		_u = _u.SetLionResourcesID(*id)
-	}
-	return _u
-}
-
-// SetLionResources sets the "lion_resources" edge to the Resources entity.
-func (_u *MenusUpdateOne) SetLionResources(v *Resources) *MenusUpdateOne {
-	return _u.SetLionResourcesID(v.ID)
-}
-
 // Mutation returns the MenusMutation object of the builder.
 func (_u *MenusUpdateOne) Mutation() *MenusMutation {
 	return _u.mutation
-}
-
-// ClearLionResources clears the "lion_resources" edge to the Resources entity.
-func (_u *MenusUpdateOne) ClearLionResources() *MenusUpdateOne {
-	_u.mutation.ClearLionResources()
-	return _u
 }
 
 // Where appends a list predicates to the MenusUpdate builder.
@@ -1015,35 +895,6 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(menus.FieldDescription, field.TypeString, value)
-	}
-	if _u.mutation.LionResourcesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   menus.LionResourcesTable,
-			Columns: []string{menus.LionResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionResourcesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   menus.LionResourcesTable,
-			Columns: []string{menus.LionResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Menus{config: _u.config}
 	_spec.Assign = _node.assignValues

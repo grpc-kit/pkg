@@ -62,25 +62,6 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthCallback
     get: "/builtin/admin/api/v1/auth/callback/{provider_name}"
 
-    # 资源管理
-    ## 获取资源
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetResource
-    get: "/builtin/admin/api/v1/resources/{id}"
-    ## 资源列表
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListResources
-    get: "/builtin/admin/api/v1/resources"
-    ## 创建资源
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateResource
-    post: "/builtin/admin/api/v1/resources"
-    body: "resource"
-    ## 更新资源
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateResource
-    patch: "/builtin/admin/api/v1/resources/{resource.id}"
-    body: "resource"
-    ## 删除资源
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteResource
-    delete: "/builtin/admin/api/v1/resources/{id}"
-
     # 服务字典管理
     ## 获取服务列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListServices
@@ -105,22 +86,6 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePolicy
     delete: "/builtin/admin/api/v1/policies/{id}"
 
-    # 资源类型字典管理
-    ## 资源类型列表
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListResourceTypes
-    get: "/builtin/admin/api/v1/resource-types"
-    ## 创建资源类型
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateResourceType
-    post: "/builtin/admin/api/v1/resource-types"
-    body: "resource_type"
-    ## 更新资源类型
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateResourceType
-    patch: "/builtin/admin/api/v1/resource-types/{resource_type.id}"
-    body: "resource_type"
-    ## 删除资源类型
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteResourceType
-    delete: "/builtin/admin/api/v1/resource-types/{id}"
-
     # 菜单管理
     ## 菜单列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListMenus
@@ -137,43 +102,6 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteMenu
     delete: "/builtin/admin/api/v1/menus/{id}"
 
-    # 策略语句管理
-    ## 获取策略语句
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetPolicyStatement
-    get: "/builtin/admin/api/v1/policy-statements/{id}"
-    ## 策略语句列表
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicyStatements
-    get: "/builtin/admin/api/v1/policy-statements"
-    ## 创建策略语句
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicyStatement
-    post: "/builtin/admin/api/v1/policy-statements"
-    body: "statement"
-    ## 更新策略语句
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePolicyStatement
-    patch: "/builtin/admin/api/v1/policy-statements/{statement.id}"
-    body: "statement"
-    ## 删除策略语句
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePolicyStatement
-    delete: "/builtin/admin/api/v1/policy-statements/{id}"
-
-    # 策略挂载管理
-    ## 获取策略挂载
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetPolicyAttachment
-    get: "/builtin/admin/api/v1/policy-attachments/{id}"
-    ## 策略挂载列表
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicyAttachments
-    get: "/builtin/admin/api/v1/policy-attachments"
-    ## 创建策略挂载
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicyAttachment
-    post: "/builtin/admin/api/v1/policy-attachments"
-    body: "attachment"
-    ## 更新策略挂载
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdatePolicyAttachment
-    patch: "/builtin/admin/api/v1/policy-attachments/{attachment.id}"
-    body: "attachment"
-    ## 删除策略挂载
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeletePolicyAttachment
-    delete: "/builtin/admin/api/v1/policy-attachments/{id}"
     # 角色管理
     ## 角色实体
     ### 角色列表

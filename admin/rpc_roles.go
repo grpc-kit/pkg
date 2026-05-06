@@ -10,7 +10,6 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/grouproles"
-	"github.com/grpc-kit/pkg/lion/policyattachments"
 
 	// 数据范围表已注释，同步取消依赖
 	// "github.com/grpc-kit/pkg/lion/roledataranges"
@@ -539,13 +538,6 @@ func (a *KnownAdminAPI) DeleteRole(ctx context.Context, req *adminv1.DeleteRoleR
 	// if db.RoleDataRanges.Query().Where(roledataranges.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
 	// 	return nil, errs.InvalidArgument(ctx).WithMessage("role has department")
 	// }
-
-	if db.PolicyAttachments.Query().Where(
-		policyattachments.PrincipalTypeEQ("ROLE"),
-		policyattachments.PrincipalIDEQ(int64(req.Id)),
-	).CountX(ctx) > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("role has policy attachment")
-	}
 
 	if db.UserRoles.Query().Where(userroles.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("role has user")

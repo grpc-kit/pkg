@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/menus"
-	"github.com/grpc-kit/pkg/lion/resources"
 )
 
 // MenusCreate is the builder for creating a Menus entity.
@@ -87,20 +86,6 @@ func (_c *MenusCreate) SetParentID(v int64) *MenusCreate {
 func (_c *MenusCreate) SetNillableParentID(v *int64) *MenusCreate {
 	if v != nil {
 		_c.SetParentID(*v)
-	}
-	return _c
-}
-
-// SetResourceID sets the "resource_id" field.
-func (_c *MenusCreate) SetResourceID(v int) *MenusCreate {
-	_c.mutation.SetResourceID(v)
-	return _c
-}
-
-// SetNillableResourceID sets the "resource_id" field if the given value is not nil.
-func (_c *MenusCreate) SetNillableResourceID(v *int) *MenusCreate {
-	if v != nil {
-		_c.SetResourceID(*v)
 	}
 	return _c
 }
@@ -241,25 +226,6 @@ func (_c *MenusCreate) SetNillableDescription(v *string) *MenusCreate {
 		_c.SetDescription(*v)
 	}
 	return _c
-}
-
-// SetLionResourcesID sets the "lion_resources" edge to the Resources entity by ID.
-func (_c *MenusCreate) SetLionResourcesID(id int) *MenusCreate {
-	_c.mutation.SetLionResourcesID(id)
-	return _c
-}
-
-// SetNillableLionResourcesID sets the "lion_resources" edge to the Resources entity by ID if the given value is not nil.
-func (_c *MenusCreate) SetNillableLionResourcesID(id *int) *MenusCreate {
-	if id != nil {
-		_c = _c.SetLionResourcesID(*id)
-	}
-	return _c
-}
-
-// SetLionResources sets the "lion_resources" edge to the Resources entity.
-func (_c *MenusCreate) SetLionResources(v *Resources) *MenusCreate {
-	return _c.SetLionResourcesID(v.ID)
 }
 
 // Mutation returns the MenusMutation object of the builder.
@@ -520,23 +486,6 @@ func (_c *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(menus.FieldDescription, field.TypeString, value)
 		_node.Description = value
-	}
-	if nodes := _c.mutation.LionResourcesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   menus.LionResourcesTable,
-			Columns: []string{menus.LionResourcesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(resources.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.ResourceID = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

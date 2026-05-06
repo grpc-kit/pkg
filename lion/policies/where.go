@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -578,52 +577,6 @@ func DescriptionEqualFold(v string) predicate.Policies {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Policies {
 	return predicate.Policies(sql.FieldContainsFold(FieldDescription, v))
-}
-
-// HasLionPolicyStatements applies the HasEdge predicate on the "lion_policy_statements" edge.
-func HasLionPolicyStatements() predicate.Policies {
-	return predicate.Policies(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionPolicyStatementsTable, LionPolicyStatementsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionPolicyStatementsWith applies the HasEdge predicate on the "lion_policy_statements" edge with a given conditions (other predicates).
-func HasLionPolicyStatementsWith(preds ...predicate.PolicyStatements) predicate.Policies {
-	return predicate.Policies(func(s *sql.Selector) {
-		step := newLionPolicyStatementsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasLionPolicyAttachments applies the HasEdge predicate on the "lion_policy_attachments" edge.
-func HasLionPolicyAttachments() predicate.Policies {
-	return predicate.Policies(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionPolicyAttachmentsTable, LionPolicyAttachmentsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionPolicyAttachmentsWith applies the HasEdge predicate on the "lion_policy_attachments" edge with a given conditions (other predicates).
-func HasLionPolicyAttachmentsWith(preds ...predicate.PolicyAttachments) predicate.Policies {
-	return predicate.Policies(func(s *sql.Selector) {
-		step := newLionPolicyAttachmentsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

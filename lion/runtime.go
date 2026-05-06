@@ -5,7 +5,6 @@ package lion
 import (
 	"time"
 
-	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departmentmembers"
@@ -15,10 +14,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
-	"github.com/grpc-kit/pkg/lion/policyattachments"
-	"github.com/grpc-kit/pkg/lion/policystatements"
-	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourcetypes"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/services"
@@ -32,77 +27,6 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	actionsMixin := schema.Actions{}.Mixin()
-	actionsMixinFields0 := actionsMixin[0].Fields()
-	_ = actionsMixinFields0
-	actionsMixinFields1 := actionsMixin[1].Fields()
-	_ = actionsMixinFields1
-	actionsFields := schema.Actions{}.Fields()
-	_ = actionsFields
-	// actionsDescCreatedAt is the schema descriptor for created_at field.
-	actionsDescCreatedAt := actionsMixinFields0[0].Descriptor()
-	// actions.DefaultCreatedAt holds the default value on creation for the created_at field.
-	actions.DefaultCreatedAt = actionsDescCreatedAt.Default.(func() time.Time)
-	// actionsDescUpdatedAt is the schema descriptor for updated_at field.
-	actionsDescUpdatedAt := actionsMixinFields0[1].Descriptor()
-	// actions.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	actions.DefaultUpdatedAt = actionsDescUpdatedAt.Default.(func() time.Time)
-	// actions.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	actions.UpdateDefaultUpdatedAt = actionsDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// actionsDescCreatedBy is the schema descriptor for created_by field.
-	actionsDescCreatedBy := actionsMixinFields1[0].Descriptor()
-	// actions.DefaultCreatedBy holds the default value on creation for the created_by field.
-	actions.DefaultCreatedBy = actionsDescCreatedBy.Default.(int64)
-	// actionsDescUpdatedBy is the schema descriptor for updated_by field.
-	actionsDescUpdatedBy := actionsMixinFields1[1].Descriptor()
-	// actions.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	actions.DefaultUpdatedBy = actionsDescUpdatedBy.Default.(int64)
-	// actionsDescCode is the schema descriptor for code field.
-	actionsDescCode := actionsFields[0].Descriptor()
-	// actions.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	actions.CodeValidator = func() func(string) error {
-		validators := actionsDescCode.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(code string) error {
-			for _, fn := range fns {
-				if err := fn(code); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// actionsDescDisplayName is the schema descriptor for display_name field.
-	actionsDescDisplayName := actionsFields[1].Descriptor()
-	// actions.DefaultDisplayName holds the default value on creation for the display_name field.
-	actions.DefaultDisplayName = actionsDescDisplayName.Default.(string)
-	// actionsDescProtected is the schema descriptor for protected field.
-	actionsDescProtected := actionsFields[3].Descriptor()
-	// actions.DefaultProtected holds the default value on creation for the protected field.
-	actions.DefaultProtected = actionsDescProtected.Default.(bool)
-	// actionsDescDescription is the schema descriptor for description field.
-	actionsDescDescription := actionsFields[4].Descriptor()
-	// actions.DefaultDescription holds the default value on creation for the description field.
-	actions.DefaultDescription = actionsDescDescription.Default.(string)
-	// actionsDescRiskLevel is the schema descriptor for risk_level field.
-	actionsDescRiskLevel := actionsFields[5].Descriptor()
-	// actions.DefaultRiskLevel holds the default value on creation for the risk_level field.
-	actions.DefaultRiskLevel = actionsDescRiskLevel.Default.(int)
-	// actionsDescOutputFields is the schema descriptor for output_fields field.
-	actionsDescOutputFields := actionsFields[6].Descriptor()
-	// actions.DefaultOutputFields holds the default value on creation for the output_fields field.
-	actions.DefaultOutputFields = actionsDescOutputFields.Default.(string)
-	// actions.OutputFieldsValidator is a validator for the "output_fields" field. It is called by the builders before save.
-	actions.OutputFieldsValidator = actionsDescOutputFields.Validators[0].(func(string) error)
-	// actionsDescEnforcementMode is the schema descriptor for enforcement_mode field.
-	actionsDescEnforcementMode := actionsFields[7].Descriptor()
-	// actions.DefaultEnforcementMode holds the default value on creation for the enforcement_mode field.
-	actions.DefaultEnforcementMode = actionsDescEnforcementMode.Default.(string)
-	// actions.EnforcementModeValidator is a validator for the "enforcement_mode" field. It is called by the builders before save.
-	actions.EnforcementModeValidator = actionsDescEnforcementMode.Validators[0].(func(string) error)
 	authprovidersMixin := schema.AuthProviders{}.Mixin()
 	authprovidersMixinFields0 := authprovidersMixin[0].Fields()
 	_ = authprovidersMixinFields0
@@ -556,7 +480,7 @@ func init() {
 	// menus.DefaultParentID holds the default value on creation for the parent_id field.
 	menus.DefaultParentID = menusDescParentID.Default.(int64)
 	// menusDescCode is the schema descriptor for code field.
-	menusDescCode := menusFields[2].Descriptor()
+	menusDescCode := menusFields[1].Descriptor()
 	// menus.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	menus.CodeValidator = func() func(string) error {
 		validators := menusDescCode.Validators
@@ -574,51 +498,51 @@ func init() {
 		}
 	}()
 	// menusDescDisplayName is the schema descriptor for display_name field.
-	menusDescDisplayName := menusFields[3].Descriptor()
+	menusDescDisplayName := menusFields[2].Descriptor()
 	// menus.DefaultDisplayName holds the default value on creation for the display_name field.
 	menus.DefaultDisplayName = menusDescDisplayName.Default.(string)
 	// menus.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	menus.DisplayNameValidator = menusDescDisplayName.Validators[0].(func(string) error)
 	// menusDescRoutePath is the schema descriptor for route_path field.
-	menusDescRoutePath := menusFields[4].Descriptor()
+	menusDescRoutePath := menusFields[3].Descriptor()
 	// menus.DefaultRoutePath holds the default value on creation for the route_path field.
 	menus.DefaultRoutePath = menusDescRoutePath.Default.(string)
 	// menus.RoutePathValidator is a validator for the "route_path" field. It is called by the builders before save.
 	menus.RoutePathValidator = menusDescRoutePath.Validators[0].(func(string) error)
 	// menusDescComponent is the schema descriptor for component field.
-	menusDescComponent := menusFields[5].Descriptor()
+	menusDescComponent := menusFields[4].Descriptor()
 	// menus.DefaultComponent holds the default value on creation for the component field.
 	menus.DefaultComponent = menusDescComponent.Default.(string)
 	// menus.ComponentValidator is a validator for the "component" field. It is called by the builders before save.
 	menus.ComponentValidator = menusDescComponent.Validators[0].(func(string) error)
 	// menusDescIcon is the schema descriptor for icon field.
-	menusDescIcon := menusFields[6].Descriptor()
+	menusDescIcon := menusFields[5].Descriptor()
 	// menus.DefaultIcon holds the default value on creation for the icon field.
 	menus.DefaultIcon = menusDescIcon.Default.(string)
 	// menus.IconValidator is a validator for the "icon" field. It is called by the builders before save.
 	menus.IconValidator = menusDescIcon.Validators[0].(func(string) error)
 	// menusDescSortOrder is the schema descriptor for sort_order field.
-	menusDescSortOrder := menusFields[7].Descriptor()
+	menusDescSortOrder := menusFields[6].Descriptor()
 	// menus.DefaultSortOrder holds the default value on creation for the sort_order field.
 	menus.DefaultSortOrder = menusDescSortOrder.Default.(int)
 	// menusDescSurfaceMask is the schema descriptor for surface_mask field.
-	menusDescSurfaceMask := menusFields[8].Descriptor()
+	menusDescSurfaceMask := menusFields[7].Descriptor()
 	// menus.DefaultSurfaceMask holds the default value on creation for the surface_mask field.
 	menus.DefaultSurfaceMask = menusDescSurfaceMask.Default.(int)
 	// menusDescVisibility is the schema descriptor for visibility field.
-	menusDescVisibility := menusFields[9].Descriptor()
+	menusDescVisibility := menusFields[8].Descriptor()
 	// menus.DefaultVisibility holds the default value on creation for the visibility field.
 	menus.DefaultVisibility = menusDescVisibility.Default.(string)
 	// menus.VisibilityValidator is a validator for the "visibility" field. It is called by the builders before save.
 	menus.VisibilityValidator = menusDescVisibility.Validators[0].(func(string) error)
 	// menusDescMenuStatus is the schema descriptor for menu_status field.
-	menusDescMenuStatus := menusFields[10].Descriptor()
+	menusDescMenuStatus := menusFields[9].Descriptor()
 	// menus.DefaultMenuStatus holds the default value on creation for the menu_status field.
 	menus.DefaultMenuStatus = menusDescMenuStatus.Default.(string)
 	// menus.MenuStatusValidator is a validator for the "menu_status" field. It is called by the builders before save.
 	menus.MenuStatusValidator = menusDescMenuStatus.Validators[0].(func(string) error)
 	// menusDescDescription is the schema descriptor for description field.
-	menusDescDescription := menusFields[12].Descriptor()
+	menusDescDescription := menusFields[11].Descriptor()
 	// menus.DefaultDescription holds the default value on creation for the description field.
 	menus.DefaultDescription = menusDescDescription.Default.(string)
 	policiesMixin := schema.Policies{}.Mixin()
@@ -680,342 +604,6 @@ func init() {
 	policiesDescDescription := policiesFields[5].Descriptor()
 	// policies.DefaultDescription holds the default value on creation for the description field.
 	policies.DefaultDescription = policiesDescDescription.Default.(string)
-	policyattachmentsMixin := schema.PolicyAttachments{}.Mixin()
-	policyattachmentsMixinFields0 := policyattachmentsMixin[0].Fields()
-	_ = policyattachmentsMixinFields0
-	policyattachmentsMixinFields1 := policyattachmentsMixin[1].Fields()
-	_ = policyattachmentsMixinFields1
-	policyattachmentsFields := schema.PolicyAttachments{}.Fields()
-	_ = policyattachmentsFields
-	// policyattachmentsDescCreatedAt is the schema descriptor for created_at field.
-	policyattachmentsDescCreatedAt := policyattachmentsMixinFields0[0].Descriptor()
-	// policyattachments.DefaultCreatedAt holds the default value on creation for the created_at field.
-	policyattachments.DefaultCreatedAt = policyattachmentsDescCreatedAt.Default.(func() time.Time)
-	// policyattachmentsDescUpdatedAt is the schema descriptor for updated_at field.
-	policyattachmentsDescUpdatedAt := policyattachmentsMixinFields0[1].Descriptor()
-	// policyattachments.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	policyattachments.DefaultUpdatedAt = policyattachmentsDescUpdatedAt.Default.(func() time.Time)
-	// policyattachments.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	policyattachments.UpdateDefaultUpdatedAt = policyattachmentsDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// policyattachmentsDescCreatedBy is the schema descriptor for created_by field.
-	policyattachmentsDescCreatedBy := policyattachmentsMixinFields1[0].Descriptor()
-	// policyattachments.DefaultCreatedBy holds the default value on creation for the created_by field.
-	policyattachments.DefaultCreatedBy = policyattachmentsDescCreatedBy.Default.(int64)
-	// policyattachmentsDescUpdatedBy is the schema descriptor for updated_by field.
-	policyattachmentsDescUpdatedBy := policyattachmentsMixinFields1[1].Descriptor()
-	// policyattachments.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	policyattachments.DefaultUpdatedBy = policyattachmentsDescUpdatedBy.Default.(int64)
-	// policyattachmentsDescPolicyID is the schema descriptor for policy_id field.
-	policyattachmentsDescPolicyID := policyattachmentsFields[0].Descriptor()
-	// policyattachments.PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
-	policyattachments.PolicyIDValidator = policyattachmentsDescPolicyID.Validators[0].(func(int) error)
-	// policyattachmentsDescPrincipalType is the schema descriptor for principal_type field.
-	policyattachmentsDescPrincipalType := policyattachmentsFields[1].Descriptor()
-	// policyattachments.DefaultPrincipalType holds the default value on creation for the principal_type field.
-	policyattachments.DefaultPrincipalType = policyattachmentsDescPrincipalType.Default.(string)
-	// policyattachments.PrincipalTypeValidator is a validator for the "principal_type" field. It is called by the builders before save.
-	policyattachments.PrincipalTypeValidator = policyattachmentsDescPrincipalType.Validators[0].(func(string) error)
-	// policyattachmentsDescPrincipalID is the schema descriptor for principal_id field.
-	policyattachmentsDescPrincipalID := policyattachmentsFields[2].Descriptor()
-	// policyattachments.DefaultPrincipalID holds the default value on creation for the principal_id field.
-	policyattachments.DefaultPrincipalID = policyattachmentsDescPrincipalID.Default.(int64)
-	// policyattachmentsDescResourceID is the schema descriptor for resource_id field.
-	policyattachmentsDescResourceID := policyattachmentsFields[3].Descriptor()
-	// policyattachments.DefaultResourceID holds the default value on creation for the resource_id field.
-	policyattachments.DefaultResourceID = policyattachmentsDescResourceID.Default.(int64)
-	// policyattachmentsDescIsRecursive is the schema descriptor for is_recursive field.
-	policyattachmentsDescIsRecursive := policyattachmentsFields[4].Descriptor()
-	// policyattachments.DefaultIsRecursive holds the default value on creation for the is_recursive field.
-	policyattachments.DefaultIsRecursive = policyattachmentsDescIsRecursive.Default.(bool)
-	// policyattachmentsDescAttachmentStatus is the schema descriptor for attachment_status field.
-	policyattachmentsDescAttachmentStatus := policyattachmentsFields[5].Descriptor()
-	// policyattachments.DefaultAttachmentStatus holds the default value on creation for the attachment_status field.
-	policyattachments.DefaultAttachmentStatus = policyattachmentsDescAttachmentStatus.Default.(int)
-	// policyattachmentsDescConditionJSON is the schema descriptor for condition_json field.
-	policyattachmentsDescConditionJSON := policyattachmentsFields[6].Descriptor()
-	// policyattachments.DefaultConditionJSON holds the default value on creation for the condition_json field.
-	policyattachments.DefaultConditionJSON = policyattachmentsDescConditionJSON.Default.(string)
-	// policyattachmentsDescDescription is the schema descriptor for description field.
-	policyattachmentsDescDescription := policyattachmentsFields[8].Descriptor()
-	// policyattachments.DefaultDescription holds the default value on creation for the description field.
-	policyattachments.DefaultDescription = policyattachmentsDescDescription.Default.(string)
-	policystatementsMixin := schema.PolicyStatements{}.Mixin()
-	policystatementsMixinFields0 := policystatementsMixin[0].Fields()
-	_ = policystatementsMixinFields0
-	policystatementsMixinFields1 := policystatementsMixin[1].Fields()
-	_ = policystatementsMixinFields1
-	policystatementsFields := schema.PolicyStatements{}.Fields()
-	_ = policystatementsFields
-	// policystatementsDescCreatedAt is the schema descriptor for created_at field.
-	policystatementsDescCreatedAt := policystatementsMixinFields0[0].Descriptor()
-	// policystatements.DefaultCreatedAt holds the default value on creation for the created_at field.
-	policystatements.DefaultCreatedAt = policystatementsDescCreatedAt.Default.(func() time.Time)
-	// policystatementsDescUpdatedAt is the schema descriptor for updated_at field.
-	policystatementsDescUpdatedAt := policystatementsMixinFields0[1].Descriptor()
-	// policystatements.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	policystatements.DefaultUpdatedAt = policystatementsDescUpdatedAt.Default.(func() time.Time)
-	// policystatements.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	policystatements.UpdateDefaultUpdatedAt = policystatementsDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// policystatementsDescCreatedBy is the schema descriptor for created_by field.
-	policystatementsDescCreatedBy := policystatementsMixinFields1[0].Descriptor()
-	// policystatements.DefaultCreatedBy holds the default value on creation for the created_by field.
-	policystatements.DefaultCreatedBy = policystatementsDescCreatedBy.Default.(int64)
-	// policystatementsDescUpdatedBy is the schema descriptor for updated_by field.
-	policystatementsDescUpdatedBy := policystatementsMixinFields1[1].Descriptor()
-	// policystatements.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	policystatements.DefaultUpdatedBy = policystatementsDescUpdatedBy.Default.(int64)
-	// policystatementsDescPolicyID is the schema descriptor for policy_id field.
-	policystatementsDescPolicyID := policystatementsFields[0].Descriptor()
-	// policystatements.PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
-	policystatements.PolicyIDValidator = policystatementsDescPolicyID.Validators[0].(func(int) error)
-	// policystatementsDescSid is the schema descriptor for sid field.
-	policystatementsDescSid := policystatementsFields[1].Descriptor()
-	// policystatements.SidValidator is a validator for the "sid" field. It is called by the builders before save.
-	policystatements.SidValidator = func() func(string) error {
-		validators := policystatementsDescSid.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(sid string) error {
-			for _, fn := range fns {
-				if err := fn(sid); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// policystatementsDescEffect is the schema descriptor for effect field.
-	policystatementsDescEffect := policystatementsFields[2].Descriptor()
-	// policystatements.DefaultEffect holds the default value on creation for the effect field.
-	policystatements.DefaultEffect = policystatementsDescEffect.Default.(int)
-	// policystatementsDescActionSelector is the schema descriptor for action_selector field.
-	policystatementsDescActionSelector := policystatementsFields[3].Descriptor()
-	// policystatements.DefaultActionSelector holds the default value on creation for the action_selector field.
-	policystatements.DefaultActionSelector = policystatementsDescActionSelector.Default.(string)
-	// policystatementsDescResourceSelector is the schema descriptor for resource_selector field.
-	policystatementsDescResourceSelector := policystatementsFields[4].Descriptor()
-	// policystatements.DefaultResourceSelector holds the default value on creation for the resource_selector field.
-	policystatements.DefaultResourceSelector = policystatementsDescResourceSelector.Default.(string)
-	// policystatementsDescConditionJSON is the schema descriptor for condition_json field.
-	policystatementsDescConditionJSON := policystatementsFields[5].Descriptor()
-	// policystatements.DefaultConditionJSON holds the default value on creation for the condition_json field.
-	policystatements.DefaultConditionJSON = policystatementsDescConditionJSON.Default.(string)
-	// policystatementsDescPriority is the schema descriptor for priority field.
-	policystatementsDescPriority := policystatementsFields[6].Descriptor()
-	// policystatements.DefaultPriority holds the default value on creation for the priority field.
-	policystatements.DefaultPriority = policystatementsDescPriority.Default.(int)
-	// policystatementsDescDescription is the schema descriptor for description field.
-	policystatementsDescDescription := policystatementsFields[7].Descriptor()
-	// policystatements.DefaultDescription holds the default value on creation for the description field.
-	policystatements.DefaultDescription = policystatementsDescDescription.Default.(string)
-	resourcetypesMixin := schema.ResourceTypes{}.Mixin()
-	resourcetypesMixinFields0 := resourcetypesMixin[0].Fields()
-	_ = resourcetypesMixinFields0
-	resourcetypesMixinFields1 := resourcetypesMixin[1].Fields()
-	_ = resourcetypesMixinFields1
-	resourcetypesFields := schema.ResourceTypes{}.Fields()
-	_ = resourcetypesFields
-	// resourcetypesDescCreatedAt is the schema descriptor for created_at field.
-	resourcetypesDescCreatedAt := resourcetypesMixinFields0[0].Descriptor()
-	// resourcetypes.DefaultCreatedAt holds the default value on creation for the created_at field.
-	resourcetypes.DefaultCreatedAt = resourcetypesDescCreatedAt.Default.(func() time.Time)
-	// resourcetypesDescUpdatedAt is the schema descriptor for updated_at field.
-	resourcetypesDescUpdatedAt := resourcetypesMixinFields0[1].Descriptor()
-	// resourcetypes.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	resourcetypes.DefaultUpdatedAt = resourcetypesDescUpdatedAt.Default.(func() time.Time)
-	// resourcetypes.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	resourcetypes.UpdateDefaultUpdatedAt = resourcetypesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// resourcetypesDescCreatedBy is the schema descriptor for created_by field.
-	resourcetypesDescCreatedBy := resourcetypesMixinFields1[0].Descriptor()
-	// resourcetypes.DefaultCreatedBy holds the default value on creation for the created_by field.
-	resourcetypes.DefaultCreatedBy = resourcetypesDescCreatedBy.Default.(int64)
-	// resourcetypesDescUpdatedBy is the schema descriptor for updated_by field.
-	resourcetypesDescUpdatedBy := resourcetypesMixinFields1[1].Descriptor()
-	// resourcetypes.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	resourcetypes.DefaultUpdatedBy = resourcetypesDescUpdatedBy.Default.(int64)
-	// resourcetypesDescCode is the schema descriptor for code field.
-	resourcetypesDescCode := resourcetypesFields[0].Descriptor()
-	// resourcetypes.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	resourcetypes.CodeValidator = func() func(string) error {
-		validators := resourcetypesDescCode.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(code string) error {
-			for _, fn := range fns {
-				if err := fn(code); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// resourcetypesDescDisplayName is the schema descriptor for display_name field.
-	resourcetypesDescDisplayName := resourcetypesFields[1].Descriptor()
-	// resourcetypes.DefaultDisplayName holds the default value on creation for the display_name field.
-	resourcetypes.DefaultDisplayName = resourcetypesDescDisplayName.Default.(string)
-	// resourcetypesDescServiceCode is the schema descriptor for service_code field.
-	resourcetypesDescServiceCode := resourcetypesFields[2].Descriptor()
-	// resourcetypes.DefaultServiceCode holds the default value on creation for the service_code field.
-	resourcetypes.DefaultServiceCode = resourcetypesDescServiceCode.Default.(string)
-	// resourcetypes.ServiceCodeValidator is a validator for the "service_code" field. It is called by the builders before save.
-	resourcetypes.ServiceCodeValidator = resourcetypesDescServiceCode.Validators[0].(func(string) error)
-	// resourcetypesDescDescription is the schema descriptor for description field.
-	resourcetypesDescDescription := resourcetypesFields[3].Descriptor()
-	// resourcetypes.DefaultDescription holds the default value on creation for the description field.
-	resourcetypes.DefaultDescription = resourcetypesDescDescription.Default.(string)
-	// resourcetypesDescProtected is the schema descriptor for protected field.
-	resourcetypesDescProtected := resourcetypesFields[4].Descriptor()
-	// resourcetypes.DefaultProtected holds the default value on creation for the protected field.
-	resourcetypes.DefaultProtected = resourcetypesDescProtected.Default.(bool)
-	resourcesMixin := schema.Resources{}.Mixin()
-	resourcesMixinFields0 := resourcesMixin[0].Fields()
-	_ = resourcesMixinFields0
-	resourcesMixinFields1 := resourcesMixin[1].Fields()
-	_ = resourcesMixinFields1
-	resourcesFields := schema.Resources{}.Fields()
-	_ = resourcesFields
-	// resourcesDescCreatedAt is the schema descriptor for created_at field.
-	resourcesDescCreatedAt := resourcesMixinFields0[0].Descriptor()
-	// resources.DefaultCreatedAt holds the default value on creation for the created_at field.
-	resources.DefaultCreatedAt = resourcesDescCreatedAt.Default.(func() time.Time)
-	// resourcesDescUpdatedAt is the schema descriptor for updated_at field.
-	resourcesDescUpdatedAt := resourcesMixinFields0[1].Descriptor()
-	// resources.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	resources.DefaultUpdatedAt = resourcesDescUpdatedAt.Default.(func() time.Time)
-	// resources.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	resources.UpdateDefaultUpdatedAt = resourcesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// resourcesDescCreatedBy is the schema descriptor for created_by field.
-	resourcesDescCreatedBy := resourcesMixinFields1[0].Descriptor()
-	// resources.DefaultCreatedBy holds the default value on creation for the created_by field.
-	resources.DefaultCreatedBy = resourcesDescCreatedBy.Default.(int64)
-	// resourcesDescUpdatedBy is the schema descriptor for updated_by field.
-	resourcesDescUpdatedBy := resourcesMixinFields1[1].Descriptor()
-	// resources.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	resources.DefaultUpdatedBy = resourcesDescUpdatedBy.Default.(int64)
-	// resourcesDescParentID is the schema descriptor for parent_id field.
-	resourcesDescParentID := resourcesFields[0].Descriptor()
-	// resources.DefaultParentID holds the default value on creation for the parent_id field.
-	resources.DefaultParentID = resourcesDescParentID.Default.(int64)
-	// resourcesDescResourceTypeID is the schema descriptor for resource_type_id field.
-	resourcesDescResourceTypeID := resourcesFields[1].Descriptor()
-	// resources.ResourceTypeIDValidator is a validator for the "resource_type_id" field. It is called by the builders before save.
-	resources.ResourceTypeIDValidator = resourcesDescResourceTypeID.Validators[0].(func(int) error)
-	// resourcesDescResourceTypeCode is the schema descriptor for resource_type_code field.
-	resourcesDescResourceTypeCode := resourcesFields[2].Descriptor()
-	// resources.ResourceTypeCodeValidator is a validator for the "resource_type_code" field. It is called by the builders before save.
-	resources.ResourceTypeCodeValidator = func() func(string) error {
-		validators := resourcesDescResourceTypeCode.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(resource_type_code string) error {
-			for _, fn := range fns {
-				if err := fn(resource_type_code); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// resourcesDescServiceCode is the schema descriptor for service_code field.
-	resourcesDescServiceCode := resourcesFields[3].Descriptor()
-	// resources.ServiceCodeValidator is a validator for the "service_code" field. It is called by the builders before save.
-	resources.ServiceCodeValidator = func() func(string) error {
-		validators := resourcesDescServiceCode.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(service_code string) error {
-			for _, fn := range fns {
-				if err := fn(service_code); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// resourcesDescTenantID is the schema descriptor for tenant_id field.
-	resourcesDescTenantID := resourcesFields[4].Descriptor()
-	// resources.DefaultTenantID holds the default value on creation for the tenant_id field.
-	resources.DefaultTenantID = resourcesDescTenantID.Default.(string)
-	// resources.TenantIDValidator is a validator for the "tenant_id" field. It is called by the builders before save.
-	resources.TenantIDValidator = resourcesDescTenantID.Validators[0].(func(string) error)
-	// resourcesDescRegion is the schema descriptor for region field.
-	resourcesDescRegion := resourcesFields[5].Descriptor()
-	// resources.DefaultRegion holds the default value on creation for the region field.
-	resources.DefaultRegion = resourcesDescRegion.Default.(string)
-	// resources.RegionValidator is a validator for the "region" field. It is called by the builders before save.
-	resources.RegionValidator = resourcesDescRegion.Validators[0].(func(string) error)
-	// resourcesDescResourcePath is the schema descriptor for resource_path field.
-	resourcesDescResourcePath := resourcesFields[6].Descriptor()
-	// resources.ResourcePathValidator is a validator for the "resource_path" field. It is called by the builders before save.
-	resources.ResourcePathValidator = func() func(string) error {
-		validators := resourcesDescResourcePath.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(resource_path string) error {
-			for _, fn := range fns {
-				if err := fn(resource_path); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// resourcesDescGrn is the schema descriptor for grn field.
-	resourcesDescGrn := resourcesFields[7].Descriptor()
-	// resources.DefaultGrn holds the default value on creation for the grn field.
-	resources.DefaultGrn = resourcesDescGrn.Default.(string)
-	// resources.GrnValidator is a validator for the "grn" field. It is called by the builders before save.
-	resources.GrnValidator = resourcesDescGrn.Validators[0].(func(string) error)
-	// resourcesDescCode is the schema descriptor for code field.
-	resourcesDescCode := resourcesFields[8].Descriptor()
-	// resources.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	resources.CodeValidator = func() func(string) error {
-		validators := resourcesDescCode.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(code string) error {
-			for _, fn := range fns {
-				if err := fn(code); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// resourcesDescDisplayName is the schema descriptor for display_name field.
-	resourcesDescDisplayName := resourcesFields[9].Descriptor()
-	// resources.DefaultDisplayName holds the default value on creation for the display_name field.
-	resources.DefaultDisplayName = resourcesDescDisplayName.Default.(string)
-	// resourcesDescResourceStatusCode is the schema descriptor for resource_status_code field.
-	resourcesDescResourceStatusCode := resourcesFields[10].Descriptor()
-	// resources.DefaultResourceStatusCode holds the default value on creation for the resource_status_code field.
-	resources.DefaultResourceStatusCode = resourcesDescResourceStatusCode.Default.(string)
-	// resources.ResourceStatusCodeValidator is a validator for the "resource_status_code" field. It is called by the builders before save.
-	resources.ResourceStatusCodeValidator = resourcesDescResourceStatusCode.Validators[0].(func(string) error)
-	// resourcesDescVisibility is the schema descriptor for visibility field.
-	resourcesDescVisibility := resourcesFields[11].Descriptor()
-	// resources.DefaultVisibility holds the default value on creation for the visibility field.
-	resources.DefaultVisibility = resourcesDescVisibility.Default.(int)
-	// resourcesDescDescription is the schema descriptor for description field.
-	resourcesDescDescription := resourcesFields[12].Descriptor()
-	// resources.DefaultDescription holds the default value on creation for the description field.
-	resources.DefaultDescription = resourcesDescDescription.Default.(string)
-	// resourcesDescProtected is the schema descriptor for protected field.
-	resourcesDescProtected := resourcesFields[13].Descriptor()
-	// resources.DefaultProtected holds the default value on creation for the protected field.
-	resources.DefaultProtected = resourcesDescProtected.Default.(bool)
 	rolesMixin := schema.Roles{}.Mixin()
 	rolesMixinFields0 := rolesMixin[0].Fields()
 	_ = rolesMixinFields0

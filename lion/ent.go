@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departmentmembers"
@@ -22,10 +21,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
-	"github.com/grpc-kit/pkg/lion/policyattachments"
-	"github.com/grpc-kit/pkg/lion/policystatements"
-	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourcetypes"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/services"
 	"github.com/grpc-kit/pkg/lion/useridentities"
@@ -92,7 +87,6 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			actions.Table:           actions.ValidColumn,
 			authproviders.Table:     authproviders.ValidColumn,
 			credentials.Table:       credentials.ValidColumn,
 			departmentmembers.Table: departmentmembers.ValidColumn,
@@ -102,10 +96,6 @@ func checkColumn(t, c string) error {
 			groups.Table:            groups.ValidColumn,
 			menus.Table:             menus.ValidColumn,
 			policies.Table:          policies.ValidColumn,
-			policyattachments.Table: policyattachments.ValidColumn,
-			policystatements.Table:  policystatements.ValidColumn,
-			resourcetypes.Table:     resourcetypes.ValidColumn,
-			resources.Table:         resources.ValidColumn,
 			roles.Table:             roles.ValidColumn,
 			services.Table:          services.ValidColumn,
 			useridentities.Table:    useridentities.ValidColumn,

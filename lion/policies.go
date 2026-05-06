@@ -40,40 +40,8 @@ type Policies struct {
 	// 是否系统内置/受保护的策略，受保护的策略不可删除
 	Protected bool `json:"protected,omitempty"`
 	// 详细描述
-	Description string `json:"description,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the PoliciesQuery when eager-loading is set.
-	Edges        PoliciesEdges `json:"edges"`
+	Description  string `json:"description,omitempty"`
 	selectValues sql.SelectValues
-}
-
-// PoliciesEdges holds the relations/edges for other nodes in the graph.
-type PoliciesEdges struct {
-	// LionPolicyStatements holds the value of the lion_policy_statements edge.
-	LionPolicyStatements []*PolicyStatements `json:"lion_policy_statements,omitempty"`
-	// LionPolicyAttachments holds the value of the lion_policy_attachments edge.
-	LionPolicyAttachments []*PolicyAttachments `json:"lion_policy_attachments,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// LionPolicyStatementsOrErr returns the LionPolicyStatements value or an error if the edge
-// was not loaded in eager-loading.
-func (e PoliciesEdges) LionPolicyStatementsOrErr() ([]*PolicyStatements, error) {
-	if e.loadedTypes[0] {
-		return e.LionPolicyStatements, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_policy_statements"}
-}
-
-// LionPolicyAttachmentsOrErr returns the LionPolicyAttachments value or an error if the edge
-// was not loaded in eager-loading.
-func (e PoliciesEdges) LionPolicyAttachmentsOrErr() ([]*PolicyAttachments, error) {
-	if e.loadedTypes[1] {
-		return e.LionPolicyAttachments, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_policy_attachments"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -192,16 +160,6 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Policies) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryLionPolicyStatements queries the "lion_policy_statements" edge of the Policies entity.
-func (_m *Policies) QueryLionPolicyStatements() *PolicyStatementsQuery {
-	return NewPoliciesClient(_m.config).QueryLionPolicyStatements(_m)
-}
-
-// QueryLionPolicyAttachments queries the "lion_policy_attachments" edge of the Policies entity.
-func (_m *Policies) QueryLionPolicyAttachments() *PolicyAttachmentsQuery {
-	return NewPoliciesClient(_m.config).QueryLionPolicyAttachments(_m)
 }
 
 // Update returns a builder for updating this Policies.

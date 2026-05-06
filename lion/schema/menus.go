@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -20,10 +19,6 @@ func (Menus) Fields() []ent.Field {
 		field.Int64("parent_id").
 			Default(0).
 			Comment("父菜单 ID，为 0 表示顶级菜单"),
-		field.Int("resource_id").
-			Optional().
-			Nillable().
-			Comment("关联 lion_resources 表 ID，可为空"),
 		field.String("code").
 			MaxLen(128).
 			NotEmpty().
@@ -69,12 +64,15 @@ func (Menus) Fields() []ent.Field {
 
 // Edges of the table.
 func (Menus) Edges() []ent.Edge {
-	return []ent.Edge{
-		edge.From("lion_resources", Resources.Type).
-			Ref("lion_menus").
-			Field("resource_id").
-			Unique(),
-	}
+	/*
+		return []ent.Edge{
+			edge.From("lion_resources", Resources.Type).
+				Ref("lion_menus").
+				Field("resource_id").
+				Unique(),
+		}
+	*/
+	return nil
 }
 
 // Mixin of the table.
@@ -90,7 +88,6 @@ func (Menus) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("code").Unique(),
 		index.Fields("parent_id"),
-		index.Fields("resource_id"),
 	}
 }
 

@@ -12,8 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/policies"
-	"github.com/grpc-kit/pkg/lion/policyattachments"
-	"github.com/grpc-kit/pkg/lion/policystatements"
 )
 
 // PoliciesCreate is the builder for creating a Policies entity.
@@ -151,36 +149,6 @@ func (_c *PoliciesCreate) SetNillableDescription(v *string) *PoliciesCreate {
 		_c.SetDescription(*v)
 	}
 	return _c
-}
-
-// AddLionPolicyStatementIDs adds the "lion_policy_statements" edge to the PolicyStatements entity by IDs.
-func (_c *PoliciesCreate) AddLionPolicyStatementIDs(ids ...int) *PoliciesCreate {
-	_c.mutation.AddLionPolicyStatementIDs(ids...)
-	return _c
-}
-
-// AddLionPolicyStatements adds the "lion_policy_statements" edges to the PolicyStatements entity.
-func (_c *PoliciesCreate) AddLionPolicyStatements(v ...*PolicyStatements) *PoliciesCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionPolicyStatementIDs(ids...)
-}
-
-// AddLionPolicyAttachmentIDs adds the "lion_policy_attachments" edge to the PolicyAttachments entity by IDs.
-func (_c *PoliciesCreate) AddLionPolicyAttachmentIDs(ids ...int) *PoliciesCreate {
-	_c.mutation.AddLionPolicyAttachmentIDs(ids...)
-	return _c
-}
-
-// AddLionPolicyAttachments adds the "lion_policy_attachments" edges to the PolicyAttachments entity.
-func (_c *PoliciesCreate) AddLionPolicyAttachments(v ...*PolicyAttachments) *PoliciesCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionPolicyAttachmentIDs(ids...)
 }
 
 // Mutation returns the PoliciesMutation object of the builder.
@@ -353,38 +321,6 @@ func (_c *PoliciesCreate) createSpec() (*Policies, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
 		_node.Description = value
-	}
-	if nodes := _c.mutation.LionPolicyStatementsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyStatementsTable,
-			Columns: []string{policies.LionPolicyStatementsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policystatements.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.LionPolicyAttachmentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   policies.LionPolicyAttachmentsTable,
-			Columns: []string{policies.LionPolicyAttachmentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(policyattachments.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

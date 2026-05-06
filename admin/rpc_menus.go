@@ -13,7 +13,6 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/resources"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -92,9 +91,7 @@ func lionMenuToProto(in *lion.Menus) *adminv1.Menu {
 		CreatedAt:   timestamppb.New(in.CreatedAt),
 		UpdatedAt:   timestamppb.New(in.UpdatedAt),
 	}
-	if in.ResourceID != nil {
-		menu.ResourceId = int64(*in.ResourceID)
-	}
+
 	return menu
 }
 
@@ -106,9 +103,6 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 	}
 	query := db.Menus.Query()
 	where := make([]predicate.Menus, 0)
-	if req.GetResourceId() > 0 {
-		where = append(where, menus.ResourceIDEQ(int(req.GetResourceId())))
-	}
 	if strings.TrimSpace(req.Filter) != "" {
 		where = append(where, menus.Or(
 			menus.CodeContainsFold(req.Filter),
@@ -225,10 +219,6 @@ func (a *KnownAdminAPI) CreateMenu(ctx context.Context, req *adminv1.CreateMenuR
 			return nil, errs.InvalidArgument(ctx).WithMessage("parent menu not found")
 		}
 	}
-	resourceID, err := a.upsertMenuAnchorResource(ctx, db, req.Menu, userID, 0)
-	if err != nil {
-		return nil, err
-	}
 	create := db.Menus.Create().
 		SetParentID(req.Menu.ParentId).
 		SetCode(req.Menu.Code).
@@ -240,7 +230,6 @@ func (a *KnownAdminAPI) CreateMenu(ctx context.Context, req *adminv1.CreateMenuR
 		SetSurfaceMask(int(req.Menu.SurfaceMask)).
 		SetVisibility(menuVisibilityFromProto(req.Menu.Visibility)).
 		SetDescription(req.Menu.Description).
-		SetResourceID(int(resourceID)).
 		SetCreatedBy(userID).
 		SetUpdatedBy(userID)
 	if len(req.Menu.Metadata) > 0 {
@@ -282,15 +271,6 @@ func (a *KnownAdminAPI) UpdateMenu(ctx context.Context, req *adminv1.UpdateMenuR
 				}
 			}
 			update.SetParentID(req.Menu.ParentId)
-		case "resource_id":
-			if req.Menu.ResourceId > 0 {
-				if _, err := db.Resources.Get(ctx, int(req.Menu.ResourceId)); err != nil {
-					return errs.InvalidArgument(ctx).WithMessage("resource not found")
-				}
-				update.SetResourceID(int(req.Menu.ResourceId))
-			} else {
-				update.ClearResourceID()
-			}
 		case "code":
 			code, err := schema.EnsureCode(req.Menu.Code)
 			if err != nil {
@@ -338,21 +318,6 @@ func (a *KnownAdminAPI) UpdateMenu(ctx context.Context, req *adminv1.UpdateMenuR
 	if err != nil {
 		return nil, err
 	}
-	menuForSync := req.Menu
-	menuForSync.ResourceId = int64(0)
-	if saved.ResourceID != nil {
-		menuForSync.ResourceId = int64(*saved.ResourceID)
-	}
-	resourceID, err := a.upsertMenuAnchorResource(ctx, db, menuForSync, userID, menuForSync.ResourceId)
-	if err != nil {
-		return nil, err
-	}
-	if saved.ResourceID == nil || *saved.ResourceID != int(resourceID) {
-		saved, err = saved.Update().SetResourceID(int(resourceID)).SetUpdatedBy(userID).Save(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
 	return lionMenuToProto(saved), nil
 }
 
@@ -383,39 +348,9 @@ func (a *KnownAdminAPI) DeleteMenu(ctx context.Context, req *adminv1.DeleteMenuR
 		rollback()
 		return nil, errs.InvalidArgument(ctx).WithMessage("cannot delete menu with child nodes")
 	}
-	resourceID := 0
-	if obj.ResourceID != nil {
-		resourceID = *obj.ResourceID
-	}
 	if err := tx.Menus.DeleteOneID(obj.ID).Exec(ctx); err != nil {
 		rollback()
 		return nil, err
-	}
-	if resourceID > 0 {
-		anchor, err := tx.Resources.Get(ctx, resourceID)
-		if err != nil && !lion.IsNotFound(err) {
-			rollback()
-			return nil, err
-		}
-		if err == nil {
-			if anchor.Protected {
-				rollback()
-				return nil, errs.InvalidArgument(ctx).WithMessage("protected menu resource can not be deleted")
-			}
-			hasResourceChildren, err := tx.Resources.Query().Where(resources.ParentIDEQ(int64(anchor.ID))).Exist(ctx)
-			if err != nil {
-				rollback()
-				return nil, err
-			}
-			if hasResourceChildren {
-				rollback()
-				return nil, errs.InvalidArgument(ctx).WithMessage("cannot delete menu with child resource anchors")
-			}
-			if err := tx.Resources.DeleteOneID(anchor.ID).Exec(ctx); err != nil {
-				rollback()
-				return nil, err
-			}
-		}
 	}
 	if err := tx.Commit(); err != nil {
 		return nil, err
