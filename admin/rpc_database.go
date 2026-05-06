@@ -276,31 +276,55 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
-	systemDept, err := tx.Departments.Query().
+	builtinDept, err := tx.Departments.Query().
 		Where(
-			departments.CodeEQ("system"),
+			departments.CodeEQ("builtin"),
 			departments.ParentIDEQ(rootDept.ID),
 		).
 		Only(ctx)
 	if lion.IsNotFound(err) {
-		systemDept, err = tx.Departments.Create().
-			SetParentID(rootDept.ID).
-			SetCode("system").
-			SetDisplayName("系统部门").
-			SetSortOrder(1).
-			SetProtected(true).
-			Save(ctx)
-		if err != nil {
+		// 兼容旧种子：如果已存在 legacy system 部门，则原位迁移为 builtin。
+		builtinDept, err = tx.Departments.Query().
+			Where(
+				departments.CodeEQ("system"),
+				departments.ParentIDEQ(rootDept.ID),
+			).
+			Only(ctx)
+		if lion.IsNotFound(err) {
+			builtinDept, err = tx.Departments.Create().
+				SetParentID(rootDept.ID).
+				SetCode("builtin").
+				SetDisplayName("内置部门").
+				SetSortOrder(1).
+				SetProtected(true).
+				Save(ctx)
+			if err != nil {
+				rollback()
+				return nil, err
+			}
+		} else if err != nil {
 			rollback()
 			return nil, err
+		} else {
+			if err := builtinDept.Update().
+				SetParentID(rootDept.ID).
+				SetCode("builtin").
+				SetDisplayName("内置部门").
+				SetSortOrder(1).
+				SetProtected(true).
+				Exec(ctx); err != nil {
+				rollback()
+				return nil, err
+			}
 		}
 	} else if err != nil {
 		rollback()
 		return nil, err
 	} else {
-		if err := systemDept.Update().
+		if err := builtinDept.Update().
 			SetParentID(rootDept.ID).
-			SetDisplayName("系统部门").
+			SetCode("builtin").
+			SetDisplayName("内置部门").
 			SetSortOrder(1).
 			SetProtected(true).
 			Exec(ctx); err != nil {
@@ -312,7 +336,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	adminDept, err := tx.Departments.Query().
 		Where(
 			departments.CodeEQ("admin"),
-			departments.ParentIDEQ(systemDept.ID),
+			departments.ParentIDEQ(builtinDept.ID),
 		).
 		Only(ctx)
 	if lion.IsNotFound(err) {
@@ -324,7 +348,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			Only(ctx)
 		if lion.IsNotFound(err) {
 			adminDept, err = tx.Departments.Create().
-				SetParentID(systemDept.ID).
+				SetParentID(builtinDept.ID).
 				SetCode("admin").
 				SetDisplayName("管理员部门").
 				SetSortOrder(1).
@@ -339,7 +363,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			return nil, err
 		} else {
 			if err := adminDept.Update().
-				SetParentID(systemDept.ID).
+				SetParentID(builtinDept.ID).
 				SetDisplayName("管理员部门").
 				SetSortOrder(1).
 				SetProtected(true).
@@ -353,7 +377,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	} else {
 		if err := adminDept.Update().
-			SetParentID(systemDept.ID).
+			SetParentID(builtinDept.ID).
 			SetDisplayName("管理员部门").
 			SetSortOrder(1).
 			SetProtected(true).
@@ -398,7 +422,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	guestDept, err := tx.Departments.Query().
 		Where(
 			departments.CodeEQ(guestCode),
-			departments.ParentIDEQ(systemDept.ID),
+			departments.ParentIDEQ(builtinDept.ID),
 		).
 		Only(ctx)
 	if lion.IsNotFound(err) {
@@ -410,7 +434,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			Only(ctx)
 		if lion.IsNotFound(err) {
 			guestDept, err = tx.Departments.Create().
-				SetParentID(systemDept.ID).
+				SetParentID(builtinDept.ID).
 				SetCode(guestCode).
 				SetDisplayName("访客部门").
 				SetSortOrder(2).
@@ -425,7 +449,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			return nil, err
 		} else {
 			if err := guestDept.Update().
-				SetParentID(systemDept.ID).
+				SetParentID(builtinDept.ID).
 				SetDisplayName("访客部门").
 				SetSortOrder(2).
 				SetProtected(true).
@@ -439,7 +463,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	} else {
 		if err := guestDept.Update().
-			SetParentID(systemDept.ID).
+			SetParentID(builtinDept.ID).
 			SetDisplayName("访客部门").
 			SetSortOrder(2).
 			SetProtected(true).
