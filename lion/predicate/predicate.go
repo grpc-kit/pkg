@@ -36,9 +36,6 @@ type Policies func(*sql.Selector)
 // Roles is the predicate function for roles builders.
 type Roles func(*sql.Selector)
 
-// Services is the predicate function for services builders.
-type Services func(*sql.Selector)
-
 // UserIdentities is the predicate function for useridentities builders.
 type UserIdentities func(*sql.Selector)
 

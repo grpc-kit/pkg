@@ -129,18 +129,6 @@ func (f RolesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RolesMutation", m)
 }
 
-// The ServicesFunc type is an adapter to allow the use of ordinary
-// function as Services mutator.
-type ServicesFunc func(context.Context, *lion.ServicesMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ServicesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.ServicesMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.ServicesMutation", m)
-}
-
 // The UserIdentitiesFunc type is an adapter to allow the use of ordinary
 // function as UserIdentities mutator.
 type UserIdentitiesFunc func(context.Context, *lion.UserIdentitiesMutation) (lion.Value, error)

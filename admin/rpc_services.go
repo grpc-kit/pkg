@@ -9,31 +9,11 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
-	"github.com/grpc-kit/pkg/lion"
 	"google.golang.org/genproto/googleapis/api/annotations"
 	"google.golang.org/genproto/googleapis/api/serviceconfig"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var httpPathVarRegexp = regexp.MustCompile(`{([^{}]+)}`)
-
-func lionServiceToProto(in *lion.Services) *adminv1.Service {
-	if in == nil {
-		return nil
-	}
-	return &adminv1.Service{
-		Id:          int64(in.ID),
-		Code:        in.Code,
-		GrpcService: in.GrpcName,
-		DisplayName: in.DisplayName,
-		Description: in.Description,
-		Protected:   in.Protected,
-		CreatedBy:   in.CreatedBy,
-		UpdatedBy:   in.UpdatedBy,
-		CreatedAt:   timestamppb.New(in.CreatedAt),
-		UpdatedAt:   timestamppb.New(in.UpdatedAt),
-	}
-}
 
 func (a *KnownAdminAPI) ListServices(ctx context.Context, req *adminv1.ListServicesRequest) (*adminv1.ListServicesResponse, error) {
 	result := &adminv1.ListServicesResponse{

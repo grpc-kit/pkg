@@ -15,12 +15,129 @@ import (
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+type builtinMenuSeed struct {
+	Code        string
+	DisplayName string
+	RoutePath   string
+	Icon        string
+	SortOrder   int
+	Children    []builtinMenuSeed
+}
+
+func builtinMenuSeeds() []builtinMenuSeed {
+	return []builtinMenuSeed{
+		{
+			Code:        "root-admin",
+			DisplayName: "Admin",
+			RoutePath:   "/",
+			SortOrder:   1,
+			Children: []builtinMenuSeed{
+				{
+					Code:        "user",
+					DisplayName: "个人中心",
+					RoutePath:   "/user",
+					Icon:        "UserOutlined",
+					SortOrder:   100,
+					Children: []builtinMenuSeed{
+						{
+							Code:        "user.profile",
+							DisplayName: "我的信息",
+							RoutePath:   "/user/profile",
+							SortOrder:   100,
+						},
+					},
+				},
+				{
+					Code:        "setting",
+					DisplayName: "系统设置",
+					RoutePath:   "/setting",
+					Icon:        "SettingOutlined",
+					SortOrder:   200,
+					Children: []builtinMenuSeed{
+						{Code: "setting.auth-providers", DisplayName: "身份认证", RoutePath: "/setting/authentications", SortOrder: 100},
+						{Code: "setting.departments", DisplayName: "组织架构", RoutePath: "/setting/departments", SortOrder: 200},
+						{Code: "setting.menus", DisplayName: "菜单管理", RoutePath: "/setting/menus", SortOrder: 250},
+						{Code: "setting.roles", DisplayName: "角色管理", RoutePath: "/setting/roles", SortOrder: 300},
+						{Code: "setting.policymanage", DisplayName: "权限策略", RoutePath: "/setting/policymanage/index", SortOrder: 400},
+						{Code: "setting.groups", DisplayName: "群组管理", RoutePath: "/setting/groups", SortOrder: 500},
+						{Code: "setting.users", DisplayName: "用户管理", RoutePath: "/setting/users", SortOrder: 600},
+						{
+							Code:        "setting.config",
+							DisplayName: "本地配置",
+							RoutePath:   "/setting/config",
+							SortOrder:   900,
+							Children: []builtinMenuSeed{
+								{Code: "setting.config.security", DisplayName: "安全配置", RoutePath: "/setting/config/security", SortOrder: 100},
+								{Code: "setting.config.services", DisplayName: "服务配置", RoutePath: "/setting/config/services", SortOrder: 200},
+								{Code: "setting.config.discover", DisplayName: "服务发现", RoutePath: "/setting/config/discover", SortOrder: 300},
+								{Code: "setting.config.database", DisplayName: "数据库配置", RoutePath: "/setting/config/database", SortOrder: 400},
+								{Code: "setting.config.cachebox", DisplayName: "缓存配置", RoutePath: "/setting/config/cachebox", SortOrder: 500},
+								{Code: "setting.config.debugger", DisplayName: "调试配置", RoutePath: "/setting/config/debugger", SortOrder: 600},
+								{Code: "setting.config.objstore", DisplayName: "对象存储", RoutePath: "/setting/config/objstore", SortOrder: 700},
+								{Code: "setting.config.frontend", DisplayName: "前端配置", RoutePath: "/setting/config/frontend", SortOrder: 800},
+								{Code: "setting.config.observables", DisplayName: "可观测性", RoutePath: "/setting/config/observables", SortOrder: 900},
+								{Code: "setting.config.cloudevents", DisplayName: "云事件", RoutePath: "/setting/config/cloudevents", SortOrder: 1000},
+								{Code: "setting.config.automations", DisplayName: "自动化", RoutePath: "/setting/config/automations", SortOrder: 1100},
+							},
+						},
+					},
+				},
+				{
+					Code:        "apidocs",
+					DisplayName: "API 文档",
+					RoutePath:   "/apidocs",
+					Icon:        "SolutionOutlined",
+					SortOrder:   300,
+					Children: []builtinMenuSeed{
+						{
+							Code:        "apidocs.service",
+							DisplayName: "服务文档",
+							RoutePath:   "/apidocs/service",
+							SortOrder:   100,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items []builtinMenuSeed) error {
+	for _, item := range items {
+		obj, err := tx.Menus.Query().Where(menus.CodeEQ(item.Code)).Only(ctx)
+		if lion.IsNotFound(err) {
+			obj, err = tx.Menus.Create().
+				SetParentID(parentID).
+				SetCode(item.Code).
+				SetDisplayName(item.DisplayName).
+				SetRoutePath(item.RoutePath).
+				SetComponent("").
+				SetIcon(item.Icon).
+				SetSortOrder(item.SortOrder).
+				SetSurfaceMask(1).
+				SetVisibility("global").
+				SetDescription("").
+				Save(ctx)
+			if err != nil {
+				return err
+			}
+		} else if err != nil {
+			return err
+		}
+		if err := createBuiltinMenus(ctx, tx, int64(obj.ID), item.Children); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // CreateDatabaseInitialize 幂等补全内置种子数据：已存在则跳过，缺失则创建。
 func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *adminv1.CreateDatabaseInitializeRequest) (*emptypb.Empty, error) {
@@ -239,6 +356,11 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			rollback()
 			return nil, err
 		}
+	}
+
+	if err := createBuiltinMenus(ctx, tx, 0, builtinMenuSeeds()); err != nil {
+		rollback()
+		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {

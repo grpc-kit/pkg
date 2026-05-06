@@ -398,37 +398,6 @@ var (
 			},
 		},
 	}
-	// LionServicesColumns holds the columns for the "lion_services" table.
-	LionServicesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "code", Type: field.TypeString, Size: 64},
-		{Name: "grpc_name", Type: field.TypeString, Size: 256},
-		{Name: "display_name", Type: field.TypeString, Default: ""},
-		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "protected", Type: field.TypeBool, Default: false},
-	}
-	// LionServicesTable holds the schema information for the "lion_services" table.
-	LionServicesTable = &schema.Table{
-		Name:       "lion_services",
-		Columns:    LionServicesColumns,
-		PrimaryKey: []*schema.Column{LionServicesColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "services_code",
-				Unique:  true,
-				Columns: []*schema.Column{LionServicesColumns[5]},
-			},
-			{
-				Name:    "services_grpc_name",
-				Unique:  true,
-				Columns: []*schema.Column{LionServicesColumns[6]},
-			},
-		},
-	}
 	// LionUserIdentitiesColumns holds the columns for the "lion_user_identities" table.
 	LionUserIdentitiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -686,7 +655,6 @@ var (
 		LionMenusTable,
 		LionPoliciesTable,
 		LionRolesTable,
-		LionServicesTable,
 		LionUserIdentitiesTable,
 		LionUserProfilesTable,
 		LionUserRolesTable,
@@ -731,9 +699,6 @@ func init() {
 	}
 	LionRolesTable.Annotation = &entsql.Annotation{
 		Table: "lion_roles",
-	}
-	LionServicesTable.Annotation = &entsql.Annotation{
-		Table: "lion_services",
 	}
 	LionUserIdentitiesTable.ForeignKeys[0].RefTable = LionAuthProvidersTable
 	LionUserIdentitiesTable.ForeignKeys[1].RefTable = LionUsersTable

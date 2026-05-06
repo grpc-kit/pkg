@@ -25,7 +25,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/services"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -57,8 +56,6 @@ type Client struct {
 	Policies *PoliciesClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
-	// Services is the client for interacting with the Services builders.
-	Services *ServicesClient
 	// UserIdentities is the client for interacting with the UserIdentities builders.
 	UserIdentities *UserIdentitiesClient
 	// UserProfiles is the client for interacting with the UserProfiles builders.
@@ -88,7 +85,6 @@ func (c *Client) init() {
 	c.Menus = NewMenusClient(c.config)
 	c.Policies = NewPoliciesClient(c.config)
 	c.Roles = NewRolesClient(c.config)
-	c.Services = NewServicesClient(c.config)
 	c.UserIdentities = NewUserIdentitiesClient(c.config)
 	c.UserProfiles = NewUserProfilesClient(c.config)
 	c.UserRoles = NewUserRolesClient(c.config)
@@ -195,7 +191,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Menus:             NewMenusClient(cfg),
 		Policies:          NewPoliciesClient(cfg),
 		Roles:             NewRolesClient(cfg),
-		Services:          NewServicesClient(cfg),
 		UserIdentities:    NewUserIdentitiesClient(cfg),
 		UserProfiles:      NewUserProfilesClient(cfg),
 		UserRoles:         NewUserRolesClient(cfg),
@@ -229,7 +224,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Menus:             NewMenusClient(cfg),
 		Policies:          NewPoliciesClient(cfg),
 		Roles:             NewRolesClient(cfg),
-		Services:          NewServicesClient(cfg),
 		UserIdentities:    NewUserIdentitiesClient(cfg),
 		UserProfiles:      NewUserProfilesClient(cfg),
 		UserRoles:         NewUserRolesClient(cfg),
@@ -265,7 +259,7 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuthProviders, c.Credentials, c.DepartmentMembers, c.Departments,
 		c.GroupMembers, c.GroupRoles, c.Groups, c.Menus, c.Policies, c.Roles,
-		c.Services, c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
+		c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -277,7 +271,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuthProviders, c.Credentials, c.DepartmentMembers, c.Departments,
 		c.GroupMembers, c.GroupRoles, c.Groups, c.Menus, c.Policies, c.Roles,
-		c.Services, c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
+		c.UserIdentities, c.UserProfiles, c.UserRoles, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -306,8 +300,6 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Policies.mutate(ctx, m)
 	case *RolesMutation:
 		return c.Roles.mutate(ctx, m)
-	case *ServicesMutation:
-		return c.Services.mutate(ctx, m)
 	case *UserIdentitiesMutation:
 		return c.UserIdentities.mutate(ctx, m)
 	case *UserProfilesMutation:
@@ -1859,139 +1851,6 @@ func (c *RolesClient) mutate(ctx context.Context, m *RolesMutation) (Value, erro
 	}
 }
 
-// ServicesClient is a client for the Services schema.
-type ServicesClient struct {
-	config
-}
-
-// NewServicesClient returns a client for the Services from the given config.
-func NewServicesClient(c config) *ServicesClient {
-	return &ServicesClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `services.Hooks(f(g(h())))`.
-func (c *ServicesClient) Use(hooks ...Hook) {
-	c.hooks.Services = append(c.hooks.Services, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `services.Intercept(f(g(h())))`.
-func (c *ServicesClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Services = append(c.inters.Services, interceptors...)
-}
-
-// Create returns a builder for creating a Services entity.
-func (c *ServicesClient) Create() *ServicesCreate {
-	mutation := newServicesMutation(c.config, OpCreate)
-	return &ServicesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Services entities.
-func (c *ServicesClient) CreateBulk(builders ...*ServicesCreate) *ServicesCreateBulk {
-	return &ServicesCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *ServicesClient) MapCreateBulk(slice any, setFunc func(*ServicesCreate, int)) *ServicesCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &ServicesCreateBulk{err: fmt.Errorf("calling to ServicesClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*ServicesCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &ServicesCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Services.
-func (c *ServicesClient) Update() *ServicesUpdate {
-	mutation := newServicesMutation(c.config, OpUpdate)
-	return &ServicesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *ServicesClient) UpdateOne(_m *Services) *ServicesUpdateOne {
-	mutation := newServicesMutation(c.config, OpUpdateOne, withServices(_m))
-	return &ServicesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *ServicesClient) UpdateOneID(id int) *ServicesUpdateOne {
-	mutation := newServicesMutation(c.config, OpUpdateOne, withServicesID(id))
-	return &ServicesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Services.
-func (c *ServicesClient) Delete() *ServicesDelete {
-	mutation := newServicesMutation(c.config, OpDelete)
-	return &ServicesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *ServicesClient) DeleteOne(_m *Services) *ServicesDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ServicesClient) DeleteOneID(id int) *ServicesDeleteOne {
-	builder := c.Delete().Where(services.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &ServicesDeleteOne{builder}
-}
-
-// Query returns a query builder for Services.
-func (c *ServicesClient) Query() *ServicesQuery {
-	return &ServicesQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeServices},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a Services entity by its id.
-func (c *ServicesClient) Get(ctx context.Context, id int) (*Services, error) {
-	return c.Query().Where(services.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *ServicesClient) GetX(ctx context.Context, id int) *Services {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *ServicesClient) Hooks() []Hook {
-	return c.hooks.Services
-}
-
-// Interceptors returns the client interceptors.
-func (c *ServicesClient) Interceptors() []Interceptor {
-	return c.inters.Services
-}
-
-func (c *ServicesClient) mutate(ctx context.Context, m *ServicesMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&ServicesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&ServicesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&ServicesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&ServicesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("lion: unknown Services mutation op: %q", m.Op())
-	}
-}
-
 // UserIdentitiesClient is a client for the UserIdentities schema.
 type UserIdentitiesClient struct {
 	config
@@ -2656,12 +2515,12 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 type (
 	hooks struct {
 		AuthProviders, Credentials, DepartmentMembers, Departments, GroupMembers,
-		GroupRoles, Groups, Menus, Policies, Roles, Services, UserIdentities,
-		UserProfiles, UserRoles, Users []ent.Hook
+		GroupRoles, Groups, Menus, Policies, Roles, UserIdentities, UserProfiles,
+		UserRoles, Users []ent.Hook
 	}
 	inters struct {
 		AuthProviders, Credentials, DepartmentMembers, Departments, GroupMembers,
-		GroupRoles, Groups, Menus, Policies, Roles, Services, UserIdentities,
-		UserProfiles, UserRoles, Users []ent.Interceptor
+		GroupRoles, Groups, Menus, Policies, Roles, UserIdentities, UserProfiles,
+		UserRoles, Users []ent.Interceptor
 	}
 )

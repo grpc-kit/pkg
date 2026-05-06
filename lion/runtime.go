@@ -16,7 +16,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
-	"github.com/grpc-kit/pkg/lion/services"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -689,79 +688,6 @@ func init() {
 	rolesDescProtected := rolesFields[7].Descriptor()
 	// roles.DefaultProtected holds the default value on creation for the protected field.
 	roles.DefaultProtected = rolesDescProtected.Default.(bool)
-	servicesMixin := schema.Services{}.Mixin()
-	servicesMixinFields0 := servicesMixin[0].Fields()
-	_ = servicesMixinFields0
-	servicesMixinFields1 := servicesMixin[1].Fields()
-	_ = servicesMixinFields1
-	servicesFields := schema.Services{}.Fields()
-	_ = servicesFields
-	// servicesDescCreatedAt is the schema descriptor for created_at field.
-	servicesDescCreatedAt := servicesMixinFields0[0].Descriptor()
-	// services.DefaultCreatedAt holds the default value on creation for the created_at field.
-	services.DefaultCreatedAt = servicesDescCreatedAt.Default.(func() time.Time)
-	// servicesDescUpdatedAt is the schema descriptor for updated_at field.
-	servicesDescUpdatedAt := servicesMixinFields0[1].Descriptor()
-	// services.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	services.DefaultUpdatedAt = servicesDescUpdatedAt.Default.(func() time.Time)
-	// services.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	services.UpdateDefaultUpdatedAt = servicesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// servicesDescCreatedBy is the schema descriptor for created_by field.
-	servicesDescCreatedBy := servicesMixinFields1[0].Descriptor()
-	// services.DefaultCreatedBy holds the default value on creation for the created_by field.
-	services.DefaultCreatedBy = servicesDescCreatedBy.Default.(int64)
-	// servicesDescUpdatedBy is the schema descriptor for updated_by field.
-	servicesDescUpdatedBy := servicesMixinFields1[1].Descriptor()
-	// services.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	services.DefaultUpdatedBy = servicesDescUpdatedBy.Default.(int64)
-	// servicesDescCode is the schema descriptor for code field.
-	servicesDescCode := servicesFields[0].Descriptor()
-	// services.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	services.CodeValidator = func() func(string) error {
-		validators := servicesDescCode.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(code string) error {
-			for _, fn := range fns {
-				if err := fn(code); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// servicesDescGrpcName is the schema descriptor for grpc_name field.
-	servicesDescGrpcName := servicesFields[1].Descriptor()
-	// services.GrpcNameValidator is a validator for the "grpc_name" field. It is called by the builders before save.
-	services.GrpcNameValidator = func() func(string) error {
-		validators := servicesDescGrpcName.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(grpc_name string) error {
-			for _, fn := range fns {
-				if err := fn(grpc_name); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// servicesDescDisplayName is the schema descriptor for display_name field.
-	servicesDescDisplayName := servicesFields[2].Descriptor()
-	// services.DefaultDisplayName holds the default value on creation for the display_name field.
-	services.DefaultDisplayName = servicesDescDisplayName.Default.(string)
-	// servicesDescDescription is the schema descriptor for description field.
-	servicesDescDescription := servicesFields[3].Descriptor()
-	// services.DefaultDescription holds the default value on creation for the description field.
-	services.DefaultDescription = servicesDescDescription.Default.(string)
-	// servicesDescProtected is the schema descriptor for protected field.
-	servicesDescProtected := servicesFields[4].Descriptor()
-	// services.DefaultProtected holds the default value on creation for the protected field.
-	services.DefaultProtected = servicesDescProtected.Default.(bool)
 	useridentitiesMixin := schema.UserIdentities{}.Mixin()
 	useridentitiesMixinFields0 := useridentitiesMixin[0].Fields()
 	_ = useridentitiesMixinFields0

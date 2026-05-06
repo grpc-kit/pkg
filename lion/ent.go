@@ -22,7 +22,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/services"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
 	"github.com/grpc-kit/pkg/lion/userroles"
@@ -97,7 +96,6 @@ func checkColumn(t, c string) error {
 			menus.Table:             menus.ValidColumn,
 			policies.Table:          policies.ValidColumn,
 			roles.Table:             roles.ValidColumn,
-			services.Table:          services.ValidColumn,
 			useridentities.Table:    useridentities.ValidColumn,
 			userprofiles.Table:      userprofiles.ValidColumn,
 			userroles.Table:         userroles.ValidColumn,
