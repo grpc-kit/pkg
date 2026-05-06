@@ -304,7 +304,7 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Id:          int64(m.ID),
 			ParentId:    int64(m.ParentID),
 			Code:        m.Code,
-			DisplayName: I18NName(m.Code),
+			DisplayName: m.DisplayName,
 			SortOrder:   int32(m.SortOrder),
 			Type:        adminv1.Department_Type(m.DepartmentType),
 			Status:      adminv1.Department_Status(m.DepartmentStatus),
