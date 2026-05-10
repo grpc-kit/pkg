@@ -49,8 +49,29 @@ type Menus struct {
 	// 前端元数据
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// 详细描述
-	Description  string `json:"description,omitempty"`
+	Description string `json:"description,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the MenusQuery when eager-loading is set.
+	Edges        MenusEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// MenusEdges holds the relations/edges for other nodes in the graph.
+type MenusEdges struct {
+	// LionRoleMenus holds the value of the lion_role_menus edge.
+	LionRoleMenus []*RoleMenus `json:"lion_role_menus,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// LionRoleMenusOrErr returns the LionRoleMenus value or an error if the edge
+// was not loaded in eager-loading.
+func (e MenusEdges) LionRoleMenusOrErr() ([]*RoleMenus, error) {
+	if e.loadedTypes[0] {
+		return e.LionRoleMenus, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_role_menus"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -196,6 +217,11 @@ func (_m *Menus) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Menus) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionRoleMenus queries the "lion_role_menus" edge of the Menus entity.
+func (_m *Menus) QueryLionRoleMenus() *RoleMenusQuery {
+	return NewMenusClient(_m.config).QueryLionRoleMenus(_m)
 }
 
 // Update returns a builder for updating this Menus.

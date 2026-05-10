@@ -30,6 +30,8 @@ type Tx struct {
 	Menus *MenusClient
 	// Policies is the client for interacting with the Policies builders.
 	Policies *PoliciesClient
+	// RoleMenus is the client for interacting with the RoleMenus builders.
+	RoleMenus *RoleMenusClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
 	// UserIdentities is the client for interacting with the UserIdentities builders.
@@ -180,6 +182,7 @@ func (tx *Tx) init() {
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
+	tx.RoleMenus = NewRoleMenusClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
 	tx.UserIdentities = NewUserIdentitiesClient(tx.config)
 	tx.UserProfiles = NewUserProfilesClient(tx.config)

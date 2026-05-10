@@ -136,6 +136,21 @@ http:
     ### 删除角色成员
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleMember
     delete: "/builtin/admin/api/v1/roles/{parent}/members/{user_id}"
+    ## 角色菜单
+    ### 创建角色菜单
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRoleMenus
+    post: "/builtin/admin/api/v1/roles/{parent}/menus"
+    body: "menus"
+    ### 更新角色菜单，对同角色下批量更新多个菜单关联
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateRoleMenus
+    patch: "/builtin/admin/api/v1/roles/{parent}/menus"
+    body: "menus"
+    ### 角色菜单列表
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoleMenus
+    get: "/builtin/admin/api/v1/roles/{parent}/menus"
+    ### 删除角色菜单
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleMenu
+    delete: "/builtin/admin/api/v1/roles/{parent}/menus/{menu_id}"
     # ## 为角色关联资源数据范围（临时注释）
     # - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRoleDataRanges
     #   post: "/builtin/admin/api/v1/roles/{role_id}/data/ranges"

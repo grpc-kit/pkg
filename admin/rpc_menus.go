@@ -13,10 +13,74 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+func (a *KnownAdminAPI) getAllowedMenuIDsByRole(ctx context.Context, db *lion.Client, roleIDs []int, minScope int) ([]int, error) {
+	if len(roleIDs) == 0 {
+		return nil, nil
+	}
+
+	items, err := db.RoleMenus.Query().
+		Where(
+			rolemenus.RoleIDIn(roleIDs...),
+			rolemenus.PermissionScopeGTE(minScope),
+		).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return nil, nil
+	}
+
+	allowed := map[int]struct{}{}
+	recursiveRoots := make([]int, 0)
+	for _, item := range items {
+		allowed[item.MenuID] = struct{}{}
+		if item.IsRecursive {
+			recursiveRoots = append(recursiveRoots, item.MenuID)
+		}
+	}
+
+	if len(recursiveRoots) > 0 {
+		allMenus, err := db.Menus.Query().
+			Select(menus.FieldID, menus.FieldParentID).
+			All(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		childrenByParent := make(map[int64][]int)
+		for _, menu := range allMenus {
+			childrenByParent[menu.ParentID] = append(childrenByParent[menu.ParentID], menu.ID)
+		}
+
+		stack := append([]int(nil), recursiveRoots...)
+		for len(stack) > 0 {
+			current := stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+
+			for _, childID := range childrenByParent[int64(current)] {
+				if _, ok := allowed[childID]; ok {
+					continue
+				}
+				allowed[childID] = struct{}{}
+				stack = append(stack, childID)
+			}
+		}
+	}
+
+	ids := make([]int, 0, len(allowed))
+	for id := range allowed {
+		ids = append(ids, id)
+	}
+	sort.Ints(ids)
+	return ids, nil
+}
 
 func menuMetadataToProto(in map[string]interface{}) map[string]string {
 	out := make(map[string]string, len(in))
@@ -101,8 +165,24 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 	if err != nil {
 		return result, nil
 	}
+	roleIDs, err := a.getUserRoleID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	allowedMenuIDs, err := a.getAllowedMenuIDsByRole(ctx, db, roleIDs, 1)
+	if err != nil {
+		return nil, err
+	}
+	if len(allowedMenuIDs) == 0 {
+		result.Menus = make([]*adminv1.Menu, 0)
+		result.TotalSize = 0
+		result.NextPageToken = ""
+		return result, nil
+	}
+
 	query := db.Menus.Query()
 	where := make([]predicate.Menus, 0)
+	where = append(where, menus.IDIn(allowedMenuIDs...))
 	if strings.TrimSpace(req.Filter) != "" {
 		where = append(where, menus.Or(
 			menus.CodeContainsFold(req.Filter),

@@ -4,7 +4,6 @@ package lion
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -15,55 +14,57 @@ import (
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/roles"
 )
 
-// MenusQuery is the builder for querying Menus entities.
-type MenusQuery struct {
+// RoleMenusQuery is the builder for querying RoleMenus entities.
+type RoleMenusQuery struct {
 	config
-	ctx               *QueryContext
-	order             []menus.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.Menus
-	withLionRoleMenus *RoleMenusQuery
+	ctx           *QueryContext
+	order         []rolemenus.OrderOption
+	inters        []Interceptor
+	predicates    []predicate.RoleMenus
+	withLionRoles *RolesQuery
+	withLionMenus *MenusQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the MenusQuery builder.
-func (_q *MenusQuery) Where(ps ...predicate.Menus) *MenusQuery {
+// Where adds a new predicate for the RoleMenusQuery builder.
+func (_q *RoleMenusQuery) Where(ps ...predicate.RoleMenus) *RoleMenusQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *MenusQuery) Limit(limit int) *MenusQuery {
+func (_q *RoleMenusQuery) Limit(limit int) *RoleMenusQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *MenusQuery) Offset(offset int) *MenusQuery {
+func (_q *RoleMenusQuery) Offset(offset int) *RoleMenusQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *MenusQuery) Unique(unique bool) *MenusQuery {
+func (_q *RoleMenusQuery) Unique(unique bool) *RoleMenusQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *MenusQuery) Order(o ...menus.OrderOption) *MenusQuery {
+func (_q *RoleMenusQuery) Order(o ...rolemenus.OrderOption) *RoleMenusQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryLionRoleMenus chains the current query on the "lion_role_menus" edge.
-func (_q *MenusQuery) QueryLionRoleMenus() *RoleMenusQuery {
-	query := (&RoleMenusClient{config: _q.config}).Query()
+// QueryLionRoles chains the current query on the "lion_roles" edge.
+func (_q *RoleMenusQuery) QueryLionRoles() *RolesQuery {
+	query := (&RolesClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -73,9 +74,9 @@ func (_q *MenusQuery) QueryLionRoleMenus() *RoleMenusQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(menus.Table, menus.FieldID, selector),
-			sqlgraph.To(rolemenus.Table, rolemenus.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, menus.LionRoleMenusTable, menus.LionRoleMenusColumn),
+			sqlgraph.From(rolemenus.Table, rolemenus.FieldID, selector),
+			sqlgraph.To(roles.Table, roles.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolemenus.LionRolesTable, rolemenus.LionRolesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -83,21 +84,43 @@ func (_q *MenusQuery) QueryLionRoleMenus() *RoleMenusQuery {
 	return query
 }
 
-// First returns the first Menus entity from the query.
-// Returns a *NotFoundError when no Menus was found.
-func (_q *MenusQuery) First(ctx context.Context) (*Menus, error) {
+// QueryLionMenus chains the current query on the "lion_menus" edge.
+func (_q *RoleMenusQuery) QueryLionMenus() *MenusQuery {
+	query := (&MenusClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rolemenus.Table, rolemenus.FieldID, selector),
+			sqlgraph.To(menus.Table, menus.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolemenus.LionMenusTable, rolemenus.LionMenusColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// First returns the first RoleMenus entity from the query.
+// Returns a *NotFoundError when no RoleMenus was found.
+func (_q *RoleMenusQuery) First(ctx context.Context) (*RoleMenus, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{menus.Label}
+		return nil, &NotFoundError{rolemenus.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *MenusQuery) FirstX(ctx context.Context) *Menus {
+func (_q *RoleMenusQuery) FirstX(ctx context.Context) *RoleMenus {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -105,22 +128,22 @@ func (_q *MenusQuery) FirstX(ctx context.Context) *Menus {
 	return node
 }
 
-// FirstID returns the first Menus ID from the query.
-// Returns a *NotFoundError when no Menus ID was found.
-func (_q *MenusQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first RoleMenus ID from the query.
+// Returns a *NotFoundError when no RoleMenus ID was found.
+func (_q *RoleMenusQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{menus.Label}
+		err = &NotFoundError{rolemenus.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *MenusQuery) FirstIDX(ctx context.Context) int {
+func (_q *RoleMenusQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -128,10 +151,10 @@ func (_q *MenusQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single Menus entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Menus entity is found.
-// Returns a *NotFoundError when no Menus entities are found.
-func (_q *MenusQuery) Only(ctx context.Context) (*Menus, error) {
+// Only returns a single RoleMenus entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one RoleMenus entity is found.
+// Returns a *NotFoundError when no RoleMenus entities are found.
+func (_q *RoleMenusQuery) Only(ctx context.Context) (*RoleMenus, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -140,14 +163,14 @@ func (_q *MenusQuery) Only(ctx context.Context) (*Menus, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{menus.Label}
+		return nil, &NotFoundError{rolemenus.Label}
 	default:
-		return nil, &NotSingularError{menus.Label}
+		return nil, &NotSingularError{rolemenus.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *MenusQuery) OnlyX(ctx context.Context) *Menus {
+func (_q *RoleMenusQuery) OnlyX(ctx context.Context) *RoleMenus {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -155,10 +178,10 @@ func (_q *MenusQuery) OnlyX(ctx context.Context) *Menus {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Menus ID in the query.
-// Returns a *NotSingularError when more than one Menus ID is found.
+// OnlyID is like Only, but returns the only RoleMenus ID in the query.
+// Returns a *NotSingularError when more than one RoleMenus ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *MenusQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *RoleMenusQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -167,15 +190,15 @@ func (_q *MenusQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{menus.Label}
+		err = &NotFoundError{rolemenus.Label}
 	default:
-		err = &NotSingularError{menus.Label}
+		err = &NotSingularError{rolemenus.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *MenusQuery) OnlyIDX(ctx context.Context) int {
+func (_q *RoleMenusQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -183,18 +206,18 @@ func (_q *MenusQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of MenusSlice.
-func (_q *MenusQuery) All(ctx context.Context) ([]*Menus, error) {
+// All executes the query and returns a list of RoleMenusSlice.
+func (_q *RoleMenusQuery) All(ctx context.Context) ([]*RoleMenus, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Menus, *MenusQuery]()
-	return withInterceptors[[]*Menus](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*RoleMenus, *RoleMenusQuery]()
+	return withInterceptors[[]*RoleMenus](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *MenusQuery) AllX(ctx context.Context) []*Menus {
+func (_q *RoleMenusQuery) AllX(ctx context.Context) []*RoleMenus {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -202,20 +225,20 @@ func (_q *MenusQuery) AllX(ctx context.Context) []*Menus {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Menus IDs.
-func (_q *MenusQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of RoleMenus IDs.
+func (_q *RoleMenusQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(menus.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(rolemenus.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *MenusQuery) IDsX(ctx context.Context) []int {
+func (_q *RoleMenusQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -224,16 +247,16 @@ func (_q *MenusQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *MenusQuery) Count(ctx context.Context) (int, error) {
+func (_q *RoleMenusQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*MenusQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*RoleMenusQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *MenusQuery) CountX(ctx context.Context) int {
+func (_q *RoleMenusQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -242,7 +265,7 @@ func (_q *MenusQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *MenusQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *RoleMenusQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -255,7 +278,7 @@ func (_q *MenusQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *MenusQuery) ExistX(ctx context.Context) bool {
+func (_q *RoleMenusQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -263,33 +286,45 @@ func (_q *MenusQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the MenusQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the RoleMenusQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *MenusQuery) Clone() *MenusQuery {
+func (_q *RoleMenusQuery) Clone() *RoleMenusQuery {
 	if _q == nil {
 		return nil
 	}
-	return &MenusQuery{
-		config:            _q.config,
-		ctx:               _q.ctx.Clone(),
-		order:             append([]menus.OrderOption{}, _q.order...),
-		inters:            append([]Interceptor{}, _q.inters...),
-		predicates:        append([]predicate.Menus{}, _q.predicates...),
-		withLionRoleMenus: _q.withLionRoleMenus.Clone(),
+	return &RoleMenusQuery{
+		config:        _q.config,
+		ctx:           _q.ctx.Clone(),
+		order:         append([]rolemenus.OrderOption{}, _q.order...),
+		inters:        append([]Interceptor{}, _q.inters...),
+		predicates:    append([]predicate.RoleMenus{}, _q.predicates...),
+		withLionRoles: _q.withLionRoles.Clone(),
+		withLionMenus: _q.withLionMenus.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithLionRoleMenus tells the query-builder to eager-load the nodes that are connected to
-// the "lion_role_menus" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *MenusQuery) WithLionRoleMenus(opts ...func(*RoleMenusQuery)) *MenusQuery {
-	query := (&RoleMenusClient{config: _q.config}).Query()
+// WithLionRoles tells the query-builder to eager-load the nodes that are connected to
+// the "lion_roles" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *RoleMenusQuery) WithLionRoles(opts ...func(*RolesQuery)) *RoleMenusQuery {
+	query := (&RolesClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withLionRoleMenus = query
+	_q.withLionRoles = query
+	return _q
+}
+
+// WithLionMenus tells the query-builder to eager-load the nodes that are connected to
+// the "lion_menus" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *RoleMenusQuery) WithLionMenus(opts ...func(*MenusQuery)) *RoleMenusQuery {
+	query := (&MenusClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionMenus = query
 	return _q
 }
 
@@ -303,15 +338,15 @@ func (_q *MenusQuery) WithLionRoleMenus(opts ...func(*RoleMenusQuery)) *MenusQue
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Menus.Query().
-//		GroupBy(menus.FieldCreatedAt).
+//	client.RoleMenus.Query().
+//		GroupBy(rolemenus.FieldCreatedAt).
 //		Aggregate(lion.Count()).
 //		Scan(ctx, &v)
-func (_q *MenusQuery) GroupBy(field string, fields ...string) *MenusGroupBy {
+func (_q *RoleMenusQuery) GroupBy(field string, fields ...string) *RoleMenusGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &MenusGroupBy{build: _q}
+	grbuild := &RoleMenusGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = menus.Label
+	grbuild.label = rolemenus.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -325,23 +360,23 @@ func (_q *MenusQuery) GroupBy(field string, fields ...string) *MenusGroupBy {
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.Menus.Query().
-//		Select(menus.FieldCreatedAt).
+//	client.RoleMenus.Query().
+//		Select(rolemenus.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *MenusQuery) Select(fields ...string) *MenusSelect {
+func (_q *RoleMenusQuery) Select(fields ...string) *RoleMenusSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &MenusSelect{MenusQuery: _q}
-	sbuild.label = menus.Label
+	sbuild := &RoleMenusSelect{RoleMenusQuery: _q}
+	sbuild.label = rolemenus.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a MenusSelect configured with the given aggregations.
-func (_q *MenusQuery) Aggregate(fns ...AggregateFunc) *MenusSelect {
+// Aggregate returns a RoleMenusSelect configured with the given aggregations.
+func (_q *RoleMenusQuery) Aggregate(fns ...AggregateFunc) *RoleMenusSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *MenusQuery) prepareQuery(ctx context.Context) error {
+func (_q *RoleMenusQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("lion: uninitialized interceptor (forgotten import lion/runtime?)")
@@ -353,7 +388,7 @@ func (_q *MenusQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !menus.ValidColumn(f) {
+		if !rolemenus.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("lion: invalid field %q for query", f)}
 		}
 	}
@@ -367,19 +402,20 @@ func (_q *MenusQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *MenusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Menus, error) {
+func (_q *RoleMenusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RoleMenus, error) {
 	var (
-		nodes       = []*Menus{}
+		nodes       = []*RoleMenus{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
-			_q.withLionRoleMenus != nil,
+		loadedTypes = [2]bool{
+			_q.withLionRoles != nil,
+			_q.withLionMenus != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Menus).scanValues(nil, columns)
+		return (*RoleMenus).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Menus{config: _q.config}
+		node := &RoleMenus{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -393,48 +429,81 @@ func (_q *MenusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Menus,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withLionRoleMenus; query != nil {
-		if err := _q.loadLionRoleMenus(ctx, query, nodes,
-			func(n *Menus) { n.Edges.LionRoleMenus = []*RoleMenus{} },
-			func(n *Menus, e *RoleMenus) { n.Edges.LionRoleMenus = append(n.Edges.LionRoleMenus, e) }); err != nil {
+	if query := _q.withLionRoles; query != nil {
+		if err := _q.loadLionRoles(ctx, query, nodes, nil,
+			func(n *RoleMenus, e *Roles) { n.Edges.LionRoles = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withLionMenus; query != nil {
+		if err := _q.loadLionMenus(ctx, query, nodes, nil,
+			func(n *RoleMenus, e *Menus) { n.Edges.LionMenus = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *MenusQuery) loadLionRoleMenus(ctx context.Context, query *RoleMenusQuery, nodes []*Menus, init func(*Menus), assign func(*Menus, *RoleMenus)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Menus)
+func (_q *RoleMenusQuery) loadLionRoles(ctx context.Context, query *RolesQuery, nodes []*RoleMenus, init func(*RoleMenus), assign func(*RoleMenus, *Roles)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*RoleMenus)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+		fk := nodes[i].RoleID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
 		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(rolemenus.FieldMenuID)
+	if len(ids) == 0 {
+		return nil
 	}
-	query.Where(predicate.RoleMenus(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(menus.LionRoleMenusColumn), fks...))
-	}))
+	query.Where(roles.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.MenuID
-		node, ok := nodeids[fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "menu_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "role_id" returned %v`, n.ID)
 		}
-		assign(node, n)
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *RoleMenusQuery) loadLionMenus(ctx context.Context, query *MenusQuery, nodes []*RoleMenus, init func(*RoleMenus), assign func(*RoleMenus, *Menus)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*RoleMenus)
+	for i := range nodes {
+		fk := nodes[i].MenuID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(menus.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "menu_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
 
-func (_q *MenusQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *RoleMenusQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -443,8 +512,8 @@ func (_q *MenusQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *MenusQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(menus.Table, menus.Columns, sqlgraph.NewFieldSpec(menus.FieldID, field.TypeInt))
+func (_q *RoleMenusQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(rolemenus.Table, rolemenus.Columns, sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -453,11 +522,17 @@ func (_q *MenusQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, menus.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, rolemenus.FieldID)
 		for i := range fields {
-			if fields[i] != menus.FieldID {
+			if fields[i] != rolemenus.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withLionRoles != nil {
+			_spec.Node.AddColumnOnce(rolemenus.FieldRoleID)
+		}
+		if _q.withLionMenus != nil {
+			_spec.Node.AddColumnOnce(rolemenus.FieldMenuID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -483,12 +558,12 @@ func (_q *MenusQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *MenusQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *RoleMenusQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(menus.Table)
+	t1 := builder.Table(rolemenus.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = menus.Columns
+		columns = rolemenus.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -515,28 +590,28 @@ func (_q *MenusQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// MenusGroupBy is the group-by builder for Menus entities.
-type MenusGroupBy struct {
+// RoleMenusGroupBy is the group-by builder for RoleMenus entities.
+type RoleMenusGroupBy struct {
 	selector
-	build *MenusQuery
+	build *RoleMenusQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *MenusGroupBy) Aggregate(fns ...AggregateFunc) *MenusGroupBy {
+func (_g *RoleMenusGroupBy) Aggregate(fns ...AggregateFunc) *RoleMenusGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *MenusGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *RoleMenusGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*MenusQuery, *MenusGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*RoleMenusQuery, *RoleMenusGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *MenusGroupBy) sqlScan(ctx context.Context, root *MenusQuery, v any) error {
+func (_g *RoleMenusGroupBy) sqlScan(ctx context.Context, root *RoleMenusQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -563,28 +638,28 @@ func (_g *MenusGroupBy) sqlScan(ctx context.Context, root *MenusQuery, v any) er
 	return sql.ScanSlice(rows, v)
 }
 
-// MenusSelect is the builder for selecting fields of Menus entities.
-type MenusSelect struct {
-	*MenusQuery
+// RoleMenusSelect is the builder for selecting fields of RoleMenus entities.
+type RoleMenusSelect struct {
+	*RoleMenusQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *MenusSelect) Aggregate(fns ...AggregateFunc) *MenusSelect {
+func (_s *RoleMenusSelect) Aggregate(fns ...AggregateFunc) *RoleMenusSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *MenusSelect) Scan(ctx context.Context, v any) error {
+func (_s *RoleMenusSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*MenusQuery, *MenusSelect](ctx, _s.MenusQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*RoleMenusQuery, *RoleMenusSelect](ctx, _s.RoleMenusQuery, _s, _s.inters, v)
 }
 
-func (_s *MenusSelect) sqlScan(ctx context.Context, root *MenusQuery, v any) error {
+func (_s *RoleMenusSelect) sqlScan(ctx context.Context, root *RoleMenusQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

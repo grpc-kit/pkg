@@ -77,6 +77,10 @@ type KnownAdminClient interface {
 	CreateRoleMembers(ctx context.Context, in *CreateRoleMembersRequest, opts ...grpc.CallOption) (*CreateRoleMembersResponse, error)
 	UpdateRoleMembers(ctx context.Context, in *UpdateRoleMembersRequest, opts ...grpc.CallOption) (*UpdateRoleMembersResponse, error)
 	DeleteRoleMember(ctx context.Context, in *DeleteRoleMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ListRoleMenus(ctx context.Context, in *ListRoleMenusRequest, opts ...grpc.CallOption) (*ListRoleMenusResponse, error)
+	CreateRoleMenus(ctx context.Context, in *CreateRoleMenusRequest, opts ...grpc.CallOption) (*CreateRoleMenusResponse, error)
+	UpdateRoleMenus(ctx context.Context, in *UpdateRoleMenusRequest, opts ...grpc.CallOption) (*UpdateRoleMenusResponse, error)
+	DeleteRoleMenu(ctx context.Context, in *DeleteRoleMenuRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 部门管理
 	CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
@@ -534,6 +538,42 @@ func (c *knownAdminClient) DeleteRoleMember(ctx context.Context, in *DeleteRoleM
 	return out, nil
 }
 
+func (c *knownAdminClient) ListRoleMenus(ctx context.Context, in *ListRoleMenusRequest, opts ...grpc.CallOption) (*ListRoleMenusResponse, error) {
+	out := new(ListRoleMenusResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleMenus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateRoleMenus(ctx context.Context, in *CreateRoleMenusRequest, opts ...grpc.CallOption) (*CreateRoleMenusResponse, error) {
+	out := new(CreateRoleMenusResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleMenus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateRoleMenus(ctx context.Context, in *UpdateRoleMenusRequest, opts ...grpc.CallOption) (*UpdateRoleMenusResponse, error) {
+	out := new(UpdateRoleMenusResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRoleMenus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteRoleMenu(ctx context.Context, in *DeleteRoleMenuRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMenu", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error) {
 	out := new(Department)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDepartment", in, out, opts...)
@@ -835,6 +875,10 @@ type KnownAdminServer interface {
 	CreateRoleMembers(context.Context, *CreateRoleMembersRequest) (*CreateRoleMembersResponse, error)
 	UpdateRoleMembers(context.Context, *UpdateRoleMembersRequest) (*UpdateRoleMembersResponse, error)
 	DeleteRoleMember(context.Context, *DeleteRoleMemberRequest) (*emptypb.Empty, error)
+	ListRoleMenus(context.Context, *ListRoleMenusRequest) (*ListRoleMenusResponse, error)
+	CreateRoleMenus(context.Context, *CreateRoleMenusRequest) (*CreateRoleMenusResponse, error)
+	UpdateRoleMenus(context.Context, *UpdateRoleMenusRequest) (*UpdateRoleMenusResponse, error)
+	DeleteRoleMenu(context.Context, *DeleteRoleMenuRequest) (*emptypb.Empty, error)
 	// 部门管理
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
@@ -1011,6 +1055,18 @@ func (UnimplementedKnownAdminServer) UpdateRoleMembers(context.Context, *UpdateR
 }
 func (UnimplementedKnownAdminServer) DeleteRoleMember(context.Context, *DeleteRoleMemberRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteRoleMember not implemented")
+}
+func (UnimplementedKnownAdminServer) ListRoleMenus(context.Context, *ListRoleMenusRequest) (*ListRoleMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRoleMenus not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateRoleMenus(context.Context, *CreateRoleMenusRequest) (*CreateRoleMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateRoleMenus not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateRoleMenus(context.Context, *UpdateRoleMenusRequest) (*UpdateRoleMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateRoleMenus not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteRoleMenu(context.Context, *DeleteRoleMenuRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteRoleMenu not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDepartment not implemented")
@@ -1933,6 +1989,78 @@ func _KnownAdmin_DeleteRoleMember_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_ListRoleMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRoleMenusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListRoleMenus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleMenus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListRoleMenus(ctx, req.(*ListRoleMenusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateRoleMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRoleMenusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateRoleMenus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleMenus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateRoleMenus(ctx, req.(*CreateRoleMenusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateRoleMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRoleMenusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateRoleMenus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRoleMenus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateRoleMenus(ctx, req.(*UpdateRoleMenusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteRoleMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRoleMenuRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteRoleMenu(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMenu",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteRoleMenu(ctx, req.(*DeleteRoleMenuRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_CreateDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDepartmentRequest)
 	if err := dec(in); err != nil {
@@ -2609,6 +2737,22 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteRoleMember",
 			Handler:    _KnownAdmin_DeleteRoleMember_Handler,
+		},
+		{
+			MethodName: "ListRoleMenus",
+			Handler:    _KnownAdmin_ListRoleMenus_Handler,
+		},
+		{
+			MethodName: "CreateRoleMenus",
+			Handler:    _KnownAdmin_CreateRoleMenus_Handler,
+		},
+		{
+			MethodName: "UpdateRoleMenus",
+			Handler:    _KnownAdmin_UpdateRoleMenus_Handler,
+		},
+		{
+			MethodName: "DeleteRoleMenu",
+			Handler:    _KnownAdmin_DeleteRoleMenu_Handler,
 		},
 		{
 			MethodName: "CreateDepartment",

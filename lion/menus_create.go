@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 )
 
 // MenusCreate is the builder for creating a Menus entity.
@@ -226,6 +227,21 @@ func (_c *MenusCreate) SetNillableDescription(v *string) *MenusCreate {
 		_c.SetDescription(*v)
 	}
 	return _c
+}
+
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
+func (_c *MenusCreate) AddLionRoleMenuIDs(ids ...int) *MenusCreate {
+	_c.mutation.AddLionRoleMenuIDs(ids...)
+	return _c
+}
+
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenus entity.
+func (_c *MenusCreate) AddLionRoleMenus(v ...*RoleMenus) *MenusCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionRoleMenuIDs(ids...)
 }
 
 // Mutation returns the MenusMutation object of the builder.
@@ -486,6 +502,22 @@ func (_c *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(menus.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if nodes := _c.mutation.LionRoleMenusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   menus.LionRoleMenusTable,
+			Columns: []string{menus.LionRoleMenusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

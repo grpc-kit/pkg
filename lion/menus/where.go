@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/predicate"
 )
 
@@ -957,6 +958,29 @@ func DescriptionEqualFold(v string) predicate.Menus {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Menus {
 	return predicate.Menus(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// HasLionRoleMenus applies the HasEdge predicate on the "lion_role_menus" edge.
+func HasLionRoleMenus() predicate.Menus {
+	return predicate.Menus(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionRoleMenusTable, LionRoleMenusColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionRoleMenusWith applies the HasEdge predicate on the "lion_role_menus" edge with a given conditions (other predicates).
+func HasLionRoleMenusWith(preds ...predicate.RoleMenus) predicate.Menus {
+	return predicate.Menus(func(s *sql.Selector) {
+		step := newLionRoleMenusStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

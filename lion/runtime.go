@@ -14,6 +14,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/useridentities"
@@ -603,6 +604,51 @@ func init() {
 	policiesDescDescription := policiesFields[5].Descriptor()
 	// policies.DefaultDescription holds the default value on creation for the description field.
 	policies.DefaultDescription = policiesDescDescription.Default.(string)
+	rolemenusMixin := schema.RoleMenus{}.Mixin()
+	rolemenusMixinFields0 := rolemenusMixin[0].Fields()
+	_ = rolemenusMixinFields0
+	rolemenusMixinFields1 := rolemenusMixin[1].Fields()
+	_ = rolemenusMixinFields1
+	rolemenusFields := schema.RoleMenus{}.Fields()
+	_ = rolemenusFields
+	// rolemenusDescCreatedAt is the schema descriptor for created_at field.
+	rolemenusDescCreatedAt := rolemenusMixinFields0[0].Descriptor()
+	// rolemenus.DefaultCreatedAt holds the default value on creation for the created_at field.
+	rolemenus.DefaultCreatedAt = rolemenusDescCreatedAt.Default.(func() time.Time)
+	// rolemenusDescUpdatedAt is the schema descriptor for updated_at field.
+	rolemenusDescUpdatedAt := rolemenusMixinFields0[1].Descriptor()
+	// rolemenus.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	rolemenus.DefaultUpdatedAt = rolemenusDescUpdatedAt.Default.(func() time.Time)
+	// rolemenus.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	rolemenus.UpdateDefaultUpdatedAt = rolemenusDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// rolemenusDescCreatedBy is the schema descriptor for created_by field.
+	rolemenusDescCreatedBy := rolemenusMixinFields1[0].Descriptor()
+	// rolemenus.DefaultCreatedBy holds the default value on creation for the created_by field.
+	rolemenus.DefaultCreatedBy = rolemenusDescCreatedBy.Default.(int64)
+	// rolemenusDescUpdatedBy is the schema descriptor for updated_by field.
+	rolemenusDescUpdatedBy := rolemenusMixinFields1[1].Descriptor()
+	// rolemenus.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	rolemenus.DefaultUpdatedBy = rolemenusDescUpdatedBy.Default.(int64)
+	// rolemenusDescRoleID is the schema descriptor for role_id field.
+	rolemenusDescRoleID := rolemenusFields[0].Descriptor()
+	// rolemenus.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	rolemenus.RoleIDValidator = rolemenusDescRoleID.Validators[0].(func(int) error)
+	// rolemenusDescMenuID is the schema descriptor for menu_id field.
+	rolemenusDescMenuID := rolemenusFields[1].Descriptor()
+	// rolemenus.MenuIDValidator is a validator for the "menu_id" field. It is called by the builders before save.
+	rolemenus.MenuIDValidator = rolemenusDescMenuID.Validators[0].(func(int) error)
+	// rolemenusDescPermissionScope is the schema descriptor for permission_scope field.
+	rolemenusDescPermissionScope := rolemenusFields[2].Descriptor()
+	// rolemenus.DefaultPermissionScope holds the default value on creation for the permission_scope field.
+	rolemenus.DefaultPermissionScope = rolemenusDescPermissionScope.Default.(int)
+	// rolemenusDescDescription is the schema descriptor for description field.
+	rolemenusDescDescription := rolemenusFields[3].Descriptor()
+	// rolemenus.DefaultDescription holds the default value on creation for the description field.
+	rolemenus.DefaultDescription = rolemenusDescDescription.Default.(string)
+	// rolemenusDescIsRecursive is the schema descriptor for is_recursive field.
+	rolemenusDescIsRecursive := rolemenusFields[4].Descriptor()
+	// rolemenus.DefaultIsRecursive holds the default value on creation for the is_recursive field.
+	rolemenus.DefaultIsRecursive = rolemenusDescIsRecursive.Default.(bool)
 	rolesMixin := schema.Roles{}.Mixin()
 	rolesMixinFields0 := rolesMixin[0].Fields()
 	_ = rolesMixinFields0

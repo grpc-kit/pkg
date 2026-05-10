@@ -2,14 +2,19 @@ package admin
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/grouproles"
+	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 
 	// 数据范围表已注释，同步取消依赖
 	// "github.com/grpc-kit/pkg/lion/roledataranges"
@@ -377,6 +382,306 @@ func (a *KnownAdminAPI) DeleteRoleMember(ctx context.Context, req *adminv1.Delet
 	return empty, nil
 }
 
+func lionRoleMenuToProto(in *lion.RoleMenus) *adminv1.RoleMenu {
+	if in == nil {
+		return nil
+	}
+	out := &adminv1.RoleMenu{
+		Id:              int64(in.ID),
+		RoleId:          int64(in.RoleID),
+		MenuId:          int64(in.MenuID),
+		PermissionScope: int32(in.PermissionScope),
+		Description:     in.Description,
+		IsRecursive:     in.IsRecursive,
+	}
+	if in.Edges.LionMenus != nil {
+		out.Menu = lionMenuToProto(in.Edges.LionMenus)
+	}
+	return out
+}
+
+func (a *KnownAdminAPI) roleMenuForUpdate(ctx context.Context, db *lion.Client, roleID int, m *adminv1.RoleMenu) (*lion.RoleMenus, error) {
+	if m.GetId() > 0 {
+		rm, err := db.RoleMenus.Get(ctx, int(m.GetId()))
+		if err != nil {
+			if lion.IsNotFound(err) {
+				return nil, errs.NotFound(ctx).WithMessage("role menu not found")
+			}
+			return nil, err
+		}
+		if rm.RoleID != roleID {
+			return nil, errs.InvalidArgument(ctx).WithMessage("role_menu id does not belong to this role")
+		}
+		if m.GetMenuId() > 0 && int(m.GetMenuId()) != rm.MenuID {
+			return nil, errs.InvalidArgument(ctx).WithMessage("menu_id does not match role_menu record")
+		}
+		return rm, nil
+	}
+
+	menuID := m.GetMenuId()
+	if menuID == 0 && m.GetMenu() != nil {
+		menuID = m.GetMenu().GetId()
+	}
+	if menuID <= 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("menu_id or id is required")
+	}
+
+	rm, err := db.RoleMenus.Query().
+		Where(rolemenus.RoleIDEQ(roleID), rolemenus.MenuIDEQ(int(menuID))).
+		Only(ctx)
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("role menu not found")
+		}
+		return nil, err
+	}
+	return rm, nil
+}
+
+// ListRoleMenus 获取角色菜单列表
+func (a *KnownAdminAPI) ListRoleMenus(ctx context.Context, req *adminv1.ListRoleMenusRequest) (*adminv1.ListRoleMenusResponse, error) {
+	result := &adminv1.ListRoleMenusResponse{Menus: make([]*adminv1.RoleMenu, 0)}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	roleID, err := strconv.Atoi(req.GetParent())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
+	query := db.RoleMenus.Query().Where(rolemenus.RoleIDEQ(roleID))
+	filter := strings.TrimSpace(req.GetFilter())
+	if filter != "" {
+		query = query.Where(rolemenus.Or(
+			rolemenus.DescriptionContainsFold(filter),
+			rolemenus.HasLionMenusWith(
+				menus.Or(
+					menus.CodeContainsFold(filter),
+					menus.DisplayNameContainsFold(filter),
+					menus.RoutePathContainsFold(filter),
+				),
+			),
+		))
+	}
+
+	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+	case "created_at asc", "create_time asc":
+		query = query.Order(lion.Asc(rolemenus.FieldCreatedAt), lion.Asc(rolemenus.FieldID))
+	case "permission_scope desc":
+		query = query.Order(lion.Desc(rolemenus.FieldPermissionScope), lion.Asc(rolemenus.FieldID))
+	case "permission_scope asc":
+		query = query.Order(lion.Asc(rolemenus.FieldPermissionScope), lion.Asc(rolemenus.FieldID))
+	case "menu_id asc":
+		query = query.Order(lion.Asc(rolemenus.FieldMenuID), lion.Asc(rolemenus.FieldID))
+	case "menu_id desc":
+		query = query.Order(lion.Desc(rolemenus.FieldMenuID), lion.Asc(rolemenus.FieldID))
+	default:
+		query = query.Order(lion.Desc(rolemenus.FieldCreatedAt), lion.Asc(rolemenus.FieldID))
+	}
+
+	totalSize, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result.TotalSize = int32(totalSize)
+
+	pageSize := GetPageSize(ctx, req.GetPageSize())
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListRoleMenusRequest_Offset:
+		query = query.Offset(int(p.Offset))
+	case *adminv1.ListRoleMenusRequest_PageToken:
+		if req.GetPageToken() != "" {
+			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
+			if decErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
+			}
+			var lastID int
+			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
+			}
+			if lastID > 0 {
+				query = query.Where(rolemenus.IDGT(lastID))
+			}
+		}
+	}
+
+	list, err := query.
+		Limit(int(pageSize)).
+		WithLionMenus().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range list {
+		result.Menus = append(result.Menus, lionRoleMenuToProto(item))
+	}
+
+	if _, ok := req.GetPagination().(*adminv1.ListRoleMenusRequest_PageToken); ok && len(list) == int(pageSize) && len(list) > 0 {
+		lastID := list[len(list)-1].ID
+		tokenData, _ := json.Marshal(lastID)
+		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	}
+
+	return result, nil
+}
+
+// CreateRoleMenus 批量创建角色菜单关联
+func (a *KnownAdminAPI) CreateRoleMenus(ctx context.Context, req *adminv1.CreateRoleMenusRequest) (*adminv1.CreateRoleMenusResponse, error) {
+	result := &adminv1.CreateRoleMenusResponse{}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	roleID, err := strconv.Atoi(req.GetParent())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
+	if len(req.GetMenus()) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("menus is empty")
+	}
+
+	var actor int64
+	if v, err := GetUserID(ctx); err == nil {
+		actor = v
+	}
+
+	for _, item := range req.GetMenus() {
+		menuID := item.GetMenuId()
+		if menuID == 0 && item.GetMenu() != nil {
+			menuID = item.GetMenu().GetId()
+		}
+		if menuID <= 0 {
+			return nil, errs.InvalidArgument(ctx).WithMessage("menu_id is required")
+		}
+
+		if _, err := db.Menus.Get(ctx, int(menuID)); err != nil {
+			if lion.IsNotFound(err) {
+				return nil, errs.NotFound(ctx).WithMessage("menu not found")
+			}
+			return nil, err
+		}
+
+		scope := item.GetPermissionScope()
+		if scope == 0 {
+			scope = 1
+		}
+		if scope < 1 {
+			return nil, errs.InvalidArgument(ctx).WithMessage("permission_scope must be >= 1")
+		}
+
+		cb := db.RoleMenus.Create().
+			SetRoleID(roleID).
+			SetMenuID(int(menuID)).
+			SetPermissionScope(int(scope)).
+			SetDescription(item.GetDescription()).
+			SetIsRecursive(item.GetIsRecursive())
+		if actor != 0 {
+			cb = cb.SetCreatedBy(actor).SetUpdatedBy(actor)
+		}
+		if _, err := cb.Save(ctx); err != nil {
+			if lion.IsConstraintError(err) {
+				return nil, errs.AlreadyExists(ctx).WithMessage("role menu already exists")
+			}
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
+// UpdateRoleMenus 批量更新角色菜单关联
+func (a *KnownAdminAPI) UpdateRoleMenus(ctx context.Context, req *adminv1.UpdateRoleMenusRequest) (*adminv1.UpdateRoleMenusResponse, error) {
+	result := &adminv1.UpdateRoleMenusResponse{}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	roleID, err := strconv.Atoi(req.GetParent())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
+	if len(req.GetMenus()) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("menus is empty")
+	}
+
+	var actor int64
+	if v, err := GetUserID(ctx); err == nil {
+		actor = v
+	}
+
+	for _, item := range req.GetMenus() {
+		rm, err := a.roleMenuForUpdate(ctx, db, roleID, item)
+		if err != nil {
+			return nil, err
+		}
+
+		upd := rm.Update().SetDescription(item.GetDescription()).SetIsRecursive(item.GetIsRecursive())
+		if scope := item.GetPermissionScope(); scope > 0 {
+			upd = upd.SetPermissionScope(int(scope))
+		}
+		if actor != 0 {
+			upd = upd.SetUpdatedBy(actor)
+		}
+		if _, err := upd.Save(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
+// DeleteRoleMenu 删除角色下的菜单关联
+func (a *KnownAdminAPI) DeleteRoleMenu(ctx context.Context, req *adminv1.DeleteRoleMenuRequest) (*emptypb.Empty, error) {
+	result := &emptypb.Empty{}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	roleID, err := strconv.Atoi(req.GetParent())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+	if req.GetMenuId() == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("menu_id is required")
+	}
+
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
+	if _, err := db.RoleMenus.Delete().
+		Where(rolemenus.RoleIDEQ(roleID), rolemenus.MenuIDEQ(int(req.GetMenuId()))).
+		Exec(ctx); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 // CreateRole 创建角色
 func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleRequest) (*adminv1.Role, error) {
 	result := &adminv1.Role{}
@@ -541,6 +846,10 @@ func (a *KnownAdminAPI) DeleteRole(ctx context.Context, req *adminv1.DeleteRoleR
 
 	if db.UserRoles.Query().Where(userroles.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("role has user")
+	}
+
+	if db.RoleMenus.Query().Where(rolemenus.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("role has menu")
 	}
 
 	_, err = db.Roles.Delete().Where(roles.ID(int(req.Id))).Exec(ctx)

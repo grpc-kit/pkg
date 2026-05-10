@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -64,15 +65,9 @@ func (Menus) Fields() []ent.Field {
 
 // Edges of the table.
 func (Menus) Edges() []ent.Edge {
-	/*
-		return []ent.Edge{
-			edge.From("lion_resources", Resources.Type).
-				Ref("lion_menus").
-				Field("resource_id").
-				Unique(),
-		}
-	*/
-	return nil
+	return []ent.Edge{
+		edge.To("lion_role_menus", RoleMenus.Type),
+	}
 }
 
 // Mixin of the table.

@@ -55,9 +55,11 @@ type RolesEdges struct {
 	LionUserRoles []*UserRoles `json:"lion_user_roles,omitempty"`
 	// LionRoleGroups holds the value of the lion_role_groups edge.
 	LionRoleGroups []*GroupRoles `json:"lion_role_groups,omitempty"`
+	// LionRoleMenus holds the value of the lion_role_menus edge.
+	LionRoleMenus []*RoleMenus `json:"lion_role_menus,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // LionUserRolesOrErr returns the LionUserRoles value or an error if the edge
@@ -76,6 +78,15 @@ func (e RolesEdges) LionRoleGroupsOrErr() ([]*GroupRoles, error) {
 		return e.LionRoleGroups, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_role_groups"}
+}
+
+// LionRoleMenusOrErr returns the LionRoleMenus value or an error if the edge
+// was not loaded in eager-loading.
+func (e RolesEdges) LionRoleMenusOrErr() ([]*RoleMenus, error) {
+	if e.loadedTypes[2] {
+		return e.LionRoleMenus, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_role_menus"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -212,6 +223,11 @@ func (_m *Roles) QueryLionUserRoles() *UserRolesQuery {
 // QueryLionRoleGroups queries the "lion_role_groups" edge of the Roles entity.
 func (_m *Roles) QueryLionRoleGroups() *GroupRolesQuery {
 	return NewRolesClient(_m.config).QueryLionRoleGroups(_m)
+}
+
+// QueryLionRoleMenus queries the "lion_role_menus" edge of the Roles entity.
+func (_m *Roles) QueryLionRoleMenus() *RoleMenusQuery {
+	return NewRolesClient(_m.config).QueryLionRoleMenus(_m)
 }
 
 // Update returns a builder for updating this Roles.

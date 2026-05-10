@@ -33,6 +33,9 @@ type Menus func(*sql.Selector)
 // Policies is the predicate function for policies builders.
 type Policies func(*sql.Selector)
 
+// RoleMenus is the predicate function for rolemenus builders.
+type RoleMenus func(*sql.Selector)
+
 // Roles is the predicate function for roles builders.
 type Roles func(*sql.Selector)
 

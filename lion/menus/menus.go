@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -45,8 +46,17 @@ const (
 	FieldMetadata = "metadata"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// EdgeLionRoleMenus holds the string denoting the lion_role_menus edge name in mutations.
+	EdgeLionRoleMenus = "lion_role_menus"
 	// Table holds the table name of the menus in the database.
 	Table = "lion_menus"
+	// LionRoleMenusTable is the table that holds the lion_role_menus relation/edge.
+	LionRoleMenusTable = "lion_role_menus"
+	// LionRoleMenusInverseTable is the table name for the RoleMenus entity.
+	// It exists in this package in order to avoid circular dependency with the "rolemenus" package.
+	LionRoleMenusInverseTable = "lion_role_menus"
+	// LionRoleMenusColumn is the table column denoting the lion_role_menus relation/edge.
+	LionRoleMenusColumn = "menu_id"
 )
 
 // Columns holds all SQL columns for menus fields.
@@ -208,4 +218,25 @@ func ByMenuStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByLionRoleMenusCount orders the results by lion_role_menus count.
+func ByLionRoleMenusCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionRoleMenusStep(), opts...)
+	}
+}
+
+// ByLionRoleMenus orders the results by lion_role_menus terms.
+func ByLionRoleMenus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionRoleMenusStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newLionRoleMenusStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionRoleMenusInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleMenusTable, LionRoleMenusColumn),
+	)
 }

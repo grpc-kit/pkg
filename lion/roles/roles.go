@@ -44,6 +44,8 @@ const (
 	EdgeLionUserRoles = "lion_user_roles"
 	// EdgeLionRoleGroups holds the string denoting the lion_role_groups edge name in mutations.
 	EdgeLionRoleGroups = "lion_role_groups"
+	// EdgeLionRoleMenus holds the string denoting the lion_role_menus edge name in mutations.
+	EdgeLionRoleMenus = "lion_role_menus"
 	// Table holds the table name of the roles in the database.
 	Table = "lion_roles"
 	// LionUserRolesTable is the table that holds the lion_user_roles relation/edge.
@@ -60,6 +62,13 @@ const (
 	LionRoleGroupsInverseTable = "lion_group_roles"
 	// LionRoleGroupsColumn is the table column denoting the lion_role_groups relation/edge.
 	LionRoleGroupsColumn = "role_id"
+	// LionRoleMenusTable is the table that holds the lion_role_menus relation/edge.
+	LionRoleMenusTable = "lion_role_menus"
+	// LionRoleMenusInverseTable is the table name for the RoleMenus entity.
+	// It exists in this package in order to avoid circular dependency with the "rolemenus" package.
+	LionRoleMenusInverseTable = "lion_role_menus"
+	// LionRoleMenusColumn is the table column denoting the lion_role_menus relation/edge.
+	LionRoleMenusColumn = "role_id"
 )
 
 // Columns holds all SQL columns for roles fields.
@@ -219,6 +228,20 @@ func ByLionRoleGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionRoleGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByLionRoleMenusCount orders the results by lion_role_menus count.
+func ByLionRoleMenusCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionRoleMenusStep(), opts...)
+	}
+}
+
+// ByLionRoleMenus orders the results by lion_role_menus terms.
+func ByLionRoleMenus(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionRoleMenusStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newLionUserRolesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -231,5 +254,12 @@ func newLionRoleGroupsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionRoleGroupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleGroupsTable, LionRoleGroupsColumn),
+	)
+}
+func newLionRoleMenusStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionRoleMenusInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRoleMenusTable, LionRoleMenusColumn),
 	)
 }

@@ -858,6 +858,541 @@ func (*UpdateRoleMembersResponse) Descriptor() ([]byte, []int) {
 	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{12}
 }
 
+type RoleMenu struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id     int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	RoleId int64 `protobuf:"varint,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	MenuId int64 `protobuf:"varint,3,opt,name=menu_id,json=menuId,proto3" json:"menu_id,omitempty"`
+	// 权限范围：1=可见，2=可操作
+	PermissionScope int32  `protobuf:"varint,4,opt,name=permission_scope,json=permissionScope,proto3" json:"permission_scope,omitempty"`
+	Description     string `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
+	// 冗余菜单详情，便于前端直接渲染
+	Menu *Menu `protobuf:"bytes,6,opt,name=menu,proto3" json:"menu,omitempty"`
+	// 是否递归包含子菜单，为 true 时授权逻辑自动涵盖所有后代菜单
+	IsRecursive bool `protobuf:"varint,7,opt,name=is_recursive,json=isRecursive,proto3" json:"is_recursive,omitempty"`
+}
+
+func (x *RoleMenu) Reset() {
+	*x = RoleMenu{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RoleMenu) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoleMenu) ProtoMessage() {}
+
+func (x *RoleMenu) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoleMenu.ProtoReflect.Descriptor instead.
+func (*RoleMenu) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *RoleMenu) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *RoleMenu) GetRoleId() int64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *RoleMenu) GetMenuId() int64 {
+	if x != nil {
+		return x.MenuId
+	}
+	return 0
+}
+
+func (x *RoleMenu) GetPermissionScope() int32 {
+	if x != nil {
+		return x.PermissionScope
+	}
+	return 0
+}
+
+func (x *RoleMenu) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *RoleMenu) GetMenu() *Menu {
+	if x != nil {
+		return x.Menu
+	}
+	return nil
+}
+
+func (x *RoleMenu) GetIsRecursive() bool {
+	if x != nil {
+		return x.IsRecursive
+	}
+	return false
+}
+
+type ListRoleMenusRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源：角色 ID（与路径 {parent} 一致）
+	Parent   string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	PageSize int32  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Types that are assignable to Pagination:
+	//
+	//	*ListRoleMenusRequest_PageToken
+	//	*ListRoleMenusRequest_Offset
+	Pagination isListRoleMenusRequest_Pagination `protobuf_oneof:"pagination"`
+	View       View                              `protobuf:"varint,4,opt,name=view,proto3,enum=grpc_kit.api.known.admin.v1.View" json:"view,omitempty"`
+	Structure  Structure                         `protobuf:"varint,5,opt,name=structure,proto3,enum=grpc_kit.api.known.admin.v1.Structure" json:"structure,omitempty"`
+	Filter     string                            `protobuf:"bytes,6,opt,name=filter,proto3" json:"filter,omitempty"`
+	OrderBy    string                            `protobuf:"bytes,7,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
+}
+
+func (x *ListRoleMenusRequest) Reset() {
+	*x = ListRoleMenusRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListRoleMenusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRoleMenusRequest) ProtoMessage() {}
+
+func (x *ListRoleMenusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRoleMenusRequest.ProtoReflect.Descriptor instead.
+func (*ListRoleMenusRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ListRoleMenusRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *ListRoleMenusRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (m *ListRoleMenusRequest) GetPagination() isListRoleMenusRequest_Pagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+func (x *ListRoleMenusRequest) GetPageToken() string {
+	if x, ok := x.GetPagination().(*ListRoleMenusRequest_PageToken); ok {
+		return x.PageToken
+	}
+	return ""
+}
+
+func (x *ListRoleMenusRequest) GetOffset() int32 {
+	if x, ok := x.GetPagination().(*ListRoleMenusRequest_Offset); ok {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *ListRoleMenusRequest) GetView() View {
+	if x != nil {
+		return x.View
+	}
+	return View_VIEW_UNSPECIFIED
+}
+
+func (x *ListRoleMenusRequest) GetStructure() Structure {
+	if x != nil {
+		return x.Structure
+	}
+	return Structure_STRUCTURE_UNSPECIFIED
+}
+
+func (x *ListRoleMenusRequest) GetFilter() string {
+	if x != nil {
+		return x.Filter
+	}
+	return ""
+}
+
+func (x *ListRoleMenusRequest) GetOrderBy() string {
+	if x != nil {
+		return x.OrderBy
+	}
+	return ""
+}
+
+type isListRoleMenusRequest_Pagination interface {
+	isListRoleMenusRequest_Pagination()
+}
+
+type ListRoleMenusRequest_PageToken struct {
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3,oneof"`
+}
+
+type ListRoleMenusRequest_Offset struct {
+	Offset int32 `protobuf:"varint,8,opt,name=offset,proto3,oneof"`
+}
+
+func (*ListRoleMenusRequest_PageToken) isListRoleMenusRequest_Pagination() {}
+
+func (*ListRoleMenusRequest_Offset) isListRoleMenusRequest_Pagination() {}
+
+type ListRoleMenusResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Menus         []*RoleMenu `protobuf:"bytes,1,rep,name=menus,proto3" json:"menus,omitempty"`
+	NextPageToken string      `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	TotalSize     int32       `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
+}
+
+func (x *ListRoleMenusResponse) Reset() {
+	*x = ListRoleMenusResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListRoleMenusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRoleMenusResponse) ProtoMessage() {}
+
+func (x *ListRoleMenusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRoleMenusResponse.ProtoReflect.Descriptor instead.
+func (*ListRoleMenusResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ListRoleMenusResponse) GetMenus() []*RoleMenu {
+	if x != nil {
+		return x.Menus
+	}
+	return nil
+}
+
+func (x *ListRoleMenusResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
+func (x *ListRoleMenusResponse) GetTotalSize() int32 {
+	if x != nil {
+		return x.TotalSize
+	}
+	return 0
+}
+
+type CreateRoleMenusRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源：角色 ID（与路径 {parent} 一致）
+	Parent string      `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	Menus  []*RoleMenu `protobuf:"bytes,2,rep,name=menus,proto3" json:"menus,omitempty"`
+}
+
+func (x *CreateRoleMenusRequest) Reset() {
+	*x = CreateRoleMenusRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateRoleMenusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateRoleMenusRequest) ProtoMessage() {}
+
+func (x *CreateRoleMenusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateRoleMenusRequest.ProtoReflect.Descriptor instead.
+func (*CreateRoleMenusRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *CreateRoleMenusRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *CreateRoleMenusRequest) GetMenus() []*RoleMenu {
+	if x != nil {
+		return x.Menus
+	}
+	return nil
+}
+
+type CreateRoleMenusResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CreateRoleMenusResponse) Reset() {
+	*x = CreateRoleMenusResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateRoleMenusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateRoleMenusResponse) ProtoMessage() {}
+
+func (x *CreateRoleMenusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateRoleMenusResponse.ProtoReflect.Descriptor instead.
+func (*CreateRoleMenusResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{17}
+}
+
+type UpdateRoleMenusRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源：角色 ID（与路径 {parent} 一致）
+	Parent string      `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	Menus  []*RoleMenu `protobuf:"bytes,2,rep,name=menus,proto3" json:"menus,omitempty"`
+}
+
+func (x *UpdateRoleMenusRequest) Reset() {
+	*x = UpdateRoleMenusRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateRoleMenusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRoleMenusRequest) ProtoMessage() {}
+
+func (x *UpdateRoleMenusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateRoleMenusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateRoleMenusRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *UpdateRoleMenusRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *UpdateRoleMenusRequest) GetMenus() []*RoleMenu {
+	if x != nil {
+		return x.Menus
+	}
+	return nil
+}
+
+type UpdateRoleMenusResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *UpdateRoleMenusResponse) Reset() {
+	*x = UpdateRoleMenusResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateRoleMenusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRoleMenusResponse) ProtoMessage() {}
+
+func (x *UpdateRoleMenusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateRoleMenusResponse.ProtoReflect.Descriptor instead.
+func (*UpdateRoleMenusResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{19}
+}
+
+type DeleteRoleMenuRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源：角色 ID（与路径 {parent} 一致）
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	MenuId int64  `protobuf:"varint,2,opt,name=menu_id,json=menuId,proto3" json:"menu_id,omitempty"`
+}
+
+func (x *DeleteRoleMenuRequest) Reset() {
+	*x = DeleteRoleMenuRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeleteRoleMenuRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteRoleMenuRequest) ProtoMessage() {}
+
+func (x *DeleteRoleMenuRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteRoleMenuRequest.ProtoReflect.Descriptor instead.
+func (*DeleteRoleMenuRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *DeleteRoleMenuRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *DeleteRoleMenuRequest) GetMenuId() int64 {
+	if x != nil {
+		return x.MenuId
+	}
+	return 0
+}
+
 var File_known_admin_v1_roles_proto protoreflect.FileDescriptor
 
 var file_known_admin_v1_roles_proto_rawDesc = []byte{
@@ -954,11 +1489,79 @@ var file_known_admin_v1_roles_proto_rawDesc = []byte{
 	0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x65, 0x6d,
 	0x62, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70, 0x52, 0x07, 0x6d, 0x65, 0x6d, 0x62, 0x65, 0x72, 0x73,
 	0x22, 0x1b, 0x0a, 0x19, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x65,
-	0x6d, 0x62, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x34, 0x5a,
-	0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63,
-	0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f,
-	0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6d, 0x62, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xf3, 0x01,
+	0x0a, 0x08, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x65, 0x6e, 0x75, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f,
+	0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x72, 0x6f, 0x6c,
+	0x65, 0x49, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x6d, 0x65, 0x6e, 0x75, 0x5f, 0x69, 0x64, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x6d, 0x65, 0x6e, 0x75, 0x49, 0x64, 0x12, 0x29, 0x0a, 0x10,
+	0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x73, 0x63, 0x6f, 0x70, 0x65,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0f, 0x70, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69,
+	0x6f, 0x6e, 0x53, 0x63, 0x6f, 0x70, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72,
+	0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65,
+	0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x35, 0x0a, 0x04, 0x6d, 0x65, 0x6e,
+	0x75, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b,
+	0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d,
+	0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x65, 0x6e, 0x75, 0x52, 0x04, 0x6d, 0x65, 0x6e, 0x75,
+	0x12, 0x21, 0x0a, 0x0c, 0x69, 0x73, 0x5f, 0x72, 0x65, 0x63, 0x75, 0x72, 0x73, 0x69, 0x76, 0x65,
+	0x18, 0x07, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0b, 0x69, 0x73, 0x52, 0x65, 0x63, 0x75, 0x72, 0x73,
+	0x69, 0x76, 0x65, 0x22, 0xc4, 0x02, 0x0a, 0x14, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x6f, 0x6c, 0x65,
+	0x4d, 0x65, 0x6e, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06,
+	0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x70, 0x61,
+	0x72, 0x65, 0x6e, 0x74, 0x12, 0x1b, 0x0a, 0x09, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x73, 0x69, 0x7a,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x70, 0x61, 0x67, 0x65, 0x53, 0x69, 0x7a,
+	0x65, 0x12, 0x1f, 0x0a, 0x0a, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x09, 0x70, 0x61, 0x67, 0x65, 0x54, 0x6f, 0x6b,
+	0x65, 0x6e, 0x12, 0x18, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x08, 0x20, 0x01,
+	0x28, 0x05, 0x48, 0x00, 0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x12, 0x35, 0x0a, 0x04,
+	0x76, 0x69, 0x65, 0x77, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x21, 0x2e, 0x67, 0x72, 0x70,
+	0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e,
+	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x65, 0x77, 0x52, 0x04, 0x76,
+	0x69, 0x65, 0x77, 0x12, 0x44, 0x0a, 0x09, 0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x75, 0x72, 0x65,
+	0x18, 0x05, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x26, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69,
+	0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69,
+	0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x74, 0x72, 0x75, 0x63, 0x74, 0x75, 0x72, 0x65, 0x52, 0x09,
+	0x73, 0x74, 0x72, 0x75, 0x63, 0x74, 0x75, 0x72, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x66, 0x69, 0x6c,
+	0x74, 0x65, 0x72, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x66, 0x69, 0x6c, 0x74, 0x65,
+	0x72, 0x12, 0x19, 0x0a, 0x08, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x5f, 0x62, 0x79, 0x18, 0x07, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x07, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x42, 0x79, 0x42, 0x0c, 0x0a, 0x0a,
+	0x70, 0x61, 0x67, 0x69, 0x6e, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x9b, 0x01, 0x0a, 0x15, 0x4c,
+	0x69, 0x73, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x65, 0x6e, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3b, 0x0a, 0x05, 0x6d, 0x65, 0x6e, 0x75, 0x73, 0x18, 0x01, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76,
+	0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x65, 0x6e, 0x75, 0x52, 0x05, 0x6d, 0x65, 0x6e, 0x75,
+	0x73, 0x12, 0x26, 0x0a, 0x0f, 0x6e, 0x65, 0x78, 0x74, 0x5f, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x74,
+	0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x6e, 0x65, 0x78, 0x74,
+	0x50, 0x61, 0x67, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x6f, 0x74,
+	0x61, 0x6c, 0x5f, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x74,
+	0x6f, 0x74, 0x61, 0x6c, 0x53, 0x69, 0x7a, 0x65, 0x22, 0x6d, 0x0a, 0x16, 0x43, 0x72, 0x65, 0x61,
+	0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x65, 0x6e, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x12, 0x3b, 0x0a, 0x05, 0x6d, 0x65,
+	0x6e, 0x75, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x67, 0x72, 0x70, 0x63,
+	0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61,
+	0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x65, 0x6e, 0x75,
+	0x52, 0x05, 0x6d, 0x65, 0x6e, 0x75, 0x73, 0x22, 0x19, 0x0a, 0x17, 0x43, 0x72, 0x65, 0x61, 0x74,
+	0x65, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x65, 0x6e, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x6d, 0x0a, 0x16, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65,
+	0x4d, 0x65, 0x6e, 0x75, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06,
+	0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x70, 0x61,
+	0x72, 0x65, 0x6e, 0x74, 0x12, 0x3b, 0x0a, 0x05, 0x6d, 0x65, 0x6e, 0x75, 0x73, 0x18, 0x02, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x25, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76,
+	0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x65, 0x6e, 0x75, 0x52, 0x05, 0x6d, 0x65, 0x6e, 0x75,
+	0x73, 0x22, 0x19, 0x0a, 0x17, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x4d,
+	0x65, 0x6e, 0x75, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x48, 0x0a, 0x15,
+	0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x65, 0x6e, 0x75, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x12, 0x17, 0x0a,
+	0x07, 0x6d, 0x65, 0x6e, 0x75, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06,
+	0x6d, 0x65, 0x6e, 0x75, 0x49, 0x64, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
+	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b,
+	0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69,
+	0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -973,7 +1576,7 @@ func file_known_admin_v1_roles_proto_rawDescGZIP() []byte {
 	return file_known_admin_v1_roles_proto_rawDescData
 }
 
-var file_known_admin_v1_roles_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_known_admin_v1_roles_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_known_admin_v1_roles_proto_goTypes = []interface{}{
 	(*CreateRoleRequest)(nil),         // 0: grpc_kit.api.known.admin.v1.CreateRoleRequest
 	(*GetRoleRequest)(nil),            // 1: grpc_kit.api.known.admin.v1.GetRoleRequest
@@ -988,23 +1591,40 @@ var file_known_admin_v1_roles_proto_goTypes = []interface{}{
 	(*CreateRoleMembersResponse)(nil), // 10: grpc_kit.api.known.admin.v1.CreateRoleMembersResponse
 	(*UpdateRoleMembersRequest)(nil),  // 11: grpc_kit.api.known.admin.v1.UpdateRoleMembersRequest
 	(*UpdateRoleMembersResponse)(nil), // 12: grpc_kit.api.known.admin.v1.UpdateRoleMembersResponse
-	(*Role)(nil),                      // 13: grpc_kit.api.known.admin.v1.Role
-	(*fieldmaskpb.FieldMask)(nil),     // 14: google.protobuf.FieldMask
-	(*Membership)(nil),                // 15: grpc_kit.api.known.admin.v1.Membership
+	(*RoleMenu)(nil),                  // 13: grpc_kit.api.known.admin.v1.RoleMenu
+	(*ListRoleMenusRequest)(nil),      // 14: grpc_kit.api.known.admin.v1.ListRoleMenusRequest
+	(*ListRoleMenusResponse)(nil),     // 15: grpc_kit.api.known.admin.v1.ListRoleMenusResponse
+	(*CreateRoleMenusRequest)(nil),    // 16: grpc_kit.api.known.admin.v1.CreateRoleMenusRequest
+	(*CreateRoleMenusResponse)(nil),   // 17: grpc_kit.api.known.admin.v1.CreateRoleMenusResponse
+	(*UpdateRoleMenusRequest)(nil),    // 18: grpc_kit.api.known.admin.v1.UpdateRoleMenusRequest
+	(*UpdateRoleMenusResponse)(nil),   // 19: grpc_kit.api.known.admin.v1.UpdateRoleMenusResponse
+	(*DeleteRoleMenuRequest)(nil),     // 20: grpc_kit.api.known.admin.v1.DeleteRoleMenuRequest
+	(*Role)(nil),                      // 21: grpc_kit.api.known.admin.v1.Role
+	(*fieldmaskpb.FieldMask)(nil),     // 22: google.protobuf.FieldMask
+	(*Membership)(nil),                // 23: grpc_kit.api.known.admin.v1.Membership
+	(*Menu)(nil),                      // 24: grpc_kit.api.known.admin.v1.Menu
+	(View)(0),                         // 25: grpc_kit.api.known.admin.v1.View
+	(Structure)(0),                    // 26: grpc_kit.api.known.admin.v1.Structure
 }
 var file_known_admin_v1_roles_proto_depIdxs = []int32{
-	13, // 0: grpc_kit.api.known.admin.v1.CreateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
-	13, // 1: grpc_kit.api.known.admin.v1.UpdateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
-	14, // 2: grpc_kit.api.known.admin.v1.UpdateRoleRequest.update_mask:type_name -> google.protobuf.FieldMask
-	13, // 3: grpc_kit.api.known.admin.v1.ListRolesResponse.roles:type_name -> grpc_kit.api.known.admin.v1.Role
-	15, // 4: grpc_kit.api.known.admin.v1.ListRoleMembersResponse.members:type_name -> grpc_kit.api.known.admin.v1.Membership
-	15, // 5: grpc_kit.api.known.admin.v1.CreateRoleMembersRequest.members:type_name -> grpc_kit.api.known.admin.v1.Membership
-	15, // 6: grpc_kit.api.known.admin.v1.UpdateRoleMembersRequest.members:type_name -> grpc_kit.api.known.admin.v1.Membership
-	7,  // [7:7] is the sub-list for method output_type
-	7,  // [7:7] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	21, // 0: grpc_kit.api.known.admin.v1.CreateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
+	21, // 1: grpc_kit.api.known.admin.v1.UpdateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
+	22, // 2: grpc_kit.api.known.admin.v1.UpdateRoleRequest.update_mask:type_name -> google.protobuf.FieldMask
+	21, // 3: grpc_kit.api.known.admin.v1.ListRolesResponse.roles:type_name -> grpc_kit.api.known.admin.v1.Role
+	23, // 4: grpc_kit.api.known.admin.v1.ListRoleMembersResponse.members:type_name -> grpc_kit.api.known.admin.v1.Membership
+	23, // 5: grpc_kit.api.known.admin.v1.CreateRoleMembersRequest.members:type_name -> grpc_kit.api.known.admin.v1.Membership
+	23, // 6: grpc_kit.api.known.admin.v1.UpdateRoleMembersRequest.members:type_name -> grpc_kit.api.known.admin.v1.Membership
+	24, // 7: grpc_kit.api.known.admin.v1.RoleMenu.menu:type_name -> grpc_kit.api.known.admin.v1.Menu
+	25, // 8: grpc_kit.api.known.admin.v1.ListRoleMenusRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
+	26, // 9: grpc_kit.api.known.admin.v1.ListRoleMenusRequest.structure:type_name -> grpc_kit.api.known.admin.v1.Structure
+	13, // 10: grpc_kit.api.known.admin.v1.ListRoleMenusResponse.menus:type_name -> grpc_kit.api.known.admin.v1.RoleMenu
+	13, // 11: grpc_kit.api.known.admin.v1.CreateRoleMenusRequest.menus:type_name -> grpc_kit.api.known.admin.v1.RoleMenu
+	13, // 12: grpc_kit.api.known.admin.v1.UpdateRoleMenusRequest.menus:type_name -> grpc_kit.api.known.admin.v1.RoleMenu
+	13, // [13:13] is the sub-list for method output_type
+	13, // [13:13] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_roles_proto_init() }
@@ -1170,6 +1790,102 @@ func file_known_admin_v1_roles_proto_init() {
 				return nil
 			}
 		}
+		file_known_admin_v1_roles_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RoleMenu); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListRoleMenusRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListRoleMenusResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateRoleMenusRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateRoleMenusResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateRoleMenusRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateRoleMenusResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeleteRoleMenuRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_known_admin_v1_roles_proto_msgTypes[4].OneofWrappers = []interface{}{
 		(*ListRolesRequest_PageToken)(nil),
@@ -1179,13 +1895,17 @@ func file_known_admin_v1_roles_proto_init() {
 		(*ListRoleMembersRequest_PageToken)(nil),
 		(*ListRoleMembersRequest_Offset)(nil),
 	}
+	file_known_admin_v1_roles_proto_msgTypes[14].OneofWrappers = []interface{}{
+		(*ListRoleMenusRequest_PageToken)(nil),
+		(*ListRoleMenusRequest_Offset)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_roles_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
