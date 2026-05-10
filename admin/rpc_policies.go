@@ -15,6 +15,23 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+func buildPolicyProto(entPolicy *lion.Policies, includeStatements bool) *adminv1.Policy {
+	result := &adminv1.Policy{
+		Id:          int64(entPolicy.ID),
+		Code:        entPolicy.Code,
+		DisplayName: entPolicy.DisplayName,
+		Status:      adminv1.Policy_Status(entPolicy.PolicyStatus),
+		Description: entPolicy.Description,
+		Protected:   entPolicy.Protected,
+	}
+
+	if includeStatements {
+		result.Statements = entPolicy.Statements
+	}
+
+	return result
+}
+
 // ListPolicies 获取策略列表
 func (a *KnownAdminAPI) ListPolicies(ctx context.Context, req *adminv1.ListPoliciesRequest) (*adminv1.ListPoliciesResponse, error) {
 	result := &adminv1.ListPoliciesResponse{}
@@ -99,18 +116,9 @@ func (a *KnownAdminAPI) ListPolicies(ctx context.Context, req *adminv1.ListPolic
 	}
 
 	// 转换为响应格式
+	includeStatements := req.GetView() == adminv1.View_VIEW_FULL
 	for _, p := range policyList {
-		policy := &adminv1.Policy{
-			Id:          int64(p.ID),
-			Code:        p.Code,
-			DisplayName: p.DisplayName,
-			Status:      adminv1.Policy_Status(p.PolicyStatus),
-			Description: p.Description,
-			Protected:   p.Protected,
-			Statements:  p.Statements,
-		}
-
-		result.Policies = append(result.Policies, policy)
+		result.Policies = append(result.Policies, buildPolicyProto(p, includeStatements))
 	}
 
 	// 构造 next_page_token（仅用于 cursor-based 分页）
@@ -125,6 +133,26 @@ func (a *KnownAdminAPI) ListPolicies(ctx context.Context, req *adminv1.ListPolic
 	}
 
 	return result, nil
+}
+
+// GetPolicy 获取策略详情
+func (a *KnownAdminAPI) GetPolicy(ctx context.Context, req *adminv1.GetPolicyRequest) (*adminv1.Policy, error) {
+	if req == nil || req.GetCode() == "" {
+		return nil, errs.InvalidArgument(ctx).WithMessage("policy code is required")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	policyEnt, err := db.Policies.Query().Where(policies.CodeEQ(req.GetCode())).First(ctx)
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("policy not found")
+	}
+
+	includeStatements := req.GetView() != adminv1.View_VIEW_BASIC
+	return buildPolicyProto(policyEnt, includeStatements), nil
 }
 
 // CreatePolicy 创建策略
@@ -167,17 +195,7 @@ func (a *KnownAdminAPI) CreatePolicy(ctx context.Context, req *adminv1.CreatePol
 	}
 
 	// 构建返回的策略对象
-	result := &adminv1.Policy{
-		Id:          int64(newPolicy.ID),
-		Code:        newPolicy.Code,
-		DisplayName: newPolicy.DisplayName,
-		Status:      adminv1.Policy_Status(newPolicy.PolicyStatus),
-		Description: newPolicy.Description,
-		Protected:   newPolicy.Protected,
-		Statements:  newPolicy.Statements,
-	}
-
-	return result, nil
+	return buildPolicyProto(newPolicy, true), nil
 }
 
 // UpdatePolicy 更新策略
@@ -249,17 +267,7 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 	}
 
 	// 构建返回的策略对象
-	result := &adminv1.Policy{
-		Id:          int64(updatedPolicy.ID),
-		Code:        updatedPolicy.Code,
-		DisplayName: updatedPolicy.DisplayName,
-		Status:      adminv1.Policy_Status(updatedPolicy.PolicyStatus),
-		Description: updatedPolicy.Description,
-		Protected:   updatedPolicy.Protected,
-		Statements:  updatedPolicy.Statements,
-	}
-
-	return result, nil
+	return buildPolicyProto(updatedPolicy, true), nil
 }
 
 // DeletePolicy 删除策略

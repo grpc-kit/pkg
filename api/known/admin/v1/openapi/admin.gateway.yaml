@@ -74,6 +74,9 @@ http:
     ## 策略列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicies
     get: "/builtin/admin/api/v1/policies"
+    ## 获取策略详情
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetPolicy
+    get: "/builtin/admin/api/v1/policies/{code}"
     ## 创建策略
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicy
     put: "/builtin/admin/api/v1/policies/{policy.code}"
