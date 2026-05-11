@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
 )
@@ -282,21 +281,6 @@ func (_c *DepartmentsCreate) SetNillableProtected(v *bool) *DepartmentsCreate {
 	return _c
 }
 
-// AddLionDepartmentMemberIDs adds the "lion_department_members" edge to the DepartmentMembers entity by IDs.
-func (_c *DepartmentsCreate) AddLionDepartmentMemberIDs(ids ...int) *DepartmentsCreate {
-	_c.mutation.AddLionDepartmentMemberIDs(ids...)
-	return _c
-}
-
-// AddLionDepartmentMembers adds the "lion_department_members" edges to the DepartmentMembers entity.
-func (_c *DepartmentsCreate) AddLionDepartmentMembers(v ...*DepartmentMembers) *DepartmentsCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionDepartmentMemberIDs(ids...)
-}
-
 // AddLionGroupIDs adds the "lion_groups" edge to the Groups entity by IDs.
 func (_c *DepartmentsCreate) AddLionGroupIDs(ids ...int) *DepartmentsCreate {
 	_c.mutation.AddLionGroupIDs(ids...)
@@ -558,22 +542,6 @@ func (_c *DepartmentsCreate) createSpec() (*Departments, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Protected(); ok {
 		_spec.SetField(departments.FieldProtected, field.TypeBool, value)
 		_node.Protected = value
-	}
-	if nodes := _c.mutation.LionDepartmentMembersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   departments.LionDepartmentMembersTable,
-			Columns: []string{departments.LionDepartmentMembersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentmembers.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.LionGroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

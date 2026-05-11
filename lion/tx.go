@@ -16,12 +16,8 @@ type Tx struct {
 	AuthProviders *AuthProvidersClient
 	// Credentials is the client for interacting with the Credentials builders.
 	Credentials *CredentialsClient
-	// DepartmentMembers is the client for interacting with the DepartmentMembers builders.
-	DepartmentMembers *DepartmentMembersClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
-	// GroupMembers is the client for interacting with the GroupMembers builders.
-	GroupMembers *GroupMembersClient
 	// GroupRoles is the client for interacting with the GroupRoles builders.
 	GroupRoles *GroupRolesClient
 	// Groups is the client for interacting with the Groups builders.
@@ -36,6 +32,8 @@ type Tx struct {
 	Roles *RolesClient
 	// UserIdentities is the client for interacting with the UserIdentities builders.
 	UserIdentities *UserIdentitiesClient
+	// UserMemberships is the client for interacting with the UserMemberships builders.
+	UserMemberships *UserMembershipsClient
 	// UserProfiles is the client for interacting with the UserProfiles builders.
 	UserProfiles *UserProfilesClient
 	// UserRoles is the client for interacting with the UserRoles builders.
@@ -175,9 +173,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
 	tx.Credentials = NewCredentialsClient(tx.config)
-	tx.DepartmentMembers = NewDepartmentMembersClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
-	tx.GroupMembers = NewGroupMembersClient(tx.config)
 	tx.GroupRoles = NewGroupRolesClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
@@ -185,6 +181,7 @@ func (tx *Tx) init() {
 	tx.RoleMenus = NewRoleMenusClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
 	tx.UserIdentities = NewUserIdentitiesClient(tx.config)
+	tx.UserMemberships = NewUserMembershipsClient(tx.config)
 	tx.UserProfiles = NewUserProfilesClient(tx.config)
 	tx.UserRoles = NewUserRolesClient(tx.config)
 	tx.Users = NewUsersClient(tx.config)

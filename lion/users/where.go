@@ -1708,21 +1708,21 @@ func HasLionUserRolesWith(preds ...predicate.UserRoles) predicate.Users {
 	})
 }
 
-// HasLionGroupMembers applies the HasEdge predicate on the "lion_group_members" edge.
-func HasLionGroupMembers() predicate.Users {
+// HasLionUserMemberships applies the HasEdge predicate on the "lion_user_memberships" edge.
+func HasLionUserMemberships() predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionGroupMembersTable, LionGroupMembersColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionUserMembershipsTable, LionUserMembershipsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLionGroupMembersWith applies the HasEdge predicate on the "lion_group_members" edge with a given conditions (other predicates).
-func HasLionGroupMembersWith(preds ...predicate.GroupMembers) predicate.Users {
+// HasLionUserMembershipsWith applies the HasEdge predicate on the "lion_user_memberships" edge with a given conditions (other predicates).
+func HasLionUserMembershipsWith(preds ...predicate.UserMemberships) predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
-		step := newLionGroupMembersStep()
+		step := newLionUserMembershipsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -1746,29 +1746,6 @@ func HasLionUserIdentities() predicate.Users {
 func HasLionUserIdentitiesWith(preds ...predicate.UserIdentities) predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
 		step := newLionUserIdentitiesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasLionDepartmentMembers applies the HasEdge predicate on the "lion_department_members" edge.
-func HasLionDepartmentMembers() predicate.Users {
-	return predicate.Users(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentMembersTable, LionDepartmentMembersColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionDepartmentMembersWith applies the HasEdge predicate on the "lion_department_members" edge with a given conditions (other predicates).
-func HasLionDepartmentMembersWith(preds ...predicate.DepartmentMembers) predicate.Users {
-	return predicate.Users(func(s *sql.Selector) {
-		step := newLionDepartmentMembersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

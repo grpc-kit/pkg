@@ -613,7 +613,7 @@ type ListGroupMembersResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// 群组成员关系列表
+	// 群组 membership 关系列表。
 	Members []*Membership `protobuf:"bytes,1,rep,name=members,proto3" json:"members,omitempty"`
 	// 用于获取下一页结果的 token。
 	// - 如果为空，表示没有更多结果。
@@ -685,9 +685,9 @@ type CreateGroupMembersRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// 父资源名称，用于限定范围。
-	// 格式示例: "organizations/123" 或 "projects/456"。
-	Parent  string        `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// 群组 ID，字段名沿用既有 parent 命名以兼容历史接口。
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	// 要写入的用户到群组 membership 关系。
 	Members []*Membership `protobuf:"bytes,2,rep,name=members,proto3" json:"members,omitempty"`
 }
 
@@ -780,10 +780,10 @@ type DeleteGroupMemberRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// 父资源名称，用于限定范围。
-	// 格式示例: "organizations/123" 或 "projects/456"。
+	// 群组 ID，字段名沿用既有 parent 命名以兼容历史接口。
 	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	UserId int64  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// 用户 ID，表示删除该用户在指定群组下的 membership 关系。
+	UserId int64 `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *DeleteGroupMemberRequest) Reset() {
@@ -837,10 +837,10 @@ type UpdateGroupMemberRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// 父资源名称，用于限定范围。
-	// 格式示例: "organizations/123" 或 "projects/456"。
-	Parent     string                 `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	UserId     int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// 群组 ID，字段名沿用既有 parent 命名以兼容历史接口。
+	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	UserId int64  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// 用户到群组的 membership 关系变更内容。
 	Member     *Membership            `protobuf:"bytes,3,opt,name=member,proto3" json:"member,omitempty"`
 	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 }

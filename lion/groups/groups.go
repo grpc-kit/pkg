@@ -50,8 +50,6 @@ const (
 	FieldDescription = "description"
 	// EdgeLionGroups holds the string denoting the lion_groups edge name in mutations.
 	EdgeLionGroups = "lion_groups"
-	// EdgeLionGroupMembers holds the string denoting the lion_group_members edge name in mutations.
-	EdgeLionGroupMembers = "lion_group_members"
 	// Table holds the table name of the groups in the database.
 	Table = "lion_groups"
 	// LionGroupsTable is the table that holds the lion_groups relation/edge.
@@ -61,13 +59,6 @@ const (
 	LionGroupsInverseTable = "lion_group_roles"
 	// LionGroupsColumn is the table column denoting the lion_groups relation/edge.
 	LionGroupsColumn = "group_id"
-	// LionGroupMembersTable is the table that holds the lion_group_members relation/edge.
-	LionGroupMembersTable = "lion_group_members"
-	// LionGroupMembersInverseTable is the table name for the GroupMembers entity.
-	// It exists in this package in order to avoid circular dependency with the "groupmembers" package.
-	LionGroupMembersInverseTable = "lion_group_members"
-	// LionGroupMembersColumn is the table column denoting the lion_group_members relation/edge.
-	LionGroupMembersColumn = "group_id"
 )
 
 // Columns holds all SQL columns for groups fields.
@@ -253,31 +244,10 @@ func ByLionGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLionGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByLionGroupMembersCount orders the results by lion_group_members count.
-func ByLionGroupMembersCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionGroupMembersStep(), opts...)
-	}
-}
-
-// ByLionGroupMembers orders the results by lion_group_members terms.
-func ByLionGroupMembers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionGroupMembersStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newLionGroupsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionGroupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionGroupsTable, LionGroupsColumn),
-	)
-}
-func newLionGroupMembersStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionGroupMembersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionGroupMembersTable, LionGroupMembersColumn),
 	)
 }

@@ -14,9 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
-	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/groupmembers"
 	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
@@ -24,6 +22,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/lion/usermemberships"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
@@ -87,21 +86,20 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			authproviders.Table:     authproviders.ValidColumn,
-			credentials.Table:       credentials.ValidColumn,
-			departmentmembers.Table: departmentmembers.ValidColumn,
-			departments.Table:       departments.ValidColumn,
-			groupmembers.Table:      groupmembers.ValidColumn,
-			grouproles.Table:        grouproles.ValidColumn,
-			groups.Table:            groups.ValidColumn,
-			menus.Table:             menus.ValidColumn,
-			policies.Table:          policies.ValidColumn,
-			rolemenus.Table:         rolemenus.ValidColumn,
-			roles.Table:             roles.ValidColumn,
-			useridentities.Table:    useridentities.ValidColumn,
-			userprofiles.Table:      userprofiles.ValidColumn,
-			userroles.Table:         userroles.ValidColumn,
-			users.Table:             users.ValidColumn,
+			authproviders.Table:   authproviders.ValidColumn,
+			credentials.Table:     credentials.ValidColumn,
+			departments.Table:     departments.ValidColumn,
+			grouproles.Table:      grouproles.ValidColumn,
+			groups.Table:          groups.ValidColumn,
+			menus.Table:           menus.ValidColumn,
+			policies.Table:        policies.ValidColumn,
+			rolemenus.Table:       rolemenus.ValidColumn,
+			roles.Table:           roles.ValidColumn,
+			useridentities.Table:  useridentities.ValidColumn,
+			usermemberships.Table: usermemberships.ValidColumn,
+			userprofiles.Table:    userprofiles.ValidColumn,
+			userroles.Table:       userroles.ValidColumn,
+			users.Table:           users.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

@@ -33,18 +33,6 @@ func (f CredentialsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.CredentialsMutation", m)
 }
 
-// The DepartmentMembersFunc type is an adapter to allow the use of ordinary
-// function as DepartmentMembers mutator.
-type DepartmentMembersFunc func(context.Context, *lion.DepartmentMembersMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f DepartmentMembersFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.DepartmentMembersMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DepartmentMembersMutation", m)
-}
-
 // The DepartmentsFunc type is an adapter to allow the use of ordinary
 // function as Departments mutator.
 type DepartmentsFunc func(context.Context, *lion.DepartmentsMutation) (lion.Value, error)
@@ -55,18 +43,6 @@ func (f DepartmentsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Valu
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DepartmentsMutation", m)
-}
-
-// The GroupMembersFunc type is an adapter to allow the use of ordinary
-// function as GroupMembers mutator.
-type GroupMembersFunc func(context.Context, *lion.GroupMembersMutation) (lion.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f GroupMembersFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
-	if mv, ok := m.(*lion.GroupMembersMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GroupMembersMutation", m)
 }
 
 // The GroupRolesFunc type is an adapter to allow the use of ordinary
@@ -151,6 +127,18 @@ func (f UserIdentitiesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.V
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserIdentitiesMutation", m)
+}
+
+// The UserMembershipsFunc type is an adapter to allow the use of ordinary
+// function as UserMemberships mutator.
+type UserMembershipsFunc func(context.Context, *lion.UserMembershipsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserMembershipsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.UserMembershipsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.UserMembershipsMutation", m)
 }
 
 // The UserProfilesFunc type is an adapter to allow the use of ordinary

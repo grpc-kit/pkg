@@ -88,57 +88,6 @@ var (
 		Columns:    LionCredentialsColumns,
 		PrimaryKey: []*schema.Column{LionCredentialsColumns[0]},
 	}
-	// LionDepartmentMembersColumns holds the columns for the "lion_department_members" table.
-	LionDepartmentMembersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "member_role", Type: field.TypeInt, Default: 0},
-		{Name: "member_status", Type: field.TypeInt, Default: 0},
-		{Name: "member_type", Type: field.TypeInt, Default: 0},
-		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
-		{Name: "metadata", Type: field.TypeString, Nullable: true},
-		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "department_id", Type: field.TypeInt},
-		{Name: "user_id", Type: field.TypeInt},
-	}
-	// LionDepartmentMembersTable holds the schema information for the "lion_department_members" table.
-	LionDepartmentMembersTable = &schema.Table{
-		Name:       "lion_department_members",
-		Columns:    LionDepartmentMembersColumns,
-		PrimaryKey: []*schema.Column{LionDepartmentMembersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_department_members_lion_departments_lion_department_members",
-				Columns:    []*schema.Column{LionDepartmentMembersColumns[11]},
-				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "lion_department_members_lion_users_lion_department_members",
-				Columns:    []*schema.Column{LionDepartmentMembersColumns[12]},
-				RefColumns: []*schema.Column{LionUsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "departmentmembers_user_id_department_id",
-				Unique:  true,
-				Columns: []*schema.Column{LionDepartmentMembersColumns[12], LionDepartmentMembersColumns[11]},
-			},
-			{
-				Name:    "departmentmembers_user_id",
-				Unique:  true,
-				Columns: []*schema.Column{LionDepartmentMembersColumns[12]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "member_type = 1",
-				},
-			},
-		},
-	}
 	// LionDepartmentsColumns holds the columns for the "lion_departments" table.
 	LionDepartmentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -170,49 +119,6 @@ var (
 		Name:       "lion_departments",
 		Columns:    LionDepartmentsColumns,
 		PrimaryKey: []*schema.Column{LionDepartmentsColumns[0]},
-	}
-	// LionGroupMembersColumns holds the columns for the "lion_group_members" table.
-	LionGroupMembersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "member_role", Type: field.TypeInt, Default: 0},
-		{Name: "member_status", Type: field.TypeInt, Default: 0},
-		{Name: "joined_at", Type: field.TypeTime, Nullable: true},
-		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
-		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
-		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "group_id", Type: field.TypeInt},
-		{Name: "user_id", Type: field.TypeInt},
-	}
-	// LionGroupMembersTable holds the schema information for the "lion_group_members" table.
-	LionGroupMembersTable = &schema.Table{
-		Name:       "lion_group_members",
-		Columns:    LionGroupMembersColumns,
-		PrimaryKey: []*schema.Column{LionGroupMembersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_group_members_lion_groups_lion_group_members",
-				Columns:    []*schema.Column{LionGroupMembersColumns[11]},
-				RefColumns: []*schema.Column{LionGroupsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "lion_group_members_lion_users_lion_group_members",
-				Columns:    []*schema.Column{LionGroupMembersColumns[12]},
-				RefColumns: []*schema.Column{LionUsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "groupmembers_user_id_group_id",
-				Unique:  true,
-				Columns: []*schema.Column{LionGroupMembersColumns[12], LionGroupMembersColumns[11]},
-			},
-		},
 	}
 	// LionGroupRolesColumns holds the columns for the "lion_group_roles" table.
 	LionGroupRolesColumns = []*schema.Column{
@@ -492,6 +398,63 @@ var (
 			},
 		},
 	}
+	// LionUserMembershipsColumns holds the columns for the "lion_user_memberships" table.
+	LionUserMembershipsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "target_type", Type: field.TypeInt, Default: 0},
+		{Name: "target_id", Type: field.TypeInt},
+		{Name: "member_role", Type: field.TypeInt, Default: 0},
+		{Name: "member_status", Type: field.TypeInt, Default: 0},
+		{Name: "member_type", Type: field.TypeInt, Default: 0},
+		{Name: "joined_at", Type: field.TypeTime, Nullable: true},
+		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "user_id", Type: field.TypeInt},
+	}
+	// LionUserMembershipsTable holds the schema information for the "lion_user_memberships" table.
+	LionUserMembershipsTable = &schema.Table{
+		Name:       "lion_user_memberships",
+		Columns:    LionUserMembershipsColumns,
+		PrimaryKey: []*schema.Column{LionUserMembershipsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_user_memberships_lion_users_lion_user_memberships",
+				Columns:    []*schema.Column{LionUserMembershipsColumns[14]},
+				RefColumns: []*schema.Column{LionUsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "usermemberships_user_id_target_type_target_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionUserMembershipsColumns[14], LionUserMembershipsColumns[5], LionUserMembershipsColumns[6]},
+			},
+			{
+				Name:    "usermemberships_target_type_target_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionUserMembershipsColumns[5], LionUserMembershipsColumns[6]},
+			},
+			{
+				Name:    "usermemberships_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionUserMembershipsColumns[14]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "target_type = 2 AND member_type = 1",
+				},
+			},
+			{
+				Name:    "usermemberships_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionUserMembershipsColumns[14]},
+			},
+		},
+	}
 	// LionUserProfilesColumns holds the columns for the "lion_user_profiles" table.
 	LionUserProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -692,9 +655,7 @@ var (
 	Tables = []*schema.Table{
 		LionAuthProvidersTable,
 		LionCredentialsTable,
-		LionDepartmentMembersTable,
 		LionDepartmentsTable,
-		LionGroupMembersTable,
 		LionGroupRolesTable,
 		LionGroupsTable,
 		LionMenusTable,
@@ -702,6 +663,7 @@ var (
 		LionRoleMenusTable,
 		LionRolesTable,
 		LionUserIdentitiesTable,
+		LionUserMembershipsTable,
 		LionUserProfilesTable,
 		LionUserRolesTable,
 		LionUsersTable,
@@ -715,18 +677,8 @@ func init() {
 	LionCredentialsTable.Annotation = &entsql.Annotation{
 		Table: "lion_credentials",
 	}
-	LionDepartmentMembersTable.ForeignKeys[0].RefTable = LionDepartmentsTable
-	LionDepartmentMembersTable.ForeignKeys[1].RefTable = LionUsersTable
-	LionDepartmentMembersTable.Annotation = &entsql.Annotation{
-		Table: "lion_department_members",
-	}
 	LionDepartmentsTable.Annotation = &entsql.Annotation{
 		Table: "lion_departments",
-	}
-	LionGroupMembersTable.ForeignKeys[0].RefTable = LionGroupsTable
-	LionGroupMembersTable.ForeignKeys[1].RefTable = LionUsersTable
-	LionGroupMembersTable.Annotation = &entsql.Annotation{
-		Table: "lion_group_members",
 	}
 	LionGroupRolesTable.ForeignKeys[0].RefTable = LionGroupsTable
 	LionGroupRolesTable.ForeignKeys[1].RefTable = LionRolesTable
@@ -755,6 +707,10 @@ func init() {
 	LionUserIdentitiesTable.ForeignKeys[1].RefTable = LionUsersTable
 	LionUserIdentitiesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_identities",
+	}
+	LionUserMembershipsTable.ForeignKeys[0].RefTable = LionUsersTable
+	LionUserMembershipsTable.Annotation = &entsql.Annotation{
+		Table: "lion_user_memberships",
 	}
 	LionUserProfilesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_profiles",

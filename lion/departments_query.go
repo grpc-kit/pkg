@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/predicate"
@@ -21,12 +20,11 @@ import (
 // DepartmentsQuery is the builder for querying Departments entities.
 type DepartmentsQuery struct {
 	config
-	ctx                       *QueryContext
-	order                     []departments.OrderOption
-	inters                    []Interceptor
-	predicates                []predicate.Departments
-	withLionDepartmentMembers *DepartmentMembersQuery
-	withLionGroups            *GroupsQuery
+	ctx            *QueryContext
+	order          []departments.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.Departments
+	withLionGroups *GroupsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,28 +59,6 @@ func (_q *DepartmentsQuery) Unique(unique bool) *DepartmentsQuery {
 func (_q *DepartmentsQuery) Order(o ...departments.OrderOption) *DepartmentsQuery {
 	_q.order = append(_q.order, o...)
 	return _q
-}
-
-// QueryLionDepartmentMembers chains the current query on the "lion_department_members" edge.
-func (_q *DepartmentsQuery) QueryLionDepartmentMembers() *DepartmentMembersQuery {
-	query := (&DepartmentMembersClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(departments.Table, departments.FieldID, selector),
-			sqlgraph.To(departmentmembers.Table, departmentmembers.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, departments.LionDepartmentMembersTable, departments.LionDepartmentMembersColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QueryLionGroups chains the current query on the "lion_groups" edge.
@@ -294,28 +270,16 @@ func (_q *DepartmentsQuery) Clone() *DepartmentsQuery {
 		return nil
 	}
 	return &DepartmentsQuery{
-		config:                    _q.config,
-		ctx:                       _q.ctx.Clone(),
-		order:                     append([]departments.OrderOption{}, _q.order...),
-		inters:                    append([]Interceptor{}, _q.inters...),
-		predicates:                append([]predicate.Departments{}, _q.predicates...),
-		withLionDepartmentMembers: _q.withLionDepartmentMembers.Clone(),
-		withLionGroups:            _q.withLionGroups.Clone(),
+		config:         _q.config,
+		ctx:            _q.ctx.Clone(),
+		order:          append([]departments.OrderOption{}, _q.order...),
+		inters:         append([]Interceptor{}, _q.inters...),
+		predicates:     append([]predicate.Departments{}, _q.predicates...),
+		withLionGroups: _q.withLionGroups.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
-}
-
-// WithLionDepartmentMembers tells the query-builder to eager-load the nodes that are connected to
-// the "lion_department_members" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *DepartmentsQuery) WithLionDepartmentMembers(opts ...func(*DepartmentMembersQuery)) *DepartmentsQuery {
-	query := (&DepartmentMembersClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withLionDepartmentMembers = query
-	return _q
 }
 
 // WithLionGroups tells the query-builder to eager-load the nodes that are connected to
@@ -407,8 +371,7 @@ func (_q *DepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	var (
 		nodes       = []*Departments{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
-			_q.withLionDepartmentMembers != nil,
+		loadedTypes = [1]bool{
 			_q.withLionGroups != nil,
 		}
 	)
@@ -430,15 +393,6 @@ func (_q *DepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withLionDepartmentMembers; query != nil {
-		if err := _q.loadLionDepartmentMembers(ctx, query, nodes,
-			func(n *Departments) { n.Edges.LionDepartmentMembers = []*DepartmentMembers{} },
-			func(n *Departments, e *DepartmentMembers) {
-				n.Edges.LionDepartmentMembers = append(n.Edges.LionDepartmentMembers, e)
-			}); err != nil {
-			return nil, err
-		}
-	}
 	if query := _q.withLionGroups; query != nil {
 		if err := _q.loadLionGroups(ctx, query, nodes,
 			func(n *Departments) { n.Edges.LionGroups = []*Groups{} },
@@ -449,36 +403,6 @@ func (_q *DepartmentsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	return nodes, nil
 }
 
-func (_q *DepartmentsQuery) loadLionDepartmentMembers(ctx context.Context, query *DepartmentMembersQuery, nodes []*Departments, init func(*Departments), assign func(*Departments, *DepartmentMembers)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Departments)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(departmentmembers.FieldDepartmentID)
-	}
-	query.Where(predicate.DepartmentMembers(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(departments.LionDepartmentMembersColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.DepartmentID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "department_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
 func (_q *DepartmentsQuery) loadLionGroups(ctx context.Context, query *GroupsQuery, nodes []*Departments, init func(*Departments), assign func(*Departments, *Groups)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Departments)

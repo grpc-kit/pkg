@@ -12,14 +12,8 @@ type AuthProviders func(*sql.Selector)
 // Credentials is the predicate function for credentials builders.
 type Credentials func(*sql.Selector)
 
-// DepartmentMembers is the predicate function for departmentmembers builders.
-type DepartmentMembers func(*sql.Selector)
-
 // Departments is the predicate function for departments builders.
 type Departments func(*sql.Selector)
-
-// GroupMembers is the predicate function for groupmembers builders.
-type GroupMembers func(*sql.Selector)
 
 // GroupRoles is the predicate function for grouproles builders.
 type GroupRoles func(*sql.Selector)
@@ -41,6 +35,9 @@ type Roles func(*sql.Selector)
 
 // UserIdentities is the predicate function for useridentities builders.
 type UserIdentities func(*sql.Selector)
+
+// UserMemberships is the predicate function for usermemberships builders.
+type UserMemberships func(*sql.Selector)
 
 // UserProfiles is the predicate function for userprofiles builders.
 type UserProfiles func(*sql.Selector)

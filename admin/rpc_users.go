@@ -15,10 +15,10 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
-	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/groupmembers"
+	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/lion/usermemberships"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/proto"
@@ -94,40 +94,6 @@ func (a *KnownAdminAPI) decryptAddressField(ctx context.Context, encrypted []byt
 	return address, nil
 }
 
-func departmentMemberToProto(member *lion.DepartmentMembers) *adminv1.Membership {
-	dm := &adminv1.Membership{
-		Id:           int64(member.ID),
-		UserId:       int64(member.UserID),
-		TargetType:   adminv1.Membership_DEPARTMENT,
-		TargetId:     int64(member.DepartmentID),
-		MemberRole:   adminv1.Membership_Role(member.MemberRole),
-		MemberStatus: adminv1.Membership_Status(member.MemberStatus),
-		MemberType:   adminv1.Membership_MemberType(member.MemberType),
-		CreatedBy:    member.CreatedBy,
-		UpdatedBy:    member.UpdatedBy,
-		CreatedAt:    timestamppb.New(member.CreatedAt),
-		UpdatedAt:    timestamppb.New(member.UpdatedAt),
-		Description:  member.Description,
-	}
-	if !member.ExpiredAt.IsZero() {
-		dm.ExpiredAt = timestamppb.New(member.ExpiredAt)
-	}
-	if member.Metadata != "" {
-		dm.Metadata = MetadataParse(member.Metadata)
-	}
-	if member.Edges.LionDepartments != nil {
-		dm.TargetName = member.Edges.LionDepartments.DisplayName
-		if dm.TargetName == "" {
-			dm.TargetName = member.Edges.LionDepartments.Code
-		}
-	}
-	if member.Edges.LionUsers != nil {
-		dm.Username = member.Edges.LionUsers.Username
-		dm.Nickname = member.Edges.LionUsers.Nickname
-	}
-	return dm
-}
-
 func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, includeSensitive bool) (*adminv1.User, error) {
 	if user == nil {
 		return nil, errs.InvalidArgument(ctx).WithMessage("user is nil").Err()
@@ -181,37 +147,74 @@ func (a *KnownAdminAPI) toAdminUser(ctx context.Context, user *lion.Users, inclu
 	resp.MfaEnabled = mfaEnabled
 
 	if includeSensitive {
-		depMembers, err := db.DepartmentMembers.Query().
-			Where(departmentmembers.UserIDEQ(user.ID)).
-			WithLionDepartments().
-			Order(lion.Asc(departmentmembers.FieldMemberType), lion.Asc(departmentmembers.FieldDepartmentID)).
+		depMembers, err := db.UserMemberships.Query().
+			Where(
+				usermemberships.UserIDEQ(user.ID),
+				usermemberships.TargetTypeEQ(membershipTargetDepartment),
+			).
+			Order(lion.Asc(usermemberships.FieldMemberType), lion.Asc(usermemberships.FieldTargetID)).
 			All(ctx)
 		if err != nil {
 			return nil, errs.Internal(ctx).WithMessage("query user department memberships failed").Err()
 		}
+		departmentMap := map[int]*lion.Departments{}
+		if len(depMembers) > 0 {
+			departmentIDs := make([]int, 0, len(depMembers))
+			for _, item := range depMembers {
+				departmentIDs = append(departmentIDs, item.TargetID)
+			}
+			depTargets, err := db.Departments.Query().
+				Where(departments.IDIn(departmentIDs...)).
+				All(ctx)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage("query user department targets failed").Err()
+			}
+			for _, item := range depTargets {
+				departmentMap[item.ID] = item
+			}
+		}
 		resp.DepartmentMembers = make([]*adminv1.Membership, 0, len(depMembers))
 		for _, item := range depMembers {
-			resp.DepartmentMembers = append(resp.DepartmentMembers, departmentMemberToProto(item))
+			membership := userMembershipToProto(item)
+			if target := departmentMap[item.TargetID]; target != nil {
+				applyMembershipTargetName(membership, target.DisplayName, target.Code)
+			}
+			resp.DepartmentMembers = append(resp.DepartmentMembers, membership)
 		}
 
-		grpMembers, err := db.GroupMembers.Query().
-			Where(groupmembers.UserIDEQ(user.ID)).
-			WithLionGroups().
-			Order(lion.Asc(groupmembers.FieldJoinedAt), lion.Asc(groupmembers.FieldGroupID)).
+		grpMembers, err := db.UserMemberships.Query().
+			Where(
+				usermemberships.UserIDEQ(user.ID),
+				usermemberships.TargetTypeEQ(membershipTargetGroup),
+			).
+			Order(lion.Asc(usermemberships.FieldJoinedAt), lion.Asc(usermemberships.FieldTargetID)).
 			All(ctx)
 		if err != nil {
 			return nil, errs.Internal(ctx).WithMessage("query user group memberships failed").Err()
 		}
+		groupMap := map[int]*lion.Groups{}
+		if len(grpMembers) > 0 {
+			groupIDs := make([]int, 0, len(grpMembers))
+			for _, item := range grpMembers {
+				groupIDs = append(groupIDs, item.TargetID)
+			}
+			groupTargets, err := db.Groups.Query().
+				Where(groups.IDIn(groupIDs...)).
+				All(ctx)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage("query user group targets failed").Err()
+			}
+			for _, item := range groupTargets {
+				groupMap[item.ID] = item
+			}
+		}
 		resp.GroupMembers = make([]*adminv1.Membership, 0, len(grpMembers))
 		for _, item := range grpMembers {
-			gm := userGroupToProto(item)
-			if item.Edges.LionGroups != nil {
-				gm.TargetName = item.Edges.LionGroups.DisplayName
-				if gm.TargetName == "" {
-					gm.TargetName = item.Edges.LionGroups.Code
-				}
+			membership := userMembershipToProto(item)
+			if target := groupMap[item.TargetID]; target != nil {
+				applyMembershipTargetName(membership, target.DisplayName, target.Code)
 			}
-			resp.GroupMembers = append(resp.GroupMembers, gm)
+			resp.GroupMembers = append(resp.GroupMembers, membership)
 		}
 	}
 
@@ -392,9 +395,10 @@ func (a *KnownAdminAPI) CreateUser(ctx context.Context, req *adminv1.CreateUserR
 			WithDetails(&errdetails.LocalizedMessage{Locale: "zh-CN", Message: "创建用户失败！"}).Err()
 	}
 
-	_, err = tx.DepartmentMembers.Create().
+	_, err = tx.UserMemberships.Create().
 		SetUserID(thisUser.ID).
-		SetDepartmentID(guestDept.ID).
+		SetTargetType(membershipTargetDepartment).
+		SetTargetID(guestDept.ID).
 		SetMemberRole(int(adminv1.Membership_MEMBER)).
 		SetMemberStatus(int(adminv1.Membership_ACTIVE)).
 		SetMemberType(int(adminv1.Membership_PRIMARY)).

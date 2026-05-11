@@ -547,7 +547,7 @@ type ListRoleMembersResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// 角色成员关系列表（与 ListGroupMembersResponse 结构一致）。
+	// 角色 membership 关系列表，沿用统一 Membership 结构。
 	Members []*Membership `protobuf:"bytes,1,rep,name=members,proto3" json:"members,omitempty"`
 	// 用于获取下一页结果的 token。
 	// - 如果为空，表示没有更多结果。

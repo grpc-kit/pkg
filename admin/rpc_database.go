@@ -13,11 +13,11 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
-	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/lion/usermemberships"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -387,16 +387,18 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
-	adminDeptMember, err := tx.DepartmentMembers.Query().
+	adminDeptMember, err := tx.UserMemberships.Query().
 		Where(
-			departmentmembers.UserIDEQ(adminUser.ID),
-			departmentmembers.DepartmentIDEQ(adminDept.ID),
+			usermemberships.UserIDEQ(adminUser.ID),
+			usermemberships.TargetTypeEQ(membershipTargetDepartment),
+			usermemberships.TargetIDEQ(adminDept.ID),
 		).
 		Only(ctx)
 	if lion.IsNotFound(err) {
-		if err := tx.DepartmentMembers.Create().
+		if err := tx.UserMemberships.Create().
 			SetUserID(adminUser.ID).
-			SetDepartmentID(adminDept.ID).
+			SetTargetType(membershipTargetDepartment).
+			SetTargetID(adminDept.ID).
 			SetMemberType(int(adminv1.Membership_PRIMARY.Number())).
 			SetMemberRole(int(adminv1.Membership_OWNER.Number())).
 			SetMemberStatus(int(adminv1.Membership_ACTIVE.Number())).

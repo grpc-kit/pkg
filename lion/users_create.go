@@ -10,9 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/departmentmembers"
-	"github.com/grpc-kit/pkg/lion/groupmembers"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/lion/usermemberships"
 	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 )
@@ -375,19 +374,19 @@ func (_c *UsersCreate) AddLionUserRoles(v ...*UserRoles) *UsersCreate {
 	return _c.AddLionUserRoleIDs(ids...)
 }
 
-// AddLionGroupMemberIDs adds the "lion_group_members" edge to the GroupMembers entity by IDs.
-func (_c *UsersCreate) AddLionGroupMemberIDs(ids ...int) *UsersCreate {
-	_c.mutation.AddLionGroupMemberIDs(ids...)
+// AddLionUserMembershipIDs adds the "lion_user_memberships" edge to the UserMemberships entity by IDs.
+func (_c *UsersCreate) AddLionUserMembershipIDs(ids ...int) *UsersCreate {
+	_c.mutation.AddLionUserMembershipIDs(ids...)
 	return _c
 }
 
-// AddLionGroupMembers adds the "lion_group_members" edges to the GroupMembers entity.
-func (_c *UsersCreate) AddLionGroupMembers(v ...*GroupMembers) *UsersCreate {
+// AddLionUserMemberships adds the "lion_user_memberships" edges to the UserMemberships entity.
+func (_c *UsersCreate) AddLionUserMemberships(v ...*UserMemberships) *UsersCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddLionGroupMemberIDs(ids...)
+	return _c.AddLionUserMembershipIDs(ids...)
 }
 
 // AddLionUserIdentityIDs adds the "lion_user_identities" edge to the UserIdentities entity by IDs.
@@ -403,21 +402,6 @@ func (_c *UsersCreate) AddLionUserIdentities(v ...*UserIdentities) *UsersCreate 
 		ids[i] = v[i].ID
 	}
 	return _c.AddLionUserIdentityIDs(ids...)
-}
-
-// AddLionDepartmentMemberIDs adds the "lion_department_members" edge to the DepartmentMembers entity by IDs.
-func (_c *UsersCreate) AddLionDepartmentMemberIDs(ids ...int) *UsersCreate {
-	_c.mutation.AddLionDepartmentMemberIDs(ids...)
-	return _c
-}
-
-// AddLionDepartmentMembers adds the "lion_department_members" edges to the DepartmentMembers entity.
-func (_c *UsersCreate) AddLionDepartmentMembers(v ...*DepartmentMembers) *UsersCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionDepartmentMemberIDs(ids...)
 }
 
 // Mutation returns the UsersMutation object of the builder.
@@ -703,15 +687,15 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LionGroupMembersIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionUserMembershipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   users.LionGroupMembersTable,
-			Columns: []string{users.LionGroupMembersColumn},
+			Table:   users.LionUserMembershipsTable,
+			Columns: []string{users.LionUserMembershipsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(usermemberships.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -728,22 +712,6 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(useridentities.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.LionDepartmentMembersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   users.LionDepartmentMembersTable,
-			Columns: []string{users.LionDepartmentMembersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(departmentmembers.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

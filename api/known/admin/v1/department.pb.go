@@ -533,7 +533,7 @@ type ListDepartmentMembersResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// 符合查询条件的用户资源。
+	// 符合查询条件的部门 membership 关系。
 	Members []*Membership `protobuf:"bytes,1,rep,name=members,proto3" json:"members,omitempty"`
 	// 用于获取下一页结果的 token。
 	// - 如果为空，表示没有更多结果。
@@ -605,8 +605,10 @@ type CreateDepartmentMembersRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DepartmentId int64         `protobuf:"varint,1,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
-	Members      []*Membership `protobuf:"bytes,2,rep,name=members,proto3" json:"members,omitempty"`
+	// 部门 ID，目标侧固定为 department。
+	DepartmentId int64 `protobuf:"varint,1,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	// 要写入的用户到部门 membership 关系。
+	Members []*Membership `protobuf:"bytes,2,rep,name=members,proto3" json:"members,omitempty"`
 }
 
 func (x *CreateDepartmentMembersRequest) Reset() {
@@ -698,8 +700,10 @@ type UpdateDepartmentMembersRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DepartmentId int64         `protobuf:"varint,1,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
-	Members      []*Membership `protobuf:"bytes,2,rep,name=members,proto3" json:"members,omitempty"`
+	// 部门 ID，目标侧固定为 department。
+	DepartmentId int64 `protobuf:"varint,1,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	// 要更新的用户到部门 membership 关系。
+	Members []*Membership `protobuf:"bytes,2,rep,name=members,proto3" json:"members,omitempty"`
 }
 
 func (x *UpdateDepartmentMembersRequest) Reset() {
@@ -791,8 +795,10 @@ type DeleteDepartmentMemberRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
+	// 部门 ID，目标侧固定为 department。
 	DepartmentId int64 `protobuf:"varint,1,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
-	UserId       int64 `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// 用户 ID，表示删除该用户在指定部门下的 membership 关系。
+	UserId int64 `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
 func (x *DeleteDepartmentMemberRequest) Reset() {

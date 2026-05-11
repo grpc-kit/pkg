@@ -1220,29 +1220,6 @@ func ProtectedNEQ(v bool) predicate.Departments {
 	return predicate.Departments(sql.FieldNEQ(FieldProtected, v))
 }
 
-// HasLionDepartmentMembers applies the HasEdge predicate on the "lion_department_members" edge.
-func HasLionDepartmentMembers() predicate.Departments {
-	return predicate.Departments(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentMembersTable, LionDepartmentMembersColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionDepartmentMembersWith applies the HasEdge predicate on the "lion_department_members" edge with a given conditions (other predicates).
-func HasLionDepartmentMembersWith(preds ...predicate.DepartmentMembers) predicate.Departments {
-	return predicate.Departments(func(s *sql.Selector) {
-		step := newLionDepartmentMembersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasLionGroups applies the HasEdge predicate on the "lion_groups" edge.
 func HasLionGroups() predicate.Departments {
 	return predicate.Departments(func(s *sql.Selector) {

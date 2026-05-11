@@ -2498,9 +2498,9 @@ type User struct {
 	Metadata map[string]string `protobuf:"bytes,27,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	// 是否启用 MFA（TOTP）
 	MfaEnabled bool `protobuf:"varint,28,opt,name=mfa_enabled,json=mfaEnabled,proto3" json:"mfa_enabled,omitempty"`
-	// 用户所属部门成员关系，详情视图或完整视图时返回
+	// 用户所属部门 membership 关系，字段名为兼容历史接口保留
 	DepartmentMembers []*Membership `protobuf:"bytes,29,rep,name=department_members,json=departmentMembers,proto3" json:"department_members,omitempty"`
-	// 用户所属群组成员关系，详情视图或完整视图时返回
+	// 用户所属群组 membership 关系，字段名为兼容历史接口保留
 	GroupMembers []*Membership `protobuf:"bytes,30,rep,name=group_members,json=groupMembers,proto3" json:"group_members,omitempty"`
 }
 
