@@ -442,16 +442,11 @@ var (
 			},
 			{
 				Name:    "usermemberships_user_id",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{LionUserMembershipsColumns[14]},
 				Annotation: &entsql.IndexAnnotation{
 					Where: "target_type = 2 AND member_type = 1",
 				},
-			},
-			{
-				Name:    "usermemberships_user_id",
-				Unique:  true,
-				Columns: []*schema.Column{LionUserMembershipsColumns[14]},
 			},
 		},
 	}

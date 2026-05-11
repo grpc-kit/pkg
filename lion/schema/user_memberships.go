@@ -74,12 +74,12 @@ func (UserMemberships) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("user_id", "target_type", "target_id").Unique(),
 		index.Fields("target_type", "target_id"),
-		index.Fields("user_id"),
+		// index.Fields("user_id"),
 		index.Fields("user_id").
 			Unique().
 			Annotations(entsql.IndexWhere("target_type = 2 AND member_type = 1")),
 	}
-	}
+}
 
 // Annotations 自定义表名。
 func (UserMemberships) Annotations() []schema.Annotation {
