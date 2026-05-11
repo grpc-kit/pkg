@@ -15,6 +15,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
@@ -521,6 +522,30 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	if err := createBuiltinMenus(ctx, tx, 0, builtinMenuSeeds()); err != nil {
 		rollback()
 		return nil, err
+	}
+
+	rootMenu, err := tx.Menus.Query().Where(menus.CodeEQ("root-admin")).Only(ctx)
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+	roleMenuExists, err := tx.RoleMenus.Query().
+		Where(rolemenus.RoleIDEQ(adminRole.ID), rolemenus.MenuIDEQ(rootMenu.ID)).
+		Exist(ctx)
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+	if !roleMenuExists {
+		if err := tx.RoleMenus.Create().
+			SetRoleID(adminRole.ID).
+			SetMenuID(rootMenu.ID).
+			SetPermissionScope(1).
+			SetIsRecursive(true).
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
