@@ -4,6 +4,7 @@ package lion
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -13,15 +14,17 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 )
 
 // PoliciesQuery is the builder for querying Policies entities.
 type PoliciesQuery struct {
 	config
-	ctx        *QueryContext
-	order      []policies.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Policies
+	ctx                  *QueryContext
+	order                []policies.OrderOption
+	inters               []Interceptor
+	predicates           []predicate.Policies
+	withLionRolePolicies *RolePoliciesQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +59,28 @@ func (_q *PoliciesQuery) Unique(unique bool) *PoliciesQuery {
 func (_q *PoliciesQuery) Order(o ...policies.OrderOption) *PoliciesQuery {
 	_q.order = append(_q.order, o...)
 	return _q
+}
+
+// QueryLionRolePolicies chains the current query on the "lion_role_policies" edge.
+func (_q *PoliciesQuery) QueryLionRolePolicies() *RolePoliciesQuery {
+	query := (&RolePoliciesClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(policies.Table, policies.FieldID, selector),
+			sqlgraph.To(rolepolicies.Table, rolepolicies.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, policies.LionRolePoliciesTable, policies.LionRolePoliciesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Policies entity from the query.
@@ -245,15 +270,27 @@ func (_q *PoliciesQuery) Clone() *PoliciesQuery {
 		return nil
 	}
 	return &PoliciesQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]policies.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Policies{}, _q.predicates...),
+		config:               _q.config,
+		ctx:                  _q.ctx.Clone(),
+		order:                append([]policies.OrderOption{}, _q.order...),
+		inters:               append([]Interceptor{}, _q.inters...),
+		predicates:           append([]predicate.Policies{}, _q.predicates...),
+		withLionRolePolicies: _q.withLionRolePolicies.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
+}
+
+// WithLionRolePolicies tells the query-builder to eager-load the nodes that are connected to
+// the "lion_role_policies" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *PoliciesQuery) WithLionRolePolicies(opts ...func(*RolePoliciesQuery)) *PoliciesQuery {
+	query := (&RolePoliciesClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withLionRolePolicies = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +369,11 @@ func (_q *PoliciesQuery) prepareQuery(ctx context.Context) error {
 
 func (_q *PoliciesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Policies, error) {
 	var (
-		nodes = []*Policies{}
-		_spec = _q.querySpec()
+		nodes       = []*Policies{}
+		_spec       = _q.querySpec()
+		loadedTypes = [1]bool{
+			_q.withLionRolePolicies != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Policies).scanValues(nil, columns)
@@ -341,6 +381,7 @@ func (_q *PoliciesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pol
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Policies{config: _q.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +393,45 @@ func (_q *PoliciesQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pol
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := _q.withLionRolePolicies; query != nil {
+		if err := _q.loadLionRolePolicies(ctx, query, nodes,
+			func(n *Policies) { n.Edges.LionRolePolicies = []*RolePolicies{} },
+			func(n *Policies, e *RolePolicies) { n.Edges.LionRolePolicies = append(n.Edges.LionRolePolicies, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (_q *PoliciesQuery) loadLionRolePolicies(ctx context.Context, query *RolePoliciesQuery, nodes []*Policies, init func(*Policies), assign func(*Policies, *RolePolicies)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Policies)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(rolepolicies.FieldPolicyID)
+	}
+	query.Where(predicate.RolePolicies(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(policies.LionRolePoliciesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PolicyID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "policy_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (_q *PoliciesQuery) sqlCount(ctx context.Context) (int, error) {

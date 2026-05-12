@@ -333,6 +333,55 @@ var (
 			},
 		},
 	}
+	// LionRolePoliciesColumns holds the columns for the "lion_role_policies" table.
+	LionRolePoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "policy_id", Type: field.TypeInt},
+		{Name: "role_id", Type: field.TypeInt},
+	}
+	// LionRolePoliciesTable holds the schema information for the "lion_role_policies" table.
+	LionRolePoliciesTable = &schema.Table{
+		Name:       "lion_role_policies",
+		Columns:    LionRolePoliciesColumns,
+		PrimaryKey: []*schema.Column{LionRolePoliciesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_role_policies_lion_policies_lion_role_policies",
+				Columns:    []*schema.Column{LionRolePoliciesColumns[7]},
+				RefColumns: []*schema.Column{LionPoliciesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "lion_role_policies_lion_roles_lion_role_policies",
+				Columns:    []*schema.Column{LionRolePoliciesColumns[8]},
+				RefColumns: []*schema.Column{LionRolesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "rolepolicies_role_id_policy_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionRolePoliciesColumns[8], LionRolePoliciesColumns[7]},
+			},
+			{
+				Name:    "rolepolicies_role_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionRolePoliciesColumns[8]},
+			},
+			{
+				Name:    "rolepolicies_policy_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionRolePoliciesColumns[7]},
+			},
+		},
+	}
 	// LionRolesColumns holds the columns for the "lion_roles" table.
 	LionRolesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -627,6 +676,7 @@ var (
 		LionPoliciesTable,
 		LionPrincipalRolesTable,
 		LionRoleMenusTable,
+		LionRolePoliciesTable,
 		LionRolesTable,
 		LionUserIdentitiesTable,
 		LionUserMembershipsTable,
@@ -663,6 +713,11 @@ func init() {
 	LionRoleMenusTable.ForeignKeys[1].RefTable = LionRolesTable
 	LionRoleMenusTable.Annotation = &entsql.Annotation{
 		Table: "lion_role_menus",
+	}
+	LionRolePoliciesTable.ForeignKeys[0].RefTable = LionPoliciesTable
+	LionRolePoliciesTable.ForeignKeys[1].RefTable = LionRolesTable
+	LionRolePoliciesTable.Annotation = &entsql.Annotation{
+		Table: "lion_role_policies",
 	}
 	LionRolesTable.Annotation = &entsql.Annotation{
 		Table: "lion_roles",

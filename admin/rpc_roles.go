@@ -15,6 +15,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 
 	// 数据范围表已注释，同步取消依赖
 	// "github.com/grpc-kit/pkg/lion/roledataranges"
@@ -894,6 +895,10 @@ func (a *KnownAdminAPI) DeleteRole(ctx context.Context, req *adminv1.DeleteRoleR
 
 	if db.RoleMenus.Query().Where(rolemenus.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
 		return nil, errs.InvalidArgument(ctx).WithMessage("role has menu")
+	}
+
+	if db.RolePolicies.Query().Where(rolepolicies.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("role has policy")
 	}
 
 	_, err = db.Roles.Delete().Where(roles.ID(int(req.Id))).Exec(ctx)

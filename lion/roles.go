@@ -53,11 +53,13 @@ type Roles struct {
 type RolesEdges struct {
 	// LionPrincipalRoles holds the value of the lion_principal_roles edge.
 	LionPrincipalRoles []*PrincipalRoles `json:"lion_principal_roles,omitempty"`
+	// LionRolePolicies holds the value of the lion_role_policies edge.
+	LionRolePolicies []*RolePolicies `json:"lion_role_policies,omitempty"`
 	// LionRoleMenus holds the value of the lion_role_menus edge.
 	LionRoleMenus []*RoleMenus `json:"lion_role_menus,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // LionPrincipalRolesOrErr returns the LionPrincipalRoles value or an error if the edge
@@ -69,10 +71,19 @@ func (e RolesEdges) LionPrincipalRolesOrErr() ([]*PrincipalRoles, error) {
 	return nil, &NotLoadedError{edge: "lion_principal_roles"}
 }
 
+// LionRolePoliciesOrErr returns the LionRolePolicies value or an error if the edge
+// was not loaded in eager-loading.
+func (e RolesEdges) LionRolePoliciesOrErr() ([]*RolePolicies, error) {
+	if e.loadedTypes[1] {
+		return e.LionRolePolicies, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_role_policies"}
+}
+
 // LionRoleMenusOrErr returns the LionRoleMenus value or an error if the edge
 // was not loaded in eager-loading.
 func (e RolesEdges) LionRoleMenusOrErr() ([]*RoleMenus, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.LionRoleMenus, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_role_menus"}
@@ -207,6 +218,11 @@ func (_m *Roles) Value(name string) (ent.Value, error) {
 // QueryLionPrincipalRoles queries the "lion_principal_roles" edge of the Roles entity.
 func (_m *Roles) QueryLionPrincipalRoles() *PrincipalRolesQuery {
 	return NewRolesClient(_m.config).QueryLionPrincipalRoles(_m)
+}
+
+// QueryLionRolePolicies queries the "lion_role_policies" edge of the Roles entity.
+func (_m *Roles) QueryLionRolePolicies() *RolePoliciesQuery {
+	return NewRolesClient(_m.config).QueryLionRolePolicies(_m)
 }
 
 // QueryLionRoleMenus queries the "lion_role_menus" edge of the Roles entity.

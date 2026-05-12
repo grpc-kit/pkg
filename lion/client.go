@@ -23,6 +23,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
@@ -51,6 +52,8 @@ type Client struct {
 	PrincipalRoles *PrincipalRolesClient
 	// RoleMenus is the client for interacting with the RoleMenus builders.
 	RoleMenus *RoleMenusClient
+	// RolePolicies is the client for interacting with the RolePolicies builders.
+	RolePolicies *RolePoliciesClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
 	// UserIdentities is the client for interacting with the UserIdentities builders.
@@ -80,6 +83,7 @@ func (c *Client) init() {
 	c.Policies = NewPoliciesClient(c.config)
 	c.PrincipalRoles = NewPrincipalRolesClient(c.config)
 	c.RoleMenus = NewRoleMenusClient(c.config)
+	c.RolePolicies = NewRolePoliciesClient(c.config)
 	c.Roles = NewRolesClient(c.config)
 	c.UserIdentities = NewUserIdentitiesClient(c.config)
 	c.UserMemberships = NewUserMembershipsClient(c.config)
@@ -185,6 +189,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Policies:        NewPoliciesClient(cfg),
 		PrincipalRoles:  NewPrincipalRolesClient(cfg),
 		RoleMenus:       NewRoleMenusClient(cfg),
+		RolePolicies:    NewRolePoliciesClient(cfg),
 		Roles:           NewRolesClient(cfg),
 		UserIdentities:  NewUserIdentitiesClient(cfg),
 		UserMemberships: NewUserMembershipsClient(cfg),
@@ -217,6 +222,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Policies:        NewPoliciesClient(cfg),
 		PrincipalRoles:  NewPrincipalRolesClient(cfg),
 		RoleMenus:       NewRoleMenusClient(cfg),
+		RolePolicies:    NewRolePoliciesClient(cfg),
 		Roles:           NewRolesClient(cfg),
 		UserIdentities:  NewUserIdentitiesClient(cfg),
 		UserMemberships: NewUserMembershipsClient(cfg),
@@ -252,8 +258,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuthProviders, c.Credentials, c.Departments, c.Groups, c.Menus, c.Policies,
-		c.PrincipalRoles, c.RoleMenus, c.Roles, c.UserIdentities, c.UserMemberships,
-		c.UserProfiles, c.Users,
+		c.PrincipalRoles, c.RoleMenus, c.RolePolicies, c.Roles, c.UserIdentities,
+		c.UserMemberships, c.UserProfiles, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -264,8 +270,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuthProviders, c.Credentials, c.Departments, c.Groups, c.Menus, c.Policies,
-		c.PrincipalRoles, c.RoleMenus, c.Roles, c.UserIdentities, c.UserMemberships,
-		c.UserProfiles, c.Users,
+		c.PrincipalRoles, c.RoleMenus, c.RolePolicies, c.Roles, c.UserIdentities,
+		c.UserMemberships, c.UserProfiles, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -290,6 +296,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PrincipalRoles.mutate(ctx, m)
 	case *RoleMenusMutation:
 		return c.RoleMenus.mutate(ctx, m)
+	case *RolePoliciesMutation:
+		return c.RolePolicies.mutate(ctx, m)
 	case *RolesMutation:
 		return c.Roles.mutate(ctx, m)
 	case *UserIdentitiesMutation:
@@ -1126,6 +1134,22 @@ func (c *PoliciesClient) GetX(ctx context.Context, id int) *Policies {
 	return obj
 }
 
+// QueryLionRolePolicies queries the lion_role_policies edge of a Policies.
+func (c *PoliciesClient) QueryLionRolePolicies(_m *Policies) *RolePoliciesQuery {
+	query := (&RolePoliciesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(policies.Table, policies.FieldID, id),
+			sqlgraph.To(rolepolicies.Table, rolepolicies.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, policies.LionRolePoliciesTable, policies.LionRolePoliciesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PoliciesClient) Hooks() []Hook {
 	return c.hooks.Policies
@@ -1465,6 +1489,171 @@ func (c *RoleMenusClient) mutate(ctx context.Context, m *RoleMenusMutation) (Val
 	}
 }
 
+// RolePoliciesClient is a client for the RolePolicies schema.
+type RolePoliciesClient struct {
+	config
+}
+
+// NewRolePoliciesClient returns a client for the RolePolicies from the given config.
+func NewRolePoliciesClient(c config) *RolePoliciesClient {
+	return &RolePoliciesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `rolepolicies.Hooks(f(g(h())))`.
+func (c *RolePoliciesClient) Use(hooks ...Hook) {
+	c.hooks.RolePolicies = append(c.hooks.RolePolicies, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `rolepolicies.Intercept(f(g(h())))`.
+func (c *RolePoliciesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RolePolicies = append(c.inters.RolePolicies, interceptors...)
+}
+
+// Create returns a builder for creating a RolePolicies entity.
+func (c *RolePoliciesClient) Create() *RolePoliciesCreate {
+	mutation := newRolePoliciesMutation(c.config, OpCreate)
+	return &RolePoliciesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RolePolicies entities.
+func (c *RolePoliciesClient) CreateBulk(builders ...*RolePoliciesCreate) *RolePoliciesCreateBulk {
+	return &RolePoliciesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RolePoliciesClient) MapCreateBulk(slice any, setFunc func(*RolePoliciesCreate, int)) *RolePoliciesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RolePoliciesCreateBulk{err: fmt.Errorf("calling to RolePoliciesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RolePoliciesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RolePoliciesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RolePolicies.
+func (c *RolePoliciesClient) Update() *RolePoliciesUpdate {
+	mutation := newRolePoliciesMutation(c.config, OpUpdate)
+	return &RolePoliciesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RolePoliciesClient) UpdateOne(_m *RolePolicies) *RolePoliciesUpdateOne {
+	mutation := newRolePoliciesMutation(c.config, OpUpdateOne, withRolePolicies(_m))
+	return &RolePoliciesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RolePoliciesClient) UpdateOneID(id int) *RolePoliciesUpdateOne {
+	mutation := newRolePoliciesMutation(c.config, OpUpdateOne, withRolePoliciesID(id))
+	return &RolePoliciesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RolePolicies.
+func (c *RolePoliciesClient) Delete() *RolePoliciesDelete {
+	mutation := newRolePoliciesMutation(c.config, OpDelete)
+	return &RolePoliciesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RolePoliciesClient) DeleteOne(_m *RolePolicies) *RolePoliciesDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RolePoliciesClient) DeleteOneID(id int) *RolePoliciesDeleteOne {
+	builder := c.Delete().Where(rolepolicies.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RolePoliciesDeleteOne{builder}
+}
+
+// Query returns a query builder for RolePolicies.
+func (c *RolePoliciesClient) Query() *RolePoliciesQuery {
+	return &RolePoliciesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRolePolicies},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a RolePolicies entity by its id.
+func (c *RolePoliciesClient) Get(ctx context.Context, id int) (*RolePolicies, error) {
+	return c.Query().Where(rolepolicies.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RolePoliciesClient) GetX(ctx context.Context, id int) *RolePolicies {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryLionRoles queries the lion_roles edge of a RolePolicies.
+func (c *RolePoliciesClient) QueryLionRoles(_m *RolePolicies) *RolesQuery {
+	query := (&RolesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rolepolicies.Table, rolepolicies.FieldID, id),
+			sqlgraph.To(roles.Table, roles.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolepolicies.LionRolesTable, rolepolicies.LionRolesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionPolicies queries the lion_policies edge of a RolePolicies.
+func (c *RolePoliciesClient) QueryLionPolicies(_m *RolePolicies) *PoliciesQuery {
+	query := (&PoliciesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rolepolicies.Table, rolepolicies.FieldID, id),
+			sqlgraph.To(policies.Table, policies.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolepolicies.LionPoliciesTable, rolepolicies.LionPoliciesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RolePoliciesClient) Hooks() []Hook {
+	return c.hooks.RolePolicies
+}
+
+// Interceptors returns the client interceptors.
+func (c *RolePoliciesClient) Interceptors() []Interceptor {
+	return c.inters.RolePolicies
+}
+
+func (c *RolePoliciesClient) mutate(ctx context.Context, m *RolePoliciesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RolePoliciesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RolePoliciesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RolePoliciesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RolePoliciesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown RolePolicies mutation op: %q", m.Op())
+	}
+}
+
 // RolesClient is a client for the Roles schema.
 type RolesClient struct {
 	config
@@ -1582,6 +1771,22 @@ func (c *RolesClient) QueryLionPrincipalRoles(_m *Roles) *PrincipalRolesQuery {
 			sqlgraph.From(roles.Table, roles.FieldID, id),
 			sqlgraph.To(principalroles.Table, principalroles.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionPrincipalRolesTable, roles.LionPrincipalRolesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLionRolePolicies queries the lion_role_policies edge of a Roles.
+func (c *RolesClient) QueryLionRolePolicies(_m *Roles) *RolePoliciesQuery {
+	query := (&RolePoliciesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(roles.Table, roles.FieldID, id),
+			sqlgraph.To(rolepolicies.Table, rolepolicies.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, roles.LionRolePoliciesTable, roles.LionRolePoliciesColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -2246,12 +2451,12 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 type (
 	hooks struct {
 		AuthProviders, Credentials, Departments, Groups, Menus, Policies,
-		PrincipalRoles, RoleMenus, Roles, UserIdentities, UserMemberships,
-		UserProfiles, Users []ent.Hook
+		PrincipalRoles, RoleMenus, RolePolicies, Roles, UserIdentities,
+		UserMemberships, UserProfiles, Users []ent.Hook
 	}
 	inters struct {
 		AuthProviders, Credentials, Departments, Groups, Menus, Policies,
-		PrincipalRoles, RoleMenus, Roles, UserIdentities, UserMemberships,
-		UserProfiles, Users []ent.Interceptor
+		PrincipalRoles, RoleMenus, RolePolicies, Roles, UserIdentities,
+		UserMemberships, UserProfiles, Users []ent.Interceptor
 	}
 )

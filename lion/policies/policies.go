@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -35,8 +36,17 @@ const (
 	FieldProtected = "protected"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// EdgeLionRolePolicies holds the string denoting the lion_role_policies edge name in mutations.
+	EdgeLionRolePolicies = "lion_role_policies"
 	// Table holds the table name of the policies in the database.
 	Table = "lion_policies"
+	// LionRolePoliciesTable is the table that holds the lion_role_policies relation/edge.
+	LionRolePoliciesTable = "lion_role_policies"
+	// LionRolePoliciesInverseTable is the table name for the RolePolicies entity.
+	// It exists in this package in order to avoid circular dependency with the "rolepolicies" package.
+	LionRolePoliciesInverseTable = "lion_role_policies"
+	// LionRolePoliciesColumn is the table column denoting the lion_role_policies relation/edge.
+	LionRolePoliciesColumn = "policy_id"
 )
 
 // Columns holds all SQL columns for policies fields.
@@ -144,4 +154,25 @@ func ByProtected(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByLionRolePoliciesCount orders the results by lion_role_policies count.
+func ByLionRolePoliciesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionRolePoliciesStep(), opts...)
+	}
+}
+
+// ByLionRolePolicies orders the results by lion_role_policies terms.
+func ByLionRolePolicies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionRolePoliciesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newLionRolePoliciesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionRolePoliciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRolePoliciesTable, LionRolePoliciesColumn),
+	)
 }

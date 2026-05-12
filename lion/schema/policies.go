@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 )
@@ -39,13 +40,9 @@ func (Policies) Fields() []ent.Field {
 
 // Edges of the table.
 func (Policies) Edges() []ent.Edge {
-	/*
-		return []ent.Edge{
-			edge.To("lion_policy_statements", PolicyStatements.Type),
-			edge.To("lion_policy_attachments", PolicyAttachments.Type),
-		}
-	*/
-	return nil
+	return []ent.Edge{
+		edge.To("lion_role_policies", RolePolicies.Type),
+	}
 }
 
 // Mixin of the table.

@@ -30,6 +30,9 @@ type PrincipalRoles func(*sql.Selector)
 // RoleMenus is the predicate function for rolemenus builders.
 type RoleMenus func(*sql.Selector)
 
+// RolePolicies is the predicate function for rolepolicies builders.
+type RolePolicies func(*sql.Selector)
+
 // Roles is the predicate function for roles builders.
 type Roles func(*sql.Selector)
 

@@ -15,6 +15,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 )
 
 // PoliciesUpdate is the builder for updating Policies entities.
@@ -199,9 +200,45 @@ func (_u *PoliciesUpdate) SetNillableDescription(v *string) *PoliciesUpdate {
 	return _u
 }
 
+// AddLionRolePolicyIDs adds the "lion_role_policies" edge to the RolePolicies entity by IDs.
+func (_u *PoliciesUpdate) AddLionRolePolicyIDs(ids ...int) *PoliciesUpdate {
+	_u.mutation.AddLionRolePolicyIDs(ids...)
+	return _u
+}
+
+// AddLionRolePolicies adds the "lion_role_policies" edges to the RolePolicies entity.
+func (_u *PoliciesUpdate) AddLionRolePolicies(v ...*RolePolicies) *PoliciesUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionRolePolicyIDs(ids...)
+}
+
 // Mutation returns the PoliciesMutation object of the builder.
 func (_u *PoliciesUpdate) Mutation() *PoliciesMutation {
 	return _u.mutation
+}
+
+// ClearLionRolePolicies clears all "lion_role_policies" edges to the RolePolicies entity.
+func (_u *PoliciesUpdate) ClearLionRolePolicies() *PoliciesUpdate {
+	_u.mutation.ClearLionRolePolicies()
+	return _u
+}
+
+// RemoveLionRolePolicyIDs removes the "lion_role_policies" edge to RolePolicies entities by IDs.
+func (_u *PoliciesUpdate) RemoveLionRolePolicyIDs(ids ...int) *PoliciesUpdate {
+	_u.mutation.RemoveLionRolePolicyIDs(ids...)
+	return _u
+}
+
+// RemoveLionRolePolicies removes "lion_role_policies" edges to RolePolicies entities.
+func (_u *PoliciesUpdate) RemoveLionRolePolicies(v ...*RolePolicies) *PoliciesUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionRolePolicyIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -319,6 +356,51 @@ func (_u *PoliciesUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.LionRolePoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   policies.LionRolePoliciesTable,
+			Columns: []string{policies.LionRolePoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolepolicies.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionRolePoliciesIDs(); len(nodes) > 0 && !_u.mutation.LionRolePoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   policies.LionRolePoliciesTable,
+			Columns: []string{policies.LionRolePoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolepolicies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionRolePoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   policies.LionRolePoliciesTable,
+			Columns: []string{policies.LionRolePoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolepolicies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -509,9 +591,45 @@ func (_u *PoliciesUpdateOne) SetNillableDescription(v *string) *PoliciesUpdateOn
 	return _u
 }
 
+// AddLionRolePolicyIDs adds the "lion_role_policies" edge to the RolePolicies entity by IDs.
+func (_u *PoliciesUpdateOne) AddLionRolePolicyIDs(ids ...int) *PoliciesUpdateOne {
+	_u.mutation.AddLionRolePolicyIDs(ids...)
+	return _u
+}
+
+// AddLionRolePolicies adds the "lion_role_policies" edges to the RolePolicies entity.
+func (_u *PoliciesUpdateOne) AddLionRolePolicies(v ...*RolePolicies) *PoliciesUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddLionRolePolicyIDs(ids...)
+}
+
 // Mutation returns the PoliciesMutation object of the builder.
 func (_u *PoliciesUpdateOne) Mutation() *PoliciesMutation {
 	return _u.mutation
+}
+
+// ClearLionRolePolicies clears all "lion_role_policies" edges to the RolePolicies entity.
+func (_u *PoliciesUpdateOne) ClearLionRolePolicies() *PoliciesUpdateOne {
+	_u.mutation.ClearLionRolePolicies()
+	return _u
+}
+
+// RemoveLionRolePolicyIDs removes the "lion_role_policies" edge to RolePolicies entities by IDs.
+func (_u *PoliciesUpdateOne) RemoveLionRolePolicyIDs(ids ...int) *PoliciesUpdateOne {
+	_u.mutation.RemoveLionRolePolicyIDs(ids...)
+	return _u
+}
+
+// RemoveLionRolePolicies removes "lion_role_policies" edges to RolePolicies entities.
+func (_u *PoliciesUpdateOne) RemoveLionRolePolicies(v ...*RolePolicies) *PoliciesUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveLionRolePolicyIDs(ids...)
 }
 
 // Where appends a list predicates to the PoliciesUpdate builder.
@@ -659,6 +777,51 @@ func (_u *PoliciesUpdateOne) sqlSave(ctx context.Context) (_node *Policies, err 
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
+	}
+	if _u.mutation.LionRolePoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   policies.LionRolePoliciesTable,
+			Columns: []string{policies.LionRolePoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolepolicies.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedLionRolePoliciesIDs(); len(nodes) > 0 && !_u.mutation.LionRolePoliciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   policies.LionRolePoliciesTable,
+			Columns: []string{policies.LionRolePoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolepolicies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.LionRolePoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   policies.LionRolePoliciesTable,
+			Columns: []string{policies.LionRolePoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolepolicies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Policies{config: _u.config}
 	_spec.Assign = _node.assignValues

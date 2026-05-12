@@ -11,6 +11,7 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -287,6 +288,9 @@ func (a *KnownAdminAPI) DeletePolicy(ctx context.Context, req *adminv1.DeletePol
 	}
 	if policyEnt.Protected {
 		return nil, errs.FailedPrecondition(ctx).WithMessage("protected policy cannot be deleted")
+	}
+	if db.RolePolicies.Query().Where(rolepolicies.PolicyIDEQ(int(req.Id))).CountX(ctx) > 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("policy has role binding")
 	}
 
 	// 执行删除

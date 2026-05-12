@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 )
 
 // PoliciesCreate is the builder for creating a Policies entity.
@@ -149,6 +150,21 @@ func (_c *PoliciesCreate) SetNillableDescription(v *string) *PoliciesCreate {
 		_c.SetDescription(*v)
 	}
 	return _c
+}
+
+// AddLionRolePolicyIDs adds the "lion_role_policies" edge to the RolePolicies entity by IDs.
+func (_c *PoliciesCreate) AddLionRolePolicyIDs(ids ...int) *PoliciesCreate {
+	_c.mutation.AddLionRolePolicyIDs(ids...)
+	return _c
+}
+
+// AddLionRolePolicies adds the "lion_role_policies" edges to the RolePolicies entity.
+func (_c *PoliciesCreate) AddLionRolePolicies(v ...*RolePolicies) *PoliciesCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionRolePolicyIDs(ids...)
 }
 
 // Mutation returns the PoliciesMutation object of the builder.
@@ -321,6 +337,22 @@ func (_c *PoliciesCreate) createSpec() (*Policies, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(policies.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if nodes := _c.mutation.LionRolePoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   policies.LionRolePoliciesTable,
+			Columns: []string{policies.LionRolePoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolepolicies.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

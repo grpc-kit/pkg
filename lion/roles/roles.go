@@ -42,6 +42,8 @@ const (
 	FieldProtected = "protected"
 	// EdgeLionPrincipalRoles holds the string denoting the lion_principal_roles edge name in mutations.
 	EdgeLionPrincipalRoles = "lion_principal_roles"
+	// EdgeLionRolePolicies holds the string denoting the lion_role_policies edge name in mutations.
+	EdgeLionRolePolicies = "lion_role_policies"
 	// EdgeLionRoleMenus holds the string denoting the lion_role_menus edge name in mutations.
 	EdgeLionRoleMenus = "lion_role_menus"
 	// Table holds the table name of the roles in the database.
@@ -53,6 +55,13 @@ const (
 	LionPrincipalRolesInverseTable = "lion_principal_roles"
 	// LionPrincipalRolesColumn is the table column denoting the lion_principal_roles relation/edge.
 	LionPrincipalRolesColumn = "role_id"
+	// LionRolePoliciesTable is the table that holds the lion_role_policies relation/edge.
+	LionRolePoliciesTable = "lion_role_policies"
+	// LionRolePoliciesInverseTable is the table name for the RolePolicies entity.
+	// It exists in this package in order to avoid circular dependency with the "rolepolicies" package.
+	LionRolePoliciesInverseTable = "lion_role_policies"
+	// LionRolePoliciesColumn is the table column denoting the lion_role_policies relation/edge.
+	LionRolePoliciesColumn = "role_id"
 	// LionRoleMenusTable is the table that holds the lion_role_menus relation/edge.
 	LionRoleMenusTable = "lion_role_menus"
 	// LionRoleMenusInverseTable is the table name for the RoleMenus entity.
@@ -206,6 +215,20 @@ func ByLionPrincipalRoles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOptio
 	}
 }
 
+// ByLionRolePoliciesCount orders the results by lion_role_policies count.
+func ByLionRolePoliciesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLionRolePoliciesStep(), opts...)
+	}
+}
+
+// ByLionRolePolicies orders the results by lion_role_policies terms.
+func ByLionRolePolicies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLionRolePoliciesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByLionRoleMenusCount orders the results by lion_role_menus count.
 func ByLionRoleMenusCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -224,6 +247,13 @@ func newLionPrincipalRolesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionPrincipalRolesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionPrincipalRolesTable, LionPrincipalRolesColumn),
+	)
+}
+func newLionRolePoliciesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LionRolePoliciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRolePoliciesTable, LionRolePoliciesColumn),
 	)
 }
 func newLionRoleMenusStep() *sqlgraph.Step {

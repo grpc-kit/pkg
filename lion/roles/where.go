@@ -738,6 +738,29 @@ func HasLionPrincipalRolesWith(preds ...predicate.PrincipalRoles) predicate.Role
 	})
 }
 
+// HasLionRolePolicies applies the HasEdge predicate on the "lion_role_policies" edge.
+func HasLionRolePolicies() predicate.Roles {
+	return predicate.Roles(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionRolePoliciesTable, LionRolePoliciesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLionRolePoliciesWith applies the HasEdge predicate on the "lion_role_policies" edge with a given conditions (other predicates).
+func HasLionRolePoliciesWith(preds ...predicate.RolePolicies) predicate.Roles {
+	return predicate.Roles(func(s *sql.Selector) {
+		step := newLionRolePoliciesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasLionRoleMenus applies the HasEdge predicate on the "lion_role_menus" edge.
 func HasLionRoleMenus() predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {

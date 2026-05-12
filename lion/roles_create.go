@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 	"github.com/grpc-kit/pkg/lion/roles"
 )
 
@@ -201,6 +202,21 @@ func (_c *RolesCreate) AddLionPrincipalRoles(v ...*PrincipalRoles) *RolesCreate 
 		ids[i] = v[i].ID
 	}
 	return _c.AddLionPrincipalRoleIDs(ids...)
+}
+
+// AddLionRolePolicyIDs adds the "lion_role_policies" edge to the RolePolicies entity by IDs.
+func (_c *RolesCreate) AddLionRolePolicyIDs(ids ...int) *RolesCreate {
+	_c.mutation.AddLionRolePolicyIDs(ids...)
+	return _c
+}
+
+// AddLionRolePolicies adds the "lion_role_policies" edges to the RolePolicies entity.
+func (_c *RolesCreate) AddLionRolePolicies(v ...*RolePolicies) *RolesCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddLionRolePolicyIDs(ids...)
 }
 
 // AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
@@ -424,6 +440,22 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(principalroles.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.LionRolePoliciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   roles.LionRolePoliciesTable,
+			Columns: []string{roles.LionRolePoliciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(rolepolicies.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

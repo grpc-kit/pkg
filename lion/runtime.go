@@ -13,6 +13,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/useridentities"
@@ -569,6 +570,43 @@ func init() {
 	rolemenusDescIsRecursive := rolemenusFields[4].Descriptor()
 	// rolemenus.DefaultIsRecursive holds the default value on creation for the is_recursive field.
 	rolemenus.DefaultIsRecursive = rolemenusDescIsRecursive.Default.(bool)
+	rolepoliciesMixin := schema.RolePolicies{}.Mixin()
+	rolepoliciesMixinFields0 := rolepoliciesMixin[0].Fields()
+	_ = rolepoliciesMixinFields0
+	rolepoliciesMixinFields1 := rolepoliciesMixin[1].Fields()
+	_ = rolepoliciesMixinFields1
+	rolepoliciesFields := schema.RolePolicies{}.Fields()
+	_ = rolepoliciesFields
+	// rolepoliciesDescCreatedAt is the schema descriptor for created_at field.
+	rolepoliciesDescCreatedAt := rolepoliciesMixinFields0[0].Descriptor()
+	// rolepolicies.DefaultCreatedAt holds the default value on creation for the created_at field.
+	rolepolicies.DefaultCreatedAt = rolepoliciesDescCreatedAt.Default.(func() time.Time)
+	// rolepoliciesDescUpdatedAt is the schema descriptor for updated_at field.
+	rolepoliciesDescUpdatedAt := rolepoliciesMixinFields0[1].Descriptor()
+	// rolepolicies.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	rolepolicies.DefaultUpdatedAt = rolepoliciesDescUpdatedAt.Default.(func() time.Time)
+	// rolepolicies.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	rolepolicies.UpdateDefaultUpdatedAt = rolepoliciesDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// rolepoliciesDescCreatedBy is the schema descriptor for created_by field.
+	rolepoliciesDescCreatedBy := rolepoliciesMixinFields1[0].Descriptor()
+	// rolepolicies.DefaultCreatedBy holds the default value on creation for the created_by field.
+	rolepolicies.DefaultCreatedBy = rolepoliciesDescCreatedBy.Default.(int64)
+	// rolepoliciesDescUpdatedBy is the schema descriptor for updated_by field.
+	rolepoliciesDescUpdatedBy := rolepoliciesMixinFields1[1].Descriptor()
+	// rolepolicies.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	rolepolicies.DefaultUpdatedBy = rolepoliciesDescUpdatedBy.Default.(int64)
+	// rolepoliciesDescRoleID is the schema descriptor for role_id field.
+	rolepoliciesDescRoleID := rolepoliciesFields[0].Descriptor()
+	// rolepolicies.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	rolepolicies.RoleIDValidator = rolepoliciesDescRoleID.Validators[0].(func(int) error)
+	// rolepoliciesDescPolicyID is the schema descriptor for policy_id field.
+	rolepoliciesDescPolicyID := rolepoliciesFields[1].Descriptor()
+	// rolepolicies.PolicyIDValidator is a validator for the "policy_id" field. It is called by the builders before save.
+	rolepolicies.PolicyIDValidator = rolepoliciesDescPolicyID.Validators[0].(func(int) error)
+	// rolepoliciesDescDescription is the schema descriptor for description field.
+	rolepoliciesDescDescription := rolepoliciesFields[3].Descriptor()
+	// rolepolicies.DefaultDescription holds the default value on creation for the description field.
+	rolepolicies.DefaultDescription = rolepoliciesDescDescription.Default.(string)
 	rolesMixin := schema.Roles{}.Mixin()
 	rolesMixinFields0 := rolesMixin[0].Fields()
 	_ = rolesMixinFields0

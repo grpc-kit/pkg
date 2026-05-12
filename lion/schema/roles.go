@@ -51,6 +51,7 @@ func (Roles) Fields() []ent.Field {
 func (Roles) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("lion_principal_roles", PrincipalRoles.Type),
+		edge.To("lion_role_policies", RolePolicies.Type),
 		edge.To("lion_role_menus", RoleMenus.Type),
 	}
 }

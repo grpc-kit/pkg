@@ -105,6 +105,18 @@ func (f RoleMenusFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RoleMenusMutation", m)
 }
 
+// The RolePoliciesFunc type is an adapter to allow the use of ordinary
+// function as RolePolicies mutator.
+type RolePoliciesFunc func(context.Context, *lion.RolePoliciesMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RolePoliciesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.RolePoliciesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.RolePoliciesMutation", m)
+}
+
 // The RolesFunc type is an adapter to allow the use of ordinary
 // function as Roles mutator.
 type RolesFunc func(context.Context, *lion.RolesMutation) (lion.Value, error)

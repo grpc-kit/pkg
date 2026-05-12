@@ -40,8 +40,29 @@ type Policies struct {
 	// 是否系统内置/受保护的策略，受保护的策略不可删除
 	Protected bool `json:"protected,omitempty"`
 	// 详细描述
-	Description  string `json:"description,omitempty"`
+	Description string `json:"description,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the PoliciesQuery when eager-loading is set.
+	Edges        PoliciesEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// PoliciesEdges holds the relations/edges for other nodes in the graph.
+type PoliciesEdges struct {
+	// LionRolePolicies holds the value of the lion_role_policies edge.
+	LionRolePolicies []*RolePolicies `json:"lion_role_policies,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// LionRolePoliciesOrErr returns the LionRolePolicies value or an error if the edge
+// was not loaded in eager-loading.
+func (e PoliciesEdges) LionRolePoliciesOrErr() ([]*RolePolicies, error) {
+	if e.loadedTypes[0] {
+		return e.LionRolePolicies, nil
+	}
+	return nil, &NotLoadedError{edge: "lion_role_policies"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -160,6 +181,11 @@ func (_m *Policies) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Policies) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryLionRolePolicies queries the "lion_role_policies" edge of the Policies entity.
+func (_m *Policies) QueryLionRolePolicies() *RolePoliciesQuery {
+	return NewPoliciesClient(_m.config).QueryLionRolePolicies(_m)
 }
 
 // Update returns a builder for updating this Policies.

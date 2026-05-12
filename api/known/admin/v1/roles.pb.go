@@ -1681,6 +1681,555 @@ func (x *DeleteRoleMenuRequest) GetMenuId() int64 {
 	return 0
 }
 
+type RolePolicyBinding struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id       int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	RoleId   int64 `protobuf:"varint,2,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	PolicyId int64 `protobuf:"varint,3,opt,name=policy_id,json=policyId,proto3" json:"policy_id,omitempty"`
+	// 冗余策略详情，便于前端直接渲染
+	Policy      *Policy                `protobuf:"bytes,4,opt,name=policy,proto3" json:"policy,omitempty"`
+	Metadata    map[string]string      `protobuf:"bytes,5,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Description string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	CreatedBy   int64                  `protobuf:"varint,10,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	UpdatedBy   int64                  `protobuf:"varint,11,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+	CreatedAt   *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt   *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+}
+
+func (x *RolePolicyBinding) Reset() {
+	*x = RolePolicyBinding{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[22]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RolePolicyBinding) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RolePolicyBinding) ProtoMessage() {}
+
+func (x *RolePolicyBinding) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[22]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RolePolicyBinding.ProtoReflect.Descriptor instead.
+func (*RolePolicyBinding) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *RolePolicyBinding) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *RolePolicyBinding) GetRoleId() int64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *RolePolicyBinding) GetPolicyId() int64 {
+	if x != nil {
+		return x.PolicyId
+	}
+	return 0
+}
+
+func (x *RolePolicyBinding) GetPolicy() *Policy {
+	if x != nil {
+		return x.Policy
+	}
+	return nil
+}
+
+func (x *RolePolicyBinding) GetMetadata() map[string]string {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+func (x *RolePolicyBinding) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *RolePolicyBinding) GetCreatedBy() int64 {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return 0
+}
+
+func (x *RolePolicyBinding) GetUpdatedBy() int64 {
+	if x != nil {
+		return x.UpdatedBy
+	}
+	return 0
+}
+
+func (x *RolePolicyBinding) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *RolePolicyBinding) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+type ListRolePoliciesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源：角色 ID（与路径 {parent} 一致）
+	Parent   string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	PageSize int32  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Types that are assignable to Pagination:
+	//
+	//	*ListRolePoliciesRequest_PageToken
+	//	*ListRolePoliciesRequest_Offset
+	Pagination isListRolePoliciesRequest_Pagination `protobuf_oneof:"pagination"`
+	View       View                                 `protobuf:"varint,4,opt,name=view,proto3,enum=grpc_kit.api.known.admin.v1.View" json:"view,omitempty"`
+	Filter     string                               `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
+	OrderBy    string                               `protobuf:"bytes,6,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
+}
+
+func (x *ListRolePoliciesRequest) Reset() {
+	*x = ListRolePoliciesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[23]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListRolePoliciesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRolePoliciesRequest) ProtoMessage() {}
+
+func (x *ListRolePoliciesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[23]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRolePoliciesRequest.ProtoReflect.Descriptor instead.
+func (*ListRolePoliciesRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *ListRolePoliciesRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *ListRolePoliciesRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (m *ListRolePoliciesRequest) GetPagination() isListRolePoliciesRequest_Pagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+func (x *ListRolePoliciesRequest) GetPageToken() string {
+	if x, ok := x.GetPagination().(*ListRolePoliciesRequest_PageToken); ok {
+		return x.PageToken
+	}
+	return ""
+}
+
+func (x *ListRolePoliciesRequest) GetOffset() int32 {
+	if x, ok := x.GetPagination().(*ListRolePoliciesRequest_Offset); ok {
+		return x.Offset
+	}
+	return 0
+}
+
+func (x *ListRolePoliciesRequest) GetView() View {
+	if x != nil {
+		return x.View
+	}
+	return View_VIEW_UNSPECIFIED
+}
+
+func (x *ListRolePoliciesRequest) GetFilter() string {
+	if x != nil {
+		return x.Filter
+	}
+	return ""
+}
+
+func (x *ListRolePoliciesRequest) GetOrderBy() string {
+	if x != nil {
+		return x.OrderBy
+	}
+	return ""
+}
+
+type isListRolePoliciesRequest_Pagination interface {
+	isListRolePoliciesRequest_Pagination()
+}
+
+type ListRolePoliciesRequest_PageToken struct {
+	PageToken string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3,oneof"`
+}
+
+type ListRolePoliciesRequest_Offset struct {
+	Offset int32 `protobuf:"varint,8,opt,name=offset,proto3,oneof"`
+}
+
+func (*ListRolePoliciesRequest_PageToken) isListRolePoliciesRequest_Pagination() {}
+
+func (*ListRolePoliciesRequest_Offset) isListRolePoliciesRequest_Pagination() {}
+
+type ListRolePoliciesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Policies      []*RolePolicyBinding `protobuf:"bytes,1,rep,name=policies,proto3" json:"policies,omitempty"`
+	NextPageToken string               `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	TotalSize     int32                `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
+}
+
+func (x *ListRolePoliciesResponse) Reset() {
+	*x = ListRolePoliciesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[24]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListRolePoliciesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListRolePoliciesResponse) ProtoMessage() {}
+
+func (x *ListRolePoliciesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[24]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListRolePoliciesResponse.ProtoReflect.Descriptor instead.
+func (*ListRolePoliciesResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ListRolePoliciesResponse) GetPolicies() []*RolePolicyBinding {
+	if x != nil {
+		return x.Policies
+	}
+	return nil
+}
+
+func (x *ListRolePoliciesResponse) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
+func (x *ListRolePoliciesResponse) GetTotalSize() int32 {
+	if x != nil {
+		return x.TotalSize
+	}
+	return 0
+}
+
+type CreateRolePoliciesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源：角色 ID（与路径 {parent} 一致）
+	Parent   string               `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	Policies []*RolePolicyBinding `protobuf:"bytes,2,rep,name=policies,proto3" json:"policies,omitempty"`
+}
+
+func (x *CreateRolePoliciesRequest) Reset() {
+	*x = CreateRolePoliciesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[25]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateRolePoliciesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateRolePoliciesRequest) ProtoMessage() {}
+
+func (x *CreateRolePoliciesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[25]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateRolePoliciesRequest.ProtoReflect.Descriptor instead.
+func (*CreateRolePoliciesRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *CreateRolePoliciesRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *CreateRolePoliciesRequest) GetPolicies() []*RolePolicyBinding {
+	if x != nil {
+		return x.Policies
+	}
+	return nil
+}
+
+type CreateRolePoliciesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CreateRolePoliciesResponse) Reset() {
+	*x = CreateRolePoliciesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[26]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreateRolePoliciesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateRolePoliciesResponse) ProtoMessage() {}
+
+func (x *CreateRolePoliciesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[26]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateRolePoliciesResponse.ProtoReflect.Descriptor instead.
+func (*CreateRolePoliciesResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{26}
+}
+
+type UpdateRolePoliciesRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源：角色 ID（与路径 {parent} 一致）
+	Parent   string               `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	Policies []*RolePolicyBinding `protobuf:"bytes,2,rep,name=policies,proto3" json:"policies,omitempty"`
+}
+
+func (x *UpdateRolePoliciesRequest) Reset() {
+	*x = UpdateRolePoliciesRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[27]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateRolePoliciesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRolePoliciesRequest) ProtoMessage() {}
+
+func (x *UpdateRolePoliciesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[27]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateRolePoliciesRequest.ProtoReflect.Descriptor instead.
+func (*UpdateRolePoliciesRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *UpdateRolePoliciesRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *UpdateRolePoliciesRequest) GetPolicies() []*RolePolicyBinding {
+	if x != nil {
+		return x.Policies
+	}
+	return nil
+}
+
+type UpdateRolePoliciesResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *UpdateRolePoliciesResponse) Reset() {
+	*x = UpdateRolePoliciesResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[28]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateRolePoliciesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRolePoliciesResponse) ProtoMessage() {}
+
+func (x *UpdateRolePoliciesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[28]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateRolePoliciesResponse.ProtoReflect.Descriptor instead.
+func (*UpdateRolePoliciesResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{28}
+}
+
+type DeleteRolePolicyRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 父资源：角色 ID（与路径 {parent} 一致）
+	Parent   string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
+	PolicyId int64  `protobuf:"varint,2,opt,name=policy_id,json=policyId,proto3" json:"policy_id,omitempty"`
+}
+
+func (x *DeleteRolePolicyRequest) Reset() {
+	*x = DeleteRolePolicyRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_roles_proto_msgTypes[29]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeleteRolePolicyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteRolePolicyRequest) ProtoMessage() {}
+
+func (x *DeleteRolePolicyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_roles_proto_msgTypes[29]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteRolePolicyRequest.ProtoReflect.Descriptor instead.
+func (*DeleteRolePolicyRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_roles_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *DeleteRolePolicyRequest) GetParent() string {
+	if x != nil {
+		return x.Parent
+	}
+	return ""
+}
+
+func (x *DeleteRolePolicyRequest) GetPolicyId() int64 {
+	if x != nil {
+		return x.PolicyId
+	}
+	return 0
+}
+
 var File_known_admin_v1_roles_proto protoreflect.FileDescriptor
 
 var file_known_admin_v1_roles_proto_rawDesc = []byte{
@@ -1916,21 +2465,106 @@ var file_known_admin_v1_roles_proto_rawDesc = []byte{
 	0x4d, 0x65, 0x6e, 0x75, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x70,
 	0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x70, 0x61, 0x72,
 	0x65, 0x6e, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x6d, 0x65, 0x6e, 0x75, 0x5f, 0x69, 0x64, 0x18, 0x02,
-	0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x6d, 0x65, 0x6e, 0x75, 0x49, 0x64, 0x2a, 0x54, 0x0a, 0x0d,
-	0x50, 0x72, 0x69, 0x6e, 0x63, 0x69, 0x70, 0x61, 0x6c, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1e, 0x0a,
-	0x1a, 0x50, 0x52, 0x49, 0x4e, 0x43, 0x49, 0x50, 0x41, 0x4c, 0x5f, 0x54, 0x59, 0x50, 0x45, 0x5f,
-	0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x08, 0x0a,
-	0x04, 0x55, 0x53, 0x45, 0x52, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x47, 0x52, 0x4f, 0x55, 0x50,
-	0x10, 0x02, 0x12, 0x0e, 0x0a, 0x0a, 0x44, 0x45, 0x50, 0x41, 0x52, 0x54, 0x4d, 0x45, 0x4e, 0x54,
-	0x10, 0x03, 0x2a, 0x49, 0x0a, 0x0d, 0x42, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x53, 0x74, 0x61,
-	0x74, 0x75, 0x73, 0x12, 0x1e, 0x0a, 0x1a, 0x42, 0x49, 0x4e, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x53,
-	0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45,
-	0x44, 0x10, 0x00, 0x12, 0x0a, 0x0a, 0x06, 0x41, 0x43, 0x54, 0x49, 0x56, 0x45, 0x10, 0x01, 0x12,
-	0x0c, 0x0a, 0x08, 0x44, 0x49, 0x53, 0x41, 0x42, 0x4c, 0x45, 0x44, 0x10, 0x02, 0x42, 0x34, 0x5a,
-	0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63,
-	0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f,
-	0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x6d, 0x65, 0x6e, 0x75, 0x49, 0x64, 0x22, 0x83, 0x04, 0x0a,
+	0x11, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x42, 0x69, 0x6e, 0x64, 0x69,
+	0x6e, 0x67, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02,
+	0x69, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x72, 0x6f, 0x6c, 0x65, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x06, 0x72, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09, 0x70,
+	0x6f, 0x6c, 0x69, 0x63, 0x79, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x08,
+	0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x49, 0x64, 0x12, 0x3b, 0x0a, 0x06, 0x70, 0x6f, 0x6c, 0x69,
+	0x63, 0x79, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f,
+	0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64,
+	0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x06, 0x70,
+	0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x58, 0x0a, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
+	0x61, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x3c, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b,
+	0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d,
+	0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79,
+	0x42, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x2e, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
+	0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12,
+	0x20, 0x0a, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x06,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f,
+	0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18,
+	0x0a, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x42, 0x79,
+	0x12, 0x1d, 0x0a, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x0b,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x64, 0x42, 0x79, 0x12,
+	0x39, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x0c, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52,
+	0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x39, 0x0a, 0x0a, 0x75, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x0d, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a,
+	0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66,
+	0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x09, 0x75, 0x70, 0x64, 0x61,
+	0x74, 0x65, 0x64, 0x41, 0x74, 0x1a, 0x3b, 0x0a, 0x0d, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
+	0x61, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02,
+	0x38, 0x01, 0x22, 0x81, 0x02, 0x0a, 0x17, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x50,
+	0x6f, 0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16,
+	0x0a, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06,
+	0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x12, 0x1b, 0x0a, 0x09, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x73,
+	0x69, 0x7a, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x70, 0x61, 0x67, 0x65, 0x53,
+	0x69, 0x7a, 0x65, 0x12, 0x1f, 0x0a, 0x0a, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x74, 0x6f, 0x6b, 0x65,
+	0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x09, 0x70, 0x61, 0x67, 0x65, 0x54,
+	0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x18, 0x0a, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x18, 0x08,
+	0x20, 0x01, 0x28, 0x05, 0x48, 0x00, 0x52, 0x06, 0x6f, 0x66, 0x66, 0x73, 0x65, 0x74, 0x12, 0x35,
+	0x0a, 0x04, 0x76, 0x69, 0x65, 0x77, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x21, 0x2e, 0x67,
+	0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77,
+	0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x65, 0x77, 0x52,
+	0x04, 0x76, 0x69, 0x65, 0x77, 0x12, 0x16, 0x0a, 0x06, 0x66, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x18,
+	0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x66, 0x69, 0x6c, 0x74, 0x65, 0x72, 0x12, 0x19, 0x0a,
+	0x08, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x5f, 0x62, 0x79, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x07, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x42, 0x79, 0x42, 0x0c, 0x0a, 0x0a, 0x70, 0x61, 0x67, 0x69,
+	0x6e, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0xad, 0x01, 0x0a, 0x18, 0x4c, 0x69, 0x73, 0x74, 0x52,
+	0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x4a, 0x0a, 0x08, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x18,
+	0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e,
+	0x2e, 0x76, 0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x42, 0x69,
+	0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x12,
+	0x26, 0x0a, 0x0f, 0x6e, 0x65, 0x78, 0x74, 0x5f, 0x70, 0x61, 0x67, 0x65, 0x5f, 0x74, 0x6f, 0x6b,
+	0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x6e, 0x65, 0x78, 0x74, 0x50, 0x61,
+	0x67, 0x65, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x74, 0x6f, 0x74, 0x61, 0x6c,
+	0x5f, 0x73, 0x69, 0x7a, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x74, 0x6f, 0x74,
+	0x61, 0x6c, 0x53, 0x69, 0x7a, 0x65, 0x22, 0x7f, 0x0a, 0x19, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x12, 0x4a, 0x0a, 0x08, 0x70,
+	0x6f, 0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2e, 0x2e,
+	0x67, 0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f,
+	0x77, 0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65,
+	0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x42, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x70,
+	0x6f, 0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x22, 0x1c, 0x0a, 0x1a, 0x43, 0x72, 0x65, 0x61, 0x74,
+	0x65, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x7f, 0x0a, 0x19, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x52,
+	0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x12, 0x4a, 0x0a, 0x08, 0x70, 0x6f,
+	0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x67,
+	0x72, 0x70, 0x63, 0x5f, 0x6b, 0x69, 0x74, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6b, 0x6e, 0x6f, 0x77,
+	0x6e, 0x2e, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x50,
+	0x6f, 0x6c, 0x69, 0x63, 0x79, 0x42, 0x69, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x52, 0x08, 0x70, 0x6f,
+	0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x22, 0x1c, 0x0a, 0x1a, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x69, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x4e, 0x0a, 0x17, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x6f,
+	0x6c, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x16, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x06, 0x70, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x12, 0x1b, 0x0a, 0x09, 0x70, 0x6f, 0x6c, 0x69, 0x63,
+	0x79, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x08, 0x70, 0x6f, 0x6c, 0x69,
+	0x63, 0x79, 0x49, 0x64, 0x2a, 0x54, 0x0a, 0x0d, 0x50, 0x72, 0x69, 0x6e, 0x63, 0x69, 0x70, 0x61,
+	0x6c, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1e, 0x0a, 0x1a, 0x50, 0x52, 0x49, 0x4e, 0x43, 0x49, 0x50,
+	0x41, 0x4c, 0x5f, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46,
+	0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x55, 0x53, 0x45, 0x52, 0x10, 0x01, 0x12,
+	0x09, 0x0a, 0x05, 0x47, 0x52, 0x4f, 0x55, 0x50, 0x10, 0x02, 0x12, 0x0e, 0x0a, 0x0a, 0x44, 0x45,
+	0x50, 0x41, 0x52, 0x54, 0x4d, 0x45, 0x4e, 0x54, 0x10, 0x03, 0x2a, 0x49, 0x0a, 0x0d, 0x42, 0x69,
+	0x6e, 0x64, 0x69, 0x6e, 0x67, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x1e, 0x0a, 0x1a, 0x42,
+	0x49, 0x4e, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x55, 0x4e,
+	0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12, 0x0a, 0x0a, 0x06, 0x41,
+	0x43, 0x54, 0x49, 0x56, 0x45, 0x10, 0x01, 0x12, 0x0c, 0x0a, 0x08, 0x44, 0x49, 0x53, 0x41, 0x42,
+	0x4c, 0x45, 0x44, 0x10, 0x02, 0x42, 0x34, 0x5a, 0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
+	0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67,
+	0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e,
+	0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1946,70 +2580,88 @@ func file_known_admin_v1_roles_proto_rawDescGZIP() []byte {
 }
 
 var file_known_admin_v1_roles_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_known_admin_v1_roles_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_known_admin_v1_roles_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_known_admin_v1_roles_proto_goTypes = []interface{}{
-	(PrincipalType)(0),                // 0: grpc_kit.api.known.admin.v1.PrincipalType
-	(BindingStatus)(0),                // 1: grpc_kit.api.known.admin.v1.BindingStatus
-	(*PrincipalRoleBinding)(nil),      // 2: grpc_kit.api.known.admin.v1.PrincipalRoleBinding
-	(*CreateRoleRequest)(nil),         // 3: grpc_kit.api.known.admin.v1.CreateRoleRequest
-	(*GetRoleRequest)(nil),            // 4: grpc_kit.api.known.admin.v1.GetRoleRequest
-	(*UpdateRoleRequest)(nil),         // 5: grpc_kit.api.known.admin.v1.UpdateRoleRequest
-	(*DeleteRoleRequest)(nil),         // 6: grpc_kit.api.known.admin.v1.DeleteRoleRequest
-	(*ListRolesRequest)(nil),          // 7: grpc_kit.api.known.admin.v1.ListRolesRequest
-	(*ListRolesResponse)(nil),         // 8: grpc_kit.api.known.admin.v1.ListRolesResponse
-	(*ListRoleMembersRequest)(nil),    // 9: grpc_kit.api.known.admin.v1.ListRoleMembersRequest
-	(*ListRoleMembersResponse)(nil),   // 10: grpc_kit.api.known.admin.v1.ListRoleMembersResponse
-	(*DeleteRoleMemberRequest)(nil),   // 11: grpc_kit.api.known.admin.v1.DeleteRoleMemberRequest
-	(*CreateRoleMembersRequest)(nil),  // 12: grpc_kit.api.known.admin.v1.CreateRoleMembersRequest
-	(*CreateRoleMembersResponse)(nil), // 13: grpc_kit.api.known.admin.v1.CreateRoleMembersResponse
-	(*UpdateRoleMembersRequest)(nil),  // 14: grpc_kit.api.known.admin.v1.UpdateRoleMembersRequest
-	(*UpdateRoleMembersResponse)(nil), // 15: grpc_kit.api.known.admin.v1.UpdateRoleMembersResponse
-	(*RoleMenu)(nil),                  // 16: grpc_kit.api.known.admin.v1.RoleMenu
-	(*ListRoleMenusRequest)(nil),      // 17: grpc_kit.api.known.admin.v1.ListRoleMenusRequest
-	(*ListRoleMenusResponse)(nil),     // 18: grpc_kit.api.known.admin.v1.ListRoleMenusResponse
-	(*CreateRoleMenusRequest)(nil),    // 19: grpc_kit.api.known.admin.v1.CreateRoleMenusRequest
-	(*CreateRoleMenusResponse)(nil),   // 20: grpc_kit.api.known.admin.v1.CreateRoleMenusResponse
-	(*UpdateRoleMenusRequest)(nil),    // 21: grpc_kit.api.known.admin.v1.UpdateRoleMenusRequest
-	(*UpdateRoleMenusResponse)(nil),   // 22: grpc_kit.api.known.admin.v1.UpdateRoleMenusResponse
-	(*DeleteRoleMenuRequest)(nil),     // 23: grpc_kit.api.known.admin.v1.DeleteRoleMenuRequest
-	nil,                               // 24: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.MetadataEntry
-	(*timestamppb.Timestamp)(nil),     // 25: google.protobuf.Timestamp
-	(*Role)(nil),                      // 26: grpc_kit.api.known.admin.v1.Role
-	(*fieldmaskpb.FieldMask)(nil),     // 27: google.protobuf.FieldMask
-	(View)(0),                         // 28: grpc_kit.api.known.admin.v1.View
-	(*Membership)(nil),                // 29: grpc_kit.api.known.admin.v1.Membership
-	(*Menu)(nil),                      // 30: grpc_kit.api.known.admin.v1.Menu
-	(Structure)(0),                    // 31: grpc_kit.api.known.admin.v1.Structure
+	(PrincipalType)(0),                 // 0: grpc_kit.api.known.admin.v1.PrincipalType
+	(BindingStatus)(0),                 // 1: grpc_kit.api.known.admin.v1.BindingStatus
+	(*PrincipalRoleBinding)(nil),       // 2: grpc_kit.api.known.admin.v1.PrincipalRoleBinding
+	(*CreateRoleRequest)(nil),          // 3: grpc_kit.api.known.admin.v1.CreateRoleRequest
+	(*GetRoleRequest)(nil),             // 4: grpc_kit.api.known.admin.v1.GetRoleRequest
+	(*UpdateRoleRequest)(nil),          // 5: grpc_kit.api.known.admin.v1.UpdateRoleRequest
+	(*DeleteRoleRequest)(nil),          // 6: grpc_kit.api.known.admin.v1.DeleteRoleRequest
+	(*ListRolesRequest)(nil),           // 7: grpc_kit.api.known.admin.v1.ListRolesRequest
+	(*ListRolesResponse)(nil),          // 8: grpc_kit.api.known.admin.v1.ListRolesResponse
+	(*ListRoleMembersRequest)(nil),     // 9: grpc_kit.api.known.admin.v1.ListRoleMembersRequest
+	(*ListRoleMembersResponse)(nil),    // 10: grpc_kit.api.known.admin.v1.ListRoleMembersResponse
+	(*DeleteRoleMemberRequest)(nil),    // 11: grpc_kit.api.known.admin.v1.DeleteRoleMemberRequest
+	(*CreateRoleMembersRequest)(nil),   // 12: grpc_kit.api.known.admin.v1.CreateRoleMembersRequest
+	(*CreateRoleMembersResponse)(nil),  // 13: grpc_kit.api.known.admin.v1.CreateRoleMembersResponse
+	(*UpdateRoleMembersRequest)(nil),   // 14: grpc_kit.api.known.admin.v1.UpdateRoleMembersRequest
+	(*UpdateRoleMembersResponse)(nil),  // 15: grpc_kit.api.known.admin.v1.UpdateRoleMembersResponse
+	(*RoleMenu)(nil),                   // 16: grpc_kit.api.known.admin.v1.RoleMenu
+	(*ListRoleMenusRequest)(nil),       // 17: grpc_kit.api.known.admin.v1.ListRoleMenusRequest
+	(*ListRoleMenusResponse)(nil),      // 18: grpc_kit.api.known.admin.v1.ListRoleMenusResponse
+	(*CreateRoleMenusRequest)(nil),     // 19: grpc_kit.api.known.admin.v1.CreateRoleMenusRequest
+	(*CreateRoleMenusResponse)(nil),    // 20: grpc_kit.api.known.admin.v1.CreateRoleMenusResponse
+	(*UpdateRoleMenusRequest)(nil),     // 21: grpc_kit.api.known.admin.v1.UpdateRoleMenusRequest
+	(*UpdateRoleMenusResponse)(nil),    // 22: grpc_kit.api.known.admin.v1.UpdateRoleMenusResponse
+	(*DeleteRoleMenuRequest)(nil),      // 23: grpc_kit.api.known.admin.v1.DeleteRoleMenuRequest
+	(*RolePolicyBinding)(nil),          // 24: grpc_kit.api.known.admin.v1.RolePolicyBinding
+	(*ListRolePoliciesRequest)(nil),    // 25: grpc_kit.api.known.admin.v1.ListRolePoliciesRequest
+	(*ListRolePoliciesResponse)(nil),   // 26: grpc_kit.api.known.admin.v1.ListRolePoliciesResponse
+	(*CreateRolePoliciesRequest)(nil),  // 27: grpc_kit.api.known.admin.v1.CreateRolePoliciesRequest
+	(*CreateRolePoliciesResponse)(nil), // 28: grpc_kit.api.known.admin.v1.CreateRolePoliciesResponse
+	(*UpdateRolePoliciesRequest)(nil),  // 29: grpc_kit.api.known.admin.v1.UpdateRolePoliciesRequest
+	(*UpdateRolePoliciesResponse)(nil), // 30: grpc_kit.api.known.admin.v1.UpdateRolePoliciesResponse
+	(*DeleteRolePolicyRequest)(nil),    // 31: grpc_kit.api.known.admin.v1.DeleteRolePolicyRequest
+	nil,                                // 32: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.MetadataEntry
+	nil,                                // 33: grpc_kit.api.known.admin.v1.RolePolicyBinding.MetadataEntry
+	(*timestamppb.Timestamp)(nil),      // 34: google.protobuf.Timestamp
+	(*Role)(nil),                       // 35: grpc_kit.api.known.admin.v1.Role
+	(*fieldmaskpb.FieldMask)(nil),      // 36: google.protobuf.FieldMask
+	(View)(0),                          // 37: grpc_kit.api.known.admin.v1.View
+	(*Membership)(nil),                 // 38: grpc_kit.api.known.admin.v1.Membership
+	(*Menu)(nil),                       // 39: grpc_kit.api.known.admin.v1.Menu
+	(Structure)(0),                     // 40: grpc_kit.api.known.admin.v1.Structure
+	(*Policy)(nil),                     // 41: grpc_kit.api.known.admin.v1.Policy
 }
 var file_known_admin_v1_roles_proto_depIdxs = []int32{
 	0,  // 0: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.principal_type:type_name -> grpc_kit.api.known.admin.v1.PrincipalType
 	1,  // 1: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.binding_status:type_name -> grpc_kit.api.known.admin.v1.BindingStatus
-	25, // 2: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.expired_at:type_name -> google.protobuf.Timestamp
-	24, // 3: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.metadata:type_name -> grpc_kit.api.known.admin.v1.PrincipalRoleBinding.MetadataEntry
-	25, // 4: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.created_at:type_name -> google.protobuf.Timestamp
-	25, // 5: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.updated_at:type_name -> google.protobuf.Timestamp
-	26, // 6: grpc_kit.api.known.admin.v1.CreateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
-	26, // 7: grpc_kit.api.known.admin.v1.UpdateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
-	27, // 8: grpc_kit.api.known.admin.v1.UpdateRoleRequest.update_mask:type_name -> google.protobuf.FieldMask
-	26, // 9: grpc_kit.api.known.admin.v1.ListRolesResponse.roles:type_name -> grpc_kit.api.known.admin.v1.Role
-	28, // 10: grpc_kit.api.known.admin.v1.ListRoleMembersRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
+	34, // 2: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.expired_at:type_name -> google.protobuf.Timestamp
+	32, // 3: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.metadata:type_name -> grpc_kit.api.known.admin.v1.PrincipalRoleBinding.MetadataEntry
+	34, // 4: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.created_at:type_name -> google.protobuf.Timestamp
+	34, // 5: grpc_kit.api.known.admin.v1.PrincipalRoleBinding.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 6: grpc_kit.api.known.admin.v1.CreateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
+	35, // 7: grpc_kit.api.known.admin.v1.UpdateRoleRequest.role:type_name -> grpc_kit.api.known.admin.v1.Role
+	36, // 8: grpc_kit.api.known.admin.v1.UpdateRoleRequest.update_mask:type_name -> google.protobuf.FieldMask
+	35, // 9: grpc_kit.api.known.admin.v1.ListRolesResponse.roles:type_name -> grpc_kit.api.known.admin.v1.Role
+	37, // 10: grpc_kit.api.known.admin.v1.ListRoleMembersRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
 	0,  // 11: grpc_kit.api.known.admin.v1.ListRoleMembersRequest.principal_type:type_name -> grpc_kit.api.known.admin.v1.PrincipalType
-	29, // 12: grpc_kit.api.known.admin.v1.ListRoleMembersResponse.members:type_name -> grpc_kit.api.known.admin.v1.Membership
+	38, // 12: grpc_kit.api.known.admin.v1.ListRoleMembersResponse.members:type_name -> grpc_kit.api.known.admin.v1.Membership
 	2,  // 13: grpc_kit.api.known.admin.v1.ListRoleMembersResponse.bindings:type_name -> grpc_kit.api.known.admin.v1.PrincipalRoleBinding
 	0,  // 14: grpc_kit.api.known.admin.v1.DeleteRoleMemberRequest.principal_type:type_name -> grpc_kit.api.known.admin.v1.PrincipalType
 	2,  // 15: grpc_kit.api.known.admin.v1.CreateRoleMembersRequest.bindings:type_name -> grpc_kit.api.known.admin.v1.PrincipalRoleBinding
 	2,  // 16: grpc_kit.api.known.admin.v1.UpdateRoleMembersRequest.bindings:type_name -> grpc_kit.api.known.admin.v1.PrincipalRoleBinding
-	30, // 17: grpc_kit.api.known.admin.v1.RoleMenu.menu:type_name -> grpc_kit.api.known.admin.v1.Menu
-	28, // 18: grpc_kit.api.known.admin.v1.ListRoleMenusRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
-	31, // 19: grpc_kit.api.known.admin.v1.ListRoleMenusRequest.structure:type_name -> grpc_kit.api.known.admin.v1.Structure
+	39, // 17: grpc_kit.api.known.admin.v1.RoleMenu.menu:type_name -> grpc_kit.api.known.admin.v1.Menu
+	37, // 18: grpc_kit.api.known.admin.v1.ListRoleMenusRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
+	40, // 19: grpc_kit.api.known.admin.v1.ListRoleMenusRequest.structure:type_name -> grpc_kit.api.known.admin.v1.Structure
 	16, // 20: grpc_kit.api.known.admin.v1.ListRoleMenusResponse.menus:type_name -> grpc_kit.api.known.admin.v1.RoleMenu
 	16, // 21: grpc_kit.api.known.admin.v1.CreateRoleMenusRequest.menus:type_name -> grpc_kit.api.known.admin.v1.RoleMenu
 	16, // 22: grpc_kit.api.known.admin.v1.UpdateRoleMenusRequest.menus:type_name -> grpc_kit.api.known.admin.v1.RoleMenu
-	23, // [23:23] is the sub-list for method output_type
-	23, // [23:23] is the sub-list for method input_type
-	23, // [23:23] is the sub-list for extension type_name
-	23, // [23:23] is the sub-list for extension extendee
-	0,  // [0:23] is the sub-list for field type_name
+	41, // 23: grpc_kit.api.known.admin.v1.RolePolicyBinding.policy:type_name -> grpc_kit.api.known.admin.v1.Policy
+	33, // 24: grpc_kit.api.known.admin.v1.RolePolicyBinding.metadata:type_name -> grpc_kit.api.known.admin.v1.RolePolicyBinding.MetadataEntry
+	34, // 25: grpc_kit.api.known.admin.v1.RolePolicyBinding.created_at:type_name -> google.protobuf.Timestamp
+	34, // 26: grpc_kit.api.known.admin.v1.RolePolicyBinding.updated_at:type_name -> google.protobuf.Timestamp
+	37, // 27: grpc_kit.api.known.admin.v1.ListRolePoliciesRequest.view:type_name -> grpc_kit.api.known.admin.v1.View
+	24, // 28: grpc_kit.api.known.admin.v1.ListRolePoliciesResponse.policies:type_name -> grpc_kit.api.known.admin.v1.RolePolicyBinding
+	24, // 29: grpc_kit.api.known.admin.v1.CreateRolePoliciesRequest.policies:type_name -> grpc_kit.api.known.admin.v1.RolePolicyBinding
+	24, // 30: grpc_kit.api.known.admin.v1.UpdateRolePoliciesRequest.policies:type_name -> grpc_kit.api.known.admin.v1.RolePolicyBinding
+	31, // [31:31] is the sub-list for method output_type
+	31, // [31:31] is the sub-list for method input_type
+	31, // [31:31] is the sub-list for extension type_name
+	31, // [31:31] is the sub-list for extension extendee
+	0,  // [0:31] is the sub-list for field type_name
 }
 
 func init() { file_known_admin_v1_roles_proto_init() }
@@ -2283,6 +2935,102 @@ func file_known_admin_v1_roles_proto_init() {
 				return nil
 			}
 		}
+		file_known_admin_v1_roles_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RolePolicyBinding); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListRolePoliciesRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListRolePoliciesResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateRolePoliciesRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateRolePoliciesResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateRolePoliciesRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateRolePoliciesResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_roles_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeleteRolePolicyRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_known_admin_v1_roles_proto_msgTypes[5].OneofWrappers = []interface{}{
 		(*ListRolesRequest_PageToken)(nil),
@@ -2296,13 +3044,17 @@ func file_known_admin_v1_roles_proto_init() {
 		(*ListRoleMenusRequest_PageToken)(nil),
 		(*ListRoleMenusRequest_Offset)(nil),
 	}
+	file_known_admin_v1_roles_proto_msgTypes[23].OneofWrappers = []interface{}{
+		(*ListRolePoliciesRequest_PageToken)(nil),
+		(*ListRolePoliciesRequest_Offset)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_roles_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   23,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

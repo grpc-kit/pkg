@@ -15,8 +15,10 @@ import (
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
@@ -171,6 +173,48 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	} else if err != nil {
 		rollback()
 		return nil, err
+	}
+
+	superadminPolicyCode := "superadmin-full-access"
+	superadminPolicy, err := tx.Policies.Query().Where(policies.CodeEQ(superadminPolicyCode)).Only(ctx)
+	if lion.IsNotFound(err) {
+		superadminPolicy, err = tx.Policies.Create().
+			SetCode(superadminPolicyCode).
+			SetDisplayName("超级管理员全量策略").
+			SetPolicyStatus(int(adminv1.Policy_ENABLED)).
+			SetProtected(true).
+			SetDescription("系统内置超级管理员全量访问策略").
+			SetStatements([]*adminv1.PolicyStatement{{
+				Effect:    adminv1.PolicyStatement_ALLOW,
+				Actions:   []string{"*"},
+				Resources: []string{"*"},
+			}}).
+			Save(ctx)
+		if err != nil {
+			rollback()
+			return nil, err
+		}
+	} else if err != nil {
+		rollback()
+		return nil, err
+	}
+
+	rolePolicyExists, err := tx.RolePolicies.Query().
+		Where(rolepolicies.RoleIDEQ(adminRole.ID), rolepolicies.PolicyIDEQ(superadminPolicy.ID)).
+		Exist(ctx)
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+	if !rolePolicyExists {
+		if err := tx.RolePolicies.Create().
+			SetRoleID(adminRole.ID).
+			SetPolicyID(superadminPolicy.ID).
+			SetDescription("初始化绑定：超级管理员默认全量策略").
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
 	}
 
 	adminUsername := seedBootstrapUsername(adminv1.BootstrapUsername_BOOTSTRAP_USERNAME_ADMIN)
