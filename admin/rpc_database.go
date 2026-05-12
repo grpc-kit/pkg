@@ -69,7 +69,16 @@ func builtinMenuSeeds() []builtinMenuSeed {
 						{Code: "setting.departments", DisplayName: "组织架构", RoutePath: "/setting/departments", SortOrder: 200},
 						{Code: "setting.menus", DisplayName: "菜单管理", RoutePath: "/setting/menus", SortOrder: 250},
 						{Code: "setting.roles", DisplayName: "角色管理", RoutePath: "/setting/roles", SortOrder: 300},
-						{Code: "setting.policymanage", DisplayName: "权限策略", RoutePath: "/setting/policymanage/index", SortOrder: 400},
+						{
+							Code:        "setting.policy",
+							DisplayName: "权限策略",
+							RoutePath:   "/setting/policy",
+							SortOrder:   400,
+							Children: []builtinMenuSeed{
+								{Code: "setting.policy.list", DisplayName: "策略列表", RoutePath: "/setting/policy/list", SortOrder: 100},
+								{Code: "setting.policy.create", DisplayName: "新建策略", RoutePath: "/setting/policy/create", SortOrder: 200},
+							},
+						},
 						{Code: "setting.groups", DisplayName: "群组管理", RoutePath: "/setting/groups", SortOrder: 500},
 						{Code: "setting.users", DisplayName: "用户管理", RoutePath: "/setting/users", SortOrder: 600},
 						{
@@ -134,6 +143,17 @@ func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items 
 			}
 		} else if err != nil {
 			return err
+		} else {
+			obj, err = obj.Update().
+				SetParentID(parentID).
+				SetDisplayName(item.DisplayName).
+				SetRoutePath(item.RoutePath).
+				SetIcon(item.Icon).
+				SetSortOrder(item.SortOrder).
+				Save(ctx)
+			if err != nil {
+				return err
+			}
 		}
 		if err := createBuiltinMenus(ctx, tx, int64(obj.ID), item.Children); err != nil {
 			return err
