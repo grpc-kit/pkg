@@ -317,18 +317,18 @@ openapiOptions:
       option:
         tags:
           - "角色管理"
-        summary: "角色成员列表"
-        description: "接口格式：/builtin/admin/api/v1/roles/{parent}/members。parent 表示角色 ID。"
+        summary: "角色主体绑定列表"
+        description: "接口格式：/builtin/admin/api/v1/roles/{parent}/members。parent 表示角色 ID。默认返回第一层主体绑定（bindings）；view=VIEW_FULL 时，members 返回展开后的有效用户 membership 结果。"
         responses:
           "200":
             examples:
-              "application/json": '{"members":[{"id":"10","user_id":"1","username":"admin","nickname":"系统管理员","target_type":"ROLE","target_id":"2001","member_role":"MEMBER","member_status":"ACTIVE"},{"id":"11","user_id":"2","username":"alice","nickname":"Alice","target_type":"ROLE","target_id":"2001","member_role":"MEMBER","member_status":"ACTIVE"}],"next_page_token":"role-members:3","total_size":2}'
+              "application/json": '{"bindings":[{"id":"10","principal_type":"USER","principal_id":"1","principal_name":"系统管理员","principal_code":"admin","role_id":"2001","binding_status":"ACTIVE"},{"id":"11","principal_type":"GROUP","principal_id":"20","principal_name":"运维团队","principal_code":"ops-team","role_id":"2001","binding_status":"ACTIVE"},{"id":"12","principal_type":"DEPARTMENT","principal_id":"5001","principal_name":"风控中心","principal_code":"risk-center","role_id":"2001","binding_status":"DISABLED"}],"members":[],"next_page_token":"role-bindings:3","total_size":3}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleMember
       option:
         tags:
           - "角色管理"
-        summary: "移除角色成员"
-        description: "接口格式：/builtin/admin/api/v1/roles/{parent}/members/{user_id}。parent 表示角色 ID。"
+        summary: "移除角色主体绑定"
+        description: "接口格式：/builtin/admin/api/v1/roles/{parent}/members/{principal_type}/{principal_id}。parent 表示角色 ID；支持删除 USER / GROUP / DEPARTMENT 三类主体绑定。"
         responses:
           "200":
             examples:
@@ -377,8 +377,8 @@ openapiOptions:
       option:
         tags:
           - "角色管理"
-        summary: "创建角色成员"
-        description: '接口格式：POST /builtin/admin/api/v1/roles/{parent}/members。parent 为角色 ID；请求体为 members 数组，如 [{"user_id":"1001"},{"user_id":"1002"}]。'
+        summary: "创建角色主体绑定"
+        description: '接口格式：POST /builtin/admin/api/v1/roles/{parent}/members。parent 为角色 ID；请求体为 bindings 数组，如 [{"principal_type":"USER","principal_id":"1001","binding_status":"ACTIVE"},{"principal_type":"GROUP","principal_id":"20","binding_status":"ACTIVE"}]。'
         responses:
           "200":
             examples:
@@ -387,8 +387,8 @@ openapiOptions:
       option:
         tags:
           - "角色管理"
-        summary: "更新角色成员"
-        description: '接口格式：PATCH /builtin/admin/api/v1/roles/{parent}/members。parent 为角色 ID；请求体为 members 数组（与 List 返回结构一致，每行以 user_roles.id 定位时可传 id，否则传 user_id）。无 FieldMask：每条 member 对 member_role、member_status、member_type、expired_at、metadata、description 整段写入（请先 GET 列表再改）。示例：[{"id":"10","user_id":"1","member_role":"ADMIN","member_status":"ACTIVE","description":"运维"}]。'
+        summary: "更新角色主体绑定"
+        description: '接口格式：PATCH /builtin/admin/api/v1/roles/{parent}/members。parent 为角色 ID；请求体为 bindings 数组。每行可通过 id 或 principal_type + principal_id 定位，支持更新 binding_status、expired_at、metadata、description。示例：[{"id":"10","principal_type":"USER","principal_id":"1","binding_status":"ACTIVE","description":"平台管理员直绑"}]。'
         responses:
           "200":
             examples:

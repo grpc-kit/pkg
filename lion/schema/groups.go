@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
-	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -70,7 +69,6 @@ func (Groups) Fields() []ent.Field {
 func (Groups) Edges() []ent.Edge {
 	return []ent.Edge{
 		// 一个 Role 可以对应多个 RoleMenu (中间实体)
-		edge.To("lion_groups", GroupRoles.Type),
 		/*
 			edge.From("lion_departments", Departments.Type).
 				Ref("lion_groups").

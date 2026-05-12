@@ -70,21 +70,12 @@ const (
 	FieldDescription = "description"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
-	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
-	EdgeLionUserRoles = "lion_user_roles"
 	// EdgeLionUserMemberships holds the string denoting the lion_user_memberships edge name in mutations.
 	EdgeLionUserMemberships = "lion_user_memberships"
 	// EdgeLionUserIdentities holds the string denoting the lion_user_identities edge name in mutations.
 	EdgeLionUserIdentities = "lion_user_identities"
 	// Table holds the table name of the users in the database.
 	Table = "lion_users"
-	// LionUserRolesTable is the table that holds the lion_user_roles relation/edge.
-	LionUserRolesTable = "lion_user_roles"
-	// LionUserRolesInverseTable is the table name for the UserRoles entity.
-	// It exists in this package in order to avoid circular dependency with the "userroles" package.
-	LionUserRolesInverseTable = "lion_user_roles"
-	// LionUserRolesColumn is the table column denoting the lion_user_roles relation/edge.
-	LionUserRolesColumn = "user_id"
 	// LionUserMembershipsTable is the table that holds the lion_user_memberships relation/edge.
 	LionUserMembershipsTable = "lion_user_memberships"
 	// LionUserMembershipsInverseTable is the table name for the UserMemberships entity.
@@ -297,20 +288,6 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLionUserRolesCount orders the results by lion_user_roles count.
-func ByLionUserRolesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionUserRolesStep(), opts...)
-	}
-}
-
-// ByLionUserRoles orders the results by lion_user_roles terms.
-func ByLionUserRoles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionUserRolesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByLionUserMembershipsCount orders the results by lion_user_memberships count.
 func ByLionUserMembershipsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -337,13 +314,6 @@ func ByLionUserIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOptio
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newLionUserIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
-}
-func newLionUserRolesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionUserRolesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionUserRolesTable, LionUserRolesColumn),
-	)
 }
 func newLionUserMembershipsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

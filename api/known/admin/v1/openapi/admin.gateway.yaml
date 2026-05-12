@@ -128,17 +128,17 @@ http:
     ### 创建角色成员
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRoleMembers
     post: "/builtin/admin/api/v1/roles/{parent}/members"
-    body: "members"
+    body: "bindings"
     ### 更新角色成员，对同角色下批量更新多个成员
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateRoleMembers
     patch: "/builtin/admin/api/v1/roles/{parent}/members"
-    body: "members"
+    body: "bindings"
     ### 角色成员列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoleMembers
     get: "/builtin/admin/api/v1/roles/{parent}/members"
     ### 删除角色成员
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleMember
-    delete: "/builtin/admin/api/v1/roles/{parent}/members/{user_id}"
+    delete: "/builtin/admin/api/v1/roles/{parent}/members/{principal_type}/{principal_id}"
     ## 角色菜单
     ### 创建角色菜单
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRoleMenus

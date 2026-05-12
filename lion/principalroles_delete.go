@@ -9,29 +9,29 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/predicate"
-	"github.com/grpc-kit/pkg/lion/userroles"
+	"github.com/grpc-kit/pkg/lion/principalroles"
 )
 
-// UserRolesDelete is the builder for deleting a UserRoles entity.
-type UserRolesDelete struct {
+// PrincipalRolesDelete is the builder for deleting a PrincipalRoles entity.
+type PrincipalRolesDelete struct {
 	config
 	hooks    []Hook
-	mutation *UserRolesMutation
+	mutation *PrincipalRolesMutation
 }
 
-// Where appends a list predicates to the UserRolesDelete builder.
-func (_d *UserRolesDelete) Where(ps ...predicate.UserRoles) *UserRolesDelete {
+// Where appends a list predicates to the PrincipalRolesDelete builder.
+func (_d *PrincipalRolesDelete) Where(ps ...predicate.PrincipalRoles) *PrincipalRolesDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *UserRolesDelete) Exec(ctx context.Context) (int, error) {
+func (_d *PrincipalRolesDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *UserRolesDelete) ExecX(ctx context.Context) int {
+func (_d *PrincipalRolesDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *UserRolesDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *UserRolesDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(userroles.Table, sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt))
+func (_d *PrincipalRolesDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(principalroles.Table, sqlgraph.NewFieldSpec(principalroles.FieldID, field.TypeInt))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *UserRolesDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// UserRolesDeleteOne is the builder for deleting a single UserRoles entity.
-type UserRolesDeleteOne struct {
-	_d *UserRolesDelete
+// PrincipalRolesDeleteOne is the builder for deleting a single PrincipalRoles entity.
+type PrincipalRolesDeleteOne struct {
+	_d *PrincipalRolesDelete
 }
 
-// Where appends a list predicates to the UserRolesDelete builder.
-func (_d *UserRolesDeleteOne) Where(ps ...predicate.UserRoles) *UserRolesDeleteOne {
+// Where appends a list predicates to the PrincipalRolesDelete builder.
+func (_d *PrincipalRolesDeleteOne) Where(ps ...predicate.PrincipalRoles) *PrincipalRolesDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *UserRolesDeleteOne) Exec(ctx context.Context) error {
+func (_d *PrincipalRolesDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{userroles.Label}
+		return &NotFoundError{principalroles.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *UserRolesDeleteOne) ExecX(ctx context.Context) {
+func (_d *PrincipalRolesDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

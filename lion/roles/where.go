@@ -715,44 +715,21 @@ func ProtectedNEQ(v bool) predicate.Roles {
 	return predicate.Roles(sql.FieldNEQ(FieldProtected, v))
 }
 
-// HasLionUserRoles applies the HasEdge predicate on the "lion_user_roles" edge.
-func HasLionUserRoles() predicate.Roles {
+// HasLionPrincipalRoles applies the HasEdge predicate on the "lion_principal_roles" edge.
+func HasLionPrincipalRoles() predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionUserRolesTable, LionUserRolesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionPrincipalRolesTable, LionPrincipalRolesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLionUserRolesWith applies the HasEdge predicate on the "lion_user_roles" edge with a given conditions (other predicates).
-func HasLionUserRolesWith(preds ...predicate.UserRoles) predicate.Roles {
+// HasLionPrincipalRolesWith applies the HasEdge predicate on the "lion_principal_roles" edge with a given conditions (other predicates).
+func HasLionPrincipalRolesWith(preds ...predicate.PrincipalRoles) predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
-		step := newLionUserRolesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasLionRoleGroups applies the HasEdge predicate on the "lion_role_groups" edge.
-func HasLionRoleGroups() predicate.Roles {
-	return predicate.Roles(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionRoleGroupsTable, LionRoleGroupsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionRoleGroupsWith applies the HasEdge predicate on the "lion_role_groups" edge with a given conditions (other predicates).
-func HasLionRoleGroupsWith(preds ...predicate.GroupRoles) predicate.Roles {
-	return predicate.Roles(func(s *sql.Selector) {
-		step := newLionRoleGroupsStep()
+		step := newLionPrincipalRolesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

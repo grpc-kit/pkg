@@ -82,30 +82,19 @@ type Users struct {
 
 // UsersEdges holds the relations/edges for other nodes in the graph.
 type UsersEdges struct {
-	// LionUserRoles holds the value of the lion_user_roles edge.
-	LionUserRoles []*UserRoles `json:"lion_user_roles,omitempty"`
 	// LionUserMemberships holds the value of the lion_user_memberships edge.
 	LionUserMemberships []*UserMemberships `json:"lion_user_memberships,omitempty"`
 	// LionUserIdentities holds the value of the lion_user_identities edge.
 	LionUserIdentities []*UserIdentities `json:"lion_user_identities,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
-}
-
-// LionUserRolesOrErr returns the LionUserRoles value or an error if the edge
-// was not loaded in eager-loading.
-func (e UsersEdges) LionUserRolesOrErr() ([]*UserRoles, error) {
-	if e.loadedTypes[0] {
-		return e.LionUserRoles, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_user_roles"}
+	loadedTypes [2]bool
 }
 
 // LionUserMembershipsOrErr returns the LionUserMemberships value or an error if the edge
 // was not loaded in eager-loading.
 func (e UsersEdges) LionUserMembershipsOrErr() ([]*UserMemberships, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.LionUserMemberships, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_user_memberships"}
@@ -114,7 +103,7 @@ func (e UsersEdges) LionUserMembershipsOrErr() ([]*UserMemberships, error) {
 // LionUserIdentitiesOrErr returns the LionUserIdentities value or an error if the edge
 // was not loaded in eager-loading.
 func (e UsersEdges) LionUserIdentitiesOrErr() ([]*UserIdentities, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.LionUserIdentities, nil
 	}
 	return nil, &NotLoadedError{edge: "lion_user_identities"}
@@ -339,11 +328,6 @@ func (_m *Users) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Users) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryLionUserRoles queries the "lion_user_roles" edge of the Users entity.
-func (_m *Users) QueryLionUserRoles() *UserRolesQuery {
-	return NewUsersClient(_m.config).QueryLionUserRoles(_m)
 }
 
 // QueryLionUserMemberships queries the "lion_user_memberships" edge of the Users entity.

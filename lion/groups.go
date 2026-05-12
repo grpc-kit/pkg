@@ -51,30 +51,9 @@ type Groups struct {
 	// 可见性定义，对应 api/known/admin/v1/common.proto 中定义
 	Visibility int `json:"visibility,omitempty"`
 	// 用户组描述
-	Description string `json:"description,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the GroupsQuery when eager-loading is set.
-	Edges                   GroupsEdges `json:"edges"`
+	Description             string `json:"description,omitempty"`
 	departments_lion_groups *int
 	selectValues            sql.SelectValues
-}
-
-// GroupsEdges holds the relations/edges for other nodes in the graph.
-type GroupsEdges struct {
-	// LionGroups holds the value of the lion_groups edge.
-	LionGroups []*GroupRoles `json:"lion_groups,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-}
-
-// LionGroupsOrErr returns the LionGroups value or an error if the edge
-// was not loaded in eager-loading.
-func (e GroupsEdges) LionGroupsOrErr() ([]*GroupRoles, error) {
-	if e.loadedTypes[0] {
-		return e.LionGroups, nil
-	}
-	return nil, &NotLoadedError{edge: "lion_groups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -236,11 +215,6 @@ func (_m *Groups) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Groups) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
-}
-
-// QueryLionGroups queries the "lion_groups" edge of the Groups entity.
-func (_m *Groups) QueryLionGroups() *GroupRolesQuery {
-	return NewGroupsClient(_m.config).QueryLionGroups(_m)
 }
 
 // Update returns a builder for updating this Groups.

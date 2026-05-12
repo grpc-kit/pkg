@@ -14,7 +14,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -508,21 +507,6 @@ func (_u *UsersUpdate) ClearMetadata() *UsersUpdate {
 	return _u
 }
 
-// AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by IDs.
-func (_u *UsersUpdate) AddLionUserRoleIDs(ids ...int) *UsersUpdate {
-	_u.mutation.AddLionUserRoleIDs(ids...)
-	return _u
-}
-
-// AddLionUserRoles adds the "lion_user_roles" edges to the UserRoles entity.
-func (_u *UsersUpdate) AddLionUserRoles(v ...*UserRoles) *UsersUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionUserRoleIDs(ids...)
-}
-
 // AddLionUserMembershipIDs adds the "lion_user_memberships" edge to the UserMemberships entity by IDs.
 func (_u *UsersUpdate) AddLionUserMembershipIDs(ids ...int) *UsersUpdate {
 	_u.mutation.AddLionUserMembershipIDs(ids...)
@@ -556,27 +540,6 @@ func (_u *UsersUpdate) AddLionUserIdentities(v ...*UserIdentities) *UsersUpdate 
 // Mutation returns the UsersMutation object of the builder.
 func (_u *UsersUpdate) Mutation() *UsersMutation {
 	return _u.mutation
-}
-
-// ClearLionUserRoles clears all "lion_user_roles" edges to the UserRoles entity.
-func (_u *UsersUpdate) ClearLionUserRoles() *UsersUpdate {
-	_u.mutation.ClearLionUserRoles()
-	return _u
-}
-
-// RemoveLionUserRoleIDs removes the "lion_user_roles" edge to UserRoles entities by IDs.
-func (_u *UsersUpdate) RemoveLionUserRoleIDs(ids ...int) *UsersUpdate {
-	_u.mutation.RemoveLionUserRoleIDs(ids...)
-	return _u
-}
-
-// RemoveLionUserRoles removes "lion_user_roles" edges to UserRoles entities.
-func (_u *UsersUpdate) RemoveLionUserRoles(v ...*UserRoles) *UsersUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveLionUserRoleIDs(ids...)
 }
 
 // ClearLionUserMemberships clears all "lion_user_memberships" edges to the UserMemberships entity.
@@ -859,51 +822,6 @@ func (_u *UsersUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(users.FieldMetadata, field.TypeJSON)
-	}
-	if _u.mutation.LionUserRolesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   users.LionUserRolesTable,
-			Columns: []string{users.LionUserRolesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionUserRolesIDs(); len(nodes) > 0 && !_u.mutation.LionUserRolesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   users.LionUserRolesTable,
-			Columns: []string{users.LionUserRolesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionUserRolesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   users.LionUserRolesTable,
-			Columns: []string{users.LionUserRolesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.LionUserMembershipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1492,21 +1410,6 @@ func (_u *UsersUpdateOne) ClearMetadata() *UsersUpdateOne {
 	return _u
 }
 
-// AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by IDs.
-func (_u *UsersUpdateOne) AddLionUserRoleIDs(ids ...int) *UsersUpdateOne {
-	_u.mutation.AddLionUserRoleIDs(ids...)
-	return _u
-}
-
-// AddLionUserRoles adds the "lion_user_roles" edges to the UserRoles entity.
-func (_u *UsersUpdateOne) AddLionUserRoles(v ...*UserRoles) *UsersUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.AddLionUserRoleIDs(ids...)
-}
-
 // AddLionUserMembershipIDs adds the "lion_user_memberships" edge to the UserMemberships entity by IDs.
 func (_u *UsersUpdateOne) AddLionUserMembershipIDs(ids ...int) *UsersUpdateOne {
 	_u.mutation.AddLionUserMembershipIDs(ids...)
@@ -1540,27 +1443,6 @@ func (_u *UsersUpdateOne) AddLionUserIdentities(v ...*UserIdentities) *UsersUpda
 // Mutation returns the UsersMutation object of the builder.
 func (_u *UsersUpdateOne) Mutation() *UsersMutation {
 	return _u.mutation
-}
-
-// ClearLionUserRoles clears all "lion_user_roles" edges to the UserRoles entity.
-func (_u *UsersUpdateOne) ClearLionUserRoles() *UsersUpdateOne {
-	_u.mutation.ClearLionUserRoles()
-	return _u
-}
-
-// RemoveLionUserRoleIDs removes the "lion_user_roles" edge to UserRoles entities by IDs.
-func (_u *UsersUpdateOne) RemoveLionUserRoleIDs(ids ...int) *UsersUpdateOne {
-	_u.mutation.RemoveLionUserRoleIDs(ids...)
-	return _u
-}
-
-// RemoveLionUserRoles removes "lion_user_roles" edges to UserRoles entities.
-func (_u *UsersUpdateOne) RemoveLionUserRoles(v ...*UserRoles) *UsersUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _u.RemoveLionUserRoleIDs(ids...)
 }
 
 // ClearLionUserMemberships clears all "lion_user_memberships" edges to the UserMemberships entity.
@@ -1873,51 +1755,6 @@ func (_u *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error)
 	}
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField(users.FieldMetadata, field.TypeJSON)
-	}
-	if _u.mutation.LionUserRolesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   users.LionUserRolesTable,
-			Columns: []string{users.LionUserRolesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLionUserRolesIDs(); len(nodes) > 0 && !_u.mutation.LionUserRolesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   users.LionUserRolesTable,
-			Columns: []string{users.LionUserRolesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LionUserRolesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   users.LionUserRolesTable,
-			Columns: []string{users.LionUserRolesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.LionUserMembershipsCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -3,19 +3,19 @@
 package lion
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/userroles"
-	"github.com/grpc-kit/pkg/lion/users"
 )
 
-// UserRoles is the model entity for the UserRoles schema.
-type UserRoles struct {
+// PrincipalRoles is the model entity for the PrincipalRoles schema.
+type PrincipalRoles struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -27,71 +27,58 @@ type UserRoles struct {
 	CreatedBy int64 `json:"created_by,omitempty"`
 	// UpdatedBy holds the value of the "updated_by" field.
 	UpdatedBy int64 `json:"updated_by,omitempty"`
-	// 关联 lion_users 表的菜单 ID
-	UserID int `json:"user_id,omitempty"`
-	// 关联 lion_roles 表的用户组 ID
+	// 主体类型：0-未指定，1-用户，2-群组，3-部门
+	PrincipalType int `json:"principal_type,omitempty"`
+	// 主体 ID，与 principal_type 配合使用
+	PrincipalID int `json:"principal_id,omitempty"`
+	// 角色 ID，关联 lion_roles
 	RoleID int `json:"role_id,omitempty"`
-	// 用户在群组中的角色：0-未指定，1-所有者，2-管理员，3-普通成员，4-访客
-	MemberRole int `json:"member_role,omitempty"`
-	// 用户群组关系状态：0-未知状态，1-待激活，2-正常启用，3-被邀请，4-禁用，5-被拒绝，6-已退出
-	MemberStatus int `json:"member_status,omitempty"`
-	// 成员关系类型，区分主部门和兼职部门
-	MemberType int `json:"member_type,omitempty"`
-	// 关系有效期，用于临时成员管理，0表示永久有效
+	// 绑定状态：1-生效，2-禁用
+	BindingStatus int `json:"binding_status,omitempty"`
+	// 绑定有效期，空表示永久有效
 	ExpiredAt time.Time `json:"expired_at,omitempty"`
-	// 元数据，用于存储自定义属性，支持业务扩展，JSON 格式存储
-	Metadata string `json:"metadata,omitempty"`
-	// 用户组描述
+	// 元数据，用于存储来源等扩展属性
+	Metadata map[string]string `json:"metadata,omitempty"`
+	// 绑定关系描述
 	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the UserRolesQuery when eager-loading is set.
-	Edges        UserRolesEdges `json:"edges"`
+	// The values are being populated by the PrincipalRolesQuery when eager-loading is set.
+	Edges        PrincipalRolesEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// UserRolesEdges holds the relations/edges for other nodes in the graph.
-type UserRolesEdges struct {
-	// LionUsers holds the value of the lion_users edge.
-	LionUsers *Users `json:"lion_users,omitempty"`
+// PrincipalRolesEdges holds the relations/edges for other nodes in the graph.
+type PrincipalRolesEdges struct {
 	// LionRoles holds the value of the lion_roles edge.
 	LionRoles *Roles `json:"lion_roles,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// LionUsersOrErr returns the LionUsers value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UserRolesEdges) LionUsersOrErr() (*Users, error) {
-	if e.LionUsers != nil {
-		return e.LionUsers, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: users.Label}
-	}
-	return nil, &NotLoadedError{edge: "lion_users"}
+	loadedTypes [1]bool
 }
 
 // LionRolesOrErr returns the LionRoles value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserRolesEdges) LionRolesOrErr() (*Roles, error) {
+func (e PrincipalRolesEdges) LionRolesOrErr() (*Roles, error) {
 	if e.LionRoles != nil {
 		return e.LionRoles, nil
-	} else if e.loadedTypes[1] {
+	} else if e.loadedTypes[0] {
 		return nil, &NotFoundError{label: roles.Label}
 	}
 	return nil, &NotLoadedError{edge: "lion_roles"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*UserRoles) scanValues(columns []string) ([]any, error) {
+func (*PrincipalRoles) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case userroles.FieldID, userroles.FieldCreatedBy, userroles.FieldUpdatedBy, userroles.FieldUserID, userroles.FieldRoleID, userroles.FieldMemberRole, userroles.FieldMemberStatus, userroles.FieldMemberType:
+		case principalroles.FieldMetadata:
+			values[i] = new([]byte)
+		case principalroles.FieldID, principalroles.FieldCreatedBy, principalroles.FieldUpdatedBy, principalroles.FieldPrincipalType, principalroles.FieldPrincipalID, principalroles.FieldRoleID, principalroles.FieldBindingStatus:
 			values[i] = new(sql.NullInt64)
-		case userroles.FieldMetadata, userroles.FieldDescription:
+		case principalroles.FieldDescription:
 			values[i] = new(sql.NullString)
-		case userroles.FieldCreatedAt, userroles.FieldUpdatedAt, userroles.FieldExpiredAt:
+		case principalroles.FieldCreatedAt, principalroles.FieldUpdatedAt, principalroles.FieldExpiredAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -101,86 +88,82 @@ func (*UserRoles) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the UserRoles fields.
-func (_m *UserRoles) assignValues(columns []string, values []any) error {
+// to the PrincipalRoles fields.
+func (_m *PrincipalRoles) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case userroles.FieldID:
+		case principalroles.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
-		case userroles.FieldCreatedAt:
+		case principalroles.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case userroles.FieldUpdatedAt:
+		case principalroles.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case userroles.FieldCreatedBy:
+		case principalroles.FieldCreatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_by", values[i])
 			} else if value.Valid {
 				_m.CreatedBy = value.Int64
 			}
-		case userroles.FieldUpdatedBy:
+		case principalroles.FieldUpdatedBy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
 			} else if value.Valid {
 				_m.UpdatedBy = value.Int64
 			}
-		case userroles.FieldUserID:
+		case principalroles.FieldPrincipalType:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
+				return fmt.Errorf("unexpected type %T for field principal_type", values[i])
 			} else if value.Valid {
-				_m.UserID = int(value.Int64)
+				_m.PrincipalType = int(value.Int64)
 			}
-		case userroles.FieldRoleID:
+		case principalroles.FieldPrincipalID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field principal_id", values[i])
+			} else if value.Valid {
+				_m.PrincipalID = int(value.Int64)
+			}
+		case principalroles.FieldRoleID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field role_id", values[i])
 			} else if value.Valid {
 				_m.RoleID = int(value.Int64)
 			}
-		case userroles.FieldMemberRole:
+		case principalroles.FieldBindingStatus:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field member_role", values[i])
+				return fmt.Errorf("unexpected type %T for field binding_status", values[i])
 			} else if value.Valid {
-				_m.MemberRole = int(value.Int64)
+				_m.BindingStatus = int(value.Int64)
 			}
-		case userroles.FieldMemberStatus:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field member_status", values[i])
-			} else if value.Valid {
-				_m.MemberStatus = int(value.Int64)
-			}
-		case userroles.FieldMemberType:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field member_type", values[i])
-			} else if value.Valid {
-				_m.MemberType = int(value.Int64)
-			}
-		case userroles.FieldExpiredAt:
+		case principalroles.FieldExpiredAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expired_at", values[i])
 			} else if value.Valid {
 				_m.ExpiredAt = value.Time
 			}
-		case userroles.FieldMetadata:
-			if value, ok := values[i].(*sql.NullString); !ok {
+		case principalroles.FieldMetadata:
+			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field metadata", values[i])
-			} else if value.Valid {
-				_m.Metadata = value.String
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &_m.Metadata); err != nil {
+					return fmt.Errorf("unmarshal field metadata: %w", err)
+				}
 			}
-		case userroles.FieldDescription:
+		case principalroles.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
@@ -193,44 +176,39 @@ func (_m *UserRoles) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the UserRoles.
+// Value returns the ent.Value that was dynamically selected and assigned to the PrincipalRoles.
 // This includes values selected through modifiers, order, etc.
-func (_m *UserRoles) Value(name string) (ent.Value, error) {
+func (_m *PrincipalRoles) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryLionUsers queries the "lion_users" edge of the UserRoles entity.
-func (_m *UserRoles) QueryLionUsers() *UsersQuery {
-	return NewUserRolesClient(_m.config).QueryLionUsers(_m)
+// QueryLionRoles queries the "lion_roles" edge of the PrincipalRoles entity.
+func (_m *PrincipalRoles) QueryLionRoles() *RolesQuery {
+	return NewPrincipalRolesClient(_m.config).QueryLionRoles(_m)
 }
 
-// QueryLionRoles queries the "lion_roles" edge of the UserRoles entity.
-func (_m *UserRoles) QueryLionRoles() *RolesQuery {
-	return NewUserRolesClient(_m.config).QueryLionRoles(_m)
-}
-
-// Update returns a builder for updating this UserRoles.
-// Note that you need to call UserRoles.Unwrap() before calling this method if this UserRoles
+// Update returns a builder for updating this PrincipalRoles.
+// Note that you need to call PrincipalRoles.Unwrap() before calling this method if this PrincipalRoles
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *UserRoles) Update() *UserRolesUpdateOne {
-	return NewUserRolesClient(_m.config).UpdateOne(_m)
+func (_m *PrincipalRoles) Update() *PrincipalRolesUpdateOne {
+	return NewPrincipalRolesClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the UserRoles entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the PrincipalRoles entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *UserRoles) Unwrap() *UserRoles {
+func (_m *PrincipalRoles) Unwrap() *PrincipalRoles {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("lion: UserRoles is not a transactional entity")
+		panic("lion: PrincipalRoles is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *UserRoles) String() string {
+func (_m *PrincipalRoles) String() string {
 	var builder strings.Builder
-	builder.WriteString("UserRoles(")
+	builder.WriteString("PrincipalRoles(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -244,26 +222,23 @@ func (_m *UserRoles) String() string {
 	builder.WriteString("updated_by=")
 	builder.WriteString(fmt.Sprintf("%v", _m.UpdatedBy))
 	builder.WriteString(", ")
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
+	builder.WriteString("principal_type=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PrincipalType))
+	builder.WriteString(", ")
+	builder.WriteString("principal_id=")
+	builder.WriteString(fmt.Sprintf("%v", _m.PrincipalID))
 	builder.WriteString(", ")
 	builder.WriteString("role_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.RoleID))
 	builder.WriteString(", ")
-	builder.WriteString("member_role=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MemberRole))
-	builder.WriteString(", ")
-	builder.WriteString("member_status=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MemberStatus))
-	builder.WriteString(", ")
-	builder.WriteString("member_type=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MemberType))
+	builder.WriteString("binding_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.BindingStatus))
 	builder.WriteString(", ")
 	builder.WriteString("expired_at=")
 	builder.WriteString(_m.ExpiredAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
-	builder.WriteString(_m.Metadata)
+	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
@@ -271,5 +246,5 @@ func (_m *UserRoles) String() string {
 	return builder.String()
 }
 
-// UserRolesSlice is a parsable slice of UserRoles.
-type UserRolesSlice []*UserRoles
+// PrincipalRolesSlice is a parsable slice of PrincipalRoles.
+type PrincipalRolesSlice []*PrincipalRoles

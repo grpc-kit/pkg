@@ -18,14 +18,14 @@ type Tx struct {
 	Credentials *CredentialsClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
-	// GroupRoles is the client for interacting with the GroupRoles builders.
-	GroupRoles *GroupRolesClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
 	// Menus is the client for interacting with the Menus builders.
 	Menus *MenusClient
 	// Policies is the client for interacting with the Policies builders.
 	Policies *PoliciesClient
+	// PrincipalRoles is the client for interacting with the PrincipalRoles builders.
+	PrincipalRoles *PrincipalRolesClient
 	// RoleMenus is the client for interacting with the RoleMenus builders.
 	RoleMenus *RoleMenusClient
 	// Roles is the client for interacting with the Roles builders.
@@ -36,8 +36,6 @@ type Tx struct {
 	UserMemberships *UserMembershipsClient
 	// UserProfiles is the client for interacting with the UserProfiles builders.
 	UserProfiles *UserProfilesClient
-	// UserRoles is the client for interacting with the UserRoles builders.
-	UserRoles *UserRolesClient
 	// Users is the client for interacting with the Users builders.
 	Users *UsersClient
 
@@ -174,16 +172,15 @@ func (tx *Tx) init() {
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
 	tx.Credentials = NewCredentialsClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
-	tx.GroupRoles = NewGroupRolesClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
+	tx.PrincipalRoles = NewPrincipalRolesClient(tx.config)
 	tx.RoleMenus = NewRoleMenusClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
 	tx.UserIdentities = NewUserIdentitiesClient(tx.config)
 	tx.UserMemberships = NewUserMembershipsClient(tx.config)
 	tx.UserProfiles = NewUserProfilesClient(tx.config)
-	tx.UserRoles = NewUserRolesClient(tx.config)
 	tx.Users = NewUsersClient(tx.config)
 }
 

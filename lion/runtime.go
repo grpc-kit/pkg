@@ -8,17 +8,16 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -223,39 +222,6 @@ func init() {
 	departmentsDescProtected := departmentsFields[16].Descriptor()
 	// departments.DefaultProtected holds the default value on creation for the protected field.
 	departments.DefaultProtected = departmentsDescProtected.Default.(bool)
-	grouprolesMixin := schema.GroupRoles{}.Mixin()
-	grouprolesMixinFields0 := grouprolesMixin[0].Fields()
-	_ = grouprolesMixinFields0
-	grouprolesMixinFields1 := grouprolesMixin[1].Fields()
-	_ = grouprolesMixinFields1
-	grouprolesFields := schema.GroupRoles{}.Fields()
-	_ = grouprolesFields
-	// grouprolesDescCreatedAt is the schema descriptor for created_at field.
-	grouprolesDescCreatedAt := grouprolesMixinFields0[0].Descriptor()
-	// grouproles.DefaultCreatedAt holds the default value on creation for the created_at field.
-	grouproles.DefaultCreatedAt = grouprolesDescCreatedAt.Default.(func() time.Time)
-	// grouprolesDescUpdatedAt is the schema descriptor for updated_at field.
-	grouprolesDescUpdatedAt := grouprolesMixinFields0[1].Descriptor()
-	// grouproles.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	grouproles.DefaultUpdatedAt = grouprolesDescUpdatedAt.Default.(func() time.Time)
-	// grouproles.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	grouproles.UpdateDefaultUpdatedAt = grouprolesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// grouprolesDescCreatedBy is the schema descriptor for created_by field.
-	grouprolesDescCreatedBy := grouprolesMixinFields1[0].Descriptor()
-	// grouproles.DefaultCreatedBy holds the default value on creation for the created_by field.
-	grouproles.DefaultCreatedBy = grouprolesDescCreatedBy.Default.(int64)
-	// grouprolesDescUpdatedBy is the schema descriptor for updated_by field.
-	grouprolesDescUpdatedBy := grouprolesMixinFields1[1].Descriptor()
-	// grouproles.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	grouproles.DefaultUpdatedBy = grouprolesDescUpdatedBy.Default.(int64)
-	// grouprolesDescGroupID is the schema descriptor for group_id field.
-	grouprolesDescGroupID := grouprolesFields[0].Descriptor()
-	// grouproles.GroupIDValidator is a validator for the "group_id" field. It is called by the builders before save.
-	grouproles.GroupIDValidator = grouprolesDescGroupID.Validators[0].(func(int) error)
-	// grouprolesDescRoleID is the schema descriptor for role_id field.
-	grouprolesDescRoleID := grouprolesFields[1].Descriptor()
-	// grouproles.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
-	grouproles.RoleIDValidator = grouprolesDescRoleID.Validators[0].(func(int) error)
 	groupsMixin := schema.Groups{}.Mixin()
 	groupsMixinFields0 := groupsMixin[0].Fields()
 	_ = groupsMixinFields0
@@ -513,6 +479,51 @@ func init() {
 	policiesDescDescription := policiesFields[5].Descriptor()
 	// policies.DefaultDescription holds the default value on creation for the description field.
 	policies.DefaultDescription = policiesDescDescription.Default.(string)
+	principalrolesMixin := schema.PrincipalRoles{}.Mixin()
+	principalrolesMixinFields0 := principalrolesMixin[0].Fields()
+	_ = principalrolesMixinFields0
+	principalrolesMixinFields1 := principalrolesMixin[1].Fields()
+	_ = principalrolesMixinFields1
+	principalrolesFields := schema.PrincipalRoles{}.Fields()
+	_ = principalrolesFields
+	// principalrolesDescCreatedAt is the schema descriptor for created_at field.
+	principalrolesDescCreatedAt := principalrolesMixinFields0[0].Descriptor()
+	// principalroles.DefaultCreatedAt holds the default value on creation for the created_at field.
+	principalroles.DefaultCreatedAt = principalrolesDescCreatedAt.Default.(func() time.Time)
+	// principalrolesDescUpdatedAt is the schema descriptor for updated_at field.
+	principalrolesDescUpdatedAt := principalrolesMixinFields0[1].Descriptor()
+	// principalroles.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	principalroles.DefaultUpdatedAt = principalrolesDescUpdatedAt.Default.(func() time.Time)
+	// principalroles.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	principalroles.UpdateDefaultUpdatedAt = principalrolesDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// principalrolesDescCreatedBy is the schema descriptor for created_by field.
+	principalrolesDescCreatedBy := principalrolesMixinFields1[0].Descriptor()
+	// principalroles.DefaultCreatedBy holds the default value on creation for the created_by field.
+	principalroles.DefaultCreatedBy = principalrolesDescCreatedBy.Default.(int64)
+	// principalrolesDescUpdatedBy is the schema descriptor for updated_by field.
+	principalrolesDescUpdatedBy := principalrolesMixinFields1[1].Descriptor()
+	// principalroles.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	principalroles.DefaultUpdatedBy = principalrolesDescUpdatedBy.Default.(int64)
+	// principalrolesDescPrincipalType is the schema descriptor for principal_type field.
+	principalrolesDescPrincipalType := principalrolesFields[0].Descriptor()
+	// principalroles.DefaultPrincipalType holds the default value on creation for the principal_type field.
+	principalroles.DefaultPrincipalType = principalrolesDescPrincipalType.Default.(int)
+	// principalrolesDescPrincipalID is the schema descriptor for principal_id field.
+	principalrolesDescPrincipalID := principalrolesFields[1].Descriptor()
+	// principalroles.PrincipalIDValidator is a validator for the "principal_id" field. It is called by the builders before save.
+	principalroles.PrincipalIDValidator = principalrolesDescPrincipalID.Validators[0].(func(int) error)
+	// principalrolesDescRoleID is the schema descriptor for role_id field.
+	principalrolesDescRoleID := principalrolesFields[2].Descriptor()
+	// principalroles.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	principalroles.RoleIDValidator = principalrolesDescRoleID.Validators[0].(func(int) error)
+	// principalrolesDescBindingStatus is the schema descriptor for binding_status field.
+	principalrolesDescBindingStatus := principalrolesFields[3].Descriptor()
+	// principalroles.DefaultBindingStatus holds the default value on creation for the binding_status field.
+	principalroles.DefaultBindingStatus = principalrolesDescBindingStatus.Default.(int)
+	// principalrolesDescDescription is the schema descriptor for description field.
+	principalrolesDescDescription := principalrolesFields[6].Descriptor()
+	// principalroles.DefaultDescription holds the default value on creation for the description field.
+	principalroles.DefaultDescription = principalrolesDescDescription.Default.(string)
 	rolemenusMixin := schema.RoleMenus{}.Mixin()
 	rolemenusMixinFields0 := rolemenusMixin[0].Fields()
 	_ = rolemenusMixinFields0
@@ -768,55 +779,6 @@ func init() {
 	userprofilesDescAttrValue := userprofilesFields[2].Descriptor()
 	// userprofiles.AttrValueValidator is a validator for the "attr_value" field. It is called by the builders before save.
 	userprofiles.AttrValueValidator = userprofilesDescAttrValue.Validators[0].(func(string) error)
-	userrolesMixin := schema.UserRoles{}.Mixin()
-	userrolesMixinFields0 := userrolesMixin[0].Fields()
-	_ = userrolesMixinFields0
-	userrolesMixinFields1 := userrolesMixin[1].Fields()
-	_ = userrolesMixinFields1
-	userrolesFields := schema.UserRoles{}.Fields()
-	_ = userrolesFields
-	// userrolesDescCreatedAt is the schema descriptor for created_at field.
-	userrolesDescCreatedAt := userrolesMixinFields0[0].Descriptor()
-	// userroles.DefaultCreatedAt holds the default value on creation for the created_at field.
-	userroles.DefaultCreatedAt = userrolesDescCreatedAt.Default.(func() time.Time)
-	// userrolesDescUpdatedAt is the schema descriptor for updated_at field.
-	userrolesDescUpdatedAt := userrolesMixinFields0[1].Descriptor()
-	// userroles.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	userroles.DefaultUpdatedAt = userrolesDescUpdatedAt.Default.(func() time.Time)
-	// userroles.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	userroles.UpdateDefaultUpdatedAt = userrolesDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// userrolesDescCreatedBy is the schema descriptor for created_by field.
-	userrolesDescCreatedBy := userrolesMixinFields1[0].Descriptor()
-	// userroles.DefaultCreatedBy holds the default value on creation for the created_by field.
-	userroles.DefaultCreatedBy = userrolesDescCreatedBy.Default.(int64)
-	// userrolesDescUpdatedBy is the schema descriptor for updated_by field.
-	userrolesDescUpdatedBy := userrolesMixinFields1[1].Descriptor()
-	// userroles.DefaultUpdatedBy holds the default value on creation for the updated_by field.
-	userroles.DefaultUpdatedBy = userrolesDescUpdatedBy.Default.(int64)
-	// userrolesDescUserID is the schema descriptor for user_id field.
-	userrolesDescUserID := userrolesFields[0].Descriptor()
-	// userroles.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	userroles.UserIDValidator = userrolesDescUserID.Validators[0].(func(int) error)
-	// userrolesDescRoleID is the schema descriptor for role_id field.
-	userrolesDescRoleID := userrolesFields[1].Descriptor()
-	// userroles.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
-	userroles.RoleIDValidator = userrolesDescRoleID.Validators[0].(func(int) error)
-	// userrolesDescMemberRole is the schema descriptor for member_role field.
-	userrolesDescMemberRole := userrolesFields[2].Descriptor()
-	// userroles.DefaultMemberRole holds the default value on creation for the member_role field.
-	userroles.DefaultMemberRole = userrolesDescMemberRole.Default.(int)
-	// userrolesDescMemberStatus is the schema descriptor for member_status field.
-	userrolesDescMemberStatus := userrolesFields[3].Descriptor()
-	// userroles.DefaultMemberStatus holds the default value on creation for the member_status field.
-	userroles.DefaultMemberStatus = userrolesDescMemberStatus.Default.(int)
-	// userrolesDescMemberType is the schema descriptor for member_type field.
-	userrolesDescMemberType := userrolesFields[4].Descriptor()
-	// userroles.DefaultMemberType holds the default value on creation for the member_type field.
-	userroles.DefaultMemberType = userrolesDescMemberType.Default.(int)
-	// userrolesDescDescription is the schema descriptor for description field.
-	userrolesDescDescription := userrolesFields[7].Descriptor()
-	// userroles.DefaultDescription holds the default value on creation for the description field.
-	userroles.DefaultDescription = userrolesDescDescription.Default.(string)
 	usersMixin := schema.Users{}.Mixin()
 	usersMixinFields0 := usersMixin[0].Fields()
 	_ = usersMixinFields0

@@ -19,7 +19,6 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/useridentities"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/pquerna/otp/totp"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -544,18 +543,13 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 		return "", fmt.Errorf("failed to parse private key: %w", err)
 	}
 
-	var groups []string
-	rs, err := db.UserRoles.Query().
-		Select(userroles.FieldRoleID, userroles.FieldUserID).
-		Where(userroles.UserIDEQ(userID)).
-		WithLionRoles().
-		All(ctx)
-	if err == nil {
-		for _, r := range rs {
-			if r.Edges.LionRoles != nil {
-				groups = append(groups, r.Edges.LionRoles.Code)
-			}
-		}
+	roleIDs, err := effectiveRoleIDsForUser(ctx, db, userID)
+	if err != nil {
+		return "", err
+	}
+	groups, err := roleCodesForIDs(ctx, db, roleIDs)
+	if err != nil {
+		return "", err
 	}
 
 	idToken := &auth.IDTokenClaims{

@@ -1938,7 +1938,7 @@ func request_KnownAdmin_CreateRoleMembers_0(ctx context.Context, marshaler runti
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Members); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Bindings); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -1972,7 +1972,7 @@ func local_request_KnownAdmin_CreateRoleMembers_0(ctx context.Context, marshaler
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Members); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Bindings); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -2006,7 +2006,7 @@ func request_KnownAdmin_UpdateRoleMembers_0(ctx context.Context, marshaler runti
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Members); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Bindings); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -2040,7 +2040,7 @@ func local_request_KnownAdmin_UpdateRoleMembers_0(ctx context.Context, marshaler
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Members); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Bindings); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -2072,6 +2072,7 @@ func request_KnownAdmin_DeleteRoleMember_0(ctx context.Context, marshaler runtim
 
 	var (
 		val string
+		e   int32
 		ok  bool
 		err error
 		_   = err
@@ -2087,14 +2088,26 @@ func request_KnownAdmin_DeleteRoleMember_0(ctx context.Context, marshaler runtim
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "parent", err)
 	}
 
-	val, ok = pathParams["user_id"]
+	val, ok = pathParams["principal_type"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "principal_type")
 	}
 
-	protoReq.UserId, err = runtime.Int64(val)
+	e, err = runtime.Enum(val, PrincipalType_value)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "principal_type", err)
+	}
+
+	protoReq.PrincipalType = PrincipalType(e)
+
+	val, ok = pathParams["principal_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "principal_id")
+	}
+
+	protoReq.PrincipalId, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "principal_id", err)
 	}
 
 	msg, err := client.DeleteRoleMember(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -2108,6 +2121,7 @@ func local_request_KnownAdmin_DeleteRoleMember_0(ctx context.Context, marshaler 
 
 	var (
 		val string
+		e   int32
 		ok  bool
 		err error
 		_   = err
@@ -2123,14 +2137,26 @@ func local_request_KnownAdmin_DeleteRoleMember_0(ctx context.Context, marshaler 
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "parent", err)
 	}
 
-	val, ok = pathParams["user_id"]
+	val, ok = pathParams["principal_type"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "principal_type")
 	}
 
-	protoReq.UserId, err = runtime.Int64(val)
+	e, err = runtime.Enum(val, PrincipalType_value)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "principal_type", err)
+	}
+
+	protoReq.PrincipalType = PrincipalType(e)
+
+	val, ok = pathParams["principal_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "principal_id")
+	}
+
+	protoReq.PrincipalId, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "principal_id", err)
 	}
 
 	msg, err := server.DeleteRoleMember(ctx, &protoReq)
@@ -5107,7 +5133,7 @@ func RegisterKnownAdminHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMember", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{parent}/members/{user_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMember", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{parent}/members/{principal_type}/{principal_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -6936,7 +6962,7 @@ func RegisterKnownAdminHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMember", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{parent}/members/{user_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMember", runtime.WithHTTPPathPattern("/builtin/admin/api/v1/roles/{parent}/members/{principal_type}/{principal_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -7728,7 +7754,7 @@ var (
 
 	pattern_KnownAdmin_UpdateRoleMembers_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"builtin", "admin", "api", "v1", "roles", "parent", "members"}, ""))
 
-	pattern_KnownAdmin_DeleteRoleMember_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 1, 0, 4, 1, 5, 7}, []string{"builtin", "admin", "api", "v1", "roles", "parent", "members", "user_id"}, ""))
+	pattern_KnownAdmin_DeleteRoleMember_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 1, 0, 4, 1, 5, 7, 1, 0, 4, 1, 5, 8}, []string{"builtin", "admin", "api", "v1", "roles", "parent", "members", "principal_type", "principal_id"}, ""))
 
 	pattern_KnownAdmin_ListRoleMenus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"builtin", "admin", "api", "v1", "roles", "parent", "menus"}, ""))
 

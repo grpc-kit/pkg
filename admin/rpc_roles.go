@@ -12,15 +12,14 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
 
 	// 数据范围表已注释，同步取消依赖
 	// "github.com/grpc-kit/pkg/lion/roledataranges"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -306,25 +305,56 @@ func (a *KnownAdminAPI) sortRoleChildren(roles []*adminv1.Role) {
 	}
 }
 
-// roleMembersToGroupMembersListReq 将 ListRoleMembers 请求映射为 ListGroupMembers 请求，
-// 以便复用 listGroupMembersFromRole（user_roles → Membership）逻辑。
-func roleMembersToGroupMembersListReq(req *adminv1.ListRoleMembersRequest) *adminv1.ListGroupMembersRequest {
-	g := &adminv1.ListGroupMembersRequest{
-		Parent:   req.GetParent(),
-		PageSize: req.GetPageSize(),
-		Filter:   req.GetFilter(),
-		OrderBy:  req.GetOrderBy(),
+func queryRolePrincipalBindings(ctx context.Context, db *lion.Client, req *adminv1.ListRoleMembersRequest, roleID int) ([]*lion.PrincipalRoles, string, int32, error) {
+	query := db.PrincipalRoles.Query().Where(principalroles.RoleIDEQ(roleID))
+	if req.GetPrincipalType() != adminv1.PrincipalType_PRINCIPAL_TYPE_UNSPECIFIED {
+		query = query.Where(principalroles.PrincipalTypeEQ(int(req.GetPrincipalType())))
 	}
+	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+	case "created_at asc", "create_time asc":
+		query = query.Order(lion.Asc(principalroles.FieldCreatedAt))
+	case "created_at desc", "create_time desc":
+		query = query.Order(lion.Desc(principalroles.FieldCreatedAt))
+	default:
+		query = query.Order(lion.Desc(principalroles.FieldID))
+	}
+	totalSize, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, "", 0, err
+	}
+	pageSize := GetPageSize(ctx, req.GetPageSize())
 	switch p := req.GetPagination().(type) {
-	case *adminv1.ListRoleMembersRequest_PageToken:
-		g.Pagination = &adminv1.ListGroupMembersRequest_PageToken{PageToken: p.PageToken}
 	case *adminv1.ListRoleMembersRequest_Offset:
-		g.Pagination = &adminv1.ListGroupMembersRequest_Offset{Offset: p.Offset}
+		query = query.Offset(int(p.Offset))
+	case *adminv1.ListRoleMembersRequest_PageToken:
+		if req.GetPageToken() != "" {
+			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
+			if decErr != nil {
+				return nil, "", 0, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
+			}
+			var lastID int
+			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
+				return nil, "", 0, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
+			}
+			if lastID > 0 {
+				query = query.Where(principalroles.IDGT(lastID))
+			}
+		}
 	}
-	return g
+	rows, err := query.Limit(int(pageSize)).All(ctx)
+	if err != nil {
+		return nil, "", 0, err
+	}
+	nextPageToken := ""
+	if _, ok := req.GetPagination().(*adminv1.ListRoleMembersRequest_PageToken); ok && len(rows) == int(pageSize) && len(rows) > 0 {
+		if data, err := json.Marshal(rows[len(rows)-1].ID); err == nil {
+			nextPageToken = base64.StdEncoding.EncodeToString(data)
+		}
+	}
+	return rows, nextPageToken, int32(totalSize), nil
 }
 
-// ListRoleMembers 获取角色成员列表（与 ListGroupMembers 中基于 user_roles 的成员结构一致）
+// ListRoleMembers 获取角色主体绑定列表，并在 full 视图下展开为用户 membership。
 func (a *KnownAdminAPI) ListRoleMembers(ctx context.Context, req *adminv1.ListRoleMembersRequest) (*adminv1.ListRoleMembersResponse, error) {
 	db, err := a.GetLionClient()
 	if err != nil {
@@ -340,18 +370,33 @@ func (a *KnownAdminAPI) ListRoleMembers(ctx context.Context, req *adminv1.ListRo
 		return nil, err
 	}
 
-	gr, err := a.listGroupMembersFromRole(ctx, roleMembersToGroupMembersListReq(req), db, roleID)
+	bindings, nextPageToken, totalSize, err := queryRolePrincipalBindings(ctx, db, req, roleID)
 	if err != nil {
 		return nil, err
 	}
-	return &adminv1.ListRoleMembersResponse{
-		Members:       gr.GetMembers(),
-		NextPageToken: gr.GetNextPageToken(),
-		TotalSize:     gr.GetTotalSize(),
-	}, nil
+	displays, err := loadPrincipalDisplays(ctx, db, bindings)
+	if err != nil {
+		return nil, err
+	}
+	response := &adminv1.ListRoleMembersResponse{
+		Members:       make([]*adminv1.Membership, 0),
+		Bindings:      make([]*adminv1.PrincipalRoleBinding, 0, len(bindings)),
+		NextPageToken: nextPageToken,
+		TotalSize:     totalSize,
+	}
+	for _, binding := range bindings {
+		response.Bindings = append(response.Bindings, principalRoleBindingToProto(binding, displays[binding.PrincipalType][binding.PrincipalID]))
+	}
+	if req.GetView() == adminv1.View_VIEW_FULL {
+		response.Members, err = expandPrincipalRoleBindingsToMembers(ctx, db, bindings)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return response, nil
 }
 
-// DeleteRoleMember 移除角色下的成员（user_roles 一行）
+// DeleteRoleMember 移除角色下的主体绑定。
 func (a *KnownAdminAPI) DeleteRoleMember(ctx context.Context, req *adminv1.DeleteRoleMemberRequest) (*emptypb.Empty, error) {
 	empty := &emptypb.Empty{}
 
@@ -369,11 +414,19 @@ func (a *KnownAdminAPI) DeleteRoleMember(ctx context.Context, req *adminv1.Delet
 	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
 		return nil, err
 	}
+	principalType, err := normalizePrincipalType(req.GetPrincipalType())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	if req.GetPrincipalId() <= 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("principal_id is required")
+	}
 
-	_, err = db.UserRoles.Delete().
+	_, err = db.PrincipalRoles.Delete().
 		Where(
-			userroles.RoleID(roleID),
-			userroles.UserIDEQ(int(req.UserId)),
+			principalroles.RoleIDEQ(roleID),
+			principalroles.PrincipalTypeEQ(principalType),
+			principalroles.PrincipalIDEQ(int(req.GetPrincipalId())),
 		).Exec(ctx)
 	if err != nil {
 		return nil, err
@@ -835,17 +888,8 @@ func (a *KnownAdminAPI) DeleteRole(ctx context.Context, req *adminv1.DeleteRoleR
 		return nil, errs.FailedPrecondition(ctx).WithMessage("protected role cannot be deleted")
 	}
 
-	if db.GroupRoles.Query().Where(grouproles.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("role has group")
-	}
-
-	// 数据范围表已注释，同步取消依赖
-	// if db.RoleDataRanges.Query().Where(roledataranges.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
-	// 	return nil, errs.InvalidArgument(ctx).WithMessage("role has department")
-	// }
-
-	if db.UserRoles.Query().Where(userroles.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("role has user")
+	if db.PrincipalRoles.Query().Where(principalroles.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("role has principal binding")
 	}
 
 	if db.RoleMenus.Query().Where(rolemenus.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
@@ -983,90 +1027,7 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 	return result, nil
 }
 
-func membershipMetadataToJSON(md map[string]string) (string, error) {
-	if len(md) == 0 {
-		return "", nil
-	}
-	b, err := json.Marshal(md)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
-}
-
-func applyMembershipToUserRolesCreate(cb *lion.UserRolesCreate, m *adminv1.Membership) (*lion.UserRolesCreate, error) {
-	cb = cb.SetMemberRole(int(m.GetMemberRole())).
-		SetMemberStatus(int(m.GetMemberStatus())).
-		SetMemberType(int(m.GetMemberType())).
-		SetDescription(m.GetDescription())
-	if m.GetExpiredAt() != nil {
-		cb = cb.SetExpiredAt(m.GetExpiredAt().AsTime())
-	}
-	meta, err := membershipMetadataToJSON(m.GetMetadata())
-	if err != nil {
-		return nil, err
-	}
-	if meta != "" {
-		cb = cb.SetMetadata(meta)
-	}
-	return cb, nil
-}
-
-func applyMembershipToUserRolesUpdate(ur *lion.UserRolesUpdateOne, m *adminv1.Membership) (*lion.UserRolesUpdateOne, error) {
-	ur = ur.SetMemberRole(int(m.GetMemberRole())).
-		SetMemberStatus(int(m.GetMemberStatus())).
-		SetMemberType(int(m.GetMemberType())).
-		SetDescription(m.GetDescription())
-	if m.GetExpiredAt() != nil {
-		ur = ur.SetExpiredAt(m.GetExpiredAt().AsTime())
-	} else {
-		ur = ur.ClearExpiredAt()
-	}
-	meta, err := membershipMetadataToJSON(m.GetMetadata())
-	if err != nil {
-		return nil, err
-	}
-	if meta == "" {
-		ur = ur.ClearMetadata()
-	} else {
-		ur = ur.SetMetadata(meta)
-	}
-	return ur, nil
-}
-
-func (a *KnownAdminAPI) userRoleForRoleMemberUpdate(ctx context.Context, db *lion.Client, roleID int, m *adminv1.Membership) (*lion.UserRoles, error) {
-	if m.GetId() > 0 {
-		ur, err := db.UserRoles.Get(ctx, int(m.GetId()))
-		if err != nil {
-			if lion.IsNotFound(err) {
-				return nil, errs.NotFound(ctx).WithMessage("user role not found")
-			}
-			return nil, err
-		}
-		if ur.RoleID != roleID {
-			return nil, errs.InvalidArgument(ctx).WithMessage("member id does not belong to this role")
-		}
-		if m.GetUserId() > 0 && int(m.GetUserId()) != ur.UserID {
-			return nil, errs.InvalidArgument(ctx).WithMessage("user_id does not match member record")
-		}
-		return ur, nil
-	}
-	if m.GetUserId() <= 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("member user_id or id is required")
-	}
-	ur, err := db.UserRoles.Query().
-		Where(userroles.RoleIDEQ(roleID), userroles.UserIDEQ(int(m.GetUserId()))).
-		Only(ctx)
-	if err != nil {
-		if lion.IsNotFound(err) {
-			return nil, errs.NotFound(ctx).WithMessage("user role membership not found")
-		}
-		return nil, err
-	}
-	return ur, nil
-}
-
-// CreateRoleMembers 批量添加角色成员（与 CreateGroupMembers REST 形态一致）
+// CreateRoleMembers 批量添加角色主体绑定。
 func (a *KnownAdminAPI) CreateRoleMembers(ctx context.Context, req *adminv1.CreateRoleMembersRequest) (*adminv1.CreateRoleMembersResponse, error) {
 	result := &adminv1.CreateRoleMembersResponse{}
 
@@ -1084,17 +1045,13 @@ func (a *KnownAdminAPI) CreateRoleMembers(ctx context.Context, req *adminv1.Crea
 		return nil, err
 	}
 
-	if len(req.GetMembers()) == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("members is empty")
+	if len(req.GetBindings()) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("bindings is empty")
 	}
 
-	for _, m := range req.GetMembers() {
-		uid := m.GetUserId()
-		if uid == 0 {
-			continue
-		}
-		cb := db.UserRoles.Create().SetRoleID(roleID).SetUserID(int(uid))
-		cb, err = applyMembershipToUserRolesCreate(cb, m)
+	for _, binding := range req.GetBindings() {
+		cb := db.PrincipalRoles.Create()
+		cb, err = applyBindingToPrincipalRoleCreate(cb, roleID, binding)
 		if err != nil {
 			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 		}
@@ -1109,7 +1066,7 @@ func (a *KnownAdminAPI) CreateRoleMembers(ctx context.Context, req *adminv1.Crea
 	return result, nil
 }
 
-// UpdateRoleMembers 批量更新角色下成员（PATCH .../roles/{parent}/members）
+// UpdateRoleMembers 批量更新角色下主体绑定（PATCH .../roles/{parent}/members）。
 func (a *KnownAdminAPI) UpdateRoleMembers(ctx context.Context, req *adminv1.UpdateRoleMembersRequest) (*adminv1.UpdateRoleMembersResponse, error) {
 	result := &adminv1.UpdateRoleMembersResponse{}
 
@@ -1127,8 +1084,8 @@ func (a *KnownAdminAPI) UpdateRoleMembers(ctx context.Context, req *adminv1.Upda
 		return nil, err
 	}
 
-	if len(req.GetMembers()) == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("members is empty")
+	if len(req.GetBindings()) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("bindings is empty")
 	}
 
 	var actor int64
@@ -1136,13 +1093,13 @@ func (a *KnownAdminAPI) UpdateRoleMembers(ctx context.Context, req *adminv1.Upda
 		actor = v
 	}
 
-	for _, m := range req.GetMembers() {
-		ur, err := a.userRoleForRoleMemberUpdate(ctx, db, roleID, m)
+	for _, binding := range req.GetBindings() {
+		row, err := a.principalRoleBindingForUpdate(ctx, db, roleID, binding)
 		if err != nil {
 			return nil, err
 		}
-		upd := ur.Update()
-		upd, err = applyMembershipToUserRolesUpdate(upd, m)
+		upd := row.Update()
+		upd, err = applyBindingToPrincipalRoleUpdate(upd, binding)
 		if err != nil {
 			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 		}

@@ -15,7 +15,6 @@ import (
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -26,7 +25,6 @@ type UsersQuery struct {
 	order                   []users.OrderOption
 	inters                  []Interceptor
 	predicates              []predicate.Users
-	withLionUserRoles       *UserRolesQuery
 	withLionUserMemberships *UserMembershipsQuery
 	withLionUserIdentities  *UserIdentitiesQuery
 	// intermediate query (i.e. traversal path).
@@ -63,28 +61,6 @@ func (_q *UsersQuery) Unique(unique bool) *UsersQuery {
 func (_q *UsersQuery) Order(o ...users.OrderOption) *UsersQuery {
 	_q.order = append(_q.order, o...)
 	return _q
-}
-
-// QueryLionUserRoles chains the current query on the "lion_user_roles" edge.
-func (_q *UsersQuery) QueryLionUserRoles() *UserRolesQuery {
-	query := (&UserRolesClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(users.Table, users.FieldID, selector),
-			sqlgraph.To(userroles.Table, userroles.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, users.LionUserRolesTable, users.LionUserRolesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QueryLionUserMemberships chains the current query on the "lion_user_memberships" edge.
@@ -323,24 +299,12 @@ func (_q *UsersQuery) Clone() *UsersQuery {
 		order:                   append([]users.OrderOption{}, _q.order...),
 		inters:                  append([]Interceptor{}, _q.inters...),
 		predicates:              append([]predicate.Users{}, _q.predicates...),
-		withLionUserRoles:       _q.withLionUserRoles.Clone(),
 		withLionUserMemberships: _q.withLionUserMemberships.Clone(),
 		withLionUserIdentities:  _q.withLionUserIdentities.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
-}
-
-// WithLionUserRoles tells the query-builder to eager-load the nodes that are connected to
-// the "lion_user_roles" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UsersQuery) WithLionUserRoles(opts ...func(*UserRolesQuery)) *UsersQuery {
-	query := (&UserRolesClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withLionUserRoles = query
-	return _q
 }
 
 // WithLionUserMemberships tells the query-builder to eager-load the nodes that are connected to
@@ -443,8 +407,7 @@ func (_q *UsersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Users,
 	var (
 		nodes       = []*Users{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
-			_q.withLionUserRoles != nil,
+		loadedTypes = [2]bool{
 			_q.withLionUserMemberships != nil,
 			_q.withLionUserIdentities != nil,
 		}
@@ -467,13 +430,6 @@ func (_q *UsersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Users,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withLionUserRoles; query != nil {
-		if err := _q.loadLionUserRoles(ctx, query, nodes,
-			func(n *Users) { n.Edges.LionUserRoles = []*UserRoles{} },
-			func(n *Users, e *UserRoles) { n.Edges.LionUserRoles = append(n.Edges.LionUserRoles, e) }); err != nil {
-			return nil, err
-		}
-	}
 	if query := _q.withLionUserMemberships; query != nil {
 		if err := _q.loadLionUserMemberships(ctx, query, nodes,
 			func(n *Users) { n.Edges.LionUserMemberships = []*UserMemberships{} },
@@ -493,36 +449,6 @@ func (_q *UsersQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Users,
 	return nodes, nil
 }
 
-func (_q *UsersQuery) loadLionUserRoles(ctx context.Context, query *UserRolesQuery, nodes []*Users, init func(*Users), assign func(*Users, *UserRoles)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Users)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(userroles.FieldUserID)
-	}
-	query.Where(predicate.UserRoles(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(users.LionUserRolesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.UserID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
 func (_q *UsersQuery) loadLionUserMemberships(ctx context.Context, query *UserMembershipsQuery, nodes []*Users, init func(*Users), assign func(*Users, *UserMemberships)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Users)

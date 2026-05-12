@@ -13,7 +13,6 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -156,129 +155,71 @@ func (a *KnownAdminAPI) ListGroups(ctx context.Context, req *adminv1.ListGroupsR
 			}
 		}
 	}
-
-	// group_type / group_status 独立参数过滤
 	if req.GetGroupType() > 0 {
 		where = append(where, groups.GroupType(int(req.GetGroupType())))
 	}
-	if req.GetGroupStatus() > 0 {
-		where = append(where, groups.GroupStatus(int(req.GetGroupStatus())))
-	}
-
-	// code / display_name 独立参数过滤（模糊匹配，不区分大小写）
-	if req.GetCode() != "" {
-		where = append(where, groups.CodeContainsFold(req.GetCode()))
-	}
-	if req.GetDisplayName() != "" {
-		where = append(where, groups.DisplayNameContainsFold(req.GetDisplayName()))
-	}
-
-	// filter: 简单 AIP-160 风格解析，支持 status=2, type=1, parent_id=0, code=xxx, display_name=xxx, ref_id=123
 	if req.GetFilter() != "" {
-		filterPredicates, err := parseListGroupsFilter(req.GetFilter())
+		predicates, err := parseListGroupsFilter(req.GetFilter())
 		if err != nil {
-			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid filter: %v", err))
+			return nil, err
 		}
-		where = append(where, filterPredicates...)
+		where = append(where, predicates...)
 	}
 
-	// 未在 filter 中显式包含删除态时，默认排除已软删除
-	if !strings.Contains(req.GetFilter(), "deleted_at") && !strings.Contains(req.GetFilter(), "show_deleted") {
-		where = append(where, groups.DeletedAtIsNil())
+	groupQuery := db.Groups.Query().Where(groups.DeletedAtIsNil())
+	if len(where) > 0 {
+		groupQuery = groupQuery.Where(where...)
 	}
 
-	query := db.Groups.Query().Where(where...)
-
-	// 排序 order_by: sort_order asc(默认), create_time desc/asc, id asc/desc
-	if req.GetOrderBy() != "" {
-		switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
-		case "create_time desc", "created_at desc":
-			query = query.Order(lion.Desc(groups.FieldCreatedAt))
-		case "create_time asc", "created_at asc":
-			query = query.Order(lion.Asc(groups.FieldCreatedAt))
-		case "sort_order asc":
-			query = query.Order(lion.Asc(groups.FieldSortOrder), lion.Asc(groups.FieldID))
-		case "sort_order desc":
-			query = query.Order(lion.Desc(groups.FieldSortOrder), lion.Asc(groups.FieldID))
-		case "id asc":
-			query = query.Order(lion.Asc(groups.FieldID))
-		case "id desc":
-			query = query.Order(lion.Desc(groups.FieldID))
-		default:
-			query = query.Order(lion.Asc(groups.FieldSortOrder), lion.Asc(groups.FieldID))
-		}
-	} else {
-		query = query.Order(lion.Asc(groups.FieldSortOrder), lion.Asc(groups.FieldID))
+	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+	case "created_at asc", "create_time asc":
+		groupQuery = groupQuery.Order(lion.Asc(groups.FieldCreatedAt))
+	case "created_at desc", "create_time desc":
+		groupQuery = groupQuery.Order(lion.Desc(groups.FieldCreatedAt))
+	default:
+		groupQuery = groupQuery.Order(lion.Asc(groups.FieldSortOrder), lion.Asc(groups.FieldID))
 	}
 
-	// 计算总数（分页前）
-	totalSize, err := query.Clone().Count(ctx)
+	totalSize, err := groupQuery.Clone().Count(ctx)
 	if err != nil {
 		return nil, err
 	}
 	result.TotalSize = int32(totalSize)
 
-	// 分页（TREE / TREE_EXPANDED 不分页，取全量）
 	pageSize := GetPageSize(ctx, req.GetPageSize())
-	var groupList []*lion.Groups
-
-	switch req.GetStructure() {
-	case adminv1.Structure_STRUCTURE_TREE, adminv1.Structure_STRUCTURE_TREE_EXPANDED:
-		groupList, err = query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		result.TotalSize = int32(len(groupList))
-	default:
-		var lastID int
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListGroupsRequest_Offset:
+		groupQuery = groupQuery.Offset(int(p.Offset))
+	case *adminv1.ListGroupsRequest_PageToken:
 		if req.GetPageToken() != "" {
-			data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
-			if err != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", err))
+			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
+			if decErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
 			}
-			if err := json.Unmarshal(data, &lastID); err != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", err))
+			var lastID int
+			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
 			}
 			if lastID > 0 {
-				query = query.Where(groups.IDGT(lastID))
+				groupQuery = groupQuery.Where(groups.IDGT(lastID))
 			}
-		}
-		switch p := req.GetPagination().(type) {
-		case *adminv1.ListGroupsRequest_Offset:
-			query = query.Offset(int(p.Offset))
-		case *adminv1.ListGroupsRequest_PageToken:
-			// cursor 已在上面处理
-		}
-		query = query.Limit(int(pageSize))
-		groupList, err = query.All(ctx)
-		if err != nil {
-			return nil, err
 		}
 	}
 
-	// 根据 View 决定是否返回时间戳等字段（STANDARD/FULL 含 created_at, updated_at, deleted_at）
-	includeTimestamps := req.GetView() == adminv1.View_VIEW_STANDARD || req.GetView() == adminv1.View_VIEW_FULL
+	groupList, err := groupQuery.Limit(int(pageSize)).All(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	// 按 structure 输出：平铺 或 树形（Group 当前 proto 无 Children 字段，树形时返回全量平铺并按 sort_order 排序）
-	switch req.GetStructure() {
-	case adminv1.Structure_STRUCTURE_TREE, adminv1.Structure_STRUCTURE_TREE_EXPANDED:
-		// 树形结构：返回全量平铺列表，按 sort_order、parent_id、id 排序便于前端建树
-		result.Groups = make([]*adminv1.Group, 0, len(groupList))
-		for _, g := range groupList {
-			result.Groups = append(result.Groups, groupToProto(g, includeTimestamps))
-		}
-		sortGroupSlice(result.Groups)
-	default:
-		result.Groups = make([]*adminv1.Group, 0, len(groupList))
-		for _, g := range groupList {
-			result.Groups = append(result.Groups, groupToProto(g, includeTimestamps))
-		}
-		// cursor 分页时生成 next_page_token
-		if _, ok := req.GetPagination().(*adminv1.ListGroupsRequest_PageToken); ok && len(groupList) == int(pageSize) && len(groupList) > 0 {
-			last := groupList[len(groupList)-1].ID
-			tokenData, _ := json.Marshal(last)
-			result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
-		}
+	includeTimestamps := req.GetView() == adminv1.View_VIEW_STANDARD || req.GetView() == adminv1.View_VIEW_FULL
+	result.Groups = make([]*adminv1.Group, 0, len(groupList))
+	for _, g := range groupList {
+		result.Groups = append(result.Groups, groupToProto(g, includeTimestamps))
+	}
+	if _, ok := req.GetPagination().(*adminv1.ListGroupsRequest_PageToken); ok && len(groupList) == int(pageSize) && len(groupList) > 0 {
+		last := groupList[len(groupList)-1].ID
+		tokenData, _ := json.Marshal(last)
+		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
 	}
 
 	return result, nil
@@ -683,116 +624,31 @@ func (a *KnownAdminAPI) listGroupMembersFromDepartment(ctx context.Context, req 
 	return result, nil
 }
 
-// listGroupMembersFromRole 从 user_roles 表查询角色群组成员
+// listGroupMembersFromRole 从 principal_roles 查询角色主体绑定，并在 full 视图下展开为用户列表。
 func (a *KnownAdminAPI) listGroupMembersFromRole(ctx context.Context, req *adminv1.ListGroupMembersRequest, db *lion.Client, roleID int) (*adminv1.ListGroupMembersResponse, error) {
-	result := &adminv1.ListGroupMembersResponse{
-		Members: make([]*adminv1.Membership, 0),
+	roleReq := &adminv1.ListRoleMembersRequest{
+		Parent:        strconv.Itoa(roleID),
+		PageSize:      req.GetPageSize(),
+		Filter:        req.GetFilter(),
+		OrderBy:       req.GetOrderBy(),
+		View:          adminv1.View_VIEW_FULL,
+		PrincipalType: adminv1.PrincipalType_PRINCIPAL_TYPE_UNSPECIFIED,
 	}
-
-	if roleID == 0 {
-		return result, nil
-	}
-
-	memberQuery := db.UserRoles.Query().Where(userroles.RoleIDEQ(roleID))
-
-	// 排序
-	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
-	case "created_at desc", "create_time desc":
-		memberQuery = memberQuery.Order(lion.Desc(userroles.FieldCreatedAt))
-	case "created_at asc", "create_time asc":
-		memberQuery = memberQuery.Order(lion.Asc(userroles.FieldCreatedAt))
-	default:
-		memberQuery = memberQuery.Order(lion.Desc(userroles.FieldID))
-	}
-
-	totalSize, err := memberQuery.Clone().Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	result.TotalSize = int32(totalSize)
-
-	pageSize := GetPageSize(ctx, req.GetPageSize())
-
-	// 分页
 	switch p := req.GetPagination().(type) {
-	case *adminv1.ListGroupMembersRequest_Offset:
-		memberQuery = memberQuery.Offset(int(p.Offset))
 	case *adminv1.ListGroupMembersRequest_PageToken:
-		if req.GetPageToken() != "" {
-			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
-			if decErr != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
-			}
-			var lastID int
-			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
-				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
-			}
-			if lastID > 0 {
-				memberQuery = memberQuery.Where(userroles.IDGT(lastID))
-			}
-		}
+		roleReq.Pagination = &adminv1.ListRoleMembersRequest_PageToken{PageToken: p.PageToken}
+	case *adminv1.ListGroupMembersRequest_Offset:
+		roleReq.Pagination = &adminv1.ListRoleMembersRequest_Offset{Offset: p.Offset}
 	}
-	memberQuery = memberQuery.Limit(int(pageSize))
-
-	members, err := memberQuery.Select(
-		userroles.FieldID,
-		userroles.FieldUserID,
-		userroles.FieldRoleID,
-		userroles.FieldMemberRole,
-		userroles.FieldMemberStatus,
-		userroles.FieldMemberType,
-		userroles.FieldExpiredAt,
-		userroles.FieldMetadata,
-		userroles.FieldDescription,
-		userroles.FieldCreatedBy,
-		userroles.FieldUpdatedBy,
-		userroles.FieldCreatedAt,
-		userroles.FieldUpdatedAt,
-	).WithLionUsers(func(q *lion.UsersQuery) {
-		q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
-	}).All(ctx)
+	roleResp, err := a.ListRoleMembers(ctx, roleReq)
 	if err != nil {
 		return nil, err
 	}
-
-	for _, m := range members {
-		user := m.Edges.LionUsers
-		if user == nil {
-			continue
-		}
-		pm := &adminv1.Membership{
-			Id:           int64(m.ID),
-			UserId:       int64(m.UserID),
-			Username:     user.Username,
-			Nickname:     user.Nickname,
-			TargetType:   adminv1.Membership_ROLE,
-			TargetId:     int64(m.RoleID),
-			MemberRole:   adminv1.Membership_Role(m.MemberRole),
-			MemberStatus: adminv1.Membership_Status(m.MemberStatus),
-			MemberType:   adminv1.Membership_MemberType(m.MemberType),
-			Description:  m.Description,
-			CreatedBy:    m.CreatedBy,
-			UpdatedBy:    m.UpdatedBy,
-			CreatedAt:    timestamppb.New(m.CreatedAt),
-			UpdatedAt:    timestamppb.New(m.UpdatedAt),
-		}
-		if !m.ExpiredAt.IsZero() {
-			pm.ExpiredAt = timestamppb.New(m.ExpiredAt)
-		}
-		if m.Metadata != "" {
-			pm.Metadata = MetadataParse(m.Metadata)
-		}
-		result.Members = append(result.Members, pm)
-	}
-
-	// Cursor 分页
-	if _, ok := req.GetPagination().(*adminv1.ListGroupMembersRequest_PageToken); ok && len(members) == int(pageSize) && len(members) > 0 {
-		lastID := members[len(members)-1].ID
-		tokenData, _ := json.Marshal(lastID)
-		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
-	}
-
-	return result, nil
+	return &adminv1.ListGroupMembersResponse{
+		Members:       roleResp.GetMembers(),
+		NextPageToken: roleResp.GetNextPageToken(),
+		TotalSize:     roleResp.GetTotalSize(),
+	}, nil
 }
 
 // dynamicRuleAllowedFields 动态规则允许过滤的用户字段白名单（非敏感、非加密字段）

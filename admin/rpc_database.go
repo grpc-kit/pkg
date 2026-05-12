@@ -15,11 +15,11 @@ import (
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -192,15 +192,24 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 
-	userRoleExists, err := tx.UserRoles.Query().
-		Where(userroles.UserIDEQ(adminUser.ID), userroles.RoleIDEQ(adminRole.ID)).
+	userRoleExists, err := tx.PrincipalRoles.Query().
+		Where(
+			principalroles.PrincipalTypeEQ(principalTypeUser),
+			principalroles.PrincipalIDEQ(adminUser.ID),
+			principalroles.RoleIDEQ(adminRole.ID),
+		).
 		Exist(ctx)
 	if err != nil {
 		rollback()
 		return nil, err
 	}
 	if !userRoleExists {
-		if err := tx.UserRoles.Create().SetUserID(adminUser.ID).SetRoleID(adminRole.ID).Exec(ctx); err != nil {
+		if err := tx.PrincipalRoles.Create().
+			SetPrincipalType(principalTypeUser).
+			SetPrincipalID(adminUser.ID).
+			SetRoleID(adminRole.ID).
+			SetBindingStatus(bindingStatusActive).
+			Exec(ctx); err != nil {
 			rollback()
 			return nil, err
 		}

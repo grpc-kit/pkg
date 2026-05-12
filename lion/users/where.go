@@ -1685,29 +1685,6 @@ func MetadataNotNil() predicate.Users {
 	return predicate.Users(sql.FieldNotNull(FieldMetadata))
 }
 
-// HasLionUserRoles applies the HasEdge predicate on the "lion_user_roles" edge.
-func HasLionUserRoles() predicate.Users {
-	return predicate.Users(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionUserRolesTable, LionUserRolesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLionUserRolesWith applies the HasEdge predicate on the "lion_user_roles" edge with a given conditions (other predicates).
-func HasLionUserRolesWith(preds ...predicate.UserRoles) predicate.Users {
-	return predicate.Users(func(s *sql.Selector) {
-		step := newLionUserRolesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasLionUserMemberships applies the HasEdge predicate on the "lion_user_memberships" edge.
 func HasLionUserMemberships() predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {

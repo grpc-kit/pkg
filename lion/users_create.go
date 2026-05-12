@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/usermemberships"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -359,21 +358,6 @@ func (_c *UsersCreate) SetMetadata(v map[string]string) *UsersCreate {
 	return _c
 }
 
-// AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by IDs.
-func (_c *UsersCreate) AddLionUserRoleIDs(ids ...int) *UsersCreate {
-	_c.mutation.AddLionUserRoleIDs(ids...)
-	return _c
-}
-
-// AddLionUserRoles adds the "lion_user_roles" edges to the UserRoles entity.
-func (_c *UsersCreate) AddLionUserRoles(v ...*UserRoles) *UsersCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionUserRoleIDs(ids...)
-}
-
 // AddLionUserMembershipIDs adds the "lion_user_memberships" edge to the UserMemberships entity by IDs.
 func (_c *UsersCreate) AddLionUserMembershipIDs(ids ...int) *UsersCreate {
 	_c.mutation.AddLionUserMembershipIDs(ids...)
@@ -670,22 +654,6 @@ func (_c *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Metadata(); ok {
 		_spec.SetField(users.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
-	}
-	if nodes := _c.mutation.LionUserRolesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   users.LionUserRolesTable,
-			Columns: []string{users.LionUserRolesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.LionUserMembershipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -22,7 +22,6 @@ import (
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/useridentities"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -1158,24 +1157,15 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 }
 
 func (s *socialUsers) setUserRoles(ctx context.Context, userID int) error {
-	rs, err := s.db.UserRoles.Query().
-		Select(
-			userroles.FieldRoleID,
-			userroles.FieldUserID,
-		).
-		Where(userroles.UserIDEQ(userID)).
-		WithLionRoles().
-		All(ctx)
+	roleIDs, err := effectiveRoleIDsForUser(ctx, s.db, userID)
 	if err != nil {
 		return err
 	}
-
-	for _, r := range rs {
-		if r.Edges.LionRoles == nil {
-			continue
-		}
-		s.Groups = append(s.Groups, r.Edges.LionRoles.Code)
+	roleCodes, err := roleCodesForIDs(ctx, s.db, roleIDs)
+	if err != nil {
+		return err
 	}
+	s.Groups = append(s.Groups, roleCodes...)
 
 	return nil
 }
