@@ -8,12 +8,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/grpc-kit/pkg/auth"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/enttest"
 	"github.com/grpc-kit/pkg/lion/globalsettings"
+	_ "github.com/mattn/go-sqlite3"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -48,7 +48,7 @@ func TestGlobalSettingsRegistryIncludesInitialSecurityKeys(t *testing.T) {
 			t.Fatalf("expected protected spec for %s/%s", tt.category, tt.settingKey)
 		}
 	}
-	}
+}
 
 func TestGetLocalMFAPolicyPrefersGlobalSettingOverLegacyProviderConfig(t *testing.T) {
 	ctx := context.Background()
@@ -404,7 +404,7 @@ func TestCreateAuthTokenUsesGlobalSettingDefaultTTL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateAuthToken failed: %v", err)
 	}
-	if resp.ExpiresIn != int32((36 * time.Hour) / time.Second) {
+	if resp.ExpiresIn != int32((36*time.Hour)/time.Second) {
 		t.Fatalf("unexpected expires_in: got=%d want=%d", resp.ExpiresIn, int32((36*time.Hour)/time.Second))
 	}
 }
