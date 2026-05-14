@@ -15,6 +15,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/globalsettings"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
@@ -89,6 +90,7 @@ func checkColumn(t, c string) error {
 			authproviders.Table:   authproviders.ValidColumn,
 			credentials.Table:     credentials.ValidColumn,
 			departments.Table:     departments.ValidColumn,
+			globalsettings.Table:  globalsettings.ValidColumn,
 			groups.Table:          groups.ValidColumn,
 			menus.Table:           menus.ValidColumn,
 			policies.Table:        policies.ValidColumn,

@@ -18,6 +18,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/globalsettings"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
@@ -42,6 +43,8 @@ type Client struct {
 	Credentials *CredentialsClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
+	// GlobalSettings is the client for interacting with the GlobalSettings builders.
+	GlobalSettings *GlobalSettingsClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
 	// Menus is the client for interacting with the Menus builders.
@@ -78,6 +81,7 @@ func (c *Client) init() {
 	c.AuthProviders = NewAuthProvidersClient(c.config)
 	c.Credentials = NewCredentialsClient(c.config)
 	c.Departments = NewDepartmentsClient(c.config)
+	c.GlobalSettings = NewGlobalSettingsClient(c.config)
 	c.Groups = NewGroupsClient(c.config)
 	c.Menus = NewMenusClient(c.config)
 	c.Policies = NewPoliciesClient(c.config)
@@ -184,6 +188,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		AuthProviders:   NewAuthProvidersClient(cfg),
 		Credentials:     NewCredentialsClient(cfg),
 		Departments:     NewDepartmentsClient(cfg),
+		GlobalSettings:  NewGlobalSettingsClient(cfg),
 		Groups:          NewGroupsClient(cfg),
 		Menus:           NewMenusClient(cfg),
 		Policies:        NewPoliciesClient(cfg),
@@ -217,6 +222,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		AuthProviders:   NewAuthProvidersClient(cfg),
 		Credentials:     NewCredentialsClient(cfg),
 		Departments:     NewDepartmentsClient(cfg),
+		GlobalSettings:  NewGlobalSettingsClient(cfg),
 		Groups:          NewGroupsClient(cfg),
 		Menus:           NewMenusClient(cfg),
 		Policies:        NewPoliciesClient(cfg),
@@ -257,9 +263,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.AuthProviders, c.Credentials, c.Departments, c.Groups, c.Menus, c.Policies,
-		c.PrincipalRoles, c.RoleMenus, c.RolePolicies, c.Roles, c.UserIdentities,
-		c.UserMemberships, c.UserProfiles, c.Users,
+		c.AuthProviders, c.Credentials, c.Departments, c.GlobalSettings, c.Groups,
+		c.Menus, c.Policies, c.PrincipalRoles, c.RoleMenus, c.RolePolicies, c.Roles,
+		c.UserIdentities, c.UserMemberships, c.UserProfiles, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -269,9 +275,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.AuthProviders, c.Credentials, c.Departments, c.Groups, c.Menus, c.Policies,
-		c.PrincipalRoles, c.RoleMenus, c.RolePolicies, c.Roles, c.UserIdentities,
-		c.UserMemberships, c.UserProfiles, c.Users,
+		c.AuthProviders, c.Credentials, c.Departments, c.GlobalSettings, c.Groups,
+		c.Menus, c.Policies, c.PrincipalRoles, c.RoleMenus, c.RolePolicies, c.Roles,
+		c.UserIdentities, c.UserMemberships, c.UserProfiles, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -286,6 +292,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Credentials.mutate(ctx, m)
 	case *DepartmentsMutation:
 		return c.Departments.mutate(ctx, m)
+	case *GlobalSettingsMutation:
+		return c.GlobalSettings.mutate(ctx, m)
 	case *GroupsMutation:
 		return c.Groups.mutate(ctx, m)
 	case *MenusMutation:
@@ -741,6 +749,139 @@ func (c *DepartmentsClient) mutate(ctx context.Context, m *DepartmentsMutation) 
 		return (&DepartmentsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown Departments mutation op: %q", m.Op())
+	}
+}
+
+// GlobalSettingsClient is a client for the GlobalSettings schema.
+type GlobalSettingsClient struct {
+	config
+}
+
+// NewGlobalSettingsClient returns a client for the GlobalSettings from the given config.
+func NewGlobalSettingsClient(c config) *GlobalSettingsClient {
+	return &GlobalSettingsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `globalsettings.Hooks(f(g(h())))`.
+func (c *GlobalSettingsClient) Use(hooks ...Hook) {
+	c.hooks.GlobalSettings = append(c.hooks.GlobalSettings, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `globalsettings.Intercept(f(g(h())))`.
+func (c *GlobalSettingsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.GlobalSettings = append(c.inters.GlobalSettings, interceptors...)
+}
+
+// Create returns a builder for creating a GlobalSettings entity.
+func (c *GlobalSettingsClient) Create() *GlobalSettingsCreate {
+	mutation := newGlobalSettingsMutation(c.config, OpCreate)
+	return &GlobalSettingsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of GlobalSettings entities.
+func (c *GlobalSettingsClient) CreateBulk(builders ...*GlobalSettingsCreate) *GlobalSettingsCreateBulk {
+	return &GlobalSettingsCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *GlobalSettingsClient) MapCreateBulk(slice any, setFunc func(*GlobalSettingsCreate, int)) *GlobalSettingsCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &GlobalSettingsCreateBulk{err: fmt.Errorf("calling to GlobalSettingsClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*GlobalSettingsCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &GlobalSettingsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for GlobalSettings.
+func (c *GlobalSettingsClient) Update() *GlobalSettingsUpdate {
+	mutation := newGlobalSettingsMutation(c.config, OpUpdate)
+	return &GlobalSettingsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GlobalSettingsClient) UpdateOne(_m *GlobalSettings) *GlobalSettingsUpdateOne {
+	mutation := newGlobalSettingsMutation(c.config, OpUpdateOne, withGlobalSettings(_m))
+	return &GlobalSettingsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GlobalSettingsClient) UpdateOneID(id int) *GlobalSettingsUpdateOne {
+	mutation := newGlobalSettingsMutation(c.config, OpUpdateOne, withGlobalSettingsID(id))
+	return &GlobalSettingsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for GlobalSettings.
+func (c *GlobalSettingsClient) Delete() *GlobalSettingsDelete {
+	mutation := newGlobalSettingsMutation(c.config, OpDelete)
+	return &GlobalSettingsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *GlobalSettingsClient) DeleteOne(_m *GlobalSettings) *GlobalSettingsDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *GlobalSettingsClient) DeleteOneID(id int) *GlobalSettingsDeleteOne {
+	builder := c.Delete().Where(globalsettings.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GlobalSettingsDeleteOne{builder}
+}
+
+// Query returns a query builder for GlobalSettings.
+func (c *GlobalSettingsClient) Query() *GlobalSettingsQuery {
+	return &GlobalSettingsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeGlobalSettings},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a GlobalSettings entity by its id.
+func (c *GlobalSettingsClient) Get(ctx context.Context, id int) (*GlobalSettings, error) {
+	return c.Query().Where(globalsettings.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GlobalSettingsClient) GetX(ctx context.Context, id int) *GlobalSettings {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *GlobalSettingsClient) Hooks() []Hook {
+	return c.hooks.GlobalSettings
+}
+
+// Interceptors returns the client interceptors.
+func (c *GlobalSettingsClient) Interceptors() []Interceptor {
+	return c.inters.GlobalSettings
+}
+
+func (c *GlobalSettingsClient) mutate(ctx context.Context, m *GlobalSettingsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&GlobalSettingsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&GlobalSettingsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&GlobalSettingsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&GlobalSettingsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown GlobalSettings mutation op: %q", m.Op())
 	}
 }
 
@@ -2450,13 +2591,13 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		AuthProviders, Credentials, Departments, Groups, Menus, Policies,
-		PrincipalRoles, RoleMenus, RolePolicies, Roles, UserIdentities,
+		AuthProviders, Credentials, Departments, GlobalSettings, Groups, Menus,
+		Policies, PrincipalRoles, RoleMenus, RolePolicies, Roles, UserIdentities,
 		UserMemberships, UserProfiles, Users []ent.Hook
 	}
 	inters struct {
-		AuthProviders, Credentials, Departments, Groups, Menus, Policies,
-		PrincipalRoles, RoleMenus, RolePolicies, Roles, UserIdentities,
+		AuthProviders, Credentials, Departments, GlobalSettings, Groups, Menus,
+		Policies, PrincipalRoles, RoleMenus, RolePolicies, Roles, UserIdentities,
 		UserMemberships, UserProfiles, Users []ent.Interceptor
 	}
 )

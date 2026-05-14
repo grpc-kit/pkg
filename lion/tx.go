@@ -18,6 +18,8 @@ type Tx struct {
 	Credentials *CredentialsClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
+	// GlobalSettings is the client for interacting with the GlobalSettings builders.
+	GlobalSettings *GlobalSettingsClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
 	// Menus is the client for interacting with the Menus builders.
@@ -174,6 +176,7 @@ func (tx *Tx) init() {
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
 	tx.Credentials = NewCredentialsClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
+	tx.GlobalSettings = NewGlobalSettingsClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)

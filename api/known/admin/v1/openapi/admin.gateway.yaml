@@ -34,6 +34,14 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigAutomations
     get: "/builtin/admin/api/v1/config/automations"
 
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetGlobalSettings
+    get: "/builtin/admin/api/v1/global-settings/{category}"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListGlobalSettings
+    get: "/builtin/admin/api/v1/global-settings"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGlobalSettings
+    post: "/builtin/admin/api/v1/global-settings/{category}"
+    body: "updates"
+
     # 认证鉴权
     ## 创建认证令牌
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthToken

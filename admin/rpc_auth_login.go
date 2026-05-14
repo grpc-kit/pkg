@@ -36,7 +36,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	// TODO; 不允许创建过长过期的 token
 	expiresIn := req.ExpiresIn
 	if expiresIn <= 0 {
-		expiresIn = 24 * 60 * 60
+		expiresIn = durationSecondsInt32(a.getLoginAccessTokenTTL(ctx))
 	}
 	providerCode := strings.TrimSpace(req.GetProviderCode())
 	if providerCode == "" {
@@ -178,7 +178,7 @@ func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.Create
 
 	expiresIn := req.ExpiresIn
 	if expiresIn <= 0 {
-		expiresIn = 24 * 60 * 60
+		expiresIn = durationSecondsInt32(a.getLoginAccessTokenTTL(ctx))
 	}
 
 	tk, err := u.GetAccessToken(expiresIn, appid)

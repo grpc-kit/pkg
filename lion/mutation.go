@@ -16,6 +16,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/globalsettings"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
@@ -42,6 +43,7 @@ const (
 	TypeAuthProviders   = "AuthProviders"
 	TypeCredentials     = "Credentials"
 	TypeDepartments     = "Departments"
+	TypeGlobalSettings  = "GlobalSettings"
 	TypeGroups          = "Groups"
 	TypeMenus           = "Menus"
 	TypePolicies        = "Policies"
@@ -5889,6 +5891,930 @@ func (m *DepartmentsMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Departments edge %s", name)
+}
+
+// GlobalSettingsMutation represents an operation that mutates the GlobalSettings nodes in the graph.
+type GlobalSettingsMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	created_at    *time.Time
+	updated_at    *time.Time
+	created_by    *int64
+	addcreated_by *int64
+	updated_by    *int64
+	addupdated_by *int64
+	category      *string
+	setting_key   *string
+	setting_value *string
+	value_type    *string
+	description   *string
+	protected     *bool
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*GlobalSettings, error)
+	predicates    []predicate.GlobalSettings
+}
+
+var _ ent.Mutation = (*GlobalSettingsMutation)(nil)
+
+// globalsettingsOption allows management of the mutation configuration using functional options.
+type globalsettingsOption func(*GlobalSettingsMutation)
+
+// newGlobalSettingsMutation creates new mutation for the GlobalSettings entity.
+func newGlobalSettingsMutation(c config, op Op, opts ...globalsettingsOption) *GlobalSettingsMutation {
+	m := &GlobalSettingsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeGlobalSettings,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withGlobalSettingsID sets the ID field of the mutation.
+func withGlobalSettingsID(id int) globalsettingsOption {
+	return func(m *GlobalSettingsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *GlobalSettings
+		)
+		m.oldValue = func(ctx context.Context) (*GlobalSettings, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().GlobalSettings.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withGlobalSettings sets the old GlobalSettings of the mutation.
+func withGlobalSettings(node *GlobalSettings) globalsettingsOption {
+	return func(m *GlobalSettingsMutation) {
+		m.oldValue = func(context.Context) (*GlobalSettings, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m GlobalSettingsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m GlobalSettingsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("lion: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *GlobalSettingsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *GlobalSettingsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().GlobalSettings.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *GlobalSettingsMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *GlobalSettingsMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the GlobalSettings entity.
+// If the GlobalSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GlobalSettingsMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *GlobalSettingsMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *GlobalSettingsMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *GlobalSettingsMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the GlobalSettings entity.
+// If the GlobalSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GlobalSettingsMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *GlobalSettingsMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (m *GlobalSettingsMutation) SetCreatedBy(i int64) {
+	m.created_by = &i
+	m.addcreated_by = nil
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *GlobalSettingsMutation) CreatedBy() (r int64, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the GlobalSettings entity.
+// If the GlobalSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GlobalSettingsMutation) OldCreatedBy(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// AddCreatedBy adds i to the "created_by" field.
+func (m *GlobalSettingsMutation) AddCreatedBy(i int64) {
+	if m.addcreated_by != nil {
+		*m.addcreated_by += i
+	} else {
+		m.addcreated_by = &i
+	}
+}
+
+// AddedCreatedBy returns the value that was added to the "created_by" field in this mutation.
+func (m *GlobalSettingsMutation) AddedCreatedBy() (r int64, exists bool) {
+	v := m.addcreated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearCreatedBy clears the value of the "created_by" field.
+func (m *GlobalSettingsMutation) ClearCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	m.clearedFields[globalsettings.FieldCreatedBy] = struct{}{}
+}
+
+// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
+func (m *GlobalSettingsMutation) CreatedByCleared() bool {
+	_, ok := m.clearedFields[globalsettings.FieldCreatedBy]
+	return ok
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *GlobalSettingsMutation) ResetCreatedBy() {
+	m.created_by = nil
+	m.addcreated_by = nil
+	delete(m.clearedFields, globalsettings.FieldCreatedBy)
+}
+
+// SetUpdatedBy sets the "updated_by" field.
+func (m *GlobalSettingsMutation) SetUpdatedBy(i int64) {
+	m.updated_by = &i
+	m.addupdated_by = nil
+}
+
+// UpdatedBy returns the value of the "updated_by" field in the mutation.
+func (m *GlobalSettingsMutation) UpdatedBy() (r int64, exists bool) {
+	v := m.updated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedBy returns the old "updated_by" field's value of the GlobalSettings entity.
+// If the GlobalSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GlobalSettingsMutation) OldUpdatedBy(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedBy: %w", err)
+	}
+	return oldValue.UpdatedBy, nil
+}
+
+// AddUpdatedBy adds i to the "updated_by" field.
+func (m *GlobalSettingsMutation) AddUpdatedBy(i int64) {
+	if m.addupdated_by != nil {
+		*m.addupdated_by += i
+	} else {
+		m.addupdated_by = &i
+	}
+}
+
+// AddedUpdatedBy returns the value that was added to the "updated_by" field in this mutation.
+func (m *GlobalSettingsMutation) AddedUpdatedBy() (r int64, exists bool) {
+	v := m.addupdated_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUpdatedBy clears the value of the "updated_by" field.
+func (m *GlobalSettingsMutation) ClearUpdatedBy() {
+	m.updated_by = nil
+	m.addupdated_by = nil
+	m.clearedFields[globalsettings.FieldUpdatedBy] = struct{}{}
+}
+
+// UpdatedByCleared returns if the "updated_by" field was cleared in this mutation.
+func (m *GlobalSettingsMutation) UpdatedByCleared() bool {
+	_, ok := m.clearedFields[globalsettings.FieldUpdatedBy]
+	return ok
+}
+
+// ResetUpdatedBy resets all changes to the "updated_by" field.
+func (m *GlobalSettingsMutation) ResetUpdatedBy() {
+	m.updated_by = nil
+	m.addupdated_by = nil
+	delete(m.clearedFields, globalsettings.FieldUpdatedBy)
+}
+
+// SetCategory sets the "category" field.
+func (m *GlobalSettingsMutation) SetCategory(s string) {
+	m.category = &s
+}
+
+// Category returns the value of the "category" field in the mutation.
+func (m *GlobalSettingsMutation) Category() (r string, exists bool) {
+	v := m.category
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCategory returns the old "category" field's value of the GlobalSettings entity.
+// If the GlobalSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GlobalSettingsMutation) OldCategory(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCategory is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCategory requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCategory: %w", err)
+	}
+	return oldValue.Category, nil
+}
+
+// ResetCategory resets all changes to the "category" field.
+func (m *GlobalSettingsMutation) ResetCategory() {
+	m.category = nil
+}
+
+// SetSettingKey sets the "setting_key" field.
+func (m *GlobalSettingsMutation) SetSettingKey(s string) {
+	m.setting_key = &s
+}
+
+// SettingKey returns the value of the "setting_key" field in the mutation.
+func (m *GlobalSettingsMutation) SettingKey() (r string, exists bool) {
+	v := m.setting_key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSettingKey returns the old "setting_key" field's value of the GlobalSettings entity.
+// If the GlobalSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GlobalSettingsMutation) OldSettingKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSettingKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSettingKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSettingKey: %w", err)
+	}
+	return oldValue.SettingKey, nil
+}
+
+// ResetSettingKey resets all changes to the "setting_key" field.
+func (m *GlobalSettingsMutation) ResetSettingKey() {
+	m.setting_key = nil
+}
+
+// SetSettingValue sets the "setting_value" field.
+func (m *GlobalSettingsMutation) SetSettingValue(s string) {
+	m.setting_value = &s
+}
+
+// SettingValue returns the value of the "setting_value" field in the mutation.
+func (m *GlobalSettingsMutation) SettingValue() (r string, exists bool) {
+	v := m.setting_value
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSettingValue returns the old "setting_value" field's value of the GlobalSettings entity.
+// If the GlobalSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GlobalSettingsMutation) OldSettingValue(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSettingValue is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSettingValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSettingValue: %w", err)
+	}
+	return oldValue.SettingValue, nil
+}
+
+// ResetSettingValue resets all changes to the "setting_value" field.
+func (m *GlobalSettingsMutation) ResetSettingValue() {
+	m.setting_value = nil
+}
+
+// SetValueType sets the "value_type" field.
+func (m *GlobalSettingsMutation) SetValueType(s string) {
+	m.value_type = &s
+}
+
+// ValueType returns the value of the "value_type" field in the mutation.
+func (m *GlobalSettingsMutation) ValueType() (r string, exists bool) {
+	v := m.value_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValueType returns the old "value_type" field's value of the GlobalSettings entity.
+// If the GlobalSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GlobalSettingsMutation) OldValueType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValueType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValueType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValueType: %w", err)
+	}
+	return oldValue.ValueType, nil
+}
+
+// ResetValueType resets all changes to the "value_type" field.
+func (m *GlobalSettingsMutation) ResetValueType() {
+	m.value_type = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *GlobalSettingsMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *GlobalSettingsMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the GlobalSettings entity.
+// If the GlobalSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GlobalSettingsMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *GlobalSettingsMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetProtected sets the "protected" field.
+func (m *GlobalSettingsMutation) SetProtected(b bool) {
+	m.protected = &b
+}
+
+// Protected returns the value of the "protected" field in the mutation.
+func (m *GlobalSettingsMutation) Protected() (r bool, exists bool) {
+	v := m.protected
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtected returns the old "protected" field's value of the GlobalSettings entity.
+// If the GlobalSettings object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *GlobalSettingsMutation) OldProtected(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtected requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
+	}
+	return oldValue.Protected, nil
+}
+
+// ResetProtected resets all changes to the "protected" field.
+func (m *GlobalSettingsMutation) ResetProtected() {
+	m.protected = nil
+}
+
+// Where appends a list predicates to the GlobalSettingsMutation builder.
+func (m *GlobalSettingsMutation) Where(ps ...predicate.GlobalSettings) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the GlobalSettingsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *GlobalSettingsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.GlobalSettings, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *GlobalSettingsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *GlobalSettingsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (GlobalSettings).
+func (m *GlobalSettingsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *GlobalSettingsMutation) Fields() []string {
+	fields := make([]string, 0, 10)
+	if m.created_at != nil {
+		fields = append(fields, globalsettings.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, globalsettings.FieldUpdatedAt)
+	}
+	if m.created_by != nil {
+		fields = append(fields, globalsettings.FieldCreatedBy)
+	}
+	if m.updated_by != nil {
+		fields = append(fields, globalsettings.FieldUpdatedBy)
+	}
+	if m.category != nil {
+		fields = append(fields, globalsettings.FieldCategory)
+	}
+	if m.setting_key != nil {
+		fields = append(fields, globalsettings.FieldSettingKey)
+	}
+	if m.setting_value != nil {
+		fields = append(fields, globalsettings.FieldSettingValue)
+	}
+	if m.value_type != nil {
+		fields = append(fields, globalsettings.FieldValueType)
+	}
+	if m.description != nil {
+		fields = append(fields, globalsettings.FieldDescription)
+	}
+	if m.protected != nil {
+		fields = append(fields, globalsettings.FieldProtected)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *GlobalSettingsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case globalsettings.FieldCreatedAt:
+		return m.CreatedAt()
+	case globalsettings.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case globalsettings.FieldCreatedBy:
+		return m.CreatedBy()
+	case globalsettings.FieldUpdatedBy:
+		return m.UpdatedBy()
+	case globalsettings.FieldCategory:
+		return m.Category()
+	case globalsettings.FieldSettingKey:
+		return m.SettingKey()
+	case globalsettings.FieldSettingValue:
+		return m.SettingValue()
+	case globalsettings.FieldValueType:
+		return m.ValueType()
+	case globalsettings.FieldDescription:
+		return m.Description()
+	case globalsettings.FieldProtected:
+		return m.Protected()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *GlobalSettingsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case globalsettings.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case globalsettings.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case globalsettings.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
+	case globalsettings.FieldUpdatedBy:
+		return m.OldUpdatedBy(ctx)
+	case globalsettings.FieldCategory:
+		return m.OldCategory(ctx)
+	case globalsettings.FieldSettingKey:
+		return m.OldSettingKey(ctx)
+	case globalsettings.FieldSettingValue:
+		return m.OldSettingValue(ctx)
+	case globalsettings.FieldValueType:
+		return m.OldValueType(ctx)
+	case globalsettings.FieldDescription:
+		return m.OldDescription(ctx)
+	case globalsettings.FieldProtected:
+		return m.OldProtected(ctx)
+	}
+	return nil, fmt.Errorf("unknown GlobalSettings field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GlobalSettingsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case globalsettings.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case globalsettings.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case globalsettings.FieldCreatedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
+		return nil
+	case globalsettings.FieldUpdatedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedBy(v)
+		return nil
+	case globalsettings.FieldCategory:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCategory(v)
+		return nil
+	case globalsettings.FieldSettingKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSettingKey(v)
+		return nil
+	case globalsettings.FieldSettingValue:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSettingValue(v)
+		return nil
+	case globalsettings.FieldValueType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValueType(v)
+		return nil
+	case globalsettings.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case globalsettings.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
+		return nil
+	}
+	return fmt.Errorf("unknown GlobalSettings field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *GlobalSettingsMutation) AddedFields() []string {
+	var fields []string
+	if m.addcreated_by != nil {
+		fields = append(fields, globalsettings.FieldCreatedBy)
+	}
+	if m.addupdated_by != nil {
+		fields = append(fields, globalsettings.FieldUpdatedBy)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *GlobalSettingsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case globalsettings.FieldCreatedBy:
+		return m.AddedCreatedBy()
+	case globalsettings.FieldUpdatedBy:
+		return m.AddedUpdatedBy()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *GlobalSettingsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case globalsettings.FieldCreatedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedBy(v)
+		return nil
+	case globalsettings.FieldUpdatedBy:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdatedBy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown GlobalSettings numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *GlobalSettingsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(globalsettings.FieldCreatedBy) {
+		fields = append(fields, globalsettings.FieldCreatedBy)
+	}
+	if m.FieldCleared(globalsettings.FieldUpdatedBy) {
+		fields = append(fields, globalsettings.FieldUpdatedBy)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *GlobalSettingsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *GlobalSettingsMutation) ClearField(name string) error {
+	switch name {
+	case globalsettings.FieldCreatedBy:
+		m.ClearCreatedBy()
+		return nil
+	case globalsettings.FieldUpdatedBy:
+		m.ClearUpdatedBy()
+		return nil
+	}
+	return fmt.Errorf("unknown GlobalSettings nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *GlobalSettingsMutation) ResetField(name string) error {
+	switch name {
+	case globalsettings.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case globalsettings.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case globalsettings.FieldCreatedBy:
+		m.ResetCreatedBy()
+		return nil
+	case globalsettings.FieldUpdatedBy:
+		m.ResetUpdatedBy()
+		return nil
+	case globalsettings.FieldCategory:
+		m.ResetCategory()
+		return nil
+	case globalsettings.FieldSettingKey:
+		m.ResetSettingKey()
+		return nil
+	case globalsettings.FieldSettingValue:
+		m.ResetSettingValue()
+		return nil
+	case globalsettings.FieldValueType:
+		m.ResetValueType()
+		return nil
+	case globalsettings.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case globalsettings.FieldProtected:
+		m.ResetProtected()
+		return nil
+	}
+	return fmt.Errorf("unknown GlobalSettings field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *GlobalSettingsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *GlobalSettingsMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *GlobalSettingsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *GlobalSettingsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *GlobalSettingsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *GlobalSettingsMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *GlobalSettingsMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown GlobalSettings unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *GlobalSettingsMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown GlobalSettings edge %s", name)
 }
 
 // GroupsMutation represents an operation that mutates the Groups nodes in the graph.

@@ -120,6 +120,38 @@ var (
 		Columns:    LionDepartmentsColumns,
 		PrimaryKey: []*schema.Column{LionDepartmentsColumns[0]},
 	}
+	// LionGlobalSettingsColumns holds the columns for the "lion_global_settings" table.
+	LionGlobalSettingsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "category", Type: field.TypeString, Size: 64},
+		{Name: "setting_key", Type: field.TypeString, Size: 128},
+		{Name: "setting_value", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "value_type", Type: field.TypeString, Size: 16, Default: "string"},
+		{Name: "description", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "protected", Type: field.TypeBool, Default: false},
+	}
+	// LionGlobalSettingsTable holds the schema information for the "lion_global_settings" table.
+	LionGlobalSettingsTable = &schema.Table{
+		Name:       "lion_global_settings",
+		Columns:    LionGlobalSettingsColumns,
+		PrimaryKey: []*schema.Column{LionGlobalSettingsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "globalsettings_category_setting_key",
+				Unique:  true,
+				Columns: []*schema.Column{LionGlobalSettingsColumns[5], LionGlobalSettingsColumns[6]},
+			},
+			{
+				Name:    "globalsettings_category",
+				Unique:  false,
+				Columns: []*schema.Column{LionGlobalSettingsColumns[5]},
+			},
+		},
+	}
 	// LionGroupsColumns holds the columns for the "lion_groups" table.
 	LionGroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -671,6 +703,7 @@ var (
 		LionAuthProvidersTable,
 		LionCredentialsTable,
 		LionDepartmentsTable,
+		LionGlobalSettingsTable,
 		LionGroupsTable,
 		LionMenusTable,
 		LionPoliciesTable,
@@ -694,6 +727,9 @@ func init() {
 	}
 	LionDepartmentsTable.Annotation = &entsql.Annotation{
 		Table: "lion_departments",
+	}
+	LionGlobalSettingsTable.Annotation = &entsql.Annotation{
+		Table: "lion_global_settings",
 	}
 	LionGroupsTable.ForeignKeys[0].RefTable = LionDepartmentsTable
 	LionGroupsTable.Annotation = &entsql.Annotation{

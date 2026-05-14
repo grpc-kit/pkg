@@ -36,6 +36,10 @@ type KnownAdminClient interface {
 	GetConfigObservables(ctx context.Context, in *GetConfigObservablesRequest, opts ...grpc.CallOption) (*ObservablesConfig, error)
 	GetConfigCloudEvents(ctx context.Context, in *GetConfigCloudEventsRequest, opts ...grpc.CallOption) (*CloudEventsConfig, error)
 	GetConfigAutomations(ctx context.Context, in *GetConfigAutomationsRequest, opts ...grpc.CallOption) (*AutomationsConfig, error)
+	// 全局设置
+	GetGlobalSettings(ctx context.Context, in *GetGlobalSettingsRequest, opts ...grpc.CallOption) (*GlobalSettingCategory, error)
+	ListGlobalSettings(ctx context.Context, in *ListGlobalSettingsRequest, opts ...grpc.CallOption) (*ListGlobalSettingsResponse, error)
+	UpdateGlobalSettings(ctx context.Context, in *UpdateGlobalSettingsRequest, opts ...grpc.CallOption) (*UpdateGlobalSettingsResponse, error)
 	// 认证鉴权
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 	ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error)
@@ -231,6 +235,33 @@ func (c *knownAdminClient) GetConfigCloudEvents(ctx context.Context, in *GetConf
 func (c *knownAdminClient) GetConfigAutomations(ctx context.Context, in *GetConfigAutomationsRequest, opts ...grpc.CallOption) (*AutomationsConfig, error) {
 	out := new(AutomationsConfig)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigAutomations", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) GetGlobalSettings(ctx context.Context, in *GetGlobalSettingsRequest, opts ...grpc.CallOption) (*GlobalSettingCategory, error) {
+	out := new(GlobalSettingCategory)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGlobalSettings", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ListGlobalSettings(ctx context.Context, in *ListGlobalSettingsRequest, opts ...grpc.CallOption) (*ListGlobalSettingsResponse, error) {
+	out := new(ListGlobalSettingsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGlobalSettings", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateGlobalSettings(ctx context.Context, in *UpdateGlobalSettingsRequest, opts ...grpc.CallOption) (*UpdateGlobalSettingsResponse, error) {
+	out := new(UpdateGlobalSettingsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGlobalSettings", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -884,6 +915,10 @@ type KnownAdminServer interface {
 	GetConfigObservables(context.Context, *GetConfigObservablesRequest) (*ObservablesConfig, error)
 	GetConfigCloudEvents(context.Context, *GetConfigCloudEventsRequest) (*CloudEventsConfig, error)
 	GetConfigAutomations(context.Context, *GetConfigAutomationsRequest) (*AutomationsConfig, error)
+	// 全局设置
+	GetGlobalSettings(context.Context, *GetGlobalSettingsRequest) (*GlobalSettingCategory, error)
+	ListGlobalSettings(context.Context, *ListGlobalSettingsRequest) (*ListGlobalSettingsResponse, error)
+	UpdateGlobalSettings(context.Context, *UpdateGlobalSettingsRequest) (*UpdateGlobalSettingsResponse, error)
 	// 认证鉴权
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 	ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error)
@@ -1008,6 +1043,15 @@ func (UnimplementedKnownAdminServer) GetConfigCloudEvents(context.Context, *GetC
 }
 func (UnimplementedKnownAdminServer) GetConfigAutomations(context.Context, *GetConfigAutomationsRequest) (*AutomationsConfig, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConfigAutomations not implemented")
+}
+func (UnimplementedKnownAdminServer) GetGlobalSettings(context.Context, *GetGlobalSettingsRequest) (*GlobalSettingCategory, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGlobalSettings not implemented")
+}
+func (UnimplementedKnownAdminServer) ListGlobalSettings(context.Context, *ListGlobalSettingsRequest) (*ListGlobalSettingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListGlobalSettings not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateGlobalSettings(context.Context, *UpdateGlobalSettingsRequest) (*UpdateGlobalSettingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateGlobalSettings not implemented")
 }
 func (UnimplementedKnownAdminServer) UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertAuthProviders not implemented")
@@ -1443,6 +1487,60 @@ func _KnownAdmin_GetConfigAutomations_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).GetConfigAutomations(ctx, req.(*GetConfigAutomationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_GetGlobalSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGlobalSettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetGlobalSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGlobalSettings",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetGlobalSettings(ctx, req.(*GetGlobalSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListGlobalSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListGlobalSettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListGlobalSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGlobalSettings",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListGlobalSettings(ctx, req.(*ListGlobalSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateGlobalSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateGlobalSettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateGlobalSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGlobalSettings",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateGlobalSettings(ctx, req.(*UpdateGlobalSettingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2761,6 +2859,18 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetConfigAutomations",
 			Handler:    _KnownAdmin_GetConfigAutomations_Handler,
+		},
+		{
+			MethodName: "GetGlobalSettings",
+			Handler:    _KnownAdmin_GetGlobalSettings_Handler,
+		},
+		{
+			MethodName: "ListGlobalSettings",
+			Handler:    _KnownAdmin_ListGlobalSettings_Handler,
+		},
+		{
+			MethodName: "UpdateGlobalSettings",
+			Handler:    _KnownAdmin_UpdateGlobalSettings_Handler,
 		},
 		{
 			MethodName: "UpsertAuthProviders",

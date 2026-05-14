@@ -33,8 +33,6 @@ type mfaChallenge struct {
 }
 
 const (
-	mfaChallengeTTL     = 5 * time.Minute
-	mfaMaxAttempts      = 5
 	mfaGCInterval       = 1 * time.Minute
 	mfaChallengeIDBytes = 16
 )
@@ -87,6 +85,10 @@ func generateChallengeID() (string, error) {
 }
 
 func (s *mfaChallengeStore) Create(ct mfaChallengeType, userID int, username string) (*mfaChallenge, error) {
+	return s.CreateWithTTL(5*time.Minute, ct, userID, username)
+}
+
+func (s *mfaChallengeStore) CreateWithTTL(ttl time.Duration, ct mfaChallengeType, userID int, username string) (*mfaChallenge, error) {
 	id, err := generateChallengeID()
 	if err != nil {
 		return nil, err
@@ -96,7 +98,7 @@ func (s *mfaChallengeStore) Create(ct mfaChallengeType, userID int, username str
 		ChallengeType: ct,
 		UserID:        userID,
 		Username:      username,
-		ExpiresAt:     time.Now().Add(mfaChallengeTTL),
+		ExpiresAt:     time.Now().Add(ttl),
 	}
 	s.mu.Lock()
 	s.entries[id] = c

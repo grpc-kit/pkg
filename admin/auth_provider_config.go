@@ -56,27 +56,12 @@ type oauthConfigData struct {
 	InsecureSkipVerify bool `json:"insecure_skip_verify,omitempty"`
 }
 
-// localConfigData LOCAL 配置，用于 JSON 列存储
-type localConfigData struct {
-	EnforceMfaForAllUsers bool `json:"enforce_mfa_for_all_users,omitempty"`
-}
-
 // protoToDBConfig 从 proto AuthProvider 中提取配置和敏感凭证
 // 返回 JSON 配置（不含敏感字段）和加密后的敏感凭证
 func protoToDBConfig(p *adminv1.AuthProvider, aesKey []byte) (configJSON json.RawMessage, secretEnc []byte, err error) {
 	var secret string
 
 	switch cfg := p.GetConfig().(type) {
-	case *adminv1.AuthProvider_LocalConfig:
-		lc := cfg.LocalConfig
-		data := &localConfigData{
-			EnforceMfaForAllUsers: lc.GetEnforceMfaForAllUsers(),
-		}
-		configJSON, err = json.Marshal(data)
-		if err != nil {
-			return nil, nil, fmt.Errorf("marshal local config: %w", err)
-		}
-
 	case *adminv1.AuthProvider_LdapConfig:
 		lc := cfg.LdapConfig
 		secret = lc.GetBindPassword()
@@ -193,16 +178,6 @@ func dbToProtoAuthProvider(row *lion.AuthProviders, aesKey []byte, withSecret bo
 	// 根据 type 解析 config JSON 并构建 oneof config
 	if len(row.Config) > 0 {
 		switch p.Type {
-		case adminv1.AuthProvider_LOCAL:
-			var data localConfigData
-			if err := json.Unmarshal(row.Config, &data); err != nil {
-				return nil, fmt.Errorf("unmarshal local config: %w", err)
-			}
-			lc := &adminv1.LocalAuthConfig{
-				EnforceMfaForAllUsers: data.EnforceMfaForAllUsers,
-			}
-			p.Config = &adminv1.AuthProvider_LocalConfig{LocalConfig: lc}
-
 		case adminv1.AuthProvider_LDAP:
 			var data ldapConfigData
 			if err := json.Unmarshal(row.Config, &data); err != nil {

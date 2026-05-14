@@ -655,7 +655,7 @@ func (s *socialUsers) issueAccessTokenForUser(ctx context.Context, u *lion.Users
 	// 填充 idToken 内容
 	idToken.SetSubject(strconv.Itoa(u.ID))
 	idToken.SetGroups(s.Groups)
-	idToken.SetExpiresAt(24 * 60 * 60)
+	idToken.SetExpiresAt(durationSecondsInt64(loginAccessTokenTTLFrom(s.logger, s.db)))
 	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 
 	// 生成 jwt 返回客户端

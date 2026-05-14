@@ -318,6 +318,11 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
+	if err := ensureGlobalSettingsSeeds(ctx, tx); err != nil {
+		rollback()
+		return nil, err
+	}
+
 	rootCode := seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_ROOT)
 	rootDept, err := tx.Departments.Query().
 		Where(

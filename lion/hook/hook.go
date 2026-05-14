@@ -45,6 +45,18 @@ func (f DepartmentsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.DepartmentsMutation", m)
 }
 
+// The GlobalSettingsFunc type is an adapter to allow the use of ordinary
+// function as GlobalSettings mutator.
+type GlobalSettingsFunc func(context.Context, *lion.GlobalSettingsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GlobalSettingsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.GlobalSettingsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.GlobalSettingsMutation", m)
+}
+
 // The GroupsFunc type is an adapter to allow the use of ordinary
 // function as Groups mutator.
 type GroupsFunc func(context.Context, *lion.GroupsMutation) (lion.Value, error)

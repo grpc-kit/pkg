@@ -15,6 +15,9 @@ type Credentials func(*sql.Selector)
 // Departments is the predicate function for departments builders.
 type Departments func(*sql.Selector)
 
+// GlobalSettings is the predicate function for globalsettings builders.
+type GlobalSettings func(*sql.Selector)
+
 // Groups is the predicate function for groups builders.
 type Groups func(*sql.Selector)
 

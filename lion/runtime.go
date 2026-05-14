@@ -8,6 +8,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/departments"
+	"github.com/grpc-kit/pkg/lion/globalsettings"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
 	"github.com/grpc-kit/pkg/lion/policies"
@@ -223,6 +224,87 @@ func init() {
 	departmentsDescProtected := departmentsFields[16].Descriptor()
 	// departments.DefaultProtected holds the default value on creation for the protected field.
 	departments.DefaultProtected = departmentsDescProtected.Default.(bool)
+	globalsettingsMixin := schema.GlobalSettings{}.Mixin()
+	globalsettingsMixinFields0 := globalsettingsMixin[0].Fields()
+	_ = globalsettingsMixinFields0
+	globalsettingsMixinFields1 := globalsettingsMixin[1].Fields()
+	_ = globalsettingsMixinFields1
+	globalsettingsFields := schema.GlobalSettings{}.Fields()
+	_ = globalsettingsFields
+	// globalsettingsDescCreatedAt is the schema descriptor for created_at field.
+	globalsettingsDescCreatedAt := globalsettingsMixinFields0[0].Descriptor()
+	// globalsettings.DefaultCreatedAt holds the default value on creation for the created_at field.
+	globalsettings.DefaultCreatedAt = globalsettingsDescCreatedAt.Default.(func() time.Time)
+	// globalsettingsDescUpdatedAt is the schema descriptor for updated_at field.
+	globalsettingsDescUpdatedAt := globalsettingsMixinFields0[1].Descriptor()
+	// globalsettings.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	globalsettings.DefaultUpdatedAt = globalsettingsDescUpdatedAt.Default.(func() time.Time)
+	// globalsettings.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	globalsettings.UpdateDefaultUpdatedAt = globalsettingsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// globalsettingsDescCreatedBy is the schema descriptor for created_by field.
+	globalsettingsDescCreatedBy := globalsettingsMixinFields1[0].Descriptor()
+	// globalsettings.DefaultCreatedBy holds the default value on creation for the created_by field.
+	globalsettings.DefaultCreatedBy = globalsettingsDescCreatedBy.Default.(int64)
+	// globalsettingsDescUpdatedBy is the schema descriptor for updated_by field.
+	globalsettingsDescUpdatedBy := globalsettingsMixinFields1[1].Descriptor()
+	// globalsettings.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	globalsettings.DefaultUpdatedBy = globalsettingsDescUpdatedBy.Default.(int64)
+	// globalsettingsDescCategory is the schema descriptor for category field.
+	globalsettingsDescCategory := globalsettingsFields[0].Descriptor()
+	// globalsettings.CategoryValidator is a validator for the "category" field. It is called by the builders before save.
+	globalsettings.CategoryValidator = func() func(string) error {
+		validators := globalsettingsDescCategory.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(category string) error {
+			for _, fn := range fns {
+				if err := fn(category); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// globalsettingsDescSettingKey is the schema descriptor for setting_key field.
+	globalsettingsDescSettingKey := globalsettingsFields[1].Descriptor()
+	// globalsettings.SettingKeyValidator is a validator for the "setting_key" field. It is called by the builders before save.
+	globalsettings.SettingKeyValidator = func() func(string) error {
+		validators := globalsettingsDescSettingKey.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(setting_key string) error {
+			for _, fn := range fns {
+				if err := fn(setting_key); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// globalsettingsDescSettingValue is the schema descriptor for setting_value field.
+	globalsettingsDescSettingValue := globalsettingsFields[2].Descriptor()
+	// globalsettings.DefaultSettingValue holds the default value on creation for the setting_value field.
+	globalsettings.DefaultSettingValue = globalsettingsDescSettingValue.Default.(string)
+	// globalsettingsDescValueType is the schema descriptor for value_type field.
+	globalsettingsDescValueType := globalsettingsFields[3].Descriptor()
+	// globalsettings.DefaultValueType holds the default value on creation for the value_type field.
+	globalsettings.DefaultValueType = globalsettingsDescValueType.Default.(string)
+	// globalsettings.ValueTypeValidator is a validator for the "value_type" field. It is called by the builders before save.
+	globalsettings.ValueTypeValidator = globalsettingsDescValueType.Validators[0].(func(string) error)
+	// globalsettingsDescDescription is the schema descriptor for description field.
+	globalsettingsDescDescription := globalsettingsFields[4].Descriptor()
+	// globalsettings.DefaultDescription holds the default value on creation for the description field.
+	globalsettings.DefaultDescription = globalsettingsDescDescription.Default.(string)
+	// globalsettings.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	globalsettings.DescriptionValidator = globalsettingsDescDescription.Validators[0].(func(string) error)
+	// globalsettingsDescProtected is the schema descriptor for protected field.
+	globalsettingsDescProtected := globalsettingsFields[5].Descriptor()
+	// globalsettings.DefaultProtected holds the default value on creation for the protected field.
+	globalsettings.DefaultProtected = globalsettingsDescProtected.Default.(bool)
 	groupsMixin := schema.Groups{}.Mixin()
 	groupsMixinFields0 := groupsMixin[0].Fields()
 	_ = groupsMixinFields0
