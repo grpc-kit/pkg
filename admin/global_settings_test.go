@@ -13,10 +13,15 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/enttest"
 	"github.com/grpc-kit/pkg/lion/globalsettings"
+	"github.com/grpc-kit/pkg/rpc"
 	_ "github.com/mattn/go-sqlite3"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+func contextWithRole(ctx context.Context, roleCode string) context.Context {
+	return rpc.ContextWithGroups(ctx, []string{roleCode})
+}
 
 func TestGlobalSettingsRegistryIncludesInitialSecurityKeys(t *testing.T) {
 	tests := []struct {
@@ -125,6 +130,7 @@ func TestGetGlobalSettingsReturnsSecurityCategory(t *testing.T) {
 	if _, err := a.CreateDatabaseInitialize(ctx, &adminv1.CreateDatabaseInitializeRequest{}); err != nil {
 		t.Fatalf("CreateDatabaseInitialize failed: %v", err)
 	}
+	ctx = contextWithRole(ctx, seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN))
 
 	resp, err := a.GetGlobalSettings(ctx, &adminv1.GetGlobalSettingsRequest{Category: globalSettingsCategorySecurity})
 	if err != nil {
@@ -138,6 +144,22 @@ func TestGetGlobalSettingsReturnsSecurityCategory(t *testing.T) {
 	}
 }
 
+func TestGetGlobalSettingsRequiresRole(t *testing.T) {
+	ctx := context.Background()
+	db := enttest.Open(t, "sqlite3", "file:get-global-settings-permission?mode=memory&cache=shared&_fk=1")
+	defer db.Close()
+
+	a := New(WithLionClient(db), WithAESKey([]byte("0123456789abcdef0123456789abcdef")))
+	if _, err := a.CreateDatabaseInitialize(ctx, &adminv1.CreateDatabaseInitializeRequest{}); err != nil {
+		t.Fatalf("CreateDatabaseInitialize failed: %v", err)
+	}
+
+	_, err := a.GetGlobalSettings(ctx, &adminv1.GetGlobalSettingsRequest{Category: globalSettingsCategorySecurity})
+	if status.Code(err) != codes.PermissionDenied {
+		t.Fatalf("unexpected error code: got=%s want=%s err=%v", status.Code(err), codes.PermissionDenied, err)
+	}
+}
+
 func TestListGlobalSettingsReturnsRegisteredCategories(t *testing.T) {
 	ctx := context.Background()
 	db := enttest.Open(t, "sqlite3", "file:list-global-settings-rpc?mode=memory&cache=shared&_fk=1")
@@ -147,6 +169,7 @@ func TestListGlobalSettingsReturnsRegisteredCategories(t *testing.T) {
 	if _, err := a.CreateDatabaseInitialize(ctx, &adminv1.CreateDatabaseInitializeRequest{}); err != nil {
 		t.Fatalf("CreateDatabaseInitialize failed: %v", err)
 	}
+	ctx = contextWithRole(ctx, seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN))
 
 	resp, err := a.ListGlobalSettings(ctx, &adminv1.ListGlobalSettingsRequest{})
 	if err != nil {
@@ -169,6 +192,7 @@ func TestUpdateGlobalSettingsRejectsUnknownKeyAndRollsBack(t *testing.T) {
 	if _, err := a.CreateDatabaseInitialize(ctx, &adminv1.CreateDatabaseInitializeRequest{}); err != nil {
 		t.Fatalf("CreateDatabaseInitialize failed: %v", err)
 	}
+	ctx = rpc.ContextWithUserID(contextWithRole(ctx, seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)), 1001)
 
 	_, err := a.UpdateGlobalSettings(ctx, &adminv1.UpdateGlobalSettingsRequest{
 		Category: globalSettingsCategorySecurity,
@@ -204,6 +228,7 @@ func TestUpdateGlobalSettingsPersistsValidatedValues(t *testing.T) {
 	if _, err := a.CreateDatabaseInitialize(ctx, &adminv1.CreateDatabaseInitializeRequest{}); err != nil {
 		t.Fatalf("CreateDatabaseInitialize failed: %v", err)
 	}
+	ctx = rpc.ContextWithUserID(contextWithRole(ctx, seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)), 1002)
 
 	resp, err := a.UpdateGlobalSettings(ctx, &adminv1.UpdateGlobalSettingsRequest{
 		Category: globalSettingsCategorySecurity,
@@ -231,6 +256,31 @@ func TestUpdateGlobalSettingsPersistsValidatedValues(t *testing.T) {
 	if row.SettingValue != "9" {
 		t.Fatalf("unexpected updated value: got=%q want=%q", row.SettingValue, "9")
 	}
+	if row.UpdatedBy != 1002 {
+		t.Fatalf("unexpected updated_by: got=%d want=%d", row.UpdatedBy, 1002)
+	}
+}
+
+func TestUpdateGlobalSettingsRequiresSuperadminRole(t *testing.T) {
+	ctx := context.Background()
+	db := enttest.Open(t, "sqlite3", "file:update-global-settings-permission?mode=memory&cache=shared&_fk=1")
+	defer db.Close()
+
+	a := New(WithLionClient(db), WithAESKey([]byte("0123456789abcdef0123456789abcdef")))
+	if _, err := a.CreateDatabaseInitialize(ctx, &adminv1.CreateDatabaseInitializeRequest{}); err != nil {
+		t.Fatalf("CreateDatabaseInitialize failed: %v", err)
+	}
+	ctx = rpc.ContextWithUserID(contextWithRole(ctx, "auditor"), 1003)
+
+	_, err := a.UpdateGlobalSettings(ctx, &adminv1.UpdateGlobalSettingsRequest{
+		Category: globalSettingsCategorySecurity,
+		Updates: []*adminv1.UpdateGlobalSetting{
+			{SettingKey: globalSettingKeyMFAMaxVerifyAttempts, SettingValue: "9"},
+		},
+	})
+	if status.Code(err) != codes.PermissionDenied {
+		t.Fatalf("unexpected error code: got=%s want=%s err=%v", status.Code(err), codes.PermissionDenied, err)
+	}
 }
 
 func TestUpdateGlobalSettingsRejectsOutOfRangeValue(t *testing.T) {
@@ -242,6 +292,7 @@ func TestUpdateGlobalSettingsRejectsOutOfRangeValue(t *testing.T) {
 	if _, err := a.CreateDatabaseInitialize(ctx, &adminv1.CreateDatabaseInitializeRequest{}); err != nil {
 		t.Fatalf("CreateDatabaseInitialize failed: %v", err)
 	}
+	ctx = rpc.ContextWithUserID(contextWithRole(ctx, seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)), 1004)
 
 	_, err := a.UpdateGlobalSettings(ctx, &adminv1.UpdateGlobalSettingsRequest{
 		Category: globalSettingsCategorySecurity,

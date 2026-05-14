@@ -12,10 +12,15 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/globalsettings"
+	"github.com/grpc-kit/pkg/lion/roles"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (a *KnownAdminAPI) GetGlobalSettings(ctx context.Context, req *adminv1.GetGlobalSettingsRequest) (*adminv1.GlobalSettingCategory, error) {
+	if err := a.checkGlobalSettingsReadPermission(ctx); err != nil {
+		return nil, err
+	}
+
 	category := strings.TrimSpace(req.GetCategory())
 	if category == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("category is required")
@@ -30,6 +35,10 @@ func (a *KnownAdminAPI) GetGlobalSettings(ctx context.Context, req *adminv1.GetG
 
 func (a *KnownAdminAPI) ListGlobalSettings(ctx context.Context, req *adminv1.ListGlobalSettingsRequest) (*adminv1.ListGlobalSettingsResponse, error) {
 	_ = req
+	if err := a.checkGlobalSettingsReadPermission(ctx); err != nil {
+		return nil, err
+	}
+
 	result := &adminv1.ListGlobalSettingsResponse{Categories: make([]*adminv1.GlobalSettingCategory, 0, len(globalSettingRegistry))}
 
 	categories := make([]string, 0, len(globalSettingRegistry))
@@ -65,10 +74,18 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 	if err != nil {
 		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
 	}
+	if err := a.checkGlobalSettingsWritePermission(ctx, db); err != nil {
+		return nil, err
+	}
 
 	validated, err := validateGlobalSettingsUpdates(req)
 	if err != nil {
 		return nil, err
+	}
+
+	var actor int64
+	if userID, userErr := GetUserID(ctx); userErr == nil {
+		actor = userID
 	}
 
 	tx, err := db.Tx(ctx)
@@ -89,24 +106,30 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 		}
 
 		if lion.IsNotFound(queryErr) {
-			if _, createErr := tx.GlobalSettings.Create().
+			create := tx.GlobalSettings.Create().
 				SetCategory(category).
 				SetSettingKey(item.settingKey).
 				SetSettingValue(item.settingValue).
 				SetValueType(string(item.spec.ValueType)).
 				SetDescription(item.spec.Description).
-				SetProtected(item.spec.Protected).
-				Save(ctx); createErr != nil {
+				SetProtected(item.spec.Protected)
+			if actor != 0 {
+				create = create.SetCreatedBy(actor).SetUpdatedBy(actor)
+			}
+			if _, createErr := create.Save(ctx); createErr != nil {
 				return nil, errs.Internal(ctx).WithMessage(createErr.Error())
 			}
 			continue
 		}
 
-		if _, updateErr := tx.GlobalSettings.Update().
+		update := tx.GlobalSettings.Update().
 			Where(globalsettings.IDEQ(existing.ID)).
 			SetSettingValue(item.settingValue).
-			SetDescription(item.spec.Description).
-			Save(ctx); updateErr != nil {
+			SetDescription(item.spec.Description)
+		if actor != 0 {
+			update = update.SetUpdatedBy(actor)
+		}
+		if _, updateErr := update.Save(ctx); updateErr != nil {
 			return nil, errs.Internal(ctx).WithMessage(updateErr.Error())
 		}
 	}
@@ -120,6 +143,43 @@ func (a *KnownAdminAPI) UpdateGlobalSettings(ctx context.Context, req *adminv1.U
 		return nil, err
 	}
 	return &adminv1.UpdateGlobalSettingsResponse{Category: categoryResp}, nil
+}
+
+func (a *KnownAdminAPI) checkGlobalSettingsReadPermission(ctx context.Context) error {
+	userRoleIDs, err := a.getUserRoleID(ctx)
+	if err != nil {
+		return err
+	}
+	if len(userRoleIDs) == 0 {
+		return errs.PermissionDenied(ctx).WithMessage("user has no roles")
+	}
+	return nil
+}
+
+func (a *KnownAdminAPI) checkGlobalSettingsWritePermission(ctx context.Context, db *lion.Client) error {
+	userRoleIDs, err := a.getUserRoleID(ctx)
+	if err != nil {
+		return err
+	}
+	if len(userRoleIDs) == 0 {
+		return errs.PermissionDenied(ctx).WithMessage("user has no roles")
+	}
+
+	superadminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)
+	hasSuperadminRole, err := db.Roles.Query().
+		Where(
+			roles.IDIn(userRoleIDs...),
+			roles.CodeEQ(superadminCode),
+		).
+		Exist(ctx)
+	if err != nil {
+		return errs.Internal(ctx).WithMessage(err.Error())
+	}
+	if !hasSuperadminRole {
+		return errs.PermissionDenied(ctx).WithMessage("global settings write requires superadmin role")
+	}
+
+	return nil
 }
 
 type validatedGlobalSettingUpdate struct {
