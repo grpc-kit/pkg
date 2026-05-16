@@ -24,18 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KnownAdminClient interface {
 	// 本地配置
-	GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*LocalConfig, error)
-	GetConfigServices(ctx context.Context, in *GetConfigServicesRequest, opts ...grpc.CallOption) (*ServicesConfig, error)
-	GetConfigDiscover(ctx context.Context, in *GetConfigDiscoverRequest, opts ...grpc.CallOption) (*DiscoverConfig, error)
-	GetConfigSecurity(ctx context.Context, in *GetConfigSecurityRequest, opts ...grpc.CallOption) (*SecurityConfig, error)
-	GetConfigDatabase(ctx context.Context, in *GetConfigDatabaseRequest, opts ...grpc.CallOption) (*DatabaseConfig, error)
-	GetConfigCachebox(ctx context.Context, in *GetConfigCacheboxRequest, opts ...grpc.CallOption) (*CacheboxConfig, error)
-	GetConfigDebugger(ctx context.Context, in *GetConfigDebuggerRequest, opts ...grpc.CallOption) (*DebuggerConfig, error)
-	GetConfigObjstore(ctx context.Context, in *GetConfigObjstoreRequest, opts ...grpc.CallOption) (*ObjstoreConfig, error)
-	GetConfigFrontend(ctx context.Context, in *GetConfigFrontendRequest, opts ...grpc.CallOption) (*FrontendConfig, error)
-	GetConfigObservables(ctx context.Context, in *GetConfigObservablesRequest, opts ...grpc.CallOption) (*ObservablesConfig, error)
-	GetConfigCloudEvents(ctx context.Context, in *GetConfigCloudEventsRequest, opts ...grpc.CallOption) (*CloudEventsConfig, error)
-	GetConfigAutomations(ctx context.Context, in *GetConfigAutomationsRequest, opts ...grpc.CallOption) (*AutomationsConfig, error)
+	ListLocalConfigs(ctx context.Context, in *ListLocalConfigsRequest, opts ...grpc.CallOption) (*ListLocalConfigsResponse, error)
+	GetLocalConfigs(ctx context.Context, in *GetLocalConfigsRequest, opts ...grpc.CallOption) (*LocalConfigs, error)
 	// 全局设置
 	GetGlobalSettings(ctx context.Context, in *GetGlobalSettingsRequest, opts ...grpc.CallOption) (*GlobalSettingCategory, error)
 	ListGlobalSettings(ctx context.Context, in *ListGlobalSettingsRequest, opts ...grpc.CallOption) (*ListGlobalSettingsResponse, error)
@@ -133,108 +123,18 @@ func NewKnownAdminClient(cc grpc.ClientConnInterface) KnownAdminClient {
 	return &knownAdminClient{cc}
 }
 
-func (c *knownAdminClient) GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*LocalConfig, error) {
-	out := new(LocalConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfig", in, out, opts...)
+func (c *knownAdminClient) ListLocalConfigs(ctx context.Context, in *ListLocalConfigsRequest, opts ...grpc.CallOption) (*ListLocalConfigsResponse, error) {
+	out := new(ListLocalConfigsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLocalConfigs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) GetConfigServices(ctx context.Context, in *GetConfigServicesRequest, opts ...grpc.CallOption) (*ServicesConfig, error) {
-	out := new(ServicesConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigServices", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigDiscover(ctx context.Context, in *GetConfigDiscoverRequest, opts ...grpc.CallOption) (*DiscoverConfig, error) {
-	out := new(DiscoverConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDiscover", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigSecurity(ctx context.Context, in *GetConfigSecurityRequest, opts ...grpc.CallOption) (*SecurityConfig, error) {
-	out := new(SecurityConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigSecurity", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigDatabase(ctx context.Context, in *GetConfigDatabaseRequest, opts ...grpc.CallOption) (*DatabaseConfig, error) {
-	out := new(DatabaseConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDatabase", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigCachebox(ctx context.Context, in *GetConfigCacheboxRequest, opts ...grpc.CallOption) (*CacheboxConfig, error) {
-	out := new(CacheboxConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigCachebox", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigDebugger(ctx context.Context, in *GetConfigDebuggerRequest, opts ...grpc.CallOption) (*DebuggerConfig, error) {
-	out := new(DebuggerConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDebugger", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigObjstore(ctx context.Context, in *GetConfigObjstoreRequest, opts ...grpc.CallOption) (*ObjstoreConfig, error) {
-	out := new(ObjstoreConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigObjstore", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigFrontend(ctx context.Context, in *GetConfigFrontendRequest, opts ...grpc.CallOption) (*FrontendConfig, error) {
-	out := new(FrontendConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigFrontend", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigObservables(ctx context.Context, in *GetConfigObservablesRequest, opts ...grpc.CallOption) (*ObservablesConfig, error) {
-	out := new(ObservablesConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigObservables", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigCloudEvents(ctx context.Context, in *GetConfigCloudEventsRequest, opts ...grpc.CallOption) (*CloudEventsConfig, error) {
-	out := new(CloudEventsConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigCloudEvents", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigAutomations(ctx context.Context, in *GetConfigAutomationsRequest, opts ...grpc.CallOption) (*AutomationsConfig, error) {
-	out := new(AutomationsConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigAutomations", in, out, opts...)
+func (c *knownAdminClient) GetLocalConfigs(ctx context.Context, in *GetLocalConfigsRequest, opts ...grpc.CallOption) (*LocalConfigs, error) {
+	out := new(LocalConfigs)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -903,18 +803,8 @@ func (c *knownAdminClient) CreateDatabaseInitialize(ctx context.Context, in *Cre
 // for forward compatibility
 type KnownAdminServer interface {
 	// 本地配置
-	GetConfig(context.Context, *GetConfigRequest) (*LocalConfig, error)
-	GetConfigServices(context.Context, *GetConfigServicesRequest) (*ServicesConfig, error)
-	GetConfigDiscover(context.Context, *GetConfigDiscoverRequest) (*DiscoverConfig, error)
-	GetConfigSecurity(context.Context, *GetConfigSecurityRequest) (*SecurityConfig, error)
-	GetConfigDatabase(context.Context, *GetConfigDatabaseRequest) (*DatabaseConfig, error)
-	GetConfigCachebox(context.Context, *GetConfigCacheboxRequest) (*CacheboxConfig, error)
-	GetConfigDebugger(context.Context, *GetConfigDebuggerRequest) (*DebuggerConfig, error)
-	GetConfigObjstore(context.Context, *GetConfigObjstoreRequest) (*ObjstoreConfig, error)
-	GetConfigFrontend(context.Context, *GetConfigFrontendRequest) (*FrontendConfig, error)
-	GetConfigObservables(context.Context, *GetConfigObservablesRequest) (*ObservablesConfig, error)
-	GetConfigCloudEvents(context.Context, *GetConfigCloudEventsRequest) (*CloudEventsConfig, error)
-	GetConfigAutomations(context.Context, *GetConfigAutomationsRequest) (*AutomationsConfig, error)
+	ListLocalConfigs(context.Context, *ListLocalConfigsRequest) (*ListLocalConfigsResponse, error)
+	GetLocalConfigs(context.Context, *GetLocalConfigsRequest) (*LocalConfigs, error)
 	// 全局设置
 	GetGlobalSettings(context.Context, *GetGlobalSettingsRequest) (*GlobalSettingCategory, error)
 	ListGlobalSettings(context.Context, *ListGlobalSettingsRequest) (*ListGlobalSettingsResponse, error)
@@ -1008,41 +898,11 @@ type KnownAdminServer interface {
 type UnimplementedKnownAdminServer struct {
 }
 
-func (UnimplementedKnownAdminServer) GetConfig(context.Context, *GetConfigRequest) (*LocalConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
+func (UnimplementedKnownAdminServer) ListLocalConfigs(context.Context, *ListLocalConfigsRequest) (*ListLocalConfigsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListLocalConfigs not implemented")
 }
-func (UnimplementedKnownAdminServer) GetConfigServices(context.Context, *GetConfigServicesRequest) (*ServicesConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigServices not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigDiscover(context.Context, *GetConfigDiscoverRequest) (*DiscoverConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigDiscover not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigSecurity(context.Context, *GetConfigSecurityRequest) (*SecurityConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigSecurity not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigDatabase(context.Context, *GetConfigDatabaseRequest) (*DatabaseConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigDatabase not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigCachebox(context.Context, *GetConfigCacheboxRequest) (*CacheboxConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigCachebox not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigDebugger(context.Context, *GetConfigDebuggerRequest) (*DebuggerConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigDebugger not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigObjstore(context.Context, *GetConfigObjstoreRequest) (*ObjstoreConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigObjstore not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigFrontend(context.Context, *GetConfigFrontendRequest) (*FrontendConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigFrontend not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigObservables(context.Context, *GetConfigObservablesRequest) (*ObservablesConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigObservables not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigCloudEvents(context.Context, *GetConfigCloudEventsRequest) (*CloudEventsConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigCloudEvents not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigAutomations(context.Context, *GetConfigAutomationsRequest) (*AutomationsConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigAutomations not implemented")
+func (UnimplementedKnownAdminServer) GetLocalConfigs(context.Context, *GetLocalConfigsRequest) (*LocalConfigs, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLocalConfigs not implemented")
 }
 func (UnimplementedKnownAdminServer) GetGlobalSettings(context.Context, *GetGlobalSettingsRequest) (*GlobalSettingCategory, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGlobalSettings not implemented")
@@ -1275,218 +1135,38 @@ func RegisterKnownAdminServer(s grpc.ServiceRegistrar, srv KnownAdminServer) {
 	s.RegisterService(&KnownAdmin_ServiceDesc, srv)
 }
 
-func _KnownAdmin_GetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigRequest)
+func _KnownAdmin_ListLocalConfigs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListLocalConfigsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfig(ctx, in)
+		return srv.(KnownAdminServer).ListLocalConfigs(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfig",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLocalConfigs",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfig(ctx, req.(*GetConfigRequest))
+		return srv.(KnownAdminServer).ListLocalConfigs(ctx, req.(*ListLocalConfigsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_GetConfigServices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigServicesRequest)
+func _KnownAdmin_GetLocalConfigs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLocalConfigsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigServices(ctx, in)
+		return srv.(KnownAdminServer).GetLocalConfigs(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigServices",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigs",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigServices(ctx, req.(*GetConfigServicesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigDiscover_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigDiscoverRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigDiscover(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDiscover",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigDiscover(ctx, req.(*GetConfigDiscoverRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigSecurity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigSecurityRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigSecurity(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigSecurity",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigSecurity(ctx, req.(*GetConfigSecurityRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigDatabase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigDatabaseRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigDatabase(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDatabase",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigDatabase(ctx, req.(*GetConfigDatabaseRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigCachebox_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigCacheboxRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigCachebox(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigCachebox",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigCachebox(ctx, req.(*GetConfigCacheboxRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigDebugger_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigDebuggerRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigDebugger(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDebugger",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigDebugger(ctx, req.(*GetConfigDebuggerRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigObjstore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigObjstoreRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigObjstore(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigObjstore",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigObjstore(ctx, req.(*GetConfigObjstoreRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigFrontend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigFrontendRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigFrontend(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigFrontend",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigFrontend(ctx, req.(*GetConfigFrontendRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigObservables_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigObservablesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigObservables(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigObservables",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigObservables(ctx, req.(*GetConfigObservablesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigCloudEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigCloudEventsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigCloudEvents(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigCloudEvents",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigCloudEvents(ctx, req.(*GetConfigCloudEventsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigAutomations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigAutomationsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigAutomations(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigAutomations",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigAutomations(ctx, req.(*GetConfigAutomationsRequest))
+		return srv.(KnownAdminServer).GetLocalConfigs(ctx, req.(*GetLocalConfigsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2813,52 +2493,12 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*KnownAdminServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetConfig",
-			Handler:    _KnownAdmin_GetConfig_Handler,
+			MethodName: "ListLocalConfigs",
+			Handler:    _KnownAdmin_ListLocalConfigs_Handler,
 		},
 		{
-			MethodName: "GetConfigServices",
-			Handler:    _KnownAdmin_GetConfigServices_Handler,
-		},
-		{
-			MethodName: "GetConfigDiscover",
-			Handler:    _KnownAdmin_GetConfigDiscover_Handler,
-		},
-		{
-			MethodName: "GetConfigSecurity",
-			Handler:    _KnownAdmin_GetConfigSecurity_Handler,
-		},
-		{
-			MethodName: "GetConfigDatabase",
-			Handler:    _KnownAdmin_GetConfigDatabase_Handler,
-		},
-		{
-			MethodName: "GetConfigCachebox",
-			Handler:    _KnownAdmin_GetConfigCachebox_Handler,
-		},
-		{
-			MethodName: "GetConfigDebugger",
-			Handler:    _KnownAdmin_GetConfigDebugger_Handler,
-		},
-		{
-			MethodName: "GetConfigObjstore",
-			Handler:    _KnownAdmin_GetConfigObjstore_Handler,
-		},
-		{
-			MethodName: "GetConfigFrontend",
-			Handler:    _KnownAdmin_GetConfigFrontend_Handler,
-		},
-		{
-			MethodName: "GetConfigObservables",
-			Handler:    _KnownAdmin_GetConfigObservables_Handler,
-		},
-		{
-			MethodName: "GetConfigCloudEvents",
-			Handler:    _KnownAdmin_GetConfigCloudEvents_Handler,
-		},
-		{
-			MethodName: "GetConfigAutomations",
-			Handler:    _KnownAdmin_GetConfigAutomations_Handler,
+			MethodName: "GetLocalConfigs",
+			Handler:    _KnownAdmin_GetLocalConfigs_Handler,
 		},
 		{
 			MethodName: "GetGlobalSettings",

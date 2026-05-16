@@ -9,37 +9,17 @@ http:
     body: "*"
 
     # 本地配置
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfig
-    get: "/builtin/admin/api/v1/config"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigServices
-    get: "/builtin/admin/api/v1/config/services"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigDiscover
-    get: "/builtin/admin/api/v1/config/discover"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigSecurity
-    get: "/builtin/admin/api/v1/config/security"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigDatabase
-    get: "/builtin/admin/api/v1/config/database"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigCachebox
-    get: "/builtin/admin/api/v1/config/cachebox"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigDebugger
-    get: "/builtin/admin/api/v1/config/debugger"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigObjstore
-    get: "/builtin/admin/api/v1/config/objstore"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigFrontend
-    get: "/builtin/admin/api/v1/config/frontend"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigObservables
-    get: "/builtin/admin/api/v1/config/observables"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigCloudEvents
-    get: "/builtin/admin/api/v1/config/cloudevents"
-  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigAutomations
-    get: "/builtin/admin/api/v1/config/automations"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListLocalConfigs
+    get: "/builtin/admin/api/v1/local/configs"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetLocalConfigs
+    get: "/builtin/admin/api/v1/local/configs/{name}"
 
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetGlobalSettings
-    get: "/builtin/admin/api/v1/global-settings/{category}"
+    get: "/builtin/admin/api/v1/global/settings/{category}"
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListGlobalSettings
-    get: "/builtin/admin/api/v1/global-settings"
+    get: "/builtin/admin/api/v1/global/settings"
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGlobalSettings
-    post: "/builtin/admin/api/v1/global-settings/{category}"
+    patch: "/builtin/admin/api/v1/global/settings/{category}"
     body: "updates"
 
     # 认证鉴权

@@ -243,26 +243,26 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfig
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListLocalConfigs
       option:
         tags:
           - "本地配置"
-        summary: "获取本地配置"
-        description: "接口格式：/builtin/admin/api/v1/config。返回本地运行配置快照。"
+        summary: "本地配置模块列表"
+        description: "接口格式：/builtin/admin/api/v1/local/configs。返回可查询模块及其启用状态。"
         responses:
           "200":
             examples:
-              "application/json": '{"services":{"name":"known-admin","enabled":true},"discover":{"name":"nacos","enabled":true},"security":{"name":"security","enabled":true},"database":{"name":"postgres","enabled":true},"frontend":{"name":"builtin-admin","enabled":true}}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetConfigSecurity
+              "application/json": '{"configs":[{"name":"services","enabled":true},{"name":"security","enabled":true},{"name":"database","enabled":false}]}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetLocalConfigs
       option:
         tags:
           - "本地配置"
-        summary: "获取安全配置"
-        description: "接口格式：/builtin/admin/api/v1/config/security。返回安全配置快照，敏感字段可能被脱敏。"
+        summary: "按模块获取本地配置"
+        description: "接口格式：/builtin/admin/api/v1/local/configs/{name}。按模块返回对应配置快照。"
         responses:
           "200":
             examples:
-              "application/json": '{"name":"security","enabled":true,"authentication":{"insecure_rpcs":["grpc.health.v1.Health/Check"],"http_users":[{"user_id":"1","username":"admin","groups":["root"],"tenant":"default"}]}}'
+              "application/json": '{"security":{"name":"security","enabled":true,"authentication":{"insecure_rpcs":["grpc.health.v1.Health/Check"],"http_users":[{"user_id":"1","username":"admin","groups":["root"],"tenant":"default"}]}}}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicies
       option:
         tags:
