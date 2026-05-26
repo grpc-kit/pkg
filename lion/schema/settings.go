@@ -54,6 +54,6 @@ func (GlobalSettings) Indexes() []ent.Index {
 // Annotations 自定义表名
 func (GlobalSettings) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "lion_global_settings"},
+		entsql.Annotation{Table: "lion_settings"},
 	}
 }

@@ -34,7 +34,7 @@ const (
 	// FieldProtected holds the string denoting the protected field in the database.
 	FieldProtected = "protected"
 	// Table holds the table name of the globalsettings in the database.
-	Table = "lion_global_settings"
+	Table = "lion_settings"
 )
 
 // Columns holds all SQL columns for globalsettings fields.
