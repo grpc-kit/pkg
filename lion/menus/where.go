@@ -110,11 +110,6 @@ func SortOrder(v int) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldSortOrder, v))
 }
 
-// SurfaceMask applies equality check predicate on the "surface_mask" field. It's identical to SurfaceMaskEQ.
-func SurfaceMask(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldSurfaceMask, v))
-}
-
 // Visibility applies equality check predicate on the "visibility" field. It's identical to VisibilityEQ.
 func Visibility(v string) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldVisibility, v))
@@ -713,46 +708,6 @@ func SortOrderLT(v int) predicate.Menus {
 // SortOrderLTE applies the LTE predicate on the "sort_order" field.
 func SortOrderLTE(v int) predicate.Menus {
 	return predicate.Menus(sql.FieldLTE(FieldSortOrder, v))
-}
-
-// SurfaceMaskEQ applies the EQ predicate on the "surface_mask" field.
-func SurfaceMaskEQ(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldEQ(FieldSurfaceMask, v))
-}
-
-// SurfaceMaskNEQ applies the NEQ predicate on the "surface_mask" field.
-func SurfaceMaskNEQ(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldNEQ(FieldSurfaceMask, v))
-}
-
-// SurfaceMaskIn applies the In predicate on the "surface_mask" field.
-func SurfaceMaskIn(vs ...int) predicate.Menus {
-	return predicate.Menus(sql.FieldIn(FieldSurfaceMask, vs...))
-}
-
-// SurfaceMaskNotIn applies the NotIn predicate on the "surface_mask" field.
-func SurfaceMaskNotIn(vs ...int) predicate.Menus {
-	return predicate.Menus(sql.FieldNotIn(FieldSurfaceMask, vs...))
-}
-
-// SurfaceMaskGT applies the GT predicate on the "surface_mask" field.
-func SurfaceMaskGT(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldGT(FieldSurfaceMask, v))
-}
-
-// SurfaceMaskGTE applies the GTE predicate on the "surface_mask" field.
-func SurfaceMaskGTE(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldGTE(FieldSurfaceMask, v))
-}
-
-// SurfaceMaskLT applies the LT predicate on the "surface_mask" field.
-func SurfaceMaskLT(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldLT(FieldSurfaceMask, v))
-}
-
-// SurfaceMaskLTE applies the LTE predicate on the "surface_mask" field.
-func SurfaceMaskLTE(v int) predicate.Menus {
-	return predicate.Menus(sql.FieldLTE(FieldSurfaceMask, v))
 }
 
 // VisibilityEQ applies the EQ predicate on the "visibility" field.

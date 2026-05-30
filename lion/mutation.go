@@ -8390,8 +8390,6 @@ type MenusMutation struct {
 	icon                   *string
 	sort_order             *int
 	addsort_order          *int
-	surface_mask           *int
-	addsurface_mask        *int
 	visibility             *string
 	menu_status            *string
 	metadata               *map[string]interface{}
@@ -9007,62 +9005,6 @@ func (m *MenusMutation) ResetSortOrder() {
 	m.addsort_order = nil
 }
 
-// SetSurfaceMask sets the "surface_mask" field.
-func (m *MenusMutation) SetSurfaceMask(i int) {
-	m.surface_mask = &i
-	m.addsurface_mask = nil
-}
-
-// SurfaceMask returns the value of the "surface_mask" field in the mutation.
-func (m *MenusMutation) SurfaceMask() (r int, exists bool) {
-	v := m.surface_mask
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSurfaceMask returns the old "surface_mask" field's value of the Menus entity.
-// If the Menus object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MenusMutation) OldSurfaceMask(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSurfaceMask is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSurfaceMask requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSurfaceMask: %w", err)
-	}
-	return oldValue.SurfaceMask, nil
-}
-
-// AddSurfaceMask adds i to the "surface_mask" field.
-func (m *MenusMutation) AddSurfaceMask(i int) {
-	if m.addsurface_mask != nil {
-		*m.addsurface_mask += i
-	} else {
-		m.addsurface_mask = &i
-	}
-}
-
-// AddedSurfaceMask returns the value that was added to the "surface_mask" field in this mutation.
-func (m *MenusMutation) AddedSurfaceMask() (r int, exists bool) {
-	v := m.addsurface_mask
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSurfaceMask resets all changes to the "surface_mask" field.
-func (m *MenusMutation) ResetSurfaceMask() {
-	m.surface_mask = nil
-	m.addsurface_mask = nil
-}
-
 // SetVisibility sets the "visibility" field.
 func (m *MenusMutation) SetVisibility(s string) {
 	m.visibility = &s
@@ -9308,7 +9250,7 @@ func (m *MenusMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MenusMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 15)
 	if m.created_at != nil {
 		fields = append(fields, menus.FieldCreatedAt)
 	}
@@ -9341,9 +9283,6 @@ func (m *MenusMutation) Fields() []string {
 	}
 	if m.sort_order != nil {
 		fields = append(fields, menus.FieldSortOrder)
-	}
-	if m.surface_mask != nil {
-		fields = append(fields, menus.FieldSurfaceMask)
 	}
 	if m.visibility != nil {
 		fields = append(fields, menus.FieldVisibility)
@@ -9387,8 +9326,6 @@ func (m *MenusMutation) Field(name string) (ent.Value, bool) {
 		return m.Icon()
 	case menus.FieldSortOrder:
 		return m.SortOrder()
-	case menus.FieldSurfaceMask:
-		return m.SurfaceMask()
 	case menus.FieldVisibility:
 		return m.Visibility()
 	case menus.FieldMenuStatus:
@@ -9428,8 +9365,6 @@ func (m *MenusMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldIcon(ctx)
 	case menus.FieldSortOrder:
 		return m.OldSortOrder(ctx)
-	case menus.FieldSurfaceMask:
-		return m.OldSurfaceMask(ctx)
 	case menus.FieldVisibility:
 		return m.OldVisibility(ctx)
 	case menus.FieldMenuStatus:
@@ -9524,13 +9459,6 @@ func (m *MenusMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSortOrder(v)
 		return nil
-	case menus.FieldSurfaceMask:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSurfaceMask(v)
-		return nil
 	case menus.FieldVisibility:
 		v, ok := value.(string)
 		if !ok {
@@ -9579,9 +9507,6 @@ func (m *MenusMutation) AddedFields() []string {
 	if m.addsort_order != nil {
 		fields = append(fields, menus.FieldSortOrder)
 	}
-	if m.addsurface_mask != nil {
-		fields = append(fields, menus.FieldSurfaceMask)
-	}
 	return fields
 }
 
@@ -9598,8 +9523,6 @@ func (m *MenusMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedParentID()
 	case menus.FieldSortOrder:
 		return m.AddedSortOrder()
-	case menus.FieldSurfaceMask:
-		return m.AddedSurfaceMask()
 	}
 	return nil, false
 }
@@ -9636,13 +9559,6 @@ func (m *MenusMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddSortOrder(v)
-		return nil
-	case menus.FieldSurfaceMask:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSurfaceMask(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Menus numeric field %s", name)
@@ -9724,9 +9640,6 @@ func (m *MenusMutation) ResetField(name string) error {
 		return nil
 	case menus.FieldSortOrder:
 		m.ResetSortOrder()
-		return nil
-	case menus.FieldSurfaceMask:
-		m.ResetSurfaceMask()
 		return nil
 	case menus.FieldVisibility:
 		m.ResetVisibility()

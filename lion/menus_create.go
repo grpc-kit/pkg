@@ -167,20 +167,6 @@ func (_c *MenusCreate) SetNillableSortOrder(v *int) *MenusCreate {
 	return _c
 }
 
-// SetSurfaceMask sets the "surface_mask" field.
-func (_c *MenusCreate) SetSurfaceMask(v int) *MenusCreate {
-	_c.mutation.SetSurfaceMask(v)
-	return _c
-}
-
-// SetNillableSurfaceMask sets the "surface_mask" field if the given value is not nil.
-func (_c *MenusCreate) SetNillableSurfaceMask(v *int) *MenusCreate {
-	if v != nil {
-		_c.SetSurfaceMask(*v)
-	}
-	return _c
-}
-
 // SetVisibility sets the "visibility" field.
 func (_c *MenusCreate) SetVisibility(v string) *MenusCreate {
 	_c.mutation.SetVisibility(v)
@@ -319,10 +305,6 @@ func (_c *MenusCreate) defaults() {
 		v := menus.DefaultSortOrder
 		_c.mutation.SetSortOrder(v)
 	}
-	if _, ok := _c.mutation.SurfaceMask(); !ok {
-		v := menus.DefaultSurfaceMask
-		_c.mutation.SetSurfaceMask(v)
-	}
 	if _, ok := _c.mutation.Visibility(); !ok {
 		v := menus.DefaultVisibility
 		_c.mutation.SetVisibility(v)
@@ -390,9 +372,6 @@ func (_c *MenusCreate) check() error {
 	}
 	if _, ok := _c.mutation.SortOrder(); !ok {
 		return &ValidationError{Name: "sort_order", err: errors.New(`lion: missing required field "Menus.sort_order"`)}
-	}
-	if _, ok := _c.mutation.SurfaceMask(); !ok {
-		return &ValidationError{Name: "surface_mask", err: errors.New(`lion: missing required field "Menus.surface_mask"`)}
 	}
 	if _, ok := _c.mutation.Visibility(); !ok {
 		return &ValidationError{Name: "visibility", err: errors.New(`lion: missing required field "Menus.visibility"`)}
@@ -482,10 +461,6 @@ func (_c *MenusCreate) createSpec() (*Menus, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SortOrder(); ok {
 		_spec.SetField(menus.FieldSortOrder, field.TypeInt, value)
 		_node.SortOrder = value
-	}
-	if value, ok := _c.mutation.SurfaceMask(); ok {
-		_spec.SetField(menus.FieldSurfaceMask, field.TypeInt, value)
-		_node.SurfaceMask = value
 	}
 	if value, ok := _c.mutation.Visibility(); ok {
 		_spec.SetField(menus.FieldVisibility, field.TypeString, value)

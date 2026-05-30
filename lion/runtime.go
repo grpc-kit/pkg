@@ -483,24 +483,20 @@ func init() {
 	menusDescSortOrder := menusFields[6].Descriptor()
 	// menus.DefaultSortOrder holds the default value on creation for the sort_order field.
 	menus.DefaultSortOrder = menusDescSortOrder.Default.(int)
-	// menusDescSurfaceMask is the schema descriptor for surface_mask field.
-	menusDescSurfaceMask := menusFields[7].Descriptor()
-	// menus.DefaultSurfaceMask holds the default value on creation for the surface_mask field.
-	menus.DefaultSurfaceMask = menusDescSurfaceMask.Default.(int)
 	// menusDescVisibility is the schema descriptor for visibility field.
-	menusDescVisibility := menusFields[8].Descriptor()
+	menusDescVisibility := menusFields[7].Descriptor()
 	// menus.DefaultVisibility holds the default value on creation for the visibility field.
 	menus.DefaultVisibility = menusDescVisibility.Default.(string)
 	// menus.VisibilityValidator is a validator for the "visibility" field. It is called by the builders before save.
 	menus.VisibilityValidator = menusDescVisibility.Validators[0].(func(string) error)
 	// menusDescMenuStatus is the schema descriptor for menu_status field.
-	menusDescMenuStatus := menusFields[9].Descriptor()
+	menusDescMenuStatus := menusFields[8].Descriptor()
 	// menus.DefaultMenuStatus holds the default value on creation for the menu_status field.
 	menus.DefaultMenuStatus = menusDescMenuStatus.Default.(string)
 	// menus.MenuStatusValidator is a validator for the "menu_status" field. It is called by the builders before save.
 	menus.MenuStatusValidator = menusDescMenuStatus.Validators[0].(func(string) error)
 	// menusDescDescription is the schema descriptor for description field.
-	menusDescDescription := menusFields[11].Descriptor()
+	menusDescDescription := menusFields[10].Descriptor()
 	// menus.DefaultDescription holds the default value on creation for the description field.
 	menus.DefaultDescription = menusDescDescription.Default.(string)
 	policiesMixin := schema.Policies{}.Mixin()

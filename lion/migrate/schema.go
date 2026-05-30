@@ -224,7 +224,6 @@ var (
 		{Name: "component", Type: field.TypeString, Size: 255, Default: ""},
 		{Name: "icon", Type: field.TypeString, Size: 64, Default: ""},
 		{Name: "sort_order", Type: field.TypeInt, Default: 100},
-		{Name: "surface_mask", Type: field.TypeInt, Default: 1},
 		{Name: "visibility", Type: field.TypeString, Size: 16, Default: "full"},
 		{Name: "menu_status", Type: field.TypeString, Size: 16, Default: "active"},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},

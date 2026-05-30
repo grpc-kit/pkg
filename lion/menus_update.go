@@ -201,27 +201,6 @@ func (_u *MenusUpdate) AddSortOrder(v int) *MenusUpdate {
 	return _u
 }
 
-// SetSurfaceMask sets the "surface_mask" field.
-func (_u *MenusUpdate) SetSurfaceMask(v int) *MenusUpdate {
-	_u.mutation.ResetSurfaceMask()
-	_u.mutation.SetSurfaceMask(v)
-	return _u
-}
-
-// SetNillableSurfaceMask sets the "surface_mask" field if the given value is not nil.
-func (_u *MenusUpdate) SetNillableSurfaceMask(v *int) *MenusUpdate {
-	if v != nil {
-		_u.SetSurfaceMask(*v)
-	}
-	return _u
-}
-
-// AddSurfaceMask adds value to the "surface_mask" field.
-func (_u *MenusUpdate) AddSurfaceMask(v int) *MenusUpdate {
-	_u.mutation.AddSurfaceMask(v)
-	return _u
-}
-
 // SetVisibility sets the "visibility" field.
 func (_u *MenusUpdate) SetVisibility(v string) *MenusUpdate {
 	_u.mutation.SetVisibility(v)
@@ -452,12 +431,6 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.AddedSortOrder(); ok {
 		_spec.AddField(menus.FieldSortOrder, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.SurfaceMask(); ok {
-		_spec.SetField(menus.FieldSurfaceMask, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedSurfaceMask(); ok {
-		_spec.AddField(menus.FieldSurfaceMask, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Visibility(); ok {
 		_spec.SetField(menus.FieldVisibility, field.TypeString, value)
@@ -708,27 +681,6 @@ func (_u *MenusUpdateOne) SetNillableSortOrder(v *int) *MenusUpdateOne {
 // AddSortOrder adds value to the "sort_order" field.
 func (_u *MenusUpdateOne) AddSortOrder(v int) *MenusUpdateOne {
 	_u.mutation.AddSortOrder(v)
-	return _u
-}
-
-// SetSurfaceMask sets the "surface_mask" field.
-func (_u *MenusUpdateOne) SetSurfaceMask(v int) *MenusUpdateOne {
-	_u.mutation.ResetSurfaceMask()
-	_u.mutation.SetSurfaceMask(v)
-	return _u
-}
-
-// SetNillableSurfaceMask sets the "surface_mask" field if the given value is not nil.
-func (_u *MenusUpdateOne) SetNillableSurfaceMask(v *int) *MenusUpdateOne {
-	if v != nil {
-		_u.SetSurfaceMask(*v)
-	}
-	return _u
-}
-
-// AddSurfaceMask adds value to the "surface_mask" field.
-func (_u *MenusUpdateOne) AddSurfaceMask(v int) *MenusUpdateOne {
-	_u.mutation.AddSurfaceMask(v)
 	return _u
 }
 
@@ -992,12 +944,6 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 	}
 	if value, ok := _u.mutation.AddedSortOrder(); ok {
 		_spec.AddField(menus.FieldSortOrder, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.SurfaceMask(); ok {
-		_spec.SetField(menus.FieldSurfaceMask, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedSurfaceMask(); ok {
-		_spec.AddField(menus.FieldSurfaceMask, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.Visibility(); ok {
 		_spec.SetField(menus.FieldVisibility, field.TypeString, value)

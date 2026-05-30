@@ -40,8 +40,6 @@ type Menus struct {
 	Icon string `json:"icon,omitempty"`
 	// 菜单排序顺序
 	SortOrder int `json:"sort_order,omitempty"`
-	// 多终端位掩码：1=admin 2=front 4=mobile
-	SurfaceMask int `json:"surface_mask,omitempty"`
 	// 菜单可见性
 	Visibility string `json:"visibility,omitempty"`
 	// 菜单状态
@@ -81,7 +79,7 @@ func (*Menus) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case menus.FieldMetadata:
 			values[i] = new([]byte)
-		case menus.FieldID, menus.FieldCreatedBy, menus.FieldUpdatedBy, menus.FieldParentID, menus.FieldSortOrder, menus.FieldSurfaceMask:
+		case menus.FieldID, menus.FieldCreatedBy, menus.FieldUpdatedBy, menus.FieldParentID, menus.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
 		case menus.FieldCode, menus.FieldDisplayName, menus.FieldRoutePath, menus.FieldComponent, menus.FieldIcon, menus.FieldVisibility, menus.FieldMenuStatus, menus.FieldDescription:
 			values[i] = new(sql.NullString)
@@ -173,12 +171,6 @@ func (_m *Menus) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field sort_order", values[i])
 			} else if value.Valid {
 				_m.SortOrder = int(value.Int64)
-			}
-		case menus.FieldSurfaceMask:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field surface_mask", values[i])
-			} else if value.Valid {
-				_m.SurfaceMask = int(value.Int64)
 			}
 		case menus.FieldVisibility:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -279,9 +271,6 @@ func (_m *Menus) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("sort_order=")
 	builder.WriteString(fmt.Sprintf("%v", _m.SortOrder))
-	builder.WriteString(", ")
-	builder.WriteString("surface_mask=")
-	builder.WriteString(fmt.Sprintf("%v", _m.SurfaceMask))
 	builder.WriteString(", ")
 	builder.WriteString("visibility=")
 	builder.WriteString(_m.Visibility)

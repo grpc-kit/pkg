@@ -36,8 +36,6 @@ const (
 	FieldIcon = "icon"
 	// FieldSortOrder holds the string denoting the sort_order field in the database.
 	FieldSortOrder = "sort_order"
-	// FieldSurfaceMask holds the string denoting the surface_mask field in the database.
-	FieldSurfaceMask = "surface_mask"
 	// FieldVisibility holds the string denoting the visibility field in the database.
 	FieldVisibility = "visibility"
 	// FieldMenuStatus holds the string denoting the menu_status field in the database.
@@ -73,7 +71,6 @@ var Columns = []string{
 	FieldComponent,
 	FieldIcon,
 	FieldSortOrder,
-	FieldSurfaceMask,
 	FieldVisibility,
 	FieldMenuStatus,
 	FieldMetadata,
@@ -123,8 +120,6 @@ var (
 	IconValidator func(string) error
 	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
 	DefaultSortOrder int
-	// DefaultSurfaceMask holds the default value on creation for the "surface_mask" field.
-	DefaultSurfaceMask int
 	// DefaultVisibility holds the default value on creation for the "visibility" field.
 	DefaultVisibility string
 	// VisibilityValidator is a validator for the "visibility" field. It is called by the builders before save.
@@ -198,11 +193,6 @@ func ByIcon(opts ...sql.OrderTermOption) OrderOption {
 // BySortOrder orders the results by the sort_order field.
 func BySortOrder(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSortOrder, opts...).ToFunc()
-}
-
-// BySurfaceMask orders the results by the surface_mask field.
-func BySurfaceMask(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSurfaceMask, opts...).ToFunc()
 }
 
 // ByVisibility orders the results by the visibility field.

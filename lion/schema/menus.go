@@ -43,9 +43,6 @@ func (Menus) Fields() []ent.Field {
 		field.Int("sort_order").
 			Default(100).
 			Comment("菜单排序顺序"),
-		field.Int("surface_mask").
-			Default(1).
-			Comment("多终端位掩码：1=admin 2=front 4=mobile"),
 		field.String("visibility").
 			MaxLen(16).
 			Default("full").
