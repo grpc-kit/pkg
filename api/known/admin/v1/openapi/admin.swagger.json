@@ -27,7 +27,7 @@
     "/builtin/admin/api/v1/auth/callback/{provider_name}": {
       "get": {
         "summary": "第三方认证回调",
-        "description": "接口格式：/builtin/admin/api/v1/auth/callback/{provider_name}。用于 OIDC/OAUTH2 等外部认证回调换取 token。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/callback/{provider_name}。用于 OIDC/OAUTH2 等外部认证回调换取 token。前置条件：state 与 provider_name 必须匹配已发起的登录会话，服务端应审计回调来源并禁止重复消费授权码。",
         "operationId": "KnownAdmin_GetAuthCallback",
         "responses": {
           "200": {
@@ -45,13 +45,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -83,7 +83,7 @@
     "/builtin/admin/api/v1/auth/login": {
       "post": {
         "summary": "登录认证",
-        "description": "接口格式：/builtin/admin/api/v1/auth/login。LOCAL: password_hash=sha256(password)；LDAP: password_hash=base64(password)（兼容约定）。请求体示例：{\"username\":\"alice\",\"password_hash\":\"3f786850e387550fdab836ed7e6dc881de23001b\",\"provider_code\":\"local\",\"expires_in\":86400}。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/login。LOCAL: password_hash=sha256(password)；LDAP: password_hash=base64(password)（兼容约定）。前置条件：provider_code 必须处于启用状态，服务端应审计登录失败与来源 IP，并对连续失败触发限流或锁定策略。请求体示例：{\"username\":\"alice\",\"password_hash\":\"3f786850e387550fdab836ed7e6dc881de23001b\",\"provider_code\":\"local\",\"expires_in\":86400}。",
         "operationId": "KnownAdmin_CreateAuthLogin",
         "responses": {
           "200": {
@@ -102,13 +102,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -130,7 +130,7 @@
     "/builtin/admin/api/v1/auth/mfa/confirm": {
       "post": {
         "summary": "确认开启 MFA",
-        "description": "接口格式：/builtin/admin/api/v1/auth/mfa/confirm。用户扫码绑定验证器后输入 6 位 TOTP 码确认开启 MFA。请求体示例：{\"challenge_id\":\"uuid-xxx\",\"totp_code\":\"123456\"}。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/mfa/confirm。用户扫码绑定验证器后输入 6 位 TOTP 码确认开启 MFA。前置条件：challenge_id 必须来自未完成的绑定流程，服务端应审计启用行为并禁止返回已使用过的恢复码。请求体示例：{\"challenge_id\":\"uuid-xxx\",\"totp_code\":\"123456\"}。",
         "operationId": "KnownAdmin_ConfirmUserMFA",
         "responses": {
           "200": {
@@ -156,13 +156,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -184,7 +184,7 @@
     "/builtin/admin/api/v1/auth/mfa/setup/confirm": {
       "post": {
         "summary": "登录态首次配置 MFA（确认）",
-        "description": "接口格式：/builtin/admin/api/v1/auth/mfa/setup/confirm。输入 6 位 TOTP 验证码确认绑定并签发登录 token。请求体示例：{\"setup_challenge_id\":\"uuid-setup-xxx\",\"totp_code\":\"123456\"}。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/mfa/setup/confirm。输入 6 位 TOTP 验证码确认绑定并签发登录 token。前置条件：setup_challenge_id 必须与开始阶段返回值匹配且未过期，服务端应审计确认结果并禁止跳过验证码校验直接签发 token。请求体示例：{\"setup_challenge_id\":\"uuid-setup-xxx\",\"totp_code\":\"123456\"}。",
         "operationId": "KnownAdmin_ConfirmAuthMFASetup",
         "responses": {
           "200": {
@@ -203,13 +203,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -231,7 +231,7 @@
     "/builtin/admin/api/v1/auth/mfa/setup/start": {
       "post": {
         "summary": "登录态首次配置 MFA（开始）",
-        "description": "接口格式：/builtin/admin/api/v1/auth/mfa/setup/start。当登录返回 challenge_type=TOTP_SETUP 时，调用本接口获取二维码和密钥。请求体示例：{\"challenge_id\":\"uuid-xxx\"}。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/mfa/setup/start。当登录返回 challenge_type=TOTP_SETUP 时，调用本接口获取二维码和密钥。前置条件：challenge_id 必须来自当前登录态且未过期，返回的 secret 仅允许本次配置流程使用并应写入审计日志。请求体示例：{\"challenge_id\":\"uuid-xxx\"}。",
         "operationId": "KnownAdmin_StartAuthMFASetup",
         "responses": {
           "200": {
@@ -250,13 +250,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -278,7 +278,7 @@
     "/builtin/admin/api/v1/auth/mfa/verify": {
       "post": {
         "summary": "登录 MFA 验证",
-        "description": "接口格式：/builtin/admin/api/v1/auth/mfa/verify。在 CreateAuthLogin 返回 mfa_required=true 后，前端调用此接口完成 TOTP 二步验证。请求体示例：{\"challenge_id\":\"uuid-xxx\",\"totp_code\":\"123456\"}。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/mfa/verify。在 CreateAuthLogin 返回 mfa_required=true 后，前端调用此接口完成 TOTP 二步验证。前置条件：challenge_id 必须来自未过期登录挑战，服务端应审计验证失败次数并禁止重复使用已完成挑战。请求体示例：{\"challenge_id\":\"uuid-xxx\",\"totp_code\":\"123456\"}。",
         "operationId": "KnownAdmin_VerifyAuthMFA",
         "responses": {
           "200": {
@@ -297,13 +297,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -325,7 +325,7 @@
     "/builtin/admin/api/v1/auth/providers": {
       "get": {
         "summary": "认证提供商列表",
-        "description": "接口格式：/builtin/admin/api/v1/auth/providers。返回可用的认证方式（LOCAL/LDAP/OIDC/OAUTH2/GITHUB/GOOGLE/WECHAT）。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/providers。返回可用的认证方式（LOCAL/LDAP/OIDC/OAUTH2/GITHUB/GOOGLE/WECHAT）。前置条件：仅允许具备认证配置读取权限的管理员调用，返回结果禁止包含 client_secret、bind_password 等敏感字段。",
         "operationId": "KnownAdmin_ListAuthProviders",
         "responses": {
           "200": {
@@ -355,13 +355,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -432,7 +432,7 @@
       },
       "post": {
         "summary": "创建认证提供商",
-        "description": "接口格式：/builtin/admin/api/v1/auth/providers。用于创建 LDAP/OIDC/OAUTH2 等认证提供商配置。请求体示例：{\"provider\":{\"code\":\"corp-ldap\",\"type\":\"LDAP\",\"status\":\"ACTIVE\",\"display_name\":\"企业LDAP\",\"description\":\"企业统一身份源\"}}。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/providers。用于创建 LDAP/OIDC/OAUTH2 等认证提供商配置。前置条件：仅允许具备最小权限的管理员调用，涉及 client_secret、bind_password 等敏感配置时应脱敏存储并写入审计日志。请求体示例：{\"provider\":{\"code\":\"corp-ldap\",\"type\":\"LDAP\",\"status\":\"ACTIVE\",\"display_name\":\"企业LDAP\",\"description\":\"企业统一身份源\"}}。",
         "operationId": "KnownAdmin_CreateAuthProvider",
         "responses": {
           "200": {
@@ -456,13 +456,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -484,7 +484,7 @@
     "/builtin/admin/api/v1/auth/providers/{id}": {
       "get": {
         "summary": "获取认证提供商详情",
-        "description": "接口格式：/builtin/admin/api/v1/auth/providers/{id}。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/providers/{id}。前置条件：仅允许具备认证配置读取权限的管理员调用，响应中禁止回传 client_secret、bind_password 等敏感字段。",
         "operationId": "KnownAdmin_GetAuthProvider",
         "responses": {
           "200": {
@@ -508,13 +508,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -533,7 +533,7 @@
       },
       "delete": {
         "summary": "删除认证提供商",
-        "description": "接口格式：/builtin/admin/api/v1/auth/providers/{id}。删除指定认证提供商。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/providers/{id}。删除指定认证提供商。前置条件：仅允许具备最小权限的管理员调用，删除前应确认无活动登录流量并记录审计日志。",
         "operationId": "KnownAdmin_DeleteAuthProvider",
         "responses": {
           "200": {
@@ -549,13 +549,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -574,7 +574,7 @@
       },
       "patch": {
         "summary": "更新认证提供商",
-        "description": "接口格式：/builtin/admin/api/v1/auth/providers/{id}。按请求字段更新 provider 配置。请求体示例：{\"id\":\"2\",\"provider\":{\"display_name\":\"企业LDAP（更新）\",\"status\":\"ACTIVE\"},\"update_mask\":{\"paths\":[\"display_name\",\"status\"]}}。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/providers/{id}。按请求字段更新 provider 配置。前置条件：仅允许具备最小权限的管理员调用，涉及密钥或绑定口令变更时必须脱敏存储并写入审计日志。请求体示例：{\"id\":\"2\",\"provider\":{\"display_name\":\"企业LDAP（更新）\",\"status\":\"ACTIVE\"},\"update_mask\":{\"paths\":[\"display_name\",\"status\"]}}。",
         "operationId": "KnownAdmin_UpdateAuthProvider",
         "responses": {
           "200": {
@@ -598,13 +598,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -633,7 +633,7 @@
     "/builtin/admin/api/v1/auth/token": {
       "post": {
         "summary": "创建访问令牌",
-        "description": "接口格式：/builtin/admin/api/v1/auth/token。用于受控场景下签发 access_token。请求体示例：{\"appid\":\"admin-web\",\"username\":\"admin\",\"password_hash\":\"8c6976e5b5410415bde908bd4dee15dfb16b0f5f\",\"expires_in\":7200}。",
+        "description": "接口格式：/builtin/admin/api/v1/auth/token。用于受控场景下签发 access_token。前置条件：仅允许受信任客户端或后台作业调用，服务端应审计令牌签发主体、scope 与 expires_in。请求体示例：{\"appid\":\"admin-web\",\"username\":\"admin\",\"password_hash\":\"8c6976e5b5410415bde908bd4dee15dfb16b0f5f\",\"expires_in\":7200}。",
         "operationId": "KnownAdmin_CreateAuthToken",
         "responses": {
           "200": {
@@ -652,13 +652,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -680,7 +680,7 @@
     "/builtin/admin/api/v1/credentials": {
       "post": {
         "summary": "创建凭证",
-        "description": "接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。请求体示例：{\"credential\":{\"code\":\"admin-jwks\",\"type\":\"JWKS\",\"algorithm\":\"RSA\",\"usage\":\"AUTH\",\"status\":\"ACTIVE\",\"source\":\"SYSTEM\",\"jwks_uri\":\"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oatuh2/jwks\"}}。",
+        "description": "接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。前置条件：仅允许具备密钥管理权限的管理员调用，禁止回传私钥材料，新增或轮换操作必须写入审计日志。请求体示例：{\"credential\":{\"code\":\"admin-jwks\",\"type\":\"JWKS\",\"algorithm\":\"RSA\",\"usage\":\"AUTH\",\"status\":\"ACTIVE\",\"source\":\"SYSTEM\",\"jwks_uri\":\"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oatuh2/jwks\"}}。",
         "operationId": "KnownAdmin_CreateCredential",
         "responses": {
           "200": {
@@ -710,13 +710,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -754,13 +754,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -828,13 +828,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -962,13 +962,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1018,13 +1018,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1185,13 +1185,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1239,13 +1239,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1296,13 +1296,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1348,13 +1348,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1427,13 +1427,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1490,50 +1490,62 @@
     },
     "/builtin/admin/api/v1/global/settings": {
       "get": {
+        "summary": "TODO: 补充 ListGlobalSettings 摘要",
+        "description": "接口格式：GET /builtin/admin/api/v1/global/settings。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_ListGlobalSettings",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ListGlobalSettingsResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
-        }
+        },
+        "tags": [
+          "全局设置"
+        ]
       }
     },
     "/builtin/admin/api/v1/global/settings/{category}": {
       "get": {
-        "summary": "全局设置",
+        "summary": "TODO: 补充 GetGlobalSettings 摘要",
+        "description": "接口格式：GET /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_GetGlobalSettings",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1GlobalSettingCategory"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1544,27 +1556,35 @@
             "required": true,
             "type": "string"
           }
+        ],
+        "tags": [
+          "全局设置"
         ]
       },
       "patch": {
+        "summary": "TODO: 补充 UpdateGlobalSettings 摘要",
+        "description": "接口格式：PATCH /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_UpdateGlobalSettings",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1UpdateGlobalSettingsResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1587,6 +1607,9 @@
               }
             }
           }
+        ],
+        "tags": [
+          "全局设置"
         ]
       }
     },
@@ -1626,13 +1649,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1773,13 +1796,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1831,13 +1854,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -1974,13 +1997,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2043,13 +2066,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2102,13 +2125,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2179,13 +2202,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2235,13 +2258,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2294,13 +2317,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2367,13 +2390,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2420,13 +2443,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2445,25 +2468,29 @@
     },
     "/builtin/admin/api/v1/menus": {
       "get": {
-        "summary": "菜单管理",
+        "summary": "TODO: 补充 ListMenus 摘要",
+        "description": "接口格式：GET /builtin/admin/api/v1/menus。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_ListMenus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ListMenusResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2547,27 +2574,35 @@
             "required": false,
             "type": "string"
           }
+        ],
+        "tags": [
+          "菜单管理"
         ]
       },
       "post": {
+        "summary": "TODO: 补充 CreateMenu 摘要",
+        "description": "接口格式：POST /builtin/admin/api/v1/menus。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_CreateMenu",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1Menu"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2580,11 +2615,16 @@
               "$ref": "#/definitions/v1Menu"
             }
           }
+        ],
+        "tags": [
+          "菜单管理"
         ]
       }
     },
     "/builtin/admin/api/v1/menus/{id}": {
       "delete": {
+        "summary": "TODO: 补充 DeleteMenu 摘要",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/menus/{id}。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_DeleteMenu",
         "responses": {
           "200": {
@@ -2592,18 +2632,21 @@
             "schema": {
               "type": "object",
               "properties": {}
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2615,29 +2658,37 @@
             "type": "string",
             "format": "int64"
           }
+        ],
+        "tags": [
+          "菜单管理"
         ]
       }
     },
     "/builtin/admin/api/v1/menus/{menu.id}": {
       "patch": {
+        "summary": "TODO: 补充 UpdateMenu 摘要",
+        "description": "接口格式：PATCH /builtin/admin/api/v1/menus/{menu.id}。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_UpdateMenu",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1Menu"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2723,13 +2774,16 @@
               "title": "Menu 菜单业务定义。"
             }
           }
+        ],
+        "tags": [
+          "菜单管理"
         ]
       }
     },
     "/builtin/admin/api/v1/oatuh2/.well-known/openid-configuration": {
       "get": {
         "summary": "获取 OAuth2 Discovery",
-        "description": "接口格式：/builtin/admin/api/v1/oatuh2/.well-known/openid-configuration。注意当前路径使用 oatuh2（历史拼写）。",
+        "description": "接口格式：/builtin/admin/api/v1/oatuh2/.well-known/openid-configuration。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许通过 HTTPS 暴露 issuer 元数据，配置变更应纳入审计。",
         "operationId": "KnownAdmin_GetOAuth2Discovery",
         "responses": {
           "200": {
@@ -2759,13 +2813,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2777,7 +2831,7 @@
     "/builtin/admin/api/v1/oatuh2/jwks": {
       "get": {
         "summary": "获取 OAuth2 JSON Web Keys",
-        "description": "接口格式：/builtin/admin/api/v1/oatuh2/jwks。注意当前路径使用 oatuh2（历史拼写）。",
+        "description": "接口格式：/builtin/admin/api/v1/oatuh2/jwks。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许发布 ACTIVE 且可公开的签名密钥，禁止返回私钥或对称密钥材料。",
         "operationId": "KnownAdmin_GetOAuth2JSONWebKeys",
         "responses": {
           "200": {
@@ -2801,13 +2855,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2819,7 +2873,7 @@
     "/builtin/admin/api/v1/oatuh2/userinfo": {
       "get": {
         "summary": "获取 OAuth2 Userinfo",
-        "description": "接口格式：/builtin/admin/api/v1/oatuh2/userinfo。注意当前路径使用 oatuh2（历史拼写）。",
+        "description": "接口格式：/builtin/admin/api/v1/oatuh2/userinfo。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许携带有效 access_token 调用，服务端应按最小权限返回 claims 并审计访问。",
         "operationId": "KnownAdmin_GetOAuth2Userinfo",
         "responses": {
           "200": {
@@ -2843,13 +2897,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2890,13 +2944,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -2996,24 +3050,29 @@
     },
     "/builtin/admin/api/v1/policies/{code}": {
       "get": {
+        "summary": "TODO: 补充 GetPolicy 摘要",
+        "description": "接口格式：GET /builtin/admin/api/v1/policies/{code}。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_GetPolicy",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1Policy"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3039,6 +3098,9 @@
             ],
             "default": "VIEW_UNSPECIFIED"
           }
+        ],
+        "tags": [
+          "策略管理"
         ]
       }
     },
@@ -3061,13 +3123,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3111,13 +3173,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3218,13 +3280,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3341,13 +3403,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3427,13 +3489,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3479,13 +3541,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3520,13 +3582,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3595,13 +3657,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3700,13 +3762,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3752,13 +3814,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3807,13 +3869,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3852,24 +3914,29 @@
     },
     "/builtin/admin/api/v1/roles/{parent}/menus": {
       "get": {
+        "summary": "TODO: 补充 ListRoleMenus 摘要",
+        "description": "接口格式：GET /builtin/admin/api/v1/roles/{parent}/menus。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_ListRoleMenus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ListRoleMenusResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3941,27 +4008,35 @@
             "required": false,
             "type": "string"
           }
+        ],
+        "tags": [
+          "菜单管理"
         ]
       },
       "post": {
+        "summary": "TODO: 补充 CreateRoleMenus 摘要",
+        "description": "接口格式：POST /builtin/admin/api/v1/roles/{parent}/menus。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_CreateRoleMenus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1CreateRoleMenusResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -3985,27 +4060,35 @@
               }
             }
           }
+        ],
+        "tags": [
+          "菜单管理"
         ]
       },
       "patch": {
+        "summary": "TODO: 补充 UpdateRoleMenus 摘要",
+        "description": "接口格式：PATCH /builtin/admin/api/v1/roles/{parent}/menus。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_UpdateRoleMenus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1UpdateRoleMenusResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4029,11 +4112,16 @@
               }
             }
           }
+        ],
+        "tags": [
+          "菜单管理"
         ]
       }
     },
     "/builtin/admin/api/v1/roles/{parent}/menus/{menu_id}": {
       "delete": {
+        "summary": "TODO: 补充 DeleteRoleMenu 摘要",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/roles/{parent}/menus/{menu_id}。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_DeleteRoleMenu",
         "responses": {
           "200": {
@@ -4041,18 +4129,21 @@
             "schema": {
               "type": "object",
               "properties": {}
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4071,29 +4162,37 @@
             "type": "string",
             "format": "int64"
           }
+        ],
+        "tags": [
+          "菜单管理"
         ]
       }
     },
     "/builtin/admin/api/v1/roles/{parent}/policies": {
       "get": {
+        "summary": "TODO: 补充 ListRolePolicies 摘要",
+        "description": "接口格式：GET /builtin/admin/api/v1/roles/{parent}/policies。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_ListRolePolicies",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ListRolePoliciesResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4151,27 +4250,35 @@
             "required": false,
             "type": "string"
           }
+        ],
+        "tags": [
+          "策略管理"
         ]
       },
       "post": {
+        "summary": "TODO: 补充 CreateRolePolicies 摘要",
+        "description": "接口格式：POST /builtin/admin/api/v1/roles/{parent}/policies。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_CreateRolePolicies",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1CreateRolePoliciesResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4195,27 +4302,35 @@
               }
             }
           }
+        ],
+        "tags": [
+          "策略管理"
         ]
       },
       "patch": {
+        "summary": "TODO: 补充 UpdateRolePolicies 摘要",
+        "description": "接口格式：PATCH /builtin/admin/api/v1/roles/{parent}/policies。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_UpdateRolePolicies",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1UpdateRolePoliciesResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4239,12 +4354,16 @@
               }
             }
           }
+        ],
+        "tags": [
+          "策略管理"
         ]
       }
     },
     "/builtin/admin/api/v1/roles/{parent}/policies/{policy_id}": {
       "delete": {
-        "summary": "rpc CreateRoleDataRanges(CreateRoleDataRangesRequest) returns(CreateRoleDataRangesResponse);\nrpc DeleteRoleDataRanges(DeleteRoleDataRangesRequest) returns(google.protobuf.Empty);\nrpc ListRoleDataRanges(ListRoleDataRangesRequest) returns(ListRoleDataRangesResponse);",
+        "summary": "TODO: 补充 DeleteRolePolicy 摘要",
+        "description": "接口格式：DELETE /builtin/admin/api/v1/roles/{parent}/policies/{policy_id}。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_DeleteRolePolicy",
         "responses": {
           "200": {
@@ -4252,18 +4371,21 @@
             "schema": {
               "type": "object",
               "properties": {}
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4282,6 +4404,9 @@
             "type": "string",
             "format": "int64"
           }
+        ],
+        "tags": [
+          "策略管理"
         ]
       }
     },
@@ -4312,13 +4437,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4409,25 +4534,29 @@
     },
     "/builtin/admin/api/v1/services": {
       "get": {
-        "summary": "服务字典管理",
+        "summary": "TODO: 补充 ListServices 摘要",
+        "description": "接口格式：GET /builtin/admin/api/v1/services。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_ListServices",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ListServicesResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4498,29 +4627,37 @@
             "required": false,
             "type": "string"
           }
+        ],
+        "tags": [
+          "服务字典管理"
         ]
       }
     },
     "/builtin/admin/api/v1/services/{parent}/actions": {
       "get": {
+        "summary": "TODO: 补充 ListServiceActions 摘要",
+        "description": "接口格式：GET /builtin/admin/api/v1/services/{parent}/actions。前置条件与业务约束待补充。",
         "operationId": "KnownAdmin_ListServiceActions",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1ListServiceActionsResponse"
+            },
+            "examples": {
+              "application/json": {}
             }
           },
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4563,6 +4700,9 @@
             "required": false,
             "type": "string"
           }
+        ],
+        "tags": [
+          "服务字典管理"
         ]
       }
     },
@@ -4620,13 +4760,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4757,13 +4897,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4817,13 +4957,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -4878,13 +5018,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -5057,13 +5197,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -5100,7 +5240,7 @@
     "/builtin/admin/api/v1/users/{user_id}/mfa/setup": {
       "post": {
         "summary": "设置 MFA（获取密钥和二维码）",
-        "description": "接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/setup。为指定用户生成 TOTP 密钥和 otpauth URI，前端据此展示二维码供用户扫描。",
+        "description": "接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/setup。为指定用户生成 TOTP 密钥和 otpauth URI，前端据此展示二维码供用户扫描。前置条件：仅允许具备最小权限的管理员或用户本人发起，生成的 secret 仅允许短时展示并应审计发放行为。",
         "operationId": "KnownAdmin_SetupUserMFA",
         "responses": {
           "200": {
@@ -5119,13 +5259,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -5156,7 +5296,7 @@
     "/builtin/admin/api/v1/users/{user_id}/password": {
       "put": {
         "summary": "更新用户密码",
-        "description": "接口格式：/builtin/admin/api/v1/users/{user_id}/password。更新指定用户密码（传递哈希值）。请求体示例：{\"user_id\":\"1001\",\"old_password_hash\":\"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a\",\"new_password_hash\":\"5e884898da28047151d0e56f8dc6292773603d0d\"}。",
+        "description": "接口格式：/builtin/admin/api/v1/users/{user_id}/password。更新指定用户密码（传递哈希值）。前置条件：仅允许本人或具备最小权限的管理员调用，服务端应审计密码变更并禁止记录明文密码或明文哈希。请求体示例：{\"user_id\":\"1001\",\"old_password_hash\":\"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a\",\"new_password_hash\":\"5e884898da28047151d0e56f8dc6292773603d0d\"}。",
         "operationId": "KnownAdmin_UpdateUserPassword",
         "responses": {
           "200": {
@@ -5171,13 +5311,13 @@
           "4xx": {
             "description": "客户端参数异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           },
           "5xx": {
             "description": "服务端处理异常",
             "schema": {
-              "$ref": ".grpc_kit.api.known.status.v1.ErrorResponse"
+              "$ref": "#/definitions/v1ErrorResponse"
             }
           }
         },
@@ -5514,6 +5654,17 @@
       },
       "title": "Role 角色实体，表示用户在系统上的权限和功能"
     },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string",
+          "description": "A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics."
+        }
+      },
+      "additionalProperties": {},
+      "description": "`Any` contains an arbitrary serialized protocol buffer message along with a\nURL that describes the type of the serialized message.\n\nProtobuf library provides support to pack/unpack Any values in the form\nof utility functions or additional generated methods of the Any type.\n\nExample 1: Pack and unpack a message in C++.\n\n    Foo foo = ...;\n    Any any;\n    any.PackFrom(foo);\n    ...\n    if (any.UnpackTo(\u0026foo)) {\n      ...\n    }\n\nExample 2: Pack and unpack a message in Java.\n\n    Foo foo = ...;\n    Any any = Any.pack(foo);\n    ...\n    if (any.is(Foo.class)) {\n      foo = any.unpack(Foo.class);\n    }\n\nExample 3: Pack and unpack a message in Python.\n\n    foo = Foo(...)\n    any = Any()\n    any.Pack(foo)\n    ...\n    if any.Is(Foo.DESCRIPTOR):\n      any.Unpack(foo)\n      ...\n\nExample 4: Pack and unpack a message in Go\n\n     foo := \u0026pb.Foo{...}\n     any, err := anypb.New(foo)\n     if err != nil {\n       ...\n     }\n     ...\n     foo := \u0026pb.Foo{}\n     if err := any.UnmarshalTo(foo); err != nil {\n       ...\n     }\n\nThe pack methods provided by protobuf library will by default use\n'type.googleapis.com/full.type.name' as the type URL and the unpack\nmethods only use the fully qualified type name after the last '/'\nin the type URL, for example \"foo.bar.com/x/y.z\" will yield type\nname \"y.z\".\n\n\nJSON\n\nThe JSON representation of an `Any` value uses the regular\nrepresentation of the deserialized, embedded message, with an\nadditional field `@type` which contains the type URL. Example:\n\n    package google.profile;\n    message Person {\n      string first_name = 1;\n      string last_name = 2;\n    }\n\n    {\n      \"@type\": \"type.googleapis.com/google.profile.Person\",\n      \"firstName\": \u003cstring\u003e,\n      \"lastName\": \u003cstring\u003e\n    }\n\nIf the embedded message type is well-known and has a custom JSON\nrepresentation, that representation will be embedded adding a field\n`value` which holds the custom JSON in addition to the `@type`\nfield. Example (for message [google.protobuf.Duration][]):\n\n    {\n      \"@type\": \"type.googleapis.com/google.protobuf.Duration\",\n      \"value\": \"1.212s\"\n    }"
+    },
     "protobufNullValue": {
       "type": "string",
       "enum": [
@@ -5521,6 +5672,29 @@
       ],
       "default": "NULL_VALUE",
       "description": "`NullValue` is a singleton enumeration to represent the null value for the\n`Value` type union.\n\n The JSON representation for `NullValue` is JSON `null`.\n\n - NULL_VALUE: Null value."
+    },
+    "statusv1Status": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "status": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      },
+      "title": "Status 用于定义统一错误状态码"
     },
     "v1ACMEConfig": {
       "type": "object",
@@ -6416,6 +6590,28 @@
           "format": "int64"
         }
       }
+    },
+    "v1ErrorResponse": {
+      "type": "object",
+      "example": {
+        "error": {
+          "code": 5,
+          "status": "NotFound",
+          "message": "unknown service",
+          "details": [
+            {
+              "@type": "type.googleapis.com/grpc_kit.api.known.status.v1.TracingRequest",
+              "id": "b17f76dc51de4098bc974e5f2009c097"
+            }
+          ]
+        }
+      },
+      "properties": {
+        "error": {
+          "$ref": "#/definitions/statusv1Status"
+        }
+      },
+      "title": "ErrorResponse 用于定义统一错误响应体"
     },
     "v1ExporterEnableConfig": {
       "type": "object",

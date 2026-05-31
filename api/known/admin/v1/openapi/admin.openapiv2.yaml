@@ -58,191 +58,11 @@ openapiOptions:
         tags:
           - "认证鉴权"
         summary: "登录认证"
-        description: '接口格式：/builtin/admin/api/v1/auth/login。LOCAL: password_hash=sha256(password)；LDAP: password_hash=base64(password)（兼容约定）。请求体示例：{"username":"alice","password_hash":"3f786850e387550fdab836ed7e6dc881de23001b","provider_code":"local","expires_in":86400}。'
+        description: '接口格式：/builtin/admin/api/v1/auth/login。LOCAL: password_hash=sha256(password)；LDAP: password_hash=base64(password)（兼容约定）。前置条件：provider_code 必须处于启用状态，服务端应审计登录失败与来源 IP，并对连续失败触发限流或锁定策略。请求体示例：{"username":"alice","password_hash":"3f786850e387550fdab836ed7e6dc881de23001b","provider_code":"local","expires_in":86400}。'
         responses:
           "200":
             examples:
               "application/json": '{"access_token":"eyJhbGciOiJSUzI1NiIsImtpZCI6ImtpZC1hZG1pbi0yMDI2In0.eyJzdWIiOiIxMDAxIiwidXNlcm5hbWUiOiJhbGljZSIsInJvbGVzIjpbImF1ZGl0b3IiXSwic2NvcGUiOiJhZG1pbiByZWFkb25seSIsImV4cCI6MTc5OTk5OTk5OX0.signature","token_type":"Bearer","expires_in":86400}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthToken
-      option:
-        tags:
-          - "认证鉴权"
-        summary: "创建访问令牌"
-        description: '接口格式：/builtin/admin/api/v1/auth/token。用于受控场景下签发 access_token。请求体示例：{"appid":"admin-web","username":"admin","password_hash":"8c6976e5b5410415bde908bd4dee15dfb16b0f5f","expires_in":7200}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"access_token":"eyJhbGciOiJSUzI1NiIsImtpZCI6ImtpZC1zZXJ2aWNlLTIwMjYifQ.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsInNjb3BlIjoiYWRtaW4iLCJleHAiOjE3OTk5OTk5OTl9.signature","token_type":"Bearer","expires_in":7200}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListAuthProviders
-      option:
-        tags:
-          - "认证鉴权"
-        summary: "认证提供商列表"
-        description: "接口格式：/builtin/admin/api/v1/auth/providers。返回可用的认证方式（LOCAL/LDAP/OIDC/OAUTH2/GITHUB/GOOGLE/WECHAT）。"
-        responses:
-          "200":
-            examples:
-              "application/json": '{"providers":[{"id":"1","code":"corp-ldap","type":"LDAP","status":"ACTIVE","display_name":"企业LDAP","description":"企业统一身份源","sort_order":20,"icon_url":"https://cdn.example.com/icons/ldap.svg"}],"next_page_token":"providers:2","total_size":12}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthProvider
-      option:
-        tags:
-          - "认证鉴权"
-        summary: "创建认证提供商"
-        description: '接口格式：/builtin/admin/api/v1/auth/providers。用于创建 LDAP/OIDC/OAUTH2 等认证提供商配置。请求体示例：{"provider":{"code":"corp-ldap","type":"LDAP","status":"ACTIVE","display_name":"企业LDAP","description":"企业统一身份源"}}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"id":"2","code":"corp-ldap","type":"LDAP","status":"ACTIVE","display_name":"企业LDAP","description":"仅企业员工可登录","sort_order":20,"icon_url":"https://cdn.example.com/icons/ldap.svg"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthProvider
-      option:
-        tags:
-          - "认证鉴权"
-        summary: "获取认证提供商详情"
-        description: "接口格式：/builtin/admin/api/v1/auth/providers/{id}。"
-        responses:
-          "200":
-            examples:
-              "application/json": '{"id":"2","code":"corp-ldap","type":"LDAP","status":"ACTIVE","display_name":"企业LDAP","description":"仅企业员工可登录","sort_order":20,"icon_url":"https://cdn.example.com/icons/ldap.svg"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateAuthProvider
-      option:
-        tags:
-          - "认证鉴权"
-        summary: "更新认证提供商"
-        description: '接口格式：/builtin/admin/api/v1/auth/providers/{id}。按请求字段更新 provider 配置。请求体示例：{"id":"2","provider":{"display_name":"企业LDAP（更新）","status":"ACTIVE"},"update_mask":{"paths":["display_name","status"]}}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"id":"2","code":"corp-ldap","type":"LDAP","status":"ACTIVE","display_name":"企业LDAP（更新）","description":"新增安全基线策略","sort_order":10,"icon_url":"https://cdn.example.com/icons/ldap.svg"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteAuthProvider
-      option:
-        tags:
-          - "认证鉴权"
-        summary: "删除认证提供商"
-        description: "接口格式：/builtin/admin/api/v1/auth/providers/{id}。删除指定认证提供商。"
-        responses:
-          "200":
-            examples:
-              "application/json": '{}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthCallback
-      option:
-        tags:
-          - "认证鉴权"
-        summary: "第三方认证回调"
-        description: "接口格式：/builtin/admin/api/v1/auth/callback/{provider_name}。用于 OIDC/OAUTH2 等外部认证回调换取 token。"
-        responses:
-          "200":
-            examples:
-              "application/json": '{"access_token":"<jwt>","token_type":"Bearer"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.VerifyAuthMFA
-      option:
-        tags:
-          - "MFA 多因素认证"
-        summary: "登录 MFA 验证"
-        description: '接口格式：/builtin/admin/api/v1/auth/mfa/verify。在 CreateAuthLogin 返回 mfa_required=true 后，前端调用此接口完成 TOTP 二步验证。请求体示例：{"challenge_id":"uuid-xxx","totp_code":"123456"}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"access_token":"eyJhbGci...","token_type":"Bearer","expires_in":86400}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.StartAuthMFASetup
-      option:
-        tags:
-          - "MFA 多因素认证"
-        summary: "登录态首次配置 MFA（开始）"
-        description: '接口格式：/builtin/admin/api/v1/auth/mfa/setup/start。当登录返回 challenge_type=TOTP_SETUP 时，调用本接口获取二维码和密钥。请求体示例：{"challenge_id":"uuid-xxx"}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"secret":"JBSWY3DPEHPK3PXP","qr_uri":"otpauth://totp/KnownAdmin:alice?secret=JBSWY3DPEHPK3PXP&issuer=KnownAdmin","setup_challenge_id":"uuid-setup-xxx"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ConfirmAuthMFASetup
-      option:
-        tags:
-          - "MFA 多因素认证"
-        summary: "登录态首次配置 MFA（确认）"
-        description: '接口格式：/builtin/admin/api/v1/auth/mfa/setup/confirm。输入 6 位 TOTP 验证码确认绑定并签发登录 token。请求体示例：{"setup_challenge_id":"uuid-setup-xxx","totp_code":"123456"}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"access_token":"eyJhbGci...","token_type":"Bearer","expires_in":86400}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.SetupUserMFA
-      option:
-        tags:
-          - "MFA 多因素认证"
-        summary: "设置 MFA（获取密钥和二维码）"
-        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/setup。为指定用户生成 TOTP 密钥和 otpauth URI，前端据此展示二维码供用户扫描。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"secret":"JBSWY3DPEHPK3PXP","qr_uri":"otpauth://totp/KnownAdmin:alice?secret=JBSWY3DPEHPK3PXP&issuer=KnownAdmin","challenge_id":"uuid-xxx"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ConfirmUserMFA
-      option:
-        tags:
-          - "MFA 多因素认证"
-        summary: "确认开启 MFA"
-        description: '接口格式：/builtin/admin/api/v1/auth/mfa/confirm。用户扫码绑定验证器后输入 6 位 TOTP 码确认开启 MFA。请求体示例：{"challenge_id":"uuid-xxx","totp_code":"123456"}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"recovery_codes":["a1b2c3d4","e5f6g7h8","i9j0k1l2","m3n4o5p6","q7r8s9t0","u1v2w3x4","y5z6a7b8","c9d0e1f2"]}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DisableUserMFA
-      option:
-        tags:
-          - "MFA 多因素认证"
-        summary: "关闭 MFA"
-        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/disable。验证当前 TOTP 码或恢复码后关闭指定用户的 MFA。请求体示例：{"user_id":"1001","totp_code":"123456"}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers
-      option:
-        tags:
-          - "用户管理"
-        summary: "用户列表"
-        description: "接口格式：/builtin/admin/api/v1/users。支持分页、过滤与排序，返回用户集合。"
-        responses:
-          "200":
-            examples:
-              "application/json": '{"users":[{"id":"1001","username":"alice","nickname":"Alice Chen","profile":"资深风控审计员","picture":"https://cdn.example.com/avatars/alice.png","website":"https://intra.example.com/u/alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","phone_number":{"country_code":"86","national_number":"13900001234"},"email":"alice@example.com"},{"id":"1002","username":"bob","nickname":"Bob Li","profile":"平台研发工程师","picture":"https://cdn.example.com/avatars/bob.png","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"MALE","email":"bob@example.com"}],"next_page_token":"users:cursor:2","total_size":2}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser
-      option:
-        tags:
-          - "用户管理"
-        summary: "创建用户"
-        description: '接口格式：/builtin/admin/api/v1/users。根据 user 字段创建新用户。请求体示例：{"user":{"username":"alice","nickname":"Alice","type":"EMPLOYEE","status":"ACTIVE","email":"alice@example.com","phone_number":{"country_code":"86","national_number":"13900001234"}}}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"id":"2","username":"alice","nickname":"Alice","profile":"风控审计员","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","phone_number":{"country_code":"86","national_number":"13900001234"},"email":"alice@example.com"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUser
-      option:
-        tags:
-          - "用户管理"
-        summary: "更新用户"
-        description: '接口格式：/builtin/admin/api/v1/users/{user.id}。按请求中的 user/update_mask 更新指定用户。请求体示例：{"user":{"id":"1001","nickname":"Alice Chen","profile":"资深风控审计员"},"update_mask":{"paths":["nickname","profile"]}}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{"id":"2","username":"alice","nickname":"Alice Chen","profile":"资深风控审计员","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","email":"alice.chen@example.com"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetUser
-      option:
-        tags:
-          - "用户管理"
-        summary: "获取用户详情"
-        description: "接口格式：/builtin/admin/api/v1/users/{id}。根据用户 ID 获取用户详情。"
-        responses:
-          "200":
-            examples:
-              "application/json": '{"id":"1001","username":"alice","nickname":"Alice Chen","profile":"资深风控审计员","picture":"https://cdn.example.com/avatars/alice.png","website":"https://intra.example.com/u/alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","phone_number":{"country_code":"86","national_number":"13900001234"},"email":"alice@example.com"}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUserPassword
-      option:
-        tags:
-          - "用户管理"
-        summary: "更新用户密码"
-        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/password。更新指定用户密码（传递哈希值）。请求体示例：{"user_id":"1001","old_password_hash":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a","new_password_hash":"5e884898da28047151d0e56f8dc6292773603d0d"}。'
-        responses:
-          "200":
-            examples:
-              "application/json": '{}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListLocalConfigs
       option:
         tags:
@@ -263,6 +83,126 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"security":{"name":"security","enabled":true,"authentication":{"insecure_rpcs":["grpc.health.v1.Health/Check"],"http_users":[{"user_id":"1","username":"admin","groups":["root"],"tenant":"default"}]}}}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetGlobalSettings
+      option:
+        tags:
+          - "全局设置"
+        summary: "TODO: 补充 GetGlobalSettings 摘要"
+        description: "接口格式：GET /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListGlobalSettings
+      option:
+        tags:
+          - "全局设置"
+        summary: "TODO: 补充 ListGlobalSettings 摘要"
+        description: "接口格式：GET /builtin/admin/api/v1/global/settings。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateGlobalSettings
+      option:
+        tags:
+          - "全局设置"
+        summary: "TODO: 补充 UpdateGlobalSettings 摘要"
+        description: "接口格式：PATCH /builtin/admin/api/v1/global/settings/{category}。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthToken
+      option:
+        tags:
+          - "认证鉴权"
+        summary: "创建访问令牌"
+        description: '接口格式：/builtin/admin/api/v1/auth/token。用于受控场景下签发 access_token。前置条件：仅允许受信任客户端或后台作业调用，服务端应审计令牌签发主体、scope 与 expires_in。请求体示例：{"appid":"admin-web","username":"admin","password_hash":"8c6976e5b5410415bde908bd4dee15dfb16b0f5f","expires_in":7200}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"access_token":"eyJhbGciOiJSUzI1NiIsImtpZCI6ImtpZC1zZXJ2aWNlLTIwMjYifQ.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsInNjb3BlIjoiYWRtaW4iLCJleHAiOjE3OTk5OTk5OTl9.signature","token_type":"Bearer","expires_in":7200}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListAuthProviders
+      option:
+        tags:
+          - "认证鉴权"
+        summary: "认证提供商列表"
+        description: "接口格式：/builtin/admin/api/v1/auth/providers。返回可用的认证方式（LOCAL/LDAP/OIDC/OAUTH2/GITHUB/GOOGLE/WECHAT）。前置条件：仅允许具备认证配置读取权限的管理员调用，返回结果禁止包含 client_secret、bind_password 等敏感字段。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"providers":[{"id":"1","code":"corp-ldap","type":"LDAP","status":"ACTIVE","display_name":"企业LDAP","description":"企业统一身份源","sort_order":20,"icon_url":"https://cdn.example.com/icons/ldap.svg"}],"next_page_token":"providers:2","total_size":12}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthProvider
+      option:
+        tags:
+          - "认证鉴权"
+        summary: "创建认证提供商"
+        description: '接口格式：/builtin/admin/api/v1/auth/providers。用于创建 LDAP/OIDC/OAUTH2 等认证提供商配置。前置条件：仅允许具备最小权限的管理员调用，涉及 client_secret、bind_password 等敏感配置时应脱敏存储并写入审计日志。请求体示例：{"provider":{"code":"corp-ldap","type":"LDAP","status":"ACTIVE","display_name":"企业LDAP","description":"企业统一身份源"}}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"2","code":"corp-ldap","type":"LDAP","status":"ACTIVE","display_name":"企业LDAP","description":"仅企业员工可登录","sort_order":20,"icon_url":"https://cdn.example.com/icons/ldap.svg"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthProvider
+      option:
+        tags:
+          - "认证鉴权"
+        summary: "获取认证提供商详情"
+        description: "接口格式：/builtin/admin/api/v1/auth/providers/{id}。前置条件：仅允许具备认证配置读取权限的管理员调用，响应中禁止回传 client_secret、bind_password 等敏感字段。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"2","code":"corp-ldap","type":"LDAP","status":"ACTIVE","display_name":"企业LDAP","description":"仅企业员工可登录","sort_order":20,"icon_url":"https://cdn.example.com/icons/ldap.svg"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteAuthProvider
+      option:
+        tags:
+          - "认证鉴权"
+        summary: "删除认证提供商"
+        description: "接口格式：/builtin/admin/api/v1/auth/providers/{id}。删除指定认证提供商。前置条件：仅允许具备最小权限的管理员调用，删除前应确认无活动登录流量并记录审计日志。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateAuthProvider
+      option:
+        tags:
+          - "认证鉴权"
+        summary: "更新认证提供商"
+        description: '接口格式：/builtin/admin/api/v1/auth/providers/{id}。按请求字段更新 provider 配置。前置条件：仅允许具备最小权限的管理员调用，涉及密钥或绑定口令变更时必须脱敏存储并写入审计日志。请求体示例：{"id":"2","provider":{"display_name":"企业LDAP（更新）","status":"ACTIVE"},"update_mask":{"paths":["display_name","status"]}}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"2","code":"corp-ldap","type":"LDAP","status":"ACTIVE","display_name":"企业LDAP（更新）","description":"新增安全基线策略","sort_order":10,"icon_url":"https://cdn.example.com/icons/ldap.svg"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetAuthCallback
+      option:
+        tags:
+          - "认证鉴权"
+        summary: "第三方认证回调"
+        description: "接口格式：/builtin/admin/api/v1/auth/callback/{provider_name}。用于 OIDC/OAUTH2 等外部认证回调换取 token。前置条件：state 与 provider_name 必须匹配已发起的登录会话，服务端应审计回调来源并禁止重复消费授权码。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"access_token":"<jwt>","token_type":"Bearer"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListServices
+      option:
+        tags:
+          - "服务字典管理"
+        summary: "TODO: 补充 ListServices 摘要"
+        description: "接口格式：GET /builtin/admin/api/v1/services。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListServiceActions
+      option:
+        tags:
+          - "服务字典管理"
+        summary: "TODO: 补充 ListServiceActions 摘要"
+        description: "接口格式：GET /builtin/admin/api/v1/services/{parent}/actions。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListPolicies
       option:
         tags:
@@ -273,6 +213,16 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"policies":[{"id":"1","code":"admin-policy","display_name":"管理员策略","type":"ROLE","status":"ENABLED","value":"role:admin","description":"管理员默认授权策略"}],"next_page_token":"policies:2","total_size":9}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetPolicy
+      option:
+        tags:
+          - "策略管理"
+        summary: "TODO: 补充 GetPolicy 摘要"
+        description: "接口格式：GET /builtin/admin/api/v1/policies/{code}。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreatePolicy
       option:
         tags:
@@ -303,6 +253,46 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListMenus
+      option:
+        tags:
+          - "菜单管理"
+        summary: "TODO: 补充 ListMenus 摘要"
+        description: "接口格式：GET /builtin/admin/api/v1/menus。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateMenu
+      option:
+        tags:
+          - "菜单管理"
+        summary: "TODO: 补充 CreateMenu 摘要"
+        description: "接口格式：POST /builtin/admin/api/v1/menus。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateMenu
+      option:
+        tags:
+          - "菜单管理"
+        summary: "TODO: 补充 UpdateMenu 摘要"
+        description: "接口格式：PATCH /builtin/admin/api/v1/menus/{menu.id}。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteMenu
+      option:
+        tags:
+          - "菜单管理"
+        summary: "TODO: 补充 DeleteMenu 摘要"
+        description: "接口格式：DELETE /builtin/admin/api/v1/menus/{id}。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoles
       option:
         tags:
@@ -313,26 +303,6 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"roles":[{"id":"2001","parent_id":"0","code":"admin","display_name":"系统管理员","sort_order":10,"type":"SYSTEM","status":"ACTIVE","description":"系统内置管理员角色"},{"id":"2002","parent_id":"2001","code":"auditor","display_name":"审计员","sort_order":30,"type":"CUSTOM","status":"ACTIVE","description":"审计报表与日志查看角色"}],"next_page_token":"roles:cursor:2","total_size":2}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoleMembers
-      option:
-        tags:
-          - "角色管理"
-        summary: "角色主体绑定列表"
-        description: "接口格式：/builtin/admin/api/v1/roles/{parent}/members。parent 表示角色 ID。默认返回第一层主体绑定（bindings）；view=VIEW_FULL 时，members 返回展开后的有效用户 membership 结果。"
-        responses:
-          "200":
-            examples:
-              "application/json": '{"bindings":[{"id":"10","principal_type":"USER","principal_id":"1","principal_name":"系统管理员","principal_code":"admin","role_id":"2001","binding_status":"ACTIVE"},{"id":"11","principal_type":"GROUP","principal_id":"20","principal_name":"运维团队","principal_code":"ops-team","role_id":"2001","binding_status":"ACTIVE"},{"id":"12","principal_type":"DEPARTMENT","principal_id":"5001","principal_name":"风控中心","principal_code":"risk-center","role_id":"2001","binding_status":"DISABLED"}],"members":[],"next_page_token":"role-bindings:3","total_size":3}'
-    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleMember
-      option:
-        tags:
-          - "角色管理"
-        summary: "移除角色主体绑定"
-        description: "接口格式：/builtin/admin/api/v1/roles/{parent}/members/{principal_type}/{principal_id}。parent 表示角色 ID；支持删除 USER / GROUP / DEPARTMENT 三类主体绑定。"
-        responses:
-          "200":
-            examples:
-              "application/json": '{}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRole
       option:
         tags:
@@ -393,6 +363,106 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoleMembers
+      option:
+        tags:
+          - "角色管理"
+        summary: "角色主体绑定列表"
+        description: "接口格式：/builtin/admin/api/v1/roles/{parent}/members。parent 表示角色 ID。默认返回第一层主体绑定（bindings）；view=VIEW_FULL 时，members 返回展开后的有效用户 membership 结果。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"bindings":[{"id":"10","principal_type":"USER","principal_id":"1","principal_name":"系统管理员","principal_code":"admin","role_id":"2001","binding_status":"ACTIVE"},{"id":"11","principal_type":"GROUP","principal_id":"20","principal_name":"运维团队","principal_code":"ops-team","role_id":"2001","binding_status":"ACTIVE"},{"id":"12","principal_type":"DEPARTMENT","principal_id":"5001","principal_name":"风控中心","principal_code":"risk-center","role_id":"2001","binding_status":"DISABLED"}],"members":[],"next_page_token":"role-bindings:3","total_size":3}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleMember
+      option:
+        tags:
+          - "角色管理"
+        summary: "移除角色主体绑定"
+        description: "接口格式：/builtin/admin/api/v1/roles/{parent}/members/{principal_type}/{principal_id}。parent 表示角色 ID；支持删除 USER / GROUP / DEPARTMENT 三类主体绑定。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRoleMenus
+      option:
+        tags:
+          - "菜单管理"
+        summary: "TODO: 补充 CreateRoleMenus 摘要"
+        description: "接口格式：POST /builtin/admin/api/v1/roles/{parent}/menus。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateRoleMenus
+      option:
+        tags:
+          - "菜单管理"
+        summary: "TODO: 补充 UpdateRoleMenus 摘要"
+        description: "接口格式：PATCH /builtin/admin/api/v1/roles/{parent}/menus。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListRoleMenus
+      option:
+        tags:
+          - "菜单管理"
+        summary: "TODO: 补充 ListRoleMenus 摘要"
+        description: "接口格式：GET /builtin/admin/api/v1/roles/{parent}/menus。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRoleMenu
+      option:
+        tags:
+          - "菜单管理"
+        summary: "TODO: 补充 DeleteRoleMenu 摘要"
+        description: "接口格式：DELETE /builtin/admin/api/v1/roles/{parent}/menus/{menu_id}。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateRolePolicies
+      option:
+        tags:
+          - "策略管理"
+        summary: "TODO: 补充 CreateRolePolicies 摘要"
+        description: "接口格式：POST /builtin/admin/api/v1/roles/{parent}/policies。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateRolePolicies
+      option:
+        tags:
+          - "策略管理"
+        summary: "TODO: 补充 UpdateRolePolicies 摘要"
+        description: "接口格式：PATCH /builtin/admin/api/v1/roles/{parent}/policies。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListRolePolicies
+      option:
+        tags:
+          - "策略管理"
+        summary: "TODO: 补充 ListRolePolicies 摘要"
+        description: "接口格式：GET /builtin/admin/api/v1/roles/{parent}/policies。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteRolePolicy
+      option:
+        tags:
+          - "策略管理"
+        summary: "TODO: 补充 DeleteRolePolicy 摘要"
+        description: "接口格式：DELETE /builtin/admin/api/v1/roles/{parent}/policies/{policy_id}。前置条件与业务约束待补充。"
+        responses:
+          "200":
+            examples:
+              "application/json": "{}"
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDepartment
       option:
         tags:
@@ -469,6 +539,116 @@ openapiOptions:
           - "部门管理"
         summary: "移除部门成员"
         description: "接口格式：/builtin/admin/api/v1/departments/{department_id}/members/{user_id}。移除指定成员关系。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListUsers
+      option:
+        tags:
+          - "用户管理"
+        summary: "用户列表"
+        description: "接口格式：/builtin/admin/api/v1/users。支持分页、过滤与排序，返回用户集合。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"users":[{"id":"1001","username":"alice","nickname":"Alice Chen","profile":"资深风控审计员","picture":"https://cdn.example.com/avatars/alice.png","website":"https://intra.example.com/u/alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","phone_number":{"country_code":"86","national_number":"13900001234"},"email":"alice@example.com"},{"id":"1002","username":"bob","nickname":"Bob Li","profile":"平台研发工程师","picture":"https://cdn.example.com/avatars/bob.png","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"MALE","email":"bob@example.com"}],"next_page_token":"users:cursor:2","total_size":2}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateUser
+      option:
+        tags:
+          - "用户管理"
+        summary: "创建用户"
+        description: '接口格式：/builtin/admin/api/v1/users。根据 user 字段创建新用户。请求体示例：{"user":{"username":"alice","nickname":"Alice","type":"EMPLOYEE","status":"ACTIVE","email":"alice@example.com","phone_number":{"country_code":"86","national_number":"13900001234"}}}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"2","username":"alice","nickname":"Alice","profile":"风控审计员","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","phone_number":{"country_code":"86","national_number":"13900001234"},"email":"alice@example.com"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUser
+      option:
+        tags:
+          - "用户管理"
+        summary: "更新用户"
+        description: '接口格式：/builtin/admin/api/v1/users/{user.id}。按请求中的 user/update_mask 更新指定用户。请求体示例：{"user":{"id":"1001","nickname":"Alice Chen","profile":"资深风控审计员"},"update_mask":{"paths":["nickname","profile"]}}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"2","username":"alice","nickname":"Alice Chen","profile":"资深风控审计员","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","email":"alice.chen@example.com"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetUser
+      option:
+        tags:
+          - "用户管理"
+        summary: "获取用户详情"
+        description: "接口格式：/builtin/admin/api/v1/users/{id}。根据用户 ID 获取用户详情。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"1001","username":"alice","nickname":"Alice Chen","profile":"资深风控审计员","picture":"https://cdn.example.com/avatars/alice.png","website":"https://intra.example.com/u/alice","timezone":"Asia/Shanghai","locale":"zh-CN","type":"EMPLOYEE","status":"ACTIVE","gender":"FEMALE","phone_number":{"country_code":"86","national_number":"13900001234"},"email":"alice@example.com"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateUserPassword
+      option:
+        tags:
+          - "用户管理"
+        summary: "更新用户密码"
+        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/password。更新指定用户密码（传递哈希值）。前置条件：仅允许本人或具备最小权限的管理员调用，服务端应审计密码变更并禁止记录明文密码或明文哈希。请求体示例：{"user_id":"1001","old_password_hash":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a","new_password_hash":"5e884898da28047151d0e56f8dc6292773603d0d"}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.VerifyAuthMFA
+      option:
+        tags:
+          - "MFA 多因素认证"
+        summary: "登录 MFA 验证"
+        description: '接口格式：/builtin/admin/api/v1/auth/mfa/verify。在 CreateAuthLogin 返回 mfa_required=true 后，前端调用此接口完成 TOTP 二步验证。前置条件：challenge_id 必须来自未过期登录挑战，服务端应审计验证失败次数并禁止重复使用已完成挑战。请求体示例：{"challenge_id":"uuid-xxx","totp_code":"123456"}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"access_token":"eyJhbGci...","token_type":"Bearer","expires_in":86400}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.StartAuthMFASetup
+      option:
+        tags:
+          - "MFA 多因素认证"
+        summary: "登录态首次配置 MFA（开始）"
+        description: '接口格式：/builtin/admin/api/v1/auth/mfa/setup/start。当登录返回 challenge_type=TOTP_SETUP 时，调用本接口获取二维码和密钥。前置条件：challenge_id 必须来自当前登录态且未过期，返回的 secret 仅允许本次配置流程使用并应写入审计日志。请求体示例：{"challenge_id":"uuid-xxx"}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"secret":"JBSWY3DPEHPK3PXP","qr_uri":"otpauth://totp/KnownAdmin:alice?secret=JBSWY3DPEHPK3PXP&issuer=KnownAdmin","setup_challenge_id":"uuid-setup-xxx"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ConfirmAuthMFASetup
+      option:
+        tags:
+          - "MFA 多因素认证"
+        summary: "登录态首次配置 MFA（确认）"
+        description: '接口格式：/builtin/admin/api/v1/auth/mfa/setup/confirm。输入 6 位 TOTP 验证码确认绑定并签发登录 token。前置条件：setup_challenge_id 必须与开始阶段返回值匹配且未过期，服务端应审计确认结果并禁止跳过验证码校验直接签发 token。请求体示例：{"setup_challenge_id":"uuid-setup-xxx","totp_code":"123456"}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"access_token":"eyJhbGci...","token_type":"Bearer","expires_in":86400}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.SetupUserMFA
+      option:
+        tags:
+          - "MFA 多因素认证"
+        summary: "设置 MFA（获取密钥和二维码）"
+        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/setup。为指定用户生成 TOTP 密钥和 otpauth URI，前端据此展示二维码供用户扫描。前置条件：仅允许具备最小权限的管理员或用户本人发起，生成的 secret 仅允许短时展示并应审计发放行为。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"secret":"JBSWY3DPEHPK3PXP","qr_uri":"otpauth://totp/KnownAdmin:alice?secret=JBSWY3DPEHPK3PXP&issuer=KnownAdmin","challenge_id":"uuid-xxx"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ConfirmUserMFA
+      option:
+        tags:
+          - "MFA 多因素认证"
+        summary: "确认开启 MFA"
+        description: '接口格式：/builtin/admin/api/v1/auth/mfa/confirm。用户扫码绑定验证器后输入 6 位 TOTP 码确认开启 MFA。前置条件：challenge_id 必须来自未完成的绑定流程，服务端应审计启用行为并禁止返回已使用过的恢复码。请求体示例：{"challenge_id":"uuid-xxx","totp_code":"123456"}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"recovery_codes":["a1b2c3d4","e5f6g7h8","i9j0k1l2","m3n4o5p6","q7r8s9t0","u1v2w3x4","y5z6a7b8","c9d0e1f2"]}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DisableUserMFA
+      option:
+        tags:
+          - "MFA 多因素认证"
+        summary: "关闭 MFA"
+        description: '接口格式：/builtin/admin/api/v1/users/{user_id}/mfa/disable。验证当前 TOTP 码或恢复码后关闭指定用户的 MFA。请求体示例：{"user_id":"1001","totp_code":"123456"}。'
         responses:
           "200":
             examples:
@@ -568,7 +748,7 @@ openapiOptions:
         tags:
           - "安全相关"
         summary: "创建凭证"
-        description: '接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。请求体示例：{"credential":{"code":"admin-jwks","type":"JWKS","algorithm":"RSA","usage":"AUTH","status":"ACTIVE","source":"SYSTEM","jwks_uri":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oatuh2/jwks"}}。'
+        description: '接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。前置条件：仅允许具备密钥管理权限的管理员调用，禁止回传私钥材料，新增或轮换操作必须写入审计日志。请求体示例：{"credential":{"code":"admin-jwks","type":"JWKS","algorithm":"RSA","usage":"AUTH","status":"ACTIVE","source":"SYSTEM","jwks_uri":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oatuh2/jwks"}}。'
         responses:
           "200":
             examples:
@@ -578,7 +758,7 @@ openapiOptions:
         tags:
           - "安全相关"
         summary: "获取 OAuth2 Discovery"
-        description: "接口格式：/builtin/admin/api/v1/oatuh2/.well-known/openid-configuration。注意当前路径使用 oatuh2（历史拼写）。"
+        description: "接口格式：/builtin/admin/api/v1/oatuh2/.well-known/openid-configuration。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许通过 HTTPS 暴露 issuer 元数据，配置变更应纳入审计。"
         responses:
           "200":
             examples:
@@ -588,7 +768,7 @@ openapiOptions:
         tags:
           - "安全相关"
         summary: "获取 OAuth2 JSON Web Keys"
-        description: "接口格式：/builtin/admin/api/v1/oatuh2/jwks。注意当前路径使用 oatuh2（历史拼写）。"
+        description: "接口格式：/builtin/admin/api/v1/oatuh2/jwks。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许发布 ACTIVE 且可公开的签名密钥，禁止返回私钥或对称密钥材料。"
         responses:
           "200":
             examples:
@@ -598,7 +778,7 @@ openapiOptions:
         tags:
           - "安全相关"
         summary: "获取 OAuth2 Userinfo"
-        description: "接口格式：/builtin/admin/api/v1/oatuh2/userinfo。注意当前路径使用 oatuh2（历史拼写）。"
+        description: "接口格式：/builtin/admin/api/v1/oatuh2/userinfo。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许携带有效 access_token 调用，服务端应按最小权限返回 claims 并审计访问。"
         responses:
           "200":
             examples:
