@@ -492,6 +492,32 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 		}
 	}
 
+	if c.Frontend.hasEnableOpenapi() {
+		adminSwaggerBody, err := adminv1.Assets.ReadFile("openapi/admin.swagger.json")
+		if err != nil {
+			return err
+		}
+
+		adminSwaggerPath := strings.TrimSuffix(c.Frontend.Interface.Openapi.HandleURL, "/") + "/admin.swagger.json"
+		if adminSwaggerPath == "/admin.swagger.json" && c.Frontend.Interface.Openapi.HandleURL == "/" {
+			adminSwaggerPath = "/admin.swagger.json"
+		}
+
+		var adminSwaggerHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Cache-Control", "public, max-age=3600")
+			_, _ = w.Write(adminSwaggerBody)
+		})
+
+		if c.Frontend.Interface.Openapi.Tracing {
+			adminSwaggerHandler = c.HTTPHandler(adminSwaggerHandler)
+		} else {
+			adminSwaggerHandler = c.Security.addHTTPHandler(adminSwaggerHandler)
+		}
+
+		mux.Handle(adminSwaggerPath, adminSwaggerHandler)
+	}
+
 	return nil
 }
 

@@ -201,9 +201,9 @@ func (f *FrontendConfig) getHandler(assets fs.FS, kind string) (http.Handler, st
 
 	var handle http.Handler
 	if embedded {
-		handle = http.FileServer(customFileSystem{http.FS(content)})
+		handle = http.FileServer(customFileSystem{FileSystem: http.FS(content)})
 	} else {
-		handle = http.FileServer(customFileSystem{http.Dir(fmt.Sprintf("./public/%v/", kind))})
+		handle = http.FileServer(customFileSystem{FileSystem: http.Dir(fmt.Sprintf("./public/%v/", kind))})
 	}
 	if err != nil {
 		return handle, "", true, err
@@ -215,6 +215,18 @@ func (f *FrontendConfig) getHandler(assets fs.FS, kind string) (http.Handler, st
 	}
 
 	return handle, handleURL, true, nil
+}
+
+func (f *FrontendConfig) hasEnableOpenapi() bool {
+	if f.Enable == nil || !*f.Enable {
+		return false
+	}
+
+	if f.Interface.Openapi == nil || !*f.Interface.Openapi.Enabled {
+		return false
+	}
+
+	return true
 }
 
 func (f *FrontendConfig) hasEnableAdmin() bool {
