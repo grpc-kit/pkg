@@ -135,7 +135,8 @@ func (Structure) EnumDescriptor() ([]byte, []int) {
 	return file_known_admin_v1_admin_common_proto_rawDescGZIP(), []int{1}
 }
 
-// 可见性是“前置过滤”，权限是“后置校验”
+// 可见性与权限是不同维度：可见性用于资源发现范围控制，权限用于最终访问或操作校验。
+// 具体实体可以按自身模型决定可见性在链路中的生效阶段。
 // 通用：部门/资源/凭证的可见性策略
 type Visibility int32
 
@@ -2263,16 +2264,19 @@ type Menu struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	ParentId    int64                  `protobuf:"varint,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
-	Code        string                 `protobuf:"bytes,4,opt,name=code,proto3" json:"code,omitempty"`
-	DisplayName string                 `protobuf:"bytes,5,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	RoutePath   string                 `protobuf:"bytes,6,opt,name=route_path,json=routePath,proto3" json:"route_path,omitempty"`
-	Component   string                 `protobuf:"bytes,7,opt,name=component,proto3" json:"component,omitempty"`
-	Icon        string                 `protobuf:"bytes,8,opt,name=icon,proto3" json:"icon,omitempty"`
-	SortOrder   int32                  `protobuf:"varint,9,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
-	Metadata    map[string]string      `protobuf:"bytes,11,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	Children    []*Menu                `protobuf:"bytes,12,rep,name=children,proto3" json:"children,omitempty"`
+	Id          int64             `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ParentId    int64             `protobuf:"varint,2,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
+	Code        string            `protobuf:"bytes,4,opt,name=code,proto3" json:"code,omitempty"`
+	DisplayName string            `protobuf:"bytes,5,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	RoutePath   string            `protobuf:"bytes,6,opt,name=route_path,json=routePath,proto3" json:"route_path,omitempty"`
+	Component   string            `protobuf:"bytes,7,opt,name=component,proto3" json:"component,omitempty"`
+	Icon        string            `protobuf:"bytes,8,opt,name=icon,proto3" json:"icon,omitempty"`
+	SortOrder   int32             `protobuf:"varint,9,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	Metadata    map[string]string `protobuf:"bytes,11,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	Children    []*Menu           `protobuf:"bytes,12,rep,name=children,proto3" json:"children,omitempty"`
+	// Visibility 菜单可见性，作为 role_menus 授权之后的附加过滤条件。
+	// 当前菜单场景优先使用 GLOBAL 与 RESTRICTED 两档明确语义；
+	// SUBTREE / LOCAL / SPECIFIC 先保留枚举定义，待菜单补齐组织归属或白名单模型后再扩展运行时语义。
 	Visibility  Visibility             `protobuf:"varint,13,opt,name=visibility,proto3,enum=grpc_kit.api.known.admin.v1.Visibility" json:"visibility,omitempty"`
 	Description string                 `protobuf:"bytes,14,opt,name=description,proto3" json:"description,omitempty"`
 	Protected   bool                   `protobuf:"varint,15,opt,name=protected,proto3" json:"protected,omitempty"`

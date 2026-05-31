@@ -12,9 +12,9 @@ import (
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/menus"
-	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
 	"github.com/grpc-kit/pkg/lion/schema"
+	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -128,8 +128,72 @@ func menuVisibilityFromProto(v adminv1.Visibility) string {
 	case adminv1.Visibility_VISIBILITY_SPECIFIC:
 		return "specific"
 	default:
-		return "full"
+		return "global"
 	}
+}
+
+func hasSuperadminMenuAccess(ctx context.Context) bool {
+	groups, ok := rpc.GetGroupsFromContext(ctx)
+	if !ok {
+		return false
+	}
+	superadminCode := seedRoleCode(adminv1.RoleCode_ROLE_CODE_SUPERADMIN)
+	for _, group := range groups {
+		if group == superadminCode {
+			return true
+		}
+	}
+	return false
+}
+
+// filterMenusByVisibility applies the runtime menu visibility narrowing after role_menus authorization.
+// For menus, only RESTRICTED currently has active runtime semantics; other values are retained as attributes.
+func filterMenusByVisibility(items []*lion.Menus, userID int64, isSuperadmin bool) []*lion.Menus {
+	filtered := make([]*lion.Menus, 0, len(items))
+	for _, item := range items {
+		if item == nil {
+			continue
+		}
+		if menuVisibilityToProto(item.Visibility) == adminv1.Visibility_VISIBILITY_RESTRICTED && !isSuperadmin && item.CreatedBy != userID {
+			continue
+		}
+		filtered = append(filtered, item)
+	}
+	return filtered
+}
+
+func pruneMenusWithoutVisibleAncestors(items []*lion.Menus) []*lion.Menus {
+	if len(items) == 0 {
+		return items
+	}
+	menuByID := make(map[int]*lion.Menus, len(items))
+	for _, item := range items {
+		if item == nil {
+			continue
+		}
+		menuByID[item.ID] = item
+	}
+
+	pruned := make([]*lion.Menus, 0, len(items))
+	for _, item := range items {
+		if item == nil {
+			continue
+		}
+		currentParentID := item.ParentID
+		visible := true
+		for currentParentID != 0 {
+			parent, ok := menuByID[int(currentParentID)]
+			if !ok || parent == nil {
+				visible = false
+				break
+			}
+			currentParentID = parent.ParentID
+		}
+		if visible {
+			pruned = append(pruned, item)
+		}
+	}
+	return pruned
 }
 
 func lionMenuToProto(in *lion.Menus) *adminv1.Menu {
@@ -254,6 +318,42 @@ func sortLionMenus(items []*lion.Menus, orderBy string) {
 	}
 }
 
+func buildMenuTree(items []*lion.Menus) []*adminv1.Menu {
+	menuMap := make(map[int64]*adminv1.Menu, len(items))
+	roots := make([]*adminv1.Menu, 0)
+	for _, item := range items {
+		menuMap[int64(item.ID)] = lionMenuToProto(item)
+	}
+	for _, item := range items {
+		current := menuMap[int64(item.ID)]
+		if item.ParentID == 0 {
+			roots = append(roots, current)
+			continue
+		}
+		if parent, ok := menuMap[item.ParentID]; ok {
+			parent.Children = append(parent.Children, current)
+		} else {
+			roots = append(roots, current)
+		}
+	}
+	var sortMenus func(items []*adminv1.Menu)
+	sortMenus = func(items []*adminv1.Menu) {
+		sort.Slice(items, func(i, j int) bool {
+			if items[i].SortOrder == items[j].SortOrder {
+				return items[i].Id < items[j].Id
+			}
+			return items[i].SortOrder < items[j].SortOrder
+		})
+		for _, item := range items {
+			if len(item.Children) > 0 {
+				sortMenus(item.Children)
+			}
+		}
+	}
+	sortMenus(roots)
+	return roots
+}
+
 func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusRequest) (*adminv1.ListMenusResponse, error) {
 	result := &adminv1.ListMenusResponse{}
 	db, err := a.GetLionClient()
@@ -275,186 +375,66 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 		return result, nil
 	}
 	pageSize := GetPageSizeByStructure(ctx, req.PageSize, req.Structure)
-	if strings.TrimSpace(req.GetCode()) != "" {
-		list, err := db.Menus.Query().
-			Where(menus.IDIn(allowedMenuIDs...)).
-			All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		list = filterMenusByCode(list, req.GetCode())
-		list = filterMenusByKeyword(list, req.Filter)
-		sortLionMenus(list, req.OrderBy)
-		result.TotalSize = int32(len(list))
+	userID, _ := GetUserID(ctx)
+	isSuperadmin := hasSuperadminMenuAccess(ctx)
 
-		start := 0
-		if req.GetPageToken() != "" {
-			data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
-			if err != nil {
-				return nil, fmt.Errorf("invalid page_token: %w", err)
-			}
-			var lastID int
-			if err := json.Unmarshal(data, &lastID); err != nil {
-				return nil, fmt.Errorf("invalid page_token format: %w", err)
-			}
-			for index, item := range list {
-				if item.ID == lastID {
-					start = index + 1
-					break
-				}
-			}
-		}
-		switch p := req.GetPagination().(type) {
-		case *adminv1.ListMenusRequest_Offset:
-			if p.Offset > 0 {
-				start = int(p.Offset)
-			}
-		}
-		if start > len(list) {
-			start = len(list)
-		}
-		end := start + int(pageSize)
-		if end > len(list) {
-			end = len(list)
-		}
-		list = list[start:end]
-
-		if req.Structure == adminv1.Structure_STRUCTURE_TREE || req.Structure == adminv1.Structure_STRUCTURE_TREE_EXPANDED {
-			menuMap := make(map[int64]*adminv1.Menu, len(list))
-			roots := make([]*adminv1.Menu, 0)
-			for _, item := range list {
-				menuMap[int64(item.ID)] = lionMenuToProto(item)
-			}
-			for _, item := range list {
-				current := menuMap[int64(item.ID)]
-				if item.ParentID == 0 {
-					roots = append(roots, current)
-					continue
-				}
-				if parent, ok := menuMap[item.ParentID]; ok {
-					parent.Children = append(parent.Children, current)
-				} else {
-					roots = append(roots, current)
-				}
-			}
-			var sortMenus func(items []*adminv1.Menu)
-			sortMenus = func(items []*adminv1.Menu) {
-				sort.Slice(items, func(i, j int) bool {
-					if items[i].SortOrder == items[j].SortOrder {
-						return items[i].Id < items[j].Id
-					}
-					return items[i].SortOrder < items[j].SortOrder
-				})
-				for _, item := range items {
-					if len(item.Children) > 0 {
-						sortMenus(item.Children)
-					}
-				}
-			}
-			sortMenus(roots)
-			result.Menus = roots
-		} else {
-			for _, item := range list {
-				result.Menus = append(result.Menus, lionMenuToProto(item))
-			}
-		}
-		if end < int(result.TotalSize) && len(list) > 0 {
-			data, _ := json.Marshal(list[len(list)-1].ID)
-			result.NextPageToken = base64.StdEncoding.EncodeToString(data)
-		}
-		return result, nil
-	}
-
-	query := db.Menus.Query()
-	where := make([]predicate.Menus, 0)
-	where = append(where, menus.IDIn(allowedMenuIDs...))
-	if strings.TrimSpace(req.Filter) != "" {
-		where = append(where, menus.Or(
-			menus.CodeContainsFold(req.Filter),
-			menus.DisplayNameContainsFold(req.Filter),
-			menus.RoutePathContainsFold(req.Filter),
-		))
-	}
-	if len(where) > 0 {
-		query = query.Where(where...)
-	}
-	switch req.OrderBy {
-	case "sort_order desc":
-		query = query.Order(lion.Desc(menus.FieldSortOrder), lion.Desc(menus.FieldID))
-	case "create_time desc":
-		query = query.Order(lion.Desc(menus.FieldCreatedAt))
-	case "create_time asc":
-		query = query.Order(lion.Asc(menus.FieldCreatedAt))
-	default:
-		query = query.Order(lion.Asc(menus.FieldSortOrder), lion.Asc(menus.FieldID))
-	}
-	totalSize, err := query.Clone().Count(ctx)
+	list, err := db.Menus.Query().
+		Where(menus.IDIn(allowedMenuIDs...)).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	result.TotalSize = int32(totalSize)
-	var lastID int
+	list = filterMenusByVisibility(list, userID, isSuperadmin)
+	if req.Structure == adminv1.Structure_STRUCTURE_TREE || req.Structure == adminv1.Structure_STRUCTURE_TREE_EXPANDED {
+		list = pruneMenusWithoutVisibleAncestors(list)
+	}
+	if strings.TrimSpace(req.GetCode()) != "" {
+		list = filterMenusByCode(list, req.GetCode())
+	}
+	list = filterMenusByKeyword(list, req.Filter)
+	sortLionMenus(list, req.OrderBy)
+	result.TotalSize = int32(len(list))
+
+	start := 0
 	if req.GetPageToken() != "" {
 		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
 		if err != nil {
 			return nil, fmt.Errorf("invalid page_token: %w", err)
 		}
+		var lastID int
 		if err := json.Unmarshal(data, &lastID); err != nil {
 			return nil, fmt.Errorf("invalid page_token format: %w", err)
 		}
-		if lastID > 0 {
-			query = query.Where(menus.IDGT(lastID))
+		for index, item := range list {
+			if item.ID == lastID {
+				start = index + 1
+				break
+			}
 		}
 	}
 	switch p := req.GetPagination().(type) {
 	case *adminv1.ListMenusRequest_Offset:
-		query = query.Offset(int(p.Offset))
-	case *adminv1.ListMenusRequest_PageToken:
+		if p.Offset > 0 {
+			start = int(p.Offset)
+		}
 	}
-	list, err := query.Limit(int(pageSize)).All(ctx)
-	if err != nil {
-		return nil, err
+	if start > len(list) {
+		start = len(list)
 	}
+	end := start + int(pageSize)
+	if end > len(list) {
+		end = len(list)
+	}
+	list = list[start:end]
+
 	if req.Structure == adminv1.Structure_STRUCTURE_TREE || req.Structure == adminv1.Structure_STRUCTURE_TREE_EXPANDED {
-		menuMap := make(map[int64]*adminv1.Menu, len(list))
-		roots := make([]*adminv1.Menu, 0)
-		for _, item := range list {
-			menuMap[int64(item.ID)] = lionMenuToProto(item)
-		}
-		for _, item := range list {
-			current := menuMap[int64(item.ID)]
-			if item.ParentID == 0 {
-				roots = append(roots, current)
-				continue
-			}
-			if parent, ok := menuMap[item.ParentID]; ok {
-				parent.Children = append(parent.Children, current)
-			} else {
-				roots = append(roots, current)
-			}
-		}
-		var sortMenus func(items []*adminv1.Menu)
-		sortMenus = func(items []*adminv1.Menu) {
-			sort.Slice(items, func(i, j int) bool {
-				if items[i].SortOrder == items[j].SortOrder {
-					return items[i].Id < items[j].Id
-				}
-				return items[i].SortOrder < items[j].SortOrder
-			})
-			for _, item := range items {
-				if len(item.Children) > 0 {
-					sortMenus(item.Children)
-				}
-			}
-		}
-		sortMenus(roots)
-		result.Menus = roots
+		result.Menus = buildMenuTree(list)
 	} else {
 		for _, item := range list {
 			result.Menus = append(result.Menus, lionMenuToProto(item))
 		}
 	}
-	if len(list) == int(pageSize) && len(list) > 0 {
+	if end < int(result.TotalSize) && len(list) > 0 {
 		data, _ := json.Marshal(list[len(list)-1].ID)
 		result.NextPageToken = base64.StdEncoding.EncodeToString(data)
 	}

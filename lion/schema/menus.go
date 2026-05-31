@@ -45,8 +45,8 @@ func (Menus) Fields() []ent.Field {
 			Comment("菜单排序顺序"),
 		field.String("visibility").
 			MaxLen(16).
-			Default("full").
-			Comment("菜单可见性"),
+			Default("global").
+			Comment("菜单可见性；当前主授权仍由角色菜单关联决定，visibility 仅作为附加属性/过滤条件"),
 		field.String("menu_status").
 			MaxLen(16).
 			Default("active").

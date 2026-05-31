@@ -40,7 +40,7 @@ type Menus struct {
 	Icon string `json:"icon,omitempty"`
 	// 菜单排序顺序
 	SortOrder int `json:"sort_order,omitempty"`
-	// 菜单可见性
+	// 菜单可见性；当前主授权仍由角色菜单关联决定，visibility 仅作为附加属性/过滤条件
 	Visibility string `json:"visibility,omitempty"`
 	// 菜单状态
 	MenuStatus string `json:"menu_status,omitempty"`
