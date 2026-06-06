@@ -1039,7 +1039,7 @@
           },
           {
             "name": "department",
-            "description": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能",
+            "description": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能\n\n字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
             "in": "body",
             "required": true,
             "schema": {
@@ -1068,22 +1068,6 @@
                   "type": "integer",
                   "format": "int32",
                   "title": "SortOrder 部门排序顺序，用于同级部门的显示顺序\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
-                },
-                "members": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1Membership"
-                  },
-                  "title": "Members 部门成员列表"
-                },
-                "children": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/v1Department"
-                  },
-                  "title": "Children 直接子部门列表，用于构建完整的组织树\n仅包含直接下级，避免深度递归查询\n建议在需要完整树结构时通过专门的服务接口获取"
                 },
                 "email": {
                   "type": "string",
@@ -1121,6 +1105,34 @@
                   },
                   "title": "Metadata 扩展元数据，存储自定义业务属性\n键值对格式，支持灵活的业务扩展需求\n示例：{\"location\": \"北京\", \"floor\": \"15F\", \"capacity\": \"50\"}"
                 },
+                "description": {
+                  "type": "string",
+                  "title": "Description 部门描述信息，详细说明部门职责和业务范围\n用于组织介绍、职责说明、业务范围描述等\n建议长度：500 字符以内，支持富文本格式"
+                },
+                "visibility": {
+                  "$ref": "#/definitions/v1Visibility",
+                  "title": "Visibility 部门及成员列表的可见性策略（使用公共枚举 Visibility）"
+                },
+                "protected": {
+                  "type": "boolean",
+                  "title": "Protected 是否为系统内置/受保护的部门，受保护的部门不可删除"
+                },
+                "members": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1Membership"
+                  },
+                  "title": "Members 部门成员列表"
+                },
+                "children": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/v1Department"
+                  },
+                  "title": "Children 直接子部门列表，用于构建完整的组织树\n仅包含直接下级，避免深度递归查询\n建议在需要完整树结构时通过专门的服务接口获取"
+                },
                 "created_by": {
                   "type": "string",
                   "format": "int64",
@@ -1145,19 +1157,9 @@
                   "type": "string",
                   "format": "date-time",
                   "title": "DeletedAt 软删除时间戳，支持数据恢复\n非空表示已删除，空值表示正常状态\n实现软删除机制，保护重要组织数据"
-                },
-                "description": {
-                  "type": "string",
-                  "title": "Description 部门描述信息，详细说明部门职责和业务范围\n用于组织介绍、职责说明、业务范围描述等\n建议长度：500 字符以内，支持富文本格式"
-                },
-                "visibility": {
-                  "$ref": "#/definitions/v1Visibility",
-                  "title": "Visibility 部门及成员列表的可见性策略（使用公共枚举 Visibility）"
-                },
-                "protected": {
-                  "type": "boolean"
                 }
               },
+              "description": "字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
               "title": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能"
             }
           }
@@ -1892,67 +1894,54 @@
                   "$ref": "#/definitions/v1GroupStatus"
                 },
                 "display_name": {
-                  "type": "string",
-                  "title": "DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明\n用于群组名称的多语言显示，提升群组管理的用户体验和可读性"
+                  "type": "string"
                 },
                 "sort_order": {
                   "type": "integer",
-                  "format": "int32",
-                  "title": "SortOrder 群组排序顺序，用于群组在列表中的显示顺序（扁平结构）\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
+                  "format": "int32"
                 },
                 "max_members": {
                   "type": "integer",
-                  "format": "int32",
-                  "title": "MaxMembers 群组最大成员数量限制，0表示不限制"
+                  "format": "int32"
                 },
                 "metadata": {
                   "type": "object",
                   "additionalProperties": {
                     "type": "string"
-                  },
-                  "title": "Metadata 元数据，用于存储自定义属性，支持业务扩展"
+                  }
                 },
                 "description": {
-                  "type": "string",
-                  "title": "Description 群组描述，详细说明群组的目的和用途"
-                },
-                "created_by": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "CreatedBy 群组创建者/所有者ID，记录创建该群组的用户"
-                },
-                "updated_by": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "UpdatedBy 群组最后更新者，记录最后修改该群组的用户"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "CreatedAt 创建时间，记录群组的创建时间戳"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "UpdatedAt 更新时间，记录群组的最后修改时间戳"
-                },
-                "deleted_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "title": "DeletedAt 软删除时间戳，非空表示已删除，空值表示正常状态"
+                  "type": "string"
                 },
                 "visibility": {
-                  "$ref": "#/definitions/v1Visibility",
-                  "title": "Visibility 群组可见性，控制群组是否对外可见"
+                  "$ref": "#/definitions/v1Visibility"
                 },
                 "ref_id": {
                   "type": "string",
-                  "format": "int64",
-                  "title": "RefID 类型关联引用ID，根据 type 赋予不同语义：\n  DEPARTMENT → 关联部门ID (departments.id)\n  ROLE       → 关联角色ID (roles.id)\n  其他类型   → 0"
+                  "format": "int64"
                 },
                 "ref_expr": {
+                  "type": "string"
+                },
+                "created_by": {
                   "type": "string",
-                  "title": "RefExpr 类型关联表达式，根据 type 赋予不同语义：\n  DYNAMIC  → 成员过滤规则，如 \"user_type = 10 AND user_status = 3\"\n  SYSTEM   → 同 DYNAMIC，成员过滤规则（系统内置，创建后不可修改）\n  EXTERNAL → 外部源描述(JSON)，如 {\"external_id\":\"ldap-001\",\"external_source\":\"ldap\"}\n  其他类型 → 空字符串"
+                  "format": "int64"
+                },
+                "updated_by": {
+                  "type": "string",
+                  "format": "int64"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "deleted_at": {
+                  "type": "string",
+                  "format": "date-time"
                 }
               },
               "title": "Group 群组实体，表示一类相同维度的用户集合，扁平结构不支持树形\n该模型用于描述系统中各类用户分组，支持多维度的用户组织与管理"
@@ -2745,8 +2734,7 @@
                   }
                 },
                 "visibility": {
-                  "$ref": "#/definitions/v1Visibility",
-                  "title": "Visibility 菜单可见性，作为 role_menus 授权之后的附加过滤条件。\n当前菜单场景优先使用 GLOBAL 与 RESTRICTED 两档明确语义；\nSUBTREE / LOCAL / SPECIFIC 先保留枚举定义，待菜单补齐组织归属或白名单模型后再扩展运行时语义。"
+                  "$ref": "#/definitions/v1Visibility"
                 },
                 "description": {
                   "type": "string"
@@ -3211,21 +3199,18 @@
                 "status": {
                   "$ref": "#/definitions/v1PolicyStatus"
                 },
+                "description": {
+                  "type": "string"
+                },
                 "protected": {
-                  "type": "boolean",
-                  "title": "Protected 是否为系统内置/受保护的策略，受保护的策略不可删除"
+                  "type": "boolean"
                 },
                 "statements": {
                   "type": "array",
                   "items": {
                     "type": "object",
                     "$ref": "#/definitions/v1PolicyStatement"
-                  },
-                  "title": "Statements 该策略下挂载的语句集合"
-                },
-                "description": {
-                  "type": "string",
-                  "title": "Description 策略描述，详细说明策略职责和业务范围"
+                  }
                 },
                 "created_by": {
                   "type": "string",
@@ -3318,21 +3303,18 @@
                 "status": {
                   "$ref": "#/definitions/v1PolicyStatus"
                 },
+                "description": {
+                  "type": "string"
+                },
                 "protected": {
-                  "type": "boolean",
-                  "title": "Protected 是否为系统内置/受保护的策略，受保护的策略不可删除"
+                  "type": "boolean"
                 },
                 "statements": {
                   "type": "array",
                   "items": {
                     "type": "object",
                     "$ref": "#/definitions/v1PolicyStatement"
-                  },
-                  "title": "Statements 该策略下挂载的语句集合"
-                },
-                "description": {
-                  "type": "string",
-                  "title": "Description 策略描述，详细说明策略职责和业务范围"
+                  }
                 },
                 "created_by": {
                   "type": "string",
@@ -4466,39 +4448,44 @@
               "properties": {
                 "parent_id": {
                   "type": "string",
-                  "format": "int64",
-                  "title": "ParentID 父角色ID，构建树形组织结构\n值为 0 表示顶级角色（如：系统内置角色）\n支持多级嵌套，建议层级深度不超过 3 级以保证查询性能"
+                  "format": "int64"
                 },
                 "code": {
-                  "type": "string",
-                  "title": "Code 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号，不允许连续分隔符，以字母或数字结尾\n长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：手动 \"admin\"、\"user.manager\"；自动 \"a7k2m3x9b5f1\""
+                  "type": "string"
                 },
                 "display_name": {
-                  "type": "string",
-                  "title": "DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明\n用于角色名称的多语言显示，便于不同地区用户理解角色含义"
+                  "type": "string"
                 },
                 "sort_order": {
                   "type": "integer",
-                  "format": "int32",
-                  "title": "SortOrder 角色排序顺序，用于同级角色的显示顺序\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
+                  "format": "int32"
                 },
                 "type": {
-                  "$ref": "#/definitions/v1RoleType",
-                  "title": "type 角色类型，决定角色的管理策略和可操作性"
+                  "$ref": "#/definitions/v1RoleType"
                 },
                 "status": {
-                  "$ref": "#/definitions/v1RoleStatus",
-                  "title": "status 角色状态，控制角色是否可用和权限是否生效"
+                  "$ref": "#/definitions/v1RoleStatus"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "protected": {
+                  "type": "boolean"
+                },
+                "children": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "$ref": "#/definitions/adminv1Role"
+                  }
                 },
                 "created_by": {
                   "type": "string",
-                  "format": "int64",
-                  "title": "CreatedBy 创建者用户ID，记录部门创建人\n用于审计追踪和权限验证"
+                  "format": "int64"
                 },
                 "updated_by": {
                   "type": "string",
-                  "format": "int64",
-                  "title": "UpdatedBy 最后更新者用户ID，记录最近修改人\n用于变更追踪和责任确认"
+                  "format": "int64"
                 },
                 "created_at": {
                   "type": "string",
@@ -4507,20 +4494,6 @@
                 "updated_at": {
                   "type": "string",
                   "format": "date-time"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "children": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "$ref": "#/definitions/adminv1Role"
-                  },
-                  "title": "Children 直接子角色列表，用于构建完整的角色树"
-                },
-                "protected": {
-                  "type": "boolean"
                 }
               },
               "title": "Role 角色实体，表示用户在系统上的权限和功能"
@@ -5039,7 +5012,7 @@
           },
           {
             "name": "user",
-            "description": "User 用户实体，表示系统中的账号信息\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
+            "description": "User 用户实体，表示系统中的账号信息\n\n字段布局约定：标识区 → 基础属性区 → 审计区(时间+操作人连续) → 敏感字段区 → 扩展区 → 关系区\n注意：审计区放在敏感字段之前，保持审计字段的连续性\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
             "in": "body",
             "required": true,
             "schema": {
@@ -5105,6 +5078,16 @@
                   "format": "date-time",
                   "title": "删除时间"
                 },
+                "created_by": {
+                  "type": "string",
+                  "format": "int64",
+                  "title": "CreatedBy 创建者用户ID，记录部门创建人"
+                },
+                "updated_by": {
+                  "type": "string",
+                  "format": "int64",
+                  "title": "UpdatedBy 最后更新者用户ID，记录最近修改人"
+                },
                 "realname": {
                   "type": "string",
                   "title": "真实姓名，用于实名认证或后台展示"
@@ -5130,16 +5113,6 @@
                   "$ref": "#/definitions/v1Address",
                   "title": "地址信息"
                 },
-                "created_by": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "CreatedBy 创建者用户ID，记录部门创建人\n用于审计追踪和权限验证"
-                },
-                "updated_by": {
-                  "type": "string",
-                  "format": "int64",
-                  "title": "UpdatedBy 最后更新者用户ID，记录最近修改人\n用于变更追踪和责任确认"
-                },
                 "metadata": {
                   "type": "object",
                   "additionalProperties": {
@@ -5157,7 +5130,7 @@
                     "type": "object",
                     "$ref": "#/definitions/v1Membership"
                   },
-                  "title": "用户所属部门 membership 关系，字段名为兼容历史接口保留"
+                  "title": "用户所属部门 membership 关系"
                 },
                 "group_members": {
                   "type": "array",
@@ -5165,10 +5138,10 @@
                     "type": "object",
                     "$ref": "#/definitions/v1Membership"
                   },
-                  "title": "用户所属群组 membership 关系，字段名为兼容历史接口保留"
+                  "title": "用户所属群组 membership 关系"
                 }
               },
-              "description": "以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
+              "description": "字段布局约定：标识区 → 基础属性区 → 审计区(时间+操作人连续) → 敏感字段区 → 扩展区 → 关系区\n注意：审计区放在敏感字段之前，保持审计字段的连续性\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
               "title": "User 用户实体，表示系统中的账号信息"
             }
           }
@@ -5368,8 +5341,7 @@
         "pattern": {
           "type": "string"
         }
-      },
-      "title": "关联的资源"
+      }
     },
     "CredentialAlgorithm": {
       "type": "string",
@@ -5595,39 +5567,44 @@
         },
         "parent_id": {
           "type": "string",
-          "format": "int64",
-          "title": "ParentID 父角色ID，构建树形组织结构\n值为 0 表示顶级角色（如：系统内置角色）\n支持多级嵌套，建议层级深度不超过 3 级以保证查询性能"
+          "format": "int64"
         },
         "code": {
-          "type": "string",
-          "title": "Code 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号，不允许连续分隔符，以字母或数字结尾\n长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：手动 \"admin\"、\"user.manager\"；自动 \"a7k2m3x9b5f1\""
+          "type": "string"
         },
         "display_name": {
-          "type": "string",
-          "title": "DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明\n用于角色名称的多语言显示，便于不同地区用户理解角色含义"
+          "type": "string"
         },
         "sort_order": {
           "type": "integer",
-          "format": "int32",
-          "title": "SortOrder 角色排序顺序，用于同级角色的显示顺序\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
+          "format": "int32"
         },
         "type": {
-          "$ref": "#/definitions/v1RoleType",
-          "title": "type 角色类型，决定角色的管理策略和可操作性"
+          "$ref": "#/definitions/v1RoleType"
         },
         "status": {
-          "$ref": "#/definitions/v1RoleStatus",
-          "title": "status 角色状态，控制角色是否可用和权限是否生效"
+          "$ref": "#/definitions/v1RoleStatus"
+        },
+        "description": {
+          "type": "string"
+        },
+        "protected": {
+          "type": "boolean"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/adminv1Role"
+          }
         },
         "created_by": {
           "type": "string",
-          "format": "int64",
-          "title": "CreatedBy 创建者用户ID，记录部门创建人\n用于审计追踪和权限验证"
+          "format": "int64"
         },
         "updated_by": {
           "type": "string",
-          "format": "int64",
-          "title": "UpdatedBy 最后更新者用户ID，记录最近修改人\n用于变更追踪和责任确认"
+          "format": "int64"
         },
         "created_at": {
           "type": "string",
@@ -5636,20 +5613,6 @@
         "updated_at": {
           "type": "string",
           "format": "date-time"
-        },
-        "description": {
-          "type": "string"
-        },
-        "children": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/adminv1Role"
-          },
-          "title": "Children 直接子角色列表，用于构建完整的角色树"
-        },
-        "protected": {
-          "type": "boolean"
         }
       },
       "title": "Role 角色实体，表示用户在系统上的权限和功能"
@@ -5724,8 +5687,7 @@
           "format": "int64"
         },
         "code": {
-          "type": "string",
-          "title": "动作唯一编码，格式：{service.code}:{RpcMethod}"
+          "type": "string"
         },
         "grpc_method": {
           "type": "string"
@@ -5733,11 +5695,24 @@
         "display_name": {
           "type": "string"
         },
+        "description": {
+          "type": "string"
+        },
         "protected": {
           "type": "boolean"
         },
-        "description": {
-          "type": "string"
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "resource_selectors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/ActionResourceSelector"
+          }
         },
         "created_by": {
           "type": "string",
@@ -5754,22 +5729,10 @@
         "updated_at": {
           "type": "string",
           "format": "date-time"
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "resource_selectors": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/ActionResourceSelector"
-          }
         }
       },
-      "title": "Action 统一动作字典，用于定义“主体可以对资源做什么”。\n它是动作语义的唯一事实来源，应替代旧 scope 中 readonly / readwrite 一类表达。\n推荐约束：\n1. action 使用稳定编码，格式为 {service.code}:{RpcMethod}，如 admin.iam:ListUsers；\n2. action 本身不直接授予权限，必须与 policy statements 组合使用；\n3. resource_type_id 关联 lion_resource_types 表，可为空（跨类型动作）。"
+      "description": "字段布局约定：标识区 → 扩展区(description/protected) → 业务属性区(tags/selectors) → 审计区",
+      "title": "Action 统一动作字典，用于定义\"主体可以对资源做什么\"。\n它是动作语义的唯一事实来源，应替代旧 scope 中 readonly / readwrite 一类表达。\n推荐约束：\n1. action 使用稳定编码，格式为 {service.code}:{RpcMethod}，如 admin.iam:ListUsers；\n2. action 本身不直接授予权限，必须与 policy statements 组合使用；\n3. resource_type_id 关联 lion_resource_types 表，可为空（跨类型动作）。"
     },
     "v1Address": {
       "type": "object",
@@ -5853,41 +5816,33 @@
           "title": "IconURL 提供商图标地址，用于登录页面展示"
         },
         "ldap_config": {
-          "$ref": "#/definitions/v1LdapConfig",
-          "title": "LDAP 身份提供商配置，仅 type=LDAP 时使用"
+          "$ref": "#/definitions/v1LdapConfig"
         },
         "oauth_config": {
-          "$ref": "#/definitions/v1OAuthConfig",
-          "title": "OAuth2 系身份提供商通用配置\n适用于 type=OIDC/OAUTH2/GITHUB/GOOGLE/WECHAT"
+          "$ref": "#/definitions/v1OAuthConfig"
         },
         "protected": {
-          "type": "boolean",
-          "title": "======== 审计区（20-24） ========"
+          "type": "boolean"
         },
         "created_by": {
           "type": "string",
-          "format": "int64",
-          "title": "CreatedBy 创建者用户ID，记录该提供商的创建人"
+          "format": "int64"
         },
         "updated_by": {
           "type": "string",
-          "format": "int64",
-          "title": "UpdatedBy 最后更新者用户ID，记录最近修改人"
+          "format": "int64"
         },
         "created_at": {
           "type": "string",
-          "format": "date-time",
-          "title": "CreatedAt 创建时间戳"
+          "format": "date-time"
         },
         "updated_at": {
           "type": "string",
-          "format": "date-time",
-          "title": "UpdatedAt 最后更新时间戳"
+          "format": "date-time"
         },
         "deleted_at": {
           "type": "string",
-          "format": "date-time",
-          "title": "DeletedAt 软删除时间戳，非空表示已删除"
+          "format": "date-time"
         }
       },
       "description": "======== 标识区（1-4） ========",
@@ -6230,101 +6185,77 @@
           "title": "Code 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号，不允许连续分隔符，以字母或数字结尾\n长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：手动 \"api.signing-key\"、\"tls-cert\"；自动 \"a7k2m3x9b5f1\""
         },
         "type": {
-          "$ref": "#/definitions/v1CredentialType",
-          "title": "凭证类型"
+          "$ref": "#/definitions/v1CredentialType"
         },
         "algorithm": {
-          "$ref": "#/definitions/CredentialAlgorithm",
-          "title": "技术算法"
+          "$ref": "#/definitions/CredentialAlgorithm"
         },
         "usage": {
-          "$ref": "#/definitions/CredentialUsage",
-          "title": "业务用途"
+          "$ref": "#/definitions/CredentialUsage"
         },
         "visibility": {
-          "$ref": "#/definitions/v1Visibility",
-          "title": "可见性"
+          "$ref": "#/definitions/v1Visibility"
         },
         "status": {
-          "$ref": "#/definitions/v1CredentialStatus",
-          "title": "当前状态"
+          "$ref": "#/definitions/v1CredentialStatus"
         },
         "source": {
-          "$ref": "#/definitions/CredentialSource",
-          "title": "凭证来源"
+          "$ref": "#/definitions/CredentialSource"
         },
         "key_id": {
-          "type": "string",
-          "title": "外部系统 Key ID / JWKS ID / HSM ID"
+          "type": "string"
         },
         "api_key": {
-          "$ref": "#/definitions/CredentialApiKeyData",
-          "title": "API Key"
+          "$ref": "#/definitions/CredentialApiKeyData"
         },
         "key_pair": {
-          "$ref": "#/definitions/CredentialKeyPairData",
-          "title": "公私钥对"
+          "$ref": "#/definitions/CredentialKeyPairData"
         },
         "x509_data": {
-          "$ref": "#/definitions/CredentialX509Data",
-          "title": "X.509 证书数据"
+          "$ref": "#/definitions/CredentialX509Data"
         },
         "license": {
-          "$ref": "#/definitions/CredentialLicenseData",
-          "title": "软件许可证"
+          "$ref": "#/definitions/CredentialLicenseData"
         },
         "symmetric_key": {
           "type": "string",
-          "format": "byte",
-          "title": "对称密钥 / HMAC / JWT"
+          "format": "byte"
         },
         "jwks_uri": {
-          "type": "string",
-          "title": "JWKS URI"
+          "type": "string"
         },
         "not_before": {
           "type": "string",
-          "format": "date-time",
-          "description": "生效时间（Not Before）",
-          "title": "时间相关字段"
+          "format": "date-time"
         },
         "expires_at": {
           "type": "string",
-          "format": "date-time",
-          "title": "过期时间"
-        },
-        "created_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "创建时间"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "最后更新时间"
-        },
-        "created_by": {
-          "type": "string",
-          "format": "int64",
-          "description": "创建者用户 ID",
-          "title": "审计信息"
-        },
-        "updated_by": {
-          "type": "string",
-          "format": "int64",
-          "title": "更新者用户 ID"
+          "format": "date-time"
         },
         "metadata": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
-          },
-          "description": "自定义业务属性",
-          "title": "附加元数据和描述"
+          }
         },
         "description": {
+          "type": "string"
+        },
+        "created_by": {
           "type": "string",
-          "title": "凭证说明或备注"
+          "format": "int64"
+        },
+        "updated_by": {
+          "type": "string",
+          "format": "int64"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
         }
       },
       "title": "企业级通用凭证定义\n支持 API Key、X.509 证书、非对称密钥对、HMAC/对称密钥、JWKS、软件许可证等多种凭证类型\n提供分层管理：类型、算法、用途、可见性、来源、策略、审计和元数据"
@@ -6447,22 +6378,6 @@
           "format": "int32",
           "title": "SortOrder 部门排序顺序，用于同级部门的显示顺序\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
         },
-        "members": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1Membership"
-          },
-          "title": "Members 部门成员列表"
-        },
-        "children": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1Department"
-          },
-          "title": "Children 直接子部门列表，用于构建完整的组织树\n仅包含直接下级，避免深度递归查询\n建议在需要完整树结构时通过专门的服务接口获取"
-        },
         "email": {
           "type": "string",
           "title": "Email 部门公共邮箱地址，用于对外联系和内部通知\n格式：标准邮箱格式，如 \"tech@company.com\"\n用途：部门公告、外部合作、客户联系等"
@@ -6499,6 +6414,34 @@
           },
           "title": "Metadata 扩展元数据，存储自定义业务属性\n键值对格式，支持灵活的业务扩展需求\n示例：{\"location\": \"北京\", \"floor\": \"15F\", \"capacity\": \"50\"}"
         },
+        "description": {
+          "type": "string",
+          "title": "Description 部门描述信息，详细说明部门职责和业务范围\n用于组织介绍、职责说明、业务范围描述等\n建议长度：500 字符以内，支持富文本格式"
+        },
+        "visibility": {
+          "$ref": "#/definitions/v1Visibility",
+          "title": "Visibility 部门及成员列表的可见性策略（使用公共枚举 Visibility）"
+        },
+        "protected": {
+          "type": "boolean",
+          "title": "Protected 是否为系统内置/受保护的部门，受保护的部门不可删除"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Membership"
+          },
+          "title": "Members 部门成员列表"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Department"
+          },
+          "title": "Children 直接子部门列表，用于构建完整的组织树\n仅包含直接下级，避免深度递归查询\n建议在需要完整树结构时通过专门的服务接口获取"
+        },
         "created_by": {
           "type": "string",
           "format": "int64",
@@ -6523,19 +6466,9 @@
           "type": "string",
           "format": "date-time",
           "title": "DeletedAt 软删除时间戳，支持数据恢复\n非空表示已删除，空值表示正常状态\n实现软删除机制，保护重要组织数据"
-        },
-        "description": {
-          "type": "string",
-          "title": "Description 部门描述信息，详细说明部门职责和业务范围\n用于组织介绍、职责说明、业务范围描述等\n建议长度：500 字符以内，支持富文本格式"
-        },
-        "visibility": {
-          "$ref": "#/definitions/v1Visibility",
-          "title": "Visibility 部门及成员列表的可见性策略（使用公共枚举 Visibility）"
-        },
-        "protected": {
-          "type": "boolean"
         }
       },
+      "description": "字段布局约定：标识区 → 业务属性区 → 扩展区(description/visibility/protected) → 关系区 → 审计区\n\n======== 标识区 ========",
       "title": "Department 组织部门实体，支持树形层级结构的企业组织架构管理\n设计原则：一个用户仅可归属于一个主部门，但可通过角色关系参与多个部门的管理\n支持国际化、状态管理、财务集成等企业级功能"
     },
     "v1DepartmentStatus": {
@@ -6792,67 +6725,54 @@
           "$ref": "#/definitions/v1GroupStatus"
         },
         "display_name": {
-          "type": "string",
-          "title": "DisplayName 前端展示名称，根据用户的语言环境，自动转换为相应区域的语言说明\n用于群组名称的多语言显示，提升群组管理的用户体验和可读性"
+          "type": "string"
         },
         "sort_order": {
           "type": "integer",
-          "format": "int32",
-          "title": "SortOrder 群组排序顺序，用于群组在列表中的显示顺序（扁平结构）\n数值越小排序越靠前，建议使用 10 的倍数便于后续插入\n默认值：100，范围：1-9999"
+          "format": "int32"
         },
         "max_members": {
           "type": "integer",
-          "format": "int32",
-          "title": "MaxMembers 群组最大成员数量限制，0表示不限制"
+          "format": "int32"
         },
         "metadata": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
-          },
-          "title": "Metadata 元数据，用于存储自定义属性，支持业务扩展"
+          }
         },
         "description": {
-          "type": "string",
-          "title": "Description 群组描述，详细说明群组的目的和用途"
-        },
-        "created_by": {
-          "type": "string",
-          "format": "int64",
-          "title": "CreatedBy 群组创建者/所有者ID，记录创建该群组的用户"
-        },
-        "updated_by": {
-          "type": "string",
-          "format": "int64",
-          "title": "UpdatedBy 群组最后更新者，记录最后修改该群组的用户"
-        },
-        "created_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "CreatedAt 创建时间，记录群组的创建时间戳"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "UpdatedAt 更新时间，记录群组的最后修改时间戳"
-        },
-        "deleted_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "DeletedAt 软删除时间戳，非空表示已删除，空值表示正常状态"
+          "type": "string"
         },
         "visibility": {
-          "$ref": "#/definitions/v1Visibility",
-          "title": "Visibility 群组可见性，控制群组是否对外可见"
+          "$ref": "#/definitions/v1Visibility"
         },
         "ref_id": {
           "type": "string",
-          "format": "int64",
-          "title": "RefID 类型关联引用ID，根据 type 赋予不同语义：\n  DEPARTMENT → 关联部门ID (departments.id)\n  ROLE       → 关联角色ID (roles.id)\n  其他类型   → 0"
+          "format": "int64"
         },
         "ref_expr": {
+          "type": "string"
+        },
+        "created_by": {
           "type": "string",
-          "title": "RefExpr 类型关联表达式，根据 type 赋予不同语义：\n  DYNAMIC  → 成员过滤规则，如 \"user_type = 10 AND user_status = 3\"\n  SYSTEM   → 同 DYNAMIC，成员过滤规则（系统内置，创建后不可修改）\n  EXTERNAL → 外部源描述(JSON)，如 {\"external_id\":\"ldap-001\",\"external_source\":\"ldap\"}\n  其他类型 → 空字符串"
+          "format": "int64"
+        },
+        "updated_by": {
+          "type": "string",
+          "format": "int64"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deleted_at": {
+          "type": "string",
+          "format": "date-time"
         }
       },
       "title": "Group 群组实体，表示一类相同维度的用户集合，扁平结构不支持树形\n该模型用于描述系统中各类用户分组，支持多维度的用户组织与管理"
@@ -6866,9 +6786,7 @@
         "ARCHIVED",
         "DISABLED"
       ],
-      "default": "STATUS_UNSPECIFIED",
-      "description": "- STATUS_UNSPECIFIED: 默认值／未知状态：系统默认值，通常不直接使用\n - PENDING: 待激活／待验证：创建后等待审核或激活的状态\n - ACTIVE: 正常启用状态：群组正常运行中，可以进行成员管理和权限分配\n - ARCHIVED: 被归档，但可查询：群组不再活跃但保留历史数据，成员不允许变更\n - DISABLED: 禁用，不可查询：群组被临时停用，通常为人工操作结果",
-      "title": "Status 群组状态，控制群组的可用状态\n群组状态（枚举值预计不会太频繁变化）\n可以根据业务再增加状态"
+      "default": "STATUS_UNSPECIFIED"
     },
     "v1GroupType": {
       "type": "string",
@@ -7501,48 +7419,39 @@
         },
         "joined_at": {
           "type": "string",
-          "format": "date-time",
-          "title": "JoinedAt 用户加入的时间"
+          "format": "date-time"
         },
         "expired_at": {
           "type": "string",
-          "format": "date-time",
-          "title": "ExpiredAt 关系有效期，用于临时成员管理，空表示永久有效"
-        },
-        "created_by": {
-          "type": "string",
-          "format": "int64",
-          "title": "CreatedBy 创建者用户ID"
-        },
-        "updated_by": {
-          "type": "string",
-          "format": "int64",
-          "title": "UpdatedBy 最后更新者用户ID"
-        },
-        "created_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "CreatedAt 关系创建时间"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time",
-          "title": "UpdatedAt 关系最后更新时间"
+          "format": "date-time"
         },
         "metadata": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
-          },
-          "title": "Metadata 扩展元数据，键值对格式，支持灵活的业务扩展"
+          }
         },
         "description": {
-          "type": "string",
-          "title": "Description 详细说明信息"
+          "type": "string"
         },
         "target_name": {
+          "type": "string"
+        },
+        "created_by": {
           "type": "string",
-          "title": "TargetName 关联目标的展示名称，用于前端直接显示部门名、群组名或角色名"
+          "format": "int64"
+        },
+        "updated_by": {
+          "type": "string",
+          "format": "int64"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
         }
       },
       "title": "Membership 统一成员关系实体\n用于描述用户与任意组织实体（群组、部门等）之间的关联关系\n支持多状态管理、角色定义、成员类型区分和审计追踪"
@@ -7639,8 +7548,7 @@
           }
         },
         "visibility": {
-          "$ref": "#/definitions/v1Visibility",
-          "title": "Visibility 菜单可见性，作为 role_menus 授权之后的附加过滤条件。\n当前菜单场景优先使用 GLOBAL 与 RESTRICTED 两档明确语义；\nSUBTREE / LOCAL / SPECIFIC 先保留枚举定义，待菜单补齐组织归属或白名单模型后再扩展运行时语义。"
+          "$ref": "#/definitions/v1Visibility"
         },
         "description": {
           "type": "string"
@@ -8038,21 +7946,18 @@
         "status": {
           "$ref": "#/definitions/v1PolicyStatus"
         },
+        "description": {
+          "type": "string"
+        },
         "protected": {
-          "type": "boolean",
-          "title": "Protected 是否为系统内置/受保护的策略，受保护的策略不可删除"
+          "type": "boolean"
         },
         "statements": {
           "type": "array",
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1PolicyStatement"
-          },
-          "title": "Statements 该策略下挂载的语句集合"
-        },
-        "description": {
-          "type": "string",
-          "title": "Description 策略描述，详细说明策略职责和业务范围"
+          }
         },
         "created_by": {
           "type": "string",
@@ -8091,23 +7996,20 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "title": "动作选择器，建议使用标准动作编码、通配符或 JSON 数组表达"
+          }
         },
         "resources": {
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "title": "资源选择器，建议作为资源匹配的主入口，如资源名、资源树路径、资源标签、GRN 模式等"
+          }
         },
         "conditions": {
           "type": "array",
           "items": {
             "type": "object",
             "$ref": "#/definitions/PolicyStatementCondition"
-          },
-          "title": "结构化条件表达式，建议承载鉴权判断条件，而不是挂载关系状态"
+          }
         },
         "created_by": {
           "type": "string",
@@ -8347,9 +8249,7 @@
         "ACTIVE",
         "DISABLED"
       ],
-      "default": "STATUS_UNSPECIFIED",
-      "description": "- STATUS_UNSPECIFIED: 默认值／未知状态：系统默认值，通常不直接使用\n - ACTIVE: 正常启用状态：角色正常可用，权限生效\n - DISABLED: 禁用状态：角色被停用，权限不生效",
-      "title": "Status 角色状态枚举，控制角色的可用性和生命周期\n用于角色的启用/禁用管理，影响用户权限的实际生效"
+      "default": "STATUS_UNSPECIFIED"
     },
     "v1RoleType": {
       "type": "string",
@@ -8359,9 +8259,7 @@
         "CUSTOM",
         "TEMPLATE"
       ],
-      "default": "TYPE_UNSPECIFIED",
-      "description": "- TYPE_UNSPECIFIED: 默认值／未指定类型：系统默认值，通常不直接使用\n - SYSTEM: 系统内置角色：由系统预定义，不可删除，权限固定\n - CUSTOM: 自定义角色：用户创建的角色，可完全自定义权限\n - TEMPLATE: 模板角色：预设的角色模板，可基于此创建新角色",
-      "title": "Type 角色类型枚举，定义角色的来源和管理方式\n用于区分不同类型的角色，影响角色的可编辑性和权限管理策略"
+      "default": "TYPE_UNSPECIFIED"
     },
     "v1S3Config": {
       "type": "object",
@@ -9193,6 +9091,16 @@
           "format": "date-time",
           "title": "删除时间"
         },
+        "created_by": {
+          "type": "string",
+          "format": "int64",
+          "title": "CreatedBy 创建者用户ID，记录部门创建人"
+        },
+        "updated_by": {
+          "type": "string",
+          "format": "int64",
+          "title": "UpdatedBy 最后更新者用户ID，记录最近修改人"
+        },
         "realname": {
           "type": "string",
           "title": "真实姓名，用于实名认证或后台展示"
@@ -9218,16 +9126,6 @@
           "$ref": "#/definitions/v1Address",
           "title": "地址信息"
         },
-        "created_by": {
-          "type": "string",
-          "format": "int64",
-          "title": "CreatedBy 创建者用户ID，记录部门创建人\n用于审计追踪和权限验证"
-        },
-        "updated_by": {
-          "type": "string",
-          "format": "int64",
-          "title": "UpdatedBy 最后更新者用户ID，记录最近修改人\n用于变更追踪和责任确认"
-        },
         "metadata": {
           "type": "object",
           "additionalProperties": {
@@ -9245,7 +9143,7 @@
             "type": "object",
             "$ref": "#/definitions/v1Membership"
           },
-          "title": "用户所属部门 membership 关系，字段名为兼容历史接口保留"
+          "title": "用户所属部门 membership 关系"
         },
         "group_members": {
           "type": "array",
@@ -9253,10 +9151,10 @@
             "type": "object",
             "$ref": "#/definitions/v1Membership"
           },
-          "title": "用户所属群组 membership 关系，字段名为兼容历史接口保留"
+          "title": "用户所属群组 membership 关系"
         }
       },
-      "description": "以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
+      "description": "字段布局约定：标识区 → 基础属性区 → 审计区(时间+操作人连续) → 敏感字段区 → 扩展区 → 关系区\n注意：审计区放在敏感字段之前，保持审计字段的连续性\n\n以下字段为非敏感/可直接输出（适合公开展示或普通资料页）",
       "title": "User 用户实体，表示系统中的账号信息"
     },
     "v1UserStatus": {
@@ -9288,7 +9186,7 @@
       ],
       "default": "TYPE_UNSPECIFIED",
       "description": "- TYPE_UNSPECIFIED: 默认值\n - CUSTOMER: 外部用户 / 业务伙伴\n\n前台用户 / 消费者\n - MERCHANT: 商户 / 卖家\n - SUPPLIER: 供应商 / 合作方\n - EMPLOYEE: 内部用户 / 员工\n\n后台用户 / 内部员工\n - ADMIN: 系统管理员\n - SYSTEM: 系统账户 (为安全和区分，编号拉开)\n\n系统集成账户 / 机器人",
-      "title": "用户的基础身份类型，后端自动维护更新，非人为更新"
+      "title": "用户的基础身份类型，后端自动维护更新，非人为更新\n编号规则：外部用户 1-9，内部用户 10-49，系统账户 99"
     },
     "v1VerifyAuthMFARequest": {
       "type": "object",
