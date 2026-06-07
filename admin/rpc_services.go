@@ -200,7 +200,9 @@ func httpRulePrimaryPathTemplate(rule *annotations.HttpRule) string {
 }
 
 func appendPathVariableSelectors(serviceCode string, in []*adminv1.Action_ResourceSelector, templates []string) []*adminv1.Action_ResourceSelector {
-	// pattern 格式为：grn:${service_code}:${region_code}:${account_id}:${resource_type}/${resource_path}
+	// pattern 格式为：grn:${partition}:${service_code}:${region_code}:${account_id}:${resource_type}/${resource_path}
+	// 6 段固定结构，与 AWS ARN 对齐；详见 adm/docs/spec/grn.md。
+	// ${partition} 占位符由 pkg/auth 在请求评估时根据 auth.Config.Partition 注入（默认 "grpc-kit"）。
 
 	if len(templates) == 0 {
 		return in
@@ -224,7 +226,7 @@ func appendPathVariableSelectors(serviceCode string, in []*adminv1.Action_Resour
 			seen[key] = struct{}{}
 			result = append(result, &adminv1.Action_ResourceSelector{
 				ResourceType: variable.resourceType,
-				Pattern:      fmt.Sprintf("grn:%v:${region_code}:${account_id}:%v/%v", serviceCode, variable.resourceType, variable.pattern),
+				Pattern:      fmt.Sprintf("grn:${partition}:%v:${region_code}:${account_id}:%v/%v", serviceCode, variable.resourceType, variable.pattern),
 			})
 		}
 	}
