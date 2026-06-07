@@ -5713,25 +5713,9 @@
             "type": "object",
             "$ref": "#/definitions/ActionResourceSelector"
           }
-        },
-        "created_by": {
-          "type": "string",
-          "format": "int64"
-        },
-        "updated_by": {
-          "type": "string",
-          "format": "int64"
-        },
-        "created_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time"
         }
       },
-      "description": "字段布局约定：标识区 → 扩展区(description/protected) → 业务属性区(tags/selectors) → 审计区",
+      "description": "字段布局约定：标识区 → 扩展区(description/protected) → 业务属性区(tags/selectors)。\n注意：Action 由 gateway/openapi 配置在运行时派生，不入库，无独立生命周期，因此不带审计字段。",
       "title": "Action 统一动作字典，用于定义\"主体可以对资源做什么\"。\n它是动作语义的唯一事实来源，应替代旧 scope 中 readonly / readwrite 一类表达。\n推荐约束：\n1. action 使用稳定编码，格式为 {service.code}:{RpcMethod}，如 admin.iam:ListUsers；\n2. action 本身不直接授予权限，必须与 policy statements 组合使用；\n3. resource_type_id 关联 lion_resource_types 表，可为空（跨类型动作）。"
     },
     "v1Address": {
@@ -8010,22 +7994,6 @@
             "type": "object",
             "$ref": "#/definitions/PolicyStatementCondition"
           }
-        },
-        "created_by": {
-          "type": "string",
-          "format": "int64"
-        },
-        "updated_by": {
-          "type": "string",
-          "format": "int64"
-        },
-        "created_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time"
         }
       },
       "title": "PolicyStatement 策略语句，是授权评估的最小单元。\n一条 statement 负责定义：对哪些 action、哪些 resource，在什么 condition 下，产生 allow / deny。\n约束建议：\n1. 资源匹配主逻辑放在 resource_selector，而不是放在 attachment 层；\n2. 条件判断主逻辑放在 condition_json，用于表达上下文、属性、时间窗等命中条件；\n3. priority 数值越小优先级越高，且显式 DENY 优先于 ALLOW。"
@@ -8734,22 +8702,6 @@
         },
         "protected": {
           "type": "boolean"
-        },
-        "created_by": {
-          "type": "string",
-          "format": "int64"
-        },
-        "updated_by": {
-          "type": "string",
-          "format": "int64"
-        },
-        "created_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updated_at": {
-          "type": "string",
-          "format": "date-time"
         }
       },
       "title": "Service 服务字典定义。"

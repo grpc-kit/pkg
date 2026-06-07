@@ -267,6 +267,13 @@ var (
 		Name:       "lion_policies",
 		Columns:    LionPoliciesColumns,
 		PrimaryKey: []*schema.Column{LionPoliciesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "policies_code",
+				Unique:  true,
+				Columns: []*schema.Column{LionPoliciesColumns[6]},
+			},
+		},
 	}
 	// LionPrincipalRolesColumns holds the columns for the "lion_principal_roles" table.
 	LionPrincipalRolesColumns = []*schema.Column{

@@ -14,6 +14,7 @@ import (
 	"github.com/grpc-kit/pkg/lion/rolepolicies"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func buildPolicyProto(entPolicy *lion.Policies, includeStatements bool) *adminv1.Policy {
@@ -24,6 +25,10 @@ func buildPolicyProto(entPolicy *lion.Policies, includeStatements bool) *adminv1
 		Status:      adminv1.Policy_Status(entPolicy.PolicyStatus),
 		Description: entPolicy.Description,
 		Protected:   entPolicy.Protected,
+		CreatedBy:   entPolicy.CreatedBy,
+		UpdatedBy:   entPolicy.UpdatedBy,
+		CreatedAt:   timestamppb.New(entPolicy.CreatedAt),
+		UpdatedAt:   timestamppb.New(entPolicy.UpdatedAt),
 	}
 
 	if includeStatements {
@@ -31,6 +36,30 @@ func buildPolicyProto(entPolicy *lion.Policies, includeStatements bool) *adminv1
 	}
 
 	return result
+}
+
+// validatePolicyStatements 校验 statement 的必填字段，避免 protojson 静默丢失 enum
+// 等问题导致的脏数据（典型场景：客户端发送 "Allow"/"Deny" 这类非规范字符串，
+// 被 DiscardUnknown 配置丢成 EFFECT_UNSPECIFIED 后落库）。
+func validatePolicyStatements(ctx context.Context, statements []*adminv1.PolicyStatement) error {
+	for i, s := range statements {
+		if s == nil {
+			return errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("statements[%d] is nil", i))
+		}
+		if s.Effect != adminv1.PolicyStatement_ALLOW && s.Effect != adminv1.PolicyStatement_DENY {
+			return errs.InvalidArgument(ctx).WithMessage(
+				fmt.Sprintf("statements[%d].effect must be ALLOW or DENY, got %s", i, s.Effect.String()))
+		}
+		if len(s.Actions) == 0 {
+			return errs.InvalidArgument(ctx).WithMessage(
+				fmt.Sprintf("statements[%d].actions must not be empty", i))
+		}
+		if len(s.Resources) == 0 {
+			return errs.InvalidArgument(ctx).WithMessage(
+				fmt.Sprintf("statements[%d].resources must not be empty", i))
+		}
+	}
+	return nil
 }
 
 // ListPolicies 获取策略列表
@@ -168,9 +197,23 @@ func (a *KnownAdminAPI) CreatePolicy(ctx context.Context, req *adminv1.CreatePol
 	}
 	req.Policy.Code = code
 
+	if err := validatePolicyStatements(ctx, req.Policy.Statements); err != nil {
+		return nil, err
+	}
+
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
+	}
+
+	// 预检 code 是否已被占用，给出明确的 AlreadyExists 错误，
+	// 同时仍依赖数据库 unique 索引兜底防止并发竞争写入。
+	exists, err := db.Policies.Query().Where(policies.CodeEQ(req.Policy.Code)).Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		return nil, errs.AlreadyExists(ctx).WithMessage(fmt.Sprintf("policy code %q already exists", req.Policy.Code))
 	}
 
 	// 获取创建者用户 ID
@@ -234,7 +277,10 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 		for _, field := range req.UpdateMask.Paths {
 			switch field {
 			case policies.FieldCode:
-				update.SetCode(req.Policy.Code)
+				// Code 创建后不可修改（见 Policy.code 注释）
+				if req.Policy.Code != policy.Code {
+					return nil, errs.InvalidArgument(ctx).WithMessage("policy code is immutable after creation")
+				}
 			case policies.FieldDisplayName:
 				update.SetDisplayName(req.Policy.DisplayName)
 			case policies.FieldPolicyStatus:
@@ -244,15 +290,23 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 			case policies.FieldProtected:
 				update.SetProtected(req.Policy.Protected)
 			case policies.FieldStatements:
+				if err := validatePolicyStatements(ctx, req.Policy.Statements); err != nil {
+					return nil, err
+				}
 				update.SetStatements(req.Policy.Statements)
 			}
 		}
 		// 始终更新 UpdatedBy
 		update.SetUpdatedBy(userID)
 	} else {
-		// 如果没有指定更新字段，则更新所有字段
+		// 如果没有指定更新字段，则更新所有字段（code 仍不可修改）
+		if req.Policy.Code != "" && req.Policy.Code != policy.Code {
+			return nil, errs.InvalidArgument(ctx).WithMessage("policy code is immutable after creation")
+		}
+		if err := validatePolicyStatements(ctx, req.Policy.Statements); err != nil {
+			return nil, err
+		}
 		update.
-			SetCode(req.Policy.Code).
 			SetDisplayName(req.Policy.DisplayName).
 			SetPolicyStatus(int(req.Policy.Status)).
 			SetDescription(req.Policy.Description).

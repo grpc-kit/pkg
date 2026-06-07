@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 )
 
@@ -57,5 +58,12 @@ func (Policies) Mixin() []ent.Mixin {
 func (Policies) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.Annotation{Table: "lion_policies"},
+	}
+}
+
+// Indexes 定义索引
+func (Policies) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("code").Unique(),
 	}
 }
