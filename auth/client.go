@@ -32,6 +32,10 @@ type Client struct {
 	opaRego  rego.PreparedEvalQuery
 	opaEnvoy authv3.AuthorizationClient
 
+	// opaData 是注入 OPA inmem store 的原始 data 快照（嵌套包名结构）。
+	// 由 initOPARego 写入，供测试断言与 P9 Reload 复用。
+	opaData map[string]interface{}
+
 	rbacData *rbacv3.RBAC
 }
 
@@ -121,12 +125,30 @@ func (c *Client) initOPARego(ctx context.Context) error {
 		return err
 	}
 
-	currentMap[parts[len(parts)-1]] = jsonRBAC
-
-	// 解析 rbac 文件，提供给外部使用
+	// 解析 rbac 文件，提供给外部使用。
+	// 注意：此处必须先于静态字典合并执行，否则注入的 services/rpc_routes/gateway_routes 等
+	// 非 envoy RBAC proto 字段会导致 protojson.Unmarshal 报 unknown field 错误。
 	if err = c.parseEnvoyRBAC(jsonRBAC); err != nil {
 		return err
 	}
+
+	// Phase 1 P3：将静态字典合并到 data.<pkg> 命名空间下（与既有 RBAC keys 平级）。
+	// 本期仅注入，Rego 模板尚未消费；P5+ 由 input_builder 反查 rpc_routes/gateway_routes，
+	// P11+ Rego 通过 services 元数据进行 GRN 匹配。
+	// 冲突策略：services / rpc_routes / gateway_routes 为保留键，静态字典优先覆盖。
+	if c.config.StaticDict != nil {
+		if jsonRBAC == nil {
+			jsonRBAC = make(map[string]interface{})
+		}
+		for k, v := range c.config.StaticDict.BuildOPAData() {
+			jsonRBAC[k] = v
+		}
+	}
+
+	currentMap[parts[len(parts)-1]] = jsonRBAC
+
+	// 保存 data 快照，供测试断言与 P9 Reload 复用。
+	c.opaData = jsonData
 
 	query, err := rego.New(
 		rego.Query(fmt.Sprintf("data.%v.allow", c.config.PackageName)),
