@@ -446,7 +446,16 @@ func (c *Client) parseEnvoyRBAC(mapData map[string]interface{}) error {
 	}
 
 	// 这里必须使用 protojson 转换为 proto 格式
-	if err = protojson.Unmarshal(rawBody, c.rbacData); err != nil {
+	//
+	// P8：使用 DiscardUnknown=true 容忍非 envoy RBAC 字段。
+	// 历史背景：dbloader（P7+）注入的 policies/roles/subjects 三段顶层键、以及
+	// static dict（P3）注入的 services/rpc_routes/gateway_routes 都不属于 envoy RBAC proto schema。
+	// 旧版通过"先 parseEnvoyRBAC 再合并 static dict"的顺序绕开，但 DataProvider 路径无法
+	// 绕开（其产物在 unmarshal jsonRBAC 时就被消费）；放宽 DiscardUnknown 是最干净的根因解，
+	// 既允许 dbloader 直接接入，也使现有合并顺序失误不再致命崩溃。
+	// 安全边界：envoy RBAC 自身字段仍按 proto schema 严格解析（类型不匹配仍报错），
+	// 仅未知字段被忽略，不会引入静默解析错误。
+	if err = (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(rawBody, c.rbacData); err != nil {
 		return fmt.Errorf("unmarshal rbac data to proto err: %w", err)
 	}
 
