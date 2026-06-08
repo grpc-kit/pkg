@@ -5,6 +5,7 @@ import (
 	"testing"
 	"testing/fstest"
 
+	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
 	"github.com/open-policy-agent/opa/rego"
 )
 
@@ -253,3 +254,181 @@ func TestBuildOPADataMerge_ReservedKeysOverwrite(t *testing.T) {
 		t.Errorf("non-conflicting business key 'users' should be preserved")
 	}
 }
+
+// ---------------------------------------------------------------------------
+// P6: Client.Allow 接入 input_builder（mergeGrpcKitInput 单测）
+// 直接覆盖三类入口 + 旧字段保留回归。
+// ---------------------------------------------------------------------------
+
+// p6BuildClient 构造一个最小可用 Client，仅 StaticDict / logger 关键字段填充。
+// 不进入 OPA Eval 流程，避免与 P3 测试重复；这里只验证 mergeGrpcKitInput 输入构造。
+func p6BuildClient(t *testing.T, sd *StaticDict) *Client {
+	t.Helper()
+	ctx := context.Background()
+	cfg := &Config{
+		PackageName: "demo.example.v1",
+		StaticDict:  sd,
+		// 不配置 OPA*：NewClient 应能正常返回（验证：当前 NewClient 依赖 OPA 任一）。
+		// 为避开 OPA 初始化路径，直接走最小 OPARego config。
+		OPARego: &OPARegoConfig{Data: []byte(`{"action": "ALLOW", "policies": {}}`)},
+	}
+	c, err := NewClient(ctx, cfg)
+	if err != nil {
+		t.Fatalf("NewClient err: %v", err)
+	}
+	return c
+}
+
+// assertGrpcKit 校验 input["grpc_kit"] 的三个字段。
+func assertGrpcKit(t *testing.T, input map[string]any, wantSvc, wantAct, wantID string) {
+	t.Helper()
+	gk, ok := input["grpc_kit"].(map[string]any)
+	if !ok {
+		t.Fatalf("input.grpc_kit missing or wrong type: %T", input["grpc_kit"])
+	}
+	if got := gk["service"]; got != wantSvc {
+		t.Errorf("grpc_kit.service = %q, want %q", got, wantSvc)
+	}
+	if got := gk["action"]; got != wantAct {
+		t.Errorf("grpc_kit.action = %q, want %q", got, wantAct)
+	}
+	if got := gk["action_id"]; got != wantID {
+		t.Errorf("grpc_kit.action_id = %q, want %q", got, wantID)
+	}
+	if _, ok := input["subject"].(map[string]any); !ok {
+		t.Errorf("input.subject missing or wrong type: %T", input["subject"])
+	}
+}
+
+func TestAllow_MergeInput_GRPCEntry(t *testing.T) {
+	// gRPC 拦截器栈：ctx 含 transport stream，FromGRPCContext 命中 RPCRoutes。
+	sd, err := NewStaticDict(p3FixtureFS(t))
+	if err != nil {
+		t.Fatalf("NewStaticDict err: %v", err)
+	}
+	c := p6BuildClient(t, sd)
+
+	ctx := newGRPCCtx("/grpc_kit.api.example.demo.v1.Demo/ListItems")
+	input := map[string]any{
+		"attributes":  map[string]any{"foo": "bar"},  // 旧字段
+		"parsed_path": []any{"grpc_kit.api.example.demo.v1.Demo", "ListItems"},
+	}
+	c.mergeGrpcKitInput(ctx, input, nil)
+
+	assertGrpcKit(t, input, "demo.v1.example", "ListItems", "demo.v1.example:ListItems")
+
+	// 旧字段不应被覆盖
+	if attrs, ok := input["attributes"].(map[string]any); !ok || attrs["foo"] != "bar" {
+		t.Errorf("legacy attributes mutated: %+v", input["attributes"])
+	}
+	if pp, ok := input["parsed_path"].([]any); !ok || len(pp) != 2 {
+		t.Errorf("legacy parsed_path mutated: %+v", input["parsed_path"])
+	}
+}
+
+func TestAllow_MergeInput_HTTPEntry_FallsBackToGatewayRoutes(t *testing.T) {
+	// 纯 HTTP 入口：ctx 无 grpc.Method，但 envoy req 含 HTTP path。
+	// 期望走 GatewayRoutes 字面匹配命中同一个 ActionID。
+	sd, err := NewStaticDict(p3FixtureFS(t))
+	if err != nil {
+		t.Fatalf("NewStaticDict err: %v", err)
+	}
+	c := p6BuildClient(t, sd)
+
+	req := &authv3.CheckRequest{
+		Attributes: &authv3.AttributeContext{
+			Request: &authv3.AttributeContext_Request{
+				Http: &authv3.AttributeContext_HttpRequest{
+					Method: "GET",
+					Path:   "/api/v1/items",
+				},
+			},
+		},
+	}
+	input := map[string]any{}
+	c.mergeGrpcKitInput(context.Background(), input, req)
+
+	assertGrpcKit(t, input, "demo.v1.example", "ListItems", "demo.v1.example:ListItems")
+}
+
+func TestAllow_MergeInput_HTTPEntry_StripsQueryString(t *testing.T) {
+	// envoy path 可能带 querystring，应被截断后再做字面匹配。
+	sd, err := NewStaticDict(p3FixtureFS(t))
+	if err != nil {
+		t.Fatalf("NewStaticDict err: %v", err)
+	}
+	c := p6BuildClient(t, sd)
+
+	req := &authv3.CheckRequest{
+		Attributes: &authv3.AttributeContext{
+			Request: &authv3.AttributeContext_Request{
+				Http: &authv3.AttributeContext_HttpRequest{
+					Method: "GET",
+					Path:   "/api/v1/items?limit=10",
+				},
+			},
+		},
+	}
+	input := map[string]any{}
+	c.mergeGrpcKitInput(context.Background(), input, req)
+
+	assertGrpcKit(t, input, "demo.v1.example", "ListItems", "demo.v1.example:ListItems")
+}
+
+func TestAllow_MergeInput_GRPCPriorityOverHTTP(t *testing.T) {
+	// gRPC 反查命中时不应被 HTTP 兜底覆盖。
+	sd, err := NewStaticDict(p3FixtureFS(t))
+	if err != nil {
+		t.Fatalf("NewStaticDict err: %v", err)
+	}
+	c := p6BuildClient(t, sd)
+
+	ctx := newGRPCCtx("/grpc_kit.api.example.demo.v1.Demo/GetItem")
+	req := &authv3.CheckRequest{
+		Attributes: &authv3.AttributeContext{
+			Request: &authv3.AttributeContext_Request{
+				Http: &authv3.AttributeContext_HttpRequest{
+					Method: "GET",
+					Path:   "/api/v1/items", // 这是 ListItems 的路径
+				},
+			},
+		},
+	}
+	input := map[string]any{}
+	c.mergeGrpcKitInput(ctx, input, req)
+
+	// 应保留 gRPC 反查结果（GetItem），HTTP 兜底（ListItems）被忽略
+	assertGrpcKit(t, input, "demo.v1.example", "GetItem", "demo.v1.example:GetItem")
+}
+
+func TestAllow_MergeInput_NoMatch_KeepsEmptyKeys(t *testing.T) {
+	// 无 StaticDict / 未注册路径 → grpc_kit 三字段全部空串但键存在。
+	c := p6BuildClient(t, nil)
+
+	input := map[string]any{
+		"attributes":  map[string]any{"x": 1},
+		"parsed_path": []any{"unknown"},
+	}
+	c.mergeGrpcKitInput(context.Background(), input, nil)
+
+	assertGrpcKit(t, input, "", "", "")
+	// 旧字段保留
+	if _, ok := input["attributes"]; !ok {
+		t.Errorf("legacy attributes lost")
+	}
+}
+
+func TestAllow_MergeInput_UnregisteredGRPCMethod(t *testing.T) {
+	// ctx 有 grpc.Method 但 RPCRoutes 无映射 → 三字段空串。
+	sd, err := NewStaticDict(p3FixtureFS(t))
+	if err != nil {
+		t.Fatalf("NewStaticDict err: %v", err)
+	}
+	c := p6BuildClient(t, sd)
+
+	ctx := newGRPCCtx("/unknown.svc/UnknownMethod")
+	input := map[string]any{}
+	c.mergeGrpcKitInput(ctx, input, nil)
+	assertGrpcKit(t, input, "", "", "")
+}
+

@@ -234,6 +234,13 @@ func (c *Client) Allow(ctx context.Context) (bool, error) {
 		return false, err
 	}
 
+	// Phase 1 P6：在保留旧 envoy 风格字段（attributes / parsed_path）的前提下，
+	// 追加协议无关的 input.grpc_kit 子树，供 P8 起新 Rego 消费 `input.grpc_kit.action_id`。
+	// 反查顺序：先 gRPC method（拦截器栈典型路径），未命中再用 envoy 请求里的
+	// HTTP method + path 走 GatewayRoutes 字面匹配（纯 HTTP handler 路径）。
+	// 旧 Rego 仍以 `input.parsed_path[0]` / `input.attributes.*` 工作，不读 grpc_kit 字段。
+	c.mergeGrpcKitInput(ctx, input, req)
+
 	c.logger.Debugf("opa auth input: %s", string(util.MustMarshalJSON(input)))
 
 	if c.config.OPARego != nil {
@@ -280,6 +287,71 @@ func (c *Client) Allow(ctx context.Context) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// mergeGrpcKitInput 把 input_builder 反查得到的 subject + grpc_kit 子树
+// 合并到 envoy 风格的 input map 中（Phase 1 P6）。
+//
+// 设计要点：
+//
+//   - **追加而非覆盖**：仅写入 `input["subject"]` 与 `input["grpc_kit"]` 两个顶层键，
+//     旧 `attributes` / `parsed_path` / `parsed_query` 保留不动 —— 旧 Rego 完全兼容。
+//   - **协议无关反查**：先用 `grpc.Method(ctx)` 走 RPCRoutes（拦截器栈典型路径），
+//     未命中再用 envoy 已还原的 HTTP method+path 走 GatewayRoutes 字面匹配。
+//   - **StaticDict 缺省时仍写空 grpc_kit**：保持 Rego 引用 `input.grpc_kit.action_id`
+//     不会 undefined；service/action/action_id 全为空字符串 ⇒ 旧规则不命中、新规则可拒绝。
+//   - **永不返回 error**：反查失败不应阻塞鉴权决策；OPA 仍会按现有规则继续评估。
+func (c *Client) mergeGrpcKitInput(ctx context.Context, input map[string]interface{}, req *authv3.CheckRequest) {
+	dict := c.config.StaticDict
+
+	// 路径 1：gRPC method 反查（grpc.Method(ctx) → /<svc>/<method> → RPCRoutes）
+	gk := FromGRPCContext(ctx, dict).GrpcKit
+
+	// 路径 2：envoy 已还原的 HTTP method+path 走 GatewayRoutes 字面匹配
+	// 仅在路径 1 未命中且 envoy req 含 HTTP 字段时尝试，避免覆盖 gRPC 反查结果。
+	if gk.ActionID == "" && req != nil {
+		if http := req.GetAttributes().GetRequest().GetHttp(); http != nil {
+			path := http.GetPath()
+			method := http.GetMethod()
+			if path != "" && dict != nil {
+				// 复用 P5 的 FromHTTPRequest 需要 *http.Request；为避免反复构造，
+				// 直接走 GatewayRoutes 字面匹配（与 FromHTTPRequest 等价语义，
+				// 仅去掉 url 解析；envoy 拿到的 path 已是裸路径或带 query）。
+				gk = lookupGatewayRoute(dict, method, path)
+			}
+		}
+	}
+
+	// 始终写入两键，便于 Rego 用空串判定"未注册动作"。
+	input["subject"] = map[string]any{}
+	input["grpc_kit"] = map[string]any{
+		"service":   gk.Service,
+		"action":    gk.Action,
+		"action_id": gk.ActionID,
+	}
+}
+
+// lookupGatewayRoute 与 FromHTTPRequest 同语义，但接受裸字符串避免构造 *http.Request。
+// envoy 还原的 path 可能含 querystring（如 "/ping?x=1"），这里仅按 "?" 之前的路径段做字面匹配。
+func lookupGatewayRoute(dict *StaticDict, method, rawPath string) GrpcKit {
+	if dict == nil {
+		return GrpcKit{}
+	}
+	path := rawPath
+	if i := strings.IndexByte(path, '?'); i >= 0 {
+		path = path[:i]
+	}
+	upper := strings.ToUpper(method)
+	for _, r := range dict.GatewayRoutes {
+		if !strings.EqualFold(r.Method, upper) {
+			continue
+		}
+		if r.PathTemplate != path {
+			continue
+		}
+		return splitActionID(r.ActionID)
+	}
+	return GrpcKit{}
 }
 
 // WithLoggerOption 设置日志记录器
