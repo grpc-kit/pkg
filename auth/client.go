@@ -69,8 +69,8 @@ func NewClient(ctx context.Context, config *Config) (*Client, error) {
 
 // initOPARego 初始化内置权限验证服务
 func (c *Client) initOPARego(ctx context.Context) error {
-	dataRego := c.config.OPARego.RegoBody
-	dataRBAC := c.config.OPARego.DataBody
+	dataRego := c.config.OPARego.Rego
+	dataRBAC := c.config.OPARego.Data
 
 	// 如果客户端提供的 rego 或 rbac 文件为空包含被注释，则使用框架默认规则
 	ncl, err := c.nonCommentLineLength(dataRego)
@@ -81,10 +81,10 @@ func (c *Client) initOPARego(ctx context.Context) error {
 		dataRego = c.config.defaultRego()
 	}
 
-	// 动态数据优先级：DataProviderFunc > DataBody > defaultRBAC()
-	// 若 DataProviderFunc 未配置、调用失败或返回为空，则依次降级。
-	if c.config.OPARego.DataProviderFunc != nil {
-		dynData, provErr := c.config.OPARego.DataProviderFunc(ctx)
+	// 动态数据优先级：DataProvider > Data > defaultRBAC()
+	// 若 DataProvider 未配置、调用失败或返回为空，则依次降级。
+	if c.config.OPARego.DataProvider != nil {
+		dynData, provErr := c.config.OPARego.DataProvider(ctx)
 		if provErr != nil {
 			c.logger.Warnf("opa dynamic data provider error, fallback to static config: %v", provErr)
 		} else {

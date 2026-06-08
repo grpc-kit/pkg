@@ -351,8 +351,8 @@ func (s *SecurityConfig) initAuthClient(ctx context.Context, logger *logrus.Entr
 	}
 	if *s.Authorization.OPANative.Enabled {
 		ac.OPARego = &auth.OPARegoConfig{
-			RegoBody: regoBody,
-			DataBody: dataBody,
+			Rego: regoBody,
+			Data: dataBody,
 		}
 	}
 	if *s.Authorization.OPAExternal.Enabled {

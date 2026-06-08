@@ -16,11 +16,13 @@ type OPASDKConfig struct {
 }
 
 type OPARegoConfig struct {
-	RegoBody []byte
-	DataBody []byte
-	// DataProviderFunc 动态数据提供函数，优先级高于 DataBody。
-	// 若函数返回空或错误，则降级到 DataBody；DataBody 也为空时使用框架内置默认规则。
-	DataProviderFunc func(ctx context.Context) ([]byte, error)
+	// Rego 静态 Rego 策略源码（旧字段名：RegoBody）。
+	Rego []byte
+	// Data 静态 OPA data JSON（旧字段名：DataBody）。
+	Data []byte
+	// DataProvider 动态数据提供函数，优先级高于 Data（旧字段名：DataProviderFunc）。
+	// 若函数返回空或错误，则降级到 Data；Data 也为空时使用框架内置默认规则。
+	DataProvider func(ctx context.Context) ([]byte, error)
 }
 
 type OPAEnvoyPluginConfig struct {
