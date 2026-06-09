@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
 	rbacv3 "github.com/envoyproxy/go-control-plane/envoy/config/rbac/v3"
 	authv3 "github.com/envoyproxy/go-control-plane/envoy/service/auth/v3"
@@ -37,6 +38,11 @@ type Client struct {
 	opaData map[string]interface{}
 
 	rbacData *rbacv3.RBAC
+
+	// Phase 1 P9：保护 opaRego / opaData / rbacData 的并发读写。
+	// 读侧（Allow + 测试断言 opaData）持 RLock；写侧（initOPARego 末尾的赋值
+	// 以及由 Reload 触发的重建）持 Lock。其他字段在 NewClient 之后只读，无需上锁。
+	mu sync.RWMutex
 }
 
 // NewClient 初始化实例
@@ -128,7 +134,10 @@ func (c *Client) initOPARego(ctx context.Context) error {
 	// 解析 rbac 文件，提供给外部使用。
 	// 注意：此处必须先于静态字典合并执行，否则注入的 services/rpc_routes/gateway_routes 等
 	// 非 envoy RBAC proto 字段会导致 protojson.Unmarshal 报 unknown field 错误。
-	if err = c.parseEnvoyRBAC(jsonRBAC); err != nil {
+	// P9：parseEnvoyRBAC 返回新分配的 *RBAC，避免多个 Reload goroutine 同时往
+	// 共享的 c.rbacData 里 unmarshal（protojson + proto.Reset 不是协程安全的）。
+	newRBAC, err := c.parseEnvoyRBAC(jsonRBAC)
+	if err != nil {
 		return err
 	}
 
@@ -147,9 +156,6 @@ func (c *Client) initOPARego(ctx context.Context) error {
 
 	currentMap[parts[len(parts)-1]] = jsonRBAC
 
-	// 保存 data 快照，供测试断言与 P9 Reload 复用。
-	c.opaData = jsonData
-
 	query, err := rego.New(
 		rego.Query(fmt.Sprintf("data.%v.allow", c.config.PackageName)),
 		rego.Module("auth.rego", string(dataRego)),
@@ -160,7 +166,14 @@ func (c *Client) initOPARego(ctx context.Context) error {
 		return err
 	}
 
+	// Phase 1 P9：原子替换 opaRego / opaData / rbacData。Allow 侧持 RLock 读，
+	// Reload 通过调用 initOPARego 间接走这条写路径。所有 return err 都发生
+	// 在赋值前 ⇒ 失败时旧值自动保持，不需要 try-and-swap。
+	c.mu.Lock()
 	c.opaRego = query
+	c.opaData = jsonData
+	c.rbacData = newRBAC
+	c.mu.Unlock()
 
 	return nil
 }
@@ -246,7 +259,14 @@ func (c *Client) Allow(ctx context.Context) (bool, error) {
 	if c.config.OPARego != nil {
 		var rs rego.ResultSet
 
-		rs, err = c.opaRego.Eval(ctx, rego.EvalInput(input))
+		// Phase 1 P9：读 opaRego 持 RLock；Reload 期间会被短暂阻塞，
+		// 但 rego.PreparedEvalQuery.Eval 本身是协程安全的，无需在 Eval 中持续持锁，
+		// 因此把 query 拷贝到栈上再释放锁，最大化并发度。
+		c.mu.RLock()
+		query := c.opaRego
+		c.mu.RUnlock()
+
+		rs, err = query.Eval(ctx, rego.EvalInput(input))
 		if err != nil {
 			return false, err
 		}
@@ -328,6 +348,12 @@ func (c *Client) mergeGrpcKitInput(ctx context.Context, input map[string]interfa
 		"service":   gk.Service,
 		"action":    gk.Action,
 		"action_id": gk.ActionID,
+	}
+
+	// Phase 1 P9：action_id 反查失败计数（无论是 dict 缺失还是字典里没有该路由）。
+	// 不区分原因 —— 业务侧关注的是"有多少请求落到了 ["*"] 兜底"。
+	if gk.ActionID == "" {
+		metricActionLookupMiss.Inc()
 	}
 }
 
@@ -437,12 +463,18 @@ func (c *Client) nonCommentLineLength(body []byte) (int, error) {
 	return nonCommentLines, nil
 }
 
-// parseEnvoyRBAC 用于解析本地 yaml 内容为 envoy RBAC
-func (c *Client) parseEnvoyRBAC(mapData map[string]interface{}) error {
+// parseEnvoyRBAC 将 yaml/json 反序列化后的 map 转为 envoy RBAC proto。
+//
+// P9：返回新分配的 *rbacv3.RBAC，调用方负责在持锁后赋给 c.rbacData。
+// 原因：protojson.Unmarshal 内部需先 proto.Reset(target)，如果 target 是跨多个
+// goroutine 共享的同一个 *RBAC 指针（顶层 c.rbacData），会与同时在读的
+// ProtoReflect 调用出现 atomic.LoadPointer / typedmemmove 竞争。改为为每次
+// Reload 新建一个 target 后原子替换，可彻底避免读写同一个对象。
+func (c *Client) parseEnvoyRBAC(mapData map[string]interface{}) (*rbacv3.RBAC, error) {
 	// 因本地配置使用 yaml 格式，故需要先转换为 json
 	rawBody, err := json.Marshal(mapData)
 	if err != nil {
-		return fmt.Errorf("marshal rbac data to json err: %w", err)
+		return nil, fmt.Errorf("marshal rbac data to json err: %w", err)
 	}
 
 	// 这里必须使用 protojson 转换为 proto 格式
@@ -455,13 +487,16 @@ func (c *Client) parseEnvoyRBAC(mapData map[string]interface{}) error {
 	// 既允许 dbloader 直接接入，也使现有合并顺序失误不再致命崩溃。
 	// 安全边界：envoy RBAC 自身字段仍按 proto schema 严格解析（类型不匹配仍报错），
 	// 仅未知字段被忽略，不会引入静默解析错误。
-	if err = (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(rawBody, c.rbacData); err != nil {
-		return fmt.Errorf("unmarshal rbac data to proto err: %w", err)
+	target := &rbacv3.RBAC{}
+	if err = (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(rawBody, target); err != nil {
+		return nil, fmt.Errorf("unmarshal rbac data to proto err: %w", err)
 	}
 
-	return nil
+	return target, nil
 }
 
 func (c *Client) GetRBACData() *rbacv3.RBAC {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.rbacData
 }
