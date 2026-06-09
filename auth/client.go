@@ -91,8 +91,10 @@ func (c *Client) initOPARego(ctx context.Context) error {
 		dataRego = c.config.defaultRego()
 	}
 
-	// 动态数据优先级：DataProvider > Data > defaultRBAC()
+	// 动态数据优先级：DataProvider > Data > defaultData()
 	// 若 DataProvider 未配置、调用失败或返回为空，则依次降级。
+	// Phase 1 P10：兜底从 defaultRBAC() 的 envoy RBAC YAML 改为 defaultData() 的
+	// {policies, roles, subjects} JSON（与 dbloader 输出对齐，含一个 _builtin_superadmin 全权角色）。
 	if c.config.OPARego.DataProvider != nil {
 		dynData, provErr := c.config.OPARego.DataProvider(ctx)
 		if provErr != nil {
@@ -112,7 +114,7 @@ func (c *Client) initOPARego(ctx context.Context) error {
 		return err
 	}
 	if ncl == 0 {
-		dataRBAC = c.config.defaultRBAC()
+		dataRBAC = c.config.defaultData()
 	}
 
 	// 需把包头加入进去，如：

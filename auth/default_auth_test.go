@@ -1,18 +1,24 @@
 package auth
 
-// default_auth_test.go (P8)
+// default_auth_test.go (P8 + P10)
 //
-// 验证 default_auth.go 末尾追加的 "DB 策略 actions-only Rego" 行为，覆盖：
+// 验证 default_auth.go 的双层 Rego 行为：
 //
-//   1) 旧规则零回归：ping / version+内网 / admin+内网+groups / api+email_verified
-//   2) DB allow 主路径：JWT.groups → role → policy(ALLOW) → action 完全匹配
-//   3) DB allow 通配：service:* 前缀通配、"*" 全通配
-//   4) DB deny 优先：同时存在 ALLOW + DENY 时整体不放行
-//   5) DB 反查 subjects：JWT.sub → data.<pkg>.subjects.users → roles
-//   6) 兜底安全：DataProvider 未挂载时 data.<pkg>.policies 等不存在，
-//      旧规则仍能放行（自然降级），P8 追加块不影响既有行为
-//   7) 跨 role 聚合：单用户多个 role，任一 role 的 policy 命中即放行
-//   8) action 不匹配：本路径不命中、且无任何旧规则可放行时拒绝
+//   兜底不变量层（P10 §3.3.1，DB 不可达时仍保证最小可用性）：
+//     1a) ping/version/openapi-spec/debug + 内网 IP → 放行；外网 → 拒绝
+//     1b) admin + 内网 IP + JWT.sub 非空 → 放行；外网或无 JWT → 拒绝
+//     说明：P10 已删 v3 兜底中的 api+email_verified 分支（fail-safe），
+//          也删了 admin+groups 兜底（统一由 DB 策略表达）。
+//
+//   DB 策略层（P8 actions-only 鉴权）：
+//     2) DB allow 主路径：JWT.groups → role → policy(ALLOW) → action 完全匹配
+//     3) DB allow 通配：service:* 前缀通配、"*" 全通配
+//     4) DB deny 优先：同时存在 ALLOW + DENY 时整体不放行
+//     5) DB 反查 subjects：JWT.sub → data.<pkg>.subjects.users → roles
+//     6) 兜底安全：DataProvider 未挂载时 data.<pkg>.policies 等不存在 → DB 段
+//        undefined，整体回落到兜底不变量层（仅 ping/version/admin 等放行）
+//     7) 跨 role 聚合：单用户多个 role，任一 role 的 policy 命中即放行
+//     8) action 不匹配：本路径不命中、且无任何不变量可放行时拒绝
 //
 // 实现要点：
 //   - 走 NewClient → initOPARego → opaRego.Eval 全链路（不绕开 access_token 解析）
@@ -174,22 +180,38 @@ func stdDBPayload() map[string]any {
 
 // ─────────────────────────────── tests ───────────────────────────────
 
-// 1) 旧规则零回归：未提供 JWT、未挂载 DataProvider 时，"ping" 仍然放行。
-func TestDefaultAuth_LegacyPingRule_StillAllows(t *testing.T) {
+// 1a) 兜底不变量：未挂 DataProvider 时，ping 仅在内网放行；外网拒绝。
+func TestDefaultAuth_PingRule_InternalOnly(t *testing.T) {
 	ctx := context.Background()
-	// 不挂 DataProvider，保持与 P3 等价场景。
 	c, err := NewClient(ctx, newOPARegoConfig(nil))
 	if err != nil {
 		t.Fatalf("NewClient err: %v", err)
 	}
-	rs, err := c.opaRego.Eval(ctx, rego.EvalInput(map[string]any{
-		"parsed_path": []string{"ping"},
-	}))
+
+	mkInput := func(addr string) map[string]any {
+		return map[string]any{
+			"parsed_path": []string{"ping"},
+			"attributes": map[string]any{
+				"source": map[string]any{"address": map[string]any{"socketAddress": map[string]any{"address": addr}}},
+				"request": map[string]any{"http": map[string]any{"headers": map[string]any{}}},
+			},
+		}
+	}
+
+	rs, err := c.opaRego.Eval(ctx, rego.EvalInput(mkInput("127.0.0.1")))
 	if err != nil {
-		t.Fatalf("Eval err: %v", err)
+		t.Fatalf("Eval internal err: %v", err)
 	}
 	if len(rs) == 0 || rs[0].Expressions[0].Value != true {
-		t.Fatalf("expected ping allow=true, got %+v", rs)
+		t.Fatalf("expected ping allow=true from internal IP, got %+v", rs)
+	}
+
+	rs, err = c.opaRego.Eval(ctx, rego.EvalInput(mkInput("8.8.8.8")))
+	if err != nil {
+		t.Fatalf("Eval external err: %v", err)
+	}
+	if len(rs) > 0 && rs[0].Expressions[0].Value == true {
+		t.Fatalf("expected ping allow=false from external IP, got %+v", rs)
 	}
 }
 
@@ -278,28 +300,53 @@ func TestDefaultAuth_DBAllow_SubjectsUsersLookup(t *testing.T) {
 }
 
 // 6) 兜底安全：DataProvider 未挂载时（即没有 data.<pkg>.policies/roles/subjects），
-// 持有合法 JWT 访问 api 业务路径 → DB 路径必然 undefined，旧规则 api+email_verified=true 才能放行
-func TestDefaultAuth_NoDB_FallbackToLegacyApiRule(t *testing.T) {
+// 业务 action 必然走不通 DB 段；进而需走兜底不变量层 —— api/* 路径在 P10 后已无兜底
+// 放行规则（v3 的 email_verified 兜底被删，fail-safe），唯一可命中的内网 + admin 路径
+// 是兜底层的 admin 不变量。
+//
+// 1b) admin 兜底：内网 + JWT.sub 非空 → 放行；无 JWT 或外网 → 拒绝；
+//     业务 api 路径无 DB 时一律拒绝（fail-safe）。
+func TestDefaultAuth_NoDB_AdminInvariantFallback(t *testing.T) {
 	ctx := context.Background()
 	c, err := NewClient(ctx, newOPARegoConfig(nil))
 	if err != nil {
 		t.Fatalf("NewClient err: %v", err)
 	}
-	// 旧规则要求 email_verified==true
-	jwtOK := encodeFakeJWT(t, map[string]any{
-		"sub":            "u-1",
-		"email_verified": true,
-	})
-	if !evalAllow(t, c, jwtOK, []string{"api"}, "demo.example.v1:Item.Get") {
-		t.Fatalf("expected legacy api rule to allow when email_verified=true")
+
+	jwtWithSub := encodeFakeJWT(t, map[string]any{"sub": "u-1"})
+
+	mkInput := func(parsedPath []string, addr, auth string) map[string]any {
+		return map[string]any{
+			"parsed_path": parsedPath,
+			"attributes": map[string]any{
+				"source": map[string]any{"address": map[string]any{"socketAddress": map[string]any{"address": addr}}},
+				"request": map[string]any{"http": map[string]any{"headers": map[string]any{
+					"authorization": auth,
+				}}},
+			},
+		}
 	}
-	jwtBad := encodeFakeJWT(t, map[string]any{
-		"sub":            "u-2",
-		"email_verified": false,
-	})
-	if evalAllow(t, c, jwtBad, []string{"api"}, "demo.example.v1:Item.Get") {
-		t.Fatalf("expected legacy api rule to deny when email_verified=false (and DB not mounted)")
+
+	check := func(name string, in map[string]any, want bool) {
+		t.Helper()
+		rs, err := c.opaRego.Eval(ctx, rego.EvalInput(in))
+		if err != nil {
+			t.Fatalf("%s: Eval err: %v", name, err)
+		}
+		got := len(rs) > 0 && rs[0].Expressions[0].Value == true
+		if got != want {
+			t.Fatalf("%s: expected allow=%v, got %v (rs=%+v)", name, want, got, rs)
+		}
 	}
+
+	// admin 内网 + 已登录 → 放行
+	check("admin internal+jwt", mkInput([]string{"admin"}, "10.1.2.3", "Bearer "+jwtWithSub), true)
+	// admin 外网 → 拒绝
+	check("admin external+jwt", mkInput([]string{"admin"}, "8.8.8.8", "Bearer "+jwtWithSub), false)
+	// admin 内网但无 JWT → 拒绝（v3 admin 兜底已删，新兜底强制要 sub）
+	check("admin internal noauth", mkInput([]string{"admin"}, "10.1.2.3", ""), false)
+	// 业务 api/* 路径 + 有效 JWT → DB 不可达时 fail-safe 拒绝（P10 已删 email_verified 兜底）
+	check("api fail-safe", mkInput([]string{"api"}, "10.1.2.3", "Bearer "+jwtWithSub), false)
 }
 
 // 7) 跨 role 聚合：JWT.groups=[ops, guest]，对一个 ops:Anything 命中 ALLOW 且 guest 的 DENY 仅覆盖 Item.Get

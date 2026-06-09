@@ -12,7 +12,7 @@ import (
 // 设计要点（与 roadmap §3.5 / §6.2 P9 行一一对应）：
 //
 //   - **复用 initOPARego 全部逻辑**：包括 DataProvider 调用、StaticDict 合并、
-//     defaultRego/defaultRBAC 兜底、PackageName 嵌套包名构造。Reload 不重写任何
+//     defaultRego/defaultData 兜底、PackageName 嵌套包名构造。Reload 不重写任何
 //     load/parse/build 逻辑，避免"主路径与刷新路径行为漂移"。
 //
 //   - **失败不替换**：initOPARego 内部所有 return err 都发生在 `c.opaRego = query`
