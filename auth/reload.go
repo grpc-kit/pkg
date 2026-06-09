@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 // Phase 1 P9：策略主动刷新。
@@ -25,11 +24,6 @@ import (
 //     用 `c.mu` RLock/Lock 保护；Reload 只是把 initOPARego 当作"持写锁的完整刷新"
 //     调用一次，不需要在 Reload 这一层再加锁。
 //
-//   - **可观测**：耗时无论成败都 Observe（失败也是真实代价），结果按 ok/fail
-//     分桶到 reload_total。注意：NewClient 内部初始调用 initOPARego 不算 Reload，
-//     不会触发 reload_total —— "启动初始化"由 cfg 层在 NewClient 成功后显式触发
-//     一次 Reload（cfg 接线属于 P9.5，本期框架侧仅提供能力）。
-//
 //   - **HTTP 端点**：仅接受 POST，避免 GET 误触发（浏览器预热 / 监控探针）。
 //     端点本身不做 RBAC —— 它就是 RBAC 数据的刷新入口，强制走业务方在 admin mux
 //     上叠加的内网兜底（IP 白名单 / mTLS / 反向代理 ACL）。响应固定 JSON 便于
@@ -40,26 +34,18 @@ import (
 // 调用方场景：
 //   - 业务在管理后台触发"重载策略"按钮
 //   - cfg 层接到 etcd watch / DB CDC 事件
-//   - 启动时显式调用一次保证指标曝光（避免 reload_total 长期为 0）
+//   - 启动时显式调用一次保证刷新链路可用
 //
 // 返回的 error 已 wrap initOPARego 原始错误，调用方可直接日志输出。
 func (c *Client) Reload(ctx context.Context) error {
 	if c == nil || c.config == nil || c.config.OPARego == nil {
-		// 未启用 OPARego 模式 —— Reload 在语义上是 no-op 但仍记一次 ok，
-		// 便于调用方监控"端点可达性"。
-		metricReloadTotal.WithLabelValues("ok").Inc()
+		// 未启用 OPARego 模式 —— Reload 在语义上是 no-op。
 		return nil
 	}
 
-	start := time.Now()
-	err := c.initOPARego(ctx)
-	metricLoaderDuration.Observe(time.Since(start).Seconds())
-
-	if err != nil {
-		metricReloadTotal.WithLabelValues("fail").Inc()
+	if err := c.initOPARego(ctx); err != nil {
 		return fmt.Errorf("reload opa rego: %w", err)
 	}
-	metricReloadTotal.WithLabelValues("ok").Inc()
 	return nil
 }
 

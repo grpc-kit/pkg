@@ -349,12 +349,6 @@ func (c *Client) mergeGrpcKitInput(ctx context.Context, input map[string]interfa
 		"action":    gk.Action,
 		"action_id": gk.ActionID,
 	}
-
-	// Phase 1 P9：action_id 反查失败计数（无论是 dict 缺失还是字典里没有该路由）。
-	// 不区分原因 —— 业务侧关注的是"有多少请求落到了 ["*"] 兜底"。
-	if gk.ActionID == "" {
-		metricActionLookupMiss.Inc()
-	}
 }
 
 // lookupGatewayRoute 与 FromHTTPRequest 同语义，但接受裸字符串避免构造 *http.Request。
