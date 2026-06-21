@@ -255,6 +255,20 @@ func (_u *MenusUpdate) SetNillableDescription(v *string) *MenusUpdate {
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *MenusUpdate) SetProtected(v bool) *MenusUpdate {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *MenusUpdate) SetNillableProtected(v *bool) *MenusUpdate {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
 func (_u *MenusUpdate) AddLionRoleMenuIDs(ids ...int) *MenusUpdate {
 	_u.mutation.AddLionRoleMenuIDs(ids...)
@@ -446,6 +460,9 @@ func (_u *MenusUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(menus.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(menus.FieldProtected, field.TypeBool, value)
 	}
 	if _u.mutation.LionRoleMenusCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -738,6 +755,20 @@ func (_u *MenusUpdateOne) SetNillableDescription(v *string) *MenusUpdateOne {
 	return _u
 }
 
+// SetProtected sets the "protected" field.
+func (_u *MenusUpdateOne) SetProtected(v bool) *MenusUpdateOne {
+	_u.mutation.SetProtected(v)
+	return _u
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_u *MenusUpdateOne) SetNillableProtected(v *bool) *MenusUpdateOne {
+	if v != nil {
+		_u.SetProtected(*v)
+	}
+	return _u
+}
+
 // AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
 func (_u *MenusUpdateOne) AddLionRoleMenuIDs(ids ...int) *MenusUpdateOne {
 	_u.mutation.AddLionRoleMenuIDs(ids...)
@@ -959,6 +990,9 @@ func (_u *MenusUpdateOne) sqlSave(ctx context.Context) (_node *Menus, err error)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(menus.FieldDescription, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Protected(); ok {
+		_spec.SetField(menus.FieldProtected, field.TypeBool, value)
 	}
 	if _u.mutation.LionRoleMenusCleared() {
 		edge := &sqlgraph.EdgeSpec{

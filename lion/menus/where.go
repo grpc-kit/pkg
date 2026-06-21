@@ -125,6 +125,11 @@ func Description(v string) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldDescription, v))
 }
 
+// Protected applies equality check predicate on the "protected" field. It's identical to ProtectedEQ.
+func Protected(v bool) predicate.Menus {
+	return predicate.Menus(sql.FieldEQ(FieldProtected, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Menus {
 	return predicate.Menus(sql.FieldEQ(FieldCreatedAt, v))
@@ -913,6 +918,16 @@ func DescriptionEqualFold(v string) predicate.Menus {
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Menus {
 	return predicate.Menus(sql.FieldContainsFold(FieldDescription, v))
+}
+
+// ProtectedEQ applies the EQ predicate on the "protected" field.
+func ProtectedEQ(v bool) predicate.Menus {
+	return predicate.Menus(sql.FieldEQ(FieldProtected, v))
+}
+
+// ProtectedNEQ applies the NEQ predicate on the "protected" field.
+func ProtectedNEQ(v bool) predicate.Menus {
+	return predicate.Menus(sql.FieldNEQ(FieldProtected, v))
 }
 
 // HasLionRoleMenus applies the HasEdge predicate on the "lion_role_menus" edge.

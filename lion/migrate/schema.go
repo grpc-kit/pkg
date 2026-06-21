@@ -228,6 +228,7 @@ var (
 		{Name: "menu_status", Type: field.TypeString, Size: 16, Default: "active"},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "protected", Type: field.TypeBool, Default: false},
 	}
 	// LionMenusTable holds the schema information for the "lion_menus" table.
 	LionMenusTable = &schema.Table{

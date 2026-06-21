@@ -8394,6 +8394,7 @@ type MenusMutation struct {
 	menu_status            *string
 	metadata               *map[string]interface{}
 	description            *string
+	protected              *bool
 	clearedFields          map[string]struct{}
 	lion_role_menus        map[int]struct{}
 	removedlion_role_menus map[int]struct{}
@@ -9162,6 +9163,42 @@ func (m *MenusMutation) ResetDescription() {
 	m.description = nil
 }
 
+// SetProtected sets the "protected" field.
+func (m *MenusMutation) SetProtected(b bool) {
+	m.protected = &b
+}
+
+// Protected returns the value of the "protected" field in the mutation.
+func (m *MenusMutation) Protected() (r bool, exists bool) {
+	v := m.protected
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProtected returns the old "protected" field's value of the Menus entity.
+// If the Menus object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MenusMutation) OldProtected(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProtected requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
+	}
+	return oldValue.Protected, nil
+}
+
+// ResetProtected resets all changes to the "protected" field.
+func (m *MenusMutation) ResetProtected() {
+	m.protected = nil
+}
+
 // AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by ids.
 func (m *MenusMutation) AddLionRoleMenuIDs(ids ...int) {
 	if m.lion_role_menus == nil {
@@ -9250,7 +9287,7 @@ func (m *MenusMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MenusMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 16)
 	if m.created_at != nil {
 		fields = append(fields, menus.FieldCreatedAt)
 	}
@@ -9296,6 +9333,9 @@ func (m *MenusMutation) Fields() []string {
 	if m.description != nil {
 		fields = append(fields, menus.FieldDescription)
 	}
+	if m.protected != nil {
+		fields = append(fields, menus.FieldProtected)
+	}
 	return fields
 }
 
@@ -9334,6 +9374,8 @@ func (m *MenusMutation) Field(name string) (ent.Value, bool) {
 		return m.Metadata()
 	case menus.FieldDescription:
 		return m.Description()
+	case menus.FieldProtected:
+		return m.Protected()
 	}
 	return nil, false
 }
@@ -9373,6 +9415,8 @@ func (m *MenusMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldMetadata(ctx)
 	case menus.FieldDescription:
 		return m.OldDescription(ctx)
+	case menus.FieldProtected:
+		return m.OldProtected(ctx)
 	}
 	return nil, fmt.Errorf("unknown Menus field %s", name)
 }
@@ -9486,6 +9530,13 @@ func (m *MenusMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
+		return nil
+	case menus.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Menus field %s", name)
@@ -9652,6 +9703,9 @@ func (m *MenusMutation) ResetField(name string) error {
 		return nil
 	case menus.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case menus.FieldProtected:
+		m.ResetProtected()
 		return nil
 	}
 	return fmt.Errorf("unknown Menus field %s", name)

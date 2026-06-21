@@ -32,11 +32,12 @@ type builtinMenuSeed struct {
 	RoutePath   string
 	Icon        string
 	SortOrder   int
+	Protected   bool
 	Children    []builtinMenuSeed
 }
 
 func builtinMenuSeeds() []builtinMenuSeed {
-	return []builtinMenuSeed{
+	seeds := []builtinMenuSeed{
 		{
 			Code:        "root",
 			DisplayName: "根目录",
@@ -45,19 +46,19 @@ func builtinMenuSeeds() []builtinMenuSeed {
 			Children: []builtinMenuSeed{
 				{
 					Code:        "admin",
-					DisplayName: "Admin",
+					DisplayName: "管理后台",
 					RoutePath:   "/",
 					SortOrder:   100,
 					Children: []builtinMenuSeed{
 						{
-							Code:        "user",
+							Code:        "admin.user",
 							DisplayName: "个人中心",
 							RoutePath:   "/user",
 							Icon:        "UserOutlined",
 							SortOrder:   100,
 							Children: []builtinMenuSeed{
 								{
-									Code:        "user.profile",
+									Code:        "admin.user.profile",
 									DisplayName: "我的信息",
 									RoutePath:   "/user/profile",
 									SortOrder:   100,
@@ -65,58 +66,60 @@ func builtinMenuSeeds() []builtinMenuSeed {
 							},
 						},
 						{
-							Code:        "setting",
+							Code:        "admin.setting",
 							DisplayName: "系统设置",
 							RoutePath:   "/setting",
 							Icon:        "SettingOutlined",
 							SortOrder:   200,
 							Children: []builtinMenuSeed{
-								{Code: "setting.auth-providers", DisplayName: "身份认证", RoutePath: "/setting/authentications", SortOrder: 100},
-								{Code: "setting.departments", DisplayName: "组织架构", RoutePath: "/setting/departments", SortOrder: 200},
-								{Code: "setting.menus", DisplayName: "菜单管理", RoutePath: "/setting/menus", SortOrder: 250},
-								{Code: "setting.roles", DisplayName: "角色管理", RoutePath: "/setting/roles", SortOrder: 300},
+								{Code: "admin.setting.auth-providers", DisplayName: "身份认证", RoutePath: "/setting/authentications", SortOrder: 100},
+								{Code: "admin.setting.departments", DisplayName: "组织架构", RoutePath: "/setting/departments", SortOrder: 200},
+								{Code: "admin.setting.menus", DisplayName: "菜单管理", RoutePath: "/setting/menus", SortOrder: 250},
+								{Code: "admin.setting.roles", DisplayName: "角色管理", RoutePath: "/setting/roles", SortOrder: 300},
 								{
-									Code:        "setting.policy",
+									Code:        "admin.setting.policy",
 									DisplayName: "权限策略",
 									RoutePath:   "/setting/policy",
 									SortOrder:   400,
 									Children: []builtinMenuSeed{
-										{Code: "setting.policy.list", DisplayName: "策略列表", RoutePath: "/setting/policy/list", SortOrder: 100},
-										{Code: "setting.policy.create", DisplayName: "新建策略", RoutePath: "/setting/policy/create", SortOrder: 200},
+										{Code: "admin.setting.policy.list", DisplayName: "策略列表", RoutePath: "/setting/policy/list", SortOrder: 100},
+										{Code: "admin.setting.policy.create", DisplayName: "新建策略", RoutePath: "/setting/policy/create", SortOrder: 200},
 									},
 								},
-								{Code: "setting.groups", DisplayName: "群组管理", RoutePath: "/setting/groups", SortOrder: 500},
-								{Code: "setting.users", DisplayName: "用户管理", RoutePath: "/setting/users", SortOrder: 600},
+								{Code: "admin.setting.groups", DisplayName: "群组管理", RoutePath: "/setting/groups", SortOrder: 500},
+								{Code: "admin.setting.users", DisplayName: "用户管理", RoutePath: "/setting/users", SortOrder: 600},
+								{Code: "admin.setting.global-settings", DisplayName: "全局设置", RoutePath: "/setting/global-settings", SortOrder: 700},
 								{
-									Code:        "setting.config",
+									Code:        "admin.setting.config",
 									DisplayName: "本地配置",
 									RoutePath:   "/setting/config",
 									SortOrder:   900,
 									Children: []builtinMenuSeed{
-										{Code: "setting.config.security", DisplayName: "安全配置", RoutePath: "/setting/config/security", SortOrder: 100},
-										{Code: "setting.config.services", DisplayName: "服务配置", RoutePath: "/setting/config/services", SortOrder: 200},
-										{Code: "setting.config.discover", DisplayName: "服务发现", RoutePath: "/setting/config/discover", SortOrder: 300},
-										{Code: "setting.config.database", DisplayName: "数据库配置", RoutePath: "/setting/config/database", SortOrder: 400},
-										{Code: "setting.config.cachebox", DisplayName: "缓存配置", RoutePath: "/setting/config/cachebox", SortOrder: 500},
-										{Code: "setting.config.debugger", DisplayName: "调试配置", RoutePath: "/setting/config/debugger", SortOrder: 600},
-										{Code: "setting.config.objstore", DisplayName: "对象存储", RoutePath: "/setting/config/objstore", SortOrder: 700},
-										{Code: "setting.config.frontend", DisplayName: "前端配置", RoutePath: "/setting/config/frontend", SortOrder: 800},
-										{Code: "setting.config.observables", DisplayName: "可观测性", RoutePath: "/setting/config/observables", SortOrder: 900},
-										{Code: "setting.config.cloudevents", DisplayName: "云事件", RoutePath: "/setting/config/cloudevents", SortOrder: 1000},
-										{Code: "setting.config.automations", DisplayName: "自动化", RoutePath: "/setting/config/automations", SortOrder: 1100},
+										{Code: "admin.setting.config.security", DisplayName: "安全配置", RoutePath: "/setting/config/security", SortOrder: 100},
+										{Code: "admin.setting.config.services", DisplayName: "服务配置", RoutePath: "/setting/config/services", SortOrder: 200},
+										{Code: "admin.setting.config.discover", DisplayName: "服务发现", RoutePath: "/setting/config/discover", SortOrder: 300},
+										{Code: "admin.setting.config.database", DisplayName: "数据库配置", RoutePath: "/setting/config/database", SortOrder: 400},
+										{Code: "admin.setting.config.cachebox", DisplayName: "缓存配置", RoutePath: "/setting/config/cachebox", SortOrder: 500},
+										{Code: "admin.setting.config.debugger", DisplayName: "调试配置", RoutePath: "/setting/config/debugger", SortOrder: 600},
+										{Code: "admin.setting.config.objstore", DisplayName: "对象存储", RoutePath: "/setting/config/objstore", SortOrder: 700},
+										{Code: "admin.setting.config.frontend", DisplayName: "前端配置", RoutePath: "/setting/config/frontend", SortOrder: 800},
+										{Code: "admin.setting.config.observables", DisplayName: "可观测性", RoutePath: "/setting/config/observables", SortOrder: 900},
+										{Code: "admin.setting.config.cloudevents", DisplayName: "云事件", RoutePath: "/setting/config/cloudevents", SortOrder: 1000},
+										{Code: "admin.setting.config.automations", DisplayName: "自动化", RoutePath: "/setting/config/automations", SortOrder: 1100},
+										{Code: "admin.setting.config.independent", DisplayName: "独立配置", RoutePath: "/setting/config/independent", SortOrder: 1200},
 									},
 								},
 							},
 						},
 						{
-							Code:        "apidocs",
+							Code:        "admin.apidocs",
 							DisplayName: "API 文档",
 							RoutePath:   "/apidocs",
 							Icon:        "SolutionOutlined",
 							SortOrder:   300,
 							Children: []builtinMenuSeed{
 								{
-									Code:        "apidocs.service",
+									Code:        "admin.apidocs.service",
 									DisplayName: "服务文档",
 									RoutePath:   "/apidocs/service",
 									SortOrder:   100,
@@ -125,8 +128,36 @@ func builtinMenuSeeds() []builtinMenuSeed {
 						},
 					},
 				},
+				{
+					Code:        "portal",
+					DisplayName: "用户门户",
+					RoutePath:   "/portal",
+					SortOrder:   200,
+				},
+				{
+					Code:        "miniapp",
+					DisplayName: "小程序",
+					RoutePath:   "/miniapp",
+					SortOrder:   300,
+				},
+				{
+					Code:        "mobile",
+					DisplayName: "移动端",
+					RoutePath:   "/mobile",
+					SortOrder:   400,
+				},
 			},
 		},
+	}
+	markMenuSeedsProtected(seeds)
+	return seeds
+}
+
+// markMenuSeedsProtected 递归标记所有内置菜单种子为受保护项。
+func markMenuSeedsProtected(seeds []builtinMenuSeed) {
+	for i := range seeds {
+		seeds[i].Protected = true
+		markMenuSeedsProtected(seeds[i].Children)
 	}
 }
 
@@ -144,6 +175,7 @@ func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items 
 				SetSortOrder(item.SortOrder).
 				SetVisibility("global").
 				SetDescription("").
+				SetProtected(item.Protected).
 				Save(ctx)
 			if err != nil {
 				return err
@@ -157,6 +189,7 @@ func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items 
 				SetRoutePath(item.RoutePath).
 				SetIcon(item.Icon).
 				SetSortOrder(item.SortOrder).
+				SetProtected(item.Protected).
 				Save(ctx)
 			if err != nil {
 				return err

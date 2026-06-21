@@ -57,6 +57,9 @@ func (Menus) Fields() []ent.Field {
 		field.String("description").
 			Default("").
 			Comment("详细描述"),
+		field.Bool("protected").
+			Default(false).
+			Comment("是否为系统内置保护项，内置项不可删除且关键字段不可修改"),
 	}
 }
 

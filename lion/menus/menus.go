@@ -44,6 +44,8 @@ const (
 	FieldMetadata = "metadata"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
 	// EdgeLionRoleMenus holds the string denoting the lion_role_menus edge name in mutations.
 	EdgeLionRoleMenus = "lion_role_menus"
 	// Table holds the table name of the menus in the database.
@@ -75,6 +77,7 @@ var Columns = []string{
 	FieldMenuStatus,
 	FieldMetadata,
 	FieldDescription,
+	FieldProtected,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -130,6 +133,8 @@ var (
 	MenuStatusValidator func(string) error
 	// DefaultDescription holds the default value on creation for the "description" field.
 	DefaultDescription string
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
 )
 
 // OrderOption defines the ordering options for the Menus queries.
@@ -208,6 +213,11 @@ func ByMenuStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
 // ByLionRoleMenusCount orders the results by lion_role_menus count.

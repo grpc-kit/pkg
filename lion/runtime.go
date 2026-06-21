@@ -499,6 +499,10 @@ func init() {
 	menusDescDescription := menusFields[10].Descriptor()
 	// menus.DefaultDescription holds the default value on creation for the description field.
 	menus.DefaultDescription = menusDescDescription.Default.(string)
+	// menusDescProtected is the schema descriptor for protected field.
+	menusDescProtected := menusFields[11].Descriptor()
+	// menus.DefaultProtected holds the default value on creation for the protected field.
+	menus.DefaultProtected = menusDescProtected.Default.(bool)
 	policiesMixin := schema.Policies{}.Mixin()
 	policiesMixinFields0 := policiesMixin[0].Fields()
 	_ = policiesMixinFields0

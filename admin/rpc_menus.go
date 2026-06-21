@@ -212,7 +212,7 @@ func lionMenuToProto(in *lion.Menus) *adminv1.Menu {
 		Metadata:    menuMetadataToProto(in.Metadata),
 		Visibility:  menuVisibilityToProto(in.Visibility),
 		Description: in.Description,
-		Protected:   false,
+		Protected:   in.Protected,
 		CreatedBy:   in.CreatedBy,
 		UpdatedBy:   in.UpdatedBy,
 		CreatedAt:   timestamppb.New(in.CreatedAt),
@@ -441,15 +441,51 @@ func (a *KnownAdminAPI) ListMenus(ctx context.Context, req *adminv1.ListMenusReq
 	return result, nil
 }
 
+// resolveMenuCode 根据父菜单 code 和用户输入的 code，解析出最终菜单 code
+// 规则：
+//   - 有父菜单 + 用户未填 code → GenerateMenuCode(parentCode) 生成 "parent.xxxxxx"
+//   - 有父菜单 + 用户填了 code → 若已含父前缀则原样校验，否则自动补前缀 "parent.usercode"
+//   - 无父菜单 + 用户未填 code → GenerateMenuCode("") 生成 6 位随机码
+//   - 无父菜单 + 用户填了 code → 原样校验
+func resolveMenuCode(parentCode, userCode string) (string, error) {
+	if parentCode == "" {
+		// 顶级菜单
+		if userCode == "" {
+			return schema.GenerateMenuCode("")
+		}
+		if err := schema.ValidateCode(userCode); err != nil {
+			return "", err
+		}
+		return userCode, nil
+	}
+
+	// 有父菜单
+	if userCode == "" {
+		return schema.GenerateMenuCode(parentCode)
+	}
+
+	// 用户填了 code，检查是否已含父前缀
+	prefix := parentCode + "."
+	if strings.HasPrefix(userCode, prefix) {
+		// 已含前缀，直接校验
+		if err := schema.ValidateCode(userCode); err != nil {
+			return "", err
+		}
+		return userCode, nil
+	}
+
+	// 未含前缀，自动补全
+	fullCode := prefix + userCode
+	if err := schema.ValidateCode(fullCode); err != nil {
+		return "", err
+	}
+	return fullCode, nil
+}
+
 func (a *KnownAdminAPI) CreateMenu(ctx context.Context, req *adminv1.CreateMenuRequest) (*adminv1.Menu, error) {
 	if req == nil || req.Menu == nil {
 		return nil, errs.InvalidArgument(ctx).WithMessage("request body menu is nil")
 	}
-	code, err := schema.EnsureCode(req.Menu.Code)
-	if err != nil {
-		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
-	}
-	req.Menu.Code = code
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
@@ -458,11 +494,24 @@ func (a *KnownAdminAPI) CreateMenu(ctx context.Context, req *adminv1.CreateMenuR
 	if err != nil {
 		return nil, err
 	}
+	// 先获取父菜单，以便解析 code 前缀
+	var parentCode string
 	if req.Menu.ParentId > 0 {
-		if _, err := db.Menus.Get(ctx, int(req.Menu.ParentId)); err != nil {
+		parent, err := db.Menus.Get(ctx, int(req.Menu.ParentId))
+		if err != nil {
 			return nil, errs.InvalidArgument(ctx).WithMessage("parent menu not found")
 		}
+		parentCode = parent.Code
 	}
+	// 解析最终 code：自动补全父前缀或自动生成
+	code, err := resolveMenuCode(parentCode, req.Menu.Code)
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	if schema.IsReservedCode(code) {
+		return nil, errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("code %q is reserved and cannot be used", code))
+	}
+	req.Menu.Code = code
 	create := db.Menus.Create().
 		SetParentID(req.Menu.ParentId).
 		SetCode(req.Menu.Code).
@@ -473,6 +522,7 @@ func (a *KnownAdminAPI) CreateMenu(ctx context.Context, req *adminv1.CreateMenuR
 		SetSortOrder(int(req.Menu.SortOrder)).
 		SetVisibility(menuVisibilityFromProto(req.Menu.Visibility)).
 		SetDescription(req.Menu.Description).
+		SetProtected(false).
 		SetCreatedBy(userID).
 		SetUpdatedBy(userID)
 	if len(req.Menu.Metadata) > 0 {
@@ -480,6 +530,9 @@ func (a *KnownAdminAPI) CreateMenu(ctx context.Context, req *adminv1.CreateMenuR
 	}
 	obj, err := create.Save(ctx)
 	if err != nil {
+		if lion.IsConstraintError(err) {
+			return nil, errs.AlreadyExists(ctx).WithMessage(fmt.Sprintf("menu with code %q already exists", req.Menu.Code))
+		}
 		return nil, err
 	}
 	return lionMenuToProto(obj), nil
@@ -506,6 +559,13 @@ func (a *KnownAdminAPI) UpdateMenu(ctx context.Context, req *adminv1.UpdateMenuR
 	}
 	update := obj.Update()
 	apply := func(path string) error {
+		// 受保护菜单的结构字段不可修改，仅允许展示属性
+		if obj.Protected {
+			switch path {
+			case "parent_id", "code", "route_path":
+				return errs.FailedPrecondition(ctx).WithMessage(fmt.Sprintf("protected menu structure field %q cannot be modified", path))
+			}
+		}
 		switch path {
 		case "parent_id":
 			if req.Menu.ParentId > 0 {
@@ -548,7 +608,7 @@ func (a *KnownAdminAPI) UpdateMenu(ctx context.Context, req *adminv1.UpdateMenuR
 			}
 		}
 	} else {
-		for _, path := range []string{"parent_id", "resource_id", "code", "display_name", "route_path", "component", "icon", "sort_order", "metadata", "visibility", "description"} {
+		for _, path := range []string{"parent_id", "code", "display_name", "route_path", "component", "icon", "sort_order", "metadata", "visibility", "description"} {
 			if err := apply(path); err != nil {
 				return nil, err
 			}
@@ -579,6 +639,10 @@ func (a *KnownAdminAPI) DeleteMenu(ctx context.Context, req *adminv1.DeleteMenuR
 	if err != nil {
 		rollback()
 		return nil, errs.NotFound(ctx).WithMessage("menu not found")
+	}
+	if obj.Protected {
+		rollback()
+		return nil, errs.FailedPrecondition(ctx).WithMessage("protected menu cannot be deleted")
 	}
 	hasChildren, err := tx.Menus.Query().Where(menus.ParentIDEQ(int64(obj.ID))).Exist(ctx)
 	if err != nil {

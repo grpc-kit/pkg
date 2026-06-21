@@ -48,6 +48,8 @@ type Menus struct {
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 	// 详细描述
 	Description string `json:"description,omitempty"`
+	// 是否为系统内置保护项，内置项不可删除且关键字段不可修改
+	Protected bool `json:"protected,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MenusQuery when eager-loading is set.
 	Edges        MenusEdges `json:"edges"`
@@ -79,6 +81,8 @@ func (*Menus) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case menus.FieldMetadata:
 			values[i] = new([]byte)
+		case menus.FieldProtected:
+			values[i] = new(sql.NullBool)
 		case menus.FieldID, menus.FieldCreatedBy, menus.FieldUpdatedBy, menus.FieldParentID, menus.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
 		case menus.FieldCode, menus.FieldDisplayName, menus.FieldRoutePath, menus.FieldComponent, menus.FieldIcon, menus.FieldVisibility, menus.FieldMenuStatus, menus.FieldDescription:
@@ -198,6 +202,12 @@ func (_m *Menus) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Description = value.String
 			}
+		case menus.FieldProtected:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field protected", values[i])
+			} else if value.Valid {
+				_m.Protected = value.Bool
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -283,6 +293,9 @@ func (_m *Menus) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(_m.Description)
+	builder.WriteString(", ")
+	builder.WriteString("protected=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
 	builder.WriteByte(')')
 	return builder.String()
 }
