@@ -228,6 +228,9 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 		authproviders.FieldConfig,
 		authproviders.FieldCreatedAt,
 		authproviders.FieldUpdatedAt,
+		authproviders.FieldCreatedBy,
+		authproviders.FieldUpdatedBy,
+		authproviders.FieldDeletedAt,
 		// 注意：List 默认不查 SecretEncrypted（敏感字段）
 	}
 
@@ -468,6 +471,11 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 				create.SetSecretEncrypted(secretEnc)
 			}
 
+			// 设置审计字段
+			if actor, err := GetUserID(ctx); err == nil && actor != 0 {
+				create.SetCreatedBy(actor).SetUpdatedBy(actor)
+			}
+
 			_, err = create.Save(ctx)
 		} else {
 			update := db.AuthProviders.Update().Where(authproviders.CodeEQ(name)).
@@ -490,6 +498,11 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 			}
 			if len(secretEnc) > 0 {
 				update.SetSecretEncrypted(secretEnc)
+			}
+
+			// 设置审计字段
+			if actor, err := GetUserID(ctx); err == nil && actor != 0 {
+				update.SetUpdatedBy(actor)
 			}
 
 			err = update.Exec(ctx)
@@ -542,6 +555,11 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 		SetDescription(req.Provider.Description).
 		SetSortOrder(int(req.Provider.SortOrder)).
 		SetIconURL(req.Provider.IconUrl)
+
+	// 设置审计字段
+	if actor, err := GetUserID(ctx); err == nil && actor != 0 {
+		create.SetCreatedBy(actor).SetUpdatedBy(actor)
+	}
 
 	if configJSON != nil {
 		create.SetConfig(configJSON)
@@ -681,6 +699,11 @@ func (a *KnownAdminAPI) UpdateAuthProvider(ctx context.Context, req *adminv1.Upd
 
 	// 构建更新操作
 	update := provider.Update()
+
+	// 设置审计字段
+	if actor, err := GetUserID(ctx); err == nil && actor != 0 {
+		update.SetUpdatedBy(actor)
+	}
 
 	// 更新公共字段
 	if req.Provider.Code != "" {

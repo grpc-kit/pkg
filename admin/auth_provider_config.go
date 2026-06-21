@@ -8,6 +8,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // ldapConfigData LDAP 非敏感配置，用于 JSON 列存储
@@ -153,6 +154,12 @@ func protoToDBConfig(p *adminv1.AuthProvider, aesKey []byte) (configJSON json.Ra
 // dbToProtoAuthProvider 将 DB 行转换为 proto AuthProvider
 // withSecret 控制是否解密并填充敏感字段（List 场景不需要，Get 场景需要）
 func dbToProtoAuthProvider(row *lion.AuthProviders, aesKey []byte, withSecret bool) (*adminv1.AuthProvider, error) {
+	// deleted_at 为可空字段，需 nil 检查
+	var deletedAt *timestamppb.Timestamp
+	if row.DeletedAt != nil {
+		deletedAt = timestamppb.New(*row.DeletedAt)
+	}
+
 	p := &adminv1.AuthProvider{
 		Id:          int64(row.ID),
 		Code:        row.Code,
@@ -163,6 +170,11 @@ func dbToProtoAuthProvider(row *lion.AuthProviders, aesKey []byte, withSecret bo
 		SortOrder:   int32(row.SortOrder),
 		IconUrl:     row.IconURL,
 		Protected:   row.Protected,
+		CreatedBy:   row.CreatedBy,
+		UpdatedBy:   row.UpdatedBy,
+		CreatedAt:   timestamppb.New(row.CreatedAt),
+		UpdatedAt:   timestamppb.New(row.UpdatedAt),
+		DeletedAt:   deletedAt,
 	}
 
 	// 解密敏感凭证

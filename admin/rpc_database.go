@@ -296,6 +296,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetDisplayName("本地账号密码登录").
 			SetSortOrder(100).
 			SetProtected(true).
+			SetCreatedBy(int64(adminUser.ID)).
+			SetUpdatedBy(int64(adminUser.ID)).
 			Save(ctx)
 		if err != nil {
 			rollback()
