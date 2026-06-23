@@ -134,18 +134,45 @@ func builtinMenuSeeds() []builtinMenuSeed {
 					DisplayName: "用户门户",
 					RoutePath:   "/portal",
 					SortOrder:   200,
+					Children: []builtinMenuSeed{
+						{
+							Code:        "portal.home",
+							DisplayName: "主页",
+							RoutePath:   "/portal/home",
+							Icon:        "HomeOutlined",
+							SortOrder:   100,
+						},
+					},
 				},
 				{
 					Code:        "miniapp",
 					DisplayName: "小程序",
 					RoutePath:   "/miniapp",
 					SortOrder:   300,
+					Children: []builtinMenuSeed{
+						{
+							Code:        "miniapp.home",
+							DisplayName: "主页",
+							RoutePath:   "/miniapp/home",
+							Icon:        "HomeOutlined",
+							SortOrder:   100,
+						},
+					},
 				},
 				{
 					Code:        "mobile",
 					DisplayName: "移动端",
 					RoutePath:   "/mobile",
 					SortOrder:   400,
+					Children: []builtinMenuSeed{
+						{
+							Code:        "mobile.home",
+							DisplayName: "主页",
+							RoutePath:   "/mobile/home",
+							Icon:        "HomeOutlined",
+							SortOrder:   100,
+						},
+					},
 				},
 			},
 		},
