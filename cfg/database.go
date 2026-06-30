@@ -170,9 +170,6 @@ func (c *LocalConfig) GetAdminDatabaseLion() (*lion.Client, error) {
 	if err = db.Schema.Create(context.TODO()); err != nil {
 		c.logger.Warnf("lion migrate err: %v", err)
 	}
-	if err = backfillLegacyLionUserMemberships(context.TODO(), rawDB, c.Database.Driver); err != nil {
-		return nil, err
-	}
 
 	return db, nil
 }
