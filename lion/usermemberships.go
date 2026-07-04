@@ -42,7 +42,7 @@ type UserMemberships struct {
 	// 用户加入目标实体的时间
 	JoinedAt time.Time `json:"joined_at,omitempty"`
 	// 关系有效期，用于临时成员管理，空表示永久有效
-	ExpiredAt time.Time `json:"expired_at,omitempty"`
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// 元数据，用于存储自定义属性，统一采用 JSON
 	Metadata map[string]string `json:"metadata,omitempty"`
 	// 成员关系描述
@@ -84,7 +84,7 @@ func (*UserMemberships) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case usermemberships.FieldDescription:
 			values[i] = new(sql.NullString)
-		case usermemberships.FieldCreatedAt, usermemberships.FieldUpdatedAt, usermemberships.FieldJoinedAt, usermemberships.FieldExpiredAt:
+		case usermemberships.FieldCreatedAt, usermemberships.FieldUpdatedAt, usermemberships.FieldJoinedAt, usermemberships.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -173,11 +173,11 @@ func (_m *UserMemberships) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.JoinedAt = value.Time
 			}
-		case usermemberships.FieldExpiredAt:
+		case usermemberships.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field expired_at", values[i])
+				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
 			} else if value.Valid {
-				_m.ExpiredAt = value.Time
+				_m.ExpiresAt = value.Time
 			}
 		case usermemberships.FieldMetadata:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -267,8 +267,8 @@ func (_m *UserMemberships) String() string {
 	builder.WriteString("joined_at=")
 	builder.WriteString(_m.JoinedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("expired_at=")
-	builder.WriteString(_m.ExpiredAt.Format(time.ANSIC))
+	builder.WriteString("expires_at=")
+	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))

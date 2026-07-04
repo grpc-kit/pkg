@@ -29,7 +29,7 @@ func (PrincipalRoles) Fields() []ent.Field {
 		field.Int("binding_status").
 			Default(1).
 			Comment("绑定状态：1-生效，2-禁用"),
-		field.Time("expired_at").
+		field.Time("expires_at").
 			Optional().
 			Comment("绑定有效期，空表示永久有效"),
 		field.JSON("metadata", map[string]string{}).

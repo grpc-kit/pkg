@@ -85,8 +85,8 @@ func applyBindingToPrincipalRoleCreate(cb *lion.PrincipalRolesCreate, roleID int
 		SetPrincipalID(int(binding.GetPrincipalId())).
 		SetRoleID(roleID).
 		SetBindingStatus(bindingStatus)
-	if binding.GetExpiredAt() != nil {
-		cb = cb.SetExpiredAt(binding.GetExpiredAt().AsTime())
+	if binding.GetExpiresAt() != nil {
+		cb = cb.SetExpiresAt(binding.GetExpiresAt().AsTime())
 	}
 	if metadata := principalRoleMetadata(binding.GetMetadata()); metadata != nil {
 		cb = cb.SetMetadata(metadata)
@@ -103,10 +103,10 @@ func applyBindingToPrincipalRoleUpdate(upd *lion.PrincipalRolesUpdateOne, bindin
 		return nil, err
 	}
 	upd = upd.SetBindingStatus(bindingStatus)
-	if binding.GetExpiredAt() != nil {
-		upd = upd.SetExpiredAt(binding.GetExpiredAt().AsTime())
+	if binding.GetExpiresAt() != nil {
+		upd = upd.SetExpiresAt(binding.GetExpiresAt().AsTime())
 	} else {
-		upd = upd.ClearExpiredAt()
+		upd = upd.ClearExpiresAt()
 	}
 	if metadata := principalRoleMetadata(binding.GetMetadata()); metadata != nil {
 		upd = upd.SetMetadata(metadata)
@@ -178,8 +178,8 @@ func principalRoleBindingToProto(binding *lion.PrincipalRoles, display principal
 		CreatedAt:     timestamppb.New(binding.CreatedAt),
 		UpdatedAt:     timestamppb.New(binding.UpdatedAt),
 	}
-	if !binding.ExpiredAt.IsZero() {
-		result.ExpiredAt = timestamppb.New(binding.ExpiredAt)
+	if !binding.ExpiresAt.IsZero() {
+		result.ExpiresAt = timestamppb.New(binding.ExpiresAt)
 	}
 	if len(binding.Metadata) > 0 {
 		result.Metadata = principalRoleMetadata(binding.Metadata)
@@ -211,7 +211,7 @@ func principalRoleToDirectUserMembership(binding *lion.PrincipalRoles, user *lio
 		int(bindingStatusToMembershipStatus(binding.BindingStatus)),
 		0,
 		nil,
-		membershipTimestamp(binding.ExpiredAt),
+		membershipTimestamp(binding.ExpiresAt),
 		binding.CreatedBy,
 		binding.UpdatedBy,
 		membershipTimestamp(binding.CreatedAt),
@@ -232,7 +232,7 @@ func isPrincipalRoleActive(binding *lion.PrincipalRoles, now time.Time) bool {
 	if binding.BindingStatus != bindingStatusActive {
 		return false
 	}
-	if !binding.ExpiredAt.IsZero() && !binding.ExpiredAt.After(now) {
+	if !binding.ExpiresAt.IsZero() && !binding.ExpiresAt.After(now) {
 		return false
 	}
 	return true
@@ -436,8 +436,8 @@ func effectiveRoleIDsForUser(ctx context.Context, db *lion.Client, userID int) (
 				principalroles.PrincipalIDIn(principalIDs...),
 				principalroles.BindingStatusEQ(bindingStatusActive),
 				principalroles.Or(
-					principalroles.ExpiredAtIsNil(),
-					principalroles.ExpiredAtGT(now),
+				principalroles.ExpiresAtIsNil(),
+				principalroles.ExpiresAtGT(now),
 				),
 			).
 			All(ctx)

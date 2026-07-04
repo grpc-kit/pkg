@@ -18,6 +18,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/globalsettings"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/oauth2clients"
+	"github.com/grpc-kit/pkg/lion/oauth2codes"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
@@ -93,6 +95,8 @@ func checkColumn(t, c string) error {
 			globalsettings.Table:  globalsettings.ValidColumn,
 			groups.Table:          groups.ValidColumn,
 			menus.Table:           menus.ValidColumn,
+			oauth2clients.Table:   oauth2clients.ValidColumn,
+			oauth2codes.Table:     oauth2codes.ValidColumn,
 			policies.Table:        policies.ValidColumn,
 			principalroles.Table:  principalroles.ValidColumn,
 			rolemenus.Table:       rolemenus.ValidColumn,

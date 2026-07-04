@@ -248,6 +248,68 @@ var (
 			},
 		},
 	}
+	// LionOauth2ClientsColumns holds the columns for the "lion_oauth2_clients" table.
+	LionOauth2ClientsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "client_id", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "client_secret_hash", Type: field.TypeString, Size: 128},
+		{Name: "display_name", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "redirect_uris", Type: field.TypeJSON, Nullable: true},
+		{Name: "client_status", Type: field.TypeInt, Default: 1},
+		{Name: "grant_types", Type: field.TypeJSON, Nullable: true},
+		{Name: "scopes", Type: field.TypeJSON, Nullable: true},
+		{Name: "logo_url", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "description", Type: field.TypeString, Size: 512, Default: ""},
+	}
+	// LionOauth2ClientsTable holds the schema information for the "lion_oauth2_clients" table.
+	LionOauth2ClientsTable = &schema.Table{
+		Name:       "lion_oauth2_clients",
+		Columns:    LionOauth2ClientsColumns,
+		PrimaryKey: []*schema.Column{LionOauth2ClientsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "oauth2clients_client_status",
+				Unique:  false,
+				Columns: []*schema.Column{LionOauth2ClientsColumns[10]},
+			},
+		},
+	}
+	// LionOauth2CodesColumns holds the columns for the "lion_oauth2_codes" table.
+	LionOauth2CodesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "code_hash", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "client_id", Type: field.TypeString, Size: 64},
+		{Name: "redirect_uri", Type: field.TypeString, Size: 512},
+		{Name: "user_id", Type: field.TypeInt, Default: 0},
+		{Name: "username", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "scopes", Type: field.TypeJSON, Nullable: true},
+		{Name: "state", Type: field.TypeString, Size: 256, Default: ""},
+		{Name: "nonce", Type: field.TypeString, Size: 256, Default: ""},
+		{Name: "code_challenge", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "code_challenge_method", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "consumed_at", Type: field.TypeTime, Nullable: true},
+	}
+	// LionOauth2CodesTable holds the schema information for the "lion_oauth2_codes" table.
+	LionOauth2CodesTable = &schema.Table{
+		Name:       "lion_oauth2_codes",
+		Columns:    LionOauth2CodesColumns,
+		PrimaryKey: []*schema.Column{LionOauth2CodesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "oauth2codes_client_id_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{LionOauth2CodesColumns[4], LionOauth2CodesColumns[13]},
+			},
+		},
+	}
 	// LionPoliciesColumns holds the columns for the "lion_policies" table.
 	LionPoliciesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -286,7 +348,7 @@ var (
 		{Name: "principal_type", Type: field.TypeInt, Default: 0},
 		{Name: "principal_id", Type: field.TypeInt},
 		{Name: "binding_status", Type: field.TypeInt, Default: 1},
-		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "role_id", Type: field.TypeInt},
@@ -513,7 +575,7 @@ var (
 		{Name: "member_status", Type: field.TypeInt, Default: 0},
 		{Name: "member_type", Type: field.TypeInt, Default: 0},
 		{Name: "joined_at", Type: field.TypeTime, Nullable: true},
-		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
 		{Name: "user_id", Type: field.TypeInt},
@@ -713,6 +775,8 @@ var (
 		LionSettingsTable,
 		LionGroupsTable,
 		LionMenusTable,
+		LionOauth2ClientsTable,
+		LionOauth2CodesTable,
 		LionPoliciesTable,
 		LionPrincipalRolesTable,
 		LionRoleMenusTable,
@@ -744,6 +808,12 @@ func init() {
 	}
 	LionMenusTable.Annotation = &entsql.Annotation{
 		Table: "lion_menus",
+	}
+	LionOauth2ClientsTable.Annotation = &entsql.Annotation{
+		Table: "lion_oauth2_clients",
+	}
+	LionOauth2CodesTable.Annotation = &entsql.Annotation{
+		Table: "lion_oauth2_codes",
 	}
 	LionPoliciesTable.Annotation = &entsql.Annotation{
 		Table: "lion_policies",

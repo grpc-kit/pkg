@@ -24,6 +24,12 @@ type Groups func(*sql.Selector)
 // Menus is the predicate function for menus builders.
 type Menus func(*sql.Selector)
 
+// OAuth2Clients is the predicate function for oauth2clients builders.
+type OAuth2Clients func(*sql.Selector)
+
+// OAuth2Codes is the predicate function for oauth2codes builders.
+type OAuth2Codes func(*sql.Selector)
+
 // Policies is the predicate function for policies builders.
 type Policies func(*sql.Selector)
 

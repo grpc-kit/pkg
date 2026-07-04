@@ -38,7 +38,7 @@ func (UserMemberships) Fields() []ent.Field {
 		field.Time("joined_at").
 			Optional().
 			Comment("用户加入目标实体的时间"),
-		field.Time("expired_at").
+		field.Time("expires_at").
 			Optional().
 			Comment("关系有效期，用于临时成员管理，空表示永久有效"),
 		field.JSON("metadata", map[string]string{}).

@@ -22,7 +22,7 @@ func newMembershipProto(
 	memberStatus int,
 	memberType int,
 	joinedAt *timestamppb.Timestamp,
-	expiredAt *timestamppb.Timestamp,
+	expiresAt *timestamppb.Timestamp,
 	createdBy int64,
 	updatedBy int64,
 	createdAt *timestamppb.Timestamp,
@@ -44,8 +44,8 @@ func newMembershipProto(
 	if joinedAt != nil {
 		membership.JoinedAt = joinedAt
 	}
-	if expiredAt != nil {
-		membership.ExpiredAt = expiredAt
+	if expiresAt != nil {
+		membership.ExpiresAt = expiresAt
 	}
 	if createdAt != nil {
 		membership.CreatedAt = createdAt
@@ -94,7 +94,7 @@ func userMembershipToProto(member *lion.UserMemberships) *adminv1.Membership {
 		member.MemberStatus,
 		member.MemberType,
 		membershipTimestamp(member.JoinedAt),
-		membershipTimestamp(member.ExpiredAt),
+		membershipTimestamp(member.ExpiresAt),
 		member.CreatedBy,
 		member.UpdatedBy,
 		membershipTimestamp(member.CreatedAt),

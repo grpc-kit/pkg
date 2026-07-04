@@ -117,16 +117,16 @@ func (_c *PrincipalRolesCreate) SetNillableBindingStatus(v *int) *PrincipalRoles
 	return _c
 }
 
-// SetExpiredAt sets the "expired_at" field.
-func (_c *PrincipalRolesCreate) SetExpiredAt(v time.Time) *PrincipalRolesCreate {
-	_c.mutation.SetExpiredAt(v)
+// SetExpiresAt sets the "expires_at" field.
+func (_c *PrincipalRolesCreate) SetExpiresAt(v time.Time) *PrincipalRolesCreate {
+	_c.mutation.SetExpiresAt(v)
 	return _c
 }
 
-// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_c *PrincipalRolesCreate) SetNillableExpiredAt(v *time.Time) *PrincipalRolesCreate {
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_c *PrincipalRolesCreate) SetNillableExpiresAt(v *time.Time) *PrincipalRolesCreate {
 	if v != nil {
-		_c.SetExpiredAt(*v)
+		_c.SetExpiresAt(*v)
 	}
 	return _c
 }
@@ -317,9 +317,9 @@ func (_c *PrincipalRolesCreate) createSpec() (*PrincipalRoles, *sqlgraph.CreateS
 		_spec.SetField(principalroles.FieldBindingStatus, field.TypeInt, value)
 		_node.BindingStatus = value
 	}
-	if value, ok := _c.mutation.ExpiredAt(); ok {
-		_spec.SetField(principalroles.FieldExpiredAt, field.TypeTime, value)
-		_node.ExpiredAt = value
+	if value, ok := _c.mutation.ExpiresAt(); ok {
+		_spec.SetField(principalroles.FieldExpiresAt, field.TypeTime, value)
+		_node.ExpiresAt = value
 	}
 	if value, ok := _c.mutation.Metadata(); ok {
 		_spec.SetField(principalroles.FieldMetadata, field.TypeJSON, value)

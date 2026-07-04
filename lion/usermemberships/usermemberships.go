@@ -36,8 +36,8 @@ const (
 	FieldMemberType = "member_type"
 	// FieldJoinedAt holds the string denoting the joined_at field in the database.
 	FieldJoinedAt = "joined_at"
-	// FieldExpiredAt holds the string denoting the expired_at field in the database.
-	FieldExpiredAt = "expired_at"
+	// FieldExpiresAt holds the string denoting the expires_at field in the database.
+	FieldExpiresAt = "expires_at"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
 	// FieldDescription holds the string denoting the description field in the database.
@@ -69,7 +69,7 @@ var Columns = []string{
 	FieldMemberStatus,
 	FieldMemberType,
 	FieldJoinedAt,
-	FieldExpiredAt,
+	FieldExpiresAt,
 	FieldMetadata,
 	FieldDescription,
 }
@@ -174,9 +174,9 @@ func ByJoinedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldJoinedAt, opts...).ToFunc()
 }
 
-// ByExpiredAt orders the results by the expired_at field.
-func ByExpiredAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldExpiredAt, opts...).ToFunc()
+// ByExpiresAt orders the results by the expires_at field.
+func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
 }
 
 // ByDescription orders the results by the description field.

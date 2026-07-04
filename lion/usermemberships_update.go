@@ -228,23 +228,23 @@ func (_u *UserMembershipsUpdate) ClearJoinedAt() *UserMembershipsUpdate {
 	return _u
 }
 
-// SetExpiredAt sets the "expired_at" field.
-func (_u *UserMembershipsUpdate) SetExpiredAt(v time.Time) *UserMembershipsUpdate {
-	_u.mutation.SetExpiredAt(v)
+// SetExpiresAt sets the "expires_at" field.
+func (_u *UserMembershipsUpdate) SetExpiresAt(v time.Time) *UserMembershipsUpdate {
+	_u.mutation.SetExpiresAt(v)
 	return _u
 }
 
-// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_u *UserMembershipsUpdate) SetNillableExpiredAt(v *time.Time) *UserMembershipsUpdate {
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_u *UserMembershipsUpdate) SetNillableExpiresAt(v *time.Time) *UserMembershipsUpdate {
 	if v != nil {
-		_u.SetExpiredAt(*v)
+		_u.SetExpiresAt(*v)
 	}
 	return _u
 }
 
-// ClearExpiredAt clears the value of the "expired_at" field.
-func (_u *UserMembershipsUpdate) ClearExpiredAt() *UserMembershipsUpdate {
-	_u.mutation.ClearExpiredAt()
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (_u *UserMembershipsUpdate) ClearExpiresAt() *UserMembershipsUpdate {
+	_u.mutation.ClearExpiresAt()
 	return _u
 }
 
@@ -419,11 +419,11 @@ func (_u *UserMembershipsUpdate) sqlSave(ctx context.Context) (_node int, err er
 	if _u.mutation.JoinedAtCleared() {
 		_spec.ClearField(usermemberships.FieldJoinedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.ExpiredAt(); ok {
-		_spec.SetField(usermemberships.FieldExpiredAt, field.TypeTime, value)
+	if value, ok := _u.mutation.ExpiresAt(); ok {
+		_spec.SetField(usermemberships.FieldExpiresAt, field.TypeTime, value)
 	}
-	if _u.mutation.ExpiredAtCleared() {
-		_spec.ClearField(usermemberships.FieldExpiredAt, field.TypeTime)
+	if _u.mutation.ExpiresAtCleared() {
+		_spec.ClearField(usermemberships.FieldExpiresAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(usermemberships.FieldMetadata, field.TypeJSON, value)
@@ -682,23 +682,23 @@ func (_u *UserMembershipsUpdateOne) ClearJoinedAt() *UserMembershipsUpdateOne {
 	return _u
 }
 
-// SetExpiredAt sets the "expired_at" field.
-func (_u *UserMembershipsUpdateOne) SetExpiredAt(v time.Time) *UserMembershipsUpdateOne {
-	_u.mutation.SetExpiredAt(v)
+// SetExpiresAt sets the "expires_at" field.
+func (_u *UserMembershipsUpdateOne) SetExpiresAt(v time.Time) *UserMembershipsUpdateOne {
+	_u.mutation.SetExpiresAt(v)
 	return _u
 }
 
-// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_u *UserMembershipsUpdateOne) SetNillableExpiredAt(v *time.Time) *UserMembershipsUpdateOne {
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_u *UserMembershipsUpdateOne) SetNillableExpiresAt(v *time.Time) *UserMembershipsUpdateOne {
 	if v != nil {
-		_u.SetExpiredAt(*v)
+		_u.SetExpiresAt(*v)
 	}
 	return _u
 }
 
-// ClearExpiredAt clears the value of the "expired_at" field.
-func (_u *UserMembershipsUpdateOne) ClearExpiredAt() *UserMembershipsUpdateOne {
-	_u.mutation.ClearExpiredAt()
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (_u *UserMembershipsUpdateOne) ClearExpiresAt() *UserMembershipsUpdateOne {
+	_u.mutation.ClearExpiresAt()
 	return _u
 }
 
@@ -903,11 +903,11 @@ func (_u *UserMembershipsUpdateOne) sqlSave(ctx context.Context) (_node *UserMem
 	if _u.mutation.JoinedAtCleared() {
 		_spec.ClearField(usermemberships.FieldJoinedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.ExpiredAt(); ok {
-		_spec.SetField(usermemberships.FieldExpiredAt, field.TypeTime, value)
+	if value, ok := _u.mutation.ExpiresAt(); ok {
+		_spec.SetField(usermemberships.FieldExpiresAt, field.TypeTime, value)
 	}
-	if _u.mutation.ExpiredAtCleared() {
-		_spec.ClearField(usermemberships.FieldExpiredAt, field.TypeTime)
+	if _u.mutation.ExpiresAtCleared() {
+		_spec.ClearField(usermemberships.FieldExpiresAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(usermemberships.FieldMetadata, field.TypeJSON, value)

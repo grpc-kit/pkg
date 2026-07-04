@@ -358,7 +358,7 @@ openapiOptions:
         tags:
           - "角色管理"
         summary: "更新角色主体绑定"
-        description: '接口格式：PATCH /builtin/admin/api/v1/roles/{parent}/members。parent 为角色 ID；请求体为 bindings 数组。每行可通过 id 或 principal_type + principal_id 定位，支持更新 binding_status、expired_at、metadata、description。示例：[{"id":"10","principal_type":"USER","principal_id":"1","binding_status":"ACTIVE","description":"平台管理员直绑"}]。'
+        description: '接口格式：PATCH /builtin/admin/api/v1/roles/{parent}/members。parent 为角色 ID；请求体为 bindings 数组。每行可通过 id 或 principal_type + principal_id 定位，支持更新 binding_status、expires_at、metadata、description。示例：[{"id":"10","principal_type":"USER","principal_id":"1","binding_status":"ACTIVE","description":"平台管理员直绑"}]。'
         responses:
           "200":
             examples:

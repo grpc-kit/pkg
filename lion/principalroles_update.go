@@ -166,23 +166,23 @@ func (_u *PrincipalRolesUpdate) AddBindingStatus(v int) *PrincipalRolesUpdate {
 	return _u
 }
 
-// SetExpiredAt sets the "expired_at" field.
-func (_u *PrincipalRolesUpdate) SetExpiredAt(v time.Time) *PrincipalRolesUpdate {
-	_u.mutation.SetExpiredAt(v)
+// SetExpiresAt sets the "expires_at" field.
+func (_u *PrincipalRolesUpdate) SetExpiresAt(v time.Time) *PrincipalRolesUpdate {
+	_u.mutation.SetExpiresAt(v)
 	return _u
 }
 
-// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_u *PrincipalRolesUpdate) SetNillableExpiredAt(v *time.Time) *PrincipalRolesUpdate {
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_u *PrincipalRolesUpdate) SetNillableExpiresAt(v *time.Time) *PrincipalRolesUpdate {
 	if v != nil {
-		_u.SetExpiredAt(*v)
+		_u.SetExpiresAt(*v)
 	}
 	return _u
 }
 
-// ClearExpiredAt clears the value of the "expired_at" field.
-func (_u *PrincipalRolesUpdate) ClearExpiredAt() *PrincipalRolesUpdate {
-	_u.mutation.ClearExpiredAt()
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (_u *PrincipalRolesUpdate) ClearExpiresAt() *PrincipalRolesUpdate {
+	_u.mutation.ClearExpiresAt()
 	return _u
 }
 
@@ -339,11 +339,11 @@ func (_u *PrincipalRolesUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if value, ok := _u.mutation.AddedBindingStatus(); ok {
 		_spec.AddField(principalroles.FieldBindingStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.ExpiredAt(); ok {
-		_spec.SetField(principalroles.FieldExpiredAt, field.TypeTime, value)
+	if value, ok := _u.mutation.ExpiresAt(); ok {
+		_spec.SetField(principalroles.FieldExpiresAt, field.TypeTime, value)
 	}
-	if _u.mutation.ExpiredAtCleared() {
-		_spec.ClearField(principalroles.FieldExpiredAt, field.TypeTime)
+	if _u.mutation.ExpiresAtCleared() {
+		_spec.ClearField(principalroles.FieldExpiresAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(principalroles.FieldMetadata, field.TypeJSON, value)
@@ -540,23 +540,23 @@ func (_u *PrincipalRolesUpdateOne) AddBindingStatus(v int) *PrincipalRolesUpdate
 	return _u
 }
 
-// SetExpiredAt sets the "expired_at" field.
-func (_u *PrincipalRolesUpdateOne) SetExpiredAt(v time.Time) *PrincipalRolesUpdateOne {
-	_u.mutation.SetExpiredAt(v)
+// SetExpiresAt sets the "expires_at" field.
+func (_u *PrincipalRolesUpdateOne) SetExpiresAt(v time.Time) *PrincipalRolesUpdateOne {
+	_u.mutation.SetExpiresAt(v)
 	return _u
 }
 
-// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_u *PrincipalRolesUpdateOne) SetNillableExpiredAt(v *time.Time) *PrincipalRolesUpdateOne {
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_u *PrincipalRolesUpdateOne) SetNillableExpiresAt(v *time.Time) *PrincipalRolesUpdateOne {
 	if v != nil {
-		_u.SetExpiredAt(*v)
+		_u.SetExpiresAt(*v)
 	}
 	return _u
 }
 
-// ClearExpiredAt clears the value of the "expired_at" field.
-func (_u *PrincipalRolesUpdateOne) ClearExpiredAt() *PrincipalRolesUpdateOne {
-	_u.mutation.ClearExpiredAt()
+// ClearExpiresAt clears the value of the "expires_at" field.
+func (_u *PrincipalRolesUpdateOne) ClearExpiresAt() *PrincipalRolesUpdateOne {
+	_u.mutation.ClearExpiresAt()
 	return _u
 }
 
@@ -743,11 +743,11 @@ func (_u *PrincipalRolesUpdateOne) sqlSave(ctx context.Context) (_node *Principa
 	if value, ok := _u.mutation.AddedBindingStatus(); ok {
 		_spec.AddField(principalroles.FieldBindingStatus, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.ExpiredAt(); ok {
-		_spec.SetField(principalroles.FieldExpiredAt, field.TypeTime, value)
+	if value, ok := _u.mutation.ExpiresAt(); ok {
+		_spec.SetField(principalroles.FieldExpiresAt, field.TypeTime, value)
 	}
-	if _u.mutation.ExpiredAtCleared() {
-		_spec.ClearField(principalroles.FieldExpiredAt, field.TypeTime)
+	if _u.mutation.ExpiresAtCleared() {
+		_spec.ClearField(principalroles.FieldExpiresAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
 		_spec.SetField(principalroles.FieldMetadata, field.TypeJSON, value)

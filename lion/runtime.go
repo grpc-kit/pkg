@@ -11,6 +11,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/globalsettings"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/oauth2clients"
+	"github.com/grpc-kit/pkg/lion/oauth2codes"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
@@ -503,6 +505,122 @@ func init() {
 	menusDescProtected := menusFields[11].Descriptor()
 	// menus.DefaultProtected holds the default value on creation for the protected field.
 	menus.DefaultProtected = menusDescProtected.Default.(bool)
+	oauth2clientsMixin := schema.OAuth2Clients{}.Mixin()
+	oauth2clientsMixinFields0 := oauth2clientsMixin[0].Fields()
+	_ = oauth2clientsMixinFields0
+	oauth2clientsMixinFields1 := oauth2clientsMixin[1].Fields()
+	_ = oauth2clientsMixinFields1
+	oauth2clientsFields := schema.OAuth2Clients{}.Fields()
+	_ = oauth2clientsFields
+	// oauth2clientsDescCreatedAt is the schema descriptor for created_at field.
+	oauth2clientsDescCreatedAt := oauth2clientsMixinFields0[0].Descriptor()
+	// oauth2clients.DefaultCreatedAt holds the default value on creation for the created_at field.
+	oauth2clients.DefaultCreatedAt = oauth2clientsDescCreatedAt.Default.(func() time.Time)
+	// oauth2clientsDescUpdatedAt is the schema descriptor for updated_at field.
+	oauth2clientsDescUpdatedAt := oauth2clientsMixinFields0[1].Descriptor()
+	// oauth2clients.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	oauth2clients.DefaultUpdatedAt = oauth2clientsDescUpdatedAt.Default.(func() time.Time)
+	// oauth2clients.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	oauth2clients.UpdateDefaultUpdatedAt = oauth2clientsDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// oauth2clientsDescCreatedBy is the schema descriptor for created_by field.
+	oauth2clientsDescCreatedBy := oauth2clientsMixinFields1[0].Descriptor()
+	// oauth2clients.DefaultCreatedBy holds the default value on creation for the created_by field.
+	oauth2clients.DefaultCreatedBy = oauth2clientsDescCreatedBy.Default.(int64)
+	// oauth2clientsDescUpdatedBy is the schema descriptor for updated_by field.
+	oauth2clientsDescUpdatedBy := oauth2clientsMixinFields1[1].Descriptor()
+	// oauth2clients.DefaultUpdatedBy holds the default value on creation for the updated_by field.
+	oauth2clients.DefaultUpdatedBy = oauth2clientsDescUpdatedBy.Default.(int64)
+	// oauth2clientsDescClientID is the schema descriptor for client_id field.
+	oauth2clientsDescClientID := oauth2clientsFields[0].Descriptor()
+	// oauth2clients.ClientIDValidator is a validator for the "client_id" field. It is called by the builders before save.
+	oauth2clients.ClientIDValidator = oauth2clientsDescClientID.Validators[0].(func(string) error)
+	// oauth2clientsDescClientSecretHash is the schema descriptor for client_secret_hash field.
+	oauth2clientsDescClientSecretHash := oauth2clientsFields[1].Descriptor()
+	// oauth2clients.ClientSecretHashValidator is a validator for the "client_secret_hash" field. It is called by the builders before save.
+	oauth2clients.ClientSecretHashValidator = oauth2clientsDescClientSecretHash.Validators[0].(func(string) error)
+	// oauth2clientsDescDisplayName is the schema descriptor for display_name field.
+	oauth2clientsDescDisplayName := oauth2clientsFields[2].Descriptor()
+	// oauth2clients.DefaultDisplayName holds the default value on creation for the display_name field.
+	oauth2clients.DefaultDisplayName = oauth2clientsDescDisplayName.Default.(string)
+	// oauth2clients.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	oauth2clients.DisplayNameValidator = oauth2clientsDescDisplayName.Validators[0].(func(string) error)
+	// oauth2clientsDescClientStatus is the schema descriptor for client_status field.
+	oauth2clientsDescClientStatus := oauth2clientsFields[4].Descriptor()
+	// oauth2clients.DefaultClientStatus holds the default value on creation for the client_status field.
+	oauth2clients.DefaultClientStatus = oauth2clientsDescClientStatus.Default.(int)
+	// oauth2clientsDescLogoURL is the schema descriptor for logo_url field.
+	oauth2clientsDescLogoURL := oauth2clientsFields[7].Descriptor()
+	// oauth2clients.DefaultLogoURL holds the default value on creation for the logo_url field.
+	oauth2clients.DefaultLogoURL = oauth2clientsDescLogoURL.Default.(string)
+	// oauth2clients.LogoURLValidator is a validator for the "logo_url" field. It is called by the builders before save.
+	oauth2clients.LogoURLValidator = oauth2clientsDescLogoURL.Validators[0].(func(string) error)
+	// oauth2clientsDescDescription is the schema descriptor for description field.
+	oauth2clientsDescDescription := oauth2clientsFields[8].Descriptor()
+	// oauth2clients.DefaultDescription holds the default value on creation for the description field.
+	oauth2clients.DefaultDescription = oauth2clientsDescDescription.Default.(string)
+	// oauth2clients.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	oauth2clients.DescriptionValidator = oauth2clientsDescDescription.Validators[0].(func(string) error)
+	oauth2codesMixin := schema.OAuth2Codes{}.Mixin()
+	oauth2codesMixinFields0 := oauth2codesMixin[0].Fields()
+	_ = oauth2codesMixinFields0
+	oauth2codesFields := schema.OAuth2Codes{}.Fields()
+	_ = oauth2codesFields
+	// oauth2codesDescCreatedAt is the schema descriptor for created_at field.
+	oauth2codesDescCreatedAt := oauth2codesMixinFields0[0].Descriptor()
+	// oauth2codes.DefaultCreatedAt holds the default value on creation for the created_at field.
+	oauth2codes.DefaultCreatedAt = oauth2codesDescCreatedAt.Default.(func() time.Time)
+	// oauth2codesDescUpdatedAt is the schema descriptor for updated_at field.
+	oauth2codesDescUpdatedAt := oauth2codesMixinFields0[1].Descriptor()
+	// oauth2codes.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	oauth2codes.DefaultUpdatedAt = oauth2codesDescUpdatedAt.Default.(func() time.Time)
+	// oauth2codes.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	oauth2codes.UpdateDefaultUpdatedAt = oauth2codesDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// oauth2codesDescCodeHash is the schema descriptor for code_hash field.
+	oauth2codesDescCodeHash := oauth2codesFields[0].Descriptor()
+	// oauth2codes.CodeHashValidator is a validator for the "code_hash" field. It is called by the builders before save.
+	oauth2codes.CodeHashValidator = oauth2codesDescCodeHash.Validators[0].(func(string) error)
+	// oauth2codesDescClientID is the schema descriptor for client_id field.
+	oauth2codesDescClientID := oauth2codesFields[1].Descriptor()
+	// oauth2codes.ClientIDValidator is a validator for the "client_id" field. It is called by the builders before save.
+	oauth2codes.ClientIDValidator = oauth2codesDescClientID.Validators[0].(func(string) error)
+	// oauth2codesDescRedirectURI is the schema descriptor for redirect_uri field.
+	oauth2codesDescRedirectURI := oauth2codesFields[2].Descriptor()
+	// oauth2codes.RedirectURIValidator is a validator for the "redirect_uri" field. It is called by the builders before save.
+	oauth2codes.RedirectURIValidator = oauth2codesDescRedirectURI.Validators[0].(func(string) error)
+	// oauth2codesDescUserID is the schema descriptor for user_id field.
+	oauth2codesDescUserID := oauth2codesFields[3].Descriptor()
+	// oauth2codes.DefaultUserID holds the default value on creation for the user_id field.
+	oauth2codes.DefaultUserID = oauth2codesDescUserID.Default.(int)
+	// oauth2codesDescUsername is the schema descriptor for username field.
+	oauth2codesDescUsername := oauth2codesFields[4].Descriptor()
+	// oauth2codes.DefaultUsername holds the default value on creation for the username field.
+	oauth2codes.DefaultUsername = oauth2codesDescUsername.Default.(string)
+	// oauth2codes.UsernameValidator is a validator for the "username" field. It is called by the builders before save.
+	oauth2codes.UsernameValidator = oauth2codesDescUsername.Validators[0].(func(string) error)
+	// oauth2codesDescState is the schema descriptor for state field.
+	oauth2codesDescState := oauth2codesFields[6].Descriptor()
+	// oauth2codes.DefaultState holds the default value on creation for the state field.
+	oauth2codes.DefaultState = oauth2codesDescState.Default.(string)
+	// oauth2codes.StateValidator is a validator for the "state" field. It is called by the builders before save.
+	oauth2codes.StateValidator = oauth2codesDescState.Validators[0].(func(string) error)
+	// oauth2codesDescNonce is the schema descriptor for nonce field.
+	oauth2codesDescNonce := oauth2codesFields[7].Descriptor()
+	// oauth2codes.DefaultNonce holds the default value on creation for the nonce field.
+	oauth2codes.DefaultNonce = oauth2codesDescNonce.Default.(string)
+	// oauth2codes.NonceValidator is a validator for the "nonce" field. It is called by the builders before save.
+	oauth2codes.NonceValidator = oauth2codesDescNonce.Validators[0].(func(string) error)
+	// oauth2codesDescCodeChallenge is the schema descriptor for code_challenge field.
+	oauth2codesDescCodeChallenge := oauth2codesFields[8].Descriptor()
+	// oauth2codes.DefaultCodeChallenge holds the default value on creation for the code_challenge field.
+	oauth2codes.DefaultCodeChallenge = oauth2codesDescCodeChallenge.Default.(string)
+	// oauth2codes.CodeChallengeValidator is a validator for the "code_challenge" field. It is called by the builders before save.
+	oauth2codes.CodeChallengeValidator = oauth2codesDescCodeChallenge.Validators[0].(func(string) error)
+	// oauth2codesDescCodeChallengeMethod is the schema descriptor for code_challenge_method field.
+	oauth2codesDescCodeChallengeMethod := oauth2codesFields[9].Descriptor()
+	// oauth2codes.DefaultCodeChallengeMethod holds the default value on creation for the code_challenge_method field.
+	oauth2codes.DefaultCodeChallengeMethod = oauth2codesDescCodeChallengeMethod.Default.(string)
+	// oauth2codes.CodeChallengeMethodValidator is a validator for the "code_challenge_method" field. It is called by the builders before save.
+	oauth2codes.CodeChallengeMethodValidator = oauth2codesDescCodeChallengeMethod.Validators[0].(func(string) error)
 	policiesMixin := schema.Policies{}.Mixin()
 	policiesMixinFields0 := policiesMixin[0].Fields()
 	_ = policiesMixinFields0

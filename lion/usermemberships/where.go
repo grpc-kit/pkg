@@ -110,9 +110,9 @@ func JoinedAt(v time.Time) predicate.UserMemberships {
 	return predicate.UserMemberships(sql.FieldEQ(FieldJoinedAt, v))
 }
 
-// ExpiredAt applies equality check predicate on the "expired_at" field. It's identical to ExpiredAtEQ.
-func ExpiredAt(v time.Time) predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldEQ(FieldExpiredAt, v))
+// ExpiresAt applies equality check predicate on the "expires_at" field. It's identical to ExpiresAtEQ.
+func ExpiresAt(v time.Time) predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldEQ(FieldExpiresAt, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
@@ -570,54 +570,54 @@ func JoinedAtNotNil() predicate.UserMemberships {
 	return predicate.UserMemberships(sql.FieldNotNull(FieldJoinedAt))
 }
 
-// ExpiredAtEQ applies the EQ predicate on the "expired_at" field.
-func ExpiredAtEQ(v time.Time) predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldEQ(FieldExpiredAt, v))
+// ExpiresAtEQ applies the EQ predicate on the "expires_at" field.
+func ExpiresAtEQ(v time.Time) predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldEQ(FieldExpiresAt, v))
 }
 
-// ExpiredAtNEQ applies the NEQ predicate on the "expired_at" field.
-func ExpiredAtNEQ(v time.Time) predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldNEQ(FieldExpiredAt, v))
+// ExpiresAtNEQ applies the NEQ predicate on the "expires_at" field.
+func ExpiresAtNEQ(v time.Time) predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldNEQ(FieldExpiresAt, v))
 }
 
-// ExpiredAtIn applies the In predicate on the "expired_at" field.
-func ExpiredAtIn(vs ...time.Time) predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldIn(FieldExpiredAt, vs...))
+// ExpiresAtIn applies the In predicate on the "expires_at" field.
+func ExpiresAtIn(vs ...time.Time) predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldIn(FieldExpiresAt, vs...))
 }
 
-// ExpiredAtNotIn applies the NotIn predicate on the "expired_at" field.
-func ExpiredAtNotIn(vs ...time.Time) predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldNotIn(FieldExpiredAt, vs...))
+// ExpiresAtNotIn applies the NotIn predicate on the "expires_at" field.
+func ExpiresAtNotIn(vs ...time.Time) predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldNotIn(FieldExpiresAt, vs...))
 }
 
-// ExpiredAtGT applies the GT predicate on the "expired_at" field.
-func ExpiredAtGT(v time.Time) predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldGT(FieldExpiredAt, v))
+// ExpiresAtGT applies the GT predicate on the "expires_at" field.
+func ExpiresAtGT(v time.Time) predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldGT(FieldExpiresAt, v))
 }
 
-// ExpiredAtGTE applies the GTE predicate on the "expired_at" field.
-func ExpiredAtGTE(v time.Time) predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldGTE(FieldExpiredAt, v))
+// ExpiresAtGTE applies the GTE predicate on the "expires_at" field.
+func ExpiresAtGTE(v time.Time) predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldGTE(FieldExpiresAt, v))
 }
 
-// ExpiredAtLT applies the LT predicate on the "expired_at" field.
-func ExpiredAtLT(v time.Time) predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldLT(FieldExpiredAt, v))
+// ExpiresAtLT applies the LT predicate on the "expires_at" field.
+func ExpiresAtLT(v time.Time) predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldLT(FieldExpiresAt, v))
 }
 
-// ExpiredAtLTE applies the LTE predicate on the "expired_at" field.
-func ExpiredAtLTE(v time.Time) predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldLTE(FieldExpiredAt, v))
+// ExpiresAtLTE applies the LTE predicate on the "expires_at" field.
+func ExpiresAtLTE(v time.Time) predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldLTE(FieldExpiresAt, v))
 }
 
-// ExpiredAtIsNil applies the IsNil predicate on the "expired_at" field.
-func ExpiredAtIsNil() predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldIsNull(FieldExpiredAt))
+// ExpiresAtIsNil applies the IsNil predicate on the "expires_at" field.
+func ExpiresAtIsNil() predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldIsNull(FieldExpiresAt))
 }
 
-// ExpiredAtNotNil applies the NotNil predicate on the "expired_at" field.
-func ExpiredAtNotNil() predicate.UserMemberships {
-	return predicate.UserMemberships(sql.FieldNotNull(FieldExpiredAt))
+// ExpiresAtNotNil applies the NotNil predicate on the "expires_at" field.
+func ExpiresAtNotNil() predicate.UserMemberships {
+	return predicate.UserMemberships(sql.FieldNotNull(FieldExpiresAt))
 }
 
 // MetadataIsNil applies the IsNil predicate on the "metadata" field.

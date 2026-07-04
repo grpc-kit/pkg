@@ -24,6 +24,10 @@ type Tx struct {
 	Groups *GroupsClient
 	// Menus is the client for interacting with the Menus builders.
 	Menus *MenusClient
+	// OAuth2Clients is the client for interacting with the OAuth2Clients builders.
+	OAuth2Clients *OAuth2ClientsClient
+	// OAuth2Codes is the client for interacting with the OAuth2Codes builders.
+	OAuth2Codes *OAuth2CodesClient
 	// Policies is the client for interacting with the Policies builders.
 	Policies *PoliciesClient
 	// PrincipalRoles is the client for interacting with the PrincipalRoles builders.
@@ -179,6 +183,8 @@ func (tx *Tx) init() {
 	tx.GlobalSettings = NewGlobalSettingsClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
 	tx.Menus = NewMenusClient(tx.config)
+	tx.OAuth2Clients = NewOAuth2ClientsClient(tx.config)
+	tx.OAuth2Codes = NewOAuth2CodesClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
 	tx.PrincipalRoles = NewPrincipalRolesClient(tx.config)
 	tx.RoleMenus = NewRoleMenusClient(tx.config)

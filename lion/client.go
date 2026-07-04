@@ -21,6 +21,8 @@ import (
 	"github.com/grpc-kit/pkg/lion/globalsettings"
 	"github.com/grpc-kit/pkg/lion/groups"
 	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/oauth2clients"
+	"github.com/grpc-kit/pkg/lion/oauth2codes"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/principalroles"
 	"github.com/grpc-kit/pkg/lion/rolemenus"
@@ -49,6 +51,10 @@ type Client struct {
 	Groups *GroupsClient
 	// Menus is the client for interacting with the Menus builders.
 	Menus *MenusClient
+	// OAuth2Clients is the client for interacting with the OAuth2Clients builders.
+	OAuth2Clients *OAuth2ClientsClient
+	// OAuth2Codes is the client for interacting with the OAuth2Codes builders.
+	OAuth2Codes *OAuth2CodesClient
 	// Policies is the client for interacting with the Policies builders.
 	Policies *PoliciesClient
 	// PrincipalRoles is the client for interacting with the PrincipalRoles builders.
@@ -84,6 +90,8 @@ func (c *Client) init() {
 	c.GlobalSettings = NewGlobalSettingsClient(c.config)
 	c.Groups = NewGroupsClient(c.config)
 	c.Menus = NewMenusClient(c.config)
+	c.OAuth2Clients = NewOAuth2ClientsClient(c.config)
+	c.OAuth2Codes = NewOAuth2CodesClient(c.config)
 	c.Policies = NewPoliciesClient(c.config)
 	c.PrincipalRoles = NewPrincipalRolesClient(c.config)
 	c.RoleMenus = NewRoleMenusClient(c.config)
@@ -191,6 +199,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GlobalSettings:  NewGlobalSettingsClient(cfg),
 		Groups:          NewGroupsClient(cfg),
 		Menus:           NewMenusClient(cfg),
+		OAuth2Clients:   NewOAuth2ClientsClient(cfg),
+		OAuth2Codes:     NewOAuth2CodesClient(cfg),
 		Policies:        NewPoliciesClient(cfg),
 		PrincipalRoles:  NewPrincipalRolesClient(cfg),
 		RoleMenus:       NewRoleMenusClient(cfg),
@@ -225,6 +235,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GlobalSettings:  NewGlobalSettingsClient(cfg),
 		Groups:          NewGroupsClient(cfg),
 		Menus:           NewMenusClient(cfg),
+		OAuth2Clients:   NewOAuth2ClientsClient(cfg),
+		OAuth2Codes:     NewOAuth2CodesClient(cfg),
 		Policies:        NewPoliciesClient(cfg),
 		PrincipalRoles:  NewPrincipalRolesClient(cfg),
 		RoleMenus:       NewRoleMenusClient(cfg),
@@ -264,8 +276,9 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AuthProviders, c.Credentials, c.Departments, c.GlobalSettings, c.Groups,
-		c.Menus, c.Policies, c.PrincipalRoles, c.RoleMenus, c.RolePolicies, c.Roles,
-		c.UserIdentities, c.UserMemberships, c.UserProfiles, c.Users,
+		c.Menus, c.OAuth2Clients, c.OAuth2Codes, c.Policies, c.PrincipalRoles,
+		c.RoleMenus, c.RolePolicies, c.Roles, c.UserIdentities, c.UserMemberships,
+		c.UserProfiles, c.Users,
 	} {
 		n.Use(hooks...)
 	}
@@ -276,8 +289,9 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AuthProviders, c.Credentials, c.Departments, c.GlobalSettings, c.Groups,
-		c.Menus, c.Policies, c.PrincipalRoles, c.RoleMenus, c.RolePolicies, c.Roles,
-		c.UserIdentities, c.UserMemberships, c.UserProfiles, c.Users,
+		c.Menus, c.OAuth2Clients, c.OAuth2Codes, c.Policies, c.PrincipalRoles,
+		c.RoleMenus, c.RolePolicies, c.Roles, c.UserIdentities, c.UserMemberships,
+		c.UserProfiles, c.Users,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -298,6 +312,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Groups.mutate(ctx, m)
 	case *MenusMutation:
 		return c.Menus.mutate(ctx, m)
+	case *OAuth2ClientsMutation:
+		return c.OAuth2Clients.mutate(ctx, m)
+	case *OAuth2CodesMutation:
+		return c.OAuth2Codes.mutate(ctx, m)
 	case *PoliciesMutation:
 		return c.Policies.mutate(ctx, m)
 	case *PrincipalRolesMutation:
@@ -1164,6 +1182,272 @@ func (c *MenusClient) mutate(ctx context.Context, m *MenusMutation) (Value, erro
 		return (&MenusDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("lion: unknown Menus mutation op: %q", m.Op())
+	}
+}
+
+// OAuth2ClientsClient is a client for the OAuth2Clients schema.
+type OAuth2ClientsClient struct {
+	config
+}
+
+// NewOAuth2ClientsClient returns a client for the OAuth2Clients from the given config.
+func NewOAuth2ClientsClient(c config) *OAuth2ClientsClient {
+	return &OAuth2ClientsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `oauth2clients.Hooks(f(g(h())))`.
+func (c *OAuth2ClientsClient) Use(hooks ...Hook) {
+	c.hooks.OAuth2Clients = append(c.hooks.OAuth2Clients, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `oauth2clients.Intercept(f(g(h())))`.
+func (c *OAuth2ClientsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OAuth2Clients = append(c.inters.OAuth2Clients, interceptors...)
+}
+
+// Create returns a builder for creating a OAuth2Clients entity.
+func (c *OAuth2ClientsClient) Create() *OAuth2ClientsCreate {
+	mutation := newOAuth2ClientsMutation(c.config, OpCreate)
+	return &OAuth2ClientsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OAuth2Clients entities.
+func (c *OAuth2ClientsClient) CreateBulk(builders ...*OAuth2ClientsCreate) *OAuth2ClientsCreateBulk {
+	return &OAuth2ClientsCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OAuth2ClientsClient) MapCreateBulk(slice any, setFunc func(*OAuth2ClientsCreate, int)) *OAuth2ClientsCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OAuth2ClientsCreateBulk{err: fmt.Errorf("calling to OAuth2ClientsClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OAuth2ClientsCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OAuth2ClientsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OAuth2Clients.
+func (c *OAuth2ClientsClient) Update() *OAuth2ClientsUpdate {
+	mutation := newOAuth2ClientsMutation(c.config, OpUpdate)
+	return &OAuth2ClientsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OAuth2ClientsClient) UpdateOne(_m *OAuth2Clients) *OAuth2ClientsUpdateOne {
+	mutation := newOAuth2ClientsMutation(c.config, OpUpdateOne, withOAuth2Clients(_m))
+	return &OAuth2ClientsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OAuth2ClientsClient) UpdateOneID(id int) *OAuth2ClientsUpdateOne {
+	mutation := newOAuth2ClientsMutation(c.config, OpUpdateOne, withOAuth2ClientsID(id))
+	return &OAuth2ClientsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OAuth2Clients.
+func (c *OAuth2ClientsClient) Delete() *OAuth2ClientsDelete {
+	mutation := newOAuth2ClientsMutation(c.config, OpDelete)
+	return &OAuth2ClientsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OAuth2ClientsClient) DeleteOne(_m *OAuth2Clients) *OAuth2ClientsDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OAuth2ClientsClient) DeleteOneID(id int) *OAuth2ClientsDeleteOne {
+	builder := c.Delete().Where(oauth2clients.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OAuth2ClientsDeleteOne{builder}
+}
+
+// Query returns a query builder for OAuth2Clients.
+func (c *OAuth2ClientsClient) Query() *OAuth2ClientsQuery {
+	return &OAuth2ClientsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOAuth2Clients},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OAuth2Clients entity by its id.
+func (c *OAuth2ClientsClient) Get(ctx context.Context, id int) (*OAuth2Clients, error) {
+	return c.Query().Where(oauth2clients.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OAuth2ClientsClient) GetX(ctx context.Context, id int) *OAuth2Clients {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OAuth2ClientsClient) Hooks() []Hook {
+	return c.hooks.OAuth2Clients
+}
+
+// Interceptors returns the client interceptors.
+func (c *OAuth2ClientsClient) Interceptors() []Interceptor {
+	return c.inters.OAuth2Clients
+}
+
+func (c *OAuth2ClientsClient) mutate(ctx context.Context, m *OAuth2ClientsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OAuth2ClientsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OAuth2ClientsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OAuth2ClientsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OAuth2ClientsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown OAuth2Clients mutation op: %q", m.Op())
+	}
+}
+
+// OAuth2CodesClient is a client for the OAuth2Codes schema.
+type OAuth2CodesClient struct {
+	config
+}
+
+// NewOAuth2CodesClient returns a client for the OAuth2Codes from the given config.
+func NewOAuth2CodesClient(c config) *OAuth2CodesClient {
+	return &OAuth2CodesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `oauth2codes.Hooks(f(g(h())))`.
+func (c *OAuth2CodesClient) Use(hooks ...Hook) {
+	c.hooks.OAuth2Codes = append(c.hooks.OAuth2Codes, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `oauth2codes.Intercept(f(g(h())))`.
+func (c *OAuth2CodesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OAuth2Codes = append(c.inters.OAuth2Codes, interceptors...)
+}
+
+// Create returns a builder for creating a OAuth2Codes entity.
+func (c *OAuth2CodesClient) Create() *OAuth2CodesCreate {
+	mutation := newOAuth2CodesMutation(c.config, OpCreate)
+	return &OAuth2CodesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OAuth2Codes entities.
+func (c *OAuth2CodesClient) CreateBulk(builders ...*OAuth2CodesCreate) *OAuth2CodesCreateBulk {
+	return &OAuth2CodesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OAuth2CodesClient) MapCreateBulk(slice any, setFunc func(*OAuth2CodesCreate, int)) *OAuth2CodesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OAuth2CodesCreateBulk{err: fmt.Errorf("calling to OAuth2CodesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OAuth2CodesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OAuth2CodesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OAuth2Codes.
+func (c *OAuth2CodesClient) Update() *OAuth2CodesUpdate {
+	mutation := newOAuth2CodesMutation(c.config, OpUpdate)
+	return &OAuth2CodesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OAuth2CodesClient) UpdateOne(_m *OAuth2Codes) *OAuth2CodesUpdateOne {
+	mutation := newOAuth2CodesMutation(c.config, OpUpdateOne, withOAuth2Codes(_m))
+	return &OAuth2CodesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OAuth2CodesClient) UpdateOneID(id int) *OAuth2CodesUpdateOne {
+	mutation := newOAuth2CodesMutation(c.config, OpUpdateOne, withOAuth2CodesID(id))
+	return &OAuth2CodesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OAuth2Codes.
+func (c *OAuth2CodesClient) Delete() *OAuth2CodesDelete {
+	mutation := newOAuth2CodesMutation(c.config, OpDelete)
+	return &OAuth2CodesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OAuth2CodesClient) DeleteOne(_m *OAuth2Codes) *OAuth2CodesDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OAuth2CodesClient) DeleteOneID(id int) *OAuth2CodesDeleteOne {
+	builder := c.Delete().Where(oauth2codes.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OAuth2CodesDeleteOne{builder}
+}
+
+// Query returns a query builder for OAuth2Codes.
+func (c *OAuth2CodesClient) Query() *OAuth2CodesQuery {
+	return &OAuth2CodesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOAuth2Codes},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OAuth2Codes entity by its id.
+func (c *OAuth2CodesClient) Get(ctx context.Context, id int) (*OAuth2Codes, error) {
+	return c.Query().Where(oauth2codes.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OAuth2CodesClient) GetX(ctx context.Context, id int) *OAuth2Codes {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OAuth2CodesClient) Hooks() []Hook {
+	return c.hooks.OAuth2Codes
+}
+
+// Interceptors returns the client interceptors.
+func (c *OAuth2CodesClient) Interceptors() []Interceptor {
+	return c.inters.OAuth2Codes
+}
+
+func (c *OAuth2CodesClient) mutate(ctx context.Context, m *OAuth2CodesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OAuth2CodesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OAuth2CodesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OAuth2CodesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OAuth2CodesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("lion: unknown OAuth2Codes mutation op: %q", m.Op())
 	}
 }
 
@@ -2592,12 +2876,12 @@ func (c *UsersClient) mutate(ctx context.Context, m *UsersMutation) (Value, erro
 type (
 	hooks struct {
 		AuthProviders, Credentials, Departments, GlobalSettings, Groups, Menus,
-		Policies, PrincipalRoles, RoleMenus, RolePolicies, Roles, UserIdentities,
-		UserMemberships, UserProfiles, Users []ent.Hook
+		OAuth2Clients, OAuth2Codes, Policies, PrincipalRoles, RoleMenus, RolePolicies,
+		Roles, UserIdentities, UserMemberships, UserProfiles, Users []ent.Hook
 	}
 	inters struct {
 		AuthProviders, Credentials, Departments, GlobalSettings, Groups, Menus,
-		Policies, PrincipalRoles, RoleMenus, RolePolicies, Roles, UserIdentities,
-		UserMemberships, UserProfiles, Users []ent.Interceptor
+		OAuth2Clients, OAuth2Codes, Policies, PrincipalRoles, RoleMenus, RolePolicies,
+		Roles, UserIdentities, UserMemberships, UserProfiles, Users []ent.Interceptor
 	}
 )

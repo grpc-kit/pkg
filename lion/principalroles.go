@@ -36,7 +36,7 @@ type PrincipalRoles struct {
 	// 绑定状态：1-生效，2-禁用
 	BindingStatus int `json:"binding_status,omitempty"`
 	// 绑定有效期，空表示永久有效
-	ExpiredAt time.Time `json:"expired_at,omitempty"`
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// 元数据，用于存储来源等扩展属性
 	Metadata map[string]string `json:"metadata,omitempty"`
 	// 绑定关系描述
@@ -78,7 +78,7 @@ func (*PrincipalRoles) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case principalroles.FieldDescription:
 			values[i] = new(sql.NullString)
-		case principalroles.FieldCreatedAt, principalroles.FieldUpdatedAt, principalroles.FieldExpiredAt:
+		case principalroles.FieldCreatedAt, principalroles.FieldUpdatedAt, principalroles.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -149,11 +149,11 @@ func (_m *PrincipalRoles) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.BindingStatus = int(value.Int64)
 			}
-		case principalroles.FieldExpiredAt:
+		case principalroles.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field expired_at", values[i])
+				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
 			} else if value.Valid {
-				_m.ExpiredAt = value.Time
+				_m.ExpiresAt = value.Time
 			}
 		case principalroles.FieldMetadata:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -234,8 +234,8 @@ func (_m *PrincipalRoles) String() string {
 	builder.WriteString("binding_status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.BindingStatus))
 	builder.WriteString(", ")
-	builder.WriteString("expired_at=")
-	builder.WriteString(_m.ExpiredAt.Format(time.ANSIC))
+	builder.WriteString("expires_at=")
+	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))

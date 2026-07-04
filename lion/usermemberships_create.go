@@ -159,16 +159,16 @@ func (_c *UserMembershipsCreate) SetNillableJoinedAt(v *time.Time) *UserMembersh
 	return _c
 }
 
-// SetExpiredAt sets the "expired_at" field.
-func (_c *UserMembershipsCreate) SetExpiredAt(v time.Time) *UserMembershipsCreate {
-	_c.mutation.SetExpiredAt(v)
+// SetExpiresAt sets the "expires_at" field.
+func (_c *UserMembershipsCreate) SetExpiresAt(v time.Time) *UserMembershipsCreate {
+	_c.mutation.SetExpiresAt(v)
 	return _c
 }
 
-// SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_c *UserMembershipsCreate) SetNillableExpiredAt(v *time.Time) *UserMembershipsCreate {
+// SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
+func (_c *UserMembershipsCreate) SetNillableExpiresAt(v *time.Time) *UserMembershipsCreate {
 	if v != nil {
-		_c.SetExpiredAt(*v)
+		_c.SetExpiresAt(*v)
 	}
 	return _c
 }
@@ -385,9 +385,9 @@ func (_c *UserMembershipsCreate) createSpec() (*UserMemberships, *sqlgraph.Creat
 		_spec.SetField(usermemberships.FieldJoinedAt, field.TypeTime, value)
 		_node.JoinedAt = value
 	}
-	if value, ok := _c.mutation.ExpiredAt(); ok {
-		_spec.SetField(usermemberships.FieldExpiredAt, field.TypeTime, value)
-		_node.ExpiredAt = value
+	if value, ok := _c.mutation.ExpiresAt(); ok {
+		_spec.SetField(usermemberships.FieldExpiresAt, field.TypeTime, value)
+		_node.ExpiresAt = value
 	}
 	if value, ok := _c.mutation.Metadata(); ok {
 		_spec.SetField(usermemberships.FieldMetadata, field.TypeJSON, value)

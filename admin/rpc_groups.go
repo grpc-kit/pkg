@@ -978,7 +978,7 @@ func (a *KnownAdminAPI) listGroupMembersFromGroupMembers(ctx context.Context, re
 		usermemberships.FieldMemberRole,
 		usermemberships.FieldMemberStatus,
 		usermemberships.FieldJoinedAt,
-		usermemberships.FieldExpiredAt,
+		usermemberships.FieldExpiresAt,
 		usermemberships.FieldMetadata,
 		usermemberships.FieldDescription,
 		usermemberships.FieldCreatedBy,
@@ -1090,8 +1090,8 @@ func (a *KnownAdminAPI) CreateGroupMembers(ctx context.Context, req *adminv1.Cre
 		}
 		create = create.SetJoinedAt(joinedAt)
 
-		if member.ExpiredAt != nil && !member.ExpiredAt.AsTime().IsZero() {
-			create = create.SetExpiredAt(member.ExpiredAt.AsTime())
+		if member.ExpiresAt != nil && !member.ExpiresAt.AsTime().IsZero() {
+			create = create.SetExpiresAt(member.ExpiresAt.AsTime())
 		}
 		if len(member.Metadata) > 0 {
 			create = create.SetMetadata(member.Metadata)
@@ -1204,9 +1204,9 @@ func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.Upda
 				update.SetMemberStatus(int(req.Member.MemberStatus))
 			case "description":
 				update.SetDescription(req.Member.Description)
-			case "expired_at":
-				if req.Member.ExpiredAt != nil {
-					update.SetExpiredAt(req.Member.ExpiredAt.AsTime())
+			case "expires_at":
+				if req.Member.ExpiresAt != nil {
+					update.SetExpiresAt(req.Member.ExpiresAt.AsTime())
 				}
 			case "metadata":
 				if len(req.Member.Metadata) > 0 {
@@ -1219,8 +1219,8 @@ func (a *KnownAdminAPI) UpdateGroupMember(ctx context.Context, req *adminv1.Upda
 			SetMemberRole(int(req.Member.MemberRole)).
 			SetMemberStatus(int(req.Member.MemberStatus)).
 			SetDescription(req.Member.Description)
-		if req.Member.ExpiredAt != nil {
-			update.SetExpiredAt(req.Member.ExpiredAt.AsTime())
+		if req.Member.ExpiresAt != nil {
+			update.SetExpiresAt(req.Member.ExpiresAt.AsTime())
 		}
 		if len(req.Member.Metadata) > 0 {
 			update.SetMetadata(req.Member.Metadata)

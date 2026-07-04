@@ -81,6 +81,30 @@ func (f MenusFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.MenusMutation", m)
 }
 
+// The OAuth2ClientsFunc type is an adapter to allow the use of ordinary
+// function as OAuth2Clients mutator.
+type OAuth2ClientsFunc func(context.Context, *lion.OAuth2ClientsMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OAuth2ClientsFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.OAuth2ClientsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.OAuth2ClientsMutation", m)
+}
+
+// The OAuth2CodesFunc type is an adapter to allow the use of ordinary
+// function as OAuth2Codes mutator.
+type OAuth2CodesFunc func(context.Context, *lion.OAuth2CodesMutation) (lion.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OAuth2CodesFunc) Mutate(ctx context.Context, m lion.Mutation) (lion.Value, error) {
+	if mv, ok := m.(*lion.OAuth2CodesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *lion.OAuth2CodesMutation", m)
+}
+
 // The PoliciesFunc type is an adapter to allow the use of ordinary
 // function as Policies mutator.
 type PoliciesFunc func(context.Context, *lion.PoliciesMutation) (lion.Value, error)
