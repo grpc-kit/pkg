@@ -783,6 +783,56 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"user_id":"1","username":"admin","nickname":"系统管理员","profile":"系统初始账号","picture":"https://cdn.example.com/avatars/admin.png","website":"https://admin.example.com","timezone":"Asia/Shanghai","locale":"zh-CN"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListOAuth2Clients
+      option:
+        tags:
+          - "安全相关"
+        summary: "OAuth2 客户端列表"
+        description: "接口格式：/builtin/admin/api/v1/oauth2/clients。返回已注册的 OAuth2 客户端列表。前置条件：仅允许具备客户端管理权限的管理员调用，返回结果禁止包含 client_secret_hash 等敏感字段。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"clients":[{"id":"1","client_id":"web-app","display_name":"Web 应用","client_status":1,"redirect_uris":["https://app.example.com/callback"],"grant_types":["authorization_code"],"scopes":["openid","profile"]},{"id":"2","client_id":"mobile.ios","display_name":"iOS 客户端","client_status":1,"redirect_uris":["com.example.app://oauth/callback"],"grant_types":["authorization_code","refresh_token"],"scopes":["openid","profile","email"]}],"next_page_token":"","total_size":2}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateOAuth2Client
+      option:
+        tags:
+          - "安全相关"
+        summary: "创建 OAuth2 客户端"
+        description: '接口格式：/builtin/admin/api/v1/oauth2/clients。用于注册新的 OAuth2 客户端应用。前置条件：仅允许具备最小权限的管理员调用，client_secret 使用 bcrypt 哈希存储，明文不可逆。请求体示例：{"client":{"client_id":"web-app","display_name":"Web 应用","redirect_uris":["https://app.example.com/callback"],"grant_types":["authorization_code"],"scopes":["openid","profile"]},"client_secret":"my-secret-123"}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"client":{"id":"3","client_id":"web-app","display_name":"Web 应用","client_status":1,"redirect_uris":["https://app.example.com/callback"],"grant_types":["authorization_code"],"scopes":["openid","profile"]},"client_secret":"aB3kF9mN2qR7sV4x"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Client
+      option:
+        tags:
+          - "安全相关"
+        summary: "获取 OAuth2 客户端详情"
+        description: "接口格式：/builtin/admin/api/v1/oauth2/clients/{id}。前置条件：仅允许具备客户端管理权限的管理员调用，响应中禁止回传 client_secret_hash 等敏感字段。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"3","client_id":"web-app","display_name":"Web 应用","client_status":1,"redirect_uris":["https://app.example.com/callback"],"grant_types":["authorization_code"],"scopes":["openid","profile"],"logo_url":"","description":""}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteOAuth2Client
+      option:
+        tags:
+          - "安全相关"
+        summary: "删除 OAuth2 客户端"
+        description: "接口格式：/builtin/admin/api/v1/oauth2/clients/{id}。软删除指定 OAuth2 客户端。前置条件：仅允许具备最小权限的管理员调用，删除前应确认无活动授权流量并记录审计日志。"
+        responses:
+          "200":
+            examples:
+              "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateOAuth2Client
+      option:
+        tags:
+          - "安全相关"
+        summary: "更新 OAuth2 客户端"
+        description: '接口格式：/builtin/admin/api/v1/oauth2/clients/{id}。按请求字段更新 client 配置。前置条件：仅允许具备最小权限的管理员调用，client_id 不可修改，client_secret 变更时使用 bcrypt 哈希存储。请求体示例：{"id":"3","client":{"display_name":"Web 应用（更新）","client_status":2},"update_mask":{"paths":["display_name","client_status"]}}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"3","client_id":"web-app","display_name":"Web 应用（更新）","client_status":2,"redirect_uris":["https://app.example.com/callback"],"grant_types":["authorization_code"],"scopes":["openid","profile"]}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDatabaseInitialize
       option:
         tags:

@@ -89,6 +89,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 								{Code: "admin.setting.groups", DisplayName: "群组管理", RoutePath: "/setting/groups", SortOrder: 500},
 								{Code: "admin.setting.users", DisplayName: "用户管理", RoutePath: "/setting/users", SortOrder: 600},
 								{Code: "admin.setting.global-settings", DisplayName: "全局设置", RoutePath: "/setting/global-settings", SortOrder: 700},
+								{Code: "admin.setting.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/oauth2-clients", SortOrder: 750},
 								{
 									Code:        "admin.setting.config",
 									DisplayName: "本地配置",

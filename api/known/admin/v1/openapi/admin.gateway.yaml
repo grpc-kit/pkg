@@ -288,6 +288,20 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Userinfo
     get: "/builtin/admin/api/v1/oatuh2/userinfo"
 
+    # OAuth2 客户端管理
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListOAuth2Clients
+    get: "/builtin/admin/api/v1/oauth2/clients"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateOAuth2Client
+    post: "/builtin/admin/api/v1/oauth2/clients"
+    body: "*"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Client
+    get: "/builtin/admin/api/v1/oauth2/clients/{id}"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateOAuth2Client
+    patch: "/builtin/admin/api/v1/oauth2/clients/{id}"
+    body: "*"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteOAuth2Client
+    delete: "/builtin/admin/api/v1/oauth2/clients/{id}"
+
     # 数据库相关
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateDatabaseInitialize
     post: "/builtin/admin/api/v1/database/initialize"

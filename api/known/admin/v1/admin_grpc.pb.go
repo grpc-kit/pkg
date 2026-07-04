@@ -111,6 +111,12 @@ type KnownAdminClient interface {
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2JSONWebKeys, error)
 	GetOAuth2Userinfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Userinfo, error)
+	// OAuth2 客户端管理
+	ListOAuth2Clients(ctx context.Context, in *ListOAuth2ClientsRequest, opts ...grpc.CallOption) (*ListOAuth2ClientsResponse, error)
+	CreateOAuth2Client(ctx context.Context, in *CreateOAuth2ClientRequest, opts ...grpc.CallOption) (*CreateOAuth2ClientResponse, error)
+	GetOAuth2Client(ctx context.Context, in *GetOAuth2ClientRequest, opts ...grpc.CallOption) (*OAuth2Client, error)
+	UpdateOAuth2Client(ctx context.Context, in *UpdateOAuth2ClientRequest, opts ...grpc.CallOption) (*OAuth2Client, error)
+	DeleteOAuth2Client(ctx context.Context, in *DeleteOAuth2ClientRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 数据库相关
 	CreateDatabaseInitialize(ctx context.Context, in *CreateDatabaseInitializeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -789,6 +795,51 @@ func (c *knownAdminClient) GetOAuth2Userinfo(ctx context.Context, in *emptypb.Em
 	return out, nil
 }
 
+func (c *knownAdminClient) ListOAuth2Clients(ctx context.Context, in *ListOAuth2ClientsRequest, opts ...grpc.CallOption) (*ListOAuth2ClientsResponse, error) {
+	out := new(ListOAuth2ClientsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListOAuth2Clients", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateOAuth2Client(ctx context.Context, in *CreateOAuth2ClientRequest, opts ...grpc.CallOption) (*CreateOAuth2ClientResponse, error) {
+	out := new(CreateOAuth2ClientResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateOAuth2Client", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) GetOAuth2Client(ctx context.Context, in *GetOAuth2ClientRequest, opts ...grpc.CallOption) (*OAuth2Client, error) {
+	out := new(OAuth2Client)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Client", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateOAuth2Client(ctx context.Context, in *UpdateOAuth2ClientRequest, opts ...grpc.CallOption) (*OAuth2Client, error) {
+	out := new(OAuth2Client)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateOAuth2Client", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteOAuth2Client(ctx context.Context, in *DeleteOAuth2ClientRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteOAuth2Client", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) CreateDatabaseInitialize(ctx context.Context, in *CreateDatabaseInitializeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize", in, out, opts...)
@@ -890,6 +941,12 @@ type KnownAdminServer interface {
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(context.Context, *emptypb.Empty) (*OAuth2JSONWebKeys, error)
 	GetOAuth2Userinfo(context.Context, *emptypb.Empty) (*OAuth2Userinfo, error)
+	// OAuth2 客户端管理
+	ListOAuth2Clients(context.Context, *ListOAuth2ClientsRequest) (*ListOAuth2ClientsResponse, error)
+	CreateOAuth2Client(context.Context, *CreateOAuth2ClientRequest) (*CreateOAuth2ClientResponse, error)
+	GetOAuth2Client(context.Context, *GetOAuth2ClientRequest) (*OAuth2Client, error)
+	UpdateOAuth2Client(context.Context, *UpdateOAuth2ClientRequest) (*OAuth2Client, error)
+	DeleteOAuth2Client(context.Context, *DeleteOAuth2ClientRequest) (*emptypb.Empty, error)
 	// 数据库相关
 	CreateDatabaseInitialize(context.Context, *CreateDatabaseInitializeRequest) (*emptypb.Empty, error)
 }
@@ -1119,6 +1176,21 @@ func (UnimplementedKnownAdminServer) GetOAuth2JSONWebKeys(context.Context, *empt
 }
 func (UnimplementedKnownAdminServer) GetOAuth2Userinfo(context.Context, *emptypb.Empty) (*OAuth2Userinfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2Userinfo not implemented")
+}
+func (UnimplementedKnownAdminServer) ListOAuth2Clients(context.Context, *ListOAuth2ClientsRequest) (*ListOAuth2ClientsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOAuth2Clients not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateOAuth2Client(context.Context, *CreateOAuth2ClientRequest) (*CreateOAuth2ClientResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateOAuth2Client not implemented")
+}
+func (UnimplementedKnownAdminServer) GetOAuth2Client(context.Context, *GetOAuth2ClientRequest) (*OAuth2Client, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2Client not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateOAuth2Client(context.Context, *UpdateOAuth2ClientRequest) (*OAuth2Client, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOAuth2Client not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteOAuth2Client(context.Context, *DeleteOAuth2ClientRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteOAuth2Client not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateDatabaseInitialize(context.Context, *CreateDatabaseInitializeRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDatabaseInitialize not implemented")
@@ -2467,6 +2539,96 @@ func _KnownAdmin_GetOAuth2Userinfo_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_ListOAuth2Clients_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOAuth2ClientsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListOAuth2Clients(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListOAuth2Clients",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListOAuth2Clients(ctx, req.(*ListOAuth2ClientsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateOAuth2Client_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOAuth2ClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateOAuth2Client(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateOAuth2Client",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateOAuth2Client(ctx, req.(*CreateOAuth2ClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_GetOAuth2Client_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOAuth2ClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetOAuth2Client(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Client",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetOAuth2Client(ctx, req.(*GetOAuth2ClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateOAuth2Client_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateOAuth2ClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateOAuth2Client(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateOAuth2Client",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateOAuth2Client(ctx, req.(*UpdateOAuth2ClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteOAuth2Client_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteOAuth2ClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteOAuth2Client(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteOAuth2Client",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteOAuth2Client(ctx, req.(*DeleteOAuth2ClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_CreateDatabaseInitialize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDatabaseInitializeRequest)
 	if err := dec(in); err != nil {
@@ -2787,6 +2949,26 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOAuth2Userinfo",
 			Handler:    _KnownAdmin_GetOAuth2Userinfo_Handler,
+		},
+		{
+			MethodName: "ListOAuth2Clients",
+			Handler:    _KnownAdmin_ListOAuth2Clients_Handler,
+		},
+		{
+			MethodName: "CreateOAuth2Client",
+			Handler:    _KnownAdmin_CreateOAuth2Client_Handler,
+		},
+		{
+			MethodName: "GetOAuth2Client",
+			Handler:    _KnownAdmin_GetOAuth2Client_Handler,
+		},
+		{
+			MethodName: "UpdateOAuth2Client",
+			Handler:    _KnownAdmin_UpdateOAuth2Client_Handler,
+		},
+		{
+			MethodName: "DeleteOAuth2Client",
+			Handler:    _KnownAdmin_DeleteOAuth2Client_Handler,
 		},
 		{
 			MethodName: "CreateDatabaseInitialize",

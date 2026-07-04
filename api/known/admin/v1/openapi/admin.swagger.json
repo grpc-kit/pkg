@@ -2900,6 +2900,361 @@
         ]
       }
     },
+    "/builtin/admin/api/v1/oauth2/clients": {
+      "get": {
+        "summary": "OAuth2 客户端列表",
+        "description": "接口格式：/builtin/admin/api/v1/oauth2/clients。返回已注册的 OAuth2 客户端列表。前置条件：仅允许具备客户端管理权限的管理员调用，返回结果禁止包含 client_secret_hash 等敏感字段。",
+        "operationId": "KnownAdmin_ListOAuth2Clients",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListOAuth2ClientsResponse"
+            },
+            "examples": {
+              "application/json": {
+                "clients": [
+                  {
+                    "id": "1",
+                    "client_id": "web-app",
+                    "display_name": "Web 应用",
+                    "client_status": 1,
+                    "redirect_uris": [
+                      "https://app.example.com/callback"
+                    ],
+                    "grant_types": [
+                      "authorization_code"
+                    ],
+                    "scopes": [
+                      "openid",
+                      "profile"
+                    ]
+                  },
+                  {
+                    "id": "2",
+                    "client_id": "mobile.ios",
+                    "display_name": "iOS 客户端",
+                    "client_status": 1,
+                    "redirect_uris": [
+                      "com.example.app://oauth/callback"
+                    ],
+                    "grant_types": [
+                      "authorization_code",
+                      "refresh_token"
+                    ],
+                    "scopes": [
+                      "openid",
+                      "profile",
+                      "email"
+                    ]
+                  }
+                ],
+                "next_page_token": "",
+                "total_size": 2
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page_size",
+            "description": "每页返回的最大客户端数。\n- 如果未指定，则使用服务端默认值 (如 20)。\n- 最大不超过 100 (超出时强制截断)。",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "page_token",
+            "description": "Cursor-based 分页",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offset",
+            "description": "Offset-based 分页",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "filter",
+            "description": "过滤条件，采用 AIP-160 定义的标准 filter 语法。\n示例: `client_status=ACTIVE AND display_name~=\"web\"`",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "order_by",
+            "description": "排序规则，指定结果返回顺序。\n格式: \"field_name [asc|desc], ...\"。\n示例: \"client_status asc, created_at desc\"",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "client_status",
+            "description": "ClientStatus 快捷过滤参数。\n示例: 1(ACTIVE)，仅返回启用中的客户端。",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "安全相关"
+        ]
+      },
+      "post": {
+        "summary": "创建 OAuth2 客户端",
+        "description": "接口格式：/builtin/admin/api/v1/oauth2/clients。用于注册新的 OAuth2 客户端应用。前置条件：仅允许具备最小权限的管理员调用，client_secret 使用 bcrypt 哈希存储，明文不可逆。请求体示例：{\"client\":{\"client_id\":\"web-app\",\"display_name\":\"Web 应用\",\"redirect_uris\":[\"https://app.example.com/callback\"],\"grant_types\":[\"authorization_code\"],\"scopes\":[\"openid\",\"profile\"]},\"client_secret\":\"my-secret-123\"}。",
+        "operationId": "KnownAdmin_CreateOAuth2Client",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateOAuth2ClientResponse"
+            },
+            "examples": {
+              "application/json": {
+                "client": {
+                  "id": "3",
+                  "client_id": "web-app",
+                  "display_name": "Web 应用",
+                  "client_status": 1,
+                  "redirect_uris": [
+                    "https://app.example.com/callback"
+                  ],
+                  "grant_types": [
+                    "authorization_code"
+                  ],
+                  "scopes": [
+                    "openid",
+                    "profile"
+                  ]
+                },
+                "client_secret": "aB3kF9mN2qR7sV4x"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateOAuth2ClientRequest"
+            }
+          }
+        ],
+        "tags": [
+          "安全相关"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/oauth2/clients/{id}": {
+      "get": {
+        "summary": "获取 OAuth2 客户端详情",
+        "description": "接口格式：/builtin/admin/api/v1/oauth2/clients/{id}。前置条件：仅允许具备客户端管理权限的管理员调用，响应中禁止回传 client_secret_hash 等敏感字段。",
+        "operationId": "KnownAdmin_GetOAuth2Client",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1OAuth2Client"
+            },
+            "examples": {
+              "application/json": {
+                "id": "3",
+                "client_id": "web-app",
+                "display_name": "Web 应用",
+                "client_status": 1,
+                "redirect_uris": [
+                  "https://app.example.com/callback"
+                ],
+                "grant_types": [
+                  "authorization_code"
+                ],
+                "scopes": [
+                  "openid",
+                  "profile"
+                ],
+                "logo_url": "",
+                "description": ""
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "安全相关"
+        ]
+      },
+      "delete": {
+        "summary": "删除 OAuth2 客户端",
+        "description": "接口格式：/builtin/admin/api/v1/oauth2/clients/{id}。软删除指定 OAuth2 客户端。前置条件：仅允许具备最小权限的管理员调用，删除前应确认无活动授权流量并记录审计日志。",
+        "operationId": "KnownAdmin_DeleteOAuth2Client",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "安全相关"
+        ]
+      },
+      "patch": {
+        "summary": "更新 OAuth2 客户端",
+        "description": "接口格式：/builtin/admin/api/v1/oauth2/clients/{id}。按请求字段更新 client 配置。前置条件：仅允许具备最小权限的管理员调用，client_id 不可修改，client_secret 变更时使用 bcrypt 哈希存储。请求体示例：{\"id\":\"3\",\"client\":{\"display_name\":\"Web 应用（更新）\",\"client_status\":2},\"update_mask\":{\"paths\":[\"display_name\",\"client_status\"]}}。",
+        "operationId": "KnownAdmin_UpdateOAuth2Client",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1OAuth2Client"
+            },
+            "examples": {
+              "application/json": {
+                "id": "3",
+                "client_id": "web-app",
+                "display_name": "Web 应用（更新）",
+                "client_status": 2,
+                "redirect_uris": [
+                  "https://app.example.com/callback"
+                ],
+                "grant_types": [
+                  "authorization_code"
+                ],
+                "scopes": [
+                  "openid",
+                  "profile"
+                ]
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "client": {
+                  "$ref": "#/definitions/v1OAuth2Client"
+                },
+                "update_mask": {
+                  "type": "string",
+                  "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：client_id 不可修改，即使列入 update_mask 也会被忽略。\n示例: paths: [\"display_name\", \"client_status\", \"redirect_uris\"]"
+                },
+                "client_secret": {
+                  "type": "string",
+                  "title": "ClientSecret 新的客户端密钥明文（可选）\n- 如果提供非空值，服务端将 bcrypt 哈希后覆盖现有密钥。\n- 如果未提供或为空，保持现有密钥不变。"
+                }
+              },
+              "title": "UpdateOAuth2ClientRequest 更新 OAuth2 客户端"
+            }
+          }
+        ],
+        "tags": [
+          "安全相关"
+        ]
+      }
+    },
     "/builtin/admin/api/v1/policies": {
       "get": {
         "summary": "策略列表",
@@ -5492,6 +5847,18 @@
       "description": "- TARGET_TYPE_UNSPECIFIED: 未指定\n - GROUP: 群组\n - DEPARTMENT: 部门\n - ROLE: 角色",
       "title": "TargetType 关联目标类型，区分成员属于哪种组织实体"
     },
+    "OAuth2ClientClientStatus": {
+      "type": "string",
+      "enum": [
+        "CLIENT_STATUS_UNSPECIFIED",
+        "ACTIVE",
+        "DISABLED",
+        "REVOKED"
+      ],
+      "default": "CLIENT_STATUS_UNSPECIFIED",
+      "description": "- ACTIVE: 启用中 - 可正常发起 OAuth2 授权流程\n - DISABLED: 已禁用 - 暂停授权，可重新启用\n - REVOKED: 已吊销 - 永久失效，不可恢复",
+      "title": "ClientStatus 客户端状态"
+    },
     "OAuth2JSONWebKeysKey": {
       "type": "object",
       "properties": {
@@ -6146,6 +6513,34 @@
     },
     "v1CreateGroupMembersResponse": {
       "type": "object"
+    },
+    "v1CreateOAuth2ClientRequest": {
+      "type": "object",
+      "properties": {
+        "client": {
+          "$ref": "#/definitions/v1OAuth2Client",
+          "title": "Client 客户端配置"
+        },
+        "client_secret": {
+          "type": "string",
+          "title": "ClientSecret 客户端密钥明文（可选）\n- 如果提供，服务端将 bcrypt 哈希后存储，明文不会被保存或返回。\n- 如果未提供，服务端自动生成 32 位随机密钥，哈希存储，明文一次性返回在响应中。\n- 注意：自动生成的明文密钥仅在此响应中返回一次，后续不可再获取。"
+        }
+      },
+      "title": "CreateOAuth2ClientRequest 创建 OAuth2 客户端"
+    },
+    "v1CreateOAuth2ClientResponse": {
+      "type": "object",
+      "properties": {
+        "client": {
+          "$ref": "#/definitions/v1OAuth2Client",
+          "title": "Client 创建成功的客户端信息（不含密钥哈希）"
+        },
+        "client_secret": {
+          "type": "string",
+          "title": "ClientSecret 明文密钥（仅在服务端自动生成时返回）\n- 如果请求中提供了 client_secret，此字段为空。\n- 此明文仅返回一次，客户端必须妥善保存。"
+        }
+      },
+      "title": "CreateOAuth2ClientResponse 创建 OAuth2 客户端响应"
     },
     "v1CreateRoleMembersResponse": {
       "type": "object"
@@ -7127,6 +7522,28 @@
         }
       }
     },
+    "v1ListOAuth2ClientsResponse": {
+      "type": "object",
+      "properties": {
+        "clients": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1OAuth2Client"
+          }
+        },
+        "next_page_token": {
+          "type": "string",
+          "title": "用于获取下一页结果的 token。\n- 如果为空，表示没有更多结果。"
+        },
+        "total_size": {
+          "type": "integer",
+          "format": "int32",
+          "title": "符合条件的客户端总数。"
+        }
+      },
+      "title": "ListOAuth2ClientsResponse OAuth2 客户端列表响应"
+    },
     "v1ListPoliciesResponse": {
       "type": "object",
       "properties": {
@@ -7558,6 +7975,78 @@
         }
       },
       "title": "Menu 菜单业务定义。"
+    },
+    "v1OAuth2Client": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "ID 全局唯一标识"
+        },
+        "client_id": {
+          "type": "string",
+          "title": "ClientID 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号\n长度：2-64 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：\"web-app\"、\"mobile.ios\"、\"api:gateway\""
+        },
+        "client_status": {
+          "$ref": "#/definitions/OAuth2ClientClientStatus"
+        },
+        "display_name": {
+          "type": "string",
+          "title": "DisplayName 客户端展示名称"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description 客户端描述信息"
+        },
+        "logo_url": {
+          "type": "string",
+          "title": "LogoURL 客户端图标地址"
+        },
+        "redirect_uris": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "RedirectUris 允许的回调地址列表"
+        },
+        "grant_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "GrantTypes 允许的授权类型\n示例：authorization_code, refresh_token, client_credentials"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Scopes 允许申请的权限范围\n示例：openid, profile, email"
+        },
+        "created_by": {
+          "type": "string",
+          "format": "int64"
+        },
+        "updated_by": {
+          "type": "string",
+          "format": "int64"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deleted_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "======== 标识区（1-4） ========",
+      "title": "OAuth2Client OAuth2 客户端实体，用于管理接入 OAuth2/OIDC 的三方应用"
     },
     "v1OAuth2Discovery": {
       "type": "object",
