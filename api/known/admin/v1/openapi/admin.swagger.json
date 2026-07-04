@@ -6343,7 +6343,8 @@
         "ACTIVE",
         "DISABLED"
       ],
-      "default": "BINDING_STATUS_UNSPECIFIED"
+      "default": "BINDING_STATUS_UNSPECIFIED",
+      "title": "BindingStatus 绑定状态"
     },
     "v1CacheboxConfig": {
       "type": "object",
@@ -7068,7 +7069,8 @@
           "type": "string",
           "format": "date-time"
         }
-      }
+      },
+      "title": "GlobalSetting 全局设置项实体"
     },
     "v1GlobalSettingCategory": {
       "type": "object",
@@ -7083,7 +7085,8 @@
             "$ref": "#/definitions/v1GlobalSetting"
           }
         }
-      }
+      },
+      "title": "GlobalSettingCategory 全局设置分类，聚合同一 category 下的设置项"
     },
     "v1Group": {
       "type": "object",
@@ -8559,7 +8562,8 @@
           "type": "string",
           "format": "date-time"
         }
-      }
+      },
+      "title": "PrincipalRoleBinding 主体-角色绑定关系实体"
     },
     "v1PrincipalType": {
       "type": "string",
@@ -8569,7 +8573,8 @@
         "GROUP",
         "DEPARTMENT"
       ],
-      "default": "PRINCIPAL_TYPE_UNSPECIFIED"
+      "default": "PRINCIPAL_TYPE_UNSPECIFIED",
+      "title": "PrincipalType 主体类型，用于角色绑定关系"
     },
     "v1PrometheusExporterConfig": {
       "type": "object",
@@ -8651,7 +8656,8 @@
           "type": "boolean",
           "title": "是否递归包含子菜单，为 true 时授权逻辑自动涵盖所有后代菜单"
         }
-      }
+      },
+      "title": "RoleMenu 角色-菜单授权关系实体"
     },
     "v1RolePolicyBinding": {
       "type": "object",
@@ -8697,7 +8703,8 @@
           "type": "string",
           "format": "date-time"
         }
-      }
+      },
+      "title": "RolePolicyBinding 角色-策略绑定关系实体"
     },
     "v1RoleStatus": {
       "type": "string",
@@ -9430,7 +9437,8 @@
         "setting_value": {
           "type": "string"
         }
-      }
+      },
+      "title": "UpdateGlobalSetting 单项更新载荷"
     },
     "v1UpdateGlobalSettingsResponse": {
       "type": "object",
