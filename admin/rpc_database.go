@@ -75,11 +75,11 @@ func builtinMenuSeeds() []builtinMenuSeed {
 								{
 									Code:        "admin.setting.auth",
 									DisplayName: "身份认证",
-									RoutePath:   "/setting/authentications",
+									RoutePath:   "/setting/auth",
 									SortOrder:   100,
 									Children: []builtinMenuSeed{
-										{Code: "admin.setting.auth.providers", DisplayName: "认证提供方", RoutePath: "/setting/authentications/providers", SortOrder: 100},
-										{Code: "admin.setting.auth.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/authentications/oauth2-clients", SortOrder: 200},
+										{Code: "admin.setting.auth.providers", DisplayName: "认证提供方", RoutePath: "/setting/auth/providers", SortOrder: 100},
+										{Code: "admin.setting.auth.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/auth/oauth2-clients", SortOrder: 200},
 									},
 								},
 								{
@@ -95,7 +95,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.menus",
 									DisplayName: "菜单管理",
 									RoutePath:   "/setting/menus",
-									SortOrder:   250,
+									SortOrder:   300,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.menus.list", DisplayName: "菜单列表", RoutePath: "/setting/menus/list", SortOrder: 100},
 									},
@@ -104,26 +104,26 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.roles",
 									DisplayName: "角色管理",
 									RoutePath:   "/setting/roles",
-									SortOrder:   300,
+									SortOrder:   400,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.roles.list", DisplayName: "角色列表", RoutePath: "/setting/roles/list", SortOrder: 100},
 									},
 								},
 								{
-									Code:        "admin.setting.policymanage",
+									Code:        "admin.setting.policies",
 									DisplayName: "权限策略",
-									RoutePath:   "/setting/policymanage",
-									SortOrder:   400,
+									RoutePath:   "/setting/policies",
+									SortOrder:   500,
 									Children: []builtinMenuSeed{
-										{Code: "admin.setting.policymanage.list", DisplayName: "策略列表", RoutePath: "/setting/policymanage/list", SortOrder: 100},
-										{Code: "admin.setting.policymanage.create", DisplayName: "新建策略", RoutePath: "/setting/policymanage/create", SortOrder: 200},
+										{Code: "admin.setting.policies.list", DisplayName: "策略列表", RoutePath: "/setting/policies/list", SortOrder: 100},
+										{Code: "admin.setting.policies.create", DisplayName: "新建策略", RoutePath: "/setting/policies/create", SortOrder: 200},
 									},
 								},
 								{
 									Code:        "admin.setting.groups",
 									DisplayName: "群组管理",
 									RoutePath:   "/setting/groups",
-									SortOrder:   500,
+									SortOrder:   600,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.groups.list", DisplayName: "群组列表", RoutePath: "/setting/groups/list", SortOrder: 100},
 									},
@@ -132,12 +132,12 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Code:        "admin.setting.users",
 									DisplayName: "用户管理",
 									RoutePath:   "/setting/users",
-									SortOrder:   600,
+									SortOrder:   700,
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.users.list", DisplayName: "用户列表", RoutePath: "/setting/users/list", SortOrder: 100},
 									},
 								},
-								{Code: "admin.setting.global-settings", DisplayName: "全局设置", RoutePath: "/setting/global-settings", SortOrder: 700},
+								{Code: "admin.setting.global-settings", DisplayName: "全局设置", RoutePath: "/setting/global-settings", SortOrder: 800},
 
 								{
 									Code:        "admin.setting.config",
