@@ -72,7 +72,16 @@ func builtinMenuSeeds() []builtinMenuSeed {
 							Icon:        "SettingOutlined",
 							SortOrder:   200,
 							Children: []builtinMenuSeed{
-								{Code: "admin.setting.auth-providers", DisplayName: "身份认证", RoutePath: "/setting/authentications", SortOrder: 100},
+								{
+									Code:        "admin.setting.auth",
+									DisplayName: "身份认证",
+									RoutePath:   "/setting/authentications",
+									SortOrder:   100,
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.auth.providers", DisplayName: "认证提供方", RoutePath: "/setting/authentications/providers", SortOrder: 100},
+										{Code: "admin.setting.auth.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/authentications/oauth2-clients", SortOrder: 200},
+									},
+								},
 								{Code: "admin.setting.departments", DisplayName: "组织架构", RoutePath: "/setting/departments", SortOrder: 200},
 								{Code: "admin.setting.menus", DisplayName: "菜单管理", RoutePath: "/setting/menus", SortOrder: 250},
 								{Code: "admin.setting.roles", DisplayName: "角色管理", RoutePath: "/setting/roles", SortOrder: 300},
@@ -89,7 +98,7 @@ func builtinMenuSeeds() []builtinMenuSeed {
 								{Code: "admin.setting.groups", DisplayName: "群组管理", RoutePath: "/setting/groups", SortOrder: 500},
 								{Code: "admin.setting.users", DisplayName: "用户管理", RoutePath: "/setting/users", SortOrder: 600},
 								{Code: "admin.setting.global-settings", DisplayName: "全局设置", RoutePath: "/setting/global-settings", SortOrder: 700},
-								{Code: "admin.setting.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/oauth2-clients", SortOrder: 750},
+
 								{
 									Code:        "admin.setting.config",
 									DisplayName: "本地配置",
