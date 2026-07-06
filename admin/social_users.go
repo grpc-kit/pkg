@@ -423,7 +423,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 		s.logger.Infof("ldap login debug: service bind success, provider=%s bind_dn=%s", s.ProviderName, maskLDAPDN(bindDN))
 	}
 
-	userDN, resolvedUsername, err := s.findLDAPUserDN(conn, username)
+	userDN, resolvedUsername, ldapAttrs, err := s.findLDAPUserDN(conn, username)
 	if err != nil {
 		s.logger.Errorf("ldap login failed: user search failed, provider=%s username=%s err=%v", s.ProviderName, username, err)
 		return nil, err
@@ -485,6 +485,8 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			maskLDAPDN(userDN),
 			localUserID,
 		)
+		// 已有用户二次登录：用最新 LDAP 属性刷新本地用户表。
+		s.syncLDAPUserAttrs(ctx, localUserID, ldapAttrs)
 	} else {
 		s.logger.Warnf(
 			"ldap login debug: identity miss, start auto provision, provider=%s username=%s resolved_username=%s user_dn=%s",
@@ -493,7 +495,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 			resolvedUsername,
 			maskLDAPDN(userDN),
 		)
-		localUserID, err = s.provisionLDAPUserOnFirstLogin(ctx, userDN, resolvedUsername)
+		localUserID, err = s.provisionLDAPUserOnFirstLogin(ctx, userDN, resolvedUsername, ldapAttrs)
 		if err != nil {
 			s.logger.Errorf(
 				"ldap login failed: auto provision error, provider=%s username=%s resolved_username=%s user_dn=%s err=%v",
@@ -564,7 +566,7 @@ func (s *socialUsers) PasswordCheckLDAP(ctx context.Context, username, passwordP
 	}, nil
 }
 
-func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, userDN, ldapUsername string) (int, error) {
+func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, userDN, ldapUsername string, attrs *ldapUserAttrs) (int, error) {
 	tx, err := s.db.Tx(ctx)
 	if err != nil {
 		return 0, err
@@ -577,11 +579,30 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, userDN,
 		return 0, err
 	}
 
-	newUser, err := tx.Users.Create().
+	userCreate := tx.Users.Create().
 		SetUsername(localUsername).
-		SetNickname(ldapUsername).
-		SetUserStatus(int(adminv1.User_ACTIVE.Number())).
-		Save(ctx)
+		SetUserStatus(int(adminv1.User_ACTIVE.Number()))
+
+	// 昵称优先使用 LDAP displayName，其次回退到 username 属性值。
+	nickname := ldapUsername
+	if attrs != nil && attrs.DisplayName != "" {
+		nickname = attrs.DisplayName
+	}
+	userCreate.SetNickname(nickname)
+
+	// 写入邮箱（加密 + hash + verified 标记）。
+	if attrs != nil && attrs.Email != "" {
+		emailEnc, encErr := crypto.EncryptAES(s.aesKey, []byte(attrs.Email))
+		if encErr != nil {
+			_ = tx.Rollback()
+			return 0, fmt.Errorf("encrypt ldap email: %w", encErr)
+		}
+		userCreate.SetEmailEncrypted(emailEnc)
+		userCreate.SetEmailHash(crypto.SHA256([]byte(attrs.Email)))
+		userCreate.SetEmailVerified(true)
+	}
+
+	newUser, err := userCreate.Save(ctx)
 	if err != nil {
 		_ = tx.Rollback()
 		return 0, err
@@ -601,6 +622,43 @@ func (s *socialUsers) provisionLDAPUserOnFirstLogin(ctx context.Context, userDN,
 		return 0, err
 	}
 	return newUser.ID, nil
+}
+
+// syncLDAPUserAttrs 在已有用户二次登录时，用最新 LDAP 属性刷新本地用户表。
+// 仅当 LDAP 侧返回了非空值时才覆盖对应字段，避免用空值清掉已有数据。
+func (s *socialUsers) syncLDAPUserAttrs(ctx context.Context, userID int, attrs *ldapUserAttrs) {
+	if attrs == nil {
+		return
+	}
+
+	userUpdate := s.db.Users.Update().Where(users.IDEQ(userID))
+
+	updated := false
+	if attrs.DisplayName != "" {
+		userUpdate.SetNickname(attrs.DisplayName)
+		updated = true
+	}
+	if attrs.Email != "" {
+		emailEnc, err := crypto.EncryptAES(s.aesKey, []byte(attrs.Email))
+		if err != nil {
+			s.logger.Warnf("ldap sync attrs: encrypt email failed, provider=%s user_id=%d err=%v", s.ProviderName, userID, err)
+		} else {
+			userUpdate.SetEmailEncrypted(emailEnc)
+			userUpdate.SetEmailHash(crypto.SHA256([]byte(attrs.Email)))
+			userUpdate.SetEmailVerified(true)
+			updated = true
+		}
+	}
+
+	if !updated {
+		return
+	}
+
+	if n, err := userUpdate.Save(ctx); err != nil {
+		s.logger.Warnf("ldap sync attrs: update user failed, provider=%s user_id=%d affected=%d err=%v", s.ProviderName, userID, n, err)
+	} else {
+		s.logger.Infof("ldap sync attrs: update user success, provider=%s user_id=%d affected=%d", s.ProviderName, userID, n)
+	}
 }
 
 func buildLDAPLocalUsernameBase(providerCode, ldapUsername string) string {
@@ -711,16 +769,33 @@ func (s *socialUsers) newLDAPConn() (*ldap.Conn, error) {
 	return conn, nil
 }
 
-func (s *socialUsers) findLDAPUserDN(conn *ldap.Conn, username string) (string, string, error) {
+// ldapUserAttrs 携带从 LDAP 搜索结果中提取的用户属性。
+type ldapUserAttrs struct {
+	Email       string
+	DisplayName string
+}
+
+func (s *socialUsers) findLDAPUserDN(conn *ldap.Conn, username string) (string, string, *ldapUserAttrs, error) {
 	searchBase := strings.TrimSpace(s.ldapCfg.UserSearchBase)
 	if searchBase == "" {
 		s.logger.Errorf("ldap search failed: empty user_search_base, provider=%s username=%s", s.ProviderName, username)
-		return "", "", fmt.Errorf("ldap user_search_base is required")
+		return "", "", nil, fmt.Errorf("ldap user_search_base is required")
 	}
 
 	usernameAttribute := strings.TrimSpace(s.ldapCfg.UsernameAttribute)
 	if usernameAttribute == "" {
 		usernameAttribute = "uid"
+	}
+
+	// 构建请求属性列表：始终包含 username 属性，按配置追加 email / display_name。
+	attributes := []string{usernameAttribute}
+	emailAttribute := strings.TrimSpace(s.ldapCfg.EmailAttribute)
+	displayNameAttribute := strings.TrimSpace(s.ldapCfg.DisplayNameAttribute)
+	if emailAttribute != "" && emailAttribute != usernameAttribute {
+		attributes = append(attributes, emailAttribute)
+	}
+	if displayNameAttribute != "" && displayNameAttribute != usernameAttribute {
+		attributes = append(attributes, displayNameAttribute)
 	}
 
 	escapedUsername := ldap.EscapeFilter(username)
@@ -737,12 +812,13 @@ func (s *socialUsers) findLDAPUserDN(conn *ldap.Conn, username string) (string, 
 		filter = fmt.Sprintf("(&%s(%s=%s))", filterTemplate, usernameAttribute, escapedUsername)
 	}
 	s.logger.Infof(
-		"ldap search debug: provider=%s username=%s search_base=%s username_attr=%s filter=%s",
+		"ldap search debug: provider=%s username=%s search_base=%s username_attr=%s filter=%s attributes=%v",
 		s.ProviderName,
 		username,
 		searchBase,
 		usernameAttribute,
 		filter,
+		attributes,
 	)
 
 	searchReq := ldap.NewSearchRequest(
@@ -753,13 +829,13 @@ func (s *socialUsers) findLDAPUserDN(conn *ldap.Conn, username string) (string, 
 		0,
 		false,
 		filter,
-		[]string{usernameAttribute},
+		attributes,
 		nil,
 	)
 	searchResp, err := conn.Search(searchReq)
 	if err != nil {
 		s.logger.Errorf("ldap search failed: provider=%s username=%s err=%v", s.ProviderName, username, err)
-		return "", "", err
+		return "", "", nil, err
 	}
 	s.logger.Infof(
 		"ldap search debug: provider=%s username=%s entry_count=%d",
@@ -768,11 +844,11 @@ func (s *socialUsers) findLDAPUserDN(conn *ldap.Conn, username string) (string, 
 		len(searchResp.Entries),
 	)
 	if len(searchResp.Entries) == 0 {
-		return "", "", nil
+		return "", "", nil, nil
 	}
 	if len(searchResp.Entries) > 1 {
 		s.logger.Warnf("ldap search failed: multiple entries, provider=%s username=%s entry_count=%d", s.ProviderName, username, len(searchResp.Entries))
-		return "", "", fmt.Errorf("ldap user search returned multiple entries")
+		return "", "", nil, fmt.Errorf("ldap user search returned multiple entries")
 	}
 
 	entry := searchResp.Entries[0]
@@ -781,7 +857,15 @@ func (s *socialUsers) findLDAPUserDN(conn *ldap.Conn, username string) (string, 
 		resolvedUsername = username
 	}
 
-	return entry.DN, resolvedUsername, nil
+	attrs := &ldapUserAttrs{}
+	if emailAttribute != "" {
+		attrs.Email = strings.TrimSpace(entry.GetAttributeValue(emailAttribute))
+	}
+	if displayNameAttribute != "" {
+		attrs.DisplayName = strings.TrimSpace(entry.GetAttributeValue(displayNameAttribute))
+	}
+
+	return entry.DN, resolvedUsername, attrs, nil
 }
 
 func maskLDAPDN(dn string) string {
