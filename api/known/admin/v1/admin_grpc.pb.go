@@ -33,6 +33,8 @@ type KnownAdminClient interface {
 	// 认证鉴权
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 	ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error)
+	// 获取登录页可用的认证提供方列表（无需认证，仅返回最小字段集）
+	ListLoginOptions(ctx context.Context, in *ListLoginOptionsRequest, opts ...grpc.CallOption) (*ListLoginOptionsResponse, error)
 	CreateAuthProvider(ctx context.Context, in *CreateAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error)
 	GetAuthProvider(ctx context.Context, in *GetAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error)
 	DeleteAuthProvider(ctx context.Context, in *DeleteAuthProviderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -186,6 +188,15 @@ func (c *knownAdminClient) UpsertAuthProviders(ctx context.Context, in *UpsertAu
 func (c *knownAdminClient) ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error) {
 	out := new(ListAuthProvidersResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ListLoginOptions(ctx context.Context, in *ListLoginOptionsRequest, opts ...grpc.CallOption) (*ListLoginOptionsResponse, error) {
+	out := new(ListLoginOptionsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLoginOptions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -863,6 +874,8 @@ type KnownAdminServer interface {
 	// 认证鉴权
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 	ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error)
+	// 获取登录页可用的认证提供方列表（无需认证，仅返回最小字段集）
+	ListLoginOptions(context.Context, *ListLoginOptionsRequest) (*ListLoginOptionsResponse, error)
 	CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error)
 	GetAuthProvider(context.Context, *GetAuthProviderRequest) (*AuthProvider, error)
 	DeleteAuthProvider(context.Context, *DeleteAuthProviderRequest) (*emptypb.Empty, error)
@@ -975,6 +988,9 @@ func (UnimplementedKnownAdminServer) UpsertAuthProviders(context.Context, *Upser
 }
 func (UnimplementedKnownAdminServer) ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAuthProviders not implemented")
+}
+func (UnimplementedKnownAdminServer) ListLoginOptions(context.Context, *ListLoginOptionsRequest) (*ListLoginOptionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListLoginOptions not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthProvider not implemented")
@@ -1329,6 +1345,24 @@ func _KnownAdmin_ListAuthProviders_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).ListAuthProviders(ctx, req.(*ListAuthProvidersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListLoginOptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListLoginOptionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListLoginOptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLoginOptions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListLoginOptions(ctx, req.(*ListLoginOptionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2681,6 +2715,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAuthProviders",
 			Handler:    _KnownAdmin_ListAuthProviders_Handler,
+		},
+		{
+			MethodName: "ListLoginOptions",
+			Handler:    _KnownAdmin_ListLoginOptions_Handler,
 		},
 		{
 			MethodName: "CreateAuthProvider",

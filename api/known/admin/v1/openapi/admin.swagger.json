@@ -127,6 +127,32 @@
         ]
       }
     },
+    "/builtin/admin/api/v1/auth/login/options": {
+      "get": {
+        "summary": "获取登录页可用的认证提供方列表（无需认证，仅返回最小字段集）",
+        "operationId": "KnownAdmin_ListLoginOptions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListLoginOptionsResponse"
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/builtin/admin/api/v1/auth/mfa/confirm": {
       "post": {
         "summary": "确认开启 MFA",
@@ -7506,6 +7532,20 @@
         }
       }
     },
+    "v1ListLoginOptionsResponse": {
+      "type": "object",
+      "properties": {
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1LoginOption"
+          },
+          "title": "options 可用的认证提供方列表（已按 sort_order 排序）"
+        }
+      },
+      "title": "ListLoginOptionsResponse 登录页认证提供方列表响应"
+    },
     "v1ListMenusResponse": {
       "type": "object",
       "properties": {
@@ -7782,6 +7822,31 @@
           "type": "string"
         }
       }
+    },
+    "v1LoginOption": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "title": "Code 系统标识符，用于 CreateAuthLogin 的 provider_code"
+        },
+        "type": {
+          "$ref": "#/definitions/v1AuthProviderType",
+          "title": "Type 身份提供商类型"
+        },
+        "display_name": {
+          "type": "string",
+          "title": "DisplayName 展示名称"
+        },
+        "icon_url": {
+          "type": "string",
+          "title": "IconURL 图标地址"
+        },
+        "oauth_config": {
+          "$ref": "#/definitions/v1OAuth2LoginConfig"
+        }
+      },
+      "title": "LoginOption 登录页认证提供方选项（最小字段集，不含敏感信息）"
     },
     "v1Membership": {
       "type": "object",
@@ -8102,6 +8167,31 @@
           }
         }
       }
+    },
+    "v1OAuth2LoginConfig": {
+      "type": "object",
+      "properties": {
+        "authorization_endpoint": {
+          "type": "string",
+          "title": "authorization_endpoint 授权端点 URL"
+        },
+        "client_id": {
+          "type": "string",
+          "title": "client_id OAuth2 客户端 ID"
+        },
+        "redirect_uri": {
+          "type": "string",
+          "title": "redirect_uri 回调地址"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "scopes 请求的权限范围"
+        }
+      },
+      "title": "OAuth2LoginConfig OAuth2 系登录跳转所需的最小配置\n仅包含前端发起授权码流程所需的 4 个字段，不包含 token_endpoint/userinfo_endpoint 等服务端字段"
     },
     "v1OAuth2Userinfo": {
       "type": "object",

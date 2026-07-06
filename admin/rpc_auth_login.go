@@ -344,6 +344,104 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 	return result, nil
 }
 
+// ListLoginOptions 获取登录页可用的认证提供方列表（无需认证）
+// 仅返回登录页渲染所需的最小字段集，不包含任何敏感配置信息
+func (a *KnownAdminAPI) ListLoginOptions(ctx context.Context, req *adminv1.ListLoginOptionsRequest) (*adminv1.ListLoginOptionsResponse, error) {
+	result := &adminv1.ListLoginOptionsResponse{
+		Options: make([]*adminv1.LoginOption, 0),
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		if a.config.staticUsers == nil || a.config.staticUsers.Len() == 0 {
+			return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+		}
+
+		// 支持本地登录
+		result.Options = append(result.Options, &adminv1.LoginOption{
+			Code:        "local",
+			Type:        adminv1.AuthProvider_LOCAL,
+			DisplayName: "本地登录",
+		})
+
+		return result, nil
+	}
+
+	selectFields := []string{
+		authproviders.FieldID,
+		authproviders.FieldCode,
+		authproviders.FieldProviderType,
+		authproviders.FieldProviderStatus,
+		authproviders.FieldDisplayName,
+		authproviders.FieldIconURL,
+		authproviders.FieldSortOrder,
+		authproviders.FieldConfig,
+	}
+
+	rows, err := db.AuthProviders.Query().
+		Where(
+			authproviders.ProviderStatusEQ(int(adminv1.AuthProvider_ACTIVE.Number())),
+			authproviders.DeletedAtIsNil(),
+		).
+		Order(lion.Asc(authproviders.FieldSortOrder), lion.Asc(authproviders.FieldID)).
+		Select(selectFields...).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, row := range rows {
+		opt := &adminv1.LoginOption{
+			Code:        row.Code,
+			Type:        adminv1.AuthProvider_Type(row.ProviderType),
+			DisplayName: row.DisplayName,
+			IconUrl:     row.IconURL,
+		}
+
+		// 仅 OAuth2 系提供商填充 OAuth2LoginConfig
+		providerType := adminv1.AuthProvider_Type(row.ProviderType)
+		if providerType == adminv1.AuthProvider_OIDC ||
+			providerType == adminv1.AuthProvider_OAUTH2 ||
+			providerType == adminv1.AuthProvider_GITHUB ||
+			providerType == adminv1.AuthProvider_GOOGLE ||
+			providerType == adminv1.AuthProvider_WECHAT {
+			if len(row.Config) > 0 {
+				var data oauthConfigData
+				if err := json.Unmarshal(row.Config, &data); err == nil {
+					oc := &adminv1.OAuth2LoginConfig{
+						AuthorizationEndpoint: data.AuthorizationEndpoint,
+						ClientId:              data.ClientID,
+						RedirectUri:           data.RedirectURI,
+						Scopes:                data.Scopes,
+					}
+
+					// OIDC 类型：若 authorization_endpoint 缺失，通过 Discovery 补全
+					if providerType == adminv1.AuthProvider_OIDC && data.Issuer != "" {
+						if oc.AuthorizationEndpoint == "" || oc.ClientId == "" {
+							// 复用 enrichOAuthEndpoints 的逻辑，需要构造临时 OAuthConfig
+							tmpOc := &adminv1.OAuthConfig{
+								Issuer:                data.Issuer,
+								AuthorizationEndpoint: data.AuthorizationEndpoint,
+								TokenEndpoint:         data.TokenEndpoint,
+								UserinfoEndpoint:      data.UserinfoEndpoint,
+								JwksUri:               data.JwksURI,
+							}
+							a.enrichOAuthEndpoints(ctx, tmpOc)
+							oc.AuthorizationEndpoint = tmpOc.AuthorizationEndpoint
+						}
+					}
+
+					opt.Config = &adminv1.LoginOption_OauthConfig{OauthConfig: oc}
+				}
+			}
+		}
+
+		result.Options = append(result.Options, opt)
+	}
+
+	return result, nil
+}
+
 // parseListAuthProvidersFilter 解析 filter 字符串为 predicate 列表
 // 支持 key=value 与 AND 组合
 // 示例: "type=OIDC AND status=ACTIVE"、"type=3 AND code=github"

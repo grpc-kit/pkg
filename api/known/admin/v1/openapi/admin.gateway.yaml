@@ -30,6 +30,9 @@ http:
     ## 获取认证提供方列表
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListAuthProviders
     get: "/builtin/admin/api/v1/auth/providers"
+    ## 获取登录页可用的认证提供方列表（无需认证，仅返回最小字段集）
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListLoginOptions
+    get: "/builtin/admin/api/v1/auth/login/options"
     ## 创建认证提供方
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateAuthProvider
     post: "/builtin/admin/api/v1/auth/providers"
