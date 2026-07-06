@@ -748,27 +748,27 @@ openapiOptions:
         tags:
           - "安全相关"
         summary: "创建凭证"
-        description: '接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。前置条件：仅允许具备密钥管理权限的管理员调用，禁止回传私钥材料，新增或轮换操作必须写入审计日志。请求体示例：{"credential":{"code":"admin-jwks","type":"JWKS","algorithm":"RSA","usage":"AUTH","status":"ACTIVE","source":"SYSTEM","jwks_uri":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oatuh2/jwks"}}。'
+        description: '接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。前置条件：仅允许具备密钥管理权限的管理员调用，禁止回传私钥材料，新增或轮换操作必须写入审计日志。请求体示例：{"credential":{"code":"admin-jwks","type":"JWKS","algorithm":"RSA","usage":"AUTH","status":"ACTIVE","source":"SYSTEM","jwks_uri":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oauth2/jwks"}}。'
         responses:
           "200":
             examples:
-              "application/json": '{"id":"301","code":"admin-jwks","type":"JWKS","algorithm":"RSA","usage":"AUTH","visibility":"PRIVATE","status":"ACTIVE","source":"SYSTEM","key_id":"kid-admin-2026","jwks_uri":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oatuh2/jwks","metadata":{"rotation":"30d"},"description":"OIDC 签名公钥集合"}'
+              "application/json": '{"id":"301","code":"admin-jwks","type":"JWKS","algorithm":"RSA","usage":"AUTH","visibility":"PRIVATE","status":"ACTIVE","source":"SYSTEM","key_id":"kid-admin-2026","jwks_uri":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oauth2/jwks","metadata":{"rotation":"30d"},"description":"OIDC 签名公钥集合"}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery
       option:
         tags:
           - "安全相关"
         summary: "获取 OAuth2 Discovery"
-        description: "接口格式：/builtin/admin/api/v1/oatuh2/.well-known/openid-configuration。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许通过 HTTPS 暴露 issuer 元数据，配置变更应纳入审计。"
+        description: "接口格式：/builtin/admin/api/v1/oauth2/.well-known/openid-configuration。前置条件：仅允许通过 HTTPS 暴露 issuer 元数据，配置变更应纳入审计。"
         responses:
           "200":
             examples:
-              "application/json": '{"issuer":"https://admin.v1.known.api.grpc-kit.com","authorization_endpoint":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/auth/login","token_endpoint":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/auth/token","jwks_uri":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oatuh2/jwks","response_types_supported":["code","token"],"subject_types_supported":["public"],"id_token_signing_alg_values_supported":["RS256"]}'
+              "application/json": '{"issuer":"https://admin.v1.known.api.grpc-kit.com","authorization_endpoint":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/auth/login","token_endpoint":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/auth/token","jwks_uri":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oauth2/jwks","response_types_supported":["code","token"],"subject_types_supported":["public"],"id_token_signing_alg_values_supported":["RS256"]}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2JSONWebKeys
       option:
         tags:
           - "安全相关"
         summary: "获取 OAuth2 JSON Web Keys"
-        description: "接口格式：/builtin/admin/api/v1/oatuh2/jwks。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许发布 ACTIVE 且可公开的签名密钥，禁止返回私钥或对称密钥材料。"
+        description: "接口格式：/builtin/admin/api/v1/oauth2/jwks。前置条件：仅允许发布 ACTIVE 且可公开的签名密钥，禁止返回私钥或对称密钥材料。"
         responses:
           "200":
             examples:
@@ -778,7 +778,7 @@ openapiOptions:
         tags:
           - "安全相关"
         summary: "获取 OAuth2 Userinfo"
-        description: "接口格式：/builtin/admin/api/v1/oatuh2/userinfo。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许携带有效 access_token 调用，服务端应按最小权限返回 claims 并审计访问。"
+        description: "接口格式：/builtin/admin/api/v1/oauth2/userinfo。前置条件：仅允许携带有效 access_token 调用，服务端应按最小权限返回 claims 并审计访问。"
         responses:
           "200":
             examples:

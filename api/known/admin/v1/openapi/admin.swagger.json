@@ -706,7 +706,7 @@
     "/builtin/admin/api/v1/credentials": {
       "post": {
         "summary": "创建凭证",
-        "description": "接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。前置条件：仅允许具备密钥管理权限的管理员调用，禁止回传私钥材料，新增或轮换操作必须写入审计日志。请求体示例：{\"credential\":{\"code\":\"admin-jwks\",\"type\":\"JWKS\",\"algorithm\":\"RSA\",\"usage\":\"AUTH\",\"status\":\"ACTIVE\",\"source\":\"SYSTEM\",\"jwks_uri\":\"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oatuh2/jwks\"}}。",
+        "description": "接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。前置条件：仅允许具备密钥管理权限的管理员调用，禁止回传私钥材料，新增或轮换操作必须写入审计日志。请求体示例：{\"credential\":{\"code\":\"admin-jwks\",\"type\":\"JWKS\",\"algorithm\":\"RSA\",\"usage\":\"AUTH\",\"status\":\"ACTIVE\",\"source\":\"SYSTEM\",\"jwks_uri\":\"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oauth2/jwks\"}}。",
         "operationId": "KnownAdmin_CreateCredential",
         "responses": {
           "200": {
@@ -725,7 +725,7 @@
                 "status": "ACTIVE",
                 "source": "SYSTEM",
                 "key_id": "kid-admin-2026",
-                "jwks_uri": "https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oatuh2/jwks",
+                "jwks_uri": "https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oauth2/jwks",
                 "metadata": {
                   "rotation": "30d"
                 },
@@ -2794,10 +2794,10 @@
         ]
       }
     },
-    "/builtin/admin/api/v1/oatuh2/.well-known/openid-configuration": {
+    "/builtin/admin/api/v1/oauth2/.well-known/openid-configuration": {
       "get": {
         "summary": "获取 OAuth2 Discovery",
-        "description": "接口格式：/builtin/admin/api/v1/oatuh2/.well-known/openid-configuration。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许通过 HTTPS 暴露 issuer 元数据，配置变更应纳入审计。",
+        "description": "接口格式：/builtin/admin/api/v1/oauth2/.well-known/openid-configuration。前置条件：仅允许通过 HTTPS 暴露 issuer 元数据，配置变更应纳入审计。",
         "operationId": "KnownAdmin_GetOAuth2Discovery",
         "responses": {
           "200": {
@@ -2810,7 +2810,7 @@
                 "issuer": "https://admin.v1.known.api.grpc-kit.com",
                 "authorization_endpoint": "https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/auth/login",
                 "token_endpoint": "https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/auth/token",
-                "jwks_uri": "https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oatuh2/jwks",
+                "jwks_uri": "https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oauth2/jwks",
                 "response_types_supported": [
                   "code",
                   "token"
@@ -2821,90 +2821,6 @@
                 "id_token_signing_alg_values_supported": [
                   "RS256"
                 ]
-              }
-            }
-          },
-          "4xx": {
-            "description": "客户端参数异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          },
-          "5xx": {
-            "description": "服务端处理异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          }
-        },
-        "tags": [
-          "安全相关"
-        ]
-      }
-    },
-    "/builtin/admin/api/v1/oatuh2/jwks": {
-      "get": {
-        "summary": "获取 OAuth2 JSON Web Keys",
-        "description": "接口格式：/builtin/admin/api/v1/oatuh2/jwks。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许发布 ACTIVE 且可公开的签名密钥，禁止返回私钥或对称密钥材料。",
-        "operationId": "KnownAdmin_GetOAuth2JSONWebKeys",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1OAuth2JSONWebKeys"
-            },
-            "examples": {
-              "application/json": {
-                "keys": [
-                  {
-                    "kty": "RSA",
-                    "kid": "key-1",
-                    "alg": "RS256",
-                    "use": "sig"
-                  }
-                ]
-              }
-            }
-          },
-          "4xx": {
-            "description": "客户端参数异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          },
-          "5xx": {
-            "description": "服务端处理异常",
-            "schema": {
-              "$ref": "#/definitions/v1ErrorResponse"
-            }
-          }
-        },
-        "tags": [
-          "安全相关"
-        ]
-      }
-    },
-    "/builtin/admin/api/v1/oatuh2/userinfo": {
-      "get": {
-        "summary": "获取 OAuth2 Userinfo",
-        "description": "接口格式：/builtin/admin/api/v1/oatuh2/userinfo。注意当前路径使用 oatuh2（历史拼写）。前置条件：仅允许携带有效 access_token 调用，服务端应按最小权限返回 claims 并审计访问。",
-        "operationId": "KnownAdmin_GetOAuth2Userinfo",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1OAuth2Userinfo"
-            },
-            "examples": {
-              "application/json": {
-                "user_id": "1",
-                "username": "admin",
-                "nickname": "系统管理员",
-                "profile": "系统初始账号",
-                "picture": "https://cdn.example.com/avatars/admin.png",
-                "website": "https://admin.example.com",
-                "timezone": "Asia/Shanghai",
-                "locale": "zh-CN"
               }
             }
           },
@@ -3276,6 +3192,90 @@
             }
           }
         ],
+        "tags": [
+          "安全相关"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/oauth2/jwks": {
+      "get": {
+        "summary": "获取 OAuth2 JSON Web Keys",
+        "description": "接口格式：/builtin/admin/api/v1/oauth2/jwks。前置条件：仅允许发布 ACTIVE 且可公开的签名密钥，禁止返回私钥或对称密钥材料。",
+        "operationId": "KnownAdmin_GetOAuth2JSONWebKeys",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1OAuth2JSONWebKeys"
+            },
+            "examples": {
+              "application/json": {
+                "keys": [
+                  {
+                    "kty": "RSA",
+                    "kid": "key-1",
+                    "alg": "RS256",
+                    "use": "sig"
+                  }
+                ]
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "tags": [
+          "安全相关"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/oauth2/userinfo": {
+      "get": {
+        "summary": "获取 OAuth2 Userinfo",
+        "description": "接口格式：/builtin/admin/api/v1/oauth2/userinfo。前置条件：仅允许携带有效 access_token 调用，服务端应按最小权限返回 claims 并审计访问。",
+        "operationId": "KnownAdmin_GetOAuth2Userinfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1OAuth2Userinfo"
+            },
+            "examples": {
+              "application/json": {
+                "user_id": "1",
+                "username": "admin",
+                "nickname": "系统管理员",
+                "profile": "系统初始账号",
+                "picture": "https://cdn.example.com/avatars/admin.png",
+                "website": "https://admin.example.com",
+                "timezone": "Asia/Shanghai",
+                "locale": "zh-CN"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
         "tags": [
           "安全相关"
         ]

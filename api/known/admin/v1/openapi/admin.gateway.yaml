@@ -285,11 +285,11 @@ http:
     post: "/builtin/admin/api/v1/credentials"
     body: "credential"
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery
-    get: "/builtin/admin/api/v1/oatuh2/.well-known/openid-configuration"
+    get: "/builtin/admin/api/v1/oauth2/.well-known/openid-configuration"
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2JSONWebKeys
-    get: "/builtin/admin/api/v1/oatuh2/jwks"
+    get: "/builtin/admin/api/v1/oauth2/jwks"
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Userinfo
-    get: "/builtin/admin/api/v1/oatuh2/userinfo"
+    get: "/builtin/admin/api/v1/oauth2/userinfo"
 
     # OAuth2 客户端管理
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListOAuth2Clients
