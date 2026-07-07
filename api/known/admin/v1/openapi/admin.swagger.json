@@ -8196,14 +8196,22 @@
     "v1OAuth2Userinfo": {
       "type": "object",
       "properties": {
+        "sub": {
+          "type": "string",
+          "title": "Subject Identifier — OIDC MUST 返回的 Subject 标识"
+        },
         "user_id": {
           "type": "string",
           "format": "int64",
-          "title": "ID 用户 ID，全局唯一标识，使用 int64 序列化为 json 为 string 类型"
+          "title": "用户 ID，全局唯一标识"
         },
-        "username": {
+        "preferred_username": {
           "type": "string",
-          "title": "用户名，系统登录凭证，必须唯一"
+          "title": "首选用户名"
+        },
+        "name": {
+          "type": "string",
+          "title": "End-User 全名"
         },
         "nickname": {
           "type": "string",
@@ -8217,19 +8225,49 @@
           "type": "string",
           "title": "用户头像 URL"
         },
-        "website": {
+        "email": {
           "type": "string",
-          "title": "个人网站地址"
+          "title": "邮箱地址"
         },
-        "timezone": {
+        "email_verified": {
+          "type": "boolean",
+          "title": "邮箱是否已验证"
+        },
+        "gender": {
+          "type": "string",
+          "title": "性别（OIDC 规范值为 \"male\"/\"female\"/\"other\"，PRIVATE 不返回）"
+        },
+        "birthdate": {
+          "type": "string",
+          "title": "生日（ISO 8601: YYYY-MM-DD）"
+        },
+        "zoneinfo": {
           "type": "string",
           "title": "时区信息（IANA 时区标识，例如 \"Asia/Shanghai\"）"
         },
         "locale": {
           "type": "string",
           "title": "用户偏好的语言与地区（例如 \"zh-CN\"、\"en-US\"）"
+        },
+        "phone_number": {
+          "type": "string",
+          "title": "电话号码（E.164 格式）"
+        },
+        "phone_number_verified": {
+          "type": "boolean",
+          "title": "电话号码是否已验证"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "int64",
+          "title": "信息最后更新时间（Unix 时间戳，秒）"
+        },
+        "website": {
+          "type": "string",
+          "title": "个人网站地址"
         }
-      }
+      },
+      "title": "OAuth2Userinfo 对应 OIDC Standard Claims 规范\nhttps://openid.net/specs/openid-connect-core-1_0.html#StandardClaims"
     },
     "v1OAuthConfig": {
       "type": "object",

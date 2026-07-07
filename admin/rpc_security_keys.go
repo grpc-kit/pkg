@@ -13,7 +13,9 @@ import (
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/credentials"
+	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -154,6 +156,8 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 }
 
 // GetOAuth2Userinfo 获取内置 OpenID 用户信息
+// 对应 OIDC userinfo endpoint，返回 OIDC Standard Claims 规范定义的用户信息
+// https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponse
 func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empty) (*adminv1.OAuth2Userinfo, error) {
 	result := &adminv1.OAuth2Userinfo{}
 
@@ -164,9 +168,118 @@ func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empt
 		return result, errs.PermissionDenied(ctx)
 	}
 
+	// 从 JWT 中提取基础 claim（这些字段在签发 token 时已确定）
+	result.Sub = idToken.Subject
 	result.UserId = idToken.GetMustUserID()
-	result.Username = idToken.Username
-	result.Nickname = idToken.Nickname
+	result.PreferredUsername = idToken.Username
+	result.Email = idToken.Email
+	result.EmailVerified = idToken.EmailVerified
+
+	// 从数据库查询用户实体，补充完整 OIDC Standard Claims
+	userID := result.UserId
+	if userID <= 0 {
+		// 缺少 user_id 时仅返回 JWT 中的基础 claim
+		return result, nil
+	}
+
+	user, err := a.config.db.Users.Query().
+		Select(
+			users.FieldID,
+			users.FieldNickname,
+			users.FieldProfile,
+			users.FieldPicture,
+			users.FieldWebsite,
+			users.FieldGender,
+			users.FieldBirthdate,
+			users.FieldTimezone,
+			users.FieldLocale,
+			users.FieldEmailVerified,
+			users.FieldPhoneNumberVerified,
+			users.FieldRealnameEncrypted,
+			users.FieldEmailEncrypted,
+			users.FieldPhoneNumberEncrypted,
+			users.FieldUpdatedAt,
+		).
+		Where(users.IDEQ(int(userID))).
+		Only(ctx)
+	if err != nil {
+		// 用户查询失败时降级返回 JWT 中的基础 claim，避免 userinfo endpoint 整体不可用
+		if lion.IsNotFound(err) {
+			a.logger.Infof("oauth2 userinfo: user %d not found, returning jwt claims only", userID)
+			return result, nil
+		}
+		a.logger.Infof("oauth2 userinfo: query user %d failed: %v, returning jwt claims only", userID, err)
+		return result, nil
+	}
+
+	result.Nickname = user.Nickname
+	result.Profile = user.Profile
+	result.Picture = user.Picture
+	result.Website = user.Website
+	result.Zoneinfo = user.Timezone
+	result.Locale = user.Locale
+	result.PhoneNumberVerified = user.PhoneNumberVerified
+
+	// email_verified 以数据库值为准（JWT 中可能过期）
+	if user.EmailVerified {
+		result.EmailVerified = true
+	}
+
+	// realname 解密映射到 OIDC name claim；若 realname 为空则回退到 nickname
+	realname, err := a.decryptStringField(ctx, users.FieldRealnameEncrypted, user.RealnameEncrypted)
+	if err != nil {
+		return nil, err
+	}
+	if realname != "" {
+		result.Name = realname
+	} else {
+		result.Name = user.Nickname
+	}
+
+	// email 解密（JWT 中 email 可能为空或过期，以数据库为准）
+	email, err := a.decryptStringField(ctx, users.FieldEmailEncrypted, user.EmailEncrypted)
+	if err != nil {
+		return nil, err
+	}
+	if email != "" {
+		result.Email = email
+	}
+
+	// phone_number 解密并格式化为 E.164 字符串
+	phoneNumber, err := a.decryptPhoneNumberField(ctx, user.PhoneNumberEncrypted)
+	if err != nil {
+		return nil, err
+	}
+	if phoneNumber != nil && phoneNumber.GetCountryCode() != "" && phoneNumber.GetNationalNumber() != "" {
+		result.PhoneNumber = fmt.Sprintf("+%s%s", phoneNumber.GetCountryCode(), phoneNumber.GetNationalNumber())
+	}
+
+	// gender enum → OIDC string
+	result.Gender = genderToOIDCString(adminv1.User_Gender(user.Gender))
+
+	// birthdate Timestamp → ISO 8601 "YYYY-MM-DD" 字符串
+	if user.Birthdate != nil {
+		result.Birthdate = user.Birthdate.Format("2006-01-02")
+	}
+
+	// updated_at → Unix 时间戳（秒）
+	result.UpdatedAt = user.UpdatedAt.Unix()
 
 	return result, nil
+}
+
+// genderToOIDCString 将 User.Gender enum 映射为 OIDC Standard Claims 规范的 gender 字符串值
+// OIDC 规范未强制枚举，常见值为 "male"/"female"/"other"；PRIVATE 和 UNSPECIFIED 返回空字符串（不返回该 claim）
+func genderToOIDCString(g adminv1.User_Gender) string {
+	switch g {
+	case adminv1.User_MALE:
+		return "male"
+	case adminv1.User_FEMALE:
+		return "female"
+	case adminv1.User_OTHER:
+		return "other"
+	default:
+		// GENDER_UNSPECIFIED / PRIVATE 不返回
+		return ""
+	}
 }
