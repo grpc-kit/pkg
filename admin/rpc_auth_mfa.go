@@ -5,14 +5,13 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/x509"
-	"encoding/json"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/pquerna/otp/totp"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
@@ -20,8 +19,8 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/useridentities"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
+	"github.com/pquerna/otp/totp"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -43,7 +42,7 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 	}
 
 	attempts := a.mfaChallenges.IncrAttempts(req.ChallengeId)
-	if attempts > mfaMaxAttempts {
+	if attempts > a.getMFAMaxVerifyAttempts(ctx) {
 		a.mfaChallenges.Delete(req.ChallengeId)
 		return nil, errs.FailedPrecondition(ctx).WithMessage("too many MFA attempts, please login again")
 	}
@@ -143,7 +142,7 @@ func (a *KnownAdminAPI) VerifyAuthMFA(ctx context.Context, req *adminv1.VerifyAu
 	return &adminv1.AuthToken{
 		AccessToken: accessToken,
 		TokenType:   "Bearer",
-		ExpiresIn:   24 * 60 * 60,
+		ExpiresIn:   durationSecondsInt32(a.getLoginAccessTokenTTL(ctx)),
 	}, nil
 }
 
@@ -196,14 +195,14 @@ func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUser
 	}
 
 	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      "KnownAdmin",
+		Issuer:      a.getMFATOTPIssuer(ctx),
 		AccountName: u.Username,
 	})
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to generate TOTP key")
 	}
 
-	challenge, err := a.mfaChallenges.Create(mfaChallengeTypeAdminSetup, u.ID, u.Username)
+	challenge, err := a.mfaChallenges.CreateWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeAdminSetup, u.ID, u.Username)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create setup challenge")
 	}
@@ -238,7 +237,7 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 
 	if !totp.Validate(req.TotpCode, challenge.TempSecret) {
 		attempts := a.mfaChallenges.IncrAttempts(req.ChallengeId)
-		if attempts > mfaMaxAttempts {
+		if attempts > a.getMFAMaxVerifyAttempts(ctx) {
 			a.mfaChallenges.Delete(req.ChallengeId)
 			return nil, errs.FailedPrecondition(ctx).WithMessage("too many attempts, please restart MFA setup")
 		}
@@ -254,7 +253,7 @@ func (a *KnownAdminAPI) ConfirmUserMFA(ctx context.Context, req *adminv1.Confirm
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to encrypt MFA secret")
 	}
-	recoveryCodes, err := generateRecoveryCodes(8)
+	recoveryCodes, err := generateRecoveryCodes(a.getMFARecoveryCodesCount(ctx))
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to generate recovery codes")
 	}
@@ -419,14 +418,14 @@ func (a *KnownAdminAPI) StartAuthMFASetup(ctx context.Context, req *adminv1.Star
 	}
 
 	key, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      "KnownAdmin",
+		Issuer:      a.getMFATOTPIssuer(ctx),
 		AccountName: challenge.Username,
 	})
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to generate TOTP key")
 	}
 
-	setupChallenge, err := a.mfaChallenges.Create(mfaChallengeTypeLoginSetupConfirm, challenge.UserID, challenge.Username)
+	setupChallenge, err := a.mfaChallenges.CreateWithTTL(a.getMFAChallengeTTL(ctx), mfaChallengeTypeLoginSetupConfirm, challenge.UserID, challenge.Username)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create setup challenge")
 	}
@@ -462,7 +461,7 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 
 	if !totp.Validate(req.TotpCode, challenge.TempSecret) {
 		attempts := a.mfaChallenges.IncrAttempts(req.SetupChallengeId)
-		if attempts > mfaMaxAttempts {
+		if attempts > a.getMFAMaxVerifyAttempts(ctx) {
 			a.mfaChallenges.Delete(req.SetupChallengeId)
 			return nil, errs.FailedPrecondition(ctx).WithMessage("too many attempts, please login again")
 		}
@@ -513,7 +512,7 @@ func (a *KnownAdminAPI) ConfirmAuthMFASetup(ctx context.Context, req *adminv1.Co
 	return &adminv1.AuthToken{
 		AccessToken: accessToken,
 		TokenType:   "Bearer",
-		ExpiresIn:   24 * 60 * 60,
+		ExpiresIn:   durationSecondsInt32(a.getLoginAccessTokenTTL(ctx)),
 	}, nil
 }
 
@@ -544,18 +543,13 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 		return "", fmt.Errorf("failed to parse private key: %w", err)
 	}
 
-	var groups []string
-	rs, err := db.UserRoles.Query().
-		Select(userroles.FieldRoleID, userroles.FieldUserID).
-		Where(userroles.UserIDEQ(userID)).
-		WithLionRoles().
-		All(ctx)
-	if err == nil {
-		for _, r := range rs {
-			if r.Edges.LionRoles != nil {
-				groups = append(groups, r.Edges.LionRoles.Code)
-			}
-		}
+	roleIDs, err := effectiveRoleIDsForUser(ctx, db, userID)
+	if err != nil {
+		return "", err
+	}
+	groups, err := roleCodesForIDs(ctx, db, roleIDs)
+	if err != nil {
+		return "", err
 	}
 
 	idToken := &auth.IDTokenClaims{
@@ -564,7 +558,7 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 	}
 	idToken.SetSubject(strconv.Itoa(u.ID))
 	idToken.SetGroups(groups)
-	idToken.SetExpiresAt(24 * 60 * 60)
+	idToken.SetExpiresAt(durationSecondsInt64(a.getLoginAccessTokenTTL(ctx)))
 	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 
 	return idToken.GetAccessTokenRSA(privateKey)

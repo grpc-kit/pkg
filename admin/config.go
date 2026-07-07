@@ -1,10 +1,29 @@
 package admin
 
 import (
+	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/genproto/googleapis/api/serviceconfig"
+	"google.golang.org/protobuf/types/known/structpb"
 )
+
+// LocalConfigSnapshot keeps admin runtime config sections for local-config APIs.
+type LocalConfigSnapshot struct {
+	Services    *adminv1.ServicesConfig
+	Discover    *adminv1.DiscoverConfig
+	Security    *adminv1.SecurityConfig
+	Database    *adminv1.DatabaseConfig
+	Cachebox    *adminv1.CacheboxConfig
+	Debugger    *adminv1.DebuggerConfig
+	Objstore    *adminv1.ObjstoreConfig
+	Frontend    *adminv1.FrontendConfig
+	Observables *adminv1.ObservablesConfig
+	Cloudevents *adminv1.CloudEventsConfig
+	Automations *adminv1.AutomationsConfig
+	Independent *structpb.Struct
+}
 
 // config 配置信息
 type config struct {
@@ -24,7 +43,15 @@ type config struct {
 	staticUsers *StaticUsers
 
 	// 运行时本地配置快照
-	localConfigSnapshot *adminv1.LocalConfig
+	localConfigSnapshot *LocalConfigSnapshot
+
+	// 公知 admin 服务的网关
+	knownAdminGatewayServiceConfig *serviceconfig.Service
+	knownAdminGatewaySwagger       *openapiconfig.OpenAPIConfig
+
+	// 微服务网关 YAML 的解析结果
+	microserviceGatewayServiceConfig *serviceconfig.Service
+	microserviceGatewaySwagger       *openapiconfig.OpenAPIConfig
 }
 
 // Options xx
@@ -70,7 +97,7 @@ func WithStaticUsers(users *StaticUsers) Options {
 }
 
 // WithLocalConfigSnapshot 设置运行时本地配置快照
-func WithLocalConfigSnapshot(snapshot *adminv1.LocalConfig) Options {
+func WithLocalConfigSnapshot(snapshot *LocalConfigSnapshot) Options {
 	return func(c *config) {
 		c.localConfigSnapshot = snapshot
 	}

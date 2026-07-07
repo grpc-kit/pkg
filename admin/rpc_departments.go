@@ -19,11 +19,10 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/departments"
 	"github.com/grpc-kit/pkg/lion/predicate"
-
+	"github.com/grpc-kit/pkg/lion/usermemberships"
 	// 数据范围表已注释，同步取消依赖
 	// "github.com/grpc-kit/pkg/lion/roledataranges"
 	// "github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/departmentmembers"
 )
 
 // CreateDepartment 创建部门
@@ -284,18 +283,42 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 
 	depQuery = depQuery.Limit(int(pageSize))
 
-	// View FULL 时预加载部门成员列表（含用户信息）
-	if req.View == adminv1.View_VIEW_FULL {
-		depQuery = depQuery.WithLionDepartmentMembers(
-			func(query *lion.DepartmentMembersQuery) {
-				query.WithLionUsers()
-			},
-		)
-	}
-
 	depObj, err := depQuery.All(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	departmentMembersByDepartmentID := map[int][]*adminv1.Membership{}
+	if req.View == adminv1.View_VIEW_FULL && len(depObj) > 0 {
+		departmentIDs := make([]int, 0, len(depObj))
+		for _, item := range depObj {
+			departmentIDs = append(departmentIDs, item.ID)
+		}
+
+		members, err := a.config.db.UserMemberships.Query().
+			Where(
+				usermemberships.TargetTypeEQ(membershipTargetDepartment),
+				usermemberships.TargetIDIn(departmentIDs...),
+			).
+			WithLionUsers(func(query *lion.UsersQuery) {
+				query.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
+			}).
+			Order(
+				lion.Asc(usermemberships.FieldTargetID),
+				lion.Asc(usermemberships.FieldMemberType),
+				lion.Asc(usermemberships.FieldUserID),
+			).
+			All(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range members {
+			departmentMembersByDepartmentID[item.TargetID] = append(
+				departmentMembersByDepartmentID[item.TargetID],
+				userMembershipToProto(item),
+			)
+		}
 	}
 
 	// 将 ent 实体转为 proto，并按 structure 返回平铺或树形
@@ -304,38 +327,15 @@ func (a *KnownAdminAPI) ListDepartments(ctx context.Context, req *adminv1.ListDe
 			Id:          int64(m.ID),
 			ParentId:    int64(m.ParentID),
 			Code:        m.Code,
-			DisplayName: I18NName(m.Code),
+			DisplayName: m.DisplayName,
 			SortOrder:   int32(m.SortOrder),
 			Type:        adminv1.Department_Type(m.DepartmentType),
 			Status:      adminv1.Department_Status(m.DepartmentStatus),
 			Visibility:  adminv1.Visibility(m.Visibility),
 			Members:     make([]*adminv1.Membership, 0),
 		}
-		if req.View == adminv1.View_VIEW_FULL && m.Edges.LionDepartmentMembers != nil {
-			for _, l := range m.Edges.LionDepartmentMembers {
-				pm := &adminv1.Membership{
-					Id:           int64(l.ID),
-					UserId:       int64(l.UserID),
-					TargetType:   adminv1.Membership_DEPARTMENT,
-					TargetId:     int64(l.DepartmentID),
-					MemberRole:   adminv1.Membership_Role(l.MemberRole),
-					MemberStatus: adminv1.Membership_Status(l.MemberStatus),
-					MemberType:   adminv1.Membership_MemberType(l.MemberType),
-					Description:  l.Description,
-					CreatedBy:    l.CreatedBy,
-					UpdatedBy:    l.UpdatedBy,
-					CreatedAt:    timestamppb.New(l.CreatedAt),
-					UpdatedAt:    timestamppb.New(l.UpdatedAt),
-				}
-				if l.Edges.LionUsers != nil {
-					pm.Username = l.Edges.LionUsers.Username
-					pm.Nickname = l.Edges.LionUsers.Nickname
-				}
-				if l.Metadata != "" {
-					pm.Metadata = MetadataParse(l.Metadata)
-				}
-				menu.Members = append(menu.Members, pm)
-			}
+		if req.View == adminv1.View_VIEW_FULL {
+			menu.Members = append(menu.Members, departmentMembersByDepartmentID[m.ID]...)
 		}
 		return menu
 	}
@@ -532,24 +532,27 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 	}
 
 	pageSize := int(GetPageSize(ctx, req.PageSize))
-	memberQuery := db.DepartmentMembers.Query().Where(departmentmembers.DepartmentIDEQ(departmentID))
+	memberQuery := db.UserMemberships.Query().Where(
+		usermemberships.TargetTypeEQ(membershipTargetDepartment),
+		usermemberships.TargetIDEQ(departmentID),
+	)
 
 	// 排序（与 proto order_by 约定一致）
 	switch req.GetOrderBy() {
 	case "created_at desc", "create_at desc":
-		memberQuery = memberQuery.Order(lion.Desc(departmentmembers.FieldCreatedAt))
+		memberQuery = memberQuery.Order(lion.Desc(usermemberships.FieldCreatedAt))
 	case "created_at asc", "create_at asc":
-		memberQuery = memberQuery.Order(lion.Asc(departmentmembers.FieldCreatedAt))
+		memberQuery = memberQuery.Order(lion.Asc(usermemberships.FieldCreatedAt))
 	case "member_role asc":
-		memberQuery = memberQuery.Order(lion.Asc(departmentmembers.FieldMemberRole))
+		memberQuery = memberQuery.Order(lion.Asc(usermemberships.FieldMemberRole))
 	case "member_role desc":
-		memberQuery = memberQuery.Order(lion.Desc(departmentmembers.FieldMemberRole))
+		memberQuery = memberQuery.Order(lion.Desc(usermemberships.FieldMemberRole))
 	case "member_status asc":
-		memberQuery = memberQuery.Order(lion.Asc(departmentmembers.FieldMemberStatus))
+		memberQuery = memberQuery.Order(lion.Asc(usermemberships.FieldMemberStatus))
 	case "member_status desc":
-		memberQuery = memberQuery.Order(lion.Desc(departmentmembers.FieldMemberStatus))
+		memberQuery = memberQuery.Order(lion.Desc(usermemberships.FieldMemberStatus))
 	default:
-		memberQuery = memberQuery.Order(lion.Desc(departmentmembers.FieldID))
+		memberQuery = memberQuery.Order(lion.Desc(usermemberships.FieldID))
 	}
 
 	totalSize, err := memberQuery.Clone().Count(ctx)
@@ -573,7 +576,7 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
 			}
 			if lastID > 0 {
-				memberQuery = memberQuery.Where(departmentmembers.IDLT(lastID))
+				memberQuery = memberQuery.Where(usermemberships.IDLT(lastID))
 			}
 		}
 	}
@@ -581,18 +584,19 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 	memberQuery = memberQuery.Limit(pageSize)
 
 	members, err := memberQuery.Select(
-		departmentmembers.FieldID,
-		departmentmembers.FieldUserID,
-		departmentmembers.FieldDepartmentID,
-		departmentmembers.FieldMemberRole,
-		departmentmembers.FieldMemberStatus,
-		departmentmembers.FieldMemberType,
-		departmentmembers.FieldDescription,
-		departmentmembers.FieldMetadata,
-		departmentmembers.FieldCreatedBy,
-		departmentmembers.FieldUpdatedBy,
-		departmentmembers.FieldCreatedAt,
-		departmentmembers.FieldUpdatedAt,
+		usermemberships.FieldID,
+		usermemberships.FieldUserID,
+		usermemberships.FieldTargetType,
+		usermemberships.FieldTargetID,
+		usermemberships.FieldMemberRole,
+		usermemberships.FieldMemberStatus,
+		usermemberships.FieldMemberType,
+		usermemberships.FieldDescription,
+		usermemberships.FieldMetadata,
+		usermemberships.FieldCreatedBy,
+		usermemberships.FieldUpdatedBy,
+		usermemberships.FieldCreatedAt,
+		usermemberships.FieldUpdatedAt,
 	).WithLionUsers(func(q *lion.UsersQuery) {
 		q.Select(users.FieldID, users.FieldUsername, users.FieldNickname)
 	}).All(ctx)
@@ -600,31 +604,8 @@ func (a *KnownAdminAPI) ListDepartmentMembers(ctx context.Context, req *adminv1.
 		return nil, err
 	}
 
-	for _, m := range members {
-		user := m.Edges.LionUsers
-		if user == nil {
-			continue
-		}
-		pm := &adminv1.Membership{
-			Id:           int64(m.ID),
-			UserId:       int64(m.UserID),
-			Username:     user.Username,
-			Nickname:     user.Nickname,
-			TargetType:   adminv1.Membership_DEPARTMENT,
-			TargetId:     int64(m.DepartmentID),
-			MemberRole:   adminv1.Membership_Role(m.MemberRole),
-			MemberStatus: adminv1.Membership_Status(m.MemberStatus),
-			MemberType:   adminv1.Membership_MemberType(m.MemberType),
-			Description:  m.Description,
-			CreatedBy:    m.CreatedBy,
-			UpdatedBy:    m.UpdatedBy,
-			CreatedAt:    timestamppb.New(m.CreatedAt),
-			UpdatedAt:    timestamppb.New(m.UpdatedAt),
-		}
-		if m.Metadata != "" {
-			pm.Metadata = MetadataParse(m.Metadata)
-		}
-		result.Members = append(result.Members, pm)
+	for _, member := range members {
+		result.Members = append(result.Members, userMembershipToProto(member))
 	}
 
 	// Cursor 分页时返回 next_page_token
@@ -664,7 +645,7 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 		userID = uid
 	}
 
-	depMembers := make([]*lion.DepartmentMembersCreate, 0, len(req.Members))
+	depMembers := make([]*lion.UserMembershipsCreate, 0, len(req.Members))
 
 	for _, member := range req.Members {
 		if member.UserId == 0 {
@@ -684,9 +665,10 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 			memberType = int(member.MemberType)
 		}
 
-		create := db.DepartmentMembers.Create().
+		create := db.UserMemberships.Create().
 			SetUserID(int(member.UserId)).
-			SetDepartmentID(int(req.DepartmentId)).
+			SetTargetType(membershipTargetDepartment).
+			SetTargetID(int(req.DepartmentId)).
 			SetMemberRole(role).
 			SetMemberStatus(status).
 			SetMemberType(memberType)
@@ -694,7 +676,10 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 			create = create.SetDescription(member.Description)
 		}
 		if len(member.Metadata) > 0 {
-			create = create.SetMetadata(MetadataJSON(member.Metadata))
+			create = create.SetMetadata(member.Metadata)
+		}
+		if member.JoinedAt != nil {
+			create = create.SetJoinedAt(member.JoinedAt.AsTime())
 		}
 		if userID != 0 {
 			create = create.SetCreatedBy(userID).SetUpdatedBy(userID)
@@ -702,7 +687,7 @@ func (a *KnownAdminAPI) CreateDepartmentMembers(ctx context.Context, req *adminv
 		depMembers = append(depMembers, create)
 	}
 
-	_, err = db.DepartmentMembers.CreateBulk(depMembers...).Save(ctx)
+	_, err = db.UserMemberships.CreateBulk(depMembers...).Save(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -740,10 +725,11 @@ func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv
 			continue
 		}
 
-		upd := db.DepartmentMembers.Update().
+		upd := db.UserMemberships.Update().
 			Where(
-				departmentmembers.DepartmentIDEQ(int(req.DepartmentId)),
-				departmentmembers.UserIDEQ(int(member.UserId)),
+				usermemberships.TargetTypeEQ(membershipTargetDepartment),
+				usermemberships.TargetIDEQ(int(req.DepartmentId)),
+				usermemberships.UserIDEQ(int(member.UserId)),
 			)
 
 		if member.MemberRole != adminv1.Membership_ROLE_UNSPECIFIED {
@@ -758,7 +744,7 @@ func (a *KnownAdminAPI) UpdateDepartmentMembers(ctx context.Context, req *adminv
 		// description 允许置空，按请求更新
 		upd = upd.SetDescription(member.Description)
 		if len(member.Metadata) > 0 {
-			upd = upd.SetMetadata(MetadataJSON(member.Metadata))
+			upd = upd.SetMetadata(member.Metadata)
 		}
 		if updatedBy != 0 {
 			upd = upd.SetUpdatedBy(updatedBy)
@@ -788,10 +774,11 @@ func (a *KnownAdminAPI) DeleteDepartmentMember(ctx context.Context, req *adminv1
 		return nil, err
 	}
 
-	_, err = db.DepartmentMembers.Delete().
+	_, err = db.UserMemberships.Delete().
 		Where(
-			departmentmembers.UserIDEQ(int(userID)),
-			departmentmembers.DepartmentIDEQ(int(departmentID)),
+			usermemberships.UserIDEQ(int(userID)),
+			usermemberships.TargetTypeEQ(membershipTargetDepartment),
+			usermemberships.TargetIDEQ(int(departmentID)),
 		).
 		Exec(ctx)
 	if err != nil {
@@ -956,9 +943,12 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 	}
 
 	// 用户所在部门及担任负责人/经理的部门（一次查询后拆分，避免两次 DB 往返）
-	udList, err := db.DepartmentMembers.Query().
-		Where(departmentmembers.UserIDEQ(int(userID))).
-		Select(departmentmembers.FieldDepartmentID, departmentmembers.FieldMemberRole).
+	udList, err := db.UserMemberships.Query().
+		Where(
+			usermemberships.UserIDEQ(int(userID)),
+			usermemberships.TargetTypeEQ(membershipTargetDepartment),
+		).
+		Select(usermemberships.FieldTargetID, usermemberships.FieldMemberRole).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -966,9 +956,9 @@ func (a *KnownAdminAPI) getVisibleDepartmentIDs(ctx context.Context, db *lion.Cl
 	userDeptIDSet := make(map[int]struct{})
 	managedDeptIDSet := make(map[int]struct{})
 	for _, ud := range udList {
-		userDeptIDSet[ud.DepartmentID] = struct{}{}
+		userDeptIDSet[ud.TargetID] = struct{}{}
 		if ud.MemberRole == int(adminv1.Membership_OWNER.Number()) || ud.MemberRole == int(adminv1.Membership_MANAGER.Number()) {
-			managedDeptIDSet[ud.DepartmentID] = struct{}{}
+			managedDeptIDSet[ud.TargetID] = struct{}{}
 		}
 	}
 

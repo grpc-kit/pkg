@@ -10,8 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/groupmembers"
-	"github.com/grpc-kit/pkg/lion/grouproles"
 	"github.com/grpc-kit/pkg/lion/groups"
 )
 
@@ -234,36 +232,6 @@ func (_c *GroupsCreate) SetNillableDescription(v *string) *GroupsCreate {
 		_c.SetDescription(*v)
 	}
 	return _c
-}
-
-// AddLionGroupIDs adds the "lion_groups" edge to the GroupRoles entity by IDs.
-func (_c *GroupsCreate) AddLionGroupIDs(ids ...int) *GroupsCreate {
-	_c.mutation.AddLionGroupIDs(ids...)
-	return _c
-}
-
-// AddLionGroups adds the "lion_groups" edges to the GroupRoles entity.
-func (_c *GroupsCreate) AddLionGroups(v ...*GroupRoles) *GroupsCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionGroupIDs(ids...)
-}
-
-// AddLionGroupMemberIDs adds the "lion_group_members" edge to the GroupMembers entity by IDs.
-func (_c *GroupsCreate) AddLionGroupMemberIDs(ids ...int) *GroupsCreate {
-	_c.mutation.AddLionGroupMemberIDs(ids...)
-	return _c
-}
-
-// AddLionGroupMembers adds the "lion_group_members" edges to the GroupMembers entity.
-func (_c *GroupsCreate) AddLionGroupMembers(v ...*GroupMembers) *GroupsCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddLionGroupMemberIDs(ids...)
 }
 
 // Mutation returns the GroupsMutation object of the builder.
@@ -511,38 +479,6 @@ func (_c *GroupsCreate) createSpec() (*Groups, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Description(); ok {
 		_spec.SetField(groups.FieldDescription, field.TypeString, value)
 		_node.Description = value
-	}
-	if nodes := _c.mutation.LionGroupsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   groups.LionGroupsTable,
-			Columns: []string{groups.LionGroupsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.LionGroupMembersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   groups.LionGroupMembersTable,
-			Columns: []string{groups.LionGroupMembersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(groupmembers.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

@@ -715,21 +715,21 @@ func ProtectedNEQ(v bool) predicate.Roles {
 	return predicate.Roles(sql.FieldNEQ(FieldProtected, v))
 }
 
-// HasLionRolePermissions applies the HasEdge predicate on the "lion_role_permissions" edge.
-func HasLionRolePermissions() predicate.Roles {
+// HasLionPrincipalRoles applies the HasEdge predicate on the "lion_principal_roles" edge.
+func HasLionPrincipalRoles() predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionRolePermissionsTable, LionRolePermissionsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionPrincipalRolesTable, LionPrincipalRolesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLionRolePermissionsWith applies the HasEdge predicate on the "lion_role_permissions" edge with a given conditions (other predicates).
-func HasLionRolePermissionsWith(preds ...predicate.RolePermissions) predicate.Roles {
+// HasLionPrincipalRolesWith applies the HasEdge predicate on the "lion_principal_roles" edge with a given conditions (other predicates).
+func HasLionPrincipalRolesWith(preds ...predicate.PrincipalRoles) predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
-		step := newLionRolePermissionsStep()
+		step := newLionPrincipalRolesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -738,21 +738,21 @@ func HasLionRolePermissionsWith(preds ...predicate.RolePermissions) predicate.Ro
 	})
 }
 
-// HasLionUserRoles applies the HasEdge predicate on the "lion_user_roles" edge.
-func HasLionUserRoles() predicate.Roles {
+// HasLionRolePolicies applies the HasEdge predicate on the "lion_role_policies" edge.
+func HasLionRolePolicies() predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionUserRolesTable, LionUserRolesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionRolePoliciesTable, LionRolePoliciesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLionUserRolesWith applies the HasEdge predicate on the "lion_user_roles" edge with a given conditions (other predicates).
-func HasLionUserRolesWith(preds ...predicate.UserRoles) predicate.Roles {
+// HasLionRolePoliciesWith applies the HasEdge predicate on the "lion_role_policies" edge with a given conditions (other predicates).
+func HasLionRolePoliciesWith(preds ...predicate.RolePolicies) predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
-		step := newLionUserRolesStep()
+		step := newLionRolePoliciesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -761,21 +761,21 @@ func HasLionUserRolesWith(preds ...predicate.UserRoles) predicate.Roles {
 	})
 }
 
-// HasLionRoleGroups applies the HasEdge predicate on the "lion_role_groups" edge.
-func HasLionRoleGroups() predicate.Roles {
+// HasLionRoleMenus applies the HasEdge predicate on the "lion_role_menus" edge.
+func HasLionRoleMenus() predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LionRoleGroupsTable, LionRoleGroupsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, LionRoleMenusTable, LionRoleMenusColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLionRoleGroupsWith applies the HasEdge predicate on the "lion_role_groups" edge with a given conditions (other predicates).
-func HasLionRoleGroupsWith(preds ...predicate.GroupRoles) predicate.Roles {
+// HasLionRoleMenusWith applies the HasEdge predicate on the "lion_role_menus" edge with a given conditions (other predicates).
+func HasLionRoleMenusWith(preds ...predicate.RoleMenus) predicate.Roles {
 	return predicate.Roles(func(s *sql.Selector) {
-		step := newLionRoleGroupsStep()
+		step := newLionRoleMenusStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

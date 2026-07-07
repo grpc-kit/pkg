@@ -6,68 +6,53 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Actions is the predicate function for actions builders.
-type Actions func(*sql.Selector)
-
 // AuthProviders is the predicate function for authproviders builders.
 type AuthProviders func(*sql.Selector)
 
 // Credentials is the predicate function for credentials builders.
 type Credentials func(*sql.Selector)
 
-// DepartmentMembers is the predicate function for departmentmembers builders.
-type DepartmentMembers func(*sql.Selector)
-
 // Departments is the predicate function for departments builders.
 type Departments func(*sql.Selector)
 
-// GroupMembers is the predicate function for groupmembers builders.
-type GroupMembers func(*sql.Selector)
-
-// GroupRoles is the predicate function for grouproles builders.
-type GroupRoles func(*sql.Selector)
+// GlobalSettings is the predicate function for globalsettings builders.
+type GlobalSettings func(*sql.Selector)
 
 // Groups is the predicate function for groups builders.
 type Groups func(*sql.Selector)
 
-// PermissionBindings is the predicate function for permissionbindings builders.
-type PermissionBindings func(*sql.Selector)
+// Menus is the predicate function for menus builders.
+type Menus func(*sql.Selector)
 
-// Permissions is the predicate function for permissions builders.
-type Permissions func(*sql.Selector)
+// OAuth2Clients is the predicate function for oauth2clients builders.
+type OAuth2Clients func(*sql.Selector)
+
+// OAuth2Codes is the predicate function for oauth2codes builders.
+type OAuth2Codes func(*sql.Selector)
 
 // Policies is the predicate function for policies builders.
 type Policies func(*sql.Selector)
 
-// PolicyAttachments is the predicate function for policyattachments builders.
-type PolicyAttachments func(*sql.Selector)
+// PrincipalRoles is the predicate function for principalroles builders.
+type PrincipalRoles func(*sql.Selector)
 
-// PolicyStatements is the predicate function for policystatements builders.
-type PolicyStatements func(*sql.Selector)
+// RoleMenus is the predicate function for rolemenus builders.
+type RoleMenus func(*sql.Selector)
 
-// ResourceScopes is the predicate function for resourcescopes builders.
-type ResourceScopes func(*sql.Selector)
-
-// Resources is the predicate function for resources builders.
-type Resources func(*sql.Selector)
-
-// RolePermissions is the predicate function for rolepermissions builders.
-type RolePermissions func(*sql.Selector)
+// RolePolicies is the predicate function for rolepolicies builders.
+type RolePolicies func(*sql.Selector)
 
 // Roles is the predicate function for roles builders.
 type Roles func(*sql.Selector)
 
-// Scopes is the predicate function for scopes builders.
-type Scopes func(*sql.Selector)
-
 // UserIdentities is the predicate function for useridentities builders.
 type UserIdentities func(*sql.Selector)
 
+// UserMemberships is the predicate function for usermemberships builders.
+type UserMemberships func(*sql.Selector)
+
 // UserProfiles is the predicate function for userprofiles builders.
 type UserProfiles func(*sql.Selector)
-
-// UserRoles is the predicate function for userroles builders.
-type UserRoles func(*sql.Selector)
 
 // Users is the predicate function for users builders.
 type Users func(*sql.Selector)

@@ -5,9 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -15,17 +13,271 @@ import (
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
-	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourcescopes"
+	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/policies"
+	"github.com/grpc-kit/pkg/lion/principalroles"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/scopes"
 	"github.com/grpc-kit/pkg/lion/useridentities"
-	"github.com/grpc-kit/pkg/lion/userroles"
+	"github.com/grpc-kit/pkg/lion/usermemberships"
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+type builtinMenuSeed struct {
+	Code        string
+	DisplayName string
+	RoutePath   string
+	Icon        string
+	SortOrder   int
+	Protected   bool
+	Children    []builtinMenuSeed
+}
+
+func builtinMenuSeeds() []builtinMenuSeed {
+	seeds := []builtinMenuSeed{
+		{
+			Code:        "root",
+			DisplayName: "根目录",
+			RoutePath:   "/",
+			SortOrder:   1,
+			Children: []builtinMenuSeed{
+				{
+					Code:        "admin",
+					DisplayName: "管理后台",
+					RoutePath:   "/",
+					SortOrder:   100,
+					Children: []builtinMenuSeed{
+						{
+							Code:        "admin.user",
+							DisplayName: "个人中心",
+							RoutePath:   "/user",
+							Icon:        "UserOutlined",
+							SortOrder:   100,
+							Children: []builtinMenuSeed{
+								{
+									Code:        "admin.user.profile",
+									DisplayName: "我的信息",
+									RoutePath:   "/user/profile",
+									SortOrder:   100,
+								},
+							},
+						},
+						{
+							Code:        "admin.setting",
+							DisplayName: "系统设置",
+							RoutePath:   "/setting",
+							Icon:        "SettingOutlined",
+							SortOrder:   200,
+							Children: []builtinMenuSeed{
+								{
+									Code:        "admin.setting.auth",
+									DisplayName: "身份认证",
+									RoutePath:   "/setting/auth",
+									SortOrder:   100,
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.auth.providers", DisplayName: "认证提供方", RoutePath: "/setting/auth/providers", SortOrder: 100},
+										{Code: "admin.setting.auth.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/auth/oauth2-clients", SortOrder: 200},
+									},
+								},
+								{
+									Code:        "admin.setting.departments",
+									DisplayName: "部门管理",
+									RoutePath:   "/setting/departments",
+									SortOrder:   200,
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.departments.detail", DisplayName: "部门详情", RoutePath: "/setting/departments/detail", SortOrder: 100},
+									},
+								},
+								{
+									Code:        "admin.setting.menus",
+									DisplayName: "菜单管理",
+									RoutePath:   "/setting/menus",
+									SortOrder:   300,
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.menus.list", DisplayName: "菜单列表", RoutePath: "/setting/menus/list", SortOrder: 100},
+									},
+								},
+								{
+									Code:        "admin.setting.roles",
+									DisplayName: "角色管理",
+									RoutePath:   "/setting/roles",
+									SortOrder:   400,
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.roles.list", DisplayName: "角色列表", RoutePath: "/setting/roles/list", SortOrder: 100},
+									},
+								},
+								{
+									Code:        "admin.setting.policies",
+									DisplayName: "权限策略",
+									RoutePath:   "/setting/policies",
+									SortOrder:   500,
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.policies.list", DisplayName: "策略列表", RoutePath: "/setting/policies/list", SortOrder: 100},
+										{Code: "admin.setting.policies.create", DisplayName: "新建策略", RoutePath: "/setting/policies/create", SortOrder: 200},
+									},
+								},
+								{
+									Code:        "admin.setting.groups",
+									DisplayName: "群组管理",
+									RoutePath:   "/setting/groups",
+									SortOrder:   600,
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.groups.list", DisplayName: "群组列表", RoutePath: "/setting/groups/list", SortOrder: 100},
+									},
+								},
+								{
+									Code:        "admin.setting.users",
+									DisplayName: "用户管理",
+									RoutePath:   "/setting/users",
+									SortOrder:   700,
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.users.list", DisplayName: "用户列表", RoutePath: "/setting/users/list", SortOrder: 100},
+									},
+								},
+								{Code: "admin.setting.global-settings", DisplayName: "全局设置", RoutePath: "/setting/global-settings", SortOrder: 800},
+
+								{
+									Code:        "admin.setting.config",
+									DisplayName: "本地配置",
+									RoutePath:   "/setting/config",
+									SortOrder:   900,
+									Children: []builtinMenuSeed{
+										{Code: "admin.setting.config.security", DisplayName: "认证鉴权", RoutePath: "/setting/config/security", SortOrder: 100},
+										{Code: "admin.setting.config.services", DisplayName: "基础服务", RoutePath: "/setting/config/services", SortOrder: 200},
+										{Code: "admin.setting.config.discover", DisplayName: "服务发现", RoutePath: "/setting/config/discover", SortOrder: 300},
+										{Code: "admin.setting.config.database", DisplayName: "关系存储", RoutePath: "/setting/config/database", SortOrder: 400},
+										{Code: "admin.setting.config.cachebox", DisplayName: "缓存服务", RoutePath: "/setting/config/cachebox", SortOrder: 500},
+										{Code: "admin.setting.config.debugger", DisplayName: "日志调试", RoutePath: "/setting/config/debugger", SortOrder: 600},
+										{Code: "admin.setting.config.objstore", DisplayName: "对象存储", RoutePath: "/setting/config/objstore", SortOrder: 700},
+										{Code: "admin.setting.config.frontend", DisplayName: "前端托管", RoutePath: "/setting/config/frontend", SortOrder: 800},
+										{Code: "admin.setting.config.observables", DisplayName: "可观测性", RoutePath: "/setting/config/observables", SortOrder: 900},
+										{Code: "admin.setting.config.cloudevents", DisplayName: "消息事件", RoutePath: "/setting/config/cloudevents", SortOrder: 1000},
+										{Code: "admin.setting.config.automations", DisplayName: "流程编排", RoutePath: "/setting/config/automations", SortOrder: 1100},
+										{Code: "admin.setting.config.independent", DisplayName: "独立配置", RoutePath: "/setting/config/independent", SortOrder: 1200},
+									},
+								},
+							},
+						},
+						{
+							Code:        "admin.apidocs",
+							DisplayName: "API 文档",
+							RoutePath:   "/apidocs",
+							Icon:        "SolutionOutlined",
+							SortOrder:   300,
+							Children: []builtinMenuSeed{
+								{
+									Code:        "admin.apidocs.service",
+									DisplayName: "服务文档",
+									RoutePath:   "/apidocs/service",
+									SortOrder:   100,
+								},
+							},
+						},
+					},
+				},
+				{
+					Code:        "portal",
+					DisplayName: "用户门户",
+					RoutePath:   "/portal",
+					SortOrder:   200,
+					Children: []builtinMenuSeed{
+						{
+							Code:        "portal.home",
+							DisplayName: "主页",
+							RoutePath:   "/portal/home",
+							Icon:        "HomeOutlined",
+							SortOrder:   100,
+						},
+					},
+				},
+				{
+					Code:        "miniapp",
+					DisplayName: "小程序",
+					RoutePath:   "/miniapp",
+					SortOrder:   300,
+					Children: []builtinMenuSeed{
+						{
+							Code:        "miniapp.home",
+							DisplayName: "主页",
+							RoutePath:   "/miniapp/home",
+							Icon:        "HomeOutlined",
+							SortOrder:   100,
+						},
+					},
+				},
+				{
+					Code:        "mobile",
+					DisplayName: "移动端",
+					RoutePath:   "/mobile",
+					SortOrder:   400,
+					Children: []builtinMenuSeed{
+						{
+							Code:        "mobile.home",
+							DisplayName: "主页",
+							RoutePath:   "/mobile/home",
+							Icon:        "HomeOutlined",
+							SortOrder:   100,
+						},
+					},
+				},
+			},
+		},
+	}
+	markMenuSeedsProtected(seeds)
+	return seeds
+}
+
+// markMenuSeedsProtected 递归标记所有内置菜单种子为受保护项。
+func markMenuSeedsProtected(seeds []builtinMenuSeed) {
+	for i := range seeds {
+		seeds[i].Protected = true
+		markMenuSeedsProtected(seeds[i].Children)
+	}
+}
+
+func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items []builtinMenuSeed) error {
+	for _, item := range items {
+		obj, err := tx.Menus.Query().Where(menus.CodeEQ(item.Code)).Only(ctx)
+		if lion.IsNotFound(err) {
+			obj, err = tx.Menus.Create().
+				SetParentID(parentID).
+				SetCode(item.Code).
+				SetDisplayName(item.DisplayName).
+				SetRoutePath(item.RoutePath).
+				SetComponent("").
+				SetIcon(item.Icon).
+				SetSortOrder(item.SortOrder).
+				SetVisibility("global").
+				SetDescription("").
+				SetProtected(item.Protected).
+				Save(ctx)
+			if err != nil {
+				return err
+			}
+		} else if err != nil {
+			return err
+		} else {
+			obj, err = obj.Update().
+				SetParentID(parentID).
+				SetDisplayName(item.DisplayName).
+				SetRoutePath(item.RoutePath).
+				SetIcon(item.Icon).
+				SetSortOrder(item.SortOrder).
+				SetProtected(item.Protected).
+				Save(ctx)
+			if err != nil {
+				return err
+			}
+		}
+		if err := createBuiltinMenus(ctx, tx, int64(obj.ID), item.Children); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // CreateDatabaseInitialize 幂等补全内置种子数据：已存在则跳过，缺失则创建。
 func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *adminv1.CreateDatabaseInitializeRequest) (*emptypb.Empty, error) {
@@ -60,6 +312,48 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 
+	superadminPolicyCode := "superadmin-full-access"
+	superadminPolicy, err := tx.Policies.Query().Where(policies.CodeEQ(superadminPolicyCode)).Only(ctx)
+	if lion.IsNotFound(err) {
+		superadminPolicy, err = tx.Policies.Create().
+			SetCode(superadminPolicyCode).
+			SetDisplayName("超级管理员全量策略").
+			SetPolicyStatus(int(adminv1.Policy_ENABLED)).
+			SetProtected(true).
+			SetDescription("系统内置超级管理员全量访问策略").
+			SetStatements([]*adminv1.PolicyStatement{{
+				Effect:    adminv1.PolicyStatement_ALLOW,
+				Actions:   []string{"*"},
+				Resources: []string{"*"},
+			}}).
+			Save(ctx)
+		if err != nil {
+			rollback()
+			return nil, err
+		}
+	} else if err != nil {
+		rollback()
+		return nil, err
+	}
+
+	rolePolicyExists, err := tx.RolePolicies.Query().
+		Where(rolepolicies.RoleIDEQ(adminRole.ID), rolepolicies.PolicyIDEQ(superadminPolicy.ID)).
+		Exist(ctx)
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+	if !rolePolicyExists {
+		if err := tx.RolePolicies.Create().
+			SetRoleID(adminRole.ID).
+			SetPolicyID(superadminPolicy.ID).
+			SetDescription("初始化绑定：超级管理员默认全量策略").
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
+	}
+
 	adminUsername := seedBootstrapUsername(adminv1.BootstrapUsername_BOOTSTRAP_USERNAME_ADMIN)
 	adminUser, err := tx.Users.Query().Where(users.UsernameEQ(adminUsername)).Only(ctx)
 	if lion.IsNotFound(err) {
@@ -79,15 +373,24 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 
-	userRoleExists, err := tx.UserRoles.Query().
-		Where(userroles.UserIDEQ(adminUser.ID), userroles.RoleIDEQ(adminRole.ID)).
+	userRoleExists, err := tx.PrincipalRoles.Query().
+		Where(
+			principalroles.PrincipalTypeEQ(principalTypeUser),
+			principalroles.PrincipalIDEQ(adminUser.ID),
+			principalroles.RoleIDEQ(adminRole.ID),
+		).
 		Exist(ctx)
 	if err != nil {
 		rollback()
 		return nil, err
 	}
 	if !userRoleExists {
-		if err := tx.UserRoles.Create().SetUserID(adminUser.ID).SetRoleID(adminRole.ID).Exec(ctx); err != nil {
+		if err := tx.PrincipalRoles.Create().
+			SetPrincipalType(principalTypeUser).
+			SetPrincipalID(adminUser.ID).
+			SetRoleID(adminRole.ID).
+			SetBindingStatus(bindingStatusActive).
+			Exec(ctx); err != nil {
 			rollback()
 			return nil, err
 		}
@@ -103,6 +406,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetDisplayName("本地账号密码登录").
 			SetSortOrder(100).
 			SetProtected(true).
+			SetCreatedBy(int64(adminUser.ID)).
+			SetUpdatedBy(int64(adminUser.ID)).
 			Save(ctx)
 		if err != nil {
 			rollback()
@@ -132,6 +437,11 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
+	if err := ensureGlobalSettingsSeeds(ctx, tx); err != nil {
+		rollback()
+		return nil, err
+	}
+
 	rootCode := seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_ROOT)
 	rootDept, err := tx.Departments.Query().
 		Where(
@@ -142,7 +452,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	if lion.IsNotFound(err) {
 		rootDept, err = tx.Departments.Create().
 			SetCode(rootCode).
-			SetDisplayName(rootCode).
+			SetDisplayName("根部门").
 			SetSortOrder(1).
 			SetProtected(true).
 			SetParentID(0).
@@ -154,22 +464,151 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	} else if err != nil {
 		rollback()
 		return nil, err
+	} else {
+		if err := rootDept.Update().
+			SetDisplayName("根部门").
+			SetProtected(true).
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
 	}
 
-	rootDeptMemberExists, err := tx.DepartmentMembers.Query().
+	builtinDept, err := tx.Departments.Query().
 		Where(
-			departmentmembers.UserIDEQ(adminUser.ID),
-			departmentmembers.DepartmentIDEQ(rootDept.ID),
+			departments.CodeEQ("builtin"),
+			departments.ParentIDEQ(rootDept.ID),
 		).
-		Exist(ctx)
-	if err != nil {
+		Only(ctx)
+	if lion.IsNotFound(err) {
+		// 兼容旧种子：如果已存在 legacy system 部门，则原位迁移为 builtin。
+		builtinDept, err = tx.Departments.Query().
+			Where(
+				departments.CodeEQ("system"),
+				departments.ParentIDEQ(rootDept.ID),
+			).
+			Only(ctx)
+		if lion.IsNotFound(err) {
+			builtinDept, err = tx.Departments.Create().
+				SetParentID(rootDept.ID).
+				SetCode("builtin").
+				SetDisplayName("内置部门").
+				SetSortOrder(1).
+				SetProtected(true).
+				Save(ctx)
+			if err != nil {
+				rollback()
+				return nil, err
+			}
+		} else if err != nil {
+			rollback()
+			return nil, err
+		} else {
+			if err := builtinDept.Update().
+				SetParentID(rootDept.ID).
+				SetCode("builtin").
+				SetDisplayName("内置部门").
+				SetSortOrder(1).
+				SetProtected(true).
+				Exec(ctx); err != nil {
+				rollback()
+				return nil, err
+			}
+		}
+	} else if err != nil {
 		rollback()
 		return nil, err
+	} else {
+		if err := builtinDept.Update().
+			SetParentID(rootDept.ID).
+			SetCode("builtin").
+			SetDisplayName("内置部门").
+			SetSortOrder(1).
+			SetProtected(true).
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
 	}
-	if !rootDeptMemberExists {
-		if err := tx.DepartmentMembers.Create().
+
+	adminDept, err := tx.Departments.Query().
+		Where(
+			departments.CodeEQ("admin"),
+			departments.ParentIDEQ(builtinDept.ID),
+		).
+		Only(ctx)
+	if lion.IsNotFound(err) {
+		adminDept, err = tx.Departments.Query().
+			Where(
+				departments.CodeEQ("admin"),
+				departments.ParentIDEQ(rootDept.ID),
+			).
+			Only(ctx)
+		if lion.IsNotFound(err) {
+			adminDept, err = tx.Departments.Create().
+				SetParentID(builtinDept.ID).
+				SetCode("admin").
+				SetDisplayName("管理员部门").
+				SetSortOrder(1).
+				SetProtected(true).
+				Save(ctx)
+			if err != nil {
+				rollback()
+				return nil, err
+			}
+		} else if err != nil {
+			rollback()
+			return nil, err
+		} else {
+			if err := adminDept.Update().
+				SetParentID(builtinDept.ID).
+				SetDisplayName("管理员部门").
+				SetSortOrder(1).
+				SetProtected(true).
+				Exec(ctx); err != nil {
+				rollback()
+				return nil, err
+			}
+		}
+	} else if err != nil {
+		rollback()
+		return nil, err
+	} else {
+		if err := adminDept.Update().
+			SetParentID(builtinDept.ID).
+			SetDisplayName("管理员部门").
+			SetSortOrder(1).
+			SetProtected(true).
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
+	}
+
+	adminDeptMember, err := tx.UserMemberships.Query().
+		Where(
+			usermemberships.UserIDEQ(adminUser.ID),
+			usermemberships.TargetTypeEQ(membershipTargetDepartment),
+			usermemberships.TargetIDEQ(adminDept.ID),
+		).
+		Only(ctx)
+	if lion.IsNotFound(err) {
+		if err := tx.UserMemberships.Create().
 			SetUserID(adminUser.ID).
-			SetDepartmentID(rootDept.ID).
+			SetTargetType(membershipTargetDepartment).
+			SetTargetID(adminDept.ID).
+			SetMemberType(int(adminv1.Membership_PRIMARY.Number())).
+			SetMemberRole(int(adminv1.Membership_OWNER.Number())).
+			SetMemberStatus(int(adminv1.Membership_ACTIVE.Number())).
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
+	} else if err != nil {
+		rollback()
+		return nil, err
+	} else {
+		if err := adminDeptMember.Update().
 			SetMemberType(int(adminv1.Membership_PRIMARY.Number())).
 			SetMemberRole(int(adminv1.Membership_OWNER.Number())).
 			SetMemberStatus(int(adminv1.Membership_ACTIVE.Number())).
@@ -180,111 +619,58 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	}
 
 	guestCode := seedDepartmentCode(adminv1.DepartmentCode_DEPARTMENT_CODE_GUEST)
-	guestExists, err := tx.Departments.Query().
+	guestDept, err := tx.Departments.Query().
 		Where(
 			departments.CodeEQ(guestCode),
-			departments.ParentIDEQ(rootDept.ID),
+			departments.ParentIDEQ(builtinDept.ID),
 		).
-		Exist(ctx)
-	if err != nil {
+		Only(ctx)
+	if lion.IsNotFound(err) {
+		guestDept, err = tx.Departments.Query().
+			Where(
+				departments.CodeEQ(guestCode),
+				departments.ParentIDEQ(rootDept.ID),
+			).
+			Only(ctx)
+		if lion.IsNotFound(err) {
+			guestDept, err = tx.Departments.Create().
+				SetParentID(builtinDept.ID).
+				SetCode(guestCode).
+				SetDisplayName("访客部门").
+				SetSortOrder(2).
+				SetProtected(true).
+				Save(ctx)
+			if err != nil {
+				rollback()
+				return nil, err
+			}
+		} else if err != nil {
+			rollback()
+			return nil, err
+		} else {
+			if err := guestDept.Update().
+				SetParentID(builtinDept.ID).
+				SetDisplayName("访客部门").
+				SetSortOrder(2).
+				SetProtected(true).
+				Exec(ctx); err != nil {
+				rollback()
+				return nil, err
+			}
+		}
+	} else if err != nil {
 		rollback()
 		return nil, err
-	}
-	if !guestExists {
-		if _, err := tx.Departments.Create().
-			SetParentID(rootDept.ID).
-			SetCode(guestCode).
-			SetDisplayName(guestCode).
+	} else {
+		if err := guestDept.Update().
+			SetParentID(builtinDept.ID).
+			SetDisplayName("访客部门").
 			SetSortOrder(2).
-			SetProtected(true).
-			Save(ctx); err != nil {
-			rollback()
-			return nil, err
-		}
-	}
-
-	rootResourceSeeds := []struct {
-		seedCode adminv1.ResourceSeedCode
-		name     string
-		resType  adminv1.Resource_Type
-		sort     int
-	}{
-		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_MENU, "菜单根节点", adminv1.Resource_MENU, 10},
-		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_DOMAIN, "领域根节点", adminv1.Resource_DOMAIN, 20},
-		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_LLM, "LLM 根节点", adminv1.Resource_LLM, 30},
-		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_API, "接口根节点", adminv1.Resource_API, 40},
-		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_DATA, "数据根节点", adminv1.Resource_DATA, 50},
-		{adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_SYSTEM, "系统根节点", adminv1.Resource_SYSTEM, 60},
-	}
-	for _, rs := range rootResourceSeeds {
-		resType := int(rs.resType.Number())
-		exists, qerr := tx.Resources.Query().Where(
-			resources.ParentIDEQ(0),
-			resources.ResourceTypeEQ(resType),
-		).Exist(ctx)
-		if qerr != nil {
-			rollback()
-			return nil, qerr
-		}
-		if exists {
-			continue
-		}
-		if _, err := tx.Resources.Create().
-			SetCode(seedResourceSeedCode(rs.seedCode)).
-			SetName(fmt.Sprintf("grn:admin:default:global:%s:root", strings.ToLower(rs.resType.String()))).
-			SetDisplayName(rs.name).
-			SetResourceType(resType).
-			SetResourceStatus(int(adminv1.Resource_ENABLED.Number())).
-			SetVisibility(int(adminv1.Visibility_VISIBILITY_GLOBAL.Number())).
-			SetSortOrder(rs.sort).
-			SetParentID(0).
-			Save(ctx); err != nil {
-			rollback()
-			return nil, err
-		}
-	}
-
-	menuTreeRIDs, err := seedBuiltinMenuTreeResources(ctx, tx, rollback)
-	if err != nil {
-		return nil, err
-	}
-
-	platformScopeType := int(adminv1.Scope_PLATFORM.Number())
-	actionScopeType := int(adminv1.Scope_ACTION.Number())
-	scopeSeeds := []struct {
-		code, displayName string
-		scopeType         int
-	}{
-		{"admin", "后台资源", platformScopeType},
-		{"user", "前台资源", platformScopeType},
-		{"app", "移动端资源", platformScopeType},
-		{"create", "创建", actionScopeType},
-		{"update", "更新", actionScopeType},
-		{"delete", "移除", actionScopeType},
-		{"readonly", "只读", actionScopeType},
-	}
-	for _, s := range scopeSeeds {
-		scopeExists, qerr := tx.Scopes.Query().Where(scopes.CodeEQ(s.code)).Exist(ctx)
-		if qerr != nil {
-			rollback()
-			return nil, qerr
-		}
-		if scopeExists {
-			continue
-		}
-		if err := tx.Scopes.Create().
-			SetCode(s.code).
-			SetScopeType(s.scopeType).
-			SetDisplayName(s.displayName).
 			SetProtected(true).
 			Exec(ctx); err != nil {
 			rollback()
 			return nil, err
 		}
-	}
-
-	if err := linkBuiltinMenuResourcesToAdminScope(ctx, tx, rollback, menuTreeRIDs); err != nil {
-		return nil, err
 	}
 
 	credCode := seedCredentialSeedCode(adminv1.CredentialSeedCode_CREDENTIAL_SEED_CODE_KEY1)
@@ -330,157 +716,38 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
+	if err := createBuiltinMenus(ctx, tx, 0, builtinMenuSeeds()); err != nil {
+		rollback()
+		return nil, err
+	}
+
+	rootMenu, err := tx.Menus.Query().Where(menus.CodeEQ("root")).Only(ctx)
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+	roleMenuExists, err := tx.RoleMenus.Query().
+		Where(rolemenus.RoleIDEQ(adminRole.ID), rolemenus.MenuIDEQ(rootMenu.ID)).
+		Exist(ctx)
+	if err != nil {
+		rollback()
+		return nil, err
+	}
+	if !roleMenuExists {
+		if err := tx.RoleMenus.Create().
+			SetRoleID(adminRole.ID).
+			SetMenuID(rootMenu.ID).
+			SetPermissionScope(1).
+			SetIsRecursive(true).
+			Exec(ctx); err != nil {
+			rollback()
+			return nil, err
+		}
+	}
+
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 
 	return result, nil
-}
-
-// seedParentMenuRoot 表示挂在 parent_id=0 的 MENU 类型根节点下（与 ResourceSeedCode 根菜单 code 一致）。
-const seedParentMenuRoot = "__menu_root__"
-
-// seedBuiltinMenuTreeResources 幂等补全内置菜单/页面资源（与常见 lion_resources 种子数据对齐）。
-// 返回值为资源 code -> id，含菜单类型根节点（用于与 admin 等作用域建立 lion_resource_scopes）。
-func seedBuiltinMenuTreeResources(ctx context.Context, tx *lion.Tx, rollback func()) (map[string]int, error) {
-	menuRoot, err := tx.Resources.Query().Where(
-		resources.ParentIDEQ(0),
-		resources.ResourceTypeEQ(int(adminv1.Resource_MENU.Number())),
-	).Only(ctx)
-	if err != nil {
-		rollback()
-		return nil, err
-	}
-
-	menuRootCode := seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_MENU)
-	idByCode := map[string]int{menuRootCode: menuRoot.ID}
-
-	type builtinMenuResource struct {
-		code, displayName, parentRef string
-		resType                      adminv1.Resource_Type
-		sort                         int
-		locator, visual              string
-		protected                    bool
-	}
-	seeds := []builtinMenuResource{
-		{"user", "个人中心", seedParentMenuRoot, adminv1.Resource_MENU, 2, "/user", "UserOutlined", true},
-		{"profile", "我的信息", "user", adminv1.Resource_MENU, 7, "/user/profile", "", true},
-		{"setting", "系统设置", seedParentMenuRoot, adminv1.Resource_MENU, 9, "/setting", "SettingOutlined", true},
-		{"auth-providers", "身份认证", "setting", adminv1.Resource_MENU, 100, "/setting/authentications", "", true},
-		{"departments", "组织架构", "setting", adminv1.Resource_MENU, 200, "/setting/departments", "", true},
-		{"roles", "角色管理", "setting", adminv1.Resource_MENU, 300, "/setting/roles", "", true},
-		{"resources", "资源管理", "setting", adminv1.Resource_MENU, 400, "/setting/resources", "", true},
-		{"permissions", "权限管理", "setting", adminv1.Resource_MENU, 500, "/setting/permissions", "", true},
-		{"groups", "群组管理", "setting", adminv1.Resource_MENU, 600, "/setting/groups", "", true},
-		{"users", "用户管理", "setting", adminv1.Resource_MENU, 700, "/setting/users", "", true},
-		{"config", "配置管理", "setting", adminv1.Resource_MENU, 900, "/setting/config", "", true},
-	}
-
-	visUnspecified := int(adminv1.Visibility_VISIBILITY_UNSPECIFIED.Number())
-	enabled := int(adminv1.Resource_ENABLED.Number())
-
-	for _, s := range seeds {
-		var parentID int64
-		switch s.parentRef {
-		case seedParentMenuRoot:
-			parentID = int64(menuRoot.ID)
-		default:
-			pid, ok := idByCode[s.parentRef]
-			if !ok {
-				rollback()
-				return nil, fmt.Errorf("builtin resource seed: unknown parent code %q", s.parentRef)
-			}
-			parentID = int64(pid)
-		}
-
-		exists, err := tx.Resources.Query().Where(
-			resources.CodeEQ(s.code),
-			resources.ParentIDEQ(parentID),
-		).Exist(ctx)
-		if err != nil {
-			rollback()
-			return nil, err
-		}
-		if exists {
-			row, err := tx.Resources.Query().Where(
-				resources.CodeEQ(s.code),
-				resources.ParentIDEQ(parentID),
-			).Only(ctx)
-			if err != nil {
-				rollback()
-				return nil, err
-			}
-			if s.protected && !row.Protected {
-				if err := tx.Resources.UpdateOneID(row.ID).SetProtected(true).Exec(ctx); err != nil {
-					rollback()
-					return nil, err
-				}
-			}
-			idByCode[s.code] = row.ID
-			continue
-		}
-
-		row, err := tx.Resources.Create().
-			SetCode(s.code).
-			SetDisplayName(s.displayName).
-			SetResourceType(int(s.resType.Number())).
-			SetResourceStatus(enabled).
-			SetVisibility(visUnspecified).
-			SetSortOrder(s.sort).
-			SetParentID(parentID).
-			SetLocator(s.locator).
-			SetVisual(s.visual).
-			SetProtected(s.protected).
-			Save(ctx)
-		if err != nil {
-			rollback()
-			return nil, err
-		}
-		idByCode[s.code] = row.ID
-	}
-	return idByCode, nil
-}
-
-const seedScopeCodeAdmin = "admin"
-
-// linkBuiltinMenuResourcesToAdminScope 将内置后台菜单树挂到 PLATFORM scope「admin」（lion_resource_scopes）。
-// 说明：lion_departments 根组织无 scope 关联表，后台可见性由本菜单资源 + admin 作用域表达。
-func linkBuiltinMenuResourcesToAdminScope(ctx context.Context, tx *lion.Tx, rollback func(), menuTreeRIDs map[string]int) error {
-	adminScope, err := tx.Scopes.Query().Where(scopes.CodeEQ(seedScopeCodeAdmin)).Only(ctx)
-	if err != nil {
-		rollback()
-		return err
-	}
-
-	menuRootCode := seedResourceSeedCode(adminv1.ResourceSeedCode_RESOURCE_SEED_CODE_ROOT_MENU)
-	codes := []string{
-		menuRootCode,
-		"user", "profile", "setting", "auth-providers", "departments", "roles", "resources",
-		"permissions", "groups", "users", "config",
-	}
-	for _, code := range codes {
-		rid := menuTreeRIDs[code]
-		if rid == 0 {
-			continue
-		}
-		linked, err := tx.ResourceScopes.Query().Where(
-			resourcescopes.ResourceIDEQ(rid),
-			resourcescopes.ScopeIDEQ(adminScope.ID),
-		).Exist(ctx)
-		if err != nil {
-			rollback()
-			return err
-		}
-		if linked {
-			continue
-		}
-		if err := tx.ResourceScopes.Create().
-			SetResourceID(rid).
-			SetScopeID(adminScope.ID).
-			Exec(ctx); err != nil {
-			rollback()
-			return err
-		}
-	}
-	return nil
 }

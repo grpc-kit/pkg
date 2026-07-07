@@ -28,47 +28,25 @@ const (
 	FieldCode = "code"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
-	// FieldPolicyType holds the string denoting the policy_type field in the database.
-	FieldPolicyType = "policy_type"
 	// FieldPolicyStatus holds the string denoting the policy_status field in the database.
 	FieldPolicyStatus = "policy_status"
-	// FieldValue holds the string denoting the value field in the database.
-	FieldValue = "value"
-	// FieldVersionNo holds the string denoting the version_no field in the database.
-	FieldVersionNo = "version_no"
+	// FieldStatements holds the string denoting the statements field in the database.
+	FieldStatements = "statements"
 	// FieldProtected holds the string denoting the protected field in the database.
 	FieldProtected = "protected"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLionPermissions holds the string denoting the lion_permissions edge name in mutations.
-	EdgeLionPermissions = "lion_permissions"
-	// EdgeLionPolicyStatements holds the string denoting the lion_policy_statements edge name in mutations.
-	EdgeLionPolicyStatements = "lion_policy_statements"
-	// EdgeLionPolicyAttachments holds the string denoting the lion_policy_attachments edge name in mutations.
-	EdgeLionPolicyAttachments = "lion_policy_attachments"
+	// EdgeLionRolePolicies holds the string denoting the lion_role_policies edge name in mutations.
+	EdgeLionRolePolicies = "lion_role_policies"
 	// Table holds the table name of the policies in the database.
 	Table = "lion_policies"
-	// LionPermissionsTable is the table that holds the lion_permissions relation/edge.
-	LionPermissionsTable = "lion_permissions"
-	// LionPermissionsInverseTable is the table name for the Permissions entity.
-	// It exists in this package in order to avoid circular dependency with the "permissions" package.
-	LionPermissionsInverseTable = "lion_permissions"
-	// LionPermissionsColumn is the table column denoting the lion_permissions relation/edge.
-	LionPermissionsColumn = "policy_id"
-	// LionPolicyStatementsTable is the table that holds the lion_policy_statements relation/edge.
-	LionPolicyStatementsTable = "lion_policy_statements"
-	// LionPolicyStatementsInverseTable is the table name for the PolicyStatements entity.
-	// It exists in this package in order to avoid circular dependency with the "policystatements" package.
-	LionPolicyStatementsInverseTable = "lion_policy_statements"
-	// LionPolicyStatementsColumn is the table column denoting the lion_policy_statements relation/edge.
-	LionPolicyStatementsColumn = "policy_id"
-	// LionPolicyAttachmentsTable is the table that holds the lion_policy_attachments relation/edge.
-	LionPolicyAttachmentsTable = "lion_policy_attachments"
-	// LionPolicyAttachmentsInverseTable is the table name for the PolicyAttachments entity.
-	// It exists in this package in order to avoid circular dependency with the "policyattachments" package.
-	LionPolicyAttachmentsInverseTable = "lion_policy_attachments"
-	// LionPolicyAttachmentsColumn is the table column denoting the lion_policy_attachments relation/edge.
-	LionPolicyAttachmentsColumn = "policy_id"
+	// LionRolePoliciesTable is the table that holds the lion_role_policies relation/edge.
+	LionRolePoliciesTable = "lion_role_policies"
+	// LionRolePoliciesInverseTable is the table name for the RolePolicies entity.
+	// It exists in this package in order to avoid circular dependency with the "rolepolicies" package.
+	LionRolePoliciesInverseTable = "lion_role_policies"
+	// LionRolePoliciesColumn is the table column denoting the lion_role_policies relation/edge.
+	LionRolePoliciesColumn = "policy_id"
 )
 
 // Columns holds all SQL columns for policies fields.
@@ -81,10 +59,8 @@ var Columns = []string{
 	FieldUpdatedBy,
 	FieldCode,
 	FieldDisplayName,
-	FieldPolicyType,
 	FieldPolicyStatus,
-	FieldValue,
-	FieldVersionNo,
+	FieldStatements,
 	FieldProtected,
 	FieldDescription,
 }
@@ -114,14 +90,8 @@ var (
 	CodeValidator func(string) error
 	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
 	DisplayNameValidator func(string) error
-	// DefaultPolicyType holds the default value on creation for the "policy_type" field.
-	DefaultPolicyType int
 	// DefaultPolicyStatus holds the default value on creation for the "policy_status" field.
 	DefaultPolicyStatus int
-	// DefaultValue holds the default value on creation for the "value" field.
-	DefaultValue string
-	// DefaultVersionNo holds the default value on creation for the "version_no" field.
-	DefaultVersionNo int64
 	// DefaultProtected holds the default value on creation for the "protected" field.
 	DefaultProtected bool
 	// DefaultDescription holds the default value on creation for the "description" field.
@@ -171,24 +141,9 @@ func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
 }
 
-// ByPolicyType orders the results by the policy_type field.
-func ByPolicyType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPolicyType, opts...).ToFunc()
-}
-
 // ByPolicyStatus orders the results by the policy_status field.
 func ByPolicyStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPolicyStatus, opts...).ToFunc()
-}
-
-// ByValue orders the results by the value field.
-func ByValue(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldValue, opts...).ToFunc()
-}
-
-// ByVersionNo orders the results by the version_no field.
-func ByVersionNo(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldVersionNo, opts...).ToFunc()
 }
 
 // ByProtected orders the results by the protected field.
@@ -201,65 +156,23 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLionPermissionsCount orders the results by lion_permissions count.
-func ByLionPermissionsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionRolePoliciesCount orders the results by lion_role_policies count.
+func ByLionRolePoliciesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionPermissionsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionRolePoliciesStep(), opts...)
 	}
 }
 
-// ByLionPermissions orders the results by lion_permissions terms.
-func ByLionPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionRolePolicies orders the results by lion_role_policies terms.
+func ByLionRolePolicies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionPermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionRolePoliciesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByLionPolicyStatementsCount orders the results by lion_policy_statements count.
-func ByLionPolicyStatementsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionPolicyStatementsStep(), opts...)
-	}
-}
-
-// ByLionPolicyStatements orders the results by lion_policy_statements terms.
-func ByLionPolicyStatements(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionPolicyStatementsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByLionPolicyAttachmentsCount orders the results by lion_policy_attachments count.
-func ByLionPolicyAttachmentsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionPolicyAttachmentsStep(), opts...)
-	}
-}
-
-// ByLionPolicyAttachments orders the results by lion_policy_attachments terms.
-func ByLionPolicyAttachments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionPolicyAttachmentsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-func newLionPermissionsStep() *sqlgraph.Step {
+func newLionRolePoliciesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionPermissionsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionPermissionsTable, LionPermissionsColumn),
-	)
-}
-func newLionPolicyStatementsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionPolicyStatementsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionPolicyStatementsTable, LionPolicyStatementsColumn),
-	)
-}
-func newLionPolicyAttachmentsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionPolicyAttachmentsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionPolicyAttachmentsTable, LionPolicyAttachmentsColumn),
+		sqlgraph.To(LionRolePoliciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionRolePoliciesTable, LionRolePoliciesColumn),
 	)
 }

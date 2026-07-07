@@ -10,10 +10,10 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/grpc-kit/pkg/lion/grouproles"
-	"github.com/grpc-kit/pkg/lion/rolepermissions"
+	"github.com/grpc-kit/pkg/lion/principalroles"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/userroles"
 )
 
 // RolesCreate is the builder for creating a Roles entity.
@@ -189,49 +189,49 @@ func (_c *RolesCreate) SetNillableProtected(v *bool) *RolesCreate {
 	return _c
 }
 
-// AddLionRolePermissionIDs adds the "lion_role_permissions" edge to the RolePermissions entity by IDs.
-func (_c *RolesCreate) AddLionRolePermissionIDs(ids ...int) *RolesCreate {
-	_c.mutation.AddLionRolePermissionIDs(ids...)
+// AddLionPrincipalRoleIDs adds the "lion_principal_roles" edge to the PrincipalRoles entity by IDs.
+func (_c *RolesCreate) AddLionPrincipalRoleIDs(ids ...int) *RolesCreate {
+	_c.mutation.AddLionPrincipalRoleIDs(ids...)
 	return _c
 }
 
-// AddLionRolePermissions adds the "lion_role_permissions" edges to the RolePermissions entity.
-func (_c *RolesCreate) AddLionRolePermissions(v ...*RolePermissions) *RolesCreate {
+// AddLionPrincipalRoles adds the "lion_principal_roles" edges to the PrincipalRoles entity.
+func (_c *RolesCreate) AddLionPrincipalRoles(v ...*PrincipalRoles) *RolesCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddLionRolePermissionIDs(ids...)
+	return _c.AddLionPrincipalRoleIDs(ids...)
 }
 
-// AddLionUserRoleIDs adds the "lion_user_roles" edge to the UserRoles entity by IDs.
-func (_c *RolesCreate) AddLionUserRoleIDs(ids ...int) *RolesCreate {
-	_c.mutation.AddLionUserRoleIDs(ids...)
+// AddLionRolePolicyIDs adds the "lion_role_policies" edge to the RolePolicies entity by IDs.
+func (_c *RolesCreate) AddLionRolePolicyIDs(ids ...int) *RolesCreate {
+	_c.mutation.AddLionRolePolicyIDs(ids...)
 	return _c
 }
 
-// AddLionUserRoles adds the "lion_user_roles" edges to the UserRoles entity.
-func (_c *RolesCreate) AddLionUserRoles(v ...*UserRoles) *RolesCreate {
+// AddLionRolePolicies adds the "lion_role_policies" edges to the RolePolicies entity.
+func (_c *RolesCreate) AddLionRolePolicies(v ...*RolePolicies) *RolesCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddLionUserRoleIDs(ids...)
+	return _c.AddLionRolePolicyIDs(ids...)
 }
 
-// AddLionRoleGroupIDs adds the "lion_role_groups" edge to the GroupRoles entity by IDs.
-func (_c *RolesCreate) AddLionRoleGroupIDs(ids ...int) *RolesCreate {
-	_c.mutation.AddLionRoleGroupIDs(ids...)
+// AddLionRoleMenuIDs adds the "lion_role_menus" edge to the RoleMenus entity by IDs.
+func (_c *RolesCreate) AddLionRoleMenuIDs(ids ...int) *RolesCreate {
+	_c.mutation.AddLionRoleMenuIDs(ids...)
 	return _c
 }
 
-// AddLionRoleGroups adds the "lion_role_groups" edges to the GroupRoles entity.
-func (_c *RolesCreate) AddLionRoleGroups(v ...*GroupRoles) *RolesCreate {
+// AddLionRoleMenus adds the "lion_role_menus" edges to the RoleMenus entity.
+func (_c *RolesCreate) AddLionRoleMenus(v ...*RoleMenus) *RolesCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddLionRoleGroupIDs(ids...)
+	return _c.AddLionRoleMenuIDs(ids...)
 }
 
 // Mutation returns the RolesMutation object of the builder.
@@ -431,15 +431,15 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 		_spec.SetField(roles.FieldProtected, field.TypeBool, value)
 		_node.Protected = value
 	}
-	if nodes := _c.mutation.LionRolePermissionsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionPrincipalRolesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionRolePermissionsTable,
-			Columns: []string{roles.LionRolePermissionsColumn},
+			Table:   roles.LionPrincipalRolesTable,
+			Columns: []string{roles.LionPrincipalRolesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rolepermissions.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(principalroles.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -447,15 +447,15 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LionUserRolesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionRolePoliciesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionUserRolesTable,
-			Columns: []string{roles.LionUserRolesColumn},
+			Table:   roles.LionRolePoliciesTable,
+			Columns: []string{roles.LionRolePoliciesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userroles.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolepolicies.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -463,15 +463,15 @@ func (_c *RolesCreate) createSpec() (*Roles, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LionRoleGroupsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LionRoleMenusIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   roles.LionRoleGroupsTable,
-			Columns: []string{roles.LionRoleGroupsColumn},
+			Table:   roles.LionRoleMenusTable,
+			Columns: []string{roles.LionRoleMenusColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(grouproles.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(rolemenus.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

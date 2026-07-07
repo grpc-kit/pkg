@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/grpc-kit/pkg/admin"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"google.golang.org/protobuf/types/known/structpb"
 )
@@ -84,12 +85,12 @@ func maskHeaders(headers map[string]string) map[string]string {
 	return out
 }
 
-func (c *LocalConfig) toAdminLocalConfigSnapshot() *adminv1.LocalConfig {
+func (c *LocalConfig) toAdminLocalConfigSnapshot() *admin.LocalConfigSnapshot {
 	if c == nil {
-		return &adminv1.LocalConfig{}
+		return &admin.LocalConfigSnapshot{}
 	}
 
-	return &adminv1.LocalConfig{
+	return &admin.LocalConfigSnapshot{
 		Services:    c.toAdminServicesConfig(),
 		Discover:    c.toAdminDiscoverConfig(),
 		Security:    c.toAdminSecurityConfig(),

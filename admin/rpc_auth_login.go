@@ -36,7 +36,7 @@ func (a *KnownAdminAPI) CreateAuthLogin(ctx context.Context, req *adminv1.Create
 	// TODO; 不允许创建过长过期的 token
 	expiresIn := req.ExpiresIn
 	if expiresIn <= 0 {
-		expiresIn = 24 * 60 * 60
+		expiresIn = durationSecondsInt32(a.getLoginAccessTokenTTL(ctx))
 	}
 	providerCode := strings.TrimSpace(req.GetProviderCode())
 	if providerCode == "" {
@@ -178,7 +178,7 @@ func (a *KnownAdminAPI) CreateAuthToken(ctx context.Context, req *adminv1.Create
 
 	expiresIn := req.ExpiresIn
 	if expiresIn <= 0 {
-		expiresIn = 24 * 60 * 60
+		expiresIn = durationSecondsInt32(a.getLoginAccessTokenTTL(ctx))
 	}
 
 	tk, err := u.GetAccessToken(expiresIn, appid)
@@ -228,6 +228,9 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 		authproviders.FieldConfig,
 		authproviders.FieldCreatedAt,
 		authproviders.FieldUpdatedAt,
+		authproviders.FieldCreatedBy,
+		authproviders.FieldUpdatedBy,
+		authproviders.FieldDeletedAt,
 		// 注意：List 默认不查 SecretEncrypted（敏感字段）
 	}
 
@@ -336,6 +339,104 @@ func (a *KnownAdminAPI) ListAuthProviders(ctx context.Context, req *adminv1.List
 		last := rows[len(rows)-1].ID
 		tokenData, _ := json.Marshal(last)
 		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	}
+
+	return result, nil
+}
+
+// ListLoginOptions 获取登录页可用的认证提供方列表（无需认证）
+// 仅返回登录页渲染所需的最小字段集，不包含任何敏感配置信息
+func (a *KnownAdminAPI) ListLoginOptions(ctx context.Context, req *adminv1.ListLoginOptionsRequest) (*adminv1.ListLoginOptionsResponse, error) {
+	result := &adminv1.ListLoginOptionsResponse{
+		Options: make([]*adminv1.LoginOption, 0),
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		if a.config.staticUsers == nil || a.config.staticUsers.Len() == 0 {
+			return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+		}
+
+		// 支持本地登录
+		result.Options = append(result.Options, &adminv1.LoginOption{
+			Code:        "local",
+			Type:        adminv1.AuthProvider_LOCAL,
+			DisplayName: "本地登录",
+		})
+
+		return result, nil
+	}
+
+	selectFields := []string{
+		authproviders.FieldID,
+		authproviders.FieldCode,
+		authproviders.FieldProviderType,
+		authproviders.FieldProviderStatus,
+		authproviders.FieldDisplayName,
+		authproviders.FieldIconURL,
+		authproviders.FieldSortOrder,
+		authproviders.FieldConfig,
+	}
+
+	rows, err := db.AuthProviders.Query().
+		Where(
+			authproviders.ProviderStatusEQ(int(adminv1.AuthProvider_ACTIVE.Number())),
+			authproviders.DeletedAtIsNil(),
+		).
+		Order(lion.Asc(authproviders.FieldSortOrder), lion.Asc(authproviders.FieldID)).
+		Select(selectFields...).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, row := range rows {
+		opt := &adminv1.LoginOption{
+			Code:        row.Code,
+			Type:        adminv1.AuthProvider_Type(row.ProviderType),
+			DisplayName: row.DisplayName,
+			IconUrl:     row.IconURL,
+		}
+
+		// 仅 OAuth2 系提供商填充 OAuth2LoginConfig
+		providerType := adminv1.AuthProvider_Type(row.ProviderType)
+		if providerType == adminv1.AuthProvider_OIDC ||
+			providerType == adminv1.AuthProvider_OAUTH2 ||
+			providerType == adminv1.AuthProvider_GITHUB ||
+			providerType == adminv1.AuthProvider_GOOGLE ||
+			providerType == adminv1.AuthProvider_WECHAT {
+			if len(row.Config) > 0 {
+				var data oauthConfigData
+				if err := json.Unmarshal(row.Config, &data); err == nil {
+					oc := &adminv1.OAuth2LoginConfig{
+						AuthorizationEndpoint: data.AuthorizationEndpoint,
+						ClientId:              data.ClientID,
+						RedirectUri:           data.RedirectURI,
+						Scopes:                data.Scopes,
+					}
+
+					// OIDC 类型：若 authorization_endpoint 缺失，通过 Discovery 补全
+					if providerType == adminv1.AuthProvider_OIDC && data.Issuer != "" {
+						if oc.AuthorizationEndpoint == "" || oc.ClientId == "" {
+							// 复用 enrichOAuthEndpoints 的逻辑，需要构造临时 OAuthConfig
+							tmpOc := &adminv1.OAuthConfig{
+								Issuer:                data.Issuer,
+								AuthorizationEndpoint: data.AuthorizationEndpoint,
+								TokenEndpoint:         data.TokenEndpoint,
+								UserinfoEndpoint:      data.UserinfoEndpoint,
+								JwksUri:               data.JwksURI,
+							}
+							a.enrichOAuthEndpoints(ctx, tmpOc)
+							oc.AuthorizationEndpoint = tmpOc.AuthorizationEndpoint
+						}
+					}
+
+					opt.Config = &adminv1.LoginOption_OauthConfig{OauthConfig: oc}
+				}
+			}
+		}
+
+		result.Options = append(result.Options, opt)
 	}
 
 	return result, nil
@@ -468,6 +569,11 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 				create.SetSecretEncrypted(secretEnc)
 			}
 
+			// 设置审计字段
+			if actor, err := GetUserID(ctx); err == nil && actor != 0 {
+				create.SetCreatedBy(actor).SetUpdatedBy(actor)
+			}
+
 			_, err = create.Save(ctx)
 		} else {
 			update := db.AuthProviders.Update().Where(authproviders.CodeEQ(name)).
@@ -490,6 +596,11 @@ func (a *KnownAdminAPI) UpsertAuthProviders(ctx context.Context, req *adminv1.Up
 			}
 			if len(secretEnc) > 0 {
 				update.SetSecretEncrypted(secretEnc)
+			}
+
+			// 设置审计字段
+			if actor, err := GetUserID(ctx); err == nil && actor != 0 {
+				update.SetUpdatedBy(actor)
 			}
 
 			err = update.Exec(ctx)
@@ -542,6 +653,11 @@ func (a *KnownAdminAPI) CreateAuthProvider(ctx context.Context, req *adminv1.Cre
 		SetDescription(req.Provider.Description).
 		SetSortOrder(int(req.Provider.SortOrder)).
 		SetIconURL(req.Provider.IconUrl)
+
+	// 设置审计字段
+	if actor, err := GetUserID(ctx); err == nil && actor != 0 {
+		create.SetCreatedBy(actor).SetUpdatedBy(actor)
+	}
 
 	if configJSON != nil {
 		create.SetConfig(configJSON)
@@ -681,6 +797,11 @@ func (a *KnownAdminAPI) UpdateAuthProvider(ctx context.Context, req *adminv1.Upd
 
 	// 构建更新操作
 	update := provider.Update()
+
+	// 设置审计字段
+	if actor, err := GetUserID(ctx); err == nil && actor != 0 {
+		update.SetUpdatedBy(actor)
+	}
 
 	// 更新公共字段
 	if req.Provider.Code != "" {

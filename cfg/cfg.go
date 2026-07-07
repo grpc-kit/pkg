@@ -208,7 +208,7 @@ type BasicAuth struct {
 	Username string `mapstructure:"username"`
 	// Password 明文口令；仅当 password_hash（trim 后）为空时，服务端用其 SHA256 十六进制作为有效口令材料（与 LOCAL 登录约定一致）。
 	// Deprecated: 生产环境优先使用 password_hash。
-	Password     string   `mapstructure:"password"`
+	Password string `mapstructure:"password"`
 	// PasswordHash 优先使用（trim 后非空）：可为 sha256 十六进制或 bcrypt 串（与库表 LOCAL 用户一致时，客户端仍传 sha256(明文)）。
 	PasswordHash string   `mapstructure:"password_hash"`
 	Groups       []string `mapstructure:"groups"`
@@ -265,7 +265,7 @@ type SaramaConfig struct {
 func New(v *viper.Viper) (*LocalConfig, error) {
 	var lc LocalConfig
 
-	if err := viper.Unmarshal(&lc); err != nil {
+	if err := v.Unmarshal(&lc); err != nil {
 		return nil, err
 	}
 
@@ -458,6 +458,12 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 		return nil
 	}
 
+	if c.adminServer != nil {
+		if err := c.adminServer.SetMicroserviceGatewayYAML(assets); err != nil {
+			return err
+		}
+	}
+
 	comps := []string{"admin", "openapi", "webroot"}
 	for _, v := range comps {
 		tracing := false
@@ -484,6 +490,32 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 		} else if err != nil {
 			return err
 		}
+	}
+
+	if c.Frontend.hasEnableOpenapi() {
+		adminSwaggerBody, err := adminv1.Assets.ReadFile("openapi/admin.swagger.json")
+		if err != nil {
+			return err
+		}
+
+		adminSwaggerPath := strings.TrimSuffix(c.Frontend.Interface.Openapi.HandleURL, "/") + "/admin.swagger.json"
+		if adminSwaggerPath == "/admin.swagger.json" && c.Frontend.Interface.Openapi.HandleURL == "/" {
+			adminSwaggerPath = "/admin.swagger.json"
+		}
+
+		var adminSwaggerHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Cache-Control", "public, max-age=3600")
+			_, _ = w.Write(adminSwaggerBody)
+		})
+
+		if c.Frontend.Interface.Openapi.Tracing {
+			adminSwaggerHandler = c.HTTPHandler(adminSwaggerHandler)
+		} else {
+			adminSwaggerHandler = c.Security.addHTTPHandler(adminSwaggerHandler)
+		}
+
+		mux.Handle(adminSwaggerPath, adminSwaggerHandler)
 	}
 
 	return nil

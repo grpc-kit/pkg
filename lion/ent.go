@@ -12,27 +12,22 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/grpc-kit/pkg/lion/actions"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
-	"github.com/grpc-kit/pkg/lion/departmentmembers"
 	"github.com/grpc-kit/pkg/lion/departments"
-	"github.com/grpc-kit/pkg/lion/groupmembers"
-	"github.com/grpc-kit/pkg/lion/grouproles"
+	"github.com/grpc-kit/pkg/lion/globalsettings"
 	"github.com/grpc-kit/pkg/lion/groups"
-	"github.com/grpc-kit/pkg/lion/permissionbindings"
-	"github.com/grpc-kit/pkg/lion/permissions"
+	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/oauth2clients"
+	"github.com/grpc-kit/pkg/lion/oauth2codes"
 	"github.com/grpc-kit/pkg/lion/policies"
-	"github.com/grpc-kit/pkg/lion/policyattachments"
-	"github.com/grpc-kit/pkg/lion/policystatements"
-	"github.com/grpc-kit/pkg/lion/resources"
-	"github.com/grpc-kit/pkg/lion/resourcescopes"
-	"github.com/grpc-kit/pkg/lion/rolepermissions"
+	"github.com/grpc-kit/pkg/lion/principalroles"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 	"github.com/grpc-kit/pkg/lion/roles"
-	"github.com/grpc-kit/pkg/lion/scopes"
 	"github.com/grpc-kit/pkg/lion/useridentities"
+	"github.com/grpc-kit/pkg/lion/usermemberships"
 	"github.com/grpc-kit/pkg/lion/userprofiles"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"github.com/grpc-kit/pkg/lion/users"
 )
 
@@ -94,28 +89,23 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			actions.Table:            actions.ValidColumn,
-			authproviders.Table:      authproviders.ValidColumn,
-			credentials.Table:        credentials.ValidColumn,
-			departmentmembers.Table:  departmentmembers.ValidColumn,
-			departments.Table:        departments.ValidColumn,
-			groupmembers.Table:       groupmembers.ValidColumn,
-			grouproles.Table:         grouproles.ValidColumn,
-			groups.Table:             groups.ValidColumn,
-			permissionbindings.Table: permissionbindings.ValidColumn,
-			permissions.Table:        permissions.ValidColumn,
-			policies.Table:           policies.ValidColumn,
-			policyattachments.Table:  policyattachments.ValidColumn,
-			policystatements.Table:   policystatements.ValidColumn,
-			resourcescopes.Table:     resourcescopes.ValidColumn,
-			resources.Table:          resources.ValidColumn,
-			rolepermissions.Table:    rolepermissions.ValidColumn,
-			roles.Table:              roles.ValidColumn,
-			scopes.Table:             scopes.ValidColumn,
-			useridentities.Table:     useridentities.ValidColumn,
-			userprofiles.Table:       userprofiles.ValidColumn,
-			userroles.Table:          userroles.ValidColumn,
-			users.Table:              users.ValidColumn,
+			authproviders.Table:   authproviders.ValidColumn,
+			credentials.Table:     credentials.ValidColumn,
+			departments.Table:     departments.ValidColumn,
+			globalsettings.Table:  globalsettings.ValidColumn,
+			groups.Table:          groups.ValidColumn,
+			menus.Table:           menus.ValidColumn,
+			oauth2clients.Table:   oauth2clients.ValidColumn,
+			oauth2codes.Table:     oauth2codes.ValidColumn,
+			policies.Table:        policies.ValidColumn,
+			principalroles.Table:  principalroles.ValidColumn,
+			rolemenus.Table:       rolemenus.ValidColumn,
+			rolepolicies.Table:    rolepolicies.ValidColumn,
+			roles.Table:           roles.ValidColumn,
+			useridentities.Table:  useridentities.ValidColumn,
+			usermemberships.Table: usermemberships.ValidColumn,
+			userprofiles.Table:    userprofiles.ValidColumn,
+			users.Table:           users.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

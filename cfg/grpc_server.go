@@ -562,7 +562,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 		// /grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin
 		// 确认是否为全局已知跳过认证的 rpc 方法
 		switch currentMethod {
-		case "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders",
+		case "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLoginOptions",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/VerifyAuthMFA",
 			"/grpc_kit.api.known.admin.v1.KnownAdmin/StartAuthMFASetup",

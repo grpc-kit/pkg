@@ -5,6 +5,7 @@ import "context"
 // Config xx
 type Config struct {
 	PackageName string
+	Partition   string // GRN partition 段，默认 "grpc-kit"（详见 docs/spec/grn.md）
 	OPASDK      *OPASDKConfig
 	OPARego     *OPARegoConfig
 	OPAEnvoy    *OPAEnvoyPluginConfig

@@ -14,7 +14,7 @@ import (
 func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAuthCallbackRequest) (*adminv1.GetAuthCallbackResponse, error) {
 	result := &adminv1.GetAuthCallbackResponse{
 		TokenType: "Bearer",
-		ExpiresIn: 24 * 60 * 60,
+		ExpiresIn: durationSecondsInt32(a.getLoginAccessTokenTTL(ctx)),
 	}
 
 	db, err := a.GetLionClient()
@@ -50,6 +50,9 @@ func (a *KnownAdminAPI) GetAuthCallback(ctx context.Context, req *adminv1.GetAut
 		return result, nil
 	}
 	result.AccessToken = authToken.GetAccessToken()
+	if authToken.GetExpiresIn() > 0 {
+		result.ExpiresIn = authToken.GetExpiresIn()
+	}
 
 	return result, nil
 }

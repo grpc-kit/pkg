@@ -2,15 +2,44 @@ package cfg
 
 import (
 	"fmt"
+	"os"
 	"testing"
+
+	"github.com/spf13/viper"
 )
 
+const cfgDatabaseIntegrationEnv = "GRPC_KIT_CFG_DB_INTEGRATION"
+
 func TestDatabase(t *testing.T) {
+	ensureTestLocalConfig(t)
 	t.Run("testDatabaseConfig", testDatabaseConfig)
 	t.Run("testDatabaseInit", testDatabaseInit)
 }
 
+func ensureTestLocalConfig(t *testing.T) {
+	t.Helper()
+	if lc != nil {
+		return
+	}
+
+	v := viper.New()
+	v.SetConfigType("yaml")
+	v.SetConfigFile("app-sample.yaml")
+	if err := v.ReadInConfig(); err != nil {
+		t.Fatalf("load config file err: %v", err)
+	}
+
+	var err error
+	lc, err = New(v)
+	if err != nil {
+		t.Fatalf("load config file err: %v", err)
+	}
+}
+
 func testDatabaseInit(t *testing.T) {
+	if os.Getenv(cfgDatabaseIntegrationEnv) == "" {
+		t.Skipf("skip external database integration test; set %s=1 to enable", cfgDatabaseIntegrationEnv)
+	}
 	if err := lc.initDatabase(); err != nil {
 		t.Errorf("database init err=%v", err)
 	}
@@ -21,11 +50,11 @@ func testDatabaseConfig(t *testing.T) {
 	case DatabaseDriverMysql:
 	case DatabaseDriverPostgresql:
 	default:
-		t.Errorf(ErrDatabaseNotSupportDriver.Error())
+		t.Error(ErrDatabaseNotSupportDriver)
 	}
 
 	if lc.Database.DBName == "" || lc.Database.Username == "" || lc.Database.Password == "" {
-		t.Errorf(ErrDatabaseParamsMust.Error())
+		t.Error(ErrDatabaseParamsMust)
 	}
 
 	if lc.Database.ConnectionPool.MaxIdleTime.Seconds() != 1800 {
@@ -43,6 +72,9 @@ func testDatabaseConfig(t *testing.T) {
 }
 
 func BenchmarkDatabaseInsert(b *testing.B) {
+	if os.Getenv(cfgDatabaseIntegrationEnv) == "" {
+		b.Skipf("skip external database benchmark; set %s=1 to enable", cfgDatabaseIntegrationEnv)
+	}
 	if err := lc.initDatabase(); err != nil {
 		b.Errorf("init database err=%v", err)
 	}

@@ -12,48 +12,38 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Actions is the client for interacting with the Actions builders.
-	Actions *ActionsClient
 	// AuthProviders is the client for interacting with the AuthProviders builders.
 	AuthProviders *AuthProvidersClient
 	// Credentials is the client for interacting with the Credentials builders.
 	Credentials *CredentialsClient
-	// DepartmentMembers is the client for interacting with the DepartmentMembers builders.
-	DepartmentMembers *DepartmentMembersClient
 	// Departments is the client for interacting with the Departments builders.
 	Departments *DepartmentsClient
-	// GroupMembers is the client for interacting with the GroupMembers builders.
-	GroupMembers *GroupMembersClient
-	// GroupRoles is the client for interacting with the GroupRoles builders.
-	GroupRoles *GroupRolesClient
+	// GlobalSettings is the client for interacting with the GlobalSettings builders.
+	GlobalSettings *GlobalSettingsClient
 	// Groups is the client for interacting with the Groups builders.
 	Groups *GroupsClient
-	// PermissionBindings is the client for interacting with the PermissionBindings builders.
-	PermissionBindings *PermissionBindingsClient
-	// Permissions is the client for interacting with the Permissions builders.
-	Permissions *PermissionsClient
+	// Menus is the client for interacting with the Menus builders.
+	Menus *MenusClient
+	// OAuth2Clients is the client for interacting with the OAuth2Clients builders.
+	OAuth2Clients *OAuth2ClientsClient
+	// OAuth2Codes is the client for interacting with the OAuth2Codes builders.
+	OAuth2Codes *OAuth2CodesClient
 	// Policies is the client for interacting with the Policies builders.
 	Policies *PoliciesClient
-	// PolicyAttachments is the client for interacting with the PolicyAttachments builders.
-	PolicyAttachments *PolicyAttachmentsClient
-	// PolicyStatements is the client for interacting with the PolicyStatements builders.
-	PolicyStatements *PolicyStatementsClient
-	// ResourceScopes is the client for interacting with the ResourceScopes builders.
-	ResourceScopes *ResourceScopesClient
-	// Resources is the client for interacting with the Resources builders.
-	Resources *ResourcesClient
-	// RolePermissions is the client for interacting with the RolePermissions builders.
-	RolePermissions *RolePermissionsClient
+	// PrincipalRoles is the client for interacting with the PrincipalRoles builders.
+	PrincipalRoles *PrincipalRolesClient
+	// RoleMenus is the client for interacting with the RoleMenus builders.
+	RoleMenus *RoleMenusClient
+	// RolePolicies is the client for interacting with the RolePolicies builders.
+	RolePolicies *RolePoliciesClient
 	// Roles is the client for interacting with the Roles builders.
 	Roles *RolesClient
-	// Scopes is the client for interacting with the Scopes builders.
-	Scopes *ScopesClient
 	// UserIdentities is the client for interacting with the UserIdentities builders.
 	UserIdentities *UserIdentitiesClient
+	// UserMemberships is the client for interacting with the UserMemberships builders.
+	UserMemberships *UserMembershipsClient
 	// UserProfiles is the client for interacting with the UserProfiles builders.
 	UserProfiles *UserProfilesClient
-	// UserRoles is the client for interacting with the UserRoles builders.
-	UserRoles *UserRolesClient
 	// Users is the client for interacting with the Users builders.
 	Users *UsersClient
 
@@ -187,27 +177,22 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Actions = NewActionsClient(tx.config)
 	tx.AuthProviders = NewAuthProvidersClient(tx.config)
 	tx.Credentials = NewCredentialsClient(tx.config)
-	tx.DepartmentMembers = NewDepartmentMembersClient(tx.config)
 	tx.Departments = NewDepartmentsClient(tx.config)
-	tx.GroupMembers = NewGroupMembersClient(tx.config)
-	tx.GroupRoles = NewGroupRolesClient(tx.config)
+	tx.GlobalSettings = NewGlobalSettingsClient(tx.config)
 	tx.Groups = NewGroupsClient(tx.config)
-	tx.PermissionBindings = NewPermissionBindingsClient(tx.config)
-	tx.Permissions = NewPermissionsClient(tx.config)
+	tx.Menus = NewMenusClient(tx.config)
+	tx.OAuth2Clients = NewOAuth2ClientsClient(tx.config)
+	tx.OAuth2Codes = NewOAuth2CodesClient(tx.config)
 	tx.Policies = NewPoliciesClient(tx.config)
-	tx.PolicyAttachments = NewPolicyAttachmentsClient(tx.config)
-	tx.PolicyStatements = NewPolicyStatementsClient(tx.config)
-	tx.ResourceScopes = NewResourceScopesClient(tx.config)
-	tx.Resources = NewResourcesClient(tx.config)
-	tx.RolePermissions = NewRolePermissionsClient(tx.config)
+	tx.PrincipalRoles = NewPrincipalRolesClient(tx.config)
+	tx.RoleMenus = NewRoleMenusClient(tx.config)
+	tx.RolePolicies = NewRolePoliciesClient(tx.config)
 	tx.Roles = NewRolesClient(tx.config)
-	tx.Scopes = NewScopesClient(tx.config)
 	tx.UserIdentities = NewUserIdentitiesClient(tx.config)
+	tx.UserMemberships = NewUserMembershipsClient(tx.config)
 	tx.UserProfiles = NewUserProfilesClient(tx.config)
-	tx.UserRoles = NewUserRolesClient(tx.config)
 	tx.Users = NewUsersClient(tx.config)
 }
 
@@ -218,7 +203,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Actions.QueryXXX(), the query will be executed
+// applies a query, for example: AuthProviders.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

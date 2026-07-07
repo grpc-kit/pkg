@@ -24,21 +24,17 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KnownAdminClient interface {
 	// 本地配置
-	GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*LocalConfig, error)
-	GetConfigServices(ctx context.Context, in *GetConfigServicesRequest, opts ...grpc.CallOption) (*ServicesConfig, error)
-	GetConfigDiscover(ctx context.Context, in *GetConfigDiscoverRequest, opts ...grpc.CallOption) (*DiscoverConfig, error)
-	GetConfigSecurity(ctx context.Context, in *GetConfigSecurityRequest, opts ...grpc.CallOption) (*SecurityConfig, error)
-	GetConfigDatabase(ctx context.Context, in *GetConfigDatabaseRequest, opts ...grpc.CallOption) (*DatabaseConfig, error)
-	GetConfigCachebox(ctx context.Context, in *GetConfigCacheboxRequest, opts ...grpc.CallOption) (*CacheboxConfig, error)
-	GetConfigDebugger(ctx context.Context, in *GetConfigDebuggerRequest, opts ...grpc.CallOption) (*DebuggerConfig, error)
-	GetConfigObjstore(ctx context.Context, in *GetConfigObjstoreRequest, opts ...grpc.CallOption) (*ObjstoreConfig, error)
-	GetConfigFrontend(ctx context.Context, in *GetConfigFrontendRequest, opts ...grpc.CallOption) (*FrontendConfig, error)
-	GetConfigObservables(ctx context.Context, in *GetConfigObservablesRequest, opts ...grpc.CallOption) (*ObservablesConfig, error)
-	GetConfigCloudEvents(ctx context.Context, in *GetConfigCloudEventsRequest, opts ...grpc.CallOption) (*CloudEventsConfig, error)
-	GetConfigAutomations(ctx context.Context, in *GetConfigAutomationsRequest, opts ...grpc.CallOption) (*AutomationsConfig, error)
+	ListLocalConfigs(ctx context.Context, in *ListLocalConfigsRequest, opts ...grpc.CallOption) (*ListLocalConfigsResponse, error)
+	GetLocalConfigs(ctx context.Context, in *GetLocalConfigsRequest, opts ...grpc.CallOption) (*LocalConfigs, error)
+	// 全局设置
+	GetGlobalSettings(ctx context.Context, in *GetGlobalSettingsRequest, opts ...grpc.CallOption) (*GlobalSettingCategory, error)
+	ListGlobalSettings(ctx context.Context, in *ListGlobalSettingsRequest, opts ...grpc.CallOption) (*ListGlobalSettingsResponse, error)
+	UpdateGlobalSettings(ctx context.Context, in *UpdateGlobalSettingsRequest, opts ...grpc.CallOption) (*UpdateGlobalSettingsResponse, error)
 	// 认证鉴权
 	UpsertAuthProviders(ctx context.Context, in *UpsertAuthProvidersRequest, opts ...grpc.CallOption) (*UpsertAuthProvidersResponse, error)
 	ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error)
+	// 获取登录页可用的认证提供方列表（无需认证，仅返回最小字段集）
+	ListLoginOptions(ctx context.Context, in *ListLoginOptionsRequest, opts ...grpc.CallOption) (*ListLoginOptionsResponse, error)
 	CreateAuthProvider(ctx context.Context, in *CreateAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error)
 	GetAuthProvider(ctx context.Context, in *GetAuthProviderRequest, opts ...grpc.CallOption) (*AuthProvider, error)
 	DeleteAuthProvider(ctx context.Context, in *DeleteAuthProviderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -54,50 +50,20 @@ type KnownAdminClient interface {
 	SetupUserMFA(ctx context.Context, in *SetupUserMFARequest, opts ...grpc.CallOption) (*SetupUserMFAResponse, error)
 	ConfirmUserMFA(ctx context.Context, in *ConfirmUserMFARequest, opts ...grpc.CallOption) (*ConfirmUserMFAResponse, error)
 	DisableUserMFA(ctx context.Context, in *DisableUserMFARequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 资源管理
-	GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*Resource, error)
-	ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error)
-	CreateResource(ctx context.Context, in *CreateResourceRequest, opts ...grpc.CallOption) (*Resource, error)
-	UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*Resource, error)
-	DeleteResource(ctx context.Context, in *DeleteResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	CreateResourceScopes(ctx context.Context, in *CreateResourceScopesRequest, opts ...grpc.CallOption) (*CreateResourceScopesResponse, error)
-	// 作用域管理
-	ListScopes(ctx context.Context, in *ListScopesRequest, opts ...grpc.CallOption) (*ListScopesResponse, error)
-	CreateScope(ctx context.Context, in *CreateScopeRequest, opts ...grpc.CallOption) (*Scope, error)
-	UpdateScope(ctx context.Context, in *UpdateScopeRequest, opts ...grpc.CallOption) (*Scope, error)
-	DeleteScope(ctx context.Context, in *DeleteScopeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	ListScopeResources(ctx context.Context, in *ListScopeResourcesRequest, opts ...grpc.CallOption) (*ListScopeResourcesResponse, error)
-	DeleteScopeResource(ctx context.Context, in *DeleteScopeResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	CreateScopeResources(ctx context.Context, in *CreateScopeResourcesRequest, opts ...grpc.CallOption) (*CreateScopeResourcesResponse, error)
+	// 服务字典管理
+	ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error)
+	ListServiceActions(ctx context.Context, in *ListServiceActionsRequest, opts ...grpc.CallOption) (*ListServiceActionsResponse, error)
+	// 菜单管理
+	ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error)
+	CreateMenu(ctx context.Context, in *CreateMenuRequest, opts ...grpc.CallOption) (*Menu, error)
+	UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...grpc.CallOption) (*Menu, error)
+	DeleteMenu(ctx context.Context, in *DeleteMenuRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 策略管理
 	ListPolicies(ctx context.Context, in *ListPoliciesRequest, opts ...grpc.CallOption) (*ListPoliciesResponse, error)
+	GetPolicy(ctx context.Context, in *GetPolicyRequest, opts ...grpc.CallOption) (*Policy, error)
 	CreatePolicy(ctx context.Context, in *CreatePolicyRequest, opts ...grpc.CallOption) (*Policy, error)
 	UpdatePolicy(ctx context.Context, in *UpdatePolicyRequest, opts ...grpc.CallOption) (*Policy, error)
 	DeletePolicy(ctx context.Context, in *DeletePolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 动作管理
-	GetAction(ctx context.Context, in *GetActionRequest, opts ...grpc.CallOption) (*Action, error)
-	ListActions(ctx context.Context, in *ListActionsRequest, opts ...grpc.CallOption) (*ListActionsResponse, error)
-	CreateAction(ctx context.Context, in *CreateActionRequest, opts ...grpc.CallOption) (*Action, error)
-	UpdateAction(ctx context.Context, in *UpdateActionRequest, opts ...grpc.CallOption) (*Action, error)
-	DeleteAction(ctx context.Context, in *DeleteActionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 策略语句管理
-	GetPolicyStatement(ctx context.Context, in *GetPolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error)
-	ListPolicyStatements(ctx context.Context, in *ListPolicyStatementsRequest, opts ...grpc.CallOption) (*ListPolicyStatementsResponse, error)
-	CreatePolicyStatement(ctx context.Context, in *CreatePolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error)
-	UpdatePolicyStatement(ctx context.Context, in *UpdatePolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error)
-	DeletePolicyStatement(ctx context.Context, in *DeletePolicyStatementRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 策略挂载管理
-	GetPolicyAttachment(ctx context.Context, in *GetPolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error)
-	ListPolicyAttachments(ctx context.Context, in *ListPolicyAttachmentsRequest, opts ...grpc.CallOption) (*ListPolicyAttachmentsResponse, error)
-	CreatePolicyAttachment(ctx context.Context, in *CreatePolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error)
-	UpdatePolicyAttachment(ctx context.Context, in *UpdatePolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error)
-	DeletePolicyAttachment(ctx context.Context, in *DeletePolicyAttachmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	// 权限管理
-	ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error)
-	GetPermission(ctx context.Context, in *GetPermissionRequest, opts ...grpc.CallOption) (*Permission, error)
-	CreatePermission(ctx context.Context, in *CreatePermissionRequest, opts ...grpc.CallOption) (*Permission, error)
-	UpdatePermission(ctx context.Context, in *UpdatePermissionRequest, opts ...grpc.CallOption) (*Permission, error)
-	DeletePermission(ctx context.Context, in *DeletePermissionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 角色相关
 	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error)
 	GetRole(ctx context.Context, in *GetRoleRequest, opts ...grpc.CallOption) (*Role, error)
@@ -108,9 +74,14 @@ type KnownAdminClient interface {
 	CreateRoleMembers(ctx context.Context, in *CreateRoleMembersRequest, opts ...grpc.CallOption) (*CreateRoleMembersResponse, error)
 	UpdateRoleMembers(ctx context.Context, in *UpdateRoleMembersRequest, opts ...grpc.CallOption) (*UpdateRoleMembersResponse, error)
 	DeleteRoleMember(ctx context.Context, in *DeleteRoleMemberRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	CreateRolePermissions(ctx context.Context, in *CreateRolePermissionsRequest, opts ...grpc.CallOption) (*CreateRolePermissionsResponse, error)
-	DeleteRolePermission(ctx context.Context, in *DeleteRolePermissionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	ListRolePermissions(ctx context.Context, in *ListRolePermissionsRequest, opts ...grpc.CallOption) (*ListRolePermissionsResponse, error)
+	ListRoleMenus(ctx context.Context, in *ListRoleMenusRequest, opts ...grpc.CallOption) (*ListRoleMenusResponse, error)
+	CreateRoleMenus(ctx context.Context, in *CreateRoleMenusRequest, opts ...grpc.CallOption) (*CreateRoleMenusResponse, error)
+	UpdateRoleMenus(ctx context.Context, in *UpdateRoleMenusRequest, opts ...grpc.CallOption) (*UpdateRoleMenusResponse, error)
+	DeleteRoleMenu(ctx context.Context, in *DeleteRoleMenuRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ListRolePolicies(ctx context.Context, in *ListRolePoliciesRequest, opts ...grpc.CallOption) (*ListRolePoliciesResponse, error)
+	CreateRolePolicies(ctx context.Context, in *CreateRolePoliciesRequest, opts ...grpc.CallOption) (*CreateRolePoliciesResponse, error)
+	UpdateRolePolicies(ctx context.Context, in *UpdateRolePoliciesRequest, opts ...grpc.CallOption) (*UpdateRolePoliciesResponse, error)
+	DeleteRolePolicy(ctx context.Context, in *DeleteRolePolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 部门管理
 	CreateDepartment(ctx context.Context, in *CreateDepartmentRequest, opts ...grpc.CallOption) (*Department, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
@@ -142,6 +113,12 @@ type KnownAdminClient interface {
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2JSONWebKeys, error)
 	GetOAuth2Userinfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Userinfo, error)
+	// OAuth2 客户端管理
+	ListOAuth2Clients(ctx context.Context, in *ListOAuth2ClientsRequest, opts ...grpc.CallOption) (*ListOAuth2ClientsResponse, error)
+	CreateOAuth2Client(ctx context.Context, in *CreateOAuth2ClientRequest, opts ...grpc.CallOption) (*CreateOAuth2ClientResponse, error)
+	GetOAuth2Client(ctx context.Context, in *GetOAuth2ClientRequest, opts ...grpc.CallOption) (*OAuth2Client, error)
+	UpdateOAuth2Client(ctx context.Context, in *UpdateOAuth2ClientRequest, opts ...grpc.CallOption) (*OAuth2Client, error)
+	DeleteOAuth2Client(ctx context.Context, in *DeleteOAuth2ClientRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 数据库相关
 	CreateDatabaseInitialize(ctx context.Context, in *CreateDatabaseInitializeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -154,108 +131,45 @@ func NewKnownAdminClient(cc grpc.ClientConnInterface) KnownAdminClient {
 	return &knownAdminClient{cc}
 }
 
-func (c *knownAdminClient) GetConfig(ctx context.Context, in *GetConfigRequest, opts ...grpc.CallOption) (*LocalConfig, error) {
-	out := new(LocalConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfig", in, out, opts...)
+func (c *knownAdminClient) ListLocalConfigs(ctx context.Context, in *ListLocalConfigsRequest, opts ...grpc.CallOption) (*ListLocalConfigsResponse, error) {
+	out := new(ListLocalConfigsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLocalConfigs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) GetConfigServices(ctx context.Context, in *GetConfigServicesRequest, opts ...grpc.CallOption) (*ServicesConfig, error) {
-	out := new(ServicesConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigServices", in, out, opts...)
+func (c *knownAdminClient) GetLocalConfigs(ctx context.Context, in *GetLocalConfigsRequest, opts ...grpc.CallOption) (*LocalConfigs, error) {
+	out := new(LocalConfigs)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigs", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) GetConfigDiscover(ctx context.Context, in *GetConfigDiscoverRequest, opts ...grpc.CallOption) (*DiscoverConfig, error) {
-	out := new(DiscoverConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDiscover", in, out, opts...)
+func (c *knownAdminClient) GetGlobalSettings(ctx context.Context, in *GetGlobalSettingsRequest, opts ...grpc.CallOption) (*GlobalSettingCategory, error) {
+	out := new(GlobalSettingCategory)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGlobalSettings", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) GetConfigSecurity(ctx context.Context, in *GetConfigSecurityRequest, opts ...grpc.CallOption) (*SecurityConfig, error) {
-	out := new(SecurityConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigSecurity", in, out, opts...)
+func (c *knownAdminClient) ListGlobalSettings(ctx context.Context, in *ListGlobalSettingsRequest, opts ...grpc.CallOption) (*ListGlobalSettingsResponse, error) {
+	out := new(ListGlobalSettingsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGlobalSettings", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) GetConfigDatabase(ctx context.Context, in *GetConfigDatabaseRequest, opts ...grpc.CallOption) (*DatabaseConfig, error) {
-	out := new(DatabaseConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDatabase", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigCachebox(ctx context.Context, in *GetConfigCacheboxRequest, opts ...grpc.CallOption) (*CacheboxConfig, error) {
-	out := new(CacheboxConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigCachebox", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigDebugger(ctx context.Context, in *GetConfigDebuggerRequest, opts ...grpc.CallOption) (*DebuggerConfig, error) {
-	out := new(DebuggerConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDebugger", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigObjstore(ctx context.Context, in *GetConfigObjstoreRequest, opts ...grpc.CallOption) (*ObjstoreConfig, error) {
-	out := new(ObjstoreConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigObjstore", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigFrontend(ctx context.Context, in *GetConfigFrontendRequest, opts ...grpc.CallOption) (*FrontendConfig, error) {
-	out := new(FrontendConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigFrontend", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigObservables(ctx context.Context, in *GetConfigObservablesRequest, opts ...grpc.CallOption) (*ObservablesConfig, error) {
-	out := new(ObservablesConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigObservables", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigCloudEvents(ctx context.Context, in *GetConfigCloudEventsRequest, opts ...grpc.CallOption) (*CloudEventsConfig, error) {
-	out := new(CloudEventsConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigCloudEvents", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetConfigAutomations(ctx context.Context, in *GetConfigAutomationsRequest, opts ...grpc.CallOption) (*AutomationsConfig, error) {
-	out := new(AutomationsConfig)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigAutomations", in, out, opts...)
+func (c *knownAdminClient) UpdateGlobalSettings(ctx context.Context, in *UpdateGlobalSettingsRequest, opts ...grpc.CallOption) (*UpdateGlobalSettingsResponse, error) {
+	out := new(UpdateGlobalSettingsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGlobalSettings", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -274,6 +188,15 @@ func (c *knownAdminClient) UpsertAuthProviders(ctx context.Context, in *UpsertAu
 func (c *knownAdminClient) ListAuthProviders(ctx context.Context, in *ListAuthProvidersRequest, opts ...grpc.CallOption) (*ListAuthProvidersResponse, error) {
 	out := new(ListAuthProvidersResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListAuthProviders", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) ListLoginOptions(ctx context.Context, in *ListLoginOptionsRequest, opts ...grpc.CallOption) (*ListLoginOptionsResponse, error) {
+	out := new(ListLoginOptionsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLoginOptions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -397,117 +320,54 @@ func (c *knownAdminClient) DisableUserMFA(ctx context.Context, in *DisableUserMF
 	return out, nil
 }
 
-func (c *knownAdminClient) GetResource(ctx context.Context, in *GetResourceRequest, opts ...grpc.CallOption) (*Resource, error) {
-	out := new(Resource)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetResource", in, out, opts...)
+func (c *knownAdminClient) ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error) {
+	out := new(ListServicesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServices", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) ListResources(ctx context.Context, in *ListResourcesRequest, opts ...grpc.CallOption) (*ListResourcesResponse, error) {
-	out := new(ListResourcesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResources", in, out, opts...)
+func (c *knownAdminClient) ListServiceActions(ctx context.Context, in *ListServiceActionsRequest, opts ...grpc.CallOption) (*ListServiceActionsResponse, error) {
+	out := new(ListServiceActionsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServiceActions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) CreateResource(ctx context.Context, in *CreateResourceRequest, opts ...grpc.CallOption) (*Resource, error) {
-	out := new(Resource)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResource", in, out, opts...)
+func (c *knownAdminClient) ListMenus(ctx context.Context, in *ListMenusRequest, opts ...grpc.CallOption) (*ListMenusResponse, error) {
+	out := new(ListMenusResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) UpdateResource(ctx context.Context, in *UpdateResourceRequest, opts ...grpc.CallOption) (*Resource, error) {
-	out := new(Resource)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateResource", in, out, opts...)
+func (c *knownAdminClient) CreateMenu(ctx context.Context, in *CreateMenuRequest, opts ...grpc.CallOption) (*Menu, error) {
+	out := new(Menu)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateMenu", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) DeleteResource(ctx context.Context, in *DeleteResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *knownAdminClient) UpdateMenu(ctx context.Context, in *UpdateMenuRequest, opts ...grpc.CallOption) (*Menu, error) {
+	out := new(Menu)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateMenu", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteMenu(ctx context.Context, in *DeleteMenuRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreateResourceScopes(ctx context.Context, in *CreateResourceScopesRequest, opts ...grpc.CallOption) (*CreateResourceScopesResponse, error) {
-	out := new(CreateResourceScopesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceScopes", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListScopes(ctx context.Context, in *ListScopesRequest, opts ...grpc.CallOption) (*ListScopesResponse, error) {
-	out := new(ListScopesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopes", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreateScope(ctx context.Context, in *CreateScopeRequest, opts ...grpc.CallOption) (*Scope, error) {
-	out := new(Scope)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScope", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdateScope(ctx context.Context, in *UpdateScopeRequest, opts ...grpc.CallOption) (*Scope, error) {
-	out := new(Scope)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateScope", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteScope(ctx context.Context, in *DeleteScopeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScope", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListScopeResources(ctx context.Context, in *ListScopeResourcesRequest, opts ...grpc.CallOption) (*ListScopeResourcesResponse, error) {
-	out := new(ListScopeResourcesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopeResources", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteScopeResource(ctx context.Context, in *DeleteScopeResourceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScopeResource", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreateScopeResources(ctx context.Context, in *CreateScopeResourcesRequest, opts ...grpc.CallOption) (*CreateScopeResourcesResponse, error) {
-	out := new(CreateScopeResourcesResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScopeResources", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteMenu", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -517,6 +377,15 @@ func (c *knownAdminClient) CreateScopeResources(ctx context.Context, in *CreateS
 func (c *knownAdminClient) ListPolicies(ctx context.Context, in *ListPoliciesRequest, opts ...grpc.CallOption) (*ListPoliciesResponse, error) {
 	out := new(ListPoliciesResponse)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicies", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) GetPolicy(ctx context.Context, in *GetPolicyRequest, opts ...grpc.CallOption) (*Policy, error) {
+	out := new(Policy)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicy", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -544,186 +413,6 @@ func (c *knownAdminClient) UpdatePolicy(ctx context.Context, in *UpdatePolicyReq
 func (c *knownAdminClient) DeletePolicy(ctx context.Context, in *DeletePolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicy", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetAction(ctx context.Context, in *GetActionRequest, opts ...grpc.CallOption) (*Action, error) {
-	out := new(Action)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAction", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListActions(ctx context.Context, in *ListActionsRequest, opts ...grpc.CallOption) (*ListActionsResponse, error) {
-	out := new(ListActionsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListActions", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreateAction(ctx context.Context, in *CreateActionRequest, opts ...grpc.CallOption) (*Action, error) {
-	out := new(Action)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAction", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdateAction(ctx context.Context, in *UpdateActionRequest, opts ...grpc.CallOption) (*Action, error) {
-	out := new(Action)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateAction", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeleteAction(ctx context.Context, in *DeleteActionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteAction", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetPolicyStatement(ctx context.Context, in *GetPolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error) {
-	out := new(PolicyStatement)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicyStatement", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListPolicyStatements(ctx context.Context, in *ListPolicyStatementsRequest, opts ...grpc.CallOption) (*ListPolicyStatementsResponse, error) {
-	out := new(ListPolicyStatementsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicyStatements", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreatePolicyStatement(ctx context.Context, in *CreatePolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error) {
-	out := new(PolicyStatement)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicyStatement", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdatePolicyStatement(ctx context.Context, in *UpdatePolicyStatementRequest, opts ...grpc.CallOption) (*PolicyStatement, error) {
-	out := new(PolicyStatement)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicyStatement", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeletePolicyStatement(ctx context.Context, in *DeletePolicyStatementRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicyStatement", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetPolicyAttachment(ctx context.Context, in *GetPolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error) {
-	out := new(PolicyAttachment)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicyAttachment", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListPolicyAttachments(ctx context.Context, in *ListPolicyAttachmentsRequest, opts ...grpc.CallOption) (*ListPolicyAttachmentsResponse, error) {
-	out := new(ListPolicyAttachmentsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicyAttachments", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreatePolicyAttachment(ctx context.Context, in *CreatePolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error) {
-	out := new(PolicyAttachment)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicyAttachment", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdatePolicyAttachment(ctx context.Context, in *UpdatePolicyAttachmentRequest, opts ...grpc.CallOption) (*PolicyAttachment, error) {
-	out := new(PolicyAttachment)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicyAttachment", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeletePolicyAttachment(ctx context.Context, in *DeletePolicyAttachmentRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicyAttachment", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) ListPermissions(ctx context.Context, in *ListPermissionsRequest, opts ...grpc.CallOption) (*ListPermissionsResponse, error) {
-	out := new(ListPermissionsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPermissions", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) GetPermission(ctx context.Context, in *GetPermissionRequest, opts ...grpc.CallOption) (*Permission, error) {
-	out := new(Permission)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPermission", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) CreatePermission(ctx context.Context, in *CreatePermissionRequest, opts ...grpc.CallOption) (*Permission, error) {
-	out := new(Permission)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePermission", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) UpdatePermission(ctx context.Context, in *UpdatePermissionRequest, opts ...grpc.CallOption) (*Permission, error) {
-	out := new(Permission)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePermission", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *knownAdminClient) DeletePermission(ctx context.Context, in *DeletePermissionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePermission", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -811,27 +500,72 @@ func (c *knownAdminClient) DeleteRoleMember(ctx context.Context, in *DeleteRoleM
 	return out, nil
 }
 
-func (c *knownAdminClient) CreateRolePermissions(ctx context.Context, in *CreateRolePermissionsRequest, opts ...grpc.CallOption) (*CreateRolePermissionsResponse, error) {
-	out := new(CreateRolePermissionsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRolePermissions", in, out, opts...)
+func (c *knownAdminClient) ListRoleMenus(ctx context.Context, in *ListRoleMenusRequest, opts ...grpc.CallOption) (*ListRoleMenusResponse, error) {
+	out := new(ListRoleMenusResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleMenus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) DeleteRolePermission(ctx context.Context, in *DeleteRolePermissionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *knownAdminClient) CreateRoleMenus(ctx context.Context, in *CreateRoleMenusRequest, opts ...grpc.CallOption) (*CreateRoleMenusResponse, error) {
+	out := new(CreateRoleMenusResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleMenus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateRoleMenus(ctx context.Context, in *UpdateRoleMenusRequest, opts ...grpc.CallOption) (*UpdateRoleMenusResponse, error) {
+	out := new(UpdateRoleMenusResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRoleMenus", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteRoleMenu(ctx context.Context, in *DeleteRoleMenuRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRolePermission", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMenu", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *knownAdminClient) ListRolePermissions(ctx context.Context, in *ListRolePermissionsRequest, opts ...grpc.CallOption) (*ListRolePermissionsResponse, error) {
-	out := new(ListRolePermissionsResponse)
-	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRolePermissions", in, out, opts...)
+func (c *knownAdminClient) ListRolePolicies(ctx context.Context, in *ListRolePoliciesRequest, opts ...grpc.CallOption) (*ListRolePoliciesResponse, error) {
+	out := new(ListRolePoliciesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRolePolicies", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateRolePolicies(ctx context.Context, in *CreateRolePoliciesRequest, opts ...grpc.CallOption) (*CreateRolePoliciesResponse, error) {
+	out := new(CreateRolePoliciesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRolePolicies", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateRolePolicies(ctx context.Context, in *UpdateRolePoliciesRequest, opts ...grpc.CallOption) (*UpdateRolePoliciesResponse, error) {
+	out := new(UpdateRolePoliciesResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRolePolicies", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteRolePolicy(ctx context.Context, in *DeleteRolePolicyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRolePolicy", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1072,6 +806,51 @@ func (c *knownAdminClient) GetOAuth2Userinfo(ctx context.Context, in *emptypb.Em
 	return out, nil
 }
 
+func (c *knownAdminClient) ListOAuth2Clients(ctx context.Context, in *ListOAuth2ClientsRequest, opts ...grpc.CallOption) (*ListOAuth2ClientsResponse, error) {
+	out := new(ListOAuth2ClientsResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/ListOAuth2Clients", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) CreateOAuth2Client(ctx context.Context, in *CreateOAuth2ClientRequest, opts ...grpc.CallOption) (*CreateOAuth2ClientResponse, error) {
+	out := new(CreateOAuth2ClientResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateOAuth2Client", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) GetOAuth2Client(ctx context.Context, in *GetOAuth2ClientRequest, opts ...grpc.CallOption) (*OAuth2Client, error) {
+	out := new(OAuth2Client)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Client", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) UpdateOAuth2Client(ctx context.Context, in *UpdateOAuth2ClientRequest, opts ...grpc.CallOption) (*OAuth2Client, error) {
+	out := new(OAuth2Client)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateOAuth2Client", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knownAdminClient) DeleteOAuth2Client(ctx context.Context, in *DeleteOAuth2ClientRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteOAuth2Client", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) CreateDatabaseInitialize(ctx context.Context, in *CreateDatabaseInitializeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize", in, out, opts...)
@@ -1086,21 +865,17 @@ func (c *knownAdminClient) CreateDatabaseInitialize(ctx context.Context, in *Cre
 // for forward compatibility
 type KnownAdminServer interface {
 	// 本地配置
-	GetConfig(context.Context, *GetConfigRequest) (*LocalConfig, error)
-	GetConfigServices(context.Context, *GetConfigServicesRequest) (*ServicesConfig, error)
-	GetConfigDiscover(context.Context, *GetConfigDiscoverRequest) (*DiscoverConfig, error)
-	GetConfigSecurity(context.Context, *GetConfigSecurityRequest) (*SecurityConfig, error)
-	GetConfigDatabase(context.Context, *GetConfigDatabaseRequest) (*DatabaseConfig, error)
-	GetConfigCachebox(context.Context, *GetConfigCacheboxRequest) (*CacheboxConfig, error)
-	GetConfigDebugger(context.Context, *GetConfigDebuggerRequest) (*DebuggerConfig, error)
-	GetConfigObjstore(context.Context, *GetConfigObjstoreRequest) (*ObjstoreConfig, error)
-	GetConfigFrontend(context.Context, *GetConfigFrontendRequest) (*FrontendConfig, error)
-	GetConfigObservables(context.Context, *GetConfigObservablesRequest) (*ObservablesConfig, error)
-	GetConfigCloudEvents(context.Context, *GetConfigCloudEventsRequest) (*CloudEventsConfig, error)
-	GetConfigAutomations(context.Context, *GetConfigAutomationsRequest) (*AutomationsConfig, error)
+	ListLocalConfigs(context.Context, *ListLocalConfigsRequest) (*ListLocalConfigsResponse, error)
+	GetLocalConfigs(context.Context, *GetLocalConfigsRequest) (*LocalConfigs, error)
+	// 全局设置
+	GetGlobalSettings(context.Context, *GetGlobalSettingsRequest) (*GlobalSettingCategory, error)
+	ListGlobalSettings(context.Context, *ListGlobalSettingsRequest) (*ListGlobalSettingsResponse, error)
+	UpdateGlobalSettings(context.Context, *UpdateGlobalSettingsRequest) (*UpdateGlobalSettingsResponse, error)
 	// 认证鉴权
 	UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error)
 	ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error)
+	// 获取登录页可用的认证提供方列表（无需认证，仅返回最小字段集）
+	ListLoginOptions(context.Context, *ListLoginOptionsRequest) (*ListLoginOptionsResponse, error)
 	CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error)
 	GetAuthProvider(context.Context, *GetAuthProviderRequest) (*AuthProvider, error)
 	DeleteAuthProvider(context.Context, *DeleteAuthProviderRequest) (*emptypb.Empty, error)
@@ -1116,50 +891,20 @@ type KnownAdminServer interface {
 	SetupUserMFA(context.Context, *SetupUserMFARequest) (*SetupUserMFAResponse, error)
 	ConfirmUserMFA(context.Context, *ConfirmUserMFARequest) (*ConfirmUserMFAResponse, error)
 	DisableUserMFA(context.Context, *DisableUserMFARequest) (*emptypb.Empty, error)
-	// 资源管理
-	GetResource(context.Context, *GetResourceRequest) (*Resource, error)
-	ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error)
-	CreateResource(context.Context, *CreateResourceRequest) (*Resource, error)
-	UpdateResource(context.Context, *UpdateResourceRequest) (*Resource, error)
-	DeleteResource(context.Context, *DeleteResourceRequest) (*emptypb.Empty, error)
-	CreateResourceScopes(context.Context, *CreateResourceScopesRequest) (*CreateResourceScopesResponse, error)
-	// 作用域管理
-	ListScopes(context.Context, *ListScopesRequest) (*ListScopesResponse, error)
-	CreateScope(context.Context, *CreateScopeRequest) (*Scope, error)
-	UpdateScope(context.Context, *UpdateScopeRequest) (*Scope, error)
-	DeleteScope(context.Context, *DeleteScopeRequest) (*emptypb.Empty, error)
-	ListScopeResources(context.Context, *ListScopeResourcesRequest) (*ListScopeResourcesResponse, error)
-	DeleteScopeResource(context.Context, *DeleteScopeResourceRequest) (*emptypb.Empty, error)
-	CreateScopeResources(context.Context, *CreateScopeResourcesRequest) (*CreateScopeResourcesResponse, error)
+	// 服务字典管理
+	ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error)
+	ListServiceActions(context.Context, *ListServiceActionsRequest) (*ListServiceActionsResponse, error)
+	// 菜单管理
+	ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error)
+	CreateMenu(context.Context, *CreateMenuRequest) (*Menu, error)
+	UpdateMenu(context.Context, *UpdateMenuRequest) (*Menu, error)
+	DeleteMenu(context.Context, *DeleteMenuRequest) (*emptypb.Empty, error)
 	// 策略管理
 	ListPolicies(context.Context, *ListPoliciesRequest) (*ListPoliciesResponse, error)
+	GetPolicy(context.Context, *GetPolicyRequest) (*Policy, error)
 	CreatePolicy(context.Context, *CreatePolicyRequest) (*Policy, error)
 	UpdatePolicy(context.Context, *UpdatePolicyRequest) (*Policy, error)
 	DeletePolicy(context.Context, *DeletePolicyRequest) (*emptypb.Empty, error)
-	// 动作管理
-	GetAction(context.Context, *GetActionRequest) (*Action, error)
-	ListActions(context.Context, *ListActionsRequest) (*ListActionsResponse, error)
-	CreateAction(context.Context, *CreateActionRequest) (*Action, error)
-	UpdateAction(context.Context, *UpdateActionRequest) (*Action, error)
-	DeleteAction(context.Context, *DeleteActionRequest) (*emptypb.Empty, error)
-	// 策略语句管理
-	GetPolicyStatement(context.Context, *GetPolicyStatementRequest) (*PolicyStatement, error)
-	ListPolicyStatements(context.Context, *ListPolicyStatementsRequest) (*ListPolicyStatementsResponse, error)
-	CreatePolicyStatement(context.Context, *CreatePolicyStatementRequest) (*PolicyStatement, error)
-	UpdatePolicyStatement(context.Context, *UpdatePolicyStatementRequest) (*PolicyStatement, error)
-	DeletePolicyStatement(context.Context, *DeletePolicyStatementRequest) (*emptypb.Empty, error)
-	// 策略挂载管理
-	GetPolicyAttachment(context.Context, *GetPolicyAttachmentRequest) (*PolicyAttachment, error)
-	ListPolicyAttachments(context.Context, *ListPolicyAttachmentsRequest) (*ListPolicyAttachmentsResponse, error)
-	CreatePolicyAttachment(context.Context, *CreatePolicyAttachmentRequest) (*PolicyAttachment, error)
-	UpdatePolicyAttachment(context.Context, *UpdatePolicyAttachmentRequest) (*PolicyAttachment, error)
-	DeletePolicyAttachment(context.Context, *DeletePolicyAttachmentRequest) (*emptypb.Empty, error)
-	// 权限管理
-	ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error)
-	GetPermission(context.Context, *GetPermissionRequest) (*Permission, error)
-	CreatePermission(context.Context, *CreatePermissionRequest) (*Permission, error)
-	UpdatePermission(context.Context, *UpdatePermissionRequest) (*Permission, error)
-	DeletePermission(context.Context, *DeletePermissionRequest) (*emptypb.Empty, error)
 	// 角色相关
 	CreateRole(context.Context, *CreateRoleRequest) (*Role, error)
 	GetRole(context.Context, *GetRoleRequest) (*Role, error)
@@ -1170,9 +915,14 @@ type KnownAdminServer interface {
 	CreateRoleMembers(context.Context, *CreateRoleMembersRequest) (*CreateRoleMembersResponse, error)
 	UpdateRoleMembers(context.Context, *UpdateRoleMembersRequest) (*UpdateRoleMembersResponse, error)
 	DeleteRoleMember(context.Context, *DeleteRoleMemberRequest) (*emptypb.Empty, error)
-	CreateRolePermissions(context.Context, *CreateRolePermissionsRequest) (*CreateRolePermissionsResponse, error)
-	DeleteRolePermission(context.Context, *DeleteRolePermissionRequest) (*emptypb.Empty, error)
-	ListRolePermissions(context.Context, *ListRolePermissionsRequest) (*ListRolePermissionsResponse, error)
+	ListRoleMenus(context.Context, *ListRoleMenusRequest) (*ListRoleMenusResponse, error)
+	CreateRoleMenus(context.Context, *CreateRoleMenusRequest) (*CreateRoleMenusResponse, error)
+	UpdateRoleMenus(context.Context, *UpdateRoleMenusRequest) (*UpdateRoleMenusResponse, error)
+	DeleteRoleMenu(context.Context, *DeleteRoleMenuRequest) (*emptypb.Empty, error)
+	ListRolePolicies(context.Context, *ListRolePoliciesRequest) (*ListRolePoliciesResponse, error)
+	CreateRolePolicies(context.Context, *CreateRolePoliciesRequest) (*CreateRolePoliciesResponse, error)
+	UpdateRolePolicies(context.Context, *UpdateRolePoliciesRequest) (*UpdateRolePoliciesResponse, error)
+	DeleteRolePolicy(context.Context, *DeleteRolePolicyRequest) (*emptypb.Empty, error)
 	// 部门管理
 	CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
@@ -1204,6 +954,12 @@ type KnownAdminServer interface {
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(context.Context, *emptypb.Empty) (*OAuth2JSONWebKeys, error)
 	GetOAuth2Userinfo(context.Context, *emptypb.Empty) (*OAuth2Userinfo, error)
+	// OAuth2 客户端管理
+	ListOAuth2Clients(context.Context, *ListOAuth2ClientsRequest) (*ListOAuth2ClientsResponse, error)
+	CreateOAuth2Client(context.Context, *CreateOAuth2ClientRequest) (*CreateOAuth2ClientResponse, error)
+	GetOAuth2Client(context.Context, *GetOAuth2ClientRequest) (*OAuth2Client, error)
+	UpdateOAuth2Client(context.Context, *UpdateOAuth2ClientRequest) (*OAuth2Client, error)
+	DeleteOAuth2Client(context.Context, *DeleteOAuth2ClientRequest) (*emptypb.Empty, error)
 	// 数据库相关
 	CreateDatabaseInitialize(context.Context, *CreateDatabaseInitializeRequest) (*emptypb.Empty, error)
 }
@@ -1212,47 +968,29 @@ type KnownAdminServer interface {
 type UnimplementedKnownAdminServer struct {
 }
 
-func (UnimplementedKnownAdminServer) GetConfig(context.Context, *GetConfigRequest) (*LocalConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
+func (UnimplementedKnownAdminServer) ListLocalConfigs(context.Context, *ListLocalConfigsRequest) (*ListLocalConfigsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListLocalConfigs not implemented")
 }
-func (UnimplementedKnownAdminServer) GetConfigServices(context.Context, *GetConfigServicesRequest) (*ServicesConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigServices not implemented")
+func (UnimplementedKnownAdminServer) GetLocalConfigs(context.Context, *GetLocalConfigsRequest) (*LocalConfigs, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetLocalConfigs not implemented")
 }
-func (UnimplementedKnownAdminServer) GetConfigDiscover(context.Context, *GetConfigDiscoverRequest) (*DiscoverConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigDiscover not implemented")
+func (UnimplementedKnownAdminServer) GetGlobalSettings(context.Context, *GetGlobalSettingsRequest) (*GlobalSettingCategory, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGlobalSettings not implemented")
 }
-func (UnimplementedKnownAdminServer) GetConfigSecurity(context.Context, *GetConfigSecurityRequest) (*SecurityConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigSecurity not implemented")
+func (UnimplementedKnownAdminServer) ListGlobalSettings(context.Context, *ListGlobalSettingsRequest) (*ListGlobalSettingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListGlobalSettings not implemented")
 }
-func (UnimplementedKnownAdminServer) GetConfigDatabase(context.Context, *GetConfigDatabaseRequest) (*DatabaseConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigDatabase not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigCachebox(context.Context, *GetConfigCacheboxRequest) (*CacheboxConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigCachebox not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigDebugger(context.Context, *GetConfigDebuggerRequest) (*DebuggerConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigDebugger not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigObjstore(context.Context, *GetConfigObjstoreRequest) (*ObjstoreConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigObjstore not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigFrontend(context.Context, *GetConfigFrontendRequest) (*FrontendConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigFrontend not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigObservables(context.Context, *GetConfigObservablesRequest) (*ObservablesConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigObservables not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigCloudEvents(context.Context, *GetConfigCloudEventsRequest) (*CloudEventsConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigCloudEvents not implemented")
-}
-func (UnimplementedKnownAdminServer) GetConfigAutomations(context.Context, *GetConfigAutomationsRequest) (*AutomationsConfig, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetConfigAutomations not implemented")
+func (UnimplementedKnownAdminServer) UpdateGlobalSettings(context.Context, *UpdateGlobalSettingsRequest) (*UpdateGlobalSettingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateGlobalSettings not implemented")
 }
 func (UnimplementedKnownAdminServer) UpsertAuthProviders(context.Context, *UpsertAuthProvidersRequest) (*UpsertAuthProvidersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertAuthProviders not implemented")
 }
 func (UnimplementedKnownAdminServer) ListAuthProviders(context.Context, *ListAuthProvidersRequest) (*ListAuthProvidersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAuthProviders not implemented")
+}
+func (UnimplementedKnownAdminServer) ListLoginOptions(context.Context, *ListLoginOptionsRequest) (*ListLoginOptionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListLoginOptions not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateAuthProvider(context.Context, *CreateAuthProviderRequest) (*AuthProvider, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateAuthProvider not implemented")
@@ -1293,47 +1031,29 @@ func (UnimplementedKnownAdminServer) ConfirmUserMFA(context.Context, *ConfirmUse
 func (UnimplementedKnownAdminServer) DisableUserMFA(context.Context, *DisableUserMFARequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DisableUserMFA not implemented")
 }
-func (UnimplementedKnownAdminServer) GetResource(context.Context, *GetResourceRequest) (*Resource, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetResource not implemented")
+func (UnimplementedKnownAdminServer) ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListServices not implemented")
 }
-func (UnimplementedKnownAdminServer) ListResources(context.Context, *ListResourcesRequest) (*ListResourcesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListResources not implemented")
+func (UnimplementedKnownAdminServer) ListServiceActions(context.Context, *ListServiceActionsRequest) (*ListServiceActionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListServiceActions not implemented")
 }
-func (UnimplementedKnownAdminServer) CreateResource(context.Context, *CreateResourceRequest) (*Resource, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateResource not implemented")
+func (UnimplementedKnownAdminServer) ListMenus(context.Context, *ListMenusRequest) (*ListMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMenus not implemented")
 }
-func (UnimplementedKnownAdminServer) UpdateResource(context.Context, *UpdateResourceRequest) (*Resource, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateResource not implemented")
+func (UnimplementedKnownAdminServer) CreateMenu(context.Context, *CreateMenuRequest) (*Menu, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateMenu not implemented")
 }
-func (UnimplementedKnownAdminServer) DeleteResource(context.Context, *DeleteResourceRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteResource not implemented")
+func (UnimplementedKnownAdminServer) UpdateMenu(context.Context, *UpdateMenuRequest) (*Menu, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateMenu not implemented")
 }
-func (UnimplementedKnownAdminServer) CreateResourceScopes(context.Context, *CreateResourceScopesRequest) (*CreateResourceScopesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateResourceScopes not implemented")
-}
-func (UnimplementedKnownAdminServer) ListScopes(context.Context, *ListScopesRequest) (*ListScopesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListScopes not implemented")
-}
-func (UnimplementedKnownAdminServer) CreateScope(context.Context, *CreateScopeRequest) (*Scope, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateScope not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdateScope(context.Context, *UpdateScopeRequest) (*Scope, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateScope not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteScope(context.Context, *DeleteScopeRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteScope not implemented")
-}
-func (UnimplementedKnownAdminServer) ListScopeResources(context.Context, *ListScopeResourcesRequest) (*ListScopeResourcesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListScopeResources not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteScopeResource(context.Context, *DeleteScopeResourceRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteScopeResource not implemented")
-}
-func (UnimplementedKnownAdminServer) CreateScopeResources(context.Context, *CreateScopeResourcesRequest) (*CreateScopeResourcesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateScopeResources not implemented")
+func (UnimplementedKnownAdminServer) DeleteMenu(context.Context, *DeleteMenuRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteMenu not implemented")
 }
 func (UnimplementedKnownAdminServer) ListPolicies(context.Context, *ListPoliciesRequest) (*ListPoliciesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPolicies not implemented")
+}
+func (UnimplementedKnownAdminServer) GetPolicy(context.Context, *GetPolicyRequest) (*Policy, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPolicy not implemented")
 }
 func (UnimplementedKnownAdminServer) CreatePolicy(context.Context, *CreatePolicyRequest) (*Policy, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePolicy not implemented")
@@ -1343,66 +1063,6 @@ func (UnimplementedKnownAdminServer) UpdatePolicy(context.Context, *UpdatePolicy
 }
 func (UnimplementedKnownAdminServer) DeletePolicy(context.Context, *DeletePolicyRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePolicy not implemented")
-}
-func (UnimplementedKnownAdminServer) GetAction(context.Context, *GetActionRequest) (*Action, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAction not implemented")
-}
-func (UnimplementedKnownAdminServer) ListActions(context.Context, *ListActionsRequest) (*ListActionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListActions not implemented")
-}
-func (UnimplementedKnownAdminServer) CreateAction(context.Context, *CreateActionRequest) (*Action, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateAction not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdateAction(context.Context, *UpdateActionRequest) (*Action, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateAction not implemented")
-}
-func (UnimplementedKnownAdminServer) DeleteAction(context.Context, *DeleteActionRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteAction not implemented")
-}
-func (UnimplementedKnownAdminServer) GetPolicyStatement(context.Context, *GetPolicyStatementRequest) (*PolicyStatement, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPolicyStatement not implemented")
-}
-func (UnimplementedKnownAdminServer) ListPolicyStatements(context.Context, *ListPolicyStatementsRequest) (*ListPolicyStatementsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListPolicyStatements not implemented")
-}
-func (UnimplementedKnownAdminServer) CreatePolicyStatement(context.Context, *CreatePolicyStatementRequest) (*PolicyStatement, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreatePolicyStatement not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdatePolicyStatement(context.Context, *UpdatePolicyStatementRequest) (*PolicyStatement, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdatePolicyStatement not implemented")
-}
-func (UnimplementedKnownAdminServer) DeletePolicyStatement(context.Context, *DeletePolicyStatementRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeletePolicyStatement not implemented")
-}
-func (UnimplementedKnownAdminServer) GetPolicyAttachment(context.Context, *GetPolicyAttachmentRequest) (*PolicyAttachment, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPolicyAttachment not implemented")
-}
-func (UnimplementedKnownAdminServer) ListPolicyAttachments(context.Context, *ListPolicyAttachmentsRequest) (*ListPolicyAttachmentsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListPolicyAttachments not implemented")
-}
-func (UnimplementedKnownAdminServer) CreatePolicyAttachment(context.Context, *CreatePolicyAttachmentRequest) (*PolicyAttachment, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreatePolicyAttachment not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdatePolicyAttachment(context.Context, *UpdatePolicyAttachmentRequest) (*PolicyAttachment, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdatePolicyAttachment not implemented")
-}
-func (UnimplementedKnownAdminServer) DeletePolicyAttachment(context.Context, *DeletePolicyAttachmentRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeletePolicyAttachment not implemented")
-}
-func (UnimplementedKnownAdminServer) ListPermissions(context.Context, *ListPermissionsRequest) (*ListPermissionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListPermissions not implemented")
-}
-func (UnimplementedKnownAdminServer) GetPermission(context.Context, *GetPermissionRequest) (*Permission, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPermission not implemented")
-}
-func (UnimplementedKnownAdminServer) CreatePermission(context.Context, *CreatePermissionRequest) (*Permission, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreatePermission not implemented")
-}
-func (UnimplementedKnownAdminServer) UpdatePermission(context.Context, *UpdatePermissionRequest) (*Permission, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdatePermission not implemented")
-}
-func (UnimplementedKnownAdminServer) DeletePermission(context.Context, *DeletePermissionRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeletePermission not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateRole(context.Context, *CreateRoleRequest) (*Role, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRole not implemented")
@@ -1431,14 +1091,29 @@ func (UnimplementedKnownAdminServer) UpdateRoleMembers(context.Context, *UpdateR
 func (UnimplementedKnownAdminServer) DeleteRoleMember(context.Context, *DeleteRoleMemberRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteRoleMember not implemented")
 }
-func (UnimplementedKnownAdminServer) CreateRolePermissions(context.Context, *CreateRolePermissionsRequest) (*CreateRolePermissionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateRolePermissions not implemented")
+func (UnimplementedKnownAdminServer) ListRoleMenus(context.Context, *ListRoleMenusRequest) (*ListRoleMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRoleMenus not implemented")
 }
-func (UnimplementedKnownAdminServer) DeleteRolePermission(context.Context, *DeleteRolePermissionRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteRolePermission not implemented")
+func (UnimplementedKnownAdminServer) CreateRoleMenus(context.Context, *CreateRoleMenusRequest) (*CreateRoleMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateRoleMenus not implemented")
 }
-func (UnimplementedKnownAdminServer) ListRolePermissions(context.Context, *ListRolePermissionsRequest) (*ListRolePermissionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListRolePermissions not implemented")
+func (UnimplementedKnownAdminServer) UpdateRoleMenus(context.Context, *UpdateRoleMenusRequest) (*UpdateRoleMenusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateRoleMenus not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteRoleMenu(context.Context, *DeleteRoleMenuRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteRoleMenu not implemented")
+}
+func (UnimplementedKnownAdminServer) ListRolePolicies(context.Context, *ListRolePoliciesRequest) (*ListRolePoliciesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRolePolicies not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateRolePolicies(context.Context, *CreateRolePoliciesRequest) (*CreateRolePoliciesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateRolePolicies not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateRolePolicies(context.Context, *UpdateRolePoliciesRequest) (*UpdateRolePoliciesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateRolePolicies not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteRolePolicy(context.Context, *DeleteRolePolicyRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteRolePolicy not implemented")
 }
 func (UnimplementedKnownAdminServer) CreateDepartment(context.Context, *CreateDepartmentRequest) (*Department, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDepartment not implemented")
@@ -1518,6 +1193,21 @@ func (UnimplementedKnownAdminServer) GetOAuth2JSONWebKeys(context.Context, *empt
 func (UnimplementedKnownAdminServer) GetOAuth2Userinfo(context.Context, *emptypb.Empty) (*OAuth2Userinfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2Userinfo not implemented")
 }
+func (UnimplementedKnownAdminServer) ListOAuth2Clients(context.Context, *ListOAuth2ClientsRequest) (*ListOAuth2ClientsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOAuth2Clients not implemented")
+}
+func (UnimplementedKnownAdminServer) CreateOAuth2Client(context.Context, *CreateOAuth2ClientRequest) (*CreateOAuth2ClientResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateOAuth2Client not implemented")
+}
+func (UnimplementedKnownAdminServer) GetOAuth2Client(context.Context, *GetOAuth2ClientRequest) (*OAuth2Client, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2Client not implemented")
+}
+func (UnimplementedKnownAdminServer) UpdateOAuth2Client(context.Context, *UpdateOAuth2ClientRequest) (*OAuth2Client, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOAuth2Client not implemented")
+}
+func (UnimplementedKnownAdminServer) DeleteOAuth2Client(context.Context, *DeleteOAuth2ClientRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteOAuth2Client not implemented")
+}
 func (UnimplementedKnownAdminServer) CreateDatabaseInitialize(context.Context, *CreateDatabaseInitializeRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDatabaseInitialize not implemented")
 }
@@ -1533,218 +1223,92 @@ func RegisterKnownAdminServer(s grpc.ServiceRegistrar, srv KnownAdminServer) {
 	s.RegisterService(&KnownAdmin_ServiceDesc, srv)
 }
 
-func _KnownAdmin_GetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigRequest)
+func _KnownAdmin_ListLocalConfigs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListLocalConfigsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfig(ctx, in)
+		return srv.(KnownAdminServer).ListLocalConfigs(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfig",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLocalConfigs",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfig(ctx, req.(*GetConfigRequest))
+		return srv.(KnownAdminServer).ListLocalConfigs(ctx, req.(*ListLocalConfigsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_GetConfigServices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigServicesRequest)
+func _KnownAdmin_GetLocalConfigs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLocalConfigsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigServices(ctx, in)
+		return srv.(KnownAdminServer).GetLocalConfigs(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigServices",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetLocalConfigs",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigServices(ctx, req.(*GetConfigServicesRequest))
+		return srv.(KnownAdminServer).GetLocalConfigs(ctx, req.(*GetLocalConfigsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_GetConfigDiscover_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigDiscoverRequest)
+func _KnownAdmin_GetGlobalSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGlobalSettingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigDiscover(ctx, in)
+		return srv.(KnownAdminServer).GetGlobalSettings(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDiscover",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetGlobalSettings",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigDiscover(ctx, req.(*GetConfigDiscoverRequest))
+		return srv.(KnownAdminServer).GetGlobalSettings(ctx, req.(*GetGlobalSettingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_GetConfigSecurity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigSecurityRequest)
+func _KnownAdmin_ListGlobalSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListGlobalSettingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigSecurity(ctx, in)
+		return srv.(KnownAdminServer).ListGlobalSettings(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigSecurity",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListGlobalSettings",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigSecurity(ctx, req.(*GetConfigSecurityRequest))
+		return srv.(KnownAdminServer).ListGlobalSettings(ctx, req.(*ListGlobalSettingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_GetConfigDatabase_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigDatabaseRequest)
+func _KnownAdmin_UpdateGlobalSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateGlobalSettingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigDatabase(ctx, in)
+		return srv.(KnownAdminServer).UpdateGlobalSettings(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDatabase",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateGlobalSettings",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigDatabase(ctx, req.(*GetConfigDatabaseRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigCachebox_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigCacheboxRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigCachebox(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigCachebox",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigCachebox(ctx, req.(*GetConfigCacheboxRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigDebugger_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigDebuggerRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigDebugger(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigDebugger",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigDebugger(ctx, req.(*GetConfigDebuggerRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigObjstore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigObjstoreRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigObjstore(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigObjstore",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigObjstore(ctx, req.(*GetConfigObjstoreRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigFrontend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigFrontendRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigFrontend(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigFrontend",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigFrontend(ctx, req.(*GetConfigFrontendRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigObservables_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigObservablesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigObservables(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigObservables",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigObservables(ctx, req.(*GetConfigObservablesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigCloudEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigCloudEventsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigCloudEvents(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigCloudEvents",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigCloudEvents(ctx, req.(*GetConfigCloudEventsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetConfigAutomations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConfigAutomationsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetConfigAutomations(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetConfigAutomations",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetConfigAutomations(ctx, req.(*GetConfigAutomationsRequest))
+		return srv.(KnownAdminServer).UpdateGlobalSettings(ctx, req.(*UpdateGlobalSettingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1781,6 +1345,24 @@ func _KnownAdmin_ListAuthProviders_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).ListAuthProviders(ctx, req.(*ListAuthProvidersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListLoginOptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListLoginOptionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListLoginOptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLoginOptions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListLoginOptions(ctx, req.(*ListLoginOptionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2019,236 +1601,110 @@ func _KnownAdmin_DisableUserMFA_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_GetResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetResourceRequest)
+func _KnownAdmin_ListServices_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListServicesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).GetResource(ctx, in)
+		return srv.(KnownAdminServer).ListServices(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetResource",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServices",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetResource(ctx, req.(*GetResourceRequest))
+		return srv.(KnownAdminServer).ListServices(ctx, req.(*ListServicesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_ListResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListResourcesRequest)
+func _KnownAdmin_ListServiceActions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListServiceActionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).ListResources(ctx, in)
+		return srv.(KnownAdminServer).ListServiceActions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListResources",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListServiceActions",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListResources(ctx, req.(*ListResourcesRequest))
+		return srv.(KnownAdminServer).ListServiceActions(ctx, req.(*ListServiceActionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_CreateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateResourceRequest)
+func _KnownAdmin_ListMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMenusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateResource(ctx, in)
+		return srv.(KnownAdminServer).ListMenus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResource",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListMenus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateResource(ctx, req.(*CreateResourceRequest))
+		return srv.(KnownAdminServer).ListMenus(ctx, req.(*ListMenusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_UpdateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateResourceRequest)
+func _KnownAdmin_CreateMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateMenuRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdateResource(ctx, in)
+		return srv.(KnownAdminServer).CreateMenu(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateResource",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateMenu",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdateResource(ctx, req.(*UpdateResourceRequest))
+		return srv.(KnownAdminServer).CreateMenu(ctx, req.(*CreateMenuRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_DeleteResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteResourceRequest)
+func _KnownAdmin_UpdateMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMenuRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteResource(ctx, in)
+		return srv.(KnownAdminServer).UpdateMenu(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteResource",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateMenu",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteResource(ctx, req.(*DeleteResourceRequest))
+		return srv.(KnownAdminServer).UpdateMenu(ctx, req.(*UpdateMenuRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_CreateResourceScopes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateResourceScopesRequest)
+func _KnownAdmin_DeleteMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMenuRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateResourceScopes(ctx, in)
+		return srv.(KnownAdminServer).DeleteMenu(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateResourceScopes",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteMenu",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateResourceScopes(ctx, req.(*CreateResourceScopesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListScopes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListScopesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListScopes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopes",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListScopes(ctx, req.(*ListScopesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreateScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateScopeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateScope(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScope",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateScope(ctx, req.(*CreateScopeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdateScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateScopeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdateScope(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateScope",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdateScope(ctx, req.(*UpdateScopeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteScope_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteScopeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteScope(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScope",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteScope(ctx, req.(*DeleteScopeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListScopeResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListScopeResourcesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListScopeResources(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListScopeResources",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListScopeResources(ctx, req.(*ListScopeResourcesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteScopeResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteScopeResourceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteScopeResource(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteScopeResource",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteScopeResource(ctx, req.(*DeleteScopeResourceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreateScopeResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateScopeResourcesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateScopeResources(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateScopeResources",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateScopeResources(ctx, req.(*CreateScopeResourcesRequest))
+		return srv.(KnownAdminServer).DeleteMenu(ctx, req.(*DeleteMenuRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2267,6 +1723,24 @@ func _KnownAdmin_ListPolicies_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).ListPolicies(ctx, req.(*ListPoliciesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_GetPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetPolicy(ctx, req.(*GetPolicyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2321,366 +1795,6 @@ func _KnownAdmin_DeletePolicy_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(KnownAdminServer).DeletePolicy(ctx, req.(*DeletePolicyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetActionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetAction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetAction",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetAction(ctx, req.(*GetActionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListActions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListActionsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListActions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListActions",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListActions(ctx, req.(*ListActionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreateAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateActionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateAction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAction",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateAction(ctx, req.(*CreateActionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdateAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateActionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdateAction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateAction",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdateAction(ctx, req.(*UpdateActionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeleteAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteActionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteAction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteAction",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteAction(ctx, req.(*DeleteActionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetPolicyStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPolicyStatementRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetPolicyStatement(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicyStatement",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetPolicyStatement(ctx, req.(*GetPolicyStatementRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListPolicyStatements_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPolicyStatementsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListPolicyStatements(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicyStatements",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListPolicyStatements(ctx, req.(*ListPolicyStatementsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreatePolicyStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreatePolicyStatementRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreatePolicyStatement(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicyStatement",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreatePolicyStatement(ctx, req.(*CreatePolicyStatementRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdatePolicyStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdatePolicyStatementRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdatePolicyStatement(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicyStatement",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdatePolicyStatement(ctx, req.(*UpdatePolicyStatementRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeletePolicyStatement_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeletePolicyStatementRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeletePolicyStatement(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicyStatement",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeletePolicyStatement(ctx, req.(*DeletePolicyStatementRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetPolicyAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPolicyAttachmentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetPolicyAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPolicyAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetPolicyAttachment(ctx, req.(*GetPolicyAttachmentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListPolicyAttachments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPolicyAttachmentsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListPolicyAttachments(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPolicyAttachments",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListPolicyAttachments(ctx, req.(*ListPolicyAttachmentsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreatePolicyAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreatePolicyAttachmentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreatePolicyAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePolicyAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreatePolicyAttachment(ctx, req.(*CreatePolicyAttachmentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdatePolicyAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdatePolicyAttachmentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdatePolicyAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePolicyAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdatePolicyAttachment(ctx, req.(*UpdatePolicyAttachmentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeletePolicyAttachment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeletePolicyAttachmentRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeletePolicyAttachment(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePolicyAttachment",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeletePolicyAttachment(ctx, req.(*DeletePolicyAttachmentRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_ListPermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPermissionsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).ListPermissions(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListPermissions",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListPermissions(ctx, req.(*ListPermissionsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_GetPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).GetPermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetPermission",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).GetPermission(ctx, req.(*GetPermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_CreatePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreatePermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).CreatePermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreatePermission",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreatePermission(ctx, req.(*CreatePermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_UpdatePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdatePermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).UpdatePermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdatePermission",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).UpdatePermission(ctx, req.(*UpdatePermissionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _KnownAdmin_DeletePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeletePermissionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(KnownAdminServer).DeletePermission(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeletePermission",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeletePermission(ctx, req.(*DeletePermissionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2847,56 +1961,146 @@ func _KnownAdmin_DeleteRoleMember_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_CreateRolePermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateRolePermissionsRequest)
+func _KnownAdmin_ListRoleMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRoleMenusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).CreateRolePermissions(ctx, in)
+		return srv.(KnownAdminServer).ListRoleMenus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRolePermissions",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRoleMenus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).CreateRolePermissions(ctx, req.(*CreateRolePermissionsRequest))
+		return srv.(KnownAdminServer).ListRoleMenus(ctx, req.(*ListRoleMenusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_DeleteRolePermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteRolePermissionRequest)
+func _KnownAdmin_CreateRoleMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRoleMenusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).DeleteRolePermission(ctx, in)
+		return srv.(KnownAdminServer).CreateRoleMenus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRolePermission",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRoleMenus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).DeleteRolePermission(ctx, req.(*DeleteRolePermissionRequest))
+		return srv.(KnownAdminServer).CreateRoleMenus(ctx, req.(*CreateRoleMenusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _KnownAdmin_ListRolePermissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListRolePermissionsRequest)
+func _KnownAdmin_UpdateRoleMenus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRoleMenusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KnownAdminServer).ListRolePermissions(ctx, in)
+		return srv.(KnownAdminServer).UpdateRoleMenus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRolePermissions",
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRoleMenus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KnownAdminServer).ListRolePermissions(ctx, req.(*ListRolePermissionsRequest))
+		return srv.(KnownAdminServer).UpdateRoleMenus(ctx, req.(*UpdateRoleMenusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteRoleMenu_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRoleMenuRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteRoleMenu(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRoleMenu",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteRoleMenu(ctx, req.(*DeleteRoleMenuRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_ListRolePolicies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRolePoliciesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListRolePolicies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListRolePolicies",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListRolePolicies(ctx, req.(*ListRolePoliciesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateRolePolicies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRolePoliciesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateRolePolicies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateRolePolicies",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateRolePolicies(ctx, req.(*CreateRolePoliciesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateRolePolicies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRolePoliciesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateRolePolicies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateRolePolicies",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateRolePolicies(ctx, req.(*UpdateRolePoliciesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteRolePolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRolePolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteRolePolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteRolePolicy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteRolePolicy(ctx, req.(*DeleteRolePolicyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -3369,6 +2573,96 @@ func _KnownAdmin_GetOAuth2Userinfo_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_ListOAuth2Clients_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOAuth2ClientsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).ListOAuth2Clients(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/ListOAuth2Clients",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).ListOAuth2Clients(ctx, req.(*ListOAuth2ClientsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_CreateOAuth2Client_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOAuth2ClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).CreateOAuth2Client(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/CreateOAuth2Client",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).CreateOAuth2Client(ctx, req.(*CreateOAuth2ClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_GetOAuth2Client_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOAuth2ClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).GetOAuth2Client(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Client",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).GetOAuth2Client(ctx, req.(*GetOAuth2ClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_UpdateOAuth2Client_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateOAuth2ClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).UpdateOAuth2Client(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/UpdateOAuth2Client",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).UpdateOAuth2Client(ctx, req.(*UpdateOAuth2ClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnownAdmin_DeleteOAuth2Client_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteOAuth2ClientRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).DeleteOAuth2Client(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/DeleteOAuth2Client",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).DeleteOAuth2Client(ctx, req.(*DeleteOAuth2ClientRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_CreateDatabaseInitialize_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateDatabaseInitializeRequest)
 	if err := dec(in); err != nil {
@@ -3395,52 +2689,24 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*KnownAdminServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetConfig",
-			Handler:    _KnownAdmin_GetConfig_Handler,
+			MethodName: "ListLocalConfigs",
+			Handler:    _KnownAdmin_ListLocalConfigs_Handler,
 		},
 		{
-			MethodName: "GetConfigServices",
-			Handler:    _KnownAdmin_GetConfigServices_Handler,
+			MethodName: "GetLocalConfigs",
+			Handler:    _KnownAdmin_GetLocalConfigs_Handler,
 		},
 		{
-			MethodName: "GetConfigDiscover",
-			Handler:    _KnownAdmin_GetConfigDiscover_Handler,
+			MethodName: "GetGlobalSettings",
+			Handler:    _KnownAdmin_GetGlobalSettings_Handler,
 		},
 		{
-			MethodName: "GetConfigSecurity",
-			Handler:    _KnownAdmin_GetConfigSecurity_Handler,
+			MethodName: "ListGlobalSettings",
+			Handler:    _KnownAdmin_ListGlobalSettings_Handler,
 		},
 		{
-			MethodName: "GetConfigDatabase",
-			Handler:    _KnownAdmin_GetConfigDatabase_Handler,
-		},
-		{
-			MethodName: "GetConfigCachebox",
-			Handler:    _KnownAdmin_GetConfigCachebox_Handler,
-		},
-		{
-			MethodName: "GetConfigDebugger",
-			Handler:    _KnownAdmin_GetConfigDebugger_Handler,
-		},
-		{
-			MethodName: "GetConfigObjstore",
-			Handler:    _KnownAdmin_GetConfigObjstore_Handler,
-		},
-		{
-			MethodName: "GetConfigFrontend",
-			Handler:    _KnownAdmin_GetConfigFrontend_Handler,
-		},
-		{
-			MethodName: "GetConfigObservables",
-			Handler:    _KnownAdmin_GetConfigObservables_Handler,
-		},
-		{
-			MethodName: "GetConfigCloudEvents",
-			Handler:    _KnownAdmin_GetConfigCloudEvents_Handler,
-		},
-		{
-			MethodName: "GetConfigAutomations",
-			Handler:    _KnownAdmin_GetConfigAutomations_Handler,
+			MethodName: "UpdateGlobalSettings",
+			Handler:    _KnownAdmin_UpdateGlobalSettings_Handler,
 		},
 		{
 			MethodName: "UpsertAuthProviders",
@@ -3449,6 +2715,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAuthProviders",
 			Handler:    _KnownAdmin_ListAuthProviders_Handler,
+		},
+		{
+			MethodName: "ListLoginOptions",
+			Handler:    _KnownAdmin_ListLoginOptions_Handler,
 		},
 		{
 			MethodName: "CreateAuthProvider",
@@ -3503,60 +2773,36 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_DisableUserMFA_Handler,
 		},
 		{
-			MethodName: "GetResource",
-			Handler:    _KnownAdmin_GetResource_Handler,
+			MethodName: "ListServices",
+			Handler:    _KnownAdmin_ListServices_Handler,
 		},
 		{
-			MethodName: "ListResources",
-			Handler:    _KnownAdmin_ListResources_Handler,
+			MethodName: "ListServiceActions",
+			Handler:    _KnownAdmin_ListServiceActions_Handler,
 		},
 		{
-			MethodName: "CreateResource",
-			Handler:    _KnownAdmin_CreateResource_Handler,
+			MethodName: "ListMenus",
+			Handler:    _KnownAdmin_ListMenus_Handler,
 		},
 		{
-			MethodName: "UpdateResource",
-			Handler:    _KnownAdmin_UpdateResource_Handler,
+			MethodName: "CreateMenu",
+			Handler:    _KnownAdmin_CreateMenu_Handler,
 		},
 		{
-			MethodName: "DeleteResource",
-			Handler:    _KnownAdmin_DeleteResource_Handler,
+			MethodName: "UpdateMenu",
+			Handler:    _KnownAdmin_UpdateMenu_Handler,
 		},
 		{
-			MethodName: "CreateResourceScopes",
-			Handler:    _KnownAdmin_CreateResourceScopes_Handler,
-		},
-		{
-			MethodName: "ListScopes",
-			Handler:    _KnownAdmin_ListScopes_Handler,
-		},
-		{
-			MethodName: "CreateScope",
-			Handler:    _KnownAdmin_CreateScope_Handler,
-		},
-		{
-			MethodName: "UpdateScope",
-			Handler:    _KnownAdmin_UpdateScope_Handler,
-		},
-		{
-			MethodName: "DeleteScope",
-			Handler:    _KnownAdmin_DeleteScope_Handler,
-		},
-		{
-			MethodName: "ListScopeResources",
-			Handler:    _KnownAdmin_ListScopeResources_Handler,
-		},
-		{
-			MethodName: "DeleteScopeResource",
-			Handler:    _KnownAdmin_DeleteScopeResource_Handler,
-		},
-		{
-			MethodName: "CreateScopeResources",
-			Handler:    _KnownAdmin_CreateScopeResources_Handler,
+			MethodName: "DeleteMenu",
+			Handler:    _KnownAdmin_DeleteMenu_Handler,
 		},
 		{
 			MethodName: "ListPolicies",
 			Handler:    _KnownAdmin_ListPolicies_Handler,
+		},
+		{
+			MethodName: "GetPolicy",
+			Handler:    _KnownAdmin_GetPolicy_Handler,
 		},
 		{
 			MethodName: "CreatePolicy",
@@ -3569,86 +2815,6 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePolicy",
 			Handler:    _KnownAdmin_DeletePolicy_Handler,
-		},
-		{
-			MethodName: "GetAction",
-			Handler:    _KnownAdmin_GetAction_Handler,
-		},
-		{
-			MethodName: "ListActions",
-			Handler:    _KnownAdmin_ListActions_Handler,
-		},
-		{
-			MethodName: "CreateAction",
-			Handler:    _KnownAdmin_CreateAction_Handler,
-		},
-		{
-			MethodName: "UpdateAction",
-			Handler:    _KnownAdmin_UpdateAction_Handler,
-		},
-		{
-			MethodName: "DeleteAction",
-			Handler:    _KnownAdmin_DeleteAction_Handler,
-		},
-		{
-			MethodName: "GetPolicyStatement",
-			Handler:    _KnownAdmin_GetPolicyStatement_Handler,
-		},
-		{
-			MethodName: "ListPolicyStatements",
-			Handler:    _KnownAdmin_ListPolicyStatements_Handler,
-		},
-		{
-			MethodName: "CreatePolicyStatement",
-			Handler:    _KnownAdmin_CreatePolicyStatement_Handler,
-		},
-		{
-			MethodName: "UpdatePolicyStatement",
-			Handler:    _KnownAdmin_UpdatePolicyStatement_Handler,
-		},
-		{
-			MethodName: "DeletePolicyStatement",
-			Handler:    _KnownAdmin_DeletePolicyStatement_Handler,
-		},
-		{
-			MethodName: "GetPolicyAttachment",
-			Handler:    _KnownAdmin_GetPolicyAttachment_Handler,
-		},
-		{
-			MethodName: "ListPolicyAttachments",
-			Handler:    _KnownAdmin_ListPolicyAttachments_Handler,
-		},
-		{
-			MethodName: "CreatePolicyAttachment",
-			Handler:    _KnownAdmin_CreatePolicyAttachment_Handler,
-		},
-		{
-			MethodName: "UpdatePolicyAttachment",
-			Handler:    _KnownAdmin_UpdatePolicyAttachment_Handler,
-		},
-		{
-			MethodName: "DeletePolicyAttachment",
-			Handler:    _KnownAdmin_DeletePolicyAttachment_Handler,
-		},
-		{
-			MethodName: "ListPermissions",
-			Handler:    _KnownAdmin_ListPermissions_Handler,
-		},
-		{
-			MethodName: "GetPermission",
-			Handler:    _KnownAdmin_GetPermission_Handler,
-		},
-		{
-			MethodName: "CreatePermission",
-			Handler:    _KnownAdmin_CreatePermission_Handler,
-		},
-		{
-			MethodName: "UpdatePermission",
-			Handler:    _KnownAdmin_UpdatePermission_Handler,
-		},
-		{
-			MethodName: "DeletePermission",
-			Handler:    _KnownAdmin_DeletePermission_Handler,
 		},
 		{
 			MethodName: "CreateRole",
@@ -3687,16 +2853,36 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KnownAdmin_DeleteRoleMember_Handler,
 		},
 		{
-			MethodName: "CreateRolePermissions",
-			Handler:    _KnownAdmin_CreateRolePermissions_Handler,
+			MethodName: "ListRoleMenus",
+			Handler:    _KnownAdmin_ListRoleMenus_Handler,
 		},
 		{
-			MethodName: "DeleteRolePermission",
-			Handler:    _KnownAdmin_DeleteRolePermission_Handler,
+			MethodName: "CreateRoleMenus",
+			Handler:    _KnownAdmin_CreateRoleMenus_Handler,
 		},
 		{
-			MethodName: "ListRolePermissions",
-			Handler:    _KnownAdmin_ListRolePermissions_Handler,
+			MethodName: "UpdateRoleMenus",
+			Handler:    _KnownAdmin_UpdateRoleMenus_Handler,
+		},
+		{
+			MethodName: "DeleteRoleMenu",
+			Handler:    _KnownAdmin_DeleteRoleMenu_Handler,
+		},
+		{
+			MethodName: "ListRolePolicies",
+			Handler:    _KnownAdmin_ListRolePolicies_Handler,
+		},
+		{
+			MethodName: "CreateRolePolicies",
+			Handler:    _KnownAdmin_CreateRolePolicies_Handler,
+		},
+		{
+			MethodName: "UpdateRolePolicies",
+			Handler:    _KnownAdmin_UpdateRolePolicies_Handler,
+		},
+		{
+			MethodName: "DeleteRolePolicy",
+			Handler:    _KnownAdmin_DeleteRolePolicy_Handler,
 		},
 		{
 			MethodName: "CreateDepartment",
@@ -3801,6 +2987,26 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOAuth2Userinfo",
 			Handler:    _KnownAdmin_GetOAuth2Userinfo_Handler,
+		},
+		{
+			MethodName: "ListOAuth2Clients",
+			Handler:    _KnownAdmin_ListOAuth2Clients_Handler,
+		},
+		{
+			MethodName: "CreateOAuth2Client",
+			Handler:    _KnownAdmin_CreateOAuth2Client_Handler,
+		},
+		{
+			MethodName: "GetOAuth2Client",
+			Handler:    _KnownAdmin_GetOAuth2Client_Handler,
+		},
+		{
+			MethodName: "UpdateOAuth2Client",
+			Handler:    _KnownAdmin_UpdateOAuth2Client_Handler,
+		},
+		{
+			MethodName: "DeleteOAuth2Client",
+			Handler:    _KnownAdmin_DeleteOAuth2Client_Handler,
 		},
 		{
 			MethodName: "CreateDatabaseInitialize",

@@ -81,7 +81,7 @@ func (a *KnownAdminAPI) CreateCredential(ctx context.Context, req *adminv1.Creat
 func (a *KnownAdminAPI) GetOAuth2Discovery(ctx context.Context, req *emptypb.Empty) (*adminv1.OAuth2Discovery, error) {
 	result := &adminv1.OAuth2Discovery{}
 
-	issuer := "http://127.0.0.1:8080/builtin/admin/api/v1/oatuh2"
+	issuer := "http://127.0.0.1:8080/builtin/admin/api/v1/oauth2"
 
 	if a.config.issuer != "" {
 		issuer = a.config.issuer

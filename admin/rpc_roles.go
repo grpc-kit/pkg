@@ -7,18 +7,20 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/grouproles"
+	"github.com/grpc-kit/pkg/lion/menus"
+	"github.com/grpc-kit/pkg/lion/principalroles"
+	"github.com/grpc-kit/pkg/lion/rolemenus"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 
 	// 数据范围表已注释，同步取消依赖
 	// "github.com/grpc-kit/pkg/lion/roledataranges"
-	"github.com/grpc-kit/pkg/lion/rolepermissions"
 	"github.com/grpc-kit/pkg/lion/roles"
 	"github.com/grpc-kit/pkg/lion/schema"
-	"github.com/grpc-kit/pkg/lion/userroles"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -304,25 +306,56 @@ func (a *KnownAdminAPI) sortRoleChildren(roles []*adminv1.Role) {
 	}
 }
 
-// roleMembersToGroupMembersListReq 将 ListRoleMembers 请求映射为 ListGroupMembers 请求，
-// 以便复用 listGroupMembersFromRole（user_roles → Membership）逻辑。
-func roleMembersToGroupMembersListReq(req *adminv1.ListRoleMembersRequest) *adminv1.ListGroupMembersRequest {
-	g := &adminv1.ListGroupMembersRequest{
-		Parent:   req.GetParent(),
-		PageSize: req.GetPageSize(),
-		Filter:   req.GetFilter(),
-		OrderBy:  req.GetOrderBy(),
+func queryRolePrincipalBindings(ctx context.Context, db *lion.Client, req *adminv1.ListRoleMembersRequest, roleID int) ([]*lion.PrincipalRoles, string, int32, error) {
+	query := db.PrincipalRoles.Query().Where(principalroles.RoleIDEQ(roleID))
+	if req.GetPrincipalType() != adminv1.PrincipalType_PRINCIPAL_TYPE_UNSPECIFIED {
+		query = query.Where(principalroles.PrincipalTypeEQ(int(req.GetPrincipalType())))
 	}
+	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+	case "created_at asc", "create_time asc":
+		query = query.Order(lion.Asc(principalroles.FieldCreatedAt))
+	case "created_at desc", "create_time desc":
+		query = query.Order(lion.Desc(principalroles.FieldCreatedAt))
+	default:
+		query = query.Order(lion.Desc(principalroles.FieldID))
+	}
+	totalSize, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, "", 0, err
+	}
+	pageSize := GetPageSize(ctx, req.GetPageSize())
 	switch p := req.GetPagination().(type) {
-	case *adminv1.ListRoleMembersRequest_PageToken:
-		g.Pagination = &adminv1.ListGroupMembersRequest_PageToken{PageToken: p.PageToken}
 	case *adminv1.ListRoleMembersRequest_Offset:
-		g.Pagination = &adminv1.ListGroupMembersRequest_Offset{Offset: p.Offset}
+		query = query.Offset(int(p.Offset))
+	case *adminv1.ListRoleMembersRequest_PageToken:
+		if req.GetPageToken() != "" {
+			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
+			if decErr != nil {
+				return nil, "", 0, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
+			}
+			var lastID int
+			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
+				return nil, "", 0, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
+			}
+			if lastID > 0 {
+				query = query.Where(principalroles.IDGT(lastID))
+			}
+		}
 	}
-	return g
+	rows, err := query.Limit(int(pageSize)).All(ctx)
+	if err != nil {
+		return nil, "", 0, err
+	}
+	nextPageToken := ""
+	if _, ok := req.GetPagination().(*adminv1.ListRoleMembersRequest_PageToken); ok && len(rows) == int(pageSize) && len(rows) > 0 {
+		if data, err := json.Marshal(rows[len(rows)-1].ID); err == nil {
+			nextPageToken = base64.StdEncoding.EncodeToString(data)
+		}
+	}
+	return rows, nextPageToken, int32(totalSize), nil
 }
 
-// ListRoleMembers 获取角色成员列表（与 ListGroupMembers 中基于 user_roles 的成员结构一致）
+// ListRoleMembers 获取角色主体绑定列表，并在 full 视图下展开为用户 membership。
 func (a *KnownAdminAPI) ListRoleMembers(ctx context.Context, req *adminv1.ListRoleMembersRequest) (*adminv1.ListRoleMembersResponse, error) {
 	db, err := a.GetLionClient()
 	if err != nil {
@@ -338,18 +371,33 @@ func (a *KnownAdminAPI) ListRoleMembers(ctx context.Context, req *adminv1.ListRo
 		return nil, err
 	}
 
-	gr, err := a.listGroupMembersFromRole(ctx, roleMembersToGroupMembersListReq(req), db, roleID)
+	bindings, nextPageToken, totalSize, err := queryRolePrincipalBindings(ctx, db, req, roleID)
 	if err != nil {
 		return nil, err
 	}
-	return &adminv1.ListRoleMembersResponse{
-		Members:       gr.GetMembers(),
-		NextPageToken: gr.GetNextPageToken(),
-		TotalSize:     gr.GetTotalSize(),
-	}, nil
+	displays, err := loadPrincipalDisplays(ctx, db, bindings)
+	if err != nil {
+		return nil, err
+	}
+	response := &adminv1.ListRoleMembersResponse{
+		Members:       make([]*adminv1.Membership, 0),
+		Bindings:      make([]*adminv1.PrincipalRoleBinding, 0, len(bindings)),
+		NextPageToken: nextPageToken,
+		TotalSize:     totalSize,
+	}
+	for _, binding := range bindings {
+		response.Bindings = append(response.Bindings, principalRoleBindingToProto(binding, displays[binding.PrincipalType][binding.PrincipalID]))
+	}
+	if req.GetView() == adminv1.View_VIEW_FULL {
+		response.Members, err = expandPrincipalRoleBindingsToMembers(ctx, db, bindings)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return response, nil
 }
 
-// DeleteRoleMember 移除角色下的成员（user_roles 一行）
+// DeleteRoleMember 移除角色下的主体绑定。
 func (a *KnownAdminAPI) DeleteRoleMember(ctx context.Context, req *adminv1.DeleteRoleMemberRequest) (*emptypb.Empty, error) {
 	empty := &emptypb.Empty{}
 
@@ -367,17 +415,325 @@ func (a *KnownAdminAPI) DeleteRoleMember(ctx context.Context, req *adminv1.Delet
 	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
 		return nil, err
 	}
+	principalType, err := normalizePrincipalType(req.GetPrincipalType())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
+	}
+	if req.GetPrincipalId() <= 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("principal_id is required")
+	}
 
-	_, err = db.UserRoles.Delete().
+	_, err = db.PrincipalRoles.Delete().
 		Where(
-			userroles.RoleID(roleID),
-			userroles.UserIDEQ(int(req.UserId)),
+			principalroles.RoleIDEQ(roleID),
+			principalroles.PrincipalTypeEQ(principalType),
+			principalroles.PrincipalIDEQ(int(req.GetPrincipalId())),
 		).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return empty, nil
+}
+
+func lionRoleMenuToProto(in *lion.RoleMenus) *adminv1.RoleMenu {
+	if in == nil {
+		return nil
+	}
+	out := &adminv1.RoleMenu{
+		Id:              int64(in.ID),
+		RoleId:          int64(in.RoleID),
+		MenuId:          int64(in.MenuID),
+		PermissionScope: int32(in.PermissionScope),
+		Description:     in.Description,
+		IsRecursive:     in.IsRecursive,
+	}
+	if in.Edges.LionMenus != nil {
+		out.Menu = lionMenuToProto(in.Edges.LionMenus)
+	}
+	return out
+}
+
+func (a *KnownAdminAPI) roleMenuForUpdate(ctx context.Context, db *lion.Client, roleID int, m *adminv1.RoleMenu) (*lion.RoleMenus, error) {
+	if m.GetId() > 0 {
+		rm, err := db.RoleMenus.Get(ctx, int(m.GetId()))
+		if err != nil {
+			if lion.IsNotFound(err) {
+				return nil, errs.NotFound(ctx).WithMessage("role menu not found")
+			}
+			return nil, err
+		}
+		if rm.RoleID != roleID {
+			return nil, errs.InvalidArgument(ctx).WithMessage("role_menu id does not belong to this role")
+		}
+		if m.GetMenuId() > 0 && int(m.GetMenuId()) != rm.MenuID {
+			return nil, errs.InvalidArgument(ctx).WithMessage("menu_id does not match role_menu record")
+		}
+		return rm, nil
+	}
+
+	menuID := m.GetMenuId()
+	if menuID == 0 && m.GetMenu() != nil {
+		menuID = m.GetMenu().GetId()
+	}
+	if menuID <= 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("menu_id or id is required")
+	}
+
+	rm, err := db.RoleMenus.Query().
+		Where(rolemenus.RoleIDEQ(roleID), rolemenus.MenuIDEQ(int(menuID))).
+		Only(ctx)
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("role menu not found")
+		}
+		return nil, err
+	}
+	return rm, nil
+}
+
+// ListRoleMenus 获取角色菜单列表
+func (a *KnownAdminAPI) ListRoleMenus(ctx context.Context, req *adminv1.ListRoleMenusRequest) (*adminv1.ListRoleMenusResponse, error) {
+	result := &adminv1.ListRoleMenusResponse{Menus: make([]*adminv1.RoleMenu, 0)}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	roleID, err := strconv.Atoi(req.GetParent())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
+	query := db.RoleMenus.Query().Where(rolemenus.RoleIDEQ(roleID))
+	filter := strings.TrimSpace(req.GetFilter())
+	if filter != "" {
+		query = query.Where(rolemenus.Or(
+			rolemenus.DescriptionContainsFold(filter),
+			rolemenus.HasLionMenusWith(
+				menus.Or(
+					menus.CodeContainsFold(filter),
+					menus.DisplayNameContainsFold(filter),
+					menus.RoutePathContainsFold(filter),
+				),
+			),
+		))
+	}
+
+	switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+	case "created_at asc", "create_time asc":
+		query = query.Order(lion.Asc(rolemenus.FieldCreatedAt), lion.Asc(rolemenus.FieldID))
+	case "permission_scope desc":
+		query = query.Order(lion.Desc(rolemenus.FieldPermissionScope), lion.Asc(rolemenus.FieldID))
+	case "permission_scope asc":
+		query = query.Order(lion.Asc(rolemenus.FieldPermissionScope), lion.Asc(rolemenus.FieldID))
+	case "menu_id asc":
+		query = query.Order(lion.Asc(rolemenus.FieldMenuID), lion.Asc(rolemenus.FieldID))
+	case "menu_id desc":
+		query = query.Order(lion.Desc(rolemenus.FieldMenuID), lion.Asc(rolemenus.FieldID))
+	default:
+		query = query.Order(lion.Desc(rolemenus.FieldCreatedAt), lion.Asc(rolemenus.FieldID))
+	}
+
+	totalSize, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result.TotalSize = int32(totalSize)
+
+	pageSize := GetPageSize(ctx, req.GetPageSize())
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListRoleMenusRequest_Offset:
+		query = query.Offset(int(p.Offset))
+	case *adminv1.ListRoleMenusRequest_PageToken:
+		if req.GetPageToken() != "" {
+			data, decErr := base64.StdEncoding.DecodeString(req.GetPageToken())
+			if decErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", decErr))
+			}
+			var lastID int
+			if jsonErr := json.Unmarshal(data, &lastID); jsonErr != nil {
+				return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", jsonErr))
+			}
+			if lastID > 0 {
+				query = query.Where(rolemenus.IDGT(lastID))
+			}
+		}
+	}
+
+	list, err := query.
+		Limit(int(pageSize)).
+		WithLionMenus().
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range list {
+		result.Menus = append(result.Menus, lionRoleMenuToProto(item))
+	}
+
+	if _, ok := req.GetPagination().(*adminv1.ListRoleMenusRequest_PageToken); ok && len(list) == int(pageSize) && len(list) > 0 {
+		lastID := list[len(list)-1].ID
+		tokenData, _ := json.Marshal(lastID)
+		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	}
+
+	return result, nil
+}
+
+// CreateRoleMenus 批量创建角色菜单关联
+func (a *KnownAdminAPI) CreateRoleMenus(ctx context.Context, req *adminv1.CreateRoleMenusRequest) (*adminv1.CreateRoleMenusResponse, error) {
+	result := &adminv1.CreateRoleMenusResponse{}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	roleID, err := strconv.Atoi(req.GetParent())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
+	if len(req.GetMenus()) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("menus is empty")
+	}
+
+	var actor int64
+	if v, err := GetUserID(ctx); err == nil {
+		actor = v
+	}
+
+	for _, item := range req.GetMenus() {
+		menuID := item.GetMenuId()
+		if menuID == 0 && item.GetMenu() != nil {
+			menuID = item.GetMenu().GetId()
+		}
+		if menuID <= 0 {
+			return nil, errs.InvalidArgument(ctx).WithMessage("menu_id is required")
+		}
+
+		if _, err := db.Menus.Get(ctx, int(menuID)); err != nil {
+			if lion.IsNotFound(err) {
+				return nil, errs.NotFound(ctx).WithMessage("menu not found")
+			}
+			return nil, err
+		}
+
+		scope := item.GetPermissionScope()
+		if scope == 0 {
+			scope = 1
+		}
+		if scope < 1 {
+			return nil, errs.InvalidArgument(ctx).WithMessage("permission_scope must be >= 1")
+		}
+
+		cb := db.RoleMenus.Create().
+			SetRoleID(roleID).
+			SetMenuID(int(menuID)).
+			SetPermissionScope(int(scope)).
+			SetDescription(item.GetDescription()).
+			SetIsRecursive(item.GetIsRecursive())
+		if actor != 0 {
+			cb = cb.SetCreatedBy(actor).SetUpdatedBy(actor)
+		}
+		if _, err := cb.Save(ctx); err != nil {
+			if lion.IsConstraintError(err) {
+				return nil, errs.AlreadyExists(ctx).WithMessage("role menu already exists")
+			}
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
+// UpdateRoleMenus 批量更新角色菜单关联
+func (a *KnownAdminAPI) UpdateRoleMenus(ctx context.Context, req *adminv1.UpdateRoleMenusRequest) (*adminv1.UpdateRoleMenusResponse, error) {
+	result := &adminv1.UpdateRoleMenusResponse{}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	roleID, err := strconv.Atoi(req.GetParent())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
+	if len(req.GetMenus()) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("menus is empty")
+	}
+
+	var actor int64
+	if v, err := GetUserID(ctx); err == nil {
+		actor = v
+	}
+
+	for _, item := range req.GetMenus() {
+		rm, err := a.roleMenuForUpdate(ctx, db, roleID, item)
+		if err != nil {
+			return nil, err
+		}
+
+		upd := rm.Update().SetDescription(item.GetDescription()).SetIsRecursive(item.GetIsRecursive())
+		if scope := item.GetPermissionScope(); scope > 0 {
+			upd = upd.SetPermissionScope(int(scope))
+		}
+		if actor != 0 {
+			upd = upd.SetUpdatedBy(actor)
+		}
+		if _, err := upd.Save(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
+}
+
+// DeleteRoleMenu 删除角色下的菜单关联
+func (a *KnownAdminAPI) DeleteRoleMenu(ctx context.Context, req *adminv1.DeleteRoleMenuRequest) (*emptypb.Empty, error) {
+	result := &emptypb.Empty{}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	roleID, err := strconv.Atoi(req.GetParent())
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body parent is invalid")
+	}
+	if req.GetMenuId() == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("menu_id is required")
+	}
+
+	if err := a.checkRolePermission(ctx, db, roleID); err != nil {
+		return nil, err
+	}
+
+	if _, err := db.RoleMenus.Delete().
+		Where(rolemenus.RoleIDEQ(roleID), rolemenus.MenuIDEQ(int(req.GetMenuId()))).
+		Exec(ctx); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // CreateRole 创建角色
@@ -533,25 +889,16 @@ func (a *KnownAdminAPI) DeleteRole(ctx context.Context, req *adminv1.DeleteRoleR
 		return nil, errs.FailedPrecondition(ctx).WithMessage("protected role cannot be deleted")
 	}
 
-	if db.GroupRoles.Query().Where(grouproles.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("role has group")
+	if db.PrincipalRoles.Query().Where(principalroles.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("role has principal binding")
 	}
 
-	// 数据范围表已注释，同步取消依赖
-	// if db.RoleDataRanges.Query().Where(roledataranges.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
-	// 	return nil, errs.InvalidArgument(ctx).WithMessage("role has department")
-	// }
-
-	if db.RolePermissions.Query().Where(rolepermissions.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("role has permission")
+	if db.RoleMenus.Query().Where(rolemenus.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("role has menu")
 	}
 
-	if db.RolePermissions.Query().Where(rolepermissions.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("role has resource")
-	}
-
-	if db.UserRoles.Query().Where(userroles.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("role has user")
+	if db.RolePolicies.Query().Where(rolepolicies.RoleIDEQ(int(req.Id))).CountX(ctx) > 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("role has policy")
 	}
 
 	_, err = db.Roles.Delete().Where(roles.ID(int(req.Id))).Exec(ctx)
@@ -685,90 +1032,7 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 	return result, nil
 }
 
-func membershipMetadataToJSON(md map[string]string) (string, error) {
-	if len(md) == 0 {
-		return "", nil
-	}
-	b, err := json.Marshal(md)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
-}
-
-func applyMembershipToUserRolesCreate(cb *lion.UserRolesCreate, m *adminv1.Membership) (*lion.UserRolesCreate, error) {
-	cb = cb.SetMemberRole(int(m.GetMemberRole())).
-		SetMemberStatus(int(m.GetMemberStatus())).
-		SetMemberType(int(m.GetMemberType())).
-		SetDescription(m.GetDescription())
-	if m.GetExpiredAt() != nil {
-		cb = cb.SetExpiredAt(m.GetExpiredAt().AsTime())
-	}
-	meta, err := membershipMetadataToJSON(m.GetMetadata())
-	if err != nil {
-		return nil, err
-	}
-	if meta != "" {
-		cb = cb.SetMetadata(meta)
-	}
-	return cb, nil
-}
-
-func applyMembershipToUserRolesUpdate(ur *lion.UserRolesUpdateOne, m *adminv1.Membership) (*lion.UserRolesUpdateOne, error) {
-	ur = ur.SetMemberRole(int(m.GetMemberRole())).
-		SetMemberStatus(int(m.GetMemberStatus())).
-		SetMemberType(int(m.GetMemberType())).
-		SetDescription(m.GetDescription())
-	if m.GetExpiredAt() != nil {
-		ur = ur.SetExpiredAt(m.GetExpiredAt().AsTime())
-	} else {
-		ur = ur.ClearExpiredAt()
-	}
-	meta, err := membershipMetadataToJSON(m.GetMetadata())
-	if err != nil {
-		return nil, err
-	}
-	if meta == "" {
-		ur = ur.ClearMetadata()
-	} else {
-		ur = ur.SetMetadata(meta)
-	}
-	return ur, nil
-}
-
-func (a *KnownAdminAPI) userRoleForRoleMemberUpdate(ctx context.Context, db *lion.Client, roleID int, m *adminv1.Membership) (*lion.UserRoles, error) {
-	if m.GetId() > 0 {
-		ur, err := db.UserRoles.Get(ctx, int(m.GetId()))
-		if err != nil {
-			if lion.IsNotFound(err) {
-				return nil, errs.NotFound(ctx).WithMessage("user role not found")
-			}
-			return nil, err
-		}
-		if ur.RoleID != roleID {
-			return nil, errs.InvalidArgument(ctx).WithMessage("member id does not belong to this role")
-		}
-		if m.GetUserId() > 0 && int(m.GetUserId()) != ur.UserID {
-			return nil, errs.InvalidArgument(ctx).WithMessage("user_id does not match member record")
-		}
-		return ur, nil
-	}
-	if m.GetUserId() <= 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("member user_id or id is required")
-	}
-	ur, err := db.UserRoles.Query().
-		Where(userroles.RoleIDEQ(roleID), userroles.UserIDEQ(int(m.GetUserId()))).
-		Only(ctx)
-	if err != nil {
-		if lion.IsNotFound(err) {
-			return nil, errs.NotFound(ctx).WithMessage("user role membership not found")
-		}
-		return nil, err
-	}
-	return ur, nil
-}
-
-// CreateRoleMembers 批量添加角色成员（与 CreateGroupMembers REST 形态一致）
+// CreateRoleMembers 批量添加角色主体绑定。
 func (a *KnownAdminAPI) CreateRoleMembers(ctx context.Context, req *adminv1.CreateRoleMembersRequest) (*adminv1.CreateRoleMembersResponse, error) {
 	result := &adminv1.CreateRoleMembersResponse{}
 
@@ -786,17 +1050,13 @@ func (a *KnownAdminAPI) CreateRoleMembers(ctx context.Context, req *adminv1.Crea
 		return nil, err
 	}
 
-	if len(req.GetMembers()) == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("members is empty")
+	if len(req.GetBindings()) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("bindings is empty")
 	}
 
-	for _, m := range req.GetMembers() {
-		uid := m.GetUserId()
-		if uid == 0 {
-			continue
-		}
-		cb := db.UserRoles.Create().SetRoleID(roleID).SetUserID(int(uid))
-		cb, err = applyMembershipToUserRolesCreate(cb, m)
+	for _, binding := range req.GetBindings() {
+		cb := db.PrincipalRoles.Create()
+		cb, err = applyBindingToPrincipalRoleCreate(cb, roleID, binding)
 		if err != nil {
 			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 		}
@@ -811,7 +1071,7 @@ func (a *KnownAdminAPI) CreateRoleMembers(ctx context.Context, req *adminv1.Crea
 	return result, nil
 }
 
-// UpdateRoleMembers 批量更新角色下成员（PATCH .../roles/{parent}/members）
+// UpdateRoleMembers 批量更新角色下主体绑定（PATCH .../roles/{parent}/members）。
 func (a *KnownAdminAPI) UpdateRoleMembers(ctx context.Context, req *adminv1.UpdateRoleMembersRequest) (*adminv1.UpdateRoleMembersResponse, error) {
 	result := &adminv1.UpdateRoleMembersResponse{}
 
@@ -829,8 +1089,8 @@ func (a *KnownAdminAPI) UpdateRoleMembers(ctx context.Context, req *adminv1.Upda
 		return nil, err
 	}
 
-	if len(req.GetMembers()) == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("members is empty")
+	if len(req.GetBindings()) == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("bindings is empty")
 	}
 
 	var actor int64
@@ -838,13 +1098,13 @@ func (a *KnownAdminAPI) UpdateRoleMembers(ctx context.Context, req *adminv1.Upda
 		actor = v
 	}
 
-	for _, m := range req.GetMembers() {
-		ur, err := a.userRoleForRoleMemberUpdate(ctx, db, roleID, m)
+	for _, binding := range req.GetBindings() {
+		row, err := a.principalRoleBindingForUpdate(ctx, db, roleID, binding)
 		if err != nil {
 			return nil, err
 		}
-		upd := ur.Update()
-		upd, err = applyMembershipToUserRolesUpdate(upd, m)
+		upd := row.Update()
+		upd, err = applyBindingToPrincipalRoleUpdate(upd, binding)
 		if err != nil {
 			return nil, errs.InvalidArgument(ctx).WithMessage(err.Error())
 		}
@@ -853,350 +1113,6 @@ func (a *KnownAdminAPI) UpdateRoleMembers(ctx context.Context, req *adminv1.Upda
 		}
 		if _, err := upd.Save(ctx); err != nil {
 			return nil, err
-		}
-	}
-
-	return result, nil
-}
-
-// CreateRolePermissions 为角色关联权限
-func (a *KnownAdminAPI) CreateRolePermissions(ctx context.Context, req *adminv1.CreateRolePermissionsRequest) (*adminv1.CreateRolePermissionsResponse, error) {
-	result := &adminv1.CreateRolePermissionsResponse{}
-
-	if req.RoleId == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("role_id is required")
-	}
-
-	if len(req.Permissions) == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("permissions list is empty")
-	}
-
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
-	}
-
-	// 检查用户是否有权限操作该角色
-	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
-		return nil, err
-	}
-
-	// 获取创建者用户 ID
-	userID, err := GetUserID(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// 检查角色是否存在
-	_, err = db.Roles.Get(ctx, int(req.RoleId))
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("role not found")
-	}
-
-	// 收集有效的权限 IDs 并验证每个权限是否存在
-	permissionIDs := make([]int, 0, len(req.Permissions))
-	permissionMap := make(map[int64]*adminv1.Permission)
-
-	for _, perm := range req.Permissions {
-		if perm.Id == 0 {
-			continue
-		}
-
-		// 检查权限是否存在
-		dbPermission, err := db.Permissions.Get(ctx, int(perm.Id))
-		if err != nil {
-			// 如果某个权限不存在，可以选择跳过或返回错误
-			// 这里选择跳过不存在的权限
-			continue
-		}
-
-		permissionIDs = append(permissionIDs, dbPermission.ID)
-		// 保存权限信息以便后续返回
-		permissionMap[perm.Id] = &adminv1.Permission{
-			Id:          int64(dbPermission.ID),
-			Code:        dbPermission.Code,
-			DisplayName: dbPermission.DisplayName,
-			Description: dbPermission.Description,
-		}
-	}
-
-	if len(permissionIDs) == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("no valid permissions found")
-	}
-
-	// 检查是否已存在关联关系，如果存在则跳过
-	existingRolePermissions, err := db.RolePermissions.Query().
-		Where(
-			rolepermissions.RoleIDEQ(int(req.RoleId)),
-			rolepermissions.PermissionIDIn(permissionIDs...),
-		).
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// 构建已存在的 permission ID 集合
-	existingPermissionIDSet := make(map[int]bool)
-	for _, rp := range existingRolePermissions {
-		existingPermissionIDSet[rp.PermissionID] = true
-	}
-
-	// 过滤出需要创建的 permission IDs（排除已存在的）
-	permissionsToCreate := make([]int, 0)
-	for _, permissionID := range permissionIDs {
-		if !existingPermissionIDSet[permissionID] {
-			permissionsToCreate = append(permissionsToCreate, permissionID)
-		}
-	}
-
-	// 批量创建关联关系
-	if len(permissionsToCreate) > 0 {
-		allRolePermissions := make([]*lion.RolePermissionsCreate, 0, len(permissionsToCreate))
-
-		for _, permissionID := range permissionsToCreate {
-			rp := db.RolePermissions.Create().
-				SetRoleID(int(req.RoleId)).
-				SetPermissionID(permissionID).
-				SetCreatedBy(userID).
-				SetUpdatedBy(userID)
-
-			allRolePermissions = append(allRolePermissions, rp)
-		}
-
-		_, err = db.RolePermissions.CreateBulk(allRolePermissions...).Save(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// 返回所有关联的权限（包括已存在的和新创建的）
-	for _, perm := range req.Permissions {
-		if perm.Id != 0 {
-			if p, ok := permissionMap[perm.Id]; ok {
-				result.Permissions = append(result.Permissions, p)
-			}
-		}
-	}
-
-	return result, nil
-}
-
-// DeleteRolePermission 删除角色下的权限关联
-func (a *KnownAdminAPI) DeleteRolePermission(ctx context.Context, req *adminv1.DeleteRolePermissionRequest) (*emptypb.Empty, error) {
-	if req.RoleId == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("role_id is required")
-	}
-
-	if req.PermissionId == 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("permission_id is required")
-	}
-
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
-	}
-
-	// 检查用户是否有权限操作该角色
-	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
-		return nil, err
-	}
-
-	// 检查角色是否存在
-	_, err = db.Roles.Get(ctx, int(req.RoleId))
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("role not found")
-	}
-
-	// 检查权限是否存在
-	_, err = db.Permissions.Get(ctx, int(req.PermissionId))
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("permission not found")
-	}
-
-	// 检查关联关系是否存在
-	_, err = db.RolePermissions.Query().
-		Where(
-			rolepermissions.RoleIDEQ(int(req.RoleId)),
-			rolepermissions.PermissionIDEQ(int(req.PermissionId)),
-		).
-		Only(ctx)
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("role permission relationship not found")
-	}
-
-	// 删除关联关系
-	_, err = db.RolePermissions.Delete().
-		Where(
-			rolepermissions.RoleIDEQ(int(req.RoleId)),
-			rolepermissions.PermissionIDEQ(int(req.PermissionId)),
-		).
-		Exec(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &emptypb.Empty{}, nil
-}
-
-// ListRolePermissions 列出角色下的所有权限
-func (a *KnownAdminAPI) ListRolePermissions(ctx context.Context, req *adminv1.ListRolePermissionsRequest) (*adminv1.ListRolePermissionsResponse, error) {
-	result := &adminv1.ListRolePermissionsResponse{}
-
-	if req.RoleId == 0 {
-		return result, errs.InvalidArgument(ctx).WithMessage("role_id is required")
-	}
-
-	db, err := a.GetLionClient()
-	if err != nil {
-		return nil, err
-	}
-
-	// 检查用户是否有权限操作该角色
-	if err := a.checkRolePermission(ctx, db, int(req.RoleId)); err != nil {
-		return nil, err
-	}
-
-	// 检查角色是否存在
-	_, err = db.Roles.Get(ctx, int(req.RoleId))
-	if err != nil {
-		return nil, errs.NotFound(ctx).WithMessage("role not found")
-	}
-
-	// 查询角色权限关联
-	rolePermissionQuery := db.RolePermissions.Query().
-		Where(rolepermissions.RoleIDEQ(int(req.RoleId)))
-
-	// 如果 View 为 FULL，需要预加载权限的详细信息（策略和资源）
-	if req.View == adminv1.View_VIEW_FULL {
-		rolePermissionQuery = rolePermissionQuery.
-			WithLionPermissions(
-				func(query *lion.PermissionsQuery) {
-					query.WithLionPolicies().
-						WithLionPermissionBindings(
-							func(query *lion.PermissionBindingsQuery) {
-								query.WithLionResourceScopes(
-									func(query *lion.ResourceScopesQuery) {
-										query.WithLionResources().
-											WithLionScopes()
-									},
-								)
-							},
-						)
-				},
-			)
-	} else {
-		// BASIC 或 STANDARD 视图，只加载基本信息
-		rolePermissionQuery = rolePermissionQuery.WithLionPermissions()
-	}
-
-	// 计算总数（在应用分页前）
-	totalSize, err := rolePermissionQuery.Clone().Count(ctx)
-	if err != nil {
-		return nil, err
-	}
-	result.TotalSize = int32(totalSize)
-
-	// 处理分页
-	pageSize := GetPageSize(ctx, req.PageSize)
-
-	// 处理排序
-	if req.OrderBy != "" {
-		switch req.OrderBy {
-		case "create_time desc":
-			rolePermissionQuery = rolePermissionQuery.Order(lion.Desc(rolepermissions.FieldCreatedAt))
-		case "create_time asc":
-			rolePermissionQuery = rolePermissionQuery.Order(lion.Asc(rolepermissions.FieldCreatedAt))
-		default:
-			rolePermissionQuery = rolePermissionQuery.Order(lion.Desc(rolepermissions.FieldCreatedAt))
-		}
-	} else {
-		// 默认排序
-		rolePermissionQuery = rolePermissionQuery.Order(lion.Desc(rolepermissions.FieldCreatedAt))
-	}
-
-	var lastID int
-	if req.GetPageToken() != "" {
-		// Cursor-based 分页
-		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
-		if err != nil {
-			return nil, fmt.Errorf("invalid page_token: %w", err)
-		}
-		if err := json.Unmarshal(data, &lastID); err != nil {
-			return nil, fmt.Errorf("invalid page_token format: %w", err)
-		}
-		if lastID > 0 {
-			rolePermissionQuery = rolePermissionQuery.Where(rolepermissions.IDGT(lastID))
-		}
-	}
-
-	switch p := req.GetPagination().(type) {
-	case *adminv1.ListRolePermissionsRequest_Offset:
-		// Offset-based 分页
-		rolePermissionQuery = rolePermissionQuery.Offset(int(p.Offset))
-	case *adminv1.ListRolePermissionsRequest_PageToken:
-		// Cursor-based 分页已在上面处理
-	}
-
-	// 应用 Limit
-	rolePermissionQuery = rolePermissionQuery.Limit(int(pageSize))
-
-	// 执行查询
-	rolePermissionList, err := rolePermissionQuery.All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	// 转换为响应格式
-	for _, rp := range rolePermissionList {
-		if rp.Edges.LionPermissions == nil {
-			continue
-		}
-
-		perm := rp.Edges.LionPermissions
-		permission := &adminv1.Permission{
-			Id:          int64(perm.ID),
-			Code:        perm.Code,
-			DisplayName: perm.DisplayName,
-			Description: perm.Description,
-		}
-
-		// 如果 View 为 FULL，加载策略和资源信息
-		if req.View == adminv1.View_VIEW_FULL {
-			// 加载策略信息
-			if perm.Edges.LionPolicies != nil {
-				policy := perm.Edges.LionPolicies
-				permission.Policy = &adminv1.Policy{
-					Id:          int64(policy.ID),
-					Code:        policy.Code,
-					DisplayName: policy.DisplayName,
-					Type:        adminv1.Policy_Type(policy.PolicyType),
-					Status:      adminv1.Policy_Status(policy.PolicyStatus),
-					Value:       policy.Value,
-					Description: policy.Description,
-				}
-			}
-
-			// 加载权限绑定资源（permission_bindings -> resource_scopes -> resources），使用 Bindings 替代已废弃的 Resources
-			if perm.Edges.LionPermissionBindings != nil {
-				for _, binding := range perm.Edges.LionPermissionBindings {
-					if pb := lionPermissionBindingToProto(binding); pb != nil {
-						permission.Bindings = append(permission.Bindings, pb)
-					}
-				}
-			}
-		}
-
-		result.Permissions = append(result.Permissions, permission)
-	}
-
-	// 构造 next_page_token（仅用于 cursor-based 分页）
-	switch req.GetPagination().(type) {
-	case *adminv1.ListRolePermissionsRequest_PageToken:
-		// 只有在使用 cursor-based 分页时才生成 next_page_token
-		if len(rolePermissionList) == int(pageSize) && len(rolePermissionList) > 0 {
-			last := rolePermissionList[len(rolePermissionList)-1].ID
-			tokenData, _ := json.Marshal(last)
-			result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
 		}
 	}
 

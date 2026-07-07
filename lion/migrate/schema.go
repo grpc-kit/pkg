@@ -9,38 +9,6 @@ import (
 )
 
 var (
-	// LionActionsColumns holds the columns for the "lion_actions" table.
-	LionActionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "code", Type: field.TypeString, Size: 128},
-		{Name: "display_name", Type: field.TypeString, Default: ""},
-		{Name: "resource_type", Type: field.TypeInt, Default: 0},
-		{Name: "projection_mapping", Type: field.TypeString, Size: 4096, Default: "{}"},
-		{Name: "protected", Type: field.TypeBool, Default: false},
-		{Name: "description", Type: field.TypeString, Default: ""},
-	}
-	// LionActionsTable holds the schema information for the "lion_actions" table.
-	LionActionsTable = &schema.Table{
-		Name:       "lion_actions",
-		Columns:    LionActionsColumns,
-		PrimaryKey: []*schema.Column{LionActionsColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "actions_code",
-				Unique:  true,
-				Columns: []*schema.Column{LionActionsColumns[5]},
-			},
-			{
-				Name:    "actions_resource_type",
-				Unique:  false,
-				Columns: []*schema.Column{LionActionsColumns[7]},
-			},
-		},
-	}
 	// LionAuthProvidersColumns holds the columns for the "lion_auth_providers" table.
 	LionAuthProvidersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -120,57 +88,6 @@ var (
 		Columns:    LionCredentialsColumns,
 		PrimaryKey: []*schema.Column{LionCredentialsColumns[0]},
 	}
-	// LionDepartmentMembersColumns holds the columns for the "lion_department_members" table.
-	LionDepartmentMembersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "member_role", Type: field.TypeInt, Default: 0},
-		{Name: "member_status", Type: field.TypeInt, Default: 0},
-		{Name: "member_type", Type: field.TypeInt, Default: 0},
-		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
-		{Name: "metadata", Type: field.TypeString, Nullable: true},
-		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "department_id", Type: field.TypeInt},
-		{Name: "user_id", Type: field.TypeInt},
-	}
-	// LionDepartmentMembersTable holds the schema information for the "lion_department_members" table.
-	LionDepartmentMembersTable = &schema.Table{
-		Name:       "lion_department_members",
-		Columns:    LionDepartmentMembersColumns,
-		PrimaryKey: []*schema.Column{LionDepartmentMembersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_department_members_lion_departments_lion_department_members",
-				Columns:    []*schema.Column{LionDepartmentMembersColumns[11]},
-				RefColumns: []*schema.Column{LionDepartmentsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "lion_department_members_lion_users_lion_department_members",
-				Columns:    []*schema.Column{LionDepartmentMembersColumns[12]},
-				RefColumns: []*schema.Column{LionUsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "departmentmembers_user_id_department_id",
-				Unique:  true,
-				Columns: []*schema.Column{LionDepartmentMembersColumns[12], LionDepartmentMembersColumns[11]},
-			},
-			{
-				Name:    "departmentmembers_user_id",
-				Unique:  true,
-				Columns: []*schema.Column{LionDepartmentMembersColumns[12]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "member_type = 1",
-				},
-			},
-		},
-	}
 	// LionDepartmentsColumns holds the columns for the "lion_departments" table.
 	LionDepartmentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -203,83 +120,35 @@ var (
 		Columns:    LionDepartmentsColumns,
 		PrimaryKey: []*schema.Column{LionDepartmentsColumns[0]},
 	}
-	// LionGroupMembersColumns holds the columns for the "lion_group_members" table.
-	LionGroupMembersColumns = []*schema.Column{
+	// LionSettingsColumns holds the columns for the "lion_settings" table.
+	LionSettingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "member_role", Type: field.TypeInt, Default: 0},
-		{Name: "member_status", Type: field.TypeInt, Default: 0},
-		{Name: "joined_at", Type: field.TypeTime, Nullable: true},
-		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
-		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
-		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "group_id", Type: field.TypeInt},
-		{Name: "user_id", Type: field.TypeInt},
+		{Name: "category", Type: field.TypeString, Size: 64},
+		{Name: "setting_key", Type: field.TypeString, Size: 128},
+		{Name: "setting_value", Type: field.TypeString, Size: 2147483647, Default: ""},
+		{Name: "value_type", Type: field.TypeString, Size: 16, Default: "string"},
+		{Name: "description", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "protected", Type: field.TypeBool, Default: false},
 	}
-	// LionGroupMembersTable holds the schema information for the "lion_group_members" table.
-	LionGroupMembersTable = &schema.Table{
-		Name:       "lion_group_members",
-		Columns:    LionGroupMembersColumns,
-		PrimaryKey: []*schema.Column{LionGroupMembersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_group_members_lion_groups_lion_group_members",
-				Columns:    []*schema.Column{LionGroupMembersColumns[11]},
-				RefColumns: []*schema.Column{LionGroupsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "lion_group_members_lion_users_lion_group_members",
-				Columns:    []*schema.Column{LionGroupMembersColumns[12]},
-				RefColumns: []*schema.Column{LionUsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
+	// LionSettingsTable holds the schema information for the "lion_settings" table.
+	LionSettingsTable = &schema.Table{
+		Name:       "lion_settings",
+		Columns:    LionSettingsColumns,
+		PrimaryKey: []*schema.Column{LionSettingsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "groupmembers_user_id_group_id",
+				Name:    "globalsettings_category_setting_key",
 				Unique:  true,
-				Columns: []*schema.Column{LionGroupMembersColumns[12], LionGroupMembersColumns[11]},
-			},
-		},
-	}
-	// LionGroupRolesColumns holds the columns for the "lion_group_roles" table.
-	LionGroupRolesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "group_id", Type: field.TypeInt},
-		{Name: "role_id", Type: field.TypeInt},
-	}
-	// LionGroupRolesTable holds the schema information for the "lion_group_roles" table.
-	LionGroupRolesTable = &schema.Table{
-		Name:       "lion_group_roles",
-		Columns:    LionGroupRolesColumns,
-		PrimaryKey: []*schema.Column{LionGroupRolesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_group_roles_lion_groups_lion_groups",
-				Columns:    []*schema.Column{LionGroupRolesColumns[5]},
-				RefColumns: []*schema.Column{LionGroupsColumns[0]},
-				OnDelete:   schema.NoAction,
+				Columns: []*schema.Column{LionSettingsColumns[5], LionSettingsColumns[6]},
 			},
 			{
-				Symbol:     "lion_group_roles_lion_roles_lion_role_groups",
-				Columns:    []*schema.Column{LionGroupRolesColumns[6]},
-				RefColumns: []*schema.Column{LionRolesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "grouproles_group_id_role_id",
-				Unique:  true,
-				Columns: []*schema.Column{LionGroupRolesColumns[5], LionGroupRolesColumns[6]},
+				Name:    "globalsettings_category",
+				Unique:  false,
+				Columns: []*schema.Column{LionSettingsColumns[5]},
 			},
 		},
 	}
@@ -341,60 +210,103 @@ var (
 			},
 		},
 	}
-	// LionPermissionBindingsColumns holds the columns for the "lion_permission_bindings" table.
-	LionPermissionBindingsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "is_recursive", Type: field.TypeBool, Default: false},
-		{Name: "allow_methods", Type: field.TypeJSON, Nullable: true},
-		{Name: "permission_id", Type: field.TypeInt},
-		{Name: "resource_scope_id", Type: field.TypeInt},
-	}
-	// LionPermissionBindingsTable holds the schema information for the "lion_permission_bindings" table.
-	LionPermissionBindingsTable = &schema.Table{
-		Name:       "lion_permission_bindings",
-		Columns:    LionPermissionBindingsColumns,
-		PrimaryKey: []*schema.Column{LionPermissionBindingsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_permission_bindings_lion_permissions_lion_permission_bindings",
-				Columns:    []*schema.Column{LionPermissionBindingsColumns[6]},
-				RefColumns: []*schema.Column{LionPermissionsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "lion_permission_bindings_lion_resource_scopes_lion_permission_bindings",
-				Columns:    []*schema.Column{LionPermissionBindingsColumns[7]},
-				RefColumns: []*schema.Column{LionResourceScopesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-	}
-	// LionPermissionsColumns holds the columns for the "lion_permissions" table.
-	LionPermissionsColumns = []*schema.Column{
+	// LionMenusColumns holds the columns for the "lion_menus" table.
+	LionMenusColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "code", Type: field.TypeString, Size: 256},
-		{Name: "display_name", Type: field.TypeString},
+		{Name: "parent_id", Type: field.TypeInt64, Default: 0},
+		{Name: "code", Type: field.TypeString, Size: 128},
+		{Name: "display_name", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "route_path", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "component", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "icon", Type: field.TypeString, Size: 64, Default: ""},
+		{Name: "sort_order", Type: field.TypeInt, Default: 100},
+		{Name: "visibility", Type: field.TypeString, Size: 16, Default: "global"},
+		{Name: "menu_status", Type: field.TypeString, Size: 16, Default: "active"},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "policy_id", Type: field.TypeInt},
+		{Name: "protected", Type: field.TypeBool, Default: false},
 	}
-	// LionPermissionsTable holds the schema information for the "lion_permissions" table.
-	LionPermissionsTable = &schema.Table{
-		Name:       "lion_permissions",
-		Columns:    LionPermissionsColumns,
-		PrimaryKey: []*schema.Column{LionPermissionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
+	// LionMenusTable holds the schema information for the "lion_menus" table.
+	LionMenusTable = &schema.Table{
+		Name:       "lion_menus",
+		Columns:    LionMenusColumns,
+		PrimaryKey: []*schema.Column{LionMenusColumns[0]},
+		Indexes: []*schema.Index{
 			{
-				Symbol:     "lion_permissions_lion_policies_lion_permissions",
-				Columns:    []*schema.Column{LionPermissionsColumns[8]},
-				RefColumns: []*schema.Column{LionPoliciesColumns[0]},
-				OnDelete:   schema.NoAction,
+				Name:    "menus_code",
+				Unique:  true,
+				Columns: []*schema.Column{LionMenusColumns[6]},
+			},
+			{
+				Name:    "menus_parent_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionMenusColumns[5]},
+			},
+		},
+	}
+	// LionOauth2ClientsColumns holds the columns for the "lion_oauth2_clients" table.
+	LionOauth2ClientsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "client_id", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "client_secret_hash", Type: field.TypeString, Size: 128},
+		{Name: "display_name", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "redirect_uris", Type: field.TypeJSON, Nullable: true},
+		{Name: "client_status", Type: field.TypeInt, Default: 1},
+		{Name: "grant_types", Type: field.TypeJSON, Nullable: true},
+		{Name: "scopes", Type: field.TypeJSON, Nullable: true},
+		{Name: "logo_url", Type: field.TypeString, Size: 512, Default: ""},
+		{Name: "description", Type: field.TypeString, Size: 512, Default: ""},
+	}
+	// LionOauth2ClientsTable holds the schema information for the "lion_oauth2_clients" table.
+	LionOauth2ClientsTable = &schema.Table{
+		Name:       "lion_oauth2_clients",
+		Columns:    LionOauth2ClientsColumns,
+		PrimaryKey: []*schema.Column{LionOauth2ClientsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "oauth2clients_client_status",
+				Unique:  false,
+				Columns: []*schema.Column{LionOauth2ClientsColumns[10]},
+			},
+		},
+	}
+	// LionOauth2CodesColumns holds the columns for the "lion_oauth2_codes" table.
+	LionOauth2CodesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "code_hash", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "client_id", Type: field.TypeString, Size: 64},
+		{Name: "redirect_uri", Type: field.TypeString, Size: 512},
+		{Name: "user_id", Type: field.TypeInt, Default: 0},
+		{Name: "username", Type: field.TypeString, Size: 255, Default: ""},
+		{Name: "scopes", Type: field.TypeJSON, Nullable: true},
+		{Name: "state", Type: field.TypeString, Size: 256, Default: ""},
+		{Name: "nonce", Type: field.TypeString, Size: 256, Default: ""},
+		{Name: "code_challenge", Type: field.TypeString, Size: 128, Default: ""},
+		{Name: "code_challenge_method", Type: field.TypeString, Size: 16, Default: ""},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "consumed_at", Type: field.TypeTime, Nullable: true},
+	}
+	// LionOauth2CodesTable holds the schema information for the "lion_oauth2_codes" table.
+	LionOauth2CodesTable = &schema.Table{
+		Name:       "lion_oauth2_codes",
+		Columns:    LionOauth2CodesColumns,
+		PrimaryKey: []*schema.Column{LionOauth2CodesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "oauth2codes_client_id_expires_at",
+				Unique:  false,
+				Columns: []*schema.Column{LionOauth2CodesColumns[4], LionOauth2CodesColumns[13]},
 			},
 		},
 	}
@@ -408,10 +320,8 @@ var (
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "code", Type: field.TypeString, Size: 256},
 		{Name: "display_name", Type: field.TypeString},
-		{Name: "policy_type", Type: field.TypeInt, Default: 0},
 		{Name: "policy_status", Type: field.TypeInt, Default: 0},
-		{Name: "value", Type: field.TypeString, Default: ""},
-		{Name: "version_no", Type: field.TypeInt64, Default: 1},
+		{Name: "statements", Type: field.TypeJSON},
 		{Name: "protected", Type: field.TypeBool, Default: false},
 		{Name: "description", Type: field.TypeString, Default: ""},
 	}
@@ -420,215 +330,156 @@ var (
 		Name:       "lion_policies",
 		Columns:    LionPoliciesColumns,
 		PrimaryKey: []*schema.Column{LionPoliciesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "policies_code",
+				Unique:  true,
+				Columns: []*schema.Column{LionPoliciesColumns[6]},
+			},
+		},
 	}
-	// LionPolicyAttachmentsColumns holds the columns for the "lion_policy_attachments" table.
-	LionPolicyAttachmentsColumns = []*schema.Column{
+	// LionPrincipalRolesColumns holds the columns for the "lion_principal_roles" table.
+	LionPrincipalRolesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
 		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
 		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "principal_type", Type: field.TypeString, Size: 32, Default: ""},
-		{Name: "principal_id", Type: field.TypeInt64, Default: 0},
-		{Name: "resource_id", Type: field.TypeInt64, Default: 0},
-		{Name: "is_recursive", Type: field.TypeBool, Default: false},
-		{Name: "attachment_status", Type: field.TypeInt, Default: 0},
-		{Name: "condition_json", Type: field.TypeString, Default: ""},
+		{Name: "principal_type", Type: field.TypeInt, Default: 0},
+		{Name: "principal_id", Type: field.TypeInt},
+		{Name: "binding_status", Type: field.TypeInt, Default: 1},
 		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "policy_id", Type: field.TypeInt},
-	}
-	// LionPolicyAttachmentsTable holds the schema information for the "lion_policy_attachments" table.
-	LionPolicyAttachmentsTable = &schema.Table{
-		Name:       "lion_policy_attachments",
-		Columns:    LionPolicyAttachmentsColumns,
-		PrimaryKey: []*schema.Column{LionPolicyAttachmentsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_policy_attachments_lion_policies_lion_policy_attachments",
-				Columns:    []*schema.Column{LionPolicyAttachmentsColumns[13]},
-				RefColumns: []*schema.Column{LionPoliciesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "policyattachments_policy_id_principal_type_principal_id",
-				Unique:  false,
-				Columns: []*schema.Column{LionPolicyAttachmentsColumns[13], LionPolicyAttachmentsColumns[5], LionPolicyAttachmentsColumns[6]},
-			},
-			{
-				Name:    "policyattachments_principal_type_principal_id_attachment_status",
-				Unique:  false,
-				Columns: []*schema.Column{LionPolicyAttachmentsColumns[5], LionPolicyAttachmentsColumns[6], LionPolicyAttachmentsColumns[9]},
-			},
-			{
-				Name:    "policyattachments_resource_id",
-				Unique:  false,
-				Columns: []*schema.Column{LionPolicyAttachmentsColumns[7]},
-			},
-		},
-	}
-	// LionPolicyStatementsColumns holds the columns for the "lion_policy_statements" table.
-	LionPolicyStatementsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "sid", Type: field.TypeString, Size: 128},
-		{Name: "effect", Type: field.TypeInt, Default: 0},
-		{Name: "action_selector", Type: field.TypeString, Default: ""},
-		{Name: "resource_selector", Type: field.TypeString, Default: ""},
-		{Name: "condition_json", Type: field.TypeString, Default: ""},
-		{Name: "priority", Type: field.TypeInt, Default: 0},
-		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "policy_id", Type: field.TypeInt},
-	}
-	// LionPolicyStatementsTable holds the schema information for the "lion_policy_statements" table.
-	LionPolicyStatementsTable = &schema.Table{
-		Name:       "lion_policy_statements",
-		Columns:    LionPolicyStatementsColumns,
-		PrimaryKey: []*schema.Column{LionPolicyStatementsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_policy_statements_lion_policies_lion_policy_statements",
-				Columns:    []*schema.Column{LionPolicyStatementsColumns[12]},
-				RefColumns: []*schema.Column{LionPoliciesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "policystatements_policy_id_sid",
-				Unique:  true,
-				Columns: []*schema.Column{LionPolicyStatementsColumns[12], LionPolicyStatementsColumns[5]},
-			},
-			{
-				Name:    "policystatements_policy_id_effect_priority",
-				Unique:  false,
-				Columns: []*schema.Column{LionPolicyStatementsColumns[12], LionPolicyStatementsColumns[6], LionPolicyStatementsColumns[10]},
-			},
-		},
-	}
-	// LionResourceScopesColumns holds the columns for the "lion_resource_scopes" table.
-	LionResourceScopesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "resource_id", Type: field.TypeInt},
-		{Name: "scope_id", Type: field.TypeInt},
-	}
-	// LionResourceScopesTable holds the schema information for the "lion_resource_scopes" table.
-	LionResourceScopesTable = &schema.Table{
-		Name:       "lion_resource_scopes",
-		Columns:    LionResourceScopesColumns,
-		PrimaryKey: []*schema.Column{LionResourceScopesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_resource_scopes_lion_resources_lion_resource_scopes",
-				Columns:    []*schema.Column{LionResourceScopesColumns[3]},
-				RefColumns: []*schema.Column{LionResourcesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "lion_resource_scopes_lion_scopes_lion_resource_scopes",
-				Columns:    []*schema.Column{LionResourceScopesColumns[4]},
-				RefColumns: []*schema.Column{LionScopesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// LionResourcesColumns holds the columns for the "lion_resources" table.
-	LionResourcesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "parent_id", Type: field.TypeInt64, Default: 0},
-		{Name: "code", Type: field.TypeString, Size: 128},
-		{Name: "name", Type: field.TypeString, Size: 512, Default: ""},
-		{Name: "display_name", Type: field.TypeString, Default: ""},
-		{Name: "resource_type", Type: field.TypeInt, Default: 0},
-		{Name: "resource_status", Type: field.TypeInt, Default: 0},
-		{Name: "visibility", Type: field.TypeInt, Default: 0},
-		{Name: "sort_order", Type: field.TypeInt, Default: 100},
-		{Name: "locator", Type: field.TypeString, Size: 512, Default: ""},
-		{Name: "visual", Type: field.TypeString, Size: 256, Default: ""},
-		{Name: "manifest", Type: field.TypeString, Default: ""},
-		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "protected", Type: field.TypeBool, Default: false},
-	}
-	// LionResourcesTable holds the schema information for the "lion_resources" table.
-	LionResourcesTable = &schema.Table{
-		Name:       "lion_resources",
-		Columns:    LionResourcesColumns,
-		PrimaryKey: []*schema.Column{LionResourcesColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "resources_parent_id",
-				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[6]},
-			},
-			{
-				Name:    "resources_resource_type",
-				Unique:  true,
-				Columns: []*schema.Column{LionResourcesColumns[10]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "parent_id = 0",
-				},
-			},
-			{
-				Name:    "resources_sort_order",
-				Unique:  false,
-				Columns: []*schema.Column{LionResourcesColumns[13]},
-			},
-			{
-				Name:    "resources_name",
-				Unique:  true,
-				Columns: []*schema.Column{LionResourcesColumns[8]},
-				Annotation: &entsql.IndexAnnotation{
-					Where: "name <> ''",
-				},
-			},
-		},
-	}
-	// LionRolePermissionsColumns holds the columns for the "lion_role_permissions" table.
-	LionRolePermissionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "permission_id", Type: field.TypeInt},
 		{Name: "role_id", Type: field.TypeInt},
 	}
-	// LionRolePermissionsTable holds the schema information for the "lion_role_permissions" table.
-	LionRolePermissionsTable = &schema.Table{
-		Name:       "lion_role_permissions",
-		Columns:    LionRolePermissionsColumns,
-		PrimaryKey: []*schema.Column{LionRolePermissionsColumns[0]},
+	// LionPrincipalRolesTable holds the schema information for the "lion_principal_roles" table.
+	LionPrincipalRolesTable = &schema.Table{
+		Name:       "lion_principal_roles",
+		Columns:    LionPrincipalRolesColumns,
+		PrimaryKey: []*schema.Column{LionPrincipalRolesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "lion_role_permissions_lion_permissions_lion_role_permissions",
-				Columns:    []*schema.Column{LionRolePermissionsColumns[5]},
-				RefColumns: []*schema.Column{LionPermissionsColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "lion_role_permissions_lion_roles_lion_role_permissions",
-				Columns:    []*schema.Column{LionRolePermissionsColumns[6]},
+				Symbol:     "lion_principal_roles_lion_roles_lion_principal_roles",
+				Columns:    []*schema.Column{LionPrincipalRolesColumns[11]},
 				RefColumns: []*schema.Column{LionRolesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "rolepermissions_role_id_permission_id",
+				Name:    "principalroles_principal_type_principal_id_role_id",
 				Unique:  true,
-				Columns: []*schema.Column{LionRolePermissionsColumns[6], LionRolePermissionsColumns[5]},
+				Columns: []*schema.Column{LionPrincipalRolesColumns[5], LionPrincipalRolesColumns[6], LionPrincipalRolesColumns[11]},
+			},
+			{
+				Name:    "principalroles_role_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionPrincipalRolesColumns[11]},
+			},
+			{
+				Name:    "principalroles_principal_type_principal_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionPrincipalRolesColumns[5], LionPrincipalRolesColumns[6]},
+			},
+			{
+				Name:    "principalroles_binding_status",
+				Unique:  false,
+				Columns: []*schema.Column{LionPrincipalRolesColumns[7]},
+			},
+		},
+	}
+	// LionRoleMenusColumns holds the columns for the "lion_role_menus" table.
+	LionRoleMenusColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "permission_scope", Type: field.TypeInt, Default: 1},
+		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "is_recursive", Type: field.TypeBool, Default: false},
+		{Name: "menu_id", Type: field.TypeInt},
+		{Name: "role_id", Type: field.TypeInt},
+	}
+	// LionRoleMenusTable holds the schema information for the "lion_role_menus" table.
+	LionRoleMenusTable = &schema.Table{
+		Name:       "lion_role_menus",
+		Columns:    LionRoleMenusColumns,
+		PrimaryKey: []*schema.Column{LionRoleMenusColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_role_menus_lion_menus_lion_role_menus",
+				Columns:    []*schema.Column{LionRoleMenusColumns[8]},
+				RefColumns: []*schema.Column{LionMenusColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "lion_role_menus_lion_roles_lion_role_menus",
+				Columns:    []*schema.Column{LionRoleMenusColumns[9]},
+				RefColumns: []*schema.Column{LionRolesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "rolemenus_role_id_menu_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionRoleMenusColumns[9], LionRoleMenusColumns[8]},
+			},
+			{
+				Name:    "rolemenus_menu_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionRoleMenusColumns[8]},
+			},
+		},
+	}
+	// LionRolePoliciesColumns holds the columns for the "lion_role_policies" table.
+	LionRolePoliciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "policy_id", Type: field.TypeInt},
+		{Name: "role_id", Type: field.TypeInt},
+	}
+	// LionRolePoliciesTable holds the schema information for the "lion_role_policies" table.
+	LionRolePoliciesTable = &schema.Table{
+		Name:       "lion_role_policies",
+		Columns:    LionRolePoliciesColumns,
+		PrimaryKey: []*schema.Column{LionRolePoliciesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_role_policies_lion_policies_lion_role_policies",
+				Columns:    []*schema.Column{LionRolePoliciesColumns[7]},
+				RefColumns: []*schema.Column{LionPoliciesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "lion_role_policies_lion_roles_lion_role_policies",
+				Columns:    []*schema.Column{LionRolePoliciesColumns[8]},
+				RefColumns: []*schema.Column{LionRolesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "rolepolicies_role_id_policy_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionRolePoliciesColumns[8], LionRolePoliciesColumns[7]},
+			},
+			{
+				Name:    "rolepolicies_role_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionRolePoliciesColumns[8]},
+			},
+			{
+				Name:    "rolepolicies_policy_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionRolePoliciesColumns[7]},
 			},
 		},
 	}
@@ -661,24 +512,6 @@ var (
 				Columns: []*schema.Column{LionRolesColumns[7]},
 			},
 		},
-	}
-	// LionScopesColumns holds the columns for the "lion_scopes" table.
-	LionScopesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "code", Type: field.TypeString, Unique: true, Size: 128},
-		{Name: "scope_type", Type: field.TypeInt, Default: 0},
-		{Name: "display_name", Type: field.TypeString, Default: ""},
-		{Name: "protected", Type: field.TypeBool, Default: false},
-		{Name: "description", Type: field.TypeString, Default: ""},
-	}
-	// LionScopesTable holds the schema information for the "lion_scopes" table.
-	LionScopesTable = &schema.Table{
-		Name:       "lion_scopes",
-		Columns:    LionScopesColumns,
-		PrimaryKey: []*schema.Column{LionScopesColumns[0]},
 	}
 	// LionUserIdentitiesColumns holds the columns for the "lion_user_identities" table.
 	LionUserIdentitiesColumns = []*schema.Column{
@@ -729,6 +562,58 @@ var (
 			},
 		},
 	}
+	// LionUserMembershipsColumns holds the columns for the "lion_user_memberships" table.
+	LionUserMembershipsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
+		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "target_type", Type: field.TypeInt, Default: 0},
+		{Name: "target_id", Type: field.TypeInt},
+		{Name: "member_role", Type: field.TypeInt, Default: 0},
+		{Name: "member_status", Type: field.TypeInt, Default: 0},
+		{Name: "member_type", Type: field.TypeInt, Default: 0},
+		{Name: "joined_at", Type: field.TypeTime, Nullable: true},
+		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "description", Type: field.TypeString, Default: ""},
+		{Name: "user_id", Type: field.TypeInt},
+	}
+	// LionUserMembershipsTable holds the schema information for the "lion_user_memberships" table.
+	LionUserMembershipsTable = &schema.Table{
+		Name:       "lion_user_memberships",
+		Columns:    LionUserMembershipsColumns,
+		PrimaryKey: []*schema.Column{LionUserMembershipsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "lion_user_memberships_lion_users_lion_user_memberships",
+				Columns:    []*schema.Column{LionUserMembershipsColumns[14]},
+				RefColumns: []*schema.Column{LionUsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "usermemberships_user_id_target_type_target_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionUserMembershipsColumns[14], LionUserMembershipsColumns[5], LionUserMembershipsColumns[6]},
+			},
+			{
+				Name:    "usermemberships_target_type_target_id",
+				Unique:  false,
+				Columns: []*schema.Column{LionUserMembershipsColumns[5], LionUserMembershipsColumns[6]},
+			},
+			{
+				Name:    "usermemberships_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{LionUserMembershipsColumns[14]},
+				Annotation: &entsql.IndexAnnotation{
+					Where: "target_type = 2 AND member_type = 1",
+				},
+			},
+		},
+	}
 	// LionUserProfilesColumns holds the columns for the "lion_user_profiles" table.
 	LionUserProfilesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -749,49 +634,6 @@ var (
 				Name:    "userprofiles_user_id_attr_key",
 				Unique:  true,
 				Columns: []*schema.Column{LionUserProfilesColumns[4], LionUserProfilesColumns[5]},
-			},
-		},
-	}
-	// LionUserRolesColumns holds the columns for the "lion_user_roles" table.
-	LionUserRolesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "updated_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
-		{Name: "created_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "updated_by", Type: field.TypeInt64, Nullable: true, Default: 0},
-		{Name: "member_role", Type: field.TypeInt, Default: 0},
-		{Name: "member_status", Type: field.TypeInt, Default: 0},
-		{Name: "member_type", Type: field.TypeInt, Default: 0},
-		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
-		{Name: "metadata", Type: field.TypeString, Nullable: true},
-		{Name: "description", Type: field.TypeString, Default: ""},
-		{Name: "role_id", Type: field.TypeInt},
-		{Name: "user_id", Type: field.TypeInt},
-	}
-	// LionUserRolesTable holds the schema information for the "lion_user_roles" table.
-	LionUserRolesTable = &schema.Table{
-		Name:       "lion_user_roles",
-		Columns:    LionUserRolesColumns,
-		PrimaryKey: []*schema.Column{LionUserRolesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "lion_user_roles_lion_roles_lion_user_roles",
-				Columns:    []*schema.Column{LionUserRolesColumns[11]},
-				RefColumns: []*schema.Column{LionRolesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "lion_user_roles_lion_users_lion_user_roles",
-				Columns:    []*schema.Column{LionUserRolesColumns[12]},
-				RefColumns: []*schema.Column{LionUsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
-		Indexes: []*schema.Index{
-			{
-				Name:    "userroles_user_id_role_id",
-				Unique:  true,
-				Columns: []*schema.Column{LionUserRolesColumns[12], LionUserRolesColumns[11]},
 			},
 		},
 	}
@@ -927,114 +769,83 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		LionActionsTable,
 		LionAuthProvidersTable,
 		LionCredentialsTable,
-		LionDepartmentMembersTable,
 		LionDepartmentsTable,
-		LionGroupMembersTable,
-		LionGroupRolesTable,
+		LionSettingsTable,
 		LionGroupsTable,
-		LionPermissionBindingsTable,
-		LionPermissionsTable,
+		LionMenusTable,
+		LionOauth2ClientsTable,
+		LionOauth2CodesTable,
 		LionPoliciesTable,
-		LionPolicyAttachmentsTable,
-		LionPolicyStatementsTable,
-		LionResourceScopesTable,
-		LionResourcesTable,
-		LionRolePermissionsTable,
+		LionPrincipalRolesTable,
+		LionRoleMenusTable,
+		LionRolePoliciesTable,
 		LionRolesTable,
-		LionScopesTable,
 		LionUserIdentitiesTable,
+		LionUserMembershipsTable,
 		LionUserProfilesTable,
-		LionUserRolesTable,
 		LionUsersTable,
 	}
 )
 
 func init() {
-	LionActionsTable.Annotation = &entsql.Annotation{
-		Table: "lion_actions",
-	}
 	LionAuthProvidersTable.Annotation = &entsql.Annotation{
 		Table: "lion_auth_providers",
 	}
 	LionCredentialsTable.Annotation = &entsql.Annotation{
 		Table: "lion_credentials",
 	}
-	LionDepartmentMembersTable.ForeignKeys[0].RefTable = LionDepartmentsTable
-	LionDepartmentMembersTable.ForeignKeys[1].RefTable = LionUsersTable
-	LionDepartmentMembersTable.Annotation = &entsql.Annotation{
-		Table: "lion_department_members",
-	}
 	LionDepartmentsTable.Annotation = &entsql.Annotation{
 		Table: "lion_departments",
 	}
-	LionGroupMembersTable.ForeignKeys[0].RefTable = LionGroupsTable
-	LionGroupMembersTable.ForeignKeys[1].RefTable = LionUsersTable
-	LionGroupMembersTable.Annotation = &entsql.Annotation{
-		Table: "lion_group_members",
-	}
-	LionGroupRolesTable.ForeignKeys[0].RefTable = LionGroupsTable
-	LionGroupRolesTable.ForeignKeys[1].RefTable = LionRolesTable
-	LionGroupRolesTable.Annotation = &entsql.Annotation{
-		Table: "lion_group_roles",
+	LionSettingsTable.Annotation = &entsql.Annotation{
+		Table: "lion_settings",
 	}
 	LionGroupsTable.ForeignKeys[0].RefTable = LionDepartmentsTable
 	LionGroupsTable.Annotation = &entsql.Annotation{
 		Table: "lion_groups",
 	}
-	LionPermissionBindingsTable.ForeignKeys[0].RefTable = LionPermissionsTable
-	LionPermissionBindingsTable.ForeignKeys[1].RefTable = LionResourceScopesTable
-	LionPermissionBindingsTable.Annotation = &entsql.Annotation{
-		Table: "lion_permission_bindings",
+	LionMenusTable.Annotation = &entsql.Annotation{
+		Table: "lion_menus",
 	}
-	LionPermissionsTable.ForeignKeys[0].RefTable = LionPoliciesTable
-	LionPermissionsTable.Annotation = &entsql.Annotation{
-		Table: "lion_permissions",
+	LionOauth2ClientsTable.Annotation = &entsql.Annotation{
+		Table: "lion_oauth2_clients",
+	}
+	LionOauth2CodesTable.Annotation = &entsql.Annotation{
+		Table: "lion_oauth2_codes",
 	}
 	LionPoliciesTable.Annotation = &entsql.Annotation{
 		Table: "lion_policies",
 	}
-	LionPolicyAttachmentsTable.ForeignKeys[0].RefTable = LionPoliciesTable
-	LionPolicyAttachmentsTable.Annotation = &entsql.Annotation{
-		Table: "lion_policy_attachments",
+	LionPrincipalRolesTable.ForeignKeys[0].RefTable = LionRolesTable
+	LionPrincipalRolesTable.Annotation = &entsql.Annotation{
+		Table: "lion_principal_roles",
 	}
-	LionPolicyStatementsTable.ForeignKeys[0].RefTable = LionPoliciesTable
-	LionPolicyStatementsTable.Annotation = &entsql.Annotation{
-		Table: "lion_policy_statements",
+	LionRoleMenusTable.ForeignKeys[0].RefTable = LionMenusTable
+	LionRoleMenusTable.ForeignKeys[1].RefTable = LionRolesTable
+	LionRoleMenusTable.Annotation = &entsql.Annotation{
+		Table: "lion_role_menus",
 	}
-	LionResourceScopesTable.ForeignKeys[0].RefTable = LionResourcesTable
-	LionResourceScopesTable.ForeignKeys[1].RefTable = LionScopesTable
-	LionResourceScopesTable.Annotation = &entsql.Annotation{
-		Table: "lion_resource_scopes",
-	}
-	LionResourcesTable.Annotation = &entsql.Annotation{
-		Table: "lion_resources",
-	}
-	LionRolePermissionsTable.ForeignKeys[0].RefTable = LionPermissionsTable
-	LionRolePermissionsTable.ForeignKeys[1].RefTable = LionRolesTable
-	LionRolePermissionsTable.Annotation = &entsql.Annotation{
-		Table: "lion_role_permissions",
+	LionRolePoliciesTable.ForeignKeys[0].RefTable = LionPoliciesTable
+	LionRolePoliciesTable.ForeignKeys[1].RefTable = LionRolesTable
+	LionRolePoliciesTable.Annotation = &entsql.Annotation{
+		Table: "lion_role_policies",
 	}
 	LionRolesTable.Annotation = &entsql.Annotation{
 		Table: "lion_roles",
-	}
-	LionScopesTable.Annotation = &entsql.Annotation{
-		Table: "lion_scopes",
 	}
 	LionUserIdentitiesTable.ForeignKeys[0].RefTable = LionAuthProvidersTable
 	LionUserIdentitiesTable.ForeignKeys[1].RefTable = LionUsersTable
 	LionUserIdentitiesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_identities",
 	}
+	LionUserMembershipsTable.ForeignKeys[0].RefTable = LionUsersTable
+	LionUserMembershipsTable.Annotation = &entsql.Annotation{
+		Table: "lion_user_memberships",
+	}
 	LionUserProfilesTable.Annotation = &entsql.Annotation{
 		Table: "lion_user_profiles",
-	}
-	LionUserRolesTable.ForeignKeys[0].RefTable = LionRolesTable
-	LionUserRolesTable.ForeignKeys[1].RefTable = LionUsersTable
-	LionUserRolesTable.Annotation = &entsql.Annotation{
-		Table: "lion_user_roles",
 	}
 	LionUsersTable.Annotation = &entsql.Annotation{
 		Table: "lion_users",

@@ -70,30 +70,19 @@ const (
 	FieldDescription = "description"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
-	// EdgeLionUserRoles holds the string denoting the lion_user_roles edge name in mutations.
-	EdgeLionUserRoles = "lion_user_roles"
-	// EdgeLionGroupMembers holds the string denoting the lion_group_members edge name in mutations.
-	EdgeLionGroupMembers = "lion_group_members"
+	// EdgeLionUserMemberships holds the string denoting the lion_user_memberships edge name in mutations.
+	EdgeLionUserMemberships = "lion_user_memberships"
 	// EdgeLionUserIdentities holds the string denoting the lion_user_identities edge name in mutations.
 	EdgeLionUserIdentities = "lion_user_identities"
-	// EdgeLionDepartmentMembers holds the string denoting the lion_department_members edge name in mutations.
-	EdgeLionDepartmentMembers = "lion_department_members"
 	// Table holds the table name of the users in the database.
 	Table = "lion_users"
-	// LionUserRolesTable is the table that holds the lion_user_roles relation/edge.
-	LionUserRolesTable = "lion_user_roles"
-	// LionUserRolesInverseTable is the table name for the UserRoles entity.
-	// It exists in this package in order to avoid circular dependency with the "userroles" package.
-	LionUserRolesInverseTable = "lion_user_roles"
-	// LionUserRolesColumn is the table column denoting the lion_user_roles relation/edge.
-	LionUserRolesColumn = "user_id"
-	// LionGroupMembersTable is the table that holds the lion_group_members relation/edge.
-	LionGroupMembersTable = "lion_group_members"
-	// LionGroupMembersInverseTable is the table name for the GroupMembers entity.
-	// It exists in this package in order to avoid circular dependency with the "groupmembers" package.
-	LionGroupMembersInverseTable = "lion_group_members"
-	// LionGroupMembersColumn is the table column denoting the lion_group_members relation/edge.
-	LionGroupMembersColumn = "user_id"
+	// LionUserMembershipsTable is the table that holds the lion_user_memberships relation/edge.
+	LionUserMembershipsTable = "lion_user_memberships"
+	// LionUserMembershipsInverseTable is the table name for the UserMemberships entity.
+	// It exists in this package in order to avoid circular dependency with the "usermemberships" package.
+	LionUserMembershipsInverseTable = "lion_user_memberships"
+	// LionUserMembershipsColumn is the table column denoting the lion_user_memberships relation/edge.
+	LionUserMembershipsColumn = "user_id"
 	// LionUserIdentitiesTable is the table that holds the lion_user_identities relation/edge.
 	LionUserIdentitiesTable = "lion_user_identities"
 	// LionUserIdentitiesInverseTable is the table name for the UserIdentities entity.
@@ -101,13 +90,6 @@ const (
 	LionUserIdentitiesInverseTable = "lion_user_identities"
 	// LionUserIdentitiesColumn is the table column denoting the lion_user_identities relation/edge.
 	LionUserIdentitiesColumn = "user_id"
-	// LionDepartmentMembersTable is the table that holds the lion_department_members relation/edge.
-	LionDepartmentMembersTable = "lion_department_members"
-	// LionDepartmentMembersInverseTable is the table name for the DepartmentMembers entity.
-	// It exists in this package in order to avoid circular dependency with the "departmentmembers" package.
-	LionDepartmentMembersInverseTable = "lion_department_members"
-	// LionDepartmentMembersColumn is the table column denoting the lion_department_members relation/edge.
-	LionDepartmentMembersColumn = "user_id"
 )
 
 // Columns holds all SQL columns for users fields.
@@ -306,31 +288,17 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLionUserRolesCount orders the results by lion_user_roles count.
-func ByLionUserRolesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLionUserMembershipsCount orders the results by lion_user_memberships count.
+func ByLionUserMembershipsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionUserRolesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLionUserMembershipsStep(), opts...)
 	}
 }
 
-// ByLionUserRoles orders the results by lion_user_roles terms.
-func ByLionUserRoles(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLionUserMemberships orders the results by lion_user_memberships terms.
+func ByLionUserMemberships(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionUserRolesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByLionGroupMembersCount orders the results by lion_group_members count.
-func ByLionGroupMembersCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionGroupMembersStep(), opts...)
-	}
-}
-
-// ByLionGroupMembers orders the results by lion_group_members terms.
-func ByLionGroupMembers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionGroupMembersStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLionUserMembershipsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -347,32 +315,11 @@ func ByLionUserIdentities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOptio
 		sqlgraph.OrderByNeighborTerms(s, newLionUserIdentitiesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByLionDepartmentMembersCount orders the results by lion_department_members count.
-func ByLionDepartmentMembersCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLionDepartmentMembersStep(), opts...)
-	}
-}
-
-// ByLionDepartmentMembers orders the results by lion_department_members terms.
-func ByLionDepartmentMembers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLionDepartmentMembersStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-func newLionUserRolesStep() *sqlgraph.Step {
+func newLionUserMembershipsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionUserRolesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionUserRolesTable, LionUserRolesColumn),
-	)
-}
-func newLionGroupMembersStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionGroupMembersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionGroupMembersTable, LionGroupMembersColumn),
+		sqlgraph.To(LionUserMembershipsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LionUserMembershipsTable, LionUserMembershipsColumn),
 	)
 }
 func newLionUserIdentitiesStep() *sqlgraph.Step {
@@ -380,12 +327,5 @@ func newLionUserIdentitiesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LionUserIdentitiesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, LionUserIdentitiesTable, LionUserIdentitiesColumn),
-	)
-}
-func newLionDepartmentMembersStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LionDepartmentMembersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LionDepartmentMembersTable, LionDepartmentMembersColumn),
 	)
 }

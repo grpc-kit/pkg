@@ -8,6 +8,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/lion"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // ldapConfigData LDAP 非敏感配置，用于 JSON 列存储
@@ -56,27 +57,12 @@ type oauthConfigData struct {
 	InsecureSkipVerify bool `json:"insecure_skip_verify,omitempty"`
 }
 
-// localConfigData LOCAL 配置，用于 JSON 列存储
-type localConfigData struct {
-	EnforceMfaForAllUsers bool `json:"enforce_mfa_for_all_users,omitempty"`
-}
-
 // protoToDBConfig 从 proto AuthProvider 中提取配置和敏感凭证
 // 返回 JSON 配置（不含敏感字段）和加密后的敏感凭证
 func protoToDBConfig(p *adminv1.AuthProvider, aesKey []byte) (configJSON json.RawMessage, secretEnc []byte, err error) {
 	var secret string
 
 	switch cfg := p.GetConfig().(type) {
-	case *adminv1.AuthProvider_LocalConfig:
-		lc := cfg.LocalConfig
-		data := &localConfigData{
-			EnforceMfaForAllUsers: lc.GetEnforceMfaForAllUsers(),
-		}
-		configJSON, err = json.Marshal(data)
-		if err != nil {
-			return nil, nil, fmt.Errorf("marshal local config: %w", err)
-		}
-
 	case *adminv1.AuthProvider_LdapConfig:
 		lc := cfg.LdapConfig
 		secret = lc.GetBindPassword()
@@ -168,6 +154,12 @@ func protoToDBConfig(p *adminv1.AuthProvider, aesKey []byte) (configJSON json.Ra
 // dbToProtoAuthProvider 将 DB 行转换为 proto AuthProvider
 // withSecret 控制是否解密并填充敏感字段（List 场景不需要，Get 场景需要）
 func dbToProtoAuthProvider(row *lion.AuthProviders, aesKey []byte, withSecret bool) (*adminv1.AuthProvider, error) {
+	// deleted_at 为可空字段，需 nil 检查
+	var deletedAt *timestamppb.Timestamp
+	if row.DeletedAt != nil {
+		deletedAt = timestamppb.New(*row.DeletedAt)
+	}
+
 	p := &adminv1.AuthProvider{
 		Id:          int64(row.ID),
 		Code:        row.Code,
@@ -178,6 +170,11 @@ func dbToProtoAuthProvider(row *lion.AuthProviders, aesKey []byte, withSecret bo
 		SortOrder:   int32(row.SortOrder),
 		IconUrl:     row.IconURL,
 		Protected:   row.Protected,
+		CreatedBy:   row.CreatedBy,
+		UpdatedBy:   row.UpdatedBy,
+		CreatedAt:   timestamppb.New(row.CreatedAt),
+		UpdatedAt:   timestamppb.New(row.UpdatedAt),
+		DeletedAt:   deletedAt,
 	}
 
 	// 解密敏感凭证
@@ -193,16 +190,6 @@ func dbToProtoAuthProvider(row *lion.AuthProviders, aesKey []byte, withSecret bo
 	// 根据 type 解析 config JSON 并构建 oneof config
 	if len(row.Config) > 0 {
 		switch p.Type {
-		case adminv1.AuthProvider_LOCAL:
-			var data localConfigData
-			if err := json.Unmarshal(row.Config, &data); err != nil {
-				return nil, fmt.Errorf("unmarshal local config: %w", err)
-			}
-			lc := &adminv1.LocalAuthConfig{
-				EnforceMfaForAllUsers: data.EnforceMfaForAllUsers,
-			}
-			p.Config = &adminv1.AuthProvider_LocalConfig{LocalConfig: lc}
-
 		case adminv1.AuthProvider_LDAP:
 			var data ldapConfigData
 			if err := json.Unmarshal(row.Config, &data); err != nil {

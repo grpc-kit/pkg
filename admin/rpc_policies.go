@@ -9,12 +9,58 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
-	"github.com/grpc-kit/pkg/lion/permissions"
 	"github.com/grpc-kit/pkg/lion/policies"
 	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/rolepolicies"
 	"github.com/grpc-kit/pkg/lion/schema"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+func buildPolicyProto(entPolicy *lion.Policies, includeStatements bool) *adminv1.Policy {
+	result := &adminv1.Policy{
+		Id:          int64(entPolicy.ID),
+		Code:        entPolicy.Code,
+		DisplayName: entPolicy.DisplayName,
+		Status:      adminv1.Policy_Status(entPolicy.PolicyStatus),
+		Description: entPolicy.Description,
+		Protected:   entPolicy.Protected,
+		CreatedBy:   entPolicy.CreatedBy,
+		UpdatedBy:   entPolicy.UpdatedBy,
+		CreatedAt:   timestamppb.New(entPolicy.CreatedAt),
+		UpdatedAt:   timestamppb.New(entPolicy.UpdatedAt),
+	}
+
+	if includeStatements {
+		result.Statements = entPolicy.Statements
+	}
+
+	return result
+}
+
+// validatePolicyStatements 校验 statement 的必填字段，避免 protojson 静默丢失 enum
+// 等问题导致的脏数据（典型场景：客户端发送 "Allow"/"Deny" 这类非规范字符串，
+// 被 DiscardUnknown 配置丢成 EFFECT_UNSPECIFIED 后落库）。
+func validatePolicyStatements(ctx context.Context, statements []*adminv1.PolicyStatement) error {
+	for i, s := range statements {
+		if s == nil {
+			return errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("statements[%d] is nil", i))
+		}
+		if s.Effect != adminv1.PolicyStatement_ALLOW && s.Effect != adminv1.PolicyStatement_DENY {
+			return errs.InvalidArgument(ctx).WithMessage(
+				fmt.Sprintf("statements[%d].effect must be ALLOW or DENY, got %s", i, s.Effect.String()))
+		}
+		if len(s.Actions) == 0 {
+			return errs.InvalidArgument(ctx).WithMessage(
+				fmt.Sprintf("statements[%d].actions must not be empty", i))
+		}
+		if len(s.Resources) == 0 {
+			return errs.InvalidArgument(ctx).WithMessage(
+				fmt.Sprintf("statements[%d].resources must not be empty", i))
+		}
+	}
+	return nil
+}
 
 // ListPolicies 获取策略列表
 func (a *KnownAdminAPI) ListPolicies(ctx context.Context, req *adminv1.ListPoliciesRequest) (*adminv1.ListPoliciesResponse, error) {
@@ -30,9 +76,6 @@ func (a *KnownAdminAPI) ListPolicies(ctx context.Context, req *adminv1.ListPolic
 	policiesWhere := make([]predicate.Policies, 0)
 
 	// 过滤条件
-	if req.PolicyType != 0 {
-		policiesWhere = append(policiesWhere, policies.PolicyTypeEQ(int(req.PolicyType)))
-	}
 	if req.PolicyStatus != 0 {
 		policiesWhere = append(policiesWhere, policies.PolicyStatusEQ(int(req.PolicyStatus)))
 	}
@@ -103,19 +146,9 @@ func (a *KnownAdminAPI) ListPolicies(ctx context.Context, req *adminv1.ListPolic
 	}
 
 	// 转换为响应格式
+	includeStatements := req.GetView() == adminv1.View_VIEW_FULL
 	for _, p := range policyList {
-		policy := &adminv1.Policy{
-			Id:          int64(p.ID),
-			Code:        p.Code,
-			DisplayName: p.DisplayName,
-			Type:        adminv1.Policy_Type(p.PolicyType),
-			Status:      adminv1.Policy_Status(p.PolicyStatus),
-			Value:       p.Value,
-			Description: p.Description,
-			Protected:   p.Protected,
-		}
-
-		result.Policies = append(result.Policies, policy)
+		result.Policies = append(result.Policies, buildPolicyProto(p, includeStatements))
 	}
 
 	// 构造 next_page_token（仅用于 cursor-based 分页）
@@ -132,6 +165,26 @@ func (a *KnownAdminAPI) ListPolicies(ctx context.Context, req *adminv1.ListPolic
 	return result, nil
 }
 
+// GetPolicy 获取策略详情
+func (a *KnownAdminAPI) GetPolicy(ctx context.Context, req *adminv1.GetPolicyRequest) (*adminv1.Policy, error) {
+	if req == nil || req.GetCode() == "" {
+		return nil, errs.InvalidArgument(ctx).WithMessage("policy code is required")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, err
+	}
+
+	policyEnt, err := db.Policies.Query().Where(policies.CodeEQ(req.GetCode())).First(ctx)
+	if err != nil {
+		return nil, errs.NotFound(ctx).WithMessage("policy not found")
+	}
+
+	includeStatements := req.GetView() != adminv1.View_VIEW_BASIC
+	return buildPolicyProto(policyEnt, includeStatements), nil
+}
+
 // CreatePolicy 创建策略
 func (a *KnownAdminAPI) CreatePolicy(ctx context.Context, req *adminv1.CreatePolicyRequest) (*adminv1.Policy, error) {
 	if req == nil || req.Policy == nil {
@@ -144,9 +197,23 @@ func (a *KnownAdminAPI) CreatePolicy(ctx context.Context, req *adminv1.CreatePol
 	}
 	req.Policy.Code = code
 
+	if err := validatePolicyStatements(ctx, req.Policy.Statements); err != nil {
+		return nil, err
+	}
+
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
+	}
+
+	// 预检 code 是否已被占用，给出明确的 AlreadyExists 错误，
+	// 同时仍依赖数据库 unique 索引兜底防止并发竞争写入。
+	exists, err := db.Policies.Query().Where(policies.CodeEQ(req.Policy.Code)).Exist(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		return nil, errs.AlreadyExists(ctx).WithMessage(fmt.Sprintf("policy code %q already exists", req.Policy.Code))
 	}
 
 	// 获取创建者用户 ID
@@ -159,11 +226,10 @@ func (a *KnownAdminAPI) CreatePolicy(ctx context.Context, req *adminv1.CreatePol
 	newPolicy, err := db.Policies.Create().
 		SetCode(req.Policy.Code).
 		SetDisplayName(req.Policy.DisplayName).
-		SetPolicyType(int(req.Policy.Type)).
 		SetPolicyStatus(int(req.Policy.Status)).
-		SetValue(req.Policy.Value).
 		SetDescription(req.Policy.Description).
 		SetProtected(req.Policy.Protected).
+		SetStatements(req.Policy.Statements).
 		SetCreatedBy(userID).
 		SetUpdatedBy(userID).
 		Save(ctx)
@@ -173,18 +239,7 @@ func (a *KnownAdminAPI) CreatePolicy(ctx context.Context, req *adminv1.CreatePol
 	}
 
 	// 构建返回的策略对象
-	result := &adminv1.Policy{
-		Id:          int64(newPolicy.ID),
-		Code:        newPolicy.Code,
-		DisplayName: newPolicy.DisplayName,
-		Type:        adminv1.Policy_Type(newPolicy.PolicyType),
-		Status:      adminv1.Policy_Status(newPolicy.PolicyStatus),
-		Value:       newPolicy.Value,
-		Description: newPolicy.Description,
-		Protected:   newPolicy.Protected,
-	}
-
-	return result, nil
+	return buildPolicyProto(newPolicy, true), nil
 }
 
 // UpdatePolicy 更新策略
@@ -222,33 +277,41 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 		for _, field := range req.UpdateMask.Paths {
 			switch field {
 			case policies.FieldCode:
-				update.SetCode(req.Policy.Code)
+				// Code 创建后不可修改（见 Policy.code 注释）
+				if req.Policy.Code != policy.Code {
+					return nil, errs.InvalidArgument(ctx).WithMessage("policy code is immutable after creation")
+				}
 			case policies.FieldDisplayName:
 				update.SetDisplayName(req.Policy.DisplayName)
-			case policies.FieldPolicyType:
-				update.SetPolicyType(int(req.Policy.Type))
 			case policies.FieldPolicyStatus:
 				update.SetPolicyStatus(int(req.Policy.Status))
-			case policies.FieldValue:
-				update.SetValue(req.Policy.Value)
 			case policies.FieldDescription:
 				update.SetDescription(req.Policy.Description)
 			case policies.FieldProtected:
 				update.SetProtected(req.Policy.Protected)
+			case policies.FieldStatements:
+				if err := validatePolicyStatements(ctx, req.Policy.Statements); err != nil {
+					return nil, err
+				}
+				update.SetStatements(req.Policy.Statements)
 			}
 		}
 		// 始终更新 UpdatedBy
 		update.SetUpdatedBy(userID)
 	} else {
-		// 如果没有指定更新字段，则更新所有字段
+		// 如果没有指定更新字段，则更新所有字段（code 仍不可修改）
+		if req.Policy.Code != "" && req.Policy.Code != policy.Code {
+			return nil, errs.InvalidArgument(ctx).WithMessage("policy code is immutable after creation")
+		}
+		if err := validatePolicyStatements(ctx, req.Policy.Statements); err != nil {
+			return nil, err
+		}
 		update.
-			SetCode(req.Policy.Code).
 			SetDisplayName(req.Policy.DisplayName).
-			SetPolicyType(int(req.Policy.Type)).
 			SetPolicyStatus(int(req.Policy.Status)).
-			SetValue(req.Policy.Value).
 			SetDescription(req.Policy.Description).
 			SetProtected(req.Policy.Protected).
+			SetStatements(req.Policy.Statements).
 			SetUpdatedBy(userID)
 	}
 
@@ -259,18 +322,7 @@ func (a *KnownAdminAPI) UpdatePolicy(ctx context.Context, req *adminv1.UpdatePol
 	}
 
 	// 构建返回的策略对象
-	result := &adminv1.Policy{
-		Id:          int64(updatedPolicy.ID),
-		Code:        updatedPolicy.Code,
-		DisplayName: updatedPolicy.DisplayName,
-		Type:        adminv1.Policy_Type(updatedPolicy.PolicyType),
-		Status:      adminv1.Policy_Status(updatedPolicy.PolicyStatus),
-		Value:       updatedPolicy.Value,
-		Description: updatedPolicy.Description,
-		Protected:   updatedPolicy.Protected,
-	}
-
-	return result, nil
+	return buildPolicyProto(updatedPolicy, true), nil
 }
 
 // DeletePolicy 删除策略
@@ -284,22 +336,15 @@ func (a *KnownAdminAPI) DeletePolicy(ctx context.Context, req *adminv1.DeletePol
 		return nil, err
 	}
 
-	// 检查策略是否存在
-	_, err = db.Policies.Get(ctx, int(req.Id))
+	policyEnt, err := db.Policies.Get(ctx, int(req.Id))
 	if err != nil {
 		return nil, errs.NotFound(ctx).WithMessage("policy not found")
 	}
-
-	// 检查是否存在关联的权限（通过 lion_permissions 表）
-	permissionsCount, err := db.Permissions.Query().
-		Where(permissions.PolicyIDEQ(int(req.Id))).
-		Count(ctx)
-	if err != nil {
-		return nil, err
+	if policyEnt.Protected {
+		return nil, errs.FailedPrecondition(ctx).WithMessage("protected policy cannot be deleted")
 	}
-
-	if permissionsCount > 0 {
-		return nil, errs.InvalidArgument(ctx).WithMessage("cannot delete policy with associated permissions")
+	if db.RolePolicies.Query().Where(rolepolicies.PolicyIDEQ(int(req.Id))).CountX(ctx) > 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("policy has role binding")
 	}
 
 	// 执行删除

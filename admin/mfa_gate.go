@@ -2,7 +2,6 @@ package admin
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -43,14 +42,12 @@ func (a *KnownAdminAPI) getLocalMFAPolicy(ctx context.Context, db *lion.Client) 
 		return false, row.ID, nil
 	}
 
-	cfg := &localConfigData{}
-	if len(row.Config) > 0 {
-		if err := json.Unmarshal(row.Config, cfg); err != nil {
-			return false, row.ID, err
-		}
+	settingsReader := newGlobalSettingsReader(a.logger, db)
+	settingEnforce, _, err := settingsReader.GetBool(ctx, globalSettingsCategorySecurity, globalSettingKeyLoginEnforceMFA)
+	if err != nil {
+		return false, row.ID, err
 	}
-
-	return cfg.EnforceMfaForAllUsers, row.ID, nil
+	return settingEnforce, row.ID, nil
 }
 
 // ensureLocalIdentity 确保用户存在 local identity（用于统一执行 LOCAL MFA 门禁）
@@ -87,7 +84,7 @@ func (a *KnownAdminAPI) ensureLocalIdentity(ctx context.Context, db *lion.Client
 }
 
 func (a *KnownAdminAPI) createMFALoginChallenge(ctx context.Context, challengeType mfaChallengeType, userID int, username string, responseType string) (*adminv1.AuthToken, error) {
-	challenge, err := a.mfaChallenges.Create(challengeType, userID, username)
+	challenge, err := a.mfaChallenges.CreateWithTTL(a.getMFAChallengeTTL(ctx), challengeType, userID, username)
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("failed to create MFA challenge")
 	}
@@ -152,6 +149,6 @@ func (a *KnownAdminAPI) applyMFAGateAfterPrimaryAuth(
 	return &adminv1.AuthToken{
 		AccessToken: accessToken,
 		TokenType:   "Bearer",
-		ExpiresIn:   24 * 60 * 60,
+		ExpiresIn:   durationSecondsInt32(a.getLoginAccessTokenTTL(ctx)),
 	}, nil
 }
