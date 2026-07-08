@@ -6533,7 +6533,13 @@
       "title": "CreateAuthTokenRequest 用于创建 token，仅管理员或特定用户可建"
     },
     "v1CreateDatabaseInitializeRequest": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "password_hash": {
+          "type": "string",
+          "title": "PasswordHash 管理员密码在本地使用 sha256 哈希结果\n为空时使用系统默认密码"
+        }
+      }
     },
     "v1CreateDepartmentMembersResponse": {
       "type": "object"

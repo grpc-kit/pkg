@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
+	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
@@ -25,6 +26,9 @@ import (
 	"github.com/grpc-kit/pkg/lion/users"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+// defaultAdminPassword 是未通过请求参数指定时的初始管理员密码明文。
+const defaultAdminPassword = "grpc-kit-cli"
 
 type builtinMenuSeed struct {
 	Code        string
@@ -283,6 +287,11 @@ func createBuiltinMenus(ctx context.Context, tx *lion.Tx, parentID int64, items 
 func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *adminv1.CreateDatabaseInitializeRequest) (*emptypb.Empty, error) {
 	result := &emptypb.Empty{}
 
+	// password_hash 为 sha256(plaintext) 的十六进制表示（64 字符），为空时使用默认密码。
+	if ph := req.GetPasswordHash(); ph != "" && len(ph) != 64 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("password_hash 必须是 sha256 的十六进制字符串（64 字符）").Err()
+	}
+
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, err
@@ -426,11 +435,15 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		return nil, err
 	}
 	if !identityExists {
+		passwordHash := req.GetPasswordHash()
+		if passwordHash == "" {
+			passwordHash = crypto.SHA256([]byte(defaultAdminPassword))
+		}
 		if err := tx.UserIdentities.Create().
 			SetProviderID(localProvider.ID).
 			SetProviderUserID(strconv.Itoa(adminUser.ID)).
 			SetUserID(adminUser.ID).
-			SetPasswordHash(crypto.BcryptHashMust(crypto.SHA256([]byte("grpc-kit-cli")))). // TODO; 由客户端参数获取
+			SetPasswordHash(crypto.BcryptHashMust(passwordHash)).
 			Exec(ctx); err != nil {
 			rollback()
 			return nil, err
