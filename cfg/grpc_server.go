@@ -3,7 +3,9 @@ package cfg
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -19,21 +21,23 @@ import (
 	grpclogging "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	grpcrecovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	statusv1 "github.com/grpc-kit/pkg/api/known/status/v1"
-	"github.com/grpc-kit/pkg/errs"
-	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
-	"github.com/grpc-kit/pkg/vars"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	otelcodes "go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
+	"github.com/grpc-kit/pkg/vars"
 )
 
 // registerGateway 注册 microservice.pb.gw
@@ -41,7 +45,7 @@ func (c *LocalConfig) registerGateway(ctx context.Context,
 	gw func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error,
 	opts ...runtime.ServeMuxOption) (*http.ServeMux, error) {
 
-	hmux, rmux := c.getHTTPServeMux(opts...)
+	hmux, muxOpts := c.getHTTPServeMux(opts...)
 
 	var forwardGWAddr string
 	grpcListenAddr, grpcListenPort, err := c.Services.getGRPCListenHostPort()
@@ -63,16 +67,35 @@ func (c *LocalConfig) registerGateway(ctx context.Context,
 	}
 	defaultOpts = append(defaultOpts, grpc.WithTransportCredentials(creds))
 
+	// TODO;
+	apiMux := runtime.NewServeMux(muxOpts...)
+	apiHandler := http.Handler(apiMux)
+	apiHandler = c.Observables.addHTTPHandler(apiHandler)
+	hmux.Handle("/api/", apiHandler)
+
 	err = gw(ctx,
-		rmux,
+		apiMux,
 		fmt.Sprintf("%v:%v", forwardGWAddr, grpcListenPort),
 		c.GetClientDialOption(defaultOpts...))
+
+	if c.Frontend.hasEnableAdmin() {
+		adminMux := runtime.NewServeMux(muxOpts...)
+		adminHandler := http.Handler(adminMux)
+		adminHandler = c.Observables.addHTTPHandler(adminHandler)
+		hmux.Handle("/builtin/admin/api/", adminHandler)
+
+		err = adminv1.RegisterKnownAdminHandlerFromEndpoint(ctx,
+			adminMux,
+			fmt.Sprintf("%v:%v", forwardGWAddr, grpcListenPort),
+			c.GetClientDialOption(defaultOpts...))
+	}
+	// TODO;
 
 	return hmux, err
 }
 
 // getHTTPServeMux 获取通用的HTTP路由规则
-func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*http.ServeMux, *runtime.ServeMux) {
+func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*http.ServeMux, []runtime.ServeMuxOption) {
 	// ServeMuxOption如果存在同样的设置选项，则以最后设置为准（见runtime.NewServeMux）
 	defaultOpts := make([]runtime.ServeMuxOption, 0)
 
@@ -149,16 +172,8 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 
 	// 正常响应时调用，统一植入特定内容
 	forwardResponseOption := func(ctx context.Context, w http.ResponseWriter, msg proto.Message) error {
-		// 禁用浏览器的 Content-Type 猜测行为
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		// 限制仅可在相同域名页面的 frame 中展示
-		w.Header().Set("X-Frame-Options", "sameorigin")
-		// 防范 XSS 攻击，检测到攻击，浏览器将不会清除页面，而是阻止页面加载
-		w.Header().Set("X-XSS-Protection", "1; mode=block")
-		// 访问一个 HTTPS 网站，要求浏览器总是通过 HTTPS 访问它
-		// w.Header().Set("Strict-Transport-Security", "max-age=172800")
-		// 返回请求ID，如果存在 trace.id 的话，否则返回默认值
-		w.Header().Set(HTTPHeaderRequestID, c.Observables.calcRequestID(ctx))
+		// 植入自定义 http 请求头
+		c.setHTTPResponseHeaders(ctx, w)
 
 		// tracing 不可用或当前无法记录上报事件
 		span := trace.SpanFromContext(ctx)
@@ -227,19 +242,28 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 			otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
 		}
 
-		t := &statusv1.TracingRequest{Id: requestID}
-		s = s.AppendDetail(t)
+		// 添加追踪信息
+		s = s.AppendDetail(&errdetails.RequestInfo{
+			RequestId: requestID,
+			// ServingData: req.URL.String(),
+		})
+		// 之后考虑废弃移除使用以上结构代替
+		// t := &statusv1.TracingRequest{Id: requestID}
+		// s = s.AppendDetail(t)
 
-		body := &statusv1.ErrorResponse{
-			Error: s.Status,
-		}
+		/*
+			body := &statusv1.ErrorResponse{
+				Error: s.Status,
+			}
 
-		rawBody, err := protojson.Marshal(body)
-		if err != nil {
-			s = errs.Internal(ctx, t).WithMessage(err.Error())
-			body.Error = s.Status
-			rawBody, _ = protojson.Marshal(body)
-		}
+			rawBody, err := protojson.Marshal(body)
+			if err != nil {
+				s = errs.Internal(ctx).WithMessage(err.Error())
+				body.Error = s.Status
+				rawBody, _ = protojson.Marshal(body)
+			}
+		*/
+		rawBody := s.ErrorResponseBody(ctx)
 
 		// 接口请求错误情况下，均会记录响应体
 		if !ignoreTracing {
@@ -308,13 +332,17 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		}
 	}
 
+	/*
+		optionWithStreamErrorHandler := func(context.Context, error) *status.Status {
+			return status.New(codes.Internal, codes.Internal.String())
+		}
+	*/
+
 	defaultOpts = append(defaultOpts, runtime.WithMetadata(optionWithMetada))
 	defaultOpts = append(defaultOpts, runtime.WithForwardResponseOption(forwardResponseOption))
 	defaultOpts = append(defaultOpts, runtime.WithErrorHandler(optionWithProtoErrorHandler))
+	// defaultOpts = append(defaultOpts, runtime.WithStreamErrorHandler(optionWithStreamErrorHandler))
 	defaultOpts = append(defaultOpts, customOpts...)
-	rmux := runtime.NewServeMux(defaultOpts...)
-
-	// TODO; 自定义 prometheus 指标
 
 	hmux := http.NewServeMux()
 	c.Observables.prometheusExporterHTTP(hmux)
@@ -329,23 +357,30 @@ func (c *LocalConfig) getHTTPServeMux(customOpts ...runtime.ServeMuxOption) (*ht
 		hmux.Handle("/debug/pprof/trace", c.Security.addHTTPHandlerFunc(pprof.Trace))
 	}
 
-	handler := http.Handler(rmux)
-	handler = c.Observables.addHTTPHandler(handler)
-
-	// TODO；后续如需集成前端，可考虑添加 "/api" 前缀，把 ”/“ 存放静态 HTML
-	// hmux.Handle("/", handler)
-	hmux.Handle("/api/", handler)
-
-	return hmux, rmux
+	return hmux, defaultOpts
 }
 
 // GetUnaryInterceptor 用于获取gRPC的一元拦截器
 func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterceptor) grpc.ServerOption {
 	// TODO; 移动到 observables 方法中
 
-	var defaultUnaryOpt []grpc.UnaryServerInterceptor
+	var defaultOpts []grpc.UnaryServerInterceptor
 
-	defaultUnaryOpt = append(defaultUnaryOpt,
+	// TODO; 测试鉴权函数, begin
+	/*
+		rawBody, err := os.ReadFile("./examples/authz/rbac.json")
+		if err != nil {
+			panic("rbac read file err: " + err.Error())
+		}
+		si, err := authz.NewStatic(string(rawBody))
+		if err != nil {
+			panic("rbac new static err: " + err.Error())
+		}
+		defaultOpts = append(defaultOpts, si.UnaryInterceptor)
+	*/
+	// TODO; 测试鉴权函数, end
+
+	defaultOpts = append(defaultOpts,
 		grpcauth.UnaryServerInterceptor(c.authValidate()),
 	)
 
@@ -353,7 +388,7 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 		auditLevel := c.CloudEvents.getAuditLevel()
 		mustSucceed := c.CloudEvents.hasAuditEventMustSucceed()
 
-		defaultUnaryOpt = append(defaultUnaryOpt,
+		defaultOpts = append(defaultOpts,
 			audit.UnaryServerInterceptor(
 				audit.WithLogger(c.logger),
 				audit.WithCloudEvent(c.CloudEvents.auditClient),
@@ -365,78 +400,64 @@ func (c *LocalConfig) GetUnaryInterceptor(interceptors ...grpc.UnaryServerInterc
 		)
 	}
 
-	defaultUnaryOpt = append(defaultUnaryOpt,
+	defaultOpts = append(defaultOpts,
 		grpclogging.UnaryServerInterceptor(c.interceptorLogger(c.logger),
 			grpclogging.WithTimestampFormat(time.RFC3339Nano),
 			grpclogging.WithLogOnEvents(grpclogging.FinishCall),
-		))
-	defaultUnaryOpt = append(defaultUnaryOpt,
+		),
+	)
+
+	defaultOpts = append(defaultOpts,
 		grpcrecovery.UnaryServerInterceptor(
 			grpcrecovery.WithRecoveryHandlerContext(c.Observables.grpcPanicRecoveryHandler),
 		),
 	)
-	defaultUnaryOpt = append(defaultUnaryOpt, interceptors...)
 
-	return grpc.ChainUnaryInterceptor(defaultUnaryOpt...)
+	defaultOpts = append(defaultOpts, interceptors...)
+
+	return grpc.ChainUnaryInterceptor(defaultOpts...)
 }
 
 // GetStreamInterceptor xx
 func (c *LocalConfig) GetStreamInterceptor(interceptors ...grpc.StreamServerInterceptor) grpc.ServerOption {
-	/*
-		// TODO; 根据fullMethodName进行过滤哪些需要记录gRPC调用链，返回false表示不记录
-		tracingFilterFunc := grpcopentracing.WithFilterFunc(func(ctx context.Context, fullMethodName string) bool {
-			return path.Base(fullMethodName) != "HealthCheck"
-		})
+	var defaultOpts []grpc.StreamServerInterceptor
 
-		// TODO; 根据fullMethodName进行过滤哪些需要记录payload的，返回false表示不记录
-		logPayloadFilterFunc := func(ctx context.Context, fullMethodName string, servingObject interface{}) bool {
-			return false
-		}
+	defaultOpts = append(defaultOpts,
+		grpcauth.StreamServerInterceptor(c.authValidate()),
+	)
 
-		// TODO; 根据fullMethodName进行过滤哪些需要记录请求状态的，返回false表示不记录
-		logReqFilterOpts := []grpclogrus.Option{grpclogrus.WithDecider(func(fullMethodName string, err error) bool {
-			// 忽略HealthCheck请求记录：msg="finished unary call with code OK" grpc.code=OK grpc.method=HealthCheck
-			return err == nil && path.Base(fullMethodName) != "HealthCheck"
-		})}
-	*/
+	if c.CloudEvents.hasAuditEnabled() {
+		auditLevel := c.CloudEvents.getAuditLevel()
+		mustSucceed := c.CloudEvents.hasAuditEventMustSucceed()
 
-	// TODO; metrics
-	/*
-		srvMetrics := grpcprometheus.NewServerMetrics(
-			grpcprometheus.WithServerHandlingTimeHistogram(
-				grpcprometheus.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
+		defaultOpts = append(defaultOpts,
+			audit.StreamServerInterceptor(
+				audit.WithLogger(c.logger),
+				audit.WithCloudEvent(c.CloudEvents.auditClient),
+				audit.WithServiceName(c.GetServiceName()),
+				audit.WithMarshal(c.Services.jsonMarshal),
+				audit.WithLevel(auditLevel),
+				audit.WithMustSucceed(mustSucceed),
 			),
 		)
-	*/
+	}
 
-	/*
-		c.promRegistry.MustRegister(srvMetrics)
-		exemplarFromContext := func(ctx context.Context) prometheus.Labels {
-			if span := trace.SpanContextFromContext(ctx); span.IsSampled() {
-				return prometheus.Labels{"traceID": span.TraceID().String()}
-			}
-			return nil
-		}
-	*/
+	defaultOpts = append(defaultOpts,
+		grpclogging.StreamServerInterceptor(c.interceptorLogger(c.logger),
+			grpclogging.WithTimestampFormat(time.RFC3339Nano),
+			grpclogging.WithLogOnEvents(grpclogging.FinishCall),
+		),
+	)
 
-	/*
-		panicsTotal := promauto.With(c.promRegistry).NewCounter(prometheus.CounterOpts{
-			Name: "grpc_req_panics_recovered_total",
-			Help: "Total number of gRPC requests recovered from internal panic.",
-		})
-		grpcPanicRecoveryHandler := func(p any) (err error) {
-			panicsTotal.Inc()
-			// level.Error(rpcLogger).Log("msg", "recovered from panic", "panic", p, "stack", debug.Stack())
-			return status.Errorf(codes.Internal, "%s", p)
-		}
-	*/
+	defaultOpts = append(defaultOpts,
+		grpcrecovery.StreamServerInterceptor(
+			grpcrecovery.WithRecoveryHandlerContext(c.Observables.grpcPanicRecoveryHandler),
+		),
+	)
 
-	var opts []grpc.StreamServerInterceptor
-	opts = append(opts, grpcrecovery.StreamServerInterceptor())
-	opts = append(opts, grpcauth.StreamServerInterceptor(c.authValidate()))
-	opts = append(opts, interceptors...)
+	defaultOpts = append(defaultOpts, interceptors...)
 
-	return grpc.ChainStreamInterceptor(opts...)
+	return grpc.ChainStreamInterceptor(defaultOpts...)
 }
 
 // GetClientDialOption 获取客户端连接的设置
@@ -472,7 +493,7 @@ func (c *LocalConfig) GetClientUnaryInterceptor() []grpc.UnaryClientInterceptor 
 	*/
 
 	var opts []grpc.UnaryClientInterceptor
-	opts = append(opts, otelgrpc.UnaryClientInterceptor())
+	// opts = append(opts, otelgrpc.UnaryClientInterceptor())
 	//opts = append(opts, grpcprometheus.UnaryClientInterceptor)
 	// opts = append(opts, grpcopentracing.UnaryClientInterceptor())
 	// opts = append(opts, grpclogrus.UnaryClientInterceptor(c.logger, logReqFilterOpts...))
@@ -538,6 +559,24 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			}
 		}
 
+		// /grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin
+		// 确认是否为全局已知跳过认证的 rpc 方法
+		switch currentMethod {
+		case "/grpc_kit.api.known.admin.v1.KnownAdmin/ListLoginOptions",
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthLogin",
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/VerifyAuthMFA",
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/StartAuthMFASetup",
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmAuthMFASetup",
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateAuthToken",
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetAuthCallback",
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery",
+			"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2JSONWebKeys":
+			ctx = c.Security.withUserID(ctx, 0)
+			ctx = c.Security.withUsername(ctx, UsernameAnonymous)
+			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeNone)
+			return ctx, nil
+		}
+
 		// 如果未配置任何验证方式，则拒绝所有请求
 		if c.Security.Authentication == nil {
 			return ctx, errs.Unauthenticated(ctx).Err()
@@ -558,16 +597,33 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 				}
 
 				for _, v := range c.Security.Authentication.HTTPUsers {
-					if v.Username == tmps[0] && v.Password == tmps[1] {
-						// 认证成功
-						ctx = c.Security.withUsername(ctx, tmps[0])
-						ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
-						ctx = c.Security.withGroups(ctx, v.Groups)
-
-						if err := c.checkPermission(ctx, v.Groups); err != nil {
-							return ctx, err
+					if v == nil {
+						continue
+					}
+					if v.Username == tmps[0] {
+						pwTrim := strings.TrimSpace(v.Password)
+						okAuth := pwTrim != "" && pwTrim == tmps[1]
+						if !okAuth {
+							eff := basicAuthEffectivePasswordHash(v)
+							if eff != "" {
+								h := sha256.New()
+								h.Write([]byte(tmps[1]))
+								userHash := hex.EncodeToString(h.Sum(nil))
+								okAuth = eff == userHash
+							}
 						}
-						return ctx, nil
+						if okAuth {
+							// 认证成功
+							ctx = c.Security.withUserID(ctx, v.UserID)
+							ctx = c.Security.withUsername(ctx, tmps[0])
+							ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
+							ctx = c.Security.withGroups(ctx, v.Groups)
+
+							if err := c.checkPermission(ctx, v.Groups); err != nil {
+								return ctx, err
+							}
+							return ctx, nil
+						}
 					}
 				}
 			}
@@ -592,7 +648,8 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			}
 
 			ctx = c.Security.withIDToken(ctx, idToken)
-			ctx = c.Security.withUsername(ctx, idToken.Email)
+			ctx = c.Security.withUserID(ctx, idToken.GetMustUserID())
+			ctx = c.Security.withUsername(ctx, idToken.Username)
 			ctx = c.Security.withGroups(ctx, idToken.Groups)
 			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBearer)
 
@@ -638,6 +695,43 @@ func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) erro
 	return nil
 }
 
+func (c *LocalConfig) setHTTPResponseHeaders(ctx context.Context, w http.ResponseWriter) {
+	md, ok := runtime.ServerMetadataFromContext(ctx)
+	if ok {
+		for k, v := range md.HeaderMD {
+			// 必须以 "X-" 开头
+			if !strings.HasPrefix(strings.ToUpper(k), "X-") {
+				continue
+			}
+
+			for i := range v {
+				w.Header().Add(k, v[i])
+			}
+		}
+		for k, v := range md.TrailerMD {
+			// 必须以 "X-" 开头
+			if !strings.HasPrefix(strings.ToUpper(k), "X-") {
+				continue
+			}
+
+			for i := range v {
+				w.Header().Add(k, v[i])
+			}
+		}
+	}
+
+	// 禁用浏览器的 Content-Type 猜测行为
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	// 限制仅可在相同域名页面的 frame 中展示
+	w.Header().Set("X-Frame-Options", "sameorigin")
+	// 防范 XSS 攻击，检测到攻击，浏览器将不会清除页面，而是阻止页面加载
+	w.Header().Set("X-XSS-Protection", "1; mode=block")
+	// 访问一个 HTTPS 网站，要求浏览器总是通过 HTTPS 访问它
+	// w.Header().Set("Strict-Transport-Security", "max-age=172800")
+	// 返回请求ID，如果存在 trace.id 的话，否则返回默认值
+	w.Header().Set(HTTPHeaderRequestID, c.Observables.calcRequestID(ctx))
+}
+
 func httpHandleGetVersion() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -649,6 +743,8 @@ func httpHandleGetVersion() http.HandlerFunc {
 
 func httpHandleHealthPing() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// TODO; 检测已开启服务的连接是否正常
+
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusOK)
 

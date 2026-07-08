@@ -6,17 +6,20 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// IDTokenClaims 用于框架jwt的数据结构
+// IDTokenClaims 用于框架jwt的数据结构，使用 auth.IDTokenClaims 代替
+/*
 type IDTokenClaims struct {
 	jwt.RegisteredClaims
 	Email           string            `json:"email"`
@@ -25,6 +28,7 @@ type IDTokenClaims struct {
 	FederatedClaims map[string]string `json:"federated_claims"`
 	Tenant          string            `json:"tenant"`
 }
+*/
 
 // OPANative 内嵌的 opa 组件
 type OPANative struct {
@@ -116,8 +120,9 @@ func (c *LocalConfig) initSecurity() error {
 
 			provider, err := oidc.NewProvider(ctx, c.Security.Authentication.OIDCProvider.Issuer)
 			if err != nil {
-				c.logger.Errorf("oidc authenticator: initializing plugin: %v", err)
-				return false, err
+				c.logger.Debugf("oidc new provider failed will be retry: %v", err)
+				// 这里返回错误后，就不会触发后续的重试
+				return false, nil
 			}
 			verifier := provider.Verifier(oidcConfig)
 			c.Security.setVerifier(verifier)
@@ -125,19 +130,40 @@ func (c *LocalConfig) initSecurity() error {
 			return true, nil
 		}
 
-		ok, err := initVerifierFn()
-		if !ok || err != nil {
-			go wait.PollUntil(time.Second*30, initVerifierFn, ctx.Done())
-		}
+		// 初始化 oidc 认证器， 等待 verifier 初始化完成
+		go func(initVerifierFn func() (done bool, err error)) {
+			if err := wait.ExponentialBackoffWithContext(ctx, wait.Backoff{
+				Duration: time.Second * 1, // 初始间隔
+				Factor:   2,               // 每次翻倍
+				Jitter:   0.0,             // 随机抖动，避免同时请求
+				Steps:    300,             // 最大重试次数
+				// Cap:      time.Second * 30, // 最大间隔
+			}, func(ctx context.Context) (done bool, err error) {
+				// 初始化 oidc 认证器， 等待 verifier 初始化完成
+				// fmt.Println("start oidc authenticator: initializing plugin")
+
+				return initVerifierFn()
+			}); err != nil {
+				c.logger.Errorf("oidc new provider verifier failed, initializing plugin exit err: %v", err)
+			}
+
+			c.logger.Infof("oid verifier is ready and polling for /.well-known/openid-configuration has been stopped")
+		}(initVerifierFn)
 	}
 
 	return nil
 }
 
 // WithIDToken 用于设置当前会话的IDToken
-func (c *SecurityConfig) withIDToken(parent context.Context, token IDTokenClaims) context.Context {
+func (c *SecurityConfig) withIDToken(parent context.Context, token auth.IDTokenClaims) context.Context {
 	// return context.WithValue(parent, idTokenKey, token)
 	return rpc.ContextWithIDToken(parent, token)
+}
+
+// WithUserID 用于设置当前会话的用户 ID
+func (c *SecurityConfig) withUserID(parent context.Context, userID int64) context.Context {
+	// return context.WithValue(parent, usernameKey, username)
+	return rpc.ContextWithUserID(parent, userID)
 }
 
 // WithUsername 用于设置当前会话的用户名
@@ -185,24 +211,46 @@ func (s *SecurityConfig) supportedHS256Alg() bool {
 }
 
 // foundUserPassword 查找用户
-func (s *SecurityConfig) foundUsername(user string) (bool, *BasicAuth) {
+func (s *SecurityConfig) foundUserID(userID int64) (bool, *BasicAuth) {
 	if s.Authentication.HTTPUsers == nil {
 		return false, nil
 	}
 
 	for _, v := range s.Authentication.HTTPUsers {
-		if user == v.Username {
+		if userID == v.UserID {
 			return true, v
+		} else if v.UserID == 0 {
+			// 兼容无 user_id 的用户
+			if crypto.Username2UserID(v.Username) == userID {
+				return true, v
+			}
 		}
 	}
 
 	return false, nil
 }
 
+// basicAuthEffectivePasswordHash 返回用于静态用户、JWT HS256 密钥及口令比较的“有效”材料：
+// password_hash（trim 后非空）则原样返回；否则 password（trim 后非空）则返回其 SHA256 十六进制字符串。
+func basicAuthEffectivePasswordHash(b *BasicAuth) string {
+	if b == nil {
+		return ""
+	}
+	ph := strings.TrimSpace(b.PasswordHash)
+	if ph != "" {
+		return ph
+	}
+	pw := strings.TrimSpace(b.Password)
+	if pw != "" {
+		return crypto.SHA256([]byte(pw))
+	}
+	return ""
+}
+
 // verifyBearerToken 用于验证 bearerToken
 // 需判断服务端是否允许 HS256 的签名算法，如果有在判断 token 是否使用 HS256
-func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString string) (IDTokenClaims, error) {
-	var idToken IDTokenClaims
+func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString string) (auth.IDTokenClaims, error) {
+	var idToken auth.IDTokenClaims
 
 	// 用户提交的 token 是否为 HS256 签名
 	hasHS256Alg := false
@@ -212,12 +260,16 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 		if token.Method.Alg() == "HS256" {
 			hasHS256Alg = true
 
-			claims, ok := token.Claims.(*IDTokenClaims)
+			claims, ok := token.Claims.(*auth.IDTokenClaims)
 			if ok {
 				// 根据 sub 获取作为 username 获取对应的 password 作为 token 的签名验证
-				f, b := s.foundUsername(claims.Subject)
+				f, b := s.foundUserID(claims.GetMustUserID())
 				if f {
-					return []byte(b.Password), nil
+					eff := basicAuthEffectivePasswordHash(b)
+					if eff == "" {
+						return nil, fmt.Errorf("not found key")
+					}
+					return []byte(eff), nil
 				}
 
 				return nil, fmt.Errorf("not found key")
@@ -229,7 +281,7 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 
 	// 仅在服务端配置支持 HS256 算法时才执行
 	if s.supportedHS256Alg() {
-		token, err := jwt.ParseWithClaims(tokenString, &IDTokenClaims{}, hs256Verify)
+		token, err := jwt.ParseWithClaims(tokenString, &idToken, hs256Verify)
 		if hasHS256Alg && err != nil {
 			if s.Authentication.OIDCProvider.Config == nil {
 				return idToken, err
@@ -247,7 +299,7 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 		}
 
 		if hasHS256Alg {
-			if !token.Valid {
+			if token == nil || !token.Valid {
 				return idToken, jwt.ErrInvalidKey
 			}
 

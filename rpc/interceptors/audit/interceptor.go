@@ -2,12 +2,10 @@ package audit
 
 import (
 	"context"
-	"strings"
 
-	"github.com/cloudevents/sdk-go/v2/event"
-	"github.com/grpc-kit/pkg/errs"
-	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/grpc"
+
+	"github.com/grpc-kit/pkg/errs"
 )
 
 // UnaryServerInterceptor 审计事件 grpc unary 拦截器
@@ -19,46 +17,25 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 	}
 
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		if opt.level == LevelNone {
-			return handler(ctx, req)
-		}
-
 		// "/default.api.oneops.netdev.v1.OneopsNetdev/DisplaySwitchPortVlans"
-		parts := strings.Split(info.FullMethod, "/")
-		if len(parts) < 3 {
-			opt.logger.Warnf("failed to parse grpc metho: %s, ignore audit", info.FullMethod)
+		grpcService, grpcMethod, err := opt.parseGRPCMethod(info.FullMethod)
+		if err != nil {
+			opt.logger.Warn(err.Error())
 			return handler(ctx, req)
 		}
 
-		grpcService := parts[1]
-		grpcMethod := parts[2]
-
-		// TODO；针对特殊的 method 不做审计
-		switch grpcMethod {
-		case "HealthCheck":
+		if !opt.auditRequired(grpcService, grpcMethod) {
 			return handler(ctx, req)
 		}
 
-		ce := event.New()
-		ce.SetSpecVersion(event.CloudEventsVersionV1)
-		ce.SetSource(opt.serviceName)
-		ce.SetType("internal.audit")
-		ce.SetSubject(grpcMethod)
-
-		ed := opt.createEventData(ctx)
-		ed.GRPCMethod = grpcMethod
-		ed.GRPCService = grpcService
+		ed := newEventDataFromContext(ctx, opt, grpcService, grpcMethod)
 
 		// 记录请求体
 		if opt.level == LevelRequest || opt.level == LevelRequestResponse {
-			jsonData, ok, jsonErr := opt.marshalJson(req)
-			if jsonErr == nil && ok {
-				ed.setRequestObject(jsonData)
-			}
+			ed.setRequestObject(req)
 		}
 
-		if err := opt.sendAuditEvent(ctx, ce, ed); err != nil {
-			rpc.MetricAuditEventSendErrorsIncr(ctx)
+		if err := ed.sendEvent(ctx); err != nil {
 			return nil, errs.Unavailable(ctx).WithMessage(err.Error())
 		}
 
@@ -66,28 +43,38 @@ func UnaryServerInterceptor(opts ...Option) grpc.UnaryServerInterceptor {
 
 		// 记录响应体审计阶段
 		if opt.level == LevelRequestResponse {
-			// TODO; 避免 err 变量污染
+			ed.setResponseObject(err, resp)
 
-			ed.setResponseStatus(err)
-
-			if err != nil {
-				jsonData, ok, jsonErr := opt.marshalJson(err)
-				if jsonErr == nil && ok {
-					ed.setResponseObject(jsonData)
-				}
-			} else {
-				jsonData, ok, jsonErr := opt.marshalJson(resp)
-				if jsonErr == nil && ok {
-					ed.setResponseObject(jsonData)
-				}
-			}
-
-			if sendErr := opt.sendAuditEvent(ctx, ce, ed); sendErr != nil {
-				rpc.MetricAuditEventSendErrorsIncr(ctx)
+			if sendErr := ed.sendEvent(ctx); sendErr != nil {
 				return nil, errs.Unavailable(ctx).WithMessage(sendErr.Error())
 			}
 		}
 
 		return resp, err
+	}
+}
+
+// StreamServerInterceptor 审计事件 grpc stream 拦截器
+func StreamServerInterceptor(opts ...Option) grpc.StreamServerInterceptor {
+	opt := defaultOption
+
+	for _, o := range opts {
+		o(opt)
+	}
+
+	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		// "/default.api.oneops.netdev.v1.OneopsNetdev/DisplaySwitchPortVlans"
+		grpcService, grpcMethod, err := opt.parseGRPCMethod(info.FullMethod)
+		if err != nil {
+			opt.logger.Warn(err.Error())
+			return handler(srv, ss)
+		}
+
+		if !opt.auditRequired(grpcService, grpcMethod) {
+			return handler(srv, ss)
+		}
+
+		x := &serverStream{ServerStream: ss, opt: opt, grpcService: grpcService, grpcMethod: grpcMethod}
+		return handler(srv, x)
 	}
 }

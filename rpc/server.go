@@ -83,6 +83,8 @@ func NewServer(c *Config) *Server {
 func (s *Server) Server() *grpc.Server {
 	if s.server == nil {
 		s.server = grpc.NewServer(s.opts...)
+		// TODO; 是否加入反射，比如可用于 grpcurl -plaintext 127.0.0.1:10081 list
+		// reflection.Register(s.server)
 	}
 
 	return s.server

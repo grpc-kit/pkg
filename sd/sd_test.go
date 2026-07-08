@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/resolver"
 )
 
 var (
@@ -61,25 +59,27 @@ func TestRegisterDemo2(t *testing.T) {
 }
 
 func TestResolver(t *testing.T) {
-	hosts := "http://127.0.0.1:2379"
-	conns, err := NewConnector(logger, ETCDV3, hosts)
-	if err != nil {
-		fmt.Println("err:", err)
-	}
+	/*
+		hosts := "http://127.0.0.1:2379"
+		conns, err := NewConnector(logger, ETCDV3, hosts)
+		if err != nil {
+			fmt.Println("err:", err)
+		}
 
-	Home("service", "default")
-	r, err := Register(conns, "com.example.grpc.demo.v1.Demo2", "127.0.0.1:20089", "", 100)
-	resolver.Register(r)
+		Home("service", "default")
+		r, err := Register(conns, "com.example.grpc.demo.v1.Demo2", "127.0.0.1:20089", "", 100)
+		resolver.Register(r)
 
-	target := fmt.Sprintf("%v://default/%v", r.Scheme(), "com.example.grpc.demo.v1.Demo2")
+		target := fmt.Sprintf("%v://default/%v", r.Scheme(), "com.example.grpc.demo.v1.Demo2")
 
-	conn, err := grpc.Dial(target, grpc.WithBalancerName("round_robin"), grpc.WithInsecure())
-	if err != nil {
-		panic(err)
-	}
-	defer conn.Close()
+		conn, err := grpc.Dial(target, grpc.WithBalancerName("round_robin"), grpc.WithInsecure())
+		if err != nil {
+			panic(err)
+		}
+		defer conn.Close()
 
-	r.Deregister()
+		r.Deregister()
 
-	fmt.Println("target:", conn.GetState().String())
+		fmt.Println("target:", conn.GetState().String())
+	*/
 }

@@ -17,7 +17,10 @@ import (
 	eventclient "github.com/cloudevents/sdk-go/v2/client"
 	rbacv3 "github.com/envoyproxy/go-control-plane/envoy/config/rbac/v3"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-kit/pkg/admin"
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
@@ -43,7 +46,7 @@ const (
 // 公共标准的 HTTP 请求头名称
 const (
 	// HTTPHeaderRequestID 全局请求ID
-	HTTPHeaderRequestID = "X-TR-REQUEST-ID"
+	HTTPHeaderRequestID = "X-REQUEST-ID"
 	// HTTPHeaderHost 主机头
 	HTTPHeaderHost = "Host"
 	// HTTPHeaderEtag 文件内容签名
@@ -89,9 +92,12 @@ type LocalConfig struct {
 	Automations *AutomationsConfig `json:",omitempty"` // 流程编排配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
-	logger    *logrus.Entry
-	srvdis    sd.Registry
-	rpcConfig *rpc.Config
+	logger      *logrus.Entry
+	srvdis      sd.Registry
+	rpcConfig   *rpc.Config
+	rpcServer   *rpc.Server
+	adminServer *admin.KnownAdminAPI
+	lionClient  *lion.Client
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
@@ -110,6 +116,12 @@ type ServicesConfig struct {
 	PublicAddress string       `mapstructure:"public_address"`
 	GRPCService   *GRPCService `mapstructure:"grpc_service"`
 	HTTPService   *HTTPService `mapstructure:"http_service"`
+	Integrations  struct {
+		GRPC struct {
+			Admin *bool `mapstructure:"admin"`
+		}
+	} `mapstructure:"integrations"`
+	SecurityKey string `mapstructure:"security_key"`
 }
 
 // DiscoverConfig 服务注册，服务启动后如何汇报自身
@@ -192,9 +204,16 @@ type Authorization struct {
 
 // BasicAuth 用于HTTP基本认证的用户权限定义
 type BasicAuth struct {
-	Username string   `mapstructure:"username"`
-	Password string   `mapstructure:"password"`
-	Groups   []string `mapstructure:"groups"`
+	UserID   int64  `mapstructure:"user_id"`
+	Username string `mapstructure:"username"`
+	// Password 明文口令；仅当 password_hash（trim 后）为空时，服务端用其 SHA256 十六进制作为有效口令材料（与 LOCAL 登录约定一致）。
+	// Deprecated: 生产环境优先使用 password_hash。
+	Password string `mapstructure:"password"`
+	// PasswordHash 优先使用（trim 后非空）：可为 sha256 十六进制或 bcrypt 串（与库表 LOCAL 用户一致时，客户端仍传 sha256(明文)）。
+	PasswordHash string   `mapstructure:"password_hash"`
+	Groups       []string `mapstructure:"groups"`
+	// 租户，默认均为 'default' 下
+	Tenant string `mapstructure:"tenant"`
 }
 
 // OIDCProvider 用于OIDC认证提供方配置
@@ -206,6 +225,7 @@ type OIDCProvider struct {
 // OIDCConfig 用于OIDC验证相关配置
 type OIDCConfig struct {
 	ClientID             string   `mapstructure:"client_id"`
+	ClientSecret         string   `mapstructure:"client_secret"`
 	SupportedSigningAlgs []string `mapstructure:"supported_signing_algs"`
 	SkipClientIDCheck    bool     `mapstructure:"skip_client_id_check"`
 	SkipExpiryCheck      bool     `mapstructure:"skip_expiry_check"`
@@ -245,7 +265,7 @@ type SaramaConfig struct {
 func New(v *viper.Viper) (*LocalConfig, error) {
 	var lc LocalConfig
 
-	if err := viper.Unmarshal(&lc); err != nil {
+	if err := v.Unmarshal(&lc); err != nil {
 		return nil, err
 	}
 
@@ -309,6 +329,57 @@ func (c *LocalConfig) Register(ctx context.Context,
 	if err := c.registerConfig(ctx); err != nil {
 		return nil, err
 	}
+
+	// TODO; 植入默认 admin api 服务
+	// 仅当配置了 "database" 且开启了 "frontend.enable" 且 "frontend.interface.admin.enabled" 则启用内置 "admin api" 服务
+	su := &admin.StaticUsers{}
+	if c.Security != nil && c.Security.Authentication != nil {
+		for _, v := range c.Security.Authentication.HTTPUsers {
+			if v == nil {
+				continue
+			}
+			uu := &admin.StaticUser{
+				UserID:       v.UserID,
+				Username:     v.Username,
+				PasswordHash: basicAuthEffectivePasswordHash(v),
+				Groups:       v.Groups,
+				Tenant:       v.Tenant,
+			}
+			su.Append(uu)
+		}
+	}
+
+	if c.Services.hasEnableIntegrationAdminServer() {
+		client, err := c.GetAdminDatabaseLion()
+		if err != nil {
+			c.logger.Infof("known admin service enabled but database not, some /builtin API will be unavailable.")
+		}
+
+		admOpts := []admin.Options{
+			admin.WithLogger(c.logger),
+			admin.WithLionClient(client),
+			admin.WithAESKey([]byte(c.Services.SecurityKey)),
+			admin.WithStaticUsers(su),
+			admin.WithLocalConfigSnapshot(c.toAdminLocalConfigSnapshot()),
+		}
+
+		if c.Security != nil && c.Security.Authentication != nil && c.Security.Authentication.OIDCProvider != nil {
+			if c.Security.Authentication.OIDCProvider.Issuer != "" && c.Security.Authentication.OIDCProvider.Config != nil {
+				admOpts = append(admOpts, admin.WithOIDCProvider(
+					c.Security.Authentication.OIDCProvider.Issuer,
+					c.Security.Authentication.OIDCProvider.Config.ClientID,
+					c.Security.Authentication.OIDCProvider.Config.ClientSecret,
+				))
+			}
+		}
+
+		adminIns := admin.New(admOpts...)
+		adminv1.RegisterKnownAdminServer(c.rpcServer.Server(), adminIns)
+
+		c.lionClient = client
+		c.adminServer = adminIns
+	}
+	// TODO; 植入默认 admin api 服务
 
 	return c.registerGateway(ctx, gw, opts...)
 }
@@ -387,6 +458,12 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 		return nil
 	}
 
+	if c.adminServer != nil {
+		if err := c.adminServer.SetMicroserviceGatewayYAML(assets); err != nil {
+			return err
+		}
+	}
+
 	comps := []string{"admin", "openapi", "webroot"}
 	for _, v := range comps {
 		tracing := false
@@ -409,11 +486,36 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 			} else {
 				handle = c.Security.addHTTPHandler(handle)
 			}
-
 			mux.Handle(url, handle)
 		} else if err != nil {
 			return err
 		}
+	}
+
+	if c.Frontend.hasEnableOpenapi() {
+		adminSwaggerBody, err := adminv1.Assets.ReadFile("openapi/admin.swagger.json")
+		if err != nil {
+			return err
+		}
+
+		adminSwaggerPath := strings.TrimSuffix(c.Frontend.Interface.Openapi.HandleURL, "/") + "/admin.swagger.json"
+		if adminSwaggerPath == "/admin.swagger.json" && c.Frontend.Interface.Openapi.HandleURL == "/" {
+			adminSwaggerPath = "/admin.swagger.json"
+		}
+
+		var adminSwaggerHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Cache-Control", "public, max-age=3600")
+			_, _ = w.Write(adminSwaggerBody)
+		})
+
+		if c.Frontend.Interface.Openapi.Tracing {
+			adminSwaggerHandler = c.HTTPHandler(adminSwaggerHandler)
+		} else {
+			adminSwaggerHandler = c.Security.addHTTPHandler(adminSwaggerHandler)
+		}
+
+		mux.Handle(adminSwaggerPath, adminSwaggerHandler)
 	}
 
 	return nil
@@ -511,13 +613,13 @@ func (c *LocalConfig) HasCacheboxEnabled() bool {
 }
 
 // IDTokenFrom 用于获取当前会话的IDToken
-func (c *LocalConfig) IDTokenFrom(ctx context.Context) (IDTokenClaims, bool) {
+func (c *LocalConfig) IDTokenFrom(ctx context.Context) (auth.IDTokenClaims, bool) {
 	tmp := rpc.GetIDTokenFromContext(ctx)
 
 	// idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
 	// return idToken, ok
 
-	idToken, ok := tmp.(IDTokenClaims)
+	idToken, ok := tmp.(auth.IDTokenClaims)
 	return idToken, ok
 }
 
@@ -574,6 +676,15 @@ func (c *LocalConfig) GetCloudEvents() (eventclient.Client, error) {
 	}
 
 	return c.CloudEvents.eventClient, nil
+}
+
+// GetIntegrationAdminServer 用于获取集成管理服务
+func (c *LocalConfig) GetIntegrationAdminServer() (*admin.KnownAdminAPI, error) {
+	if c.adminServer == nil {
+		return nil, fmt.Errorf("integration admin server is nil")
+	}
+
+	return c.adminServer, nil
 }
 
 func (c *LocalConfig) registerConfig(ctx context.Context) error {

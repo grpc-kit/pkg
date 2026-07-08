@@ -3,17 +3,13 @@ package audit
 import (
 	"context"
 	"fmt"
-	"time"
+	"strings"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/client"
-	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/google/uuid"
-	"github.com/grpc-kit/pkg/rpc"
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/proto"
 	"k8s.io/utils/pointer"
 )
 
@@ -33,7 +29,11 @@ type interceptorOption struct {
 
 	level Level
 
-	serviceName string
+	serviceName string // netdev.v1.oneops.api.grpc-kit.com
+
+	// 存在问题，共享实例不能存储变化的内容
+	// grpcService string // default.api.oneops.netdev.v1.OneopsNetdev
+	// grpcMethod  string // DisplaySwitchPortVlans
 
 	marshal     protojson.MarshalOptions
 	mustSucceed *bool
@@ -48,19 +48,14 @@ func (o *interceptorOption) getTraceID(ctx context.Context) string {
 	return uuid.New().String()
 }
 
-func (o *interceptorOption) marshalJson(data any) (string, bool, error) {
-	if protoResp, ok := data.(proto.Message); ok {
-		jsonResp, err := o.marshal.Marshal(protoResp)
-		if err != nil {
-			return "", false, err
-		}
-		return string(jsonResp), true, nil
-	}
+/*
+func (o *interceptorOption) sendAuditEvent(ctx context.Context, data *EventData) error {
+	ce := event.New()
+	ce.SetSource(o.serviceName)
+	ce.SetSubject(o.grpcMethod)
+	ce.SetType("internal.audit")
+	ce.SetSpecVersion(event.CloudEventsVersionV1)
 
-	return "", false, fmt.Errorf("expected proto.Message, got %T", data)
-}
-
-func (o *interceptorOption) sendAuditEvent(ctx context.Context, ce event.Event, data *EventData) error {
 	data.StageTimestamp = time.Now()
 
 	if o.mustSucceed == nil || *o.mustSucceed {
@@ -86,40 +81,36 @@ func (o *interceptorOption) sendAuditEvent(ctx context.Context, ce event.Event, 
 
 	return fmt.Errorf("unable to send audit event, this request will be aborted")
 }
+*/
 
-func (o *interceptorOption) createEventData(ctx context.Context) *EventData {
-	username, ok := rpc.GetUsernameFromContext(ctx)
-	if !ok {
-		username = "-"
-	}
-	groups, ok := rpc.GetGroupsFromContext(ctx)
-	if !ok {
-		groups = []string{}
+func (o *interceptorOption) parseGRPCMethod(fullMethod string) (string, string, error) {
+	parts := strings.Split(fullMethod, "/")
+	if len(parts) < 3 {
+		return "", "", fmt.Errorf("failed to parse grpc metho: %s, ignore audit", fullMethod)
 	}
 
-	eventData := &EventData{
-		ServiceName: o.serviceName,
-		Level:       o.level,
-		AuditID:     o.getTraceID(ctx),
-		Stage:       StageRequestReceived,
+	return parts[1], parts[2], nil
+}
 
-		// GRPCMethod:  grpcMethod,
-		// GRPCService: grpcService,
-
-		User: struct {
-			UID      string              `json:"uid"`
-			Username string              `json:"username"`
-			Groups   []string            `json:"groups"`
-			Extra    map[string][]string `json:"extra"`
-		}{UID: username, Username: username, Groups: groups, Extra: make(map[string][]string, 0)},
-
-		SourceIPs: rpc.GetSourceIPsFromMetadata(ctx),
-		UserAgent: rpc.GetUserAgentFromMetadata(ctx),
-
-		RequestReceivedTimestamp: time.Now(),
+func (o *interceptorOption) auditRequired(grpcService, grpcMethod string) bool {
+	// 审计等级为 LevelNone 时，不需要审计
+	if o.level == LevelNone {
+		return false
 	}
 
-	return eventData
+	// TODO; 内部服务不做审计
+	switch grpcService {
+	case "grpc_kit.api.known.admin.v1.KnownAdmin":
+		return false
+	}
+
+	// TODO；针对特殊的 method 不做审计
+	switch grpcMethod {
+	case "HealthCheck":
+		return false
+	}
+
+	return true
 }
 
 // Option is a functional option for audit.

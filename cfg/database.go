@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -8,8 +9,17 @@ import (
 
 	entsql "entgo.io/ent/dialect/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/grpc-kit/pkg/lion"
 	_ "github.com/lib/pq"
 )
+
+var legacyLionAuthzTables = []string{
+	"lion_role_permissions",
+	"lion_permission_bindings",
+	"lion_resource_scopes",
+	"lion_permissions",
+	"lion_scopes",
+}
 
 var (
 	ErrDatabaseNotInit          = errors.New("database not initialize")
@@ -98,6 +108,9 @@ func (c *LocalConfig) initDatabase() error {
 
 	c.Database.db = db
 
+	// TODO; 这里用于测试 lion 数据库
+	// c.testDatabaseLion()
+
 	return nil
 }
 
@@ -122,4 +135,41 @@ func (c *LocalConfig) GetDatabaseEntSQLDriver() (*entsql.Driver, error) {
 	}
 
 	return entsql.OpenDB(c.Database.Driver, db), nil
+}
+
+func dropLegacyLionAuthzTables(ctx context.Context, db *sql.DB) error {
+	for _, tableName := range legacyLionAuthzTables {
+		if _, err := db.ExecContext(ctx, fmt.Sprintf("DROP TABLE IF EXISTS %s", tableName)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// GetAdminDatabaseLion 用于测试 Lion 配置
+// TODO: 这里用于测试 lion 数据库
+func (c *LocalConfig) GetAdminDatabaseLion() (*lion.Client, error) {
+	if c.lionClient != nil {
+		return c.lionClient, nil
+	}
+
+	rawDB, err := c.GetDatabase()
+	if err != nil {
+		return nil, err
+	}
+	if err := dropLegacyLionAuthzTables(context.TODO(), rawDB); err != nil {
+		return nil, err
+	}
+
+	driver, err := c.GetDatabaseEntSQLDriver()
+	if err != nil {
+		return nil, err
+	}
+
+	db := lion.NewClient(lion.Driver(driver))
+	if err = db.Schema.Create(context.TODO()); err != nil {
+		c.logger.Warnf("lion migrate err: %v", err)
+	}
+
+	return db, nil
 }

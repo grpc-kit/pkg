@@ -1,0 +1,69 @@
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
+)
+
+// Policies holds the schema definition for the Policies entity.
+type Policies struct {
+	ent.Schema
+}
+
+// Fields of the table.
+func (Policies) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("code").
+			MaxLen(256).
+			NotEmpty().
+			Comment("对我展示的权限名称，如：管理用户列表"),
+		field.String("display_name").
+			NotEmpty().
+			Comment("国际化键值，用于前端多语言显示的标识符"),
+		field.Int("policy_status").
+			Default(0).
+			Comment("是否启用该资源项，禁用后完全不可访问"),
+		field.JSON("statements", []*adminv1.PolicyStatement{}).
+			Comment("策略内容"),
+		field.Bool("protected").
+			Default(false).
+			Comment("是否系统内置/受保护的策略，受保护的策略不可删除"),
+		field.String("description").
+			Default("").
+			Comment("详细描述"),
+	}
+}
+
+// Edges of the table.
+func (Policies) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("lion_role_policies", RolePolicies.Type),
+	}
+}
+
+// Mixin of the table.
+func (Policies) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		TimeMixin{},
+		AuditMixin{},
+	}
+}
+
+// Annotations 自定义表名
+func (Policies) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "lion_policies"},
+	}
+}
+
+// Indexes 定义索引
+func (Policies) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("code").Unique(),
+	}
+}

@@ -9,7 +9,7 @@ const (
 	// idTokenKey 用于存放当前jwt的解析后的数据结构
 	idTokenKey contextKey = iota
 
-	// usernameKey 用于存放当前用户名，http base对应username，jwt对应email
+	// usernameKey 用于存放当前用户名，http base对应username，jwt对应username
 	usernameKey
 
 	// authenticationTypeKey 用于存放当前认证方式
@@ -17,11 +17,18 @@ const (
 
 	// groupsKey 用于存放当前用户归属的组列表
 	groupsKey
+
+	// userIDKey 用于存放当前用户 ID
+	userIDKey
 )
 
 // ContextWithIDToken xx
 func ContextWithIDToken(parent context.Context, token interface{}) context.Context {
 	return context.WithValue(parent, idTokenKey, token)
+}
+
+func ContextWithUserID(parent context.Context, userID int64) context.Context {
+	return context.WithValue(parent, userIDKey, userID)
 }
 
 func ContextWithUsername(parent context.Context, username string) context.Context {
@@ -44,6 +51,17 @@ func GetGroupsFromContext(ctx context.Context) ([]string, bool) {
 func GetAuthenticationTypeFromContext(ctx context.Context) (string, bool) {
 	username, ok := ctx.Value(authenticationTypeKey).(string)
 	return username, ok
+}
+
+func GetUserIDFromContext(ctx context.Context) (int64, bool) {
+	defaultUser := 0
+
+	userID, ok := ctx.Value(userIDKey).(int64)
+	if ok && userID != 0 {
+		return userID, true
+	}
+
+	return int64(defaultUser), false
 }
 
 func GetUsernameFromContext(ctx context.Context) (string, bool) {

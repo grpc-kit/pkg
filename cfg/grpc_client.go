@@ -67,6 +67,10 @@ func (c *LocalConfig) GetRPCServer() (*rpc.Server, error) {
 		return nil, fmt.Errorf("rpc cconfig is nil")
 	}
 
+	if c.rpcServer != nil {
+		return c.rpcServer, nil
+	}
+
 	if c.Observables.hasEnable() {
 		opt := grpc.StatsHandler(
 			otelgrpc.NewServerHandler(otelgrpc.WithFilter(c.Observables.grpcTracingEnableFilter)),
@@ -75,5 +79,6 @@ func (c *LocalConfig) GetRPCServer() (*rpc.Server, error) {
 		c.rpcConfig.WithServerOption(opt)
 	}
 
-	return rpc.NewServer(c.rpcConfig), nil
+	c.rpcServer = rpc.NewServer(c.rpcConfig)
+	return c.rpcServer, nil
 }

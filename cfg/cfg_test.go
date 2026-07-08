@@ -44,7 +44,7 @@ func testServiceName(t *testing.T) {
 }
 
 func testLogger(t *testing.T) {
-	err := lc.InitDebugger()
+	err := lc.initDebugger()
 	if err != nil {
 		t.Errorf("Init logger err: %v\n", err)
 	}

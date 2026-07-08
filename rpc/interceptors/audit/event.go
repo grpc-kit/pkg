@@ -1,9 +1,16 @@
 package audit
 
 import (
+	"fmt"
 	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/cloudevents/sdk-go/v2/event"
+	"golang.org/x/net/context"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/rpc"
 )
 
 // Level 定义审计级别
@@ -44,6 +51,8 @@ type Status struct {
 
 // EventData 审计事件
 type EventData struct {
+	opt *interceptorOption
+
 	// 唯一标识服务名称，如：netdev.v1.oneops.api.grpc-kit.com
 	ServiceName string `json:"service_name"`
 
@@ -83,28 +92,126 @@ type EventData struct {
 	StageTimestamp           time.Time `json:"stage_timestamp"`
 }
 
-func (e *EventData) setResponseObject(data string) {
-	e.ResponseObject = data
+func newEventDataFromContext(ctx context.Context, opt *interceptorOption, grpcService, grpcMethod string) *EventData {
+	username, ok := rpc.GetUsernameFromContext(ctx)
+	if !ok {
+		username = "-"
+	}
+	groups, ok := rpc.GetGroupsFromContext(ctx)
+	if !ok {
+		groups = []string{}
+	}
+
+	e := &EventData{
+		opt: opt,
+
+		ServiceName: opt.serviceName,
+		Level:       opt.level,
+		AuditID:     opt.getTraceID(ctx),
+		Stage:       StageRequestReceived,
+		GRPCMethod:  grpcMethod,
+		GRPCService: grpcService,
+		User: struct {
+			UID      string              `json:"uid"`
+			Username string              `json:"username"`
+			Groups   []string            `json:"groups"`
+			Extra    map[string][]string `json:"extra"`
+		}{UID: username, Username: username, Groups: groups, Extra: make(map[string][]string, 0)},
+
+		SourceIPs: rpc.GetSourceIPsFromMetadata(ctx),
+		UserAgent: rpc.GetUserAgentFromMetadata(ctx),
+
+		RequestReceivedTimestamp: time.Now(),
+	}
+
+	return e
+}
+
+func (e *EventData) setResponseObject(grpcErr error, message interface{}) {
 	e.Stage = StageResponseComplete
 	e.StageTimestamp = time.Now()
-}
 
-func (e *EventData) setRequestObject(data string) {
-	e.RequestObject = data
-	e.Stage = StageRequestReceived
-	e.StageTimestamp = time.Now()
-}
+	if grpcErr != nil {
+		st := errs.FromError(grpcErr)
 
-func (e *EventData) setResponseStatus(err error) {
-	if err == nil {
+		e.ResponseStatus.Status = "failure"
+		e.ResponseStatus.Reason = st.GetStatus()
+		e.ResponseStatus.Code = st.HTTPStatusCode()
+		e.ResponseObject = grpcErr.Error()
+	} else {
 		e.ResponseStatus.Status = "success"
 		e.ResponseStatus.Reason = "OK"
 		e.ResponseStatus.Code = 200
-		return
+
+		if protoResp, ok := message.(proto.Message); ok {
+			jsonResp, err := e.opt.marshal.Marshal(protoResp)
+			if err != nil {
+				// TODO; 这里执行成功了，但是序列化失败返回记录了错误
+				e.ResponseObject = err.Error()
+			} else {
+				e.ResponseObject = string(jsonResp)
+			}
+		}
+	}
+}
+
+func (e *EventData) setRequestObject(message interface{}) {
+	e.Stage = StageRequestReceived
+	e.StageTimestamp = time.Now()
+
+	if protoResp, ok := message.(proto.Message); ok {
+		jsonResp, err := e.opt.marshal.Marshal(protoResp)
+		if err != nil {
+			e.RequestObject = err.Error()
+		} else {
+			e.RequestObject = string(jsonResp)
+		}
+	}
+}
+
+func (e *EventData) sendEvent(ctx context.Context) error {
+	ce := event.New()
+	ce.SetSource(e.ServiceName)
+	ce.SetSubject(e.GRPCMethod)
+	ce.SetType("internal.audit")
+	ce.SetSpecVersion(event.CloudEventsVersionV1)
+
+	e.StageTimestamp = time.Now()
+
+	var err error
+
+	if e.opt.mustSucceed == nil || *e.opt.mustSucceed {
+		if err = ce.SetData(event.ApplicationJSON, e); err == nil {
+			if cloudevents.IsACK(e.opt.client.Send(ctx, ce)) {
+				return nil
+			} else {
+				err = fmt.Errorf("send audit event not ack")
+			}
+		}
+	} else {
+		go func() {
+			if err = ce.SetData(event.ApplicationJSON, e); err == nil {
+				if cloudevents.IsUndelivered(e.opt.client.Send(ctx, ce)) {
+					rpc.MetricAuditEventSendErrorsIncr(ctx)
+
+					e.opt.logger.Warnf("unable to send audit event, this request %v will be not audited", e.GRPCMethod)
+				}
+			} else {
+				rpc.MetricAuditEventSendErrorsIncr(ctx)
+
+				e.opt.logger.Warnf("failed to set event data: %v", err)
+			}
+		}()
+
+		// 审计日志推送失败，无需终止本次请求
+		return nil
 	}
 
-	st := errs.FromError(err)
-	e.ResponseStatus.Status = "failure"
-	e.ResponseStatus.Reason = st.GetStatus()
-	e.ResponseStatus.Code = st.HTTPStatusCode()
+	if err != nil {
+		rpc.MetricAuditEventSendErrorsIncr(ctx)
+
+		e.opt.logger.Errorf("failed to set event data: %v", err)
+	}
+
+	return fmt.Errorf("unable to send audit event, this request will be aborted")
 }

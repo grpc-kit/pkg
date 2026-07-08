@@ -1,0 +1,83 @@
+{
+  "_doc": "GRN Match 共享测试用例 — Go 与 Rego 双侧 MUST 一致。覆盖 spec/grn.md §8 验收清单 + 边界用例。pattern/want 均为原始字符串；wantOk 是期望结果。",
+  "cases": [
+    {
+      "name": "spec_8_1_full_wildcard_hits_concrete",
+      "pattern": "grn:grpc-kit:netdev.v1.oneops:*:*:host/*",
+      "want":    "grn:grpc-kit:netdev.v1.oneops:cn-bj:1001:host/sw-bj-01",
+      "wantOk":  true
+    },
+    {
+      "name": "spec_8_2_partition_mismatch",
+      "pattern": "grn:grpc-kit-cn:svc:*:*:*",
+      "want":    "grn:grpc-kit:svc:cn-bj:1001:host/sw-bj-01",
+      "wantOk":  false
+    },
+    {
+      "name": "spec_8_3_partition_wildcard_rejected",
+      "pattern": "grn:*:svc:*:*:*",
+      "want":    "grn:grpc-kit:svc:cn-bj:1001:host/sw-bj-01",
+      "wantOk":  false
+    },
+    {
+      "name": "spec_8_4_empty_region_account_exact",
+      "pattern": "grn:grpc-kit:admin.v1.known:::services/x",
+      "want":    "grn:grpc-kit:admin.v1.known:::services/x",
+      "wantOk":  true
+    },
+    {
+      "name": "region_wildcard_matches_empty_region",
+      "pattern": "grn:grpc-kit:admin.v1.known:*:*:services/x",
+      "want":    "grn:grpc-kit:admin.v1.known:::services/x",
+      "wantOk":  true
+    },
+    {
+      "name": "resource_glob_prefix_match",
+      "pattern": "grn:grpc-kit:netdev.v1.oneops:*:1001:host/sw-bj-*",
+      "want":    "grn:grpc-kit:netdev.v1.oneops:cn-bj:1001:host/sw-bj-01",
+      "wantOk":  true
+    },
+    {
+      "name": "resource_single_star_does_not_cross_slash",
+      "pattern": "grn:grpc-kit:netdev.v1.oneops:*:1001:host/*",
+      "want":    "grn:grpc-kit:netdev.v1.oneops:cn-bj:1001:host/cluster-a/sw-sh-99",
+      "wantOk":  false
+    },
+    {
+      "name": "resource_double_star_crosses_slash",
+      "pattern": "grn:grpc-kit:netdev.v1.oneops:*:1001:host/**",
+      "want":    "grn:grpc-kit:netdev.v1.oneops:cn-bj:1001:host/cluster-a/sw-sh-99",
+      "wantOk":  true
+    },
+    {
+      "name": "cross_service_full_wildcard",
+      "pattern": "grn:grpc-kit:*:*:*:*",
+      "want":    "grn:grpc-kit:netdev.v1.oneops:cn-bj:1001:host/sw-bj-01",
+      "wantOk":  true
+    },
+    {
+      "name": "exact_match_no_wildcards",
+      "pattern": "grn:grpc-kit:svc:r:a:type/path",
+      "want":    "grn:grpc-kit:svc:r:a:type/path",
+      "wantOk":  true
+    },
+    {
+      "name": "resource_segment_with_colons_in_path",
+      "pattern": "grn:grpc-kit:svc:r:a:type/path:with:colons",
+      "want":    "grn:grpc-kit:svc:r:a:type/path:with:colons",
+      "wantOk":  true
+    },
+    {
+      "name": "service_mismatch",
+      "pattern": "grn:grpc-kit:svc-a:*:*:*",
+      "want":    "grn:grpc-kit:svc-b:r:a:type/x",
+      "wantOk":  false
+    },
+    {
+      "name": "account_strict_mismatch",
+      "pattern": "grn:grpc-kit:svc:*:1001:host/*",
+      "want":    "grn:grpc-kit:svc:r:1002:host/x",
+      "wantOk":  false
+    }
+  ]
+}

@@ -48,6 +48,11 @@ func (f customFileSystem) Open(name string) (http.File, error) {
 			file, err = f.FileSystem.Open(fmt.Sprintf("%v/index.html", name))
 			if err != nil && errors.Is(err, os.ErrNotExist) {
 				file, err = f.FileSystem.Open("404.html")
+
+				// TODO; history fallback 效果
+				if errors.Is(err, os.ErrNotExist) {
+					file, err = f.FileSystem.Open("index.html")
+				}
 			}
 		case ".html":
 			// TODO; 404.html 文件可实现自定义
@@ -196,9 +201,9 @@ func (f *FrontendConfig) getHandler(assets fs.FS, kind string) (http.Handler, st
 
 	var handle http.Handler
 	if embedded {
-		handle = http.FileServer(customFileSystem{http.FS(content)})
+		handle = http.FileServer(customFileSystem{FileSystem: http.FS(content)})
 	} else {
-		handle = http.FileServer(customFileSystem{http.Dir(fmt.Sprintf("./public/%v/", kind))})
+		handle = http.FileServer(customFileSystem{FileSystem: http.Dir(fmt.Sprintf("./public/%v/", kind))})
 	}
 	if err != nil {
 		return handle, "", true, err
@@ -210,4 +215,28 @@ func (f *FrontendConfig) getHandler(assets fs.FS, kind string) (http.Handler, st
 	}
 
 	return handle, handleURL, true, nil
+}
+
+func (f *FrontendConfig) hasEnableOpenapi() bool {
+	if f.Enable == nil || !*f.Enable {
+		return false
+	}
+
+	if f.Interface.Openapi == nil || !*f.Interface.Openapi.Enabled {
+		return false
+	}
+
+	return true
+}
+
+func (f *FrontendConfig) hasEnableAdmin() bool {
+	if f.Enable == nil || !*f.Enable {
+		return false
+	}
+
+	if f.Interface.Admin == nil || !*f.Interface.Admin.Enabled {
+		return false
+	}
+
+	return true
 }

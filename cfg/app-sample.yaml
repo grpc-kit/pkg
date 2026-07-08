@@ -52,6 +52,14 @@ services:
           - test.grpc-kit.com
           - demo.grpc-kit.com
 
+  # 内置集成服务开关
+  integrations:
+    grpc:
+      admin: true
+
+  # 用于对称加密等密钥
+  security_key: ""
+
 # 服务注册配置
 discover:
   driver: etcdv3

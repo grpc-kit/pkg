@@ -7,6 +7,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/grpc-kit/pkg/vars"
 	"github.com/redis/go-redis/extra/redisotel/v9"
@@ -21,6 +22,8 @@ type LRUCachebox interface {
 	Remove(ctx context.Context, key string) bool
 	// SetValue 向内存缓存添加值
 	SetValue(ctx context.Context, key string, value any) bool
+	// SetValueWithTTL 向内存缓存添加值，支持 TTL 自动过期
+	SetValueWithTTL(ctx context.Context, key string, value any, ttl time.Duration) bool
 	// GetStructValue 从内存缓存获取值，并填充用户给定的类型
 	GetStructValue(ctx context.Context, key string, ptx any) bool
 }
@@ -35,6 +38,17 @@ type memoryCache struct {
 type redisCache struct {
 	logger *logrus.Entry
 	cache  redis.UniversalClient
+}
+
+// cacheEntry 缓存条目，支持 TTL 过期
+type cacheEntry struct {
+	value    any
+	expireAt time.Time // 零值表示永不过期
+}
+
+// isExpired 检查缓存条目是否已过期
+func (e cacheEntry) isExpired() bool {
+	return !e.expireAt.IsZero() && time.Now().After(e.expireAt)
 }
 
 // NewMemoryCache 创建内存缓存实例
@@ -84,8 +98,18 @@ func (c *memoryCache) GetStructValue(ctx context.Context, key string, ptr any) b
 		return false
 	}
 
+	entry, ok := val.(cacheEntry)
+	if !ok {
+		return false
+	}
+
+	if entry.isExpired() {
+		c.cache.Remove(getCacheKey(key))
+		return false
+	}
+
 	ptrVal := reflect.ValueOf(ptr).Elem()
-	valReflect := reflect.ValueOf(val)
+	valReflect := reflect.ValueOf(entry.value)
 
 	if !valReflect.Type().AssignableTo(ptrVal.Type()) {
 		return false
@@ -97,7 +121,17 @@ func (c *memoryCache) GetStructValue(ctx context.Context, key string, ptr any) b
 
 // SetValue 向内存缓存添加值
 func (c *memoryCache) SetValue(ctx context.Context, key string, value any) bool {
-	c.cache.Add(getCacheKey(key), value)
+	c.cache.Add(getCacheKey(key), cacheEntry{value: value})
+	return true
+}
+
+// SetValueWithTTL 向内存缓存添加值，支持 TTL 自动过期
+func (c *memoryCache) SetValueWithTTL(ctx context.Context, key string, value any, ttl time.Duration) bool {
+	var expireAt time.Time
+	if ttl > 0 {
+		expireAt = time.Now().Add(ttl)
+	}
+	c.cache.Add(getCacheKey(key), cacheEntry{value: value, expireAt: expireAt})
 	return true
 }
 
@@ -146,6 +180,24 @@ func (c *redisCache) SetValue(ctx context.Context, key string, value any) bool {
 	encoded := base64.StdEncoding.EncodeToString(buffer.Bytes())
 	err := c.cache.Set(ctx, getCacheKey(key), encoded, 0).Err()
 	if err != nil {
+		c.logger.Errorf("redis cache failed to set value for key %v: %v", key, err)
+		return false
+	}
+
+	return true
+}
+
+// SetValueWithTTL 向 redis 缓存添加值，支持 TTL 自动过期
+func (c *redisCache) SetValueWithTTL(ctx context.Context, key string, value any, ttl time.Duration) bool {
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+	if err := encoder.Encode(value); err != nil {
+		c.logger.Errorf("redis cache failed to encode value for key %v: %v", key, err)
+		return false
+	}
+
+	encoded := base64.StdEncoding.EncodeToString(buffer.Bytes())
+	if err := c.cache.Set(ctx, getCacheKey(key), encoded, ttl).Err(); err != nil {
 		c.logger.Errorf("redis cache failed to set value for key %v: %v", key, err)
 		return false
 	}
