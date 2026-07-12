@@ -11,7 +11,6 @@ import (
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
-	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/credentials"
@@ -126,8 +125,7 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 		return nil, err
 	}
 
-	derBytes := crypto.Base64Decode(sk.PublicKey)
-	pubInterface, err := x509.ParsePKIXPublicKey(derBytes)
+	pubInterface, err := x509.ParsePKIXPublicKey(sk.PublicKey)
 	if err != nil {
 		return nil, err
 	}

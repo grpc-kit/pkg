@@ -17,12 +17,18 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldCreatedBy holds the string denoting the created_by field in the database.
 	FieldCreatedBy = "created_by"
 	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
 	FieldUpdatedBy = "updated_by"
 	// FieldCode holds the string denoting the code field in the database.
 	FieldCode = "code"
+	// FieldDisplayName holds the string denoting the display_name field in the database.
+	FieldDisplayName = "display_name"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldCredentialType holds the string denoting the credential_type field in the database.
 	FieldCredentialType = "credential_type"
 	// FieldCredentialAlgorithm holds the string denoting the credential_algorithm field in the database.
@@ -35,6 +41,8 @@ const (
 	FieldCredentialStatus = "credential_status"
 	// FieldCredentialSource holds the string denoting the credential_source field in the database.
 	FieldCredentialSource = "credential_source"
+	// FieldProtected holds the string denoting the protected field in the database.
+	FieldProtected = "protected"
 	// FieldKeyID holds the string denoting the key_id field in the database.
 	FieldKeyID = "key_id"
 	// FieldAPIKey holds the string denoting the api_key field in the database.
@@ -65,8 +73,6 @@ const (
 	FieldExpiresAt = "expires_at"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
-	// FieldDescription holds the string denoting the description field in the database.
-	FieldDescription = "description"
 	// Table holds the table name of the credentials in the database.
 	Table = "lion_credentials"
 )
@@ -76,15 +82,19 @@ var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldCreatedBy,
 	FieldUpdatedBy,
 	FieldCode,
+	FieldDisplayName,
+	FieldDescription,
 	FieldCredentialType,
 	FieldCredentialAlgorithm,
 	FieldCredentialUsage,
 	FieldCredentialVisibility,
 	FieldCredentialStatus,
 	FieldCredentialSource,
+	FieldProtected,
 	FieldKeyID,
 	FieldAPIKey,
 	FieldAPISecretEncrypted,
@@ -100,7 +110,6 @@ var Columns = []string{
 	FieldNotBefore,
 	FieldExpiresAt,
 	FieldMetadata,
-	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -124,6 +133,8 @@ var (
 	DefaultCreatedBy int64
 	// DefaultUpdatedBy holds the default value on creation for the "updated_by" field.
 	DefaultUpdatedBy int64
+	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	CodeValidator func(string) error
 	// DefaultCredentialType holds the default value on creation for the "credential_type" field.
 	DefaultCredentialType int
 	// DefaultCredentialAlgorithm holds the default value on creation for the "credential_algorithm" field.
@@ -136,6 +147,8 @@ var (
 	DefaultCredentialStatus int
 	// DefaultCredentialSource holds the default value on creation for the "credential_source" field.
 	DefaultCredentialSource int
+	// DefaultProtected holds the default value on creation for the "protected" field.
+	DefaultProtected bool
 )
 
 // OrderOption defines the ordering options for the Credentials queries.
@@ -156,6 +169,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
 // ByCreatedBy orders the results by the created_by field.
 func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
@@ -169,6 +187,16 @@ func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
 // ByCode orders the results by the code field.
 func ByCode(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCode, opts...).ToFunc()
+}
+
+// ByDisplayName orders the results by the display_name field.
+func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
 // ByCredentialType orders the results by the credential_type field.
@@ -201,6 +229,11 @@ func ByCredentialSource(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCredentialSource, opts...).ToFunc()
 }
 
+// ByProtected orders the results by the protected field.
+func ByProtected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldProtected, opts...).ToFunc()
+}
+
 // ByKeyID orders the results by the key_id field.
 func ByKeyID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldKeyID, opts...).ToFunc()
@@ -209,21 +242,6 @@ func ByKeyID(opts ...sql.OrderTermOption) OrderOption {
 // ByAPIKey orders the results by the api_key field.
 func ByAPIKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAPIKey, opts...).ToFunc()
-}
-
-// ByPublicKey orders the results by the public_key field.
-func ByPublicKey(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPublicKey, opts...).ToFunc()
-}
-
-// ByLicenseKeyEncrypted orders the results by the license_key_encrypted field.
-func ByLicenseKeyEncrypted(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLicenseKeyEncrypted, opts...).ToFunc()
-}
-
-// BySignature orders the results by the signature field.
-func BySignature(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSignature, opts...).ToFunc()
 }
 
 // ByJwksURI orders the results by the jwks_uri field.
@@ -239,9 +257,4 @@ func ByNotBefore(opts ...sql.OrderTermOption) OrderOption {
 // ByExpiresAt orders the results by the expires_at field.
 func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
-}
-
-// ByDescription orders the results by the description field.
-func ByDescription(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }

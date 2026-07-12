@@ -48,6 +48,20 @@ func (_c *CredentialsCreate) SetNillableUpdatedAt(v *time.Time) *CredentialsCrea
 	return _c
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (_c *CredentialsCreate) SetDeletedAt(v time.Time) *CredentialsCreate {
+	_c.mutation.SetDeletedAt(v)
+	return _c
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *CredentialsCreate) SetNillableDeletedAt(v *time.Time) *CredentialsCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetCreatedBy sets the "created_by" field.
 func (_c *CredentialsCreate) SetCreatedBy(v int64) *CredentialsCreate {
 	_c.mutation.SetCreatedBy(v)
@@ -79,6 +93,34 @@ func (_c *CredentialsCreate) SetNillableUpdatedBy(v *int64) *CredentialsCreate {
 // SetCode sets the "code" field.
 func (_c *CredentialsCreate) SetCode(v string) *CredentialsCreate {
 	_c.mutation.SetCode(v)
+	return _c
+}
+
+// SetDisplayName sets the "display_name" field.
+func (_c *CredentialsCreate) SetDisplayName(v string) *CredentialsCreate {
+	_c.mutation.SetDisplayName(v)
+	return _c
+}
+
+// SetNillableDisplayName sets the "display_name" field if the given value is not nil.
+func (_c *CredentialsCreate) SetNillableDisplayName(v *string) *CredentialsCreate {
+	if v != nil {
+		_c.SetDisplayName(*v)
+	}
+	return _c
+}
+
+// SetDescription sets the "description" field.
+func (_c *CredentialsCreate) SetDescription(v string) *CredentialsCreate {
+	_c.mutation.SetDescription(v)
+	return _c
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (_c *CredentialsCreate) SetNillableDescription(v *string) *CredentialsCreate {
+	if v != nil {
+		_c.SetDescription(*v)
+	}
 	return _c
 }
 
@@ -166,6 +208,20 @@ func (_c *CredentialsCreate) SetNillableCredentialSource(v *int) *CredentialsCre
 	return _c
 }
 
+// SetProtected sets the "protected" field.
+func (_c *CredentialsCreate) SetProtected(v bool) *CredentialsCreate {
+	_c.mutation.SetProtected(v)
+	return _c
+}
+
+// SetNillableProtected sets the "protected" field if the given value is not nil.
+func (_c *CredentialsCreate) SetNillableProtected(v *bool) *CredentialsCreate {
+	if v != nil {
+		_c.SetProtected(*v)
+	}
+	return _c
+}
+
 // SetKeyID sets the "key_id" field.
 func (_c *CredentialsCreate) SetKeyID(v string) *CredentialsCreate {
 	_c.mutation.SetKeyID(v)
@@ -201,16 +257,8 @@ func (_c *CredentialsCreate) SetAPISecretEncrypted(v []byte) *CredentialsCreate 
 }
 
 // SetPublicKey sets the "public_key" field.
-func (_c *CredentialsCreate) SetPublicKey(v string) *CredentialsCreate {
+func (_c *CredentialsCreate) SetPublicKey(v []byte) *CredentialsCreate {
 	_c.mutation.SetPublicKey(v)
-	return _c
-}
-
-// SetNillablePublicKey sets the "public_key" field if the given value is not nil.
-func (_c *CredentialsCreate) SetNillablePublicKey(v *string) *CredentialsCreate {
-	if v != nil {
-		_c.SetPublicKey(*v)
-	}
 	return _c
 }
 
@@ -239,30 +287,14 @@ func (_c *CredentialsCreate) SetCaChain(v [][]uint8) *CredentialsCreate {
 }
 
 // SetLicenseKeyEncrypted sets the "license_key_encrypted" field.
-func (_c *CredentialsCreate) SetLicenseKeyEncrypted(v string) *CredentialsCreate {
+func (_c *CredentialsCreate) SetLicenseKeyEncrypted(v []byte) *CredentialsCreate {
 	_c.mutation.SetLicenseKeyEncrypted(v)
 	return _c
 }
 
-// SetNillableLicenseKeyEncrypted sets the "license_key_encrypted" field if the given value is not nil.
-func (_c *CredentialsCreate) SetNillableLicenseKeyEncrypted(v *string) *CredentialsCreate {
-	if v != nil {
-		_c.SetLicenseKeyEncrypted(*v)
-	}
-	return _c
-}
-
 // SetSignature sets the "signature" field.
-func (_c *CredentialsCreate) SetSignature(v string) *CredentialsCreate {
+func (_c *CredentialsCreate) SetSignature(v []byte) *CredentialsCreate {
 	_c.mutation.SetSignature(v)
-	return _c
-}
-
-// SetNillableSignature sets the "signature" field if the given value is not nil.
-func (_c *CredentialsCreate) SetNillableSignature(v *string) *CredentialsCreate {
-	if v != nil {
-		_c.SetSignature(*v)
-	}
 	return _c
 }
 
@@ -317,20 +349,6 @@ func (_c *CredentialsCreate) SetNillableExpiresAt(v *time.Time) *CredentialsCrea
 // SetMetadata sets the "metadata" field.
 func (_c *CredentialsCreate) SetMetadata(v map[string]string) *CredentialsCreate {
 	_c.mutation.SetMetadata(v)
-	return _c
-}
-
-// SetDescription sets the "description" field.
-func (_c *CredentialsCreate) SetDescription(v string) *CredentialsCreate {
-	_c.mutation.SetDescription(v)
-	return _c
-}
-
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_c *CredentialsCreate) SetNillableDescription(v *string) *CredentialsCreate {
-	if v != nil {
-		_c.SetDescription(*v)
-	}
 	return _c
 }
 
@@ -409,6 +427,10 @@ func (_c *CredentialsCreate) defaults() {
 		v := credentials.DefaultCredentialSource
 		_c.mutation.SetCredentialSource(v)
 	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		v := credentials.DefaultProtected
+		_c.mutation.SetProtected(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -421,6 +443,11 @@ func (_c *CredentialsCreate) check() error {
 	}
 	if _, ok := _c.mutation.Code(); !ok {
 		return &ValidationError{Name: "code", err: errors.New(`lion: missing required field "Credentials.code"`)}
+	}
+	if v, ok := _c.mutation.Code(); ok {
+		if err := credentials.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Credentials.code": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.CredentialType(); !ok {
 		return &ValidationError{Name: "credential_type", err: errors.New(`lion: missing required field "Credentials.credential_type"`)}
@@ -439,6 +466,9 @@ func (_c *CredentialsCreate) check() error {
 	}
 	if _, ok := _c.mutation.CredentialSource(); !ok {
 		return &ValidationError{Name: "credential_source", err: errors.New(`lion: missing required field "Credentials.credential_source"`)}
+	}
+	if _, ok := _c.mutation.Protected(); !ok {
+		return &ValidationError{Name: "protected", err: errors.New(`lion: missing required field "Credentials.protected"`)}
 	}
 	return nil
 }
@@ -474,6 +504,10 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 		_spec.SetField(credentials.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
+	if value, ok := _c.mutation.DeletedAt(); ok {
+		_spec.SetField(credentials.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := _c.mutation.CreatedBy(); ok {
 		_spec.SetField(credentials.FieldCreatedBy, field.TypeInt64, value)
 		_node.CreatedBy = value
@@ -485,6 +519,14 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Code(); ok {
 		_spec.SetField(credentials.FieldCode, field.TypeString, value)
 		_node.Code = value
+	}
+	if value, ok := _c.mutation.DisplayName(); ok {
+		_spec.SetField(credentials.FieldDisplayName, field.TypeString, value)
+		_node.DisplayName = value
+	}
+	if value, ok := _c.mutation.Description(); ok {
+		_spec.SetField(credentials.FieldDescription, field.TypeString, value)
+		_node.Description = value
 	}
 	if value, ok := _c.mutation.CredentialType(); ok {
 		_spec.SetField(credentials.FieldCredentialType, field.TypeInt, value)
@@ -510,6 +552,10 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 		_spec.SetField(credentials.FieldCredentialSource, field.TypeInt, value)
 		_node.CredentialSource = value
 	}
+	if value, ok := _c.mutation.Protected(); ok {
+		_spec.SetField(credentials.FieldProtected, field.TypeBool, value)
+		_node.Protected = value
+	}
 	if value, ok := _c.mutation.KeyID(); ok {
 		_spec.SetField(credentials.FieldKeyID, field.TypeString, value)
 		_node.KeyID = value
@@ -523,7 +569,7 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 		_node.APISecretEncrypted = value
 	}
 	if value, ok := _c.mutation.PublicKey(); ok {
-		_spec.SetField(credentials.FieldPublicKey, field.TypeString, value)
+		_spec.SetField(credentials.FieldPublicKey, field.TypeBytes, value)
 		_node.PublicKey = value
 	}
 	if value, ok := _c.mutation.PrivateKeyEncrypted(); ok {
@@ -543,11 +589,11 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 		_node.CaChain = value
 	}
 	if value, ok := _c.mutation.LicenseKeyEncrypted(); ok {
-		_spec.SetField(credentials.FieldLicenseKeyEncrypted, field.TypeString, value)
+		_spec.SetField(credentials.FieldLicenseKeyEncrypted, field.TypeBytes, value)
 		_node.LicenseKeyEncrypted = value
 	}
 	if value, ok := _c.mutation.Signature(); ok {
-		_spec.SetField(credentials.FieldSignature, field.TypeString, value)
+		_spec.SetField(credentials.FieldSignature, field.TypeBytes, value)
 		_node.Signature = value
 	}
 	if value, ok := _c.mutation.SymmetricKey(); ok {
@@ -569,10 +615,6 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Metadata(); ok {
 		_spec.SetField(credentials.FieldMetadata, field.TypeJSON, value)
 		_node.Metadata = value
-	}
-	if value, ok := _c.mutation.Description(); ok {
-		_spec.SetField(credentials.FieldDescription, field.TypeString, value)
-		_node.Description = value
 	}
 	return _node, _spec
 }

@@ -714,6 +714,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 		if err := tx.Credentials.Create().
 			SetCode(credCode).
+			SetProtected(true).
 			SetCredentialType(int(adminv1.Credential_JWKS.Number())).
 			SetCredentialAlgorithm(int(adminv1.Credential_RSA.Number())).
 			SetCredentialUsage(int(adminv1.Credential_SIGNING.Number())).
@@ -721,7 +722,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetCredentialStatus(int(adminv1.Credential_ACTIVE.Number())).
 			SetCredentialSource(int(adminv1.Credential_SYSTEM.Number())).
 			SetKeyID(uuid.New().String()).
-			SetPublicKey(crypto.Base64Encode(publicKeyBytes)).
+			SetDisplayName("内置 JWKS 签名密钥").
+			SetPublicKey(publicKeyBytes).
 			SetPrivateKeyEncrypted(privateKeyEnc).
 			Exec(ctx); err != nil {
 			rollback()

@@ -5,9 +5,13 @@ import (
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
-// Credentials holds the schema definition for the Credentials entity.
+// Credentials 企业级通用凭证实体，支持 API Key、X.509 证书、非对称密钥对、
+// HMAC/对称密钥、JWKS、软件许可证等多种凭证类型
+// 对应 proto: Credential (admin.common.proto)
+// 表名: lion_credentials
 type Credentials struct {
 	ent.Schema
 }
@@ -15,23 +19,33 @@ type Credentials struct {
 // Fields of the table.
 func (Credentials) Fields() []ent.Field {
 	return []ent.Field{
-		// 基本信息
+		// === 标识区（proto field 1-2）===
 		field.String("code").
-			Comment("凭证显示名称"),
+			Unique().
+			MaxLen(32).
+			Comment("凭证唯一编码，创建后不可修改（2-32字符，小写字母开头）"),
 
-		// 凭证分类字段 (原 proto enum 转为 int)
+		// === 展示区（proto field 3-4）===
+		field.String("display_name").
+			Optional().
+			Comment("前端展示名称，用于凭证列表、详情页等用户可见场景"),
+		field.String("description").
+			Optional().
+			Comment("凭证说明或备注"),
+
+		// === 分类区（proto field 5-7，原 proto enum 转为 int）===
 		field.Int("credential_type").
 			Default(0).
-			Comment("凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=JWKS, 7=HSM_REF, 8=FIDO, 99=OTHER"),
+			Comment("凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=JWKS, 7=HSM_REF, 8=FIDO, 9=SECRET"),
 		field.Int("credential_algorithm").
 			Default(0).
-			Comment("算法类型: 0=未指定, 1=RSA, 2=ECDSA, 3=ED25519, 4=HMAC, 5=AES, 6=CHACHA20_POLY1305, 99=OTHER"),
+			Comment("算法类型: 0=未指定, 1=RSA, 2=ECDSA, 3=ED25519, 4=HMAC, 5=AES, 6=CHACHA20_POLY1305, 20=SM2, 21=SM3, 22=SM4, 23=SM9, 99=CUSTOM"),
 		field.Int("credential_usage").
 			Default(0).
 			Comment("凭证用途: 0=未指定, 1=SIGNING, 2=ENCRYPTION, 10=AUTH, 11=LICENSE, 12=OTP"),
 		field.Int("credential_visibility").
 			Default(1).
-			Comment("可见性: 0=未指定, 6=PRIVATE, 4=INTERNAL, 7=PUBLIC, 8=TEAM(凭证常用); 1-3,5,9-10 见 Visibility 枚举"),
+			Comment("可见性: 0=未指定, 1=GLOBAL, 2=SUBTREE, 3=LOCAL, 4=RESTRICTED, 5=SPECIFIC"),
 		field.Int("credential_status").
 			Default(1).
 			Comment("状态: 0=未指定, 1=ACTIVE, 2=PENDING, 3=DISABLED, 4=EXPIRED, 5=REVOKED"),
@@ -39,12 +53,18 @@ func (Credentials) Fields() []ent.Field {
 			Default(0).
 			Comment("来源: 0=未指定, 1=SYSTEM, 2=USER, 3=KMS, 4=EXTERNAL"),
 
+		// === 管理区（proto field 8-11）===
+		field.Bool("protected").
+			Default(false).
+			Comment("是否受保护（受保护记录不可删除，如内置 JWKS 签名密钥）"),
+
+		// === 密钥材料区（proto field 12-18）===
 		// 外部引用
 		field.String("key_id").
 			Optional().
-			Comment("外部系统 Key ID / JWKS ID / HSM ID"),
+			Comment("凭证标识，用于查询、幂等与去重。生成策略因类型而异：API_KEY=api_key SHA256, SYMMETRIC_KEY=密钥 SHA256, KEY_PAIR/JWKS=公钥 SHA256, X509=证书 SHA256, LICENSE=license_key SHA256, HSM_REF=KMS key handle, FIDO=credentialId, SECRET=密文 SHA256"),
 
-		// API Key 相关字段
+		// === key_material: API Key（proto oneof 13）===
 		field.String("api_key").
 			Optional().
 			Comment("API Key 的公有标识"),
@@ -53,20 +73,23 @@ func (Credentials) Fields() []ent.Field {
 			Sensitive().
 			Comment("API Secret / 私密部分，敏感数据"),
 
-		// 密钥对相关字段
-		field.String("public_key").
+		// === key_material: KeyPair（proto oneof 14）===
+		// 注意: private_key_encrypted 同时复用于 X509 类型（proto oneof 15），
+		// 因 oneof key_material 保证互斥，一条记录不会同时有两种类型的私钥
+		field.Bytes("public_key").
 			Optional().
 			Comment("公钥内容（PEM/DER 格式）"),
 		field.Bytes("private_key_encrypted").
 			Optional().
 			Sensitive().
-			Comment("私钥内容（PEM/DER 格式），敏感数据"),
+			Comment("私钥内容（PEM/DER 格式），敏感数据；KEY_PAIR 类型为密钥对私钥，X509 类型为证书对应私钥"),
 		field.Bytes("passphrase_encrypted").
 			Optional().
 			Sensitive().
 			Comment("私钥加密口令，可选"),
 
-		// X.509 证书相关字段
+		// === key_material: X509（proto oneof 15）===
+		// private_key_encrypted 复用 KeyPair 组中定义的字段，此处不重复定义
 		field.Bytes("certificate").
 			Optional().
 			Comment("主证书（PEM/DER 格式）"),
@@ -74,24 +97,25 @@ func (Credentials) Fields() []ent.Field {
 			Optional().
 			Comment("可选 CA 证书链（顺序从根到中间证书）"),
 
-		// 许可证相关字段
-		field.String("license_key_encrypted").
+		// === key_material: License（proto oneof 16）===
+		field.Bytes("license_key_encrypted").
 			Optional().
-			Comment("许可证密钥或主体内容"),
-		field.String("signature").
+			Sensitive().
+			Comment("许可证密钥或主体内容，敏感数据"),
+		field.Bytes("signature").
 			Optional().
 			Comment("许可证数字签名，用于验证完整性"),
 
-		// 对称密钥和 JWKS
+		// === key_material: Symmetric / JWKS（proto oneof 17-18）===
 		field.Bytes("symmetric_key").
 			Optional().
 			Sensitive().
-			Comment("对称密钥 / HMAC / JWT"),
+			Comment("对称密钥 / HMAC / JWT / AES-GCM 加密后的完整 Token（可解密还原）"),
 		field.String("jwks_uri").
 			Optional().
 			Comment("JWKS URI"),
 
-		// 时间相关字段
+		// === 生命周期区（proto field 19-20）===
 		field.Time("not_before").
 			Optional().
 			Nillable().
@@ -101,13 +125,10 @@ func (Credentials) Fields() []ent.Field {
 			Nillable().
 			Comment("过期时间"),
 
-		// 附加元数据
+		// === 扩展区（proto field 21）===
 		field.JSON("metadata", map[string]string{}).
 			Optional().
 			Comment("自定义业务属性，许可证附加信息，如授权范围、用户数、有效期等"),
-		field.String("description").
-			Optional().
-			Comment("凭证说明或备注"),
 	}
 }
 
@@ -119,8 +140,32 @@ func (Credentials) Edges() []ent.Edge {
 // Mixin of the table.
 func (Credentials) Mixin() []ent.Mixin {
 	return []ent.Mixin{
-		TimeMixinWithoutDeleted{},
-		AuditMixin{},
+		TimeMixin{},  // created_at, updated_at, deleted_at（支持软删除）
+		AuditMixin{}, // created_by, updated_by
+	}
+}
+
+// Indexes 定义索引
+func (Credentials) Indexes() []ent.Index {
+	return []ent.Index{
+		// code 唯一索引已在字段定义中设置 Unique()
+		// key_id 条件唯一索引：仅非空值唯一（token 场景存 SHA256 摘要需幂等去重；
+		// License/FIDO 等类型可能不设 key_id，多条 NULL 不冲突）
+		index.Fields("key_id").Unique().Annotations(
+			entsql.IndexWhere("key_id IS NOT NULL AND key_id != ''"),
+		),
+		// 按类型过滤（管理后台分类展示）
+		index.Fields("credential_type"),
+		// 按状态过滤（常用：只查 ACTIVE）
+		index.Fields("credential_status"),
+		// 按用途过滤
+		index.Fields("credential_usage"),
+		// 按来源过滤
+		index.Fields("credential_source"),
+		// 过期时间扫描（定时清理任务）
+		index.Fields("expires_at"),
+		// 按创建者查询（token 管理按用户筛选）
+		index.Fields("created_by"),
 	}
 }
 

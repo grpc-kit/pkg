@@ -5733,10 +5733,15 @@
         "ED25519",
         "HMAC",
         "AES",
-        "CHACHA20_POLY1305"
+        "CHACHA20_POLY1305",
+        "SM2",
+        "SM3",
+        "SM4",
+        "SM9",
+        "CUSTOM"
       ],
       "default": "ALGORITHM_UNSPECIFIED",
-      "description": "- ALGORITHM_UNSPECIFIED: 未指定\n - RSA: 非对称签名/加密算法\n\nRSA 公私钥算法\n - ECDSA: ECDSA 椭圆曲线签名算法\n - ED25519: Ed25519 高性能椭圆曲线签名算法\n - HMAC: 对称签名 / HMAC\n\nHMAC 对称签名算法，hash 类型可在 metadata 指定 (SHA256, SHA512, SHA3 等)\n - AES: 对称加密算法\n\nAES 对称加密算法，可在 metadata 指定 key 长度 (128/256) 和模式 (GCM/CBC 等)\n - CHACHA20_POLY1305: ChaCha20-Poly1305 对称加密 + 完整性验证，高性能",
+      "description": "- ALGORITHM_UNSPECIFIED: 未指定\n - RSA: 非对称签名/加密算法\n\nRSA 公私钥算法\n - ECDSA: ECDSA 椭圆曲线签名算法\n - ED25519: Ed25519 高性能椭圆曲线签名算法\n - HMAC: 对称签名 / HMAC\n\nHMAC 对称签名算法，hash 类型可在 metadata 指定 (SHA256, SHA512, SHA3 等)\n - AES: 对称加密算法\n\nAES 对称加密算法，可在 metadata 指定 key 长度 (128/256) 和模式 (GCM/CBC 等)\n - CHACHA20_POLY1305: ChaCha20-Poly1305 对称加密 + 完整性验证，高性能\n - SM2: 国密算法\n\nSM2 椭圆曲线公钥密码算法（签名/密钥交换）\n - SM3: SM3 密码杂凑算法（256 位哈希）\n - SM4: SM4 分组对称密码算法\n - SM9: SM9 标识密码算法（基于标识的非对称加密）\n - CUSTOM: 自定义算法\n\n自定义或企业自研算法，具体算法名写入 metadata[\"algorithm\"]",
       "title": "算法类型枚举"
     },
     "CredentialApiKeyData": {
@@ -5780,10 +5785,12 @@
       "properties": {
         "license_key": {
           "type": "string",
-          "title": "许可证密钥或主体内容"
+          "format": "byte",
+          "title": "许可证密钥或主体内容（文本密钥用 UTF-8 编码，二进制许可证直接传入）"
         },
         "signature": {
           "type": "string",
+          "format": "byte",
           "title": "许可证数字签名，用于验证完整性"
         }
       },
@@ -6590,32 +6597,51 @@
         "id": {
           "type": "string",
           "format": "int64",
-          "title": "凭证唯一 ID"
+          "title": "ID 凭证唯一标识"
         },
         "code": {
           "type": "string",
           "title": "Code 系统标识符，创建后不可修改\n规则：以小写字母开头，仅包含小写字母、数字、连字符、点号和冒号，不允许连续分隔符，以字母或数字结尾\n长度：2-32 字符；如客户端未提供，服务端自动生成 12 位随机编码\n示例：手动 \"api.signing-key\"、\"tls-cert\"；自动 \"a7k2m3x9b5f1\""
         },
+        "display_name": {
+          "type": "string",
+          "title": "DisplayName 前端展示名称，用于凭证列表、详情页等用户可见场景"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description 凭证说明或备注"
+        },
         "type": {
-          "$ref": "#/definitions/v1CredentialType"
+          "$ref": "#/definitions/v1CredentialType",
+          "title": "Type 凭证类型（载体/结构）"
         },
         "algorithm": {
-          "$ref": "#/definitions/CredentialAlgorithm"
+          "$ref": "#/definitions/CredentialAlgorithm",
+          "title": "Algorithm 算法类型"
         },
         "usage": {
-          "$ref": "#/definitions/CredentialUsage"
+          "$ref": "#/definitions/CredentialUsage",
+          "title": "Usage 凭证用途"
         },
         "visibility": {
-          "$ref": "#/definitions/v1Visibility"
+          "$ref": "#/definitions/v1Visibility",
+          "title": "Visibility 可见性策略（使用公共枚举 Visibility）"
         },
         "status": {
-          "$ref": "#/definitions/v1CredentialStatus"
+          "$ref": "#/definitions/v1CredentialStatus",
+          "title": "Status 凭证状态"
         },
         "source": {
-          "$ref": "#/definitions/CredentialSource"
+          "$ref": "#/definitions/CredentialSource",
+          "title": "Source 凭证来源"
+        },
+        "protected": {
+          "type": "boolean",
+          "title": "Protected 是否为系统内置/受保护的凭证，受保护的凭证不可删除"
         },
         "key_id": {
-          "type": "string"
+          "type": "string",
+          "title": "KeyID 凭证标识，用于查询、幂等与去重\n生成策略因类型而异：\n- API_KEY: api_key 的 SHA256 摘要，或直接使用公有标识\n- SYMMETRIC_KEY: 对称密钥的 SHA256 摘要\n- KEY_PAIR / JWKS: 公钥的 SHA256 摘要（亦可作为 JWKS kid）\n- X509: 证书的 SHA256 摘要（即 X.509 标准指纹）\n- LICENSE: license_key 的 SHA256 摘要\n- HSM_REF: KMS/HSM 返回的 key handle / key ARN\n- FIDO: 设备 credentialId\n- SECRET: 密文内容的 SHA256 摘要"
         },
         "api_key": {
           "$ref": "#/definitions/CredentialApiKeyData"
@@ -6638,38 +6664,48 @@
         },
         "not_before": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "NotBefore 生效时间（Not Before）"
         },
         "expires_at": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "ExpiresAt 过期时间"
         },
         "metadata": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
-          }
-        },
-        "description": {
-          "type": "string"
+          },
+          "title": "Metadata 自定义业务属性，如许可证附加信息（授权范围、用户数、有效期等）"
         },
         "created_by": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "CreatedBy 创建者用户ID"
         },
         "updated_by": {
           "type": "string",
-          "format": "int64"
+          "format": "int64",
+          "title": "UpdatedBy 最后更新者用户ID"
         },
         "created_at": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "CreatedAt 创建时间戳"
         },
         "updated_at": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "title": "UpdatedAt 最后更新时间戳"
+        },
+        "deleted_at": {
+          "type": "string",
+          "format": "date-time",
+          "title": "DeletedAt 软删除时间戳，非空表示已删除"
         }
       },
+      "description": "字段布局约定：标识区 -\u003e 展示区 -\u003e 分类区 -\u003e 管理区 -\u003e 密钥材料区 -\u003e 生命周期区 -\u003e 扩展区 -\u003e 审计区",
       "title": "企业级通用凭证定义\n支持 API Key、X.509 证书、非对称密钥对、HMAC/对称密钥、JWKS、软件许可证等多种凭证类型\n提供分层管理：类型、算法、用途、可见性、来源、策略、审计和元数据"
     },
     "v1CredentialStatus": {
@@ -6697,10 +6733,11 @@
         "LICENSE",
         "JWKS",
         "HSM_REF",
-        "FIDO"
+        "FIDO",
+        "SECRET"
       ],
       "default": "TYPE_UNSPECIFIED",
-      "description": "- TYPE_UNSPECIFIED: 未指定类型\n - API_KEY: API Key\n - SYMMETRIC_KEY: 对称密钥 / HMAC / AES\n - KEY_PAIR: 公私钥对\n - X509: X.509 证书凭证（包含主证书、私钥、CA链）\n - LICENSE: 软件许可证\n - JWKS: JSON Web Key Set URI / 内容\n - HSM_REF: 外部安全模块 (KMS/HSM) 引用\n - FIDO: 硬件安全密钥 / 多因素认证设备",
+      "description": "- TYPE_UNSPECIFIED: 未指定类型\n - API_KEY: API Key\n - SYMMETRIC_KEY: 对称密钥 / HMAC / AES\n - KEY_PAIR: 公私钥对\n - X509: X.509 证书凭证（包含主证书、私钥、CA链）\n - LICENSE: 软件许可证\n - JWKS: JSON Web Key Set URI / 内容\n - HSM_REF: 外部安全模块 (KMS/HSM) 引用\n - FIDO: 硬件安全密钥 / 多因素认证设备\n - SECRET: 非密钥类密文（数据库密码、连接串、第三方 API 凭据等），加密存储于 symmetric_key 字段",
       "title": "凭证类型（载体/结构）"
     },
     "v1DatabaseConfig": {
