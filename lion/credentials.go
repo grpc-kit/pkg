@@ -34,7 +34,7 @@ type Credentials struct {
 	DisplayName string `json:"display_name,omitempty"`
 	// 凭证说明或备注
 	Description string `json:"description,omitempty"`
-	// 凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=JWKS, 7=HSM_REF, 8=FIDO, 9=SECRET
+	// 凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=JWKS, 7=HSM_REF, 8=FIDO, 9=SECRET, 99=OTHER
 	CredentialType int `json:"credential_type,omitempty"`
 	// 算法类型: 0=未指定, 1=RSA, 2=ECDSA, 3=ED25519, 4=HMAC, 5=AES, 6=CHACHA20_POLY1305, 20=SM2, 21=SM3, 22=SM4, 23=SM9, 99=CUSTOM
 	CredentialAlgorithm int `json:"credential_algorithm,omitempty"`
@@ -58,7 +58,7 @@ type Credentials struct {
 	PublicKey []byte `json:"public_key,omitempty"`
 	// 私钥内容（PEM/DER 格式），敏感数据；KEY_PAIR 类型为密钥对私钥，X509 类型为证书对应私钥
 	PrivateKeyEncrypted []byte `json:"-"`
-	// 私钥加密口令，可选
+	// 私钥加密口令，可选；同时服务于 KEY_PAIR 和 X509 类型
 	PassphraseEncrypted []byte `json:"-"`
 	// 主证书（PEM/DER 格式）
 	Certificate []byte `json:"certificate,omitempty"`
@@ -68,8 +68,8 @@ type Credentials struct {
 	LicenseKeyEncrypted []byte `json:"-"`
 	// 许可证数字签名，用于验证完整性
 	Signature []byte `json:"signature,omitempty"`
-	// 对称密钥 / HMAC / JWT / AES-GCM 加密后的完整 Token（可解密还原）
-	SymmetricKey []byte `json:"-"`
+	// 对称密钥 / HMAC / JWT / AES-GCM 加密后的完整 Token（可解密还原）；SECRET 类型复用此字段存储非密钥类密文
+	SymmetricKeyEncrypted []byte `json:"-"`
 	// JWKS URI
 	JwksURI string `json:"jwks_uri,omitempty"`
 	// 生效时间（Not Before）
@@ -86,7 +86,7 @@ func (*Credentials) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case credentials.FieldAPISecretEncrypted, credentials.FieldPublicKey, credentials.FieldPrivateKeyEncrypted, credentials.FieldPassphraseEncrypted, credentials.FieldCertificate, credentials.FieldCaChain, credentials.FieldLicenseKeyEncrypted, credentials.FieldSignature, credentials.FieldSymmetricKey, credentials.FieldMetadata:
+		case credentials.FieldAPISecretEncrypted, credentials.FieldPublicKey, credentials.FieldPrivateKeyEncrypted, credentials.FieldPassphraseEncrypted, credentials.FieldCertificate, credentials.FieldCaChain, credentials.FieldLicenseKeyEncrypted, credentials.FieldSignature, credentials.FieldSymmetricKeyEncrypted, credentials.FieldMetadata:
 			values[i] = new([]byte)
 		case credentials.FieldProtected:
 			values[i] = new(sql.NullBool)
@@ -270,11 +270,11 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.Signature = *value
 			}
-		case credentials.FieldSymmetricKey:
+		case credentials.FieldSymmetricKeyEncrypted:
 			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field symmetric_key", values[i])
+				return fmt.Errorf("unexpected type %T for field symmetric_key_encrypted", values[i])
 			} else if value != nil {
-				_m.SymmetricKey = *value
+				_m.SymmetricKeyEncrypted = *value
 			}
 		case credentials.FieldJwksURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -413,7 +413,7 @@ func (_m *Credentials) String() string {
 	builder.WriteString("signature=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Signature))
 	builder.WriteString(", ")
-	builder.WriteString("symmetric_key=<sensitive>")
+	builder.WriteString("symmetric_key_encrypted=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("jwks_uri=")
 	builder.WriteString(_m.JwksURI)

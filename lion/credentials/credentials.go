@@ -63,8 +63,8 @@ const (
 	FieldLicenseKeyEncrypted = "license_key_encrypted"
 	// FieldSignature holds the string denoting the signature field in the database.
 	FieldSignature = "signature"
-	// FieldSymmetricKey holds the string denoting the symmetric_key field in the database.
-	FieldSymmetricKey = "symmetric_key"
+	// FieldSymmetricKeyEncrypted holds the string denoting the symmetric_key_encrypted field in the database.
+	FieldSymmetricKeyEncrypted = "symmetric_key_encrypted"
 	// FieldJwksURI holds the string denoting the jwks_uri field in the database.
 	FieldJwksURI = "jwks_uri"
 	// FieldNotBefore holds the string denoting the not_before field in the database.
@@ -105,7 +105,7 @@ var Columns = []string{
 	FieldCaChain,
 	FieldLicenseKeyEncrypted,
 	FieldSignature,
-	FieldSymmetricKey,
+	FieldSymmetricKeyEncrypted,
 	FieldJwksURI,
 	FieldNotBefore,
 	FieldExpiresAt,
@@ -135,6 +135,10 @@ var (
 	DefaultUpdatedBy int64
 	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	CodeValidator func(string) error
+	// DefaultDisplayName holds the default value on creation for the "display_name" field.
+	DefaultDisplayName string
+	// DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	DisplayNameValidator func(string) error
 	// DefaultCredentialType holds the default value on creation for the "credential_type" field.
 	DefaultCredentialType int
 	// DefaultCredentialAlgorithm holds the default value on creation for the "credential_algorithm" field.

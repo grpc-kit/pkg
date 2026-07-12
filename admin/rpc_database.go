@@ -722,7 +722,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetCredentialStatus(int(adminv1.Credential_ACTIVE.Number())).
 			SetCredentialSource(int(adminv1.Credential_SYSTEM.Number())).
 			SetKeyID(uuid.New().String()).
-			SetDisplayName("内置 JWKS 签名密钥").
+			SetDisplayName("JWKS Signing Key").
 			SetPublicKey(publicKeyBytes).
 			SetPrivateKeyEncrypted(privateKeyEnc).
 			Exec(ctx); err != nil {

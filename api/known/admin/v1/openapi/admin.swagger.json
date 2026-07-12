@@ -5842,6 +5842,11 @@
             "format": "byte"
           },
           "title": "可选 CA 证书链（顺序从根到中间证书）"
+        },
+        "passphrase": {
+          "type": "string",
+          "format": "byte",
+          "title": "私钥加密口令，可选，敏感数据"
         }
       },
       "title": "X.509 证书捆绑数据"

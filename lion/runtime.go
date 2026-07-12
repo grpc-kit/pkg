@@ -113,6 +113,12 @@ func init() {
 	credentialsDescCode := credentialsFields[0].Descriptor()
 	// credentials.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	credentials.CodeValidator = credentialsDescCode.Validators[0].(func(string) error)
+	// credentialsDescDisplayName is the schema descriptor for display_name field.
+	credentialsDescDisplayName := credentialsFields[1].Descriptor()
+	// credentials.DefaultDisplayName holds the default value on creation for the display_name field.
+	credentials.DefaultDisplayName = credentialsDescDisplayName.Default.(string)
+	// credentials.DisplayNameValidator is a validator for the "display_name" field. It is called by the builders before save.
+	credentials.DisplayNameValidator = credentialsDescDisplayName.Validators[0].(func(string) error)
 	// credentialsDescCredentialType is the schema descriptor for credential_type field.
 	credentialsDescCredentialType := credentialsFields[3].Descriptor()
 	// credentials.DefaultCredentialType holds the default value on creation for the credential_type field.

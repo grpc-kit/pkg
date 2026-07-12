@@ -174,9 +174,9 @@ func Signature(v []byte) predicate.Credentials {
 	return predicate.Credentials(sql.FieldEQ(FieldSignature, v))
 }
 
-// SymmetricKey applies equality check predicate on the "symmetric_key" field. It's identical to SymmetricKeyEQ.
-func SymmetricKey(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldSymmetricKey, v))
+// SymmetricKeyEncrypted applies equality check predicate on the "symmetric_key_encrypted" field. It's identical to SymmetricKeyEncryptedEQ.
+func SymmetricKeyEncrypted(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldSymmetricKeyEncrypted, v))
 }
 
 // JwksURI applies equality check predicate on the "jwks_uri" field. It's identical to JwksURIEQ.
@@ -542,16 +542,6 @@ func DisplayNameHasPrefix(v string) predicate.Credentials {
 // DisplayNameHasSuffix applies the HasSuffix predicate on the "display_name" field.
 func DisplayNameHasSuffix(v string) predicate.Credentials {
 	return predicate.Credentials(sql.FieldHasSuffix(FieldDisplayName, v))
-}
-
-// DisplayNameIsNil applies the IsNil predicate on the "display_name" field.
-func DisplayNameIsNil() predicate.Credentials {
-	return predicate.Credentials(sql.FieldIsNull(FieldDisplayName))
-}
-
-// DisplayNameNotNil applies the NotNil predicate on the "display_name" field.
-func DisplayNameNotNil() predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotNull(FieldDisplayName))
 }
 
 // DisplayNameEqualFold applies the EqualFold predicate on the "display_name" field.
@@ -1399,54 +1389,54 @@ func SignatureNotNil() predicate.Credentials {
 	return predicate.Credentials(sql.FieldNotNull(FieldSignature))
 }
 
-// SymmetricKeyEQ applies the EQ predicate on the "symmetric_key" field.
-func SymmetricKeyEQ(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldSymmetricKey, v))
+// SymmetricKeyEncryptedEQ applies the EQ predicate on the "symmetric_key_encrypted" field.
+func SymmetricKeyEncryptedEQ(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldSymmetricKeyEncrypted, v))
 }
 
-// SymmetricKeyNEQ applies the NEQ predicate on the "symmetric_key" field.
-func SymmetricKeyNEQ(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNEQ(FieldSymmetricKey, v))
+// SymmetricKeyEncryptedNEQ applies the NEQ predicate on the "symmetric_key_encrypted" field.
+func SymmetricKeyEncryptedNEQ(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldSymmetricKeyEncrypted, v))
 }
 
-// SymmetricKeyIn applies the In predicate on the "symmetric_key" field.
-func SymmetricKeyIn(vs ...[]byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldIn(FieldSymmetricKey, vs...))
+// SymmetricKeyEncryptedIn applies the In predicate on the "symmetric_key_encrypted" field.
+func SymmetricKeyEncryptedIn(vs ...[]byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldSymmetricKeyEncrypted, vs...))
 }
 
-// SymmetricKeyNotIn applies the NotIn predicate on the "symmetric_key" field.
-func SymmetricKeyNotIn(vs ...[]byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotIn(FieldSymmetricKey, vs...))
+// SymmetricKeyEncryptedNotIn applies the NotIn predicate on the "symmetric_key_encrypted" field.
+func SymmetricKeyEncryptedNotIn(vs ...[]byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldSymmetricKeyEncrypted, vs...))
 }
 
-// SymmetricKeyGT applies the GT predicate on the "symmetric_key" field.
-func SymmetricKeyGT(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGT(FieldSymmetricKey, v))
+// SymmetricKeyEncryptedGT applies the GT predicate on the "symmetric_key_encrypted" field.
+func SymmetricKeyEncryptedGT(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldSymmetricKeyEncrypted, v))
 }
 
-// SymmetricKeyGTE applies the GTE predicate on the "symmetric_key" field.
-func SymmetricKeyGTE(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGTE(FieldSymmetricKey, v))
+// SymmetricKeyEncryptedGTE applies the GTE predicate on the "symmetric_key_encrypted" field.
+func SymmetricKeyEncryptedGTE(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldSymmetricKeyEncrypted, v))
 }
 
-// SymmetricKeyLT applies the LT predicate on the "symmetric_key" field.
-func SymmetricKeyLT(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLT(FieldSymmetricKey, v))
+// SymmetricKeyEncryptedLT applies the LT predicate on the "symmetric_key_encrypted" field.
+func SymmetricKeyEncryptedLT(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldSymmetricKeyEncrypted, v))
 }
 
-// SymmetricKeyLTE applies the LTE predicate on the "symmetric_key" field.
-func SymmetricKeyLTE(v []byte) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLTE(FieldSymmetricKey, v))
+// SymmetricKeyEncryptedLTE applies the LTE predicate on the "symmetric_key_encrypted" field.
+func SymmetricKeyEncryptedLTE(v []byte) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldSymmetricKeyEncrypted, v))
 }
 
-// SymmetricKeyIsNil applies the IsNil predicate on the "symmetric_key" field.
-func SymmetricKeyIsNil() predicate.Credentials {
-	return predicate.Credentials(sql.FieldIsNull(FieldSymmetricKey))
+// SymmetricKeyEncryptedIsNil applies the IsNil predicate on the "symmetric_key_encrypted" field.
+func SymmetricKeyEncryptedIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldSymmetricKeyEncrypted))
 }
 
-// SymmetricKeyNotNil applies the NotNil predicate on the "symmetric_key" field.
-func SymmetricKeyNotNil() predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotNull(FieldSymmetricKey))
+// SymmetricKeyEncryptedNotNil applies the NotNil predicate on the "symmetric_key_encrypted" field.
+func SymmetricKeyEncryptedNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldSymmetricKeyEncrypted))
 }
 
 // JwksURIEQ applies the EQ predicate on the "jwks_uri" field.

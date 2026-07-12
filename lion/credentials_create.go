@@ -298,9 +298,9 @@ func (_c *CredentialsCreate) SetSignature(v []byte) *CredentialsCreate {
 	return _c
 }
 
-// SetSymmetricKey sets the "symmetric_key" field.
-func (_c *CredentialsCreate) SetSymmetricKey(v []byte) *CredentialsCreate {
-	_c.mutation.SetSymmetricKey(v)
+// SetSymmetricKeyEncrypted sets the "symmetric_key_encrypted" field.
+func (_c *CredentialsCreate) SetSymmetricKeyEncrypted(v []byte) *CredentialsCreate {
+	_c.mutation.SetSymmetricKeyEncrypted(v)
 	return _c
 }
 
@@ -403,6 +403,10 @@ func (_c *CredentialsCreate) defaults() {
 		v := credentials.DefaultUpdatedBy
 		_c.mutation.SetUpdatedBy(v)
 	}
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		v := credentials.DefaultDisplayName
+		_c.mutation.SetDisplayName(v)
+	}
 	if _, ok := _c.mutation.CredentialType(); !ok {
 		v := credentials.DefaultCredentialType
 		_c.mutation.SetCredentialType(v)
@@ -447,6 +451,14 @@ func (_c *CredentialsCreate) check() error {
 	if v, ok := _c.mutation.Code(); ok {
 		if err := credentials.CodeValidator(v); err != nil {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Credentials.code": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.DisplayName(); !ok {
+		return &ValidationError{Name: "display_name", err: errors.New(`lion: missing required field "Credentials.display_name"`)}
+	}
+	if v, ok := _c.mutation.DisplayName(); ok {
+		if err := credentials.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Credentials.display_name": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.CredentialType(); !ok {
@@ -596,9 +608,9 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 		_spec.SetField(credentials.FieldSignature, field.TypeBytes, value)
 		_node.Signature = value
 	}
-	if value, ok := _c.mutation.SymmetricKey(); ok {
-		_spec.SetField(credentials.FieldSymmetricKey, field.TypeBytes, value)
-		_node.SymmetricKey = value
+	if value, ok := _c.mutation.SymmetricKeyEncrypted(); ok {
+		_spec.SetField(credentials.FieldSymmetricKeyEncrypted, field.TypeBytes, value)
+		_node.SymmetricKeyEncrypted = value
 	}
 	if value, ok := _c.mutation.JwksURI(); ok {
 		_spec.SetField(credentials.FieldJwksURI, field.TypeString, value)

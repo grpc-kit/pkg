@@ -1561,7 +1561,7 @@ type CredentialsMutation struct {
 	appendca_chain           [][]uint8
 	license_key_encrypted    *[]byte
 	signature                *[]byte
-	symmetric_key            *[]byte
+	symmetric_key_encrypted  *[]byte
 	jwks_uri                 *string
 	not_before               *time.Time
 	expires_at               *time.Time
@@ -1998,22 +1998,9 @@ func (m *CredentialsMutation) OldDisplayName(ctx context.Context) (v string, err
 	return oldValue.DisplayName, nil
 }
 
-// ClearDisplayName clears the value of the "display_name" field.
-func (m *CredentialsMutation) ClearDisplayName() {
-	m.display_name = nil
-	m.clearedFields[credentials.FieldDisplayName] = struct{}{}
-}
-
-// DisplayNameCleared returns if the "display_name" field was cleared in this mutation.
-func (m *CredentialsMutation) DisplayNameCleared() bool {
-	_, ok := m.clearedFields[credentials.FieldDisplayName]
-	return ok
-}
-
 // ResetDisplayName resets all changes to the "display_name" field.
 func (m *CredentialsMutation) ResetDisplayName() {
 	m.display_name = nil
-	delete(m.clearedFields, credentials.FieldDisplayName)
 }
 
 // SetDescription sets the "description" field.
@@ -2943,53 +2930,53 @@ func (m *CredentialsMutation) ResetSignature() {
 	delete(m.clearedFields, credentials.FieldSignature)
 }
 
-// SetSymmetricKey sets the "symmetric_key" field.
-func (m *CredentialsMutation) SetSymmetricKey(b []byte) {
-	m.symmetric_key = &b
+// SetSymmetricKeyEncrypted sets the "symmetric_key_encrypted" field.
+func (m *CredentialsMutation) SetSymmetricKeyEncrypted(b []byte) {
+	m.symmetric_key_encrypted = &b
 }
 
-// SymmetricKey returns the value of the "symmetric_key" field in the mutation.
-func (m *CredentialsMutation) SymmetricKey() (r []byte, exists bool) {
-	v := m.symmetric_key
+// SymmetricKeyEncrypted returns the value of the "symmetric_key_encrypted" field in the mutation.
+func (m *CredentialsMutation) SymmetricKeyEncrypted() (r []byte, exists bool) {
+	v := m.symmetric_key_encrypted
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSymmetricKey returns the old "symmetric_key" field's value of the Credentials entity.
+// OldSymmetricKeyEncrypted returns the old "symmetric_key_encrypted" field's value of the Credentials entity.
 // If the Credentials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldSymmetricKey(ctx context.Context) (v []byte, err error) {
+func (m *CredentialsMutation) OldSymmetricKeyEncrypted(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSymmetricKey is only allowed on UpdateOne operations")
+		return v, errors.New("OldSymmetricKeyEncrypted is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSymmetricKey requires an ID field in the mutation")
+		return v, errors.New("OldSymmetricKeyEncrypted requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSymmetricKey: %w", err)
+		return v, fmt.Errorf("querying old value for OldSymmetricKeyEncrypted: %w", err)
 	}
-	return oldValue.SymmetricKey, nil
+	return oldValue.SymmetricKeyEncrypted, nil
 }
 
-// ClearSymmetricKey clears the value of the "symmetric_key" field.
-func (m *CredentialsMutation) ClearSymmetricKey() {
-	m.symmetric_key = nil
-	m.clearedFields[credentials.FieldSymmetricKey] = struct{}{}
+// ClearSymmetricKeyEncrypted clears the value of the "symmetric_key_encrypted" field.
+func (m *CredentialsMutation) ClearSymmetricKeyEncrypted() {
+	m.symmetric_key_encrypted = nil
+	m.clearedFields[credentials.FieldSymmetricKeyEncrypted] = struct{}{}
 }
 
-// SymmetricKeyCleared returns if the "symmetric_key" field was cleared in this mutation.
-func (m *CredentialsMutation) SymmetricKeyCleared() bool {
-	_, ok := m.clearedFields[credentials.FieldSymmetricKey]
+// SymmetricKeyEncryptedCleared returns if the "symmetric_key_encrypted" field was cleared in this mutation.
+func (m *CredentialsMutation) SymmetricKeyEncryptedCleared() bool {
+	_, ok := m.clearedFields[credentials.FieldSymmetricKeyEncrypted]
 	return ok
 }
 
-// ResetSymmetricKey resets all changes to the "symmetric_key" field.
-func (m *CredentialsMutation) ResetSymmetricKey() {
-	m.symmetric_key = nil
-	delete(m.clearedFields, credentials.FieldSymmetricKey)
+// ResetSymmetricKeyEncrypted resets all changes to the "symmetric_key_encrypted" field.
+func (m *CredentialsMutation) ResetSymmetricKeyEncrypted() {
+	m.symmetric_key_encrypted = nil
+	delete(m.clearedFields, credentials.FieldSymmetricKeyEncrypted)
 }
 
 // SetJwksURI sets the "jwks_uri" field.
@@ -3298,8 +3285,8 @@ func (m *CredentialsMutation) Fields() []string {
 	if m.signature != nil {
 		fields = append(fields, credentials.FieldSignature)
 	}
-	if m.symmetric_key != nil {
-		fields = append(fields, credentials.FieldSymmetricKey)
+	if m.symmetric_key_encrypted != nil {
+		fields = append(fields, credentials.FieldSymmetricKeyEncrypted)
 	}
 	if m.jwks_uri != nil {
 		fields = append(fields, credentials.FieldJwksURI)
@@ -3371,8 +3358,8 @@ func (m *CredentialsMutation) Field(name string) (ent.Value, bool) {
 		return m.LicenseKeyEncrypted()
 	case credentials.FieldSignature:
 		return m.Signature()
-	case credentials.FieldSymmetricKey:
-		return m.SymmetricKey()
+	case credentials.FieldSymmetricKeyEncrypted:
+		return m.SymmetricKeyEncrypted()
 	case credentials.FieldJwksURI:
 		return m.JwksURI()
 	case credentials.FieldNotBefore:
@@ -3440,8 +3427,8 @@ func (m *CredentialsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldLicenseKeyEncrypted(ctx)
 	case credentials.FieldSignature:
 		return m.OldSignature(ctx)
-	case credentials.FieldSymmetricKey:
-		return m.OldSymmetricKey(ctx)
+	case credentials.FieldSymmetricKeyEncrypted:
+		return m.OldSymmetricKeyEncrypted(ctx)
 	case credentials.FieldJwksURI:
 		return m.OldJwksURI(ctx)
 	case credentials.FieldNotBefore:
@@ -3634,12 +3621,12 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSignature(v)
 		return nil
-	case credentials.FieldSymmetricKey:
+	case credentials.FieldSymmetricKeyEncrypted:
 		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSymmetricKey(v)
+		m.SetSymmetricKeyEncrypted(v)
 		return nil
 	case credentials.FieldJwksURI:
 		v, ok := value.(string)
@@ -3807,9 +3794,6 @@ func (m *CredentialsMutation) ClearedFields() []string {
 	if m.FieldCleared(credentials.FieldUpdatedBy) {
 		fields = append(fields, credentials.FieldUpdatedBy)
 	}
-	if m.FieldCleared(credentials.FieldDisplayName) {
-		fields = append(fields, credentials.FieldDisplayName)
-	}
 	if m.FieldCleared(credentials.FieldDescription) {
 		fields = append(fields, credentials.FieldDescription)
 	}
@@ -3843,8 +3827,8 @@ func (m *CredentialsMutation) ClearedFields() []string {
 	if m.FieldCleared(credentials.FieldSignature) {
 		fields = append(fields, credentials.FieldSignature)
 	}
-	if m.FieldCleared(credentials.FieldSymmetricKey) {
-		fields = append(fields, credentials.FieldSymmetricKey)
+	if m.FieldCleared(credentials.FieldSymmetricKeyEncrypted) {
+		fields = append(fields, credentials.FieldSymmetricKeyEncrypted)
 	}
 	if m.FieldCleared(credentials.FieldJwksURI) {
 		fields = append(fields, credentials.FieldJwksURI)
@@ -3881,9 +3865,6 @@ func (m *CredentialsMutation) ClearField(name string) error {
 	case credentials.FieldUpdatedBy:
 		m.ClearUpdatedBy()
 		return nil
-	case credentials.FieldDisplayName:
-		m.ClearDisplayName()
-		return nil
 	case credentials.FieldDescription:
 		m.ClearDescription()
 		return nil
@@ -3917,8 +3898,8 @@ func (m *CredentialsMutation) ClearField(name string) error {
 	case credentials.FieldSignature:
 		m.ClearSignature()
 		return nil
-	case credentials.FieldSymmetricKey:
-		m.ClearSymmetricKey()
+	case credentials.FieldSymmetricKeyEncrypted:
+		m.ClearSymmetricKeyEncrypted()
 		return nil
 	case credentials.FieldJwksURI:
 		m.ClearJwksURI()
@@ -4015,8 +3996,8 @@ func (m *CredentialsMutation) ResetField(name string) error {
 	case credentials.FieldSignature:
 		m.ResetSignature()
 		return nil
-	case credentials.FieldSymmetricKey:
-		m.ResetSymmetricKey()
+	case credentials.FieldSymmetricKeyEncrypted:
+		m.ResetSymmetricKeyEncrypted()
 		return nil
 	case credentials.FieldJwksURI:
 		m.ResetJwksURI()

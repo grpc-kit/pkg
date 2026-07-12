@@ -27,7 +27,8 @@ func (Credentials) Fields() []ent.Field {
 
 		// === 展示区（proto field 3-4）===
 		field.String("display_name").
-			Optional().
+			Default("").
+			MaxLen(256).
 			Comment("前端展示名称，用于凭证列表、详情页等用户可见场景"),
 		field.String("description").
 			Optional().
@@ -36,7 +37,7 @@ func (Credentials) Fields() []ent.Field {
 		// === 分类区（proto field 5-7，原 proto enum 转为 int）===
 		field.Int("credential_type").
 			Default(0).
-			Comment("凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=JWKS, 7=HSM_REF, 8=FIDO, 9=SECRET"),
+			Comment("凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=JWKS, 7=HSM_REF, 8=FIDO, 9=SECRET, 99=OTHER"),
 		field.Int("credential_algorithm").
 			Default(0).
 			Comment("算法类型: 0=未指定, 1=RSA, 2=ECDSA, 3=ED25519, 4=HMAC, 5=AES, 6=CHACHA20_POLY1305, 20=SM2, 21=SM3, 22=SM4, 23=SM9, 99=CUSTOM"),
@@ -86,7 +87,7 @@ func (Credentials) Fields() []ent.Field {
 		field.Bytes("passphrase_encrypted").
 			Optional().
 			Sensitive().
-			Comment("私钥加密口令，可选"),
+			Comment("私钥加密口令，可选；同时服务于 KEY_PAIR 和 X509 类型"),
 
 		// === key_material: X509（proto oneof 15）===
 		// private_key_encrypted 复用 KeyPair 组中定义的字段，此处不重复定义
@@ -107,10 +108,10 @@ func (Credentials) Fields() []ent.Field {
 			Comment("许可证数字签名，用于验证完整性"),
 
 		// === key_material: Symmetric / JWKS（proto oneof 17-18）===
-		field.Bytes("symmetric_key").
+		field.Bytes("symmetric_key_encrypted").
 			Optional().
 			Sensitive().
-			Comment("对称密钥 / HMAC / JWT / AES-GCM 加密后的完整 Token（可解密还原）"),
+			Comment("对称密钥 / HMAC / JWT / AES-GCM 加密后的完整 Token（可解密还原）；SECRET 类型复用此字段存储非密钥类密文"),
 		field.String("jwks_uri").
 			Optional().
 			Comment("JWKS URI"),

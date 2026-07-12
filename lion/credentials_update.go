@@ -137,12 +137,6 @@ func (_u *CredentialsUpdate) SetNillableDisplayName(v *string) *CredentialsUpdat
 	return _u
 }
 
-// ClearDisplayName clears the value of the "display_name" field.
-func (_u *CredentialsUpdate) ClearDisplayName() *CredentialsUpdate {
-	_u.mutation.ClearDisplayName()
-	return _u
-}
-
 // SetDescription sets the "description" field.
 func (_u *CredentialsUpdate) SetDescription(v string) *CredentialsUpdate {
 	_u.mutation.SetDescription(v)
@@ -445,15 +439,15 @@ func (_u *CredentialsUpdate) ClearSignature() *CredentialsUpdate {
 	return _u
 }
 
-// SetSymmetricKey sets the "symmetric_key" field.
-func (_u *CredentialsUpdate) SetSymmetricKey(v []byte) *CredentialsUpdate {
-	_u.mutation.SetSymmetricKey(v)
+// SetSymmetricKeyEncrypted sets the "symmetric_key_encrypted" field.
+func (_u *CredentialsUpdate) SetSymmetricKeyEncrypted(v []byte) *CredentialsUpdate {
+	_u.mutation.SetSymmetricKeyEncrypted(v)
 	return _u
 }
 
-// ClearSymmetricKey clears the value of the "symmetric_key" field.
-func (_u *CredentialsUpdate) ClearSymmetricKey() *CredentialsUpdate {
-	_u.mutation.ClearSymmetricKey()
+// ClearSymmetricKeyEncrypted clears the value of the "symmetric_key_encrypted" field.
+func (_u *CredentialsUpdate) ClearSymmetricKeyEncrypted() *CredentialsUpdate {
+	_u.mutation.ClearSymmetricKeyEncrypted()
 	return _u
 }
 
@@ -577,6 +571,11 @@ func (_u *CredentialsUpdate) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Credentials.code": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := credentials.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Credentials.display_name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -624,9 +623,6 @@ func (_u *CredentialsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(credentials.FieldDisplayName, field.TypeString, value)
-	}
-	if _u.mutation.DisplayNameCleared() {
-		_spec.ClearField(credentials.FieldDisplayName, field.TypeString)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(credentials.FieldDescription, field.TypeString, value)
@@ -738,11 +734,11 @@ func (_u *CredentialsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if _u.mutation.SignatureCleared() {
 		_spec.ClearField(credentials.FieldSignature, field.TypeBytes)
 	}
-	if value, ok := _u.mutation.SymmetricKey(); ok {
-		_spec.SetField(credentials.FieldSymmetricKey, field.TypeBytes, value)
+	if value, ok := _u.mutation.SymmetricKeyEncrypted(); ok {
+		_spec.SetField(credentials.FieldSymmetricKeyEncrypted, field.TypeBytes, value)
 	}
-	if _u.mutation.SymmetricKeyCleared() {
-		_spec.ClearField(credentials.FieldSymmetricKey, field.TypeBytes)
+	if _u.mutation.SymmetricKeyEncryptedCleared() {
+		_spec.ClearField(credentials.FieldSymmetricKeyEncrypted, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.JwksURI(); ok {
 		_spec.SetField(credentials.FieldJwksURI, field.TypeString, value)
@@ -893,12 +889,6 @@ func (_u *CredentialsUpdateOne) SetNillableDisplayName(v *string) *CredentialsUp
 	if v != nil {
 		_u.SetDisplayName(*v)
 	}
-	return _u
-}
-
-// ClearDisplayName clears the value of the "display_name" field.
-func (_u *CredentialsUpdateOne) ClearDisplayName() *CredentialsUpdateOne {
-	_u.mutation.ClearDisplayName()
 	return _u
 }
 
@@ -1204,15 +1194,15 @@ func (_u *CredentialsUpdateOne) ClearSignature() *CredentialsUpdateOne {
 	return _u
 }
 
-// SetSymmetricKey sets the "symmetric_key" field.
-func (_u *CredentialsUpdateOne) SetSymmetricKey(v []byte) *CredentialsUpdateOne {
-	_u.mutation.SetSymmetricKey(v)
+// SetSymmetricKeyEncrypted sets the "symmetric_key_encrypted" field.
+func (_u *CredentialsUpdateOne) SetSymmetricKeyEncrypted(v []byte) *CredentialsUpdateOne {
+	_u.mutation.SetSymmetricKeyEncrypted(v)
 	return _u
 }
 
-// ClearSymmetricKey clears the value of the "symmetric_key" field.
-func (_u *CredentialsUpdateOne) ClearSymmetricKey() *CredentialsUpdateOne {
-	_u.mutation.ClearSymmetricKey()
+// ClearSymmetricKeyEncrypted clears the value of the "symmetric_key_encrypted" field.
+func (_u *CredentialsUpdateOne) ClearSymmetricKeyEncrypted() *CredentialsUpdateOne {
+	_u.mutation.ClearSymmetricKeyEncrypted()
 	return _u
 }
 
@@ -1349,6 +1339,11 @@ func (_u *CredentialsUpdateOne) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`lion: validator failed for field "Credentials.code": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.DisplayName(); ok {
+		if err := credentials.DisplayNameValidator(v); err != nil {
+			return &ValidationError{Name: "display_name", err: fmt.Errorf(`lion: validator failed for field "Credentials.display_name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -1413,9 +1408,6 @@ func (_u *CredentialsUpdateOne) sqlSave(ctx context.Context) (_node *Credentials
 	}
 	if value, ok := _u.mutation.DisplayName(); ok {
 		_spec.SetField(credentials.FieldDisplayName, field.TypeString, value)
-	}
-	if _u.mutation.DisplayNameCleared() {
-		_spec.ClearField(credentials.FieldDisplayName, field.TypeString)
 	}
 	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(credentials.FieldDescription, field.TypeString, value)
@@ -1527,11 +1519,11 @@ func (_u *CredentialsUpdateOne) sqlSave(ctx context.Context) (_node *Credentials
 	if _u.mutation.SignatureCleared() {
 		_spec.ClearField(credentials.FieldSignature, field.TypeBytes)
 	}
-	if value, ok := _u.mutation.SymmetricKey(); ok {
-		_spec.SetField(credentials.FieldSymmetricKey, field.TypeBytes, value)
+	if value, ok := _u.mutation.SymmetricKeyEncrypted(); ok {
+		_spec.SetField(credentials.FieldSymmetricKeyEncrypted, field.TypeBytes, value)
 	}
-	if _u.mutation.SymmetricKeyCleared() {
-		_spec.ClearField(credentials.FieldSymmetricKey, field.TypeBytes)
+	if _u.mutation.SymmetricKeyEncryptedCleared() {
+		_spec.ClearField(credentials.FieldSymmetricKeyEncrypted, field.TypeBytes)
 	}
 	if value, ok := _u.mutation.JwksURI(); ok {
 		_spec.SetField(credentials.FieldJwksURI, field.TypeString, value)
