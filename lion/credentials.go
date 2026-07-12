@@ -34,11 +34,11 @@ type Credentials struct {
 	DisplayName string `json:"display_name,omitempty"`
 	// 凭证说明或备注
 	Description string `json:"description,omitempty"`
-	// 凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=JWKS, 7=HSM_REF, 8=FIDO, 9=SECRET, 99=OTHER
+	// 凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=SECRET
 	CredentialType int `json:"credential_type,omitempty"`
-	// 算法类型: 0=未指定, 1=RSA, 2=ECDSA, 3=ED25519, 4=HMAC, 5=AES, 6=CHACHA20_POLY1305, 20=SM2, 21=SM3, 22=SM4, 23=SM9, 99=CUSTOM
+	// 算法类型: 0=未指定, 1=RSA, 2=ECDSA, 3=ED25519, 4=HMAC, 5=AES, 6=CHACHA20_POLY1305, 10=SM2, 11=SM4, 12=SM9, 99=CUSTOM
 	CredentialAlgorithm int `json:"credential_algorithm,omitempty"`
-	// 凭证用途: 0=未指定, 1=SIGNING, 2=ENCRYPTION, 10=AUTH, 11=LICENSE, 12=OTP
+	// 凭证用途: 0=未指定, 1=SIGNING, 2=ENCRYPTION, 10=AUTH, 11=OTP, 12=JWKS
 	CredentialUsage int `json:"credential_usage,omitempty"`
 	// 可见性: 0=未指定, 1=GLOBAL, 2=SUBTREE, 3=LOCAL, 4=RESTRICTED, 5=SPECIFIC
 	CredentialVisibility int `json:"credential_visibility,omitempty"`
@@ -46,9 +46,9 @@ type Credentials struct {
 	CredentialStatus int `json:"credential_status,omitempty"`
 	// 来源: 0=未指定, 1=SYSTEM, 2=USER, 3=KMS, 4=EXTERNAL
 	CredentialSource int `json:"credential_source,omitempty"`
-	// 是否受保护（受保护记录不可删除，如内置 JWKS 签名密钥）
+	// 是否受保护（受保护记录不可删除，如内置签名密钥）
 	Protected bool `json:"protected,omitempty"`
-	// 凭证标识，用于查询、幂等与去重。生成策略因类型而异：API_KEY=api_key SHA256, SYMMETRIC_KEY=密钥 SHA256, KEY_PAIR/JWKS=公钥 SHA256, X509=证书 SHA256, LICENSE=license_key SHA256, HSM_REF=KMS key handle, FIDO=credentialId, SECRET=密文 SHA256
+	// 凭证标识，用于查询、幂等与去重。生成策略因类型而异：API_KEY=api_key SHA256, SYMMETRIC_KEY=密钥 SHA256, KEY_PAIR=公钥 SHA256, X509=证书 SHA256, LICENSE=license_key SHA256, SECRET=密文 SHA256
 	KeyID string `json:"key_id,omitempty"`
 	// API Key 的公有标识
 	APIKey string `json:"api_key,omitempty"`
@@ -70,8 +70,6 @@ type Credentials struct {
 	Signature []byte `json:"signature,omitempty"`
 	// 对称密钥 / HMAC / JWT / AES-GCM 加密后的完整 Token（可解密还原）；SECRET 类型复用此字段存储非密钥类密文
 	SymmetricKeyEncrypted []byte `json:"-"`
-	// JWKS URI
-	JwksURI string `json:"jwks_uri,omitempty"`
 	// 生效时间（Not Before）
 	NotBefore *time.Time `json:"not_before,omitempty"`
 	// 过期时间
@@ -92,7 +90,7 @@ func (*Credentials) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case credentials.FieldID, credentials.FieldCreatedBy, credentials.FieldUpdatedBy, credentials.FieldCredentialType, credentials.FieldCredentialAlgorithm, credentials.FieldCredentialUsage, credentials.FieldCredentialVisibility, credentials.FieldCredentialStatus, credentials.FieldCredentialSource:
 			values[i] = new(sql.NullInt64)
-		case credentials.FieldCode, credentials.FieldDisplayName, credentials.FieldDescription, credentials.FieldKeyID, credentials.FieldAPIKey, credentials.FieldJwksURI:
+		case credentials.FieldCode, credentials.FieldDisplayName, credentials.FieldDescription, credentials.FieldKeyID, credentials.FieldAPIKey:
 			values[i] = new(sql.NullString)
 		case credentials.FieldCreatedAt, credentials.FieldUpdatedAt, credentials.FieldDeletedAt, credentials.FieldNotBefore, credentials.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -276,12 +274,6 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.SymmetricKeyEncrypted = *value
 			}
-		case credentials.FieldJwksURI:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field jwks_uri", values[i])
-			} else if value.Valid {
-				_m.JwksURI = value.String
-			}
 		case credentials.FieldNotBefore:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field not_before", values[i])
@@ -414,9 +406,6 @@ func (_m *Credentials) String() string {
 	builder.WriteString(fmt.Sprintf("%v", _m.Signature))
 	builder.WriteString(", ")
 	builder.WriteString("symmetric_key_encrypted=<sensitive>")
-	builder.WriteString(", ")
-	builder.WriteString("jwks_uri=")
-	builder.WriteString(_m.JwksURI)
 	builder.WriteString(", ")
 	if v := _m.NotBefore; v != nil {
 		builder.WriteString("not_before=")

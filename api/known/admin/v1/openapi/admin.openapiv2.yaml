@@ -748,11 +748,11 @@ openapiOptions:
         tags:
           - "安全相关"
         summary: "创建凭证"
-        description: '接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。前置条件：仅允许具备密钥管理权限的管理员调用，禁止回传私钥材料，新增或轮换操作必须写入审计日志。请求体示例：{"credential":{"code":"admin-jwks","type":"JWKS","algorithm":"RSA","usage":"AUTH","status":"ACTIVE","source":"SYSTEM","jwks_uri":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oauth2/jwks"}}。'
+        description: '接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。前置条件：仅允许具备密钥管理权限的管理员调用，禁止回传私钥材料，新增或轮换操作必须写入审计日志。请求体示例：{"credential":{"code":"admin-jwks","type":"KEY_PAIR","algorithm":"RSA","usage":"JWKS","status":"ACTIVE","source":"SYSTEM"}}。'
         responses:
           "200":
             examples:
-              "application/json": '{"id":"301","code":"admin-jwks","type":"JWKS","algorithm":"RSA","usage":"AUTH","visibility":"PRIVATE","status":"ACTIVE","source":"SYSTEM","key_id":"kid-admin-2026","jwks_uri":"https://admin.v1.known.api.grpc-kit.com/builtin/admin/api/v1/oauth2/jwks","metadata":{"rotation":"30d"},"description":"OIDC 签名公钥集合"}'
+              "application/json": '{"id":"301","code":"admin-jwks","type":"KEY_PAIR","algorithm":"RSA","usage":"JWKS","visibility":"PRIVATE","status":"ACTIVE","source":"SYSTEM","key_id":"kid-admin-2026","metadata":{"rotation":"30d"},"description":"OIDC 签名公钥集合"}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery
       option:
         tags:

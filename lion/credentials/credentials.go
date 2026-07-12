@@ -65,8 +65,6 @@ const (
 	FieldSignature = "signature"
 	// FieldSymmetricKeyEncrypted holds the string denoting the symmetric_key_encrypted field in the database.
 	FieldSymmetricKeyEncrypted = "symmetric_key_encrypted"
-	// FieldJwksURI holds the string denoting the jwks_uri field in the database.
-	FieldJwksURI = "jwks_uri"
 	// FieldNotBefore holds the string denoting the not_before field in the database.
 	FieldNotBefore = "not_before"
 	// FieldExpiresAt holds the string denoting the expires_at field in the database.
@@ -106,7 +104,6 @@ var Columns = []string{
 	FieldLicenseKeyEncrypted,
 	FieldSignature,
 	FieldSymmetricKeyEncrypted,
-	FieldJwksURI,
 	FieldNotBefore,
 	FieldExpiresAt,
 	FieldMetadata,
@@ -246,11 +243,6 @@ func ByKeyID(opts ...sql.OrderTermOption) OrderOption {
 // ByAPIKey orders the results by the api_key field.
 func ByAPIKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAPIKey, opts...).ToFunc()
-}
-
-// ByJwksURI orders the results by the jwks_uri field.
-func ByJwksURI(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldJwksURI, opts...).ToFunc()
 }
 
 // ByNotBefore orders the results by the not_before field.

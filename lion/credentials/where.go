@@ -179,11 +179,6 @@ func SymmetricKeyEncrypted(v []byte) predicate.Credentials {
 	return predicate.Credentials(sql.FieldEQ(FieldSymmetricKeyEncrypted, v))
 }
 
-// JwksURI applies equality check predicate on the "jwks_uri" field. It's identical to JwksURIEQ.
-func JwksURI(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldJwksURI, v))
-}
-
 // NotBefore applies equality check predicate on the "not_before" field. It's identical to NotBeforeEQ.
 func NotBefore(v time.Time) predicate.Credentials {
 	return predicate.Credentials(sql.FieldEQ(FieldNotBefore, v))
@@ -1437,81 +1432,6 @@ func SymmetricKeyEncryptedIsNil() predicate.Credentials {
 // SymmetricKeyEncryptedNotNil applies the NotNil predicate on the "symmetric_key_encrypted" field.
 func SymmetricKeyEncryptedNotNil() predicate.Credentials {
 	return predicate.Credentials(sql.FieldNotNull(FieldSymmetricKeyEncrypted))
-}
-
-// JwksURIEQ applies the EQ predicate on the "jwks_uri" field.
-func JwksURIEQ(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldJwksURI, v))
-}
-
-// JwksURINEQ applies the NEQ predicate on the "jwks_uri" field.
-func JwksURINEQ(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNEQ(FieldJwksURI, v))
-}
-
-// JwksURIIn applies the In predicate on the "jwks_uri" field.
-func JwksURIIn(vs ...string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldIn(FieldJwksURI, vs...))
-}
-
-// JwksURINotIn applies the NotIn predicate on the "jwks_uri" field.
-func JwksURINotIn(vs ...string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotIn(FieldJwksURI, vs...))
-}
-
-// JwksURIGT applies the GT predicate on the "jwks_uri" field.
-func JwksURIGT(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGT(FieldJwksURI, v))
-}
-
-// JwksURIGTE applies the GTE predicate on the "jwks_uri" field.
-func JwksURIGTE(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGTE(FieldJwksURI, v))
-}
-
-// JwksURILT applies the LT predicate on the "jwks_uri" field.
-func JwksURILT(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLT(FieldJwksURI, v))
-}
-
-// JwksURILTE applies the LTE predicate on the "jwks_uri" field.
-func JwksURILTE(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLTE(FieldJwksURI, v))
-}
-
-// JwksURIContains applies the Contains predicate on the "jwks_uri" field.
-func JwksURIContains(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldContains(FieldJwksURI, v))
-}
-
-// JwksURIHasPrefix applies the HasPrefix predicate on the "jwks_uri" field.
-func JwksURIHasPrefix(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldHasPrefix(FieldJwksURI, v))
-}
-
-// JwksURIHasSuffix applies the HasSuffix predicate on the "jwks_uri" field.
-func JwksURIHasSuffix(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldHasSuffix(FieldJwksURI, v))
-}
-
-// JwksURIIsNil applies the IsNil predicate on the "jwks_uri" field.
-func JwksURIIsNil() predicate.Credentials {
-	return predicate.Credentials(sql.FieldIsNull(FieldJwksURI))
-}
-
-// JwksURINotNil applies the NotNil predicate on the "jwks_uri" field.
-func JwksURINotNil() predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotNull(FieldJwksURI))
-}
-
-// JwksURIEqualFold applies the EqualFold predicate on the "jwks_uri" field.
-func JwksURIEqualFold(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEqualFold(FieldJwksURI, v))
-}
-
-// JwksURIContainsFold applies the ContainsFold predicate on the "jwks_uri" field.
-func JwksURIContainsFold(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldContainsFold(FieldJwksURI, v))
 }
 
 // NotBeforeEQ applies the EQ predicate on the "not_before" field.

@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"strconv"
 
-	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
@@ -689,7 +688,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 	credCode := seedCredentialSeedCode(adminv1.CredentialSeedCode_CREDENTIAL_SEED_CODE_KEY1)
 	credExists, err := tx.Credentials.Query().Where(
 		credentials.CodeEQ(credCode),
-		credentials.CredentialTypeEQ(int(adminv1.Credential_JWKS.Number())),
+		credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
+		credentials.CredentialUsageEQ(int(adminv1.Credential_JWKS.Number())),
 	).Exist(ctx)
 	if err != nil {
 		rollback()
@@ -712,16 +712,18 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			rollback()
 			return nil, err
 		}
+		// key_id 使用公钥的 SHA256 摘要，以保持一致性并支持 JWKS kid 语义
+		keyID := crypto.SHA256(publicKeyBytes)
 		if err := tx.Credentials.Create().
 			SetCode(credCode).
 			SetProtected(true).
-			SetCredentialType(int(adminv1.Credential_JWKS.Number())).
+			SetCredentialType(int(adminv1.Credential_KEY_PAIR.Number())).
 			SetCredentialAlgorithm(int(adminv1.Credential_RSA.Number())).
-			SetCredentialUsage(int(adminv1.Credential_SIGNING.Number())).
+			SetCredentialUsage(int(adminv1.Credential_JWKS.Number())).
 			SetCredentialVisibility(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())).
 			SetCredentialStatus(int(adminv1.Credential_ACTIVE.Number())).
 			SetCredentialSource(int(adminv1.Credential_SYSTEM.Number())).
-			SetKeyID(uuid.New().String()).
+			SetKeyID(keyID).
 			SetDisplayName("JWKS Signing Key").
 			SetPublicKey(publicKeyBytes).
 			SetPrivateKeyEncrypted(privateKeyEnc).

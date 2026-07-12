@@ -9,7 +9,7 @@ import (
 )
 
 // Credentials 企业级通用凭证实体，支持 API Key、X.509 证书、非对称密钥对、
-// HMAC/对称密钥、JWKS、软件许可证等多种凭证类型
+// HMAC/对称密钥、软件许可证等多种凭证类型
 // 对应 proto: Credential (admin.common.proto)
 // 表名: lion_credentials
 type Credentials struct {
@@ -37,13 +37,13 @@ func (Credentials) Fields() []ent.Field {
 		// === 分类区（proto field 5-7，原 proto enum 转为 int）===
 		field.Int("credential_type").
 			Default(0).
-			Comment("凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=JWKS, 7=HSM_REF, 8=FIDO, 9=SECRET, 99=OTHER"),
+			Comment("凭证类型: 0=未指定, 1=API_KEY, 2=SYMMETRIC_KEY, 3=KEY_PAIR, 4=X509, 5=LICENSE, 6=SECRET"),
 		field.Int("credential_algorithm").
 			Default(0).
-			Comment("算法类型: 0=未指定, 1=RSA, 2=ECDSA, 3=ED25519, 4=HMAC, 5=AES, 6=CHACHA20_POLY1305, 20=SM2, 21=SM3, 22=SM4, 23=SM9, 99=CUSTOM"),
+			Comment("算法类型: 0=未指定, 1=RSA, 2=ECDSA, 3=ED25519, 4=HMAC, 5=AES, 6=CHACHA20_POLY1305, 10=SM2, 11=SM4, 12=SM9, 99=CUSTOM"),
 		field.Int("credential_usage").
 			Default(0).
-			Comment("凭证用途: 0=未指定, 1=SIGNING, 2=ENCRYPTION, 10=AUTH, 11=LICENSE, 12=OTP"),
+			Comment("凭证用途: 0=未指定, 1=SIGNING, 2=ENCRYPTION, 10=AUTH, 11=OTP, 12=JWKS"),
 		field.Int("credential_visibility").
 			Default(1).
 			Comment("可见性: 0=未指定, 1=GLOBAL, 2=SUBTREE, 3=LOCAL, 4=RESTRICTED, 5=SPECIFIC"),
@@ -57,15 +57,15 @@ func (Credentials) Fields() []ent.Field {
 		// === 管理区（proto field 8-11）===
 		field.Bool("protected").
 			Default(false).
-			Comment("是否受保护（受保护记录不可删除，如内置 JWKS 签名密钥）"),
+			Comment("是否受保护（受保护记录不可删除，如内置签名密钥）"),
 
 		// === 密钥材料区（proto field 12-18）===
 		// 外部引用
 		field.String("key_id").
 			Optional().
-			Comment("凭证标识，用于查询、幂等与去重。生成策略因类型而异：API_KEY=api_key SHA256, SYMMETRIC_KEY=密钥 SHA256, KEY_PAIR/JWKS=公钥 SHA256, X509=证书 SHA256, LICENSE=license_key SHA256, HSM_REF=KMS key handle, FIDO=credentialId, SECRET=密文 SHA256"),
+			Comment("凭证标识，用于查询、幂等与去重。生成策略因类型而异：API_KEY=api_key SHA256, SYMMETRIC_KEY=密钥 SHA256, KEY_PAIR=公钥 SHA256, X509=证书 SHA256, LICENSE=license_key SHA256, SECRET=密文 SHA256"),
 
-		// === key_material: API Key（proto oneof 13）===
+		// === key_material: API Key（proto oneof 12）===
 		field.String("api_key").
 			Optional().
 			Comment("API Key 的公有标识"),
@@ -74,7 +74,7 @@ func (Credentials) Fields() []ent.Field {
 			Sensitive().
 			Comment("API Secret / 私密部分，敏感数据"),
 
-		// === key_material: KeyPair（proto oneof 14）===
+		// === key_material: KeyPair（proto oneof 13）===
 		// 注意: private_key_encrypted 同时复用于 X509 类型（proto oneof 15），
 		// 因 oneof key_material 保证互斥，一条记录不会同时有两种类型的私钥
 		field.Bytes("public_key").
@@ -89,7 +89,7 @@ func (Credentials) Fields() []ent.Field {
 			Sensitive().
 			Comment("私钥加密口令，可选；同时服务于 KEY_PAIR 和 X509 类型"),
 
-		// === key_material: X509（proto oneof 15）===
+		// === key_material: X509（proto oneof 14）===
 		// private_key_encrypted 复用 KeyPair 组中定义的字段，此处不重复定义
 		field.Bytes("certificate").
 			Optional().
@@ -98,7 +98,7 @@ func (Credentials) Fields() []ent.Field {
 			Optional().
 			Comment("可选 CA 证书链（顺序从根到中间证书）"),
 
-		// === key_material: License（proto oneof 16）===
+		// === key_material: License（proto oneof 15）===
 		field.Bytes("license_key_encrypted").
 			Optional().
 			Sensitive().
@@ -107,16 +107,13 @@ func (Credentials) Fields() []ent.Field {
 			Optional().
 			Comment("许可证数字签名，用于验证完整性"),
 
-		// === key_material: Symmetric / JWKS（proto oneof 17-18）===
+		// === key_material: Symmetric（proto oneof 16）===
 		field.Bytes("symmetric_key_encrypted").
 			Optional().
 			Sensitive().
 			Comment("对称密钥 / HMAC / JWT / AES-GCM 加密后的完整 Token（可解密还原）；SECRET 类型复用此字段存储非密钥类密文"),
-		field.String("jwks_uri").
-			Optional().
-			Comment("JWKS URI"),
 
-		// === 生命周期区（proto field 19-20）===
+		// === 生命周期区（proto field 18-19）===
 		field.Time("not_before").
 			Optional().
 			Nillable().
@@ -126,7 +123,7 @@ func (Credentials) Fields() []ent.Field {
 			Nillable().
 			Comment("过期时间"),
 
-		// === 扩展区（proto field 21）===
+		// === 扩展区（proto field 20）===
 		field.JSON("metadata", map[string]string{}).
 			Optional().
 			Comment("自定义业务属性，许可证附加信息，如授权范围、用户数、有效期等"),
@@ -151,7 +148,7 @@ func (Credentials) Indexes() []ent.Index {
 	return []ent.Index{
 		// code 唯一索引已在字段定义中设置 Unique()
 		// key_id 条件唯一索引：仅非空值唯一（token 场景存 SHA256 摘要需幂等去重；
-		// License/FIDO 等类型可能不设 key_id，多条 NULL 不冲突）
+		// License 等类型可能不设 key_id，多条 NULL 不冲突）
 		index.Fields("key_id").Unique().Annotations(
 			entsql.IndexWhere("key_id IS NOT NULL AND key_id != ''"),
 		),

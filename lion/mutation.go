@@ -1562,7 +1562,6 @@ type CredentialsMutation struct {
 	license_key_encrypted    *[]byte
 	signature                *[]byte
 	symmetric_key_encrypted  *[]byte
-	jwks_uri                 *string
 	not_before               *time.Time
 	expires_at               *time.Time
 	metadata                 *map[string]string
@@ -2979,55 +2978,6 @@ func (m *CredentialsMutation) ResetSymmetricKeyEncrypted() {
 	delete(m.clearedFields, credentials.FieldSymmetricKeyEncrypted)
 }
 
-// SetJwksURI sets the "jwks_uri" field.
-func (m *CredentialsMutation) SetJwksURI(s string) {
-	m.jwks_uri = &s
-}
-
-// JwksURI returns the value of the "jwks_uri" field in the mutation.
-func (m *CredentialsMutation) JwksURI() (r string, exists bool) {
-	v := m.jwks_uri
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldJwksURI returns the old "jwks_uri" field's value of the Credentials entity.
-// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldJwksURI(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldJwksURI is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldJwksURI requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldJwksURI: %w", err)
-	}
-	return oldValue.JwksURI, nil
-}
-
-// ClearJwksURI clears the value of the "jwks_uri" field.
-func (m *CredentialsMutation) ClearJwksURI() {
-	m.jwks_uri = nil
-	m.clearedFields[credentials.FieldJwksURI] = struct{}{}
-}
-
-// JwksURICleared returns if the "jwks_uri" field was cleared in this mutation.
-func (m *CredentialsMutation) JwksURICleared() bool {
-	_, ok := m.clearedFields[credentials.FieldJwksURI]
-	return ok
-}
-
-// ResetJwksURI resets all changes to the "jwks_uri" field.
-func (m *CredentialsMutation) ResetJwksURI() {
-	m.jwks_uri = nil
-	delete(m.clearedFields, credentials.FieldJwksURI)
-}
-
 // SetNotBefore sets the "not_before" field.
 func (m *CredentialsMutation) SetNotBefore(t time.Time) {
 	m.not_before = &t
@@ -3209,7 +3159,7 @@ func (m *CredentialsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CredentialsMutation) Fields() []string {
-	fields := make([]string, 0, 30)
+	fields := make([]string, 0, 29)
 	if m.created_at != nil {
 		fields = append(fields, credentials.FieldCreatedAt)
 	}
@@ -3288,9 +3238,6 @@ func (m *CredentialsMutation) Fields() []string {
 	if m.symmetric_key_encrypted != nil {
 		fields = append(fields, credentials.FieldSymmetricKeyEncrypted)
 	}
-	if m.jwks_uri != nil {
-		fields = append(fields, credentials.FieldJwksURI)
-	}
 	if m.not_before != nil {
 		fields = append(fields, credentials.FieldNotBefore)
 	}
@@ -3360,8 +3307,6 @@ func (m *CredentialsMutation) Field(name string) (ent.Value, bool) {
 		return m.Signature()
 	case credentials.FieldSymmetricKeyEncrypted:
 		return m.SymmetricKeyEncrypted()
-	case credentials.FieldJwksURI:
-		return m.JwksURI()
 	case credentials.FieldNotBefore:
 		return m.NotBefore()
 	case credentials.FieldExpiresAt:
@@ -3429,8 +3374,6 @@ func (m *CredentialsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldSignature(ctx)
 	case credentials.FieldSymmetricKeyEncrypted:
 		return m.OldSymmetricKeyEncrypted(ctx)
-	case credentials.FieldJwksURI:
-		return m.OldJwksURI(ctx)
 	case credentials.FieldNotBefore:
 		return m.OldNotBefore(ctx)
 	case credentials.FieldExpiresAt:
@@ -3628,13 +3571,6 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSymmetricKeyEncrypted(v)
 		return nil
-	case credentials.FieldJwksURI:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetJwksURI(v)
-		return nil
 	case credentials.FieldNotBefore:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -3830,9 +3766,6 @@ func (m *CredentialsMutation) ClearedFields() []string {
 	if m.FieldCleared(credentials.FieldSymmetricKeyEncrypted) {
 		fields = append(fields, credentials.FieldSymmetricKeyEncrypted)
 	}
-	if m.FieldCleared(credentials.FieldJwksURI) {
-		fields = append(fields, credentials.FieldJwksURI)
-	}
 	if m.FieldCleared(credentials.FieldNotBefore) {
 		fields = append(fields, credentials.FieldNotBefore)
 	}
@@ -3900,9 +3833,6 @@ func (m *CredentialsMutation) ClearField(name string) error {
 		return nil
 	case credentials.FieldSymmetricKeyEncrypted:
 		m.ClearSymmetricKeyEncrypted()
-		return nil
-	case credentials.FieldJwksURI:
-		m.ClearJwksURI()
 		return nil
 	case credentials.FieldNotBefore:
 		m.ClearNotBefore()
@@ -3998,9 +3928,6 @@ func (m *CredentialsMutation) ResetField(name string) error {
 		return nil
 	case credentials.FieldSymmetricKeyEncrypted:
 		m.ResetSymmetricKeyEncrypted()
-		return nil
-	case credentials.FieldJwksURI:
-		m.ResetJwksURI()
 		return nil
 	case credentials.FieldNotBefore:
 		m.ResetNotBefore()

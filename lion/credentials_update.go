@@ -451,26 +451,6 @@ func (_u *CredentialsUpdate) ClearSymmetricKeyEncrypted() *CredentialsUpdate {
 	return _u
 }
 
-// SetJwksURI sets the "jwks_uri" field.
-func (_u *CredentialsUpdate) SetJwksURI(v string) *CredentialsUpdate {
-	_u.mutation.SetJwksURI(v)
-	return _u
-}
-
-// SetNillableJwksURI sets the "jwks_uri" field if the given value is not nil.
-func (_u *CredentialsUpdate) SetNillableJwksURI(v *string) *CredentialsUpdate {
-	if v != nil {
-		_u.SetJwksURI(*v)
-	}
-	return _u
-}
-
-// ClearJwksURI clears the value of the "jwks_uri" field.
-func (_u *CredentialsUpdate) ClearJwksURI() *CredentialsUpdate {
-	_u.mutation.ClearJwksURI()
-	return _u
-}
-
 // SetNotBefore sets the "not_before" field.
 func (_u *CredentialsUpdate) SetNotBefore(v time.Time) *CredentialsUpdate {
 	_u.mutation.SetNotBefore(v)
@@ -739,12 +719,6 @@ func (_u *CredentialsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	}
 	if _u.mutation.SymmetricKeyEncryptedCleared() {
 		_spec.ClearField(credentials.FieldSymmetricKeyEncrypted, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.JwksURI(); ok {
-		_spec.SetField(credentials.FieldJwksURI, field.TypeString, value)
-	}
-	if _u.mutation.JwksURICleared() {
-		_spec.ClearField(credentials.FieldJwksURI, field.TypeString)
 	}
 	if value, ok := _u.mutation.NotBefore(); ok {
 		_spec.SetField(credentials.FieldNotBefore, field.TypeTime, value)
@@ -1206,26 +1180,6 @@ func (_u *CredentialsUpdateOne) ClearSymmetricKeyEncrypted() *CredentialsUpdateO
 	return _u
 }
 
-// SetJwksURI sets the "jwks_uri" field.
-func (_u *CredentialsUpdateOne) SetJwksURI(v string) *CredentialsUpdateOne {
-	_u.mutation.SetJwksURI(v)
-	return _u
-}
-
-// SetNillableJwksURI sets the "jwks_uri" field if the given value is not nil.
-func (_u *CredentialsUpdateOne) SetNillableJwksURI(v *string) *CredentialsUpdateOne {
-	if v != nil {
-		_u.SetJwksURI(*v)
-	}
-	return _u
-}
-
-// ClearJwksURI clears the value of the "jwks_uri" field.
-func (_u *CredentialsUpdateOne) ClearJwksURI() *CredentialsUpdateOne {
-	_u.mutation.ClearJwksURI()
-	return _u
-}
-
 // SetNotBefore sets the "not_before" field.
 func (_u *CredentialsUpdateOne) SetNotBefore(v time.Time) *CredentialsUpdateOne {
 	_u.mutation.SetNotBefore(v)
@@ -1524,12 +1478,6 @@ func (_u *CredentialsUpdateOne) sqlSave(ctx context.Context) (_node *Credentials
 	}
 	if _u.mutation.SymmetricKeyEncryptedCleared() {
 		_spec.ClearField(credentials.FieldSymmetricKeyEncrypted, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.JwksURI(); ok {
-		_spec.SetField(credentials.FieldJwksURI, field.TypeString, value)
-	}
-	if _u.mutation.JwksURICleared() {
-		_spec.ClearField(credentials.FieldJwksURI, field.TypeString)
 	}
 	if value, ok := _u.mutation.NotBefore(); ok {
 		_spec.SetField(credentials.FieldNotBefore, field.TypeTime, value)

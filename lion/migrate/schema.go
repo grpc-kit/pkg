@@ -80,7 +80,6 @@ var (
 		{Name: "license_key_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "signature", Type: field.TypeBytes, Nullable: true},
 		{Name: "symmetric_key_encrypted", Type: field.TypeBytes, Nullable: true},
-		{Name: "jwks_uri", Type: field.TypeString, Nullable: true},
 		{Name: "not_before", Type: field.TypeTime, Nullable: true},
 		{Name: "expires_at", Type: field.TypeTime, Nullable: true},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
@@ -122,7 +121,7 @@ var (
 			{
 				Name:    "credentials_expires_at",
 				Unique:  false,
-				Columns: []*schema.Column{LionCredentialsColumns[29]},
+				Columns: []*schema.Column{LionCredentialsColumns[28]},
 			},
 			{
 				Name:    "credentials_created_by",

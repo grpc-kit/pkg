@@ -304,20 +304,6 @@ func (_c *CredentialsCreate) SetSymmetricKeyEncrypted(v []byte) *CredentialsCrea
 	return _c
 }
 
-// SetJwksURI sets the "jwks_uri" field.
-func (_c *CredentialsCreate) SetJwksURI(v string) *CredentialsCreate {
-	_c.mutation.SetJwksURI(v)
-	return _c
-}
-
-// SetNillableJwksURI sets the "jwks_uri" field if the given value is not nil.
-func (_c *CredentialsCreate) SetNillableJwksURI(v *string) *CredentialsCreate {
-	if v != nil {
-		_c.SetJwksURI(*v)
-	}
-	return _c
-}
-
 // SetNotBefore sets the "not_before" field.
 func (_c *CredentialsCreate) SetNotBefore(v time.Time) *CredentialsCreate {
 	_c.mutation.SetNotBefore(v)
@@ -611,10 +597,6 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.SymmetricKeyEncrypted(); ok {
 		_spec.SetField(credentials.FieldSymmetricKeyEncrypted, field.TypeBytes, value)
 		_node.SymmetricKeyEncrypted = value
-	}
-	if value, ok := _c.mutation.JwksURI(); ok {
-		_spec.SetField(credentials.FieldJwksURI, field.TypeString, value)
-		_node.JwksURI = value
 	}
 	if value, ok := _c.mutation.NotBefore(); ok {
 		_spec.SetField(credentials.FieldNotBefore, field.TypeTime, value)
