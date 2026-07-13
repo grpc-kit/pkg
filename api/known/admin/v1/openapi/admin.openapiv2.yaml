@@ -793,6 +793,16 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.RevealCredentialSecret
+      option:
+        tags:
+          - "安全相关"
+        summary: "揭示凭证密钥"
+        description: '接口格式：/builtin/admin/api/v1/credentials/{id}/reveal。通过当前用户密码二次验证后，返回解密后的敏感字段（api_secret / private_key / passphrase / license_key / symmetric_key）。请求体示例：{"id":"1","password_hash":"e3b0c44e98fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"1","symmetric_key":"eyJhbGciOiJIUzI1NiJ9.payload.signature"}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery
       option:
         tags:

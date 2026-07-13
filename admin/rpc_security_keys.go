@@ -18,9 +18,11 @@ import (
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/lion/authproviders"
 	"github.com/grpc-kit/pkg/lion/credentials"
 	"github.com/grpc-kit/pkg/lion/predicate"
 	"github.com/grpc-kit/pkg/lion/schema"
+	"github.com/grpc-kit/pkg/lion/useridentities"
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -713,6 +715,177 @@ func (a *KnownAdminAPI) DeleteCredential(ctx context.Context, req *adminv1.Delet
 	}
 
 	return &emptypb.Empty{}, nil
+}
+
+// verifyUserPassword 验证用户密码，支持静态用户和数据库注册用户。
+// 优先尝试静态用户验证（SHA256 字符串比较），失败后尝试数据库用户验证（bcrypt 比较）。
+// 返回 true 表示密码验证通过。
+func (a *KnownAdminAPI) verifyUserPassword(ctx context.Context, username, passwordHash string) bool {
+	// 1. 尝试静态用户验证
+	if a.config.staticUsers != nil {
+		if _, ok := a.config.staticUsers.Valid(username, passwordHash); ok {
+			return true
+		}
+	}
+
+	// 2. 尝试数据库用户验证
+	db, err := a.GetLionClient()
+	if err != nil {
+		// 没有数据库且静态用户验证已失败
+		return false
+	}
+
+	// 查询 LOCAL 类型的认证提供方及其关联的用户身份
+	provider, err := db.AuthProviders.Query().
+		Select(
+			authproviders.FieldID,
+		).
+		Where(authproviders.ProviderTypeEQ(int(adminv1.AuthProvider_LOCAL.Number()))).
+		Only(ctx)
+	if err != nil {
+		return false
+	}
+
+	// 查询用户及其身份信息
+	u, err := db.Users.Query().
+		Select(
+			users.FieldID,
+			users.FieldUsername,
+		).
+		Where(
+			users.UsernameEQ(username),
+			users.UserStatusEQ(int(adminv1.User_ACTIVE.Number())),
+		).
+		WithLionUserIdentities(func(q *lion.UserIdentitiesQuery) {
+			q.Select(
+				useridentities.FieldID,
+				useridentities.FieldUserID,
+				useridentities.FieldProviderID,
+				useridentities.FieldPasswordHash,
+			).Where(
+				useridentities.ProviderIDEQ(provider.ID),
+			)
+		}).
+		Only(ctx)
+	if err != nil {
+		return false
+	}
+
+	if len(u.Edges.LionUserIdentities) == 0 {
+		return false
+	}
+
+	identity := u.Edges.LionUserIdentities[0]
+	if identity.PasswordHash == "" {
+		return false
+	}
+
+	// bcrypt 比较：identity.PasswordHash 是 bcrypt 哈希，passwordHash 是 SHA256 十六进制
+	if err := crypto.BcryptCompare(identity.PasswordHash, passwordHash); err != nil {
+		return false
+	}
+
+	return true
+}
+
+// RevealCredentialSecret 揭示凭证密钥
+// 通过当前用户密码二次验证后，解密并返回凭证的敏感字段。
+// 安全约束：
+// - 从 context 获取当前用户名，与 password_hash 一起验证身份
+// - 支持静态用户和数据库注册用户两种验证方式
+// - 验证失败返回 Unauthenticated
+// - 按凭证类型仅解密并返回该类型实际拥有的字段
+// - 操作记录审计日志
+func (a *KnownAdminAPI) RevealCredentialSecret(ctx context.Context, req *adminv1.RevealCredentialSecretRequest) (*adminv1.RevealCredentialSecretResponse, error) {
+	if req.Id == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("credential id is required")
+	}
+
+	if req.PasswordHash == "" {
+		return nil, errs.InvalidArgument(ctx).WithMessage("password_hash is required")
+	}
+
+	// 从 context 获取当前用户名
+	username, ok := rpc.GetUsernameFromContext(ctx)
+	if !ok || username == "" || username == "anonymous" {
+		return nil, errs.Unauthenticated(ctx).WithMessage("unable to determine current user")
+	}
+
+	// 验证当前用户密码（支持静态用户和数据库用户）
+	if !a.verifyUserPassword(ctx, username, req.PasswordHash) {
+		return nil, errs.Unauthenticated(ctx).WithMessage("password verification failed")
+	}
+
+	// 获取数据库客户端
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+	}
+
+	// 查询凭证记录
+	row, err := db.Credentials.Get(ctx, int(req.Id))
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("credential not found")
+		}
+		return nil, err
+	}
+
+	result := &adminv1.RevealCredentialSecretResponse{
+		Id: int64(row.ID),
+	}
+
+	// 根据凭证类型解密对应字段
+	switch row.CredentialType {
+	case int(adminv1.Credential_API_KEY.Number()):
+		if len(row.APISecretEncrypted) > 0 {
+			plain, err := crypto.DecryptAES(a.config.aesKey, row.APISecretEncrypted)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage("failed to decrypt api_secret: " + err.Error())
+			}
+			result.ApiSecret = plain
+		}
+	case int(adminv1.Credential_SYMMETRIC_KEY.Number()), int(adminv1.Credential_SECRET.Number()):
+		if len(row.SymmetricKeyEncrypted) > 0 {
+			plain, err := crypto.DecryptAES(a.config.aesKey, row.SymmetricKeyEncrypted)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage("failed to decrypt symmetric_key: " + err.Error())
+			}
+			result.SymmetricKey = plain
+		}
+	case int(adminv1.Credential_KEY_PAIR.Number()), int(adminv1.Credential_X509.Number()):
+		if len(row.PrivateKeyEncrypted) > 0 {
+			plain, err := crypto.DecryptAES(a.config.aesKey, row.PrivateKeyEncrypted)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage("failed to decrypt private_key: " + err.Error())
+			}
+			result.PrivateKey = plain
+		}
+		if len(row.PassphraseEncrypted) > 0 {
+			plain, err := crypto.DecryptAES(a.config.aesKey, row.PassphraseEncrypted)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage("failed to decrypt passphrase: " + err.Error())
+			}
+			result.Passphrase = plain
+		}
+	case int(adminv1.Credential_LICENSE.Number()):
+		if len(row.LicenseKeyEncrypted) > 0 {
+			plain, err := crypto.DecryptAES(a.config.aesKey, row.LicenseKeyEncrypted)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage("failed to decrypt license_key: " + err.Error())
+			}
+			result.LicenseKey = plain
+		}
+	default:
+		return nil, errs.InvalidArgument(ctx).WithMessage("unsupported credential type for reveal")
+	}
+
+	// 审计日志
+	userID, _ := GetUserID(ctx)
+	a.config.logger.Infof("credential secret revealed: credential_id=%d, credential_code=%s, credential_type=%d, operator=%s(%d)",
+		row.ID, row.Code, row.CredentialType, username, userID)
+
+	return result, nil
 }
 
 // GetOAuth2Discovery 获取内置 OpenID 配置

@@ -1,13 +1,17 @@
 package admin
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
+	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/credentials"
+	"github.com/grpc-kit/pkg/rpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -522,4 +526,273 @@ func TestTimestampPbUsage(t *testing.T) {
 	if ts == nil {
 		t.Fatal("expected non-nil timestamp")
 	}
+}
+
+// ======================== RevealCredentialSecret tests ========================
+
+// helper: 创建带 AES key 和静态用户的 API 实例
+func newRevealTestAPI(t *testing.T) *KnownAdminAPI {
+	t.Helper()
+	aesKey := []byte("0123456789abcdef0123456789abcdef")
+	passwordHash := crypto.SHA256([]byte("test-password"))
+	users := &StaticUsers{
+		&StaticUser{Username: "admin", PasswordHash: passwordHash, UserID: 1},
+	}
+	return New(WithAESKey(aesKey), WithStaticUsers(users))
+}
+
+func TestRevealCredentialSecret_ZeroID(t *testing.T) {
+	api := newRevealTestAPI(t)
+	ctx := rpc.ContextWithUsername(context.Background(), "admin")
+	ctx = rpc.ContextWithUserID(ctx, 1)
+
+	_, err := api.RevealCredentialSecret(ctx, &adminv1.RevealCredentialSecretRequest{
+		Id:           0,
+		PasswordHash: "some-hash",
+	})
+	if err == nil {
+		t.Fatal("expected error for zero id")
+	}
+	st, ok := err.(*errs.Status)
+	if !ok {
+		t.Fatalf("expected *errs.Status, got %T", err)
+	}
+	if st.Code != int32(codes.InvalidArgument) {
+		t.Errorf("expected InvalidArgument, got code=%d", st.Code)
+	}
+}
+
+func TestRevealCredentialSecret_EmptyPasswordHash(t *testing.T) {
+	api := newRevealTestAPI(t)
+	ctx := rpc.ContextWithUsername(context.Background(), "admin")
+	ctx = rpc.ContextWithUserID(ctx, 1)
+
+	_, err := api.RevealCredentialSecret(ctx, &adminv1.RevealCredentialSecretRequest{
+		Id:           1,
+		PasswordHash: "",
+	})
+	if err == nil {
+		t.Fatal("expected error for empty password_hash")
+	}
+	st, ok := err.(*errs.Status)
+	if !ok {
+		t.Fatalf("expected *errs.Status, got %T", err)
+	}
+	if st.Code != int32(codes.InvalidArgument) {
+		t.Errorf("expected InvalidArgument, got code=%d", st.Code)
+	}
+}
+
+func TestRevealCredentialSecret_NoUserContext(t *testing.T) {
+	api := newRevealTestAPI(t)
+	ctx := context.Background()
+
+	_, err := api.RevealCredentialSecret(ctx, &adminv1.RevealCredentialSecretRequest{
+		Id:           1,
+		PasswordHash: "some-hash",
+	})
+	if err == nil {
+		t.Fatal("expected error for missing user context")
+	}
+	st, ok := err.(*errs.Status)
+	if !ok {
+		t.Fatalf("expected *errs.Status, got %T", err)
+	}
+	if st.Code != int32(codes.Unauthenticated) {
+		t.Errorf("expected Unauthenticated, got code=%d", st.Code)
+	}
+}
+
+func TestRevealCredentialSecret_AnonymousUser(t *testing.T) {
+	api := newRevealTestAPI(t)
+	// 未设置 username 时，GetUsernameFromContext 返回 "anonymous"
+	ctx := context.Background()
+
+	_, err := api.RevealCredentialSecret(ctx, &adminv1.RevealCredentialSecretRequest{
+		Id:           1,
+		PasswordHash: "some-hash",
+	})
+	if err == nil {
+		t.Fatal("expected error for anonymous user")
+	}
+	st, ok := err.(*errs.Status)
+	if !ok {
+		t.Fatalf("expected *errs.Status, got %T", err)
+	}
+	if st.Code != int32(codes.Unauthenticated) {
+		t.Errorf("expected Unauthenticated, got code=%d", st.Code)
+	}
+}
+
+func TestRevealCredentialSecret_NoStaticUsers(t *testing.T) {
+	aesKey := []byte("0123456789abcdef0123456789abcdef")
+	api := New(WithAESKey(aesKey)) // no WithStaticUsers
+	ctx := rpc.ContextWithUsername(context.Background(), "admin")
+	ctx = rpc.ContextWithUserID(ctx, 1)
+
+	_, err := api.RevealCredentialSecret(ctx, &adminv1.RevealCredentialSecretRequest{
+		Id:           1,
+		PasswordHash: "some-hash",
+	})
+	if err == nil {
+		t.Fatal("expected error when no static users configured")
+	}
+	st, ok := err.(*errs.Status)
+	if !ok {
+		t.Fatalf("expected *errs.Status, got %T", err)
+	}
+	if st.Code != int32(codes.Unauthenticated) {
+		t.Errorf("expected Unauthenticated, got code=%d", st.Code)
+	}
+}
+
+func TestRevealCredentialSecret_WrongPassword(t *testing.T) {
+	api := newRevealTestAPI(t)
+	ctx := rpc.ContextWithUsername(context.Background(), "admin")
+	ctx = rpc.ContextWithUserID(ctx, 1)
+
+	_, err := api.RevealCredentialSecret(ctx, &adminv1.RevealCredentialSecretRequest{
+		Id:           1,
+		PasswordHash: "wrong-password-hash",
+	})
+	if err == nil {
+		t.Fatal("expected error for wrong password")
+	}
+	st, ok := err.(*errs.Status)
+	if !ok {
+		t.Fatalf("expected *errs.Status, got %T", err)
+	}
+	if st.Code != int32(codes.Unauthenticated) {
+		t.Errorf("expected Unauthenticated, got code=%d", st.Code)
+	}
+}
+
+func TestRevealCredentialSecret_WrongUsername(t *testing.T) {
+	api := newRevealTestAPI(t)
+	// 用户名不在静态用户列表中
+	ctx := rpc.ContextWithUsername(context.Background(), "nonexistent")
+	ctx = rpc.ContextWithUserID(ctx, 2)
+
+	correctHash := crypto.SHA256([]byte("test-password"))
+	_, err := api.RevealCredentialSecret(ctx, &adminv1.RevealCredentialSecretRequest{
+		Id:           1,
+		PasswordHash: correctHash,
+	})
+	if err == nil {
+		t.Fatal("expected error for wrong username")
+	}
+	st, ok := err.(*errs.Status)
+	if !ok {
+		t.Fatalf("expected *errs.Status, got %T", err)
+	}
+	if st.Code != int32(codes.Unauthenticated) {
+		t.Errorf("expected Unauthenticated, got code=%d", st.Code)
+	}
+}
+
+func TestRevealCredentialSecret_ValidAuth_NoDatabase(t *testing.T) {
+	api := newRevealTestAPI(t)
+	ctx := rpc.ContextWithUsername(context.Background(), "admin")
+	ctx = rpc.ContextWithUserID(ctx, 1)
+
+	correctHash := crypto.SHA256([]byte("test-password"))
+	_, err := api.RevealCredentialSecret(ctx, &adminv1.RevealCredentialSecretRequest{
+		Id:           1,
+		PasswordHash: correctHash,
+	})
+	if err == nil {
+		t.Fatal("expected error when database is not configured")
+	}
+	// 没有数据库时应返回 Unimplemented
+	st, ok := err.(*errs.Status)
+	if !ok {
+		t.Fatalf("expected *errs.Status, got %T", err)
+	}
+	if st.Code != int32(codes.Unimplemented) {
+		t.Errorf("expected Unimplemented, got code=%d", st.Code)
+	}
+}
+
+// 确保加密/解密往返与 RevealCredentialSecret 使用的逻辑一致
+func TestRevealCredentialSecret_EncryptionRoundTrip(t *testing.T) {
+	aesKey := []byte("0123456789abcdef0123456789abcdef")
+
+	// 模拟 API_KEY 类型凭证的 api_secret
+	originalSecret := []byte("sk-abc123-secret-value")
+	encrypted, err := crypto.EncryptAES(aesKey, originalSecret)
+	if err != nil {
+		t.Fatalf("encrypt failed: %v", err)
+	}
+
+	decrypted, err := crypto.DecryptAES(aesKey, encrypted)
+	if err != nil {
+		t.Fatalf("decrypt failed: %v", err)
+	}
+	if string(decrypted) != string(originalSecret) {
+		t.Errorf("round-trip mismatch: expected %q, got %q", originalSecret, decrypted)
+	}
+
+	// 模拟 SYMMETRIC_KEY 类型凭证的 symmetric_key
+	originalSymKey := []byte("my-symmetric-access-token")
+	encSym, err := crypto.EncryptAES(aesKey, originalSymKey)
+	if err != nil {
+		t.Fatalf("encrypt symmetric_key failed: %v", err)
+	}
+	decSym, err := crypto.DecryptAES(aesKey, encSym)
+	if err != nil {
+		t.Fatalf("decrypt symmetric_key failed: %v", err)
+	}
+	if string(decSym) != string(originalSymKey) {
+		t.Errorf("symmetric_key round-trip mismatch: expected %q, got %q", originalSymKey, decSym)
+	}
+
+	// 模拟 KEY_PAIR 类型凭证的 private_key + passphrase
+	originalPrivKey := []byte("-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----")
+	originalPassphrase := []byte("my-passphrase")
+	encPriv, err := crypto.EncryptAES(aesKey, originalPrivKey)
+	if err != nil {
+		t.Fatalf("encrypt private_key failed: %v", err)
+	}
+	encPass, err := crypto.EncryptAES(aesKey, originalPassphrase)
+	if err != nil {
+		t.Fatalf("encrypt passphrase failed: %v", err)
+	}
+	decPriv, err := crypto.DecryptAES(aesKey, encPriv)
+	if err != nil {
+		t.Fatalf("decrypt private_key failed: %v", err)
+	}
+	decPass, err := crypto.DecryptAES(aesKey, encPass)
+	if err != nil {
+		t.Fatalf("decrypt passphrase failed: %v", err)
+	}
+	if string(decPriv) != string(originalPrivKey) {
+		t.Errorf("private_key round-trip mismatch: expected %q, got %q", originalPrivKey, decPriv)
+	}
+	if string(decPass) != string(originalPassphrase) {
+		t.Errorf("passphrase round-trip mismatch: expected %q, got %q", originalPassphrase, decPass)
+	}
+
+	// 模拟 LICENSE 类型凭证的 license_key
+	originalLicense := []byte("LICENSE-KEY-12345")
+	encLic, err := crypto.EncryptAES(aesKey, originalLicense)
+	if err != nil {
+		t.Fatalf("encrypt license_key failed: %v", err)
+	}
+	decLic, err := crypto.DecryptAES(aesKey, encLic)
+	if err != nil {
+		t.Fatalf("decrypt license_key failed: %v", err)
+	}
+	if string(decLic) != string(originalLicense) {
+		t.Errorf("license_key round-trip mismatch: expected %q, got %q", originalLicense, decLic)
+	}
+}
+
+// 确保 lion 包导入在测试中被使用（编译时检查）
+func TestRevealCredentialSecret_LionImportCheck(t *testing.T) {
+	// 验证 credentials 包的加密字段名称存在
+	_ = credentials.FieldPrivateKeyEncrypted
+	_ = credentials.FieldAPISecretEncrypted
+	_ = credentials.FieldSymmetricKeyEncrypted
+	_ = credentials.FieldPassphraseEncrypted
+	_ = credentials.FieldLicenseKeyEncrypted
 }

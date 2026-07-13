@@ -1022,6 +1022,67 @@
         ]
       }
     },
+    "/builtin/admin/api/v1/credentials/{id}/reveal": {
+      "post": {
+        "summary": "揭示凭证密钥",
+        "description": "接口格式：/builtin/admin/api/v1/credentials/{id}/reveal。通过当前用户密码二次验证后，返回解密后的敏感字段（api_secret / private_key / passphrase / license_key / symmetric_key）。请求体示例：{\"id\":\"1\",\"password_hash\":\"e3b0c44e98fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}。",
+        "operationId": "KnownAdmin_RevealCredentialSecret",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1RevealCredentialSecretResponse"
+            },
+            "examples": {
+              "application/json": {
+                "id": "1",
+                "symmetric_key": "eyJhbGciOiJIUzI1NiJ9.payload.signature"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "凭证 ID",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password_hash": {
+                  "type": "string",
+                  "title": "当前用户密码的 SHA256 hex，用于二次身份验证"
+                }
+              },
+              "title": "RevealCredentialSecretRequest 揭示凭证密钥\n通过当前用户密码二次验证后，返回解密后的敏感字段。"
+            }
+          }
+        ],
+        "tags": [
+          "安全相关"
+        ]
+      }
+    },
     "/builtin/admin/api/v1/database/initialize": {
       "post": {
         "summary": "初始化数据库",
@@ -9078,6 +9139,42 @@
           "type": "string"
         }
       }
+    },
+    "v1RevealCredentialSecretResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64",
+          "title": "凭证 ID"
+        },
+        "api_secret": {
+          "type": "string",
+          "format": "byte",
+          "title": "API_KEY 类型的 api_secret"
+        },
+        "private_key": {
+          "type": "string",
+          "format": "byte",
+          "title": "KEY_PAIR / X509 类型的 private_key"
+        },
+        "passphrase": {
+          "type": "string",
+          "format": "byte",
+          "title": "KEY_PAIR / X509 类型的 passphrase"
+        },
+        "license_key": {
+          "type": "string",
+          "format": "byte",
+          "title": "LICENSE 类型的 license_key"
+        },
+        "symmetric_key": {
+          "type": "string",
+          "format": "byte",
+          "title": "SYMMETRIC_KEY / SECRET 类型的 symmetric_key"
+        }
+      },
+      "title": "RevealCredentialSecretResponse 揭示凭证密钥响应\n按凭证类型仅填充该类型实际拥有的敏感字段，其余字段为零值。"
     },
     "v1RoleMenu": {
       "type": "object",

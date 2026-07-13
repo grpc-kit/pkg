@@ -446,6 +446,160 @@ func (x *DeleteCredentialRequest) GetId() int64 {
 	return 0
 }
 
+// RevealCredentialSecretRequest 揭示凭证密钥
+// 通过当前用户密码二次验证后，返回解密后的敏感字段。
+type RevealCredentialSecretRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 凭证 ID
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// 当前用户密码的 SHA256 hex，用于二次身份验证
+	PasswordHash string `protobuf:"bytes,2,opt,name=password_hash,json=passwordHash,proto3" json:"password_hash,omitempty"`
+}
+
+func (x *RevealCredentialSecretRequest) Reset() {
+	*x = RevealCredentialSecretRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_security_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RevealCredentialSecretRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevealCredentialSecretRequest) ProtoMessage() {}
+
+func (x *RevealCredentialSecretRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_security_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevealCredentialSecretRequest.ProtoReflect.Descriptor instead.
+func (*RevealCredentialSecretRequest) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_security_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RevealCredentialSecretRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *RevealCredentialSecretRequest) GetPasswordHash() string {
+	if x != nil {
+		return x.PasswordHash
+	}
+	return ""
+}
+
+// RevealCredentialSecretResponse 揭示凭证密钥响应
+// 按凭证类型仅填充该类型实际拥有的敏感字段，其余字段为零值。
+type RevealCredentialSecretResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// 凭证 ID
+	Id int64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	// API_KEY 类型的 api_secret
+	ApiSecret []byte `protobuf:"bytes,2,opt,name=api_secret,json=apiSecret,proto3" json:"api_secret,omitempty"`
+	// KEY_PAIR / X509 类型的 private_key
+	PrivateKey []byte `protobuf:"bytes,3,opt,name=private_key,json=privateKey,proto3" json:"private_key,omitempty"`
+	// KEY_PAIR / X509 类型的 passphrase
+	Passphrase []byte `protobuf:"bytes,4,opt,name=passphrase,proto3" json:"passphrase,omitempty"`
+	// LICENSE 类型的 license_key
+	LicenseKey []byte `protobuf:"bytes,5,opt,name=license_key,json=licenseKey,proto3" json:"license_key,omitempty"`
+	// SYMMETRIC_KEY / SECRET 类型的 symmetric_key
+	SymmetricKey []byte `protobuf:"bytes,6,opt,name=symmetric_key,json=symmetricKey,proto3" json:"symmetric_key,omitempty"`
+}
+
+func (x *RevealCredentialSecretResponse) Reset() {
+	*x = RevealCredentialSecretResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_known_admin_v1_security_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RevealCredentialSecretResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevealCredentialSecretResponse) ProtoMessage() {}
+
+func (x *RevealCredentialSecretResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_known_admin_v1_security_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevealCredentialSecretResponse.ProtoReflect.Descriptor instead.
+func (*RevealCredentialSecretResponse) Descriptor() ([]byte, []int) {
+	return file_known_admin_v1_security_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *RevealCredentialSecretResponse) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *RevealCredentialSecretResponse) GetApiSecret() []byte {
+	if x != nil {
+		return x.ApiSecret
+	}
+	return nil
+}
+
+func (x *RevealCredentialSecretResponse) GetPrivateKey() []byte {
+	if x != nil {
+		return x.PrivateKey
+	}
+	return nil
+}
+
+func (x *RevealCredentialSecretResponse) GetPassphrase() []byte {
+	if x != nil {
+		return x.Passphrase
+	}
+	return nil
+}
+
+func (x *RevealCredentialSecretResponse) GetLicenseKey() []byte {
+	if x != nil {
+		return x.LicenseKey
+	}
+	return nil
+}
+
+func (x *RevealCredentialSecretResponse) GetSymmetricKey() []byte {
+	if x != nil {
+		return x.SymmetricKey
+	}
+	return nil
+}
+
 var File_known_admin_v1_security_proto protoreflect.FileDescriptor
 
 var file_known_admin_v1_security_proto_rawDesc = []byte{
@@ -509,11 +663,30 @@ var file_known_admin_v1_security_proto_rawDesc = []byte{
 	0x6c, 0x64, 0x4d, 0x61, 0x73, 0x6b, 0x52, 0x0a, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4d, 0x61,
 	0x73, 0x6b, 0x22, 0x29, 0x0a, 0x17, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x43, 0x72, 0x65, 0x64,
 	0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a,
-	0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x42, 0x34, 0x5a,
-	0x32, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63,
-	0x2d, 0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f,
-	0x77, 0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69,
-	0x6e, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x22, 0x54, 0x0a,
+	0x1d, 0x52, 0x65, 0x76, 0x65, 0x61, 0x6c, 0x43, 0x72, 0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61,
+	0x6c, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e,
+	0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x23,
+	0x0a, 0x0d, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x5f, 0x68, 0x61, 0x73, 0x68, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x48,
+	0x61, 0x73, 0x68, 0x22, 0xd6, 0x01, 0x0a, 0x1e, 0x52, 0x65, 0x76, 0x65, 0x61, 0x6c, 0x43, 0x72,
+	0x65, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x61, 0x6c, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x61, 0x70, 0x69, 0x5f, 0x73, 0x65,
+	0x63, 0x72, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x09, 0x61, 0x70, 0x69, 0x53,
+	0x65, 0x63, 0x72, 0x65, 0x74, 0x12, 0x1f, 0x0a, 0x0b, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65,
+	0x5f, 0x6b, 0x65, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0a, 0x70, 0x72, 0x69, 0x76,
+	0x61, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x12, 0x1e, 0x0a, 0x0a, 0x70, 0x61, 0x73, 0x73, 0x70, 0x68,
+	0x72, 0x61, 0x73, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0a, 0x70, 0x61, 0x73, 0x73,
+	0x70, 0x68, 0x72, 0x61, 0x73, 0x65, 0x12, 0x1f, 0x0a, 0x0b, 0x6c, 0x69, 0x63, 0x65, 0x6e, 0x73,
+	0x65, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0a, 0x6c, 0x69, 0x63,
+	0x65, 0x6e, 0x73, 0x65, 0x4b, 0x65, 0x79, 0x12, 0x23, 0x0a, 0x0d, 0x73, 0x79, 0x6d, 0x6d, 0x65,
+	0x74, 0x72, 0x69, 0x63, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0c,
+	0x73, 0x79, 0x6d, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x42, 0x34, 0x5a, 0x32,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x67, 0x72, 0x70, 0x63, 0x2d,
+	0x6b, 0x69, 0x74, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6b, 0x6e, 0x6f, 0x77,
+	0x6e, 0x2f, 0x61, 0x64, 0x6d, 0x69, 0x6e, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x64, 0x6d, 0x69, 0x6e,
+	0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -528,22 +701,24 @@ func file_known_admin_v1_security_proto_rawDescGZIP() []byte {
 	return file_known_admin_v1_security_proto_rawDescData
 }
 
-var file_known_admin_v1_security_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_known_admin_v1_security_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_known_admin_v1_security_proto_goTypes = []interface{}{
-	(*CreateCredentialRequest)(nil), // 0: grpc_kit.api.known.admin.v1.CreateCredentialRequest
-	(*ListCredentialsRequest)(nil),  // 1: grpc_kit.api.known.admin.v1.ListCredentialsRequest
-	(*ListCredentialsResponse)(nil), // 2: grpc_kit.api.known.admin.v1.ListCredentialsResponse
-	(*GetCredentialRequest)(nil),    // 3: grpc_kit.api.known.admin.v1.GetCredentialRequest
-	(*UpdateCredentialRequest)(nil), // 4: grpc_kit.api.known.admin.v1.UpdateCredentialRequest
-	(*DeleteCredentialRequest)(nil), // 5: grpc_kit.api.known.admin.v1.DeleteCredentialRequest
-	(*Credential)(nil),              // 6: grpc_kit.api.known.admin.v1.Credential
-	(*fieldmaskpb.FieldMask)(nil),   // 7: google.protobuf.FieldMask
+	(*CreateCredentialRequest)(nil),        // 0: grpc_kit.api.known.admin.v1.CreateCredentialRequest
+	(*ListCredentialsRequest)(nil),         // 1: grpc_kit.api.known.admin.v1.ListCredentialsRequest
+	(*ListCredentialsResponse)(nil),        // 2: grpc_kit.api.known.admin.v1.ListCredentialsResponse
+	(*GetCredentialRequest)(nil),           // 3: grpc_kit.api.known.admin.v1.GetCredentialRequest
+	(*UpdateCredentialRequest)(nil),        // 4: grpc_kit.api.known.admin.v1.UpdateCredentialRequest
+	(*DeleteCredentialRequest)(nil),        // 5: grpc_kit.api.known.admin.v1.DeleteCredentialRequest
+	(*RevealCredentialSecretRequest)(nil),  // 6: grpc_kit.api.known.admin.v1.RevealCredentialSecretRequest
+	(*RevealCredentialSecretResponse)(nil), // 7: grpc_kit.api.known.admin.v1.RevealCredentialSecretResponse
+	(*Credential)(nil),                     // 8: grpc_kit.api.known.admin.v1.Credential
+	(*fieldmaskpb.FieldMask)(nil),          // 9: google.protobuf.FieldMask
 }
 var file_known_admin_v1_security_proto_depIdxs = []int32{
-	6, // 0: grpc_kit.api.known.admin.v1.CreateCredentialRequest.credential:type_name -> grpc_kit.api.known.admin.v1.Credential
-	6, // 1: grpc_kit.api.known.admin.v1.ListCredentialsResponse.credentials:type_name -> grpc_kit.api.known.admin.v1.Credential
-	6, // 2: grpc_kit.api.known.admin.v1.UpdateCredentialRequest.credential:type_name -> grpc_kit.api.known.admin.v1.Credential
-	7, // 3: grpc_kit.api.known.admin.v1.UpdateCredentialRequest.update_mask:type_name -> google.protobuf.FieldMask
+	8, // 0: grpc_kit.api.known.admin.v1.CreateCredentialRequest.credential:type_name -> grpc_kit.api.known.admin.v1.Credential
+	8, // 1: grpc_kit.api.known.admin.v1.ListCredentialsResponse.credentials:type_name -> grpc_kit.api.known.admin.v1.Credential
+	8, // 2: grpc_kit.api.known.admin.v1.UpdateCredentialRequest.credential:type_name -> grpc_kit.api.known.admin.v1.Credential
+	9, // 3: grpc_kit.api.known.admin.v1.UpdateCredentialRequest.update_mask:type_name -> google.protobuf.FieldMask
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
@@ -630,6 +805,30 @@ func file_known_admin_v1_security_proto_init() {
 				return nil
 			}
 		}
+		file_known_admin_v1_security_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RevealCredentialSecretRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_known_admin_v1_security_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RevealCredentialSecretResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_known_admin_v1_security_proto_msgTypes[1].OneofWrappers = []interface{}{
 		(*ListCredentialsRequest_PageToken)(nil),
@@ -641,7 +840,7 @@ func file_known_admin_v1_security_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_known_admin_v1_security_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

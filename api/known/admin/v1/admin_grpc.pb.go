@@ -114,6 +114,7 @@ type KnownAdminClient interface {
 	GetCredential(ctx context.Context, in *GetCredentialRequest, opts ...grpc.CallOption) (*Credential, error)
 	UpdateCredential(ctx context.Context, in *UpdateCredentialRequest, opts ...grpc.CallOption) (*Credential, error)
 	DeleteCredential(ctx context.Context, in *DeleteCredentialRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RevealCredentialSecret(ctx context.Context, in *RevealCredentialSecretRequest, opts ...grpc.CallOption) (*RevealCredentialSecretResponse, error)
 	GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2JSONWebKeys, error)
 	GetOAuth2Userinfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Userinfo, error)
@@ -819,6 +820,15 @@ func (c *knownAdminClient) DeleteCredential(ctx context.Context, in *DeleteCrede
 	return out, nil
 }
 
+func (c *knownAdminClient) RevealCredentialSecret(ctx context.Context, in *RevealCredentialSecretRequest, opts ...grpc.CallOption) (*RevealCredentialSecretResponse, error) {
+	out := new(RevealCredentialSecretResponse)
+	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/RevealCredentialSecret", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *knownAdminClient) GetOAuth2Discovery(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OAuth2Discovery, error) {
 	out := new(OAuth2Discovery)
 	err := c.cc.Invoke(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Discovery", in, out, opts...)
@@ -995,6 +1005,7 @@ type KnownAdminServer interface {
 	GetCredential(context.Context, *GetCredentialRequest) (*Credential, error)
 	UpdateCredential(context.Context, *UpdateCredentialRequest) (*Credential, error)
 	DeleteCredential(context.Context, *DeleteCredentialRequest) (*emptypb.Empty, error)
+	RevealCredentialSecret(context.Context, *RevealCredentialSecretRequest) (*RevealCredentialSecretResponse, error)
 	GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error)
 	GetOAuth2JSONWebKeys(context.Context, *emptypb.Empty) (*OAuth2JSONWebKeys, error)
 	GetOAuth2Userinfo(context.Context, *emptypb.Empty) (*OAuth2Userinfo, error)
@@ -1239,6 +1250,9 @@ func (UnimplementedKnownAdminServer) UpdateCredential(context.Context, *UpdateCr
 }
 func (UnimplementedKnownAdminServer) DeleteCredential(context.Context, *DeleteCredentialRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCredential not implemented")
+}
+func (UnimplementedKnownAdminServer) RevealCredentialSecret(context.Context, *RevealCredentialSecretRequest) (*RevealCredentialSecretResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevealCredentialSecret not implemented")
 }
 func (UnimplementedKnownAdminServer) GetOAuth2Discovery(context.Context, *emptypb.Empty) (*OAuth2Discovery, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOAuth2Discovery not implemented")
@@ -2647,6 +2661,24 @@ func _KnownAdmin_DeleteCredential_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnownAdmin_RevealCredentialSecret_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevealCredentialSecretRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnownAdminServer).RevealCredentialSecret(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc_kit.api.known.admin.v1.KnownAdmin/RevealCredentialSecret",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnownAdminServer).RevealCredentialSecret(ctx, req.(*RevealCredentialSecretRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _KnownAdmin_GetOAuth2Discovery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -3119,6 +3151,10 @@ var KnownAdmin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCredential",
 			Handler:    _KnownAdmin_DeleteCredential_Handler,
+		},
+		{
+			MethodName: "RevealCredentialSecret",
+			Handler:    _KnownAdmin_RevealCredentialSecret_Handler,
 		},
 		{
 			MethodName: "GetOAuth2Discovery",
