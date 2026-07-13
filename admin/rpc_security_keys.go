@@ -127,12 +127,13 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 
 	pubInterface, err := x509.ParsePKIXPublicKey(sk.PublicKey)
 	if err != nil {
-		return nil, err
+		a.logger.Errorf("oauth2 jwks: failed to parse public_key (len=%d, firstByte=0x%02x): %v", len(sk.PublicKey), firstByte(sk.PublicKey), err)
+		return nil, errs.Internal(ctx).WithMessage("failed to parse JWKS public key").Err()
 	}
 
 	publicKey, ok := pubInterface.(*rsa.PublicKey)
 	if !ok {
-		return nil, fmt.Errorf("not an RSA public key")
+		return nil, errs.Internal(ctx).WithMessage("JWKS public key is not RSA").Err()
 	}
 
 	// 将模数 N 和指数 E 转换为 Base64URL 编码
@@ -264,6 +265,14 @@ func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empt
 	result.UpdatedAt = user.UpdatedAt.Unix()
 
 	return result, nil
+}
+
+// firstByte 返回字节切片的首字节，空切片返回 0。
+func firstByte(b []byte) byte {
+	if len(b) == 0 {
+		return 0
+	}
+	return b[0]
 }
 
 // genderToOIDCString 将 User.Gender enum 映射为 OIDC Standard Claims 规范的 gender 字符串值
