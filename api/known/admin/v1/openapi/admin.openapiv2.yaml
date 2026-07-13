@@ -753,6 +753,46 @@ openapiOptions:
           "200":
             examples:
               "application/json": '{"id":"301","code":"admin-jwks","type":"KEY_PAIR","algorithm":"RSA","usage":"JWKS","visibility":"PRIVATE","status":"ACTIVE","source":"SYSTEM","key_id":"kid-admin-2026","metadata":{"rotation":"30d"},"description":"OIDC 签名公钥集合"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.ListCredentials
+      option:
+        tags:
+          - "安全相关"
+        summary: "凭证列表"
+        description: '接口格式：/builtin/admin/api/v1/credentials。返回凭证列表，敏感字段（api_secret / private_key / symmetric_key）默认不返回。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"credentials":[{"id":"1","code":"key1","type":"KEY_PAIR","algorithm":"RSA","usage":"JWKS","status":"ACTIVE","source":"SYSTEM"}],"next_page_token":"","total_size":1}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetCredential
+      option:
+        tags:
+          - "安全相关"
+        summary: "获取凭证详情"
+        description: '接口格式：/builtin/admin/api/v1/credentials/{id}。返回凭证详情，敏感字段需额外权限才返回。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"1","code":"key1","type":"KEY_PAIR","algorithm":"RSA","usage":"JWKS","status":"ACTIVE","source":"SYSTEM","key_id":"a1b2c3d4e5f6"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateCredential
+      option:
+        tags:
+          - "安全相关"
+        summary: "更新凭证"
+        description: '接口格式：/builtin/admin/api/v1/credentials/{id}。仅允许更新 status / display_name / description / expires_at / metadata。受保护（protected=true）的凭证仅允许更新 display_name / description。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{"id":"1","code":"key1","status":"DISABLED"}'
+    - method: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteCredential
+      option:
+        tags:
+          - "安全相关"
+        summary: "删除凭证"
+        description: '接口格式：/builtin/admin/api/v1/credentials/{id}。软删除指定凭证，受保护（protected=true）的凭证不可删除。'
+        responses:
+          "200":
+            examples:
+              "application/json": '{}'
     - method: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery
       option:
         tags:

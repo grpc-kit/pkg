@@ -5,77 +5,714 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"reflect"
+	"strconv"
+	"strings"
+	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
+	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/lion"
 	"github.com/grpc-kit/pkg/lion/credentials"
+	"github.com/grpc-kit/pkg/lion/predicate"
+	"github.com/grpc-kit/pkg/lion/schema"
 	"github.com/grpc-kit/pkg/lion/users"
 	"github.com/grpc-kit/pkg/rpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// CreateCredential 生成签名密钥
+// credentialToProto 将 ent 行转换为 proto message。
+// 永不映射 *_encrypted 敏感字段；key_material oneof 仅返回非敏感数据。
+func credentialToProto(row *lion.Credentials) *adminv1.Credential {
+	result := &adminv1.Credential{
+		Id:          int64(row.ID),
+		Code:        row.Code,
+		DisplayName: row.DisplayName,
+		Description: row.Description,
+		Type:        adminv1.Credential_Type(row.CredentialType),
+		Algorithm:   adminv1.Credential_Algorithm(row.CredentialAlgorithm),
+		Usage:       adminv1.Credential_Usage(row.CredentialUsage),
+		Visibility:  adminv1.Visibility(row.CredentialVisibility),
+		Status:      adminv1.Credential_Status(row.CredentialStatus),
+		Source:      adminv1.Credential_Source(row.CredentialSource),
+		Protected:   row.Protected,
+		KeyId:       row.KeyID,
+		CreatedBy:   row.CreatedBy,
+		UpdatedBy:   row.UpdatedBy,
+		CreatedAt:   timestamppb.New(row.CreatedAt),
+		UpdatedAt:   timestamppb.New(row.UpdatedAt),
+	}
+
+	if row.DeletedAt != nil {
+		result.DeletedAt = timestamppb.New(*row.DeletedAt)
+	}
+
+	if row.NotBefore != nil {
+		result.NotBefore = timestamppb.New(*row.NotBefore)
+	}
+
+	if row.ExpiresAt != nil {
+		result.ExpiresAt = timestamppb.New(*row.ExpiresAt)
+	}
+
+	if row.Metadata != nil {
+		result.Metadata = make(map[string]string, len(row.Metadata))
+		for k, v := range row.Metadata {
+			result.Metadata[k] = v
+		}
+	}
+
+	// key_material oneof: 仅返回非敏感数据
+	switch row.CredentialType {
+	case int(adminv1.Credential_API_KEY.Number()):
+		result.KeyMaterial = &adminv1.Credential_ApiKey{
+			ApiKey: &adminv1.Credential_ApiKeyData{
+				ApiKey: row.APIKey,
+				// ApiSecret 永不返回
+			},
+		}
+	case int(adminv1.Credential_KEY_PAIR.Number()):
+		result.KeyMaterial = &adminv1.Credential_KeyPair{
+			KeyPair: &adminv1.Credential_KeyPairData{
+				PublicKey: row.PublicKey,
+				// PrivateKey / Passphrase 永不返回
+			},
+		}
+	case int(adminv1.Credential_X509.Number()):
+		result.KeyMaterial = &adminv1.Credential_X509Data_{
+			X509Data: &adminv1.Credential_X509Data{
+				Certificate: row.Certificate,
+				CaChain:     row.CaChain,
+				// PrivateKey / Passphrase 永不返回
+			},
+		}
+	case int(adminv1.Credential_LICENSE.Number()):
+		result.KeyMaterial = &adminv1.Credential_License{
+			License: &adminv1.Credential_LicenseData{
+				Signature: row.Signature,
+				// LicenseKey 永不返回
+			},
+		}
+	case int(adminv1.Credential_SYMMETRIC_KEY.Number()), int(adminv1.Credential_SECRET.Number()):
+		// SymmetricKey 永不返回（敏感数据），仅设置 oneof 类型标记
+		// 返回空 []byte 表示该凭证为对称密钥/密文类型，但内容不暴露
+	}
+	// TYPE_UNSPECIFIED: 不设置 key_material
+
+	return result
+}
+
+// generateCredentialCode 生成或校验凭证编码。
+// 空 code 时自动生成，非空时校验合法性。使用 schema.EnsureCode 统一处理。
+func generateCredentialCode(code string) (string, error) {
+	return schema.EnsureCode(code)
+}
+
+// computeKeyID 根据凭证类型计算 key_id（SHA256 摘要）
+func computeKeyID(cred *adminv1.Credential) string {
+	switch cred.GetType() {
+	case adminv1.Credential_API_KEY:
+		if ak := cred.GetApiKey(); ak != nil {
+			return crypto.SHA256([]byte(ak.ApiKey))
+		}
+	case adminv1.Credential_SYMMETRIC_KEY:
+		return crypto.SHA256(cred.GetSymmetricKey())
+	case adminv1.Credential_KEY_PAIR:
+		if kp := cred.GetKeyPair(); kp != nil {
+			return crypto.SHA256(kp.PublicKey)
+		}
+	case adminv1.Credential_X509:
+		if x := cred.GetX509Data(); x != nil {
+			return crypto.SHA256(x.Certificate)
+		}
+	case adminv1.Credential_LICENSE:
+		if lic := cred.GetLicense(); lic != nil {
+			return crypto.SHA256(lic.LicenseKey)
+		}
+	case adminv1.Credential_SECRET:
+		return crypto.SHA256(cred.GetSymmetricKey())
+	}
+	return ""
+}
+
+// isTokenPersistenceRequest 判断是否为 Token 持久化请求。
+// 识别条件：type=SECRET + usage=AUTH + source=USER
+// 用于决定是否执行 key_id 幂等检查。
+func isTokenPersistenceRequest(cred *adminv1.Credential) bool {
+	return cred.GetType() == adminv1.Credential_SECRET &&
+		cred.GetUsage() == adminv1.Credential_AUTH &&
+		cred.GetSource() == adminv1.Credential_USER
+}
+
+// encryptSensitiveField 使用 AES-GCM 加密敏感字段
+func (a *KnownAdminAPI) encryptSensitiveField(plainText []byte) ([]byte, error) {
+	if len(plainText) == 0 {
+		return nil, nil
+	}
+	return crypto.EncryptAES(a.config.aesKey, plainText)
+}
+
+// decryptToken 使用 AES-GCM 解密持久化的 Token。
+// 供后续 GetCredential 扩展、审计、Token 迁移等场景按需解密还原完整 token。
+func (a *KnownAdminAPI) decryptToken(encryptedToken []byte) (string, error) {
+	plain, err := crypto.DecryptAES(a.config.aesKey, encryptedToken)
+	if err != nil {
+		return "", err
+	}
+	return string(plain), nil
+}
+
+// CreateCredential 创建凭证
 func (a *KnownAdminAPI) CreateCredential(ctx context.Context, req *adminv1.CreateCredentialRequest) (*adminv1.Credential, error) {
-	result := &adminv1.Credential{}
+	if req.Credential == nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body credential is nil")
+	}
 
-	// 仅允许存在一条记录，如已存在多次创建返回已存在内容
+	cred := req.Credential
 
-	/*
-		tx, err := a.config.db.Tx(ctx)
+	// 生成或校验 code
+	code, err := generateCredentialCode(cred.Code)
+	if err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid code: %v", err))
+	}
+	cred.Code = code
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+	}
+
+	// 唯一性校验：code 重复检查
+	exists, err := db.Credentials.Query().
+		Where(credentials.CodeEQ(code), credentials.DeletedAtIsNil()).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if exists > 0 {
+		return nil, errs.AlreadyExists(ctx).WithMessage(fmt.Sprintf("credential with code %q already exists", code))
+	}
+
+	// 计算 key_id
+	keyID := computeKeyID(cred)
+
+	// Token 持久化幂等检查：若 key_id 已存在则返回已有记录，
+	// 避免同一 token 被重复持久化。
+	if isTokenPersistenceRequest(cred) && keyID != "" {
+		existing, err := db.Credentials.Query().
+			Where(credentials.KeyIDEQ(keyID), credentials.DeletedAtIsNil()).
+			Only(ctx)
+		if err == nil && existing != nil {
+			return credentialToProto(existing), nil
+		}
+		if !lion.IsNotFound(err) {
+			return nil, err
+		}
+		// NotFound -> 继续创建流程
+	}
+
+	create := db.Credentials.Create().
+		SetCode(code).
+		SetCredentialType(int(cred.Type.Number())).
+		SetCredentialAlgorithm(int(cred.Algorithm.Number())).
+		SetCredentialUsage(int(cred.Usage.Number())).
+		SetCredentialVisibility(int(cred.Visibility.Number())).
+		SetCredentialStatus(int(cred.Status.Number())).
+		SetCredentialSource(int(cred.Source.Number())).
+		SetDisplayName(cred.DisplayName).
+		SetDescription(cred.Description).
+		SetKeyID(keyID)
+
+	// 设置审计字段
+	if actor, err := GetUserID(ctx); err == nil && actor != 0 {
+		create.SetCreatedBy(actor).SetUpdatedBy(actor)
+	}
+
+	// 设置生命周期
+	if cred.NotBefore != nil {
+		create.SetNillableNotBefore(timePtr(cred.NotBefore.AsTime()))
+	}
+	if cred.ExpiresAt != nil {
+		create.SetNillableExpiresAt(timePtr(cred.ExpiresAt.AsTime()))
+	}
+
+	// 设置 metadata
+	if cred.Metadata != nil {
+		create.SetMetadata(cred.Metadata)
+	}
+
+	// 根据类型设置密钥材料
+	switch cred.Type {
+	case adminv1.Credential_API_KEY:
+		ak := cred.GetApiKey()
+		if ak == nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage("api_key data is required for API_KEY type")
+		}
+		create.SetAPIKey(ak.ApiKey)
+		if len(ak.ApiSecret) > 0 {
+			enc, err := a.encryptSensitiveField(ak.ApiSecret)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage(fmt.Sprintf("encrypt api_secret failed: %v", err))
+			}
+			create.SetAPISecretEncrypted(enc)
+		}
+
+	case adminv1.Credential_SYMMETRIC_KEY, adminv1.Credential_SECRET:
+		symKey := cred.GetSymmetricKey()
+		if len(symKey) == 0 {
+			return nil, errs.InvalidArgument(ctx).WithMessage("symmetric_key is required for SYMMETRIC_KEY/SECRET type")
+		}
+		enc, err := a.encryptSensitiveField(symKey)
 		if err != nil {
-			return nil, err
+			return nil, errs.Internal(ctx).WithMessage(fmt.Sprintf("encrypt symmetric_key failed: %v", err))
+		}
+		create.SetSymmetricKeyEncrypted(enc)
+
+	case adminv1.Credential_KEY_PAIR:
+		kp := cred.GetKeyPair()
+		if kp == nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage("key_pair data is required for KEY_PAIR type")
+		}
+		create.SetPublicKey(kp.PublicKey)
+		if len(kp.PrivateKey) > 0 {
+			enc, err := a.encryptSensitiveField(kp.PrivateKey)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage(fmt.Sprintf("encrypt private_key failed: %v", err))
+			}
+			create.SetPrivateKeyEncrypted(enc)
+		}
+		if len(kp.Passphrase) > 0 {
+			enc, err := a.encryptSensitiveField(kp.Passphrase)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage(fmt.Sprintf("encrypt passphrase failed: %v", err))
+			}
+			create.SetPassphraseEncrypted(enc)
 		}
 
-		key, err := tx.Credentials.Query().Select(credentials.FieldPublicKey).Only(ctx)
-		if err != nil && !lion.IsNotFound(err) {
-			return nil, err
+	case adminv1.Credential_X509:
+		x := cred.GetX509Data()
+		if x == nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage("x509_data is required for X509 type")
+		}
+		create.SetCertificate(x.Certificate)
+		if len(x.CaChain) > 0 {
+			create.SetCaChain(x.CaChain)
+		}
+		if len(x.PrivateKey) > 0 {
+			enc, err := a.encryptSensitiveField(x.PrivateKey)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage(fmt.Sprintf("encrypt private_key failed: %v", err))
+			}
+			create.SetPrivateKeyEncrypted(enc)
+		}
+		if len(x.Passphrase) > 0 {
+			enc, err := a.encryptSensitiveField(x.Passphrase)
+			if err != nil {
+				return nil, errs.Internal(ctx).WithMessage(fmt.Sprintf("encrypt passphrase failed: %v", err))
+			}
+			create.SetPassphraseEncrypted(enc)
 		}
 
-		// 不存在记录则新建
-		if lion.IsNotFound(err) {
-			privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	case adminv1.Credential_LICENSE:
+		lic := cred.GetLicense()
+		if lic == nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage("license data is required for LICENSE type")
+		}
+		if len(lic.LicenseKey) > 0 {
+			enc, err := a.encryptSensitiveField(lic.LicenseKey)
 			if err != nil {
-				return nil, err
+				return nil, errs.Internal(ctx).WithMessage(fmt.Sprintf("encrypt license_key failed: %v", err))
 			}
-
-			privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
-			publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
-			if err != nil {
-				return nil, err
-			}
-
-			privateKeyEnc, err := crypto.EncryptAES(a.config.aesKey, privateKeyBytes)
-			if err != nil {
-				return nil, err
-			}
-
-			appid := uuid.New().String()
-			if req.Credential.Appid != "" {
-				appid = req.Credential.Appid
-			}
-
-			tx.Credentials.Create().
-				SetName(req.Credential.Name).
-				SetType(int(req.Credential.Type)).
-				SetAppid(appid).
-				SetUsage(req.Credential.Usage).
-				SetPublicKey(crypto.Base64Encode(publicKeyBytes)).
-				SetPrivateKeyEncrypted(privateKeyEnc).SaveX(ctx)
-
-			result.PublicKey = crypto.Base64Encode(publicKeyBytes)
-		} else {
-			result.PublicKey = key.PublicKey
+			create.SetLicenseKeyEncrypted(enc)
+		}
+		if len(lic.Signature) > 0 {
+			create.SetSignature(lic.Signature)
 		}
 
-		_ = tx.Commit()
-	*/
+	default:
+		return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("unsupported credential type: %s", cred.Type))
+	}
+
+	row, err := create.Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return credentialToProto(row), nil
+}
+
+// ListCredentials 查询凭证列表
+func (a *KnownAdminAPI) ListCredentials(ctx context.Context, req *adminv1.ListCredentialsRequest) (*adminv1.ListCredentialsResponse, error) {
+	result := &adminv1.ListCredentialsResponse{
+		Credentials: make([]*adminv1.Credential, 0),
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+	}
+
+	// selectFields: 排除所有 *_encrypted 敏感字段
+	selectFields := []string{
+		credentials.FieldID,
+		credentials.FieldCode,
+		credentials.FieldDisplayName,
+		credentials.FieldDescription,
+		credentials.FieldCredentialType,
+		credentials.FieldCredentialAlgorithm,
+		credentials.FieldCredentialUsage,
+		credentials.FieldCredentialVisibility,
+		credentials.FieldCredentialStatus,
+		credentials.FieldCredentialSource,
+		credentials.FieldProtected,
+		credentials.FieldKeyID,
+		credentials.FieldAPIKey,
+		credentials.FieldPublicKey,
+		credentials.FieldCertificate,
+		credentials.FieldCaChain,
+		credentials.FieldSignature,
+		credentials.FieldNotBefore,
+		credentials.FieldExpiresAt,
+		credentials.FieldMetadata,
+		credentials.FieldCreatedBy,
+		credentials.FieldUpdatedBy,
+		credentials.FieldCreatedAt,
+		credentials.FieldUpdatedAt,
+		credentials.FieldDeletedAt,
+		// 注意：List 永不查 *_encrypted 字段
+	}
+
+	// 构建过滤条件
+	where := make([]predicate.Credentials, 0)
+
+	// filter: 简单 AIP-160 风格解析
+	if req.GetFilter() != "" {
+		filterPredicates, err := parseListCredentialsFilter(req.GetFilter())
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid filter: %v", err))
+		}
+		where = append(where, filterPredicates...)
+	}
+
+	// 快捷过滤参数
+	if req.GetCredentialType() > 0 {
+		where = append(where, credentials.CredentialTypeEQ(int(req.GetCredentialType())))
+	}
+	if req.GetCredentialStatus() > 0 {
+		where = append(where, credentials.CredentialStatusEQ(int(req.GetCredentialStatus())))
+	}
+	if req.GetCredentialUsage() > 0 {
+		where = append(where, credentials.CredentialUsageEQ(int(req.GetCredentialUsage())))
+	}
+
+	// 默认排除已软删除的记录
+	if !strings.Contains(req.GetFilter(), "deleted_at") && !strings.Contains(req.GetFilter(), "show_deleted") {
+		where = append(where, credentials.DeletedAtIsNil())
+	}
+
+	query := db.Credentials.Query().Where(where...)
+
+	// 排序
+	if req.GetOrderBy() != "" {
+		switch strings.TrimSpace(strings.ToLower(req.GetOrderBy())) {
+		case "credential_status asc":
+			query = query.Order(lion.Asc(credentials.FieldCredentialStatus), lion.Asc(credentials.FieldID))
+		case "credential_status desc":
+			query = query.Order(lion.Desc(credentials.FieldCredentialStatus), lion.Asc(credentials.FieldID))
+		case "created_at desc", "create_time desc":
+			query = query.Order(lion.Desc(credentials.FieldCreatedAt))
+		case "created_at asc", "create_time asc":
+			query = query.Order(lion.Asc(credentials.FieldCreatedAt))
+		case "id asc":
+			query = query.Order(lion.Asc(credentials.FieldID))
+		case "id desc":
+			query = query.Order(lion.Desc(credentials.FieldID))
+		case "display_name asc":
+			query = query.Order(lion.Asc(credentials.FieldDisplayName))
+		case "display_name desc":
+			query = query.Order(lion.Desc(credentials.FieldDisplayName))
+		case "credential_type asc":
+			query = query.Order(lion.Asc(credentials.FieldCredentialType), lion.Asc(credentials.FieldID))
+		case "credential_type desc":
+			query = query.Order(lion.Desc(credentials.FieldCredentialType), lion.Asc(credentials.FieldID))
+		default:
+			query = query.Order(lion.Asc(credentials.FieldCredentialStatus), lion.Asc(credentials.FieldID))
+		}
+	} else {
+		query = query.Order(lion.Asc(credentials.FieldCredentialStatus), lion.Asc(credentials.FieldID))
+	}
+
+	// 计算总数
+	totalSize, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result.TotalSize = int32(totalSize)
+
+	// 分页
+	pageSize := GetPageSize(ctx, req.GetPageSize())
+
+	// cursor-based 分页
+	if req.GetPageToken() != "" {
+		data, err := base64.StdEncoding.DecodeString(req.GetPageToken())
+		if err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token: %v", err))
+		}
+		var lastID int
+		if err := json.Unmarshal(data, &lastID); err != nil {
+			return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid page_token format: %v", err))
+		}
+		if lastID > 0 {
+			query = query.Where(credentials.IDGT(lastID))
+		}
+	}
+
+	// offset-based 分页
+	switch p := req.GetPagination().(type) {
+	case *adminv1.ListCredentialsRequest_Offset:
+		query = query.Offset(int(p.Offset))
+	case *adminv1.ListCredentialsRequest_PageToken:
+		// cursor 已在上面处理
+	}
+
+	// 应用 Select 限定返回字段并执行查询
+	rows, err := query.Limit(int(pageSize)).Select(selectFields...).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, row := range rows {
+		result.Credentials = append(result.Credentials, credentialToProto(row))
+	}
+
+	// cursor 分页时生成 next_page_token
+	if _, ok := req.GetPagination().(*adminv1.ListCredentialsRequest_PageToken); ok && len(rows) == int(pageSize) && len(rows) > 0 {
+		last := rows[len(rows)-1].ID
+		tokenData, _ := json.Marshal(last)
+		result.NextPageToken = base64.StdEncoding.EncodeToString(tokenData)
+	}
 
 	return result, nil
+}
+
+// parseListCredentialsFilter 解析 filter 字符串为 predicate 列表
+// 支持 key=value 与 AND 组合
+// 示例: "credential_status=ACTIVE AND credential_type=KEY_PAIR"
+func parseListCredentialsFilter(filter string) ([]predicate.Credentials, error) {
+	out := make([]predicate.Credentials, 0)
+	parts := strings.Split(filter, " AND ")
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		idx := strings.Index(p, "=")
+		if idx <= 0 {
+			continue
+		}
+		key := strings.TrimSpace(strings.Trim(p[:idx], "\""))
+		val := strings.TrimSpace(strings.Trim(p[idx+1:], "\""))
+
+		switch key {
+		case "credential_status":
+			n, err := strconv.Atoi(val)
+			if err != nil {
+				enumVal, ok := adminv1.Credential_Status_value[strings.ToUpper(val)]
+				if !ok {
+					return nil, fmt.Errorf("unknown credential status: %s", val)
+				}
+				n = int(enumVal)
+			}
+			out = append(out, credentials.CredentialStatusEQ(n))
+		case "credential_type":
+			n, err := strconv.Atoi(val)
+			if err != nil {
+				enumVal, ok := adminv1.Credential_Type_value[strings.ToUpper(val)]
+				if !ok {
+					return nil, fmt.Errorf("unknown credential type: %s", val)
+				}
+				n = int(enumVal)
+			}
+			out = append(out, credentials.CredentialTypeEQ(n))
+		case "credential_usage":
+			n, err := strconv.Atoi(val)
+			if err != nil {
+				enumVal, ok := adminv1.Credential_Usage_value[strings.ToUpper(val)]
+				if !ok {
+					return nil, fmt.Errorf("unknown credential usage: %s", val)
+				}
+				n = int(enumVal)
+			}
+			out = append(out, credentials.CredentialUsageEQ(n))
+		case "code":
+			out = append(out, credentials.CodeEqualFold(val))
+		case "display_name":
+			out = append(out, credentials.DisplayNameContainsFold(val))
+		case "key_id":
+			out = append(out, credentials.KeyIDEQ(val))
+		}
+	}
+	return out, nil
+}
+
+// GetCredential 获取凭证详情
+func (a *KnownAdminAPI) GetCredential(ctx context.Context, req *adminv1.GetCredentialRequest) (*adminv1.Credential, error) {
+	if req.Id == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("credential id is required")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+	}
+
+	row, err := db.Credentials.Get(ctx, int(req.Id))
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("credential not found")
+		}
+		return nil, err
+	}
+
+	return credentialToProto(row), nil
+}
+
+// UpdateCredential 更新凭证
+// 仅允许更新 status / display_name / description / expires_at / metadata
+// 受保护（protected=true）的凭证仅允许更新 display_name / description
+func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.UpdateCredentialRequest) (*adminv1.Credential, error) {
+	if req.Id == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("credential id is required")
+	}
+
+	if req.Credential == nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage("request body credential is nil")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+	}
+
+	// 查找要更新的凭证
+	row, err := db.Credentials.Get(ctx, int(req.Id))
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("credential not found")
+		}
+		return nil, err
+	}
+
+	update := row.Update()
+
+	// 设置审计字段
+	if actor, err := GetUserID(ctx); err == nil && actor != 0 {
+		update.SetUpdatedBy(actor)
+	}
+
+	cred := req.Credential
+	isProtected := row.Protected
+
+	// 根据 update_mask 更新字段
+	mask := req.GetUpdateMask()
+	if mask != nil && len(mask.GetPaths()) > 0 {
+		for _, path := range mask.GetPaths() {
+			// 受保护凭证仅允许更新 display_name / description
+			if isProtected && path != "display_name" && path != "description" {
+				continue
+			}
+			switch path {
+			case "display_name":
+				update.SetDisplayName(cred.DisplayName)
+			case "description":
+				update.SetDescription(cred.Description)
+			case "status":
+				update.SetCredentialStatus(int(cred.Status.Number()))
+			case "expires_at":
+				if cred.ExpiresAt != nil {
+					update.SetNillableExpiresAt(timePtr(cred.ExpiresAt.AsTime()))
+				}
+			case "not_before":
+				if cred.NotBefore != nil {
+					update.SetNillableNotBefore(timePtr(cred.NotBefore.AsTime()))
+				}
+			case "metadata":
+				if cred.Metadata != nil {
+					update.SetMetadata(cred.Metadata)
+				}
+			case "code", "type", "algorithm", "key_id", "key_material":
+				// 不可修改字段，忽略
+			}
+		}
+	} else {
+		// 未提供 update_mask，更新所有非空字段
+		if cred.DisplayName != "" {
+			update.SetDisplayName(cred.DisplayName)
+		}
+		if cred.Description != "" {
+			update.SetDescription(cred.Description)
+		}
+		if !isProtected && cred.Status != adminv1.Credential_STATUS_UNSPECIFIED {
+			update.SetCredentialStatus(int(cred.Status.Number()))
+		}
+		if !isProtected && cred.ExpiresAt != nil {
+			update.SetNillableExpiresAt(timePtr(cred.ExpiresAt.AsTime()))
+		}
+		if !isProtected && cred.NotBefore != nil {
+			update.SetNillableNotBefore(timePtr(cred.NotBefore.AsTime()))
+		}
+		if !isProtected && cred.Metadata != nil {
+			update.SetMetadata(cred.Metadata)
+		}
+	}
+
+	updated, err := update.Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return credentialToProto(updated), nil
+}
+
+// DeleteCredential 删除凭证（软删除）
+// 受保护（protected=true）的凭证不可删除
+func (a *KnownAdminAPI) DeleteCredential(ctx context.Context, req *adminv1.DeleteCredentialRequest) (*emptypb.Empty, error) {
+	if req.Id == 0 {
+		return nil, errs.InvalidArgument(ctx).WithMessage("credential id is required")
+	}
+
+	db, err := a.GetLionClient()
+	if err != nil {
+		return nil, errs.Unimplemented(ctx).WithMessage("get lion client failed")
+	}
+
+	// 检查凭证是否存在
+	row, err := db.Credentials.Get(ctx, int(req.Id))
+	if err != nil {
+		if lion.IsNotFound(err) {
+			return nil, errs.NotFound(ctx).WithMessage("credential not found")
+		}
+		return nil, err
+	}
+
+	// 受保护凭证不可删除
+	if row.Protected {
+		return nil, errs.InvalidArgument(ctx).WithMessage("protected credential cannot be deleted")
+	}
+
+	// 执行软删除
+	err = db.Credentials.DeleteOneID(int(req.Id)).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 // GetOAuth2Discovery 获取内置 OpenID 配置
@@ -273,6 +910,11 @@ func firstByte(b []byte) byte {
 		return 0
 	}
 	return b[0]
+}
+
+// timePtr 返回给定 time.Time 的指针
+func timePtr(t time.Time) *time.Time {
+	return &t
 }
 
 // genderToOIDCString 将 User.Gender enum 映射为 OIDC Standard Claims 规范的 gender 字符串值

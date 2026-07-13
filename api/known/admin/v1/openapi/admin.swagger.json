@@ -704,6 +704,114 @@
       }
     },
     "/builtin/admin/api/v1/credentials": {
+      "get": {
+        "summary": "凭证列表",
+        "description": "接口格式：/builtin/admin/api/v1/credentials。返回凭证列表，敏感字段（api_secret / private_key / symmetric_key）默认不返回。",
+        "operationId": "KnownAdmin_ListCredentials",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListCredentialsResponse"
+            },
+            "examples": {
+              "application/json": {
+                "credentials": [
+                  {
+                    "id": "1",
+                    "code": "key1",
+                    "type": "KEY_PAIR",
+                    "algorithm": "RSA",
+                    "usage": "JWKS",
+                    "status": "ACTIVE",
+                    "source": "SYSTEM"
+                  }
+                ],
+                "next_page_token": "",
+                "total_size": 1
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page_size",
+            "description": "每页返回的最大凭证数。\n- 如果未指定，则使用服务端默认值 (如 20)。\n- 最大不超过 100 (超出时强制截断)。",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "page_token",
+            "description": "Cursor-based 分页",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offset",
+            "description": "Offset-based 分页",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "filter",
+            "description": "过滤条件，采用 AIP-160 定义的标准 filter 语法。\n示例: `credential_status=ACTIVE AND credential_type=KEY_PAIR`",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "order_by",
+            "description": "排序规则，指定结果返回顺序。\n格式: \"field_name [asc|desc], ...\"。\n示例: \"credential_status asc, created_at desc\"",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "credential_type",
+            "description": "CredentialType 快捷过滤参数。\n示例: 3(KEY_PAIR)，仅返回密钥对类型的凭证。",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "credential_status",
+            "description": "CredentialStatus 快捷过滤参数。\n示例: 1(ACTIVE)，仅返回有效凭证。",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "credential_usage",
+            "description": "CredentialUsage 快捷过滤参数。\n示例: 12(JWKS)，仅返回 JWKS 用途的凭证。",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "安全相关"
+        ]
+      },
       "post": {
         "summary": "创建凭证",
         "description": "接口格式：/builtin/admin/api/v1/credentials。根据 credential 字段创建密钥或证书凭证。前置条件：仅允许具备密钥管理权限的管理员调用，禁止回传私钥材料，新增或轮换操作必须写入审计日志。请求体示例：{\"credential\":{\"code\":\"admin-jwks\",\"type\":\"KEY_PAIR\",\"algorithm\":\"RSA\",\"usage\":\"JWKS\",\"status\":\"ACTIVE\",\"source\":\"SYSTEM\"}}。",
@@ -752,6 +860,160 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/v1Credential"
+            }
+          }
+        ],
+        "tags": [
+          "安全相关"
+        ]
+      }
+    },
+    "/builtin/admin/api/v1/credentials/{id}": {
+      "get": {
+        "summary": "获取凭证详情",
+        "description": "接口格式：/builtin/admin/api/v1/credentials/{id}。返回凭证详情，敏感字段需额外权限才返回。",
+        "operationId": "KnownAdmin_GetCredential",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Credential"
+            },
+            "examples": {
+              "application/json": {
+                "id": "1",
+                "code": "key1",
+                "type": "KEY_PAIR",
+                "algorithm": "RSA",
+                "usage": "JWKS",
+                "status": "ACTIVE",
+                "source": "SYSTEM",
+                "key_id": "a1b2c3d4e5f6"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "安全相关"
+        ]
+      },
+      "delete": {
+        "summary": "删除凭证",
+        "description": "接口格式：/builtin/admin/api/v1/credentials/{id}。软删除指定凭证，受保护（protected=true）的凭证不可删除。",
+        "operationId": "KnownAdmin_DeleteCredential",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "安全相关"
+        ]
+      },
+      "patch": {
+        "summary": "更新凭证",
+        "description": "接口格式：/builtin/admin/api/v1/credentials/{id}。仅允许更新 status / display_name / description / expires_at / metadata。受保护（protected=true）的凭证仅允许更新 display_name / description。",
+        "operationId": "KnownAdmin_UpdateCredential",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Credential"
+            },
+            "examples": {
+              "application/json": {
+                "id": "1",
+                "code": "key1",
+                "status": "DISABLED"
+              }
+            }
+          },
+          "4xx": {
+            "description": "客户端参数异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          },
+          "5xx": {
+            "description": "服务端处理异常",
+            "schema": {
+              "$ref": "#/definitions/v1ErrorResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "credential": {
+                  "$ref": "#/definitions/v1Credential"
+                },
+                "update_mask": {
+                  "type": "string",
+                  "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：code / type / algorithm / key_material / key_id 不可修改，即使列入 update_mask 也会被忽略。\n示例: paths: [\"display_name\", \"status\", \"expires_at\"]"
+                }
+              },
+              "title": "UpdateCredentialRequest 更新凭证"
             }
           }
         ],
@@ -7463,6 +7725,28 @@
           "title": "符合条件的提供商总数。\n- 常用于前端分页控件。\n- 注意：可能会因性能原因而近似。\nAIP-132: total_size 是可选字段。"
         }
       }
+    },
+    "v1ListCredentialsResponse": {
+      "type": "object",
+      "properties": {
+        "credentials": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Credential"
+          }
+        },
+        "next_page_token": {
+          "type": "string",
+          "title": "用于获取下一页结果的 token。\n- 如果为空，表示没有更多结果。"
+        },
+        "total_size": {
+          "type": "integer",
+          "format": "int32",
+          "title": "符合条件的凭证总数。"
+        }
+      },
+      "title": "ListCredentialsResponse 凭证列表响应"
     },
     "v1ListDepartmentMembersResponse": {
       "type": "object",

@@ -284,6 +284,15 @@ http:
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.CreateCredential
     post: "/builtin/admin/api/v1/credentials"
     body: "credential"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.ListCredentials
+    get: "/builtin/admin/api/v1/credentials"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetCredential
+    get: "/builtin/admin/api/v1/credentials/{id}"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.UpdateCredential
+    patch: "/builtin/admin/api/v1/credentials/{id}"
+    body: "*"
+  - selector: grpc_kit.api.known.admin.v1.KnownAdmin.DeleteCredential
+    delete: "/builtin/admin/api/v1/credentials/{id}"
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2Discovery
     get: "/builtin/admin/api/v1/oauth2/.well-known/openid-configuration"
   - selector: grpc_kit.api.known.admin.v1.KnownAdmin.GetOAuth2JSONWebKeys
