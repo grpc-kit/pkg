@@ -12,12 +12,11 @@ const (
 	prefixDepartmentCode     = "DEPARTMENT_CODE_"
 	prefixRoleCode           = "ROLE_CODE_"
 	prefixAuthProviderCode   = "AUTH_PROVIDER_CODE_"
-	prefixResourceSeedCode   = "RESOURCE_SEED_CODE_"
 	prefixCredentialSeedCode = "CREDENTIAL_SEED_CODE_"
 	prefixBootstrapUsername  = "BOOTSTRAP_USERNAME_"
 )
 
-// codeFromEnumName 将 protobuf 枚举符号名（如 RESOURCE_SEED_CODE_ROOT_DOMAIN）转为种子使用的字符串（root-domain）。
+// codeFromEnumName 将 protobuf 枚举符号名（如 DEPARTMENT_CODE_ROOT）转为种子使用的字符串（root）。
 func codeFromEnumName(prefix, full string) string {
 	if full == "" {
 		return ""
@@ -50,10 +49,6 @@ func seedRoleCode(c adminv1.RoleCode) string {
 
 func seedAuthProviderCode(c adminv1.AuthProviderCode) string {
 	return seedFromEnumName(adminv1.AuthProviderCode_name, prefixAuthProviderCode, int32(c))
-}
-
-func seedResourceSeedCode(c adminv1.ResourceSeedCode) string {
-	return seedFromEnumName(adminv1.ResourceSeedCode_name, prefixResourceSeedCode, int32(c))
 }
 
 func seedCredentialSeedCode(c adminv1.CredentialSeedCode) string {

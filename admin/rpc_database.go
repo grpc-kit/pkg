@@ -687,7 +687,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
-	credCode := seedCredentialSeedCode(adminv1.CredentialSeedCode_CREDENTIAL_SEED_CODE_KEY1)
+	credCode := seedCredentialSeedCode(adminv1.CredentialSeedCode_CREDENTIAL_SEED_CODE_JWKS_SIGNING_KEY1)
 	credExists, err := tx.Credentials.Query().Where(
 		credentials.CodeEQ(credCode),
 		credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
@@ -714,8 +714,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			rollback()
 			return nil, err
 		}
-		// key_id 使用公钥的 SHA256 摘要，以保持一致性并支持 JWKS kid 语义
-		keyID := crypto.SHA256(publicKeyBytes)
+		// key_id 使用公钥 SHA256 摘要的前 11 个十六进制字符，简短且支持 JWKS kid 语义
+		keyID := crypto.SHA256(publicKeyBytes)[:11]
 		if err := tx.Credentials.Create().
 			SetCode(credCode).
 			SetProtected(true).

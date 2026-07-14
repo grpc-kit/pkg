@@ -116,29 +116,29 @@ func generateCredentialCode(code string) (string, error) {
 	return schema.EnsureCode(code)
 }
 
-// computeKeyID 根据凭证类型计算 key_id（SHA256 摘要）
+// computeKeyID 根据凭证类型计算 key_id（SHA256 摘要前 11 个十六进制字符）
 func computeKeyID(cred *adminv1.Credential) string {
 	switch cred.GetType() {
 	case adminv1.Credential_API_KEY:
 		if ak := cred.GetApiKey(); ak != nil {
-			return crypto.SHA256([]byte(ak.ApiKey))
+			return crypto.SHA256([]byte(ak.ApiKey))[:11]
 		}
 	case adminv1.Credential_SYMMETRIC_KEY:
-		return crypto.SHA256(cred.GetSymmetricKey())
+		return crypto.SHA256(cred.GetSymmetricKey())[:11]
 	case adminv1.Credential_KEY_PAIR:
 		if kp := cred.GetKeyPair(); kp != nil {
-			return crypto.SHA256(kp.PublicKey)
+			return crypto.SHA256(kp.PublicKey)[:11]
 		}
 	case adminv1.Credential_X509:
 		if x := cred.GetX509Data(); x != nil {
-			return crypto.SHA256(x.Certificate)
+			return crypto.SHA256(x.Certificate)[:11]
 		}
 	case adminv1.Credential_LICENSE:
 		if lic := cred.GetLicense(); lic != nil {
-			return crypto.SHA256(lic.LicenseKey)
+			return crypto.SHA256(lic.LicenseKey)[:11]
 		}
 	case adminv1.Credential_SECRET:
-		return crypto.SHA256(cred.GetSymmetricKey())
+		return crypto.SHA256(cred.GetSymmetricKey())[:11]
 	}
 	return ""
 }
