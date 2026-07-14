@@ -79,8 +79,12 @@ func (i *IDTokenClaims) GetAccessToken(signeKey string) (string, error) {
 	return ss, nil
 }
 
-func (i *IDTokenClaims) GetAccessTokenRSA(signeKey *rsa.PrivateKey) (string, error) {
-	ss, err := jwt.NewWithClaims(jwt.SigningMethodRS256, i).SignedString(signeKey)
+func (i *IDTokenClaims) GetAccessTokenRSA(signeKey *rsa.PrivateKey, kid string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, i)
+	if kid != "" {
+		token.Header["kid"] = kid
+	}
+	ss, err := token.SignedString(signeKey)
 	if err != nil {
 		return ss, err
 	}

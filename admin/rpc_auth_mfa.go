@@ -527,8 +527,17 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 	}
 
 	sk, err := db.Credentials.Query().
-		Select(credentials.FieldPrivateKeyEncrypted).
-		Only(ctx)
+		Select(credentials.FieldPrivateKeyEncrypted, credentials.FieldKeyID).
+		Where(
+			credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
+			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_RSA.Number())),
+			credentials.CredentialUsageEQ(int(adminv1.Credential_JWKS.Number())),
+			credentials.CredentialVisibilityEQ(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())),
+			credentials.CredentialStatusEQ(int(adminv1.Credential_ACTIVE.Number())),
+			credentials.CredentialSourceEQ(int(adminv1.Credential_SYSTEM.Number())),
+		).
+		Order(credentials.ByID()).
+		First(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to query credentials: %w", err)
 	}
@@ -561,7 +570,7 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 	idToken.SetExpiresAt(durationSecondsInt64(a.getLoginAccessTokenTTL(ctx)))
 	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 
-	return idToken.GetAccessTokenRSA(privateKey)
+	return idToken.GetAccessTokenRSA(privateKey, sk.KeyID)
 }
 
 func generateRecoveryCodes(count int) ([]string, error) {

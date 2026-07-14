@@ -916,7 +916,7 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 		Keys: make([]*adminv1.OAuth2JSONWebKeys_Key, 0),
 	}
 
-	sk, err := a.config.db.Credentials.Query().
+	sks, err := a.config.db.Credentials.Query().
 		Select(
 			credentials.FieldKeyID,
 			credentials.FieldPublicKey,
@@ -930,36 +930,36 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 			credentials.CredentialSourceEQ(int(adminv1.Credential_SYSTEM.Number())),
 		).
 		Order(credentials.ByID()).
-		Only(ctx)
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	pubInterface, err := x509.ParsePKIXPublicKey(sk.PublicKey)
-	if err != nil {
-		a.logger.Errorf("oauth2 jwks: failed to parse public_key (len=%d, firstByte=0x%02x): %v", len(sk.PublicKey), firstByte(sk.PublicKey), err)
-		return nil, errs.Internal(ctx).WithMessage("failed to parse JWKS public key").Err()
+	for _, sk := range sks {
+		pubInterface, err := x509.ParsePKIXPublicKey(sk.PublicKey)
+		if err != nil {
+			a.logger.Errorf("oauth2 jwks: failed to parse public_key (len=%d, firstByte=0x%02x): %v", len(sk.PublicKey), firstByte(sk.PublicKey), err)
+			return nil, errs.Internal(ctx).WithMessage("failed to parse JWKS public key").Err()
+		}
+
+		publicKey, ok := pubInterface.(*rsa.PublicKey)
+		if !ok {
+			return nil, errs.Internal(ctx).WithMessage("JWKS public key is not RSA").Err()
+		}
+
+		// 将模数 N 和指数 E 转换为 Base64URL 编码
+		n := base64.RawURLEncoding.EncodeToString(publicKey.N.Bytes())
+		e := base64.RawURLEncoding.EncodeToString(big.NewInt(int64(publicKey.E)).Bytes())
+
+		result.Keys = append(result.Keys, &adminv1.OAuth2JSONWebKeys_Key{
+			Kty: "RSA",
+			Use: "sig",
+			Alg: "RS256",
+			E:   e,
+			N:   n,
+			Kid: sk.KeyID,
+		})
 	}
-
-	publicKey, ok := pubInterface.(*rsa.PublicKey)
-	if !ok {
-		return nil, errs.Internal(ctx).WithMessage("JWKS public key is not RSA").Err()
-	}
-
-	// 将模数 N 和指数 E 转换为 Base64URL 编码
-	n := base64.RawURLEncoding.EncodeToString(publicKey.N.Bytes())
-	e := base64.RawURLEncoding.EncodeToString(big.NewInt(int64(publicKey.E)).Bytes())
-
-	tmp := &adminv1.OAuth2JSONWebKeys_Key{
-		Kty: "RSA",
-		Use: "sig",
-		Alg: "RS256",
-		E:   e,
-		N:   n,
-		Kid: sk.KeyID,
-	}
-
-	result.Keys = append(result.Keys, tmp)
 
 	return result, nil
 }
