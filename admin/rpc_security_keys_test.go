@@ -242,8 +242,8 @@ func TestComputeKeyID_APIKey(t *testing.T) {
 	if keyID == "" {
 		t.Error("expected non-empty key_id for API_KEY")
 	}
-	if len(keyID) != 11 {
-		t.Errorf("expected 11-char truncated SHA256 hex, got len=%d", len(keyID))
+	if len(keyID) != 40 {
+		t.Errorf("expected 40-char SHA-1 hex, got len=%d", len(keyID))
 	}
 }
 
@@ -259,8 +259,8 @@ func TestComputeKeyID_SymmetricKey(t *testing.T) {
 	if keyID == "" {
 		t.Error("expected non-empty key_id for SYMMETRIC_KEY")
 	}
-	if len(keyID) != 11 {
-		t.Errorf("expected 11-char truncated SHA256 hex, got len=%d", len(keyID))
+	if len(keyID) != 40 {
+		t.Errorf("expected 40-char SHA-1 hex, got len=%d", len(keyID))
 	}
 }
 
@@ -278,8 +278,8 @@ func TestComputeKeyID_KeyPair(t *testing.T) {
 	if keyID == "" {
 		t.Error("expected non-empty key_id for KEY_PAIR")
 	}
-	if len(keyID) != 11 {
-		t.Errorf("expected 11-char truncated SHA256 hex, got len=%d", len(keyID))
+	if len(keyID) != 40 {
+		t.Errorf("expected 40-char SHA-1 hex, got len=%d", len(keyID))
 	}
 }
 

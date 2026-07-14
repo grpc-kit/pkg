@@ -714,8 +714,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			rollback()
 			return nil, err
 		}
-		// key_id 使用公钥 SHA256 摘要的前 11 个十六进制字符，简短且支持 JWKS kid 语义
-		keyID := crypto.SHA256(publicKeyBytes)[:11]
+		// key_id 使用公钥 SHA-1 摘要（40 字符 hex），与 Google OIDC provider 的 JWKS kid 风格一致
+		keyID := crypto.SHA1(publicKeyBytes)
 		if err := tx.Credentials.Create().
 			SetCode(credCode).
 			SetProtected(true).

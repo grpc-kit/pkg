@@ -147,7 +147,7 @@ func (Credentials) Mixin() []ent.Mixin {
 func (Credentials) Indexes() []ent.Index {
 	return []ent.Index{
 		// code 唯一索引已在字段定义中设置 Unique()
-		// key_id 条件唯一索引：仅非空值唯一（token 场景存 SHA256 摘要需幂等去重；
+		// key_id 条件唯一索引：仅非空值唯一（token 场景存 SHA-1 摘要需幂等去重；
 		// License 等类型可能不设 key_id，多条 NULL 不冲突）
 		index.Fields("key_id").Unique().Annotations(
 			entsql.IndexWhere("key_id IS NOT NULL AND key_id != ''"),
