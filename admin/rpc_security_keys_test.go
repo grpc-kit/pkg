@@ -32,7 +32,7 @@ func TestCredentialToProto_BasicFields(t *testing.T) {
 		CredentialStatus:     int(adminv1.Credential_ACTIVE.Number()),
 		CredentialSource:     int(adminv1.Credential_SYSTEM.Number()),
 		Protected:            true,
-		KeyID:                "abc123def456",
+		Fingerprint:          "abc123def456",
 		PublicKey:            []byte("-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE...\n-----END PUBLIC KEY-----"),
 		Metadata:             map[string]string{"rotation": "30d"},
 		CreatedBy:            1,
@@ -69,8 +69,8 @@ func TestCredentialToProto_BasicFields(t *testing.T) {
 	if proto.Protected != true {
 		t.Errorf("expected Protected=true, got %v", proto.Protected)
 	}
-	if proto.KeyId != "abc123def456" {
-		t.Errorf("expected KeyId=abc123def456, got %s", proto.KeyId)
+	if proto.Fingerprint != "abc123def456" {
+		t.Errorf("expected Fingerprint=abc123def456, got %s", proto.Fingerprint)
 	}
 	if proto.CreatedBy != 1 {
 		t.Errorf("expected CreatedBy=1, got %d", proto.CreatedBy)
@@ -228,7 +228,7 @@ func TestGenerateCredentialCode_InvalidCode(t *testing.T) {
 	}
 }
 
-func TestComputeKeyID_APIKey(t *testing.T) {
+func TestComputeFingerprint_APIKey(t *testing.T) {
 	cred := &adminv1.Credential{
 		Type: adminv1.Credential_API_KEY,
 		KeyMaterial: &adminv1.Credential_ApiKey{
@@ -238,16 +238,16 @@ func TestComputeKeyID_APIKey(t *testing.T) {
 		},
 	}
 
-	keyID := computeKeyID(cred)
-	if keyID == "" {
-		t.Error("expected non-empty key_id for API_KEY")
+	fp := computeFingerprint(cred)
+	if fp == "" {
+		t.Error("expected non-empty fingerprint for API_KEY")
 	}
-	if len(keyID) != 40 {
-		t.Errorf("expected 40-char SHA-1 hex, got len=%d", len(keyID))
+	if len(fp) != 64 {
+		t.Errorf("expected 64-char SHA-256 hex, got len=%d", len(fp))
 	}
 }
 
-func TestComputeKeyID_SymmetricKey(t *testing.T) {
+func TestComputeFingerprint_SymmetricKey(t *testing.T) {
 	cred := &adminv1.Credential{
 		Type: adminv1.Credential_SYMMETRIC_KEY,
 		KeyMaterial: &adminv1.Credential_SymmetricKey{
@@ -255,16 +255,16 @@ func TestComputeKeyID_SymmetricKey(t *testing.T) {
 		},
 	}
 
-	keyID := computeKeyID(cred)
-	if keyID == "" {
-		t.Error("expected non-empty key_id for SYMMETRIC_KEY")
+	fp := computeFingerprint(cred)
+	if fp == "" {
+		t.Error("expected non-empty fingerprint for SYMMETRIC_KEY")
 	}
-	if len(keyID) != 40 {
-		t.Errorf("expected 40-char SHA-1 hex, got len=%d", len(keyID))
+	if len(fp) != 64 {
+		t.Errorf("expected 64-char SHA-256 hex, got len=%d", len(fp))
 	}
 }
 
-func TestComputeKeyID_KeyPair(t *testing.T) {
+func TestComputeFingerprint_KeyPair(t *testing.T) {
 	cred := &adminv1.Credential{
 		Type: adminv1.Credential_KEY_PAIR,
 		KeyMaterial: &adminv1.Credential_KeyPair{
@@ -274,23 +274,23 @@ func TestComputeKeyID_KeyPair(t *testing.T) {
 		},
 	}
 
-	keyID := computeKeyID(cred)
-	if keyID == "" {
-		t.Error("expected non-empty key_id for KEY_PAIR")
+	fp := computeFingerprint(cred)
+	if fp == "" {
+		t.Error("expected non-empty fingerprint for KEY_PAIR")
 	}
-	if len(keyID) != 40 {
-		t.Errorf("expected 40-char SHA-1 hex, got len=%d", len(keyID))
+	if len(fp) != 64 {
+		t.Errorf("expected 64-char SHA-256 hex, got len=%d", len(fp))
 	}
 }
 
-func TestComputeKeyID_Unspecified(t *testing.T) {
+func TestComputeFingerprint_Unspecified(t *testing.T) {
 	cred := &adminv1.Credential{
 		Type: adminv1.Credential_TYPE_UNSPECIFIED,
 	}
 
-	keyID := computeKeyID(cred)
-	if keyID != "" {
-		t.Errorf("expected empty key_id for TYPE_UNSPECIFIED, got %s", keyID)
+	fp := computeFingerprint(cred)
+	if fp != "" {
+		t.Errorf("expected empty fingerprint for TYPE_UNSPECIFIED, got %s", fp)
 	}
 }
 
@@ -354,8 +354,8 @@ func TestParseListCredentialsFilter_Empty(t *testing.T) {
 	}
 }
 
-func TestParseListCredentialsFilter_KeyID(t *testing.T) {
-	preds, err := parseListCredentialsFilter("key_id=abc123")
+func TestParseListCredentialsFilter_Fingerprint(t *testing.T) {
+	preds, err := parseListCredentialsFilter("fingerprint=abc123")
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -395,7 +395,7 @@ func TestFieldConstantsExist(t *testing.T) {
 	fields := []string{
 		credentials.FieldID,
 		credentials.FieldCode,
-		credentials.FieldKeyID,
+		credentials.FieldFingerprint,
 		credentials.FieldCredentialType,
 		credentials.FieldCredentialStatus,
 		credentials.FieldCredentialUsage,

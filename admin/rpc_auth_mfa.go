@@ -527,7 +527,7 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 	}
 
 	sk, err := db.Credentials.Query().
-		Select(credentials.FieldPrivateKeyEncrypted, credentials.FieldKeyID).
+		Select(credentials.FieldPrivateKeyEncrypted, credentials.FieldCode).
 		Where(
 			credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
 			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_RSA.Number())),
@@ -570,7 +570,7 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 	idToken.SetExpiresAt(durationSecondsInt64(a.getLoginAccessTokenTTL(ctx)))
 	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 
-	return idToken.GetAccessTokenRSA(privateKey, sk.KeyID)
+	return idToken.GetAccessTokenRSA(privateKey, sk.Code)
 }
 
 func generateRecoveryCodes(count int) ([]string, error) {

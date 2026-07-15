@@ -222,16 +222,16 @@ func (_c *CredentialsCreate) SetNillableProtected(v *bool) *CredentialsCreate {
 	return _c
 }
 
-// SetKeyID sets the "key_id" field.
-func (_c *CredentialsCreate) SetKeyID(v string) *CredentialsCreate {
-	_c.mutation.SetKeyID(v)
+// SetFingerprint sets the "fingerprint" field.
+func (_c *CredentialsCreate) SetFingerprint(v string) *CredentialsCreate {
+	_c.mutation.SetFingerprint(v)
 	return _c
 }
 
-// SetNillableKeyID sets the "key_id" field if the given value is not nil.
-func (_c *CredentialsCreate) SetNillableKeyID(v *string) *CredentialsCreate {
+// SetNillableFingerprint sets the "fingerprint" field if the given value is not nil.
+func (_c *CredentialsCreate) SetNillableFingerprint(v *string) *CredentialsCreate {
 	if v != nil {
-		_c.SetKeyID(*v)
+		_c.SetFingerprint(*v)
 	}
 	return _c
 }
@@ -554,9 +554,9 @@ func (_c *CredentialsCreate) createSpec() (*Credentials, *sqlgraph.CreateSpec) {
 		_spec.SetField(credentials.FieldProtected, field.TypeBool, value)
 		_node.Protected = value
 	}
-	if value, ok := _c.mutation.KeyID(); ok {
-		_spec.SetField(credentials.FieldKeyID, field.TypeString, value)
-		_node.KeyID = value
+	if value, ok := _c.mutation.Fingerprint(); ok {
+		_spec.SetField(credentials.FieldFingerprint, field.TypeString, value)
+		_node.Fingerprint = value
 	}
 	if value, ok := _c.mutation.APIKey(); ok {
 		_spec.SetField(credentials.FieldAPIKey, field.TypeString, value)

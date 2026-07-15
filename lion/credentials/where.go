@@ -129,9 +129,9 @@ func Protected(v bool) predicate.Credentials {
 	return predicate.Credentials(sql.FieldEQ(FieldProtected, v))
 }
 
-// KeyID applies equality check predicate on the "key_id" field. It's identical to KeyIDEQ.
-func KeyID(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldKeyID, v))
+// Fingerprint applies equality check predicate on the "fingerprint" field. It's identical to FingerprintEQ.
+func Fingerprint(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldFingerprint, v))
 }
 
 // APIKey applies equality check predicate on the "api_key" field. It's identical to APIKeyEQ.
@@ -874,79 +874,79 @@ func ProtectedNEQ(v bool) predicate.Credentials {
 	return predicate.Credentials(sql.FieldNEQ(FieldProtected, v))
 }
 
-// KeyIDEQ applies the EQ predicate on the "key_id" field.
-func KeyIDEQ(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEQ(FieldKeyID, v))
+// FingerprintEQ applies the EQ predicate on the "fingerprint" field.
+func FingerprintEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEQ(FieldFingerprint, v))
 }
 
-// KeyIDNEQ applies the NEQ predicate on the "key_id" field.
-func KeyIDNEQ(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNEQ(FieldKeyID, v))
+// FingerprintNEQ applies the NEQ predicate on the "fingerprint" field.
+func FingerprintNEQ(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNEQ(FieldFingerprint, v))
 }
 
-// KeyIDIn applies the In predicate on the "key_id" field.
-func KeyIDIn(vs ...string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldIn(FieldKeyID, vs...))
+// FingerprintIn applies the In predicate on the "fingerprint" field.
+func FingerprintIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldIn(FieldFingerprint, vs...))
 }
 
-// KeyIDNotIn applies the NotIn predicate on the "key_id" field.
-func KeyIDNotIn(vs ...string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotIn(FieldKeyID, vs...))
+// FingerprintNotIn applies the NotIn predicate on the "fingerprint" field.
+func FingerprintNotIn(vs ...string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotIn(FieldFingerprint, vs...))
 }
 
-// KeyIDGT applies the GT predicate on the "key_id" field.
-func KeyIDGT(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGT(FieldKeyID, v))
+// FingerprintGT applies the GT predicate on the "fingerprint" field.
+func FingerprintGT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGT(FieldFingerprint, v))
 }
 
-// KeyIDGTE applies the GTE predicate on the "key_id" field.
-func KeyIDGTE(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldGTE(FieldKeyID, v))
+// FingerprintGTE applies the GTE predicate on the "fingerprint" field.
+func FingerprintGTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldGTE(FieldFingerprint, v))
 }
 
-// KeyIDLT applies the LT predicate on the "key_id" field.
-func KeyIDLT(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLT(FieldKeyID, v))
+// FingerprintLT applies the LT predicate on the "fingerprint" field.
+func FingerprintLT(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLT(FieldFingerprint, v))
 }
 
-// KeyIDLTE applies the LTE predicate on the "key_id" field.
-func KeyIDLTE(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldLTE(FieldKeyID, v))
+// FingerprintLTE applies the LTE predicate on the "fingerprint" field.
+func FingerprintLTE(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldLTE(FieldFingerprint, v))
 }
 
-// KeyIDContains applies the Contains predicate on the "key_id" field.
-func KeyIDContains(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldContains(FieldKeyID, v))
+// FingerprintContains applies the Contains predicate on the "fingerprint" field.
+func FingerprintContains(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContains(FieldFingerprint, v))
 }
 
-// KeyIDHasPrefix applies the HasPrefix predicate on the "key_id" field.
-func KeyIDHasPrefix(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldHasPrefix(FieldKeyID, v))
+// FingerprintHasPrefix applies the HasPrefix predicate on the "fingerprint" field.
+func FingerprintHasPrefix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasPrefix(FieldFingerprint, v))
 }
 
-// KeyIDHasSuffix applies the HasSuffix predicate on the "key_id" field.
-func KeyIDHasSuffix(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldHasSuffix(FieldKeyID, v))
+// FingerprintHasSuffix applies the HasSuffix predicate on the "fingerprint" field.
+func FingerprintHasSuffix(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldHasSuffix(FieldFingerprint, v))
 }
 
-// KeyIDIsNil applies the IsNil predicate on the "key_id" field.
-func KeyIDIsNil() predicate.Credentials {
-	return predicate.Credentials(sql.FieldIsNull(FieldKeyID))
+// FingerprintIsNil applies the IsNil predicate on the "fingerprint" field.
+func FingerprintIsNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldIsNull(FieldFingerprint))
 }
 
-// KeyIDNotNil applies the NotNil predicate on the "key_id" field.
-func KeyIDNotNil() predicate.Credentials {
-	return predicate.Credentials(sql.FieldNotNull(FieldKeyID))
+// FingerprintNotNil applies the NotNil predicate on the "fingerprint" field.
+func FingerprintNotNil() predicate.Credentials {
+	return predicate.Credentials(sql.FieldNotNull(FieldFingerprint))
 }
 
-// KeyIDEqualFold applies the EqualFold predicate on the "key_id" field.
-func KeyIDEqualFold(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldEqualFold(FieldKeyID, v))
+// FingerprintEqualFold applies the EqualFold predicate on the "fingerprint" field.
+func FingerprintEqualFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldEqualFold(FieldFingerprint, v))
 }
 
-// KeyIDContainsFold applies the ContainsFold predicate on the "key_id" field.
-func KeyIDContainsFold(v string) predicate.Credentials {
-	return predicate.Credentials(sql.FieldContainsFold(FieldKeyID, v))
+// FingerprintContainsFold applies the ContainsFold predicate on the "fingerprint" field.
+func FingerprintContainsFold(v string) predicate.Credentials {
+	return predicate.Credentials(sql.FieldContainsFold(FieldFingerprint, v))
 }
 
 // APIKeyEQ applies the EQ predicate on the "api_key" field.

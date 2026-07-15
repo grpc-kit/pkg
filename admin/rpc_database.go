@@ -714,8 +714,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			rollback()
 			return nil, err
 		}
-		// key_id 使用公钥 SHA-1 摘要（40 字符 hex），与 Google OIDC provider 的 JWKS kid 风格一致
-		keyID := crypto.SHA1(publicKeyBytes)
+		// fingerprint 使用公钥 SHA-256 摘要（64 字符 hex），用于幂等去重
+		fp := crypto.SHA256(publicKeyBytes)
 		if err := tx.Credentials.Create().
 			SetCode(credCode).
 			SetProtected(true).
@@ -725,7 +725,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetCredentialVisibility(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())).
 			SetCredentialStatus(int(adminv1.Credential_ACTIVE.Number())).
 			SetCredentialSource(int(adminv1.Credential_SYSTEM.Number())).
-			SetKeyID(keyID).
+			SetFingerprint(fp).
 			SetDisplayName("JWKS Signing Key").
 			SetPublicKey(publicKeyBytes).
 			SetPrivateKeyEncrypted(privateKeyEnc).

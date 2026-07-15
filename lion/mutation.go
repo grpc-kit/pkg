@@ -1550,7 +1550,7 @@ type CredentialsMutation struct {
 	credential_source        *int
 	addcredential_source     *int
 	protected                *bool
-	key_id                   *string
+	fingerprint              *string
 	api_key                  *string
 	api_secret_encrypted     *[]byte
 	public_key               *[]byte
@@ -2423,53 +2423,53 @@ func (m *CredentialsMutation) ResetProtected() {
 	m.protected = nil
 }
 
-// SetKeyID sets the "key_id" field.
-func (m *CredentialsMutation) SetKeyID(s string) {
-	m.key_id = &s
+// SetFingerprint sets the "fingerprint" field.
+func (m *CredentialsMutation) SetFingerprint(s string) {
+	m.fingerprint = &s
 }
 
-// KeyID returns the value of the "key_id" field in the mutation.
-func (m *CredentialsMutation) KeyID() (r string, exists bool) {
-	v := m.key_id
+// Fingerprint returns the value of the "fingerprint" field in the mutation.
+func (m *CredentialsMutation) Fingerprint() (r string, exists bool) {
+	v := m.fingerprint
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldKeyID returns the old "key_id" field's value of the Credentials entity.
+// OldFingerprint returns the old "fingerprint" field's value of the Credentials entity.
 // If the Credentials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldKeyID(ctx context.Context) (v string, err error) {
+func (m *CredentialsMutation) OldFingerprint(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldKeyID is only allowed on UpdateOne operations")
+		return v, errors.New("OldFingerprint is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldKeyID requires an ID field in the mutation")
+		return v, errors.New("OldFingerprint requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldKeyID: %w", err)
+		return v, fmt.Errorf("querying old value for OldFingerprint: %w", err)
 	}
-	return oldValue.KeyID, nil
+	return oldValue.Fingerprint, nil
 }
 
-// ClearKeyID clears the value of the "key_id" field.
-func (m *CredentialsMutation) ClearKeyID() {
-	m.key_id = nil
-	m.clearedFields[credentials.FieldKeyID] = struct{}{}
+// ClearFingerprint clears the value of the "fingerprint" field.
+func (m *CredentialsMutation) ClearFingerprint() {
+	m.fingerprint = nil
+	m.clearedFields[credentials.FieldFingerprint] = struct{}{}
 }
 
-// KeyIDCleared returns if the "key_id" field was cleared in this mutation.
-func (m *CredentialsMutation) KeyIDCleared() bool {
-	_, ok := m.clearedFields[credentials.FieldKeyID]
+// FingerprintCleared returns if the "fingerprint" field was cleared in this mutation.
+func (m *CredentialsMutation) FingerprintCleared() bool {
+	_, ok := m.clearedFields[credentials.FieldFingerprint]
 	return ok
 }
 
-// ResetKeyID resets all changes to the "key_id" field.
-func (m *CredentialsMutation) ResetKeyID() {
-	m.key_id = nil
-	delete(m.clearedFields, credentials.FieldKeyID)
+// ResetFingerprint resets all changes to the "fingerprint" field.
+func (m *CredentialsMutation) ResetFingerprint() {
+	m.fingerprint = nil
+	delete(m.clearedFields, credentials.FieldFingerprint)
 }
 
 // SetAPIKey sets the "api_key" field.
@@ -3205,8 +3205,8 @@ func (m *CredentialsMutation) Fields() []string {
 	if m.protected != nil {
 		fields = append(fields, credentials.FieldProtected)
 	}
-	if m.key_id != nil {
-		fields = append(fields, credentials.FieldKeyID)
+	if m.fingerprint != nil {
+		fields = append(fields, credentials.FieldFingerprint)
 	}
 	if m.api_key != nil {
 		fields = append(fields, credentials.FieldAPIKey)
@@ -3285,8 +3285,8 @@ func (m *CredentialsMutation) Field(name string) (ent.Value, bool) {
 		return m.CredentialSource()
 	case credentials.FieldProtected:
 		return m.Protected()
-	case credentials.FieldKeyID:
-		return m.KeyID()
+	case credentials.FieldFingerprint:
+		return m.Fingerprint()
 	case credentials.FieldAPIKey:
 		return m.APIKey()
 	case credentials.FieldAPISecretEncrypted:
@@ -3352,8 +3352,8 @@ func (m *CredentialsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldCredentialSource(ctx)
 	case credentials.FieldProtected:
 		return m.OldProtected(ctx)
-	case credentials.FieldKeyID:
-		return m.OldKeyID(ctx)
+	case credentials.FieldFingerprint:
+		return m.OldFingerprint(ctx)
 	case credentials.FieldAPIKey:
 		return m.OldAPIKey(ctx)
 	case credentials.FieldAPISecretEncrypted:
@@ -3494,12 +3494,12 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetProtected(v)
 		return nil
-	case credentials.FieldKeyID:
+	case credentials.FieldFingerprint:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetKeyID(v)
+		m.SetFingerprint(v)
 		return nil
 	case credentials.FieldAPIKey:
 		v, ok := value.(string)
@@ -3733,8 +3733,8 @@ func (m *CredentialsMutation) ClearedFields() []string {
 	if m.FieldCleared(credentials.FieldDescription) {
 		fields = append(fields, credentials.FieldDescription)
 	}
-	if m.FieldCleared(credentials.FieldKeyID) {
-		fields = append(fields, credentials.FieldKeyID)
+	if m.FieldCleared(credentials.FieldFingerprint) {
+		fields = append(fields, credentials.FieldFingerprint)
 	}
 	if m.FieldCleared(credentials.FieldAPIKey) {
 		fields = append(fields, credentials.FieldAPIKey)
@@ -3801,8 +3801,8 @@ func (m *CredentialsMutation) ClearField(name string) error {
 	case credentials.FieldDescription:
 		m.ClearDescription()
 		return nil
-	case credentials.FieldKeyID:
-		m.ClearKeyID()
+	case credentials.FieldFingerprint:
+		m.ClearFingerprint()
 		return nil
 	case credentials.FieldAPIKey:
 		m.ClearAPIKey()
@@ -3896,8 +3896,8 @@ func (m *CredentialsMutation) ResetField(name string) error {
 	case credentials.FieldProtected:
 		m.ResetProtected()
 		return nil
-	case credentials.FieldKeyID:
-		m.ResetKeyID()
+	case credentials.FieldFingerprint:
+		m.ResetFingerprint()
 		return nil
 	case credentials.FieldAPIKey:
 		m.ResetAPIKey()

@@ -48,8 +48,8 @@ type Credentials struct {
 	CredentialSource int `json:"credential_source,omitempty"`
 	// 是否受保护（受保护记录不可删除，如内置签名密钥）
 	Protected bool `json:"protected,omitempty"`
-	// 凭证标识，用于查询、幂等与去重。生成策略因类型而异：API_KEY=api_key SHA256, SYMMETRIC_KEY=密钥 SHA256, KEY_PAIR=公钥 SHA256, X509=证书 SHA256, LICENSE=license_key SHA256, SECRET=密文 SHA256
-	KeyID string `json:"key_id,omitempty"`
+	// 密钥指纹（SHA-256 摘要，64 字符 hex），用于幂等去重。生成策略因类型而异：API_KEY=api_key SHA-256, SYMMETRIC_KEY=密钥 SHA-256, KEY_PAIR=公钥 SHA-256, X509=证书 SHA-256, LICENSE=license_key SHA-256, SECRET=密文 SHA-256
+	Fingerprint string `json:"fingerprint,omitempty"`
 	// API Key 的公有标识
 	APIKey string `json:"api_key,omitempty"`
 	// API Secret / 私密部分，敏感数据
@@ -90,7 +90,7 @@ func (*Credentials) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case credentials.FieldID, credentials.FieldCreatedBy, credentials.FieldUpdatedBy, credentials.FieldCredentialType, credentials.FieldCredentialAlgorithm, credentials.FieldCredentialUsage, credentials.FieldCredentialVisibility, credentials.FieldCredentialStatus, credentials.FieldCredentialSource:
 			values[i] = new(sql.NullInt64)
-		case credentials.FieldCode, credentials.FieldDisplayName, credentials.FieldDescription, credentials.FieldKeyID, credentials.FieldAPIKey:
+		case credentials.FieldCode, credentials.FieldDisplayName, credentials.FieldDescription, credentials.FieldFingerprint, credentials.FieldAPIKey:
 			values[i] = new(sql.NullString)
 		case credentials.FieldCreatedAt, credentials.FieldUpdatedAt, credentials.FieldDeletedAt, credentials.FieldNotBefore, credentials.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -206,11 +206,11 @@ func (_m *Credentials) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Protected = value.Bool
 			}
-		case credentials.FieldKeyID:
+		case credentials.FieldFingerprint:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field key_id", values[i])
+				return fmt.Errorf("unexpected type %T for field fingerprint", values[i])
 			} else if value.Valid {
-				_m.KeyID = value.String
+				_m.Fingerprint = value.String
 			}
 		case credentials.FieldAPIKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -379,8 +379,8 @@ func (_m *Credentials) String() string {
 	builder.WriteString("protected=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Protected))
 	builder.WriteString(", ")
-	builder.WriteString("key_id=")
-	builder.WriteString(_m.KeyID)
+	builder.WriteString("fingerprint=")
+	builder.WriteString(_m.Fingerprint)
 	builder.WriteString(", ")
 	builder.WriteString("api_key=")
 	builder.WriteString(_m.APIKey)

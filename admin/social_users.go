@@ -37,9 +37,9 @@ type socialUsers struct {
 
 	aesKey     []byte
 	privateKey *rsa.PrivateKey
-	// keyID 是当前签名密钥的 key_id，写入 JWT header 的 kid，
+	// kid 是当前签名密钥的 code，写入 JWT header，
 	// 供验证端从 JWKS 中匹配对应的公钥。多密钥轮换场景下不可缺失。
-	keyID string
+	kid string
 
 	ProviderName string
 	AuthProvider *lion.AuthProviders
@@ -71,7 +71,7 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 	}
 
 	sk, err := db.Credentials.Query().
-		Select(credentials.FieldPrivateKeyEncrypted, credentials.FieldKeyID).
+		Select(credentials.FieldPrivateKeyEncrypted, credentials.FieldCode).
 		Where(
 			credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
 			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_RSA.Number())),
@@ -102,7 +102,7 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 		db:           db,
 		aesKey:       aesKey,
 		privateKey:   privateKey,
-		keyID:        sk.KeyID,
+		kid:          sk.Code,
 		ProviderName: providerName,
 		AuthProvider: ap,
 	}
@@ -215,7 +215,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		idToken.SetGroups(s.Groups)
 
 		// 生成 jwt 返回客户端
-		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey, s.keyID)
+		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey, s.kid)
 		if err != nil {
 			return accessToken, err
 		}
@@ -294,7 +294,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		idToken.SetSubject(strconv.Itoa(userID))
 		idToken.SetGroups(s.Groups)
 
-		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey, s.keyID)
+		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey, s.kid)
 		if err != nil {
 			return accessToken, err
 		}
@@ -730,7 +730,7 @@ func (s *socialUsers) issueAccessTokenForUser(ctx context.Context, u *lion.Users
 	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 
 	// 生成 jwt 返回客户端
-	accessToken, err := idToken.GetAccessTokenRSA(s.privateKey, s.keyID)
+	accessToken, err := idToken.GetAccessTokenRSA(s.privateKey, s.kid)
 	if err != nil {
 		return "", false, err
 	}

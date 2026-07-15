@@ -340,7 +340,7 @@ type UpdateCredentialRequest struct {
 	Id         int64       `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Credential *Credential `protobuf:"bytes,2,opt,name=credential,proto3" json:"credential,omitempty"`
 	// 指定需要更新的字段列表，未列出的字段不会被修改。
-	// 注意：code / type / algorithm / key_material / key_id 不可修改，即使列入 update_mask 也会被忽略。
+	// 注意：code / type / algorithm / key_material / fingerprint 不可修改，即使列入 update_mask 也会被忽略。
 	// 示例: paths: ["display_name", "status", "expires_at"]
 	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 }

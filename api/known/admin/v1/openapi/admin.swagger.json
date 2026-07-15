@@ -1010,7 +1010,7 @@
                 },
                 "update_mask": {
                   "type": "string",
-                  "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：code / type / algorithm / key_material / key_id 不可修改，即使列入 update_mask 也会被忽略。\n示例: paths: [\"display_name\", \"status\", \"expires_at\"]"
+                  "title": "指定需要更新的字段列表，未列出的字段不会被修改。\n注意：code / type / algorithm / key_material / fingerprint 不可修改，即使列入 update_mask 也会被忽略。\n示例: paths: [\"display_name\", \"status\", \"expires_at\"]"
                 }
               },
               "title": "UpdateCredentialRequest 更新凭证"
@@ -6982,9 +6982,9 @@
           "type": "string",
           "format": "byte"
         },
-        "key_id": {
+        "fingerprint": {
           "type": "string",
-          "title": "KeyID 凭证标识，用于查询、幂等与去重\n生成策略因类型而异：\n- API_KEY: api_key 的 SHA256 摘要\n- SYMMETRIC_KEY: 对称密钥的 SHA256 摘要\n- KEY_PAIR: 公钥的 SHA256 摘要（亦可作为 JWKS kid）\n- X509: 证书的 SHA256 摘要（即 X.509 标准指纹）\n- LICENSE: license_key 的 SHA256 摘要\n- SECRET: 密文内容的 SHA256 摘要\n注意：key_id 始终为内容摘要或外部系统返回的唯一标识，不使用随机 UUID。"
+          "title": "Fingerprint 密钥指纹（SHA-256 摘要，64 字符 hex），用于幂等去重\n生成策略因类型而异：\n- API_KEY: api_key 的 SHA-256 摘要\n- SYMMETRIC_KEY: 对称密钥的 SHA-256 摘要\n- KEY_PAIR: 公钥的 SHA-256 摘要\n- X509: 证书的 SHA-256 摘要（即 X.509 标准指纹）\n- LICENSE: license_key 的 SHA-256 摘要\n- SECRET: 密文内容的 SHA-256 摘要\n注意：fingerprint 始终为内容摘要，不使用随机 UUID。\nJWKS kid 使用 code 字段，不使用 fingerprint。"
         },
         "not_before": {
           "type": "string",

@@ -297,23 +297,23 @@ func (_u *CredentialsUpdate) SetNillableProtected(v *bool) *CredentialsUpdate {
 	return _u
 }
 
-// SetKeyID sets the "key_id" field.
-func (_u *CredentialsUpdate) SetKeyID(v string) *CredentialsUpdate {
-	_u.mutation.SetKeyID(v)
+// SetFingerprint sets the "fingerprint" field.
+func (_u *CredentialsUpdate) SetFingerprint(v string) *CredentialsUpdate {
+	_u.mutation.SetFingerprint(v)
 	return _u
 }
 
-// SetNillableKeyID sets the "key_id" field if the given value is not nil.
-func (_u *CredentialsUpdate) SetNillableKeyID(v *string) *CredentialsUpdate {
+// SetNillableFingerprint sets the "fingerprint" field if the given value is not nil.
+func (_u *CredentialsUpdate) SetNillableFingerprint(v *string) *CredentialsUpdate {
 	if v != nil {
-		_u.SetKeyID(*v)
+		_u.SetFingerprint(*v)
 	}
 	return _u
 }
 
-// ClearKeyID clears the value of the "key_id" field.
-func (_u *CredentialsUpdate) ClearKeyID() *CredentialsUpdate {
-	_u.mutation.ClearKeyID()
+// ClearFingerprint clears the value of the "fingerprint" field.
+func (_u *CredentialsUpdate) ClearFingerprint() *CredentialsUpdate {
+	_u.mutation.ClearFingerprint()
 	return _u
 }
 
@@ -649,11 +649,11 @@ func (_u *CredentialsUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	if value, ok := _u.mutation.Protected(); ok {
 		_spec.SetField(credentials.FieldProtected, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.KeyID(); ok {
-		_spec.SetField(credentials.FieldKeyID, field.TypeString, value)
+	if value, ok := _u.mutation.Fingerprint(); ok {
+		_spec.SetField(credentials.FieldFingerprint, field.TypeString, value)
 	}
-	if _u.mutation.KeyIDCleared() {
-		_spec.ClearField(credentials.FieldKeyID, field.TypeString)
+	if _u.mutation.FingerprintCleared() {
+		_spec.ClearField(credentials.FieldFingerprint, field.TypeString)
 	}
 	if value, ok := _u.mutation.APIKey(); ok {
 		_spec.SetField(credentials.FieldAPIKey, field.TypeString, value)
@@ -1026,23 +1026,23 @@ func (_u *CredentialsUpdateOne) SetNillableProtected(v *bool) *CredentialsUpdate
 	return _u
 }
 
-// SetKeyID sets the "key_id" field.
-func (_u *CredentialsUpdateOne) SetKeyID(v string) *CredentialsUpdateOne {
-	_u.mutation.SetKeyID(v)
+// SetFingerprint sets the "fingerprint" field.
+func (_u *CredentialsUpdateOne) SetFingerprint(v string) *CredentialsUpdateOne {
+	_u.mutation.SetFingerprint(v)
 	return _u
 }
 
-// SetNillableKeyID sets the "key_id" field if the given value is not nil.
-func (_u *CredentialsUpdateOne) SetNillableKeyID(v *string) *CredentialsUpdateOne {
+// SetNillableFingerprint sets the "fingerprint" field if the given value is not nil.
+func (_u *CredentialsUpdateOne) SetNillableFingerprint(v *string) *CredentialsUpdateOne {
 	if v != nil {
-		_u.SetKeyID(*v)
+		_u.SetFingerprint(*v)
 	}
 	return _u
 }
 
-// ClearKeyID clears the value of the "key_id" field.
-func (_u *CredentialsUpdateOne) ClearKeyID() *CredentialsUpdateOne {
-	_u.mutation.ClearKeyID()
+// ClearFingerprint clears the value of the "fingerprint" field.
+func (_u *CredentialsUpdateOne) ClearFingerprint() *CredentialsUpdateOne {
+	_u.mutation.ClearFingerprint()
 	return _u
 }
 
@@ -1408,11 +1408,11 @@ func (_u *CredentialsUpdateOne) sqlSave(ctx context.Context) (_node *Credentials
 	if value, ok := _u.mutation.Protected(); ok {
 		_spec.SetField(credentials.FieldProtected, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.KeyID(); ok {
-		_spec.SetField(credentials.FieldKeyID, field.TypeString, value)
+	if value, ok := _u.mutation.Fingerprint(); ok {
+		_spec.SetField(credentials.FieldFingerprint, field.TypeString, value)
 	}
-	if _u.mutation.KeyIDCleared() {
-		_spec.ClearField(credentials.FieldKeyID, field.TypeString)
+	if _u.mutation.FingerprintCleared() {
+		_spec.ClearField(credentials.FieldFingerprint, field.TypeString)
 	}
 	if value, ok := _u.mutation.APIKey(); ok {
 		_spec.SetField(credentials.FieldAPIKey, field.TypeString, value)

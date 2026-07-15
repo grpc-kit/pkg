@@ -44,7 +44,7 @@ func credentialToProto(row *lion.Credentials) *adminv1.Credential {
 		Status:      adminv1.Credential_Status(row.CredentialStatus),
 		Source:      adminv1.Credential_Source(row.CredentialSource),
 		Protected:   row.Protected,
-		KeyId:       row.KeyID,
+		Fingerprint: row.Fingerprint,
 		CreatedBy:   row.CreatedBy,
 		UpdatedBy:   row.UpdatedBy,
 		CreatedAt:   timestamppb.New(row.CreatedAt),
@@ -116,36 +116,36 @@ func generateCredentialCode(code string) (string, error) {
 	return schema.EnsureCode(code)
 }
 
-// computeKeyID 根据凭证类型计算 key_id（SHA-1 摘要，40 字符 hex，与 Google OIDC kid 风格一致）
-func computeKeyID(cred *adminv1.Credential) string {
+// computeFingerprint 根据凭证类型计算密钥指纹（SHA-256 摘要，64 字符 hex，用于幂等去重）
+func computeFingerprint(cred *adminv1.Credential) string {
 	switch cred.GetType() {
 	case adminv1.Credential_API_KEY:
 		if ak := cred.GetApiKey(); ak != nil {
-			return crypto.SHA1([]byte(ak.ApiKey))
+			return crypto.SHA256([]byte(ak.ApiKey))
 		}
 	case adminv1.Credential_SYMMETRIC_KEY:
-		return crypto.SHA1(cred.GetSymmetricKey())
+		return crypto.SHA256(cred.GetSymmetricKey())
 	case adminv1.Credential_KEY_PAIR:
 		if kp := cred.GetKeyPair(); kp != nil {
-			return crypto.SHA1(kp.PublicKey)
+			return crypto.SHA256(kp.PublicKey)
 		}
 	case adminv1.Credential_X509:
 		if x := cred.GetX509Data(); x != nil {
-			return crypto.SHA1(x.Certificate)
+			return crypto.SHA256(x.Certificate)
 		}
 	case adminv1.Credential_LICENSE:
 		if lic := cred.GetLicense(); lic != nil {
-			return crypto.SHA1(lic.LicenseKey)
+			return crypto.SHA256(lic.LicenseKey)
 		}
 	case adminv1.Credential_SECRET:
-		return crypto.SHA1(cred.GetSymmetricKey())
+		return crypto.SHA256(cred.GetSymmetricKey())
 	}
 	return ""
 }
 
 // isTokenPersistenceRequest 判断是否为 Token 持久化请求。
 // 识别条件：type=SECRET + usage=AUTH + source=USER
-// 用于决定是否执行 key_id 幂等检查。
+// 用于决定是否执行 fingerprint 幂等检查。
 func isTokenPersistenceRequest(cred *adminv1.Credential) bool {
 	return cred.GetType() == adminv1.Credential_SECRET &&
 		cred.GetUsage() == adminv1.Credential_AUTH &&
@@ -201,14 +201,14 @@ func (a *KnownAdminAPI) CreateCredential(ctx context.Context, req *adminv1.Creat
 		return nil, errs.AlreadyExists(ctx).WithMessage(fmt.Sprintf("credential with code %q already exists", code))
 	}
 
-	// 计算 key_id
-	keyID := computeKeyID(cred)
+	// 计算密钥指纹
+	fp := computeFingerprint(cred)
 
-	// Token 持久化幂等检查：若 key_id 已存在则返回已有记录，
+	// Token 持久化幂等检查：若 fingerprint 已存在则返回已有记录，
 	// 避免同一 token 被重复持久化。
-	if isTokenPersistenceRequest(cred) && keyID != "" {
+	if isTokenPersistenceRequest(cred) && fp != "" {
 		existing, err := db.Credentials.Query().
-			Where(credentials.KeyIDEQ(keyID), credentials.DeletedAtIsNil()).
+			Where(credentials.FingerprintEQ(fp), credentials.DeletedAtIsNil()).
 			Only(ctx)
 		if err == nil && existing != nil {
 			return credentialToProto(existing), nil
@@ -229,7 +229,7 @@ func (a *KnownAdminAPI) CreateCredential(ctx context.Context, req *adminv1.Creat
 		SetCredentialSource(int(cred.Source.Number())).
 		SetDisplayName(cred.DisplayName).
 		SetDescription(cred.Description).
-		SetKeyID(keyID)
+		SetFingerprint(fp)
 
 	// 设置审计字段
 	if actor, err := GetUserID(ctx); err == nil && actor != 0 {
@@ -373,7 +373,7 @@ func (a *KnownAdminAPI) ListCredentials(ctx context.Context, req *adminv1.ListCr
 		credentials.FieldCredentialStatus,
 		credentials.FieldCredentialSource,
 		credentials.FieldProtected,
-		credentials.FieldKeyID,
+		credentials.FieldFingerprint,
 		credentials.FieldAPIKey,
 		credentials.FieldPublicKey,
 		credentials.FieldCertificate,
@@ -556,8 +556,8 @@ func parseListCredentialsFilter(filter string) ([]predicate.Credentials, error) 
 			out = append(out, credentials.CodeEqualFold(val))
 		case "display_name":
 			out = append(out, credentials.DisplayNameContainsFold(val))
-		case "key_id":
-			out = append(out, credentials.KeyIDEQ(val))
+		case "fingerprint":
+			out = append(out, credentials.FingerprintEQ(val))
 		}
 	}
 	return out, nil
@@ -648,7 +648,7 @@ func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.Updat
 				if cred.Metadata != nil {
 					update.SetMetadata(cred.Metadata)
 				}
-			case "code", "type", "algorithm", "key_id", "key_material":
+			case "code", "type", "algorithm", "fingerprint", "key_material":
 				// 不可修改字段，忽略
 			}
 		}
@@ -918,7 +918,7 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 
 	sks, err := a.config.db.Credentials.Query().
 		Select(
-			credentials.FieldKeyID,
+			credentials.FieldCode,
 			credentials.FieldPublicKey,
 		).
 		Where(
@@ -957,7 +957,7 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 			Alg: "RS256",
 			E:   e,
 			N:   n,
-			Kid: sk.KeyID,
+			Kid: sk.Code,
 		})
 	}
 

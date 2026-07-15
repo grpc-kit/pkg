@@ -69,7 +69,7 @@ var (
 		{Name: "credential_status", Type: field.TypeInt, Default: 1},
 		{Name: "credential_source", Type: field.TypeInt, Default: 0},
 		{Name: "protected", Type: field.TypeBool, Default: false},
-		{Name: "key_id", Type: field.TypeString, Nullable: true},
+		{Name: "fingerprint", Type: field.TypeString, Nullable: true},
 		{Name: "api_key", Type: field.TypeString, Nullable: true},
 		{Name: "api_secret_encrypted", Type: field.TypeBytes, Nullable: true},
 		{Name: "public_key", Type: field.TypeBytes, Nullable: true},
@@ -91,11 +91,11 @@ var (
 		PrimaryKey: []*schema.Column{LionCredentialsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "credentials_key_id",
+				Name:    "credentials_fingerprint",
 				Unique:  true,
 				Columns: []*schema.Column{LionCredentialsColumns[16]},
 				Annotation: &entsql.IndexAnnotation{
-					Where: "key_id IS NOT NULL AND key_id != ''",
+					Where: "fingerprint IS NOT NULL AND fingerprint != ''",
 				},
 			},
 			{

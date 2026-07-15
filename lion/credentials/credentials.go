@@ -43,8 +43,8 @@ const (
 	FieldCredentialSource = "credential_source"
 	// FieldProtected holds the string denoting the protected field in the database.
 	FieldProtected = "protected"
-	// FieldKeyID holds the string denoting the key_id field in the database.
-	FieldKeyID = "key_id"
+	// FieldFingerprint holds the string denoting the fingerprint field in the database.
+	FieldFingerprint = "fingerprint"
 	// FieldAPIKey holds the string denoting the api_key field in the database.
 	FieldAPIKey = "api_key"
 	// FieldAPISecretEncrypted holds the string denoting the api_secret_encrypted field in the database.
@@ -93,7 +93,7 @@ var Columns = []string{
 	FieldCredentialStatus,
 	FieldCredentialSource,
 	FieldProtected,
-	FieldKeyID,
+	FieldFingerprint,
 	FieldAPIKey,
 	FieldAPISecretEncrypted,
 	FieldPublicKey,
@@ -235,9 +235,9 @@ func ByProtected(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProtected, opts...).ToFunc()
 }
 
-// ByKeyID orders the results by the key_id field.
-func ByKeyID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldKeyID, opts...).ToFunc()
+// ByFingerprint orders the results by the fingerprint field.
+func ByFingerprint(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFingerprint, opts...).ToFunc()
 }
 
 // ByAPIKey orders the results by the api_key field.

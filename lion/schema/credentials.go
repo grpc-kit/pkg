@@ -60,10 +60,10 @@ func (Credentials) Fields() []ent.Field {
 			Comment("是否受保护（受保护记录不可删除，如内置签名密钥）"),
 
 		// === 密钥材料区（proto field 12-18）===
-		// 外部引用
-		field.String("key_id").
+		// 密钥指纹
+		field.String("fingerprint").
 			Optional().
-			Comment("凭证标识，用于查询、幂等与去重。生成策略因类型而异：API_KEY=api_key SHA256, SYMMETRIC_KEY=密钥 SHA256, KEY_PAIR=公钥 SHA256, X509=证书 SHA256, LICENSE=license_key SHA256, SECRET=密文 SHA256"),
+			Comment("密钥指纹（SHA-256 摘要，64 字符 hex），用于幂等去重。生成策略因类型而异：API_KEY=api_key SHA-256, SYMMETRIC_KEY=密钥 SHA-256, KEY_PAIR=公钥 SHA-256, X509=证书 SHA-256, LICENSE=license_key SHA-256, SECRET=密文 SHA-256"),
 
 		// === key_material: API Key（proto oneof 12）===
 		field.String("api_key").
@@ -147,10 +147,10 @@ func (Credentials) Mixin() []ent.Mixin {
 func (Credentials) Indexes() []ent.Index {
 	return []ent.Index{
 		// code 唯一索引已在字段定义中设置 Unique()
-		// key_id 条件唯一索引：仅非空值唯一（token 场景存 SHA-1 摘要需幂等去重；
-		// License 等类型可能不设 key_id，多条 NULL 不冲突）
-		index.Fields("key_id").Unique().Annotations(
-			entsql.IndexWhere("key_id IS NOT NULL AND key_id != ''"),
+		// fingerprint 条件唯一索引：仅非空值唯一（token 场景存 SHA-256 摘要需幂等去重；
+		// License 等类型可能不设 fingerprint，多条 NULL 不冲突）
+		index.Fields("fingerprint").Unique().Annotations(
+			entsql.IndexWhere("fingerprint IS NOT NULL AND fingerprint != ''"),
 		),
 		// 按类型过滤（管理后台分类展示）
 		index.Fields("credential_type"),
