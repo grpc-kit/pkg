@@ -2,7 +2,10 @@ package cfg
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -430,4 +433,76 @@ func (s *SecurityConfig) addHTTPHandler(handler http.Handler) http.Handler {
 
 func (s *SecurityConfig) addHTTPHandlerFunc(handler http.HandlerFunc) http.Handler {
 	return s.addHTTPHandler(handler)
+}
+
+// VerifyHTTPRequest 在 HTTP 层验证请求的身份认证（Basic Auth / Bearer Token）。
+// 若 Security 未启用则直接放行；验证成功返回 nil，失败返回 error。
+// 该方法签名满足 mcp.AuthFunc（func(*http.Request) error），可直接作为 MCP 认证回调使用。
+func (s *SecurityConfig) VerifyHTTPRequest(r *http.Request) error {
+	if s == nil || !s.Enable {
+		return nil
+	}
+
+	if s.Authentication == nil {
+		return fmt.Errorf("authentication not configured")
+	}
+
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return fmt.Errorf("missing Authorization header")
+	}
+
+	// 尝试 Basic Auth 验证
+	if strings.HasPrefix(authHeader, "Basic ") && len(s.Authentication.HTTPUsers) > 0 {
+		basicToken := strings.TrimPrefix(authHeader, "Basic ")
+		payload, err := base64.StdEncoding.DecodeString(basicToken)
+		if err != nil {
+			return fmt.Errorf("invalid basic auth encoding: %w", err)
+		}
+
+		tmps := strings.SplitN(string(payload), ":", 2)
+		if len(tmps) != 2 {
+			return fmt.Errorf("invalid basic auth format")
+		}
+
+		for _, v := range s.Authentication.HTTPUsers {
+			if v == nil {
+				continue
+			}
+			if v.Username == tmps[0] {
+				pwTrim := strings.TrimSpace(v.Password)
+				okAuth := pwTrim != "" && pwTrim == tmps[1]
+				if !okAuth {
+					eff := basicAuthEffectivePasswordHash(v)
+					if eff != "" {
+						h := sha256.New()
+						h.Write([]byte(tmps[1]))
+						userHash := hex.EncodeToString(h.Sum(nil))
+						okAuth = eff == userHash
+					}
+				}
+				if okAuth {
+					return nil
+				}
+			}
+		}
+		return fmt.Errorf("invalid basic auth credentials")
+	}
+
+	// 尝试 Bearer Token 验证
+	if strings.HasPrefix(authHeader, "Bearer ") && s.Authentication.OIDCProvider != nil {
+		bearerToken := strings.TrimPrefix(authHeader, "Bearer ")
+		if bearerToken == "" {
+			return fmt.Errorf("empty bearer token")
+		}
+
+		ctx := context.TODO()
+		_, err := s.verifyBearerToken(ctx, bearerToken)
+		if err != nil {
+			return fmt.Errorf("invalid bearer token: %w", err)
+		}
+		return nil
+	}
+
+	return fmt.Errorf("unauthorized")
 }

@@ -99,8 +99,11 @@ func (c *LocalConfig) registerGateway(ctx context.Context,
 			return hmux, fmt.Errorf("create mcp server: %w", mcpErr)
 		}
 		if mcpSrv != nil {
-			mcpHandler := c.Observables.addHTTPHandler(mcpSrv.Handler())
-			hmux.Handle(c.AIConnector.MCPServer.Path, mcpHandler)
+			// 中间件包装顺序：Auth -> Observables(tracing) -> MCP handler
+			handler := mcpSrv.Handler()
+			handler = mcp.NewAuthMiddleware(c.Security.VerifyHTTPRequest, handler)
+			handler = c.Observables.addHTTPHandler(handler)
+			hmux.Handle(c.AIConnector.MCPServer.Path, handler)
 			c.mcpServer = mcpSrv
 		}
 	}
