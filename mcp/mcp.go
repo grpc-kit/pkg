@@ -65,3 +65,22 @@ func (s *Server) Handler() http.Handler {
 func (s *Server) MCPServer() *mcp.Server {
 	return s.mcpServer
 }
+
+// Close 优雅关闭 MCP Server 的所有活跃 sessions
+// 采用 best-effort 策略：遍历所有活跃 session 逐个关闭，收集第一个错误但继续关闭剩余 session。
+// SDK handler 无导出的 Close 方法，关闭 session 后 HTTP 连接会自然终止。
+func (s *Server) Close() error {
+	if s == nil || s.mcpServer == nil {
+		return nil
+	}
+
+	var firstErr error
+	for session := range s.mcpServer.Sessions() {
+		if err := session.Close(); err != nil {
+			if firstErr == nil {
+				firstErr = err
+			}
+		}
+	}
+	return firstErr
+}

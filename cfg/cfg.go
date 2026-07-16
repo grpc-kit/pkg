@@ -396,6 +396,14 @@ func (c *LocalConfig) Register(ctx context.Context,
 func (c *LocalConfig) Deregister() error {
 	// TODO; 释放各总资源
 	ctx := context.TODO()
+
+	// 关闭 MCP Server 活跃 sessions（在 HTTP server 关闭前）
+	if c.mcpServer != nil {
+		if err := c.mcpServer.Close(); err != nil {
+			c.logger.Warnf("close mcp server: %v", err)
+		}
+	}
+
 	if err := c.Observables.shutdown(ctx); err != nil {
 		return err
 	}

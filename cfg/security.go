@@ -504,5 +504,13 @@ func (s *SecurityConfig) VerifyHTTPRequest(r *http.Request) error {
 		return nil
 	}
 
-	return fmt.Errorf("unauthorized")
+	// 区分未匹配的认证场景，提供更有针对性的错误信息
+	switch {
+	case strings.HasPrefix(authHeader, "Bearer "):
+		return fmt.Errorf("bearer token authentication not configured")
+	case strings.HasPrefix(authHeader, "Basic "):
+		return fmt.Errorf("basic auth has no configured users")
+	default:
+		return fmt.Errorf("unsupported authentication method")
+	}
 }

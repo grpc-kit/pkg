@@ -60,7 +60,3 @@ func (c *LocalConfig) initAIConnector() error {
 
 	return nil
 }
-
-func (a *AIConnectorConfig) defaultValues() {
-	return
-}

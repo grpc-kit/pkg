@@ -141,3 +141,70 @@ func TestMCPHandler(t *testing.T) {
 		initResult.ServerInfo.Version,
 		initResult.ProtocolVersion)
 }
+
+// --- Close 方法测试 ---
+
+func TestServerClose_Nil(t *testing.T) {
+	// nil Server 不应 panic
+	var s *Server
+	if err := s.Close(); err != nil {
+		t.Fatalf("Close() on nil Server should return nil, got: %v", err)
+	}
+}
+
+func TestServerClose_NoSessions(t *testing.T) {
+	srv, err := NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer failed: %v", err)
+	}
+	if srv == nil {
+		t.Fatalf("expected non-nil server")
+	}
+
+	// 无活跃 session 时 Close 不应报错
+	if err := srv.Close(); err != nil {
+		t.Fatalf("Close() with no sessions should return nil, got: %v", err)
+	}
+}
+
+func TestServerClose_WithSessions(t *testing.T) {
+	srv, err := NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer failed: %v", err)
+	}
+	if srv == nil {
+		t.Fatalf("expected non-nil server")
+	}
+
+	httpServer := httptest.NewServer(srv.Handler())
+	defer httpServer.Close()
+
+	ctx := context.Background()
+	transport := &mcp.StreamableClientTransport{
+		Endpoint: httpServer.URL,
+	}
+	client := mcp.NewClient(&mcp.Implementation{
+		Name:    "test-client-close",
+		Version: "0.0.1",
+	}, nil)
+
+	session, err := client.Connect(ctx, transport, nil)
+	if err != nil {
+		t.Fatalf("client.Connect failed: %v", err)
+	}
+	t.Logf("client connected, session active")
+
+	// 关闭 Server 端所有 sessions
+	if err := srv.Close(); err != nil {
+		t.Fatalf("Close() returned error: %v", err)
+	}
+
+	// 验证 session 被关闭：客户端后续操作应返回错误
+	// 尝试 Ping，预期失败
+	pingErr := session.Ping(ctx, nil)
+	if pingErr == nil {
+		t.Errorf("expected Ping to fail after server Close(), but succeeded")
+	} else {
+		t.Logf("Ping after Close() returned expected error: %v", pingErr)
+	}
+}
