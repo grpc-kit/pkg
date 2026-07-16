@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -105,10 +106,99 @@ func (c *LocalConfig) registerGateway(ctx context.Context,
 			handler = c.Observables.addHTTPHandler(handler)
 			hmux.Handle(c.AIConnector.MCPServer.Path, handler)
 			c.mcpServer = mcpSrv
+
+			// 注册内置 Tools
+			c.registerMCPBuiltinTools(mcpSrv, forwardGWAddr, grpcListenPort, defaultOpts)
 		}
 	}
 
 	return hmux, err
+}
+
+// registerMCPBuiltinTools 为 MCP Server 注册内置 Tools（health_check、get_service_info、
+// list_grpc_methods、get_config）。所有回调均以闭包形式传入，避免 pkg/mcp 反向依赖 pkg/cfg。
+func (c *LocalConfig) registerMCPBuiltinTools(mcpSrv *mcp.Server, forwardGWAddr string, grpcListenPort int, defaultOpts []grpc.DialOption) {
+	if mcpSrv == nil {
+		return
+	}
+	server := mcpSrv.MCPServer()
+
+	// --- grpcConnFn: 懒创建 gRPC 连接，缓存于闭包变量 ---
+	var cachedConn *grpc.ClientConn
+	grpcConnFn := func() (*grpc.ClientConn, error) {
+		if cachedConn != nil {
+			return cachedConn, nil
+		}
+		target := fmt.Sprintf("%s:%d", forwardGWAddr, grpcListenPort)
+		conn, err := grpc.DialContext(context.Background(), target, defaultOpts...)
+		if err != nil {
+			return nil, err
+		}
+		cachedConn = conn
+		return cachedConn, nil
+	}
+
+	// --- infoFn: 返回服务元信息 ---
+	infoFn := func() (map[string]any, error) {
+		info := vars.GetVersion()
+		return map[string]any{
+			"appname":        info.Appname,
+			"releaseVersion": info.ReleaseVersion,
+			"gitCommit":      info.GitCommit,
+			"gitBranch":      info.GitBranch,
+			"buildDate":      info.BuildDate,
+			"goVersion":      info.GoVersion,
+			"compiler":       info.Compiler,
+			"platform":       info.Platform,
+			"cliVersion":     info.CliVersion,
+			"commitUnixTime": info.CommitUnixTime,
+		}, nil
+	}
+
+	// --- methodsFn: 列出所有 gRPC 方法及其 HTTP 映射 ---
+	methodsFn := func() ([]map[string]any, error) {
+		if c.adminServer == nil {
+			return []map[string]any{}, nil
+		}
+		resp, err := c.adminServer.ListServiceActions(context.Background(), &adminv1.ListServiceActionsRequest{
+			PageSize: 1000,
+		})
+		if err != nil {
+			return nil, err
+		}
+		methods := make([]map[string]any, 0, len(resp.GetActions()))
+		for _, action := range resp.GetActions() {
+			methods = append(methods, map[string]any{
+				"code":        action.GetCode(),
+				"grpcMethod":  action.GetGrpcMethod(),
+				"displayName": action.GetDisplayName(),
+				"description": action.GetDescription(),
+				"tags":        action.GetTags(),
+			})
+		}
+		return methods, nil
+	}
+
+	// --- cfgFn: 返回脱敏后的运行时配置快照 ---
+	cfgFn := func() (map[string]any, error) {
+		snapshot := c.toAdminLocalConfigSnapshot()
+		b, err := json.Marshal(snapshot)
+		if err != nil {
+			return nil, fmt.Errorf("marshal config snapshot: %w", err)
+		}
+		var m map[string]any
+		if err := json.Unmarshal(b, &m); err != nil {
+			return nil, fmt.Errorf("unmarshal config snapshot: %w", err)
+		}
+		return m, nil
+	}
+
+	mcp.RegisterBuiltinTools(server, mcp.BuiltinToolsConfig{
+		GRPCConn:    grpcConnFn,
+		ServiceInfo: infoFn,
+		GrpcMethods: methodsFn,
+		Config:      cfgFn,
+	})
 }
 
 // getHTTPServeMux 获取通用的HTTP路由规则
