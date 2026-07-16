@@ -1,4 +1,4 @@
-package mcp
+package tools
 
 import (
 	"context"
@@ -9,6 +9,8 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/grpc"
+
+	mcpserver "github.com/grpc-kit/pkg/mcp"
 )
 
 // --- Mock 回调函数 ---
@@ -62,7 +64,7 @@ func mockConfigFn() (map[string]any, error) {
 func setupTestServer(t *testing.T, cfg BuiltinToolsConfig) (*mcp.ClientSession, *httptest.Server) {
 	t.Helper()
 
-	srv, err := NewServer(true, "streamable_http")
+	srv, err := mcpserver.NewServer(true, "streamable_http")
 	if err != nil {
 		t.Fatalf("NewServer failed: %v", err)
 	}

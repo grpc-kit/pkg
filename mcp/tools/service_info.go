@@ -1,4 +1,4 @@
-package mcp
+package tools
 
 import (
 	"context"
@@ -7,20 +7,20 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// registerGrpcMethodsTool 注册 list_grpc_methods Tool。
-// 若 methodsFn 为 nil，跳过注册。
-func registerGrpcMethodsTool(server *mcp.Server, methodsFn GrpcMethodsFunc) {
-	if methodsFn == nil {
+// registerServiceInfoTool 注册 get_service_info Tool。
+// 若 infoFn 为 nil，跳过注册。
+func registerServiceInfoTool(server *mcp.Server, infoFn ServiceInfoFunc) {
+	if infoFn == nil {
 		return
 	}
 
 	tool := &mcp.Tool{
-		Name:        "list_grpc_methods",
-		Description: "List all registered gRPC methods with their HTTP mappings and descriptions",
+		Name:        "get_service_info",
+		Description: "Get service metadata: name, version, git commit, build date, go version, etc.",
 	}
 
 	mcp.AddTool(server, tool, func(ctx context.Context, req *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, any, error) {
-		methods, err := methodsFn()
+		info, err := infoFn()
 		if err != nil {
 			return &mcp.CallToolResult{
 				IsError: true,
@@ -30,12 +30,7 @@ func registerGrpcMethodsTool(server *mcp.Server, methodsFn GrpcMethodsFunc) {
 			}, nil, nil
 		}
 
-		result := map[string]any{
-			"methods": methods,
-			"total":   len(methods),
-		}
-
-		b, err := json.Marshal(result)
+		b, err := json.Marshal(info)
 		if err != nil {
 			return &mcp.CallToolResult{
 				IsError: true,

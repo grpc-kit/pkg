@@ -38,6 +38,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/mcp"
+	mcptools "github.com/grpc-kit/pkg/mcp/tools"
 	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
 	"github.com/grpc-kit/pkg/vars"
 )
@@ -193,7 +194,7 @@ func (c *LocalConfig) registerMCPBuiltinTools(mcpSrv *mcp.Server, forwardGWAddr 
 		return m, nil
 	}
 
-	mcp.RegisterBuiltinTools(server, mcp.BuiltinToolsConfig{
+	mcptools.RegisterBuiltinTools(server, mcptools.BuiltinToolsConfig{
 		GRPCConn:    grpcConnFn,
 		ServiceInfo: infoFn,
 		GrpcMethods: methodsFn,
