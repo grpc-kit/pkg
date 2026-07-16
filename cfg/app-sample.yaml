@@ -348,6 +348,14 @@ cloudevents:
     event:
       must_succeed: false # 默认必须成功，会阻塞请求
 
+# AI 连接器配置（MCP Server）
+aiconnector:
+  enable: false
+  mcp_server:
+    enable: false
+    path: /mcp
+    transport: streamable_http
+
 # 应用私有配置
 independent:
   name: grpc-kit

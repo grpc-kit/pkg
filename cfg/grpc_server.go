@@ -36,6 +36,7 @@ import (
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/mcp"
 	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
 	"github.com/grpc-kit/pkg/vars"
 )
@@ -90,6 +91,19 @@ func (c *LocalConfig) registerGateway(ctx context.Context,
 			c.GetClientDialOption(defaultOpts...))
 	}
 	// TODO;
+
+	// 挂载 MCP Server handler（若启用）
+	if c.AIConnector != nil && c.AIConnector.MCPServer.Enable {
+		mcpSrv, mcpErr := mcp.NewServer(c.AIConnector.MCPServer.Enable, c.AIConnector.MCPServer.Transport)
+		if mcpErr != nil {
+			return hmux, fmt.Errorf("create mcp server: %w", mcpErr)
+		}
+		if mcpSrv != nil {
+			mcpHandler := c.Observables.addHTTPHandler(mcpSrv.Handler())
+			hmux.Handle(c.AIConnector.MCPServer.Path, mcpHandler)
+			c.mcpServer = mcpSrv
+		}
+	}
 
 	return hmux, err
 }

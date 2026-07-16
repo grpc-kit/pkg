@@ -21,6 +21,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/mcp"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
@@ -90,6 +91,7 @@ type LocalConfig struct {
 	Observables *ObservablesConfig `json:",omitempty"` // 可观测性配置
 	CloudEvents *CloudEventsConfig `json:",omitempty"` // 公共事件配置
 	Automations *AutomationsConfig `json:",omitempty"` // 流程编排配置
+	AIConnector *AIConnectorConfig `json:",omitempty"` // 智能连接配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
 	logger      *logrus.Entry
@@ -98,6 +100,7 @@ type LocalConfig struct {
 	rpcServer   *rpc.Server
 	adminServer *admin.KnownAdminAPI
 	lionClient  *lion.Client
+	mcpServer   *mcp.Server
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
@@ -316,6 +319,11 @@ func (c *LocalConfig) Init() error {
 
 	if err := c.initAutomations(); err != nil {
 		return err
+	}
+
+	// AIConnector 初始化放在最后，依赖其他子系统已就绪
+	if err := c.initAIConnector(); err != nil {
+		return fmt.Errorf("init aiconnector: %w", err)
 	}
 
 	return nil
