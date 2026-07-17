@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/pprof"
 	"net/textproto"
@@ -200,6 +201,36 @@ func (c *LocalConfig) registerMCPBuiltinTools(mcpSrv *mcp.Server, forwardGWAddr 
 		GrpcMethods: methodsFn,
 		Config:      cfgFn,
 	})
+}
+
+// runAutoBridge 将已注册的 gRPC 方法自动转换为 MCP Tools。
+// 必须在 SetMicroserviceGatewayYAML 成功之后调用，否则 gateway/swagger 配置为 nil。
+// 幂等：server.AddTool 对同名 tool 为覆盖语义，可安全重复调用。
+func (c *LocalConfig) runAutoBridge() {
+	if c.mcpServer == nil || c.adminServer == nil {
+		return
+	}
+
+	if c.rpcConfig == nil || c.rpcConfig.HTTPAddress == "" {
+		log.Printf("[mcp] HTTPAddress is empty; skip AutoBridge")
+		return
+	}
+	httpBaseURL := "http://" + c.rpcConfig.HTTPAddress
+
+	httpClient := &http.Client{Timeout: 30 * time.Second}
+	gatewayCfg, gwErr := c.adminServer.GetMicroserviceGatewayServiceConfig()
+	if gwErr != nil {
+		log.Printf("[mcp] get gateway service config: %v", gwErr)
+	}
+	swaggerCfg, swErr := c.adminServer.GetMicroserviceGatewaySwagger()
+	if swErr != nil {
+		log.Printf("[mcp] get gateway swagger: %v", swErr)
+	}
+
+	server := c.mcpServer.MCPServer()
+	if err := mcptools.AutoBridge(server, nil, httpClient, httpBaseURL, gatewayCfg, swaggerCfg); err != nil {
+		log.Printf("[mcp] autobridge: %v", err)
+	}
 }
 
 // getHTTPServeMux 获取通用的HTTP路由规则

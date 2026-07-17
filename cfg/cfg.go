@@ -478,6 +478,8 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 		if err := c.adminServer.SetMicroserviceGatewayYAML(assets); err != nil {
 			return err
 		}
+		// gateway/swagger YAML 已加载，现在执行 AutoBridge 将 gRPC 方法注册为 MCP Tools
+		c.runAutoBridge()
 	}
 
 	comps := []string{"admin", "openapi", "webroot"}

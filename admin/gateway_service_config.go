@@ -125,12 +125,24 @@ func (a *KnownAdminAPI) getMicroserviceGatewayServiceConfig() (*serviceconfig.Se
 	return a.config.microserviceGatewayServiceConfig, nil
 }
 
+// GetMicroserviceGatewayServiceConfig 公开的 gateway 配置访问器，委托给私有方法。
+// 该方法在内部错误（如配置未加载）时返回 (nil, error)，由调用方按需处理。
+func (a *KnownAdminAPI) GetMicroserviceGatewayServiceConfig() (*serviceconfig.Service, error) {
+	return a.getMicroserviceGatewayServiceConfig()
+}
+
 func (a *KnownAdminAPI) getMicroserviceGatewaySwagger() (*openapiconfig.OpenAPIConfig, error) {
 	if a == nil || a.config == nil || a.config.microserviceGatewaySwagger == nil {
 		return nil, fmt.Errorf("microservice gateway openapiv2 is nil")
 	}
 
 	return a.config.microserviceGatewaySwagger, nil
+}
+
+// GetMicroserviceGatewaySwagger 公开的 swagger 配置访问器，委托给私有方法。
+// 该方法在内部错误（如配置未加载）时返回 (nil, error)，由调用方按需处理。
+func (a *KnownAdminAPI) GetMicroserviceGatewaySwagger() (*openapiconfig.OpenAPIConfig, error) {
+	return a.getMicroserviceGatewaySwagger()
 }
 
 func (a *KnownAdminAPI) getKnownAdminGatewayServiceConfig() (*serviceconfig.Service, error) {
