@@ -301,6 +301,24 @@ func bridgeHandler(
 	if contentSet {
 		httpReq.Header.Set("Content-Type", "application/json")
 	}
+	// 透传认证：把 MCP 客户端原始 Authorization header 设置到 outgoing HTTP 请求上，
+	// 使 gateway 能通过既有 optionWithMetada 机制把 Authorization 透传给 gRPC 服务端
+	// 进行鉴权与审计。
+	//
+	// 通过 req.Extra.Header 获取 -- MCP SDK 在 servePOST 中会把当前 POST 请求的
+	// HTTP headers 注入到 RequestExtra.Header（见 SDK streamable.go）。这是最可靠的
+	// 方式，因为每个 tool call 请求的 headers 都是独立的，不受 stateful session
+	// 复用的影响。
+	//
+	// 注：middleware.go 中 NewAuthMiddleware 也通过 context 注入 Authorization
+	// （ContextWithAuthHeader/AuthHeaderFromContext），作为未来扩展点（如 OPA per-tool
+	// 鉴权中间件链）预留。但 bridgeHandler 不依赖 context 路径，避免 pkg/mcp/tools
+	// -> pkg/mcp 的测试期循环依赖。
+	if req != nil && req.Extra != nil && req.Extra.Header != nil {
+		if authHeader := req.Extra.Header.Get("Authorization"); authHeader != "" {
+			httpReq.Header.Set("Authorization", authHeader)
+		}
+	}
 
 	resp, err := httpClient.Do(httpReq)
 	if err != nil {

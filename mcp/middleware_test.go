@@ -105,6 +105,69 @@ func TestLoggingMiddleware(t *testing.T) {
 	}
 }
 
+// captureAuthHandler 捕获下游收到的 context 中的 Authorization 值。
+type captureAuthHandler struct {
+	got string
+}
+
+func (c *captureAuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	c.got = AuthHeaderFromContext(r.Context())
+	w.WriteHeader(http.StatusOK)
+}
+
+func TestAuthMiddleware_InjectsAuthHeader(t *testing.T) {
+	// 设置 Authorization header -> authFn nil -> 下游通过 AuthHeaderFromContext 拿到原始值
+	capture := &captureAuthHandler{}
+	h := NewAuthMiddleware(nil, capture)
+	req := httptest.NewRequest(http.MethodPost, "/mcp", nil)
+	req.Header.Set("Authorization", "Bearer test-token-123")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	if capture.got != "Bearer test-token-123" {
+		t.Fatalf("expected downstream to receive 'Bearer test-token-123', got %q", capture.got)
+	}
+}
+
+func TestAuthMiddleware_AuthFnNilStillInjects(t *testing.T) {
+	// authFn nil + 无 Authorization header -> 下游拿到的 authHeader 为空字符串（不 panic）
+	capture := &captureAuthHandler{}
+	h := NewAuthMiddleware(nil, capture)
+	req := httptest.NewRequest(http.MethodPost, "/mcp", nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	if capture.got != "" {
+		t.Fatalf("expected empty auth header, got %q", capture.got)
+	}
+}
+
+func TestAuthMiddleware_AuthFnErrorDoesNotInject(t *testing.T) {
+	// authFn 返回 error -> 下游不调用，不注入
+	capture := &captureAuthHandler{}
+	authFn := func(r *http.Request) error {
+		return errUnauthorized("invalid token")
+	}
+	h := NewAuthMiddleware(authFn, capture)
+	req := httptest.NewRequest(http.MethodPost, "/mcp", nil)
+	req.Header.Set("Authorization", "Bearer invalid")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d", rec.Code)
+	}
+	if capture.got != "" {
+		t.Fatalf("expected no injection on auth failure, but downstream received %q", capture.got)
+	}
+}
+
 // errUnauthorized 是测试用的简单 error
 type testError string
 

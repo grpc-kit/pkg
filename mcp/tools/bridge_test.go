@@ -389,6 +389,10 @@ func TestAutoBridge_ToolCall(t *testing.T) {
 		if r.URL.Path != "/v1/items/42" {
 			t.Errorf("expected /v1/items/42, got %s", r.URL.Path)
 		}
+		// 验证 Authorization header 已透传到 gateway
+		if got := r.Header.Get("Authorization"); got != "Bearer test-token" {
+			t.Errorf("gateway: expected Authorization 'Bearer test-token', got %q", got)
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(`{"id":"42","name":"alice"}`))
@@ -415,7 +419,18 @@ func TestAutoBridge_ToolCall(t *testing.T) {
 	defer httpServer.Close()
 
 	ctx := context.Background()
-	transport := &mcp.StreamableClientTransport{Endpoint: httpServer.URL}
+	// 使用自定义 HTTPClient，通过 RoundTripper 为每个 MCP POST 请求注入 Authorization header，
+	// 模拟真实 MCP 客户端携带认证凭据的场景。
+	transport := &mcp.StreamableClientTransport{
+		Endpoint: httpServer.URL,
+		HTTPClient: &http.Client{
+			Transport: &authInjectingTransport{
+				base:           http.DefaultTransport,
+				authorization:  "Bearer test-token",
+				targetEndpoint: httpServer.URL,
+			},
+		},
+	}
 	client := mcp.NewClient(&mcp.Implementation{Name: "test-client", Version: "0.0.1"}, nil)
 	session, err := client.Connect(ctx, transport, nil)
 	if err != nil {
@@ -444,6 +459,26 @@ func TestAutoBridge_ToolCall(t *testing.T) {
 	if !strings.Contains(tc.Text, `"id":"42"`) {
 		t.Errorf("unexpected response body: %s", tc.Text)
 	}
+}
+
+// authInjectingTransport 是一个 http.RoundTripper 包装器，
+// 为发往 targetEndpoint 的请求注入指定的 Authorization header。
+// 用于测试 MCP 客户端携带认证凭据时 AutoBridge 的透传行为。
+type authInjectingTransport struct {
+	base           http.RoundTripper
+	authorization  string
+	targetEndpoint string
+}
+
+func (t *authInjectingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// 仅对发往 MCP server 的请求注入 Authorization（不干扰 gateway 的 mock 请求）
+	if req.URL.Host == "" || strings.Contains(t.targetEndpoint, req.URL.Host) {
+		// 克隆请求以避免修改原始请求
+		clone := req.Clone(req.Context())
+		clone.Header.Set("Authorization", t.authorization)
+		return t.base.RoundTrip(clone)
+	}
+	return t.base.RoundTrip(req)
 }
 
 func TestAutoBridge_ToolCallError(t *testing.T) {
@@ -539,5 +574,132 @@ func TestAutoBridge_ToolCallMissingPathParam(t *testing.T) {
 		if ok && !strings.Contains(tc.Text, "id") {
 			t.Errorf("expected error to mention 'id', got: %s", tc.Text)
 		}
+	}
+}
+
+// TestAutoBridge_AuthPropagation 验证 MCP 客户端携带 Authorization header 时，
+// AutoBridge 的 bridgeHandler 能通过 req.Extra.Header 获取并透传给 gateway。
+// 这是 stateful 模式下的核心认证透传路径。
+func TestAutoBridge_AuthPropagation(t *testing.T) {
+	// mock gateway 记录收到的 Authorization
+	var gwAuthHeader string
+	gwSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gwAuthHeader = r.Header.Get("Authorization")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"id":"1","name":"ok"}`))
+	}))
+	defer gwSrv.Close()
+
+	mcpSrv, err := mcpserver.NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+
+	cfg := makeGatewayCfg(
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.GetItem",
+			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items/{id}"},
+		},
+	)
+
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil); err != nil {
+		t.Fatalf("AutoBridge: %v", err)
+	}
+
+	httpServer := httptest.NewServer(mcpSrv.Handler())
+	defer httpServer.Close()
+
+	ctx := context.Background()
+	transport := &mcp.StreamableClientTransport{
+		Endpoint: httpServer.URL,
+		HTTPClient: &http.Client{
+			Transport: &authInjectingTransport{
+				base:           http.DefaultTransport,
+				authorization:  "Bearer propagation-test",
+				targetEndpoint: httpServer.URL,
+			},
+		},
+	}
+	client := mcp.NewClient(&mcp.Implementation{Name: "test-client", Version: "0.0.1"}, nil)
+	session, err := client.Connect(ctx, transport, nil)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	defer session.Close()
+
+	result, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      "test_service_get_item",
+		Arguments: map[string]any{"id": "1"},
+	})
+	if err != nil {
+		t.Fatalf("CallTool: %v", err)
+	}
+	if result.IsError {
+		t.Fatalf("unexpected error: %v", result.Content)
+	}
+
+	// 验证 gateway 收到了完整的 Authorization header
+	if gwAuthHeader != "Bearer propagation-test" {
+		t.Errorf("expected gateway to receive Authorization 'Bearer propagation-test', got %q", gwAuthHeader)
+	}
+}
+
+// TestAutoBridge_AuthPropagation_NoAuth 验证 MCP 客户端不携带 Authorization header 时，
+// bridgeHandler 不会设置空值或 panic，gateway 收到的 Authorization 为空。
+func TestAutoBridge_AuthPropagation_NoAuth(t *testing.T) {
+	// mock gateway 记录收到的 Authorization
+	var gwAuthHeader string
+	gwSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gwAuthHeader = r.Header.Get("Authorization")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"id":"1","name":"ok"}`))
+	}))
+	defer gwSrv.Close()
+
+	mcpSrv, err := mcpserver.NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+
+	cfg := makeGatewayCfg(
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.GetItem",
+			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items/{id}"},
+		},
+	)
+
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil); err != nil {
+		t.Fatalf("AutoBridge: %v", err)
+	}
+
+	httpServer := httptest.NewServer(mcpSrv.Handler())
+	defer httpServer.Close()
+
+	ctx := context.Background()
+	// 不注入 Authorization 的标准 transport
+	transport := &mcp.StreamableClientTransport{Endpoint: httpServer.URL}
+	client := mcp.NewClient(&mcp.Implementation{Name: "test-client", Version: "0.0.1"}, nil)
+	session, err := client.Connect(ctx, transport, nil)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	defer session.Close()
+
+	result, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      "test_service_get_item",
+		Arguments: map[string]any{"id": "1"},
+	})
+	if err != nil {
+		t.Fatalf("CallTool: %v", err)
+	}
+	if result.IsError {
+		t.Fatalf("unexpected error: %v", result.Content)
+	}
+
+	// 验证 gateway 未收到 Authorization
+	if gwAuthHeader != "" {
+		t.Errorf("expected empty Authorization at gateway, got %q", gwAuthHeader)
 	}
 }
