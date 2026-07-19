@@ -23,9 +23,9 @@ type MCPServerConfig struct {
 
 	// AllowedTags 控制 AutoBridge 仅暴露 tags 命中此白名单的 gRPC 方法为 MCP tool。
 	// 匹配语义：operation 的 tags 列表中只要有一个值出现在 AllowedTags 中即命中（OR 语义）。
-	// 空列表 = 不过滤，暴露全部有 HTTP 映射的 gRPC 方法（向后兼容）。
-	// 非空列表 = 仅暴露命中的方法，未设 tags 或未命中的方法不暴露。
-	// 示例：allowed_tags: ["mcp"] 仅暴露 openapiv2.yaml 中标注了 tags: [..., "mcp"] 的方法。
+	// 默认值 ["mcp"]：仅暴露 openapiv2.yaml 中标注了 tags: [..., "mcp"] 的方法（最小暴露原则）。
+	// 如需暴露其他 tag 的方法，需在此显式追加，例如 allowed_tags: ["mcp", "chat"]。
+	// 注意：未设 tags 或未命中白名单的方法不会被暴露。
 	AllowedTags []string `mapstructure:"allowed_tags"`
 }
 
@@ -34,9 +34,10 @@ func DefaultAIConnectorConfig() *AIConnectorConfig {
 	return &AIConnectorConfig{
 		Enable: false,
 		MCPServer: MCPServerConfig{
-			Enable:    false,
-			Path:      "/mcp",
-			Transport: "streamable_http",
+			Enable:      false,
+			Path:        "/mcp",
+			Transport:   "streamable_http",
+			AllowedTags: []string{"mcp"},
 		},
 	}
 }
@@ -56,6 +57,9 @@ func (c *LocalConfig) initAIConnector() error {
 	}
 	if mcp.Transport == "" {
 		mcp.Transport = "streamable_http"
+	}
+	if len(mcp.AllowedTags) == 0 {
+		mcp.AllowedTags = []string{"mcp"}
 	}
 
 	// 注意：MCP Server 的名称和版本使用 pkg/vars/base.go 中的

@@ -783,7 +783,9 @@ func TestAutoBridge_TagFilter_Whitelist(t *testing.T) {
 	}
 }
 
-// TestAutoBridge_TagFilter_EmptyWhitelist 验证 allowedTags 为空时不过滤（向后兼容）。
+// TestAutoBridge_TagFilter_EmptyWhitelist 验证 AutoBridge 内部 API：allowedTags=nil 时不过滤（暴露全部）。
+// 注意：生产路径通过 AllowedTagsForMCP() 调用时永远不会返回 nil（默认值 ["mcp"]），
+// 此测试仅验证 AutoBridge 函数本身的 nil 行为。
 func TestAutoBridge_TagFilter_EmptyWhitelist(t *testing.T) {
 	mcpSrv, err := mcpserver.NewServer(true, "streamable_http")
 	if err != nil {

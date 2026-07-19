@@ -204,10 +204,13 @@ func (c *LocalConfig) registerMCPBuiltinTools(mcpSrv *mcp.Server, forwardGWAddr 
 }
 
 // AllowedTagsForMCP 返回 MCP AutoBridge 的 tag 白名单。
-// 当 AIConnector 未配置时返回 nil（不过滤，向后兼容）。
+// 未配置时返回默认值 ["mcp"]（最小暴露原则：仅暴露标注了 mcp tag 的方法）。
 func (c *LocalConfig) AllowedTagsForMCP() []string {
 	if c.AIConnector == nil {
-		return nil
+		return []string{"mcp"}
+	}
+	if len(c.AIConnector.MCPServer.AllowedTags) == 0 {
+		return []string{"mcp"}
 	}
 	return c.AIConnector.MCPServer.AllowedTags
 }

@@ -31,6 +31,9 @@ func testInitAIConnectorNil(t *testing.T) {
 	if c.AIConnector.MCPServer.Transport != "streamable_http" {
 		t.Errorf("MCPServer.Transport = %q, want %q", c.AIConnector.MCPServer.Transport, "streamable_http")
 	}
+	if got := c.AIConnector.MCPServer.AllowedTags; len(got) != 1 || got[0] != "mcp" {
+		t.Errorf("MCPServer.AllowedTags = %v, want [\"mcp\"] (default filled)", got)
+	}
 }
 
 func testInitAIConnectorDefaults(t *testing.T) {
@@ -57,6 +60,9 @@ func testInitAIConnectorDefaults(t *testing.T) {
 	if c.AIConnector.MCPServer.Transport != "streamable_http" {
 		t.Errorf("MCPServer.Transport = %q, want %q (default filled)", c.AIConnector.MCPServer.Transport, "streamable_http")
 	}
+	if got := c.AIConnector.MCPServer.AllowedTags; len(got) != 1 || got[0] != "mcp" {
+		t.Errorf("MCPServer.AllowedTags = %v, want [\"mcp\"] (default filled)", got)
+	}
 }
 
 func testInitAIConnectorPreserved(t *testing.T) {
@@ -64,9 +70,10 @@ func testInitAIConnectorPreserved(t *testing.T) {
 		AIConnector: &AIConnectorConfig{
 			Enable: true,
 			MCPServer: MCPServerConfig{
-				Enable:    true,
-				Path:      "/custom-mcp",
-				Transport: "sse",
+				Enable:      true,
+				Path:        "/custom-mcp",
+				Transport:   "sse",
+				AllowedTags: []string{"chat", "note"},
 			},
 		},
 	}
@@ -78,6 +85,9 @@ func testInitAIConnectorPreserved(t *testing.T) {
 	}
 	if c.AIConnector.MCPServer.Transport != "sse" {
 		t.Errorf("MCPServer.Transport = %q, want %q (preserved)", c.AIConnector.MCPServer.Transport, "sse")
+	}
+	if got := c.AIConnector.MCPServer.AllowedTags; len(got) != 2 || got[0] != "chat" || got[1] != "note" {
+		t.Errorf("MCPServer.AllowedTags = %v, want [\"chat\" \"note\"] (preserved)", got)
 	}
 }
 
@@ -100,6 +110,9 @@ func testInitAIConnectorDisabled(t *testing.T) {
 	if c.AIConnector.MCPServer.Transport != "streamable_http" {
 		t.Errorf("MCPServer.Transport = %q, want %q (should fill default even when disabled)", c.AIConnector.MCPServer.Transport, "streamable_http")
 	}
+	if got := c.AIConnector.MCPServer.AllowedTags; len(got) != 1 || got[0] != "mcp" {
+		t.Errorf("MCPServer.AllowedTags = %v, want [\"mcp\"] (should fill default even when disabled)", got)
+	}
 }
 
 func TestDefaultAIConnectorConfig(t *testing.T) {
@@ -118,5 +131,8 @@ func TestDefaultAIConnectorConfig(t *testing.T) {
 	}
 	if d.MCPServer.Transport != "streamable_http" {
 		t.Errorf("MCPServer.Transport = %q, want %q", d.MCPServer.Transport, "streamable_http")
+	}
+	if got := d.MCPServer.AllowedTags; len(got) != 1 || got[0] != "mcp" {
+		t.Errorf("MCPServer.AllowedTags = %v, want [\"mcp\"]", got)
 	}
 }
