@@ -14,6 +14,8 @@ import (
 	"google.golang.org/genproto/googleapis/api/serviceconfig"
 
 	mcpserver "github.com/grpc-kit/pkg/mcp"
+
+	options "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 )
 
 // === 单元测试：辅助函数 ===
@@ -199,7 +201,7 @@ func makeGatewayCfg(rules ...*annotations.HttpRule) *serviceconfig.Service {
 
 func TestAutoBridge_NilServer(t *testing.T) {
 	// nil server 不应 panic
-	err := AutoBridge(nil, nil, nil, "", makeGatewayCfg(), nil)
+	err := AutoBridge(nil, nil, nil, "", makeGatewayCfg(), nil, nil)
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
 	}
@@ -208,7 +210,7 @@ func TestAutoBridge_NilServer(t *testing.T) {
 func TestAutoBridge_NilConfig(t *testing.T) {
 	srv := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "0"}, nil)
 	// nil gatewayCfg 不应 panic
-	err := AutoBridge(srv, nil, nil, "", nil, nil)
+	err := AutoBridge(srv, nil, nil, "", nil, nil, nil)
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
 	}
@@ -227,7 +229,7 @@ func TestAutoBridge_NilSwagger(t *testing.T) {
 			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items/{id}"},
 		},
 	)
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil, nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -284,7 +286,7 @@ func TestAutoBridge_ToolRegistration(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -334,7 +336,7 @@ func TestAutoBridge_AdditionalBindings(t *testing.T) {
 	}
 
 	cfg := makeGatewayCfg(rule)
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil, nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -411,7 +413,7 @@ func TestAutoBridge_ToolCall(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -501,7 +503,7 @@ func TestAutoBridge_ToolCallError(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -542,7 +544,7 @@ func TestAutoBridge_ToolCallMissingPathParam(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, "http://localhost", cfg, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, "http://localhost", cfg, nil, nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -603,7 +605,7 @@ func TestAutoBridge_AuthPropagation(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -670,7 +672,7 @@ func TestAutoBridge_AuthPropagation_NoAuth(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -701,5 +703,244 @@ func TestAutoBridge_AuthPropagation_NoAuth(t *testing.T) {
 	// 验证 gateway 未收到 Authorization
 	if gwAuthHeader != "" {
 		t.Errorf("expected empty Authorization at gateway, got %q", gwAuthHeader)
+	}
+}
+
+// makeSwaggerWithTags 构造一个带 tags 的 OpenAPIConfig 用于 tag 过滤测试。
+// methodTags: key=method selector, value=tags 列表。
+func makeSwaggerWithTags(methodTags map[string][]string) *openapiconfig.OpenAPIConfig {
+	cfg := &openapiconfig.OpenAPIConfig{
+		OpenapiOptions: &openapiconfig.OpenAPIOptions{
+			Method: make([]*openapiconfig.OpenAPIMethodOption, 0, len(methodTags)),
+		},
+	}
+	for method, tags := range methodTags {
+		cfg.OpenapiOptions.Method = append(cfg.OpenapiOptions.Method, &openapiconfig.OpenAPIMethodOption{
+			Method: method,
+			Option: &options.Operation{Tags: tags},
+		})
+	}
+	return cfg
+}
+
+// TestAutoBridge_TagFilter_Whitelist 验证 allowedTags 非空时，
+// 只有 tags 命中白名单的方法才注册为 MCP tool。
+func TestAutoBridge_TagFilter_Whitelist(t *testing.T) {
+	mcpSrv, err := mcpserver.NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+
+	cfg := makeGatewayCfg(
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.GetItem",
+			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items/{id}"},
+		},
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.ListItems",
+			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items"},
+		},
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.DeleteItem",
+			Pattern:  &annotations.HttpRule_Delete{Delete: "/v1/items/{id}"},
+		},
+	)
+
+	// GetItem 有 mcp tag，ListItems 只有 admin tag，DeleteItem 无 tags
+	swagger := makeSwaggerWithTags(map[string][]string{
+		"grpc_kit.api.test.v1.TestService.GetItem":    {"mcp"},
+		"grpc_kit.api.test.v1.TestService.ListItems":  {"admin"},
+		"grpc_kit.api.test.v1.TestService.DeleteItem": {},
+	})
+
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, []string{"mcp"}); err != nil {
+		t.Fatalf("AutoBridge: %v", err)
+	}
+
+	httpServer := httptest.NewServer(mcpSrv.Handler())
+	defer httpServer.Close()
+
+	ctx := context.Background()
+	transport := &mcp.StreamableClientTransport{Endpoint: httpServer.URL}
+	client := mcp.NewClient(&mcp.Implementation{Name: "test-client", Version: "0.0.1"}, nil)
+	session, err := client.Connect(ctx, transport, nil)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	defer session.Close()
+
+	tools, err := session.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+
+	// 仅 GetItem（tag=mcp）应被注册
+	if len(tools.Tools) != 1 {
+		t.Fatalf("expected 1 tool (only mcp-tagged), got %d: %+v", len(tools.Tools), tools.Tools)
+	}
+	if tools.Tools[0].Name != "test_service_get_item" {
+		t.Errorf("expected tool name 'test_service_get_item', got %q", tools.Tools[0].Name)
+	}
+}
+
+// TestAutoBridge_TagFilter_EmptyWhitelist 验证 allowedTags 为空时不过滤（向后兼容）。
+func TestAutoBridge_TagFilter_EmptyWhitelist(t *testing.T) {
+	mcpSrv, err := mcpserver.NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+
+	cfg := makeGatewayCfg(
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.GetItem",
+			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items/{id}"},
+		},
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.ListItems",
+			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items"},
+		},
+	)
+
+	swagger := makeSwaggerWithTags(map[string][]string{
+		"grpc_kit.api.test.v1.TestService.GetItem":   {"mcp"},
+		"grpc_kit.api.test.v1.TestService.ListItems": {"admin"},
+	})
+
+	// allowedTags=nil => 不过滤，全部注册
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, nil); err != nil {
+		t.Fatalf("AutoBridge: %v", err)
+	}
+
+	httpServer := httptest.NewServer(mcpSrv.Handler())
+	defer httpServer.Close()
+
+	ctx := context.Background()
+	transport := &mcp.StreamableClientTransport{Endpoint: httpServer.URL}
+	client := mcp.NewClient(&mcp.Implementation{Name: "test-client", Version: "0.0.1"}, nil)
+	session, err := client.Connect(ctx, transport, nil)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	defer session.Close()
+
+	tools, err := session.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+
+	if len(tools.Tools) != 2 {
+		t.Fatalf("expected 2 tools (no filtering), got %d", len(tools.Tools))
+	}
+}
+
+// TestAutoBridge_TagFilter_NilSwagger 验证 allowedTags 非空但 swaggerCfg=nil 时，
+// 所有方法都无 tags 信息，因此全部被过滤（不注册任何 tool）。
+func TestAutoBridge_TagFilter_NilSwagger(t *testing.T) {
+	mcpSrv, err := mcpserver.NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+
+	cfg := makeGatewayCfg(
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.GetItem",
+			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items/{id}"},
+		},
+	)
+
+	// swaggerCfg=nil + allowedTags=["mcp"] => 无法确定 tags => 全部被过滤
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil, []string{"mcp"}); err != nil {
+		t.Fatalf("AutoBridge: %v", err)
+	}
+
+	httpServer := httptest.NewServer(mcpSrv.Handler())
+	defer httpServer.Close()
+
+	ctx := context.Background()
+	transport := &mcp.StreamableClientTransport{Endpoint: httpServer.URL}
+	client := mcp.NewClient(&mcp.Implementation{Name: "test-client", Version: "0.0.1"}, nil)
+	session, err := client.Connect(ctx, transport, nil)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	defer session.Close()
+
+	tools, err := session.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+
+	if len(tools.Tools) != 0 {
+		t.Fatalf("expected 0 tools (nil swagger + non-empty allowedTags), got %d", len(tools.Tools))
+	}
+}
+
+// TestAutoBridge_TagFilter_MultipleAllowedTags 验证 OR 语义：
+// operation tags 命中白名单中任一值即注册。
+func TestAutoBridge_TagFilter_MultipleAllowedTags(t *testing.T) {
+	mcpSrv, err := mcpserver.NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+
+	cfg := makeGatewayCfg(
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.GetItem",
+			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items/{id}"},
+		},
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.ListItems",
+			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items"},
+		},
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.DeleteItem",
+			Pattern:  &annotations.HttpRule_Delete{Delete: "/v1/items/{id}"},
+		},
+	)
+
+	swagger := makeSwaggerWithTags(map[string][]string{
+		"grpc_kit.api.test.v1.TestService.GetItem":    {"mcp"},
+		"grpc_kit.api.test.v1.TestService.ListItems":  {"admin"},
+		"grpc_kit.api.test.v1.TestService.DeleteItem": {"internal"},
+	})
+
+	// allowedTags=["mcp", "admin"] => GetItem(mcp) 和 ListItems(admin) 命中
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, []string{"mcp", "admin"}); err != nil {
+		t.Fatalf("AutoBridge: %v", err)
+	}
+
+	httpServer := httptest.NewServer(mcpSrv.Handler())
+	defer httpServer.Close()
+
+	ctx := context.Background()
+	transport := &mcp.StreamableClientTransport{Endpoint: httpServer.URL}
+	client := mcp.NewClient(&mcp.Implementation{Name: "test-client", Version: "0.0.1"}, nil)
+	session, err := client.Connect(ctx, transport, nil)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	defer session.Close()
+
+	tools, err := session.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+
+	if len(tools.Tools) != 2 {
+		t.Fatalf("expected 2 tools (mcp + admin tagged), got %d", len(tools.Tools))
+	}
+
+	names := make(map[string]struct{}, len(tools.Tools))
+	for _, tl := range tools.Tools {
+		names[tl.Name] = struct{}{}
+	}
+	if _, ok := names["test_service_get_item"]; !ok {
+		t.Error("expected tool 'test_service_get_item' to be registered")
+	}
+	if _, ok := names["test_service_list_items"]; !ok {
+		t.Error("expected tool 'test_service_list_items' to be registered")
+	}
+	if _, ok := names["test_service_delete_item"]; ok {
+		t.Error("tool 'test_service_delete_item' should NOT be registered (tag=internal not in whitelist)")
 	}
 }

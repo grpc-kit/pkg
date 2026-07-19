@@ -185,6 +185,7 @@ func AutoBridge(
 	httpBaseURL string,
 	gatewayCfg *serviceconfig.Service,
 	swaggerCfg *openapiconfig.OpenAPIConfig,
+	allowedTags []string,
 ) error {
 	_ = connFn // 暂未使用，预留 gRPC reflection 优化
 	if server == nil {
@@ -200,6 +201,12 @@ func AutoBridge(
 	// 构建 selector -> swagger Operation 映射表
 	docMap := buildSelectorDocMap(swaggerCfg)
 
+	// allowedTags 非空时构建快速查找集合（白名单，OR 语义）
+	allowedSet := make(map[string]struct{}, len(allowedTags))
+	for _, t := range allowedTags {
+		allowedSet[t] = struct{}{}
+	}
+
 	rules := gatewayCfg.GetHttp().GetRules()
 	registered := make(map[string]struct{}, len(rules))
 
@@ -214,6 +221,12 @@ func AutoBridge(
 
 		baseName := toSnakeCase(serviceName) + "_" + toSnakeCase(methodName)
 		summary, description, tags := lookupSwaggerDoc(docMap, rule.GetSelector())
+
+		// tag 白名单过滤：allowedTags 非空时，operation 的 tags 必须命中至少一个才注册。
+		// 未命中（含 tags 为空）的方法跳过，不暴露为 MCP tool。
+		if len(allowedSet) > 0 && !hasAllowedTag(tags, allowedSet) {
+			continue
+		}
 
 		// 收集主绑定 + AdditionalBindings
 		bindings := collectHttpBindings(rule)
@@ -423,6 +436,17 @@ func mergeSummaryDescription(summary, description string) string {
 		return summary
 	}
 	return description
+}
+
+// hasAllowedTag 判断 operation 的 tags 是否命中白名单集合（OR 语义）。
+// tags 为空时返回 false（白名单语义：未标注的不暴露）。
+func hasAllowedTag(tags []string, allowedSet map[string]struct{}) bool {
+	for _, t := range tags {
+		if _, ok := allowedSet[t]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 // collectHttpBindings 收集主绑定 + 所有 AdditionalBindings 为统一列表。

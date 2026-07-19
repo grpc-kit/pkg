@@ -20,6 +20,13 @@ type MCPServerConfig struct {
 
 	// 传输协议：streamable_http | sse（默认 streamable_http）
 	Transport string `mapstructure:"transport"`
+
+	// AllowedTags 控制 AutoBridge 仅暴露 tags 命中此白名单的 gRPC 方法为 MCP tool。
+	// 匹配语义：operation 的 tags 列表中只要有一个值出现在 AllowedTags 中即命中（OR 语义）。
+	// 空列表 = 不过滤，暴露全部有 HTTP 映射的 gRPC 方法（向后兼容）。
+	// 非空列表 = 仅暴露命中的方法，未设 tags 或未命中的方法不暴露。
+	// 示例：allowed_tags: ["mcp"] 仅暴露 openapiv2.yaml 中标注了 tags: [..., "mcp"] 的方法。
+	AllowedTags []string `mapstructure:"allowed_tags"`
 }
 
 // DefaultAIConnectorConfig 返回 AIConnectorConfig 默认值

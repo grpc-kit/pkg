@@ -412,7 +412,7 @@ func TestIntegration_AutoBridgeAuthPropagation(t *testing.T) {
 		},
 	}
 
-	if err := mcptools.AutoBridge(srv.MCPServer(), nil, &http.Client{}, gwSrv.URL, gatewayCfg, nil); err != nil {
+	if err := mcptools.AutoBridge(srv.MCPServer(), nil, &http.Client{}, gwSrv.URL, gatewayCfg, nil, nil); err != nil {
 		t.Fatalf("AutoBridge failed: %v", err)
 	}
 

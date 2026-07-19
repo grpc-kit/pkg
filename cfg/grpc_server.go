@@ -203,6 +203,15 @@ func (c *LocalConfig) registerMCPBuiltinTools(mcpSrv *mcp.Server, forwardGWAddr 
 	})
 }
 
+// AllowedTagsForMCP 返回 MCP AutoBridge 的 tag 白名单。
+// 当 AIConnector 未配置时返回 nil（不过滤，向后兼容）。
+func (c *LocalConfig) AllowedTagsForMCP() []string {
+	if c.AIConnector == nil {
+		return nil
+	}
+	return c.AIConnector.MCPServer.AllowedTags
+}
+
 // runAutoBridge 将已注册的 gRPC 方法自动转换为 MCP Tools。
 // 必须在 SetMicroserviceGatewayYAML 成功之后调用，否则 gateway/swagger 配置为 nil。
 // 幂等：server.AddTool 对同名 tool 为覆盖语义，可安全重复调用。
@@ -228,7 +237,8 @@ func (c *LocalConfig) runAutoBridge() {
 	}
 
 	server := c.mcpServer.MCPServer()
-	if err := mcptools.AutoBridge(server, nil, httpClient, httpBaseURL, gatewayCfg, swaggerCfg); err != nil {
+	allowedTags := c.AllowedTagsForMCP()
+	if err := mcptools.AutoBridge(server, nil, httpClient, httpBaseURL, gatewayCfg, swaggerCfg, allowedTags); err != nil {
 		log.Printf("[mcp] autobridge: %v", err)
 	}
 }
