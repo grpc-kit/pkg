@@ -355,6 +355,12 @@ aiconnector:
     enable: false
     path: /mcp
     transport: streamable_http
+    # AutoBridge 仅暴露 openapiv2.yaml 中 tags 命中此白名单的 gRPC 方法为 MCP tool（OR 语义）
+    # 默认值 ["mcp"]：仅暴露标注了 tags: [..., "mcp"] 的方法（最小暴露原则）
+    # 如需暴露其他 tag 的方法，需在此显式追加，例如 ["mcp", "chat"]
+    # 未设 tags 或未命中白名单的方法不会被暴露
+    allowed_tags:
+      - mcp
 
 # 应用私有配置
 independent:
