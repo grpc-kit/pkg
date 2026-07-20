@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -1086,4 +1087,195 @@ func flattenBodySchema(p swaggerParameter, bodyField string, doc *swaggerDoc) (f
 		return nil, nil
 	}
 	return map[string]any{name: expanded}, nil
+}
+
+// pathParamNames 从 path 模板提取 {param} 名称集合。
+func pathParamNames(pathTemplate string) map[string]struct{} {
+	out := make(map[string]struct{})
+	for _, m := range pathParamRegex.FindAllStringSubmatch(pathTemplate, -1) {
+		out[m[1]] = struct{}{}
+	}
+	return out
+}
+
+// queryParamNames 从 swagger 操作提取 in=="query" 的参数名集合。op 为 nil 时返回 nil。
+func queryParamNames(op *swaggerOperation) map[string]struct{} {
+	if op == nil {
+		return nil
+	}
+	out := make(map[string]struct{})
+	for _, p := range op.Parameters {
+		if p.In == "query" {
+			out[p.Name] = struct{}{}
+		}
+	}
+	return out
+}
+
+// bodyParamSchemaKind 判断 body 参数 schema 是 object（消息字段）还是 scalar（基本类型/array）。
+// 返回 "object"、"scalar" 或 ""（无 body 参数）。$ref 与 type:object/缺省均视为 object。
+func bodyParamSchemaKind(op *swaggerOperation) string {
+	if op == nil {
+		return ""
+	}
+	for _, p := range op.Parameters {
+		if p.In != "body" {
+			continue
+		}
+		if len(p.Schema) == 0 {
+			return "object"
+		}
+		var m map[string]any
+		if json.Unmarshal(p.Schema, &m) != nil {
+			return "object"
+		}
+		if _, hasRef := m["$ref"]; hasRef {
+			return "object"
+		}
+		if t, _ := m["type"].(string); t == "" || t == "object" {
+			return "object"
+		}
+		return "scalar"
+	}
+	return ""
+}
+
+// buildRequestBody 根据 swagger 参数分类 + gateway bodyField 构建请求体。
+//
+// body 格式（经生成 gateway 代码实证：body 直接 Decode 进 protoReq 或 protoReq.<字段>，
+// 故 body 为字段值本身，不包装）：
+//   - bodyField == ""：无 body 映射，返回 (nil, false)（参数走 query）
+//   - bodyField == "*" 或 "fieldname"（消息字段）：body = 非 path/非 query 参数的 flat 对象；
+//     无参数时为 "{}"
+//   - bodyField == "fieldname"（标量字段）：body = args[bodyField] 的原始 JSON 值；未提供则 (nil, false)
+//
+// 参数是否属于 query：以 op.Parameters 中 in=="query" 的 name 集合为准（命名即 grpc-gateway 期望）。
+// op 为 nil 时退化为「非 path 即 body」。
+//
+// 注意：本文档 §4.2.7 原述 body:"fieldname" 包装为 {"fieldname":<flat>} 有误（与 gateway 的
+// Decode(&protoReq.<field>) 语义冲突），已据 admin.pb.gw.go 实证修正为不包装（见 §4.2.7 修订）。
+func buildRequestBody(args map[string]json.RawMessage, op *swaggerOperation, pathTemplate, bodyField string) (json.RawMessage, bool) {
+	if bodyField == "" {
+		return nil, false
+	}
+
+	pathSet := pathParamNames(pathTemplate)
+	querySet := queryParamNames(op)
+
+	bodyArgs := make(map[string]json.RawMessage)
+	for k, v := range args {
+		if _, isPath := pathSet[k]; isPath {
+			continue
+		}
+		if querySet != nil {
+			if _, isQuery := querySet[k]; isQuery {
+				continue
+			}
+		}
+		bodyArgs[k] = v
+	}
+
+	// 标量 body：发送字段原始值
+	if bodyParamSchemaKind(op) == "scalar" {
+		if v, ok := bodyArgs[bodyField]; ok {
+			return v, true
+		}
+		return nil, false
+	}
+
+	// 消息 body（body:"*" 或 body:"fieldname" 消息字段）：flat 对象，不包装
+	b, err := json.Marshal(bodyArgs)
+	if err != nil {
+		return nil, false
+	}
+	return b, true
+}
+
+// queryValues 将单个参数的 JSON 原始值转换为 query 值列表。
+// 数组展开为多值（重复参数名）；null/空字符串跳过；对象/数字/布尔取 JSON 文本。
+func queryValues(raw json.RawMessage) []string {
+	raw = bytes.TrimSpace(raw)
+	if len(raw) == 0 {
+		return nil
+	}
+	if raw[0] == '[' {
+		var arr []json.RawMessage
+		if json.Unmarshal(raw, &arr) != nil {
+			return nil
+		}
+		var out []string
+		for _, e := range arr {
+			out = append(out, queryValues(e)...)
+		}
+		return out
+	}
+	if bytes.Equal(raw, []byte("null")) {
+		return nil
+	}
+	if raw[0] == '"' {
+		var s string
+		if json.Unmarshal(raw, &s) != nil {
+			return nil
+		}
+		if s == "" {
+			return nil
+		}
+		return []string{s}
+	}
+	return []string{string(raw)}
+}
+
+// appendQueryParams 为请求 URL 追加 query string。
+//
+// 仅取 op 中 in=="query" 的参数（op 为 nil 时取所有非 path 参数）。命名直接使用 swagger
+// 给定的 name（已为 grpc-gateway 期望格式，含点分嵌套名如 ping.name）。
+// 值编码：字符串去引号；数字/布尔取 JSON 文本；数组重复参数名（?tag=a&tag=b）；
+// 对象 marshal 为 JSON 文本作为单值；空字符串/null 跳过。
+func appendQueryParams(base, pathTemplate string, op *swaggerOperation, args map[string]json.RawMessage) string {
+	pathSet := pathParamNames(pathTemplate)
+	querySet := queryParamNames(op)
+
+	vals := url.Values{}
+	for k, raw := range args {
+		if _, isPath := pathSet[k]; isPath {
+			continue
+		}
+		if querySet != nil {
+			if _, isQuery := querySet[k]; !isQuery {
+				continue
+			}
+		}
+		for _, v := range queryValues(raw) {
+			vals.Add(k, v)
+		}
+	}
+
+	if len(vals) == 0 {
+		return base
+	}
+	return base + "?" + vals.Encode()
+}
+
+// lookupOpDocs 解析 tool 的 summary/description/tags：swagger 优先，openapiv2 docMap 兜底。
+// 返回原始三值，由调用方按既有逻辑 mergeSummaryDescription + formatDescription 组装最终描述。
+func lookupOpDocs(op *swaggerOperation, docMap map[string]swaggerMethod, selector string) (summary, description string, tags []string) {
+	if op != nil {
+		summary = op.Summary
+		description = op.Description
+		tags = op.Tags
+	}
+	if docMap != nil {
+		if entry, ok := docMap[selector]; ok {
+			if summary == "" {
+				summary = entry.summary
+			}
+			if description == "" {
+				description = entry.description
+			}
+			if len(tags) == 0 {
+				tags = entry.tags
+			}
+		}
+	}
+	return summary, description, tags
 }
