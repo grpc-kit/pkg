@@ -215,6 +215,21 @@ func (c *LocalConfig) AllowedTagsForMCP() []string {
 	return c.AIConnector.MCPServer.AllowedTags
 }
 
+// MCPServerInstance 返回已创建的 MCP Server wrapper 实例（*pkg/mcp.Server）。
+// 若未启用 MCP（aiconnector.mcp_server.enable=false）或尚未调用 Register()
+// （内部 mcpServer 在 registerGateway 中创建），返回 nil。
+//
+// 业务项目可在 LocalConfig.Register() 之后调用此方法，获取 wrapper 后再调
+// .MCPServer() 得到 SDK *mcp.Server 实例，用于注册自定义原生 MCP 资源
+// （Tools、Resources、Prompts）。自定义资源与 AutoBridge 生成的 Tool 共存，
+// 且自动获得框架 NewAuthMiddleware 认证保护，不受 allowed_tags 过滤。
+//
+// 注意：AddTool / AddResource / AddPrompt 均为幂等（同名/同 URI 覆盖），
+// 自定义资源建议加业务前缀避免与 AutoBridge 的 {service}_{method} 命名冲突。
+func (c *LocalConfig) MCPServerInstance() *mcp.Server {
+	return c.mcpServer
+}
+
 // runAutoBridge 将已注册的 gRPC 方法自动转换为 MCP Tools。
 // 必须在 SetMicroserviceGatewayYAML 成功之后调用，否则 gateway/swagger 配置为 nil。
 // 幂等：server.AddTool 对同名 tool 为覆盖语义，可安全重复调用。
