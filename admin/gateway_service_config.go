@@ -56,6 +56,9 @@ func (c *config) setMicroserviceGatewayYAML(assets fs.FS) error {
 		return fmt.Errorf("admin config is nil")
 	}
 
+	// 保留 assets FS 供 AutoBridge 加载 openapi/microservice.swagger.json（Phase 6）。
+	c.microserviceGatewayAssets = assets
+
 	// 解析 gateway.yaml
 	gatewayFile, err := assets.Open("openapi/microservice.gateway.yaml")
 	if err != nil {
@@ -143,6 +146,19 @@ func (a *KnownAdminAPI) getMicroserviceGatewaySwagger() (*openapiconfig.OpenAPIC
 // 该方法在内部错误（如配置未加载）时返回 (nil, error)，由调用方按需处理。
 func (a *KnownAdminAPI) GetMicroserviceGatewaySwagger() (*openapiconfig.OpenAPIConfig, error) {
 	return a.getMicroserviceGatewaySwagger()
+}
+
+// microserviceSwaggerAssetName 是微服务 swagger 资产基名（与 microservice.gateway.yaml 同源）。
+const microserviceSwaggerAssetName = "microservice"
+
+// GetMicroserviceGatewaySwaggerJSON 返回微服务网关资产 FS 与 swagger 资产基名，
+// 供 AutoBridge 侧 loadSwaggerDoc 加载 openapi/<name>.swagger.json（Phase 6）。
+// 未调用 SetMicroserviceGatewayYAML 时 assets 为 nil，调用方应降级为仅 path 参数。
+func (a *KnownAdminAPI) GetMicroserviceGatewaySwaggerJSON() (fs.FS, string) {
+	if a == nil || a.config == nil {
+		return nil, microserviceSwaggerAssetName
+	}
+	return a.config.microserviceGatewayAssets, microserviceSwaggerAssetName
 }
 
 func (a *KnownAdminAPI) getKnownAdminGatewayServiceConfig() (*serviceconfig.Service, error) {

@@ -1,6 +1,8 @@
 package admin
 
 import (
+	"io/fs"
+
 	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/lion"
@@ -52,6 +54,9 @@ type config struct {
 	// 微服务网关 YAML 的解析结果
 	microserviceGatewayServiceConfig *serviceconfig.Service
 	microserviceGatewaySwagger       *openapiconfig.OpenAPIConfig
+	// 微服务网关资产 FS（含 openapi/microservice.swagger.json），供 AutoBridge 加载 swagger 用。
+	// 由 setMicroserviceGatewayYAML 保留；未加载时为 nil。
+	microserviceGatewayAssets fs.FS
 }
 
 // Options xx
