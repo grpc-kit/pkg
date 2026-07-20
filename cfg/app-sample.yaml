@@ -359,6 +359,9 @@ aiconnector:
     # 默认值 ["mcp"]：仅暴露标注了 tags: [..., "mcp"] 的方法（最小暴露原则）
     # 如需暴露其他 tag 的方法，需在此显式追加，例如 ["mcp", "chat"]
     # 未设 tags 或未命中白名单的方法不会被暴露
+    # 注意：业务项目可通过 LocalConfig.MCPServerInstance() 注册自定义原生 MCP 资源
+    #       （Tools / Resources / Prompts），自定义资源不受 allowed_tags 过滤，
+    #       与 AutoBridge Tool 共存于同一 MCP Server
     allowed_tags:
       - mcp
 
