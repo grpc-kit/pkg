@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"regexp"
 	"strings"
@@ -697,4 +699,281 @@ func extractBodyArgs(args map[string]json.RawMessage, path string) (json.RawMess
 		return nil, false
 	}
 	return b, true
+}
+
+// ----------------------------------------------------------------------------
+// Phase 6: Swagger JSON 解析（Step 1-2）
+//
+// AutoBridge 的 Input Schema 数据源从 path 模板扩展为完整 Swagger 2.0 文档。
+// 以下类型与函数负责加载 swagger.json、建立 (httpMethod, path) 操作索引、
+// 递归 inline 展开 $ref（自包含 JSON Schema，含 title->description 提升与
+// 深度/环保护）。本阶段仅新增能力，尚未接入 AutoBridge 主循环（Step 3+）。
+// ----------------------------------------------------------------------------
+
+// swaggerDoc 是 Swagger 2.0 文档的轻量表示，仅保留 AutoBridge 所需字段。
+//
+//   - Paths: path -> method(小写, 如 "get"/"post") -> operation
+//   - Definitions: definition 名 -> 原始 JSON Schema（按需懒解析，支持 $ref 递归展开）
+type swaggerDoc struct {
+	Paths       map[string]map[string]*swaggerOperation `json:"paths"`
+	Definitions map[string]json.RawMessage              `json:"definitions"`
+}
+
+// swaggerOperation 对应 OpenAPI 2.0 的 Operation Object（仅保留所需字段）。
+type swaggerOperation struct {
+	OperationID string             `json:"operationId"`
+	Summary     string             `json:"summary"`
+	Description string             `json:"description"`
+	Tags        []string           `json:"tags"`
+	Parameters  []swaggerParameter `json:"parameters"`
+}
+
+// swaggerParameter 对应 OpenAPI 2.0 的 Parameter Object。
+//
+//   - In: "path" | "query" | "body"（formData/header 不适用于 grpc-gateway 产物）
+//   - Type/Format/Items: path/query 基本类型及其数组元素
+//   - Schema: body 参数的 schema（$ref 指向请求消息 definition，或 inline）
+type swaggerParameter struct {
+	Name        string          `json:"name"`
+	In          string          `json:"in"`
+	Required    bool            `json:"required"`
+	Description string          `json:"description"`
+	Type        string          `json:"type"`
+	Format      string          `json:"format"`
+	Items       json.RawMessage `json:"items"`
+	Schema      json.RawMessage `json:"schema"`
+}
+
+// swaggerOpIndex 以 (HTTP 方法大写, path) 为键索引操作，便于按 binding 快速查找。
+type swaggerOpIndex map[string]map[string]*swaggerOperation
+
+// loadSwaggerDoc 从 assets FS 读取并解析 openapi/<name>.swagger.json。
+//
+// assets 为 nil、文件缺失或解析失败时返回 (nil, error)；调用方应降级为
+// 仅 path 参数的旧行为（见 §5.1）。definitions 保留为原始字节，按需懒解析。
+func loadSwaggerDoc(assets fs.FS, name string) (*swaggerDoc, error) {
+	if assets == nil {
+		return nil, fmt.Errorf("assets fs is nil")
+	}
+	f, err := assets.Open("openapi/" + name + ".swagger.json")
+	if err != nil {
+		return nil, fmt.Errorf("open swagger %q: %w", name, err)
+	}
+	defer f.Close()
+
+	data, err := io.ReadAll(f)
+	if err != nil {
+		return nil, fmt.Errorf("read swagger %q: %w", name, err)
+	}
+
+	doc := &swaggerDoc{}
+	if err := json.Unmarshal(data, doc); err != nil {
+		return nil, fmt.Errorf("unmarshal swagger %q: %w", name, err)
+	}
+	return doc, nil
+}
+
+// buildSwaggerOpIndex 遍历 doc.Paths 构建 (method, path) 索引。
+//
+// method 取键名并 ToUpper；同一 (method, path) 仅保留一个操作
+// （Swagger 规范保证唯一）。doc 为 nil 时返回空索引。
+func buildSwaggerOpIndex(doc *swaggerDoc) swaggerOpIndex {
+	idx := swaggerOpIndex{}
+	if doc == nil || doc.Paths == nil {
+		return idx
+	}
+	for path, methods := range doc.Paths {
+		if methods == nil {
+			continue
+		}
+		for methodLC, op := range methods {
+			if op == nil {
+				continue
+			}
+			method := strings.ToUpper(methodLC)
+			if idx[method] == nil {
+				idx[method] = make(map[string]*swaggerOperation)
+			}
+			idx[method][path] = op
+		}
+	}
+	return idx
+}
+
+// lookupSwaggerOp 按 (httpMethod, pathTemplate) 查找操作。未命中返回 nil。
+func lookupSwaggerOp(idx swaggerOpIndex, httpMethod, pathTemplate string) *swaggerOperation {
+	if idx == nil {
+		return nil
+	}
+	methods := idx[strings.ToUpper(httpMethod)]
+	if methods == nil {
+		return nil
+	}
+	return methods[pathTemplate]
+}
+
+// swaggerRefPrefix 是 Swagger 2.0 definition 引用的标准前缀。
+const swaggerRefPrefix = "#/definitions/"
+
+// resolveSwaggerRef 解析 "#/definitions/<name>" 形式的 $ref，返回该 definition
+// 的原始 schema。ref 非 definitions 引用、doc 为 nil 或 definition 不存在时返回 nil。
+func resolveSwaggerRef(doc *swaggerDoc, ref string) json.RawMessage {
+	if !strings.HasPrefix(ref, swaggerRefPrefix) {
+		return nil
+	}
+	if doc == nil || doc.Definitions == nil {
+		return nil
+	}
+	return doc.Definitions[ref[len(swaggerRefPrefix):]]
+}
+
+// refDefName 从 "#/definitions/<name>" 提取 <name>；非标准引用返回空串。
+func refDefName(ref string) string {
+	if !strings.HasPrefix(ref, swaggerRefPrefix) {
+		return ""
+	}
+	return ref[len(swaggerRefPrefix):]
+}
+
+// inlineSwaggerSchema 将 schema（可能含 $ref）递归展开为自包含 map[string]any。
+//
+// 处理逻辑：
+//  1. 含 $ref：
+//     - 环检测：name 已在当前路径 seen 中 -> {"type":"object","description":"<name> (递归引用)"}
+//     - 深度限制：depth > maxDepth -> {"type":"object"}（不再展开本 $ref）
+//     - 否则 resolveSwaggerRef 后递归（depth+1）；seen 按路径回溯（进入加、返回删），
+//       保证共享 definition（如 v1ErrorResponse 被引 98 次）不被误降级
+//  2. inline schema：拷贝 type/format/enum/items/properties 等键，对 properties
+//     与 items 递归；字段语义优先取 description，缺失时取 title 提升为 description
+//     （swagger 产物约 99% 字段语义在 title，见 §11.2）
+//
+// 参数：
+//   - schema: 原始 JSON（$ref 或 inline object/primitive）
+//   - doc: 用于解析 $ref
+//   - maxDepth: $ref 展开深度上限（建议 4；depth 超过此值则降级）
+//   - depth: 当前已展开的 $ref 深度（从 0 起，含 body 参数自身的 $ref）
+//   - seen: 当前展开路径上已遇到的 definition 名集合（环检测，须回溯；nil 则不检测）
+func inlineSwaggerSchema(schema json.RawMessage, doc *swaggerDoc, maxDepth, depth int, seen map[string]struct{}) map[string]any {
+	if len(schema) == 0 {
+		return map[string]any{"type": "object"}
+	}
+	var m map[string]any
+	if err := json.Unmarshal(schema, &m); err != nil {
+		return map[string]any{"type": "object"}
+	}
+	return inlineSchemaObj(m, doc, maxDepth, depth, seen)
+}
+
+// inlineSchemaObj 处理已解析的 schema 对象，返回自包含 map。
+// 是 inlineSwaggerSchema 的递归核心；seen 按路径回溯以保证共享 definition 不被误降级。
+func inlineSchemaObj(m map[string]any, doc *swaggerDoc, maxDepth, depth int, seen map[string]struct{}) map[string]any {
+	// $ref 分支
+	if ref, ok := m["$ref"].(string); ok && ref != "" {
+		name := refDefName(ref)
+		if name != "" && seen != nil {
+			if _, cyclic := seen[name]; cyclic {
+				return map[string]any{"type": "object", "description": name + " (递归引用)"}
+			}
+		}
+		if depth > maxDepth {
+			return map[string]any{"type": "object"}
+		}
+		resolved := resolveSwaggerRef(doc, ref)
+		if len(resolved) == 0 {
+			return map[string]any{"type": "object"}
+		}
+		var rm map[string]any
+		if err := json.Unmarshal(resolved, &rm); err != nil {
+			return map[string]any{"type": "object"}
+		}
+		if name != "" && seen != nil {
+			seen[name] = struct{}{}
+		}
+		out := inlineSchemaObj(rm, doc, maxDepth, depth+1, seen)
+		if name != "" && seen != nil {
+			delete(seen, name)
+		}
+		return out
+	}
+
+	// inline schema：拷贝键并递归 properties / items
+	out := make(map[string]any, len(m)+1)
+	for k, v := range m {
+		switch k {
+		case "properties":
+			if props, ok := v.(map[string]any); ok {
+				np := make(map[string]any, len(props))
+				for pn, pv := range props {
+					if psm, ok := pv.(map[string]any); ok {
+						np[pn] = inlineSchemaObj(psm, doc, maxDepth, depth, seen)
+					} else {
+						np[pn] = pv
+					}
+				}
+				out[k] = np
+				continue
+			}
+		case "items":
+			if im, ok := v.(map[string]any); ok {
+				out[k] = inlineSchemaObj(im, doc, maxDepth, depth, seen)
+				continue
+			}
+			if arr, ok := v.([]any); ok {
+				na := make([]any, len(arr))
+				for i, e := range arr {
+					if em, ok := e.(map[string]any); ok {
+						na[i] = inlineSchemaObj(em, doc, maxDepth, depth, seen)
+					} else {
+						na[i] = e
+					}
+				}
+				out[k] = na
+				continue
+			}
+		}
+		out[k] = v
+	}
+
+	// 字段语义：title -> description 提升（description 缺失时）
+	if t, ok := out["title"].(string); ok && t != "" {
+		if _, has := out["description"]; !has {
+			out["description"] = t
+		}
+	}
+	return out
+}
+
+// primitiveParamSchema 为 path/query 基本类型参数构建子 schema。
+//
+// type 缺省视为 "string"；integer/number 保留 format；附带 description。
+// 数组（type:array）参数输出 {"type":"array","items":{...}}，items 原样内联
+// （query 数组元素恒为基本类型，不含 $ref）。
+func primitiveParamSchema(p swaggerParameter) map[string]any {
+	if p.Type == "array" {
+		arr := map[string]any{"type": "array"}
+		if len(p.Items) > 0 {
+			var items map[string]any
+			if err := json.Unmarshal(p.Items, &items); err == nil {
+				arr["items"] = items
+			}
+		}
+		if p.Description != "" {
+			arr["description"] = p.Description
+		}
+		return arr
+	}
+
+	out := map[string]any{}
+	t := p.Type
+	if t == "" {
+		t = "string"
+	}
+	out["type"] = t
+	if p.Format != "" {
+		out["format"] = p.Format
+	}
+	if p.Description != "" {
+		out["description"] = p.Description
+	}
+	return out
 }
