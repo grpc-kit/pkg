@@ -201,7 +201,7 @@ func makeGatewayCfg(rules ...*annotations.HttpRule) *serviceconfig.Service {
 
 func TestAutoBridge_NilServer(t *testing.T) {
 	// nil server 不应 panic
-	err := AutoBridge(nil, nil, nil, "", makeGatewayCfg(), nil, nil)
+	err := AutoBridge(nil, nil, nil, "", makeGatewayCfg(), nil, nil, "", nil)
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
 	}
@@ -210,7 +210,7 @@ func TestAutoBridge_NilServer(t *testing.T) {
 func TestAutoBridge_NilConfig(t *testing.T) {
 	srv := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "0"}, nil)
 	// nil gatewayCfg 不应 panic
-	err := AutoBridge(srv, nil, nil, "", nil, nil, nil)
+	err := AutoBridge(srv, nil, nil, "", nil, nil, nil, "", nil)
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
 	}
@@ -229,7 +229,7 @@ func TestAutoBridge_NilSwagger(t *testing.T) {
 			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items/{id}"},
 		},
 	)
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil, nil, "", nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -286,7 +286,7 @@ func TestAutoBridge_ToolRegistration(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, nil, "", nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -336,7 +336,7 @@ func TestAutoBridge_AdditionalBindings(t *testing.T) {
 	}
 
 	cfg := makeGatewayCfg(rule)
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil, nil, "", nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -413,7 +413,7 @@ func TestAutoBridge_ToolCall(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil, "", nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -503,7 +503,7 @@ func TestAutoBridge_ToolCallError(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil, "", nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -544,7 +544,7 @@ func TestAutoBridge_ToolCallMissingPathParam(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, "http://localhost", cfg, nil, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, "http://localhost", cfg, nil, nil, "", nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -605,7 +605,7 @@ func TestAutoBridge_AuthPropagation(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil, "", nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -672,7 +672,7 @@ func TestAutoBridge_AuthPropagation_NoAuth(t *testing.T) {
 		},
 	)
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, &http.Client{}, gwSrv.URL, cfg, nil, nil, "", nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -753,7 +753,7 @@ func TestAutoBridge_TagFilter_Whitelist(t *testing.T) {
 		"grpc_kit.api.test.v1.TestService.DeleteItem": {},
 	})
 
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, []string{"mcp"}); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, nil, "", []string{"mcp"}); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -809,7 +809,7 @@ func TestAutoBridge_TagFilter_EmptyWhitelist(t *testing.T) {
 	})
 
 	// allowedTags=nil => 不过滤，全部注册
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, nil); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, nil, "", nil); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -851,7 +851,7 @@ func TestAutoBridge_TagFilter_NilSwagger(t *testing.T) {
 	)
 
 	// swaggerCfg=nil + allowedTags=["mcp"] => 无法确定 tags => 全部被过滤
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil, []string{"mcp"}); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil, nil, "", []string{"mcp"}); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 
@@ -907,7 +907,7 @@ func TestAutoBridge_TagFilter_MultipleAllowedTags(t *testing.T) {
 	})
 
 	// allowedTags=["mcp", "admin"] => GetItem(mcp) 和 ListItems(admin) 命中
-	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, []string{"mcp", "admin"}); err != nil {
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, swagger, nil, "", []string{"mcp", "admin"}); err != nil {
 		t.Fatalf("AutoBridge: %v", err)
 	}
 

@@ -100,9 +100,9 @@ func TestBuildInputSchemaFromSwagger_PathAndQuery(t *testing.T) {
 	if pn == nil || pn["type"] != "string" {
 		t.Errorf("provider_name = %v, want string", pn)
 	}
-	requireContains(t, schema, "provider_name", true)  // path 必填
-	requireContains(t, schema, "code", false)           // query 可选
-	requireContains(t, schema, "state", false)          // query 可选
+	requireContains(t, schema, "provider_name", true) // path 必填
+	requireContains(t, schema, "code", false)         // query 可选
+	requireContains(t, schema, "state", false)        // query 可选
 }
 
 // TestBuildInputSchemaFromSwagger_BodyField 验证 body="fieldname"：字段类型（消息）展平到顶层。

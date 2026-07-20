@@ -188,6 +188,8 @@ func AutoBridge(
 	httpBaseURL string,
 	gatewayCfg *serviceconfig.Service,
 	swaggerCfg *openapiconfig.OpenAPIConfig,
+	assets fs.FS,
+	swaggerAssetName string,
 	allowedTags []string,
 ) error {
 	_ = connFn // 暂未使用，预留 gRPC reflection 优化
@@ -201,7 +203,15 @@ func AutoBridge(
 		httpClient = http.DefaultClient
 	}
 
-	// 构建 selector -> swagger Operation 映射表
+	// 加载 swagger.json（Phase 6）：失败/缺失时 swDoc=nil，op 查找恒为 nil，
+	// buildInputSchemaFromSwagger 降级为仅 path 参数（Phase 5 行为），不报错。
+	swDoc, _ := loadSwaggerDoc(assets, swaggerAssetName)
+	var opIndex swaggerOpIndex
+	if swDoc != nil {
+		opIndex = buildSwaggerOpIndex(swDoc)
+	}
+
+	// selector -> openapiv2 方法文档（summary/description/tags 兜底）
 	docMap := buildSelectorDocMap(swaggerCfg)
 
 	// allowedTags 非空时构建快速查找集合（白名单，OR 语义）
@@ -223,13 +233,6 @@ func AutoBridge(
 		}
 
 		baseName := toSnakeCase(serviceName) + "_" + toSnakeCase(methodName)
-		summary, description, tags := lookupSwaggerDoc(docMap, rule.GetSelector())
-
-		// tag 白名单过滤：allowedTags 非空时，operation 的 tags 必须命中至少一个才注册。
-		// 未命中（含 tags 为空）的方法跳过，不暴露为 MCP tool。
-		if len(allowedSet) > 0 && !hasAllowedTag(tags, allowedSet) {
-			continue
-		}
 
 		// 收集主绑定 + AdditionalBindings
 		bindings := collectHttpBindings(rule)
@@ -242,6 +245,18 @@ func AutoBridge(
 			if httpMethod == "" || pathTemplate == "" {
 				continue
 			}
+
+			op := lookupSwaggerOp(opIndex, httpMethod, pathTemplate)
+			// summary/description/tags 优先取 swagger op，兜底 openapiv2 docMap
+			summary, description, tags := lookupOpDocs(op, docMap, rule.GetSelector())
+
+			// tag 白名单过滤：allowedTags 非空时，tags 必须命中至少一个才注册。
+			// 未命中（含 tags 为空）的 binding 跳过，不暴露为 MCP tool。
+			if len(allowedSet) > 0 && !hasAllowedTag(tags, allowedSet) {
+				continue
+			}
+
+			bodyField := binding.GetBody()
 
 			// 主绑定（bindingIdx == 0）使用 baseName；
 			// AdditionalBindings（bindingIdx > 0）追加路径后缀以区分。
@@ -256,14 +271,16 @@ func AutoBridge(
 				toolName = baseName + "__" + suffix
 			}
 			toolName = uniqueToolName(toolName, registered)
-			inputSchema := buildInputSchema(pathTemplate)
+			inputSchema := buildInputSchemaFromSwagger(op, bodyField, pathTemplate, swDoc)
 			desc := formatDescription(tags, mergeSummaryDescription(summary, description))
 
 			// 捕获循环变量
 			method := httpMethod
 			tmpl := pathTemplate
+			bf := bodyField
+			opCapture := op
 			handler := func(ctx context.Context, req *mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-				return bridgeHandler(ctx, req, httpClient, httpBaseURL, method, tmpl)
+				return bridgeHandler(ctx, req, httpClient, httpBaseURL, method, tmpl, bf, opCapture)
 			}
 
 			server.AddTool(&mcp.Tool{
@@ -282,7 +299,8 @@ func bridgeHandler(
 	ctx context.Context,
 	req *mcp.CallToolRequest,
 	httpClient *http.Client,
-	httpBaseURL, httpMethod, pathTemplate string,
+	httpBaseURL, httpMethod, pathTemplate, bodyField string,
+	op *swaggerOperation,
 ) (*mcp.CallToolResult, error) {
 	args := parseArguments(req.Params.Arguments)
 
@@ -292,22 +310,21 @@ func bridgeHandler(
 		return errorResult("missing path parameter: " + missing), nil
 	}
 
-	// 构建完整 URL
+	// 构建完整 URL（含 query 参数；op 分类，命名即 grpc-gateway 期望）
 	base := strings.TrimRight(httpBaseURL, "/")
-	url := base + path
+	url := appendQueryParams(base+path, pathTemplate, op, args)
 
 	var (
 		bodyReader io.Reader
 		contentSet bool
 	)
-	if !isIdempotentMethod(httpMethod) {
-		// 非幂等方法：body 整体为 JSON
-		raw, ok := extractBodyArgs(args, path)
-		if !ok {
-			raw = json.RawMessage("{}")
+	// 非幂等方法（POST/PATCH）或有 body 映射（PUT 等）时构建请求体
+	if !isIdempotentMethod(httpMethod) || bodyField != "" {
+		body, ok := buildRequestBody(args, op, pathTemplate, bodyField)
+		if ok {
+			bodyReader = bytes.NewReader(body)
+			contentSet = true
 		}
-		bodyReader = bytes.NewReader(raw)
-		contentSet = true
 	}
 
 	httpReq, err := http.NewRequestWithContext(ctx, httpMethod, url, bodyReader)
@@ -424,14 +441,8 @@ func buildSelectorDocMap(swaggerCfg *openapiconfig.OpenAPIConfig) map[string]swa
 	return out
 }
 
-// lookupSwaggerDoc 从映射表查找文档。selector 在映射中不存在时返回空字段。
-func lookupSwaggerDoc(docMap map[string]swaggerMethod, selector string) (summary, description string, tags []string) {
-	entry, ok := docMap[selector]
-	if !ok {
-		return "", "", nil
-	}
-	return entry.summary, entry.description, entry.tags
-}
+// lookupSwaggerDoc 已被 lookupOpDocs（swagger 优先 + docMap 兜底）取代并删除。
+// docMap 的兜底逻辑现由 lookupOpDocs(op=nil) 路径提供。
 
 // mergeSummaryDescription 合并 summary 与 description：summary 优先。
 func mergeSummaryDescription(summary, description string) string {
@@ -671,36 +682,8 @@ func substitutePathParams(pathTemplate string, args map[string]json.RawMessage) 
 	return out, ""
 }
 
-// extractBodyArgs 提取 body 参数（去除已用于 path 的参数）。
-//
-// 幂等方法（GET/DELETE 等）返回 (nil, false) 表示不需要 body。
-// 非幂等方法返回剩余参数（任意 JSON）。
-func extractBodyArgs(args map[string]json.RawMessage, path string) (json.RawMessage, bool) {
-	// 收集 path 参数名
-	pathParams := make(map[string]struct{})
-	for _, m := range pathParamRegex.FindAllStringSubmatch(path, -1) {
-		pathParams[m[1]] = struct{}{}
-	}
-
-	// 构造剩余对象
-	filtered := make(map[string]json.RawMessage, len(args))
-	for k, v := range args {
-		if _, isPath := pathParams[k]; isPath {
-			continue
-		}
-		filtered[k] = v
-	}
-
-	if len(filtered) == 0 {
-		return nil, false
-	}
-
-	b, err := json.Marshal(filtered)
-	if err != nil {
-		return nil, false
-	}
-	return b, true
-}
+// extractBodyArgs 已被 buildRequestBody（Phase 6）替代并删除。
+// 历史实现见 git history；新实现按 swagger 参数分类构建 flat/标量 body，见 buildRequestBody。
 
 // ----------------------------------------------------------------------------
 // Phase 6: Swagger JSON 解析（Step 1-2）
@@ -843,7 +826,7 @@ func refDefName(ref string) string {
 //     - 环检测：name 已在当前路径 seen 中 -> {"type":"object","description":"<name> (递归引用)"}
 //     - 深度限制：depth > maxDepth -> {"type":"object"}（不再展开本 $ref）
 //     - 否则 resolveSwaggerRef 后递归（depth+1）；seen 按路径回溯（进入加、返回删），
-//       保证共享 definition（如 v1ErrorResponse 被引 98 次）不被误降级
+//     保证共享 definition（如 v1ErrorResponse 被引 98 次）不被误降级
 //  2. inline schema：拷贝 type/format/enum/items/properties 等键，对 properties
 //     与 items 递归；字段语义优先取 description，缺失时取 title 提升为 description
 //     （swagger 产物约 99% 字段语义在 title，见 §11.2）
@@ -992,10 +975,10 @@ const swaggerInlineMaxDepth = 4
 //     - "path":  properties[name]=primitiveParamSchema(p)，加入 required（path 参数恒必填）
 //     - "query": properties[name]=primitiveParamSchema(p)（含数组），p.Required 时加入 required
 //     - "body":  inline 展开 p.Schema 后由 flattenBodySchema 处理：
-//       - object 含 properties -> 各 property 合并进顶层 properties（展平），其 required 合并进顶层
-//         （body:"*" / body:"fieldname" 消息字段类型）
-//       - 基本类型/array -> properties[bodyField]=展开结果（body:"fieldname" 标量字段）
-//       - object 无 properties（空请求消息）-> 不新增字段（见 §5.4）
+//     - object 含 properties -> 各 property 合并进顶层 properties（展平），其 required 合并进顶层
+//     （body:"*" / body:"fieldname" 消息字段类型）
+//     - 基本类型/array -> properties[bodyField]=展开结果（body:"fieldname" 标量字段）
+//     - object 无 properties（空请求消息）-> 不新增字段（见 §5.4）
 //
 // 返回 {"type":"object","properties":{...},"required":[...]}（required 为空时省略）。
 //
@@ -1055,8 +1038,8 @@ func buildInputSchemaFromSwagger(op *swaggerOperation, bodyField, pathTemplate s
 //
 // 返回：
 //   - fields: 字段名 -> 子 schema
-//     - object 含 properties：展平后的 body 字段（body:"*" / body:"fieldname" 消息字段）
-//     - 基本类型/array：{bodyField: 展开结果}（body:"fieldname" 标量字段；bodyField 空时兜底为参数名）
+//   - object 含 properties：展平后的 body 字段（body:"*" / body:"fieldname" 消息字段）
+//   - 基本类型/array：{bodyField: 展开结果}（body:"fieldname" 标量字段；bodyField 空时兜底为参数名）
 //   - required: body definition 顶层 required 数组中的字段名（展平后即为顶层必填字段）
 func flattenBodySchema(p swaggerParameter, bodyField string, doc *swaggerDoc) (fields map[string]any, required []string) {
 	expanded := inlineSwaggerSchema(p.Schema, doc, swaggerInlineMaxDepth, 0, map[string]struct{}{})

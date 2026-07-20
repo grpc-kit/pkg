@@ -253,10 +253,13 @@ func (c *LocalConfig) runAutoBridge() {
 	if swErr != nil {
 		log.Printf("[mcp] get gateway swagger: %v", swErr)
 	}
+	// swagger.json 资产（Phase 6）：用于 AutoBridge 生成完整 input schema（含 body/query 字段）。
+	// 未加载时 assets=nil，AutoBridge 降级为仅 path 参数。
+	swaggerAssets, swaggerAssetName := c.adminServer.GetMicroserviceGatewaySwaggerJSON()
 
 	server := c.mcpServer.MCPServer()
 	allowedTags := c.AllowedTagsForMCP()
-	if err := mcptools.AutoBridge(server, nil, httpClient, httpBaseURL, gatewayCfg, swaggerCfg, allowedTags); err != nil {
+	if err := mcptools.AutoBridge(server, nil, httpClient, httpBaseURL, gatewayCfg, swaggerCfg, swaggerAssets, swaggerAssetName, allowedTags); err != nil {
 		log.Printf("[mcp] autobridge: %v", err)
 	}
 }
