@@ -977,3 +977,113 @@ func primitiveParamSchema(p swaggerParameter) map[string]any {
 	}
 	return out
 }
+
+// swaggerInlineMaxDepth 是 body schema $ref 展开的最大深度。
+// 实测 CLI 微服务请求消息最大嵌套深度为 4，该值对 input schema 足够（0 截断）
+// 且避免 token 浪费（见 §5.3）。
+const swaggerInlineMaxDepth = 4
+
+// buildInputSchemaFromSwagger 基于 swagger operation + gateway body 配置构建 input JSON Schema。
+//
+// 处理逻辑：
+//  1. op == nil -> 降级为 buildInputSchema(pathTemplate)（仅 path 参数，即当前行为）。
+//  2. 遍历 op.Parameters 按 in 分类：
+//     - "path":  properties[name]=primitiveParamSchema(p)，加入 required（path 参数恒必填）
+//     - "query": properties[name]=primitiveParamSchema(p)（含数组），p.Required 时加入 required
+//     - "body":  inline 展开 p.Schema 后由 flattenBodySchema 处理：
+//       - object 含 properties -> 各 property 合并进顶层 properties（展平），其 required 合并进顶层
+//         （body:"*" / body:"fieldname" 消息字段类型）
+//       - 基本类型/array -> properties[bodyField]=展开结果（body:"fieldname" 标量字段）
+//       - object 无 properties（空请求消息）-> 不新增字段（见 §5.4）
+//
+// 返回 {"type":"object","properties":{...},"required":[...]}（required 为空时省略）。
+//
+// 展平 body 字段使 LLM 以扁平 JSON 提供参数，与 handler 发送给 gateway 的 flat body 一致；
+// body:"fieldname" 时由 handler（Step 4）再包装为 {"fieldname":<flat>}。
+func buildInputSchemaFromSwagger(op *swaggerOperation, bodyField, pathTemplate string, doc *swaggerDoc) map[string]any {
+	if op == nil {
+		return buildInputSchema(pathTemplate)
+	}
+
+	props := make(map[string]any)
+	required := make([]string, 0)
+	requiredSet := make(map[string]struct{})
+	addRequired := func(name string) {
+		if name == "" {
+			return
+		}
+		if _, ok := requiredSet[name]; !ok {
+			requiredSet[name] = struct{}{}
+			required = append(required, name)
+		}
+	}
+
+	for i := range op.Parameters {
+		p := op.Parameters[i]
+		switch p.In {
+		case "path":
+			props[p.Name] = primitiveParamSchema(p)
+			addRequired(p.Name)
+		case "query":
+			props[p.Name] = primitiveParamSchema(p)
+			if p.Required {
+				addRequired(p.Name)
+			}
+		case "body":
+			fields, reqs := flattenBodySchema(p, bodyField, doc)
+			for name, sub := range fields {
+				props[name] = sub
+			}
+			for _, r := range reqs {
+				addRequired(r)
+			}
+		}
+	}
+
+	schema := map[string]any{
+		"type":       "object",
+		"properties": props,
+	}
+	if len(required) > 0 {
+		schema["required"] = required
+	}
+	return schema
+}
+
+// flattenBodySchema 展开 body 参数 schema，返回需合并进顶层 input schema 的字段。
+//
+// 返回：
+//   - fields: 字段名 -> 子 schema
+//     - object 含 properties：展平后的 body 字段（body:"*" / body:"fieldname" 消息字段）
+//     - 基本类型/array：{bodyField: 展开结果}（body:"fieldname" 标量字段；bodyField 空时兜底为参数名）
+//   - required: body definition 顶层 required 数组中的字段名（展平后即为顶层必填字段）
+func flattenBodySchema(p swaggerParameter, bodyField string, doc *swaggerDoc) (fields map[string]any, required []string) {
+	expanded := inlineSwaggerSchema(p.Schema, doc, swaggerInlineMaxDepth, 0, map[string]struct{}{})
+
+	// 展开结果为 object 且含 properties -> 展平
+	if expanded["type"] == "object" {
+		if props, ok := expanded["properties"].(map[string]any); ok && len(props) > 0 {
+			fields = props
+			if reqArr, ok := expanded["required"].([]any); ok {
+				for _, r := range reqArr {
+					if s, ok := r.(string); ok {
+						required = append(required, s)
+					}
+				}
+			}
+			return fields, required
+		}
+		// object 但无 properties（空请求消息）：不新增字段
+		return nil, nil
+	}
+
+	// 基本类型 / array（body:"fieldname" 标量字段）：以 bodyField 为键
+	name := bodyField
+	if name == "" {
+		name = p.Name // 兜底（通常为 "body"）
+	}
+	if name == "" {
+		return nil, nil
+	}
+	return map[string]any{name: expanded}, nil
+}
