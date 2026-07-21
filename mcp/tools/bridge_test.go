@@ -297,7 +297,7 @@ func TestAutoBridge_NilSwagger(t *testing.T) {
 	}
 	defer session.Close()
 
-	// 注册的 toolName: test_service_get_item (snake_case 拼接)
+	// 注册的 toolName: get_item (snake_case 拼接)
 	tools, err := session.ListTools(ctx, nil)
 	if err != nil {
 		t.Fatalf("ListTools: %v", err)
@@ -359,16 +359,16 @@ func TestAutoBridge_ToolRegistration(t *testing.T) {
 		t.Fatalf("ListTools: %v", err)
 	}
 
-	// 期望至少注册 2 个 tool：test_service_get_item, test_service_list_items
+	// 期望至少注册 2 个 tool：get_item, list_items
 	names := make(map[string]bool, len(tools.Tools))
 	for _, tool := range tools.Tools {
 		names[tool.Name] = true
 	}
-	if !names["test_service_get_item"] {
-		t.Errorf("expected tool test_service_get_item, got: %v", names)
+	if !names["get_item"] {
+		t.Errorf("expected tool get_item, got: %v", names)
 	}
-	if !names["test_service_list_items"] {
-		t.Errorf("expected tool test_service_list_items, got: %v", names)
+	if !names["list_items"] {
+		t.Errorf("expected tool list_items, got: %v", names)
 	}
 }
 
@@ -422,9 +422,9 @@ func TestAutoBridge_ToolAnnotations(t *testing.T) {
 		idempotent  bool
 		destructive *bool
 	}{
-		"test_service_get_item":    {true, true, ptrBool(false)},
-		"test_service_create_item": {false, false, ptrBool(false)},
-		"test_service_delete_item": {false, true, ptrBool(true)},
+		"get_item":    {true, true, ptrBool(false)},
+		"create_item": {false, false, ptrBool(false)},
+		"delete_item": {false, true, ptrBool(true)},
 	}
 
 	got := make(map[string]*mcp.ToolAnnotations, len(tools.Tools))
@@ -506,15 +506,15 @@ func TestAutoBridge_AdditionalBindings(t *testing.T) {
 	// 第一个不带后缀（baseName），第二个带 "__items" 后缀
 	hasBase, hasSuffixed := false, false
 	for _, n := range names {
-		if n == "test_service_get_item" {
+		if n == "get_item" {
 			hasBase = true
 		}
-		if strings.HasPrefix(n, "test_service_get_item__") {
+		if strings.HasPrefix(n, "get_item__") {
 			hasSuffixed = true
 		}
 	}
 	if !hasBase {
-		t.Errorf("expected test_service_get_item (primary), got %v", names)
+		t.Errorf("expected get_item (primary), got %v", names)
 	}
 	if !hasSuffixed {
 		t.Errorf("expected suffixed tool (additional binding), got %v", names)
@@ -579,7 +579,7 @@ func TestAutoBridge_ToolCall(t *testing.T) {
 
 	// 调用 tool，传入 path 参数
 	result, err := session.CallTool(ctx, &mcp.CallToolParams{
-		Name:      "test_service_get_item",
+		Name:      "get_item",
 		Arguments: map[string]any{"id": "42"},
 	})
 	if err != nil {
@@ -657,7 +657,7 @@ func TestAutoBridge_ToolCallError(t *testing.T) {
 	defer session.Close()
 
 	result, err := session.CallTool(ctx, &mcp.CallToolParams{
-		Name:      "test_service_get_item",
+		Name:      "get_item",
 		Arguments: map[string]any{"id": "1"},
 	})
 	if err != nil {
@@ -699,7 +699,7 @@ func TestAutoBridge_ToolCallMissingPathParam(t *testing.T) {
 
 	// 缺 id 参数
 	result, err := session.CallTool(ctx, &mcp.CallToolParams{
-		Name:      "test_service_get_item",
+		Name:      "get_item",
 		Arguments: map[string]any{},
 	})
 	if err != nil {
@@ -768,7 +768,7 @@ func TestAutoBridge_AuthPropagation(t *testing.T) {
 	defer session.Close()
 
 	result, err := session.CallTool(ctx, &mcp.CallToolParams{
-		Name:      "test_service_get_item",
+		Name:      "get_item",
 		Arguments: map[string]any{"id": "1"},
 	})
 	if err != nil {
@@ -827,7 +827,7 @@ func TestAutoBridge_AuthPropagation_NoAuth(t *testing.T) {
 	defer session.Close()
 
 	result, err := session.CallTool(ctx, &mcp.CallToolParams{
-		Name:      "test_service_get_item",
+		Name:      "get_item",
 		Arguments: map[string]any{"id": "1"},
 	})
 	if err != nil {
@@ -915,8 +915,8 @@ func TestAutoBridge_TagFilter_Whitelist(t *testing.T) {
 	if len(tools.Tools) != 1 {
 		t.Fatalf("expected 1 tool (only mcp-tagged), got %d: %+v", len(tools.Tools), tools.Tools)
 	}
-	if tools.Tools[0].Name != "test_service_get_item" {
-		t.Errorf("expected tool name 'test_service_get_item', got %q", tools.Tools[0].Name)
+	if tools.Tools[0].Name != "get_item" {
+		t.Errorf("expected tool name 'get_item', got %q", tools.Tools[0].Name)
 	}
 }
 
@@ -1073,13 +1073,13 @@ func TestAutoBridge_TagFilter_MultipleAllowedTags(t *testing.T) {
 	for _, tl := range tools.Tools {
 		names[tl.Name] = struct{}{}
 	}
-	if _, ok := names["test_service_get_item"]; !ok {
-		t.Error("expected tool 'test_service_get_item' to be registered")
+	if _, ok := names["get_item"]; !ok {
+		t.Error("expected tool 'get_item' to be registered")
 	}
-	if _, ok := names["test_service_list_items"]; !ok {
-		t.Error("expected tool 'test_service_list_items' to be registered")
+	if _, ok := names["list_items"]; !ok {
+		t.Error("expected tool 'list_items' to be registered")
 	}
-	if _, ok := names["test_service_delete_item"]; ok {
-		t.Error("tool 'test_service_delete_item' should NOT be registered (tag=internal not in whitelist)")
+	if _, ok := names["delete_item"]; ok {
+		t.Error("tool 'delete_item' should NOT be registered (tag=internal not in whitelist)")
 	}
 }

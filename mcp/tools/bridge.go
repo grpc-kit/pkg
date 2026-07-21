@@ -232,7 +232,12 @@ func AutoBridge(
 			continue
 		}
 
-		baseName := toSnakeCase(serviceName) + "_" + toSnakeCase(methodName)
+		// Tool name 仅取方法名（snake_case），不加服务名前缀。
+		// grpc-kit 单进程只跑一个业务微服务，AutoBridge 只处理该微服务的 gateway
+		// 配置（不含 admin），所有 tool 同属一个 service，服务名前缀是冗余噪音。
+		// serviceName 仍保留用于上方的空值 guard（检测 malformed selector）。
+		// 多 service 场景下 method 重名由 uniqueToolName 追加 _2/_3 兜底。
+		baseName := toSnakeCase(methodName)
 
 		// 收集主绑定 + AdditionalBindings
 		bindings := collectHttpBindings(rule)

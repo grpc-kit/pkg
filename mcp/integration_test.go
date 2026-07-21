@@ -150,7 +150,7 @@ func TestIntegration_AutoBridgeAuthPropagation(t *testing.T) {
 	defer session.Close()
 
 	result, err := session.CallTool(ctx, &mcp.CallToolParams{
-		Name:      "test_service_get_item",
+		Name:      "get_item",
 		Arguments: map[string]any{"id": "99"},
 	})
 	if err != nil {
