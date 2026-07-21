@@ -630,6 +630,17 @@ func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientIntercepto
 	return opts
 }
 
+// selfServiceAdminMethods 是需要认证但不依赖角色的自服务 RPC 方法白名单。
+// 这类方法（用户管理自己的 MFA、OIDC 标准端点、数据库 bootstrap）即使
+// IDTokenClaims.Groups 为空也允许访问，不强制要求用户拥有任何角色。
+var selfServiceAdminMethods = map[string]struct{}{
+	"/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA":         {},
+	"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA":      {},
+	"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA":      {},
+	"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo":   {},
+	"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize": {},
+}
+
 // authValidate 认证与鉴权拦截器
 func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
@@ -724,7 +735,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 							ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
 							ctx = c.Security.withGroups(ctx, v.Groups)
 
-							if err := c.checkPermission(ctx, v.Groups); err != nil {
+							if err := c.checkPermission(ctx, currentMethod, v.Groups); err != nil {
 								return ctx, err
 							}
 							return ctx, nil
@@ -758,7 +769,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			ctx = c.Security.withGroups(ctx, idToken.Groups)
 			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBearer)
 
-			if err := c.checkPermission(ctx, idToken.Groups); err != nil {
+			if err := c.checkPermission(ctx, currentMethod, idToken.Groups); err != nil {
 				return ctx, err
 			}
 			return ctx, nil
@@ -768,7 +779,19 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 	}
 }
 
-func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) error {
+func (c *LocalConfig) checkPermission(ctx context.Context, method string, groups []string) error {
+	// 安全策略：对于内置管理接口，已认证用户必须至少拥有一个用户组（角色），
+	// 即 IDTokenClaims.Groups 必须非空，否则直接拒绝访问（403）。
+	// 自服务方法（用户管理自己的 MFA、OIDC 标准端点、数据库 bootstrap）豁免此检查，
+	// 允许无角色的已认证用户访问，但仍需通过后续 AllowedGroups 与 OPA 评估。
+	if len(groups) == 0 {
+		if _, isSelfService := selfServiceAdminMethods[method]; !isSelfService {
+			return errs.PermissionDenied(ctx).
+				WithMessage("user has no role assignments; groups claim is required to access admin APIs").
+				Err()
+		}
+	}
+
 	// 需要当前用户组进行核对，是否拥护权限
 	if len(c.Security.Authorization.AllowedGroups) > 0 {
 		allow := false
