@@ -287,6 +287,7 @@ func AutoBridge(
 				Name:        toolName,
 				Description: desc,
 				InputSchema: inputSchema,
+				Annotations: buildToolAnnotations(httpMethod),
 			}, handler)
 		}
 	}
@@ -401,6 +402,48 @@ func isIdempotentMethod(method string) bool {
 		return true
 	}
 	return false
+}
+
+// ptrBool 返回 b 的地址，用于 *bool 类型的 ToolAnnotations 字段。
+func ptrBool(b bool) *bool { return &b }
+
+// buildToolAnnotations 根据 HTTP method 推断 MCP ToolAnnotations 语义标注。
+//
+// 映射规则（Phase 8 Layer 1）：
+//   - GET / HEAD / OPTIONS：只读 + 幂等（ReadOnlyHint=true, IdempotentHint=true, DestructiveHint=false）
+//   - PUT：幂等写入（IdempotentHint=true, DestructiveHint=false）
+//   - DELETE：幂等破坏性删除（IdempotentHint=true, DestructiveHint=true）
+//   - POST / PATCH / 其他：非幂等写入（DestructiveHint=false）
+//
+// OpenWorldHint 保持 nil：AutoBridge 通过本地 gateway 调用，不与外部世界直接交互。
+// DestructiveHint 显式设 false（而非 nil）以覆盖 SDK 默认值 true。
+func buildToolAnnotations(httpMethod string) *mcp.ToolAnnotations {
+	switch strings.ToUpper(httpMethod) {
+	case "GET", "HEAD", "OPTIONS":
+		return &mcp.ToolAnnotations{
+			ReadOnlyHint:    true,
+			IdempotentHint:  true,
+			DestructiveHint: ptrBool(false),
+		}
+	case "PUT":
+		return &mcp.ToolAnnotations{
+			ReadOnlyHint:    false,
+			IdempotentHint:  true,
+			DestructiveHint: ptrBool(false),
+		}
+	case "DELETE":
+		return &mcp.ToolAnnotations{
+			ReadOnlyHint:    false,
+			IdempotentHint:  true,
+			DestructiveHint: ptrBool(true),
+		}
+	default: // POST, PATCH, 自定义方法
+		return &mcp.ToolAnnotations{
+			ReadOnlyHint:    false,
+			IdempotentHint:  false,
+			DestructiveHint: ptrBool(false),
+		}
+	}
 }
 
 // pathParamRegex 匹配 path template 中的 {param} 占位符。

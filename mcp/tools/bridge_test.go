@@ -114,6 +114,58 @@ func TestFormatDescription(t *testing.T) {
 	}
 }
 
+func TestBuildToolAnnotations(t *testing.T) {
+	tests := []struct {
+		name             string
+		method           string
+		wantReadOnly     bool
+		wantIdempotent   bool
+		wantDestructive  *bool // nil = 期望 DestructiveHint 为 nil; 非 nil = 期望值
+		wantOpenWorldNil bool  // true = 期望 OpenWorldHint 为 nil
+	}{
+		{"GET", "GET", true, true, ptrBool(false), true},
+		{"HEAD", "HEAD", true, true, ptrBool(false), true},
+		{"OPTIONS", "OPTIONS", true, true, ptrBool(false), true},
+		{"PUT", "PUT", false, true, ptrBool(false), true},
+		{"DELETE", "DELETE", false, true, ptrBool(true), true},
+		{"POST", "POST", false, false, ptrBool(false), true},
+		{"PATCH", "PATCH", false, false, ptrBool(false), true},
+		{"lowercase_get", "get", true, true, ptrBool(false), true}, // 大小写不敏感
+		{"custom_QUERY", "QUERY", false, false, ptrBool(false), true},
+		{"empty", "", false, false, ptrBool(false), true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := buildToolAnnotations(tc.method)
+			if got == nil {
+				t.Fatal("buildToolAnnotations returned nil")
+			}
+			if got.ReadOnlyHint != tc.wantReadOnly {
+				t.Errorf("ReadOnlyHint = %v, want %v", got.ReadOnlyHint, tc.wantReadOnly)
+			}
+			if got.IdempotentHint != tc.wantIdempotent {
+				t.Errorf("IdempotentHint = %v, want %v", got.IdempotentHint, tc.wantIdempotent)
+			}
+			// DestructiveHint 是 *bool，需 nil 检查
+			if tc.wantDestructive == nil {
+				if got.DestructiveHint != nil {
+					t.Errorf("DestructiveHint = %v, want nil", *got.DestructiveHint)
+				}
+			} else {
+				if got.DestructiveHint == nil {
+					t.Errorf("DestructiveHint = nil, want %v", *tc.wantDestructive)
+				} else if *got.DestructiveHint != *tc.wantDestructive {
+					t.Errorf("DestructiveHint = %v, want %v", *got.DestructiveHint, *tc.wantDestructive)
+				}
+			}
+			// OpenWorldHint 应始终为 nil
+			if tc.wantOpenWorldNil && got.OpenWorldHint != nil {
+				t.Errorf("OpenWorldHint = %v, want nil", *got.OpenWorldHint)
+			}
+		})
+	}
+}
+
 func TestBuildInputSchema(t *testing.T) {
 	tests := []struct {
 		tmpl      string
@@ -317,6 +369,91 @@ func TestAutoBridge_ToolRegistration(t *testing.T) {
 	}
 	if !names["test_service_list_items"] {
 		t.Errorf("expected tool test_service_list_items, got: %v", names)
+	}
+}
+
+func TestAutoBridge_ToolAnnotations(t *testing.T) {
+	mcpSrv, err := mcpserver.NewServer(true, "streamable_http")
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+
+	cfg := makeGatewayCfg(
+		// GET → ReadOnly+Idempotent, DestructiveHint=false
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.GetItem",
+			Pattern:  &annotations.HttpRule_Get{Get: "/v1/items/{id}"},
+		},
+		// POST → neither ReadOnly nor Idempotent, DestructiveHint=false
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.CreateItem",
+			Pattern:  &annotations.HttpRule_Post{Post: "/v1/items"},
+		},
+		// DELETE → Idempotent+Destructive
+		&annotations.HttpRule{
+			Selector: "grpc_kit.api.test.v1.TestService.DeleteItem",
+			Pattern:  &annotations.HttpRule_Delete{Delete: "/v1/items/{id}"},
+		},
+	)
+
+	if err := AutoBridge(mcpSrv.MCPServer(), nil, http.DefaultClient, "http://localhost:8080", cfg, nil, nil, "", nil); err != nil {
+		t.Fatalf("AutoBridge: %v", err)
+	}
+
+	httpServer := httptest.NewServer(mcpSrv.Handler())
+	defer httpServer.Close()
+
+	ctx := context.Background()
+	transport := &mcp.StreamableClientTransport{Endpoint: httpServer.URL}
+	client := mcp.NewClient(&mcp.Implementation{Name: "test-client", Version: "0.0.1"}, nil)
+	session, err := client.Connect(ctx, transport, nil)
+	if err != nil {
+		t.Fatalf("Connect: %v", err)
+	}
+	defer session.Close()
+
+	tools, err := session.ListTools(ctx, nil)
+	if err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+
+	want := map[string]struct {
+		readonly    bool
+		idempotent  bool
+		destructive *bool
+	}{
+		"test_service_get_item":    {true, true, ptrBool(false)},
+		"test_service_create_item": {false, false, ptrBool(false)},
+		"test_service_delete_item": {false, true, ptrBool(true)},
+	}
+
+	got := make(map[string]*mcp.ToolAnnotations, len(tools.Tools))
+	for _, tool := range tools.Tools {
+		if tool.Annotations != nil {
+			got[tool.Name] = tool.Annotations
+		}
+	}
+
+	for name, exp := range want {
+		ann, ok := got[name]
+		if !ok {
+			t.Errorf("tool %q: no annotations received", name)
+			continue
+		}
+		if ann.ReadOnlyHint != exp.readonly {
+			t.Errorf("tool %q: ReadOnlyHint = %v, want %v", name, ann.ReadOnlyHint, exp.readonly)
+		}
+		if ann.IdempotentHint != exp.idempotent {
+			t.Errorf("tool %q: IdempotentHint = %v, want %v", name, ann.IdempotentHint, exp.idempotent)
+		}
+		if ann.DestructiveHint == nil {
+			t.Errorf("tool %q: DestructiveHint = nil, want %v", name, *exp.destructive)
+		} else if *ann.DestructiveHint != *exp.destructive {
+			t.Errorf("tool %q: DestructiveHint = %v, want %v", name, *ann.DestructiveHint, *exp.destructive)
+		}
+		if ann.OpenWorldHint != nil {
+			t.Errorf("tool %q: OpenWorldHint = %v, want nil", name, *ann.OpenWorldHint)
+		}
 	}
 }
 
