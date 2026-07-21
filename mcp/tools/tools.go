@@ -3,7 +3,6 @@ package tools
 import (
 	"encoding/json"
 
-	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/grpc"
 )
 
@@ -16,37 +15,6 @@ func mustJSON(v any) string {
 	return string(b)
 }
 
-// GRPCConnFunc 返回本地 gRPC 连接，供 health_check 等 Tool 使用。
+// GRPCConnFunc 返回本地 gRPC 连接，供 AutoBridge 等需要直连 gRPC 的场景使用。
 // 连接应由调用方惰性创建并缓存。
 type GRPCConnFunc func() (*grpc.ClientConn, error)
-
-// ServiceInfoFunc 返回服务元信息（名称、版本、git commit 等）。
-type ServiceInfoFunc func() (map[string]any, error)
-
-// GrpcMethodsFunc 返回已注册的 gRPC 方法列表。
-// 每个元素包含 service、method、description 等字段。
-type GrpcMethodsFunc func() ([]map[string]any, error)
-
-// ConfigSnapshotFunc 返回脱敏后的运行配置。
-type ConfigSnapshotFunc func() (map[string]any, error)
-
-// BuiltinToolsConfig 汇总所有内置 Tool 的回调配置。
-// 任意回调为 nil 时，对应 Tool 不会被注册（不报错）。
-type BuiltinToolsConfig struct {
-	GRPCConn    GRPCConnFunc
-	ServiceInfo ServiceInfoFunc
-	GrpcMethods GrpcMethodsFunc
-	Config      ConfigSnapshotFunc
-}
-
-// RegisterBuiltinTools 向 MCP Server 注册全部内置 Tools。
-// 各回调为 nil 时跳过对应 Tool 注册。
-func RegisterBuiltinTools(server *mcp.Server, cfg BuiltinToolsConfig) {
-	if server == nil {
-		return
-	}
-	registerHealthCheckTool(server, cfg.GRPCConn)
-	registerServiceInfoTool(server, cfg.ServiceInfo)
-	registerGrpcMethodsTool(server, cfg.GrpcMethods)
-	registerConfigTool(server, cfg.Config)
-}

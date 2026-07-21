@@ -480,6 +480,9 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 		}
 		// gateway/swagger YAML 已加载，现在执行 AutoBridge 将 gRPC 方法注册为 MCP Tools
 		c.runAutoBridge()
+		// 注册内置 Resources（version + openapi-spec×2）与 getting_started Prompt
+		//（swagger 资产已就绪；见 Phase 9 / ADR-010）
+		c.runMCPBuiltinResources()
 	}
 
 	comps := []string{"admin", "openapi", "webroot"}
