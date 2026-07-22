@@ -4,17 +4,20 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/http/pprof"
 	"net/textproto"
 	"path"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -152,9 +155,42 @@ func (c *LocalConfig) runAutoBridge() {
 		log.Printf("[mcp] HTTPAddress is empty; skip AutoBridge")
 		return
 	}
-	httpBaseURL := "http://" + c.rpcConfig.HTTPAddress
 
-	httpClient := &http.Client{Timeout: 30 * time.Second}
+	// 解析 HTTP 监听地址（getHTTPListenHostPort 内部已将 0.0.0.0 归一化为 127.0.0.1）
+	httpHost, httpPort, addrErr := c.Services.getHTTPListenHostPort()
+	if addrErr != nil {
+		log.Printf("[mcp] parse HTTP address: %v; skip AutoBridge", addrErr)
+		return
+	}
+	// 检测 HTTP 网关是否启用了 TLS（手动证书或 ACME 自动证书）。
+	// 与 pkg/rpc/server.go StartBackground() 中的 TLS 启动判断条件保持一致。
+	httpTLSEnabled := c.rpcConfig.TLS.HTTPCertFile != "" ||
+		len(c.rpcConfig.TLS.ACMEDomains) > 0
+
+	scheme := "http"
+	if httpTLSEnabled {
+		scheme = "https"
+	}
+	httpBaseURL := scheme + "://" + net.JoinHostPort(httpHost, strconv.Itoa(httpPort))
+
+	// 使用自定义 Transport 禁用代理（Proxy: nil），避免线上环境 HTTP_PROXY
+	// 把回环请求劫持到代理服务器导致阻塞。同时设置合理的连接池参数。
+	transport := &http.Transport{
+		Proxy:               nil, // 回环请求不走代理
+		MaxIdleConns:        10,
+		MaxIdleConnsPerHost: 5,
+		IdleConnTimeout:     90 * time.Second,
+	}
+	if httpTLSEnabled {
+		// 回环地址为 127.0.0.1，证书 SAN 通常不包含该 IP，需跳过验证。
+		transport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
+		}
+	}
+	httpClient := &http.Client{
+		Timeout:   30 * time.Second,
+		Transport: transport,
+	}
 	gatewayCfg, gwErr := c.adminServer.GetMicroserviceGatewayServiceConfig()
 	if gwErr != nil {
 		log.Printf("[mcp] get gateway service config: %v", gwErr)
@@ -634,10 +670,10 @@ func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientIntercepto
 // 这类方法（用户管理自己的 MFA、OIDC 标准端点、数据库 bootstrap）即使
 // IDTokenClaims.Groups 为空也允许访问，不强制要求用户拥有任何角色。
 var selfServiceAdminMethods = map[string]struct{}{
-	"/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA":         {},
-	"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA":      {},
-	"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA":      {},
-	"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo":   {},
+	"/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA":             {},
+	"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA":           {},
+	"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA":           {},
+	"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo":        {},
 	"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize": {},
 }
 

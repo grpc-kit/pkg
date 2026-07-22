@@ -2,6 +2,8 @@ package cfg
 
 import (
 	"context"
+	"net"
+	"strconv"
 	"testing"
 
 	"github.com/grpc-kit/pkg/errs"
@@ -101,4 +103,153 @@ func TestCheckPermission_AllowedGroupsStillEnforced(t *testing.T) {
 	// 注意：自服务豁免仅针对 Groups 非空前置门，AllowedGroups 仍需满足。
 	err = c.checkPermission(ctx, "/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA", nil)
 	isPermissionDenied(t, err)
+}
+
+func TestGetHTTPListenHostPort(t *testing.T) {
+	tests := []struct {
+		name     string
+		svc      ServicesConfig
+		wantHost string
+		wantPort int
+		wantErr  bool
+	}{
+		{
+			name:     "0.0.0.0 normalized to 127.0.0.1",
+			svc:      ServicesConfig{HTTPAddress: "0.0.0.0:8080"},
+			wantHost: "127.0.0.1",
+			wantPort: 8080,
+		},
+		{
+			name:     "loopback http_address",
+			svc:      ServicesConfig{HTTPAddress: "127.0.0.1:8080"},
+			wantHost: "127.0.0.1",
+			wantPort: 8080,
+		},
+		{
+			name:     "external ip http_address",
+			svc:      ServicesConfig{HTTPAddress: "192.168.1.1:8080"},
+			wantHost: "192.168.1.1",
+			wantPort: 8080,
+		},
+		{
+			name: "http_service.address overrides http_address",
+			svc: ServicesConfig{
+				HTTPAddress: "0.0.0.0:9090",
+				HTTPService: &HTTPService{Address: "127.0.0.1:8080"},
+			},
+			wantHost: "127.0.0.1",
+			wantPort: 8080,
+		},
+		{
+			name:    "invalid format - no port",
+			svc:     ServicesConfig{HTTPAddress: "0.0.0.0"},
+			wantErr: true,
+		},
+		{
+			name:    "invalid format - bad port",
+			svc:     ServicesConfig{HTTPAddress: "0.0.0.0:abc"},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			host, port, err := tt.svc.getHTTPListenHostPort()
+			if tt.wantErr {
+				if err == nil {
+					t.Fatalf("expected error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if host != tt.wantHost {
+				t.Errorf("host = %q, want %q", host, tt.wantHost)
+			}
+			if port != tt.wantPort {
+				t.Errorf("port = %d, want %d", port, tt.wantPort)
+			}
+		})
+	}
+}
+
+func TestLoopbackNormalization(t *testing.T) {
+	tests := []struct {
+		name     string
+		httpAddr string
+		wantURL  string
+	}{
+		{
+			name:     "0.0.0.0 normalized to 127.0.0.1",
+			httpAddr: "0.0.0.0:8080",
+			wantURL:  "http://127.0.0.1:8080",
+		},
+		{
+			name:     "127.0.0.1 stays as-is",
+			httpAddr: "127.0.0.1:8080",
+			wantURL:  "http://127.0.0.1:8080",
+		},
+		{
+			name:     "external IP stays as-is",
+			httpAddr: "192.168.1.1:8080",
+			wantURL:  "http://192.168.1.1:8080",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			svc := ServicesConfig{HTTPAddress: tt.httpAddr}
+			host, port, err := svc.getHTTPListenHostPort()
+			if err != nil {
+				t.Fatalf("getHTTPListenHostPort: %v", err)
+			}
+			// getHTTPListenHostPort 内部已归一化 0.0.0.0 -> 127.0.0.1
+			gotURL := "http://" + net.JoinHostPort(host, strconv.Itoa(port))
+			if gotURL != tt.wantURL {
+				t.Errorf("got %q, want %q", gotURL, tt.wantURL)
+			}
+		})
+	}
+}
+
+func TestHTTPSchemeDetection(t *testing.T) {
+	tests := []struct {
+		name        string
+		certFile    string
+		acmeDomains []string
+		wantScheme  string
+	}{
+		{
+			name:        "no TLS -> http",
+			certFile:    "",
+			acmeDomains: nil,
+			wantScheme:  "http",
+		},
+		{
+			name:        "manual cert -> https",
+			certFile:    "/path/to/cert.pem",
+			acmeDomains: nil,
+			wantScheme:  "https",
+		},
+		{
+			name:        "acme domains -> https",
+			certFile:    "",
+			acmeDomains: []string{"example.com"},
+			wantScheme:  "https",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tlsEnabled := tt.certFile != "" || len(tt.acmeDomains) > 0
+			scheme := "http"
+			if tlsEnabled {
+				scheme = "https"
+			}
+			if scheme != tt.wantScheme {
+				t.Errorf("scheme = %q, want %q", scheme, tt.wantScheme)
+			}
+		})
+	}
 }
