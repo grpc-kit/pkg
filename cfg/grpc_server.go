@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"net/http/pprof"
@@ -152,14 +151,14 @@ func (c *LocalConfig) runAutoBridge() {
 	}
 
 	if c.rpcConfig == nil || c.rpcConfig.HTTPAddress == "" {
-		log.Printf("[mcp] HTTPAddress is empty; skip AutoBridge")
+		c.logger.Infoln("[mcp] HTTPAddress is empty; skip AutoBridge")
 		return
 	}
 
 	// 解析 HTTP 监听地址（getHTTPListenHostPort 内部已将 0.0.0.0 归一化为 127.0.0.1）
 	httpHost, httpPort, addrErr := c.Services.getHTTPListenHostPort()
 	if addrErr != nil {
-		log.Printf("[mcp] parse HTTP address: %v; skip AutoBridge", addrErr)
+		c.logger.Errorf("[mcp] parse HTTP address: %v; skip AutoBridge", addrErr)
 		return
 	}
 	// 检测 HTTP 网关是否启用了 TLS（手动证书或 ACME 自动证书）。
@@ -193,11 +192,11 @@ func (c *LocalConfig) runAutoBridge() {
 	}
 	gatewayCfg, gwErr := c.adminServer.GetMicroserviceGatewayServiceConfig()
 	if gwErr != nil {
-		log.Printf("[mcp] get gateway service config: %v", gwErr)
+		c.logger.Errorf("[mcp] get gateway service config: %v", gwErr)
 	}
 	swaggerCfg, swErr := c.adminServer.GetMicroserviceGatewaySwagger()
 	if swErr != nil {
-		log.Printf("[mcp] get gateway swagger: %v", swErr)
+		c.logger.Errorf("[mcp] get gateway swagger: %v", swErr)
 	}
 	// swagger.json 资产（Phase 6）：用于 AutoBridge 生成完整 input schema（含 body/query 字段）。
 	// 未加载时 assets=nil，AutoBridge 降级为仅 path 参数。
@@ -205,8 +204,8 @@ func (c *LocalConfig) runAutoBridge() {
 
 	server := c.mcpServer.MCPServer()
 	allowedTags := c.AllowedTagsForMCP()
-	if err := mcptools.AutoBridge(server, nil, httpClient, httpBaseURL, gatewayCfg, swaggerCfg, swaggerAssets, swaggerAssetName, allowedTags); err != nil {
-		log.Printf("[mcp] autobridge: %v", err)
+	if err := mcptools.AutoBridge(server, nil, httpClient, httpBaseURL, gatewayCfg, swaggerCfg, swaggerAssets, swaggerAssetName, allowedTags, c.logger); err != nil {
+		c.logger.Errorf("[mcp] autobridge: %v", err)
 	}
 }
 
