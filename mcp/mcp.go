@@ -43,7 +43,10 @@ func NewServer(enable bool, transport string) (*Server, error) {
 	var handler http.Handler
 	switch transport {
 	case "streamable_http":
-		handler = mcp.NewStreamableHTTPHandler(getServer, nil)
+		handler = mcp.NewStreamableHTTPHandler(getServer, &mcp.StreamableHTTPOptions{
+			JSONResponse:               false,
+			DisableLocalhostProtection: true,
+		})
 	case "sse":
 		handler = mcp.NewSSEHandler(getServer, nil)
 	default:
