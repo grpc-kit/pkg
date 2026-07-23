@@ -202,22 +202,116 @@ func TestBuildInputSchema(t *testing.T) {
 }
 
 func TestSubstitutePathParams(t *testing.T) {
-	args := map[string]json.RawMessage{
-		"id":   json.RawMessage(`"123"`),
-		"name": json.RawMessage(`"alice"`),
-	}
-	got, missing := substitutePathParams("/v1/{id}/users/{name}", args)
-	if missing != "" {
-		t.Errorf("unexpected missing: %s", missing)
-	}
-	if got != "/v1/123/users/alice" {
-		t.Errorf("got %q, want /v1/123/users/alice", got)
+	tests := []struct {
+		name        string
+		tmpl        string
+		args        map[string]json.RawMessage
+		wantPath    string
+		wantMissing string
+	}{
+		{
+			name:        "string params (regression)",
+			tmpl:        "/v1/{id}/users/{name}",
+			args:        map[string]json.RawMessage{"id": json.RawMessage(`"123"`), "name": json.RawMessage(`"alice"`)},
+			wantPath:    "/v1/123/users/alice",
+			wantMissing: "",
+		},
+		{
+			name:        "integer param",
+			tmpl:        "/api/backup/upload/config/{host}/{timepoint}",
+			args:        map[string]json.RawMessage{"host": json.RawMessage(`"192.168.17.252"`), "timepoint": json.RawMessage(`1784787173`)},
+			wantPath:    "/api/backup/upload/config/192.168.17.252/1784787173",
+			wantMissing: "",
+		},
+		{
+			name:        "int64 max (no precision loss)",
+			tmpl:        "/v1/{id}",
+			args:        map[string]json.RawMessage{"id": json.RawMessage(`9223372036854775807`)},
+			wantPath:    "/v1/9223372036854775807",
+			wantMissing: "",
+		},
+		{
+			name:        "boolean true",
+			tmpl:        "/v1/{enabled}",
+			args:        map[string]json.RawMessage{"enabled": json.RawMessage(`true`)},
+			wantPath:    "/v1/true",
+			wantMissing: "",
+		},
+		{
+			name:        "boolean false (not treated as missing)",
+			tmpl:        "/v1/{enabled}",
+			args:        map[string]json.RawMessage{"enabled": json.RawMessage(`false`)},
+			wantPath:    "/v1/false",
+			wantMissing: "",
+		},
+		{
+			name:        "float number",
+			tmpl:        "/v1/{ratio}",
+			args:        map[string]json.RawMessage{"ratio": json.RawMessage(`1.5`)},
+			wantPath:    "/v1/1.5",
+			wantMissing: "",
+		},
+		{
+			name:        "null value treated as missing",
+			tmpl:        "/v1/{id}",
+			args:        map[string]json.RawMessage{"id": json.RawMessage(`null`)},
+			wantPath:    "",
+			wantMissing: "id",
+		},
+		{
+			name:        "missing param",
+			tmpl:        "/v1/{id}",
+			args:        map[string]json.RawMessage{},
+			wantPath:    "",
+			wantMissing: "id",
+		},
+		{
+			name:        "empty string treated as missing",
+			tmpl:        "/v1/{id}",
+			args:        map[string]json.RawMessage{"id": json.RawMessage(`""`)},
+			wantPath:    "",
+			wantMissing: "id",
+		},
 	}
 
-	// 缺参数
-	_, missing = substitutePathParams("/v1/{id}", map[string]json.RawMessage{})
-	if missing != "id" {
-		t.Errorf("expected missing=id, got %q", missing)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, missing := substitutePathParams(tt.tmpl, tt.args)
+			if missing != tt.wantMissing {
+				t.Errorf("missing=%q, want %q", missing, tt.wantMissing)
+			}
+			if got != tt.wantPath {
+				t.Errorf("path=%q, want %q", got, tt.wantPath)
+			}
+		})
+	}
+}
+
+func TestRawToString(t *testing.T) {
+	tests := []struct {
+		name string
+		raw  json.RawMessage
+		want string
+	}{
+		{"string", json.RawMessage(`"hello"`), "hello"},
+		{"empty string", json.RawMessage(`""`), ""},
+		{"integer", json.RawMessage(`42`), "42"},
+		{"int64 max", json.RawMessage(`9223372036854775807`), "9223372036854775807"},
+		{"float", json.RawMessage(`3.14`), "3.14"},
+		{"bool true", json.RawMessage(`true`), "true"},
+		{"bool false", json.RawMessage(`false`), "false"},
+		{"null", json.RawMessage(`null`), ""},
+		{"empty raw", json.RawMessage(``), ""},
+		{"object (unrecognized)", json.RawMessage(`{}`), ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := rawToString(tt.raw)
+			if got != tt.want {
+				t.Errorf("rawToString(%s) = %q, want %q", tt.raw, got, tt.want)
+			}
+		})
 	}
 }
 

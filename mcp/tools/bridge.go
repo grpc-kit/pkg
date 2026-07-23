@@ -757,9 +757,39 @@ func parseArguments(raw json.RawMessage) map[string]json.RawMessage {
 	return out
 }
 
+// rawToString 将 json.RawMessage 转为可用于 URL path 的字符串。
+//
+// 支持 string / number / boolean 类型；null 或空返回空串。
+// number 使用 json.Number 保留原始文本，避免大整数经 float64 转换后精度丢失。
+func rawToString(raw json.RawMessage) string {
+	if len(raw) == 0 {
+		return ""
+	}
+	// 先尝试 string
+	var s string
+	if err := json.Unmarshal(raw, &s); err == nil {
+		return s
+	}
+	// 尝试 number（json.Number 保留原始文本，避免精度丢失）
+	var n json.Number
+	if err := json.Unmarshal(raw, &n); err == nil {
+		return n.String()
+	}
+	// 尝试 boolean
+	var b bool
+	if err := json.Unmarshal(raw, &b); err == nil {
+		if b {
+			return "true"
+		}
+		return "false"
+	}
+	return ""
+}
+
 // substitutePathParams 替换 path template 中的 {param} 占位符。
 //
 // 缺失参数时返回 ("", missingParamName)；空参数视为缺失。
+// 支持 string / number / boolean 类型的参数值，统一转为字符串用于 URL path。
 func substitutePathParams(pathTemplate string, args map[string]json.RawMessage) (string, string) {
 	missing := ""
 	out := pathParamRegex.ReplaceAllStringFunc(pathTemplate, func(token string) string {
@@ -773,12 +803,7 @@ func substitutePathParams(pathTemplate string, args map[string]json.RawMessage) 
 			missing = name
 			return token
 		}
-		// 去掉 JSON 字符串引号
-		var s string
-		if err := json.Unmarshal(raw, &s); err != nil {
-			missing = name
-			return token
-		}
+		s := rawToString(raw)
 		if s == "" {
 			missing = name
 			return token
