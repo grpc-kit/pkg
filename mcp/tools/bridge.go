@@ -209,8 +209,6 @@ func AutoBridge(
 		httpClient = http.DefaultClient
 	}
 
-	logger.Infoln("http base url:", httpBaseURL)
-
 	// 加载 swagger.json（Phase 6）：失败/缺失时 swDoc=nil，op 查找恒为 nil，
 	// buildInputSchemaFromSwagger 降级为仅 path 参数（Phase 5 行为），不报错。
 	swDoc, _ := loadSwaggerDoc(assets, swaggerAssetName)
