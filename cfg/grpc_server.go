@@ -665,17 +665,6 @@ func (c *LocalConfig) GetClientStreamInterceptor() []grpc.StreamClientIntercepto
 	return opts
 }
 
-// selfServiceAdminMethods 是需要认证但不依赖角色的自服务 RPC 方法白名单。
-// 这类方法（用户管理自己的 MFA、OIDC 标准端点、数据库 bootstrap）即使
-// IDTokenClaims.Groups 为空也允许访问，不强制要求用户拥有任何角色。
-var selfServiceAdminMethods = map[string]struct{}{
-	"/grpc_kit.api.known.admin.v1.KnownAdmin/SetupUserMFA":             {},
-	"/grpc_kit.api.known.admin.v1.KnownAdmin/ConfirmUserMFA":           {},
-	"/grpc_kit.api.known.admin.v1.KnownAdmin/DisableUserMFA":           {},
-	"/grpc_kit.api.known.admin.v1.KnownAdmin/GetOAuth2Userinfo":        {},
-	"/grpc_kit.api.known.admin.v1.KnownAdmin/CreateDatabaseInitialize": {},
-}
-
 // authValidate 认证与鉴权拦截器
 func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 	return func(ctx context.Context) (context.Context, error) {
@@ -820,7 +809,7 @@ func (c *LocalConfig) checkPermission(ctx context.Context, method string, groups
 	// 自服务方法（用户管理自己的 MFA、OIDC 标准端点、数据库 bootstrap）豁免此检查，
 	// 允许无角色的已认证用户访问，但仍需通过后续 AllowedGroups 与 OPA 评估。
 	if len(groups) == 0 {
-		if _, isSelfService := selfServiceAdminMethods[method]; !isSelfService {
+		if strings.HasPrefix(method, "/grpc_kit.api.known.admin.v1.KnownAdmin/") {
 			return errs.PermissionDenied(ctx).
 				WithMessage("user has no role assignments; groups claim is required to access admin APIs").
 				Err()
