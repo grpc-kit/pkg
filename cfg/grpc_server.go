@@ -4,16 +4,20 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/fs"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/pprof"
 	"net/textproto"
 	"path"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -27,6 +31,7 @@ import (
 	otelcodes "go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/genproto/googleapis/api/serviceconfig"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -34,8 +39,11 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
+	"github.com/grpc-kit/pkg/mcp"
+	mcptools "github.com/grpc-kit/pkg/mcp/tools"
 	"github.com/grpc-kit/pkg/rpc/interceptors/audit"
 	"github.com/grpc-kit/pkg/vars"
 )
@@ -91,7 +99,161 @@ func (c *LocalConfig) registerGateway(ctx context.Context,
 	}
 	// TODO;
 
+	// 挂载 MCP Server handler（若启用）
+	if c.AIConnector != nil && c.AIConnector.MCPServer.Enable {
+		mcpSrv, mcpErr := mcp.NewServer(c.AIConnector.MCPServer.Enable, c.AIConnector.MCPServer.Transport)
+		if mcpErr != nil {
+			return hmux, fmt.Errorf("create mcp server: %w", mcpErr)
+		}
+		if mcpSrv != nil {
+			// 中间件包装顺序：Auth -> Observables(tracing) -> MCP handler
+			handler := mcpSrv.Handler()
+			handler = mcp.NewAuthMiddleware(c.Security.VerifyHTTPRequest, handler)
+			handler = c.Observables.addHTTPHandler(handler)
+			hmux.Handle(c.AIConnector.MCPServer.Path, handler)
+			c.mcpServer = mcpSrv
+		}
+	}
+
 	return hmux, err
+}
+
+// AllowedTagsForMCP 返回 MCP AutoBridge 的 tag 白名单。
+// 未配置时返回默认值 ["mcp"]（最小暴露原则：仅暴露标注了 mcp tag 的方法）。
+func (c *LocalConfig) AllowedTagsForMCP() []string {
+	if c.AIConnector == nil {
+		return []string{"mcp"}
+	}
+	if len(c.AIConnector.MCPServer.AllowedTags) == 0 {
+		return []string{"mcp"}
+	}
+	return c.AIConnector.MCPServer.AllowedTags
+}
+
+// MCPServerInstance 返回已创建的 MCP Server wrapper 实例（*pkg/mcp.Server）。
+// 若未启用 MCP（aiconnector.mcp_server.enable=false）或尚未调用 Register()
+// （内部 mcpServer 在 registerGateway 中创建），返回 nil。
+//
+// 业务项目可在 LocalConfig.Register() 之后调用此方法，获取 wrapper 后再调
+// .MCPServer() 得到 SDK *mcp.Server 实例，用于注册自定义原生 MCP 资源
+// （Tools、Resources、Prompts）。自定义资源与 AutoBridge 生成的 Tool 共存，
+// 且自动获得框架 NewAuthMiddleware 认证保护，不受 allowed_tags 过滤。
+//
+// 注意：AddTool / AddResource / AddPrompt 均为幂等（同名/同 URI 覆盖），
+// 自定义资源建议加业务前缀避免与 AutoBridge 的 {service}_{method} 命名冲突。
+func (c *LocalConfig) MCPServerInstance() *mcp.Server {
+	return c.mcpServer
+}
+
+// runAutoBridge 将已注册的 gRPC 方法自动转换为 MCP Tools。
+// adminServer 为 nil 时（未启用 admin 集成），gateway/swagger 配置不可用，
+// AutoBridge 安全跳过（零 tool 注册）。MCP Server 本身仍可对外服务，
+// 用户可通过 MCPServerInstance() 扩展点自行注册自定义 Tool。
+// 幂等：server.AddTool 对同名 tool 为覆盖语义，可安全重复调用。
+func (c *LocalConfig) runAutoBridge() {
+	if c.mcpServer == nil {
+		return
+	}
+
+	if c.rpcConfig == nil || c.rpcConfig.HTTPAddress == "" {
+		c.logger.Infoln("[mcp] HTTPAddress is empty; skip AutoBridge")
+		return
+	}
+
+	// 解析 HTTP 监听地址（getHTTPListenHostPort 内部已将 0.0.0.0 归一化为 127.0.0.1）
+	httpHost, httpPort, addrErr := c.Services.getHTTPListenHostPort()
+	if addrErr != nil {
+		c.logger.Errorf("[mcp] parse HTTP address: %v; skip AutoBridge", addrErr)
+		return
+	}
+	// 检测 HTTP 网关是否启用了 TLS（手动证书或 ACME 自动证书）。
+	// 与 pkg/rpc/server.go StartBackground() 中的 TLS 启动判断条件保持一致。
+	httpTLSEnabled := c.rpcConfig.TLS.HTTPCertFile != "" ||
+		len(c.rpcConfig.TLS.ACMEDomains) > 0
+
+	scheme := "http"
+	if httpTLSEnabled {
+		scheme = "https"
+	}
+	httpBaseURL := scheme + "://" + net.JoinHostPort(httpHost, strconv.Itoa(httpPort))
+
+	// 使用自定义 Transport 禁用代理（Proxy: nil），避免线上环境 HTTP_PROXY
+	// 把回环请求劫持到代理服务器导致阻塞。同时设置合理的连接池参数。
+	transport := &http.Transport{
+		Proxy:               nil, // 回环请求不走代理
+		MaxIdleConns:        10,
+		MaxIdleConnsPerHost: 5,
+		IdleConnTimeout:     90 * time.Second,
+	}
+	if httpTLSEnabled {
+		// 回环地址为 127.0.0.1，证书 SAN 通常不包含该 IP，需跳过验证。
+		transport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
+		}
+	}
+	httpClient := &http.Client{
+		Timeout:   30 * time.Second,
+		Transport: transport,
+	}
+	// adminServer 为 nil 时（未启用 admin 集成），gateway/swagger 配置不可用，
+	// AutoBridge 安全跳过（gatewayCfg==nil 时 AutoBridge 返回 nil，零 tool 注册）。
+	var gatewayCfg *serviceconfig.Service
+	var swaggerCfg *openapiconfig.OpenAPIConfig
+	var swaggerAssets fs.FS
+	var swaggerAssetName string
+	if c.adminServer != nil {
+		var gwErr, swErr error
+		gatewayCfg, gwErr = c.adminServer.GetMicroserviceGatewayServiceConfig()
+		if gwErr != nil {
+			c.logger.Errorf("[mcp] get gateway service config: %v", gwErr)
+		}
+		swaggerCfg, swErr = c.adminServer.GetMicroserviceGatewaySwagger()
+		if swErr != nil {
+			c.logger.Errorf("[mcp] get gateway swagger: %v", swErr)
+		}
+		// swagger.json 资产（Phase 6）：用于 AutoBridge 生成完整 input schema（含 body/query 字段）。
+		// 未加载时 assets=nil，AutoBridge 降级为仅 path 参数。
+		swaggerAssets, swaggerAssetName = c.adminServer.GetMicroserviceGatewaySwaggerJSON()
+	} else {
+		c.logger.Infoln("[mcp] adminServer is nil; AutoBridge skipped (no gateway config available)")
+	}
+
+	server := c.mcpServer.MCPServer()
+	allowedTags := c.AllowedTagsForMCP()
+	if err := mcptools.AutoBridge(server, nil, httpClient, httpBaseURL, gatewayCfg, swaggerCfg, swaggerAssets, swaggerAssetName, allowedTags, c.logger); err != nil {
+		c.logger.Errorf("[mcp] autobridge: %v", err)
+	}
+}
+
+// runMCPBuiltinResources 注册框架内置 Resources（version + openapi-spec×2）与 getting_started Prompt。
+//
+// adminServer 为 nil 时（未启用 admin 集成），swagger 资产不可用：
+//   - version resource 始终注册（不依赖 adminServer）。
+//   - microservice resource 跳过（swFS==nil 时 RegisterBuiltinResources 内部守卫跳过）。
+//   - getting_started prompt 仍注册，文案退化为通用版（readSwaggerTitle 对 nil FS 返回空串）。
+//
+// Frontend.Enable=false 时 HTTPHandlerFrontend 直接 return，本方法不执行（与 runAutoBridge 一致）。
+// 幂等：AddResource / AddPrompt 对同 URI/同名为覆盖语义，可安全重复调用。
+func (c *LocalConfig) runMCPBuiltinResources() {
+	if c.mcpServer == nil {
+		return
+	}
+
+	var swFS fs.FS
+	var swName string
+	if c.adminServer != nil {
+		swFS, swName = c.adminServer.GetMicroserviceGatewaySwaggerJSON()
+	}
+
+	server := c.mcpServer.MCPServer()
+	mcptools.RegisterBuiltinResources(server, mcptools.BuiltinResourcesConfig{
+		VersionText:             vars.GetVersion().String(),
+		MicroserviceSwaggerFS:   swFS,
+		MicroserviceSwaggerName: swName,
+		AdminEnabled:            c.Services.hasEnableIntegrationAdminServer(),
+		AdminSwaggerFS:          adminv1.Assets,
+	})
+	mcptools.RegisterGettingStartedPrompt(server, swFS, swName)
 }
 
 // getHTTPServeMux 获取通用的HTTP路由规则
@@ -619,7 +781,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 							ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
 							ctx = c.Security.withGroups(ctx, v.Groups)
 
-							if err := c.checkPermission(ctx, v.Groups); err != nil {
+							if err := c.checkPermission(ctx, currentMethod, v.Groups); err != nil {
 								return ctx, err
 							}
 							return ctx, nil
@@ -653,7 +815,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 			ctx = c.Security.withGroups(ctx, idToken.Groups)
 			ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBearer)
 
-			if err := c.checkPermission(ctx, idToken.Groups); err != nil {
+			if err := c.checkPermission(ctx, currentMethod, idToken.Groups); err != nil {
 				return ctx, err
 			}
 			return ctx, nil
@@ -663,7 +825,19 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 	}
 }
 
-func (c *LocalConfig) checkPermission(ctx context.Context, groups []string) error {
+func (c *LocalConfig) checkPermission(ctx context.Context, method string, groups []string) error {
+	// 安全策略：对于内置管理接口，已认证用户必须至少拥有一个用户组（角色），
+	// 即 IDTokenClaims.Groups 必须非空，否则直接拒绝访问（403）。
+	// 自服务方法（用户管理自己的 MFA、OIDC 标准端点、数据库 bootstrap）豁免此检查，
+	// 允许无角色的已认证用户访问，但仍需通过后续 AllowedGroups 与 OPA 评估。
+	if len(groups) == 0 {
+		if strings.HasPrefix(method, "/grpc_kit.api.known.admin.v1.KnownAdmin/") {
+			return errs.PermissionDenied(ctx).
+				WithMessage("user has no role assignments; groups claim is required to access admin APIs").
+				Err()
+		}
+	}
+
 	// 需要当前用户组进行核对，是否拥护权限
 	if len(c.Security.Authorization.AllowedGroups) > 0 {
 		allow := false

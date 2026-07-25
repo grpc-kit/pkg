@@ -1529,11 +1529,14 @@ type CredentialsMutation struct {
 	id                       *int
 	created_at               *time.Time
 	updated_at               *time.Time
+	deleted_at               *time.Time
 	created_by               *int64
 	addcreated_by            *int64
 	updated_by               *int64
 	addupdated_by            *int64
 	code                     *string
+	display_name             *string
+	description              *string
 	credential_type          *int
 	addcredential_type       *int
 	credential_algorithm     *int
@@ -1546,23 +1549,22 @@ type CredentialsMutation struct {
 	addcredential_status     *int
 	credential_source        *int
 	addcredential_source     *int
-	key_id                   *string
+	protected                *bool
+	fingerprint              *string
 	api_key                  *string
 	api_secret_encrypted     *[]byte
-	public_key               *string
+	public_key               *[]byte
 	private_key_encrypted    *[]byte
 	passphrase_encrypted     *[]byte
 	certificate              *[]byte
 	ca_chain                 *[][]uint8
 	appendca_chain           [][]uint8
-	license_key_encrypted    *string
-	signature                *string
-	symmetric_key            *[]byte
-	jwks_uri                 *string
+	license_key_encrypted    *[]byte
+	signature                *[]byte
+	symmetric_key_encrypted  *[]byte
 	not_before               *time.Time
 	expires_at               *time.Time
 	metadata                 *map[string]string
-	description              *string
 	clearedFields            map[string]struct{}
 	done                     bool
 	oldValue                 func(context.Context) (*Credentials, error)
@@ -1739,6 +1741,55 @@ func (m *CredentialsMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (m *CredentialsMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *CredentialsMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Credentials entity.
+// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialsMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *CredentialsMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[credentials.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *CredentialsMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[credentials.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *CredentialsMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, credentials.FieldDeletedAt)
+}
+
 // SetCreatedBy sets the "created_by" field.
 func (m *CredentialsMutation) SetCreatedBy(i int64) {
 	m.created_by = &i
@@ -1913,6 +1964,91 @@ func (m *CredentialsMutation) OldCode(ctx context.Context) (v string, err error)
 // ResetCode resets all changes to the "code" field.
 func (m *CredentialsMutation) ResetCode() {
 	m.code = nil
+}
+
+// SetDisplayName sets the "display_name" field.
+func (m *CredentialsMutation) SetDisplayName(s string) {
+	m.display_name = &s
+}
+
+// DisplayName returns the value of the "display_name" field in the mutation.
+func (m *CredentialsMutation) DisplayName() (r string, exists bool) {
+	v := m.display_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisplayName returns the old "display_name" field's value of the Credentials entity.
+// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialsMutation) OldDisplayName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisplayName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisplayName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisplayName: %w", err)
+	}
+	return oldValue.DisplayName, nil
+}
+
+// ResetDisplayName resets all changes to the "display_name" field.
+func (m *CredentialsMutation) ResetDisplayName() {
+	m.display_name = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *CredentialsMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *CredentialsMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Credentials entity.
+// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialsMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *CredentialsMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[credentials.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *CredentialsMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[credentials.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *CredentialsMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, credentials.FieldDescription)
 }
 
 // SetCredentialType sets the "credential_type" field.
@@ -2251,53 +2387,89 @@ func (m *CredentialsMutation) ResetCredentialSource() {
 	m.addcredential_source = nil
 }
 
-// SetKeyID sets the "key_id" field.
-func (m *CredentialsMutation) SetKeyID(s string) {
-	m.key_id = &s
+// SetProtected sets the "protected" field.
+func (m *CredentialsMutation) SetProtected(b bool) {
+	m.protected = &b
 }
 
-// KeyID returns the value of the "key_id" field in the mutation.
-func (m *CredentialsMutation) KeyID() (r string, exists bool) {
-	v := m.key_id
+// Protected returns the value of the "protected" field in the mutation.
+func (m *CredentialsMutation) Protected() (r bool, exists bool) {
+	v := m.protected
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldKeyID returns the old "key_id" field's value of the Credentials entity.
+// OldProtected returns the old "protected" field's value of the Credentials entity.
 // If the Credentials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldKeyID(ctx context.Context) (v string, err error) {
+func (m *CredentialsMutation) OldProtected(ctx context.Context) (v bool, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldKeyID is only allowed on UpdateOne operations")
+		return v, errors.New("OldProtected is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldKeyID requires an ID field in the mutation")
+		return v, errors.New("OldProtected requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldKeyID: %w", err)
+		return v, fmt.Errorf("querying old value for OldProtected: %w", err)
 	}
-	return oldValue.KeyID, nil
+	return oldValue.Protected, nil
 }
 
-// ClearKeyID clears the value of the "key_id" field.
-func (m *CredentialsMutation) ClearKeyID() {
-	m.key_id = nil
-	m.clearedFields[credentials.FieldKeyID] = struct{}{}
+// ResetProtected resets all changes to the "protected" field.
+func (m *CredentialsMutation) ResetProtected() {
+	m.protected = nil
 }
 
-// KeyIDCleared returns if the "key_id" field was cleared in this mutation.
-func (m *CredentialsMutation) KeyIDCleared() bool {
-	_, ok := m.clearedFields[credentials.FieldKeyID]
+// SetFingerprint sets the "fingerprint" field.
+func (m *CredentialsMutation) SetFingerprint(s string) {
+	m.fingerprint = &s
+}
+
+// Fingerprint returns the value of the "fingerprint" field in the mutation.
+func (m *CredentialsMutation) Fingerprint() (r string, exists bool) {
+	v := m.fingerprint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFingerprint returns the old "fingerprint" field's value of the Credentials entity.
+// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CredentialsMutation) OldFingerprint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFingerprint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFingerprint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFingerprint: %w", err)
+	}
+	return oldValue.Fingerprint, nil
+}
+
+// ClearFingerprint clears the value of the "fingerprint" field.
+func (m *CredentialsMutation) ClearFingerprint() {
+	m.fingerprint = nil
+	m.clearedFields[credentials.FieldFingerprint] = struct{}{}
+}
+
+// FingerprintCleared returns if the "fingerprint" field was cleared in this mutation.
+func (m *CredentialsMutation) FingerprintCleared() bool {
+	_, ok := m.clearedFields[credentials.FieldFingerprint]
 	return ok
 }
 
-// ResetKeyID resets all changes to the "key_id" field.
-func (m *CredentialsMutation) ResetKeyID() {
-	m.key_id = nil
-	delete(m.clearedFields, credentials.FieldKeyID)
+// ResetFingerprint resets all changes to the "fingerprint" field.
+func (m *CredentialsMutation) ResetFingerprint() {
+	m.fingerprint = nil
+	delete(m.clearedFields, credentials.FieldFingerprint)
 }
 
 // SetAPIKey sets the "api_key" field.
@@ -2399,12 +2571,12 @@ func (m *CredentialsMutation) ResetAPISecretEncrypted() {
 }
 
 // SetPublicKey sets the "public_key" field.
-func (m *CredentialsMutation) SetPublicKey(s string) {
-	m.public_key = &s
+func (m *CredentialsMutation) SetPublicKey(b []byte) {
+	m.public_key = &b
 }
 
 // PublicKey returns the value of the "public_key" field in the mutation.
-func (m *CredentialsMutation) PublicKey() (r string, exists bool) {
+func (m *CredentialsMutation) PublicKey() (r []byte, exists bool) {
 	v := m.public_key
 	if v == nil {
 		return
@@ -2415,7 +2587,7 @@ func (m *CredentialsMutation) PublicKey() (r string, exists bool) {
 // OldPublicKey returns the old "public_key" field's value of the Credentials entity.
 // If the Credentials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldPublicKey(ctx context.Context) (v string, err error) {
+func (m *CredentialsMutation) OldPublicKey(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPublicKey is only allowed on UpdateOne operations")
 	}
@@ -2660,12 +2832,12 @@ func (m *CredentialsMutation) ResetCaChain() {
 }
 
 // SetLicenseKeyEncrypted sets the "license_key_encrypted" field.
-func (m *CredentialsMutation) SetLicenseKeyEncrypted(s string) {
-	m.license_key_encrypted = &s
+func (m *CredentialsMutation) SetLicenseKeyEncrypted(b []byte) {
+	m.license_key_encrypted = &b
 }
 
 // LicenseKeyEncrypted returns the value of the "license_key_encrypted" field in the mutation.
-func (m *CredentialsMutation) LicenseKeyEncrypted() (r string, exists bool) {
+func (m *CredentialsMutation) LicenseKeyEncrypted() (r []byte, exists bool) {
 	v := m.license_key_encrypted
 	if v == nil {
 		return
@@ -2676,7 +2848,7 @@ func (m *CredentialsMutation) LicenseKeyEncrypted() (r string, exists bool) {
 // OldLicenseKeyEncrypted returns the old "license_key_encrypted" field's value of the Credentials entity.
 // If the Credentials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldLicenseKeyEncrypted(ctx context.Context) (v string, err error) {
+func (m *CredentialsMutation) OldLicenseKeyEncrypted(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldLicenseKeyEncrypted is only allowed on UpdateOne operations")
 	}
@@ -2709,12 +2881,12 @@ func (m *CredentialsMutation) ResetLicenseKeyEncrypted() {
 }
 
 // SetSignature sets the "signature" field.
-func (m *CredentialsMutation) SetSignature(s string) {
-	m.signature = &s
+func (m *CredentialsMutation) SetSignature(b []byte) {
+	m.signature = &b
 }
 
 // Signature returns the value of the "signature" field in the mutation.
-func (m *CredentialsMutation) Signature() (r string, exists bool) {
+func (m *CredentialsMutation) Signature() (r []byte, exists bool) {
 	v := m.signature
 	if v == nil {
 		return
@@ -2725,7 +2897,7 @@ func (m *CredentialsMutation) Signature() (r string, exists bool) {
 // OldSignature returns the old "signature" field's value of the Credentials entity.
 // If the Credentials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldSignature(ctx context.Context) (v string, err error) {
+func (m *CredentialsMutation) OldSignature(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSignature is only allowed on UpdateOne operations")
 	}
@@ -2757,102 +2929,53 @@ func (m *CredentialsMutation) ResetSignature() {
 	delete(m.clearedFields, credentials.FieldSignature)
 }
 
-// SetSymmetricKey sets the "symmetric_key" field.
-func (m *CredentialsMutation) SetSymmetricKey(b []byte) {
-	m.symmetric_key = &b
+// SetSymmetricKeyEncrypted sets the "symmetric_key_encrypted" field.
+func (m *CredentialsMutation) SetSymmetricKeyEncrypted(b []byte) {
+	m.symmetric_key_encrypted = &b
 }
 
-// SymmetricKey returns the value of the "symmetric_key" field in the mutation.
-func (m *CredentialsMutation) SymmetricKey() (r []byte, exists bool) {
-	v := m.symmetric_key
+// SymmetricKeyEncrypted returns the value of the "symmetric_key_encrypted" field in the mutation.
+func (m *CredentialsMutation) SymmetricKeyEncrypted() (r []byte, exists bool) {
+	v := m.symmetric_key_encrypted
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSymmetricKey returns the old "symmetric_key" field's value of the Credentials entity.
+// OldSymmetricKeyEncrypted returns the old "symmetric_key_encrypted" field's value of the Credentials entity.
 // If the Credentials object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldSymmetricKey(ctx context.Context) (v []byte, err error) {
+func (m *CredentialsMutation) OldSymmetricKeyEncrypted(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSymmetricKey is only allowed on UpdateOne operations")
+		return v, errors.New("OldSymmetricKeyEncrypted is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSymmetricKey requires an ID field in the mutation")
+		return v, errors.New("OldSymmetricKeyEncrypted requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSymmetricKey: %w", err)
+		return v, fmt.Errorf("querying old value for OldSymmetricKeyEncrypted: %w", err)
 	}
-	return oldValue.SymmetricKey, nil
+	return oldValue.SymmetricKeyEncrypted, nil
 }
 
-// ClearSymmetricKey clears the value of the "symmetric_key" field.
-func (m *CredentialsMutation) ClearSymmetricKey() {
-	m.symmetric_key = nil
-	m.clearedFields[credentials.FieldSymmetricKey] = struct{}{}
+// ClearSymmetricKeyEncrypted clears the value of the "symmetric_key_encrypted" field.
+func (m *CredentialsMutation) ClearSymmetricKeyEncrypted() {
+	m.symmetric_key_encrypted = nil
+	m.clearedFields[credentials.FieldSymmetricKeyEncrypted] = struct{}{}
 }
 
-// SymmetricKeyCleared returns if the "symmetric_key" field was cleared in this mutation.
-func (m *CredentialsMutation) SymmetricKeyCleared() bool {
-	_, ok := m.clearedFields[credentials.FieldSymmetricKey]
+// SymmetricKeyEncryptedCleared returns if the "symmetric_key_encrypted" field was cleared in this mutation.
+func (m *CredentialsMutation) SymmetricKeyEncryptedCleared() bool {
+	_, ok := m.clearedFields[credentials.FieldSymmetricKeyEncrypted]
 	return ok
 }
 
-// ResetSymmetricKey resets all changes to the "symmetric_key" field.
-func (m *CredentialsMutation) ResetSymmetricKey() {
-	m.symmetric_key = nil
-	delete(m.clearedFields, credentials.FieldSymmetricKey)
-}
-
-// SetJwksURI sets the "jwks_uri" field.
-func (m *CredentialsMutation) SetJwksURI(s string) {
-	m.jwks_uri = &s
-}
-
-// JwksURI returns the value of the "jwks_uri" field in the mutation.
-func (m *CredentialsMutation) JwksURI() (r string, exists bool) {
-	v := m.jwks_uri
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldJwksURI returns the old "jwks_uri" field's value of the Credentials entity.
-// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldJwksURI(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldJwksURI is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldJwksURI requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldJwksURI: %w", err)
-	}
-	return oldValue.JwksURI, nil
-}
-
-// ClearJwksURI clears the value of the "jwks_uri" field.
-func (m *CredentialsMutation) ClearJwksURI() {
-	m.jwks_uri = nil
-	m.clearedFields[credentials.FieldJwksURI] = struct{}{}
-}
-
-// JwksURICleared returns if the "jwks_uri" field was cleared in this mutation.
-func (m *CredentialsMutation) JwksURICleared() bool {
-	_, ok := m.clearedFields[credentials.FieldJwksURI]
-	return ok
-}
-
-// ResetJwksURI resets all changes to the "jwks_uri" field.
-func (m *CredentialsMutation) ResetJwksURI() {
-	m.jwks_uri = nil
-	delete(m.clearedFields, credentials.FieldJwksURI)
+// ResetSymmetricKeyEncrypted resets all changes to the "symmetric_key_encrypted" field.
+func (m *CredentialsMutation) ResetSymmetricKeyEncrypted() {
+	m.symmetric_key_encrypted = nil
+	delete(m.clearedFields, credentials.FieldSymmetricKeyEncrypted)
 }
 
 // SetNotBefore sets the "not_before" field.
@@ -3002,55 +3125,6 @@ func (m *CredentialsMutation) ResetMetadata() {
 	delete(m.clearedFields, credentials.FieldMetadata)
 }
 
-// SetDescription sets the "description" field.
-func (m *CredentialsMutation) SetDescription(s string) {
-	m.description = &s
-}
-
-// Description returns the value of the "description" field in the mutation.
-func (m *CredentialsMutation) Description() (r string, exists bool) {
-	v := m.description
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDescription returns the old "description" field's value of the Credentials entity.
-// If the Credentials object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CredentialsMutation) OldDescription(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDescription requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
-	}
-	return oldValue.Description, nil
-}
-
-// ClearDescription clears the value of the "description" field.
-func (m *CredentialsMutation) ClearDescription() {
-	m.description = nil
-	m.clearedFields[credentials.FieldDescription] = struct{}{}
-}
-
-// DescriptionCleared returns if the "description" field was cleared in this mutation.
-func (m *CredentialsMutation) DescriptionCleared() bool {
-	_, ok := m.clearedFields[credentials.FieldDescription]
-	return ok
-}
-
-// ResetDescription resets all changes to the "description" field.
-func (m *CredentialsMutation) ResetDescription() {
-	m.description = nil
-	delete(m.clearedFields, credentials.FieldDescription)
-}
-
 // Where appends a list predicates to the CredentialsMutation builder.
 func (m *CredentialsMutation) Where(ps ...predicate.Credentials) {
 	m.predicates = append(m.predicates, ps...)
@@ -3085,12 +3159,15 @@ func (m *CredentialsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CredentialsMutation) Fields() []string {
-	fields := make([]string, 0, 27)
+	fields := make([]string, 0, 29)
 	if m.created_at != nil {
 		fields = append(fields, credentials.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, credentials.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, credentials.FieldDeletedAt)
 	}
 	if m.created_by != nil {
 		fields = append(fields, credentials.FieldCreatedBy)
@@ -3100,6 +3177,12 @@ func (m *CredentialsMutation) Fields() []string {
 	}
 	if m.code != nil {
 		fields = append(fields, credentials.FieldCode)
+	}
+	if m.display_name != nil {
+		fields = append(fields, credentials.FieldDisplayName)
+	}
+	if m.description != nil {
+		fields = append(fields, credentials.FieldDescription)
 	}
 	if m.credential_type != nil {
 		fields = append(fields, credentials.FieldCredentialType)
@@ -3119,8 +3202,11 @@ func (m *CredentialsMutation) Fields() []string {
 	if m.credential_source != nil {
 		fields = append(fields, credentials.FieldCredentialSource)
 	}
-	if m.key_id != nil {
-		fields = append(fields, credentials.FieldKeyID)
+	if m.protected != nil {
+		fields = append(fields, credentials.FieldProtected)
+	}
+	if m.fingerprint != nil {
+		fields = append(fields, credentials.FieldFingerprint)
 	}
 	if m.api_key != nil {
 		fields = append(fields, credentials.FieldAPIKey)
@@ -3149,11 +3235,8 @@ func (m *CredentialsMutation) Fields() []string {
 	if m.signature != nil {
 		fields = append(fields, credentials.FieldSignature)
 	}
-	if m.symmetric_key != nil {
-		fields = append(fields, credentials.FieldSymmetricKey)
-	}
-	if m.jwks_uri != nil {
-		fields = append(fields, credentials.FieldJwksURI)
+	if m.symmetric_key_encrypted != nil {
+		fields = append(fields, credentials.FieldSymmetricKeyEncrypted)
 	}
 	if m.not_before != nil {
 		fields = append(fields, credentials.FieldNotBefore)
@@ -3163,9 +3246,6 @@ func (m *CredentialsMutation) Fields() []string {
 	}
 	if m.metadata != nil {
 		fields = append(fields, credentials.FieldMetadata)
-	}
-	if m.description != nil {
-		fields = append(fields, credentials.FieldDescription)
 	}
 	return fields
 }
@@ -3179,12 +3259,18 @@ func (m *CredentialsMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case credentials.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case credentials.FieldDeletedAt:
+		return m.DeletedAt()
 	case credentials.FieldCreatedBy:
 		return m.CreatedBy()
 	case credentials.FieldUpdatedBy:
 		return m.UpdatedBy()
 	case credentials.FieldCode:
 		return m.Code()
+	case credentials.FieldDisplayName:
+		return m.DisplayName()
+	case credentials.FieldDescription:
+		return m.Description()
 	case credentials.FieldCredentialType:
 		return m.CredentialType()
 	case credentials.FieldCredentialAlgorithm:
@@ -3197,8 +3283,10 @@ func (m *CredentialsMutation) Field(name string) (ent.Value, bool) {
 		return m.CredentialStatus()
 	case credentials.FieldCredentialSource:
 		return m.CredentialSource()
-	case credentials.FieldKeyID:
-		return m.KeyID()
+	case credentials.FieldProtected:
+		return m.Protected()
+	case credentials.FieldFingerprint:
+		return m.Fingerprint()
 	case credentials.FieldAPIKey:
 		return m.APIKey()
 	case credentials.FieldAPISecretEncrypted:
@@ -3217,18 +3305,14 @@ func (m *CredentialsMutation) Field(name string) (ent.Value, bool) {
 		return m.LicenseKeyEncrypted()
 	case credentials.FieldSignature:
 		return m.Signature()
-	case credentials.FieldSymmetricKey:
-		return m.SymmetricKey()
-	case credentials.FieldJwksURI:
-		return m.JwksURI()
+	case credentials.FieldSymmetricKeyEncrypted:
+		return m.SymmetricKeyEncrypted()
 	case credentials.FieldNotBefore:
 		return m.NotBefore()
 	case credentials.FieldExpiresAt:
 		return m.ExpiresAt()
 	case credentials.FieldMetadata:
 		return m.Metadata()
-	case credentials.FieldDescription:
-		return m.Description()
 	}
 	return nil, false
 }
@@ -3242,12 +3326,18 @@ func (m *CredentialsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldCreatedAt(ctx)
 	case credentials.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case credentials.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case credentials.FieldCreatedBy:
 		return m.OldCreatedBy(ctx)
 	case credentials.FieldUpdatedBy:
 		return m.OldUpdatedBy(ctx)
 	case credentials.FieldCode:
 		return m.OldCode(ctx)
+	case credentials.FieldDisplayName:
+		return m.OldDisplayName(ctx)
+	case credentials.FieldDescription:
+		return m.OldDescription(ctx)
 	case credentials.FieldCredentialType:
 		return m.OldCredentialType(ctx)
 	case credentials.FieldCredentialAlgorithm:
@@ -3260,8 +3350,10 @@ func (m *CredentialsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldCredentialStatus(ctx)
 	case credentials.FieldCredentialSource:
 		return m.OldCredentialSource(ctx)
-	case credentials.FieldKeyID:
-		return m.OldKeyID(ctx)
+	case credentials.FieldProtected:
+		return m.OldProtected(ctx)
+	case credentials.FieldFingerprint:
+		return m.OldFingerprint(ctx)
 	case credentials.FieldAPIKey:
 		return m.OldAPIKey(ctx)
 	case credentials.FieldAPISecretEncrypted:
@@ -3280,18 +3372,14 @@ func (m *CredentialsMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldLicenseKeyEncrypted(ctx)
 	case credentials.FieldSignature:
 		return m.OldSignature(ctx)
-	case credentials.FieldSymmetricKey:
-		return m.OldSymmetricKey(ctx)
-	case credentials.FieldJwksURI:
-		return m.OldJwksURI(ctx)
+	case credentials.FieldSymmetricKeyEncrypted:
+		return m.OldSymmetricKeyEncrypted(ctx)
 	case credentials.FieldNotBefore:
 		return m.OldNotBefore(ctx)
 	case credentials.FieldExpiresAt:
 		return m.OldExpiresAt(ctx)
 	case credentials.FieldMetadata:
 		return m.OldMetadata(ctx)
-	case credentials.FieldDescription:
-		return m.OldDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown Credentials field %s", name)
 }
@@ -3315,6 +3403,13 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdatedAt(v)
 		return nil
+	case credentials.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
 	case credentials.FieldCreatedBy:
 		v, ok := value.(int64)
 		if !ok {
@@ -3335,6 +3430,20 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCode(v)
+		return nil
+	case credentials.FieldDisplayName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisplayName(v)
+		return nil
+	case credentials.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
 		return nil
 	case credentials.FieldCredentialType:
 		v, ok := value.(int)
@@ -3378,12 +3487,19 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCredentialSource(v)
 		return nil
-	case credentials.FieldKeyID:
+	case credentials.FieldProtected:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProtected(v)
+		return nil
+	case credentials.FieldFingerprint:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetKeyID(v)
+		m.SetFingerprint(v)
 		return nil
 	case credentials.FieldAPIKey:
 		v, ok := value.(string)
@@ -3400,7 +3516,7 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 		m.SetAPISecretEncrypted(v)
 		return nil
 	case credentials.FieldPublicKey:
-		v, ok := value.(string)
+		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3435,32 +3551,25 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 		m.SetCaChain(v)
 		return nil
 	case credentials.FieldLicenseKeyEncrypted:
-		v, ok := value.(string)
+		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLicenseKeyEncrypted(v)
 		return nil
 	case credentials.FieldSignature:
-		v, ok := value.(string)
+		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSignature(v)
 		return nil
-	case credentials.FieldSymmetricKey:
+	case credentials.FieldSymmetricKeyEncrypted:
 		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSymmetricKey(v)
-		return nil
-	case credentials.FieldJwksURI:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetJwksURI(v)
+		m.SetSymmetricKeyEncrypted(v)
 		return nil
 	case credentials.FieldNotBefore:
 		v, ok := value.(time.Time)
@@ -3482,13 +3591,6 @@ func (m *CredentialsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMetadata(v)
-		return nil
-	case credentials.FieldDescription:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDescription(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Credentials field %s", name)
@@ -3619,14 +3721,20 @@ func (m *CredentialsMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *CredentialsMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(credentials.FieldDeletedAt) {
+		fields = append(fields, credentials.FieldDeletedAt)
+	}
 	if m.FieldCleared(credentials.FieldCreatedBy) {
 		fields = append(fields, credentials.FieldCreatedBy)
 	}
 	if m.FieldCleared(credentials.FieldUpdatedBy) {
 		fields = append(fields, credentials.FieldUpdatedBy)
 	}
-	if m.FieldCleared(credentials.FieldKeyID) {
-		fields = append(fields, credentials.FieldKeyID)
+	if m.FieldCleared(credentials.FieldDescription) {
+		fields = append(fields, credentials.FieldDescription)
+	}
+	if m.FieldCleared(credentials.FieldFingerprint) {
+		fields = append(fields, credentials.FieldFingerprint)
 	}
 	if m.FieldCleared(credentials.FieldAPIKey) {
 		fields = append(fields, credentials.FieldAPIKey)
@@ -3655,11 +3763,8 @@ func (m *CredentialsMutation) ClearedFields() []string {
 	if m.FieldCleared(credentials.FieldSignature) {
 		fields = append(fields, credentials.FieldSignature)
 	}
-	if m.FieldCleared(credentials.FieldSymmetricKey) {
-		fields = append(fields, credentials.FieldSymmetricKey)
-	}
-	if m.FieldCleared(credentials.FieldJwksURI) {
-		fields = append(fields, credentials.FieldJwksURI)
+	if m.FieldCleared(credentials.FieldSymmetricKeyEncrypted) {
+		fields = append(fields, credentials.FieldSymmetricKeyEncrypted)
 	}
 	if m.FieldCleared(credentials.FieldNotBefore) {
 		fields = append(fields, credentials.FieldNotBefore)
@@ -3669,9 +3774,6 @@ func (m *CredentialsMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(credentials.FieldMetadata) {
 		fields = append(fields, credentials.FieldMetadata)
-	}
-	if m.FieldCleared(credentials.FieldDescription) {
-		fields = append(fields, credentials.FieldDescription)
 	}
 	return fields
 }
@@ -3687,14 +3789,20 @@ func (m *CredentialsMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *CredentialsMutation) ClearField(name string) error {
 	switch name {
+	case credentials.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
 	case credentials.FieldCreatedBy:
 		m.ClearCreatedBy()
 		return nil
 	case credentials.FieldUpdatedBy:
 		m.ClearUpdatedBy()
 		return nil
-	case credentials.FieldKeyID:
-		m.ClearKeyID()
+	case credentials.FieldDescription:
+		m.ClearDescription()
+		return nil
+	case credentials.FieldFingerprint:
+		m.ClearFingerprint()
 		return nil
 	case credentials.FieldAPIKey:
 		m.ClearAPIKey()
@@ -3723,11 +3831,8 @@ func (m *CredentialsMutation) ClearField(name string) error {
 	case credentials.FieldSignature:
 		m.ClearSignature()
 		return nil
-	case credentials.FieldSymmetricKey:
-		m.ClearSymmetricKey()
-		return nil
-	case credentials.FieldJwksURI:
-		m.ClearJwksURI()
+	case credentials.FieldSymmetricKeyEncrypted:
+		m.ClearSymmetricKeyEncrypted()
 		return nil
 	case credentials.FieldNotBefore:
 		m.ClearNotBefore()
@@ -3737,9 +3842,6 @@ func (m *CredentialsMutation) ClearField(name string) error {
 		return nil
 	case credentials.FieldMetadata:
 		m.ClearMetadata()
-		return nil
-	case credentials.FieldDescription:
-		m.ClearDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown Credentials nullable field %s", name)
@@ -3755,6 +3857,9 @@ func (m *CredentialsMutation) ResetField(name string) error {
 	case credentials.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
+	case credentials.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
 	case credentials.FieldCreatedBy:
 		m.ResetCreatedBy()
 		return nil
@@ -3763,6 +3868,12 @@ func (m *CredentialsMutation) ResetField(name string) error {
 		return nil
 	case credentials.FieldCode:
 		m.ResetCode()
+		return nil
+	case credentials.FieldDisplayName:
+		m.ResetDisplayName()
+		return nil
+	case credentials.FieldDescription:
+		m.ResetDescription()
 		return nil
 	case credentials.FieldCredentialType:
 		m.ResetCredentialType()
@@ -3782,8 +3893,11 @@ func (m *CredentialsMutation) ResetField(name string) error {
 	case credentials.FieldCredentialSource:
 		m.ResetCredentialSource()
 		return nil
-	case credentials.FieldKeyID:
-		m.ResetKeyID()
+	case credentials.FieldProtected:
+		m.ResetProtected()
+		return nil
+	case credentials.FieldFingerprint:
+		m.ResetFingerprint()
 		return nil
 	case credentials.FieldAPIKey:
 		m.ResetAPIKey()
@@ -3812,11 +3926,8 @@ func (m *CredentialsMutation) ResetField(name string) error {
 	case credentials.FieldSignature:
 		m.ResetSignature()
 		return nil
-	case credentials.FieldSymmetricKey:
-		m.ResetSymmetricKey()
-		return nil
-	case credentials.FieldJwksURI:
-		m.ResetJwksURI()
+	case credentials.FieldSymmetricKeyEncrypted:
+		m.ResetSymmetricKeyEncrypted()
 		return nil
 	case credentials.FieldNotBefore:
 		m.ResetNotBefore()
@@ -3826,9 +3937,6 @@ func (m *CredentialsMutation) ResetField(name string) error {
 		return nil
 	case credentials.FieldMetadata:
 		m.ResetMetadata()
-		return nil
-	case credentials.FieldDescription:
-		m.ResetDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown Credentials field %s", name)

@@ -68,6 +68,34 @@ func (s ServicesConfig) getGRPCListenPort() int {
 	return port
 }
 
+// getHTTPListenHostPort 解析HTTP监听的IP地址与端口
+// 优先使用 http_service.address，其次使用 http_address
+func (s ServicesConfig) getHTTPListenHostPort() (string, int, error) {
+	httpAddress := s.HTTPAddress
+	if s.HTTPService != nil && s.HTTPService.Address != "" {
+		httpAddress = s.HTTPService.Address
+	}
+
+	temps := strings.Split(httpAddress, ":")
+	if len(temps) != 2 {
+		return "", -1, fmt.Errorf("http-address format invalid")
+	}
+
+	port, err := strconv.Atoi(temps[1])
+	if err != nil {
+		return "", -1, fmt.Errorf("http-address format invalid")
+	}
+
+	host := temps[0]
+	// 归一化：0.0.0.0 或空 host 在容器网络命名空间下无法 dial，
+	// 统一替换为 127.0.0.1，与 registerGateway 中 forwardGWAddr 逻辑一致。
+	if host == "0.0.0.0" || host == "" {
+		host = "127.0.0.1"
+	}
+
+	return host, port, nil
+}
+
 // getClientCredentials 用于根据配置文件获取证书配置，存在四种情况：
 // 1. 如果未配置 grpc 证书，则使用 insecure.NewCredentials()
 // 2. 如果配置了 grpc 服务端证书，未配置客户端 ca 则跳过 ca 验证

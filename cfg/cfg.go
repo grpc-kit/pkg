@@ -21,6 +21,7 @@ import (
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion"
+	"github.com/grpc-kit/pkg/mcp"
 	"github.com/grpc-kit/pkg/rpc"
 	"github.com/grpc-kit/pkg/sd"
 	"github.com/mitchellh/mapstructure"
@@ -90,6 +91,7 @@ type LocalConfig struct {
 	Observables *ObservablesConfig `json:",omitempty"` // 可观测性配置
 	CloudEvents *CloudEventsConfig `json:",omitempty"` // 公共事件配置
 	Automations *AutomationsConfig `json:",omitempty"` // 流程编排配置
+	AIConnector *AIConnectorConfig `json:",omitempty"` // 智能连接配置
 	Independent interface{}        `json:",omitempty"` // 应用私有配置
 
 	logger      *logrus.Entry
@@ -98,6 +100,7 @@ type LocalConfig struct {
 	rpcServer   *rpc.Server
 	adminServer *admin.KnownAdminAPI
 	lionClient  *lion.Client
+	mcpServer   *mcp.Server
 }
 
 // ServicesConfig 基础服务配置，用于设定命名空间、注册的路径、监听的地址等
@@ -318,6 +321,11 @@ func (c *LocalConfig) Init() error {
 		return err
 	}
 
+	// AIConnector 初始化放在最后，依赖其他子系统已就绪
+	if err := c.initAIConnector(); err != nil {
+		return fmt.Errorf("init aiconnector: %w", err)
+	}
+
 	return nil
 }
 
@@ -388,6 +396,14 @@ func (c *LocalConfig) Register(ctx context.Context,
 func (c *LocalConfig) Deregister() error {
 	// TODO; 释放各总资源
 	ctx := context.TODO()
+
+	// 关闭 MCP Server 活跃 sessions（在 HTTP server 关闭前）
+	if c.mcpServer != nil {
+		if err := c.mcpServer.Close(); err != nil {
+			c.logger.Warnf("close mcp server: %v", err)
+		}
+	}
+
 	if err := c.Observables.shutdown(ctx); err != nil {
 		return err
 	}
@@ -463,6 +479,11 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 			return err
 		}
 	}
+	// AutoBridge / BuiltinResources 不依赖 adminServer 是否启用：
+	// adminServer 为 nil 时底层函数对 nil 安全降级（AutoBridge 跳过、version resource
+	// 和 getting_started prompt 仍注册），使 MCP 可独立于 admin 后台使用（方案 C）。
+	c.runAutoBridge()
+	c.runMCPBuiltinResources()
 
 	comps := []string{"admin", "openapi", "webroot"}
 	for _, v := range comps {

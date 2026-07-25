@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"strconv"
 
-	"github.com/google/uuid"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/errs"
@@ -84,6 +83,8 @@ func builtinMenuSeeds() []builtinMenuSeed {
 									Children: []builtinMenuSeed{
 										{Code: "admin.setting.auth.providers", DisplayName: "认证提供方", RoutePath: "/setting/auth/providers", SortOrder: 100},
 										{Code: "admin.setting.auth.oauth2-clients", DisplayName: "OAuth2 客户端", RoutePath: "/setting/auth/oauth2-clients", SortOrder: 200},
+										{Code: "admin.setting.auth.credentials", DisplayName: "凭证管理", RoutePath: "/setting/auth/credentials", SortOrder: 300},
+										{Code: "admin.setting.auth.tokens", DisplayName: "令牌管理", RoutePath: "/setting/auth/tokens", SortOrder: 400},
 									},
 								},
 								{
@@ -686,10 +687,12 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
-	credCode := seedCredentialSeedCode(adminv1.CredentialSeedCode_CREDENTIAL_SEED_CODE_KEY1)
+	credCode := seedCredentialCode(adminv1.CredentialCode_CREDENTIAL_CODE_JWT_SIGNING_V1)
+
 	credExists, err := tx.Credentials.Query().Where(
 		credentials.CodeEQ(credCode),
-		credentials.CredentialTypeEQ(int(adminv1.Credential_JWKS.Number())),
+		credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
+		credentials.CredentialUsageEQ(int(adminv1.Credential_JWKS.Number())),
 	).Exist(ctx)
 	if err != nil {
 		rollback()
@@ -712,16 +715,20 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			rollback()
 			return nil, err
 		}
+		// fingerprint 使用公钥 SHA-256 摘要（64 字符 hex），用于幂等去重
+		fp := crypto.SHA256(publicKeyBytes)
 		if err := tx.Credentials.Create().
 			SetCode(credCode).
-			SetCredentialType(int(adminv1.Credential_JWKS.Number())).
+			SetProtected(true).
+			SetCredentialType(int(adminv1.Credential_KEY_PAIR.Number())).
 			SetCredentialAlgorithm(int(adminv1.Credential_RSA.Number())).
-			SetCredentialUsage(int(adminv1.Credential_SIGNING.Number())).
+			SetCredentialUsage(int(adminv1.Credential_JWKS.Number())).
 			SetCredentialVisibility(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())).
 			SetCredentialStatus(int(adminv1.Credential_ACTIVE.Number())).
 			SetCredentialSource(int(adminv1.Credential_SYSTEM.Number())).
-			SetKeyID(uuid.New().String()).
-			SetPublicKey(crypto.Base64Encode(publicKeyBytes)).
+			SetFingerprint(fp).
+			SetDisplayName("JWT Signing Key v1").
+			SetPublicKey(publicKeyBytes).
 			SetPrivateKeyEncrypted(privateKeyEnc).
 			Exec(ctx); err != nil {
 			rollback()

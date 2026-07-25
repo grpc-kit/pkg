@@ -152,6 +152,15 @@ func (a *KnownAdminAPI) SetupUserMFA(ctx context.Context, req *adminv1.SetupUser
 		return nil, errs.InvalidArgument(ctx).WithMessage("user_id is required")
 	}
 
+	// 自服务校验：用户只能为自己设置 MFA，防止已认证但无角色的用户越权操作他人账户。
+	operatorID, err := GetUserID(ctx)
+	if err != nil || operatorID <= 0 {
+		return nil, errs.PermissionDenied(ctx).WithMessage("not found user id")
+	}
+	if int64(req.UserId) != operatorID {
+		return nil, errs.PermissionDenied(ctx).WithMessage("cannot setup MFA for other users")
+	}
+
 	db, err := a.GetLionClient()
 	if err != nil {
 		return nil, errs.Internal(ctx).WithMessage("database unavailable")
@@ -301,6 +310,15 @@ func (a *KnownAdminAPI) DisableUserMFA(ctx context.Context, req *adminv1.Disable
 	}
 	if req.TotpCode == "" {
 		return nil, errs.InvalidArgument(ctx).WithMessage("totp_code is required")
+	}
+
+	// 自服务校验：用户只能关闭自己的 MFA，防止已认证但无角色的用户越权操作他人账户。
+	operatorID, err := GetUserID(ctx)
+	if err != nil || operatorID <= 0 {
+		return nil, errs.PermissionDenied(ctx).WithMessage("not found user id")
+	}
+	if int64(req.UserId) != operatorID {
+		return nil, errs.PermissionDenied(ctx).WithMessage("cannot disable MFA for other users")
 	}
 
 	db, err := a.GetLionClient()
@@ -527,8 +545,17 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 	}
 
 	sk, err := db.Credentials.Query().
-		Select(credentials.FieldPrivateKeyEncrypted).
-		Only(ctx)
+		Select(credentials.FieldPrivateKeyEncrypted, credentials.FieldCode).
+		Where(
+			credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
+			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_RSA.Number())),
+			credentials.CredentialUsageEQ(int(adminv1.Credential_JWKS.Number())),
+			credentials.CredentialVisibilityEQ(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())),
+			credentials.CredentialStatusEQ(int(adminv1.Credential_ACTIVE.Number())),
+			credentials.CredentialSourceEQ(int(adminv1.Credential_SYSTEM.Number())),
+		).
+		Order(credentials.ByID()).
+		First(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to query credentials: %w", err)
 	}
@@ -561,7 +588,7 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 	idToken.SetExpiresAt(durationSecondsInt64(a.getLoginAccessTokenTTL(ctx)))
 	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 
-	return idToken.GetAccessTokenRSA(privateKey)
+	return idToken.GetAccessTokenRSA(privateKey, sk.Code)
 }
 
 func generateRecoveryCodes(count int) ([]string, error) {
