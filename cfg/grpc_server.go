@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -30,6 +31,7 @@ import (
 	otelcodes "go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/genproto/googleapis/api/serviceconfig"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -37,6 +39,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/grpc-kit/pkg/admin/openapiconfig"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/errs"
 	"github.com/grpc-kit/pkg/mcp"
@@ -143,10 +146,12 @@ func (c *LocalConfig) MCPServerInstance() *mcp.Server {
 }
 
 // runAutoBridge 将已注册的 gRPC 方法自动转换为 MCP Tools。
-// 必须在 SetMicroserviceGatewayYAML 成功之后调用，否则 gateway/swagger 配置为 nil。
+// adminServer 为 nil 时（未启用 admin 集成），gateway/swagger 配置不可用，
+// AutoBridge 安全跳过（零 tool 注册）。MCP Server 本身仍可对外服务，
+// 用户可通过 MCPServerInstance() 扩展点自行注册自定义 Tool。
 // 幂等：server.AddTool 对同名 tool 为覆盖语义，可安全重复调用。
 func (c *LocalConfig) runAutoBridge() {
-	if c.mcpServer == nil || c.adminServer == nil {
+	if c.mcpServer == nil {
 		return
 	}
 
@@ -190,17 +195,28 @@ func (c *LocalConfig) runAutoBridge() {
 		Timeout:   30 * time.Second,
 		Transport: transport,
 	}
-	gatewayCfg, gwErr := c.adminServer.GetMicroserviceGatewayServiceConfig()
-	if gwErr != nil {
-		c.logger.Errorf("[mcp] get gateway service config: %v", gwErr)
+	// adminServer 为 nil 时（未启用 admin 集成），gateway/swagger 配置不可用，
+	// AutoBridge 安全跳过（gatewayCfg==nil 时 AutoBridge 返回 nil，零 tool 注册）。
+	var gatewayCfg *serviceconfig.Service
+	var swaggerCfg *openapiconfig.OpenAPIConfig
+	var swaggerAssets fs.FS
+	var swaggerAssetName string
+	if c.adminServer != nil {
+		var gwErr, swErr error
+		gatewayCfg, gwErr = c.adminServer.GetMicroserviceGatewayServiceConfig()
+		if gwErr != nil {
+			c.logger.Errorf("[mcp] get gateway service config: %v", gwErr)
+		}
+		swaggerCfg, swErr = c.adminServer.GetMicroserviceGatewaySwagger()
+		if swErr != nil {
+			c.logger.Errorf("[mcp] get gateway swagger: %v", swErr)
+		}
+		// swagger.json 资产（Phase 6）：用于 AutoBridge 生成完整 input schema（含 body/query 字段）。
+		// 未加载时 assets=nil，AutoBridge 降级为仅 path 参数。
+		swaggerAssets, swaggerAssetName = c.adminServer.GetMicroserviceGatewaySwaggerJSON()
+	} else {
+		c.logger.Infoln("[mcp] adminServer is nil; AutoBridge skipped (no gateway config available)")
 	}
-	swaggerCfg, swErr := c.adminServer.GetMicroserviceGatewaySwagger()
-	if swErr != nil {
-		c.logger.Errorf("[mcp] get gateway swagger: %v", swErr)
-	}
-	// swagger.json 资产（Phase 6）：用于 AutoBridge 生成完整 input schema（含 body/query 字段）。
-	// 未加载时 assets=nil，AutoBridge 降级为仅 path 参数。
-	swaggerAssets, swaggerAssetName := c.adminServer.GetMicroserviceGatewaySwaggerJSON()
 
 	server := c.mcpServer.MCPServer()
 	allowedTags := c.AllowedTagsForMCP()
@@ -211,17 +227,23 @@ func (c *LocalConfig) runAutoBridge() {
 
 // runMCPBuiltinResources 注册框架内置 Resources（version + openapi-spec×2）与 getting_started Prompt。
 //
-// 必须在 SetMicroserviceGatewayYAML 成功之后调用（swagger 资产此时才就绪），与 runAutoBridge 同一时序。
-// 这些 resource/prompt 镜像已公开 HTTP 端点（/version、/openapi-spec），不引入新安全面（见 ADR-010）。
-// Frontend.Enable=false 时 HTTPHandlerFrontend 直接 return，本方法不执行（与 runAutoBridge 一致）。
+// adminServer 为 nil 时（未启用 admin 集成），swagger 资产不可用：
+//   - version resource 始终注册（不依赖 adminServer）。
+//   - microservice resource 跳过（swFS==nil 时 RegisterBuiltinResources 内部守卫跳过）。
+//   - getting_started prompt 仍注册，文案退化为通用版（readSwaggerTitle 对 nil FS 返回空串）。
 //
+// Frontend.Enable=false 时 HTTPHandlerFrontend 直接 return，本方法不执行（与 runAutoBridge 一致）。
 // 幂等：AddResource / AddPrompt 对同 URI/同名为覆盖语义，可安全重复调用。
 func (c *LocalConfig) runMCPBuiltinResources() {
-	if c.mcpServer == nil || c.adminServer == nil {
+	if c.mcpServer == nil {
 		return
 	}
 
-	swFS, swName := c.adminServer.GetMicroserviceGatewaySwaggerJSON()
+	var swFS fs.FS
+	var swName string
+	if c.adminServer != nil {
+		swFS, swName = c.adminServer.GetMicroserviceGatewaySwaggerJSON()
+	}
 
 	server := c.mcpServer.MCPServer()
 	mcptools.RegisterBuiltinResources(server, mcptools.BuiltinResourcesConfig{

@@ -478,12 +478,12 @@ func (c *LocalConfig) HTTPHandlerFrontend(mux *http.ServeMux, assets fs.FS) erro
 		if err := c.adminServer.SetMicroserviceGatewayYAML(assets); err != nil {
 			return err
 		}
-		// gateway/swagger YAML 已加载，现在执行 AutoBridge 将 gRPC 方法注册为 MCP Tools
-		c.runAutoBridge()
-		// 注册内置 Resources（version + openapi-spec×2）与 getting_started Prompt
-		//（swagger 资产已就绪；见 Phase 9 / ADR-010）
-		c.runMCPBuiltinResources()
 	}
+	// AutoBridge / BuiltinResources 不依赖 adminServer 是否启用：
+	// adminServer 为 nil 时底层函数对 nil 安全降级（AutoBridge 跳过、version resource
+	// 和 getting_started prompt 仍注册），使 MCP 可独立于 admin 后台使用（方案 C）。
+	c.runAutoBridge()
+	c.runMCPBuiltinResources()
 
 	comps := []string{"admin", "openapi", "webroot"}
 	for _, v := range comps {
