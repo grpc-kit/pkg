@@ -52,17 +52,17 @@ func TestSeedAuthProviderCode(t *testing.T) {
 	}
 }
 
-func TestSeedCredentialSeedCode(t *testing.T) {
+func TestSeedCredentialCode(t *testing.T) {
 	tests := []struct {
-		c    adminv1.CredentialSeedCode
+		c    adminv1.CredentialCode
 		want string
 	}{
-		{adminv1.CredentialSeedCode_CREDENTIAL_SEED_CODE_UNSPECIFIED, ""},
-		{adminv1.CredentialSeedCode_CREDENTIAL_SEED_CODE_JWKS_SIGNING_KEY1, "jwks-signing-key1"},
+		{adminv1.CredentialCode_CREDENTIAL_CODE_UNSPECIFIED, ""},
+		{adminv1.CredentialCode_CREDENTIAL_CODE_JWT_SIGNING_V1, "jwt-signing-v1"},
 	}
 	for _, tt := range tests {
-		if got := seedCredentialSeedCode(tt.c); got != tt.want {
-			t.Errorf("seedCredentialSeedCode(%v) = %q, want %q", tt.c, got, tt.want)
+		if got := seedCredentialCode(tt.c); got != tt.want {
+			t.Errorf("seedCredentialCode(%v) = %q, want %q", tt.c, got, tt.want)
 		}
 	}
 }

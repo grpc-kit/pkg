@@ -687,7 +687,8 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 		}
 	}
 
-	credCode := seedCredentialSeedCode(adminv1.CredentialSeedCode_CREDENTIAL_SEED_CODE_JWKS_SIGNING_KEY1)
+	credCode := seedCredentialCode(adminv1.CredentialCode_CREDENTIAL_CODE_JWT_SIGNING_V1)
+
 	credExists, err := tx.Credentials.Query().Where(
 		credentials.CodeEQ(credCode),
 		credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
@@ -726,7 +727,7 @@ func (a *KnownAdminAPI) CreateDatabaseInitialize(ctx context.Context, req *admin
 			SetCredentialStatus(int(adminv1.Credential_ACTIVE.Number())).
 			SetCredentialSource(int(adminv1.Credential_SYSTEM.Number())).
 			SetFingerprint(fp).
-			SetDisplayName("JWKS Signing Key").
+			SetDisplayName("JWT Signing Key v1").
 			SetPublicKey(publicKeyBytes).
 			SetPrivateKeyEncrypted(privateKeyEnc).
 			Exec(ctx); err != nil {
