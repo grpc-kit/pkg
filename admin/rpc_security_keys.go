@@ -625,8 +625,8 @@ func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.Updat
 	mask := req.GetUpdateMask()
 	if mask != nil && len(mask.GetPaths()) > 0 {
 		for _, path := range mask.GetPaths() {
-			// 受保护凭证仅允许更新 display_name / description
-			if isProtected && path != "display_name" && path != "description" {
+			// 受保护凭证仅允许更新 display_name / description / status
+			if isProtected && path != "display_name" && path != "description" && path != "status" {
 				continue
 			}
 			switch path {
@@ -660,7 +660,7 @@ func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.Updat
 		if cred.Description != "" {
 			update.SetDescription(cred.Description)
 		}
-		if !isProtected && cred.Status != adminv1.Credential_STATUS_UNSPECIFIED {
+		if cred.Status != adminv1.Credential_STATUS_UNSPECIFIED {
 			update.SetCredentialStatus(int(cred.Status.Number()))
 		}
 		if !isProtected && cred.ExpiresAt != nil {
