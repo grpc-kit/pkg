@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"math/big"
 	"reflect"
@@ -143,6 +144,144 @@ func computeFingerprint(cred *adminv1.Credential) string {
 	return ""
 }
 
+// normalizePublicKeyToDER 将公钥材料归一化为 raw DER 字节。
+// 接受 PEM 文本（-----BEGIN PUBLIC KEY-----）或 raw DER，统一返回 PKIX DER。
+// 空输入返回空输出；无法识别的格式返回错误。
+func normalizePublicKeyToDER(raw []byte) ([]byte, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	// PEM 文本：首字节为 '-' (0x2D)
+	if raw[0] == 0x2D {
+		block, _ := pem.Decode(raw)
+		if block == nil {
+			return nil, fmt.Errorf("failed to decode PEM public key")
+		}
+		return block.Bytes, nil
+	}
+	// raw DER：首字节为 0x30 (SEQUENCE)，原样返回
+	if raw[0] == 0x30 {
+		return raw, nil
+	}
+	return nil, fmt.Errorf("unrecognized public key format (firstByte=0x%02x)", raw[0])
+}
+
+// normalizePrivateKeyToPKCS1DER 将私钥材料归一化为 PKCS#1 DER 字节。
+// 接受 PEM 文本（-----BEGIN PRIVATE KEY----- / -----BEGIN RSA PRIVATE KEY-----）
+// 或 raw DER，统一返回 PKCS#1 DER（与系统种子 x509.MarshalPKCS1PrivateKey 一致）。
+// 空输入返回空输出；无法识别的格式返回错误。
+func normalizePrivateKeyToPKCS1DER(raw []byte) ([]byte, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	var derBytes []byte
+	// PEM 文本：首字节为 '-' (0x2D)
+	if raw[0] == 0x2D {
+		block, _ := pem.Decode(raw)
+		if block == nil {
+			return nil, fmt.Errorf("failed to decode PEM private key")
+		}
+		derBytes = block.Bytes
+	} else if raw[0] == 0x30 {
+		// raw DER：首字节为 0x30 (SEQUENCE)
+		derBytes = raw
+	} else {
+		return nil, fmt.Errorf("unrecognized private key format (firstByte=0x%02x)", raw[0])
+	}
+
+	// 尝试按 PKCS#8 解析（前端 Web Crypto exportKey("pkcs8") 产出 PKCS#8）
+	key, err := x509.ParsePKCS8PrivateKey(derBytes)
+	if err == nil {
+		rsaKey, ok := key.(*rsa.PrivateKey)
+		if !ok {
+			return nil, fmt.Errorf("PKCS#8 private key is not RSA: %T", key)
+		}
+		return x509.MarshalPKCS1PrivateKey(rsaKey), nil
+	}
+
+	// 尝试按 PKCS#1 解析（已是 PKCS#1 DER，原样返回）
+	if _, err := x509.ParsePKCS1PrivateKey(derBytes); err == nil {
+		return derBytes, nil
+	}
+
+	return nil, fmt.Errorf("failed to parse private key as PKCS#8 or PKCS#1")
+}
+
+// normalizeCertificateToDER 将 X.509 证书归一化为 raw DER 字节。
+// 接受 PEM 文本（-----BEGIN CERTIFICATE-----）或 raw DER，统一返回 DER。
+// 空输入返回空输出；无法识别的格式返回错误。
+func normalizeCertificateToDER(raw []byte) ([]byte, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	// PEM 文本：首字节为 '-' (0x2D)
+	if raw[0] == 0x2D {
+		block, _ := pem.Decode(raw)
+		if block == nil {
+			return nil, fmt.Errorf("failed to decode PEM certificate")
+		}
+		return block.Bytes, nil
+	}
+	// raw DER：首字节为 0x30 (SEQUENCE)，原样返回
+	if raw[0] == 0x30 {
+		return raw, nil
+	}
+	return nil, fmt.Errorf("unrecognized certificate format (firstByte=0x%02x)", raw[0])
+}
+
+// normalizeCredentialKeyMaterial 按凭证类型归一化密钥材料为 raw DER，原地修改 cred。
+// 仅处理含密钥材料的类型（KEY_PAIR / X509），其余类型不做处理。
+func normalizeCredentialKeyMaterial(cred *adminv1.Credential) error {
+	switch cred.GetType() {
+	case adminv1.Credential_KEY_PAIR:
+		kp := cred.GetKeyPair()
+		if kp == nil {
+			return nil
+		}
+		pubDER, err := normalizePublicKeyToDER(kp.PublicKey)
+		if err != nil {
+			return fmt.Errorf("normalize public_key: %w", err)
+		}
+		kp.PublicKey = pubDER
+
+		privDER, err := normalizePrivateKeyToPKCS1DER(kp.PrivateKey)
+		if err != nil {
+			return fmt.Errorf("normalize private_key: %w", err)
+		}
+		kp.PrivateKey = privDER
+		// passphrase 是普通文本，不涉及 DER 归一化
+
+	case adminv1.Credential_X509:
+		x := cred.GetX509Data()
+		if x == nil {
+			return nil
+		}
+		certDER, err := normalizeCertificateToDER(x.Certificate)
+		if err != nil {
+			return fmt.Errorf("normalize certificate: %w", err)
+		}
+		x.Certificate = certDER
+
+		// ca_chain 中的每张证书也归一化
+		for i, ca := range x.CaChain {
+			caDER, err := normalizeCertificateToDER(ca)
+			if err != nil {
+				return fmt.Errorf("normalize ca_chain[%d]: %w", i, err)
+			}
+			x.CaChain[i] = caDER
+		}
+
+		// X509 凭证的私钥同样归一化为 PKCS#1 DER
+		privDER, err := normalizePrivateKeyToPKCS1DER(x.PrivateKey)
+		if err != nil {
+			return fmt.Errorf("normalize private_key: %w", err)
+		}
+		x.PrivateKey = privDER
+		// passphrase 是普通文本，不涉及 DER 归一化
+	}
+	return nil
+}
+
 // isTokenPersistenceRequest 判断是否为 Token 持久化请求。
 // 识别条件：type=SECRET + usage=AUTH + source=USER
 // 用于决定是否执行 fingerprint 幂等检查。
@@ -199,6 +338,12 @@ func (a *KnownAdminAPI) CreateCredential(ctx context.Context, req *adminv1.Creat
 	}
 	if exists > 0 {
 		return nil, errs.AlreadyExists(ctx).WithMessage(fmt.Sprintf("credential with code %q already exists", code))
+	}
+
+	// 归一化密钥材料为 raw DER，确保 DB 存储格式统一（公钥 PKIX DER、私钥 PKCS#1 DER）。
+	// 必须在 computeFingerprint 之前执行，使 fingerprint 基于 DER 计算，与系统种子一致。
+	if err := normalizeCredentialKeyMaterial(cred); err != nil {
+		return nil, errs.InvalidArgument(ctx).WithMessage(fmt.Sprintf("invalid key material: %v", err))
 	}
 
 	// 计算密钥指纹
