@@ -291,6 +291,32 @@ func isTokenPersistenceRequest(cred *adminv1.Credential) bool {
 		cred.GetSource() == adminv1.Credential_USER
 }
 
+// isJWKSCredential 判断 ent 凭证行是否为 JWKS 凭证。
+// 识别条件：type=KEY_PAIR + algorithm=RSA + usage=JWKS + visibility=VISIBILITY_RESTRICTED + source=SYSTEM
+// 不检查 status，由调用方决定是否叠加状态过滤。
+func isJWKSCredential(row *lion.Credentials) bool {
+	return row.CredentialType == int(adminv1.Credential_KEY_PAIR.Number()) &&
+		row.CredentialAlgorithm == int(adminv1.Credential_RSA.Number()) &&
+		row.CredentialUsage == int(adminv1.Credential_JWKS.Number()) &&
+		row.CredentialVisibility == int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number()) &&
+		row.CredentialSource == int(adminv1.Credential_SYSTEM.Number())
+}
+
+// countActiveJWKSCredentials 统计当前处于 ACTIVE 状态的 JWKS 凭证数量。
+// 用于守卫：确保系统始终至少存在一个活跃的 JWKS 凭证。
+func countActiveJWKSCredentials(ctx context.Context, db *lion.Client) (int, error) {
+	return db.Credentials.Query().
+		Where(
+			credentials.CredentialTypeEQ(int(adminv1.Credential_KEY_PAIR.Number())),
+			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_RSA.Number())),
+			credentials.CredentialUsageEQ(int(adminv1.Credential_JWKS.Number())),
+			credentials.CredentialVisibilityEQ(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())),
+			credentials.CredentialStatusEQ(int(adminv1.Credential_ACTIVE.Number())),
+			credentials.CredentialSourceEQ(int(adminv1.Credential_SYSTEM.Number())),
+		).
+		Count(ctx)
+}
+
 // encryptSensitiveField 使用 AES-GCM 加密敏感字段
 func (a *KnownAdminAPI) encryptSensitiveField(plainText []byte) ([]byte, error) {
 	if len(plainText) == 0 {
@@ -819,6 +845,30 @@ func (a *KnownAdminAPI) UpdateCredential(ctx context.Context, req *adminv1.Updat
 		}
 	}
 
+	// 守卫：禁止将最后一个活跃的 JWKS 凭证状态改为非 ACTIVE
+	if isJWKSCredential(row) && row.CredentialStatus == int(adminv1.Credential_ACTIVE.Number()) {
+		newStatus := row.CredentialStatus // 默认无变更
+		if mask != nil && len(mask.GetPaths()) > 0 {
+			for _, path := range mask.GetPaths() {
+				if path == "status" {
+					newStatus = int(cred.Status.Number())
+					break
+				}
+			}
+		} else if cred.Status != adminv1.Credential_STATUS_UNSPECIFIED {
+			newStatus = int(cred.Status.Number())
+		}
+		if newStatus != int(adminv1.Credential_ACTIVE.Number()) {
+			count, err := countActiveJWKSCredentials(ctx, db)
+			if err != nil {
+				return nil, err
+			}
+			if count <= 1 {
+				return nil, errs.FailedPrecondition(ctx).WithMessage("at least one active JWKS credential must exist")
+			}
+		}
+	}
+
 	updated, err := update.Save(ctx)
 	if err != nil {
 		return nil, err
@@ -851,6 +901,17 @@ func (a *KnownAdminAPI) DeleteCredential(ctx context.Context, req *adminv1.Delet
 	// 受保护凭证不可删除
 	if row.Protected {
 		return nil, errs.InvalidArgument(ctx).WithMessage("protected credential cannot be deleted")
+	}
+
+	// 守卫：禁止删除最后一个活跃的 JWKS 凭证
+	if isJWKSCredential(row) && row.CredentialStatus == int(adminv1.Credential_ACTIVE.Number()) {
+		count, err := countActiveJWKSCredentials(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+		if count <= 1 {
+			return nil, errs.FailedPrecondition(ctx).WithMessage("at least one active JWKS credential must exist")
+		}
 	}
 
 	// 执行软删除
@@ -1071,7 +1132,14 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 			credentials.CredentialAlgorithmEQ(int(adminv1.Credential_RSA.Number())),
 			credentials.CredentialUsageEQ(int(adminv1.Credential_JWKS.Number())),
 			credentials.CredentialVisibilityEQ(int(adminv1.Visibility_VISIBILITY_RESTRICTED.Number())),
-			credentials.CredentialStatusEQ(int(adminv1.Credential_ACTIVE.Number())),
+			// JWKS 端点需同时列出 ACTIVE 和 EXPIRED 状态的公钥：
+			// ACTIVE - 当前用于签名的活跃密钥
+			// EXPIRED - 已过期但仍有未过期 token 需要验证的密钥
+			// 注意：DISABLED（手动禁用）和 REVOKED（已吊销）不列出，因为可能涉及安全问题
+			credentials.CredentialStatusIn(
+				int(adminv1.Credential_ACTIVE.Number()),
+				int(adminv1.Credential_EXPIRED.Number()),
+			),
 			credentials.CredentialSourceEQ(int(adminv1.Credential_SYSTEM.Number())),
 		).
 		Order(credentials.ByID()).
