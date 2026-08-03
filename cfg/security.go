@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/crypto"
 	"github.com/grpc-kit/pkg/rpc"
@@ -320,7 +320,14 @@ func (s *SecurityConfig) verifyBearerToken(ctx context.Context, tokenString stri
 				}
 				clientID := s.Authentication.OIDCProvider.Config.ClientID
 				if clientID != "" {
-					if !idToken.VerifyAudience(clientID, true) {
+					audienceMatch := false
+					for _, aud := range idToken.Audience {
+						if aud == clientID {
+							audienceMatch = true
+							break
+						}
+					}
+					if !audienceMatch {
 						return idToken, jwt.ErrTokenInvalidAudience
 					}
 				}
