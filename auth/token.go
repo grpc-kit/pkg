@@ -108,78 +108,56 @@ func ParseIDTokenClaims(token string) (*IDTokenClaims, error) {
 	return &claims, err
 }
 
-func (i *IDTokenClaims) SetSubject(subject string) *IDTokenClaims {
-	i.Subject = subject
-	return i
+// --- CommonClaims 方法 ---
+// 以下 setter 与 GetMustUserID 仅触碰 CommonClaims（或其内嵌 RegisteredClaims）的字段，
+// 故定义在 *CommonClaims 上，经嵌入提升后由 IDTokenClaims 与 AccessTokenClaims 共用。
+
+func (c *CommonClaims) SetSubject(subject string) *CommonClaims {
+	c.Subject = subject
+	return c
 }
 
-func (i *IDTokenClaims) SetExpiresAt(expiresIn int64) *IDTokenClaims {
-	i.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Duration(expiresIn) * time.Second))
-	return i
+func (c *CommonClaims) SetExpiresAt(expiresIn int64) *CommonClaims {
+	c.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Duration(expiresIn) * time.Second))
+	return c
 }
 
 // SetEmail 设置用户邮箱。非空直接使用；为空时回退到 sub@localhost 并标记已验证。
-func (i *IDTokenClaims) SetEmail(email string) *IDTokenClaims {
+func (c *CommonClaims) SetEmail(email string) *CommonClaims {
 	if email != "" {
-		i.Email = email
+		c.Email = email
 	} else {
-		i.Email = fmt.Sprintf("%s@localhost", i.Subject)
-		i.EmailVerified = true
+		c.Email = fmt.Sprintf("%s@localhost", c.Subject)
+		c.EmailVerified = true
 	}
 
-	return i
+	return c
 }
 
-func (i *IDTokenClaims) SetGroups(groups []string) *IDTokenClaims {
-	i.Groups = groups
-	return i
+func (c *CommonClaims) SetGroups(groups []string) *CommonClaims {
+	c.Groups = groups
+	return c
 }
 
-func (i *IDTokenClaims) SetRoles(roles []string) *IDTokenClaims {
-	i.Roles = roles
-	return i
+func (c *CommonClaims) SetRoles(roles []string) *CommonClaims {
+	c.Roles = roles
+	return c
 }
 
-// GetAccessToken 以 HS256 签名生成 access token JWT。
-func (i *IDTokenClaims) GetAccessToken(signeKey string) (string, error) {
-	key := crypto.SHA256([]byte(signeKey))
-
-	ss, err := jwt.NewWithClaims(jwt.SigningMethodHS256, i).SignedString([]byte(key))
+func (c *CommonClaims) GetMustUserID() int64 {
+	userID, err := strconv.ParseInt(c.Subject, 10, 64)
 	if err != nil {
-		return ss, err
-	}
-
-	return ss, nil
-}
-
-// GetAccessTokenRSA 以 RS256 签名生成 access token JWT，kid 非空时写入 header。
-func (i *IDTokenClaims) GetAccessTokenRSA(signeKey *rsa.PrivateKey, kid string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, i)
-	if kid != "" {
-		token.Header["kid"] = kid
-	}
-	ss, err := token.SignedString(signeKey)
-	if err != nil {
-		return ss, err
-	}
-
-	return ss, nil
-}
-
-func (i *IDTokenClaims) GetMustUserID() int64 {
-	userID, err := strconv.ParseInt(i.Subject, 10, 64)
-	if err != nil {
-		if i.Subject == "" {
+		if c.Subject == "" {
 			return 0
 		}
 
-		username := i.Username
+		username := c.Username
 		if username == "" {
 			// 回退到 OIDC 标准字段 preferred_username
-			username = i.PreferredUsername
+			username = c.PreferredUsername
 		}
 		if username == "" {
-			username = i.Subject
+			username = c.Subject
 		}
 
 		// 如果为 lion_users 中用户登录的，则 "subject" 必须为 "user_id"
@@ -188,4 +166,61 @@ func (i *IDTokenClaims) GetMustUserID() int64 {
 	}
 
 	return userID
+}
+
+// --- JWT 签名（共享实现）---
+//
+// 签名必须序列化具体类型（IDTokenClaims / AccessTokenClaims）的全部字段，
+// 因此签名为包级函数、接收 jwt.Claims，由各具体类型的 GetAccessToken 薄包装传入自身。
+// 切勿将签名定义为 *CommonClaims 的方法：那样 jwt.NewWithClaims 只会序列化 CommonClaims，
+// 丢失 IDToken / AccessToken 的专有声明（nonce、azp、client_id、scope 等）。
+
+// SignAccessToken 以 HS256 签名生成 access token JWT。
+func SignAccessToken(claims jwt.Claims, signKey string) (string, error) {
+	key := crypto.SHA256([]byte(signKey))
+
+	ss, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(key))
+	if err != nil {
+		return ss, err
+	}
+
+	return ss, nil
+}
+
+// SignAccessTokenRSA 以 RS256 签名生成 access token JWT，kid 非空时写入 header。
+func SignAccessTokenRSA(claims jwt.Claims, privateKey *rsa.PrivateKey, kid string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	if kid != "" {
+		token.Header["kid"] = kid
+	}
+	ss, err := token.SignedString(privateKey)
+	if err != nil {
+		return ss, err
+	}
+
+	return ss, nil
+}
+
+// --- 具体类型签名包装 ---
+// 保留方法式 API（x.GetAccessToken(key)），内部委托给共享签名函数，
+// 传入具体类型自身以保证完整序列化。
+
+// GetAccessToken 以 HS256 签名生成 access token JWT。
+func (i *IDTokenClaims) GetAccessToken(signKey string) (string, error) {
+	return SignAccessToken(i, signKey)
+}
+
+// GetAccessTokenRSA 以 RS256 签名生成 access token JWT，kid 非空时写入 header。
+func (i *IDTokenClaims) GetAccessTokenRSA(privateKey *rsa.PrivateKey, kid string) (string, error) {
+	return SignAccessTokenRSA(i, privateKey, kid)
+}
+
+// GetAccessToken 以 HS256 签名生成 access token JWT。
+func (a *AccessTokenClaims) GetAccessToken(signKey string) (string, error) {
+	return SignAccessToken(a, signKey)
+}
+
+// GetAccessTokenRSA 以 RS256 签名生成 access token JWT，kid 非空时写入 header。
+func (a *AccessTokenClaims) GetAccessTokenRSA(privateKey *rsa.PrivateKey, kid string) (string, error) {
+	return SignAccessTokenRSA(a, privateKey, kid)
 }
