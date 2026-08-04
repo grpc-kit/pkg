@@ -36,20 +36,22 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 	}
 
 	claims := auth.IDTokenClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   strconv.FormatInt(userID, 10),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresIn) * time.Second)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),
+		CommonClaims: auth.CommonClaims{
+			RegisteredClaims: jwt.RegisteredClaims{
+				Subject:   strconv.FormatInt(userID, 10),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiresIn) * time.Second)),
+				IssuedAt:  jwt.NewNumericDate(time.Now()),
+				NotBefore: jwt.NewNumericDate(time.Now()),
+			},
+			Email:           fmt.Sprintf("%s@localhost", s.Username),
+			EmailVerified:   true,
+			Groups:          s.Groups,
+			FederatedClaims: nil,
+			Appid:           appid,
+			Tenant:          tenant,
+			Username:        s.Username,
+			Nickname:        s.Username,
 		},
-		Email:           fmt.Sprintf("%s@localhost", s.Username),
-		EmailVerified:   true,
-		Groups:          s.Groups,
-		FederatedClaims: nil,
-		Appid:           appid,
-		Tenant:          tenant,
-		Username:        s.Username,
-		Nickname:        s.Username,
 	}
 
 	ss, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(s.PasswordHash))

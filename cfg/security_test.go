@@ -80,14 +80,16 @@ func testSecurityTokenHS256(t *testing.T) {
 	// makeValidClaims returns claims that should pass all checks.
 	makeValidClaims := func() *auth.IDTokenClaims {
 		return &auth.IDTokenClaims{
-			RegisteredClaims: jwt.RegisteredClaims{
-				Subject:   "testuser",
-				Issuer:    testIssuer,
-				Audience:  []string{testClientID},
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
-				IssuedAt:  jwt.NewNumericDate(time.Now()),
+			CommonClaims: auth.CommonClaims{
+				RegisteredClaims: jwt.RegisteredClaims{
+					Subject:   "testuser",
+					Issuer:    testIssuer,
+					Audience:  []string{testClientID},
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
+					IssuedAt:  jwt.NewNumericDate(time.Now()),
+				},
+				Email: "testuser@localhost",
 			},
-			Email: "testuser@localhost",
 		}
 	}
 

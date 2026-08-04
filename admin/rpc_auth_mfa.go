@@ -580,8 +580,10 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 	}
 
 	idToken := &auth.IDTokenClaims{
-		Username: u.Username,
-		Nickname: u.Nickname,
+		CommonClaims: auth.CommonClaims{
+			Username: u.Username,
+			Nickname: u.Nickname,
+		},
 	}
 	idToken.SetSubject(strconv.Itoa(u.ID))
 	idToken.SetGroups(groups)

@@ -267,10 +267,12 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		email := getMapString(userinfo, emailField)
 
 		idToken = &auth.IDTokenClaims{
-			Username:      username,
-			Nickname:      username,
-			Email:         email,
-			EmailVerified: email != "",
+			CommonClaims: auth.CommonClaims{
+				Username:      username,
+				Nickname:      username,
+				Email:         email,
+				EmailVerified: email != "",
+			},
 		}
 		idToken.SetSubject(providerUserID)
 
@@ -720,8 +722,10 @@ func (s *socialUsers) issueAccessTokenForUser(ctx context.Context, u *lion.Users
 	}
 
 	idToken := &auth.IDTokenClaims{
-		Username: u.Username,
-		Nickname: u.Nickname,
+		CommonClaims: auth.CommonClaims{
+			Username: u.Username,
+			Nickname: u.Nickname,
+		},
 	}
 	// 填充 idToken 内容
 	idToken.SetSubject(strconv.Itoa(u.ID))
