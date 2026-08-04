@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/grpc-kit/pkg/crypto"
 )
 
 // TestAccessTokenClaims_PromotedMethodsAndSigning 验证重构后的两个关键性质：
@@ -62,5 +63,30 @@ func TestAccessTokenClaims_PromotedMethodsAndSigning(t *testing.T) {
 	}
 	if decoded.Scope != "openid profile" {
 		t.Errorf("Scope = %q, want openid profile", decoded.Scope)
+	}
+}
+
+func TestPreferredUsernameCompatibility(t *testing.T) {
+	tests := []struct {
+		name       string
+		claims     CommonClaims
+		want       string
+		wantUserID int64
+	}{
+		{name: "standard claim", claims: CommonClaims{PreferredUsername: "preferred"}, want: "preferred", wantUserID: crypto.Username2UserID("preferred")},
+		{name: "legacy claim", claims: CommonClaims{Username: "legacy"}, want: "legacy", wantUserID: crypto.Username2UserID("legacy")},
+		{name: "standard wins", claims: CommonClaims{PreferredUsername: "preferred", Username: "legacy"}, want: "preferred", wantUserID: crypto.Username2UserID("preferred")},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			claims := tt.claims
+			if got := claims.GetPreferredUsername(); got != tt.want {
+				t.Fatalf("GetPreferredUsername() = %q, want %q", got, tt.want)
+			}
+			claims.Subject = "not-a-number"
+			if got := claims.GetMustUserID(); got != tt.wantUserID {
+				t.Fatalf("GetMustUserID() = %d, want %d", got, tt.wantUserID)
+			}
+		})
 	}
 }

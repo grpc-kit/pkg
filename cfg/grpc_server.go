@@ -817,7 +817,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 
 			ctx = c.Security.withIDToken(ctx, idToken)
 			ctx = c.Security.withUserID(ctx, idToken.GetMustUserID())
-			ctx = c.Security.withUsername(ctx, idToken.Username)
+			ctx = c.Security.withUsername(ctx, idToken.GetPreferredUsername())
 			ctx = c.Security.withGroups(ctx, idToken.Groups)
 			roles, _ := auth.EffectiveRoles(idToken)
 			ctx = c.Security.withRoles(ctx, roles)

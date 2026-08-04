@@ -210,7 +210,6 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		}
 
 		claims := &auth.AccessTokenClaims{CommonClaims: auth.CommonClaims{
-			Username:          profile.Username,
 			PreferredUsername: profile.PreferredUsername,
 			Nickname:          profile.Nickname,
 			Email:             profile.Email,
@@ -274,11 +273,12 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		email := getMapString(userinfo, emailField)
 
 		profile := externalUserClaims{
-			ProviderSubject: providerUserID,
-			Username:        username,
-			Nickname:        username,
-			Email:           email,
-			EmailVerified:   email != "",
+			ProviderSubject:   providerUserID,
+			Username:          username,
+			PreferredUsername: username,
+			Nickname:          username,
+			Email:             email,
+			EmailVerified:     email != "",
 		}
 
 		expiresIn := int64(3600)
@@ -297,10 +297,10 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		}
 
 		claims := &auth.AccessTokenClaims{CommonClaims: auth.CommonClaims{
-			Username:      profile.Username,
-			Nickname:      profile.Nickname,
-			Email:         profile.Email,
-			EmailVerified: profile.EmailVerified,
+			PreferredUsername: profile.PreferredUsername,
+			Nickname:          profile.Nickname,
+			Email:             profile.Email,
+			EmailVerified:     profile.EmailVerified,
 		}}
 		claims.SetSubject(strconv.Itoa(userID))
 		claims.SetGroups(s.Groups)
@@ -326,12 +326,11 @@ type externalUserClaims struct {
 }
 
 func externalUserClaimsFromIDToken(claims *auth.IDTokenClaims) externalUserClaims {
-	username := claims.Username
+	preferredUsername := strings.TrimSpace(claims.PreferredUsername)
+	username := preferredUsername
 	if username == "" {
-		username = claims.PreferredUsername
-	}
-	if username == "" {
-		username = claims.Nickname
+		// 仅兼容旧 provider token 中的自定义 username claim。
+		username = strings.TrimSpace(claims.Username)
 	}
 	if username == "" {
 		username = claims.Subject
@@ -340,7 +339,7 @@ func externalUserClaimsFromIDToken(claims *auth.IDTokenClaims) externalUserClaim
 	return externalUserClaims{
 		ProviderSubject:   claims.Subject,
 		Username:          username,
-		PreferredUsername: claims.PreferredUsername,
+		PreferredUsername: preferredUsername,
 		Nickname:          claims.Nickname,
 		Email:             claims.Email,
 		EmailVerified:     claims.EmailVerified,
@@ -788,12 +787,13 @@ func findAvailableUsername(ctx context.Context, tx *lion.Tx, base string) (strin
 
 func (s *socialUsers) issueAccessTokenForUser(ctx context.Context, u *lion.Users) (string, bool, error) {
 	if err := s.setUserRolesAndGroups(ctx, u.ID); err != nil {
+		return "", false, err
 	}
 
 	accessTokenClaims := &auth.AccessTokenClaims{
 		CommonClaims: auth.CommonClaims{
-			Username: u.Username,
-			Nickname: u.Nickname,
+			PreferredUsername: u.Username,
+			Nickname:          u.Nickname,
 		},
 	}
 	// 填充 access token claims。

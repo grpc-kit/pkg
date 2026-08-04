@@ -1199,7 +1199,7 @@ func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empt
 	// 从 JWT 中提取基础 claim（这些字段在签发 token 时已确定）
 	result.Sub = claims.Subject
 	result.UserId = claims.GetMustUserID()
-	result.PreferredUsername = claims.Username
+	result.PreferredUsername = claims.GetPreferredUsername()
 	result.Email = claims.Email
 	result.EmailVerified = claims.EmailVerified
 

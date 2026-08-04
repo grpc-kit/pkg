@@ -24,7 +24,7 @@ type CommonClaims struct {
 	EmailVerified bool `json:"email_verified,omitempty"`
 	// Name 用户全名，展示用。
 	Name string `json:"name,omitempty"`
-	// PreferredUsername OIDC 标准用户名；框架使用 Username，此字段仅作 GetMustUserID 回退。
+	// PreferredUsername OIDC 标准用户名。新 token 使用该字段，不再签发自定义 username。
 	PreferredUsername string `json:"preferred_username,omitempty"`
 	// Nickname 昵称。
 	Nickname string `json:"nickname,omitempty"`
@@ -49,7 +49,7 @@ type CommonClaims struct {
 	// 仅用于兼容解析旧 Token，禁止在新 Token 中签发。
 	Appid string `json:"appid,omitempty"`
 	// Deprecated: 历史应用标识字段。
-	// Username 事实主用户名字段。GetMustUserID 优先使用，为空时回退到 PreferredUsername。
+	// Username 历史自定义字段，仅用于解析旧 token，禁止新 token 签发。
 	Username string `json:"username,omitempty"`
 }
 
@@ -184,6 +184,14 @@ func (c *CommonClaims) SetRoles(roles []string) *CommonClaims {
 	return c
 }
 
+// GetPreferredUsername 返回 OIDC 标准用户名，并兼容读取历史 username claim。
+func (c *CommonClaims) GetPreferredUsername() string {
+	if username := strings.TrimSpace(c.PreferredUsername); username != "" {
+		return username
+	}
+	return strings.TrimSpace(c.Username)
+}
+
 func (c *CommonClaims) GetMustUserID() int64 {
 	userID, err := strconv.ParseInt(c.Subject, 10, 64)
 	if err != nil {
@@ -191,11 +199,7 @@ func (c *CommonClaims) GetMustUserID() int64 {
 			return 0
 		}
 
-		username := c.Username
-		if username == "" {
-			// 回退到 OIDC 标准字段 preferred_username
-			username = c.PreferredUsername
-		}
+		username := c.GetPreferredUsername()
 		if username == "" {
 			username = c.Subject
 		}

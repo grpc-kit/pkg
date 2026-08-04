@@ -581,8 +581,8 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 
 	accessTokenClaims := &auth.AccessTokenClaims{
 		CommonClaims: auth.CommonClaims{
-			Username: u.Username,
-			Nickname: u.Nickname,
+			PreferredUsername: u.Username,
+			Nickname:          u.Nickname,
 		},
 	}
 	accessTokenClaims.SetSubject(strconv.Itoa(u.ID))

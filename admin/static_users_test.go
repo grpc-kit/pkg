@@ -62,6 +62,9 @@ func TestStaticUserAccessTokenUsesConfiguredPasswordHashAsHMACKey(t *testing.T) 
 	if claims.Subject != "42" || claims.Appid != "legacy-app" {
 		t.Fatalf("claims mismatch: sub=%q appid=%q", claims.Subject, claims.Appid)
 	}
+	if claims.PreferredUsername != "static-user" || claims.Username != "" {
+		t.Fatalf("username claims mismatch: preferred=%q username=%q", claims.PreferredUsername, claims.Username)
+	}
 }
 
 func TestStaticUserAccessTokenSeparatesRolesAndGroups(t *testing.T) {

@@ -73,6 +73,10 @@ func extractUserFromAccessToken(accessToken string) (int, string, error) {
 		return 0, "", err
 	}
 
-	username, _ := claims["username"].(string)
+	username, _ := claims["preferred_username"].(string)
+	if username == "" {
+		// 兼容历史自定义 username claim。
+		username, _ = claims["username"].(string)
+	}
 	return userID, username, nil
 }
