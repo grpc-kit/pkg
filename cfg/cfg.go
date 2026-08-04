@@ -54,25 +54,6 @@ const (
 	HTTPHeaderEtag = "Etag"
 )
 
-/*
-// contextKey 使用自定义类型不对外，防止碰撞冲突
-type contextKey int
-
-const (
-	// idTokenKey 用于存放当前jwt的解析后的数据结构
-	idTokenKey contextKey = iota
-
-	// usernameKey 用于存放当前用户名，http base对应username，jwt对应email
-	usernameKey
-
-	// authenticationTypeKey 用于存放当前认证方式
-	authenticationTypeKey
-
-	// groupsKey 用于存放当前用户归属的组列表
-	groupsKey
-)
-*/
-
 const (
 	// ScopeNameGRPCKit 用于该包产生链路、指标的权威名称
 	ScopeNameGRPCKit = "github.com/grpc-kit/pkg"
@@ -684,9 +665,16 @@ func (c *LocalConfig) HasCacheboxEnabled() bool {
 
 // AccessTokenFrom 获取当前会话中已验证的 access token claims。
 func (c *LocalConfig) AccessTokenFrom(ctx context.Context) (auth.AccessTokenClaims, bool) {
-	tmp := rpc.GetIDTokenFromContext(ctx)
-	accessToken, ok := tmp.(auth.AccessTokenClaims)
-	return accessToken, ok
+	token := rpc.GetTokenClaimsFromContext(ctx)
+	switch claims := token.(type) {
+	case auth.AccessTokenClaims:
+		return claims, true
+	case *auth.AccessTokenClaims:
+		if claims != nil {
+			return *claims, true
+		}
+	}
+	return auth.AccessTokenClaims{}, false
 }
 
 // IDTokenFrom 用于获取当前会话的 token claims。
@@ -695,9 +683,6 @@ func (c *LocalConfig) AccessTokenFrom(ctx context.Context) (auth.AccessTokenClai
 // 本方法仅将其公共字段投影为旧类型，以保持一个兼容周期。
 func (c *LocalConfig) IDTokenFrom(ctx context.Context) (auth.IDTokenClaims, bool) {
 	tmp := rpc.GetIDTokenFromContext(ctx)
-
-	// idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
-	// return idToken, ok
 
 	if idToken, ok := tmp.(auth.IDTokenClaims); ok {
 		return idToken, true

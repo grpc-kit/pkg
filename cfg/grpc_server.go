@@ -815,7 +815,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 				return ctx, errs.Unauthenticated(ctx).Err()
 			}
 
-			ctx = c.Security.withIDToken(ctx, idToken)
+			ctx = c.Security.withAccessTokenClaims(ctx, idToken)
 			ctx = c.Security.withUserID(ctx, idToken.GetMustUserID())
 			ctx = c.Security.withUsername(ctx, idToken.GetPreferredUsername())
 			ctx = c.Security.withGroups(ctx, idToken.Groups)

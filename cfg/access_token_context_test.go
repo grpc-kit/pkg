@@ -20,7 +20,7 @@ func TestAccessTokenFromKeepsLegacyIDTokenProjection(t *testing.T) {
 	want.SetSubject("123")
 
 	ctx := context.Background()
-	ctx = (&SecurityConfig{}).withIDToken(ctx, want)
+	ctx = (&SecurityConfig{}).withAccessTokenClaims(ctx, want)
 
 	got, ok := c.AccessTokenFrom(ctx)
 	if !ok || got.ClientID != want.ClientID || got.Scope != want.Scope {

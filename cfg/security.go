@@ -145,11 +145,15 @@ func (c *LocalConfig) initSecurity() error {
 	return nil
 }
 
-// withIDToken 将已验证的 access token claims 写入当前会话。
-// 函数名为兼容历史调用暂不调整。
+// withAccessTokenClaims 将已验证的 access token claims 写入当前会话。
+func (c *SecurityConfig) withAccessTokenClaims(parent context.Context, token auth.AccessTokenClaims) context.Context {
+	return rpc.ContextWithTokenClaims(parent, token)
+}
+
+// withIDToken 保留用于兼容历史调用方。
+// Deprecated: use withAccessTokenClaims。
 func (c *SecurityConfig) withIDToken(parent context.Context, token auth.AccessTokenClaims) context.Context {
-	// return context.WithValue(parent, idTokenKey, token)
-	return rpc.ContextWithIDToken(parent, token)
+	return c.withAccessTokenClaims(parent, token)
 }
 
 // WithUserID 用于设置当前会话的用户 ID

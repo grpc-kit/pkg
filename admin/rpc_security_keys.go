@@ -9,7 +9,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"math/big"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -1183,16 +1182,23 @@ func (a *KnownAdminAPI) GetOAuth2JSONWebKeys(ctx context.Context, req *emptypb.E
 func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empty) (*adminv1.OAuth2Userinfo, error) {
 	result := &adminv1.OAuth2Userinfo{}
 
-	tmp := rpc.GetIDTokenFromContext(ctx)
-	a.logger.Infof("get id token type: %v", reflect.TypeOf(tmp))
 	var claims *auth.CommonClaims
-	switch token := tmp.(type) {
+	switch token := rpc.GetTokenClaimsFromContext(ctx).(type) {
 	case auth.AccessTokenClaims:
 		claims = &token.CommonClaims
+	case *auth.AccessTokenClaims:
+		if token != nil {
+			claims = &token.CommonClaims
+		}
 	case auth.IDTokenClaims:
-		// 兼容由旧调用方直接写入 context 的 claims。
+		// 兼容由旧调用方直接写入 context 的 IDTokenClaims。
 		claims = &token.CommonClaims
-	default:
+	case *auth.IDTokenClaims:
+		if token != nil {
+			claims = &token.CommonClaims
+		}
+	}
+	if claims == nil {
 		return result, errs.PermissionDenied(ctx)
 	}
 
