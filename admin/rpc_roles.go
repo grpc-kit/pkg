@@ -770,6 +770,13 @@ func (a *KnownAdminAPI) CreateRole(ctx context.Context, req *adminv1.CreateRoleR
 		SetProtected(false).
 		SetSortOrder(int(req.Role.SortOrder))
 
+	// proto3 枚举缺省值为 STATUS_UNSPECIFIED，角色创建默认启用。
+	roleStatus := int(req.Role.Status)
+	if roleStatus == int(adminv1.Role_STATUS_UNSPECIFIED) {
+		roleStatus = int(adminv1.Role_ACTIVE)
+	}
+	createBuilder.SetRoleStatus(roleStatus)
+
 	// 设置 parent_id（如果提供）
 	if req.Role.ParentId > 0 {
 		createBuilder.SetParentID(int(req.Role.ParentId))
@@ -971,6 +978,8 @@ func (a *KnownAdminAPI) UpdateRole(ctx context.Context, req *adminv1.UpdateRoleR
 				x.SetDescription(req.Role.Description)
 			case roles.FieldDisplayName:
 				x.SetDisplayName(req.Role.DisplayName)
+			case "status", roles.FieldRoleStatus:
+				x.SetRoleStatus(int(req.Role.Status))
 			}
 		}
 		if err := a.checkRootRoleConstraint(ctx, db, int(req.Role.Id), nextCode, nextParentID); err != nil {
