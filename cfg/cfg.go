@@ -200,9 +200,56 @@ type Authentication struct {
 // Authorization 用于鉴权
 type Authorization struct {
 	AllowedGroups  []string       `mapstructure:"allowed_groups"`
+	AllowedRoles   []string       `mapstructure:"allowed_roles"`
 	OPANative      OPANative      `mapstructure:"opa_native"`
 	OPAExternal    OPAExternal    `mapstructure:"opa_external"`
 	OPAEnvoyPlugin OPAEnvoyPlugin `mapstructure:"opa_envoy_plugin"`
+}
+
+// effectiveAllowedRoles returns the authorization allow-list using the new
+// role name while preserving the legacy allowed_groups configuration key.
+// When both names are supplied they must describe the same set; silently
+// merging two security allow-lists could expand access unexpectedly.
+func (a *Authorization) effectiveAllowedRoles() ([]string, bool) {
+	if a == nil {
+		return nil, true
+	}
+	if a.AllowedRoles == nil {
+		return a.AllowedGroups, true
+	}
+	if a.AllowedGroups == nil {
+		return a.AllowedRoles, true
+	}
+	if !sameStringSet(a.AllowedGroups, a.AllowedRoles) {
+		return nil, false
+	}
+	return a.AllowedRoles, true
+}
+
+func sameStringSet(left, right []string) bool {
+	leftSet := make(map[string]struct{}, len(left))
+	rightSet := make(map[string]struct{}, len(right))
+	for _, value := range left {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			leftSet[value] = struct{}{}
+		}
+	}
+	for _, value := range right {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			rightSet[value] = struct{}{}
+		}
+	}
+	if len(leftSet) != len(rightSet) {
+		return false
+	}
+	for value := range leftSet {
+		if _, ok := rightSet[value]; !ok {
+			return false
+		}
+	}
+	return true
 }
 
 // BasicAuth 用于HTTP基本认证的用户权限定义

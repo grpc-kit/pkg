@@ -843,11 +843,16 @@ func (c *LocalConfig) checkPermission(ctx context.Context, method string, roles 
 		}
 	}
 
-	// AllowedGroups is retained for configuration compatibility; its values are role codes.
-	if len(c.Security.Authorization.AllowedGroups) > 0 {
+	// allowed_groups is retained for compatibility; both names contain role codes.
+	allowedRoles, consistent := c.Security.Authorization.effectiveAllowedRoles()
+	if !consistent {
+		c.logger.Errorf("authorization allowed_groups and allowed_roles differ")
+		return errs.PermissionDenied(ctx).WithMessage("authorization role allow-lists conflict").Err()
+	}
+	if len(allowedRoles) > 0 {
 		allow := false
 		found := make(map[string]int, 0)
-		for _, g := range c.Security.Authorization.AllowedGroups {
+		for _, g := range allowedRoles {
 			found[g] = 0
 		}
 		for _, g := range roles {

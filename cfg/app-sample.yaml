@@ -104,6 +104,9 @@ security:
 
   # 鉴权：能做什么
   authorization:
+    # 新配置使用 role code；allowed_groups 保留兼容旧配置
+    allowed_roles:
+      - sysadmin
     allowed_groups:
       - sysadmin
 
