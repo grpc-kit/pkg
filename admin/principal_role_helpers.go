@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 	"sort"
+	"strings"
 	"time"
 
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
@@ -436,8 +437,8 @@ func effectiveRoleIDsForUser(ctx context.Context, db *lion.Client, userID int) (
 				principalroles.PrincipalIDIn(principalIDs...),
 				principalroles.BindingStatusEQ(bindingStatusActive),
 				principalroles.Or(
-				principalroles.ExpiresAtIsNil(),
-				principalroles.ExpiresAtGT(now),
+					principalroles.ExpiresAtIsNil(),
+					principalroles.ExpiresAtGT(now),
 				),
 			).
 			All(ctx)
@@ -496,6 +497,49 @@ func effectiveRoleIDsForUser(ctx context.Context, db *lion.Client, userID int) (
 	}
 	sort.Ints(result)
 	return result, nil
+}
+
+func effectiveGroupCodesForUser(ctx context.Context, db *lion.Client, userID int) ([]string, error) {
+	rows, err := db.UserMemberships.Query().
+		Select(usermemberships.FieldTargetID).
+		Where(
+			usermemberships.UserIDEQ(userID),
+			usermemberships.TargetTypeEQ(membershipTargetGroup),
+			usermemberships.MemberStatusEQ(int(adminv1.Membership_ACTIVE)),
+			usermemberships.Or(usermemberships.ExpiresAtIsNil(), usermemberships.ExpiresAtGT(time.Now())),
+		).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]int, 0, len(rows))
+	seen := make(map[int]struct{}, len(rows))
+	for _, row := range rows {
+		if _, ok := seen[row.TargetID]; ok {
+			continue
+		}
+		seen[row.TargetID] = struct{}{}
+		ids = append(ids, row.TargetID)
+	}
+	if len(ids) == 0 {
+		return []string{}, nil
+	}
+	groupRows, err := db.Groups.Query().
+		Select(groups.FieldID, groups.FieldCode).
+		Where(groups.IDIn(ids...), groups.GroupStatusEQ(int(adminv1.Group_ACTIVE)), groups.DeletedAtIsNil()).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	codes := make([]string, 0, len(groupRows))
+	for _, row := range groupRows {
+		code := strings.TrimSpace(row.Code)
+		if code != "" {
+			codes = append(codes, code)
+		}
+	}
+	sort.Strings(codes)
+	return codes, nil
 }
 
 func roleCodesForIDs(ctx context.Context, db *lion.Client, roleIDs []int) ([]string, error) {

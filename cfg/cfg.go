@@ -262,6 +262,7 @@ type BasicAuth struct {
 	// PasswordHash 优先使用（trim 后非空）：可为 sha256 十六进制或 bcrypt 串（与库表 LOCAL 用户一致时，客户端仍传 sha256(明文)）。
 	PasswordHash string   `mapstructure:"password_hash"`
 	Groups       []string `mapstructure:"groups"`
+	Roles        []string `mapstructure:"roles"`
 	// 租户，默认均为 'default' 下
 	Tenant string `mapstructure:"tenant"`
 }
@@ -398,6 +399,7 @@ func (c *LocalConfig) Register(ctx context.Context,
 				Username:     v.Username,
 				PasswordHash: basicAuthEffectivePasswordHash(v),
 				Groups:       v.Groups,
+				Roles:        v.Roles,
 				Tenant:       v.Tenant,
 			}
 			su.Append(uu)

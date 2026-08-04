@@ -18,6 +18,7 @@ type StaticUser struct {
 	PasswordHash string   `json:"password_hash"`
 	Email        string   `json:"email"`
 	Groups       []string `json:"groups"`
+	Roles        []string `json:"roles,omitempty"`
 	Tenant       string   `json:"tenant"`
 }
 
@@ -35,6 +36,11 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 		userID = crypto.Username2UserID(s.Username)
 	}
 
+	roles, groups := s.Roles, s.Groups
+	if s.Roles == nil {
+		roles, groups = s.Groups, nil
+	}
+
 	claims := auth.AccessTokenClaims{
 		CommonClaims: auth.CommonClaims{
 			RegisteredClaims: jwt.RegisteredClaims{
@@ -45,8 +51,8 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 			},
 			Email:           fmt.Sprintf("%s@localhost", s.Username),
 			EmailVerified:   true,
-			Groups:          s.Groups,
-			Roles:           s.Groups,
+			Groups:          groups,
+			Roles:           roles,
 			FederatedClaims: nil,
 			Appid:           appid,
 			Tenant:          tenant,

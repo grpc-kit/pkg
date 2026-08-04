@@ -167,7 +167,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return "", err
 		}
 
-		if err = s.setUserRoles(ctx, userID); err != nil {
+		if err = s.setUserRolesAndGroups(ctx, userID); err != nil {
 			return "", err
 		}
 
@@ -205,7 +205,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return accessToken, err
 		}
 
-		if err = s.setUserRoles(ctx, userID); err != nil {
+		if err = s.setUserRolesAndGroups(ctx, userID); err != nil {
 			return "", err
 		}
 
@@ -292,7 +292,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return accessToken, err
 		}
 
-		if err = s.setUserRoles(ctx, userID); err != nil {
+		if err = s.setUserRolesAndGroups(ctx, userID); err != nil {
 			return "", err
 		}
 
@@ -787,7 +787,7 @@ func findAvailableUsername(ctx context.Context, tx *lion.Tx, base string) (strin
 }
 
 func (s *socialUsers) issueAccessTokenForUser(ctx context.Context, u *lion.Users) (string, bool, error) {
-	if err := s.setUserRoles(ctx, u.ID); err != nil {
+	if err := s.setUserRolesAndGroups(ctx, u.ID); err != nil {
 	}
 
 	accessTokenClaims := &auth.AccessTokenClaims{
@@ -1328,6 +1328,7 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 }
 
 func (s *socialUsers) setUserRoles(ctx context.Context, userID int) error {
+	s.Roles = nil
 	roleIDs, err := effectiveRoleIDsForUser(ctx, s.db, userID)
 	if err != nil {
 		return err
@@ -1336,8 +1337,24 @@ func (s *socialUsers) setUserRoles(ctx context.Context, userID int) error {
 	if err != nil {
 		return err
 	}
-	s.Groups = append(s.Groups, roleCodes...)
 	s.Roles = append(s.Roles, roleCodes...)
 
 	return nil
+}
+
+func (s *socialUsers) setUserGroups(ctx context.Context, userID int) error {
+	s.Groups = nil
+	groupCodes, err := effectiveGroupCodesForUser(ctx, s.db, userID)
+	if err != nil {
+		return err
+	}
+	s.Groups = append(s.Groups, groupCodes...)
+	return nil
+}
+
+func (s *socialUsers) setUserRolesAndGroups(ctx context.Context, userID int) error {
+	if err := s.setUserRoles(ctx, userID); err != nil {
+		return err
+	}
+	return s.setUserGroups(ctx, userID)
 }

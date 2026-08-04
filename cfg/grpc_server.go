@@ -777,11 +777,14 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 						}
 						if okAuth {
 							// 认证成功
-							roles := v.Groups
+							roles, groups := v.Roles, v.Groups
+							if v.Roles == nil {
+								roles, groups = v.Groups, nil
+							}
 							ctx = c.Security.withUserID(ctx, v.UserID)
 							ctx = c.Security.withUsername(ctx, tmps[0])
 							ctx = c.Security.withAuthenticationType(ctx, AuthenticationTypeBasic)
-							ctx = c.Security.withGroups(ctx, v.Groups)
+							ctx = c.Security.withGroups(ctx, groups)
 							ctx = c.Security.withRoles(ctx, roles)
 
 							if err := c.checkPermission(ctx, currentMethod, roles); err != nil {

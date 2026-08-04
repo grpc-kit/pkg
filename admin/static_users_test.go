@@ -63,3 +63,34 @@ func TestStaticUserAccessTokenUsesConfiguredPasswordHashAsHMACKey(t *testing.T) 
 		t.Fatalf("claims mismatch: sub=%q appid=%q", claims.Subject, claims.Appid)
 	}
 }
+
+func TestStaticUserAccessTokenSeparatesRolesAndGroups(t *testing.T) {
+	const passwordHash = "password-hash"
+	newUser := StaticUser{UserID: 1, Username: "new", PasswordHash: passwordHash, Roles: []string{"admin"}, Groups: []string{"engineering"}}
+	legacyUser := StaticUser{UserID: 2, Username: "legacy", PasswordHash: passwordHash, Groups: []string{"admin"}}
+	for _, tc := range []struct {
+		name                  string
+		user                  StaticUser
+		wantRoles, wantGroups []string
+	}{
+		{"new", newUser, []string{"admin"}, []string{"engineering"}},
+		{"legacy", legacyUser, []string{"admin"}, nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tokenString, err := tc.user.GetAccessToken(3600, "app")
+			if err != nil {
+				t.Fatal(err)
+			}
+			var claims auth.AccessTokenClaims
+			if _, err := jwt.ParseWithClaims(tokenString, &claims, func(*jwt.Token) (interface{}, error) { return []byte(passwordHash), nil }); err != nil {
+				t.Fatal(err)
+			}
+			if len(claims.Roles) != len(tc.wantRoles) || claims.Roles[0] != tc.wantRoles[0] {
+				t.Fatalf("roles=%v", claims.Roles)
+			}
+			if len(claims.Groups) != len(tc.wantGroups) || (len(tc.wantGroups) > 0 && claims.Groups[0] != tc.wantGroups[0]) {
+				t.Fatalf("groups=%v", claims.Groups)
+			}
+		})
+	}
+}
