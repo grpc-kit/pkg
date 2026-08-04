@@ -35,7 +35,7 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 		userID = crypto.Username2UserID(s.Username)
 	}
 
-	claims := auth.IDTokenClaims{
+	claims := auth.AccessTokenClaims{
 		CommonClaims: auth.CommonClaims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Subject:   strconv.FormatInt(userID, 10),

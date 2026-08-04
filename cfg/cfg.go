@@ -633,15 +633,31 @@ func (c *LocalConfig) HasCacheboxEnabled() bool {
 	return c.Cachebox.Enable
 }
 
-// IDTokenFrom 用于获取当前会话的IDToken
+// AccessTokenFrom 获取当前会话中已验证的 access token claims。
+func (c *LocalConfig) AccessTokenFrom(ctx context.Context) (auth.AccessTokenClaims, bool) {
+	tmp := rpc.GetIDTokenFromContext(ctx)
+	accessToken, ok := tmp.(auth.AccessTokenClaims)
+	return accessToken, ok
+}
+
+// IDTokenFrom 用于获取当前会话的 token claims。
+//
+// Deprecated: use AccessTokenFrom. Bearer context 现承载 auth.AccessTokenClaims；
+// 本方法仅将其公共字段投影为旧类型，以保持一个兼容周期。
 func (c *LocalConfig) IDTokenFrom(ctx context.Context) (auth.IDTokenClaims, bool) {
 	tmp := rpc.GetIDTokenFromContext(ctx)
 
 	// idToken, ok := ctx.Value(idTokenKey).(IDTokenClaims)
 	// return idToken, ok
 
-	idToken, ok := tmp.(auth.IDTokenClaims)
-	return idToken, ok
+	if idToken, ok := tmp.(auth.IDTokenClaims); ok {
+		return idToken, true
+	}
+	accessToken, ok := tmp.(auth.AccessTokenClaims)
+	if !ok {
+		return auth.IDTokenClaims{}, false
+	}
+	return auth.IDTokenClaims{CommonClaims: accessToken.CommonClaims}, true
 }
 
 // UsernameFrom 用于获取当前会话的用户名

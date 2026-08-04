@@ -52,10 +52,9 @@ type CommonClaims struct {
 	Username string `json:"username,omitempty"`
 }
 
-// IDTokenClaims 是框架通用 JWT 载荷，同时用于签发 OIDC ID Token 和 OAuth2 Access Token。
-// 所有登录路径（static_users / mfa / social_users）均以本结构体构建 access_token。
-// social_users.go 通过 jwt.ParseWithClaims 将外部 OIDC Provider 的 id_token 反序列化到本结构体，
-// 因此保留 OIDC 标准字段即使框架自身不设置。
+// IDTokenClaims 仅描述 OIDC ID Token 声明。
+// 当前 social_users.go 使用本结构体承载已由 OIDC verifier 验证的外部 Provider id_token；
+// 框架 access token 使用 AccessTokenClaims。
 // 参考：OIDC Core §2 / §5.1，RFC 7519 §4.1。
 type IDTokenClaims struct {
 	CommonClaims
@@ -206,11 +205,13 @@ func SignAccessTokenRSA(claims jwt.Claims, privateKey *rsa.PrivateKey, kid strin
 // 传入具体类型自身以保证完整序列化。
 
 // GetAccessToken 以 HS256 签名生成 access token JWT。
+// Deprecated: IDTokenClaims 不应用于新 access token；仅为兼容旧调用保留。
 func (i *IDTokenClaims) GetAccessToken(signKey string) (string, error) {
 	return SignAccessToken(i, signKey)
 }
 
 // GetAccessTokenRSA 以 RS256 签名生成 access token JWT，kid 非空时写入 header。
+// Deprecated: IDTokenClaims 不应用于新 access token；仅为兼容旧调用保留。
 func (i *IDTokenClaims) GetAccessTokenRSA(privateKey *rsa.PrivateKey, kid string) (string, error) {
 	return SignAccessTokenRSA(i, privateKey, kid)
 }

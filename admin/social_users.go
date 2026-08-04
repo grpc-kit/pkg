@@ -17,7 +17,6 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/go-ldap/ldap/v3"
-	"github.com/golang-jwt/jwt/v5"
 	adminv1 "github.com/grpc-kit/pkg/api/known/admin/v1"
 	"github.com/grpc-kit/pkg/auth"
 	"github.com/grpc-kit/pkg/lion/credentials"
@@ -154,8 +153,6 @@ func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db
 func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error) {
 	accessToken := ""
 
-	idToken := &auth.IDTokenClaims{}
-
 	switch adminv1.AuthProvider_Type(s.AuthProvider.ProviderType) {
 	case adminv1.AuthProvider_LOCAL:
 
@@ -174,12 +171,12 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return "", err
 		}
 
-		// 填充 idToken 内容
-		idToken.SetSubject(strconv.Itoa(userID))
-		idToken.SetGroups(s.Groups)
-		idToken.SetRoles(s.Roles)
+		claims := &auth.AccessTokenClaims{}
+		claims.SetSubject(strconv.Itoa(userID))
+		claims.SetGroups(s.Groups)
+		claims.SetRoles(s.Roles)
 
-		accessToken, err = idToken.GetAccessToken(resp.SessionKey)
+		accessToken, err = claims.GetAccessToken(resp.SessionKey)
 		if err != nil {
 			return accessToken, err
 		}
@@ -196,14 +193,14 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return accessToken, fmt.Errorf("get auth providers failed")
 		}
 
-		// 填充 idToken 内容
-		_, err = jwt.ParseWithClaims(rawIDToken, idToken, func(token *jwt.Token) (interface{}, error) {
-			return nil, nil
-		})
-		idToken.SetExpiresAt(oauth2Token.ExpiresIn)
+		providerClaims, err := s.verifyOIDCIDToken(ctx, rawIDToken)
+		if err != nil {
+			return accessToken, err
+		}
+		profile := externalUserClaimsFromIDToken(providerClaims)
 
 		// 判断是否已存在数据库中
-		userID, err := s.upsertUserOIDC(ctx, oauth2Token, idToken)
+		userID, err := s.upsertUserOIDC(ctx, oauth2Token, profile)
 		if err != nil {
 			return accessToken, err
 		}
@@ -212,13 +209,20 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return "", err
 		}
 
-		// 填充 idToken 内容
-		idToken.SetSubject(strconv.Itoa(userID))
-		idToken.SetGroups(s.Groups)
-		idToken.SetRoles(s.Roles)
+		claims := &auth.AccessTokenClaims{CommonClaims: auth.CommonClaims{
+			Username:          profile.Username,
+			PreferredUsername: profile.PreferredUsername,
+			Nickname:          profile.Nickname,
+			Email:             profile.Email,
+			EmailVerified:     profile.EmailVerified,
+		}}
+		claims.SetSubject(strconv.Itoa(userID))
+		claims.SetGroups(s.Groups)
+		claims.SetRoles(s.Roles)
+		claims.SetExpiresAt(oauth2Token.ExpiresIn)
 
 		// 生成 jwt 返回客户端
-		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey, s.kid)
+		accessToken, err = claims.GetAccessTokenRSA(s.privateKey, s.kid)
 		if err != nil {
 			return accessToken, err
 		}
@@ -269,15 +273,13 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		}
 		email := getMapString(userinfo, emailField)
 
-		idToken = &auth.IDTokenClaims{
-			CommonClaims: auth.CommonClaims{
-				Username:      username,
-				Nickname:      username,
-				Email:         email,
-				EmailVerified: email != "",
-			},
+		profile := externalUserClaims{
+			ProviderSubject: providerUserID,
+			Username:        username,
+			Nickname:        username,
+			Email:           email,
+			EmailVerified:   email != "",
 		}
-		idToken.SetSubject(providerUserID)
 
 		expiresIn := int64(3600)
 		if !oauth2Token.Expiry.IsZero() {
@@ -285,9 +287,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 				expiresIn = sec
 			}
 		}
-		idToken.SetExpiresAt(expiresIn)
-
-		userID, err := s.upsertUserOIDC(ctx, oauth2Token, idToken)
+		userID, err := s.upsertUserOIDC(ctx, oauth2Token, profile)
 		if err != nil {
 			return accessToken, err
 		}
@@ -296,17 +296,82 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 			return "", err
 		}
 
-		idToken.SetSubject(strconv.Itoa(userID))
-		idToken.SetGroups(s.Groups)
-		idToken.SetRoles(s.Roles)
+		claims := &auth.AccessTokenClaims{CommonClaims: auth.CommonClaims{
+			Username:      profile.Username,
+			Nickname:      profile.Nickname,
+			Email:         profile.Email,
+			EmailVerified: profile.EmailVerified,
+		}}
+		claims.SetSubject(strconv.Itoa(userID))
+		claims.SetGroups(s.Groups)
+		claims.SetRoles(s.Roles)
+		claims.SetExpiresAt(expiresIn)
 
-		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey, s.kid)
+		accessToken, err = claims.GetAccessTokenRSA(s.privateKey, s.kid)
 		if err != nil {
 			return accessToken, err
 		}
 	}
 
 	return accessToken, nil
+}
+
+type externalUserClaims struct {
+	ProviderSubject   string
+	Username          string
+	PreferredUsername string
+	Nickname          string
+	Email             string
+	EmailVerified     bool
+}
+
+func externalUserClaimsFromIDToken(claims *auth.IDTokenClaims) externalUserClaims {
+	username := claims.Username
+	if username == "" {
+		username = claims.PreferredUsername
+	}
+	if username == "" {
+		username = claims.Nickname
+	}
+	if username == "" {
+		username = claims.Subject
+	}
+
+	return externalUserClaims{
+		ProviderSubject:   claims.Subject,
+		Username:          username,
+		PreferredUsername: claims.PreferredUsername,
+		Nickname:          claims.Nickname,
+		Email:             claims.Email,
+		EmailVerified:     claims.EmailVerified,
+	}
+}
+
+func (s *socialUsers) verifyOIDCIDToken(ctx context.Context, rawIDToken string) (*auth.IDTokenClaims, error) {
+	if s.oauthCfg == nil {
+		return nil, fmt.Errorf("oauth config not initialized")
+	}
+	if strings.TrimSpace(s.oauthCfg.Issuer) == "" {
+		return nil, fmt.Errorf("oidc issuer is required")
+	}
+	if strings.TrimSpace(s.oauthCfg.ClientID) == "" {
+		return nil, fmt.Errorf("oidc client_id is required")
+	}
+
+	provider, err := oidc.NewProvider(ctx, s.oauthCfg.Issuer)
+	if err != nil {
+		return nil, fmt.Errorf("discover oidc provider: %w", err)
+	}
+	verifiedToken, err := provider.Verifier(&oidc.Config{ClientID: s.oauthCfg.ClientID}).Verify(ctx, rawIDToken)
+	if err != nil {
+		return nil, fmt.Errorf("verify oidc id_token: %w", err)
+	}
+
+	claims := &auth.IDTokenClaims{}
+	if err := verifiedToken.Claims(claims); err != nil {
+		return nil, fmt.Errorf("decode oidc id_token claims: %w", err)
+	}
+	return claims, nil
 }
 
 func getMapString(m map[string]interface{}, key string) string {
@@ -725,21 +790,21 @@ func (s *socialUsers) issueAccessTokenForUser(ctx context.Context, u *lion.Users
 	if err := s.setUserRoles(ctx, u.ID); err != nil {
 	}
 
-	idToken := &auth.IDTokenClaims{
+	accessTokenClaims := &auth.AccessTokenClaims{
 		CommonClaims: auth.CommonClaims{
 			Username: u.Username,
 			Nickname: u.Nickname,
 		},
 	}
-	// 填充 idToken 内容
-	idToken.SetSubject(strconv.Itoa(u.ID))
-	idToken.SetGroups(s.Groups)
-	idToken.SetRoles(s.Roles)
-	idToken.SetExpiresAt(durationSecondsInt64(loginAccessTokenTTLFrom(s.logger, s.db)))
-	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
+	// 填充 access token claims。
+	accessTokenClaims.SetSubject(strconv.Itoa(u.ID))
+	accessTokenClaims.SetGroups(s.Groups)
+	accessTokenClaims.SetRoles(s.Roles)
+	accessTokenClaims.SetExpiresAt(durationSecondsInt64(loginAccessTokenTTLFrom(s.logger, s.db)))
+	accessTokenClaims.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 
 	// 生成 jwt 返回客户端
-	accessToken, err := idToken.GetAccessTokenRSA(s.privateKey, s.kid)
+	accessToken, err := accessTokenClaims.GetAccessTokenRSA(s.privateKey, s.kid)
 	if err != nil {
 		return "", false, err
 	}
@@ -905,11 +970,11 @@ func (s *socialUsers) GetAccessToken(expiresIn int32, appid string) {
 
 }
 
-func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, idToken *auth.IDTokenClaims) (int, error) {
+func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.Token, profile externalUserClaims) (int, error) {
 	existIdentity, err := s.db.UserIdentities.Query().
 		Where(
 			useridentities.ProviderID(s.AuthProvider.ID),
-			useridentities.ProviderUserIDEQ(idToken.Subject),
+			useridentities.ProviderUserIDEQ(profile.ProviderSubject),
 		).
 		Select(useridentities.FieldID, useridentities.FieldUserID).
 		Only(ctx)
@@ -925,7 +990,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 	if existUserID == 0 && lion.IsNotFound(err) {
 		// TODO; 新增用户，preferred username 如何定义，开启事务
 		// 规范：provider_name_email_prefix
-		username := strings.ToLower(fmt.Sprintf("%v_%v", s.ProviderName, idToken.Subject))
+		username := strings.ToLower(fmt.Sprintf("%v_%v", s.ProviderName, profile.ProviderSubject))
 
 		// 首先确保 "lion_users" 不存在这个用户，开启一个事务
 		tx, err := s.db.Tx(ctx)
@@ -941,7 +1006,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		}
 
 		var emailEnc []byte
-		emailEnc, err = crypto.EncryptAES(s.aesKey, []byte(idToken.Email))
+		emailEnc, err = crypto.EncryptAES(s.aesKey, []byte(profile.Email))
 		if err != nil {
 			// TODO;
 		}
@@ -949,8 +1014,8 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		newUser, err := tx.Users.Create().
 			SetUsername(username).
 			SetEmailEncrypted(emailEnc).
-			SetEmailVerified(idToken.EmailVerified).
-			SetEmailHash(crypto.SHA256([]byte(idToken.Email))).
+			SetEmailVerified(profile.EmailVerified).
+			SetEmailHash(crypto.SHA256([]byte(profile.Email))).
 			Save(ctx)
 		if err != nil {
 			_ = tx.Rollback()
@@ -970,7 +1035,7 @@ func (s *socialUsers) upsertUserOIDC(ctx context.Context, oauth2Token *oauth2.To
 		_, err = tx.UserIdentities.Create().
 			SetUserID(newUser.ID).
 			SetProviderID(s.AuthProvider.ID).
-			SetProviderUserID(idToken.Subject).
+			SetProviderUserID(profile.ProviderSubject).
 			SetAccessTokenEncrypted(accessTokenEnc).
 			SetRefreshTokenEncrypted(refreshTokenEnc).
 			SetTokenExpiresAt(oauth2Token.Expiry).

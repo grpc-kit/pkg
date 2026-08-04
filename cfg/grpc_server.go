@@ -827,7 +827,7 @@ func (c *LocalConfig) authValidate() grpcauth.AuthFunc {
 
 func (c *LocalConfig) checkPermission(ctx context.Context, method string, groups []string) error {
 	// 安全策略：对于内置管理接口，已认证用户必须至少拥有一个用户组（角色），
-	// 即 IDTokenClaims.Groups 必须非空，否则直接拒绝访问（403）。
+	// 即 AccessTokenClaims.Groups 必须非空，否则直接拒绝访问（403）。
 	// 自服务方法（用户管理自己的 MFA、OIDC 标准端点、数据库 bootstrap）豁免此检查，
 	// 允许无角色的已认证用户访问，但仍需通过后续 AllowedGroups 与 OPA 评估。
 	if len(groups) == 0 {

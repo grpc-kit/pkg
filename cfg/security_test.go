@@ -68,9 +68,9 @@ func testSecurityTokenHS256(t *testing.T) {
 	}
 
 	// signHS256Token creates a valid HS256 token signed with SHA256(password).
-	signHS256Token := func(s *SecurityConfig, claims *auth.IDTokenClaims) string {
+	signHS256Token := func(claims jwt.Claims) string {
 		t.Helper()
-		tokenStr, err := claims.GetAccessToken(testUserPassword)
+		tokenStr, err := auth.SignAccessToken(claims, testUserPassword)
 		if err != nil {
 			t.Fatalf("failed to sign token: %v", err)
 		}
@@ -98,13 +98,29 @@ func testSecurityTokenHS256(t *testing.T) {
 	// --- 有效 token + 正确 audience -> 通过 ---
 	t.Run("ValidToken", func(t *testing.T) {
 		s := buildHS256SecurityConfig(false, false, false)
-		tokenStr := signHS256Token(s, makeValidClaims())
+		tokenStr := signHS256Token(makeValidClaims())
 		claims, err := s.verifyBearerToken(ctx, tokenStr)
 		if err != nil {
 			t.Fatalf("expected nil error for valid token, got: %v", err)
 		}
 		if claims.Subject != "testuser" {
 			t.Errorf("expected subject 'testuser', got %q", claims.Subject)
+		}
+	})
+
+	// 新验证器必须同时接受 AccessTokenClaims 形态的新 token。
+	t.Run("ValidAccessTokenClaims", func(t *testing.T) {
+		s := buildHS256SecurityConfig(false, false, false)
+		claims := &auth.AccessTokenClaims{CommonClaims: makeValidClaims().CommonClaims}
+		claims.ClientID = testClientID
+		claims.Scope = "openid profile"
+		tokenStr := signHS256Token(claims)
+		got, err := s.verifyBearerToken(ctx, tokenStr)
+		if err != nil {
+			t.Fatalf("expected nil error for access token claims, got: %v", err)
+		}
+		if got.ClientID != testClientID || got.Scope != "openid profile" {
+			t.Fatalf("access-specific claims lost: client_id=%q scope=%q", got.ClientID, got.Scope)
 		}
 	})
 
@@ -143,7 +159,7 @@ func testSecurityTokenHS256(t *testing.T) {
 		s := buildHS256SecurityConfig(false, false, false)
 		claims := makeValidClaims()
 		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(-1 * time.Hour))
-		tokenStr := signHS256Token(s, claims)
+		tokenStr := signHS256Token(claims)
 		_, err := s.verifyBearerToken(ctx, tokenStr)
 		if err == nil {
 			t.Fatalf("expected error for expired token, got nil")
@@ -158,7 +174,7 @@ func testSecurityTokenHS256(t *testing.T) {
 		s := buildHS256SecurityConfig(true, false, false)
 		claims := makeValidClaims()
 		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(-1 * time.Hour))
-		tokenStr := signHS256Token(s, claims)
+		tokenStr := signHS256Token(claims)
 		_, err := s.verifyBearerToken(ctx, tokenStr)
 		if err != nil {
 			t.Fatalf("expected nil error for expired token with SkipExpiryCheck=true, got: %v", err)
@@ -170,7 +186,7 @@ func testSecurityTokenHS256(t *testing.T) {
 		s := buildHS256SecurityConfig(false, false, false)
 		claims := makeValidClaims()
 		claims.Audience = []string{"wrong-client-id"}
-		tokenStr := signHS256Token(s, claims)
+		tokenStr := signHS256Token(claims)
 		_, err := s.verifyBearerToken(ctx, tokenStr)
 		if err == nil {
 			t.Fatalf("expected error for wrong audience, got nil")
@@ -185,7 +201,7 @@ func testSecurityTokenHS256(t *testing.T) {
 		s := buildHS256SecurityConfig(false, false, false)
 		claims := makeValidClaims()
 		claims.Issuer = "https://wrong-issuer.local"
-		tokenStr := signHS256Token(s, claims)
+		tokenStr := signHS256Token(claims)
 		_, err := s.verifyBearerToken(ctx, tokenStr)
 		if err == nil {
 			t.Fatalf("expected error for wrong issuer, got nil")
@@ -203,7 +219,7 @@ func testSecurityTokenHS256(t *testing.T) {
 		claims := makeValidClaims()
 		claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(-1 * time.Hour))
 		claims.Audience = []string{"wrong-client-id"}
-		tokenStr := signHS256Token(s, claims)
+		tokenStr := signHS256Token(claims)
 		_, err := s.verifyBearerToken(ctx, tokenStr)
 		// v4 行为：SkipExpiryCheck=true 时过期 token 直接通过，audience 不校验
 		if err != nil {

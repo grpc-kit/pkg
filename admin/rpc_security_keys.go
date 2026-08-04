@@ -1185,17 +1185,23 @@ func (a *KnownAdminAPI) GetOAuth2Userinfo(ctx context.Context, req *emptypb.Empt
 
 	tmp := rpc.GetIDTokenFromContext(ctx)
 	a.logger.Infof("get id token type: %v", reflect.TypeOf(tmp))
-	idToken, ok := tmp.(auth.IDTokenClaims)
-	if !ok {
+	var claims *auth.CommonClaims
+	switch token := tmp.(type) {
+	case auth.AccessTokenClaims:
+		claims = &token.CommonClaims
+	case auth.IDTokenClaims:
+		// 兼容由旧调用方直接写入 context 的 claims。
+		claims = &token.CommonClaims
+	default:
 		return result, errs.PermissionDenied(ctx)
 	}
 
 	// 从 JWT 中提取基础 claim（这些字段在签发 token 时已确定）
-	result.Sub = idToken.Subject
-	result.UserId = idToken.GetMustUserID()
-	result.PreferredUsername = idToken.Username
-	result.Email = idToken.Email
-	result.EmailVerified = idToken.EmailVerified
+	result.Sub = claims.Subject
+	result.UserId = claims.GetMustUserID()
+	result.PreferredUsername = claims.Username
+	result.Email = claims.Email
+	result.EmailVerified = claims.EmailVerified
 
 	// 从数据库查询用户实体，补充完整 OIDC Standard Claims
 	userID := result.UserId

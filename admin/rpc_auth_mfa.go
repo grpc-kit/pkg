@@ -579,19 +579,19 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 		return "", err
 	}
 
-	idToken := &auth.IDTokenClaims{
+	accessTokenClaims := &auth.AccessTokenClaims{
 		CommonClaims: auth.CommonClaims{
 			Username: u.Username,
 			Nickname: u.Nickname,
 		},
 	}
-	idToken.SetSubject(strconv.Itoa(u.ID))
-	idToken.SetGroups(groups)
-	idToken.SetRoles(groups)
-	idToken.SetExpiresAt(durationSecondsInt64(a.getLoginAccessTokenTTL(ctx)))
-	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
+	accessTokenClaims.SetSubject(strconv.Itoa(u.ID))
+	accessTokenClaims.SetGroups(groups)
+	accessTokenClaims.SetRoles(groups)
+	accessTokenClaims.SetExpiresAt(durationSecondsInt64(a.getLoginAccessTokenTTL(ctx)))
+	accessTokenClaims.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 
-	return idToken.GetAccessTokenRSA(privateKey, sk.Code)
+	return accessTokenClaims.GetAccessTokenRSA(privateKey, sk.Code)
 }
 
 func generateRecoveryCodes(count int) ([]string, error) {
