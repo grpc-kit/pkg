@@ -176,6 +176,11 @@ func (c *SecurityConfig) withGroups(parent context.Context, groups []string) con
 	return rpc.ContextWithGroups(parent, groups)
 }
 
+// withRoles stores the canonical role codes used by authorization checks.
+func (c *SecurityConfig) withRoles(parent context.Context, roles []string) context.Context {
+	return rpc.ContextWithRoles(parent, roles)
+}
+
 // setVerifier 用于设置oidc verifier实例
 func (s *SecurityConfig) setVerifier(v *oidc.IDTokenVerifier) {
 	s.tokenVerifier.Store(v)

@@ -693,6 +693,12 @@ func (c *LocalConfig) GroupsFrom(ctx context.Context) ([]string, bool) {
 	return rpc.GetGroupsFromContext(ctx)
 }
 
+// RolesFrom 获取当前会话中用于授权的角色编码列表。
+// 迁移期间若 context 只有旧 groups 值，getter 会自动回退到 groups。
+func (c *LocalConfig) RolesFrom(ctx context.Context) ([]string, bool) {
+	return rpc.GetRolesFromContext(ctx)
+}
+
 // GetRBACData 用于获取 RBAC 数据
 func (c *LocalConfig) GetRBACData(ctx context.Context) *rbacv3.RBAC {
 	if c.Security == nil || c.Security.Enable == false || c.Security.authClient == nil {

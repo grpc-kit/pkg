@@ -18,6 +18,9 @@ const (
 	// groupsKey 用于存放当前用户归属的组列表
 	groupsKey
 
+	// rolesKey 用于存放当前用户用于授权的角色编码列表
+	rolesKey
+
 	// userIDKey 用于存放当前用户 ID
 	userIDKey
 )
@@ -44,6 +47,22 @@ func ContextWithGroups(parent context.Context, groups []string) context.Context 
 }
 
 func GetGroupsFromContext(ctx context.Context) ([]string, bool) {
+	groups, ok := ctx.Value(groupsKey).([]string)
+	return groups, ok
+}
+
+// ContextWithRoles stores the canonical role codes used for authorization.
+func ContextWithRoles(parent context.Context, roles []string) context.Context {
+	return context.WithValue(parent, rolesKey, roles)
+}
+
+// GetRolesFromContext returns canonical roles. During migration, contexts
+// created by old callers fall back to the legacy groups value.
+func GetRolesFromContext(ctx context.Context) ([]string, bool) {
+	roles, ok := ctx.Value(rolesKey).([]string)
+	if ok {
+		return roles, true
+	}
 	groups, ok := ctx.Value(groupsKey).([]string)
 	return groups, ok
 }

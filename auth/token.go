@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -50,6 +51,46 @@ type CommonClaims struct {
 	// Deprecated: 历史应用标识字段。
 	// Username 事实主用户名字段。GetMustUserID 优先使用，为空时回退到 PreferredUsername。
 	Username string `json:"username,omitempty"`
+}
+
+// RoleClaimSource identifies which JWT claim supplied the effective roles.
+// LegacyGroups is used for tokens issued before the roles claim was introduced.
+type RoleClaimSource string
+
+const (
+	RoleClaimSourceRoles        RoleClaimSource = "roles"
+	RoleClaimSourceLegacyGroups RoleClaimSource = "legacy_groups"
+)
+
+// EffectiveRoles returns the role codes used for authorization.
+// A non-nil roles claim is authoritative, including an explicitly empty list;
+// groups is used only when the roles claim is absent from a legacy token.
+func EffectiveRoles(claims AccessTokenClaims) ([]string, RoleClaimSource) {
+	if claims.Roles != nil {
+		return normalizeRoleCodes(claims.Roles), RoleClaimSourceRoles
+	}
+	return normalizeRoleCodes(claims.Groups), RoleClaimSourceLegacyGroups
+}
+
+func normalizeRoleCodes(values []string) []string {
+	if len(values) == 0 {
+		return []string{}
+	}
+
+	result := make([]string, 0, len(values))
+	seen := make(map[string]struct{}, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+	return result
 }
 
 // IDTokenClaims 仅描述 OIDC ID Token 声明。
