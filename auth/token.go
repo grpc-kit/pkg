@@ -219,30 +219,40 @@ func (c *CommonClaims) GetMustUserID() int64 {
 // 切勿将签名定义为 *CommonClaims 的方法：那样 jwt.NewWithClaims 只会序列化 CommonClaims，
 // 丢失 IDToken / AccessToken 的专有声明（nonce、azp、client_id、scope 等）。
 
-// SignAccessToken 以 HS256 签名生成 access token JWT。
-func SignAccessToken(claims jwt.Claims, signKey string) (string, error) {
+func signHS256(claims jwt.Claims, signKey, typ string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token.Header["typ"] = typ
 	key := crypto.SHA256([]byte(signKey))
-
-	ss, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(key))
-	if err != nil {
-		return ss, err
-	}
-
-	return ss, nil
+	return token.SignedString([]byte(key))
 }
 
-// SignAccessTokenRSA 以 RS256 签名生成 access token JWT，kid 非空时写入 header。
-func SignAccessTokenRSA(claims jwt.Claims, privateKey *rsa.PrivateKey, kid string) (string, error) {
+// SignAccessToken 以 HS256 签名生成 Access Token，使用 at+jwt 类型。
+func SignAccessToken(claims jwt.Claims, signKey string) (string, error) {
+	return signHS256(claims, signKey, "at+jwt")
+}
+
+// SignIDToken 以 HS256 签名生成 ID Token，使用 JWT 类型。
+func SignIDToken(claims jwt.Claims, signKey string) (string, error) {
+	return signHS256(claims, signKey, "JWT")
+}
+
+func signRS256(claims jwt.Claims, privateKey *rsa.PrivateKey, kid, typ string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	token.Header["typ"] = typ
 	if kid != "" {
 		token.Header["kid"] = kid
 	}
-	ss, err := token.SignedString(privateKey)
-	if err != nil {
-		return ss, err
-	}
+	return token.SignedString(privateKey)
+}
 
-	return ss, nil
+// SignAccessTokenRSA 以 RS256 签名生成 Access Token，kid 非空时写入 header。
+func SignAccessTokenRSA(claims jwt.Claims, privateKey *rsa.PrivateKey, kid string) (string, error) {
+	return signRS256(claims, privateKey, kid, "at+jwt")
+}
+
+// SignIDTokenRSA 以 RS256 签名生成 ID Token，kid 非空时写入 header。
+func SignIDTokenRSA(claims jwt.Claims, privateKey *rsa.PrivateKey, kid string) (string, error) {
+	return signRS256(claims, privateKey, kid, "JWT")
 }
 
 // --- 具体类型签名包装 ---
@@ -252,13 +262,13 @@ func SignAccessTokenRSA(claims jwt.Claims, privateKey *rsa.PrivateKey, kid strin
 // GetAccessToken 以 HS256 签名生成 access token JWT。
 // Deprecated: IDTokenClaims 不应用于新 access token；仅为兼容旧调用保留。
 func (i *IDTokenClaims) GetAccessToken(signKey string) (string, error) {
-	return SignAccessToken(i, signKey)
+	return SignIDToken(i, signKey)
 }
 
 // GetAccessTokenRSA 以 RS256 签名生成 access token JWT，kid 非空时写入 header。
 // Deprecated: IDTokenClaims 不应用于新 access token；仅为兼容旧调用保留。
 func (i *IDTokenClaims) GetAccessTokenRSA(privateKey *rsa.PrivateKey, kid string) (string, error) {
-	return SignAccessTokenRSA(i, privateKey, kid)
+	return SignIDTokenRSA(i, privateKey, kid)
 }
 
 // GetAccessToken 以 HS256 签名生成 access token JWT。

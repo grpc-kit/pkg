@@ -64,6 +64,28 @@ func TestAccessTokenClaims_PromotedMethodsAndSigning(t *testing.T) {
 	if decoded.Scope != "openid profile" {
 		t.Errorf("Scope = %q, want openid profile", decoded.Scope)
 	}
+
+	headerOnly, _, err := jwt.NewParser().ParseUnverified(tok, &AccessTokenClaims{})
+	if err != nil {
+		t.Fatalf("ParseUnverified header: %v", err)
+	}
+	if got := headerOnly.Header["typ"]; got != "at+jwt" {
+		t.Fatalf("Access Token typ = %v, want at+jwt", got)
+	}
+}
+
+func TestIDTokenHeaderType(t *testing.T) {
+	tok, err := (&IDTokenClaims{}).GetAccessToken("test-sign-key")
+	if err != nil {
+		t.Fatal(err)
+	}
+	token, _, err := jwt.NewParser().ParseUnverified(tok, &IDTokenClaims{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := token.Header["typ"]; got != "JWT" {
+		t.Fatalf("ID Token typ = %v, want JWT", got)
+	}
 }
 
 func TestPreferredUsernameCompatibility(t *testing.T) {

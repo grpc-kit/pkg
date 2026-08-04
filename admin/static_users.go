@@ -61,7 +61,10 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 		},
 	}
 
-	ss, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(s.PasswordHash))
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Static-user tokens are long-term local Access Tokens, not ID Tokens.
+	token.Header["typ"] = "at+jwt"
+	ss, err := token.SignedString([]byte(s.PasswordHash))
 	if err != nil {
 		return ss, err
 	}
