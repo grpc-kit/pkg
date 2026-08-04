@@ -118,10 +118,11 @@ func (i *IDTokenClaims) SetExpiresAt(expiresIn int64) *IDTokenClaims {
 	return i
 }
 
-// SetEmail 设置用户邮箱。当 email 为空时回退到 sub@localhost。
-// BUG: 条件应为 email != ""，当前逻辑导致传入非空 email 时不赋值（所有调用方均传入非空值）。
+// SetEmail 设置用户邮箱。非空直接使用；为空时回退到 sub@localhost 并标记已验证。
 func (i *IDTokenClaims) SetEmail(email string) *IDTokenClaims {
-	if email == "" {
+	if email != "" {
+		i.Email = email
+	} else {
 		i.Email = fmt.Sprintf("%s@localhost", i.Subject)
 		i.EmailVerified = true
 	}
