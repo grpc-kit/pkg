@@ -46,6 +46,7 @@ func (s StaticUser) GetAccessToken(expiresIn int32, appid string) (string, error
 			Email:           fmt.Sprintf("%s@localhost", s.Username),
 			EmailVerified:   true,
 			Groups:          s.Groups,
+			Roles:           s.Groups,
 			FederatedClaims: nil,
 			Appid:           appid,
 			Tenant:          tenant,

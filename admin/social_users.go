@@ -51,6 +51,7 @@ type socialUsers struct {
 	secret string
 
 	Groups []string `json:"groups"`
+	Roles  []string `json:"roles,omitempty"`
 }
 
 func newSocialUsers(ctx context.Context, logger *logrus.Entry, aesKey []byte, db *lion.Client, providerName string) (*socialUsers, error) {
@@ -176,6 +177,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		// 填充 idToken 内容
 		idToken.SetSubject(strconv.Itoa(userID))
 		idToken.SetGroups(s.Groups)
+		idToken.SetRoles(s.Roles)
 
 		accessToken, err = idToken.GetAccessToken(resp.SessionKey)
 		if err != nil {
@@ -213,6 +215,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 		// 填充 idToken 内容
 		idToken.SetSubject(strconv.Itoa(userID))
 		idToken.SetGroups(s.Groups)
+		idToken.SetRoles(s.Roles)
 
 		// 生成 jwt 返回客户端
 		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey, s.kid)
@@ -295,6 +298,7 @@ func (s *socialUsers) Exchange(ctx context.Context, code string) (string, error)
 
 		idToken.SetSubject(strconv.Itoa(userID))
 		idToken.SetGroups(s.Groups)
+		idToken.SetRoles(s.Roles)
 
 		accessToken, err = idToken.GetAccessTokenRSA(s.privateKey, s.kid)
 		if err != nil {
@@ -730,6 +734,7 @@ func (s *socialUsers) issueAccessTokenForUser(ctx context.Context, u *lion.Users
 	// 填充 idToken 内容
 	idToken.SetSubject(strconv.Itoa(u.ID))
 	idToken.SetGroups(s.Groups)
+	idToken.SetRoles(s.Roles)
 	idToken.SetExpiresAt(durationSecondsInt64(loginAccessTokenTTLFrom(s.logger, s.db)))
 	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 
@@ -1267,6 +1272,7 @@ func (s *socialUsers) setUserRoles(ctx context.Context, userID int) error {
 		return err
 	}
 	s.Groups = append(s.Groups, roleCodes...)
+	s.Roles = append(s.Roles, roleCodes...)
 
 	return nil
 }

@@ -587,6 +587,7 @@ func (a *KnownAdminAPI) issueTokenForUser(ctx context.Context, db *lion.Client, 
 	}
 	idToken.SetSubject(strconv.Itoa(u.ID))
 	idToken.SetGroups(groups)
+	idToken.SetRoles(groups)
 	idToken.SetExpiresAt(durationSecondsInt64(a.getLoginAccessTokenTTL(ctx)))
 	idToken.SetEmail(fmt.Sprintf("%v@localhost", u.Username))
 

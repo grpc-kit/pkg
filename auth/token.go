@@ -135,6 +135,11 @@ func (i *IDTokenClaims) SetGroups(groups []string) *IDTokenClaims {
 	return i
 }
 
+func (i *IDTokenClaims) SetRoles(roles []string) *IDTokenClaims {
+	i.Roles = roles
+	return i
+}
+
 // GetAccessToken 以 HS256 签名生成 access token JWT。
 func (i *IDTokenClaims) GetAccessToken(signeKey string) (string, error) {
 	key := crypto.SHA256([]byte(signeKey))
