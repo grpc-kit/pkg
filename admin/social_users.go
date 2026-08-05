@@ -1191,7 +1191,11 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 			useridentities.ProviderIDEQ(s.AuthProvider.ID),
 			useridentities.ProviderUserIDEQ(resp.Openid),
 		).
-		Select(useridentities.FieldID, useridentities.FieldUserID).
+		Select(
+			useridentities.FieldID,
+			useridentities.FieldUserID,
+			useridentities.FieldProviderUnionID,
+		).
 		Only(ctx)
 	if err != nil && !lion.IsNotFound(err) {
 		return 0, err
@@ -1200,6 +1204,24 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 	var existUserID int
 	if existIdentity != nil {
 		existUserID = existIdentity.UserID
+
+		unionID, shouldPersist, conflict := reconcileWechatUnionID(existIdentity.ProviderUnionID, resp.Unionid)
+		if conflict {
+			// UnionID 不参与当前登录匹配。发生冲突时保留已存值，避免在尚未建模
+			// 微信开放平台账号信任域之前错误覆盖跨应用身份标识。
+			s.logger.Warnf(
+				"wechat unionid mismatch: provider=%s identity_id=%d; keeping stored value",
+				s.ProviderName,
+				existIdentity.ID,
+			)
+		}
+		if shouldPersist {
+			if _, updateErr := s.db.UserIdentities.UpdateOneID(existIdentity.ID).
+				SetProviderUnionID(unionID).
+				Save(ctx); updateErr != nil {
+				return 0, fmt.Errorf("backfill wechat unionid: %w", updateErr)
+			}
+		}
 	}
 
 	if existUserID == 0 && lion.IsNotFound(err) {
@@ -1247,12 +1269,16 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 			refreshTokenEnc = accessTokenEnc
 		}
 
-		_, err = tx.UserIdentities.Create().
+		identityCreate := tx.UserIdentities.Create().
 			SetUserID(newUser.ID).
 			SetProviderID(s.AuthProvider.ID).
 			SetProviderUserID(resp.Openid).
 			SetAccessTokenEncrypted(accessTokenEnc).
-			SetRefreshTokenEncrypted(refreshTokenEnc).
+			SetRefreshTokenEncrypted(refreshTokenEnc)
+		if unionID := strings.TrimSpace(resp.Unionid); unionID != "" {
+			identityCreate.SetProviderUnionID(unionID)
+		}
+		_, err = identityCreate.
 			//SetTokenExpiresAt(oauth2Token.Expiry).
 			Save(ctx)
 		if err != nil {
@@ -1268,4 +1294,22 @@ func (s *socialUsers) upsertUserWechat(ctx context.Context, resp *wechatCode2Ses
 	}
 
 	return existUserID, nil
+}
+
+// reconcileWechatUnionID 决定微信登录返回的 UnionID 是否需要持久化。
+// 空值不会清除历史数据；已存值与新值冲突时保留历史数据并交由上层记录告警。
+func reconcileWechatUnionID(stored, incoming string) (value string, shouldPersist, conflict bool) {
+	stored = strings.TrimSpace(stored)
+	incoming = strings.TrimSpace(incoming)
+
+	switch {
+	case incoming == "":
+		return stored, false, false
+	case stored == "":
+		return incoming, true, false
+	case stored == incoming:
+		return stored, false, false
+	default:
+		return stored, false, true
+	}
 }
